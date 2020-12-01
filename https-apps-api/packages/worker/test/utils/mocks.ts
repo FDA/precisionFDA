@@ -3,7 +3,7 @@ import Bull, { Job } from 'bull'
 import { client, queue } from '@pfda/https-apps-shared'
 import { handler } from '../../src/jobs'
 import * as generate from './generate'
-import { FILES_DESC_RES, FILES_LIST_RES } from './mock-responses'
+import { FILES_DESC_RES, FILES_LIST_RES_ROOT } from './mock-responses'
 
 const sandbox = sinon.createSandbox()
 
@@ -11,7 +11,7 @@ const fakes = {
   client: {
     jobDescribeFake: sinon.stub().callsFake(() => ({ result: 'yep' })),
     jobCreateFake: sinon.stub().callsFake(() => ({ id: generate.job.jobId() })),
-    filesListFake: sinon.stub().callsFake(() => FILES_LIST_RES),
+    filesListFake: sinon.stub().callsFake(() => FILES_LIST_RES_ROOT),
     filesDescFake: sinon.stub().callsFake(() => FILES_DESC_RES),
   },
   queue: {
@@ -32,7 +32,7 @@ const mocksSetup = () => {
   sandbox.replace(client, 'jobDescribe', fakes.client.jobDescribeFake)
   sandbox.replace(client, 'jobCreate', fakes.client.jobCreateFake)
   sandbox.replace(client, 'filesList', fakes.client.filesListFake)
-  sandbox.replace(client, 'describeFiles', fakes.client.filesDescFake)
+  sandbox.replace(client, 'filesDescribe', fakes.client.filesDescFake)
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
   sandbox.replace(Bull.prototype, 'add', fakes.bull.addToQueueStub)

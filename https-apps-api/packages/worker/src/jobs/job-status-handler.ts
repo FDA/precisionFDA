@@ -11,7 +11,6 @@ export const jobStatusHandler = async (bullJob: Job) => {
   // build context
   const ctx: WorkerOpsCtx = {
     em: database.orm().em.fork(),
-    // todo: http pino instance?
     log,
     user: data.user,
     job: bullJob,

@@ -9,9 +9,12 @@ import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { UserFile } from '../../user-file'
 import { User } from '../..'
-import { FILE_STATE, FILE_STI_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
+import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Job> {
+  protected user: User
+  protected job: Job
+
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
@@ -29,6 +32,8 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       await removeRepeatable(this.ctx.job)
       return
     }
+    this.job = job
+    this.user = user
 
     // todo: check users ownership -> we should have a helper for it
     if (!shouldSyncStatus(job)) {
@@ -66,42 +71,48 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         accessToken: this.ctx.user.accessToken,
         project: job.project,
       })
+      // todo: this should only run if the app type is Jupyter
+      // fetch snapshots on the platform
+      const snapshotsInProject = await client.filesList({
+        accessToken: this.ctx.user.accessToken,
+        project: job.project,
+        folder: '/.Notebook_snapshots',
+      })
       // compare check differences
       const remoteFileIds = map(prop('id'))(filesInProject.results)
+      const snapshotFileIds = map(prop('id'))(snapshotsInProject.results)
+      const regularFileIds = difference(remoteFileIds, snapshotFileIds)
+      this.ctx.log.info({ regularFileIds, snapshotFileIds }, 'Remote state file ids')
+
       const localFileIds = map(prop('dxid'))(localfiles)
-      const newFileIds = difference(remoteFileIds, localFileIds)
-      this.ctx.log.info({ newFileIds }, 'Discovered newly created files')
-      // todo: find a way to handle the snapshots
+      const newRegularFileIds = difference(regularFileIds, localFileIds)
+      const newSnapshotFileIds = difference(snapshotFileIds, localFileIds)
+      this.ctx.log.info({ newRegularFileIds, newSnapshotFileIds }, 'Discovered newly created files')
 
       // ask the API for info about new files
-      const newFilesData = await client.describeFiles({
+      const newFilesData = await client.filesDescribe({
         accessToken: this.ctx.user.accessToken,
-        fileIds: newFileIds,
+        fileIds: newRegularFileIds.concat(newSnapshotFileIds),
       })
-      // load new files to our DB with correct type
-      newFileIds.forEach(fileId => {
+      // build regular files in DB
+      newRegularFileIds.forEach(fileId => {
         const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
         if (!apiResponse) {
           this.ctx.log.warn({ fileId }, 'File was not found in the API response')
           return
         }
-        const userFile = new UserFile(user)
-        wrap(userFile).assign({
-          dxid: fileId,
-          project: job.project,
-          state: FILE_STATE.CLOSED,
-          name: apiResponse.describe.name,
-          userId: user.id,
-          scope: job.scope ?? 'private',
-          fileSize: apiResponse.describe.size,
-          parentId: job.id,
-          parentType: PARENT_TYPE.JOB,
-          parentFolderId: job.localFolderId,
-          uid: `${fileId}-1`,
-          stiType: FILE_STI_TYPE.USERFILE,
-          // todo: entity type~> snapshot
-        })
-        em.persist(userFile)
+        const file = this.createUserFile(fileId, apiResponse, false)
+        em.persist(file)
+      })
+      // build snapshot files in DB
+      newSnapshotFileIds.forEach(fileId => {
+        const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
+        if (!apiResponse) {
+          this.ctx.log.warn({ fileId }, 'File was not found in the API response')
+          return
+        }
+        const file = this.createUserFile(fileId, apiResponse, true)
+        em.persist(file)
       })
       // store them in the database
       await em.flush()
@@ -116,5 +127,25 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     )
     await em.flush()
     this.ctx.log.debug({ job: updatedJob }, 'updated job')
+  }
+
+  private createUserFile(fileId: string, apiResponse, isSnapshot: boolean): UserFile {
+    const userFile = new UserFile(this.user)
+    wrap(userFile).assign({
+      dxid: fileId,
+      project: this.job.project,
+      state: FILE_STATE.CLOSED,
+      name: apiResponse.describe.name,
+      userId: this.user.id,
+      scope: this.job.scope ?? 'private',
+      fileSize: apiResponse.describe.size,
+      parentId: this.job.id,
+      parentType: PARENT_TYPE.JOB,
+      parentFolderId: this.job.localFolderId,
+      uid: `${fileId}-1`,
+      stiType: FILE_STI_TYPE.USERFILE,
+      entityType: isSnapshot ? FILE_TYPE.SNAPSHOT : FILE_TYPE.REGULAR,
+    })
+    return userFile
   }
 }

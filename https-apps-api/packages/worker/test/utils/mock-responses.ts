@@ -1,4 +1,4 @@
-const FILES_LIST_RES = {
+const FILES_LIST_RES_ROOT = {
   results: [
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
@@ -28,11 +28,21 @@ const FILES_LIST_RES = {
   next: null,
 } as const
 
+const FILES_LIST_RES_SNAPSHOT = {
+  results: [
+    {
+      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+      id: 'file-Fyz76Q80f24p444q33Fg7ggz',
+    },
+  ],
+  next: null,
+} as const
+
 const FILES_DESC_RES = {
   results: [
     {
       describe: {
-        id: FILES_LIST_RES.results[0].id,
+        id: FILES_LIST_RES_ROOT.results[0].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -51,7 +61,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES.results[1].id,
+        id: FILES_LIST_RES_ROOT.results[1].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -70,7 +80,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES.results[2].id,
+        id: FILES_LIST_RES_ROOT.results[2].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -89,7 +99,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES.results[3].id,
+        id: FILES_LIST_RES_ROOT.results[3].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -108,7 +118,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES.results[4].id,
+        id: FILES_LIST_RES_ROOT.results[4].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -127,7 +137,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES.results[5].id,
+        id: FILES_LIST_RES_ROOT.results[5].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -136,7 +146,7 @@ const FILES_DESC_RES = {
         state: 'closed',
         hidden: false,
         links: [],
-        folder: '/',
+        folder: '/.Notebook_snapshots',
         tags: [],
         created: 1606401885000,
         modified: 1606401886627,
@@ -147,4 +157,4 @@ const FILES_DESC_RES = {
   ],
 } as const
 
-export { FILES_LIST_RES, FILES_DESC_RES }
+export { FILES_LIST_RES_ROOT, FILES_LIST_RES_SNAPSHOT, FILES_DESC_RES }

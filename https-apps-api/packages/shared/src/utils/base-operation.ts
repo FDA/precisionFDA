@@ -1,6 +1,7 @@
 /* eslint-disable import/group-exports */
 /* eslint-disable max-classes-per-file */
 import { nanoid } from 'nanoid'
+import { path } from 'ramda'
 import type { AnyObject, OpsCtx, WorkerOpsCtx, Maybe } from '../types'
 
 export type DefaultInput = AnyObject
@@ -56,6 +57,7 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
         id: this.id,
         jobType: this.ctx.job.data?.type,
         bullJobId: this.ctx.job.id,
+        bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
       },
       'Worker operation started',
     )
