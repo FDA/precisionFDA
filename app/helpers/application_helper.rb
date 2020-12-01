@@ -120,13 +120,15 @@ module ApplicationHelper
       icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     end
 
-    if item.accessible_by?(@context) || (item.try(:user).try(:dxuser) == CHALLENGE_BOT_DX_USER && @context.logged_in? && @context.user.is_challenge_evaluator?)
+    # rubocop:disable Rails/HelperInstanceVariable
+    if item.check_accessibility(@context)
       html_opts = { class: opts[:title_class] }
       html_opts[:data] = opts[:data] if opts[:data]
       opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), html_opts)
     else
-      icon_span + item.uid
+      icon_span + item.title.to_s # do not show app uid if unaccessible
     end
+    # rubocop:enable Rails/HelperInstanceVariable
   end
 
   # Shortcut for unilink(..., icon_class: fa-fw)

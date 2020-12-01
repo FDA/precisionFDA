@@ -15,6 +15,8 @@ class Answer < ApplicationRecord
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note
   include Permissions
+  include CommonPermissions
+
   validates :discussion_id, uniqueness: { scope: :user_id }
   belongs_to :user
   belongs_to :discussion

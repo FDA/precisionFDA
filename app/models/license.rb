@@ -16,6 +16,7 @@
 class License < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include Licenses
 
   belongs_to :user

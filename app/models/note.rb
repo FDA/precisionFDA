@@ -15,6 +15,7 @@
 class Note < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
 
   belongs_to :user, required: true
   has_one :answer

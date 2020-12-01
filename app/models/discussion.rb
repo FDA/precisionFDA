@@ -14,6 +14,7 @@ class Discussion < ApplicationRecord
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note
   include Permissions
+  include CommonPermissions
 
   belongs_to :user
   has_many :answers, dependent: :destroy

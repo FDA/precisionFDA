@@ -58,6 +58,14 @@ module Permissions
     end
   end
 
+  # Checks if object is accessible by the user.
+  # @return [Boolean] Returns true if object is accessible by a user, false otherwise.
+  def accessible_by_user?(user)
+    public? ||
+      !in_space? && user_id == user.id ||
+      in_space? && user.space_uids.include?(scope)
+  end
+
   def accessible_by?(context)
     if context.guest?
       public?

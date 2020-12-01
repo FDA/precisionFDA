@@ -26,6 +26,7 @@ class Space < ActiveRecord::Base
 
   include Auditor
   include Scopes
+  include CommonPermissions
 
   STATE_UNACTIVATED = "unactivated".freeze
   STATE_ACTIVE = "active".freeze

@@ -23,6 +23,7 @@
 class Workflow < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include InternalUid
 
   belongs_to :user

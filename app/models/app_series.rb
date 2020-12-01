@@ -19,6 +19,7 @@ class AppSeries < ApplicationRecord
 
   include Auditor
   include Permissions
+  include CommonPermissions
 
   has_many :apps
   has_many :jobs

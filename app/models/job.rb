@@ -24,6 +24,7 @@
 class Job < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include InternalUid
   include Scopes
 

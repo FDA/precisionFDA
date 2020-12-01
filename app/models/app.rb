@@ -24,6 +24,7 @@
 class App < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include InternalUid
   include Scopes
 
@@ -121,14 +122,6 @@ class App < ApplicationRecord
     return false unless context.review_space_admin?
 
     space_object.reviewer? || space_object.verification?
-  end
-
-  # Checks if app is accessible by the user.
-  # @return [Boolean] Returns true if app is accessible by a user, false otherwise.
-  def accessible_by_user?(user)
-    public? ||
-      !in_space? && user_id == user.id ||
-      in_space? && user.space_uids.include?(scope)
   end
 
   def runnable_by?(user)
