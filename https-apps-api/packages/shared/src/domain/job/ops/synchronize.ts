@@ -34,7 +34,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     if (!shouldSyncStatus(job)) {
       this.ctx.log.info({ input, job }, 'Job is already finished')
       await removeRepeatable(this.ctx.job)
-      return job
+      return
     }
     // we want to synchronize the job status if it is not yet terminated
     let platformJobData: client.JobDescribeResponse
@@ -47,63 +47,64 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       // handle WORKER dirty state here
       // we could do more efficient error handling and also calls repetition here
       await removeRepeatable(this.ctx.job)
-      return job
+      return
     }
-    // todo: move under isStateTerminal ..
-    const filesInProject = await client.filesList({
-      accessToken: this.ctx.user.accessToken,
-      project: job.project,
-    })
-    const localfiles = await filesRepo.findProjectFiles({ project: job.project })
-    const remoteFileIds = map(prop('id'))(filesInProject.results)
-    const localFileIds = map(prop('dxid'))(localfiles)
-    const newFileIds = difference(remoteFileIds, localFileIds)
-    // ask the API for info about new files
-    const newFilesData = await client.describeFiles({
-      accessToken: this.ctx.user.accessToken,
-      fileIds: newFileIds,
-    })
-    newFileIds.forEach(fileId => {
-      const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
-      if (!apiResponse) {
-        this.ctx.log.warn({ fileId }, 'File was not found in the API response')
-        return
-      }
-      const userFile = new UserFile(user)
-      wrap(userFile).assign({
-        dxid: fileId,
-        project: job.project,
-        state: FILE_STATE.CLOSED,
-        name: apiResponse.describe.name,
-        userId: user.id,
-        scope: job.scope ?? 'private',
-        fileSize: apiResponse.describe.size,
-        parentId: job.id,
-        parentType: PARENT_TYPE.JOB,
-        parentFolderId: job.localFolderId,
-        uid: `${fileId}-1`,
-        stiType: FILE_STI_TYPE.USERFILE,
-        // todo: entity type~> snapshot
-      })
-      em.persist(userFile)
-    })
-    // store them in the database
-    await em.flush()
 
     // fixme: the mapping is not perfect for the https apps
     const remoteState = platformJobData.state
     if (remoteState === job.state) {
       this.ctx.log.info({ remoteState }, 'State has not changed, no updates')
-      return job
+      return
     }
 
     if (isStateTerminal(remoteState)) {
-      // todo: if job.state === done there is more sync tasks to do (filess)
       this.ctx.log.debug({ remoteState }, 'We will do lots of updates')
       // fetch all files related to the app
+      const localfiles = await filesRepo.findProjectFiles({ project: job.project })
       // fetch all files on the platform
+      const filesInProject = await client.filesList({
+        accessToken: this.ctx.user.accessToken,
+        project: job.project,
+      })
       // compare check differences
+      const remoteFileIds = map(prop('id'))(filesInProject.results)
+      const localFileIds = map(prop('dxid'))(localfiles)
+      const newFileIds = difference(remoteFileIds, localFileIds)
+      this.ctx.log.info({ newFileIds }, 'Discovered newly created files')
+      // todo: find a way to handle the snapshots
+
+      // ask the API for info about new files
+      const newFilesData = await client.describeFiles({
+        accessToken: this.ctx.user.accessToken,
+        fileIds: newFileIds,
+      })
       // load new files to our DB with correct type
+      newFileIds.forEach(fileId => {
+        const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
+        if (!apiResponse) {
+          this.ctx.log.warn({ fileId }, 'File was not found in the API response')
+          return
+        }
+        const userFile = new UserFile(user)
+        wrap(userFile).assign({
+          dxid: fileId,
+          project: job.project,
+          state: FILE_STATE.CLOSED,
+          name: apiResponse.describe.name,
+          userId: user.id,
+          scope: job.scope ?? 'private',
+          fileSize: apiResponse.describe.size,
+          parentId: job.id,
+          parentType: PARENT_TYPE.JOB,
+          parentFolderId: job.localFolderId,
+          uid: `${fileId}-1`,
+          stiType: FILE_STI_TYPE.USERFILE,
+          // todo: entity type~> snapshot
+        })
+        em.persist(userFile)
+      })
+      // store them in the database
+      await em.flush()
     }
     this.ctx.log.info({ jobId: input.dxid }, 'Updating job, state change discovered')
     const updatedJob = wrap(job).assign(
@@ -114,6 +115,6 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       { em },
     )
     await em.flush()
-    return updatedJob
+    this.ctx.log.debug({ job: updatedJob }, 'updated job')
   }
 }
