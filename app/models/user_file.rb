@@ -46,6 +46,7 @@
 class UserFile < Node
   include Licenses
   include InternalUid
+  include CommonPermissions
 
   require "uri"
 

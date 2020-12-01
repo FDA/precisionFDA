@@ -15,6 +15,7 @@
 class WorkflowSeries < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
 
   has_many :workflows
   belongs_to :latest_revision_workflow, class_name: "Workflow"

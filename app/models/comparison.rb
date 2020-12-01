@@ -20,6 +20,7 @@
 class Comparison < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include Scopes
 
   DESCRIPTION_MAX_LENGTH = 1000

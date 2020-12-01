@@ -29,6 +29,7 @@ class Node < ApplicationRecord
   self.inheritance_column = :sti_type
 
   include Permissions
+  include CommonPermissions
 
   # pFDA internal state, used for files that are being removing by a worker.
   STATE_REMOVING = "removing".freeze

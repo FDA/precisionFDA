@@ -15,6 +15,7 @@
 class Analysis < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   extend ApplicationHelper
 
   belongs_to :workflow
