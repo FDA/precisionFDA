@@ -294,9 +294,10 @@ class AppsController < ApplicationController
             instanceType: run_instance_type,
             input: input_info.run_inputs,
           )
-        rescue StandardError => e
-          # TODO: improve errors catching
-          fail "Can't run https app #{@app.uid} due to an error: #{e.message}"
+        rescue HttpsAppsClient::Error => e
+          fail e.message
+        rescue StandardError
+          fail "Something went wrong"
         end
 
       job = Job.find_by!(dxid: result["dxid"])

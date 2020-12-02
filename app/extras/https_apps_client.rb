@@ -1,5 +1,24 @@
 # The client for communicating with JupiterLab service.
 class HttpsAppsClient
+  # Client's specific error.
+  class Error < Net::HTTPClientException
+    def initialize(response_body)
+      @error_body = parsed_body(response_body)
+    end
+
+    def message
+      @error_body["message"] || "Jupyter Labs service client error."
+    end
+
+    private
+
+    def parsed_body(response_body)
+      JSON.parse(response_body)
+    rescue JSON::ParserError
+      {}
+    end
+  end
+
   # @param token [String] User access token.
   # @param user [User] A user.
   def initialize(token, user)
@@ -14,13 +33,13 @@ class HttpsAppsClient
     request(
       "/apps/#{app_dxid}/run",
       opts.merge(scope: Scopes::SCOPE_PUBLIC),
-      "POST",
+      Net::HTTP::Post::METHOD,
     )
   end
 
   private
 
-  def request(path, body = {}, method_name = "POST")
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
     uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{auth_querystring}")
     conn_opts = connection_opts.merge(use_ssl: uri.scheme == "https")
 
@@ -34,7 +53,7 @@ class HttpsAppsClient
   def connection_opts
     @connection_opts ||= begin
       opts = { read_timeout: 180 }
-      opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if test_env?
+      opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if dev_or_test_env?
       opts
     end
   end
@@ -56,7 +75,7 @@ class HttpsAppsClient
   end
 
   # rubocop:disable Rails/UnknownEnv
-  def test_env?
+  def dev_or_test_env?
     Rails.env.development? || Rails.env.test? || Rails.env.ui_test?
   end
   # rubocop:enable Rails/UnknownEnv
@@ -67,7 +86,7 @@ class HttpsAppsClient
   def handle_response(response)
     response.value
     JSON.parse(response.body)
-  rescue Net::HTTPClientException => e
-    raise e, "#{e.message}. #{response.body}", e.backtrace
+  rescue Net::HTTPClientException
+    raise Error, response.body
   end
 end
