@@ -41,7 +41,8 @@ class App < ApplicationRecord
   HTTPS_RSHINY = "r_shiny".freeze
 
   TYPE_REGULAR = "regular".freeze
-  TYPE_HTTPS = "https".freeze
+  TYPE_JUPYTER = "jupyter".freeze
+  TYPE_TTYD = "ttyd".freeze
 
   belongs_to :user
   has_one :org, through: :user
@@ -74,8 +75,13 @@ class App < ApplicationRecord
 
   enum entity_type: {
     TYPE_REGULAR => 0,
-    TYPE_HTTPS => 1,
+    TYPE_JUPYTER => 1,
+    TYPE_TTYD => 2,
   }
+
+  def https?
+    [TYPE_JUPYTER, TYPE_TTYD].include?(entity_type)
+  end
 
   def to_param
     uid
