@@ -29,6 +29,8 @@ module IOC
         )
       end
 
+      register("https_apps_client") { HttpsAppsClient.new(config[:token], config[:user]) }
+
       namespace "api" do
         register("user", memoize: true) { DNAnexusAPI.new(config[:token]) }
         register("admin", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN) }

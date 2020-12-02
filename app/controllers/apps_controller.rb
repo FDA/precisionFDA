@@ -237,6 +237,7 @@ class AppsController < ApplicationController
     end
   end
 
+  # TODO: do refactoring of this method later!
   # Inputs
   #
   # id (string, required): the dxid of the app to run
@@ -262,6 +263,11 @@ class AppsController < ApplicationController
     inputs = unsafe_params["inputs"]
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
+    run_instance_type = unsafe_params[:instance_type]
+    if run_instance_type
+      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(run_instance_type)
+    end
+
     # App should exist and be accessible and runnable by a user.
     @app = App.find_by!(uid: id)
 
@@ -270,6 +276,32 @@ class AppsController < ApplicationController
     # Check if asset licenses have been accepted
     unless @app.assets.all? { |a| a.license.blank? || a.licensed_by?(@context) }
       fail "Asset licenses must be accepted"
+    end
+
+    # Call JupiterLab service if https app is running
+    if @app.https?
+      https_apps_client = DIContainer.resolve("https_apps_client")
+      input_info = input_spec_preparer.run(@app, inputs)
+
+      fail input_spec_preparer.first_error unless input_spec_preparer.valid?
+
+      result =
+        begin
+          https_apps_client.app_run(
+            @app.dxid,
+            name: name,
+            httpsAppType: @app.entity_type,
+            instanceType: run_instance_type,
+            input: input_info.run_inputs,
+          )
+        rescue StandardError => e
+          # TODO: improve errors catching
+          fail "Can't run https app #{@app.uid} due to an error: #{e.message}"
+        end
+
+      job = Job.find_by!(dxid: result["dxid"])
+
+      render(json: { id: job.uid }) && return
     end
 
     space_id = unsafe_params[:space_id]
@@ -282,13 +314,6 @@ class AppsController < ApplicationController
     input_info = input_spec_preparer.run(@app, inputs, space&.accessible_scopes)
 
     fail input_spec_preparer.first_error unless input_spec_preparer.valid?
-
-    run_instance_type = unsafe_params[:instance_type]
-
-    # User can override the instance type
-    if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(run_instance_type)
-    end
 
     if space
       project = space.project_for_user(@context.user)

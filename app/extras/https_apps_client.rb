@@ -1,0 +1,73 @@
+# The client for communicating with JupiterLab service.
+class HttpsAppsClient
+  # @param token [String] User access token.
+  # @param user [User] A user.
+  def initialize(token, user)
+    @token = token
+    @user = user
+  end
+
+  # Run app.
+  # @param app_dxid [String] App dxid.
+  # @param opts [Hash] Request body options.
+  def app_run(app_dxid, opts)
+    request(
+      "/apps/#{app_dxid}/run",
+      opts.merge(scope: Scopes::SCOPE_PUBLIC),
+      "POST",
+    )
+  end
+
+  private
+
+  def request(path, body = {}, method_name = "POST")
+    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{auth_querystring}")
+    conn_opts = connection_opts.merge(use_ssl: uri.scheme == "https")
+
+    Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
+      handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
+    end
+  end
+
+  # Returns connection options.
+  # @return [Hash] Connection options.
+  def connection_opts
+    @connection_opts ||= begin
+      opts = { read_timeout: 180 }
+      opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if test_env?
+      opts
+    end
+  end
+
+  def auth_querystring
+    {
+      id: @user.id,
+      accessToken: @token,
+      dxuser: @user.dxuser,
+    }.to_query
+  end
+
+  # Returns HTTP headers to be sent during every request.
+  # @return [Hash] Headers to be sent.
+  def headers
+    @headers ||= {
+      "Content-Type" => "application/json",
+    }
+  end
+
+  # rubocop:disable Rails/UnknownEnv
+  def test_env?
+    Rails.env.development? || Rails.env.test? || Rails.env.ui_test?
+  end
+  # rubocop:enable Rails/UnknownEnv
+
+  # Builds hash from response.
+  # @param response [String] Response string.
+  # @return [Hash] Response from server converted to hash.
+  def handle_response(response)
+    response.value
+    JSON.parse(response.body)
+  rescue Net::HTTPClientException => e
+    raise e, "#{e.message}. #{response.body}", e.backtrace
+  end
+end
