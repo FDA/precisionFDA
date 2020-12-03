@@ -16,7 +16,7 @@ declare type DeepPartial<T> = {
     : DeepPartial<T[P]>
 }
 
-declare type Maybe<T> = T | undefined
+declare type Maybe<T> = T | undefined | null
 
 declare type AnyObject = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

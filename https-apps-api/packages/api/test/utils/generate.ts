@@ -1,8 +1,14 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { User, Job, App } from '@pfda/https-apps-shared/src/domain'
+import { User, Job, App, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
+import {
+  FILE_STATE,
+  FILE_STI_TYPE,
+  FILE_TYPE,
+  PARENT_TYPE,
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
 
 const chance = new Chance()
 
@@ -132,4 +138,37 @@ const job = {
   jobId: () => 'job-FyZg2z000B72xG6b3yVY5BBK',
 }
 
-export { random, user, job, app }
+const userFile = {
+  simple: (): Partial<UserFile> => {
+    const dxid = `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_TYPE.REGULAR,
+      state: FILE_STATE.CLOSED,
+      parentId: 1,
+      parentType: PARENT_TYPE.USER,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
+  snapshot: (): Partial<UserFile> => {
+    const dxid = `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: `snapshot-${chance.name()}`,
+      scope: 'private',
+      entityType: FILE_TYPE.SNAPSHOT,
+      state: FILE_STATE.CLOSED,
+      parentId: 1,
+      parentType: PARENT_TYPE.JOB,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
+}
+
+export { random, user, job, app, userFile }

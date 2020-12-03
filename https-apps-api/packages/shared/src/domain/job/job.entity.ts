@@ -3,6 +3,7 @@ import {
   Entity,
   EntityRepositoryType,
   IdentifiedReference,
+  JsonType,
   ManyToOne,
   OneToMany,
   PrimaryKey,
@@ -33,8 +34,9 @@ export class Job extends BaseEntity {
   @Property({ hidden: true })
   describe: string
 
-  @Property({ hidden: true })
-  provenance: string
+  // fixme: should be custom TS type here
+  @Property({ type: JsonType })
+  provenance: any
 
   @Property()
   state: JOB_STATE
@@ -56,12 +58,10 @@ export class Job extends BaseEntity {
   appSeriesId: number
 
   @Property()
-  localFolderId: number;
+  localFolderId: number
 
   // @Property()
   // analysisId: number
-
-  [EntityRepositoryType]?: JobRepository
 
   // relations
   @ManyToOne()
@@ -74,7 +74,17 @@ export class Job extends BaseEntity {
     entity: () => Tagging,
     mappedBy: t => t.job,
   })
-  taggings = new Collection<Tagging>(this)
+  taggings = new Collection<Tagging>(this);
+
+  // pivot table key names are mismatched and this does not work :(
+  // @ManyToMany({
+  //   pivotTable: 'job_inputs',
+  //   joinColumn: 'job_id',
+  //   inverseJoinColumn: 'user_file_id',
+  // })
+  // userFiles = new Collection<UserFile>(this);
+
+  [EntityRepositoryType]?: JobRepository
 
   constructor(user: User, app?: App) {
     super()

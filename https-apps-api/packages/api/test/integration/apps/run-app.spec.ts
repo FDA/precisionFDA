@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
@@ -53,8 +53,13 @@ describe('POST /apps/:id/run', () => {
       project: user.jupyterProject,
       state: JOB_STATE.IDLE,
       scope: 'public',
-      // todo:
-      // provenance: {},
+      provenance: {
+        [generate.job.jobId()]: {
+          app_dxid: app.dxid,
+          app_id: app.id,
+          inputs: {},
+        },
+      },
       runData: {
         run_instance_type: DEFAULT_INSTANCE_TYPE,
         run_inputs: {
@@ -95,6 +100,37 @@ describe('POST /apps/:id/run', () => {
       },
     })
   })
+
+  it('accepts snapshot file dxid', async () => {
+    const snapshotFile = create.filesHelper.create(em, { user })
+    await em.flush()
+    const input = {
+      ...generate.app.runAppInput(),
+      input: {
+        snapshot: snapshotFile.dxid,
+      },
+    }
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(input)
+      .expect(201)
+    expect(body)
+      .to.have.property('provenance')
+      .that.is.deep.equal({
+        [generate.job.jobId()]: {
+          app_dxid: app.dxid,
+          app_id: app.id,
+          inputs: { snapshot: snapshotFile.dxid },
+        },
+      })
+    const jobFileRows = await em.createQueryBuilder('job_inputs').select('*').execute()
+    expect(jobFileRows).to.be.an('array').with.lengthOf(1)
+    expect(jobFileRows[0]).to.have.property('job_id', body.id)
+    expect(jobFileRows[0]).to.have.property('user_file_id', snapshotFile.id)
+  })
+
+  // todo: tests job files creation!
 
   // todo: test all default values and overrides
   it('calls the platform API', async () => {
@@ -163,6 +199,17 @@ describe('POST /apps/:id/run', () => {
         .send(generate.app.runAppInput())
         .expect(404)
       expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+    })
+
+    it('throws 404 when snapshot is provided but file does not exist', async () => {
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${app.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+        })
+        .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
     })
   })
 })
