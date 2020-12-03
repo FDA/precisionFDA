@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/core'
+import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
 import { FILE_TYPE } from './user-file.enum'
 
@@ -14,5 +14,11 @@ export class UserFileRepository extends EntityRepository<UserFile> {
 
   async findProjectFiles(input: { project: string }): Promise<UserFile[]> {
     return await this.find({ project: input.project })
+  }
+
+  async createUserFileJobRefs(fileIds: number[], jobId: number) {
+    const qb = this.em.createQueryBuilder('job_inputs')
+    qb.insert(fileIds.map(fileId => ({ user_file_id: fileId, job_id: jobId })))
+    return await qb.execute()
   }
 }

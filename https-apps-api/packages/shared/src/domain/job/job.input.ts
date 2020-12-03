@@ -52,6 +52,8 @@ const runAppSchema: JSONSchema7 = {
     name: { type: 'string', maxLength: config.validation.maxStrLen },
     input: {
       type: 'object',
+      additionalProperties: false,
+      required: [],
       // these inputs are for jupyter app only
       properties: {
         duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },

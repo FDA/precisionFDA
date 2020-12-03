@@ -15,7 +15,8 @@ import {
 } from '../job.enum'
 import { createJobSyncTask } from '../../../queue'
 import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
-import { AnyObject } from '../../../types'
+import { AnyObject, Maybe } from '../../../types'
+import { UserFile } from '../..'
 
 export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   private input: RunAppInput
@@ -50,35 +51,63 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     const runInputDb = this.buildJobRunInput({ app })
     const runDxInput = this.buildClientApiCall({ app, platformAppId })
     const jobName = input.name ?? app.title
+    // todo: more conditions, user can use the file -> could be the spaces again etc
+    const snapshotFile =
+      input.input && input.input.snapshot
+        ? await em.findOne(UserFile, { dxid: input.input?.snapshot })
+        : null
+
+    // todo: should be only allowed for apps that work with snapshots
+    if (input.input?.snapshot && !snapshotFile) {
+      throw new errors.NotFoundError(`User file dxid: ${input.input.snapshot} not found`, {
+        code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+      })
+    }
+
+    /**
+     * EVENTS - when job is created
+     */
 
     const repo = this.ctx.em.getRepository(Job)
     const newJobClientRes = await client.jobCreate(runDxInput)
-    // todo: transaction (explicit? consider.. maybe with provenance later)
     // add all the data to the database
-    const job = repo.create({
-      user: em.getReference(User, this.ctx.user.id),
-      app: em.getReference(App, app.id),
-      dxid: newJobClientRes.id,
-      state: JOB_STATE.IDLE,
-      project: this.projectId,
-      name: jobName,
-      // will be resolved later
-      describe: {},
-      scope: input.scope,
-      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-      runData: {
-        run_instance_type: runWithInstanceType,
-        run_inputs: runInputDb,
-        run_outputs: {},
-      },
-      // todo: gotta implement files first!
-      provenance: {},
-      appSeriesId: app.appSeriesId,
-      uid: `${newJobClientRes.id}-1`,
-    })
-    // todo: create Event entry -> low priority probably
-    em.persist(job)
-    await em.flush()
+    await em.begin()
+    let job: Job
+    try {
+      job = repo.create({
+        user: em.getReference(User, this.ctx.user.id),
+        app: em.getReference(App, app.id),
+        dxid: newJobClientRes.id,
+        state: JOB_STATE.IDLE,
+        project: this.projectId,
+        name: jobName,
+        // will be resolved later
+        describe: {},
+        scope: input.scope,
+        entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+        runData: {
+          run_instance_type: runWithInstanceType,
+          run_inputs: runInputDb,
+          run_outputs: {},
+        },
+        provenance: {},
+        appSeriesId: app.appSeriesId,
+        uid: `${newJobClientRes.id}-1`,
+      })
+      // todo: create Event entry -> low priority probably
+      em.persist(job)
+      job.provenance = this.buildProvenance({ app, job, snapshot: snapshotFile })
+      await em.flush()
+
+      if (snapshotFile) {
+        const jobFilesRepo = this.ctx.em.getRepository(UserFile)
+        await jobFilesRepo.createUserFileJobRefs([snapshotFile.id], job.id)
+      }
+      await em.commit()
+    } catch (err) {
+      await em.rollback()
+      throw err
+    }
 
     await createJobSyncTask({ dxid: job.dxid }, this.ctx.user)
     return job
@@ -105,6 +134,23 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       )
     }
     return value.default
+  }
+
+  private buildProvenance({
+    app,
+    job,
+    snapshot,
+  }: {
+    app: App
+    job: Job
+    snapshot: Maybe<UserFile>
+  }) {
+    const initValue = { [job.dxid]: { app_dxid: app.dxid, app_id: app.id, inputs: {} } }
+    if (snapshot) {
+      initValue[job.dxid].inputs = { snapshot: snapshot.dxid }
+    }
+    // todo: add parent files provenance?
+    return initValue
   }
 
   // refactor both!

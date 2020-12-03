@@ -58,6 +58,7 @@ export class UserFile extends BaseEntity {
   @Property()
   scopedParentFolderId?: number
 
+  // todo: micro-orm can do single table inheritance
   @Property()
   stiType: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
 
