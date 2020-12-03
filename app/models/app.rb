@@ -213,8 +213,7 @@ class App < ApplicationRecord
 
         { HTTPS_JUPYTER => ENV["HTTPS_JUPYTER"],
           HTTPS_TTYD => ENV["HTTPS_TTYD"],
-          HTTPS_RSHINY => ENV["HTTPS_RSHINY"],
-        }.key(dxid) || ""
+          HTTPS_RSHINY => ENV["HTTPS_RSHINY"] }.key(dxid) || ""
       end
   end
 
