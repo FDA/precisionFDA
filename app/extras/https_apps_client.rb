@@ -32,7 +32,7 @@ class HttpsAppsClient
   def app_run(app_dxid, opts)
     request(
       "/apps/#{app_dxid}/run",
-      opts.merge(scope: Scopes::SCOPE_PUBLIC),
+      opts,
       Net::HTTP::Post::METHOD,
     )
   end

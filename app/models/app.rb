@@ -35,6 +35,10 @@ class App < ApplicationRecord
   TYPE_REGULAR = "regular".freeze
   TYPE_HTTPS = "https".freeze
 
+  HTTPS_JUPYTER = "jupyter".freeze
+  HTTPS_TTYD = "ttyd".freeze
+  HTTPS_RSHINY = "r_shiny".freeze
+
   belongs_to :user
   has_one :org, through: :user
 
@@ -200,6 +204,18 @@ class App < ApplicationRecord
 
   def update_series_deleted_status
     app_series.update(deleted: deleted)
+  end
+
+  def https_subtype
+    @https_subtype ||=
+      begin
+        return "" if regular?
+
+        { HTTPS_JUPYTER => ENV["HTTPS_JUPYTER"],
+          HTTPS_TTYD => ENV["HTTPS_TTYD"],
+          HTTPS_RSHINY => ENV["HTTPS_RSHINY"],
+        }.key(dxid) || ""
+      end
   end
 
   delegate :name, to: :app_series

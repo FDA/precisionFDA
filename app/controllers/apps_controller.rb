@@ -290,8 +290,9 @@ class AppsController < ApplicationController
           https_apps_client.app_run(
             @app.dxid,
             name: name,
-            httpsAppType: @app.entity_type,
+            httpsAppType: @app.https_subtype,
             instanceType: run_instance_type,
+            scope: Scopes::SCOPE_PRIVATE,
             input: input_info.run_inputs,
           )
         rescue HttpsAppsClient::Error => e
