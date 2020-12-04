@@ -12,7 +12,7 @@ import * as create from '../../utils/create'
 import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
-describe('GET /jobs/:id', () => {
+describe.skip('GET /jobs/:id', () => {
   let em: EntityManager
   let job: Job
   let user: User

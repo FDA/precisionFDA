@@ -7,7 +7,10 @@ import {
   JOB_STATE,
   JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
+  allowedFeatures,
+  allowedInstanceTypes,
 } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import { api } from '../../../src/server'
 import { dropData } from '../../utils/db'
 import * as create from '../../utils/create'
@@ -52,7 +55,7 @@ describe('POST /apps/:id/run', () => {
       // default app type
       project: user.jupyterProject,
       state: JOB_STATE.IDLE,
-      scope: 'public',
+      scope: 'private',
       provenance: {
         [generate.job.jobId()]: {
           app_dxid: app.dxid,
@@ -90,9 +93,14 @@ describe('POST /apps/:id/run', () => {
       // default app type
       project: user.ttydProject,
       state: JOB_STATE.IDLE,
-      scope: 'public',
-      // todo:
-      // provenance: {},
+      scope: 'private',
+      provenance: {
+        [generate.job.jobId()]: {
+          app_dxid: app.dxid,
+          app_id: app.id,
+          inputs: {},
+        },
+      },
       runData: {
         run_instance_type: DEFAULT_INSTANCE_TYPE,
         run_inputs: {},
@@ -130,9 +138,63 @@ describe('POST /apps/:id/run', () => {
     expect(jobFileRows[0]).to.have.property('user_file_id', snapshotFile.id)
   })
 
-  // todo: tests job files creation!
+  it('accepts all input params (uses all overrides)', async () => {
+    const inputComplete = {
+      ...generate.app.runAppInput(),
+      instanceType: 'himem-2',
+      name: 'my-job-name',
+      input: {
+        duration: 60,
+        feature: 'ML_IP',
+        imagename: 'my-imagename',
+        cmd: 'my-command-override',
+      },
+    }
+    await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(inputComplete)
+      .expect(201)
+    // all overrides took place
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('name', inputComplete.name)
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      duration: inputComplete.input.duration,
+      feature: allowedFeatures.ML_IP,
+      // todo: missing imagename and cmd
+    })
+    expect(platformCall)
+      .to.have.property('systemRequirements')
+      .that.deep.equals({
+        '*': { instanceType: allowedInstanceTypes[inputComplete.instanceType] },
+      })
+  })
 
-  // todo: test all default values and overrides
+  it('accepts minimal input params (uses all defaults)', async () => {
+    const inputComplete = {
+      httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
+      scope: 'private',
+      input: {},
+    }
+    await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(inputComplete)
+      .expect(201)
+    // all defaults took place
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('name').that.is.undefined()
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      duration: 240,
+      feature: allowedFeatures.PYTHON_R,
+    })
+    expect(platformCall)
+      .to.have.property('systemRequirements')
+      .that.deep.equals({
+        '*': { instanceType: DEFAULT_INSTANCE_TYPE },
+      })
+  })
+
   it('calls the platform API', async () => {
     await supertest(api.getServer())
       .post(`/apps/${app.dxid}/run`)
