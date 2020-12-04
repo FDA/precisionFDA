@@ -4,8 +4,10 @@ import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
 import { UserFile } from './user-file/user-file.entity'
+import { JobClosedEvent } from './event/job-closed.entity'
+import { Organization } from './org/org.entity'
 
-const entities = { App, Job, User, Tag, Tagging, UserFile }
+const entities = { App, Job, User, Tag, Tagging, UserFile, JobClosedEvent, Organization }
 
 export * as app from './app'
 
@@ -18,5 +20,9 @@ export * as tag from './tag'
 export * as tagging from './tagging'
 
 export * as userFile from './user-file'
+
+export * as event from './event'
+
+export * as org from './org'
 
 export { entities, Job, App, User, UserFile }

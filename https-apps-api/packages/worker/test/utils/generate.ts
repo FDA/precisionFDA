@@ -20,6 +20,7 @@ const random = {
   email: () => chance.email(),
   password: () => chance.string({ length: 20 }),
   dxstr: (): string => nanoid(),
+  chance,
 }
 
 // generators fill in random data, usually without foreign keys

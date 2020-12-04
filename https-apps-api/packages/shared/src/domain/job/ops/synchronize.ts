@@ -11,6 +11,7 @@ import { UserFile } from '../../user-file'
 import { User } from '../..'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
+import { createJobClosed } from '../../event/event.helper'
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Job> {
   protected user: User
@@ -65,6 +66,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
 
     if (isStateTerminal(remoteState)) {
       this.ctx.log.debug({ remoteState }, 'We will do lots of updates')
+      // create jobClosed event
+      const eventEntity = await createJobClosed(user, job)
+      em.persist(eventEntity)
+
       // fetch all files related to the app
       const localfiles = await filesRepo.findProjectFiles({ project: job.project })
       // fetch all files on the platform
