@@ -68,7 +68,7 @@ export class Job extends BaseEntity {
   user!: IdentifiedReference<User>
 
   @ManyToOne()
-  app?: IdentifiedReference<App>
+  app!: IdentifiedReference<App>
 
   @OneToMany({
     entity: () => Tagging,

@@ -1,4 +1,5 @@
-import { EntityManager, wrap } from '@mikro-orm/core'
+import { wrap } from '@mikro-orm/core'
+import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User, Job, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -34,7 +35,7 @@ const createSyncJobTask = async (
 }
 
 describe('TASK: sync_job_status', () => {
-  let em: EntityManager
+  let em: EntityManager<MySqlDriver>
   let user: User
   let app: App
 
@@ -113,7 +114,7 @@ describe('TASK: sync_job_status', () => {
     // expect(maybeUpdatedJob).to.have.property('updatedAt').that.is.equal(job.updatedAt)
   })
 
-  it('updates our DB, local state is idle, remote is terminating', async () => {
+  it('updates our DB, local state is IDLE, remote is TERMINATED', async () => {
     const job = create.jobHelper.create(
       em,
       { user, app },
@@ -131,6 +132,19 @@ describe('TASK: sync_job_status', () => {
     const updatedJob = await afterEm.findOne(Job, job.id)
     expect(updatedJob).to.have.property('state', JOB_STATE.TERMINATED)
     expect(updatedJob).to.have.property('updatedAt').that.is.not.equal(job.updatedAt)
+    // fetch created event
+    const events = await afterEm.createQueryBuilder('events').select('*').execute()
+    expect(events).to.be.an('array').with.lengthOf(1)
+    expect(stripEntityDates(events[0])).to.be.deep.equal({
+      id: 1,
+      type: 'Event::JobClosed',
+      org_handle: user.organization.getProperty('handle'),
+      dxuser: user.dxuser,
+      param1: job.dxid,
+      param2: app.dxid,
+      param3: null,
+      param4: null,
+    })
   })
 
   context('files sync', () => {
