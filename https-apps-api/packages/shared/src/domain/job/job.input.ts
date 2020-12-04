@@ -61,7 +61,7 @@ const runAppSchema: JSONSchema7 = {
         feature: {
           type: 'string',
           enum: Object.keys(allowedFeatures),
-          default: allowedFeatures.python,
+          default: allowedFeatures.PYTHON_R,
         },
         imagename: { type: 'string', maxLength: config.validation.maxStrLen },
         cmd: { type: 'string', maxLength: config.validation.maxStrLen },

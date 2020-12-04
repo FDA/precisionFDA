@@ -34,8 +34,8 @@ const allowedInstanceTypes = {
 const DEFAULT_INSTANCE_TYPE = allowedInstanceTypes['baseline-2']
 
 const allowedFeatures = {
-  python: 'PYTHON_R',
-  mlIp: 'ML_IP',
+  PYTHON_R: 'PYTHON_R',
+  ML_IP: 'ML_IP',
 }
 
 export {

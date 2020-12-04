@@ -108,14 +108,14 @@ const app = {
   },
   runAppInput: () => ({
     httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
-    scope: 'public',
+    scope: 'private',
     input: {
       duration: 30,
     },
   }),
   runTtydAppInput: () => ({
     httpsAppType: APP_HTTPS_SUBTYPE.TTYD,
-    scope: 'public',
+    scope: 'private',
     input: {},
   }),
 }
