@@ -24,6 +24,14 @@ type RunAppInput = {
   appDxId: string
 }
 
+type Provenance = {
+  [k: string]: {
+    app_dxid: string
+    app_id: number
+    inputs: { [k: string]: string }
+  }
+}
+
 type DescribeJobInput = DxIdInput & {
   appId?: number
 }
@@ -85,6 +93,7 @@ const jobIdAppIdSchema: JSONSchema7 = {
 export {
   runAppSchema,
   RunAppInput,
+  Provenance,
   jobIdAppIdSchema,
   DxIdInput,
   DescribeJobInput,

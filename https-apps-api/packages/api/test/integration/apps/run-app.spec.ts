@@ -136,9 +136,17 @@ describe('POST /apps/:id/run', () => {
     expect(jobFileRows).to.be.an('array').with.lengthOf(1)
     expect(jobFileRows[0]).to.have.property('job_id', body.id)
     expect(jobFileRows[0]).to.have.property('user_file_id', snapshotFile.id)
+    // correct API call shape
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('input')
+    expect(platformCall.input)
+      .to.have.property('snapshot')
+      .that.deep.equals({
+        $dnanexus_link: { id: snapshotFile.dxid, project: user.jupyterProject },
+      })
   })
 
-  it('accepts all input params (uses all overrides)', async () => {
+  it('accepts all input params (uses all overrides and optionals)', async () => {
     const inputComplete = {
       ...generate.app.runAppInput(),
       instanceType: 'himem-2',
@@ -161,7 +169,8 @@ describe('POST /apps/:id/run', () => {
     expect(platformCall).to.have.property('input').that.deep.equals({
       duration: inputComplete.input.duration,
       feature: allowedFeatures.ML_IP,
-      // todo: missing imagename and cmd
+      imagename: inputComplete.input.imagename,
+      cmd: inputComplete.input.cmd,
     })
     expect(platformCall)
       .to.have.property('systemRequirements')
@@ -183,6 +192,7 @@ describe('POST /apps/:id/run', () => {
       .expect(201)
     // all defaults took place
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    console.log(platformCall, '!')
     expect(platformCall).to.have.property('name').that.is.undefined()
     expect(platformCall).to.have.property('input').that.deep.equals({
       duration: 240,
