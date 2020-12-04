@@ -1,15 +1,22 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
 import { entities } from '@pfda/https-apps-shared'
+import { Organization } from '@pfda/https-apps-shared/src/domain/org'
 import * as generate from './generate'
 
 const userHelper = {
   create: (em: EntityManager, data?: Partial<typeof entities.User>) => {
+    const org = wrap(new Organization()).assign({
+      handle: `org-${generate.random.dxstr()}`,
+      name: generate.random.chance.name(),
+    })
+    em.persist(org)
+
     const defaults = generate.user.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const user = wrap(new entities.User()).assign(input, { em })
+    const user = wrap(new entities.User(org)).assign(input, { em })
     em.persist(user)
     return user
   },
