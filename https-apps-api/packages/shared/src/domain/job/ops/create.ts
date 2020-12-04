@@ -1,7 +1,7 @@
 import { prop } from 'ramda'
 import * as client from '../../../platform-client'
 import * as errors from '../../../errors'
-import type { RunAppInput } from '../job.input'
+import type { RunAppInput, Provenance } from '../job.input'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import { App, helper as appHelper } from '../../app'
@@ -63,10 +63,6 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
       })
     }
-
-    /**
-     * EVENTS - when job is created
-     */
 
     const repo = this.ctx.em.getRepository(Job)
     const newJobClientRes = await client.jobCreate(runDxInput)
@@ -144,7 +140,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     app: App
     job: Job
     snapshot: Maybe<UserFile>
-  }) {
+  }): Provenance {
     const initValue = { [job.dxid]: { app_dxid: app.dxid, app_id: app.id, inputs: {} } }
     if (snapshot) {
       initValue[job.dxid].inputs = { snapshot: snapshot.dxid }
@@ -153,7 +149,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     return initValue
   }
 
-  // refactor both!
+  // job.run_data JSON field
   private buildJobRunInput({ app }: { app: App }) {
     // todo: switch?
     if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.TTYD) {
@@ -175,9 +171,14 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
             ? allowedFeatures[jobSpecificInput.feature]
             : this.getDefaultSpecValue(app, 'feature'),
       }
-      // todo: test if this
       if (jobSpecificInput?.snapshot) {
         runInput['snapshot'] = jobSpecificInput.snapshot
+      }
+      if (jobSpecificInput?.cmd) {
+        runInput['cmd'] = jobSpecificInput.cmd
+      }
+      if (jobSpecificInput?.imagename) {
+        runInput['imagename'] = jobSpecificInput.imagename
       }
       return runInput
     } else {
@@ -212,23 +213,30 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     // customizations based on app type
     if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.JUPYTER) {
       const jobInputs = this.input.input
+      // mandatory input fields
       const feature =
         jobInputs?.feature && allowedFeatures[jobInputs.feature]
           ? allowedFeatures[jobInputs.feature]
           : this.getDefaultSpecValue(app, 'feature')
       const duration = jobInputs?.duration ?? this.getDefaultSpecValue(app, 'duration')
-      // default jupyter values
       payload.input = {
         duration,
         feature,
       }
+      // optional input fields
       if (jobInputs?.snapshot) {
-        payload.snapshot = {
+        payload['input']['snapshot'] = {
           $dnanexus_link: {
             id: jobInputs.snapshot,
             project: this.projectId,
           },
         }
+      }
+      if (jobInputs?.cmd) {
+        payload['input']['cmd'] = jobInputs.cmd
+      }
+      if (jobInputs?.imagename) {
+        payload['input']['imagename'] = jobInputs.imagename
       }
     } else if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.TTYD) {
       payload.input = {}

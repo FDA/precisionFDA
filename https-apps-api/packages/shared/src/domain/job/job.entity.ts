@@ -16,6 +16,7 @@ import { User } from '../user'
 import { Tagging } from '../tagging'
 import { JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
+import { Provenance } from './job.input'
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 export class Job extends BaseEntity {
@@ -34,9 +35,8 @@ export class Job extends BaseEntity {
   @Property({ hidden: true })
   describe: string
 
-  // fixme: should be custom TS type here
   @Property({ type: JsonType })
-  provenance: any
+  provenance: Provenance
 
   @Property()
   state: JOB_STATE
