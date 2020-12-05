@@ -8,7 +8,7 @@
         </p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-          <%= image_tag("docs/site_activity_reporting.png") %>
+          <%= image_tag("docs/site_activity_reporting.png", alt: "Site activity calendar") %>
         </div>
 
         <p>The dashboard is divided into four sections:</p>
@@ -31,7 +31,7 @@
         </p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img bs-docs-media-img-smaller">
-          <%= image_tag("docs/users_and_usage.png") %>
+          <%= image_tag("docs/users_and_usage.png", alt: "Users and usage data") %>
         </div>
 
         <p>
@@ -44,15 +44,15 @@
       </div>
 
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:site_activity_reporting][:url]) %>
+        <%= video_iframe(videos[:site_activity_reporting][:url], videos[:site_activity_reporting][:title]) %>
       </div>
     </div>
 
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
-          <li><a href="#site-activity-reporting">Site Activity Reporting</a></li>
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
+          <li><a href="#site-activity-reporting", aria-label= 'Navigation to Site Activity module'>Site Activity Reporting</a></li>
           <li><a href="#users-and-usage">Users and Usage</a></li>
         </ul>
       </nav>

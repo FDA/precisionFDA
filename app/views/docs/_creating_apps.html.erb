@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:apps_create][:url]) %>
+        <%= video_iframe(videos[:apps_create][:url], videos[:apps_create][:title]) %>
       </div>
       <div id="dev-name" class="h2">App naming conventions</div>
       <div class="bs-docs-section">
@@ -54,7 +54,7 @@
             </tr>
           </tbody>
         </table>
-        <div class="bs-callout bs-callout-primary bs-callout-darker">
+        <div class="bs-callout bs-callout-primary bs-callout-darker docs-header-color">
           <h4>Input spec example</h4>
           <p>Let's consider an app which takes a BED file with genomic intervals, and extends each interval's coordinates by adding a fixed amount of padding on both sides. Here's an example of input spec:</p>
           <table class="table table-bordered">
@@ -103,7 +103,7 @@
           </table>
         </div>
         <p>The output specification is similar to the input specification (but with no default values). When creating an app, you specify what kind of inputs your app is expected to create, and define names and labels for them. When your script runs, it is responsible for generating the respective outputs. If an output is marked as optional, your script is not required to produce it. See the <a href="#dev-script">app shell script</a> section for more information.</p>
-        <div class="bs-callout bs-callout-primary bs-callout-darker">
+        <div class="bs-callout bs-callout-primary bs-callout-darker docs-header-color">
           <h4>Output spec example</h4>
           <p>To continue our aforementioned example, here is a potential output specification for our example app:</p>
           <table class="table table-bordered">
@@ -314,7 +314,7 @@
         <p>App assets are the building blocks of apps. They are tarballs (file archives), which get uncompressed in the root folder of the virtual machine before the app script starts to run. They can contain executables (such as bioinformatics tools), static data (such as reference genomes and index files) or pretty much anything else that is required for an app to run.</p>
         <p>Just like regular files, app assets can be either private or publicly contributed to the precisionFDA community. Your app can choose among any accessible assets (whether private or public).</p>
         <div class="alert alert-info">
-          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> You can have a public app that uses a private asset. In that case, people will be able to run the app, but will not have access to the private executables. They will also be able to fork the app but their fork won't include the private assets. This may be an option of choice if you want to allow people to try out something without giving them access to the code. For more information consult the second table in the <a href="<%= show_docs_path("publishing") %>">Publishing</a> section.
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> You can have a public app that uses a private asset. In that case, people will be able to run the app, but will not have access to the private executables. They will also be able to fork the app but their fork won't include the private assets. This may be an option of choice if you want to allow people to try out something without giving them access to the code. For more information consult the second table in the <a class= "content-link" href="<%= show_docs_path("publishing") %>">Publishing</a> section.
         </div>
         <p>To help get you started, the precisionFDA team has contributed a few popular app assets that you can include in your app's environment. The table below lists some examples of such public app assets:</p>
 
@@ -445,7 +445,7 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
             </table>
           </li>
         </ul>
-        <div class="bs-callout bs-callout-primary bs-callout-darker">
+        <div class="bs-callout bs-callout-primary bs-callout-darker docs-header-color">
           <h4>Example of system-defined variables</h4>
           <p>For our <a href="#dev-io">example</a>, the system would define the following variables:</p>
           <table class="table table-bordered">
@@ -479,7 +479,7 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
           <li>For string, integer, float and boolean outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>value</em></code>. For example, if you've defined an output field called <code>qc_pass</code> of boolean type, use <code>emit qc_pass true</code> to set it to true.</li>
           <li>For file outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>filename</em></code>. This command will upload the particular file from the local hard disk of the virtual machine onto the cloud storage, and assign it to that field.</li>
         </ul>
-        <div class="bs-callout bs-callout-primary bs-callout-darker">
+        <div class="bs-callout bs-callout-primary bs-callout-darker docs-header-color">
           <h4>Example of app script</h4>
           <p>To put it all together, here is what the script would look like for our example app:</p>
           <pre style="white-space: nowrap">bedtools slop -i "$intervals_path" -g grch37.chrsizes -b "$padding" &gt;"$intervals_prefix".padded.bed<br>
@@ -521,13 +521,13 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
         <p>In addition, this feature can be used to take a peek at the insides of an app &mdash; just fork it to bring up the editor, and the simply cancel the operation. This allows you to see the app's script, assets, etc.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:apps_fork][:url]) %>
+        <%= video_iframe(videos[:apps_fork][:url], videos[:apps_fork][:title]) %>
       </div>
       <div id="dev-import" class="h2">App Import</div>
       <div class="bs-docs-section">
         <p>
           On precisionFDA, there are two methods for building apps.
-          You may create apps on precisionFDA using the UI, as is described in <%= link_to 'Creating Apps', show_docs_path(:creating_apps, anchor: :dev) %>.
+          You may create apps on precisionFDA using the UI, as is described in <%= link_to 'Creating Apps', show_docs_path(:creating_apps, anchor: :dev), "aria-label": 'Navigation to creating apps module' %>.
           However, advanced users may choose to instead create their app by writing a CWL or WDL file that contains all the pertinent details for the app and uploading this to precisionFDA.
         </p>
       </div>
@@ -624,7 +624,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/cwl_wdl_create_app.png") %>
+        <%= image_tag("docs/creating_apps/cwl_wdl_create_app.png", alt: "Create an App with import options for CWL,WDL files and fields for App name and title") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -633,7 +633,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_cwl_modal.png") %>
+        <%= image_tag("docs/creating_apps/import_cwl_modal.png", alt: "Import CWL modal popup with fields for typing CWL and an option to select CWL file" ) %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -641,7 +641,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_cwl_modal_script.png") %>
+        <%= image_tag("docs/creating_apps/import_cwl_modal_script.png", alt: "Example CWL script on Import CWL modal popup") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -650,7 +650,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_cwl_modal_error.png") %>
+        <%= image_tag("docs/creating_apps/import_cwl_modal_error.png", alt: "CWL import script error notification for nonexistent base command") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -658,7 +658,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_cwl_wdl_modal_success.png") %>
+        <%= image_tag("docs/creating_apps/import_cwl_wdl_modal_success.png", alt: " Modal popup notification for successful app creation and App URL") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -666,7 +666,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_cwl_io.png") %>
+        <%= image_tag("docs/creating_apps/import_cwl_io.png", alt: "CWL App inputs and outputs displayed under SPEC tab") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -674,7 +674,7 @@ baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/script_tabs.png") %>
+        <%= image_tag("docs/creating_apps/script_tabs.png", alt: "App description under README tab") %>
       </div>
 
 
@@ -727,7 +727,7 @@ task bwa_mem_tool {
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/cwl_wdl_create_app.png") %>
+        <%= image_tag("docs/creating_apps/cwl_wdl_create_app.png", alt: "Create an App with import options for CWL,WDL files and fields for App name and title") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -735,7 +735,7 @@ task bwa_mem_tool {
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_wdl_modal.png") %>
+        <%= image_tag("docs/creating_apps/import_wdl_modal.png", alt: "Import WDL modal popup with fields for typing WDL and an option to select WDL file") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -743,7 +743,7 @@ task bwa_mem_tool {
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_wdl_modal_script.png") %>
+        <%= image_tag("docs/creating_apps/import_wdl_modal_script.png", alt: "Example WDL script on Import WDL modal popup") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -751,7 +751,7 @@ task bwa_mem_tool {
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_wdl_modal_error.png") %>
+        <%= image_tag("docs/creating_apps/import_wdl_modal_error.png", alt: "WDL import script error notification for wrong docker image name format") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -759,7 +759,7 @@ task bwa_mem_tool {
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_cwl_wdl_modal_success.png") %>
+        <%= image_tag("docs/creating_apps/import_cwl_wdl_modal_success.png", alt: "Modal popup notification for successful app creation and App URL") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -767,7 +767,7 @@ task bwa_mem_tool {
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/creating_apps/import_wdl_io.png") %>
+        <%= image_tag("docs/creating_apps/import_wdl_io.png", alt: "WDL App inputs and outputs displayed under SPEC tab") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -783,19 +783,19 @@ task bwa_mem_tool {
               This is an example of an app that has "Reverse read" and "Output prefix" as optional inputs.
             </p>
             <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-              <%= image_tag("docs/creating_apps/wdl_default_vals.png") %>
+              <%= image_tag("docs/creating_apps/wdl_default_vals.png", alt: "Requried and optional inputs under SPEC tab") %>
             </div>
             <p>
               After importing the WDL file, all optional inputs don’t have any default value. Click on "Edit" and fo to tab "I/O Spec" to add default values for optional inputs.
             </p>
             <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-              <%= image_tag("docs/creating_apps/wdl_io_edit.png") %>
+              <%= image_tag("docs/creating_apps/wdl_io_edit.png", alt: "WDL I/O Spec tab with Class,Name,Label,Helptext,DefaultValue,Optional field labels") %>
             </div>
             <p>
               Default values are shown in spec after editing.
             </p>
             <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-              <%= image_tag("docs/creating_apps/wdl_default_vals_2.png") %>
+              <%= image_tag("docs/creating_apps/wdl_default_vals_2.png", alt: "Requried and optional inputs under SPEC tab") %>
             </div>
           </li>
           <li>
@@ -807,13 +807,13 @@ task bwa_mem_tool {
               Click on "Edit" to open the editing page of the app, scroll down to the script that creates the inputs.json file.
             </p>
             <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-              <%= image_tag("docs/creating_apps/wdl_json_inputs.png") %>
+              <%= image_tag("docs/creating_apps/wdl_json_inputs.png", alt: "Script in inputs.json file") %>
             </div>
             <p>
               Modify the script for the optional inputs as following, make sure to change the workflow name (run_app) and the app name (app) into your workflow name and your app name in this script.
             </p>
             <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-              <%= image_tag("docs/creating_apps/wdl_json_inputs_2.png") %>
+              <%= image_tag("docs/creating_apps/wdl_json_inputs_2.png", alt: "Modifiled script for optional inputs in inputs.json file") %>
             </div>
             <p>
               Since the "Output prefix" has default value has "out", it is not necessary to have an extra if block for this input parameter.
@@ -825,7 +825,7 @@ task bwa_mem_tool {
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
           <li><a href="#dev-name">App naming conventions</a></li>
           <li><a href="#dev-io">Input and Output spec</a></li>
           <li><a href="#dev-vm-env">VM Environment</a></li>

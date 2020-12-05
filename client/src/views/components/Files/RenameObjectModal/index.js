@@ -29,6 +29,10 @@ const RenameObjectModal = ({ renameAction, hideAction, isOpen, isLoading, defaul
     [fileName],
   )
 
+  const enterKeyDownHandler = (e) => {
+    if(e.key === 'Enter') { renameHandler() }
+  }
+
   const disableButton = !fileName || !fileName.length
 
   return (
@@ -44,6 +48,8 @@ const RenameObjectModal = ({ renameAction, hideAction, isOpen, isLoading, defaul
         placeholder="Rename..."
         value={fileName}
         onChange={changeFileName}
+        onKeyDown={enterKeyDownHandler}
+        autoFocus
         lg
       />
     </Modal>

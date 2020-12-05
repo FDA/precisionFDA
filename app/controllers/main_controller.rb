@@ -203,7 +203,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def login
     if @context.guest?
-      render "_partials/_error", status: :forbidden, locals: { message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, you need a user account. Contact precisionfda@fda.hhs.gov if you need to upgrade to a user account with contributor-level access." }
+      render "_partials/_error", status: :forbidden, locals: { message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, your user account must be provisioned. Your account is currently being reviewed by an FDA administrator for provisioning. If you do not receive full access within 14 days, please contact precisionfda@fda.hhs.gov to request an upgraded account with end-level access." }
     else
       redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode_www_form_component(OAUTH2_REDIRECT_URI)}"
     end
@@ -338,7 +338,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         file = UserFile.find_by(uid: (row[1] + "-2"))
         result = api.call(file.project,
                           "clone",
-                          "project": user.private_files_project, "objects": [row[1]])
+                          "project" => user.private_files_project,
+                          "objects" => [row[1]])
         next if result["exists"].include?(row[1])
 
         new_file = file.dup

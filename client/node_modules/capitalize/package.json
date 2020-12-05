@@ -1,0 +1,28 @@
+{
+  "name": "capitalize",
+  "version": "2.0.3",
+  "description": "capitalize the first letter of a string, or all words in a string",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "tape": "~2.4.0",
+    "markdown-code-blocks": "0.0.1"
+  },
+  "scripts": {
+    "test": "markdown-code-blocks -t javascript < README.md | node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/grncdr/js-capitalize.git"
+  },
+  "bugs": {
+    "type": "git",
+    "url": "git://github.com/grncdr/js-capitalize/issues"
+  },
+  "homepage": "https://github.com/grncdr/js-capitalize",
+  "keywords": [
+    "capitalize"
+  ],
+  "author": "Stephen Sugden <me@stephensugden.com>",
+  "license": "MIT"
+}

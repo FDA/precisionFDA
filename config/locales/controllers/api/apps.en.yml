@@ -1,0 +1,8 @@
+en:
+  api:
+    apps:
+      copy:
+        messages:
+          publish: "The app has been published successfully."
+          publish_to_private: "The app has been published to the private area successfully."
+          publish_to_space: "The app has been published to the space successfully."

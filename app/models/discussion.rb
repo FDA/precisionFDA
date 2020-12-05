@@ -96,7 +96,7 @@ class Discussion < ApplicationRecord
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && scope_to_publish_to == "public"
+    core_publishable_by?(context) && scope_to_publish_to == "public"
   end
 
   def rename(new_name, context)

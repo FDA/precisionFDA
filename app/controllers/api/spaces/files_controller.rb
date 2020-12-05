@@ -74,7 +74,7 @@ module Api
 
         result = folder_service.add_folder(params[:name], parent_folder, @space.uid)
 
-        raise ApiError, "Can't create a folder with name '#{params[:name]}'." if result.failure?
+        raise ApiError, result.value.values.flatten.first if result.failure?
 
         render json: result.value, adapter: :json
       end

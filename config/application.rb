@@ -9,8 +9,14 @@ Bundler.require(*Rails.groups)
 
 module PrecisionFda
   class Application < Rails::Application
+    # Says whether autoload paths have to be added to $LOAD_PATH.
+    # This flag is true by default, but it is recommended to be set to false in :zeitwerk mode.
+    config.add_autoload_paths_to_load_path = false
+
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.2
+    config.load_defaults 6.0
+
+    config.autoloader = :zeitwerk
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
@@ -44,7 +50,7 @@ module PrecisionFda
         strategy: :replace
 
     # Minimum Sass number precision required by bootstrap-sass
-    ::Sass::Script::Value::Number.precision = [8, ::Sass::Script::Value::Number.precision].max
+    ::SassC::Script::Value::Number.precision = [8, ::SassC::Script::Value::Number.precision].max
 
     config.active_record.belongs_to_required_by_default = false
 

@@ -18,7 +18,7 @@
         <p>Once you have chosen the input files, the "Compare" button will light up in the center. Click it and enter a name for your comparison to launch the comparison process.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:comparisons][:url]) %>
+        <%= video_iframe(videos[:comparisons][:url], videos[:comparisons][:title]) %>
       </div>
       <div id="comparisons-bed" class="h2">BED files</div>
       <div class="bs-docs-section">
@@ -138,7 +138,7 @@
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
           <li><a href="#comparisons-new">Creating a new comparison</a></li>
           <li><a href="#comparisons-bed">BED files</a></li>
           <li><a href="#comparisons-results">Understanding comparison results</a></li>

@@ -6,6 +6,7 @@ class AppSerializer < ApplicationSerializer
     :title,
     :added_by,
     :created_at,
+    :created_at_date_time,
     :revision,
     :run_by_you,
     :org,
@@ -53,6 +54,12 @@ class AppSerializer < ApplicationSerializer
     formatted_time(object.created_at)
   end
 
+  # Returns formatted created_at time.
+  # @return [String] Formatted time.
+  def created_at_date_time
+    formatted_date_time(object.created_at)
+  end
+
   # Builds links.
   # @return [Hash] Links.
   def links
@@ -63,7 +70,9 @@ class AppSerializer < ApplicationSerializer
       links[:user] = user_path(added_by)
 
       if can_run? && !run_by_you? && app_ids.empty? && !object.in_locked_space?
-        links[:run_job] = new_app_job_path(object.app_series.latest_version_app)
+        links[:run_job] = new_app_job_path(
+          object.app_series.latest_version_app || object.app_series.latest_revision_app,
+        )
       end
     end
   end

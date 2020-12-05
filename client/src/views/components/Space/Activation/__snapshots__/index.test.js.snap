@@ -27,7 +27,7 @@ exports[`<Activation /> renders 1`] = `
         <div
           className="space-members_role"
         >
-          Guest Lead
+          Space Lead
         </div>
       </div>
       <div
@@ -79,7 +79,7 @@ exports[`<Activation /> renders 1`] = `
             Both 
             Host Lead
              and 
-            Guest Lead
+            Space Lead
              must 
             "Accept Space"
              to activate it.

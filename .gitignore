@@ -20,6 +20,9 @@
 # Ignore generated assets
 /public/assets
 
+#Ignore generated node modules
+/node_modules
+
 # Ignore deployed gems
 /vendor/bundle
 
@@ -31,3 +34,24 @@
 
 # Ignore application configuration
 /config/application.yml
+/public/FISMA_docs/2018_FDA_OC_PrecisionFDA\ Decision\ Memo.pdf
+/config/initializers/globals.rb
+/config/initializers/fips.rb
+/config/database.yml.ci
+app/assets/images/presskit
+app/assets/images/participants
+app/assets/images/misc
+app/assets/images/logo-*
+app/assets/images/precisionFDA*
+app/assets/images/ubuntu-1*
+scripts/jenkins_entrypoint.sh
+app/assets/images/docs/site_administration
+app/assets/images/docs/verification_spaces
+app/assets/images/docs/review_spaces
+app/assets/images/docs/site_customization
+app/assets/images/docs/challenge_workbench
+app/assets/images/challenges
+app/assets/images/docs/users_and_usage.png
+app/assets/images/docs/site_activity_reporting.png
+
+

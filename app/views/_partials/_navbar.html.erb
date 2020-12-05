@@ -1,29 +1,44 @@
-<% if @context.logged_in_or_guest? || !(params[:controller] == 'main' && params[:action] == 'index') %>
-<nav class="navbar navbar-inverse navbar-static-top">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#pfda-navbar-collapse" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <%= link_to image_tag("precisionFDA.white.navbar.png", alt: "PrecisionFDA Home", height: "33px"), root_path, class: "navbar-brand"  %>
-    </div>
+<% if @context.logged_in_or_guest? || controller_name == "main" && action_name == "index" %>
+  <nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+          data-target="#pfda-navbar-collapse" aria-expanded="false">
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="pfda-navbar-collapse">
-      <% if (params[:controller] == 'spaces' && params[:action] == 'index') %>
-        <%= render "_partials/nav_links_spaces" %>
-      <% else %>
-        <%= render "_partials/nav_links" %>
-      <% end %>
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <%= link_to image_tag("precisionFDA.white.navbar.png", alt: "PrecisionFDA Home", height: "33px"), root_path, class: "navbar-brand" %>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="pfda-navbar-collapse">
+        <% if @context.logged_in_or_guest? %>
+          <% if inside_of_spaces? %>
+            <%= render "_partials/nav_links_spaces" %>
+          <% elsif inside_of_space_item?(@space) %>
+            <%= render "_partials/nav_links_space_item" %>
+          <% else %>
+            <%= render "_partials/nav_links" %>
+          <% end %>
+          <%= render "_partials/nav_user" %>
+        <% else %>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <%= link_to login_path, class: "btn accessible-btn-link btn-lg", data: { no_turbolink: true } do %>
+                <span class="fa fa-fw fa-sign-in" aria-hidden="true"></span> Log in
+              <% end %>
+            </li>
+          </ul>
+        <% end %>
+      </div>
     </div>
-  </div>
-</nav>
-<%= render "_partials/fisma_banner" %>
-<%= render "_partials/modal_notification_settings" %>
+  </nav>
+  <%= render "_partials/fisma_banner", :dynamic_id => 'FISMA security information 1'  %>
+  <%= render "_partials/modal_notification_settings" %>
 <% end %>
 
 <%= render "_partials/modal_external_link_notify" %>

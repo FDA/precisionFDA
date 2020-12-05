@@ -51,7 +51,7 @@ class SpaceSerializer < ApplicationSerializer
       links[:unlock] = unlock_api_space_path(object) if can_unlock?
       links[:update] = api_space_path(object) if can_update?
       links[:update_tags] = tags_api_space_path(object) if can_update?
-      links[:apps] = apps_api_space_path(object) if can_access?
+      links[:apps] = api_apps_path(object) if can_access?
       links[:files] = files_api_space_path(object) if can_access?
       links[:workflows] = workflows_api_space_path(object) if can_access?
       links[:jobs] = jobs_api_space_path(object) if can_access?

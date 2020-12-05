@@ -36,8 +36,8 @@ export default (link, name, folderId) => (
         } else {
           dispatch(createFolderFailure())
           if (response.payload && response.payload.error) {
-            const { type, message } = response.payload.error
-            dispatch(showAlertAboveAll({ message: `${type}: ${message}` }))
+            const { message } = response.payload.error
+            dispatch(showAlertAboveAll({ message }))
           } else {
             dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
           }

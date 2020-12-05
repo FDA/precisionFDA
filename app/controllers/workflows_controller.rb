@@ -26,7 +26,12 @@ class WorkflowsController < ApplicationController
     comment_data
     @revisions = @workflow.workflow_series.accessible_revisions(@context).select(:title, :id, :dxid, :uid, :revision)
 
-    @workflow.in_space? ? User.sync_jobs!(@context, @workflow.jobs, @workflow.project) : User.sync_jobs!(@context)
+    if @workflow.in_space?
+      User.sync_jobs!(@context, @workflow.jobs, @workflow.project)
+      @space = @workflow.space_object
+    else
+      User.sync_jobs!(@context)
+    end
 
     a = Analysis.arel_table
     batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten

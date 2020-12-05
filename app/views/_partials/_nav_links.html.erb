@@ -1,105 +1,76 @@
-<% if @context.logged_in_or_guest? %>
-  <ul class="nav-links nav navbar-nav">
-    <li class="<%= 'active' if params[:controller] == 'main' && params[:action] == 'index' %>" role="presentation">
-      <%= link_to root_path do %>
+<ul class="nav-links nav navbar-nav">
+    <li class="<%= 'active' if controller_name == 'main' && action_name == 'index' %>" role="presentation">
+      <%= link_to root_path, "aria-label": 'Application overview link' do %>
         <div class="nav-icon fa fa-2x fa-home"></div>
         <div class="nav-pill-title">Overview</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if %w(discussions answers).include?(params[:controller]) %>" role="presentation">
-      <%= link_to discussions_path do %>
+    <li class="<%= 'active' if %w(discussions answers).include?(controller_name) %>" role="presentation">
+      <%= link_to discussions_path, "aria-label": 'Application navigation link' do %>
         <div class="nav-icon fa fa-2x fa-comments-o"></div>
         <div class="nav-pill-title">Discussions</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(params[:controller]) %>" role="presentation">
-      <%= link_to challenges_path do %>
+    <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(controller_name) %>" role="presentation">
+      <%= link_to challenges_path, "aria-label": 'Application challenges link' do %>
         <div class="nav-icon fa fa-2x fa-trophy"></div>
         <div class="nav-pill-title">Challenges</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if %w(experts expert_questions).include?(params[:controller]) %>" role="presentation">
-      <%= link_to experts_path do %>
+    <li class="<%= 'active' if %w(experts expert_questions).include?(controller_name) %>" role="presentation">
+      <%= link_to experts_path, "aria-label": 'Application experts link' do %>
         <div class="nav-icon fa fa-2x fa-star-o"></div>
         <div class="nav-pill-title">Experts</div>
       <% end %>
     </li>
     <li class="nav-spacer"></li>
-    <li class="<%= 'active' if params[:controller] == 'notes' %>" role="presentation">
-      <%= link_to notes_path do %>
+    <li class="<%= 'active' if controller_name == 'notes' %>" role="presentation">
+      <%= link_to notes_path, "aria-label": 'Application notes link' do %>
         <div class="nav-icon fa fa-2x fa-sticky-note"></div>
         <div class="nav-pill-title">Notes</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if params[:controller] == 'files' %>" role="presentation">
-      <%= link_to files_path do %>
+    <li class="<%= 'active' if controller_name == 'files' %>" role="presentation">
+      <%= link_to files_path, "aria-label": 'Application files link' do %>
         <div class="nav-icon fa fa-2x fa-files-o"></div>
         <div class="nav-pill-title">Files</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if params[:controller] == 'comparisons' %>" role="presentation">
-      <%= link_to comparisons_path do %>
+    <li class="<%= 'active' if controller_name == 'comparisons' %>" role="presentation">
+      <%= link_to comparisons_path, "aria-label": 'Application comparisons link' do %>
         <div class="nav-icon fa fa-2x fa-bullseye"></div>
         <div class="nav-pill-title">Comparisons</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if %w(apps jobs assets).include?(params[:controller]) %>" role="presentation">
-      <%= link_to apps_path do %>
+    <li class="<%= 'active' if %w(apps jobs assets).include?(controller_name) %>" role="presentation">
+      <%= link_to apps_path, "aria-label": 'Application apps link' do %>
         <div class="nav-icon fa fa-2x fa-cubes"></div>
         <div class="nav-pill-title">Apps</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if params[:controller] == 'workflows' %>" role="presentation">
-      <%= link_to workflows_path do %>
+    <li class="<%= 'active' if controller_name == 'workflows' %>" role="presentation">
+      <%= link_to workflows_path, "aria-label": 'Application workflows link' do %>
         <div class="nav-icon fa fa-2x fa-flash"></div>
         <div class="nav-pill-title">Workflows</div>
       <% end %>
     </li>
+    <!--  TODO: take away this condition when final merge be ready -->
+    <% if Rails.env.development? || Rails.env.ui_test? %>
+      <li class="nav-spacer"></li>
+      <li class="<%= 'active' if (controller_name == 'home' || controller_name == 'main') %>" role="presentation">
+        <%= link_to home_path, data: { turbolinks: false }, notice: "Book not found" do %>
+          <div class="nav-icon fa fa-2x fa-fort-awesome"></div>
+          <div class="nav-pill-title">My Home</div>
+        <% end %>
+      </li>
+    <% end %>
     <% if UserPolicy.can_see_spaces?(@context) %>
       <li class="nav-spacer"></li>
-      <li class="<%= 'active' if params[:controller] == 'spaces' %>" role="presentation">
-        <%= link_to spaces_path, data: { turbolinks: false } do %>
+      <li class="<%= 'active' if controller_name == 'spaces' %>" role="presentation">
+        <%= link_to spaces_path, data: { turbolinks: false }, "aria-label": 'Application spaces link' do %>
           <div class="nav-icon fa fa-2x fa-object-group"></div>
           <div class="nav-pill-title">Spaces</div>
         <% end %>
       </li>
     <% end %>
   </ul>
-  <ul class="nav navbar-nav navbar-right">
-    <li>
-      <a href="mailto:precisionfda-support@dnanexus.com"><span class="fa fa-fw fa-commenting-o"></span> Support</a>
-    </li>
-    <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= @context.logged_in? ? @context.user.full_name : @context.username %> <span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><%= link_to "Profile", profile_path %></li>
-        <% if @context.logged_in? %>
-          <li><%= link_to "Public Profile", user_path(@context.username) %></li>
-        <% end %>
-        <li><%= link_to "Manage Licenses", licenses_path %></li>
-        <% if @context.logged_in? && UserPolicy.access_notification_preference?(@context.user) %>
-          <li><a href="#" data-toggle="modal" data-target="#notification_settings_modal">Notification Settings</a></li>
-        <% end %>
-        <li role="separator" class="divider"></li>
-        <li><a href="<%= about_path %>"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
-        <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
-        <li><a href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
-        <li role="separator" class="divider"></li>
-        <% if @context.can_administer_site? %>
-          <li><%= link_to "Admin Dashboard", admin_root_path %></li>
-          <li role="separator" class="divider"></li>
-        <% end %>
-        <li><%= link_to "Log out", logout_path, method: :delete, data: {no_turbolink: true} %></li>
-      </ul>
-    </li>
-    <li><%= link_to image_tag(@context.gravatar_url, class: 'img-circle', height: '48px'), profile_path %></li>
-  </ul>
-<% else %>
-  <ul class="nav navbar-nav navbar-right">
-    <li>
-      <%= link_to login_path, class: "btn accessible-btn-link btn-lg", data: {no_turbolink: true} do %>
-        <span class="fa fa-fw fa-sign-in" aria-hidden="true"></span> Log in
-      <% end %>
-    </li>
-  </ul>
-<% end %>

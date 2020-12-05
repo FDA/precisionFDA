@@ -172,4 +172,20 @@ module ApplicationHelper
 
     filter_requests(current_user, OrgActionRequest::State::APPROVED).first.present?
   end
+
+  # Checks if user opens spaces page.
+  # @param space [Space, nil] The space.
+  # @return [Boolean] Returns true if user opens spaces page, false otherwise.
+  def inside_of_spaces?
+    controller_name == "spaces" && action_name == "index"
+  end
+
+  # Checks if user opens a space item show page (App, File, Workflow).
+  # @param space [Space, nil] The space.
+  # @return [Boolean] Returns true if user opens a space item show page, false otherwise.
+  def inside_of_space_item?(space = nil)
+    %w(apps files workflows).include?(controller_name) &&
+      action_name == "show" &&
+      space.present?
+  end
 end

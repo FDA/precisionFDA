@@ -17,9 +17,6 @@
 #  complete_time       :datetime
 #
 
-require "wdl_object/input"
-require "wdl_object/output"
-
 class WDLObject
   class Task
     include ActiveModel::Validations
