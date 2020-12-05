@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAppsFeaturedPage test should render 1`] = `
+<HomeLayout>
+  <div
+    className="home-page-layout__header-row"
+  >
+    <div
+      className="home-page-layout__actions--right"
+    >
+      <DropdownMenu
+        title="Actions"
+      />
+    </div>
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Connect(HomeAppsFeaturedTable)
+      apps={Array []}
+    />
+  </div>
+</HomeLayout>
+`;

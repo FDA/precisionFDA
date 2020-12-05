@@ -20,6 +20,8 @@ module Api
                     workflows
                   )
 
+    before_action :sync_files, only: %i(files)
+
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
@@ -100,17 +102,6 @@ module Api
       space.update!(update_space_params)
 
       render json: space, adapter: :json
-    end
-
-    # GET /api/spaces/:id/apps
-    # Fetches space apps.
-    def apps
-      allowed_orderings = %w(created_at).freeze
-      order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
-
-      apps = @space.latest_revision_apps.order(order)
-
-      render json: apps, meta: apps_meta, adapter: :json
     end
 
     # GET /api/spaces/:id/files
@@ -229,6 +220,10 @@ module Api
 
     private
 
+    def sync_files
+      User.sync_files!(@context)
+    end
+
     def copy_service
       @copy_service ||= CopyService.new(api: api, user: current_user)
     end
@@ -270,6 +265,8 @@ module Api
       meta = {}
 
       meta[:links] = {}.tap do |links|
+        links[:copy_private] = copy_api_files_path
+
         if @space.editable_by?(current_user)
           links[:publish] = publish_files_api_space_files_path(@space)
           links[:move] = move_api_space_files_path(@space)
@@ -296,7 +293,10 @@ module Api
 
     def apps_meta
       { links: {} }.tap do |meta|
+        # copy to space link
         meta[:links][:copy] = copy_api_apps_path if @space.editable_by?(current_user)
+        # copy to private area link
+        meta[:links][:copy_private] = copy_api_apps_path
       end
     end
 

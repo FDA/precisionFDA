@@ -96,8 +96,8 @@ class Comparison < ApplicationRecord
     state != "pending"
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && state == "done"
+  def publishable_by?(context, _scope_to_publish_to)
+    core_publishable_by?(context) && state == STATE_DONE
   end
 
   def rename(new_name, description, context)

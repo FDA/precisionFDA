@@ -9,7 +9,7 @@
         </p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-          <%= image_tag("docs/challenge_workbench/create1.png") %>
+          <%= image_tag("docs/challenge_workbench/create1.png", alt: "Highlighted Create a new challenge button on Challenges page") %>
         </div>
 
         <p>
@@ -17,7 +17,7 @@
         </p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-          <%= image_tag("docs/challenge_workbench/create2.png") %>
+          <%= image_tag("docs/challenge_workbench/create2.png", alt: "Create a new challenge page") %>
         </div>
 
         <ul>
@@ -43,7 +43,7 @@
         <p>Finally, the challenge can be put into the "archived” phase, at which time the large challenge banner is removed. The challenge is still visible on a card under the “Previous PrecisionFDA Challenges” section of the Challenges page.</p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-          <%= image_tag("docs/challenge_workbench/phases.png") %>
+          <%= image_tag("docs/challenge_workbench/phases.png", alt: "Highlighted Settings button for an archived challenge on challenges page") %>
         </div>
 
         <p>Modifying the challenge page settings, phases, and card can all be done by clicking the “Settings” button nearby the challenge on the challenge site. Again, this feature is only accessible to admins on the site.</p>
@@ -54,7 +54,7 @@
         <p>When viewing a challenge page, you will be able to edit the content. The tool underlying this page editor is called ContentTools. There is much more complete documentation on how to use the ContentTools editor at <a href="http://getcontenttools.com/">getcontenttools</a>. To begin editing your challenge, under the “Challenges” tab, scroll down to your challenge and click “Edit Page”.</p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-          <%= image_tag("docs/challenge_workbench/edit1.png") %>
+          <%= image_tag("docs/challenge_workbench/edit1.png", alt: "Highlighted Edit button for an archived challenge on challenges page") %>
         </div>
       </div>
 
@@ -67,7 +67,7 @@
         </p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-          <%= image_tag("docs/challenge_workbench/edit2.png") %>
+          <%= image_tag("docs/challenge_workbench/edit2.png", alt: "Available Resources for archived Challenge") %>
         </div>
 
         <p>You should ensure that the files related to the challenge are linked on the Challenge Intro page. It is usually best to link to the file's page, allowing users to generate their own download URLs.</p>
@@ -94,14 +94,14 @@
       </div>
 
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:challenge_workbench][:url]) %>
+        <%= video_iframe(videos[:challenge_workbench][:url], videos[:challenge_workbench][:title]) %>
       </div>
     </div>
 
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
           <li><a href="#challenge-new">Creating a New Challenge</a></li>
           <li><a href="#challenge-phases">Challenge Phases</a></li>
           <li><a href="#challenge-edit">Editing an Existing Challenge</a></li>

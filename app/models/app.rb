@@ -103,10 +103,14 @@ class App < ApplicationRecord
     version.present?
   end
 
+  # Checks if app can be published or copied to a PUBLIC or SPACE scope.
+  # @param context [Context] The user context.
+  # @param scope_to_publish_to [String] The scope to publish to. Can be 'public' or 'space-xxx'
+  # @return [Boolean] Returns true if an app is publishable by a user, false otherwise.
   def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
-    core_publishable_by?(context, scope_to_publish_to) &&
+    core_publishable_by?(context) &&
       private? &&
-      (app_series.private? || (app_series.scope == scope_to_publish_to))
+      (app_series.private? || app_series.scope == scope_to_publish_to)
   end
 
   # TODO: to be refactored.

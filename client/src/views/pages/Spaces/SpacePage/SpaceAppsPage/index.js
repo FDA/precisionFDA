@@ -8,18 +8,24 @@ import AppShape from '../../../../shapes/AppShape'
 import {
   spaceAppsListSelector,
   spaceAppsLinksSelector,
+  spaceAppsCopyToPrivateSelector,
 } from '../../../../../reducers/spaces/apps/selectors'
 import { spaceDataSelector } from '../../../../../reducers/spaces/space/selectors'
 import SpaceLayout from '../../../../layouts/SpaceLayout'
 import AddDataModal from '../../../../components/Space/AddDataModal'
 import CopyModal from '../../../../components/Space/Apps/CopyModal'
 import { showSpaceAddDataModal } from '../../../../../actions/spaces'
-import { fetchApps, resetSpaceAppsFilters, showAppsCopyModal } from '../../../../../actions/spaces'
+import {
+  fetchApps,
+  resetSpaceAppsFilters,
+  showAppsCopyModal,
+  copyToPrivate,
+} from '../../../../../actions/spaces'
 import SpaceAppsList from '../../../../components/Space/Apps/SpaceAppsList'
 import Button from '../../../../components/Button'
 import Icon from '../../../../components/Icon'
 import { getSpacePageTitle } from '../../../../../helpers/spaces'
-import { SPACE_ADD_DATA_TYPES } from '../../../../../constants'
+import { SPACE_ADD_DATA_TYPES, OBJECT_TYPES } from '../../../../../constants'
 
 
 class SpaceAppsPage extends Component {
@@ -42,9 +48,17 @@ class SpaceAppsPage extends Component {
   }
 
   render() {
-    const { spaceId, space, apps, appsLinks, showAddAppsModal, showCopyModal } = this.props
+    const {
+      spaceId, space, apps, appsLinks, showAddAppsModal,
+      showCopyModal, copyToPrivate, isCopyingToPrivate,
+    } = this.props
+
     const checkedApps = apps.filter(((app) => app.isChecked))
     const title = getSpacePageTitle('Apps', space.isPrivate)
+
+    const copyToPrivateHandler = () => {
+      return copyToPrivate(appsLinks?.copy_private, checkedApps.map((app) => app.id))
+    }
 
     return (
       <SpaceLayout spaceId={spaceId} space={space}>
@@ -56,6 +70,14 @@ class SpaceAppsPage extends Component {
                 <span>
                   <Icon icon="fa-clone" />&nbsp;
                   Copy To Space
+                </span>
+              </Button>
+            )}
+            {(checkedApps.length > 0 && appsLinks?.copy_private) && (
+              <Button type="primary" onClick={copyToPrivateHandler} disabled={isCopyingToPrivate}>
+                <span>
+                  <Icon icon="fa-lock" />&nbsp;
+                  {isCopyingToPrivate ? 'Copying...' : 'Copy To Private'}
                 </span>
               </Button>
             )}
@@ -84,27 +106,33 @@ class SpaceAppsPage extends Component {
 SpaceAppsPage.propTypes = {
   spaceId: PropTypes.string,
   space: PropTypes.shape(SpaceShape),
+  isCopyingToPrivate: PropTypes.bool,
   apps: PropTypes.arrayOf(PropTypes.exact(AppShape)),
   appsLinks: PropTypes.shape({
     copy: PropTypes.string,
+    copy_private: PropTypes.string,
   }),
   loadApps: PropTypes.func,
   resetFilters: PropTypes.func,
   showAddAppsModal: PropTypes.func,
   showCopyModal: PropTypes.func,
+  copyToPrivate: PropTypes.func,
 }
 
 SpaceAppsPage.defaultProps = {
   apps: [],
+  isCopyingToPrivate: false,
   loadApps: () => {},
   resetFilters: () => {},
   showAddAppsModal: () => {},
   showCopyModal: () => {},
+  copyToPrivate: () => {},
 }
 
 const mapStateToProps = (state) => ({
   space: spaceDataSelector(state),
   apps: spaceAppsListSelector(state),
+  isCopyingToPrivate: spaceAppsCopyToPrivateSelector(state).isCopying,
   appsLinks: spaceAppsLinksSelector(state),
 })
 
@@ -113,6 +141,7 @@ const mapDispatchToProps = dispatch => ({
   resetFilters: () => dispatch(resetSpaceAppsFilters()),
   showAddAppsModal: () => dispatch(showSpaceAddDataModal(SPACE_ADD_DATA_TYPES.APPS)),
   showCopyModal: () => dispatch(showAppsCopyModal()),
+  copyToPrivate: (link, ids) => dispatch(copyToPrivate(link, ids, OBJECT_TYPES.APP)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SpaceAppsPage)

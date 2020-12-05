@@ -1,6 +1,6 @@
 # Helper for rendering docs.
 module DocsHelper
-  include ::Concerns::OrgAdmin
+  include OrgAdmin
 
   # Returns menu depending on user's roles.
   # When a context user has no right to see the spaces docs - this section is taken away from menu
@@ -32,9 +32,9 @@ module DocsHelper
     t("docs.videos.common")
   end
 
-  def video_iframe(url)
+  def video_iframe(url, title=nil)
     content_tag :div, class: "embed-container" do
-      content_tag("iframe", nil, src: url, frameborder: 0, allowfullscreen: true)
+      content_tag("iframe", nil, src: url, frameborder: 0, allowfullscreen: true, title: title)
     end
   end
 end

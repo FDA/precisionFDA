@@ -13,7 +13,7 @@
         <p>To create a workflow, navigate to the Workflows page and select <strong>Create Workflow</strong>.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/workflows/create.png") %>
+        <%= image_tag("docs/workflows/create.png", alt: "Create workflow page") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -29,7 +29,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/workflows/stages.png") %>
+        <%= image_tag("docs/workflows/stages.png", alt: "Add Stages modal popup") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -43,7 +43,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/workflows/diagram_grid.png") %>
+        <%= image_tag("docs/workflows/diagram_grid.png", alt: "Apps on workflow grid") %>
       </div>
       <div id="workflow-configure-apps" class="h2">Configure a Workflow's apps</div>
       <div class="bs-docs-section">
@@ -53,7 +53,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/workflows/configure_apps.png") %>
+        <%= image_tag("docs/workflows/configure_apps.png", alt: "Configue workflow app modal popup") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -71,7 +71,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/workflows/select_outputs.png") %>
+        <%= image_tag("docs/workflows/select_outputs.png", alt: "Select app output page") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -87,7 +87,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/workflows/finish.png") %>
+        <%= image_tag("docs/workflows/finish.png", alt: "Finished app configuration", alt: "Creating review space") %>
       </div>
       <div class="bs-docs-section">
         <div class="alert alert-info">
@@ -104,13 +104,13 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:workflows][:url]) %>
+        <%= video_iframe(videos[:workflows][:url], videos[:workflows][:title]) %>
       </div>
     </div>
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
           <li><a href="#workflows">Overview</a></li>
           <li><a href="#workflow-create">Creating a Workflow</a></li>
           <li><a href="#workflow-add-apps">Add apps to a Workflow</a></li>

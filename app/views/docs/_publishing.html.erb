@@ -79,11 +79,11 @@
           </tbody>
         </table>
         <div class="alert alert-info">
-          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> You can always use <a href="<%= show_docs_path("tracking") %>">the tracking feature</a> to review the permissions of an item and its related items, both before and after publication. This will give you an idea of what is accessible to everybody (shown in green) versus only to you (shown in white).
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> You can always use <a class= "content-link" href="<%= show_docs_path("tracking") %>">the tracking feature</a> to review the permissions of an item and its related items, both before and after publication. This will give you an idea of what is accessible to everybody (shown in green) versus only to you (shown in white).
         </div>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:publishing][:url]) %>
+        <%= video_iframe(videos[:publishing][:url], videos[:publishing][:title]) %>
       </div>
     </div>
   </div>

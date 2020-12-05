@@ -323,43 +323,42 @@ class SubmissionsController < ApplicationController
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
   end
 
-  # Clones user's submission file into challenge space
+  # Clones user's submission files into challenge space.
   def clone_inputs_to_space
     api = DIContainer.resolve("api.user")
+
     api.project_invite(
       @context.user.private_files_project,
       "user-#{CHALLENGE_BOT_DX_USER}",
-      "VIEW",
+      DNAnexusAPI::PROJECT_ACCESS_VIEW,
       suppressEmailNotification: true,
       suppressAllNotifications: true,
     )
 
-    files = @inputs.values.map { |v| UserFile.accessible_by(@context).find_by(uid: v) }.compact
+    files = UserFile.accessible_by(@context).where(uid: @inputs.values)
 
-    unless files.empty?
-      UserFile.transaction do
-        file_cloner = FileCloner.by_challenge_bot
-        file_cloner.publish(files, @challenge.space.uid)
-      end
-    end
+    challenge_bot_copy_service.copy(files, @challenge.space.scope)
 
     api.project_decrease_permissions(
       @context.user.private_files_project,
-      "NONE",
+      DNAnexusAPI::PROJECT_ACCESS_NONE,
       "user-#{CHALLENGE_BOT_DX_USER}",
+    )
+  end
+
+  def challenge_bot_copy_service
+    @challenge_bot_copy_service ||= CopyService.new(
+      api: DIContainer.resolve("api.challenge_bot"),
+      user: User.challenge_bot,
     )
   end
 
   def job_creator
     @job_creator ||= JobCreator.new(
-      api: DNAnexusAPI.new(CHALLENGE_BOT_TOKEN),
+      api: DIContainer.resolve("api.challenge_bot"),
       context: @context,
-      user: challenge_bot,
+      user: User.challenge_bot,
       project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     )
-  end
-
-  def challenge_bot
-    @challenge_bot ||= User.challenge_bot
   end
 end

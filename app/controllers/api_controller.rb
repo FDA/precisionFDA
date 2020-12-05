@@ -9,6 +9,7 @@ class ApiController < ApplicationController
   before_action :require_api_login, except: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_notes, :list_related, :describe, :search_assets]
   before_action :require_api_login_or_guest, only: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_related, :describe, :search_assets]
   before_action :validate_create_asset, only: :create_asset
+  before_action :validate_create_file, only: :create_file
   before_action :validate_get_upload_url, only: :get_upload_url
 
   rescue_from ApiError, with: :render_error_method
@@ -680,41 +681,21 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
-    file_name = unsafe_params[:name]
-    if file_name.blank? || !file_name.is_a?(String)
-      fail "File name needs to be a non-empty String"
-    end
+    project = UserFile.publication_project!(current_user, @scope)
 
-    description = unsafe_params[:description]
-    if description && !description.is_a?(String)
-      fail "File description needs to be a String"
-    end
-
-    folder = Folder.editable_by(@context).find_by(id: unsafe_params[:folder_id])
-
-    scope = "private"
-    user = @context.user
-    project = user.private_files_project
-    public_scope = ActiveModel::Type::Boolean.new.cast(params[:public_scope])
-
-    if public_scope
-      scope = "public"
-      project = user.public_files_project
-    end
-
-    api = DNAnexusAPI.new(@context.token)
-    dxid = api.call("file", "new", "name": file_name, "project": project)["id"]
+    api = DIContainer.resolve("api.user")
+    file_dxid = api.file_new(params[:name], project)["id"]
 
     file = UserFile.create!(
-      dxid: dxid,
+      dxid: file_dxid,
       project: project,
-      name: file_name,
+      name: params[:name],
       state: "open",
-      description: description,
-      user_id: user.id,
-      parent: user,
-      scope: scope,
-      parent_folder_id: folder.try(:id)
+      description: params[:description],
+      user: current_user,
+      parent: current_user,
+      scope: @scope,
+      UserFile.scope_column_name(@scope) => @folder&.id,
     )
 
     render json: { id: file.uid }
@@ -1397,4 +1378,50 @@ class ApiController < ApplicationController
     end
   end
   # rubocop:enable Style/SignalException
+
+  # Validates and initializes parameters for a file creation.
+  # rubocop:disable Metrics/MethodLength
+  def validate_create_file
+    file_name = params[:name].presence
+    if file_name.blank? || !file_name.is_a?(String)
+      raise_api_error "File name needs to be a non-empty String"
+    end
+
+    description = params[:description].presence
+    if description && !description.is_a?(String)
+      raise_api_error "File description needs to be a String"
+    end
+
+    folder_id = params[:folder_id].presence
+    @folder =
+      begin
+        folder_id && Folder.find(folder_id)
+      rescue ActiveRecord::RecordNotFound
+        raise_api_error "The folder doesn't exist."
+      end
+
+    if @folder && !@folder.editable_by?(@context)
+      raise_api_error "You don't have permissions to add files to the folder."
+    end
+
+    @scope = if ActiveModel::Type::Boolean.new.cast(params[:public_scope])
+      Scopes::SCOPE_PUBLIC
+    else
+      params[:scope].presence || Scopes::SCOPE_PRIVATE
+    end
+
+    unless [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE].include?(@scope) ||
+           Space.valid_scope?(@scope)
+      raise_api_error "Scope is invalid"
+    end
+
+    if Space.valid_scope?(@scope) && !Space.from_scope(@scope).editable_by?(current_user)
+      raise_api_error "You don't have permissions to add files to the space."
+    end
+
+    return if @folder.nil? || @folder.scope == @scope
+
+    raise_api_error "The folder doesn't belong to a scope #{@scope}."
+  end
+  # rubocop:enable all
 end

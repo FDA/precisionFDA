@@ -48,77 +48,81 @@
         </div>
         <hr>
         <div class="form-group form-group-lg">
-          <%= f.label :first_name, "First name", class: 'control-label col-sm-4' %>
+          <%= f.label :first_name, "First name", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :last_name, "Last name", class: 'control-label col-sm-4' %>
+          <%= f.label :last_name, "Last name", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :email, "Email address", class: 'control-label col-sm-4' %>
+          <%= f.label :email, "Email address", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.email_field :email, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :address1, "Address 1", class: 'control-label col-sm-4' %>
+          <%= f.label :address1, "Address 1", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :address1, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :address2, "Address 2", class: 'control-label col-sm-4' %>
+          <%= f.label :address2, "Address 2", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :address2, class: 'form-control input-lg', placeholder: 'Optional' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :city, "City", class: 'control-label col-sm-4' %>
+          <%= f.label :city, "City", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :city, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :country, "Country", class: 'control-label col-sm-4' %>
+          <%= f.label :country_id, "Country", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.select :country_id, @countries, {include_blank: true}, {class: 'form-control input-lg', required: 'required'} %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :postal_code, "Postal Code", class: 'control-label col-sm-4' %>
+          <%= f.label :postal_code, "Postal Code", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :postal_code, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :us_state, "US State", class: 'control-label col-sm-4' %>
+          <%= f.label :us_state, "US State", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.select :us_state, @us_states_list, {include_blank: true}, {class: 'form-control input-lg', required: 'required', disabled: true} %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4' %>
+          <%= f.label :phone_country_id, "Country Code", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-3">
             <%= f.select :phone_country_id, @dial_codes, {include_blank: true}, {class: 'form-control input-lg', required: 'required'} %>
           </div>
-          <div class="col-sm-offset-1 col-sm-6">
-            <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required' %>
-            <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" value="true" />
-          </div>
-          <div class="col-sm-offset-1 col-sm-6">
+          <!--<div class="col-sm-offset-1 col-sm-6">-->
           <%#= <button class="btn btn-lg btn-primary hidden" data-bind="click: showConfirmPhoneModal, disable: disableConfirmPhoneButton, css: {
               hidden: !showConfirmPhoneButton()
             }">Request text validation code</button>
             <div class="text-success hidden phone-confirmed" data-bind="css: {hidden: !phoneConfirmed()}">Phone number has been validated</div> %>
+          <!--</div>-->
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4 request_access_form_font_color', id: 'phone_label' %>
+           
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required', "aria-labelledby": 'phone_label' %>
+            <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" value="true" />
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
-          <%= f.label :duns, "DUNS #", class: 'control-label col-sm-4' %>
+          <%= f.label :duns, "DUNS #", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :duns, class: 'form-control input-lg', placeholder: 'Optional' %>
           </div>
@@ -139,25 +143,25 @@
 
         <div class="form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
-            <strong>Tell us a bit more about your goals / reasons why are requesting access:</strong>
+            <%= f.label :req_reason, "Tell us a bit more about your goals / reasons why are requesting access:", class: 'request_reason_text_custom request_access_form_font_color' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
-            <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required' %>
+            <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required'%>
           </div>
         </div>
         <div class="form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
             Do you intend to organize or participate in a community challenge or appathon?
             <div class="checkbox">
-              <label class="">
+              <label class="request_access_form_font_color">
                 <%= f.check_box :participate_intent %>
                 Yes, I intend to participate
               </label>
             </div>
             <div class="checkbox">
-              <label class="">
+              <label class="request_access_form_font_color">
                 <%= f.check_box :organize_intent %>
                 Yes, I intend to organize
               </label>
@@ -166,7 +170,7 @@
         </div>
         <div class="form-group form-group-lg form-group-optional">
           <div class="col-sm-offset-5 col-sm-10">
-            Do you have any data to contribute? If so, list below.
+            <%= f.label :req_data, "Do you have any data to contribute? If so, list below.", class: 'request_data_text_custom request_access_form_font_color request_access_form_font_color' %>
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
@@ -176,7 +180,7 @@
         </div>
         <div class="form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
-            Do you have any software to contribute? If so, list below.
+            <%= f.label :req_software, "Do you have any software to contribute? If so, list below.", class: 'request_access_custom17080 request_access_form_font_color request_access_form_font_color' %>
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
@@ -188,11 +192,11 @@
           <div class="col-sm-offset-5 col-sm-10">
             Ultimately, what do you see as your intended use for precisionFDA?
             <div class="checkbox">
-              <label class="checkbox-inline">
+              <label class="checkbox-inline request_access_form_font_color">
                 <%= f.check_box :research_intent %>
                 Research use
               </label>
-              <label class="checkbox-inline">
+              <label class="checkbox-inline request_access_form_font_color">
                 <%= f.check_box :clinical_intent %>
                 Clinical use
               </label>
