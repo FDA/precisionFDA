@@ -4,7 +4,7 @@ import * as errors from '../../../errors'
 import type { RunAppInput, Provenance } from '../job.input'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
-import { App, helper as appHelper } from '../../app'
+import { App } from '../../app'
 import { User, helper as userHelper } from '../../user'
 import {
   JOB_STATE,
@@ -27,10 +27,8 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     const em = this.ctx.em
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
-    const app = await em.findOne(App, {
-      dxid: input.appDxId,
-      user: em.getReference(User, this.ctx.user.id),
-    })
+    // whitelist https public apps
+    const app = await em.getRepository(App).findPublic(input.appDxId)
 
     if (!user) {
       throw new errors.UserNotFoundError()
@@ -41,8 +39,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         code: errors.ErrorCodes.APP_NOT_FOUND,
       })
     }
-    // todo: use class context for everything or nothing
-    const platformAppId = appHelper.getAppHandle({ app, appType: input.httpsAppType })
+    const platformAppId = app.dxid
     this.projectId = userHelper.getProjectForAppType(user, input.httpsAppType)
     const runWithInstanceType =
       this.input.instanceType && allowedInstanceTypes[this.input.instanceType]

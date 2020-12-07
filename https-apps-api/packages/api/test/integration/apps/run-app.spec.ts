@@ -192,7 +192,6 @@ describe('POST /apps/:id/run', () => {
       .expect(201)
     // all defaults took place
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
-    console.log(platformCall, '!')
     expect(platformCall).to.have.property('name').that.is.undefined()
     expect(platformCall).to.have.property('input').that.deep.equals({
       duration: 240,
@@ -259,9 +258,22 @@ describe('POST /apps/:id/run', () => {
       expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
     })
 
-    it('throws 401 when user does not own the app', async () => {
+    // deprecated, admin owns the apps
+    it.skip('throws 401 when user does not own the app', async () => {
       const anotherUser = create.userHelper.create(em)
       const anotherApp = create.appHelper.create(em, { user: anotherUser })
+      await em.flush()
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${anotherApp.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+        })
+        .send(generate.app.runAppInput())
+      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+    })
+
+    it('throws 404 if requested app does not follow the requirements', async () => {
+      const anotherApp = create.appHelper.create(em, { user }, { scope: 'private' })
       await em.flush()
       const { body } = await supertest(api.getServer())
         .post(`/apps/${anotherApp.dxid}/run`)

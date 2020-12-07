@@ -48,11 +48,7 @@ const defaultConfig = {
   platform: {
     apiUrl: 'https://stagingapi.dnanexus.com',
     authApiUrl: 'https://stagingauth.dnanexus.com',
-    appHandles: {
-      jupyter: 'app-dxjupyterlab',
-      cloudwatch: 'app-cloud_workstation',
-      ttyd: 'app-ttyd',
-    },
+    adminUser: 'precisionfda.admin_dev',
   },
   redis: {
     url: process.env.REDIS_URL ?? 'redis://localhost:6379',
