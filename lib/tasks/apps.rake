@@ -15,6 +15,7 @@ namespace :apps do
     app_info = api.app_describe(app_dxid)
 
     created_by = User.find_by(dxuser: app_info["createdBy"].sub(/^user-/, "")) ||
+                 ENV["CREATED_BY"].present? && User.find_by(dxuser: ENV["CREATED_BY"]) ||
                  User.find_by(dxuser: ADMIN_USER.sub(/^user-/, ""))
 
     abort "Can't find createdBy user for the app" unless created_by
@@ -28,9 +29,8 @@ namespace :apps do
     release = app_info.dig("runSpec", "release")
 
     input_spec = app_info["inputSpec"].select do |spec|
-      spec["class"] = spec["class"].sub(/^array:/, "")
       is_supported = %w(string file int boolean float).include?(spec["class"])
-      p "Unhandler class #{spec['class']}" unless is_supported
+      p "Unhandled class #{spec['class']}" unless is_supported
       is_supported
     end
 
