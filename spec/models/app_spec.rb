@@ -19,6 +19,7 @@
 #  uid           :string(255)
 #  dev_group     :string(255)
 #  release       :string(255)      not null
+#  entity_type   :integer          default("regular"), not null
 #
 
 require "rails_helper"
