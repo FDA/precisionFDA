@@ -20,6 +20,7 @@
 #  dev_group     :string(255)
 #  release       :string(255)      not null
 #  featured      :boolean          default(FALSE)
+#  entity_type   :integer          default("regular"), not null
 #
 
 class App < ApplicationRecord

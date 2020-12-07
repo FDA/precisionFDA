@@ -20,6 +20,7 @@
 #  uid             :string(255)
 #  local_folder_id :integer
 #  featured        :boolean          default(FALSE)
+#  entity_type     :integer          default("regular"), not null
 #
 
 class Job < ApplicationRecord
