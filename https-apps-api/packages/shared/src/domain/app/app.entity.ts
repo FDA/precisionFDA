@@ -8,13 +8,15 @@ import {
   Collection,
   OneToMany,
   Enum,
+  EntityRepositoryType,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { Job } from '../job/job.entity'
 import { User } from '../user/user.entity'
 import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from './app.enum'
+import { AppRepository } from './app.repository'
 
-@Entity({ tableName: 'apps' })
+@Entity({ tableName: 'apps', customRepository: () => AppRepository })
 export class App extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -67,7 +69,9 @@ export class App extends BaseEntity {
   jobs = new Collection<Job>(this)
 
   @Enum()
-  entityType: ENTITY_TYPE
+  entityType: ENTITY_TYPE;
+
+  [EntityRepositoryType]?: AppRepository
 
   constructor(user: User) {
     super()

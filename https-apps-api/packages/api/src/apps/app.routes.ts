@@ -1,15 +1,15 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { app as appDomain, job as jobDomain, utils } from '@pfda/https-apps-shared'
+import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 import { makeValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
-router.get('/', async ctx => {
-  const res = await new appDomain.ListAppsOperation(pickOpsCtx(ctx)).execute()
-  ctx.body = res
-})
+// router.get('/', async ctx => {
+//   const res = await new appDomain.ListAppsOperation(pickOpsCtx(ctx)).execute()
+//   ctx.body = res
+// })
 
 router.post(
   '/:appDxId/run',
