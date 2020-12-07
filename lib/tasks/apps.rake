@@ -29,7 +29,6 @@ namespace :apps do
     release = app_info.dig("runSpec", "release")
 
     input_spec = app_info["inputSpec"].select do |spec|
-      spec["class"] = spec["class"].sub(/^array:/, "")
       is_supported = %w(string file int boolean float).include?(spec["class"])
       p "Unhandled class #{spec['class']}" unless is_supported
       is_supported
