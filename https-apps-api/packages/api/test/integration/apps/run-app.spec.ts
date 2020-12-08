@@ -115,7 +115,7 @@ describe('POST /apps/:id/run', () => {
     const input = {
       ...generate.app.runAppInput(),
       input: {
-        snapshot: snapshotFile.dxid,
+        snapshot: snapshotFile.uid,
       },
     }
     const { body } = await supertest(api.getServer())
