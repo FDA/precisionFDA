@@ -45,14 +45,15 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
         ? allowedInstanceTypes[this.input.instanceType]
         : DEFAULT_INSTANCE_TYPE
-    const runInputDb = this.buildJobRunInput({ app })
-    const runDxInput = this.buildClientApiCall({ app, platformAppId })
-    const jobName = input.name ?? app.title
-    // todo: more conditions, user can use the file -> could be the spaces again etc
+
     const snapshotFile =
       input.input && input.input.snapshot
-        ? await em.findOne(UserFile, { dxid: input.input?.snapshot })
+        ? await em.findOne(UserFile, { uid: input.input?.snapshot })
         : null
+    const runInputDb = this.buildJobRunInput({ app, snapshot: snapshotFile })
+    const runDxInput = this.buildClientApiCall({ app, platformAppId, snapshot: snapshotFile })
+    const jobName = input.name ?? app.title
+    // todo: more conditions, user can use the file -> could be the spaces again etc
 
     // todo: should be only allowed for apps that work with snapshots
     if (input.input?.snapshot && !snapshotFile) {
@@ -147,7 +148,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   }
 
   // job.run_data JSON field
-  private buildJobRunInput({ app }: { app: App }) {
+  private buildJobRunInput({ app, snapshot }: { app: App; snapshot: Maybe<UserFile> }) {
     // todo: switch?
     if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.TTYD) {
       return {}
@@ -168,8 +169,8 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
             ? allowedFeatures[jobSpecificInput.feature]
             : this.getDefaultSpecValue(app, 'feature'),
       }
-      if (jobSpecificInput?.snapshot) {
-        runInput['snapshot'] = jobSpecificInput.snapshot
+      if (jobSpecificInput?.snapshot && snapshot) {
+        runInput['snapshot'] = snapshot.dxid
       }
       if (jobSpecificInput?.cmd) {
         runInput['cmd'] = jobSpecificInput.cmd
@@ -186,9 +187,11 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   private buildClientApiCall({
     app,
     platformAppId,
+    snapshot,
   }: {
     app: App
     platformAppId: string
+    snapshot: Maybe<UserFile>
   }): client.JobCreateParams {
     const runWithInstanceType =
       this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
@@ -221,10 +224,10 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         feature,
       }
       // optional input fields
-      if (jobInputs?.snapshot) {
+      if (jobInputs?.snapshot && snapshot) {
         payload['input']['snapshot'] = {
           $dnanexus_link: {
-            id: jobInputs.snapshot,
+            id: snapshot.dxid,
             project: this.projectId,
           },
         }
