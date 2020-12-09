@@ -282,6 +282,7 @@ class AppsController < ApplicationController
     if @app.https?
       https_apps_client = DIContainer.resolve("https_apps_client")
       input_info = input_spec_preparer.run(@app, inputs)
+      puts input_info
 
       fail input_spec_preparer.first_error unless input_spec_preparer.valid?
 
@@ -296,8 +297,12 @@ class AppsController < ApplicationController
             input: input_info.run_inputs,
           )
         rescue HttpsAppsClient::Error => e
+          puts "appclient err"
+          puts e
           fail e.message
-        rescue StandardError
+        rescue StandardError => e
+          puts "stderr?"
+          puts e
           fail "Something went wrong"
         end
 
