@@ -108,6 +108,8 @@ gem "sidekiq"
 
 gem "whenever", require: false
 
+gem "soapforce"
+
 group :development do
   # Annotate models
   gem "annotate"
