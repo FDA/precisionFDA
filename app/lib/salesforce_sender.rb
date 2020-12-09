@@ -20,7 +20,7 @@ class SalesforceSender
           replyTo: mail_from,
           subject: mail.subject,
           htmlBody: mail.html_part.body,
-          orgWideEmailAddressId: org_wide_email_address_id(mail_from),
+          # orgWideEmailAddressId: org_wide_email_address_id(mail_from),
           fileAttachments: attachments(mail),
         },
       },
