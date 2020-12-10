@@ -1,14 +1,13 @@
 module DXClient
   module Endpoints
-    # Contains jobs-related methods.
+    # Provides jobs-related methods.
     module Jobs
-      include DXClient::Errors
-      # Terminates an analysis and all of the stages' origin jobs and/or analyses.
-      # https://documentation.dnanexus.com/developer/api/running-analyses/workflows-and-analyses#api-method-analysis-xxxx-terminate
-      # @param job_dxid [String] Job's dxid.
+      # Terminates the job.
+      # @param user_dxid [String] Job dxid to terminate.
+      # @param opts [Hash] Additional options.
       # @return [Hash]
-      def job_terminate(job_dxid)
-        call(job_dxid, "terminate")
+      def job_terminate(job_dxid, opts = {})
+        call(job_dxid, "terminate", opts)
       end
     end
   end
