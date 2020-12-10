@@ -37,6 +37,17 @@ class HttpsAppsClient
     )
   end
 
+  # Terminate the job.
+  # @param job_dxid [String] Job dxid to terminate.
+  # @param opts [Hash] Request body options.
+  def job_terminate(job_dxid)
+    request(
+      "/jobs/#{job_dxid}/terminate",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   private
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)

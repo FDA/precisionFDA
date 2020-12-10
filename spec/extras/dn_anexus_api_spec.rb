@@ -478,4 +478,17 @@ describe DNAnexusAPI do
       end
     end
   end
+
+  describe "#job_terminate" do
+    let(:job_dxid) { "some-dxid" }
+
+    it_behaves_like "call" do
+      let(:client_method) { :job_terminate }
+      let(:client_method_args) { [job_dxid, payload] }
+
+      let(:expected_subject) { job_dxid }
+      let(:expected_method) { "terminate" }
+      let(:expected_payload) { payload }
+    end
+  end
 end

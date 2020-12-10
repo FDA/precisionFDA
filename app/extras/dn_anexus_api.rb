@@ -9,6 +9,7 @@ class DNAnexusAPI
   include DXClient::Endpoints::Projects
   include DXClient::Endpoints::System
   include DXClient::Endpoints::Users
+  include DXClient::Endpoints::Jobs
   include DXClient::Endpoints::Workflows
 
   def self.for_admin
