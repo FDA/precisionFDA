@@ -1,8 +1,7 @@
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
-import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
-import { App, User } from '@pfda/https-apps-shared/src/domain'
+import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
 import {
   JOB_STATE,
   JOB_DB_ENTITY_TYPE,
@@ -17,6 +16,7 @@ import * as create from '../../utils/create'
 import * as generate from '../../utils/generate'
 import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
+import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 
 describe('POST /apps/:id/run', () => {
   let em: EntityManager
@@ -42,13 +42,12 @@ describe('POST /apps/:id/run', () => {
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
       .expect(201)
-    expect(stripEntityDates(body)).to.deep.equal({
+    expect(body).to.deep.equal({
       id: 1,
       app: app.id,
-      appSeriesId: null,
+      // appSeriesId: null,
       name: app.title,
       dxid: generate.job.jobId(),
-      uid: `${generate.job.jobId()}-1`,
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
       taggings: [],
@@ -56,22 +55,39 @@ describe('POST /apps/:id/run', () => {
       project: user.jupyterProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
-      provenance: {
-        [generate.job.jobId()]: {
-          app_dxid: app.dxid,
-          app_id: app.id,
-          inputs: {},
-        },
-      },
-      runData: {
+    })
+  })
+
+  it('builds json fields in the db', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runAppInput())
+      .expect(201)
+    const jobInDb = await em.findOne(Job, body.id)
+    expect(jobInDb).to.have.property('uid', `${generate.job.jobId()}-1`)
+    expect(jobInDb).to.have.property('describe', '{}')
+    expect(jobInDb).to.have.property(
+      'runData',
+      JSON.stringify({
         run_instance_type: DEFAULT_INSTANCE_TYPE,
         run_inputs: {
           duration: generate.app.runAppInput().input.duration,
           feature: 'PYTHON_R', // default from the specs
         },
         run_outputs: {},
-      },
-    })
+      }),
+    )
+    expect(jobInDb).to.have.property(
+      'provenance',
+      JSON.stringify({
+        [generate.job.jobId()]: {
+          app_dxid: app.dxid,
+          app_id: app.id,
+          inputs: {},
+        },
+      }),
+    )
   })
 
   it('response shape - ttyd app', async () => {
@@ -83,10 +99,8 @@ describe('POST /apps/:id/run', () => {
     expect(stripEntityDates(body)).to.deep.equal({
       id: 1,
       app: app.id,
-      appSeriesId: null,
       name: app.title,
       dxid: generate.job.jobId(),
-      uid: `${generate.job.jobId()}-1`,
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
       taggings: [],
@@ -94,18 +108,6 @@ describe('POST /apps/:id/run', () => {
       project: user.ttydProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
-      provenance: {
-        [generate.job.jobId()]: {
-          app_dxid: app.dxid,
-          app_id: app.id,
-          inputs: {},
-        },
-      },
-      runData: {
-        run_instance_type: DEFAULT_INSTANCE_TYPE,
-        run_inputs: {},
-        run_outputs: {},
-      },
     })
   })
 
@@ -123,15 +125,16 @@ describe('POST /apps/:id/run', () => {
       .query({ ...getDefaultQueryData(user) })
       .send(input)
       .expect(201)
-    expect(body)
-      .to.have.property('provenance')
-      .that.is.deep.equal({
-        [generate.job.jobId()]: {
-          app_dxid: app.dxid,
-          app_id: app.id,
-          inputs: { snapshot: snapshotFile.dxid },
-        },
-      })
+    const jobInDb = await em.findOne(Job, { id: body.id })
+    expect(jobInDb).to.have.property('provenance')
+    const provenance = JSON.parse((jobInDb.provenance as unknown) as string)
+    expect(provenance).to.be.deep.equal({
+      [generate.job.jobId()]: {
+        app_dxid: app.dxid,
+        app_id: app.id,
+        inputs: { snapshot: snapshotFile.dxid },
+      },
+    })
     const jobFileRows = await em.createQueryBuilder('job_inputs').select('*').execute()
     expect(jobFileRows).to.be.an('array').with.lengthOf(1)
     expect(jobFileRows[0]).to.have.property('job_id', body.id)

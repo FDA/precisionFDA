@@ -1,8 +1,8 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 import { makeValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils'
+import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
@@ -22,6 +22,17 @@ router.get(
       dxid: ctx.params.jobDxId,
     })
     ctx.body = job
+  },
+)
+
+router.patch(
+  '/:jobDxId/terminate',
+  makeValidationMdw({ params: utils.schemas.getDxidInputSchema('jobDxId') }),
+  async ctx => {
+    const res = await new jobDomain.RequestTerminateJobOperation(pickOpsCtx(ctx)).execute({
+      dxid: ctx.params.jobDxId,
+    })
+    ctx.body = res
   },
 )
 

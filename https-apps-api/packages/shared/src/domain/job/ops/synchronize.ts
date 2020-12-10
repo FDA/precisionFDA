@@ -72,6 +72,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
 
       // fetch all files related to the app
       const localfiles = await filesRepo.findProjectFiles({ project: job.project })
+      // fixme: should work with the API limitations, especially because of the production migration
       // fetch all files on the platform
       const filesInProject = await client.filesList({
         accessToken: this.ctx.user.accessToken,

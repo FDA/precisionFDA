@@ -10,6 +10,7 @@ type BaseParams = {
   accessToken: string
 }
 type JobDescribeParams = BaseParams & { jobId: string }
+type JobTerminateParams = BaseParams & { jobId: string }
 // todo: ..
 type JobCreateParams = BaseParams & {
   appId: string
@@ -57,6 +58,8 @@ type JobCreateResponse = {
   id: string
 }
 
+type JobTerminateResponse = JobCreateResponse
+
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
   state: string
@@ -71,14 +74,6 @@ type JobDescribeResponse = {
     }
   }
 } & AnyObject
-
-// tasks here:
-// auth handler
-// error handler
-// return types
-// logging!
-// refactor
-// tests
 
 const log = getLogger('platform-client-logger')
 
@@ -116,6 +111,24 @@ const jobCreate = async (params: JobCreateParams): Promise<JobCreateResponse> =>
   const options: AxiosRequestConfig = {
     method: 'POST',
     data: { ...omit(['accessToken', 'appId'], params) },
+    url,
+    headers: setupHeaders(params),
+  }
+  try {
+    log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+    const res = await axios.request(options)
+    return res.data
+  } catch (err) {
+    log.warn({ requestOptions: options }, 'Failed request options')
+    return handleFailed(err)
+  }
+}
+
+const jobTerminate = async (params: JobTerminateParams): Promise<JobTerminateResponse> => {
+  const url = `${config.platform.apiUrl}/${params.jobId}/terminate`
+  const options: AxiosRequestConfig = {
+    method: 'POST',
+    data: {},
     url,
     headers: setupHeaders(params),
   }
@@ -187,4 +200,12 @@ const filesDescribe = async (params: DescribeFilesParams): Promise<DescribeFiles
   }
 }
 
-export { jobDescribe, jobCreate, filesList, filesDescribe, JobDescribeResponse, JobCreateParams }
+export {
+  jobDescribe,
+  jobCreate,
+  jobTerminate,
+  filesList,
+  filesDescribe,
+  JobDescribeResponse,
+  JobCreateParams,
+}
