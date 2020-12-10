@@ -30,15 +30,6 @@ export class Job extends BaseEntity {
   project: string
 
   @Property()
-  runData: string
-
-  @Property({ hidden: true })
-  describe: string
-
-  @Property({ type: JsonType })
-  provenance: Provenance
-
-  @Property()
   state: JOB_STATE
 
   @Property()
@@ -48,16 +39,25 @@ export class Job extends BaseEntity {
   scope: string
 
   @Property()
-  uid: string
-
-  @Property()
   entityType: number
 
+  @Property({ hidden: true })
+  runData: string
+
+  @Property({ hidden: true })
+  describe: string
+
+  @Property({ type: JsonType, hidden: true })
+  provenance: Provenance
+
+  @Property({ hidden: true })
+  uid: string
+
   // foreign keys -> not yet mapped
-  @Property()
+  @Property({ hidden: true })
   appSeriesId: number
 
-  @Property()
+  @Property({ hidden: true })
   localFolderId: number
 
   // @Property()

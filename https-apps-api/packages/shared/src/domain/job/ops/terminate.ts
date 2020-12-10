@@ -2,19 +2,42 @@ import * as errors from '../../../errors'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import { DxIdInput } from '../job.input'
+import * as client from '../../../platform-client'
+import { JOB_STATE } from '../job.enum'
+import { isStateTerminal } from '../job.helper'
+import { ENTITY_TYPE } from '../../app/app.enum'
 
 export class RequestTerminateJobOperation extends BaseOperation<DxIdInput, Job> {
   async run(input: DxIdInput): Promise<Job> {
-    // set to terminating
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
-    const job = await jobRepo.findOne({ dxid: input.dxid, user: this.ctx.user.id })
-    // worker should set to terminated?
+    // scope is private/scope-x so this should work
+    // no further checks, client-facing API should resolve whether given user can terminate given job (scopes)
+    const job = await jobRepo.findOne({ dxid: input.dxid })
+
+    // input validations
     if (!job) {
       throw new errors.JobNotFoundError()
     }
-    // add task to the queue - OR it should pick it up automatically
+
+    if (job.entityType !== ENTITY_TYPE.HTTPS) {
+      throw new errors.JobNotFoundError('Job is not HTTPS job.')
+    }
+
+    if (isStateTerminal(job.state) || job.state === JOB_STATE.TERMINATING) {
+      this.ctx.log.info({ jobId: job.id }, 'Job is already terminated or terminating')
+      return job
+    }
     // call the platform API
+    const apiResult = await client.jobTerminate({
+      jobId: job.dxid,
+      accessToken: this.ctx.user.accessToken,
+    })
+    this.ctx.log.info({ jobId: job.id, jobDxId: job.dxid, apiResult }, 'Job set to terminate')
     // set to terminating
+    job.state = JOB_STATE.TERMINATING
+    await em.flush()
+
+    return job
   }
 }

@@ -51,6 +51,9 @@ test-worker:
 	NODE_ENV=test $(bin)mocha --config ./packages/worker/.mocharc.js \
 	--recursive "./packages/worker/test/integration/**/*.spec.ts"
 
+test: test-api
+	make test-worker
+
 clean:
 	$(bin)lerna run clean
 
@@ -59,4 +62,4 @@ pristine:
 	$(bin)lerna run uninstall
 	rm -rf ./temp && rm -rf ./node_modules
 
-.PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker run-worker-repl
+.PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker run-worker-repl test
