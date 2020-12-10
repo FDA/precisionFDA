@@ -373,8 +373,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def create_request_access
     @invitation = Invitation.new
 
-    # if verify_recaptcha(model: @invitation)
-    if true
+    if verify_recaptcha(model: @invitation)
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
     end
 
