@@ -82,7 +82,7 @@ class Job < ApplicationRecord
   acts_as_votable
 
   scope :done, -> { where(state: STATE_DONE) }
-  scope :terminal, -> { where(state: [TERMINAL_STATES]) }
+  scope :terminal, -> { where(state: TERMINAL_STATES) }
 
   enum entity_type: {
     TYPE_REGULAR => 0,
