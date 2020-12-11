@@ -53,6 +53,7 @@ class Job < ApplicationRecord
   STATE_DONE = "done".freeze
   STATE_FAILED = "failed".freeze
   STATE_IDLE = "idle".freeze
+  STATE_RUNNING = "running".freeze
   STATE_TERMINATED = "terminated".freeze
   STATE_TERMINATING = "terminating".freeze
 
@@ -121,6 +122,10 @@ class Job < ApplicationRecord
     state == STATE_DONE
   end
 
+  def running?
+    state == STATE_RUNNING
+  end
+
   def failed?
     state == STATE_FAILED
   end
@@ -145,6 +150,12 @@ class Job < ApplicationRecord
 
   def energy_string
     (energy || "TBD").to_s
+  end
+
+  def https_job_external_url
+    return unless https?
+
+    describe.dig(:httpsApp, :dns, :url)
   end
 
   def update_provenance!
