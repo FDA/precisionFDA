@@ -43,7 +43,8 @@ module UserService
     # @param inputs [String] Project name.
     # @return [Hash] Created project.
     def create_project(project_name)
-      api.project_new(project_name, billTo: user.billto)
+      raise "HTTPS_APPS_BILL_TO environment variable is not set" if ENV["HTTPS_APPS_BILL_TO"].blank?
+      api.project_new(project_name, billTo: ENV["HTTPS_APPS_BILL_TO"])
     end
   end
 end
