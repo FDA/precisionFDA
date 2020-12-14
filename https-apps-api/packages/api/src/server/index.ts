@@ -1,13 +1,12 @@
 import http from 'http'
 import https from 'https'
 import fs from 'fs'
-import path from 'path'
-import { config } from '@pfda/https-apps-shared'
 import Koa from 'koa'
 import koaBody from 'koa-bodyparser'
 import { log } from '../logger'
 import * as mdw from './middleware'
 import { router } from './routes'
+import { config } from '@pfda/https-apps-shared'
 
 const koa = new Koa<Koa.DefaultState, Api.Ctx>()
 // todo: security, compression middlewares
@@ -39,9 +38,9 @@ const startHttpsServer = async (): Promise<void> => {
       .createServer(
         {
           // eslint-disable-next-line no-sync
-          key: fs.readFileSync(path.join(__dirname, '../../key.pem')),
+          key: fs.readFileSync(config.api.keyCertPath),
           // eslint-disable-next-line no-sync
-          cert: fs.readFileSync(path.join(__dirname, '../../cert.pem')),
+          cert: fs.readFileSync(config.api.certPath),
         },
         koa.callback(),
       )

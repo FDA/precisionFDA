@@ -1,5 +1,14 @@
 import { ConfigOverride } from '..'
 
 export const config: ConfigOverride = {
-  appName: 'dev-app-name',
+  appName: 'https-apps-worker-dev',
+  logs: {
+    pretty: false,
+    level: 'debug',
+  },
+  workerJobs: {
+    syncJob: {
+      repeatPattern: '*/2 * * * *',
+    },
+  },
 }

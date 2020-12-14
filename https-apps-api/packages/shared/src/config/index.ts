@@ -5,6 +5,8 @@ import { default as dotenv } from 'dotenv'
 dotenv.config()
 
 // eslint-disable-next-line import/first
+import path from 'path'
+// eslint-disable-next-line import/first
 import { mergeDeepRight } from 'ramda'
 // eslint-disable-next-line import/first
 import { ENVS } from '../enums'
@@ -15,12 +17,12 @@ import * as overrides from './envs'
 
 type Maybe<T> = T | null
 
-const parseIntFromProcess = (envVarName: string): Maybe<number> => {
-  const value = parseInt(process.env[envVarName], 10)
+const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
+  const value = parseInt(envValue, 10)
   return isNaN(value) ? null : value
 }
 
-const parseBooleanFromProcess = (value: string, defaultValue = false): boolean =>
+const parseBooleanFromProcess = (value: string | undefined, defaultValue = false): boolean =>
   value ? value.toLowerCase() === 'true' : defaultValue
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -31,6 +33,8 @@ const defaultConfig = {
   api: {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     port: parseIntFromProcess(process.env.PORT) ?? 3001,
+    certPath: process.env.PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
+    keyCertPath: process.env.PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
   },
   logs: {
     pretty: true,
@@ -61,7 +65,8 @@ const defaultConfig = {
     },
     syncJob: {
       // every two minutes
-      repeatPattern: '*/2 * * * *',
+      // repeatPattern: '*/2 * * * *',
+      repeatPattern: '*/1 * * * *',
     },
   },
 }
