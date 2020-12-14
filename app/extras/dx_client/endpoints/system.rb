@@ -19,6 +19,14 @@ module DXClient
         call("system", "findDataObjects", opts)
       end
 
+      # Finds orgs.
+      # @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findorgs
+      # @param opts [Hash] Options used to find orgs.
+      # @return [Array]
+      def system_find_orgs(opts = {})
+        call("system", "findOrgs", opts)
+      end
+
       # Finds jobs.
       # @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findjobs
       # @param opts [Hash] Options used to find jobs.

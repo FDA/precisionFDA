@@ -1,3 +1,4 @@
+# Environment helpers.
 module EnvHelpers
   def with_environment(partial_env)
     old = ENV.to_hash
