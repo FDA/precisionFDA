@@ -430,6 +430,17 @@ describe DNAnexusAPI do
     end
   end
 
+  describe "#system_find_orgs" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_orgs }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findOrgs" }
+      let(:expected_payload) { payload }
+    end
+  end
+
   describe "#system_find_projects" do
     it_behaves_like "call" do
       let(:client_method) { :system_find_projects }

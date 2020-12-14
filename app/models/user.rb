@@ -414,7 +414,7 @@ class User < ApplicationRecord
       project: user.private_files_project,
       parentJob: nil,
       parentAnalysis: nil,
-      describe: true
+      describe: true,
     )["results"].first
 
     sync_job_state(result, job, user, api)
@@ -435,7 +435,7 @@ class User < ApplicationRecord
       project:  job.project || user.private_files_project,
       parentJob: nil,
       parentAnalysis: job.analysis.try(:dxid),
-      describe: true
+      describe: true,
     )["results"].first
 
     return if result.blank?
@@ -451,9 +451,9 @@ class User < ApplicationRecord
 
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     jobs.regular.where(user_id: user.id).
-                 where.not(state: Job::TERMINAL_STATES).
-                 limit(SYNC_JOBS_LIMIT).
-                 each_slice(1000) do |jobs_batch|
+      where.not(state: Job::TERMINAL_STATES).
+      limit(SYNC_JOBS_LIMIT).
+      each_slice(1000) do |jobs_batch|
       jobs_hash = jobs_batch.map { |job| [job.dxid, job] }.to_h
 
       jobs_hash.keys.each do |job_dxid|
@@ -481,7 +481,8 @@ class User < ApplicationRecord
     api = DIContainer.resolve("api.challenge_bot")
 
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Job.regular.where(user_id: user.id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+    Job.regular.where(user_id: user.id).
+      where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
       jobs_hash = jobs.map { |job| [job.dxid, job] }.to_h
 
       api.system_find_jobs(
@@ -509,8 +510,6 @@ class User < ApplicationRecord
   def self.user_helper_attribute(id, attribute)
     find(id)[attribute]
   end
-
-  private
 
   def self.sync_file_state(result, file, user)
     if result["statusCode"] == 404
@@ -553,6 +552,9 @@ class User < ApplicationRecord
     end
   end
 
+  private_class_method :sync_file_state
+
+  # rubocop:todo Metrics/MethodLength
   def self.sync_job_state(result, job, user, api)
     state = result["describe"]["state"]
     # Only do anything if local job state is stale
@@ -575,7 +577,8 @@ class User < ApplicationRecord
       end
       output_file_ids.uniq!
       output_file_ids.each_slice(1000) do |slice_of_file_ids|
-        api.system_describe_data_objects(slice_of_file_ids)["results"].each_with_index do |api_result, i|
+        api.system_describe_data_objects(slice_of_file_ids)["results"].
+          each_with_index do |api_result, i|
           # Push avoids creating a new array as opposed to +/+=
           output_file_cache.push(
             dxid: slice_of_file_ids[i],
@@ -626,6 +629,9 @@ class User < ApplicationRecord
       end
     end
   end
+  # rubocop:enable Metrics/MethodLength
+
+  private_class_method :sync_job_state
 
   alias_method :site_admin?, :can_administer_site?
 end
