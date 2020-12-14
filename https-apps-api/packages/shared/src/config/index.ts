@@ -84,7 +84,8 @@ const defaultConfig = {
     },
     syncJob: {
       // every two minutes
-      repeatPattern: '*/2 * * * *',
+      // repeatPattern: '*/2 * * * *',
+      repeatPattern: '*/1 * * * *',
     },
   },
 }
