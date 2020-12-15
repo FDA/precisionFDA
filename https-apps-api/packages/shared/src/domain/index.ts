@@ -3,11 +3,24 @@ import { Job } from './job/job.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
+import { Node } from './user-file/node.entity'
+import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
 import { JobClosedEvent } from './event/job-closed.entity'
 import { Organization } from './org/org.entity'
 
-const entities = { App, Job, User, Tag, Tagging, UserFile, JobClosedEvent, Organization }
+const entities = {
+  App,
+  Job,
+  User,
+  Tag,
+  Tagging,
+  Node,
+  Folder,
+  UserFile,
+  JobClosedEvent,
+  Organization,
+}
 
 export * as app from './app'
 
