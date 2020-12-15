@@ -215,7 +215,7 @@ describe('TASK: sync_job_status', () => {
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
       )
-      const filesInDb = await em.find(UserFile, {}, { populate: false })
+      const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
       // converted to JSON to remove user reference
       const resultFile = wrap(filesInDb[0]).toJSON()
@@ -260,7 +260,8 @@ describe('TASK: sync_job_status', () => {
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
       )
-      const filesInDb = await em.find(UserFile, {}, { populate: false })
+      // stiType has to be set explicitely (should go to the repository I guess)
+      const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
       // converted to JSON to remove user reference
       const resultFile = wrap(filesInDb[0]).toJSON()

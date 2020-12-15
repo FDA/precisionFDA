@@ -74,6 +74,20 @@ const filesHelper = {
     em.persist(file)
     return file
   },
+  createFolder: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.UserFile>>,
+  ) => {
+    const defaults = generate.folder.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const folder = wrap(new entities.Folder(references.user)).assign(input)
+    em.persist(folder)
+    return folder
+  },
 }
 
 export { userHelper, jobHelper, appHelper, filesHelper }

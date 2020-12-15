@@ -9,12 +9,11 @@ import {
 } from '@mikro-orm/core'
 import { User } from '..'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_TYPE, PARENT_TYPE, FILE_STI_TYPE } from './user-file.enum'
-import { UserFileRepository } from './user-file.repository'
+import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from './user-file.enum'
 
-@Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
-@Entity({ tableName: 'nodes', customRepository: () => UserFileRepository })
-export class UserFile extends Node {
+@Entity({ tableName: 'nodes' })
+@Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
+export class Folder extends Node {
   @Property()
   project: string
 

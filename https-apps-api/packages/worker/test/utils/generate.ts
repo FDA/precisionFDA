@@ -10,6 +10,7 @@ import {
   FILE_TYPE,
   PARENT_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+import { Folder } from '@pfda/https-apps-shared/src/domain/user-file'
 // todo: should be in shared helpers
 
 const chance = new Chance()
@@ -87,4 +88,15 @@ const userFile = {
   },
 }
 
-export { random, user, job, app, userFile }
+const folder = {
+  simple: (): Partial<Folder> => ({
+    name: chance.name(),
+    scope: 'private',
+    entityType: FILE_TYPE.REGULAR,
+    parentId: 1,
+    parentType: PARENT_TYPE.USER,
+    stiType: FILE_STI_TYPE.FOLDER,
+  }),
+}
+
+export { random, user, job, app, userFile, folder }

@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = {
-  timeout: 5000,
+  timeout: 10000,
   colors: true,
   checkleaks: true,
   file: './packages/worker/test/index.ts',
