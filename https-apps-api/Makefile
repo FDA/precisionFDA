@@ -20,6 +20,12 @@ run-dist:
 run-worker-dist:
 	node ./packages/worker/dist/index.js
 
+run-dev-dist:
+	node ./packages/api/dist/index.js > ../log/https-api.log
+
+run-worker-dev-dist:
+	node ./packages/api/dist/index.js > ../log/https-worker.log
+
 # run app locally starting from worker API
 run-dev:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/api/src/index.ts
@@ -62,4 +68,4 @@ pristine:
 	$(bin)lerna run uninstall
 	rm -rf ./temp && rm -rf ./node_modules
 
-.PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker run-worker-repl test
+.PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker run-worker-repl test run-dev-dist run-worker-dev-dist
