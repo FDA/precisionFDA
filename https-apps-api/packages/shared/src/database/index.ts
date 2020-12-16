@@ -13,7 +13,7 @@ const start = async (): Promise<void> => {
       metadataProvider: TsMorphMetadataProvider,
       entities: [BaseEntity, ...Object.values(entities)],
       type: 'mysql',
-      dbName: config.database.dbName,
+      // dbName: config.database.dbName,
       clientUrl: config.database.clientUrl,
       debug: config.database.debug,
       // useful for mysql datetime type https://mikro-orm.io/docs/configuration#forcing-utc-timezone
