@@ -24,7 +24,7 @@ run-dev-dist:
 	node ./packages/api/dist/index.js > ../log/https-api.log
 
 run-worker-dev-dist:
-	node ./packages/api/dist/index.js > ../log/https-worker.log
+	node ./packages/worker/dist/index.js > ../log/https-worker.log
 
 # run app locally starting from worker API
 run-dev:
