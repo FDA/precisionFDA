@@ -1,6 +1,6 @@
 import { BaseOperation } from '../../../utils/base-operation'
 
-export class FolderUpsertOperation extends BaseOperation<> {
+export class FolderUpsertOperation extends BaseOperation<any, any> {
   // em is passed as the input, it will come from other operation
   // that way, we can achieve transactions simply, if we wanted
   async run(input) {
