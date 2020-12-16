@@ -5,8 +5,8 @@ export const config: ConfigOverride = {
     level: process.env.LOG_LEVEL || 'error',
   },
   database: {
-    dbName: process.env.DATABASE_TEST_NAME ?? 'precisionfda-test',
-    clientUrl: process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:3306',
+    clientUrl:
+      process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:3306/precisionfda-test',
     // debug: true,
     debug: false,
   },
