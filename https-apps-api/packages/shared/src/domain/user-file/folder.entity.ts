@@ -55,9 +55,8 @@ export class Folder extends Node {
   // todo: micro-orm can do single table inheritance
 
   @ManyToOne()
-  user!: IdentifiedReference<User>;
+  user!: IdentifiedReference<User>
 
-  [EntityRepositoryType]?: UserFileRepository
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
