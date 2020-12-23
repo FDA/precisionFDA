@@ -25,6 +25,10 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   CHALLENGE_BOT_DX_USER = "challenge.bot".freeze
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F5g2fGj0458P90BP9ZbpkpvG".freeze
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F5g2fGj06B2Vy5Yx7pKPVb50".freeze
+
+  HTTPS_JUPYTER_APP_DXID = nil
+  HTTPS_TTYD_APP_DXID = nil
+  HTTPS_RSHINY_APP_DXID = nil
 else
   HOST =
     # rubocop:todo Rails/UnknownEnv
@@ -69,6 +73,10 @@ else
   CHALLENGE_BOT_DX_USER = "challenge.bot.2".freeze
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F53j4F806B0v3GjVB81yQY8F".freeze
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F53j4F80PQGQ73yV87JKb0p3".freeze
+
+  HTTPS_JUPYTER_APP_DXID = "app-Fyfv6Zj5ZjQvqKF73YZbqVp3"
+  HTTPS_TTYD_APP_DXID = "app-FyVPqvQ0bFbx0Jx23xZ3ggkV"
+  HTTPS_RSHINY_APP_DXID = nil
 end
 
 OAUTH2_REDIRECT_URI = "#{HOST}/return_from_login".freeze
