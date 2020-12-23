@@ -212,8 +212,6 @@ class App < ApplicationRecord
       begin
         return "" if regular?
 
-        HTTPS_JUPYTER_APP_DXID
-
         { HTTPS_JUPYTER => HTTPS_JUPYTER_APP_DXID,
           HTTPS_TTYD => HTTPS_TTYD_APP_DXID,
           HTTPS_RSHINY => HTTPS_RSHINY_APP_DXID }.key(dxid) || ""
