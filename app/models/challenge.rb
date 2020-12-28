@@ -97,10 +97,6 @@ class Challenge < ApplicationRecord
       result
     end
 
-    def featured(context)
-      accessible_by(context).order(specified_order: "desc")
-    end
-
     def app_owned_by(context)
       return none unless context.logged_in?
 
@@ -145,8 +141,10 @@ class Challenge < ApplicationRecord
     self.class.accessible_by(context).exists?(id)
   end
 
-  def editable_by?(context)
-    context.challenge_admin?
+  def editable_by?(context_or_user)
+    user = context_or_user.is_a?(User) ? context_or_user : context_or_user.user
+
+    user.site_or_challenge_admin?
   end
 
   def status_setup?

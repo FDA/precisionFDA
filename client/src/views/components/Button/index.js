@@ -6,7 +6,7 @@ import './style.sass'
 
 
 const TYPES = ['danger', 'success', 'warning', 'primary', 'info', 'default']
-const SIZES = ['sm', 'xs', 'lg']
+const SIZES = ['xs', 'sm', 'md', 'lg']
 
 const Button = ({ children, type, size, className, ...rest }) => {
   const typeClass = TYPES.includes(type) ? `btn-${type}` : 'btn-default'

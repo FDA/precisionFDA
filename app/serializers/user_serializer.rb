@@ -11,6 +11,8 @@ class UserSerializer < ApplicationSerializer
     :links,
   )
 
+  attribute :can_create_challenges?, key: :can_create_challenges
+
   has_one :org
 
   # Checks if a user has site admin role.
@@ -42,5 +44,9 @@ class UserSerializer < ApplicationSerializer
       # GET user accessible licenses list - show this link when current user has licenses
       links[:licenses] = api_list_licenses_path(object) unless current_user.licenses.empty?
     end
+  end
+
+  def can_create_challenges?
+    object.can_create_challenges?
   end
 end

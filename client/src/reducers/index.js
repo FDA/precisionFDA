@@ -4,6 +4,7 @@ import context from './context'
 import spaces from './spaces'
 import alertNotifications from './alertNotifications'
 import home from './home'
+import challenges from './challenges'
 import error from '../views/components/ErrorWrapper/reducer'
 
 
@@ -13,4 +14,5 @@ export default combineReducers({
   alertNotifications,
   error,
   home,
+  challenges,
 })
