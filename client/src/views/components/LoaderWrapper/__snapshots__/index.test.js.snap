@@ -4,8 +4,8 @@ exports[`LoaderWrapper matches snapshot 1`] = `
 <div
   className="pfda-loader-wrapper"
 >
-  <ContainerLoader
-    text="Loading precisionFDA"
-  />
+  <div>
+    Div
+  </div>
 </div>
 `;

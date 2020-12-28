@@ -807,7 +807,7 @@ class ApiController < ApplicationController
   #
   # rubocop:disable Style/SignalException
   def create_challenge_card_image
-    return unless @context.can_administer_site? || @context.challenge_admin?
+    return unless current_user.site_or_challenge_admin?
 
     name = unsafe_params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
@@ -846,7 +846,7 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_challenge_resource
-    return unless @context.challenge_admin?
+    return unless current_user.site_or_challenge_admin?
 
     challenge = Challenge.find_by!(id: unsafe_params[:challenge_id])
     unless challenge.editable_by?(@context)
@@ -933,7 +933,7 @@ class ApiController < ApplicationController
       if file.parent_type == "Asset"
         User.sync_asset!(@context, file.id)
       else
-        if file.created_by_challenge_bot? && (@context.can_administer_site? || @context.challenge_admin?)
+        if file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
           User.sync_challenge_file!(file.id)
         else
           User.sync_file!(@context, file.id)
@@ -955,7 +955,7 @@ class ApiController < ApplicationController
       # So we may have to store a reference to the file and generate
       # a shorter duration url each time it is rendered
 
-      token = if file.created_by_challenge_bot? && (@context.can_administer_site? || @context.challenge_admin?)
+      token = if file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
         CHALLENGE_BOT_TOKEN
       else
         @context.token
@@ -1022,7 +1022,7 @@ class ApiController < ApplicationController
     file = UserFile.where(parent_type: "User").find_by_uid!(id)
     token = @context.token
     if file.user_id != @context.user_id
-      if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
+      if file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
         token = CHALLENGE_BOT_TOKEN
       else
         fail "The current user does not have access to the file."

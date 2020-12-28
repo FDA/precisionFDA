@@ -182,4 +182,16 @@ class NotificationsMailer < ApplicationMailer
       mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
     end
   end
+
+  def challenge_proposal_received(proposal)
+    recipients = ["precisionfda-support@dnanexus.com"]
+    if ENV["DNANEXUS_BACKEND"] == "production"
+      recipients << "precisionfda@fda.hhs.gov"
+    end
+    email_body = proposal.map { |e| e.join(' = ') }.join('\n')
+    mail to: recipients,
+         reply_to: "precisionfda-support@dnanexus.com",
+         subject: "New challenge proposal received from #{proposal.name} (#{proposal.email})",
+         body: email_body
+  end
 end

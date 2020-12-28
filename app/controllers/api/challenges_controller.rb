@@ -1,10 +1,44 @@
 module Api
+  # Challenges API controller.
   class ChallengesController < BaseController
+    include Paginationable
 
-    before_action :check_admin
+    skip_before_action :require_api_login, except: :save_editor_page
+    before_action :check_admin, only: :save_editor_page
+
+    def index
+      page = params[:page].presence || 1
+      year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
+
+      challenges = accessible_challenges.order(start_at: :desc).page(page).per(5)
+      challenges = challenges.where(Arel.sql("YEAR(start_at) = #{year}")) if year
+
+      render json: challenges,
+             meta: pagination_dict(challenges),
+             adapter: :json
+    end
+
+    def show
+      challenge = accessible_challenges.find_by(id: params[:id])
+
+      unless challenge
+        render json: { error: I18n.t("api.challenges.not_found_or_forbidden") }
+        return
+      end
+
+      render json: challenge, adapter: :json
+    end
+
+    def years
+      all_years = accessible_challenges.order(start_at: :desc).pluck(:start_at).map(&:year).uniq
+
+      render json: all_years
+    end
 
     def save_editor_page
-      return if unsafe_params[:regions].blank?
+      return if params[:regions].blank?
+
+      challenge = Challenge.find(params[:id])
 
       if challenge.nil?
         render json: { error: "The challenge not found." }.to_json, status: 404
@@ -21,11 +55,16 @@ module Api
       end
     end
 
-    private
-
-    def challenge
-      @challenge ||= Challenge.find(unsafe_params[:id])
+    def accessible_challenges
+      Challenge.accessible_by(@context)
     end
 
+    def propose
+      proposal = params.to_unsafe_h.slice(:name, :email, :organisation,
+                                          :specific_question, :specific_question_text,
+                                          :data_details, :data_details_text)
+      NotificationsMailer.challenge_proposal_received(proposal)
+      render json: {}
+    end
   end
 end
