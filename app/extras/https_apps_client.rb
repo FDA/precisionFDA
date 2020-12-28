@@ -64,7 +64,7 @@ class HttpsAppsClient
   def connection_opts
     @connection_opts ||= begin
       opts = { read_timeout: 180 }
-      opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if dev_or_test_env?
+      opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) unless production_env?
       opts
     end
   end
@@ -85,11 +85,9 @@ class HttpsAppsClient
     }
   end
 
-  # rubocop:disable Rails/UnknownEnv
-  def dev_or_test_env?
-    Rails.env.development? || Rails.env.test? || Rails.env.ui_test?
+  def production_env?
+    ENV["DNANEXUS_BACKEND"] == "production"
   end
-  # rubocop:enable Rails/UnknownEnv
 
   # Builds hash from response.
   # @param response [String] Response string.
