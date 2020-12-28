@@ -63,7 +63,7 @@ class HttpsAppsClient
   # @return [Hash] Connection options.
   def connection_opts
     @connection_opts ||= begin
-      opts = { read_timeout: 180 }
+      opts = { read_timeout: 120 }
       opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) unless production_env?
       opts
     end
