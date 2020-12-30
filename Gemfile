@@ -160,6 +160,6 @@ end
 
 group :production do
   gem "exception_notification", "4.1.1"
-  gem "soapforce"
+  # gem "soapforce"
   gem "unicorn", "~> 4.9.0"
 end
