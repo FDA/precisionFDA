@@ -586,7 +586,7 @@ DEPENDENCIES
   sidekiq
   simple_form (~> 5.0.2)
   simplecov (>= 0.18.5)
-  soapforce (>= 0.8.0)
+  soapforce
   sprockets (= 3.7.2)
   therubyracer
   thin
