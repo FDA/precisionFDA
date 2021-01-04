@@ -12,6 +12,7 @@ const getQueue = (): Bull.Queue => statusQueue
 
 // set up the queues
 const createQueues = (): void => {
+  console.log(config.workerJobs.queues.default, config.redis.url, 'worker being set up')
   statusQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
     defaultJobOptions: {
       // if set to false, it will eventually eat up space in the redis instance
