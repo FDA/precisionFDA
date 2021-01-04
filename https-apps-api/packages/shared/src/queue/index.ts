@@ -14,6 +14,9 @@ const getQueue = (): Bull.Queue => statusQueue
 const createQueues = (): void => {
   console.log(config.workerJobs.queues.default, config.redis.url, 'worker being set up')
   statusQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
+    redis: {
+      password: config.redis.authPassword,
+    },
     defaultJobOptions: {
       // if set to false, it will eventually eat up space in the redis instance
       removeOnComplete: true,
