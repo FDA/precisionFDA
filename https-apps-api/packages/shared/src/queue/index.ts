@@ -16,6 +16,8 @@ const createQueues = (): void => {
   statusQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
     redis: {
       password: config.redis.authPassword,
+      connectTimeout: 30000,
+      // tls: {},
     },
     defaultJobOptions: {
       // if set to false, it will eventually eat up space in the redis instance
@@ -35,6 +37,7 @@ const addToQueue = async (task: AnyObject, options?: JobOptions): Promise<Job> =
   }
   console.log('adding a task to queue', task, options)
   const job = await statusQueue.add(task, options)
+  console.log('task added')
   return job
 }
 
