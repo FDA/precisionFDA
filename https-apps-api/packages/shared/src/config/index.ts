@@ -56,6 +56,7 @@ const defaultConfig = {
   },
   redis: {
     url: process.env.REDIS_URL ?? 'redis://localhost:6379',
+    authPassword: process.env.REDIS_AUTH ?? 'redis-pswd-placeholder',
   },
   workerJobs: {
     queues: {
