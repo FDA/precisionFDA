@@ -9,7 +9,6 @@ export const config: ConfigOverride = {
     dbName: process.env.DATABASE_TEST_NAME ?? 'precisionfda-test',
     clientUrl:
       process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:3306/precisionfda-test',
-    // debug: true,
     debug: false,
   },
   workerJobs: {
