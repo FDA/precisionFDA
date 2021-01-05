@@ -22,14 +22,14 @@ const initDeleteProcedure = async (connection: Connection): Promise<void> => {
   const truncateStatementsRes = await connection.execute(generateTruncateStatements())
   const statements: string[] = truncateStatementsRes.map(row => Object.values(row).pop())
   const procedure = `
-    CREATE PROCEDURE droptest ()
+    CREATE PROCEDURE \`${config.database.dbName}\`.droptest ()
     BEGIN
       set foreign_key_checks = 0;
       ${statements.join(' \n')}
 	    set foreign_key_checks = 1;
     END;
   `
-  await connection.execute('DROP PROCEDURE IF EXISTS droptest;')
+  await connection.execute(`DROP PROCEDURE IF EXISTS \`${config.database.dbName}\`.droptest;`)
   await connection.execute(procedure)
 }
 
