@@ -41,7 +41,8 @@ const defaultConfig = {
     level: 'debug',
   },
   database: {
-    // dbName: process.env.DATABASE_NAME ?? 'precision-fda',
+    // it is used for testing, not for default DB connection
+    dbName: process.env.DATABASE_NAME ?? 'precision-fda',
     clientUrl: process.env.DATABASE_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
     debug: parseBooleanFromProcess(process.env.DATABASE_DEBUG) ?? false,
   },
@@ -56,7 +57,9 @@ const defaultConfig = {
   },
   redis: {
     url: process.env.REDIS_URL ?? 'redis://localhost:6379',
+    isSecure: false,
     authPassword: process.env.REDIS_AUTH ?? 'redis-pswd-placeholder',
+    connectTimeout: 30000,
   },
   workerJobs: {
     queues: {

@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import Bull, { Job, JobOptions } from 'bull'
+import Bull, { Job, JobOptions, QueueOptions } from 'bull'
 import { AnyObject, UserCtx } from '../types'
 import { defaultLogger as log } from '../logger'
 import { config } from '../config'
@@ -12,12 +12,16 @@ const getQueue = (): Bull.Queue => statusQueue
 
 // set up the queues
 const createQueues = (): void => {
+  // other config passed into IORedis constructor
+  const redisOptions: QueueOptions['redis'] = {
+    tls: config.redis.isSecure as any,
+  }
+  if (config.redis.isSecure) {
+    redisOptions.password = config.redis.authPassword
+    redisOptions.connectTimeout = config.redis.connectTimeout
+  }
   statusQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
-    redis: {
-      password: config.redis.authPassword,
-      connectTimeout: 30000,
-      tls: true as any,
-    },
+    redis: redisOptions,
     defaultJobOptions: {
       // if set to false, it will eventually eat up space in the redis instance
       removeOnComplete: true,
@@ -34,9 +38,20 @@ const addToQueue = async (task: AnyObject, options?: JobOptions): Promise<Job> =
   if (typeof statusQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
-  console.log('adding a task to queue', task, options)
+  log.info(
+    {
+      task: {
+        type: task.type,
+        payload: task.payload,
+        userId: task.user?.id,
+      },
+      job: {
+        id: options?.jobId,
+      },
+    },
+    'adding a task to queue',
+  )
   const job = await statusQueue.add(task, options)
-  console.log('task added')
   return job
 }
 

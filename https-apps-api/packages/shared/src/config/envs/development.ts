@@ -11,4 +11,7 @@ export const config: ConfigOverride = {
       repeatPattern: '*/2 * * * *',
     },
   },
+  redis: {
+    isSecure: true,
+  },
 }

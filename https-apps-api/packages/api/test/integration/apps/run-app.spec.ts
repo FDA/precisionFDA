@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
+import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
 import {
   JOB_STATE,
@@ -16,7 +17,6 @@ import * as create from '../../utils/create'
 import * as generate from '../../utils/generate'
 import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
-import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 
 describe('POST /apps/:id/run', () => {
   let em: EntityManager
