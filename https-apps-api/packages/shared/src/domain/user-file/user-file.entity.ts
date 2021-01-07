@@ -1,13 +1,15 @@
 import {
+  Collection,
   Entity,
   EntityRepositoryType,
   Filter,
   IdentifiedReference,
   ManyToOne,
+  OneToMany,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User } from '..'
+import { User, Tagging } from '..'
 import { Node } from './node.entity'
 import { FILE_STATE, FILE_TYPE, PARENT_TYPE, FILE_STI_TYPE } from './user-file.enum'
 import { UserFileRepository } from './user-file.repository'
@@ -56,7 +58,10 @@ export class UserFile extends Node {
   // todo: micro-orm can do single table inheritance
 
   @ManyToOne()
-  user!: IdentifiedReference<User>;
+  user!: IdentifiedReference<User>
+
+  @OneToMany(() => Tagging, tagging => tagging.userFile)
+  taggings = new Collection<Tagging>(this);
 
   [EntityRepositoryType]?: UserFileRepository
   constructor(user: User) {
