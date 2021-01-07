@@ -1,7 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database, queue } from '@pfda/https-apps-shared'
-import { App, User, Job, UserFile } from '@pfda/https-apps-shared/src/domain'
+import { App, User, Job, UserFile, Tag } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
@@ -13,7 +13,7 @@ import {
 import { dropData } from '../utils/db'
 import * as create from '../utils/create'
 import * as generate from '../utils/generate'
-import { fakes } from '../utils/mocks'
+import { fakes, mocksReset } from '../utils/mocks'
 import {
   FILES_DESC_RES,
   FILES_LIST_RES_ROOT,
@@ -49,11 +49,7 @@ describe('TASK: sync_job_status', () => {
     app = create.appHelper.create(em, { user })
     await em.flush()
     // reset fakes
-    fakes.bull.addToQueueStub.resetHistory()
-    fakes.client.jobDescribeFake.resetHistory()
-    fakes.client.filesListFake.resetHistory()
-    fakes.client.filesDescFake.resetHistory()
-    fakes.queue.removeRepeatableFake.resetHistory()
+    mocksReset()
   })
 
   it('processes a queue task - calls the queue handlers', async () => {
@@ -204,8 +200,14 @@ describe('TASK: sync_job_status', () => {
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // return only first entry so it is easier to test
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
-      fakes.client.filesListFake.returns({
+      // first client.filesList() for all the files
+      fakes.client.filesListFake.onCall(0).returns({
         results: [FILES_LIST_RES_ROOT.results[0]],
+        next: null,
+      })
+      // second client.filesList() for snapshots subfolder
+      fakes.client.filesListFake.onCall(1).returns({
+        results: [],
         next: null,
       })
       fakes.client.filesDescFake.returns({
@@ -237,6 +239,59 @@ describe('TASK: sync_job_status', () => {
         entityType: FILE_TYPE.REGULAR,
         stiType: FILE_STI_TYPE.USERFILE,
       })
+    })
+
+    it('creates two regular files with tags', async () => {
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+      )
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // first client.filesList() for all the files
+      fakes.client.filesListFake.onCall(0).returns({
+        results: FILES_LIST_RES_ROOT.results.slice(0, 2),
+        next: null,
+      })
+      // second client.filesList() for snapshots subfolder
+      fakes.client.filesListFake.onCall(1).returns({
+        results: [],
+        next: null,
+      })
+      fakes.client.filesDescFake.returns({
+        results: FILES_DESC_RES.results.slice(0, 2),
+      })
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      const filesInDb = await em.find(
+        UserFile,
+        {},
+        { populate: ['taggings.tag'], orderBy: { id: 'ASC' }, filters: ['userfile'] },
+      )
+      expect(filesInDb).to.be.an('array').with.lengthOf(2)
+      // userfile id 1
+      expect(filesInDb[0]).to.have.property('taggings')
+      expect(filesInDb[0].taggings.getItems()).to.be.a('array').with.lengthOf(1)
+      expect(filesInDb[0].taggings.getItems()[0]).to.have.property('tagId', 1)
+      expect(filesInDb[0].taggings.getItems()[0]).to.have.property('taggerId', user.id)
+      expect(filesInDb[0].taggings.getItems()[0]).to.have.property('taggableId', filesInDb[0].id)
+      expect(filesInDb[0].taggings.getItems()[0]).to.have.property('taggableType', 'Node')
+      expect(filesInDb[0].taggings.getItems()[0]).to.have.property('taggerType', 'User')
+      // userfile id 2
+      expect(filesInDb[1]).to.have.property('taggings')
+      expect(filesInDb[1].taggings.getItems()).to.be.a('array').with.lengthOf(1)
+      expect(filesInDb[1].taggings.getItems()[0]).to.have.property('tagId', 1)
+      expect(filesInDb[1].taggings.getItems()[0]).to.have.property('taggerId', user.id)
+      expect(filesInDb[1].taggings.getItems()[0]).to.have.property('taggableId', filesInDb[1].id)
+      expect(filesInDb[1].taggings.getItems()[0]).to.have.property('taggableType', 'Node')
+      expect(filesInDb[1].taggings.getItems()[0]).to.have.property('taggerType', 'User')
+      // each file has one tag assigned
+      // tag has the correct usage count
+      const tag = await em.findOne(Tag, { id: 1 })
+      expect(tag).to.have.property('taggingCount', 2)
     })
 
     it('creates snapshot file in the database', async () => {
@@ -283,6 +338,51 @@ describe('TASK: sync_job_status', () => {
         entityType: FILE_TYPE.SNAPSHOT,
         stiType: FILE_STI_TYPE.USERFILE,
       })
+    })
+
+    it('creates tags for both regular and snapshot file', async () => {
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+      )
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // all the files
+      fakes.client.filesListFake.onCall(0).returns({
+        results: [FILES_LIST_RES_ROOT.results[0], FILES_LIST_RES_ROOT.results[5]],
+        next: null,
+      })
+      // snapshot files
+      fakes.client.filesListFake.onCall(1).returns({
+        results: [FILES_LIST_RES_ROOT.results[5]],
+        next: null,
+      })
+      fakes.client.filesDescFake.returns({
+        results: [FILES_DESC_RES.results[0], FILES_DESC_RES.results[5]],
+      })
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      // stiType has to be set explicitely (should go to the repository I guess)
+      const filesInDb = await em.find(
+        UserFile,
+        {},
+        { populate: ['taggings.tag'], filters: ['userfile'] },
+      )
+      expect(filesInDb).to.be.an('array').with.lengthOf(2)
+      const regularFile = filesInDb.find(file => file.entityType === FILE_TYPE.REGULAR)
+      const snapshotFile = filesInDb.find(file => file.entityType === FILE_TYPE.SNAPSHOT)
+      expect(regularFile).to.not.be.undefined()
+      expect(regularFile.taggings.count()).to.equal(1)
+      expect(regularFile.taggings.getItems()[0].tag).to.have.property('id', 1)
+      expect(regularFile.taggings.getItems()[0].tag).to.have.property('taggingCount', 1)
+
+      expect(snapshotFile).to.not.be.undefined()
+      expect(snapshotFile.taggings.count()).to.equal(1)
+      expect(snapshotFile.taggings.getItems()[0].tag).to.have.property('id', 2)
+      expect(snapshotFile.taggings.getItems()[0].tag).to.have.property('taggingCount', 1)
     })
   })
 

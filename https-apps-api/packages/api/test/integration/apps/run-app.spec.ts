@@ -50,7 +50,6 @@ describe('POST /apps/:id/run', () => {
       dxid: generate.job.jobId(),
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
-      taggings: [],
       // default app type
       project: user.jupyterProject,
       state: JOB_STATE.IDLE,
@@ -103,7 +102,6 @@ describe('POST /apps/:id/run', () => {
       dxid: generate.job.jobId(),
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
-      taggings: [],
       // default app type
       project: user.ttydProject,
       state: JOB_STATE.IDLE,

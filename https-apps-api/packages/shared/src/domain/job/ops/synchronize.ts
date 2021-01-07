@@ -7,8 +7,7 @@ import { getJobSubtype, isStateTerminal, shouldSyncStatus } from '../job.helper'
 import * as client from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
-import { UserFile } from '../../user-file'
-import { User } from '../..'
+import { User, Tagging, UserFile, Tag } from '../..'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
 import { createJobClosed } from '../../event/event.helper'
@@ -21,9 +20,11 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
     const filesRepo = em.getRepository(UserFile)
+    const taggingsRepo = em.getRepository(Tagging)
     const job = await jobRepo.findOne({ dxid: input.dxid })
     const user = await em.findOne(User, { id: this.ctx.user.id })
 
+    // check input data
     if (!job) {
       this.ctx.log.warn({ input }, 'Job does not exist')
       await removeRepeatable(this.ctx.job)
@@ -34,10 +35,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       await removeRepeatable(this.ctx.job)
       return
     }
+    // todo: check users ownership -> we should have a helper for it
     this.job = job
     this.user = user
 
-    // todo: check users ownership -> we should have a helper for it
     if (!shouldSyncStatus(job)) {
       this.ctx.log.info({ input, job }, 'Job is already finished')
       await removeRepeatable(this.ctx.job)
@@ -109,6 +110,8 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         fileIds: newRegularFileIds.concat(newSnapshotFileIds),
       })
       // build regular files in DB
+      const regularFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
+      const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
       newRegularFileIds.forEach(fileId => {
         const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
         if (!apiResponse) {
@@ -116,6 +119,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
           return
         }
         const file = this.createUserFile(fileId, apiResponse, false)
+        const tagging = taggingsRepo.createForFile({
+          fileId: file.id,
+          tagId: regularFilesTag.id,
+          userId: user.id,
+        })
+        file.taggings.add(tagging)
         em.persist(file)
       })
       // build snapshot files in DB
@@ -126,6 +135,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
           return
         }
         const file = this.createUserFile(fileId, apiResponse, true)
+        const tagging = taggingsRepo.createForFile({
+          fileId: file.id,
+          tagId: jupyterSnapshotTag.id,
+          userId: user.id,
+        })
+        file.taggings.add(tagging)
         em.persist(file)
       })
       // store them in the database

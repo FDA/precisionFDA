@@ -68,13 +68,7 @@ export class Job extends BaseEntity {
   user!: IdentifiedReference<User>
 
   @ManyToOne()
-  app!: IdentifiedReference<App>
-
-  @OneToMany({
-    entity: () => Tagging,
-    mappedBy: t => t.job,
-  })
-  taggings = new Collection<Tagging>(this);
+  app!: IdentifiedReference<App>;
 
   // pivot table key names are mismatched and this does not work :(
   // @ManyToMany({

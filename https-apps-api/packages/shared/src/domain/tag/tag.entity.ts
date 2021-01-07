@@ -1,21 +1,30 @@
-import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
-import { BaseEntity } from '../../database/base-entity'
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core'
 import { Tagging } from '../tagging'
+import { TagRepository } from './ag.repository'
 
-@Entity({ tableName: 'tags' })
-export class Tag extends BaseEntity {
+@Entity({ tableName: 'tags', customRepository: () => TagRepository })
+export class Tag {
   @PrimaryKey()
   id: number
 
   @Property()
   name: string
 
-  @Property()
+  @Property({ fieldName: 'taggings_count' })
   taggingCount: number
 
   @OneToMany({
     entity: () => Tagging,
     mappedBy: t => t.tag,
   })
-  taggings = new Collection<Tagging>(this)
+  taggings = new Collection<Tagging>(this);
+
+  [EntityRepositoryType]?: TagRepository
 }
