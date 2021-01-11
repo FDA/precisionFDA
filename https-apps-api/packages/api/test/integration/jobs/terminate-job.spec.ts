@@ -4,13 +4,11 @@ import supertest from 'supertest'
 import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { ENTITY_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
-import { api } from '../../../src/server'
-import { dropData } from '../../utils/db'
-import * as create from '../../utils/create'
-import * as generate from '../../utils/generate'
-import { fakes } from '../../utils/mocks'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
+import { api } from '../../../src/server'
+import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('PATCH /jobs/:id/terminate', () => {
   let em: EntityManager
@@ -19,7 +17,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   let job: Job
 
   beforeEach(async () => {
-    await dropData(database.connection())
+    await db.dropData(database.connection())
     // create DB mocks
     em = database.orm().em
     em.clear()
@@ -27,8 +25,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     await em.flush()
-
-    fakes.client.jobTerminateFake.resetHistory()
+    mocksReset()
   })
 
   it('response shape', async () => {

@@ -5,10 +5,9 @@ import { errors, database } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { APP_HTTPS_SUBTYPE, APP_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
+import { create, db } from '@pfda/https-apps-shared/src/utils/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
 import { api } from '../../../src/server'
-import { dropData } from '../../utils/db'
-import * as create from '../../utils/create'
-import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /apps', () => {
@@ -17,7 +16,7 @@ describe.skip('GET /apps', () => {
   let app: App
 
   beforeEach(async () => {
-    await dropData(database.connection())
+    await db.dropData(database.connection())
     // create DB mocks
     em = database.orm().em
     em.clear()
@@ -25,7 +24,7 @@ describe.skip('GET /apps', () => {
     app = create.appHelper.create(em, { user })
     await em.flush()
     // handle the stubs
-    fakes.client.jobCreateFake.resetHistory()
+    mocksReset()
   })
 
   it('response shape', async () => {
