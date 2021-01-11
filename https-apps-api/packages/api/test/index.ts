@@ -2,24 +2,23 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
 import { database } from '@pfda/https-apps-shared'
+import { db, mocks } from '@pfda/https-apps-shared/src/utils/test'
 import { api } from '../src/server'
-import { initDeleteProcedure } from './utils/db'
-import { mocksRestore, mocksSetup } from './utils/mocks'
 
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
 before(async () => {
-  mocksSetup()
+  mocks.mocksSetup()
 
   await database.start()
   await api.startHttpServer()
 
-  await initDeleteProcedure(database.connection())
+  await db.initDeleteProcedure(database.connection())
 })
 
 after(async () => {
-  mocksRestore()
+  mocks.mocksRestore()
 
   await api.stopServer()
   await database.stop()

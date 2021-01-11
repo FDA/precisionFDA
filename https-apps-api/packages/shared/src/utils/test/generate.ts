@@ -1,14 +1,15 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { User, Job, App, UserFile } from '@pfda/https-apps-shared/src/domain'
-import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
+import { entities } from '../../domain'
+import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../../domain/job/job.enum'
+import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from '../../domain/app/app.enum'
+import type { AnyObject } from '../../types'
 import {
   FILE_STATE,
   FILE_STI_TYPE,
   FILE_TYPE,
   PARENT_TYPE,
-} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+} from '../../domain/user-file/user-file.enum'
 
 const chance = new Chance()
 
@@ -24,13 +25,12 @@ const random = {
 // generators fill in random data, usually without foreign keys
 
 const user = {
-  simple: (): Partial<User> => ({
+  simple: (): Partial<InstanceType<typeof entities.User>> => ({
     firstName: random.firstName(),
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
     jupyterProject: `project-${random.dxstr()}`,
     ttydProject: `project-${random.dxstr()}`,
-    // deprecated for now
     // cloudWorkstationProject: `project-${random.dxstr()}`,
     // httpsProject: `project-${random.dxstr()}`,
   }),
@@ -95,7 +95,7 @@ const app = {
         },
       ],
     }),
-  simple: (): Partial<App> => {
+  simple: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
@@ -107,7 +107,7 @@ const app = {
       entityType: ENTITY_TYPE.HTTPS,
     }
   },
-  runAppInput: () => ({
+  runAppInput: (): AnyObject => ({
     httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
     scope: 'private',
     input: {
@@ -122,7 +122,7 @@ const app = {
 }
 
 const job = {
-  simple: (): Partial<Job> => {
+  simple: (): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
     return {
       dxid,
@@ -140,7 +140,7 @@ const job = {
 }
 
 const userFile = {
-  simple: (): Partial<UserFile> => {
+  simple: (): Partial<InstanceType<typeof entities.UserFile>> => {
     const dxid = `file-${random.dxstr()}`
     return {
       dxid,
@@ -172,4 +172,30 @@ const userFile = {
   },
 }
 
-export { random, user, job, app, userFile }
+const folder = {
+  simple: (): Partial<InstanceType<typeof entities.Folder>> => ({
+    name: chance.name(),
+    scope: 'private',
+    entityType: FILE_TYPE.REGULAR,
+    parentId: 1,
+    parentType: PARENT_TYPE.USER,
+    stiType: FILE_STI_TYPE.FOLDER,
+  }),
+}
+
+const tag = {
+  simple: (): Partial<InstanceType<typeof entities.Tag>> => ({
+    name: chance.name(),
+    taggingCount: 0,
+  }),
+}
+
+const tagging = {
+  userfileDefaults: (): Partial<InstanceType<typeof entities.Tagging>> => ({
+    taggableType: 'Node',
+    taggerType: 'User',
+    context: 'tags',
+  }),
+}
+
+export { random, user, job, app, userFile, folder, tag, tagging }

@@ -6,10 +6,9 @@ import { database, errors } from '@pfda/https-apps-shared'
 import { App, User, Job } from '@pfda/https-apps-shared/src/domain'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import supertest from 'supertest'
+import { create, db } from '@pfda/https-apps-shared/src/utils/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
 import { api } from '../../../src/server'
-import { dropData } from '../../utils/db'
-import * as create from '../../utils/create'
-import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /jobs/:id', () => {
@@ -19,7 +18,7 @@ describe.skip('GET /jobs/:id', () => {
   let app: App
 
   beforeEach(async () => {
-    await dropData(database.connection())
+    await db.dropData(database.connection())
     // create DB mocks
     em = database.orm().em
     em.clear()
@@ -28,8 +27,7 @@ describe.skip('GET /jobs/:id', () => {
     job = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.DONE })
     await em.flush()
 
-    fakes.client.jobDescribeFake.resetHistory()
-    fakes.queue.createJobSyncTaskFake.resetHistory()
+    mocksReset()
   })
 
   it('response shape', async () => {

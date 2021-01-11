@@ -11,11 +11,9 @@ import {
   allowedInstanceTypes,
 } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
+import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
 import { api } from '../../../src/server'
-import { dropData } from '../../utils/db'
-import * as create from '../../utils/create'
-import * as generate from '../../utils/generate'
-import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe('POST /apps/:id/run', () => {
@@ -24,7 +22,7 @@ describe('POST /apps/:id/run', () => {
   let app: App
 
   beforeEach(async () => {
-    await dropData(database.connection())
+    await db.dropData(database.connection())
     // create DB mocks
     em = database.orm().em
     em.clear()
@@ -32,8 +30,7 @@ describe('POST /apps/:id/run', () => {
     app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     await em.flush()
     // handle the stubs
-    fakes.client.jobCreateFake.resetHistory()
-    fakes.queue.createJobSyncTaskFake.resetHistory()
+    mocksReset()
   })
 
   it('response shape', async () => {

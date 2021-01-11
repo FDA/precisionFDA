@@ -1,13 +1,10 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
-import { entities } from '@pfda/https-apps-shared'
-import { Organization } from '@pfda/https-apps-shared/src/domain/org'
-import { tag, Tagging } from 'shared/src/domain'
+import { entities } from '../../domain'
 import * as generate from './generate'
-// todo: should be in shared helpers
 
 const userHelper = {
   create: (em: EntityManager, data?: Partial<typeof entities.User>) => {
-    const org = wrap(new Organization()).assign({
+    const org = wrap(new entities.Organization()).assign({
       handle: `org-${generate.random.dxstr()}`,
       name: generate.random.chance.name(),
     })
@@ -110,10 +107,10 @@ const tagsHelper = {
     const defaults = generate.tagging.userfileDefaults()
     const input = {
       ...defaults,
-      tag,
+      tag: references.tag,
       ...data,
     }
-    const tagging = new Tagging()
+    const tagging = new entities.Tagging()
     wrap(tagging).assign(input, { em })
     references.tag.taggings.add(tagging)
     references.tag.taggingCount++

@@ -5,20 +5,19 @@ import { App, User, Job, UserFile, Tag, Tagging } from '@pfda/https-apps-shared/
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
+import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import {
+  FILES_DESC_RES,
+  FILES_LIST_RES_ROOT,
+  FILES_LIST_RES_SNAPSHOT,
+} from '@pfda/https-apps-shared/src/utils/test/mock-responses'
 import {
   FILE_STI_TYPE,
   FILE_TYPE,
   PARENT_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
-import { dropData } from '../utils/db'
-import * as create from '../utils/create'
-import * as generate from '../utils/generate'
-import { fakes, mocksReset } from '../utils/mocks'
-import {
-  FILES_DESC_RES,
-  FILES_LIST_RES_ROOT,
-  FILES_LIST_RES_SNAPSHOT,
-} from '../utils/mock-responses'
+import { fakes as localFakes } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
 
 const createSyncJobTask = async (
@@ -42,7 +41,7 @@ describe('TASK: sync_job_status', () => {
   beforeEach(async () => {
     // probably not needed
     // await emptyDefaultQueue()
-    await dropData(database.connection())
+    await db.dropData(database.connection())
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
@@ -59,7 +58,7 @@ describe('TASK: sync_job_status', () => {
       { dxid: job.dxid },
       { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
     )
-    expect(fakes.bull.addToQueueStub.calledOnce).to.be.true()
+    expect(localFakes.addToQueueStub.calledOnce).to.be.true()
   })
 
   it('calls the platform API stub (db job state is idle)', async () => {
