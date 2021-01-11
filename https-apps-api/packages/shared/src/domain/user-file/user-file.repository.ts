@@ -13,7 +13,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
   }
 
   async findProjectFiles(input: { project: string }): Promise<UserFile[]> {
-    return await this.find({ project: input.project })
+    return await this.find({ project: input.project }, { populate: ['taggings.tag'] })
   }
 
   async createUserFileJobRefs(fileIds: number[], jobId: number) {

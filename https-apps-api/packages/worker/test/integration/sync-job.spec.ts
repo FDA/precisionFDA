@@ -1,7 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database, queue } from '@pfda/https-apps-shared'
-import { App, User, Job, UserFile, Tag } from '@pfda/https-apps-shared/src/domain'
+import { App, User, Job, UserFile, Tag, Tagging } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
@@ -188,6 +188,58 @@ describe('TASK: sync_job_status', () => {
         .that.has.members(FILES_DESC_RES.results.slice(1).map(fileMock => fileMock.describe.id))
       // first file already exists so it is omitted from our system
       expect(descFilesCallArgs).to.have.property('fileIds').that.not.have.members([file.id])
+    })
+
+    it('does not call describe endpoint if there are no new files', async () => {
+      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+      )
+      const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
+      const firstFile = create.filesHelper.create(
+        em,
+        { user },
+        {
+          ...generate.userFile.simple(),
+          parentType: PARENT_TYPE.JOB,
+          parentId: job.id,
+          dxid: firstFileDxid,
+          project: job.project,
+          uid: `${firstFileDxid}-1`,
+          fileSize: FILES_DESC_RES.results[0].describe.size,
+          name: FILES_DESC_RES.results[0].describe.name,
+        },
+      )
+      create.tagsHelper.createTagging(
+        em,
+        { tag },
+        {
+          userFile: firstFile,
+          tagger: user,
+        },
+      )
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // first client.filesList() for all the files
+      fakes.client.filesListFake.onCall(0).returns({
+        results: [FILES_LIST_RES_ROOT.results[0]],
+        next: null,
+      })
+      // second client.filesList() for snapshots subfolder
+      fakes.client.filesListFake.onCall(1).returns({
+        results: [],
+        next: null,
+      })
+      fakes.client.filesDescFake.returns({
+        results: [FILES_DESC_RES.results[0]],
+      })
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.client.filesDescFake.notCalled).to.be.true()
     })
 
     it('creates regular file in the database', async () => {
@@ -383,6 +435,67 @@ describe('TASK: sync_job_status', () => {
       expect(snapshotFile.taggings.count()).to.equal(1)
       expect(snapshotFile.taggings.getItems()[0].tag).to.have.property('id', 2)
       expect(snapshotFile.taggings.getItems()[0].tag).to.have.property('taggingCount', 1)
+    })
+
+    it('removes file from local database if it is not at the platform', async () => {
+      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+      )
+      const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
+      const firstFile = create.filesHelper.create(
+        em,
+        { user },
+        {
+          ...generate.userFile.simple(),
+          parentType: PARENT_TYPE.JOB,
+          parentId: job.id,
+          dxid: firstFileDxid,
+          project: job.project,
+          uid: `${firstFileDxid}-1`,
+          fileSize: FILES_DESC_RES.results[0].describe.size,
+          name: FILES_DESC_RES.results[0].describe.name,
+        },
+      )
+      create.tagsHelper.createTagging(
+        em,
+        { tag },
+        {
+          userFile: firstFile,
+          tagger: user,
+        },
+      )
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // first client.filesList() for all the files
+      fakes.client.filesListFake.onCall(0).returns({
+        results: [],
+        next: null,
+      })
+      // second client.filesList() for snapshots subfolder
+      fakes.client.filesListFake.onCall(1).returns({
+        results: [],
+        next: null,
+      })
+      fakes.client.filesDescFake.returns({
+        results: [],
+      })
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      // no new files
+      expect(fakes.client.filesDescFake.notCalled).to.be.true()
+      em.clear()
+      const filesInDb = await em.find(UserFile, {})
+      expect(filesInDb).to.be.an('array').with.lengthOf(0)
+      const taggingsInDb = await em.find(Tagging, {})
+      expect(taggingsInDb).to.be.an('array').with.lengthOf(0)
+      const tagsInDb = await em.find(Tag, {})
+      expect(tagsInDb).to.be.an('array').with.lengthOf(1)
+      expect(tagsInDb[0]).to.have.property('taggingCount', 0)
     })
   })
 

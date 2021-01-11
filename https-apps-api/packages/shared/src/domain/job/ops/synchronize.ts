@@ -71,6 +71,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
 
+      // FILES SYNC
       // fetch all files related to the app
       const localfiles = await filesRepo.findProjectFiles({ project: job.project })
       // fixme: should work with the API limitations, especially because of the production migration
@@ -79,7 +80,6 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         accessToken: this.ctx.user.accessToken,
         project: job.project,
       })
-      // todo: this should only run if the app type is Jupyter
       // fetch snapshots on the platform
       const snapshotsInProject = await client.filesList({
         accessToken: this.ctx.user.accessToken,
@@ -100,51 +100,78 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       }
 
       const localFileIds = map(prop('dxid'))(localfiles)
+      // todo: careful for duplicities -> make a test for it
       const newRegularFileIds = difference(regularFileIds, localFileIds)
       const newSnapshotFileIds = difference(snapshotFileIds, localFileIds)
+      const newFileIds = newRegularFileIds.concat(newSnapshotFileIds)
+      // todo: also detect missing files
+      const remoteDeletedFileIds = difference(localFileIds, remoteFileIds)
       this.ctx.log.info({ newRegularFileIds, newSnapshotFileIds }, 'Discovered newly created files')
+      this.ctx.log.info({ remoteDeletedFileIds }, 'Discovered deleted file ids')
 
-      // ask the API for info about new files
-      const newFilesData = await client.filesDescribe({
-        accessToken: this.ctx.user.accessToken,
-        fileIds: newRegularFileIds.concat(newSnapshotFileIds),
-      })
-      // build regular files in DB
-      const regularFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
-      const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
-      newRegularFileIds.forEach(fileId => {
-        const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
-        if (!apiResponse) {
-          this.ctx.log.warn({ fileId }, 'File was not found in the API response')
-          return
-        }
-        const file = this.createUserFile(fileId, apiResponse, false)
-        const tagging = taggingsRepo.createForFile({
-          fileId: file.id,
-          tagId: regularFilesTag.id,
-          userId: user.id,
+      // fixme: this should only happen if we discovered some new files
+      if (newFileIds.length > 0) {
+        // handle all the new files
+        // ask the API for info about new files
+        const newFilesData = await client.filesDescribe({
+          accessToken: this.ctx.user.accessToken,
+          fileIds: newRegularFileIds.concat(newSnapshotFileIds),
         })
-        file.taggings.add(tagging)
-        em.persist(file)
-      })
-      // build snapshot files in DB
-      newSnapshotFileIds.forEach(fileId => {
-        const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
-        if (!apiResponse) {
-          this.ctx.log.warn({ fileId }, 'File was not found in the API response')
-          return
-        }
-        const file = this.createUserFile(fileId, apiResponse, true)
-        const tagging = taggingsRepo.createForFile({
-          fileId: file.id,
-          tagId: jupyterSnapshotTag.id,
-          userId: user.id,
+        // build regular files in DB
+        const regularFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
+        const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
+        newRegularFileIds.forEach(fileId => {
+          const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
+          if (!apiResponse) {
+            this.ctx.log.warn({ fileId }, 'File was not found in the API response')
+            return
+          }
+          const file = this.createUserFile(fileId, apiResponse, false)
+          const tagging = taggingsRepo.createForFile({
+            fileId: file.id,
+            tagId: regularFilesTag.id,
+            userId: user.id,
+          })
+          file.taggings.add(tagging)
+          em.persist(file)
         })
-        file.taggings.add(tagging)
-        em.persist(file)
-      })
-      // store them in the database
-      await em.flush()
+        // build snapshot files in DB
+        newSnapshotFileIds.forEach(fileId => {
+          const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
+          if (!apiResponse) {
+            this.ctx.log.warn({ fileId }, 'File was not found in the API response')
+            return
+          }
+          const file = this.createUserFile(fileId, apiResponse, true)
+          const tagging = taggingsRepo.createForFile({
+            fileId: file.id,
+            tagId: jupyterSnapshotTag.id,
+            userId: user.id,
+          })
+          file.taggings.add(tagging)
+          em.persist(file)
+        })
+        // store them in the database
+        await em.flush()
+      }
+      if (remoteDeletedFileIds.length > 0) {
+        // delete local files -> they are not in the platform anymore
+        // todo: could resolve it from localFiles var - entities are initialized
+        // todo: what about taggings?
+        // todo: this would require an explicit transaction
+        localfiles
+          .filter(fileEntity => remoteDeletedFileIds.includes(fileEntity.dxid))
+          .forEach(fileEntity => {
+            // remove all the references
+            filesRepo.remove(fileEntity)
+            fileEntity.taggings
+              .getItems()
+              .forEach(taggingEntity => taggingEntity.tag.taggingCount--)
+            fileEntity.taggings.removeAll()
+          })
+        await em.flush()
+      }
+      // FILES SYNC END
     }
     this.ctx.log.info({ jobId: input.dxid }, 'Updating job, state change discovered')
     const updatedJob = wrap(job).assign(
