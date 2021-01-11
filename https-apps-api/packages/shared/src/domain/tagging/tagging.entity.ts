@@ -1,6 +1,5 @@
 import { Entity, EntityRepositoryType, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { UserFile, User, Tag } from '..'
-import { BaseEntity } from '../../database/base-entity'
 import { TaggingRepository } from './tagging.repository'
 
 @Entity({ tableName: 'taggings', customRepository: () => TaggingRepository })

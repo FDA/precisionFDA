@@ -60,7 +60,7 @@ export class UserFile extends Node {
   @ManyToOne()
   user!: IdentifiedReference<User>
 
-  @OneToMany(() => Tagging, tagging => tagging.userFile)
+  @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this);
 
   [EntityRepositoryType]?: UserFileRepository
