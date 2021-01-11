@@ -1,6 +1,7 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
 import { entities } from '@pfda/https-apps-shared'
 import { Organization } from '@pfda/https-apps-shared/src/domain/org'
+import { tag, Tagging } from 'shared/src/domain'
 import * as generate from './generate'
 // todo: should be in shared helpers
 
@@ -90,4 +91,35 @@ const filesHelper = {
   },
 }
 
-export { userHelper, jobHelper, appHelper, filesHelper }
+const tagsHelper = {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.Tag>>) => {
+    const defaults = generate.tag.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const newTag = wrap(new entities.Tag()).assign(input)
+    em.persist(newTag)
+    return newTag
+  },
+  createTagging: (
+    em: EntityManager,
+    references: { tag: InstanceType<typeof entities.Tag> },
+    data?: Partial<InstanceType<typeof entities.Tagging>>,
+  ) => {
+    const defaults = generate.tagging.userfileDefaults()
+    const input = {
+      ...defaults,
+      tag,
+      ...data,
+    }
+    const tagging = new Tagging()
+    wrap(tagging).assign(input, { em })
+    references.tag.taggings.add(tagging)
+    references.tag.taggingCount++
+    em.persist(tagging)
+    return tagging
+  },
+}
+
+export { userHelper, jobHelper, appHelper, filesHelper, tagsHelper }
