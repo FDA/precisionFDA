@@ -1,6 +1,6 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { User, Job, App, UserFile } from '@pfda/https-apps-shared/src/domain'
+import { User, Job, App, UserFile, Tag, Tagging } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import type { AnyObject } from '@pfda/https-apps-shared/src/types'
@@ -99,4 +99,19 @@ const folder = {
   }),
 }
 
-export { random, user, job, app, userFile, folder }
+const tag = {
+  simple: (): Partial<Tag> => ({
+    name: chance.name(),
+    taggingCount: 0,
+  }),
+}
+
+const tagging = {
+  userfileDefaults: (): Partial<Tagging> => ({
+    taggableType: 'Node',
+    taggerType: 'User',
+    context: 'tags',
+  }),
+}
+
+export { random, user, job, app, userFile, folder, tag, tagging }
