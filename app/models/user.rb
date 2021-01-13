@@ -232,7 +232,7 @@ class User < ApplicationRecord
   end
 
   def is_challenge_evaluator?
-    admin_groups.any?(&:challenge_eval?) || can_administer_site?
+    challenge_eval? || can_administer_site?
   end
 
   def challenge_eval?
