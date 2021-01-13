@@ -28,7 +28,7 @@
           </span>
         </h3>
       <% end %>
-        <% if challenge_index_page %>
+        <% if challenge_index_page && challenge.accessible_by?(@context) %>
           <a class="btn accessible-btn-danger btn-lg" href="<%= challenge_path(challenge) %>">
             View Challenge
           </a>

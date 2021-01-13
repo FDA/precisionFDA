@@ -1,13 +1,11 @@
+# Challenges controller.
+# rubocop:todo Metrics/ClassLength
 class ChallengesController < ApplicationController
   skip_before_action :require_login, only: %i(index consistency truth appathons join show)
   before_action :require_login_or_guest, only: []
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
-
-  helper_method :app_owners_for_select,
-                :challenge_order_for_select,
-                :host_lead_dxusers,
-                :guest_lead_dxusers
+  before_action :check_scope_accessibility, only: %i(create update)
 
   def index
     @consistency_challenge = FixedChallenge.consistency(@context)
@@ -27,7 +25,11 @@ class ChallengesController < ApplicationController
 
       if @challenge.save
         @challenge.update_card_image_url!
-        @challenge.provision_space!(@context, challenge_params[:host_lead_dxuser], challenge_params[:guest_lead_dxuser])
+        @challenge.provision_space!(
+          @context,
+          challenge_params[:host_lead_dxuser],
+          challenge_params[:guest_lead_dxuser],
+        )
         redirect_to challenge_path(@challenge)
       else
         js challenge_params.to_h
@@ -47,7 +49,11 @@ class ChallengesController < ApplicationController
         @challenge.update_order(challenge_params["replacement_id"])
 
         unless @challenge.space
-          @challenge.provision_space!(@context, challenge_params[:host_lead_dxuser], challenge_params[:guest_lead_dxuser])
+          @challenge.provision_space!(
+            @context,
+            challenge_params[:host_lead_dxuser],
+            challenge_params[:guest_lead_dxuser],
+          )
         end
 
         flash[:success] = "The challenge was updated successfully."
@@ -58,6 +64,80 @@ class ChallengesController < ApplicationController
       end
     end
   end
+
+  # rubocop:todo Metrics/MethodLength
+  def show
+    @challenge = Challenge.find(params[:id])
+
+    unless @challenge.accessible_by?(@context)
+      redirect_to challenges_path, alert: "You don't have permissions to view this challenge"
+      return
+    end
+
+    User.sync_challenge_jobs!
+    @tab = unsafe_params[:tab]
+    @submissions = Submission.none
+    @my_entries = false
+    @csv = nil
+    @csv_names = nil
+    @csv_ids = nil
+    @headers = nil
+    @keys = nil
+
+    case @tab
+    when "submissions"
+      @submissions = @challenge.submissions.accessible_by_public
+    when "results"
+      unless @challenge.can_show_results?(@context)
+        redirect_to challenges_path
+        return
+      end
+
+      @submissions = @challenge.submissions.accessible_by_public
+
+      if @challenge.automated?
+        @results = @challenge.completed_submissions
+        @result_columns = @challenge.output_names
+      else
+        @csv = CSV.open(
+          Rails.root.join("app/assets/csvs/treasure_hunt_warm_up_results.csv"),
+          encoding: "bom|utf-8",
+        ).read
+
+        @vaf_spotter_ids = [8, 9, 12, 20, 21, 22, 23, 25, 32, 34, 35, 36, 37, 38, 41,
+                            49, 51, 79, 81, 89, 90, 96, 97, 98, 104, 110, 116, 120,
+                            122, 124, 143, 147, 149, 150, 155, 156, 157]
+        @headers = @csv.shift(7)
+        @keys = @headers.map(&:first)
+        @csv_ids, @csv_names = @csv.map { |row| row.shift.split(" ", 2) }.
+          map { |id, name| [id.to_i, name.to_s] }.transpose
+        # @vaf_submissions is no longer an ActiveRecord relation,
+        #   careful if you want to use wice_grid.
+        @vaf_results = @submissions.select { |s| @csv_ids.include?(s.id) }.
+          sort_by { |s| @csv_ids.index s.id }
+      end
+    when "my_entries"
+      @submissions = @challenge.submissions.editable_by(@context)
+      @my_entries = true
+    else
+      return
+    end
+
+    @submissions_grid = initialize_grid(@submissions,
+                                        name: "submissions",
+                                        order: "submissions.id",
+                                        order_direction: "desc",
+                                        per_page: 100)
+
+    @resources_grid = initialize_grid(@challenge.challenge_resources,
+                                      name: "resources",
+                                      order: "challenge_resources.updated_at",
+                                      order_direction: "desc",
+                                      per_page: 100)
+
+    js submissions: @submissions.map { |s| s.slice(:id, :name, :desc) }
+  end
+  # rubocop:enable Metrics/MethodLength
 
   def announce_result
     @challenge.jobs.find_each do |job|
@@ -86,11 +166,13 @@ class ChallengesController < ApplicationController
       if Challenge.add_app_dev(@context, challenge.id, app.id)
         flash[:success] = "Your app '#{app.title}' was successfully assigned to: #{challenge.name}"
       else
-        flash.now[:error] = "The specified app could not be assigned to the current challenge: #{challenge.name} due to an internal error."
+        flash.now[:error] = "The specified app could not be assigned to the current challenge: " \
+                            "#{challenge.name} due to an internal error."
       end
       redirect_to app_jobs_path(app)
     else
-      flash[:error] = "The specified app was not found and could not be assigned to the current challenge: #{challenge.name}."
+      flash[:error] = "The specified app was not found and could not be assigned " \
+                      "to the current challenge: #{challenge.name}."
       redirect_to apps_path
     end
   end
@@ -107,9 +189,11 @@ class ChallengesController < ApplicationController
     if !challenge.followed_by?(@context.user)
       @context.user.follow(challenge)
       Event::SignedUpForChallenge.create_for(challenge, @context.user)
-      flash[:success] = "You are now following the challenge! If you would like to participate please submit an entry by the deadline."
+      flash[:success] = "You are now following the challenge! If you would like to participate " \
+                        "please submit an entry by the deadline."
     else
-      flash[:success] = "You are already following the challenge! Remember to submit your entries by the challenge deadline!"
+      flash[:success] = "You are already following the challenge! Remember to submit your " \
+                        "entries by the challenge deadline!"
     end
     redirect_to challenge_path(challenge)
   end
@@ -128,72 +212,6 @@ class ChallengesController < ApplicationController
     js challenge: @challenge.slice(:id)
   end
 
-  def show
-    @challenge = Challenge.find_by(id: unsafe_params[:id])
-
-    if @challenge.nil? || !@challenge.is_viewable?(@context)
-      redirect_to challenges_path
-      return
-    end
-
-    User.sync_challenge_jobs!
-    @tab = unsafe_params[:tab]
-    @submissions = Submission.none
-    @my_entries = false
-    @csv = nil
-    @csv_names = nil
-    @csv_ids = nil
-    @headers = nil
-    @keys = nil
-
-    case @tab
-    when "submissions"
-      @submissions = @challenge.submissions.accessible_by_public
-    when "results"
-      unless @challenge.can_show_results?(@context)
-        redirect_to challenges_path
-        return
-      end
-
-      @submissions = @challenge.submissions.accessible_by_public
-      if @challenge.automated?
-        @results = @challenge.completed_submissions
-        @result_columns = @challenge.output_names
-      else
-        @csv = CSV.open("#{Rails.root}/app/assets/csvs/treasure_hunt_warm_up_results.csv", encoding: "bom|utf-8").read
-        @vaf_spotter_ids = [8, 9, 12, 20, 21, 22, 23, 25, 32, 34, 35, 36, 37, 38, 41,
-                            49, 51, 79, 81, 89, 90, 96, 97, 98, 104, 110, 116, 120,
-                            122, 124, 143, 147, 149, 150, 155, 156, 157]
-        @headers = @csv.shift(7)
-        @keys = @headers.map { |c| c.first }
-        @csv_ids, @csv_names = @csv.map { |row| row.shift.split(" ", 2) }.
-          map { |id, name| [id.to_i, name.to_s] }.transpose
-        # @vaf_submissions is no longer an ActiveRecord relation, careful if you want to use wice_grid
-        @vaf_results = @submissions.select { |s| @csv_ids.include?(s.id) }.
-          sort_by { |s| @csv_ids.index s.id }
-      end
-    when "my_entries"
-      @submissions = @challenge.submissions.editable_by(@context)
-      @my_entries = true
-    else
-      return
-    end
-
-    @submissions_grid = initialize_grid(@submissions,
-                                        name: "submissions",
-                                        order: "submissions.id",
-                                        order_direction: "desc",
-                                        per_page: 100)
-
-    @resources_grid = initialize_grid(@challenge.challenge_resources,
-                                      name: "resources",
-                                      order: "challenge_resources.updated_at",
-                                      order_direction: "desc",
-                                      per_page: 100)
-
-    js submissions: @submissions.map { |s| s.slice(:id, :name, :desc) }
-  end
-
   # Challenge 1 - Consistency
   def consistency
     @discussion = Discussion.find_by(id: CONSISTENCY_DISCUSSION_ID)
@@ -210,6 +228,7 @@ class ChallengesController < ApplicationController
   end
 
   # Challenge 2 - Truth
+  # rubocop:todo Metrics/MethodLength
   def truth
     @discussion = Discussion.find_by(id: TRUTH_DISCUSSION_ID)
 
@@ -225,7 +244,8 @@ class ChallengesController < ApplicationController
 
     @tab = unsafe_params[:tab]
 
-    if @tab == "results-peek" || @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results" || @tab == "results-explore"))
+    if %w(results-peek results-explore-peek).include?(@tab) ||
+       @truth_challenge[:results_announced] && %w(results results-explore).include?(@tab)
 
       grid_params = {
         name: "truth_results",
@@ -236,14 +256,17 @@ class ChallengesController < ApplicationController
 
       unless unsafe_params.key?(:truth_results)
         if unsafe_params.key?(:query_id)
-          @saved_query = SavedQuery.find_by(id: unsafe_params[:query_id], grid_name: "truth_results")
+          @saved_query =
+            SavedQuery.find_by(id: unsafe_params[:query_id], grid_name: "truth_results")
+
           if !@saved_query.nil?
             unsafe_params[:truth_results] = JSON.parse(@saved_query.query)["truth_results"]
           else
             redirect_to truth_challenges_path(tab: @tab)
           end
         else
-          # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
+          # ?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&
+          #   truth_results[f][subset][]=*&truth_results[f][genotype][]=*
           unsafe_params[:truth_results] = {
             f: {
               type: %w(SNP),
@@ -257,7 +280,8 @@ class ChallengesController < ApplicationController
 
       @results_grid = initialize_grid(TruthChallengeResult, grid_params)
 
-      if @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results-explore"))
+      if @tab == "results-explore-peek" ||
+         @truth_challenge[:results_announced] && @tab == "results-explore"
         if @context.logged_in_or_guest?
           @new_saved_query = SavedQuery.new(
             query: filter_and_order_state_as_hash(@results_grid).to_json,
@@ -268,6 +292,7 @@ class ChallengesController < ApplicationController
       end
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # TODO: may need to change this for future appathons
   # Challenge 3 - Appathon in a Box
@@ -278,36 +303,22 @@ class ChallengesController < ApplicationController
 
   private
 
+  def check_scope_accessibility
+    scope = challenge_params[:scope]
+    space_id = scope.presence && Space.scope_id(scope)
+
+    return if space_id.nil? ||
+              action_name == "update" && @challenge.scope == scope ||
+              Space.groups.editable_by(@context).exists?(space_id)
+
+    action_to_render = action_name == "create" ? :new : :edit
+
+    flash[:error] = "The scope '#{scope}' is not assignable to the challenge."
+    render action: action_to_render
+  end
+
   def check_on_challenge_admin
     redirect_to challenges_path unless @context.challenge_admin?
-  end
-
-  # Returns a collection of users-owners of apps for selection on challenge create or edit
-  # each User should be valid, i.e. to have an Org, otherwise skipped
-  # @return [Array] Array<Array> of users info: user names with org name, user id
-  def app_owners_for_select
-    @app_owners_candidates = User.real.map { |u| [u.select_text, u.id] if u.org }.compact
-  end
-
-  # Returns a collection of challenges for selection on challenge edit page
-  # @return  Array<Array> Array of challenges name + id
-  def challenge_order_for_select
-    Challenge.not_archived.all.map { |ch| [ch.name, ch.id] }
-  end
-
-  # Returns a collection of Site admins and challenge admins
-  # @return [Array<String>] dxids of Site admins and challenge admins
-  def host_lead_dxusers
-    User.site_admins.or(User.challenge_admins).order(:dxuser).distinct.pluck(:dxuser)
-  end
-
-  # Returns a collection of Site admins, challenge evaluators and challenge admins
-  # @return [Array<String>] dxids of Site admins, challenge evaluators and challenge admins
-  def guest_lead_dxusers
-    User.site_admins.
-      or(User.challenge_admins).
-      or(User.challenge_evaluators).
-      order(:dxuser).distinct.pluck(:dxuser)
   end
 
   def find_editable_challenge
@@ -327,6 +338,7 @@ class ChallengesController < ApplicationController
       permit(
         :name,
         :description,
+        :scope,
         :app_owner_id,
         :start_at,
         :end_at,
@@ -345,6 +357,7 @@ class ChallengesController < ApplicationController
       permit(
         :name,
         :description,
+        :scope,
         :app_owner_id,
         :start_at,
         :end_at,
@@ -366,7 +379,7 @@ class ChallengesController < ApplicationController
   end
 
   def challenge_cards
-    Challenge.archived.all.map do |challenge|
+    Challenge.accessible_by(@context).archived.map do |challenge|
       ChallengeCard.by_context(challenge, @context)
     end
   end
@@ -375,3 +388,4 @@ class ChallengesController < ApplicationController
     @file_publisher ||= FilePublisher.by_challenge_bot
   end
 end
+# rubocop:enable Metrics/ClassLength
