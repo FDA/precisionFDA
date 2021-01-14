@@ -28,7 +28,6 @@ if ENV["DNANEXUS_BACKEND"] == "production"
 
   HTTPS_JUPYTER_APP_DXID = nil
   HTTPS_TTYD_APP_DXID = nil
-  HTTPS_RSHINY_APP_DXID = nil
 else
   HOST =
     # rubocop:todo Rails/UnknownEnv
@@ -74,10 +73,11 @@ else
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F53j4F806B0v3GjVB81yQY8F".freeze
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F53j4F80PQGQ73yV87JKb0p3".freeze
 
-  HTTPS_JUPYTER_APP_DXID = "app-Fyfv6Zj5ZjQvqKF73YZbqVp3"
-  HTTPS_TTYD_APP_DXID = "app-FyVPqvQ0bFbx0Jx23xZ3ggkV"
-  HTTPS_RSHINY_APP_DXID = nil
+  HTTPS_JUPYTER_APP_DXID = "app-Fyfv6Zj5ZjQvqKF73YZbqVp3".freeze
+  HTTPS_TTYD_APP_DXID = "app-FyVPqvQ0bFbx0Jx23xZ3ggkV".freeze
 end
+
+HTTPS_RSHINY_APP_DXID = nil
 
 OAUTH2_REDIRECT_URI = "#{HOST}/return_from_login".freeze
 
