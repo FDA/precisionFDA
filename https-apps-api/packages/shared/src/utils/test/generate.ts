@@ -155,7 +155,7 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
-  snapshot: (): Partial<UserFile> => {
+  snapshot: (): Partial<InstanceType<typeof entities.UserFile>> => {
     const dxid = `file-${random.dxstr()}`
     return {
       dxid,
