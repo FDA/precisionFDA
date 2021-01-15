@@ -295,7 +295,7 @@ class AppsController < ApplicationController
             scope: Scopes::SCOPE_PRIVATE,
             input: input_info.run_inputs,
           )
-        rescue HttpsAppsClient::Error => e
+        rescue HttpsAppsClient::Error, Errno::ECONNREFUSED => e
           fail e.message
         rescue StandardError
           fail "Something went wrong"
