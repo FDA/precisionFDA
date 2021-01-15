@@ -52,7 +52,10 @@ class HttpsAppsClient
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
     uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{auth_querystring}")
-    conn_opts = connection_opts.merge(use_ssl: uri.scheme == "https")
+    use_ssl = uri.scheme == "https"
+
+    conn_opts = connection_opts.merge(use_ssl: use_ssl)
+    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if !production_env? && use_ssl
 
     Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
       handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
@@ -62,11 +65,7 @@ class HttpsAppsClient
   # Returns connection options.
   # @return [Hash] Connection options.
   def connection_opts
-    @connection_opts ||= begin
-      opts = { read_timeout: 120 }
-      opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) unless production_env?
-      opts
-    end
+    @connection_opts ||= { read_timeout: 120 }
   end
 
   def auth_querystring
