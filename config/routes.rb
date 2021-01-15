@@ -391,9 +391,10 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :jobs, except: :index do
+    resources :jobs, except: %i(index update edit) do
       member do
         get "log"
+        get "open_external"
       end
       resources :comments
     end
