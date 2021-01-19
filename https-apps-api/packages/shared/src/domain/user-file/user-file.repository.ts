@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_TYPE } from './user-file.enum'
+import { FILE_STI_TYPE, FILE_TYPE } from './user-file.enum'
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   async findSnapshot(input: { userId: number; project: string }): Promise<UserFile | null> {
@@ -13,7 +13,10 @@ export class UserFileRepository extends EntityRepository<UserFile> {
   }
 
   async findProjectFiles(input: { project: string }): Promise<UserFile[]> {
-    return await this.find({ project: input.project }, { populate: ['taggings.tag'] })
+    return await this.find(
+      { project: input.project, stiType: { $ne: FILE_STI_TYPE.FOLDER } },
+      { populate: ['taggings.tag'] },
+    )
   }
 
   async createUserFileJobRefs(fileIds: number[], jobId: number) {
