@@ -51,11 +51,11 @@ run-worker-repl:
 
 test-api:
 	NODE_ENV=test $(bin)mocha --config ./packages/api/.mocharc.js \
-	--recursive "./packages/api/test/integration/**/*.spec.ts"
+	--recursive "./packages/api/test/**/*.spec.ts"
 
 test-worker:
 	NODE_ENV=test $(bin)mocha --config ./packages/worker/.mocharc.js \
-	--recursive "./packages/worker/test/integration/**/*.spec.ts"
+	--recursive "./packages/worker/test/**/*.spec.ts"
 
 test: test-api
 	make test-worker
