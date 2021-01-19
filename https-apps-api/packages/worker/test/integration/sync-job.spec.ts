@@ -190,6 +190,27 @@ describe('TASK: sync_job_status', () => {
       expect(descFilesCallArgs).to.have.property('fileIds').that.not.have.members([file.id])
     })
 
+    it('calls listFolders', async () => {
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+      )
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // first call runs with "/" folder, second with "/.Notebook_snapshots"
+      fakes.client.filesListFake.onCall(0).returns(FILES_LIST_RES_ROOT)
+      fakes.client.filesListFake.onCall(1).returns(FILES_LIST_RES_SNAPSHOT)
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.client.filesListFake.calledTwice).to.be.true()
+      const listAllCallArgs = fakes.client.filesListFake.getCall(0).args[0]
+      expect(listAllCallArgs).to.have.keys(['accessToken', 'project'])
+      // todo: and more
+    })
+
     it('does not call describe endpoint if there are no new files', async () => {
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
       const job = create.jobHelper.create(

@@ -7,10 +7,11 @@ import { getJobSubtype, isStateTerminal, shouldSyncStatus } from '../job.helper'
 import * as client from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
-import { User, Tagging, UserFile, Tag } from '../..'
+import { User, Tagging, UserFile, Tag, Folder } from '../..'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
 import { createJobClosed } from '../../event/event.helper'
+import { SyncFoldersOperation } from '../../user-file'
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Job> {
   protected user: User
@@ -71,8 +72,31 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
 
+      // FOLDERS SYNC
+      const foldersRepo = em.getRepository(Folder)
+      // const localFolders = await foldersRepo.findForSynchronization()
+      const projectDesc = await client.foldersList({
+        projectId: job.project,
+        accessToken: this.ctx.user.accessToken,
+      })
+      const syncFoldersOp = new SyncFoldersOperation({
+        log: this.ctx.log,
+        em: this.ctx.em,
+        user: this.ctx.user,
+      })
+      const localFolders = await syncFoldersOp.execute({
+        remoteFolderPaths: projectDesc.folders,
+        scope: job.scope,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+        projectDxid: job.project,
+      })
+      // for each NEW local folder query files and check for differences
+      // FOLDERS SYNC END
+
       // FILES SYNC
-      // fetch all files related to the app
+      // REFACTOR all this
+      // fetch all files related to the ap
       const localfiles = await filesRepo.findProjectFiles({ project: job.project })
       // fixme: should work with the API limitations, especially because of the production migration
       // fetch all files on the platform

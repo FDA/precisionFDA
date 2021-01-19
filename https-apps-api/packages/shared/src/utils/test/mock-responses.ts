@@ -38,6 +38,11 @@ const FILES_LIST_RES_SNAPSHOT = {
   next: null,
 } as const
 
+const FOLDERS_LIST_RES = {
+  id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  folders: ['/', '/.Notebook_snapshots', '/test-folder'],
+}
+
 const FILES_DESC_RES = {
   results: [
     {
@@ -157,4 +162,4 @@ const FILES_DESC_RES = {
   ],
 } as const
 
-export { FILES_LIST_RES_ROOT, FILES_LIST_RES_SNAPSHOT, FILES_DESC_RES }
+export { FILES_LIST_RES_ROOT, FILES_LIST_RES_SNAPSHOT, FILES_DESC_RES, FOLDERS_LIST_RES }
