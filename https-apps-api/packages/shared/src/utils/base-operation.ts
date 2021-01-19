@@ -23,7 +23,14 @@ export abstract class BaseOperation<IN, OUT> {
 
   async execute(props?: IN): Promise<Maybe<OUT>> {
     const startTime = Date.now()
-    this.ctx.log.info({ startTime, id: this.id }, 'Operation started')
+    this.ctx.log.info(
+      {
+        name: this.constructor.name,
+        startTime,
+        id: this.id,
+      },
+      'Operation started',
+    )
     try {
       // run the operation with context
       const res = await this.run(props)
@@ -53,6 +60,7 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
     const startTime = Date.now()
     this.ctx.log.info(
       {
+        name: this.constructor.name,
         startTime,
         id: this.id,
         jobType: this.ctx.job.data?.type,

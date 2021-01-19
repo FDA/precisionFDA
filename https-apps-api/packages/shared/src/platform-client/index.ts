@@ -35,6 +35,10 @@ type DescribeFilesParams = BaseParams & {
   fileIds: string[]
 }
 
+type DescribeFoldersParams = BaseParams & {
+  projectId: string
+}
+
 type ListFilesResponse = {
   results: Array<{
     id: string
@@ -52,6 +56,11 @@ type DescribeFilesResponse = {
       // add more here
     }
   }>
+}
+
+type DescribeFoldersResponse = {
+  id: string
+  folders: Array<string>
 }
 
 type JobCreateResponse = {
@@ -200,12 +209,32 @@ const filesDescribe = async (params: DescribeFilesParams): Promise<DescribeFiles
   }
 }
 
+const foldersList = async (params: DescribeFoldersParams): Promise<DescribeFoldersResponse> => {
+  const url = `${config.platform.apiUrl}/${params.projectId}/describe`
+  const options: AxiosRequestConfig = {
+    method: 'POST',
+    data: { fields: { folders: true } },
+    url,
+    headers: setupHeaders(params),
+  }
+  try {
+    log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+    const res = await axios.request(options)
+    return res.data
+  } catch (err) {
+    log.warn({ requestOptions: options }, 'Failed request options')
+    return handleFailed(err)
+  }
+}
+
 export {
   jobDescribe,
   jobCreate,
   jobTerminate,
   filesList,
   filesDescribe,
+  foldersList,
   JobDescribeResponse,
   JobCreateParams,
+  DescribeFoldersResponse,
 }

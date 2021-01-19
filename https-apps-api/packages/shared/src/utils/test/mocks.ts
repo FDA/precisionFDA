@@ -3,7 +3,7 @@ import Bull from 'bull'
 import { client, queue } from '../..'
 // import { handler } from '../../src/jobs'
 import * as generate from './generate'
-import { FILES_DESC_RES, FILES_LIST_RES_ROOT } from './mock-responses'
+import { FILES_DESC_RES, FILES_LIST_RES_ROOT, FOLDERS_LIST_RES } from './mock-responses'
 
 const sandbox = sinon.createSandbox()
 
@@ -14,6 +14,7 @@ const fakes = {
     jobTerminateFake: sinon.stub(),
     filesListFake: sinon.stub(),
     filesDescFake: sinon.stub(),
+    foldersListFake: sinon.stub(),
   },
   queue: {
     removeRepeatableFake: sinon.fake(),
@@ -32,6 +33,7 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
+  fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
 }
 
 const mocksSetup = () => {
@@ -42,6 +44,7 @@ const mocksSetup = () => {
   sandbox.replace(client, 'jobTerminate', fakes.client.jobTerminateFake)
   sandbox.replace(client, 'filesList', fakes.client.filesListFake)
   sandbox.replace(client, 'filesDescribe', fakes.client.filesDescFake)
+  sandbox.replace(client, 'foldersList', fakes.client.foldersListFake)
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
   // stub queue helpers
@@ -55,6 +58,7 @@ const mocksReset = () => {
   fakes.client.jobTerminateFake.reset()
   fakes.client.filesListFake.reset()
   fakes.client.filesDescFake.reset()
+  fakes.client.foldersListFake.reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()
