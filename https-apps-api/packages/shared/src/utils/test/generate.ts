@@ -175,10 +175,12 @@ const userFile = {
 const folder = {
   simple: (): Partial<InstanceType<typeof entities.Folder>> => ({
     name: chance.name(),
+    project: undefined,
+    dxid: undefined,
     scope: 'private',
     entityType: FILE_TYPE.REGULAR,
     parentId: 1,
-    parentType: PARENT_TYPE.USER,
+    parentType: PARENT_TYPE.JOB,
     stiType: FILE_STI_TYPE.FOLDER,
   }),
 }

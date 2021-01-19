@@ -74,7 +74,10 @@ const filesHelper = {
   },
   createFolder: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
+    references: {
+      user: InstanceType<typeof entities.User>
+      parent?: InstanceType<typeof entities.Folder>
+    },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
     const defaults = generate.folder.simple()
@@ -82,7 +85,7 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
-    const folder = wrap(new entities.Folder(references.user)).assign(input)
+    const folder = wrap(new entities.Folder(references.user, references.parent)).assign(input)
     em.persist(folder)
     return folder
   },

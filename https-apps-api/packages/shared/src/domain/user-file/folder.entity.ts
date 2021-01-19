@@ -7,11 +7,13 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
+import { isNil } from 'ramda'
 import { User } from '..'
+import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from './user-file.enum'
 
-@Entity({ tableName: 'nodes' })
+@Entity({ tableName: 'nodes', customRepository: () => FolderRepository })
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
 export class Folder extends Node {
   @Property()
@@ -55,10 +57,18 @@ export class Folder extends Node {
   // todo: micro-orm can do single table inheritance
 
   @ManyToOne()
-  user!: IdentifiedReference<User>
+  parentFolder?: IdentifiedReference<Folder>
 
-  constructor(user: User) {
+  @ManyToOne()
+  user!: IdentifiedReference<User>;
+
+  [EntityRepositoryType]?: FolderRepository
+
+  constructor(user: User, parentFolder?: Folder) {
     super()
     this.user = Reference.create(user)
+    if (!isNil(parentFolder)) {
+      this.parentFolder = Reference.create(parentFolder)
+    }
   }
 }
