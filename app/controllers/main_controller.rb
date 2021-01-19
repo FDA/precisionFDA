@@ -6,6 +6,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
                                                index
                                                about
+                                               terms
                                                login
                                                return_from_login
                                                request_access
