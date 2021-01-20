@@ -1,4 +1,4 @@
-import { PARENT_TYPE } from './user-file.enum'
+import { FILE_TYPE, PARENT_TYPE } from './user-file.enum'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]
@@ -8,4 +8,13 @@ type SyncFoldersInput = {
   scope: string
 }
 
-export { SyncFoldersInput }
+type SyncFilesInFolderInput = {
+  folderId: number | null
+  projectDxid: string
+  scope: string
+  parentId: number
+  parentType: PARENT_TYPE
+  entityType: FILE_TYPE
+}
+
+export { SyncFoldersInput, SyncFilesInFolderInput }

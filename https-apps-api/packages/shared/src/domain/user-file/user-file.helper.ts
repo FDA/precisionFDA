@@ -59,6 +59,11 @@ const parseFoldersFromDatabase = (folders: Folder[]): string[] => {
   return folderPaths
 }
 
+const getFolderPath = (folders: Folder[], current: Folder): string => {
+  const chain = folderTraverse(folders, current, [])
+  return `/${chain.join('/')}`
+}
+
 const createFoldersTraverse = (
   folders: Folder[],
   pathStr: string[],
@@ -128,4 +133,5 @@ export {
   getPathsToBuild,
   getPathsToKeep,
   filterDuplicities,
+  getFolderPath,
 }
