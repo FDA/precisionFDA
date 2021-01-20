@@ -11,7 +11,7 @@ import {
   FILES_LIST_RES_ROOT,
 } from '@pfda/https-apps-shared/src/utils/test/mock-responses'
 
-describe.only('syncFilesInFolder operation', () => {
+describe('syncFilesInFolder operation', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let job: Job

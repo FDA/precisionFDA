@@ -142,7 +142,7 @@ describe('TASK: sync_job_status', () => {
     })
   })
 
-  context('files sync', () => {
+  context.skip('files sync', () => {
     it('calls the listFiles and descFiles', async () => {
       const job = create.jobHelper.create(
         em,
