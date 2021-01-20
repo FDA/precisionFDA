@@ -31,7 +31,6 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       projectDxid: input.projectDxid,
     })
     let localFolderPaths = parseFoldersFromDatabase(localFolders)
-    // console.log(localFolders, localFolderPaths, 'locall')
     // newly discovered paths
     const pathsToBuild = getPathsToBuild(remotePaths, localFolderPaths)
     let newFolders: Folder[] = []
@@ -60,11 +59,10 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       // (using just a reference without identifier)
       // eslint-disable-next-line no-await-in-loop
       await em.persistAndFlush(res)
+      this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'created new folders with names')
     }
-    // console.log(pathsToBuild, newFolders, 'to create?')
 
     // paths to keep and then to remove
-    // todo: refresh everything!
     localFolderPaths = parseFoldersFromDatabase(localFolders.concat(newFolders))
     const pathsToKeep = getPathsToKeep(remotePaths, localFolderPaths)
     // console.log(pathsToKeep, 'keep')
@@ -83,14 +81,9 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       localFolders.concat(newFolders),
       foldersToKeep,
     )
-    // console.log(foldersToKeep, 'keep this')
+    this.ctx.log.info({ names: foldersToDelete.map(f => f.name) }, 'folders to delete')
     await em.removeAndFlush(foldersToDelete)
-    // console.log(localFolders, 'delete this')
 
-    // and plug in to the worker
-    // prepare whatever is needed for staging setup but only non-breaking changes
-    // then files sync
-    // console.log(localFolders.concat(newFolders).length, 'len test')
     return await repo.findForSynchronization({
       userId: this.ctx.user.id,
       projectDxid: input.projectDxid,

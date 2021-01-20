@@ -9,7 +9,8 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User, Tagging } from '..'
+import { isNil } from 'ramda'
+import { User, Tagging, Folder } from '..'
 import { Node } from './node.entity'
 import { FILE_STATE, FILE_TYPE, PARENT_TYPE, FILE_STI_TYPE } from './user-file.enum'
 import { UserFileRepository } from './user-file.repository'
@@ -60,12 +61,18 @@ export class UserFile extends Node {
   @ManyToOne()
   user!: IdentifiedReference<User>
 
+  @ManyToOne()
+  parentFolder?: IdentifiedReference<Folder>
+
   @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this);
 
   [EntityRepositoryType]?: UserFileRepository
-  constructor(user: User) {
+  constructor(user: User, parentFolder?: Folder) {
     super()
     this.user = Reference.create(user)
+    if (!isNil(parentFolder)) {
+      this.parentFolder = Reference.create(parentFolder)
+    }
   }
 }

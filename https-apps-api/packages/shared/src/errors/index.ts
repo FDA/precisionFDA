@@ -6,6 +6,7 @@ type BaseErrorProps = AnyObject & {
   code: ErrorCodes
   statusCode?: number
   name?: string
+  details?: AnyObject
 }
 type MaybeBaseErrorProps = Partial<BaseErrorProps>
 

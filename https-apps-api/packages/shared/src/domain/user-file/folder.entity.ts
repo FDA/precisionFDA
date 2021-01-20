@@ -1,14 +1,16 @@
 import {
+  Collection,
   Entity,
   EntityRepositoryType,
   Filter,
   IdentifiedReference,
   ManyToOne,
+  OneToMany,
   Property,
   Reference,
 } from '@mikro-orm/core'
 import { isNil } from 'ramda'
-import { User } from '..'
+import { Tagging, User } from '..'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from './user-file.enum'
@@ -55,6 +57,9 @@ export class Folder extends Node {
   scopedParentFolderId?: number
 
   // todo: micro-orm can do single table inheritance
+
+  @OneToMany(() => Tagging, tagging => tagging.folder, { orphanRemoval: true })
+  taggings = new Collection<Tagging>(this)
 
   @ManyToOne()
   parentFolder?: IdentifiedReference<Folder>

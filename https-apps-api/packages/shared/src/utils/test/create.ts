@@ -60,7 +60,10 @@ const appHelper = {
 const filesHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
+    references: {
+      user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
+    },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
     const defaults = generate.userFile.simple()
@@ -68,7 +71,10 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
-    const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    const file = wrap(new entities.UserFile(references.user, references.parentFolder)).assign(
+      input,
+      { em },
+    )
     em.persist(file)
     return file
   },

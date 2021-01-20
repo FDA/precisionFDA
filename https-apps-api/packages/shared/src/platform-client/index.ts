@@ -173,6 +173,7 @@ const filesList = async (params: ListFilesParams): Promise<ListFilesResponse> =>
   const scope = {
     project: params.project,
     folder: params.folder ?? '/',
+    recurse: false,
   }
   const url = `${config.platform.apiUrl}/system/findDataObjects`
   const options: AxiosRequestConfig = {

@@ -9,11 +9,11 @@ import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { User, Tagging, UserFile, Tag, Folder } from '../..'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
-import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
+import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from '../../app/app.enum'
 import { createJobClosed } from '../../event/event.helper'
-import { SyncFoldersOperation } from '../../user-file'
+import { SyncFilesInFolderOperation, SyncFoldersOperation } from '../../user-file'
 
-export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Job> {
+export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
   protected user: User
   protected job: Job
 
@@ -72,9 +72,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
 
-      // FOLDERS SYNC
-      const foldersRepo = em.getRepository(Folder)
-      // const localFolders = await foldersRepo.findForSynchronization()
+      // FOLDERS AND FILES SYNC
       const projectDesc = await client.foldersList({
         projectId: job.project,
         accessToken: this.ctx.user.accessToken,
@@ -92,109 +90,133 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         projectDxid: job.project,
       })
       // for each NEW local folder query files and check for differences
-      // FOLDERS SYNC END
+      // todo: add root folder somehow
+      const folderPathsToCheck: Array<Folder | null> = [...localFolders, null]
+      await Promise.all(
+        folderPathsToCheck.map(async (folder: Folder | null) => {
+          const syncFilesInFolderOp = new SyncFilesInFolderOperation({
+            log: this.ctx.log,
+            em: this.ctx.em,
+            user: this.ctx.user,
+          })
+          const files = await syncFilesInFolderOp.execute({
+            folderId: folder ? folder.id : null,
+            projectDxid: job.project,
+            scope: job.scope,
+            parentType: PARENT_TYPE.JOB,
+            parentId: job.id,
+            entityType: FILE_TYPE.REGULAR,
+          })
+          // extra action based on folderPath happens here
+          // todo: handle snapshots and taggings
+        }),
+      )
+      // FOLDERS AND FILES SYNC END
+
+      // todo: tags
+      // todo: entity type - snapshot
 
       // FILES SYNC
       // REFACTOR all this
       // fetch all files related to the ap
-      const localfiles = await filesRepo.findProjectFiles({ project: job.project })
-      // fixme: should work with the API limitations, especially because of the production migration
-      // fetch all files on the platform
-      const filesInProject = await client.filesList({
-        accessToken: this.ctx.user.accessToken,
-        project: job.project,
-      })
-      // fetch snapshots on the platform
-      const snapshotsInProject = await client.filesList({
-        accessToken: this.ctx.user.accessToken,
-        project: job.project,
-        folder: '/.Notebook_snapshots',
-      })
-      // compare check differences
-      const remoteFileIds = map(prop('id'))(filesInProject.results)
-      const snapshotFileIds = map(prop('id'))(snapshotsInProject.results)
-      const regularFileIds = difference(remoteFileIds, snapshotFileIds)
-      this.ctx.log.info({ regularFileIds, snapshotFileIds }, 'Remote state file ids')
+      // const localfiles = await filesRepo.findProjectFiles({ project: job.project })
+      // // fixme: should work with the API limitations, especially because of the production migration
+      // // fetch all files on the platform
+      // const filesInProject = await client.filesList({
+      //   accessToken: this.ctx.user.accessToken,
+      //   project: job.project,
+      // })
+      // // fetch snapshots on the platform
+      // const snapshotsInProject = await client.filesList({
+      //   accessToken: this.ctx.user.accessToken,
+      //   project: job.project,
+      //   folder: '/.Notebook_snapshots',
+      // })
+      // // compare check differences
+      // const remoteFileIds = map(prop('id'))(filesInProject.results)
+      // const snapshotFileIds = map(prop('id'))(snapshotsInProject.results)
+      // const regularFileIds = difference(remoteFileIds, snapshotFileIds)
+      // this.ctx.log.info({ regularFileIds, snapshotFileIds }, 'Remote state file ids')
 
-      if (getJobSubtype(job, user) !== APP_HTTPS_SUBTYPE.JUPYTER && snapshotFileIds.length > 0) {
-        this.ctx.log.warn(
-          { jobId: job.id, jobType: getJobSubtype(job, user), snapshotFileIds },
-          'Job type is not Jupyter but snapshots were discovered on the platfrom',
-        )
-      }
+      // if (getJobSubtype(job, user) !== APP_HTTPS_SUBTYPE.JUPYTER && snapshotFileIds.length > 0) {
+      //   this.ctx.log.warn(
+      //     { jobId: job.id, jobType: getJobSubtype(job, user), snapshotFileIds },
+      //     'Job type is not Jupyter but snapshots were discovered on the platfrom',
+      //   )
+      // }
 
-      const localFileIds = map(prop('dxid'))(localfiles)
-      // todo: careful for duplicities -> make a test for it
-      const newRegularFileIds = difference(regularFileIds, localFileIds)
-      const newSnapshotFileIds = difference(snapshotFileIds, localFileIds)
-      const newFileIds = newRegularFileIds.concat(newSnapshotFileIds)
-      // todo: also detect missing files
-      const remoteDeletedFileIds = difference(localFileIds, remoteFileIds)
-      this.ctx.log.info({ newRegularFileIds, newSnapshotFileIds }, 'Discovered newly created files')
-      this.ctx.log.info({ remoteDeletedFileIds }, 'Discovered deleted file ids')
+      // const localFileIds = map(prop('dxid'))(localfiles)
+      // // todo: careful for duplicities -> make a test for it
+      // const newRegularFileIds = difference(regularFileIds, localFileIds)
+      // const newSnapshotFileIds = difference(snapshotFileIds, localFileIds)
+      // const newFileIds = newRegularFileIds.concat(newSnapshotFileIds)
+      // // todo: also detect missing files
+      // const remoteDeletedFileIds = difference(localFileIds, remoteFileIds)
+      // this.ctx.log.info({ newRegularFileIds, newSnapshotFileIds }, 'Discovered newly created files')
+      // this.ctx.log.info({ remoteDeletedFileIds }, 'Discovered deleted file ids')
 
-      // fixme: this should only happen if we discovered some new files
-      if (newFileIds.length > 0) {
-        // handle all the new files
-        // ask the API for info about new files
-        const newFilesData = await client.filesDescribe({
-          accessToken: this.ctx.user.accessToken,
-          fileIds: newRegularFileIds.concat(newSnapshotFileIds),
-        })
-        // build regular files in DB
-        const regularFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
-        const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
-        newRegularFileIds.forEach(fileId => {
-          const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
-          if (!apiResponse) {
-            this.ctx.log.warn({ fileId }, 'File was not found in the API response')
-            return
-          }
-          const file = this.createUserFile(fileId, apiResponse, false)
-          const tagging = taggingsRepo.createForFile({
-            fileId: file.id,
-            tagId: regularFilesTag.id,
-            userId: user.id,
-          })
-          file.taggings.add(tagging)
-          em.persist(file)
-        })
-        // build snapshot files in DB
-        newSnapshotFileIds.forEach(fileId => {
-          const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
-          if (!apiResponse) {
-            this.ctx.log.warn({ fileId }, 'File was not found in the API response')
-            return
-          }
-          const file = this.createUserFile(fileId, apiResponse, true)
-          const tagging = taggingsRepo.createForFile({
-            fileId: file.id,
-            tagId: jupyterSnapshotTag.id,
-            userId: user.id,
-          })
-          file.taggings.add(tagging)
-          em.persist(file)
-        })
-        // store them in the database
-        await em.flush()
-      }
-      if (remoteDeletedFileIds.length > 0) {
-        // delete local files -> they are not in the platform anymore
-        // todo: could resolve it from localFiles var - entities are initialized
-        // todo: what about taggings?
-        // todo: this would require an explicit transaction
-        localfiles
-          .filter(fileEntity => remoteDeletedFileIds.includes(fileEntity.dxid))
-          .forEach(fileEntity => {
-            // remove all the references
-            filesRepo.remove(fileEntity)
-            fileEntity.taggings
-              .getItems()
-              .forEach(taggingEntity => taggingEntity.tag.taggingCount--)
-            fileEntity.taggings.removeAll()
-          })
-        await em.flush()
-      }
+      // // fixme: this should only happen if we discovered some new files
+      // if (newFileIds.length > 0) {
+      //   // handle all the new files
+      //   // ask the API for info about new files
+      //   const newFilesData = await client.filesDescribe({
+      //     accessToken: this.ctx.user.accessToken,
+      //     fileIds: newRegularFileIds.concat(newSnapshotFileIds),
+      //   })
+      //   // build regular files in DB
+      //   const regularFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
+      //   const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
+      //   newRegularFileIds.forEach(fileId => {
+      //     const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
+      //     if (!apiResponse) {
+      //       this.ctx.log.warn({ fileId }, 'File was not found in the API response')
+      //       return
+      //     }
+      //     const file = this.createUserFile(fileId, apiResponse, false)
+      //     const tagging = taggingsRepo.createForFile({
+      //       fileId: file.id,
+      //       tagId: regularFilesTag.id,
+      //       userId: user.id,
+      //     })
+      //     file.taggings.add(tagging)
+      //     em.persist(file)
+      //   })
+      //   // build snapshot files in DB
+      //   newSnapshotFileIds.forEach(fileId => {
+      //     const apiResponse = newFilesData.results.find(data => fileId === data.describe.id)
+      //     if (!apiResponse) {
+      //       this.ctx.log.warn({ fileId }, 'File was not found in the API response')
+      //       return
+      //     }
+      //     const file = this.createUserFile(fileId, apiResponse, true)
+      //     const tagging = taggingsRepo.createForFile({
+      //       fileId: file.id,
+      //       tagId: jupyterSnapshotTag.id,
+      //       userId: user.id,
+      //     })
+      //     file.taggings.add(tagging)
+      //     em.persist(file)
+      //   })
+      //   // store them in the database
+      //   await em.flush()
+      // }
+      // if (remoteDeletedFileIds.length > 0) {
+      //   // delete local files -> they are not in the platform anymore
+      //   // todo: could resolve it from localFiles var - entities are initialized
+      //   // todo: what about taggings?
+      //   // todo: this would require an explicit transaction
+      //   localfiles
+      //     .filter(fileEntity => remoteDeletedFileIds.includes(fileEntity.dxid))
+      //     .forEach(fileEntity => {
+      //       // remove all the references
+      //       filesRepo.remove(fileEntity)
+      //       fileEntity.taggings
+      //         .getItems()
+      //         .forEach(taggingEntity => taggingEntity.tag.taggingCount--)
+      //       fileEntity.taggings.removeAll()
+      //     })
+      //   await em.flush()
+      // }
       // FILES SYNC END
     }
     this.ctx.log.info({ jobId: input.dxid }, 'Updating job, state change discovered')
@@ -209,23 +231,23 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     this.ctx.log.debug({ job: updatedJob }, 'updated job')
   }
 
-  private createUserFile(fileId: string, apiResponse, isSnapshot: boolean): UserFile {
-    const userFile = new UserFile(this.user)
-    wrap(userFile).assign({
-      dxid: fileId,
-      project: this.job.project,
-      state: FILE_STATE.CLOSED,
-      name: apiResponse.describe.name,
-      userId: this.user.id,
-      scope: this.job.scope ?? 'private',
-      fileSize: apiResponse.describe.size,
-      parentId: this.job.id,
-      parentType: PARENT_TYPE.JOB,
-      parentFolderId: this.job.localFolderId,
-      uid: `${fileId}-1`,
-      stiType: FILE_STI_TYPE.USERFILE,
-      entityType: isSnapshot ? FILE_TYPE.SNAPSHOT : FILE_TYPE.REGULAR,
-    })
-    return userFile
-  }
+  // private createUserFile(fileId: string, apiResponse, isSnapshot: boolean): UserFile {
+  //   const userFile = new UserFile(this.user)
+  //   wrap(userFile).assign({
+  //     dxid: fileId,
+  //     project: this.job.project,
+  //     state: FILE_STATE.CLOSED,
+  //     name: apiResponse.describe.name,
+  //     userId: this.user.id,
+  //     scope: this.job.scope ?? 'private',
+  //     fileSize: apiResponse.describe.size,
+  //     parentId: this.job.id,
+  //     parentType: PARENT_TYPE.JOB,
+  //     parentFolderId: this.job.localFolderId,
+  //     uid: `${fileId}-1`,
+  //     stiType: FILE_STI_TYPE.USERFILE,
+  //     entityType: isSnapshot ? FILE_TYPE.SNAPSHOT : FILE_TYPE.REGULAR,
+  //   })
+  //   return userFile
+  // }
 }

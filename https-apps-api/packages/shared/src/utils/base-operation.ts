@@ -2,7 +2,7 @@
 /* eslint-disable max-classes-per-file */
 import { nanoid } from 'nanoid'
 import { path } from 'ramda'
-import type { AnyObject, OpsCtx, WorkerOpsCtx, Maybe } from '../types'
+import type { AnyObject, OpsCtx, WorkerOpsCtx } from '../types'
 
 export type DefaultInput = AnyObject
 
@@ -21,7 +21,7 @@ export abstract class BaseOperation<IN, OUT> {
     }
   }
 
-  async execute(props?: IN): Promise<Maybe<OUT>> {
+  async execute(props?: IN): Promise<OUT> {
     const startTime = Date.now()
     this.ctx.log.info(
       {
@@ -44,7 +44,7 @@ export abstract class BaseOperation<IN, OUT> {
     }
   }
 
-  public abstract async run(props?: IN): Promise<Maybe<OUT>>
+  public abstract run(props?: IN): Promise<OUT>
 }
 
 export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT> {
@@ -56,7 +56,7 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
     this.ctx.job = inputCtx.job
   }
 
-  async execute(props?: IN): Promise<Maybe<OUT>> {
+  async execute(props?: IN): Promise<OUT> {
     const startTime = Date.now()
     this.ctx.log.info(
       {
