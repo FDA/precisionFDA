@@ -7,7 +7,7 @@ import {
   Property,
 } from '@mikro-orm/core'
 import { Tagging } from '../tagging'
-import { TagRepository } from './ag.repository'
+import { TagRepository } from './tag.repository'
 
 @Entity({ tableName: 'tags', customRepository: () => TagRepository })
 export class Tag {

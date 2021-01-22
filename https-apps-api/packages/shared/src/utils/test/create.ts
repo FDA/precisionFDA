@@ -63,6 +63,7 @@ const filesHelper = {
     references: {
       user: InstanceType<typeof entities.User>
       parentFolder?: InstanceType<typeof entities.Folder>
+      parent?: InstanceType<typeof entities.Job>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {

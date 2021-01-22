@@ -8,14 +8,22 @@ import { errors, client } from '../../..'
 import type { Maybe } from '../../../types'
 import { FILE_STATE, FILE_STI_TYPE } from '../user-file.enum'
 
-export class SyncFilesInFolderOperation extends BaseOperation<SyncFilesInFolderInput, UserFile[]> {
-  async run(input: SyncFilesInFolderInput): Promise<UserFile[]> {
+type SyncFolderFilesOutput = {
+  files: UserFile[]
+  folderPath: string
+}
+
+export class SyncFilesInFolderOperation extends BaseOperation<
+  SyncFilesInFolderInput,
+  SyncFolderFilesOutput
+> {
+  async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
     const em = this.ctx.em.fork(false)
-    const folderRepo = em.getRepository(Folder)
-    const fileRepo = em.getRepository(UserFile)
 
     // BEGIN TRANSACTION
     await em.begin()
+    const folderRepo = em.getRepository(Folder)
+    const fileRepo = em.getRepository(UserFile)
     try {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const user = (await em.findOne(User, { id: this.ctx.user.id }))!
@@ -81,13 +89,15 @@ export class SyncFilesInFolderOperation extends BaseOperation<SyncFilesInFolderI
               dxid: details.describe.id,
               project: input.projectDxid,
               parentFolder: !isNil(current) ? wrap(current).toReference() : undefined,
+              // these two should be resolved separately - could be User | Job
+              parentType: input.parentType,
+              parentId: input.parentId,
+              // parent: em.getReference(Job, input.parentId),
               state: FILE_STATE.CLOSED,
               name: details.describe.name,
               userId: user.id,
               scope: input.scope,
               fileSize: details.describe.size,
-              parentId: input.parentId,
-              parentType: input.parentType,
               uid: `${details.describe.id}-1`,
               stiType: FILE_STI_TYPE.USERFILE,
               entityType: input.entityType,
@@ -114,14 +124,20 @@ export class SyncFilesInFolderOperation extends BaseOperation<SyncFilesInFolderI
       }
       // TRANSACTION CLOSE
       await em.commit()
-      return await fileRepo.findProjectFilesInSubfolder({
-        project: input.projectDxid,
-        folderId: input.folderId,
-      })
+      return {
+        folderPath,
+        files: await fileRepo.findProjectFilesInSubfolder({
+          project: input.projectDxid,
+          folderId: input.folderId,
+        }),
+      }
     } catch (err) {
-      this.ctx.log.error({ err }, 'Transaction failed to commit')
+      this.ctx.log.error(
+        { err, parentId: input.parentId, folderId: input.folderId },
+        'Transaction failed to commit',
+      )
       await em.rollback()
-      return []
+      throw err
     }
   }
 }

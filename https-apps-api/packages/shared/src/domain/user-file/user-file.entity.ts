@@ -64,6 +64,10 @@ export class UserFile extends Node {
   @ManyToOne()
   parentFolder?: IdentifiedReference<Folder>
 
+  // todo: could be User etc..
+  // @ManyToOne()
+  // parent?: IdentifiedReference<Job>
+
   @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this);
 
