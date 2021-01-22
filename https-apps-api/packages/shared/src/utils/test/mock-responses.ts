@@ -16,14 +16,15 @@ const FILES_LIST_RES_ROOT = {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyz77k80f24j1JB6332YgXKY',
     },
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
-      id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
-    },
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
-      id: 'file-Fyz76Q80f24p444q33Fg7ggz',
-    },
+    // recurse = false -> should not be returned
+    // {
+    //   project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    //   id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
+    // },
+    // {
+    //   project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    //   id: 'file-Fyz76Q80f24p444q33Fg7ggz',
+    // },
   ],
   next: null,
 } as const
@@ -33,6 +34,16 @@ const FILES_LIST_RES_SNAPSHOT = {
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyz76Q80f24p444q33Fg7ggz',
+    },
+  ],
+  next: null,
+} as const
+
+const FILES_LIST_RES_TEST_FOLDER = {
+  results: [
+    {
+      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+      id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
     },
   ],
   next: null,
@@ -51,7 +62,7 @@ const FILES_DESC_RES = {
         project: 'project-foo',
         class: 'file',
         sponsored: false,
-        name: 'untitled-checkpoint.txt',
+        name: 'a',
         types: [],
         state: 'closed',
         hidden: false,
@@ -70,7 +81,7 @@ const FILES_DESC_RES = {
         project: 'project-foo',
         class: 'file',
         sponsored: false,
-        name: 'untitled-checkpoint.txt',
+        name: 'b',
         types: [],
         state: 'closed',
         hidden: false,
@@ -89,7 +100,7 @@ const FILES_DESC_RES = {
         project: 'project-foo',
         class: 'file',
         sponsored: false,
-        name: 'untitled-checkpoint.txt',
+        name: 'c',
         types: [],
         state: 'closed',
         hidden: false,
@@ -108,7 +119,7 @@ const FILES_DESC_RES = {
         project: 'project-foo',
         class: 'file',
         sponsored: false,
-        name: 'untitled-checkpoint.txt',
+        name: 'd',
         types: [],
         state: 'closed',
         hidden: false,
@@ -123,16 +134,16 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_ROOT.results[4].id,
+        id: FILES_LIST_RES_TEST_FOLDER.results[0].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
-        name: 'untitled-checkpoint.txt',
+        name: 'test',
         types: [],
         state: 'closed',
         hidden: false,
         links: [],
-        folder: '/',
+        folder: '/test-folder',
         tags: [],
         created: 1606401885000,
         modified: 1606401886627,
@@ -142,11 +153,11 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_ROOT.results[5].id,
+        id: FILES_LIST_RES_SNAPSHOT.results[0].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
-        name: 'untitled-checkpoint.txt',
+        name: 'snapshot',
         types: [],
         state: 'closed',
         hidden: false,
@@ -162,4 +173,10 @@ const FILES_DESC_RES = {
   ],
 } as const
 
-export { FILES_LIST_RES_ROOT, FILES_LIST_RES_SNAPSHOT, FILES_DESC_RES, FOLDERS_LIST_RES }
+export {
+  FILES_LIST_RES_ROOT,
+  FILES_LIST_RES_SNAPSHOT,
+  FILES_DESC_RES,
+  FOLDERS_LIST_RES,
+  FILES_LIST_RES_TEST_FOLDER,
+}

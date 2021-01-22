@@ -150,7 +150,6 @@ const userFile = {
       scope: 'private',
       entityType: FILE_TYPE.REGULAR,
       state: FILE_STATE.CLOSED,
-      parentId: 1,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
     }

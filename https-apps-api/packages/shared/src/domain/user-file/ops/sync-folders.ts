@@ -12,7 +12,7 @@ import {
   getPathsToKeep,
   filterDuplicities,
 } from '../user-file.helper'
-import { User } from '../..'
+import { User, UserFile } from '../..'
 import { errors } from '../../..'
 
 // todo: maybe another operation type for "can be called from another operation"
@@ -82,7 +82,24 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       foldersToKeep,
     )
     this.ctx.log.info({ names: foldersToDelete.map(f => f.name) }, 'folders to delete')
-    await em.removeAndFlush(foldersToDelete)
+    await Promise.all(
+      foldersToDelete.map(async folder => {
+        // delete files of given folder
+        const files = await em.find(
+          UserFile,
+          { parentFolderId: folder.id },
+          { populate: ['taggings.tag'] },
+        )
+        // todo: this piece should be in a repo
+        files.forEach(f => {
+          em.remove(f)
+          f.taggings.getItems().forEach(tagging => tagging.tag.taggingCount--)
+          f.taggings.removeAll()
+        })
+        em.remove(folder)
+      }),
+    )
+    await em.flush()
 
     return await repo.findForSynchronization({
       userId: this.ctx.user.id,

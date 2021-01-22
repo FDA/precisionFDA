@@ -5,7 +5,6 @@ import {
   IdentifiedReference,
   JsonType,
   ManyToOne,
-  OneToMany,
   PrimaryKey,
   Property,
   Reference,
@@ -13,7 +12,6 @@ import {
 import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
-import { Tagging } from '../tagging'
 import { JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
@@ -76,6 +74,7 @@ export class Job extends BaseEntity {
   //   joinColumn: 'job_id',
   //   inverseJoinColumn: 'user_file_id',
   // })
+  // @OneToMany(() => UserFile, userfile => userfile.parent)
   // userFiles = new Collection<UserFile>(this);
 
   [EntityRepositoryType]?: JobRepository
