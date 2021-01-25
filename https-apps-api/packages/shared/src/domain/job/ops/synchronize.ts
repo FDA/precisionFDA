@@ -1,4 +1,5 @@
 import { wrap } from '@mikro-orm/core'
+import { difference, isNil } from 'ramda'
 import { CheckStatusJob } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
@@ -7,9 +8,16 @@ import * as client from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { User, Tagging, UserFile, Tag, Folder } from '../..'
-import { FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
+import { errors } from '../../..'
+import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 import { createJobClosed } from '../../event/event.helper'
-import { SyncFilesInFolderOperation, SyncFoldersOperation } from '../../user-file'
+import {
+  SyncFilesInFolderOperation,
+  SyncFolderFilesOutput,
+  SyncFoldersOperation,
+} from '../../user-file'
+
+type FilesByFolder = Pick<SyncFolderFilesOutput, 'folder' | 'folderPath'> & { files: UserFile[] }
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
   protected user: User
@@ -108,16 +116,24 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
           return res
         }),
       )
-      // assign tags outside of the files sync transactions
+      // handle dxids to remove
+      const filesToRemove = ([] as string[]).concat(...syncFilesResp.map(res => res.toRemove))
+      await this.removeLocalFiles(filesToRemove)
+      await em.flush()
+      // more complex
+      const fileUpdates = await this.addLocalFiles(syncFilesResp)
+      await em.flush()
+      // load all the local files per subfolder
+      const localFiles = await this.loadFilesPerFolder(fileUpdates)
+
       await Promise.all(
-        syncFilesResp.map(async ({ folderPath, files }) => {
+        localFiles.map(async ({ folderPath, files }) => {
           // extra action based on folderPath happens here
           if (folderPath.includes('/.Notebook_snapshots')) {
             await this.assignTags(files, jupyterSnapshotTag)
             this.changeEntityType(files)
           }
           // all files get this for now
-          // maybe locking problem here?
           await this.assignTags(files, httpsFilesTag)
         }),
       )
@@ -134,6 +150,97 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     )
     await em.flush()
     this.ctx.log.debug({ job: updatedJob }, 'updated job')
+  }
+
+  private async addLocalFiles(input: SyncFolderFilesOutput[]): Promise<FilesByFolder[]> {
+    const filesToCreate = ([] as string[]).concat(...input.map(res => res.toAdd))
+    // API call can be shared
+    if (filesToCreate.length === 0) {
+      return input.map(res => ({
+        folder: res.folder,
+        folderPath: res.folderPath,
+        // for this state, just a placeholder
+        files: [],
+      }))
+    }
+    const filesDesc = await client.filesDescribe({
+      accessToken: this.ctx.user.accessToken,
+      fileIds: filesToCreate,
+    })
+    return await Promise.all(
+      input.map(async res => {
+        const current = res.folder
+        const newInFolder = res.toAdd.map(dxid => {
+          const details = filesDesc.results.find(f => f.describe.id === dxid)
+          if (!details) {
+            throw new errors.NotFoundError('File not found in the filesDescribe response', {
+              details: { dxid },
+            })
+          }
+          const folderOrUndef = !isNil(current) ? current : undefined
+          return wrap(new UserFile(this.user, folderOrUndef)).assign(
+            {
+              dxid: details.describe.id,
+              project: this.job.project,
+              parentFolder: !isNil(current) ? wrap(current).toReference() : undefined,
+              // these two should be resolved separately - could be User | Job
+              parentType: PARENT_TYPE.JOB,
+              parentId: this.job.id,
+              // parent: em.getReference(Job, input.parentId),
+              state: FILE_STATE.CLOSED,
+              name: details.describe.name,
+              userId: this.user.id,
+              scope: this.job.scope,
+              fileSize: details.describe.size,
+              uid: `${details.describe.id}-1`,
+              stiType: FILE_STI_TYPE.USERFILE,
+              entityType: FILE_TYPE.REGULAR,
+            },
+            { em: this.ctx.em },
+          )
+        })
+        this.ctx.em.persist(newInFolder)
+        return {
+          folder: res.folder,
+          folderPath: res.folderPath,
+          // for this state, just a placeholder
+          files: [],
+        }
+      }),
+    )
+  }
+
+  private async loadFilesPerFolder(input: FilesByFolder[]): Promise<FilesByFolder[]> {
+    const fileRepo = this.ctx.em.getRepository(UserFile)
+    return await Promise.all(
+      input.map(async res => {
+        const files = await fileRepo.findProjectFilesInSubfolder({
+          project: this.job.project,
+          folderId: isNil(res.folder) ? null : res.folder.id,
+        })
+        return {
+          ...res,
+          files,
+        }
+      }),
+    )
+  }
+
+  // just makes changes in the em
+  private async removeLocalFiles(fileIds: string[]): Promise<UserFile[]> {
+    const filesRepo = this.ctx.em.getRepository(UserFile)
+    const localFiles = await filesRepo.find({ dxid: { $in: fileIds } })
+    if (localFiles.length > fileIds.length) {
+      throw new errors.NotFoundError('Some Local user files to delete were not found', {
+        details: {
+          missingDxids: difference(
+            fileIds,
+            localFiles.map(lf => lf.dxid),
+          ),
+        },
+      })
+    }
+    return filesRepo.removeFilesWithTags(localFiles)
   }
 
   private changeEntityType(files: UserFile[]): void {

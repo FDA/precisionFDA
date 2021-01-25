@@ -50,8 +50,8 @@ export class UserFile extends Node {
   @Property()
   parentType: PARENT_TYPE
 
-  @Property()
-  parentFolderId?: number
+  // @Property()
+  // parentFolderId?: number
 
   @Property()
   scopedParentFolderId?: number
@@ -61,7 +61,7 @@ export class UserFile extends Node {
   @ManyToOne()
   user!: IdentifiedReference<User>
 
-  @ManyToOne()
+  @ManyToOne({ entity: () => Folder, joinColumn: 'parent_folder_id' })
   parentFolder?: IdentifiedReference<Folder>
 
   // todo: could be User etc..

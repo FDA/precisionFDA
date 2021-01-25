@@ -10,7 +10,7 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { isNil } from 'ramda'
-import { Tagging, User } from '..'
+import { Tagging, User, UserFile } from '..'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from './user-file.enum'
@@ -64,6 +64,9 @@ export class Folder extends Node {
   // todo: could be User etc..
   // @ManyToOne()
   // parent?: IdentifiedReference<Job>
+
+  @OneToMany(() => UserFile, userfile => userfile.parentFolder)
+  userFiles = new Collection<UserFile>(this)
 
   @ManyToOne()
   parentFolder?: IdentifiedReference<Folder>

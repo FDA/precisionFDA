@@ -87,7 +87,7 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
         // delete files of given folder
         const files = await em.find(
           UserFile,
-          { parentFolderId: folder.id },
+          { parentFolder: folder.id },
           { populate: ['taggings.tag'] },
         )
         // todo: this piece should be in a repo

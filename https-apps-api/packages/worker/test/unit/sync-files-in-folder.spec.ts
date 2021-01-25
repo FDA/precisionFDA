@@ -72,7 +72,11 @@ describe('syncFilesInFolder operation', () => {
       .onCall(0)
       .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 1), next: null })
     const input = { ...defaultInput, folderId: subfolder.id }
-    await op.execute(input)
+    const res = await op.execute(input)
+    // response shape
+    expect(Object.keys(res)).to.have.members(['folder', 'folderPath', 'toAdd', 'toRemove'])
+    expect(res.folder).to.have.property('id', subfolder.id)
+    expect(res.folderPath).to.equal('/a/b')
 
     expect(fakes.client.filesListFake.calledOnce).to.be.true()
     expect(fakes.client.filesDescFake.notCalled).to.be.true()
@@ -80,7 +84,7 @@ describe('syncFilesInFolder operation', () => {
     expect(nodesCount).to.be.equal(1)
   })
 
-  it('creates one new file in a folder', async () => {
+  it('returns new file dxid', async () => {
     const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
     const createdFileDesc = FILES_DESC_RES.results[1].describe
     const subfolder = create.filesHelper.createFolder(
@@ -102,22 +106,13 @@ describe('syncFilesInFolder operation', () => {
     fakes.client.filesListFake
       .onCall(0)
       .returns({ results: FILES_LIST_RES_ROOT.results.slice(1, 2), next: null })
-    fakes.client.filesDescFake
-      .onCall(0)
-      .returns({ results: FILES_DESC_RES.results.slice(1, 2), next: null })
     const input = { ...defaultInput, folderId: folder.id }
     const res = await op.execute(input)
     // in the folder these is only one file
-    expect(res).to.have.keys(['files', 'folderPath'])
     expect(res.folderPath).to.equal('/a')
-    expect(res.files).to.be.an('array').with.lengthOf(1)
-    expect(res.files[0]).to.have.property('name', createdFileDesc.name)
-    expect(res.files[0]).to.have.property('dxid', createdFileDesc.id)
+    expect(res).to.have.property('toAdd').that.has.members([createdFileDesc.id])
+    expect(res).to.have.property('toRemove').that.has.lengthOf(0)
     expect(fakes.client.filesListFake.calledOnce).to.be.true()
-    expect(fakes.client.filesDescFake.calledOnce).to.be.true()
-    // original file is not deleted - in total, we have two files now
-    const nodesCount = await em.count(UserFile, {}, { filters: ['userfile'] })
-    expect(nodesCount).to.be.equal(2)
   })
 
   it('creates one more new file in a subfolder', async () => {
@@ -147,15 +142,10 @@ describe('syncFilesInFolder operation', () => {
       .returns({ results: FILES_DESC_RES.results.slice(1, 2), next: null })
     const input = { ...defaultInput, folderId: subfolder.id }
     const res = await op.execute(input)
-    expect(res).to.have.keys(['files', 'folderPath'])
     expect(res.folderPath).to.equal('/a/b')
-    expect(res.files).to.be.an('array').with.lengthOf(2)
-    expect(res.files[0]).to.have.property('name', file.name)
-    expect(res.files[0]).to.have.property('dxid', firstFileDxid)
-    expect(res.files[1]).to.have.property('name', createdFileDesc.name)
-    expect(res.files[1]).to.have.property('dxid', createdFileDesc.id)
+    expect(res).to.have.property('toAdd').that.has.members([createdFileDesc.id])
+    expect(res).to.have.property('toRemove').that.has.lengthOf(0)
     expect(fakes.client.filesListFake.calledOnce).to.be.true()
-    expect(fakes.client.filesDescFake.calledOnce).to.be.true()
   })
 
   it('deletes existing file', async () => {
@@ -178,9 +168,9 @@ describe('syncFilesInFolder operation', () => {
     })
     fakes.client.filesListFake.onCall(0).returns({ results: [], next: null })
     const input = { ...defaultInput, folderId: subfolder.id }
-    await op.execute(input)
-    const nodesCount = await em.count(UserFile, {}, { filters: ['userfile'] })
-    expect(nodesCount).to.be.equal(0)
+    const res = await op.execute(input)
+    expect(res).to.have.property('toRemove').that.has.members([file.dxid])
+    expect(res).to.have.property('toAdd').that.has.lengthOf(0)
   })
 
   it('deletes existing file and creates another', async () => {
@@ -210,10 +200,8 @@ describe('syncFilesInFolder operation', () => {
       .returns({ results: FILES_DESC_RES.results.slice(1, 2), next: null })
     const input = { ...defaultInput, folderId: subfolder.id }
     const res = await op.execute(input)
-    expect(res.files).to.be.an('array').with.lengthOf(1)
-    expect(res.files[0]).to.have.property('dxid', secondFileDxid)
-    const nodesCount = await em.count(UserFile, {}, { filters: ['userfile'] })
-    expect(nodesCount).to.be.equal(1)
+    expect(res).to.have.property('toRemove').that.has.members([file.dxid])
+    expect(res).to.have.property('toAdd').that.has.members([secondFileDxid])
   })
 
   // todo: deletes file when folder is deleted
