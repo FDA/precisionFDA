@@ -47,6 +47,7 @@ export class TaggingRepository extends EntityRepository<Tagging> {
       },
       { em: this.em },
     )
+    this.em.persist(fileTagging)
     // increase tag count in tags
     fileTagging.tag.taggingCount++
     return fileTagging
