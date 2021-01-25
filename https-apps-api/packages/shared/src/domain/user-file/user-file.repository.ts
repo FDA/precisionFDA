@@ -28,10 +28,19 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         project: input.project,
         stiType: { $ne: FILE_STI_TYPE.FOLDER },
         parentType: PARENT_TYPE.JOB,
-        parentFolderId: input.folderId,
+        parentFolder: input.folderId,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
     )
+  }
+
+  removeFilesWithTags(files: UserFile[]): UserFile[] {
+    return files.map(file => {
+      this.remove(file)
+      file.taggings.getItems().forEach(tagging => tagging.tag.taggingCount--)
+      file.taggings.removeAll()
+      return file
+    })
   }
 
   async createUserFileJobRefs(fileIds: number[], jobId: number) {
