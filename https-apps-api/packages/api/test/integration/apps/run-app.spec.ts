@@ -256,6 +256,20 @@ describe('POST /apps/:id/run', () => {
       expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
     })
 
+    it('throws 404 when user does not have the project set', async () => {
+      user.jupyterProject = null
+      await em.flush()
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${app.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+          id: user.id,
+        })
+        .send(generate.app.runAppInput())
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
+    })
+
     // deprecated, admin owns the apps
     it.skip('throws 401 when user does not own the app', async () => {
       const anotherUser = create.userHelper.create(em)
