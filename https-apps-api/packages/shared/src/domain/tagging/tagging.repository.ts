@@ -25,11 +25,14 @@ export class TaggingRepository extends EntityRepository<Tagging> {
   }
 
   async findForFiles(input: FindMultipleInput): Promise<Tagging[]> {
-    return await this.find({
-      userFile: { $in: input.fileIds.map(fileId => this.em.getReference(UserFile, fileId)) },
-      tagId: input.tagId,
-      taggerId: input.userId,
-    })
+    return await this.find(
+      {
+        userFile: { $in: input.fileIds.map(fileId => this.em.getReference(UserFile, fileId)) },
+        tagId: input.tagId,
+        taggerId: input.userId,
+      },
+      { populate: ['tag'] },
+    )
   }
 
   upsertForFile(input: FindInput): Tagging {
@@ -49,7 +52,8 @@ export class TaggingRepository extends EntityRepository<Tagging> {
     )
     this.em.persist(fileTagging)
     // increase tag count in tags
-    fileTagging.tag.taggingCount++
+    // todo: this does not work, it is separately elsewhere for now
+    // fileTagging.tag.taggingCount++
     return fileTagging
   }
 }
