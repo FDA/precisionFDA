@@ -102,10 +102,11 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         folderPathsToCheck.map(async (folder: Folder | null) => {
           const syncFilesInFolderOp = new SyncFilesInFolderOperation({
             log: this.ctx.log,
-            em: this.ctx.em,
+            // operations run in parallel, they should have their own DB context
+            em: this.ctx.em.fork(false),
             user: this.ctx.user,
           })
-          const res = await syncFilesInFolderOp.execute({
+          return await syncFilesInFolderOp.execute({
             folderId: folder ? folder.id : null,
             projectDxid: job.project,
             scope: job.scope,
@@ -113,7 +114,6 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
             parentId: job.id,
             entityType: FILE_TYPE.REGULAR,
           })
-          return res
         }),
       )
       // handle dxids to remove
@@ -227,7 +227,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
   }
 
   // just makes changes in the em
-  private async removeLocalFiles(fileIds: string[]): Promise<UserFile[]> {
+  private async removeLocalFiles(fileIds: string[]): Promise<void> {
+    if (fileIds.length === 0) {
+      return
+    }
     const filesRepo = this.ctx.em.getRepository(UserFile)
     const localFiles = await filesRepo.find({ dxid: { $in: fileIds } })
     if (localFiles.length > fileIds.length) {
@@ -240,7 +243,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         },
       })
     }
-    return filesRepo.removeFilesWithTags(localFiles)
+    filesRepo.removeFilesWithTags(localFiles)
   }
 
   private changeEntityType(files: UserFile[]): void {
