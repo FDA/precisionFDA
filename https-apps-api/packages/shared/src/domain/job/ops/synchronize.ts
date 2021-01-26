@@ -128,13 +128,16 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
 
       await Promise.all(
         localFiles.map(async ({ folderPath, files }) => {
+          // const helperEm: any = this.ctx.em.fork(false)
           // extra action based on folderPath happens here
           if (folderPath.includes('/.Notebook_snapshots')) {
-            await this.assignTags(files, jupyterSnapshotTag)
+            const newSnapshotTagsCnt = await this.assignTags(files, jupyterSnapshotTag)
+            jupyterSnapshotTag.taggingCount += newSnapshotTagsCnt
             this.changeEntityType(files)
           }
           // all files get this for now
-          await this.assignTags(files, httpsFilesTag)
+          const newHttpsTagsCnt = await this.assignTags(files, httpsFilesTag)
+          httpsFilesTag.taggingCount += newHttpsTagsCnt
         }),
       )
       await em.flush()
@@ -211,9 +214,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
   }
 
   private async loadFilesPerFolder(input: FilesByFolder[]): Promise<FilesByFolder[]> {
-    const fileRepo = this.ctx.em.getRepository(UserFile)
     return await Promise.all(
       input.map(async res => {
+        const em = this.ctx.em.fork(false)
+        const fileRepo = em.getRepository(UserFile)
         const files = await fileRepo.findProjectFilesInSubfolder({
           project: this.job.project,
           folderId: isNil(res.folder) ? null : res.folder.id,
@@ -232,7 +236,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       return
     }
     const filesRepo = this.ctx.em.getRepository(UserFile)
-    const localFiles = await filesRepo.find({ dxid: { $in: fileIds } })
+    const localFiles = await filesRepo.find(
+      { dxid: { $in: fileIds } },
+      { populate: ['taggings.tag'] },
+    )
     if (localFiles.length > fileIds.length) {
       throw new errors.NotFoundError('Some Local user files to delete were not found', {
         details: {
@@ -252,17 +259,19 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     })
   }
 
-  private async assignTags(files: UserFile[], tag: Tag): Promise<void> {
-    const em = this.ctx.em
+  private async assignTags(files: UserFile[], tag: Tag): Promise<number> {
+    // const em = this.ctx.em
+    const em = this.ctx.em.fork(true)
     const taggingRepo = em.getRepository(Tagging)
     const existingRefs = await taggingRepo.findForFiles({
       fileIds: files.map(f => f.id),
       tagId: tag.id,
       userId: this.ctx.user.id,
     })
+    let createdTags = 0
     files.forEach(file => {
       const existing = existingRefs.find(tagging => tagging.taggableId === file.id)
-      if (existing) {
+      if (!isNil(existing)) {
         return
       }
       const tagging = taggingRepo.upsertForFile({
@@ -270,7 +279,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         fileId: file.id,
         userId: this.ctx.user.id,
       })
+      // tagging.tag.taggingCount++
       file.taggings.add(tagging)
+      em.persist(tagging)
+      createdTags++
     })
+    await em.flush()
+    return createdTags
   }
 }

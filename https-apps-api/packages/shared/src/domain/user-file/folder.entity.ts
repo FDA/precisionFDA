@@ -65,8 +65,8 @@ export class Folder extends Node {
   // @ManyToOne()
   // parent?: IdentifiedReference<Job>
 
-  @OneToMany(() => UserFile, userfile => userfile.parentFolder)
-  userFiles = new Collection<UserFile>(this)
+  // @OneToMany(() => UserFile, userfile => userfile.parentFolder)
+  // userFiles = new Collection<UserFile>(this)
 
   @ManyToOne()
   parentFolder?: IdentifiedReference<Folder>
