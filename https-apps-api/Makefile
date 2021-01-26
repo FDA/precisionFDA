@@ -33,8 +33,8 @@ run-dev:
 run-worker-dev:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/index.ts
 
-# test-worker:
-# 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
+test-worker-task:
+	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
 
 watch:
 	$(bin)nodemon --watch ./packages/api/src --ext ts --exec make run-dev
