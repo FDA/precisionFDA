@@ -28,7 +28,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         project: input.project,
         stiType: { $ne: FILE_STI_TYPE.FOLDER },
         parentType: PARENT_TYPE.JOB,
-        parentFolder: input.folderId,
+        parentFolderId: input.folderId,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
     )

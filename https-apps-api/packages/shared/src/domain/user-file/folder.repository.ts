@@ -11,7 +11,7 @@ export class FolderRepository extends EntityRepository<Folder> {
     // implicit conditions on how to find folders :)
     return await this.find(
       { user: this.getReference(userId), project: projectDxid },
-      { filters: ['folder'], populate: ['parentFolder'], orderBy: { id: 'ASC' } },
+      { filters: ['folder'], orderBy: { id: 'ASC' } },
     )
   }
 }

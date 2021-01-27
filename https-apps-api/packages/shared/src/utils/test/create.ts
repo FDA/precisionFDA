@@ -62,6 +62,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      // todo: remove both
       parentFolder?: InstanceType<typeof entities.Folder>
       parent?: InstanceType<typeof entities.Job>
     },
@@ -72,10 +73,7 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
-    const file = wrap(new entities.UserFile(references.user, references.parentFolder)).assign(
-      input,
-      { em },
-    )
+    const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
     em.persist(file)
     return file
   },
@@ -83,6 +81,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      // todo: remove
       parent?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
@@ -92,7 +91,7 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
-    const folder = wrap(new entities.Folder(references.user, references.parent)).assign(input)
+    const folder = wrap(new entities.Folder(references.user)).assign(input)
     em.persist(folder)
     return folder
   },

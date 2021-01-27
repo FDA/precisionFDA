@@ -3,28 +3,39 @@ const FILES_LIST_RES_ROOT = {
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyzv0V00f24kgVbb3zBj1Bg9',
+      describe: {
+        id: 'file-Fyzv0V00f24kgVbb3zBj1Bg9',
+        name: 'a',
+        size: 0,
+      },
     },
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyzqyg80f24v2BJ93yq7yF4j',
+      describe: {
+        id: 'file-Fyzqyg80f24v2BJ93yq7yF4j',
+        name: 'b',
+        size: 0,
+      },
     },
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyzqyg00f24f3qf940Pj7pfx',
+      describe: {
+        id: 'file-Fyzqyg00f24f3qf940Pj7pfx',
+        name: 'c',
+        size: 0,
+      },
     },
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyz77k80f24j1JB6332YgXKY',
+      describe: {
+        id: 'file-Fyz77k80f24j1JB6332YgXKY',
+        name: 'd',
+        size: 0,
+      },
     },
-    // recurse = false -> should not be returned
-    // {
-    //   project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
-    //   id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
-    // },
-    // {
-    //   project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
-    //   id: 'file-Fyz76Q80f24p444q33Fg7ggz',
-    // },
   ],
   next: null,
 } as const

@@ -43,7 +43,7 @@ describe('syncFolders operation', () => {
     // todo: complete test of DB entry shape
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('name', 'foo')
-    expect(res[0]).to.have.property('parentFolder', undefined)
+    expect(res[0]).to.have.property('parentFolderId', undefined)
   })
 
   it('creates two subfolders with the same name', async () => {
@@ -61,15 +61,13 @@ describe('syncFolders operation', () => {
     const local = res.find(f => f.id === folder.id)
     expect(local).to.exist()
     // // foo/bar
-    const subfolder = res.find(f => f.name === 'bar' && f.parentFolder.id === folder.id)
+    const subfolder = res.find(f => f.name === 'bar' && f.parentFolderId === folder.id)
     expect(subfolder).to.exist()
-    expect(subfolder).to.have.property('parentFolder')
-    expect(subfolder.parentFolder).to.have.property('id', local.id)
+    expect(subfolder.parentFolderId).to.be.equal(local.id)
     // // foo/bar/bar
-    const subfolder2 = res.find(f => f.name === 'bar' && f.parentFolder.id !== folder.id)
+    const subfolder2 = res.find(f => f.name === 'bar' && f.parentFolderId !== folder.id)
     expect(subfolder2).to.exist()
-    expect(subfolder2).to.have.property('parentFolder')
-    expect(subfolder2.parentFolder).to.have.property('id', subfolder.id)
+    expect(subfolder2.parentFolderId).to.be.equal(subfolder.id)
   })
 
   it('creates folders with the same name', async () => {
