@@ -38,7 +38,6 @@ class App < ApplicationRecord
 
   HTTPS_JUPYTER = "jupyter".freeze
   HTTPS_TTYD = "ttyd".freeze
-  HTTPS_RSHINY = "r_shiny".freeze
 
   TYPE_REGULAR = "regular".freeze
   TYPE_HTTPS = "https".freeze
@@ -215,14 +214,18 @@ class App < ApplicationRecord
     app_series.update(deleted: deleted)
   end
 
+  # FIXME: this is a temporary solution while we send httpsAppType to JupyterLab service,
+  #   and is only for testing purposes!
   def https_subtype
     @https_subtype ||=
       begin
-        return "" if regular?
+        return "" unless https?
 
-        { HTTPS_JUPYTER => HTTPS_JUPYTER_APP_DXID,
-          HTTPS_TTYD => HTTPS_TTYD_APP_DXID,
-          HTTPS_RSHINY => HTTPS_RSHINY_APP_DXID }.key(dxid) || ""
+        if readme.include?("DXJupyterLab")
+          HTTPS_JUPYTER
+        elsif readme.include?("TTYD")
+          HTTPS_TTYD
+        end
       end
   end
 

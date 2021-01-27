@@ -158,11 +158,11 @@ class AppsController < ApplicationController
 
     if @app.nil?
       flash[:error] = I18n.t("app_not_accessible")
-      redirect_to apps_path && return
+      redirect_to(apps_path) && return
     elsif @app.id != @app.app_series.latest_revision_app_id
       redirect_to edit_app_path(@app.app_series.latest_revision_app) && return
     else
-      attrs = %i(dxid name scope title version revision readme spec internal release)
+      attrs = %i(dxid name scope title version revision readme spec internal release entity_type)
       js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
     end
   end
@@ -231,10 +231,10 @@ class AppsController < ApplicationController
     if @app.nil?
       flash[:error] = I18n.t("app_fork_forbidden")
       redirect_to apps_path && return
-    else
-      attrs = %i(dxid name title version revision readme spec internal release)
-      js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
     end
+
+    attrs = %i(dxid name title version revision readme spec internal release entity_type)
+    js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
   end
 
   # TODO: do refactoring of this method later!

@@ -60,6 +60,7 @@ class CopyService
         opts[:scope] = scope
         opts[:name] = app.name
         opts[:title] = app.title
+        opts[:entity_type] = app.entity_type
         opts[:release] = app.release
         opts[:output_spec] = app.output_spec
         opts[:code] = app.code
