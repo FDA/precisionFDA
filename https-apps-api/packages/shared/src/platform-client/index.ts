@@ -1,6 +1,6 @@
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
-import { omit } from 'ramda'
+import { isNil, omit } from 'ramda'
 import { errors } from '..'
 import { config } from '../config'
 import { getLogger } from '../logger'
@@ -29,6 +29,7 @@ type JobCreateParams = BaseParams & {
 type ListFilesParams = BaseParams & {
   project: string
   folder?: string
+  includeDescProps?: boolean
 }
 
 type DescribeFilesParams = BaseParams & {
@@ -43,6 +44,11 @@ type ListFilesResponse = {
   results: Array<{
     id: string
     project: string
+    describe?: {
+      id: string
+      name: string
+      size: number
+    }
   }>
   next?: boolean
 }
@@ -170,15 +176,27 @@ const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeRespon
 }
 
 const filesList = async (params: ListFilesParams): Promise<ListFilesResponse> => {
+  const data: AnyObject = {
+    class: 'file',
+  }
   const scope = {
     project: params.project,
     folder: params.folder ?? '/',
     recurse: false,
   }
+  data.scope = scope
+  if (!isNil(params.includeDescProps)) {
+    data.describe = {
+      fields: {
+        name: true,
+        size: true,
+      },
+    }
+  }
   const url = `${config.platform.apiUrl}/system/findDataObjects`
   const options: AxiosRequestConfig = {
     method: 'POST',
-    data: { class: 'file', scope },
+    data,
     url,
     headers: setupHeaders(params),
   }

@@ -65,7 +65,6 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
     // paths to keep and then to remove
     localFolderPaths = parseFoldersFromDatabase(localFolders.concat(newFolders))
     const pathsToKeep = getPathsToKeep(remotePaths, localFolderPaths)
-    // console.log(pathsToKeep, 'keep')
     let foldersToKeep: Folder[] = []
     pathsToKeep.forEach(path => {
       const names = getFolders(path)
@@ -87,15 +86,10 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
         // delete files of given folder
         const files = await em.find(
           UserFile,
-          { parentFolder: folder.id },
+          { parentFolderId: folder.id },
           { populate: ['taggings.tag'] },
         )
-        // todo: this piece should be in a repo
-        files.forEach(f => {
-          em.remove(f)
-          f.taggings.getItems().forEach(tagging => tagging.tag.taggingCount--)
-          f.taggings.removeAll()
-        })
+        em.getRepository(UserFile).removeFilesWithTags(files)
         em.remove(folder)
       }),
     )

@@ -68,19 +68,16 @@ export class Folder extends Node {
   // @OneToMany(() => UserFile, userfile => userfile.parentFolder)
   // userFiles = new Collection<UserFile>(this)
 
-  @ManyToOne()
-  parentFolder?: IdentifiedReference<Folder>
+  // @ManyToOne()
+  // parentFolder?: IdentifiedReference<Folder>
 
   @ManyToOne()
   user!: IdentifiedReference<User>;
 
   [EntityRepositoryType]?: FolderRepository
 
-  constructor(user: User, parentFolder?: Folder) {
+  constructor(user: User) {
     super()
     this.user = Reference.create(user)
-    if (!isNil(parentFolder)) {
-      this.parentFolder = Reference.create(parentFolder)
-    }
   }
 }

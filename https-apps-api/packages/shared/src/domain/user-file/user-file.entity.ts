@@ -50,8 +50,8 @@ export class UserFile extends Node {
   @Property()
   parentType: PARENT_TYPE
 
-  // @Property()
-  // parentFolderId?: number
+  @Property({ fieldName: 'parent_folder_id' })
+  parentFolderId?: number
 
   @Property()
   scopedParentFolderId?: number
@@ -61,8 +61,8 @@ export class UserFile extends Node {
   @ManyToOne()
   user!: IdentifiedReference<User>
 
-  @ManyToOne({ entity: () => Folder, joinColumn: 'parent_folder_id' })
-  parentFolder?: IdentifiedReference<Folder>
+  // @ManyToOne({ entity: () => Folder, joinColumn: 'parent_folder_id' })
+  // parentFolder?: IdentifiedReference<Folder>
 
   // todo: could be User etc..
   // @ManyToOne()
@@ -72,11 +72,8 @@ export class UserFile extends Node {
   taggings = new Collection<Tagging>(this);
 
   [EntityRepositoryType]?: UserFileRepository
-  constructor(user: User, parentFolder?: Folder) {
+  constructor(user: User) {
     super()
     this.user = Reference.create(user)
-    if (!isNil(parentFolder)) {
-      this.parentFolder = Reference.create(parentFolder)
-    }
   }
 }

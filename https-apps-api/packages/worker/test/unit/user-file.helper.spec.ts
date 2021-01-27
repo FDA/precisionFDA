@@ -47,15 +47,17 @@ describe('user-file.helper', () => {
       await em.flush()
       const subfolder = create.filesHelper.createFolder(
         em,
-        { user, parent: parentFolder },
+        { user },
         {
+          parentFolderId: parentFolder.id,
           name: 'sub-folder',
         },
       )
       const subfolder2 = create.filesHelper.createFolder(
         em,
-        { user, parent: parentFolder },
+        { user },
         {
+          parentFolderId: parentFolder.id,
           name: 'sub-folder2',
         },
       )
@@ -80,16 +82,18 @@ describe('user-file.helper', () => {
       await em.flush()
       const subfolder = create.filesHelper.createFolder(
         em,
-        { user, parent: parentFolder },
+        { user },
         {
+          parentFolderId: parentFolder.id,
           name: 'sub-folder',
         },
       )
       await em.flush()
       const subfolder2 = create.filesHelper.createFolder(
         em,
-        { user, parent: subfolder },
+        { user },
         {
+          parentFolderId: subfolder.id,
           name: 'sub-folder2',
         },
       )
