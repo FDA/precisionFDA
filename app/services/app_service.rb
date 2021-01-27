@@ -69,6 +69,7 @@ class AppService
         revision: revision,
         title: opts[:title],
         readme: opts[:readme],
+        entity_type: opts[:entity_type] || App::TYPE_REGULAR,
         user: user,
         scope: scope,
         app_series: app_series,

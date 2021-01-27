@@ -4,6 +4,7 @@ class AppSerializer < ApplicationSerializer
     :id,
     :uid,
     :dxid,
+    :entity_type,
     :name,
     :title,
     :added_by,
