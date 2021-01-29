@@ -15,6 +15,8 @@ type SyncFilesInFolderInput = {
   parentId: number
   parentType: PARENT_TYPE
   entityType: FILE_TYPE
+  runAdd: boolean
+  runRemove: boolean
 }
 
 export { SyncFoldersInput, SyncFilesInFolderInput }

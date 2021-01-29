@@ -93,8 +93,34 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       // for each local folder query files and check for differences
       // null is added -> root folder
       const folderPathsToCheck: Array<Folder | null> = [null, ...localFolders]
+      const fileDeletesSeq = async (): Promise<void> => {
+        for (const folder of folderPathsToCheck) {
+          // !!!
+          const syncFilesEm = this.ctx.em.fork(true)
+          const syncFilesInFolderOp = new SyncFilesInFolderOperation({
+            log: this.ctx.log,
+            // operations run in parallel, they should have their own DB context
+            em: syncFilesEm,
+            user: this.ctx.user,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          await syncFilesInFolderOp.execute({
+            folderId: !isNil(folder) ? folder.id : null,
+            projectDxid: job.project,
+            scope: job.scope,
+            parentType: PARENT_TYPE.JOB,
+            parentId: job.id,
+            entityType: FILE_TYPE.REGULAR,
+            runRemove: true,
+            runAdd: false,
+          })
+          // syncFilesResp.push(res)
+        }
+      }
       const syncFilesResp: SyncFolderFilesOutput[] = []
-      const fileUpdatesSeq = async (): Promise<void> => {
+      await fileDeletesSeq()
+
+      const fileAddsSeq = async (): Promise<void> => {
         for (const folder of folderPathsToCheck) {
           // !!!
           const syncFilesEm = this.ctx.em.fork(true)
@@ -112,11 +138,13 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
             parentType: PARENT_TYPE.JOB,
             parentId: job.id,
             entityType: FILE_TYPE.REGULAR,
+            runRemove: false,
+            runAdd: true,
           })
           syncFilesResp.push(res)
         }
       }
-      await fileUpdatesSeq()
+      await fileAddsSeq()
 
       const httpsFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
       const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')

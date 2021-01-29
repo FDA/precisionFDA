@@ -40,6 +40,8 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
     defaultInput = {
+      runAdd: true,
+      runRemove: true,
       projectDxid: project,
       folderId: folder.id,
       scope: job.scope,

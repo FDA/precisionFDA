@@ -84,42 +84,46 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     })
 
     // remove
-    const filesToRemove = localFiles.filter(file => toRemove.includes(file.dxid))
-    fileRepo.removeFilesWithTags(filesToRemove)
-    await em.flush()
+    if (input.runRemove) {
+      const filesToRemove = localFiles.filter(file => toRemove.includes(file.dxid))
+      fileRepo.removeFilesWithTags(filesToRemove)
+      await em.flush()
+    }
 
     // add new files
-    toAdd.forEach(dxid => {
-      const remoteDetails = remoteFiles.results.find(remoteFile => remoteFile.id === dxid)
-      if (!remoteDetails) {
-        throw new Error('remote details not found for file dxid')
-      }
-      const newFile = wrap(new UserFile(em.getReference(User, this.ctx.user.id))).assign(
-        {
-          dxid: remoteDetails?.id,
-          uid: `${remoteDetails.id}-1`,
-          name: remoteDetails?.describe?.name,
-          fileSize: remoteDetails?.describe?.size,
-          project: input.projectDxid,
-          scope: input.scope,
-          // userId: user?.id,
-          parentType: PARENT_TYPE.JOB,
-          parentId: input.parentId,
-          parentFolderId: current?.id,
-          state: FILE_STATE.CLOSED,
-          stiType: FILE_STI_TYPE.USERFILE,
-          entityType: FILE_TYPE.REGULAR,
-        },
-        { em },
-      )
-      em.persist(newFile)
-      return newFile
-    })
-    await em.flush()
+    if (input.runAdd) {
+      toAdd.forEach(dxid => {
+        const remoteDetails = remoteFiles.results.find(remoteFile => remoteFile.id === dxid)
+        if (!remoteDetails) {
+          throw new Error('remote details not found for file dxid')
+        }
+        const newFile = wrap(new UserFile(em.getReference(User, this.ctx.user.id))).assign(
+          {
+            dxid: remoteDetails?.id,
+            uid: `${remoteDetails.id}-1`,
+            name: remoteDetails?.describe?.name,
+            fileSize: remoteDetails?.describe?.size,
+            project: input.projectDxid,
+            scope: input.scope,
+            // userId: user?.id,
+            parentType: PARENT_TYPE.JOB,
+            parentId: input.parentId,
+            parentFolderId: current?.id,
+            state: FILE_STATE.CLOSED,
+            stiType: FILE_STI_TYPE.USERFILE,
+            entityType: FILE_TYPE.REGULAR,
+          },
+          { em },
+        )
+        em.persist(newFile)
+        return newFile
+      })
+      await em.flush()
+    }
 
     this.ctx.log.info(
       { folderPath, toAdd, toRemove },
-      'files added/removed under given subfolder path',
+      'files detected to add/remove under given subfolder path',
     )
     // final result
     const files = await fileRepo.findProjectFilesInSubfolder({
