@@ -32,9 +32,9 @@ const defaultConfig = {
   env,
   api: {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    port: parseIntFromProcess(process.env.PORT) ?? 3001,
-    certPath: process.env.PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
-    keyCertPath: process.env.PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
+    port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
+    certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
+    keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
   },
   logs: {
     pretty: true,
@@ -42,9 +42,10 @@ const defaultConfig = {
   },
   database: {
     // it is used for testing, not for default DB connection
-    dbName: process.env.DATABASE_NAME ?? 'precision-fda',
-    clientUrl: process.env.DATABASE_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
-    debug: parseBooleanFromProcess(process.env.DATABASE_DEBUG) ?? false,
+    dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
+    clientUrl:
+      process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
+    debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
   },
   validation: {
     maxStrLen: 255,
@@ -56,9 +57,9 @@ const defaultConfig = {
     adminUser: 'precisionfda.admin_dev',
   },
   redis: {
-    url: process.env.REDIS_URL ?? 'redis://localhost:6379',
+    url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
     isSecure: false,
-    authPassword: process.env.REDIS_AUTH ?? 'redis-pswd-placeholder',
+    authPassword: process.env.NODE_REDIS_AUTH ?? 'redis-pswd-placeholder',
     connectTimeout: 30000,
   },
   workerJobs: {
