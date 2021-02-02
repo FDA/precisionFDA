@@ -1,3 +1,5 @@
+import type { JSONSchema7 } from 'json-schema'
+import { config } from '../../config'
 import { FILE_TYPE, PARENT_TYPE } from './user-file.enum'
 
 type SyncFoldersInput = {
@@ -19,4 +21,18 @@ type SyncFilesInFolderInput = {
   runRemove: boolean
 }
 
-export { SyncFoldersInput, SyncFilesInFolderInput }
+type RenameFolderInput = {
+  id: number
+  newName: string
+}
+
+const renameFolderSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    newName: { type: 'string', maxLength: config.validation.maxStrLen },
+  },
+  required: ['newName'],
+  additionalProperties: false,
+}
+
+export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema }

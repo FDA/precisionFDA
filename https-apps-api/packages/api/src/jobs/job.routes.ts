@@ -1,8 +1,8 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
+import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 import { makeValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils'
-import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 
 const router = new Router<DefaultState, Api.Ctx>()
 

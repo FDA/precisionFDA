@@ -1,5 +1,7 @@
 export * as enums from './user-file.enum'
 
+export * as inputs from './user-file.input'
+
 export { Node } from './node.entity'
 
 export { UserFile } from './user-file.entity'
@@ -7,6 +9,8 @@ export { UserFile } from './user-file.entity'
 export { Folder } from './folder.entity'
 
 export * as helper from './user-file.helper'
+
+export { FolderRenameOperation } from './ops/folder-rename'
 
 export { SyncFoldersOperation } from './ops/sync-folders'
 

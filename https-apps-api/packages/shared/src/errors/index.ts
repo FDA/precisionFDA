@@ -20,6 +20,7 @@ export enum ErrorCodes {
   JOB_NOT_FOUND = 'E_JOB_NOT_FOUND',
   APP_NOT_FOUND = 'E_APP_NOT_FOUND',
   PROJECT_NOT_FOUND = 'E_PROJECT_NOT_FOUND',
+  FOLDER_NOT_FOUND = 'E_FOLDER_NOT_FOUND',
   USER_NOT_FOUND = 'E_USER_NOT_FOUND',
   USER_FILE_NOT_FOUND = 'E_USER_FILE_NOT_FOUND',
   NEXUS_REQUEST_FAILED = 'E_DNANEXUS_PLATFORM_REQUEST_FAILED',
@@ -86,6 +87,15 @@ export class JobNotFoundError extends NotFoundError {
   constructor(message = 'Job entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.JOB_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
+export class FolderNotFoundError extends NotFoundError {
+  constructor(message = 'Folder entity not found', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.FOLDER_NOT_FOUND,
       ...props,
     })
   }
