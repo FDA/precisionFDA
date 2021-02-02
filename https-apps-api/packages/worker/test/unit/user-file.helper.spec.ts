@@ -17,6 +17,15 @@ describe('user-file.helper', () => {
       ])
     })
 
+    it('should sort folders structure correctly', () => {
+      // incorrect output discovered from the API
+      // could break the folders sync
+      const input = ['/', '/foo-renamed/bar', '/foo-renamed']
+      const result = userFile.helper.parseFoldersFromClient(input)
+      expect(result).to.be.an('array').with.lengthOf(2)
+      expect(result).to.have.ordered.members(['/foo-renamed', '/foo-renamed/bar'])
+    })
+
     it('puts longer strings after shorter strings', () => {
       const input = ['/', '/a/b/c', '/a/b']
       const result = userFile.helper.parseFoldersFromClient(input)
