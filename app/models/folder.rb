@@ -135,4 +135,9 @@ class Folder < Node # :nodoc:
     sub_folders.each { |folder| collected += folder.all_children(where).to_a }
     collected
   end
+
+  # FIXME: find other way to distinguish https folders from the rest.
+  def https?
+    parent_type == Job.name && project.present?
+  end
 end

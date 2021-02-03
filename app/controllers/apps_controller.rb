@@ -295,10 +295,8 @@ class AppsController < ApplicationController
             scope: Scopes::SCOPE_PRIVATE,
             input: input_info.run_inputs,
           )
-        rescue HttpsAppsClient::Error, Errno::ECONNREFUSED => e
+        rescue HttpsAppsClient::Error => e
           fail e.message
-        rescue StandardError
-          fail "Something went wrong"
         end
 
       job = Job.find_by!(dxid: result["dxid"])

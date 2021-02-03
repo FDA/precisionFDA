@@ -38,6 +38,9 @@ class Node < ApplicationRecord
   # pFDA internal state, used for files that are being removing by a worker.
   STATE_REMOVING = "removing".freeze
 
+  TYPE_REGULAR = "regular".freeze # only for UserFile
+  TYPE_SNAPSHOT = "snapshot".freeze # only for UserFile
+
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
   belongs_to :scoped_parent_folder, class_name: "Folder"
@@ -45,6 +48,13 @@ class Node < ApplicationRecord
   scope :files_and_folders, -> { where(sti_type: %w(Folder UserFile)) }
   scope :files, -> { where(sti_type: %w(UserFile)) }
   scope :folders, -> { where(sti_type: %w(Folder)) }
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_SNAPSHOT => 1,
+  }
+
+  acts_as_taggable
 
   def title
     parent_type == "Asset" ? self.becomes(Asset).prefix : name
