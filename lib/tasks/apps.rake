@@ -1,13 +1,13 @@
 # rubocop:disable Metrics/BlockLength
 # rubocop:disable Metrics/MethodLength
 namespace :apps do
-  TTYD_CODE = <<~CODE
+  TTYD_CODE = <<~CODE.freeze
     #!/bin/bash
     set -e -x -o pipefail
     ttyd -p 443 dx-su-contrib
   CODE
 
-  JUPYTER_CODE = <<~CODE
+  JUPYTER_CODE = <<~CODE.freeze
     #!/usr/bin/env bash
 
     set -e
