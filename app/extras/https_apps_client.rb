@@ -48,6 +48,14 @@ class HttpsAppsClient
     )
   end
 
+  def folder_rename(folder_id, new_name)
+    request(
+      "/folders/#{folder_id}/rename",
+      { newName: new_name },
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   private
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
@@ -94,7 +102,11 @@ class HttpsAppsClient
   def handle_response(response)
     response.value
     JSON.parse(response.body)
+  rescue Errno::ECONNREFUSED => e
+    raise Error, e.message
   rescue Net::HTTPClientException
     raise Error, response.body
+  rescue StandardError
+    raise Error, "Something went wrong"
   end
 end

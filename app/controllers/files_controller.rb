@@ -288,7 +288,7 @@ class FilesController < ApplicationController
   end
 
   def rename_folder
-    folder = Folder.editable_by(@context).find(unsafe_params[:id])
+    folder = Folder.editable_by(@context).find(params[:id])
     folder_service = FolderService.new(@context)
     result = folder_service.rename(folder, file_params[:name])
     parent_folder = folder.parent_folder

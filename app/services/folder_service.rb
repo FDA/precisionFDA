@@ -43,6 +43,8 @@ class FolderService
       )
     end
 
+    return rename_https_folder(folder, new_name) if folder.https?
+
     folder.name = new_name
     folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
   end
@@ -127,6 +129,23 @@ class FolderService
   private
 
   attr_reader :context
+
+  def rename_https_folder(folder, new_name)
+    https_apps_client = DIContainer.resolve("https_apps_client")
+
+    begin
+      ApplicationRecord.transaction do
+        folder.update!(name: new_name)
+        https_apps_client.folder_rename(folder.id, new_name)
+      end
+    rescue HttpsAppsClient::Error => e
+      return Rats.failure(message: e.message)
+    rescue StandardError
+      return Rats.failure(message: "Something went wrong")
+    end
+
+    Rats.success(folder)
+  end
 
   def remove_folder(folder)
     if folder.public? && folder.all_files.present?
