@@ -54,7 +54,7 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Job URL</h5>
         <p class="list-group-item-text">
-          <%= link_to(open_external_job_path(@job)) do %>
+          <%= link_to(open_external_job_path(@job), "data-turbolinks" => false) do %>
             <span class="fa fa-external-link"></span> open
           <% end %>
         </p>
