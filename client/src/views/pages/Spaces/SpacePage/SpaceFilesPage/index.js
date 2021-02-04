@@ -12,6 +12,7 @@ import {
   sortFiles,
   resetSpaceFilesFilters,
   showFilesAddFolderModal,
+  setFilesCurrentPageValue,
 } from '../../../../../actions/spaces'
 import Button from '../../../../components/Button'
 import Icon from '../../../../components/Icon'
@@ -56,9 +57,10 @@ class SpaceFilesPage extends Component {
   }
 
   render() {
-    const { spaceId, space, sortFiles, showAddFolderModal, showAddFilesModal } = this.props
+    const { spaceId, space, sortFiles, showAddFolderModal, showAddFilesModal, setPageFiles } = this.props
     const folderId = this.getFolderId()
     const sortHandler = (type) => sortFiles(spaceId, folderId, type)
+    const pageHandler = (value) => setPageFiles(spaceId, folderId, value)
     const title = getSpacePageTitle('Files', space.isPrivate)
 
     return (
@@ -87,7 +89,11 @@ class SpaceFilesPage extends Component {
         </div>
 
         <div className="pfda-padded-t20">
-          <FilesTable spaceId={spaceId} sortHandler={sortHandler} />
+          <FilesTable
+            spaceId={spaceId}
+            sortHandler={sortHandler}
+            pageHandler={pageHandler}
+          />
         </div>
 
         <AddFolderModal loadFilesHandler={this.loadSpaceFiles} folderId={folderId} />
@@ -109,6 +115,7 @@ SpaceFilesPage.propTypes = {
   showAddFolderModal: PropTypes.func,
   showAddFilesModal: PropTypes.func,
   location: PropTypes.object,
+  setPageFiles: PropTypes.func,
 }
 
 SpaceFilesPage.defaultProps = {
@@ -127,6 +134,10 @@ const mapDispatchToProps = dispatch => ({
   loadFiles: (spaceId, folderId) => dispatch(fetchFiles(spaceId, folderId)),
   sortFiles: (spaceId, folderId, type) => {
     dispatch(sortFiles(type))
+    dispatch(fetchFiles(spaceId, folderId))
+  },
+  setPageFiles: (spaceId, folderId, value) => {
+    dispatch(setFilesCurrentPageValue(value))
     dispatch(fetchFiles(spaceId, folderId))
   },
   resetFilters: () => dispatch(resetSpaceFilesFilters()),

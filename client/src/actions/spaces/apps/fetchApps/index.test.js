@@ -16,6 +16,7 @@ import * as MAP from '../../../../views/shapes/AppShape'
 
 describe('fetchApps()', () => {
   const spaceId = 1
+  const page = 1
 
   afterEach(() => {
     fetchMock.reset()
@@ -24,9 +25,10 @@ describe('fetchApps()', () => {
   describe('dispatch actions', () => {
     const apps = ['app1', 'app2']
     const links = {}
+    const pagination = {}
 
     const store = mockStore(reducer({}, { type: undefined }))
-    const url = `/api/apps?space_id=${spaceId}`
+    const url = `/api/apps?page=${page}&space_id=${spaceId}`
     MAP.mapToApp = jest.fn((app) => (app))
 
     afterEach(() => {
@@ -34,14 +36,14 @@ describe('fetchApps()', () => {
     })
 
     it('dispatches correct actions on success response', () => {
-      fetchMock.get(url, { apps, meta: { links }})
+      fetchMock.get(url, { apps, meta: { links, pagination }})
 
       return store.dispatch(fetchApps(spaceId)).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
           { type: SPACE_APPS_FETCH_START, payload: {}},
-          { type: SPACE_APPS_FETCH_SUCCESS, payload: { apps, links }},
+          { type: SPACE_APPS_FETCH_SUCCESS, payload: { apps, links, pagination }},
         ])
       })
     })
@@ -78,6 +80,7 @@ describe('fetchApps()', () => {
           apps: {
             sortType,
             sortDirection,
+            pagination: {},
           },
         },
       }, { type: undefined }))
@@ -95,7 +98,9 @@ describe('fetchApps()', () => {
     describe('when sort type is not given', () => {
       const store = mockStore(reducer({
         spaces: {
-          apps: {},
+          apps: {
+            pagination: {},
+          },
         },
       }, { type: undefined }))
 

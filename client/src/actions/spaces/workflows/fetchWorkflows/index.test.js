@@ -16,6 +16,7 @@ import { ALERT_ABOVE_ALL } from '../../../../constants'
 
 describe('fetchWorkflows()', () => {
   const spaceId = 1
+  const page = 1
 
   afterEach(() => {
     fetchMock.reset()
@@ -24,9 +25,10 @@ describe('fetchWorkflows()', () => {
   describe('dispatch actions', () => {
     const workflows = ['wf1', 'wf2']
     const links = {}
+    const pagination = {}
 
     const store = mockStore(reducer({}, { type: undefined }))
-    const url = `/api/spaces/${spaceId}/workflows`
+    const url = `/api/workflows?page=${page}&space_id=${spaceId}`
     MAP.mapToWorkflow = jest.fn((wf) => (wf))
 
     afterEach(() => {
@@ -34,14 +36,14 @@ describe('fetchWorkflows()', () => {
     })
 
     it('dispatches correct actions on success response', () => {
-      fetchMock.get(url, { workflows: workflows, meta: { links }})
+      fetchMock.get(url, { workflows: workflows, meta: { links, pagination }})
 
       return store.dispatch(fetchWorkflows(spaceId)).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
           { type: SPACE_WORKFLOWS_FETCH_START, payload: {}},
-          { type: SPACE_WORKFLOWS_FETCH_SUCCESS, payload: { workflows, links }},
+          { type: SPACE_WORKFLOWS_FETCH_SUCCESS, payload: { workflows, links, pagination }},
         ])
       })
     })
@@ -78,6 +80,7 @@ describe('fetchWorkflows()', () => {
           workflows: {
             sortType,
             sortDirection,
+            pagination: {},
           },
         },
       }, { type: undefined }))
@@ -95,7 +98,9 @@ describe('fetchWorkflows()', () => {
     describe('when sort type is not given', () => {
       const store = mockStore(reducer({
         spaces: {
-          workflows: {},
+          workflows: {
+            pagination: {},
+          },
         },
       }, { type: undefined }))
 

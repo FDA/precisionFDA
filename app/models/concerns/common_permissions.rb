@@ -8,7 +8,7 @@ module CommonPermissions
   # analog of item.accessible_by?(@context) ||
   # @return [Boolean] Returns true if object is accessible by a user, false otherwise.
   def check_accessibility(context)
-    accessible_by_user?(context.user) ||
+    accessible_by_user?(context) ||
       (try(:user).try(:dxuser) == CHALLENGE_BOT_DX_USER &&
         context.logged_in? &&
         context.user.is_challenge_evaluator?)

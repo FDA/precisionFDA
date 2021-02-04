@@ -21,6 +21,8 @@ const getSpacesIcon = (type) => {
     case 'contributor':
     case 'viewer':
       return 'fa-star'
+    case 'space':
+      return 'fa-object-group'
     default:
       return ''
   }

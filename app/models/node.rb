@@ -19,12 +19,15 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  featured                :boolean          default(FALSE)
 #
 
 class Node < ApplicationRecord
   include Auditor
   extend Scopes
   include Scopes
+  include Featured
+  include TagsContainer
 
   self.inheritance_column = :sti_type
 
@@ -42,8 +45,6 @@ class Node < ApplicationRecord
   scope :files, -> { where(sti_type: %w(UserFile)) }
   scope :folders, -> { where(sti_type: %w(Folder)) }
 
-  acts_as_taggable
-
   def title
     parent_type == "Asset" ? self.becomes(Asset).prefix : name
   end
@@ -58,6 +59,13 @@ class Node < ApplicationRecord
 
   def parent_folder
     Folder.find_by(id: self[self.class.scope_column_name(scope)])
+  end
+
+  # Check, whether node is publishable. A node should be 'private' or in space.
+  # @param user [User] A user who is going to publish.
+  # @return [Boolean] Returns true if a node can be published by a user, false otherwise.
+  def publishable?(user)
+    user.present? && !public?
   end
 
   class << self

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeExecutionsActionModal matches snapshot 1`] = `
+<div
+  className="objects-actions-modal"
+>
+  <Modal
+    modalFooterContent={<SwitchFooter />}
+    noPadding={true}
+    title="Some Action 0 Item(s)?"
+  >
+    <table
+      className="table objects-actions-modal__table"
+    >
+      <tbody />
+    </table>
+  </Modal>
+</div>
+`;

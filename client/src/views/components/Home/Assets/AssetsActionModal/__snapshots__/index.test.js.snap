@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssetsActionModal test should render 1`] = `
+<div
+  className="objects-actions-modal"
+>
+  <Modal
+    modalFooterContent={<SwitchFooter />}
+    noPadding={true}
+    title="Some Action 0 Item(s)?"
+  >
+    <AssetsList
+      assets={Array []}
+    />
+  </Modal>
+</div>
+`;

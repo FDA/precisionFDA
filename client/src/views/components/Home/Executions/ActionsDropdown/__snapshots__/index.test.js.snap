@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsDropdown test should render 1`] = `
+<Fragment>
+  <DropdownMenu
+    message=""
+    options={
+      Array [
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "View Logs",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Terminate",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Track",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Copy to space",
+        },
+        Object {
+          "hide": true,
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Feature",
+        },
+        Object {
+          "isDisabled": true,
+          "link": "undefined&scope=public",
+          "method": "post",
+          "text": "Make public",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Attach to...",
+        },
+      ]
+    }
+    title="Actions"
+  />
+  <Connect(CopyToSpaceModal)
+    copyAction={[Function]}
+    hideAction={[Function]}
+  />
+  <Connect(HomeAttachToModal)
+    attachAction={[Function]}
+    hideAction={[Function]}
+    ids={Array []}
+    itemsType="JOB"
+  />
+  <HomeExecutionsActionModal
+    action="terminate"
+    executions={Array []}
+    hideAction={[Function]}
+    modalAction={[Function]}
+  />
+  <HomeEditTagsModal
+    name=""
+    updateAction={[Function]}
+  />
+</Fragment>
+`;

@@ -27,6 +27,8 @@ class License < ApplicationRecord
   has_many :assets, through: :licensed_items, source: :licenseable, source_type: "Asset"
   has_many :licensed_users, through: :accepted_licenses, source: :user
 
+  acts_as_taggable
+
   def uid
     "license-#{id}"
   end

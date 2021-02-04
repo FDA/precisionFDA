@@ -19,7 +19,7 @@ const Select = ({ name, id, lg, options, value, styleClasses, multiple, ...rest 
   )
 }
 
-const valuePropType = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+const valuePropType = PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool])
 
 Select.propTypes = {
   options: PropTypes.arrayOf(

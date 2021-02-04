@@ -19,6 +19,7 @@
 #  analysis_id     :integer
 #  uid             :string(255)
 #  local_folder_id :integer
+#  featured        :boolean          default(FALSE)
 #
 
 class Job < ApplicationRecord
@@ -26,7 +27,9 @@ class Job < ApplicationRecord
   include Permissions
   include CommonPermissions
   include InternalUid
+  include Featured
   include Scopes
+  include TagsContainer
 
   INSTANCE_TYPES = {
     "baseline-2" => "mem1_ssd1_x2_fedramp",
@@ -72,13 +75,14 @@ class Job < ApplicationRecord
   store :provenance, coder: JSON
 
   acts_as_commentable
-  acts_as_taggable
   acts_as_votable
 
   scope :done, -> { where(state: STATE_DONE) }
   scope :terminal, -> { where(state: [TERMINAL_STATES]) }
 
   delegate :input_spec, :output_spec, to: :app
+
+  attr_accessor :current_user
 
   def to_param
     uid

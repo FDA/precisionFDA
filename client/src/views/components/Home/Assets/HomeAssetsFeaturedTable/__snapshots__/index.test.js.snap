@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAssetsFeaturedTable test should render 1`] = `
+<div
+  className="home-page-layout__data-table"
+>
+  <div
+    className="home-page-layout__table-wrapper"
+  >
+    <Table>
+      <Thead>
+        <th
+          className="pfda-padded-l10"
+        >
+          <Icon
+            icon="fa-square-o home-page-layout__data-table_checkbox"
+          />
+        </th>
+        <Th
+          sortHandler={[Function]}
+          type="name"
+        >
+          name
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="username"
+        >
+          added by
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="size"
+        >
+          size
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="created_at"
+        >
+          created
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="tags"
+        >
+          tags
+        </Th>
+      </Thead>
+      <Tbody>
+        <FilterRow
+          onChangeFieldsValue={[Function]}
+        />
+      </Tbody>
+    </Table>
+  </div>
+  <div
+    className="pfda-padded-t20 text-center"
+  >
+    No assets found.
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Pagination
+      data={
+        Object {
+          "currentPage": undefined,
+          "nextPage": undefined,
+          "prevPage": undefined,
+          "totalPages": undefined,
+        }
+      }
+      setPageHandler={[Function]}
+    />
+  </div>
+</div>
+`;

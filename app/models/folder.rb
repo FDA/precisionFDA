@@ -19,12 +19,14 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  featured                :boolean          default(FALSE)
 #
 
 class Folder < Node # :nodoc:
   MAX_NAME_LENGTH = 255
 
   scope :private_for, ->(context) { where(user_id: context.user.id, scope: SCOPE_PRIVATE) }
+  scope :private_for_user, ->(user) { where(user_id: user.id, scope: SCOPE_PRIVATE) }
 
   validates :name,
             presence: { message: "Name could not be blank" },
@@ -50,6 +52,14 @@ class Folder < Node # :nodoc:
   scope :not_removing, -> { where.not(state: STATE_REMOVING).or(where(state: nil)) }
 
   class << self
+    # Returns folder count of user 'private' scope.
+    # Is used in for user serializer in Home
+    # @param [User] User object
+    # @return [Integer] Folder count.
+    def private_count(user)
+      private_for_user(user).count
+    end
+
     def batch_private_folders(context, parent_folder_id = nil)
       Folder.
         private_for(context).

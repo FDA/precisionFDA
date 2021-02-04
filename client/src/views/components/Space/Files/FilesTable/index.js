@@ -9,9 +9,12 @@ import {
   spaceIsFetchingFilesSelector,
   spaceFilesListSortTypeSelector,
   spaceFilesListSortDirectionSelector,
-  spaceFilesCheckedAllSelector, spacePathSelector,
+  spaceFilesCheckedAllSelector,
+  spacePathSelector,
+  spaceFilesListPaginationSelector,
 } from '../../../../../reducers/spaces/files/selectors'
 import FileShape from '../../../../shapes/FileShape'
+import PaginationShape from '../../../../shapes/PaginationShape'
 import Loader from '../../../Loader'
 import Icon from '../../../Icon'
 import LinkTargetBlank from '../../../LinkTargetBlank'
@@ -19,6 +22,9 @@ import { Table, Tbody, Thead, Th } from '../../../TableComponents'
 import { toggleFileCheckbox, toggleAllFileCheckboxes } from '../../../../../actions/spaces/files'
 import { STATE_REMOVING, STATE_COPYING } from '../../../../../constants'
 import './style.sass'
+import Counters from '../../../TableComponents/Counters'
+import Pagination from '../../../TableComponents/Pagination'
+import TagsList from '../../../TagsList'
 
 
 const FolderLink = ({ file, spaceId, isDisabled }) => {
@@ -51,8 +57,10 @@ const FileLink = ({ file, spaceId, isDisabled }) => {
     )
   }
 
+  const linkShow = file.links.filePath ? `/home${file.links.filePath}` : null
+
   return (
-    <LinkTargetBlank url={file.links.filePath}>
+    <LinkTargetBlank url={linkShow}>
       <Icon icon='fa-file-o' fw />
       <span>{file.name}</span>
     </LinkTargetBlank>
@@ -61,11 +69,12 @@ const FileLink = ({ file, spaceId, isDisabled }) => {
 
 const OriginalLink = ({ file }) => {
   const { originPath } = file.links
+  const url = originPath.href ? `/home${originPath.href}` : null
 
   switch (typeof originPath) {
     case 'object':
       return file.state === 'closed' ? (
-        <LinkTargetBlank url={originPath.href}>
+        <LinkTargetBlank url={url}>
           <i className={originPath.fa} />
           <span>{originPath.text}</span>
         </LinkTargetBlank>
@@ -94,7 +103,7 @@ const Row = ({ file, spaceId, toggleCheckbox }) => {
   return (
     <tr className={rowClasses}>
       <td>
-        { !isDisabled ? <Icon icon={checkboxClasses} onClick={toggleHandler} /> : null}
+        {!isDisabled ? <Icon icon={checkboxClasses} onClick={toggleHandler} /> : null}
       </td>
       <td>
         <FileLink file={file} spaceId={spaceId} isDisabled={isDisabled} />
@@ -112,7 +121,7 @@ const Row = ({ file, spaceId, toggleCheckbox }) => {
       </td>
       <td>{file.created}</td>
       <td>{file.state}</td>
-      <td>{file.tags}</td>
+      <td><TagsList tags={file.tags} /></td>
     </tr>
   )
 }
@@ -133,7 +142,7 @@ const breadcrumbs = (path, spaceId) => (
   </div>
 )
 
-const FilesTable = ({ sortHandler, toggleCheckbox, toggleAllCheckboxes, spaceId, files, path, isCheckedAll, isFetching, sortType, sortDir }) => {
+const FilesTable = ({ sortHandler, toggleCheckbox, toggleAllCheckboxes, spaceId, files, path, isCheckedAll, isFetching, sortType, sortDir, pagination, pageHandler }) => {
   const checkboxClasses = classNames({
     'fa-square-o': !isCheckedAll,
     'fa-check-square-o': isCheckedAll,
@@ -147,34 +156,48 @@ const FilesTable = ({ sortHandler, toggleCheckbox, toggleAllCheckboxes, spaceId,
     )
   }
 
-  let content = <div className="text-center">No files found.</div>
+  const { currentPage, nextPage, totalPages, totalCount } = pagination
 
+
+  let content = <div className="text-center">No files found.</div>
   if (files.length) {
     content = (
       <div className="space-files-table">
-        <Table>
-          <Thead>
-            <th className="pfda-padded-l10">
-              <Icon onClick={toggleAllCheckboxes} icon={checkboxClasses}/>
-            </th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='name'>name</Th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='type'>type</Th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='org'>org</Th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='added_by'>added
+        <div className='space-page-layout__list-wrapper'>
+          <Table>
+            <Thead>
+              <th className="pfda-padded-l10">
+                <Icon onClick={toggleAllCheckboxes} icon={checkboxClasses} />
+              </th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='name'>name</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='type'>type</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='org'>org</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='added_by'>added
               by</Th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='size'>size</Th>
-            <Th>origin</Th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir}
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='size'>size</Th>
+              <Th>origin</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir}
                 type='created_at'>created</Th>
-            <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir}
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir}
                 type='state'>state</Th>
-            <Th>tags</Th>
-          </Thead>
-          <Tbody>
-            {files.map((file) => <Row file={file} toggleCheckbox={toggleCheckbox} spaceId={spaceId}
-                                      key={file.id}/>)}
-          </Tbody>
-        </Table>
+              <Th>tags</Th>
+            </Thead>
+            <Tbody>
+              {files.map((file) => <Row file={file} toggleCheckbox={toggleCheckbox} spaceId={spaceId}
+                key={file.id} />)}
+            </Tbody>
+          </Table>
+        </div>
+        <Counters
+          currentPage={currentPage}
+          nextPage={nextPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          count={files.length}
+        />
+        <div className='pfda-padded-t20'>
+          <Pagination data={pagination} setPageHandler={pageHandler} />
+        </div>
       </div>
     )
   }
@@ -199,6 +222,8 @@ FilesTable.propTypes = {
   sortHandler: PropTypes.func,
   toggleCheckbox: PropTypes.func,
   toggleAllCheckboxes: PropTypes.func,
+  pagination: PropTypes.exact(PaginationShape),
+  pageHandler: PropTypes.func,
 }
 
 FilesTable.defaultProps = {
@@ -206,6 +231,7 @@ FilesTable.defaultProps = {
   sortHandler: () => { },
   toggleCheckbox: () => { },
   toggleAllCheckboxes: () => { },
+  pagination: {},
 }
 
 const mapStateToProps = state => ({
@@ -215,6 +241,7 @@ const mapStateToProps = state => ({
   isFetching: spaceIsFetchingFilesSelector(state),
   sortType: spaceFilesListSortTypeSelector(state),
   sortDir: spaceFilesListSortDirectionSelector(state),
+  pagination: spaceFilesListPaginationSelector(state),
 })
 
 const mapDispatchToProps = dispatch => ({

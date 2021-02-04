@@ -16,6 +16,7 @@ import { ALERT_ABOVE_ALL } from '../../../../constants'
 
 describe('fetchJobs()', () => {
   const spaceId = 1
+  const page = 1
 
   afterEach(() => {
     fetchMock.reset()
@@ -30,21 +31,22 @@ describe('fetchJobs()', () => {
     ]
 
     const store = mockStore(reducer({}, { type: undefined }))
-    const url = `/api/spaces/${spaceId}/jobs`
+    const url = `/api/jobs?page=${page}&space_id=${spaceId}`
+    const pagination = {}
 
     afterEach(() => {
       store.clearActions()
     })
 
     it('dispatches correct actions on success response', () => {
-      fetchMock.get(url, { jobs: jobs })
+      fetchMock.get(url, { jobs: jobs, pagination })
 
       return store.dispatch(fetchJobs(spaceId)).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
           { type: SPACE_JOBS_FETCH_START, payload: {}},
-          { type: SPACE_JOBS_FETCH_SUCCESS, payload: { jobs: jobs.map(MAP.mapToJob) }},
+          { type: SPACE_JOBS_FETCH_SUCCESS, payload: { jobs: jobs.map(MAP.mapToJob), pagination }},
         ])
       })
     })
@@ -81,6 +83,7 @@ describe('fetchJobs()', () => {
           jobs: {
             sortType,
             sortDirection,
+            pagination: {},
           },
         },
       }, { type: undefined }))
@@ -98,7 +101,9 @@ describe('fetchJobs()', () => {
     describe('when sort type is not given', () => {
       const store = mockStore(reducer({
         spaces: {
-          jobs: {},
+          jobs: {
+            pagination: {},
+          },
         },
       }, { type: undefined }))
 

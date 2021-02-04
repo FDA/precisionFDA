@@ -1,6 +1,35 @@
 module WorkflowConcern
   include ActiveSupport::Concern
 
+  # Finds a workflow by uid, accessible by current user.
+  # @param id [Integer]
+  # @return [workflow] A workflow Object if it is accessible by user.
+  #   raise ApiError if not.
+  def find_workflow
+    @workflow = Workflow.accessible_by(@context).unremoved.find_by(uid: unsafe_params[:id])
+
+    raise ApiError, I18n.t("workflow_not_accessible") if @workflow.nil?
+
+    @workflow
+  end
+
+  # Get revisions for a single workflow
+  def revisions_data
+    @revisions = @workflow.workflow_series.
+      accessible_revisions(@context).
+      select(:title, :id, :uid, :dxid, :revision)
+  end
+
+  # Proceed with workflow jobs sync
+  def jobs_sync
+    if @workflow.in_space?
+      User.sync_jobs!(@context, @workflow.jobs, @workflow.project)
+      @space = @workflow.space_object
+    else
+      User.sync_jobs!(@context)
+    end
+  end
+
   def collect_inputs(batch)
     case batch[:class]
     when "string"
@@ -167,5 +196,11 @@ module WorkflowConcern
       end
     end
     analysis_dxid
+  end
+
+  def workflows_meta
+    { links: {} }.tap do |meta|
+      meta[:links][:copy] = copy_api_workflows_path if @space.editable_by?(current_user)
+    end
   end
 end
