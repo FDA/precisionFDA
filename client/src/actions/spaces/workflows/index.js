@@ -5,6 +5,7 @@ import {
   SPACE_WORKFLOWS_TOGGLE_ALL_CHECKBOXES,
   SPACE_WORKFLOWS_SHOW_COPY_MODAL,
   SPACE_WORKFLOWS_HIDE_COPY_MODAL,
+  SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE,
 } from '../types'
 import fetchWorkflows from './fetchWorkflows'
 import sortWorkflows from './sortWorkflows'
@@ -15,6 +16,8 @@ const resetSpaceWorkflowsFilters = () => createAction(SPACE_WORKFLOWS_RESET_FILT
 
 const toggleWorkflowCheckbox = (id) => createAction(SPACE_WORKFLOWS_TOGGLE_CHECKBOX, id)
 const toggleAllWorkflowCheckboxes = () => createAction(SPACE_WORKFLOWS_TOGGLE_ALL_CHECKBOXES)
+
+const setWorkflowsCurrentPageValue = (value) => createAction(SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE, value)
 
 const showWorkflowsCopyModal = () => createAction(SPACE_WORKFLOWS_SHOW_COPY_MODAL)
 const hideWorkflowsCopyModal = () => createAction(SPACE_WORKFLOWS_HIDE_COPY_MODAL)
@@ -28,4 +31,5 @@ export {
   toggleAllWorkflowCheckboxes,
   showWorkflowsCopyModal,
   hideWorkflowsCopyModal,
+  setWorkflowsCurrentPageValue,
 }

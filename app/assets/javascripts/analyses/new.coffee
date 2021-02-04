@@ -80,7 +80,7 @@ class WorkflowViewModel
     }
     Precision.api('/api/run_workflow', params)
       .done( =>
-        window.location.replace("/workflows/#{@workflowUid}")
+        window.location.replace("/home/workflows/#{@workflowUid}")
     )
       .fail((error) =>
         @isRunning(false)

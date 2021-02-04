@@ -73,6 +73,9 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "verified", default: false, null: false
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
+    t.index ["deleted"], name: "index_app_series_on_deleted"
     t.index ["dxid"], name: "index_app_series_on_dxid"
     t.index ["latest_revision_app_id"], name: "index_app_series_on_latest_revision_app_id"
     t.index ["latest_version_app_id"], name: "index_app_series_on_latest_version_app_id"
@@ -113,7 +116,10 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.string "uid"
     t.string "dev_group"
     t.string "release", null: false
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
     t.index ["app_series_id"], name: "index_apps_on_app_series_id"
+    t.index ["deleted"], name: "index_apps_on_deleted"
     t.index ["dxid"], name: "index_apps_on_dxid"
     t.index ["scope"], name: "index_apps_on_scope"
     t.index ["uid"], name: "index_apps_on_uid", unique: true
@@ -373,6 +379,7 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.integer "analysis_id"
     t.string "uid"
     t.integer "local_folder_id"
+    t.boolean "featured", default: false
     t.index ["analysis_id"], name: "fk_rails_0a95efec7a"
     t.index ["app_id"], name: "index_jobs_on_app_id"
     t.index ["app_series_id"], name: "index_jobs_on_app_series_id"
@@ -449,6 +456,7 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.string "sti_type"
     t.integer "scoped_parent_folder_id"
     t.string "uid"
+    t.boolean "featured", default: false
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
     t.index ["state"], name: "index_nodes_on_state"
@@ -838,6 +846,9 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.string "scope"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
+    t.index ["deleted"], name: "index_workflow_series_on_deleted"
     t.index ["latest_revision_workflow_id"], name: "index_workflow_series_on_latest_revision_workflow_id"
     t.index ["user_id"], name: "index_workflow_series_on_user_id"
   end
@@ -858,6 +869,9 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.datetime "updated_at", null: false
     t.string "uid"
     t.string "project"
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
+    t.index ["deleted"], name: "index_workflows_on_deleted"
     t.index ["uid"], name: "index_workflows_on_uid", unique: true
     t.index ["user_id"], name: "index_workflows_on_user_id"
     t.index ["workflow_series_id"], name: "index_workflows_on_workflow_series_id"

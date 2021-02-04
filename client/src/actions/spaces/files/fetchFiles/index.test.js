@@ -17,6 +17,7 @@ import * as MAP from '../../../../views/shapes/FileShape'
 describe('fetchFiles()', () => {
   const spaceId = 1
   const folderId = null
+  const page = 1
 
   afterEach(() => {
     fetchMock.reset()
@@ -25,9 +26,10 @@ describe('fetchFiles()', () => {
   describe('dispatch actions', () => {
     const files = ['file1 ', 'file2', 'file3']
     const links = { link: 'link' }
+    const pagination = {}
 
     const store = mockStore(reducer({}, { type: undefined }))
-    const url = `/api/spaces/${spaceId}/files?folder_id`
+    const url = ` /api/files?folder_id&page=${page}&space_id=${spaceId}`
     MAP.mapToFile = jest.fn((file) => (file))
 
     afterEach(() => {
@@ -35,14 +37,14 @@ describe('fetchFiles()', () => {
     })
 
     it('dispatches correct actions on success response', () => {
-      fetchMock.get(url, { entries: files, meta: { links }})
+      fetchMock.get(url, { entries: files, meta: { links, pagination }})
 
       return store.dispatch(fetchFiles(spaceId, folderId)).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
           { type: SPACE_FILES_FETCH_START, payload: {}},
-          { type: SPACE_FILES_FETCH_SUCCESS, payload: { files, links }},
+          { type: SPACE_FILES_FETCH_SUCCESS, payload: { files, links, pagination }},
         ])
       })
     })
@@ -81,6 +83,7 @@ describe('fetchFiles()', () => {
           files: {
             sortType,
             sortDirection,
+            pagination: {},
           },
         },
       }, { type: undefined }))
@@ -98,12 +101,14 @@ describe('fetchFiles()', () => {
     describe('when sort type is not given', () => {
       const store = mockStore(reducer({
         spaces: {
-          files: {},
+          files: {
+            pagination: {},
+          },
         },
       }, { type: undefined }))
 
       it("doesn't pass it to API call", () => {
-        console.warn( API.getFiles.mock.calls )
+        console.info( API.getFiles.mock.calls )
 
         return store.dispatch(fetchFiles(spaceId, folderId)).then(() => {
           expect(API.getFiles.mock.calls.length).toEqual(1)

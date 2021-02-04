@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeExecutionsSinglePage test should render 1`] = `
+<HomeLayout>
+  <span>
+    Execution not found
+  </span>
+</HomeLayout>
+`;

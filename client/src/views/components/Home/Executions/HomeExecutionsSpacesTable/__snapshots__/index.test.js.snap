@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeExecutionsSpacesTable test should render 1`] = `
+<div
+  className="home-page-layout__data-table"
+>
+  <div
+    className="home-page-layout__table-wrapper"
+  >
+    <Table>
+      <Thead>
+        <th
+          className="pfda-padded-l10"
+        >
+          <Icon
+            icon="fa-square-o home-page-layout__data-table_checkbox"
+          />
+        </th>
+        <th
+          className="pfda-padded-l10"
+        >
+          <Icon
+            icon="fa-caret-down home-page-layout__data-table_checkbox"
+          />
+        </th>
+        <Th>
+          state
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="name"
+        >
+          name
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="apptitle"
+        >
+          app title
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="username"
+        >
+          launched by
+        </Th>
+        <Th>
+          location
+        </Th>
+        <Th>
+          instance type
+        </Th>
+        <Th>
+          duration
+        </Th>
+        <Th>
+          energy
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="created_at"
+        >
+          launched on
+        </Th>
+        <Th>
+          tags
+        </Th>
+      </Thead>
+      <Tbody>
+        <FilterRow
+          onChangeFieldsValue={[Function]}
+        />
+      </Tbody>
+    </Table>
+  </div>
+  <div
+    className="pfda-padded-t20 text-center"
+  >
+    No executions found.
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Pagination
+      data={
+        Object {
+          "currentPage": undefined,
+          "nextPage": undefined,
+          "prevPage": undefined,
+          "totalPages": undefined,
+        }
+      }
+      setPageHandler={[Function]}
+    />
+  </div>
+</div>
+`;

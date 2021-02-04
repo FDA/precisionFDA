@@ -31,7 +31,8 @@ class FilePublisher
     files.uniq.each do |file|
       next unless file.publishable?(user)
 
-      unless [UserFile::STATE_CLOSED, UserFile::STATE_COPYING].include?(file.state)
+      unless [UserFile::STATE_CLOSED, UserFile::STATE_COPYING].include?(file.state) ||
+             (file.klass == "folder")
         raise "Unable to publish #{file.name} - file is not closed"
       end
 
@@ -44,13 +45,17 @@ class FilePublisher
     end
 
     projects.each do |project, project_files|
-      api.project_clone(project, destination_project, { objects: project_files.map(&:dxid)} )
+      if project.present? # clone only files, not folders
+        api.project_clone(project, destination_project, { objects: project_files.map(&:dxid) })
+      end
 
       UserFile.transaction do
         project_files.each do |file|
           file.reload
 
-          raise "Race condition for file #{file.id} (#{file.dxid})" unless file.publishable?(user)
+          unless file.publishable?(user)
+            raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
+          end
 
           file.update!(
               state: UserFile::STATE_CLOSED,
@@ -61,13 +66,20 @@ class FilePublisher
           count += 1
 
           if scope =~ /^space-(\d+)$/
-            event_type = file.klass == "asset" ? :asset_added : :file_added
-            SpaceEventService.call($1.to_i, user.id, nil, file, event_type)
+            event_type =
+              if file.klass == "asset"
+                :asset_added
+              elsif file.klass == "file"
+                :file_added
+              end
+            if event_type.present?
+              SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, event_type)
+            end
           end
         end
       end
 
-      api.call(project, "removeObjects", objects: project_files.map(&:dxid))
+      api.call(project, "removeObjects", objects: project_files.map(&:dxid)) if project.present?
     end
 
     count

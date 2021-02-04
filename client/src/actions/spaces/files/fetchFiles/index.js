@@ -8,9 +8,11 @@ import {
   SPACE_FILES_FETCH_FAILURE,
 } from '../../types'
 import { mapToFile } from '../../../../views/shapes/FileShape'
+import { mapToPagination } from '../../../../views/shapes/PaginationShape'
 import {
   spaceFilesListSortTypeSelector,
   spaceFilesListSortDirectionSelector,
+  spaceFilesListPaginationSelector,
 } from '../../../../reducers/spaces/files/selectors'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
@@ -25,10 +27,13 @@ export default (spaceId, folderId) => (
   (dispatch, getState) => {
     const sortType = spaceFilesListSortTypeSelector(getState())
     const sortDir = spaceFilesListSortDirectionSelector(getState())
+    const { currentPage } = spaceFilesListPaginationSelector(getState())
 
     let params = { folder_id: folderId }
 
     if (sortType) { params = { order_by: sortType, order_dir: sortDir, folder_id: folderId } }
+    if (currentPage) params.page = currentPage
+
     dispatch(fetchFilesStart())
 
     return API.getFiles(spaceId, params)
@@ -36,7 +41,9 @@ export default (spaceId, folderId) => (
         if (response.status === httpStatusCodes.OK) {
           const files = response.payload.entries.map(mapToFile)
           const { links, path } = response.payload.meta
-          dispatch(fetchFilesSuccess({ files, links, path }))
+          const pagination = response.payload.meta ? mapToPagination(response.payload.meta.pagination) : {}
+
+          dispatch(fetchFilesSuccess({ files, links, path, pagination }))
         } else {
           dispatch(fetchFilesFailure())
 

@@ -19,6 +19,7 @@ import {
   COPY_APPS_TO_PRIVATE_START,
   COPY_APPS_TO_PRIVATE_SUCCESS,
   COPY_APPS_TO_PRIVATE_FAILURE,
+  SPACE_APPS_SET_CURRENT_PAGE_VALUE,
 } from '../../../actions/spaces/types'
 import { isCheckedAllCheckboxes } from '../../../helpers'
 
@@ -29,11 +30,12 @@ export default createReducer(initialState, {
     isFetching: true,
   }),
 
-  [SPACE_APPS_FETCH_SUCCESS]: (state, { apps, links }) => ({
+  [SPACE_APPS_FETCH_SUCCESS]: (state, { apps, links, pagination }) => ({
     ...state,
     entries: [...apps],
     isFetching: false,
     links,
+    pagination,
   }),
 
   [SPACE_APPS_FETCH_FAILURE]: state => ({
@@ -45,6 +47,14 @@ export default createReducer(initialState, {
     ...state,
     sortType: type,
     sortDirection: direction,
+  }),
+
+  [SPACE_APPS_SET_CURRENT_PAGE_VALUE]: (state, value) => ({
+    ...state,
+    pagination: {
+      ...state.pagination,
+      currentPage: value,
+    },
   }),
 
   [SPACE_APPS_RESET_FILTERS]: (state) => ({

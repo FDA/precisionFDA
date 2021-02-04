@@ -44,5 +44,7 @@ module UidFindable
     else
       raise "Invalid id '#{uid}' in item_from_uid"
     end
+  rescue ActiveRecord::RecordNotFound => e
+    raise e.message
   end
 end

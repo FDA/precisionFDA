@@ -2,19 +2,32 @@
 class AppSerializer < ApplicationSerializer
   attributes(
     :id,
+    :uid,
+    :dxid,
     :name,
     :title,
     :added_by,
+    :added_by_fullname,
     :created_at,
     :created_at_date_time,
+    :location,
+    :readme,
     :revision,
+    :app_series_id,
     :run_by_you,
     :org,
     :explorers,
+    :featured,
+    :active,
     :links,
   )
 
   attribute :all_tags_list, key: :tags
+
+  # Returns a tags list for an App
+  def all_tags_list
+    object.app_series.all_tags_list
+  end
 
   # Returns an app user org handle.
   # @return [String] handle.
@@ -42,40 +55,86 @@ class AppSerializer < ApplicationSerializer
     end
   end
 
-  # Returns a user who has created this app.
-  # @return [String] User dxuser.
-  def added_by
-    object.user.dxuser
-  end
-
   # Returns formatted created_at time.
   # @return [String] Formatted time.
   def created_at
     formatted_time(object.created_at)
   end
 
-  # Returns formatted created_at time.
-  # @return [String] Formatted time.
-  def created_at_date_time
-    formatted_date_time(object.created_at)
+  # Returns if App was marked as 'deleted'.
+  def active
+    object.not_deleted?
   end
 
   # Builds links.
   # @return [Hash] Links.
+  # rubocop:disable Metrics/MethodLength
   def links
-    return unless current_user
+    return {} unless current_user
 
+    # rubocop:disable Metrics/BlockLength
     {}.tap do |links|
       links[:show] = app_path(object)
       links[:user] = user_path(added_by)
+      links[:space] = space_path if object.in_space?
+      links[:jobs] = jobs_api_app_path(object)
+      # GET track single app
+      links[:track] = track_object
+      # GET /apps/:id/fork - fork a single app
+      links[:fork] = fork_app_path(object)
+      # POST export a single app to a docker container
+      links[:export] = export_app_path(object)
+      # GET cwl_export a single app to a cwl file
+      links[:cwl_export] = cwl_export_app_path(object)
+      # GET wdl_export a single app to a wdl file
+      links[:wdl_export] = wdl_export_app_path(object)
+      # POST /api/apps/copy  copy_api_apps
+      links[:copy] = copy_api_apps_path
 
-      if can_run? && !run_by_you? && app_ids.empty? && !object.in_locked_space?
+      if object.owned_by_user?(current_user)
+        # POST /api/attach_to: api_attach_to_notes, discussions, answers
+        links[:attach_to] = api_attach_to_notes_path
+        unless object.in_space? && member_viewer?
+          # PUT /api/workflows/delete soft delete
+          links[:delete] = delete_api_apps_path
+          # edit a single app TODO: create update in api/apps_controller
+          links[:edit] = edit_app_path(object)
+        end
+        links[:edit_tags] = api_set_tags_path if
+          object.owned_by_user?(current_user) && !member_viewer?
+
+        # POST set app as challenge App
+        links[:assign_app] = api_assign_app_path
+        # publish single app if it is not public already or it is not in space
+        links[:publish] = publish_object unless object.public? || object.in_space?
+      end
+
+      if can_run? && !object.in_locked_space?
+        unless member_viewer?
+          # app single run
+          links[:run_job] = new_app_job_path(
+            object.app_series.latest_version_app || object.app_series.latest_revision_app,
+          )
+          # GET app batch run
+          links[:batch_run] = batch_app_app_path(object.uid)
+        end
+      end
+      unless object.in_space?
+        # app single run
         links[:run_job] = new_app_job_path(
           object.app_series.latest_version_app || object.app_series.latest_revision_app,
         )
+        # GET app batch run
+        links[:batch_run] = batch_app_app_path(object.uid)
+      end
+      if current_user.can_administer_site?
+        # PUT /api/apps/feature
+        links[:feature] = feature_api_apps_path
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
+  # rubocop:enable Metrics/MethodLength
 
   private
 

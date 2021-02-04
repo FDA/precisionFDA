@@ -17,5 +17,10 @@
 FactoryBot.define do
   factory :app_series do
     scope { "private" }
+
+    # trait :with_app do
+    #   apps
+    #
+    # end
   end
 end

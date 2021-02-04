@@ -15,6 +15,7 @@ class Discussion < ApplicationRecord
   # given that the real permissions are mandated by the note
   include Permissions
   include CommonPermissions
+  include TagsContainer
 
   belongs_to :user
   has_many :answers, dependent: :destroy
@@ -23,7 +24,6 @@ class Discussion < ApplicationRecord
   acts_as_commentable
   acts_as_votable
   acts_as_followable
-  acts_as_taggable
 
   def uid
     "discussion-#{id}"

@@ -8,11 +8,11 @@ import './style.sass'
 const TYPES = ['danger', 'success', 'warning', 'primary', 'info', 'default']
 const SIZES = ['sm', 'xs', 'lg']
 
-const Button = ({ children, type, size, ...rest }) => {
+const Button = ({ children, type, size, className, ...rest }) => {
   const typeClass = TYPES.includes(type) ? `btn-${type}` : 'btn-default'
   const sizeClass = SIZES.includes(size) ? `btn-${size}` : null
 
-  const classes = classNames(['btn', typeClass, sizeClass])
+  const classes = classNames(['btn', typeClass, sizeClass, className])
   return <button {...rest} className={classes}>{children}</button>
 }
 
@@ -26,4 +26,5 @@ Button.propTypes = {
   ]),
   type: PropTypes.oneOf(TYPES),
   size: PropTypes.oneOf(SIZES),
+  className: PropTypes.string,
 }

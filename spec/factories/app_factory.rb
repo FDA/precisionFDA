@@ -30,4 +30,17 @@ FactoryBot.define do
     dxid { "app-#{SecureRandom.hex(12)}" }
     release { UBUNTU_14 }
   end
+
+  factory :app_with_series, class: "App" do
+    app_series
+
+    title { "default_title" }
+    scope { App::SCOPE_PRIVATE }
+    dxid { "app-#{SecureRandom.hex(12)}" }
+    release { UBUNTU_14 }
+
+    after(:create) do |app|
+      app.app_series.update(latest_revision_app_id: app.id, latest_version_app_id: app.id)
+    end
+  end
 end

@@ -104,40 +104,6 @@ module Api
       render json: space, adapter: :json
     end
 
-    # GET /api/spaces/:id/files
-    # Fetches space files.
-    def files
-      orderings = {
-        "name" => "name",
-        "type" => "sti_type",
-        "created_at" => "created_at",
-        "size" => "file_size",
-        "state" => "state",
-      }
-
-      order = order_query(orderings[params[:order_by]], params[:order_dir], orderings.values)
-
-      folder_id = params[:folder_id]
-
-      nodes = @space.nodes.files_and_folders.where(scoped_parent_folder_id: folder_id).order(order)
-
-      render json: {
-        entries: nodes.map { |node| helpers.client_file(node, @space, current_user) },
-        meta: files_meta,
-      }
-    end
-
-    # GET /api/spaces/:id/workflows
-    # Fetches space workflows.
-    def workflows
-      allowed_orderings = %w(created_at).freeze
-      order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
-
-      workflows = @space.workflows.order(order)
-
-      render json: workflows, meta: workflows_meta, adapter: :json
-    end
-
     # GET /api/spaces/:id/members
     # Fetches space members, according to filter value.
     def members

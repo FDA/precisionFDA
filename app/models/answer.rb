@@ -16,6 +16,7 @@ class Answer < ApplicationRecord
   # given that the real permissions are mandated by the note
   include Permissions
   include CommonPermissions
+  include TagsContainer
 
   validates :discussion_id, uniqueness: { scope: :user_id }
   belongs_to :user
@@ -24,7 +25,6 @@ class Answer < ApplicationRecord
 
   acts_as_commentable
   acts_as_votable
-  acts_as_taggable
 
   def uid
     "answer-#{id}"

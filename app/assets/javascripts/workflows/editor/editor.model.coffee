@@ -115,7 +115,7 @@ class WorkflowEditorModel
 
     Precision.api('/api/workflows', params)
       .done((res) ->
-        window.location.replace("/workflows/#{res.id}")
+        window.location.replace("/home/workflows/#{res.id}")
       )
       .fail((error) =>
         @wfIsSaving(false)
