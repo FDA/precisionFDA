@@ -53,7 +53,7 @@ class DNAnexusAPI
       scope: { full: true },
       label: "httpsapp",
       client_id: "httpsapp",
-      redirect_uri: URI.join(job.https_job_external_url.downcase, "oauth2/access"),
+      redirect_uri: "#{job.https_job_external_url.downcase}:443/oauth2/access",
     }
 
     call("system", "newAuthToken", params)["authorization_code"]
