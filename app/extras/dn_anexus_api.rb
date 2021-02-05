@@ -4,6 +4,7 @@ class DNAnexusAPI
   include DXClient::Endpoints::Apps
   include DXClient::Endpoints::Applets
   include DXClient::Endpoints::Files
+  include DXClient::Endpoints::Jobs
   include DXClient::Endpoints::Organizations
   include DXClient::Endpoints::Projects
   include DXClient::Endpoints::System
@@ -42,9 +43,8 @@ class DNAnexusAPI
     begin
       call("user-#{username}", "describe")
     rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
+      return false if e.message =~ /^404/
+
       raise e
     end
     true
@@ -54,9 +54,8 @@ class DNAnexusAPI
     begin
       call("org-#{orgname}", "describe")
     rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
+      return false if e.message =~ /^404/
+
       raise e
     end
     true
@@ -66,9 +65,8 @@ class DNAnexusAPI
     begin
       call(entity.to_s, "describe")
     rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
+      return false if e.message =~ /^404/
+
       raise e
     end
     true
@@ -79,15 +77,12 @@ class DNAnexusAPI
     begin
       api.call(ORG_DUMMY, "invite", invitee: email, suppressEmailNotification: true)
     rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
+      return false if e.message =~ /^404/
+
       raise e
     end
     api.call(ORG_DUMMY, "findMembers")["results"].each do |result|
-      if result["level"] == "MEMBER"
-        api.call(ORG_DUMMY, "removeMember", user: result["id"])
-      end
+      api.call(ORG_DUMMY, "removeMember", user: result["id"]) if result["level"] == "MEMBER"
     end
     true
   end

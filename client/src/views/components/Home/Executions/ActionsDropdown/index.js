@@ -63,7 +63,7 @@ const ActionsDropdown = (props) => {
     },
     {
       text: 'Terminate',
-      isDisabled: singleExecutions.length !== 1 || !singleExecutions.some(e => e.links.terminate),
+      isDisabled: !singleExecutions && !singleExecutions.all(e => e.links.terminate),
       onClick: () => props.showTerminateModal(),
     },
     {
