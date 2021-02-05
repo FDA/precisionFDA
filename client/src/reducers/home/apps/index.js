@@ -6,6 +6,7 @@ import {
   HOME_APPS_FETCH_FAILURE,
   HOME_APPS_TOGGLE_ALL_CHECKBOXES,
   HOME_APPS_TOGGLE_CHECKBOX,
+<<<<<<< HEAD
   HOME_APPS_FETCH_APP_DETAILS_START,
   HOME_APPS_FETCH_APP_DETAILS_SUCCESS,
   HOME_APPS_FETCH_APP_DETAILS_FAILURE,
@@ -46,10 +47,27 @@ export default createReducer(initialState, {
     ...state,
     [appsType]: {
       ...state[appsType],
+=======
+  HOME_APPS_FEATURED_FETCH_START,
+  HOME_APPS_FEATURED_FETCH_SUCCESS,
+  HOME_APPS_FEATURED_FETCH_FAILURE,
+  HOME_APPS_FEATURED_TOGGLE_ALL_CHECKBOXES,
+  HOME_APPS_FEATURED_TOGGLE_CHECKBOX,
+} from '../../../actions/home/types'
+import { isCheckedAllCheckboxes } from '../../../helpers'
+
+
+export default createReducer(initialState, {
+  [HOME_APPS_FETCH_START]: state => ({
+    ...state,
+    privateApps: {
+      ...state.privateApps,
+>>>>>>> production
       isFetching: true,
     },
   }),
 
+<<<<<<< HEAD
   [HOME_APPS_FETCH_SUCCESS]: (state, { appsType, apps, pagination }) => ({
     ...state,
     [appsType]: {
@@ -68,10 +86,27 @@ export default createReducer(initialState, {
     ...state,
     [appsType]: {
       ...state[appsType],
+=======
+  [HOME_APPS_FETCH_SUCCESS]: (state, apps) => ({
+    ...state,
+    privateApps: {
+      ...state.privateApps,
+      isFetching: false,
+      isCheckedAll: false,
+      apps: [...apps],
+    },
+  }),
+
+  [HOME_APPS_FETCH_FAILURE]: state => ({
+    ...state,
+    privateApps: {
+      ...state.privateApps,
+>>>>>>> production
       isFetching: false,
     },
   }),
 
+<<<<<<< HEAD
   [HOME_APPS_TOGGLE_ALL_CHECKBOXES]: (state, appsType) => {
     const isCheckedAll = isCheckedAllCheckboxes(state[appsType].apps)
     return {
@@ -79,6 +114,14 @@ export default createReducer(initialState, {
       [appsType]: {
         ...state[appsType],
         apps: state[appsType].apps.map((app) => {
+=======
+  [HOME_APPS_TOGGLE_ALL_CHECKBOXES]: (state) => {
+    const isCheckedAll = isCheckedAllCheckboxes(state.privateApps.apps)
+    return {
+      ...state,
+      privateApps: {
+        apps: state.privateApps.apps.map((app) => {
+>>>>>>> production
           app.isChecked = !isCheckedAll
           return app
         }),
@@ -87,22 +130,32 @@ export default createReducer(initialState, {
     }
   },
 
+<<<<<<< HEAD
   [HOME_APPS_TOGGLE_CHECKBOX]: (state, { appsType, id }) => {
     const apps = state[appsType].apps.map((app) => {
+=======
+  [HOME_APPS_TOGGLE_CHECKBOX]: (state, id) => {
+    const apps = state.privateApps.apps.map((app) => {
+>>>>>>> production
       if (app.id === id) app.isChecked = !app.isChecked
       return app
     })
     const isCheckedAll = isCheckedAllCheckboxes(apps)
     return {
       ...state,
+<<<<<<< HEAD
       [appsType]: {
         ...state[appsType],
+=======
+      privateApps: {
+>>>>>>> production
         isCheckedAll,
         apps,
       },
     }
   },
 
+<<<<<<< HEAD
   [HOME_APPS_FETCH_APP_DETAILS_START]: (state) => ({
     ...state,
     appDetails: {
@@ -158,10 +211,36 @@ export default createReducer(initialState, {
     ...state,
     appExecutions: {
       ...state.appExecutions,
+=======
+
+  [HOME_APPS_FEATURED_FETCH_START]: state => ({
+    ...state,
+    featuredApps: {
+      ...state.featuredApps,
+      isFetching: true,
+    },
+  }),
+
+  [HOME_APPS_FEATURED_FETCH_SUCCESS]: (state, apps) => ({
+    ...state,
+    featuredApps: {
+      ...state.featuredApps,
+      isFetching: false,
+      isCheckedAll: false,
+      apps: [...apps],
+    },
+  }),
+
+  [HOME_APPS_FEATURED_FETCH_FAILURE]: state => ({
+    ...state,
+    featuredApps: {
+      ...state.featuredApps,
+>>>>>>> production
       isFetching: false,
     },
   }),
 
+<<<<<<< HEAD
   [HOME_APPS_RESET_MODALS]: (state) => ({
     ...state,
     copyToSpaceModal: {
@@ -384,3 +463,34 @@ export default createReducer(initialState, {
     }
   },
 })
+=======
+  [HOME_APPS_FEATURED_TOGGLE_ALL_CHECKBOXES]: (state) => {
+    const isCheckedAll = isCheckedAllCheckboxes(state.featuredApps.apps)
+    return {
+      ...state,
+      featuredApps: {
+        apps: state.featuredApps.apps.map((app) => {
+          app.isChecked = !isCheckedAll
+          return app
+        }),
+        isCheckedAll: !isCheckedAll,
+      },
+    }
+  },
+
+  [HOME_APPS_FEATURED_TOGGLE_CHECKBOX]: (state, id) => {
+    const apps = state.featuredApps.apps.map((app) => {
+      if (app.id === id) app.isChecked = !app.isChecked
+      return app
+    })
+    const isCheckedAll = isCheckedAllCheckboxes(apps)
+    return {
+      ...state,
+      featuredApps: {
+        isCheckedAll,
+        apps,
+      },
+    }
+  },
+})
+>>>>>>> production

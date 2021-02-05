@@ -30,9 +30,13 @@ const tmpOptions = [
   },
 ]
 
+<<<<<<< HEAD
 const Item = ({ text, icon, isDisabled, onClick, link, method, hide }) => {
   if (hide) return null
 
+=======
+const Item = ({ text, icon, isDisabled, onClick }) => {
+>>>>>>> production
   const classes = classNames({
     'dropdown-menu__item--disabled': isDisabled,
   }, 'dropdown-menu__item')
@@ -41,6 +45,7 @@ const Item = ({ text, icon, isDisabled, onClick, link, method, hide }) => {
     if (!isDisabled && typeof onClick === 'function') onClick()
   }
 
+<<<<<<< HEAD
   if (link && !isDisabled) {
     return (
       <li className={classes}>
@@ -52,6 +57,8 @@ const Item = ({ text, icon, isDisabled, onClick, link, method, hide }) => {
     )
   }
 
+=======
+>>>>>>> production
   return (
     <li className={classes} onClick={handler}>
       {icon && <Icon icon={icon} />}&nbsp;
@@ -60,6 +67,7 @@ const Item = ({ text, icon, isDisabled, onClick, link, method, hide }) => {
   )
 }
 
+<<<<<<< HEAD
 const DropdownMenu = ({ icon, title, options, className, message = '' }) => {
   const menuOptions = options ? options : tmpOptions
 
@@ -79,6 +87,18 @@ const DropdownMenu = ({ icon, title, options, className, message = '' }) => {
   return (
     <div className='btn-group'>
       <div className={classes}>
+=======
+const DropdownMenu = ({ icon, title, options }) => {
+  const menuOptions = options ? options : tmpOptions
+
+  const list = menuOptions.map((e) => {
+    return <Item {...e} key={e.text} onClick={e.onClick} />
+  })
+
+  return (
+    <div className='btn-group'>
+      <div className='dropdown'>
+>>>>>>> production
         <Button type='primary' data-toggle='dropdown'>
           <>
             {icon && <Icon icon={icon} />}&nbsp;
@@ -100,17 +120,23 @@ Item.propTypes = {
   title: PropTypes.string,
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
+<<<<<<< HEAD
   link: PropTypes.string,
   method: PropTypes.string,
   hide: PropTypes.bool,
+=======
+>>>>>>> production
 }
 
 DropdownMenu.propTypes = {
   icon: PropTypes.string,
   title: PropTypes.string,
   options: PropTypes.array,
+<<<<<<< HEAD
   className: PropTypes.string,
   message: PropTypes.string,
+=======
+>>>>>>> production
 }
 
 export default DropdownMenu
