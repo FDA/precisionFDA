@@ -9,6 +9,10 @@ type BaseErrorProps = AnyObject & {
   details?: AnyObject
 }
 type MaybeBaseErrorProps = Partial<BaseErrorProps>
+type ClientErrorProps = MaybeBaseErrorProps & {
+  clientResponse: any
+  clientStatusCode: number
+}
 
 export enum ErrorCodes {
   GENERIC = 'E_INTERNAL',
@@ -111,7 +115,7 @@ export class UserNotFoundError extends NotFoundError {
 }
 
 export class ClientRequestError extends BaseError {
-  constructor(message = 'Client API call failed', props: MaybeBaseErrorProps = {}) {
+  constructor(message: string, props: ClientErrorProps) {
     super(message, {
       code: ErrorCodes.NEXUS_REQUEST_FAILED,
       statusCode: 400,

@@ -8,6 +8,7 @@ import * as client from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { User, Tagging, UserFile, Tag, Folder } from '../..'
+import { errors } from '../../..'
 import { FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 import { createJobClosed } from '../../event/event.helper'
 import {
@@ -54,6 +55,14 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         accessToken: this.ctx.user.accessToken,
       })
     } catch (err) {
+      if (err instanceof errors.ClientRequestError) {
+        // we retrieved response status code
+        if (err.props?.clientStatusCode && err.props?.clientStatusCode >= 500) {
+          // there was an error on platform side, we will retry later
+          this.ctx.log.info('Will not remove this job - 5xx error code detected')
+          return
+        }
+      }
       // handle WORKER dirty state here
       // we could do more efficient error handling and also calls repetition here
       await removeRepeatable(this.ctx.job)
