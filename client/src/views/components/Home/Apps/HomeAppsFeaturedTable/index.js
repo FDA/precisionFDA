@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 import React, { useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames/bind'
 import { Link } from 'react-router-dom'
+=======
+import React from 'react'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import classNames from 'classnames/bind'
+>>>>>>> production
 
 import HomeAppShape from '../../../../shapes/HomeAppShape'
 import Loader from '../../../Loader'
@@ -10,12 +17,16 @@ import TagsList from '../../../TagsList'
 import {
   homeAppsFeaturedIsFetchingSelector,
   homeAppsFeaturedIsCheckedAllSelector,
+<<<<<<< HEAD
   homeAppsFeaturedFiltersSelector,
+=======
+>>>>>>> production
 } from '../../../../../reducers/home/apps/selectors'
 import {
   toggleAllAppsFeaturedCheckboxes,
   toggleAppFeaturedCheckbox,
 } from '../../../../../actions/home'
+<<<<<<< HEAD
 import { getOrder } from '../../../../../helpers'
 import { Table, Thead, Tbody, Th } from '../../../TableComponents'
 import Input from '../../../FormComponents/Input'
@@ -27,6 +38,16 @@ import { debounce } from '../../../../../utils'
 
 
 const HomeAppsFeaturedTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCheckboxes, toggleAppCheckbox, filters, handleFilterValue }) => {
+=======
+import { Table, Thead, Tbody, Th } from '../../../TableComponents'
+import Input from '../../../FormComponents/Input'
+import Pagination from '../../../../components/TableComponents/Pagination'
+import Icon from '../../../Icon'
+import { getSpacesIcon } from '../../../../../helpers/spaces'
+
+
+const HomeAppsFeaturedTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCheckboxes, toggleAppCheckbox }) => {
+>>>>>>> production
   const checkboxClasses = classNames({
     'fa-square-o': !isCheckedAll,
     'fa-check-square-o': isCheckedAll,
@@ -40,6 +61,7 @@ const HomeAppsFeaturedTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCh
     )
   }
 
+<<<<<<< HEAD
   const { sortType, sortDirection, currentPage, nextPage, prevPage, totalPages, totalCount, fields } = filters
 
   const [fieldsSearch, setFieldsSearch] = useState(fields)
@@ -68,11 +90,26 @@ const HomeAppsFeaturedTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCh
   return (
     <div className="home-page-layout__data-table">
       <div className="home-page-layout__table-wrapper">
+=======
+  const sortType = null
+  const sortDir = null
+  const pagination = {
+    currentPage: 1,
+    nextPage: null,
+    prevPage: null,
+    totalPages: 3,
+  }
+
+  if (apps.length) {
+    return (
+      <div className="home-page-layout__data-table">
+>>>>>>> production
         <Table>
           <Thead>
             <th className="pfda-padded-l10">
               <Icon onClick={toggleAllAppsCheckboxes} icon={checkboxClasses} />
             </th>
+<<<<<<< HEAD
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='name'>name</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='title'>title</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='revision'>revision</Th>
@@ -106,6 +143,34 @@ const HomeAppsFeaturedTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCh
     </div>
   )
 
+=======
+            <Th sortType={sortType} sortDir={sortDir} type='name'>name</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='location'>title</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='added by'>revision</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='size'>added by</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='created'>location</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='origin'>created</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='tags'>tags</Th>
+          </Thead>
+          <Tbody>
+            <>
+              <FilterRow />
+              {apps.map((app) => <Row app={app} key={app.id} toggleAppCheckbox={toggleAppCheckbox} />)}
+            </>
+          </Tbody>
+        </Table>
+        <div className='home-page-layout__data-table_count'>
+          1-2/2
+        </div>
+        <div className='pfda-padded-t20'>
+          <Pagination data={pagination} />
+        </div>
+      </div>
+    )
+  }
+
+  return <div className='text-center'>No apps found.</div>
+>>>>>>> production
 }
 
 const Row = ({ app, toggleAppCheckbox }) => {
@@ -122,6 +187,7 @@ const Row = ({ app, toggleAppCheckbox }) => {
           onClick={() => toggleAppCheckbox(app.id)}
         />
       </td>
+<<<<<<< HEAD
       <td className='home-page-layout__data-table_name'>{app.name}</td>
       <td className='home-page-layout__data-table_title'>
         <Link to={`/home${app.links.show}`}>
@@ -135,6 +201,22 @@ const Row = ({ app, toggleAppCheckbox }) => {
           <span>{app.addedByFullname}</span>
         </a>
       </td>
+=======
+      <td>{app.name}</td>
+      <td>
+        <a href={app.links.show}>
+          <Icon icon={getSpacesIcon('apps')} fw />
+          <span>{app.title}</span>
+        </a>
+      </td>
+      <td>{app.revision}</td>
+      <td>
+        <a href={app.links.user}>
+          <span>{app.addedBy}</span>
+        </a>
+      </td>
+      <td>{app.location}</td>
+>>>>>>> production
       <td>
         {app.createdAtDateTime}
       </td>
@@ -143,6 +225,7 @@ const Row = ({ app, toggleAppCheckbox }) => {
   )
 }
 
+<<<<<<< HEAD
 const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
   const filtersConfig = ['', 'name', 'title', 'revision', 'username', '', 'tags']
 
@@ -159,6 +242,16 @@ const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
           onChange={(e) => {
             onChangeFieldsValue(fieldsSearch.set(filter, e.target.value))
           }}
+=======
+const FilterRow = () => {
+  const filtersConfig = ['name', 'title', 'revision', 'addedBy', 'location', 'created', 'tags']
+  const filters = filtersConfig.map((e) => {
+    return (
+      <td key={e}>
+        <Input
+          name={e}
+          placeholder='--'
+>>>>>>> production
         />
       </td>
     )
@@ -166,6 +259,10 @@ const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
 
   return (
     <tr>
+<<<<<<< HEAD
+=======
+      <td></td>
+>>>>>>> production
       {filters}
     </tr>
   )
@@ -177,15 +274,21 @@ HomeAppsFeaturedTable.propTypes = {
   isCheckedAll: PropTypes.bool,
   toggleAllAppsCheckboxes: PropTypes.func,
   toggleAppCheckbox: PropTypes.func,
+<<<<<<< HEAD
   filters: PropTypes.object,
   setAppFilterValue: PropTypes.func,
   handleFilterValue: PropTypes.func,
+=======
+>>>>>>> production
 }
 
 HomeAppsFeaturedTable.defaultProps = {
   apps: [],
   sortHandler: () => { },
+<<<<<<< HEAD
   filters: {},
+=======
+>>>>>>> production
   toggleAppCheckbox: () => { },
   toggleAllAppsCheckboxes: () => { },
 }
@@ -195,6 +298,7 @@ Row.propTypes = {
   toggleAppCheckbox: PropTypes.func,
 }
 
+<<<<<<< HEAD
 FilterRow.propTypes = {
   onChangeFieldsValue: PropTypes.func,
   fieldsSearch: PropTypes.object,
@@ -204,6 +308,11 @@ const mapStateToProps = (state) => ({
   isFetching: homeAppsFeaturedIsFetchingSelector(state),
   isCheckedAll: homeAppsFeaturedIsCheckedAllSelector(state),
   filters: homeAppsFeaturedFiltersSelector(state),
+=======
+const mapStateToProps = (state) => ({
+  isFetching: homeAppsFeaturedIsFetchingSelector(state),
+  isCheckedAll: homeAppsFeaturedIsCheckedAllSelector(state),
+>>>>>>> production
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -215,4 +324,8 @@ export default connect(mapStateToProps, mapDispatchToProps)(HomeAppsFeaturedTabl
 
 export {
   HomeAppsFeaturedTable,
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> production

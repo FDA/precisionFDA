@@ -28,7 +28,11 @@ describe('fetchApps()', () => {
     const pagination = {}
 
     const store = mockStore(reducer({}, { type: undefined }))
+<<<<<<< HEAD
     const url = `/api/apps?page=${page}&space_id=${spaceId}`
+=======
+    const url = `/api/apps?space_id=${spaceId}`
+>>>>>>> production
     MAP.mapToApp = jest.fn((app) => (app))
 
     afterEach(() => {

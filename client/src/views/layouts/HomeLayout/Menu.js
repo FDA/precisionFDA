@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect } from 'react'
 import { NavLink, withRouter } from 'react-router-dom'
 import PropTypes from 'prop-types'
@@ -61,6 +62,38 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
   const classes = classNames({
     'home-page-layout__menu': true,
     'home-page-layout__menu--hidden': !isLeftMenuOpen,
+=======
+import React, { useState } from 'react'
+import { NavLink, withRouter } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import classNames from 'classnames/bind'
+
+import Icon from '../../components/Icon'
+
+
+const MenuLink = ({ url, icon, text, counter }) => (
+  <NavLink
+    to={url}
+    className='home-page-layout__menu-item'
+    activeClassName='home-page-layout__menu-item--active'
+  >
+    <Icon icon={icon} />
+    <span className='home-page-layout__menu-item-text'>
+      <span>{text}</span>
+      {(!isNaN(counter)) && <span>({counter})</span>}
+    </span>
+  </NavLink>
+)
+
+const Menu = ({ match }) => {
+  const [isHidden, setIsHidden] = useState(false)
+
+  const tab = match.params.tab ? `/${match.params.tab}` : ''
+
+  const classes = classNames({
+    'home-page-layout__menu': true,
+    'home-page-layout__menu--hidden': isHidden,
+>>>>>>> production
   })
 
   const switcherClasses = classNames({
@@ -74,15 +107,20 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           url={`/home/files${tab}`}
           icon={'fa-files-o'}
           text='Files'
+<<<<<<< HEAD
           counter={counters.files}
           page={HOME_PAGES.FILES}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+=======
+          counter={0}
+>>>>>>> production
         />
         <MenuLink
           url={`/home/apps${tab}`}
           icon={'fa-cube'}
           text='Apps'
+<<<<<<< HEAD
           counter={counters.apps}
           page={HOME_PAGES.APPS}
           currentPage={currentPage}
@@ -96,11 +134,21 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           page={HOME_PAGES.ASSETS}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+=======
+          counter={0}
+        />
+        <MenuLink
+          url={`/home/assets${tab}`}
+          icon={'fa-cube'}
+          text='Assets'
+          counter={0}
+>>>>>>> production
         />
         <MenuLink
           url={`/home/workflows${tab}`}
           icon={'fa-bolt'}
           text='Workflows'
+<<<<<<< HEAD
           counter={counters.workflows}
           page={HOME_PAGES.WORKFLOWS}
           currentPage={currentPage}
@@ -122,12 +170,36 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
       </div>
       <div className='home-page-layout__bottom-area' onClick={() => setIsLeftMenuOpen(!isLeftMenuOpen)}>
         {(isLeftMenuOpen) && '<< Collapse sidebar'}
+=======
+          counter={0}
+        />
+        <MenuLink
+          url={`/home/executions${tab}`}
+          icon={'fa-cogs'}
+          text='Executions'
+          counter={0}
+        />
+        <MenuLink
+          url={`/home/notes${tab}`}
+          icon={'fa-sticky-note'}
+          text='Notes'
+          counter={0}
+        />
+      </div>
+      <div className={switcherClasses} onClick={() => setIsHidden(!isHidden)}>
+        {(!isHidden) && <Icon icon='fa-chevron-left' />}
+        {(isHidden) && <Icon icon='fa-chevron-right' />}
+      </div>
+      <div className='home-page-layout__bottom-area' onClick={() => setIsHidden(!isHidden)}>
+        {(!isHidden) && '<< Collapse sidebar'}
+>>>>>>> production
       </div>
     </div>
   )
 }
 
 Menu.propTypes = {
+<<<<<<< HEAD
   currentTab: PropTypes.string,
   currentPage: PropTypes.string,
   setCurrentPage: PropTypes.func,
@@ -135,6 +207,9 @@ Menu.propTypes = {
   match: PropTypes.object,
   isLeftMenuOpen: PropTypes.bool,
   setIsLeftMenuOpen: PropTypes.func,
+=======
+  match: PropTypes.object,
+>>>>>>> production
 }
 
 MenuLink.propTypes = {
@@ -142,6 +217,7 @@ MenuLink.propTypes = {
   icon: PropTypes.string,
   text: PropTypes.string,
   counter: PropTypes.number,
+<<<<<<< HEAD
   page: PropTypes.string,
   currentPage: PropTypes.string,
   setCurrentPage: PropTypes.func,
@@ -161,3 +237,8 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Menu))
+=======
+}
+
+export default withRouter(props => <Menu {...props}/>)
+>>>>>>> production
