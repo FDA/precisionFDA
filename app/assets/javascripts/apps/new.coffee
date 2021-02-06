@@ -165,7 +165,7 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     @newAppUid = ko.observable()
     @newAssetUid = ko.observable()
     @newAppURL = ko.computed(=> "/apps/#{@newAppUid()}")
-    @newAssetURL = ko.computed(=> "/app_assets/#{@newAssetUid()}")
+    @newAssetURL = ko.computed(=> "/assets/#{@newAssetUid()}")
     @dockerImage = ko.observable(null)
     @modalTitle = ko.computed(() =>
       switch @importType()

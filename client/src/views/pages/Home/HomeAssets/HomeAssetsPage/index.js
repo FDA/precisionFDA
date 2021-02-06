@@ -42,7 +42,7 @@ const HomeAssetsPage = (props) => {
     <HomeLayout>
       <div className='home-page-layout__header-row'>
         <div className='home-page-layout__actions'>
-          <LinkTargetBlank url='/app_assets/new'>
+          <LinkTargetBlank url='/assets/new'>
             <Button type='primary'>
               <span>
                 <Icon icon='fa-question' />&nbsp;
