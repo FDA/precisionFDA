@@ -22,7 +22,7 @@
     "history": "^4.10.1",
     "http-status-codes": "^1.4.0",
     "prop-types": "^15.7.2",
-    "query-string": "^6.11.1",
+    "query-string": "^6.13.8",
     "ramda": "^0.27.0",
     "rc-tree": "^3.2.2",
     "react": "^16.12.0",
