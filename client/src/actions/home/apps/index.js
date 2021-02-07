@@ -2,7 +2,6 @@ import { createAction } from '../../../utils/redux'
 import {
   HOME_APPS_TOGGLE_ALL_CHECKBOXES,
   HOME_APPS_TOGGLE_CHECKBOX,
-<<<<<<< HEAD
   HOME_APPS_RESET_MODALS,
   HOME_APPS_SHOW_MODAL,
   HOME_APPS_HIDE_MODAL,
@@ -62,25 +61,10 @@ const hideAppsDeleteModal = () => createAction(HOME_APPS_HIDE_MODAL, HOME_APPS_M
 
 const setAppExecutionsFilterValue = (value) => createAction(HOME_APPS_SET_FILTER_VALUE, { appsType: 'appExecutions', value })
 const resetAppExecutionsFiltersValue = () => createAction(HOME_APPS_RESET_FILTERS, { appsType: 'appExecutions' })
-=======
-  HOME_APPS_FEATURED_TOGGLE_ALL_CHECKBOXES,
-  HOME_APPS_FEATURED_TOGGLE_CHECKBOX,
-} from '../types'
-import fetchApps from './fetchApps'
-import fetchAppsFeatured from './fetchAppsFeatured'
-
-
-const toggleAllAppsCheckboxes = () => createAction(HOME_APPS_TOGGLE_ALL_CHECKBOXES)
-const toggleAppCheckbox = (id) => createAction(HOME_APPS_TOGGLE_CHECKBOX, id)
-
-const toggleAllAppsFeaturedCheckboxes = () => createAction(HOME_APPS_FEATURED_TOGGLE_ALL_CHECKBOXES)
-const toggleAppFeaturedCheckbox = (id) => createAction(HOME_APPS_FEATURED_TOGGLE_CHECKBOX, id)
->>>>>>> production
 
 export {
   fetchApps,
   fetchAppsFeatured,
-<<<<<<< HEAD
   fetchAppsEverybody,
   fetchAppsSpaces,
   fetchAppDetails,
@@ -119,10 +103,3 @@ export {
   setAppExecutionsFilterValue,
   resetAppExecutionsFiltersValue,
 }
-=======
-  toggleAllAppsCheckboxes,
-  toggleAppCheckbox,
-  toggleAllAppsFeaturedCheckboxes,
-  toggleAppFeaturedCheckbox,
-}
->>>>>>> production

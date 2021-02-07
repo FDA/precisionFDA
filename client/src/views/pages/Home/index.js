@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-<<<<<<< HEAD
 import { connect } from 'react-redux'
 
 import { homeCurrentTabSelector } from '../../../reducers/home/page/selectors'
@@ -56,24 +55,12 @@ const HomePage = ({ match, currentTab }) => {
     }
     uid = match.params.tab
   }
-=======
-
-import HomeAppsPage from './HomeAppsPage'
-import HomeAppsFeaturedPage from './HomeAppsFeaturedPage'
-import HomeLayout from '../../layouts/HomeLayout'
-
-
-const HomePage = ({ match }) => {
-  const { page } = match.params
-  const tab = match.params.tab ? `/${match.params.tab}` : ''
->>>>>>> production
 
   switch (page + tab) {
     case 'apps':
       return <HomeAppsPage />
     case 'apps/featured':
       return <HomeAppsFeaturedPage />
-<<<<<<< HEAD
     case 'apps/everybody':
       return <HomeAppsEverybodyPage />
     case 'apps/spaces':
@@ -120,8 +107,6 @@ const HomePage = ({ match }) => {
       return <HomeAssetsSpacesPage />
     case 'assets/file-page':
       return <HomeAssetSinglePage uid={uid} />
-=======
->>>>>>> production
     default:
       return <HomeLayout>Page not found</HomeLayout>
   }
@@ -129,7 +114,6 @@ const HomePage = ({ match }) => {
 
 HomePage.propTypes = {
   match: PropTypes.any,
-<<<<<<< HEAD
   currentTab: PropTypes.string,
 }
 
@@ -143,8 +127,3 @@ export {
   HomePage,
 }
 
-=======
-}
-
-export default HomePage
->>>>>>> production

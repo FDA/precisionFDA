@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useEffect } from 'react'
 import { NavLink, withRouter } from 'react-router-dom'
 import PropTypes from 'prop-types'
@@ -51,43 +50,18 @@ const Tabs = ({ match, currentTab, setCurrentTab }) => {
     }
   }, [currentTab])
 
-=======
-import React from 'react'
-import { NavLink, withRouter } from 'react-router-dom'
-import PropTypes from 'prop-types'
-
-
-const Tab = ({ url, text }) => (
-  <NavLink
-    exact
-    to={url}
-    className="home-page-layout__tabs-item"
-    activeClassName="home-page-layout__tabs-item--active"
-  >
-    <span>{text}</span>
-  </NavLink>
-)
-
-const Tabs = ({ match }) => {
-  const page = match.params.page
-
->>>>>>> production
   return (
     <div className='home-page-layout__tabs'>
       <Tab
         url={`/home/${page}`}
         text='Me'
-<<<<<<< HEAD
         tab={HOME_TABS.PRIVATE}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-=======
->>>>>>> production
       />
       <Tab
         url={`/home/${page}/featured`}
         text='Featured'
-<<<<<<< HEAD
         tab={HOME_TABS.FEATURED}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
@@ -98,22 +72,13 @@ const Tabs = ({ match }) => {
         tab={HOME_TABS.EVERYBODY}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-=======
-      />
-      <Tab
-        url={`/home/${page}/everybody`}
-        text='Everybody'
->>>>>>> production
       />
       <Tab
         url={`/home/${page}/spaces`}
         text='Spaces'
-<<<<<<< HEAD
         tab={HOME_TABS.SPACES}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-=======
->>>>>>> production
       />
     </div>
   )
@@ -122,18 +87,14 @@ const Tabs = ({ match }) => {
 Tab.propTypes = {
   url: PropTypes.string,
   text: PropTypes.string,
-<<<<<<< HEAD
   currentTab: PropTypes.string,
   tab: PropTypes.string,
   setCurrentTab: PropTypes.func,
   isDisabled: PropTypes.bool,
-=======
->>>>>>> production
 }
 
 Tabs.propTypes = {
   match: PropTypes.object,
-<<<<<<< HEAD
   currentTab: PropTypes.string,
   setCurrentTab: PropTypes.func,
 }
@@ -147,8 +108,3 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Tabs))
-=======
-}
-
-export default withRouter(props => <Tabs {...props} />)
->>>>>>> production
