@@ -8,7 +8,6 @@ import Menu from './Menu'
 import './style.sass'
 
 
-<<<<<<< HEAD
 const HomeLayout = ({ children, hideTabs }) => {
   return (
     <DefaultLayout>
@@ -23,20 +22,6 @@ const HomeLayout = ({ children, hideTabs }) => {
             }
             <div className="pfda-padded-20">
               {children}
-=======
-const HomeLayout = (props) => {
-  return (
-    <DefaultLayout>
-      <div>
-        <Tabs />
-      </div>
-      <div className="home-page-layout">
-        <div className='home-page-layout__container'>
-          <Menu />
-          <div className="home-page-layout__content">
-            <div className="pfda-padded-20">
-              {props.children}
->>>>>>> production
             </div>
           </div>
         </div>
@@ -50,13 +35,7 @@ HomeLayout.propTypes = {
     PropTypes.arrayOf(PropTypes.element),
     PropTypes.element,
   ]).isRequired,
-<<<<<<< HEAD
   hideTabs: PropTypes.bool,
 }
 
 export default HomeLayout
-=======
-}
-
-export default HomeLayout
->>>>>>> production

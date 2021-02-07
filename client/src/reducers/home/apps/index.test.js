@@ -1,7 +1,6 @@
 import reducer from './index'
 import {
   HOME_APPS_FETCH_START,
-<<<<<<< HEAD
   HOME_APPS_FETCH_APP_DETAILS_START,
   HOME_APPS_FETCH_APP_DETAILS_SUCCESS,
   HOME_APPS_FETCH_APP_DETAILS_FAILURE,
@@ -17,23 +16,10 @@ describe('fetch private apps start', () => {
 
     expect(reducer(initialState, action)).toEqual({
       [HOME_APP_TYPES.PRIVATE]: {
-=======
-} from '../../../actions/home/types'
-
-
-describe('reducer apps actions processing', () => {
-  it('HOME_APPS_FETCH_START', () => {
-    const initialState = {}
-    const action = { type: HOME_APPS_FETCH_START }
-
-    expect(reducer(initialState, action)).toEqual({
-      privateApps: {
->>>>>>> production
         isFetching: true,
       },
     })
   })
-<<<<<<< HEAD
 })
 
 describe('fetch featured apps start', () => {
@@ -109,6 +95,3 @@ describe('reset filter value', () => {
     })
   })
 })
-=======
-})
->>>>>>> production

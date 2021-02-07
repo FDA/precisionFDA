@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { createAction } from '../../utils/redux'
 import {
   fetchApps,
@@ -504,23 +503,3 @@ export {
   showAssetsLicenseModal,
   hideAssetsLicenseModal,
 }
-=======
-import {
-  fetchApps,
-  fetchAppsFeatured,
-  toggleAllAppsCheckboxes,
-  toggleAppCheckbox,
-  toggleAllAppsFeaturedCheckboxes,
-  toggleAppFeaturedCheckbox,
-} from './apps'
-
-
-export {
-  fetchApps,
-  fetchAppsFeatured,
-  toggleAllAppsCheckboxes,
-  toggleAppCheckbox,
-  toggleAllAppsFeaturedCheckboxes,
-  toggleAppFeaturedCheckbox,
-}
->>>>>>> production

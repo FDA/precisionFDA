@@ -2,7 +2,6 @@
 
 exports[`HomeAppsTable test should render 1`] = `
 <div
-<<<<<<< HEAD
   className="home-page-layout__data-table"
 >
   <div
@@ -82,10 +81,5 @@ exports[`HomeAppsTable test should render 1`] = `
       setPageHandler={[Function]}
     />
   </div>
-=======
-  className="text-center"
->
-  No apps found.
->>>>>>> production
 </div>
 `;

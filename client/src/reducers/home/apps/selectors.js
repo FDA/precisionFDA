@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { HOME_APP_TYPES } from '../../../constants'
 
 
@@ -31,12 +30,3 @@ export const homeAppsEditTagsModalSelector = (state) => state.home.apps.editTags
 export const homeAppsAttachToModalSelector = (state) => state.home.apps.appsAttachToModal
 export const homeAppsComparisonModalSelector = (state) => state.home.apps.comparisonModal
 export const homeAppsDeleteModalSelector = (state) => state.home.apps.deleteModal
-=======
-export const homeAppsListSelector = (state) => state.home.apps.privateApps.apps
-export const homeAppsIsFetchingSelector = (state) => state.home.apps.privateApps.isFetching
-export const homeAppsIsCheckedAllSelector = (state) => state.home.apps.privateApps.isCheckedAll
-
-export const homeAppsFeaturedListSelector = (state) => state.home.apps.featuredApps.apps
-export const homeAppsFeaturedIsFetchingSelector = (state) => state.home.apps.featuredApps.isFetching
-export const homeAppsFeaturedIsCheckedAllSelector = (state) => state.home.apps.featuredApps.isCheckedAll
->>>>>>> production
