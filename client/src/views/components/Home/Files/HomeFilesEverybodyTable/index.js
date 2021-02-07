@@ -61,7 +61,7 @@ const HomeFilesEverybodyTable = ({ files, isFetching, isCheckedAll, toggleAllFil
       </div>
     )
   }
-  console.log(path)
+
   const { sortType, sortDirection, currentPage, nextPage, prevPage, totalPages, totalCount, fields } = filters
   
   const [fieldsSearch, setFieldsSearch] = useState(fields)
@@ -200,7 +200,7 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
   }
 
   let originLink = ''
-  if (file.origin === 'object') {
+  if (typeof file.origin === 'object') {
     originLink = file.links.origin_object.origin_type === 'Job' ?
       `/home/jobs/${file.links.origin_object.origin_uid}` :
       `/home${file.origin.href}`
