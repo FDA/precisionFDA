@@ -150,7 +150,7 @@ const Row = ({ file, toggleFileCheckbox }) => {
   }
 
   let originLink = ''
-  if (file.origin === 'object') {
+  if (typeof file.origin === 'object') {
     originLink = file.links.origin_object.origin_type === 'Job' ?
       `/home/jobs/${file.links.origin_object.origin_uid}` :
       `/home${file.origin.href}`
