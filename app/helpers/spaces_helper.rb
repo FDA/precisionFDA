@@ -362,7 +362,7 @@ module SpacesHelper
     elsif node.parent_type == "Node" && node.parent.blank?
       "Copied"
     elsif node.parent_type != "User"
-      node_origin_link(unilinkfw(node.parent))
+      node_origin_link(unilinkfw(node.parent, { no_home: true }))
     else
       "Uploaded"
     end

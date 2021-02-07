@@ -161,7 +161,7 @@ module Api
           jobs: @app.editable_jobs(@context),
           assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
           challenges: @assignable_challenges.select do |ch|
-            ch.is_viewable?(@context) || ch.app_owner == @context.user
+            ch.accessible_by?(@context) || ch.app_owner == @context.user
           end,
           notes: @notes,
           discussions: @discussions,

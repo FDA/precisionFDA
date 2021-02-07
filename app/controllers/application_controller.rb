@@ -194,7 +194,7 @@ class ApplicationController < ActionController::Base
       className: item_sliced[:klass],
       fa_class: view_context.fa_class(object),
       scope: scope,
-      path: accessible ? pathify(object) : nil,
+      path: accessible ? concat_path(object) : nil,
       owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
@@ -253,6 +253,15 @@ class ApplicationController < ActionController::Base
     end
 
     describe
+  end
+
+  # Concat item path with '/home' to create a link to Home - for specific items
+  def concat_path(item)
+    if %w(file folder app app-series job asset workflow workflow-series).include? item.klass
+      "/home".concat(pathify(item))
+    else
+      pathify(item)
+    end
   end
 
   # Sets time zone for current user.
