@@ -368,7 +368,7 @@ class SubmissionsController < ApplicationController
   end
 
   def check_challenge_access
-    return if Challenge.accessible_by(@context).exists?(params[:challenge_id])
+    return if Challenge.accessible_by(@context).exists?(params[:challenge_id].to_i)
 
     redirect_to challenges_path, alert: "The challenge is not accessible to you"
   end
