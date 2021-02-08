@@ -11,6 +11,7 @@
     "lodash": "^4.17.19"
   },
   "scripts": {
+    "test": "jest",
     "test:watch": "jest --watch"
   },
   "jest": {
