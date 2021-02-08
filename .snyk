@@ -1,0 +1,24 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+ignore:
+  'SNYK-RUBY-ACTIONCABLE-20338':
+    - '* > actioncable@6.0.3.4':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
+  'snyk:lic:rubygems:unicorn:GPL-2.0':
+    - '* > unicorn@4.9.0':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
+  'snyk:lic:rubygems:sidekiq:LGPL-3.0':
+    - '* > sidekiq@6.1.2':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
+  'snyk:lic:rubygems:raindrops:LGPL-2.1':
+    - '* > raindrops@0.19.1':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
+  'snyk:lic:rubygems:kgio:LGPL-2.1':
+    - '* > kgio@2.11.3':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
+patch: {}

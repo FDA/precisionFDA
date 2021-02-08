@@ -10,15 +10,15 @@ module SpaceConcern
 
   # Finds a space by id, accessible by current user.
   # @param space_id [Integer]
-  # @return [Space] A space Object.
+  # @return [Space] A space Object if it is accessible by user, visible and not locked OR
+  #   return nil Object if not.
   def find_user_space
     @space = Space.undeleted.find(params[:space_id])
-
-    return if @space.accessible_by_user?(current_user)
-
     raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 
-    head :forbidden
+    return nil unless @space.accessible_by_user?(current_user)
+
+    @space
   end
 
   # Checks if user is able to modify content of a space.

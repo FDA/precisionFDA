@@ -12,6 +12,7 @@ import {
   SPACE_FILES_SHOW_COPY_MODAL,
   SPACE_FILES_HIDE_COPY_MODAL,
   SPACE_SELECT_ACCESSIBLE_SPACE,
+  SPACE_FILES_SET_CURRENT_PAGE_VALUE,
 } from '../types'
 import fetchFiles from './fetchFiles'
 import sortFiles from './sortFiles'
@@ -30,6 +31,7 @@ const hideFilesAddFolderModal = () => createAction(SPACE_FILES_HIDE_ADD_FOLDER_M
 
 const toggleFileCheckbox = (id) => createAction(SPACE_FILES_TOGGLE_CHECKBOX, id)
 const toggleAllFileCheckboxes = () => createAction(SPACE_FILES_TOGGLE_ALL_CHECKBOXES)
+const setFilesCurrentPageValue = (value) => createAction(SPACE_FILES_SET_CURRENT_PAGE_VALUE, value)
 
 const showFilesActionModal = (action) => createAction(SPACE_FILES_SHOW_ACTION_MODAL, action)
 const hideFilesActionModal = () => createAction(SPACE_FILES_HIDE_ACTION_MODAL)
@@ -63,4 +65,5 @@ export {
   hideFilesCopyModal,
   selectAccessibleSpace,
   fetchAccessibleFiles,
+  setFilesCurrentPageValue,
 }

@@ -156,7 +156,7 @@ class BatchAppNewView
         Precision.api('/apps/run', params)
           .done((rs) =>
             if !rs.error?
-              window.location = "/apps/#{@uid}"
+              window.location = "/home/apps/#{@uid}"
             else
               @busy(false)
               @running(false)
@@ -215,7 +215,7 @@ class BatchAppNewView
           @_batchRun(batchData, totalBatchFileIds, nextBatchFileIds, counter + 1)
         )
     else
-      window.location = "/apps/#{@uid}"
+      window.location = "/home/apps/#{@uid}/jobs"
 #########################################################
 #
 #

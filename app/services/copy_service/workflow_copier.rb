@@ -66,6 +66,7 @@ class CopyService
         source_app = App.find_by!(uid: stage["app_uid"])
         new_app = copy_service.copy(source_app, scope).first
 
+        stage["app_dxid"] = new_app.dxid
         stage["app_uid"] = new_app.uid
         stage["inputs"].map! do |input|
           if input["class"] == "file" && input["default_workflow_value"].present?

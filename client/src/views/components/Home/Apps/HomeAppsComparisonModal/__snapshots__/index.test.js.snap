@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAppsComparisonModal test should render 1`] = `
+<Modal
+  modalFooterContent={<SwitchFooter />}
+  title="Attention!"
+/>
+`;

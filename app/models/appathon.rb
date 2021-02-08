@@ -18,6 +18,7 @@
 
 class Appathon < ApplicationRecord
   include Auditor
+  include CommonPermissions
 
   belongs_to :meta_appathon
   belongs_to :admin, class_name: "User"

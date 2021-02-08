@@ -6,9 +6,8 @@ class CopyService
   end
 
   def copy(entity, scope)
-    Copies.wrap(
-      copier_class(Array(entity).first).new(user: user, api: api).copy(entity, scope),
-    )
+    copier = copier_class(Array(entity).first)
+    Copies.wrap(copier.new(user: user, api: api).copy(entity, scope))
   end
 
   private

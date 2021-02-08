@@ -80,7 +80,10 @@ Modal.propTypes = {
   isOpen: PropTypes.bool,
   isLoading: PropTypes.bool,
   noPadding: PropTypes.bool,
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.element,
+  ]),
   subTitle: PropTypes.string,
   hideModalHandler: PropTypes.func,
   className: PropTypes.any,

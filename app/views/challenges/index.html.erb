@@ -1,7 +1,5 @@
 <% content_for :title do %>PrecisionFDA Challenges<% end %>
 
-<%#= render "challenges/biothreat" %>
-
 <% @featured_challenges.each do |challenge| %>
   <%= render "challenges/header", challenge: challenge, challenge_index_page: true %>
 <% end %>
@@ -10,7 +8,7 @@
   <div class="container container-padded container-fluid">
     <h2>
       Previous PrecisionFDA Challenges
-      <% if @context.can_administer_site? || @context.challenge_admin? %>
+      <% if @context.can_create_challenges? %>
         <%= link_to new_challenge_path, class: "btn-right btn btn-primary btn-lg" do %>
           <span class="fa fa-plus-square"></span> &nbsp;Create a new challenge
         <% end %>
@@ -18,8 +16,6 @@
     </h2>
     <h4>Explore the results of previous challenges</h4>
     <%= render "challenges/cards", challenges: @challenges %>
-  <br/>
-  <br/>
-  <br/>
+    <br/><br/><br/>
   </div>
 </div>

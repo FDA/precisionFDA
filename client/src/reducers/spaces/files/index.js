@@ -40,6 +40,7 @@ import {
   FETCH_ACCESSIBLE_SPACES_START,
   FETCH_ACCESSIBLE_SPACES_SUCCESS,
   FETCH_ACCESSIBLE_SPACES_FAILURE,
+  SPACE_FILES_SET_CURRENT_PAGE_VALUE,
 } from '../../../actions/spaces/types'
 import { isCheckedAllCheckboxes, getModalKey } from '../../../helpers'
 import {
@@ -74,12 +75,13 @@ export default createReducer(initialState, {
     isFetching: true,
   }),
 
-  [SPACE_FILES_FETCH_SUCCESS]: (state, { files, links, path }) => ({
+  [SPACE_FILES_FETCH_SUCCESS]: (state, { files, links, path, pagination }) => ({
     ...state,
     entries: [...files],
     isFetching: false,
     links,
     path,
+    pagination,
   }),
 
   [SPACE_FILES_FETCH_FAILURE]: state => ({
@@ -91,6 +93,14 @@ export default createReducer(initialState, {
     ...state,
     sortType: type,
     sortDirection: direction,
+  }),
+
+  [SPACE_FILES_SET_CURRENT_PAGE_VALUE]: (state, value) => ({
+    ...state,
+    pagination: {
+      ...state.pagination,
+      currentPage: value,
+    },
   }),
 
   [SPACE_FILES_RESET_FILTERS]: (state) => ({

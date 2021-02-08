@@ -4,6 +4,7 @@ export const spaceFilesCheckedAllSelector = (state) => state.spaces.files.isChec
 export const spaceIsFetchingFilesSelector = (state) => state.spaces.files.isFetching
 export const spaceFilesListSortTypeSelector = (state) => state.spaces.files.sortType
 export const spaceFilesListSortDirectionSelector = (state) => state.spaces.files.sortDirection
+export const spaceFilesListPaginationSelector = (state) => state.spaces.files.pagination
 export const spaceFilesAddFolderModalSelector = (state) => state.spaces.files.addFolderModal
 export const spaceFilesActionModalSelector = (state) => state.spaces.files.actionModal
 export const spaceFilesLinksSelector = (state) => state.spaces.files.links

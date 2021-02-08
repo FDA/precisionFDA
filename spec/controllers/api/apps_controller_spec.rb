@@ -2,6 +2,7 @@ require "rails_helper"
 
 RSpec.describe Api::AppsController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
+  let(:admin) { create(:user, :admin) }
   let(:asset) { create(:asset, dxid: "file-test", user_id: user.id) }
 
   let(:input) do
@@ -114,6 +115,71 @@ RSpec.describe Api::AppsController, type: :controller do
     it "creates an event" do
       expect(Event::AppCreated.count).to eq(1)
       expect(Event::AppCreated.first.param1).to eq(last_app.dxid)
+    end
+  end
+
+  describe "PUT feature" do
+    context "when user is authenticated" do
+      let(:latest_version_app) { create(:app, user: admin) }
+      let(:app_series) { create(:app_series, latest_version_app: latest_version_app, user: admin) }
+      let(:latest_revision_app) do
+        create(:app, user: admin, app_series: app_series, scope: Scopes::SCOPE_PUBLIC)
+      end
+
+      before do
+        authenticate!(admin)
+      end
+
+      it "feature apps" do
+        put :invert_feature, params: { item_ids: latest_revision_app.uid,
+                                       featured: true }, format: :json
+
+        expect(response).to be_successful
+        expect { latest_revision_app.reload }.to change(latest_revision_app,
+                                                        :featured).from(false).to(true)
+        expect { app_series.reload }.to change(app_series, :featured).from(false).to(true)
+      end
+    end
+
+    context "when user is not authenticated" do
+      let(:latest_version_app) { create(:app, user: user) }
+
+      it "un-feature apps" do
+        put :invert_feature, params: { item_ids: latest_version_app.uid }
+
+        expect(response).to be_unauthorized
+      end
+    end
+  end
+
+  describe "POST delete" do
+    context "when user is authenticated" do
+      let(:latest_version_app) { create(:app, user: user) }
+      let(:app_series) { create(:app_series, latest_version_app: latest_version_app, user: user) }
+      let(:latest_revision_app) { create(:app, user: user, app_series: app_series) }
+
+      before do
+        authenticate!(user)
+      end
+
+      it "soft-delete apps" do
+        post :soft_delete, params: { item_ids: latest_revision_app.uid }, format: :json
+
+        expect(response).to be_successful
+        expect { latest_revision_app.reload }.to change(latest_revision_app,
+                                                        :deleted).from(false).to(true)
+        expect { app_series.reload }.to change(app_series, :deleted).from(false).to(true)
+      end
+    end
+
+    context "when user is not authenticated" do
+      let(:latest_version_app) { create(:app, user: user) }
+
+      it "soft-delete apps" do
+        post :soft_delete, params: { item_ids: latest_version_app.uid }
+
+        expect(response).to be_unauthorized
+      end
     end
   end
 end

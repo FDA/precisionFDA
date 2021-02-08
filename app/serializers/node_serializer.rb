@@ -5,12 +5,13 @@ class NodeSerializer < ApplicationSerializer
     :name,
     :type,
     :state,
+    :location,
     :added_by,
     :created_at,
-    :scope,
+    :all_tags_list,
+    :featured,
   )
 
-  attribute :all_tags_list, key: :tags
   attribute :sti_type, key: :type
 
   # Returns a user who has created this node.
@@ -24,6 +25,4 @@ class NodeSerializer < ApplicationSerializer
   def created_at
     formatted_time(object.created_at)
   end
-
-  delegate :scope, to: :object
 end

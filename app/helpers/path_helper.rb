@@ -120,7 +120,7 @@ module PathHelper
       explore_files_path(folder_id: folder.id)
     elsif folder.in_space?
       space = folder.space
-      files_api_space_path(id: space.id, folder_id: folder.id)
+      api_files_path(space_id: space.id, folder_id: folder.id)
     else
       raise "Unable to build folder's path"
     end

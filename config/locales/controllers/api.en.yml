@@ -3,3 +3,12 @@ en:
     errors:
       invalid_permission: You have read-only access to the %{title} within the space
       invalid_scope: Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id.
+    feature:
+      messages:
+        featured: "The item(s) has been featured successfully."
+        un_featured: "The item(s) has been un-featured successfully."
+        failed: "Impossible to (un)feature item(s): not Public or you have no permissions."
+    delete:
+      messages:
+        deleted: "The item(s) has been successfully deleted."
+        not_deleted: "Not all items are available for deletion."

@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeMoveModal matches snapshot 1`] = `
+<Modal
+  modalFooterContent={
+    <React.Fragment>
+      <Button
+        disabled={true}
+        onClick={[Function]}
+        type="primary"
+      >
+        Move
+      </Button>
+      <Button>
+        Cancel
+      </Button>
+    </React.Fragment>
+  }
+  title="Choose a folder to move selected items into"
+>
+  <FileTree
+    loadData={[Function]}
+    onSelect={[Function]}
+  />
+</Modal>
+`;

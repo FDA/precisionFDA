@@ -1,0 +1,33 @@
+{
+  "input_spec": {
+    "stages": [
+      {
+        "name": "vcf_statistics",
+        "prev_slot": null,
+        "next_slot": "stage-ttocf6d20g0000",
+        "slotId": "stage-0ia5h62ob40000",
+        "app_dxid": "app-FyyJ8Jj0k3p0GjPVF0jfZVJf",
+        "app_uid": "app-Fz7f1xj08gx0FGF79BX5Yzbj-1",
+        "inputs": [],
+        "outputs": [],
+        "instanceType": "baseline-8",
+        "stageIndex": 0
+      },
+      {
+        "name": "vcf_statistics",
+        "prev_slot": "stage-0ia5h62ob40000",
+        "next_slot": null,
+        "slotId": "stage-ttocf6d20g0000",
+        "app_dxid": "app-FyyJ8Jj0k3p0GjPVF0jfZVJf",
+        "app_uid": "app-Fz7f1z80j3f5vq09GgF9zY46-1",
+        "inputs": [],
+        "outputs": [],
+        "instanceType": "baseline-8",
+        "stageIndex": 10
+      }
+    ]
+  },
+  "output_spec": {
+    "stages": []
+  }
+}

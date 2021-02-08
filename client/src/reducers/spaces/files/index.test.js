@@ -37,6 +37,7 @@ import {
   COPY_FILES_TO_PRIVATE_START,
   COPY_FILES_TO_PRIVATE_SUCCESS,
   COPY_FILES_TO_PRIVATE_FAILURE,
+  SPACE_FILES_SET_CURRENT_PAGE_VALUE,
 } from '../../../actions/spaces/types'
 
 
@@ -458,6 +459,17 @@ describe('reducer actions processing', () => {
       actionModal: {
         isLoading: false,
         isOpen: true,
+      },
+    })
+  })
+
+  it('SPACE_FILES_SET_CURRENT_PAGE_VALUE', () => {
+    const initialState = {}
+    const action = { type: SPACE_FILES_SET_CURRENT_PAGE_VALUE, payload: 3 }
+
+    expect(reducer(initialState, action)).toEqual({
+      pagination: {
+        currentPage: 3,
       },
     })
   })

@@ -15,6 +15,8 @@
 class Note < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
+  include TagsContainer
 
   belongs_to :user, required: true
   has_one :answer
@@ -28,7 +30,6 @@ class Note < ApplicationRecord
 
   acts_as_followable
   acts_as_commentable
-  acts_as_taggable
   acts_as_votable
 
   # Collects note files attachments of both item types: "Node" and "UserFile".

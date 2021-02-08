@@ -25,5 +25,4 @@ class Session < ApplicationRecord
   def expired?
     updated_at < MAX_MINUTES_INACTIVITY.minutes.ago
   end
-
 end

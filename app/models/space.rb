@@ -26,6 +26,8 @@ class Space < ActiveRecord::Base
 
   include Auditor
   include Scopes
+  include CommonPermissions
+  include TagsContainer
 
   STATE_UNACTIVATED = "unactivated".freeze
   STATE_ACTIVE = "active".freeze
@@ -52,7 +54,6 @@ class Space < ActiveRecord::Base
   has_many :comments, as: :commentable
 
   acts_as_commentable
-  acts_as_taggable
 
   store :meta, accessors: [:cts], coder: JSON
 
@@ -253,7 +254,7 @@ class Space < ActiveRecord::Base
 
   def title
     if review?
-      confidential? ? "#{name}(Confidential)" : "#{name}(Cooperative)"
+      confidential? ? "#{name}(Private)" : "#{name}(Shared)"
     elsif verification?
       "#{name}(Verification)"
     else

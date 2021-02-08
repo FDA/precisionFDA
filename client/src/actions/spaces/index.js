@@ -35,6 +35,7 @@ import {
   fetchAccessibleApps,
   toggleAppCheckbox,
   toggleAllAppCheckboxes,
+  setAppsCurrentPageValue,
   showAppsCopyModal,
   hideAppsCopyModal,
 } from './apps'
@@ -59,6 +60,7 @@ import {
   hideFilesCopyModal,
   selectAccessibleSpace,
   fetchAccessibleFiles,
+  setFilesCurrentPageValue,
 } from './files'
 import {
   fetchWorkflows,
@@ -69,6 +71,7 @@ import {
   toggleAllWorkflowCheckboxes,
   showWorkflowsCopyModal,
   hideWorkflowsCopyModal,
+  setWorkflowsCurrentPageValue,
 } from './workflows'
 import {
   fetchMembers,
@@ -76,7 +79,7 @@ import {
   showAddMembersModal,
   hideAddMembersModal,
 } from './members'
-import { fetchJobs, sortJobs, resetSpaceJobsFilters } from './jobs'
+import { fetchJobs, sortJobs, resetSpaceJobsFilters, setJobsCurrentPageValue } from './jobs'
 import createSpace from './createSpace'
 import fetchNewSpaceInfo from './fetchNewSpaceInfo'
 import editSpace from './editSpace'
@@ -193,4 +196,8 @@ export {
   hideAppsCopyModal,
   showWorkflowsCopyModal,
   hideWorkflowsCopyModal,
+  setWorkflowsCurrentPageValue,
+  setAppsCurrentPageValue,
+  setJobsCurrentPageValue,
+  setFilesCurrentPageValue,
 }

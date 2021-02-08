@@ -91,7 +91,7 @@ class JobsNewView
       Precision.api('/apps/run', params)
         .done((rs) =>
           if !rs.error?
-            window.location = if @spaceId() then "/spaces/#{@spaceId()}/jobs" else "/apps/#{@uid}/jobs"
+            window.location = if @spaceId() then "/spaces/#{@spaceId()}/jobs" else "/home/apps/#{@uid}/jobs"
           else
             @busy(false)
             @running(false)

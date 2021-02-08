@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 const AppShape = {
   id: PropTypes.number,
+  dxid: PropTypes.string,
   addedBy: PropTypes.string,
   createdAt: PropTypes.string,
   createdAtDateTime: PropTypes.string,
@@ -19,6 +20,7 @@ const AppShape = {
 
 const mapToApp = (data) => ({
   id: data.id,
+  dxid: data.dxid,
   addedBy: data.added_by,
   createdAt: data.created_at,
   createdAtDateTime: data.created_at_date_time,

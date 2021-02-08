@@ -1,0 +1,11 @@
+en:
+  api:
+    jobs:
+      copy:
+        success:
+          one: "%{count} item is copied successfully."
+          other: "%{count} items are copied successfully."
+        jobs_not_copied:
+          one: Job %{jobs} isn't copied since it already exists in the destination scope.
+          other: Jobs %{jobs} aren't copied since they already exist in the destination
+                 scope.

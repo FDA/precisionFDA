@@ -58,6 +58,35 @@ module Permissions
     end
   end
 
+  # Determine, whether an item is owned by a user context.
+  #   Calculates current user id and its space_uids ofr both cases:
+  #   user and user's context.
+  # @param user [Context or User] A user context.
+  # @return [Boolean] Returns true if user has access to a item, false otherwise.
+  def owned_by_user?(user)
+    if user.is_a?(User)
+      id = user.id
+      space_uids = user.space_uids
+    elsif user.is_a?(Context)
+      id = user.user.id
+      space_uids = user.user.space_uids
+    end
+
+    return false unless user&.logged_in?
+
+    !in_space? && user_id == id ||
+      in_space? && space_uids.include?(scope)
+  end
+
+  # Checks if object is accessible by the user context.
+  #   accessible by a user context, false otherwise.
+  # @param user [Context or User] A user context.
+  # @return [Boolean] Returns true if object is public or
+  #   is owned by a user context
+  def accessible_by_user?(user)
+    public? || owned_by_user?(user)
+  end
+
   def accessible_by?(context)
     if context.guest?
       public?

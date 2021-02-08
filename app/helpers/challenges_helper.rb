@@ -94,4 +94,42 @@ module ChallengesHelper
       """
     end
   end
+
+  # Returns a collection of users-owners of apps for selection on challenge create or edit
+  # each User should be valid, i.e. to have an Org, otherwise skipped
+  # @return [Array] Array<Array> of users info: user names with org name, user id
+  def app_owners_for_select
+    User.real.map { |u| [u.select_text, u.id] if u.org }.compact
+  end
+
+  # Returns a collection of Site admins and challenge admins
+  # @return [Array<String>] dxids of Site admins and challenge admins
+  def host_lead_dxusers
+    User.site_admins.or(User.challenge_admins).order(:dxuser).distinct.pluck(:dxuser)
+  end
+
+  # Returns a collection of Site admins, challenge evaluators and challenge admins
+  # @return [Array<String>] dxids of Site admins, challenge evaluators and challenge admins
+  def guest_lead_dxusers
+    User.site_admins.
+      or(User.challenge_admins).
+      or(User.challenge_evaluators).
+      order(:dxuser).distinct.pluck(:dxuser)
+  end
+
+  # Returns a collection of challenges for selection on challenge edit page
+  # @return  Array<Array> Array of challenges name + id
+  def challenge_order_for_select
+    Challenge.not_status(Challenge::STATUS_ARCHIVED).all.map { |ch| [ch.name, ch.id] }
+  end
+
+  def spaces_for_select(context, challenge)
+    original_space = if challenge.persisted? && Space.valid_scope?(challenge.scope)
+      Space.from_scope(challenge.scope)
+    end
+
+    [[Scopes::SCOPE_PUBLIC.titleize, Scopes::SCOPE_PUBLIC]] +
+      Space.groups.editable_by(context).order(:name).map { |space| [space.title, space.scope] } +
+      [[original_space&.title, original_space&.scope]]
+  end
 end
