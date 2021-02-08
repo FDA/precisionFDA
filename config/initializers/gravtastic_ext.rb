@@ -1,6 +1,8 @@
 Rails.application.config.to_prepare do
   module Gravtastic
     module InstanceMethods
+      require "open3"
+
       def gravatar_id
         source = send(self.class.gravatar_source).to_s.downcase
 
