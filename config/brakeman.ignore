@@ -1,6 +1,85 @@
 {
   "ignored_warnings": [
+    {
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "788cfa9e741ffde67620a52a7cd027ad5191b6eea3388e4d6dded17d4e8eca07",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: SHA1",
+      "file": "config/initializers/fips.rb",
+      "line": 52,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "OpenSSL::Digest::SHA1.new",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "80992a8086d9d2006ec3d0c4bf366683144605bebd069c32261079e91024b6ff",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: MD5",
+      "file": "config/initializers/fips.rb",
+      "line": 57,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "Digest::MD5.prepend(SHA256_OpenSSL)",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "d614fbb0e0cd59bedc7c4fb66d3f2a5d581b545a33af9eb1678f8b0728bd51b6",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: SHA1",
+      "file": "config/initializers/fips.rb",
+      "line": 58,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "Digest::SHA1.prepend(SHA1_OpenSSL)",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "ff9b129b8bb4d4ff628f16bdeedf133ff776892384ca2945a257ae14453195ad",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/challenges/show.html.erb",
+      "line": 64,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Challenge.find(params[:id]).regions[\"intro\"]",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ChallengesController",
+          "method": "show",
+          "line": 139,
+          "file": "app/controllers/challenges_controller.rb",
+          "rendered": {
+            "name": "challenges/show",
+            "file": "app/views/challenges/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "challenges/show"
+      },
+      "user_input": null,
+      "confidence": "High",
+      "note": ""
+    }
   ],
-  "updated": "2021-02-08 17:05:27 +0300",
+  "updated": "2021-02-08 18:35:32 +0300",
   "brakeman_version": "4.9.1"
 }
