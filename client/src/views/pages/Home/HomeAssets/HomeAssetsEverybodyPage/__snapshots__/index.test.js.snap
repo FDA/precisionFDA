@@ -9,7 +9,7 @@ exports[`HomeAssetsEverybodyPage test should render 1`] = `
       className="home-page-layout__actions"
     >
       <LinkTargetBlank
-        url="/app_assets/new"
+        url="/assets/new"
       >
         <Button
           type="primary"
