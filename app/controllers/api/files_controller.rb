@@ -95,20 +95,20 @@ module Api
       filter_tags = params.dig(:filters, :tags)
 
       files = UserFile.real_files.
-          featured.accessible_by(@context).
-          includes(:user, :taggings).eager_load(user: :org).
-          search_by_tags(filter_tags)
+        featured.accessible_by(@context).
+        includes(:user, :taggings).eager_load(user: :org).
+        search_by_tags(filter_tags)
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = Folder.
-          featured.accessible_by(@context).
-          includes(:taggings).eager_load(user: :org).
-          eager_load(user: :org).
-          search_by_tags(filter_tags)
+        featured.accessible_by(@context).
+        includes(:taggings).eager_load(user: :org).
+        eager_load(user: :org).
+        search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
       user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
 
       page_dict = pagination_dict(user_files)
 
