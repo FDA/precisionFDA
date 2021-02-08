@@ -1,0 +1,8 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+ignore:
+  'SNYK-RUBY-ACTIONCABLE-20338':
+    - '* > actioncable@6.0.3.4':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
+patch: {}
