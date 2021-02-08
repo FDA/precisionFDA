@@ -6,7 +6,7 @@ class FileModel
     @sizeFormatted = humanFormat(file.size, { unit: 'B' })
 
     @path = ko.computed(=>
-      "/files/#{@id()}" if @id()?
+      "/home/files/#{@id()}" if @id()?
     )
 
     @isUploading = ko.computed(=>
@@ -33,7 +33,7 @@ class FileModel
 
 class FilesNewView
   constructor: (data) ->
-    
+
     @folder_id = data.folder_id
     @files = ko.observableArray()
 
