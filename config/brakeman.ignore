@@ -1,210 +1,85 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "Cross Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "0a34a4be283e215eea08d14581cd554df63509263038ad25e9d9a9a352438e5c",
-      "message": "Unescaped model attribute",
-      "file": "app/views/challenges/show.html.erb",
-      "line": 64,
-      "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Challenge.find_by(:id => params[:id]).regions[\"intro\"]",
-      "render_path": [{"type":"controller","class":"ChallengesController","method":"show","line":185,"file":"app/controllers/challenges_controller.rb"}],
-      "location": {
-        "type": "template",
-        "template": "challenges/show"
-      },
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "788cfa9e741ffde67620a52a7cd027ad5191b6eea3388e4d6dded17d4e8eca07",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: SHA1",
+      "file": "config/initializers/fips.rb",
+      "line": 52,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "OpenSSL::Digest::SHA1.new",
+      "render_path": null,
+      "location": null,
       "user_input": null,
       "confidence": "Medium",
       "note": ""
     },
     {
-      "warning_type": "Dynamic Render Path",
-      "warning_code": 15,
-      "fingerprint": "29580600f7047514f77caf4d965dc2bcdd18430315429e711a9694123442631a",
-      "message": "Render path contains parameter value",
-      "file": "app/views/docs/show.html.erb",
-      "line": 18,
-      "link": "http://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
-      "code": "render(partial => \"docs/#{(params[:section].to_sym or :intro)}\", {})",
-      "render_path": [{"type":"controller","class":"DocsController","method":"show","line":10,"file":"app/controllers/docs_controller.rb"}],
-      "location": {
-        "type": "template",
-        "template": "docs/show"
-      },
-      "user_input": "params[:section].to_sym",
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "80992a8086d9d2006ec3d0c4bf366683144605bebd069c32261079e91024b6ff",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: MD5",
+      "file": "config/initializers/fips.rb",
+      "line": 57,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "Digest::MD5.prepend(SHA256_OpenSSL)",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
       "confidence": "Medium",
       "note": ""
     },
     {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "86e051ad0b912694bd514dfeefed2d2d4bafb599b71a1e2b5cd79947c263c652",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/licenses_controller.rb",
-      "line": 143,
-      "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(pathify(item_from_uid(params[:redirect_to_uid])))",
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "d614fbb0e0cd59bedc7c4fb66d3f2a5d581b545a33af9eb1678f8b0728bd51b6",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: SHA1",
+      "file": "config/initializers/fips.rb",
+      "line": 58,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "Digest::SHA1.prepend(SHA1_OpenSSL)",
       "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "LicensesController",
-        "method": "accept"
-      },
-      "user_input": "params[:redirect_to_uid]",
-      "confidence": "Weak",
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
       "note": ""
     },
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "87308ab5310bc721e500093fb3ba6e8e7678bfcdfd1c81bfdc0fbbd4294a4cf8",
+      "fingerprint": "ff9b129b8bb4d4ff628f16bdeedf133ff776892384ca2945a257ae14453195ad",
       "check_name": "CrossSiteScripting",
-      "message": "Unescaped parameter value",
-      "file": "app/views/main/track.html.erb",
-      "line": 22,
-      "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "graph_nodes(graph_decorator.for_track(item_from_uid(params[:id])))",
+      "message": "Unescaped model attribute",
+      "file": "app/views/challenges/show.html.erb",
+      "line": 64,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Challenge.find(params[:id]).regions[\"intro\"]",
       "render_path": [
         {
           "type": "controller",
-          "class": "MainController",
-          "method": "track",
-          "line": 503,
-          "file": "app/controllers/main_controller.rb"
+          "class": "ChallengesController",
+          "method": "show",
+          "line": 139,
+          "file": "app/controllers/challenges_controller.rb",
+          "rendered": {
+            "name": "challenges/show",
+            "file": "app/views/challenges/show.html.erb"
+          }
         }
       ],
       "location": {
         "type": "template",
-        "template": "main/track"
+        "template": "challenges/show"
       },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "b6902b1ab365851261eb6c6ef8c1a69c8106a360a353c1948e0cd753d98f942d",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped parameter value",
-      "file": "app/views/main/track.html.erb",
-      "line": 23,
-      "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "graph_edges(graph_decorator.for_track(item_from_uid(params[:id])))",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "MainController",
-          "method": "track",
-          "line": 503,
-          "file": "app/controllers/main_controller.rb"
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "main/track"
-      },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "d29d718fc2a17edf14e8a65d256b156d8dbf41dc172edf343730b135b82dd35f",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/licenses_controller.rb",
-      "line": 165,
-      "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(pathify(item_from_uid(params[:item_uid])))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "LicensesController",
-        "method": "license_item"
-      },
-      "user_input": "params[:item_uid]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "ebfa61651b7ab1438714a535a9ce0ba5d01e4dd66a3ca70923620429bcdc93eb",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/main_controller.rb",
-      "line": 570,
-      "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(pathify(item_from_uid(params[\"taggable_uid\"])))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "MainController",
-        "method": "set_tags"
-      },
-      "user_input": "params[\"taggable_uid\"]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "fd47c515849391ac7d14ddf3ee81b605a671fa1e67e53806731860da78a47e71",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/main_controller.rb",
-      "line": 493,
-      "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(pathify(item_from_uid(params[:id])))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "MainController",
-        "method": "publish"
-      },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "fd47c515849391ac7d14ddf3ee81b605a671fa1e67e53806731860da78a47e71",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/main_controller.rb",
-      "line": 505,
-      "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(pathify(item_from_uid(params[:id])))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "MainController",
-        "method": "publish"
-      },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "fd47c515849391ac7d14ddf3ee81b605a671fa1e67e53806731860da78a47e71",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/main_controller.rb",
-      "line": 511,
-      "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(pathify(item_from_uid(params[:id])))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "MainController",
-        "method": "publish"
-      },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
+      "user_input": null,
+      "confidence": "High",
       "note": ""
     }
   ],
-  "updated": "2019-09-04 16:19:31 +0000",
-  "brakeman_version": "3.3.5"
+  "updated": "2021-02-08 18:35:32 +0300",
+  "brakeman_version": "4.9.1"
 }
