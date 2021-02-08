@@ -30,6 +30,7 @@ FactoryBot.define do
     title { "default_title" }
     name { "default_name" }
     revision { 1 }
+    spec { { "input_spec": { "stages": [] } } }
 
     after(:create) do |workflow|
       workflow.workflow_series.update!(latest_revision_workflow: workflow)

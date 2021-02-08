@@ -52,7 +52,7 @@ export const filesMove = (spaceId, nodeIds, targetId, currentFolderId) => (dispa
 
 export const fetchSubfolders = (spaceId, folderId) => dispatch => {
   dispatch(fetchSubfoldersStart())
-
+  
   return getSubfolders(spaceId, folderId)
     .then(response => {
       if (response.status === httpStatusCodes.OK) {

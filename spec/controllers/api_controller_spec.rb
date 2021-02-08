@@ -861,5 +861,45 @@ RSpec.describe ApiController, type: :controller do
       end
     end
   end
+
+  describe "POST #set_tags" do
+    context "when logged in" do
+      let(:host_lead) { create(:user, dxuser: "user_1") }
+      let(:guest_lead) { create(:user, dxuser: "user_2") }
+      let(:user_member) { create(:user, dxuser: "user_3") }
+      let(:review) do
+        create(
+          :space,
+          :review,
+          :accepted,
+          host_lead_id: host_lead.id,
+          guest_lead_id: guest_lead.id,
+        )
+      end
+      let(:workflow) { create(:workflow, user: host_lead) }
+      let(:tag_list) { ["Simulation", "Read Mapping", "Variation Calling"] }
+      let(:set_tags_payload) do
+        {
+          "taggable_uid": workflow.uid,
+          "tags": "",
+          "suggested_tags": tag_list,
+        }
+      end
+
+      before do
+        authenticate!(host_lead)
+      end
+
+      it "updates tags" do
+        post :set_tags, params: set_tags_payload
+
+        aggregate_failures do
+          expect(response.content_type).to eq "application/json; charset=utf-8"
+          expect(response).to be_successful
+          expect(workflow.tags.map(&:name)).to eq(tag_list)
+        end
+      end
+    end
+  end
   # rubocop:enable RSpec/AnyInstance
 end

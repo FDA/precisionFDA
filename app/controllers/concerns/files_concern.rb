@@ -40,4 +40,15 @@ module FilesConcern
     when "featured" then "Featured"
     end
   end
+
+  def refresh_file(file, context)
+    return unless file.state != "closed"
+
+    if file.challenge_file?
+      User.sync_challenge_file!(file.id)
+    else
+      User.sync_file!(context, file.id)
+    end
+    file.reload
+  end
 end

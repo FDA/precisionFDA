@@ -6,6 +6,7 @@ import {
   CONTEXT_FETCH_SUCCESS,
   CONTEXT_FETCH_FAILURE,
 } from './types'
+import { setInitialPageCounters, setInitialPageAdminStatus } from '../home'
 import * as API from '../../api/context'
 
 
@@ -23,6 +24,11 @@ export default () => (
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
           dispatch(contextFetchSuccess(response.payload))
+
+          const counters = response.payload.user.counters
+          dispatch(setInitialPageCounters(counters))
+          const admin = response.payload.user.admin ? response.payload.user.admin : false
+          dispatch(setInitialPageAdminStatus(admin))
         } else {
           dispatch(contextFetchFailure())
         }

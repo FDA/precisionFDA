@@ -10,8 +10,6 @@ class LicensesController < ApplicationController
       per_page: 100,
       include: [:user, {user: :org}]
     })
-
-    # TODO: accepted_licenses_grid
   end
 
   def show

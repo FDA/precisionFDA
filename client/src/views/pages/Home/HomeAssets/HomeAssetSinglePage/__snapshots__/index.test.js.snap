@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAssetSinglePage test should render 1`] = `
+<HomeLayout>
+  <span>
+    Asset not found
+  </span>
+</HomeLayout>
+`;

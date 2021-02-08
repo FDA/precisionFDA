@@ -24,6 +24,7 @@ import {
   spacesListPaginationSelector,
 } from '../../../../reducers/spaces/list/selectors'
 import './style.sass'
+import Pagination from '../../TableComponents/Pagination'
 
 
 const SpacesList = (props) => {
@@ -49,9 +50,12 @@ const SpacesList = (props) => {
 
   if (isCardView) {
     return (
-      <div className={classes}>
-        {spaces.map((space) => <CardItem space={space} key={space.id} lockToggleHandler={lockToggleHandler} />)}
-      </div>
+      <>
+        <div className={classes}>
+          {spaces.map((space) => <CardItem space={space} key={space.id} lockToggleHandler={lockToggleHandler} />)}
+        </div>
+        <Pagination data={pagintion} setPageHandler={setPageHandler} />
+      </>
     )
   }
 
@@ -88,9 +92,9 @@ SpacesList.propTypes = {
 
 SpacesList.defaultProps = {
   spaces: [],
-  sortHandler: () => {},
-  lockToggleHandler: () => {},
-  setPageHandler: () => {},
+  sortHandler: () => { },
+  lockToggleHandler: () => { },
+  setPageHandler: () => { },
 }
 
 const mapStateToProps = state => ({

@@ -2,37 +2,175 @@ module Api
   # Home API controller.
   # rubocop:disable Metrics/ClassLength
   class AppsController < ApiController
+    # extend ActiveSupport::Concern
+
+    include AppsHelper
+    include CommonConcern
+    include AppsConcern
     include SpaceConcern
     include Paginationable
     include Sortable
     include ErrorProcessable
+    include Scopes
 
     before_action :validate_app, only: :create
     before_action :can_copy_to_scope?, only: %i(copy)
+    before_action :user_notes_objects, only: %i(index spaces everybody)
+
+    PAGE_SIZE = Paginationable::PAGE_SIZE
 
     # GET /api/apps
     # A common Apps fetch method for space and home pages, depends upon @params[:space_id].
     # @param space_id [Integer] Space id for apps fetch. When it is nil, then fetching for
     #   all apps, editable by current user.
     # @param order_by, order_dir [String] Params for ordering.
-    # @return apps [App] Array of Apps objects.
+    # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def index
+      apps = []
+      page_meta = {}
+
       if params[:space_id]
-        find_user_space
-        allowed_orderings = %w(created_at).freeze
-        order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
+        if find_user_space
+          apps = @space.latest_revision_apps.unremoved.
+            eager_load(:app_series, :user).includes(:taggings).
+            search_by_tags(params.dig(:filters, :tags)).
+            order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+          apps = AppSeriesService::AppSeriesFilter.call(apps, params[:filters])
 
-        apps = @space.latest_revision_apps.order(order)
-
-        render json: apps, meta: apps_meta, adapter: :json
+          page_meta = { pagination: pagination_dict(apps) }
+        end
       else
-        apps = AppSeries.editable_by(@context).
-          eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org]).
-          order(created_at: :desc).
-          map { |series| series.latest_accessible(@context) }.compact
+        apps_series = AppSeries.accessible_by(@context).accessible_by_private.unremoved.
+          eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
-        render json: apps, adapter: :json
+        filters = params[:filters]
+        apps = apps_series.map do |series|
+          latest = series.latest_accessible(@context)
+          if (latest&.scope == "private") && AppSeriesService::AppSeriesFilter.
+              match(latest, filters)
+            latest
+          end
+        end.compact
+
+        apps = sort_array_by_fields(apps)
+        page_meta = pagination_meta(apps.count)
+        apps = paginate_array(apps)
       end
+
+      render_apps_list(apps, page_meta)
+    end
+
+    # GET /api/apps/featured
+    # A fetch method for apps, accessible by public and with user taggings.
+    # @param order_by, order_dir [String] Params for ordering.
+    # @return apps [App] Array of Apps objects if they exist OR apps: [].
+    def featured
+      filters = params[:filters]
+      apps = AppSeries.unremoved.featured.
+        accessible_by_public.eager_load(:user, :taggings).
+        search_by_tags(params.dig(:filters, :tags)).map do |series|
+          latest = series.latest_accessible(@context)
+          if (latest&.scope == "public") && AppSeriesService::AppSeriesFilter.
+              match(latest, filters)
+            latest
+          end
+        end.compact
+
+      apps = sort_array_by_fields(apps)
+      page_meta = pagination_meta(apps.count)
+      apps = paginate_array(apps)
+
+      render_apps_list(apps, page_meta)
+    end
+
+    # GET /api/apps/everybody
+    # A fetch method for apps, accessible by public and of latest revisions.
+    # @param order_by, order_dir [String] Params for ordering.
+    # @return apps [App] Array of Apps objects if they exist OR apps: [].
+    def everybody
+      apps_series = AppSeries.unremoved.
+        eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
+
+      filters = params[:filters]
+      apps = apps_series.map do |series|
+        latest = series.latest_accessible(@context)
+        if (latest&.scope == "public") && AppSeriesService::AppSeriesFilter.
+            match(latest, filters)
+          latest
+        end
+      end.compact
+
+      apps = sort_array_by_fields(apps)
+      page_meta = pagination_meta(apps.count)
+      apps = paginate_array(apps)
+
+      render_apps_list(apps, page_meta)
+    end
+
+    # GET /api/apps/spaces
+    # Apps fetch method for apps, accessible by user and of 'space' scope.
+    # @param order_by, order_dir [String] Params for ordering.
+    # @return apps [App] Array of Apps objects, which scope is not 'private' or 'public', i.e.
+    #   apps scope is one of 'space-...', if they exist OR apps: [].
+    def spaces
+      apps_series = AppSeries.accessible_by(@context).unremoved.
+        eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org]).
+        where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE])
+
+      filters = params[:filters]
+      apps = apps_series.map do |series|
+        series_app = series.latest_accessible(@context)
+        if series_app.in_space? && AppSeriesService::AppSeriesFilter.
+            match(series_app, filters)
+          series_app
+        end
+      end.compact
+
+      apps = sort_array_by_fields(apps)
+      page_meta = pagination_meta(apps.count)
+      apps = paginate_array(apps)
+
+      render_apps_list(apps, page_meta)
+    end
+
+    # A common method for apps list json rendering.
+    # @param apps [Array] Array of App objects.
+    # @param add_meta [Hash] Hash of additional meta params.
+    def render_apps_list(apps, add_meta = {})
+      render json: apps, root: "apps", meta: apps_meta(apps).merge(add_meta), adapter: :json
+    end
+
+    # GET /api/apps/:id (show)
+    # Apps fetch method for app, accessible by user.
+    # @param id [String] uid of App object.
+    # @return app [App] Apps object, with its connected data.
+    def show
+      find_app
+      comments_data(@app)
+      load_revisions
+      load_relations(@app)
+      load_challenges
+
+      User.sync_jobs!(@context)
+
+      render json:
+        @app, adapter: :json,
+        meta:  {
+          spec: @app.spec,
+          revisions: @revisions,
+          jobs: @app.editable_jobs(@context),
+          assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
+          challenges: @assignable_challenges.select do |ch|
+            ch.accessible_by?(@context) || ch.app_owner == @context.user
+          end,
+          notes: @notes,
+          discussions: @discussions,
+          answers: @answers,
+          comparator: app_added_to_comparators?(@app),
+          default_comparator: show_comparison_app_label?(@context, @app),
+          comments: @comments,
+          links: meta_links(@app).merge(comparator_links),
+        }
     end
 
     # TODO: this route needs to be refactored.
@@ -135,10 +273,9 @@ module Api
       scope = %w(public private).include?(params[:scope]) ? params[:scope] : %w(public private)
       query = params[:query].presence
 
-      app_series = AppSeries.includes(:latest_revision_app)
-        .accessible_by(@context)
-        .where(scope: scope)
-        .page(page)
+      app_series = AppSeries.includes(:latest_revision_app).
+        accessible_by(@context).unremoved.
+        where(scope: scope).page(page)
 
       if query
         app_series = app_series.eager_load(:tags)
@@ -170,40 +307,23 @@ module Api
       render json: apps
     end
 
-    # Add Rdoc
-    def featured
-      org = Org.featured
-      apps = []
-      if org
-        apps = AppSeries.
-          accessible_by_public.
-          includes(:user, :taggings).
-          where(users: { org_id: org.id }).
-          order(created_at: :desc)
-      end
-
-      render json: apps
-    end
-
-    # Add Rdoc
-    def everybody
-      apps = AppSeries.
-        accessible_by_public.
-        includes(:latest_version_app, :taggings).
-        order(created_at: :desc)
-
-      render json: apps
-    end
-
     private
 
     # Add Rdoc
-    def apps_meta
-      { links: {} }.tap do |meta|
+    def apps_meta(apps)
+      { links: {}, count: {}, notes: {}, answers: {}, discussions: {} }.tap do |meta|
         # copy to space link
-        meta[:links][:copy] = copy_api_apps_path if @space.editable_by?(current_user)
+        meta[:links][:copy] = copy_api_apps_path if @space&.editable_by?(current_user)
         # copy to private area link
         meta[:links][:copy_private] = copy_api_apps_path
+        # create a new app (with unRedesigned UI)
+        meta[:links][:create] = new_app_path
+        # apps count
+        meta[:count] = apps.count
+        # user_notes_objects
+        meta[:notes] = @user_notes
+        meta[:answers] = @user_answers
+        meta[:discussions] = @user_discussions
       end
     end
 
@@ -565,6 +685,26 @@ module Api
       else
         I18n.t("api.apps.copy.messages.publish_to_space")
       end
+    end
+
+    def comparator_links
+      links = {}
+
+      if @context.user.can_administer_site? && @app.scope == "public"
+        if show_swap_comparison_app_button?(@context, @app)
+          links[:set_app] = set_comparison_app_admin_apps_path
+        end
+
+        unless global_comparison_app?(@app)
+          if app_added_to_comparators?(@app)
+            links[:remove_from_comparators] = remove_from_comparators_admin_apps_path
+          else
+            links[:add_to_comparators] = add_to_comparators_admin_apps_path
+          end
+        end
+      end
+
+      { comparators: links }
     end
   end
   # rubocop:enable Metrics/ClassLength

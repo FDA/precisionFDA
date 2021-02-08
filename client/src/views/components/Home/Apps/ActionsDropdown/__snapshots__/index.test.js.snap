@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsDropdown test should render 1`] = `
+<Fragment>
+  <DropdownMenu
+    message=""
+    options={
+      Array [
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Run",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Run batch",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Track",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Edit",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Fork",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Export to",
+        },
+        Object {
+          "isDisabled": true,
+          "link": "undefined&scope=public",
+          "method": "post",
+          "text": "Make public",
+        },
+        Object {
+          "hide": true,
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Feature",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Delete",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Copy to space",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Attach to...",
+        },
+        Object {
+          "hide": true,
+          "isDisabled": true,
+          "text": "Attach License",
+        },
+        Object {
+          "hide": true,
+          "link": undefined,
+          "text": "Comments",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Set as Challenge App",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Edit tags",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Add to Comparators",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Set this app as comparison default",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Remove from Comparators",
+        },
+      ]
+    }
+    title="Actions"
+  />
+  <Connect(CopyToSpaceModal)
+    copyAction={[Function]}
+    hideAction={[Function]}
+    ids={Array []}
+  />
+  <HomeExportModal
+    hideAction={[Function]}
+    isOpen={false}
+    options={
+      Array [
+        Object {
+          "isPost": true,
+          "label": "Docker Container",
+          "link": undefined,
+          "value": "docker",
+        },
+        Object {
+          "label": "CWL Tool",
+          "link": undefined,
+          "value": "cwl",
+        },
+        Object {
+          "label": "WDL Task",
+          "link": undefined,
+          "value": "wdl",
+        },
+      ]
+    }
+    title="Export to"
+  />
+  <AppsActionModal
+    apps={Array []}
+    hideAction={[Function]}
+    modalAction={[Function]}
+  />
+  <Connect(HomeAttachToModal)
+    attachAction={[Function]}
+    hideAction={[Function]}
+    ids={Array []}
+    itemsType="APP"
+  />
+  <HomeAppsComparisonModal
+    actionType="set"
+    hideAction={[Function]}
+    modalAction={[Function]}
+  />
+</Fragment>
+`;

@@ -19,13 +19,18 @@
 #  uid           :string(255)
 #  dev_group     :string(255)
 #  release       :string(255)      not null
+#  featured      :boolean          default(FALSE)
 #
 
 class App < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include InternalUid
+  include Featured
   include Scopes
+  include SoftRemovable
+  include TagsContainer
 
   belongs_to :user
   has_one :org, through: :user
@@ -39,16 +44,32 @@ class App < ApplicationRecord
 
   has_many :challenges
 
+  before_update { |app| app.update_series_featured_status if app.featured_changed? }
+  before_update { |app| app.update_series_deleted_status if app.deleted_changed? }
+
+  attr_accessor :current_user
+
   store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
   store :internal, accessors: [ :ordered_assets, :packages, :code ], coder: JSON
 
   acts_as_commentable
-  acts_as_taggable
 
-  VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
+  VALID_IO_CLASSES = %w(file string boolean int float).freeze
 
   def to_param
     uid
+  end
+
+  # Get an array of app's jobs, editable by a context user
+  # Jobs are serialized.
+  #  @param context [Context] The user context.
+  #  @return jobs [Array of serialized Job objects.
+  def editable_jobs(context)
+    app_series.jobs.
+      editable_by(context).
+      includes(:taggings).
+      order(created_at: :desc).
+      map { |job| JobSerializer.new(job) }
   end
 
   # Scopes of files when an app is running out of spaces.
@@ -120,15 +141,7 @@ class App < ApplicationRecord
     return false unless context.logged_in?
     return false unless context.review_space_admin?
 
-    space_object.reviewer? || space_object.verification?
-  end
-
-  # Checks if app is accessible by the user.
-  # @return [Boolean] Returns true if app is accessible by a user, false otherwise.
-  def accessible_by_user?(user)
-    public? ||
-      !in_space? && user_id == user.id ||
-      in_space? && user.space_uids.include?(scope)
+    in_space? && (space_object.reviewer? || space_object.verification?)
   end
 
   def runnable_by?(user)
@@ -171,6 +184,14 @@ class App < ApplicationRecord
   def latest_accessible_in_scope?
     private? && self == app_series.latest_revision_app ||
       (in_space? || public?) && self == app_series.latest_version_app
+  end
+
+  def update_series_featured_status
+    app_series.update(featured: featured)
+  end
+
+  def update_series_deleted_status
+    app_series.update(deleted: deleted)
   end
 
   delegate :name, to: :app_series

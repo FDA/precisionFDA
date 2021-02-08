@@ -51,7 +51,7 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Comparator App</h5>
         <p class="list-group-item-text">
-          <%= link_to(App.find_by(dxid: @comparison.app_dxid).name, app_path(@comparison.app_dxid))  %>
+          <%= link_to(App.find_by(dxid: @comparison.app_dxid).name, "/home".concat(app_path(@comparison.app_dxid)))  %>
         </p>
       </li>
     <% else %>

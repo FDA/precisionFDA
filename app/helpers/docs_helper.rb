@@ -32,7 +32,7 @@ module DocsHelper
     t("docs.videos.common")
   end
 
-  def video_iframe(url, title=nil)
+  def video_iframe(url, title = nil)
     content_tag :div, class: "embed-container" do
       content_tag("iframe", nil, src: url, frameborder: 0, allowfullscreen: true, title: title)
     end

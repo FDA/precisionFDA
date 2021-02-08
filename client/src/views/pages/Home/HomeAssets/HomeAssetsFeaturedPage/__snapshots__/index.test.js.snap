@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAssetsFeaturedPage test should render 1`] = `
+<HomeLayout>
+  <div
+    className="home-page-layout__header-row"
+  >
+    <div
+      className="home-page-layout__actions--right"
+    >
+      <Connect(ActionsDropdown)
+        assets={Array []}
+        page="featured"
+      />
+    </div>
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Connect(HomeAssetsFeaturedTable)
+      assets={Array []}
+      handleFilterValue={[Function]}
+    />
+  </div>
+</HomeLayout>
+`;

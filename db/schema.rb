@@ -2,15 +2,15 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# Note that this schema.rb definition is the authoritative source for your
-# database schema. If you need to create the application database on another
-# system, you should be using db:schema:load, not running all the migrations
-# from scratch. The latter is a flawed and unsustainable approach (the more migrations
-# you'll amass, the slower it'll run and the greater likelihood for issues).
+# This file is the source Rails uses to define your schema when running `rails
+# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# be faster and is potentially less error prone than running all of your
+# migrations from scratch. Old migrations may fail to apply correctly if those
+# migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_05_20_102716) do
+ActiveRecord::Schema.define(version: 2020_12_16_201523) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -73,6 +73,9 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "verified", default: false, null: false
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
+    t.index ["deleted"], name: "index_app_series_on_deleted"
     t.index ["dxid"], name: "index_app_series_on_dxid"
     t.index ["latest_revision_app_id"], name: "index_app_series_on_latest_revision_app_id"
     t.index ["latest_version_app_id"], name: "index_app_series_on_latest_version_app_id"
@@ -113,7 +116,10 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.string "uid"
     t.string "dev_group"
     t.string "release", null: false
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
     t.index ["app_series_id"], name: "index_apps_on_app_series_id"
+    t.index ["deleted"], name: "index_apps_on_deleted"
     t.index ["dxid"], name: "index_apps_on_dxid"
     t.index ["scope"], name: "index_apps_on_scope"
     t.index ["uid"], name: "index_apps_on_uid", unique: true
@@ -163,7 +169,7 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.integer "app_owner_id"
     t.integer "app_id"
     t.text "description"
-    t.text "meta", limit: 16777215
+    t.text "meta", size: :medium
     t.datetime "start_at"
     t.datetime "end_at"
     t.datetime "created_at", null: false
@@ -174,6 +180,7 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.string "card_image_id"
     t.integer "space_id"
     t.integer "specified_order"
+    t.string "scope", default: "public", null: false
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -372,6 +379,7 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.integer "analysis_id"
     t.string "uid"
     t.integer "local_folder_id"
+    t.boolean "featured", default: false
     t.index ["analysis_id"], name: "fk_rails_0a95efec7a"
     t.index ["app_id"], name: "index_jobs_on_app_id"
     t.index ["app_series_id"], name: "index_jobs_on_app_series_id"
@@ -448,6 +456,7 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.string "sti_type"
     t.integer "scoped_parent_folder_id"
     t.string "uid"
+    t.boolean "featured", default: false
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
     t.index ["state"], name: "index_nodes_on_state"
@@ -810,7 +819,7 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.integer "item_id", null: false
     t.string "event", null: false
     t.string "whodunnit"
-    t.text "object", limit: 4294967295
+    t.text "object", size: :long
     t.datetime "created_at"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
@@ -837,6 +846,9 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.string "scope"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
+    t.index ["deleted"], name: "index_workflow_series_on_deleted"
     t.index ["latest_revision_workflow_id"], name: "index_workflow_series_on_latest_revision_workflow_id"
     t.index ["user_id"], name: "index_workflow_series_on_user_id"
   end
@@ -857,6 +869,9 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.datetime "updated_at", null: false
     t.string "uid"
     t.string "project"
+    t.boolean "featured", default: false
+    t.boolean "deleted", default: false, null: false
+    t.index ["deleted"], name: "index_workflows_on_deleted"
     t.index ["uid"], name: "index_workflows_on_uid", unique: true
     t.index ["user_id"], name: "index_workflows_on_user_id"
     t.index ["workflow_series_id"], name: "index_workflows_on_workflow_series_id"

@@ -209,7 +209,7 @@ class AppEditorModel
     Precision.api('/api/apps', params)
       .done((data) =>
         Precision.unbind.traps()
-        window.location.replace("/apps/#{data.id}/jobs")
+        window.location.replace("/home/apps/#{data.id}/jobs")
       )
       .fail((error) =>
         errorObject = JSON.parse error.responseText
