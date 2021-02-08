@@ -39,4 +39,12 @@ interface WorkerOpsCtx extends OpsCtx {
   job: Job
 }
 
-export type { DeepPartial, AnyObject, UserCtx, OpsCtx, WorkerOpsCtx, Maybe }
+type DxIdInput = {
+  dxid: string
+}
+
+type IdInput = {
+  id: number
+}
+
+export type { DeepPartial, AnyObject, UserCtx, OpsCtx, WorkerOpsCtx, Maybe, DxIdInput, IdInput }

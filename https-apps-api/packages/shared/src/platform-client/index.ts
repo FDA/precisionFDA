@@ -46,6 +46,11 @@ type RenameFolderParams = BaseParams & {
   projectId: string
 }
 
+type RemoveFolderParams = BaseParams & {
+  folderPath: string
+  projectId: string
+}
+
 type ListFilesResponse = {
   results: Array<{
     id: string
@@ -188,6 +193,27 @@ const renameFolder = async (params: RenameFolderParams): Promise<ClassIdResponse
   }
 }
 
+const removeFolderRec = async (params: RemoveFolderParams): Promise<ClassIdResponse> => {
+  const url = `${config.platform.apiUrl}/${params.projectId}/removeFolder`
+  const options: AxiosRequestConfig = {
+    method: 'POST',
+    data: {
+      folder: params.folderPath,
+      recurse: true,
+    },
+    url,
+    headers: setupHeaders(params),
+  }
+  try {
+    log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+    const res = await axios.request(options)
+    return res.data
+  } catch (err) {
+    log.warn({ requestOptions: options }, 'Failed request options')
+    return handleFailed(err)
+  }
+}
+
 const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeResponse> => {
   const url = `${config.platform.apiUrl}/${params.jobId}/describe`
   const options: AxiosRequestConfig = {
@@ -284,6 +310,7 @@ export {
   filesList,
   filesDescribe,
   foldersList,
+  removeFolderRec,
   renameFolder,
   JobDescribeResponse,
   JobCreateParams,
