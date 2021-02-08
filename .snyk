@@ -5,4 +5,8 @@ ignore:
     - '* > actioncable@6.0.3.4':
       reason: 'No upgrade or patch available'
       expires: '2021-01-01T00:00:00.000Z'
+  'snyk:lic:rubygems:unicorn:GPL-2.0':
+    - '* > unicorn@4.9.0':
+      reason: 'No upgrade or patch available'
+      expires: '2021-01-01T00:00:00.000Z'
 patch: {}
