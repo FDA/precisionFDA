@@ -16,6 +16,7 @@ const fakes = {
     filesDescFake: sinon.stub(),
     foldersListFake: sinon.stub(),
     folderRenameFake: sinon.stub(),
+    folderRemoveFake: sinon.stub(),
   },
   queue: {
     removeRepeatableFake: sinon.fake(),
@@ -33,6 +34,7 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.jobCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
+  fakes.client.folderRemoveFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
   fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
@@ -48,6 +50,7 @@ const mocksSetup = () => {
   sandbox.replace(client, 'filesDescribe', fakes.client.filesDescFake)
   sandbox.replace(client, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client, 'renameFolder', fakes.client.folderRenameFake)
+  sandbox.replace(client, 'removeFolderRec', fakes.client.folderRemoveFake)
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
   // stub queue helpers
@@ -63,6 +66,7 @@ const mocksReset = () => {
   fakes.client.filesDescFake.reset()
   fakes.client.foldersListFake.reset()
   fakes.client.folderRenameFake.reset()
+  fakes.client.folderRemoveFake.reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()

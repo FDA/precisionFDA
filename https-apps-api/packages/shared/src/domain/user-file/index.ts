@@ -12,6 +12,8 @@ export * as helper from './user-file.helper'
 
 export { FolderRenameOperation } from './ops/folder-rename'
 
+export { FolderDeleteOperation } from './ops/folder-delete'
+
 export { SyncFoldersOperation } from './ops/sync-folders'
 
 export { SyncFilesInFolderOperation, SyncFolderFilesOutput } from './ops/sync-folder-files'

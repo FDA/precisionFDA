@@ -10,13 +10,7 @@ export class FolderRenameOperation extends BaseOperation<RenameFolderInput, Fold
     await em.begin()
     try {
       const folderRepo = em.getRepository(Folder)
-      const existingFolder = await folderRepo.findOne(
-        {
-          project: { $ne: null },
-          id: input.id,
-        },
-        { filters: ['folder'] },
-      )
+      const existingFolder = await folderRepo.findOneWithProject(input.id)
       if (!existingFolder) {
         throw new errors.FolderNotFoundError()
       }

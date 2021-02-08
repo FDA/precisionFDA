@@ -1,6 +1,7 @@
 import { difference, intersection, isNil, uniqBy } from 'ramda'
 import { User } from '..'
 import { Folder } from './folder.entity'
+import { FolderRepository } from './folder.repository'
 
 const getFolders = (pathStr: string) => pathStr.split('/').slice(1)
 
@@ -22,6 +23,19 @@ const filterDuplicities = uniqBy((fol: Folder) => fol.id)
 const parseFoldersFromClient = (paths: string[]): string[] => {
   const folders = paths.filter((entry: string) => entry !== '/').sort((a, b) => a.localeCompare(b))
   return folders
+}
+
+const childrenTraverse = async (
+  folder: Folder,
+  repo: FolderRepository,
+  acc: Folder[],
+): Promise<Folder[]> => {
+  // fixme: if there is a loop in folder ids, it will crash hard
+  // could be easily prevented -> return if id already exists in acc
+  acc.push(folder)
+  const subfolders = await repo.findChildren({ parentFolderId: folder.id })
+  await Promise.all(subfolders.map(sf => childrenTraverse(sf, repo, acc)))
+  return acc
 }
 
 // recursion step
@@ -134,4 +148,5 @@ export {
   getPathsToKeep,
   filterDuplicities,
   getFolderPath,
+  childrenTraverse,
 }

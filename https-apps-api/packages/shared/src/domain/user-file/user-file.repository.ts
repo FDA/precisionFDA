@@ -34,6 +34,13 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     )
   }
 
+  async findFilesInFolders(input: { folderIds: number[] }): Promise<UserFile[]> {
+    return await this.find(
+      { parentFolderId: { $in: input.folderIds } },
+      { filters: ['userfile'], populate: ['taggings.tag'] },
+    )
+  }
+
   removeFilesWithTags(files: UserFile[]): UserFile[] {
     return files.map(file => {
       this.remove(file)
