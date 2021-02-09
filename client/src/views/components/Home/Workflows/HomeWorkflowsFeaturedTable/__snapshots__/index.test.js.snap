@@ -20,6 +20,12 @@ exports[`HomeWorkflowsFeaturedTable test should render 1`] = `
           sortHandler={[Function]}
           type="name"
         >
+          name
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="name"
+        >
           title
         </Th>
         <Th
