@@ -29,6 +29,11 @@ class FolderSerializer < NodeSerializer
       links[:space] = space_path if object.in_space?
       links[:copy] = copy_api_files_path
       links[:children] = children_api_folders_path
+
+      if current_user.can_administer_site?
+        # PUT /api/files/feature
+        links[:feature] = feature_api_files_path
+      end
     end
   end
 
