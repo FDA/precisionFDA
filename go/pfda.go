@@ -371,7 +371,7 @@ func uploadAsset(rootFolderPath string, name string, readmeFilePath string) {
   check(err)
 
   makeRequestFail("POST", closeURL, jsonData)
-  fmt.Println(">> Done! Access your asset at " + baseURL + "/app_assets/" + fileID)
+  fmt.Println(">> Done! Access your asset at " + baseURL + "/assets/" + fileID)
 }
 
 func uploadFile(path string) {
