@@ -18,6 +18,12 @@ exports[`HomeWorkflowsEveryoneTable test should render 1`] = `
         </th>
         <Th
           sortHandler={[Function]}
+          type="name"
+        >
+          name
+        </Th>
+        <Th
+          sortHandler={[Function]}
           type="title"
         >
           title

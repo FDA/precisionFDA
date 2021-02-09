@@ -74,6 +74,7 @@ const HomeWorkflowsTable = ({ workflows, isFetching, isCheckedAll, toggleAllWork
             <th className='pfda-padded-l10'>
               <Icon onClick={toggleAllWorkflowsCheckboxes} icon={checkboxClasses} />
             </th>
+            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='name'>name</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='title'>title</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='created_at'>created</Th>
@@ -129,11 +130,16 @@ const linkShow = workflow.links ? `/home${workflow.links.show}` : null
           onClick={() => toggleWorkflowCheckbox(workflow.id)}
         />
       </td>
-      <td className='home-page-layout__data-table_name'>
+      <td>
         <Link to={linkShow}>
           <Icon icon={getSpacesIcon('workflows')} fw />
-          {workflow.title}
+          <span>{workflow.name}</span>
         </Link>
+      </td>
+      <td className='home-page-layout__data-table_name'>
+        <span>
+          {workflow.title}
+        </span>
       </td>
 
       <td>
@@ -152,7 +158,7 @@ const linkShow = workflow.links ? `/home${workflow.links.show}` : null
 }
 
 const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
-  const filtersConfig = ['', 'title', 'addedBy', '', 'tags']
+  const filtersConfig = ['', 'name', 'title', 'addedBy', '', 'tags']
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>

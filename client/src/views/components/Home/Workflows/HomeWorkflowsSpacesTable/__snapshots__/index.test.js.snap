@@ -22,6 +22,12 @@ exports[`HomeWorkflowsSpacesTable test should render 1`] = `
         >
           name
         </Th>
+        <Th
+          sortHandler={[Function]}
+          type="name"
+        >
+          title
+        </Th>
         <Th>
           location
         </Th>
