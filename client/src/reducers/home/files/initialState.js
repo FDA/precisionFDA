@@ -56,4 +56,5 @@ export default {
   },
   editTagsModal: modalState,
   licenseModal: modalState,
+  acceptLicenseModal: modalState,
 }

@@ -20,6 +20,14 @@ module Licenses
     end
   end
 
+  # Check license status, whether it is 'active' or 'pending'
+  # @param user [User object]
+  # @param status [String]
+  # @return true or false - depends upon match status given
+  def license_status?(user, status)
+    accepted_licenses.exists?(user_id: user.id, state: [nil, status])
+  end
+
   def licensed_by_set?(context)
     if context.guest?
       false

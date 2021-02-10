@@ -13,6 +13,7 @@ class UserFileSerializer < NodeSerializer
     :location,
     :links,
     :file_license,
+    :show_license_pending,
   )
 
   attribute :all_tags_list, key: :tags
@@ -35,6 +36,10 @@ class UserFileSerializer < NodeSerializer
     formatted_time(object.created_at)
   end
 
+  def show_license_pending
+    object.license_status?(current_user, "pending")
+  end
+
   # Builds links to files.
   # @return [Hash] Links.
   # rubocop:disable Metrics/MethodLength
@@ -49,17 +54,32 @@ class UserFileSerializer < NodeSerializer
       # track single object
       links[:track] = track_object
 
-      # GET download single file
-      links[:download] = download_api_file_path(object)
       # POST download_list files
       links[:download_list] = download_list_api_files_path
-      # POST Authorize URL - to move to api
-      links[:link] = link_file_path(object)
 
-      # publish single file if it is not public already
-      links[:publish] = publish_object unless object.public?
-      # POST /api/files/copy  copy_api_files
-      links[:copy] = copy_api_files_path
+      unless object.license&.approval_required
+        # GET download single file
+        links[:download] = download_api_file_path(object)
+        # POST Authorize URL - to move to api
+        links[:link] = link_file_path(object)
+        # POST /api/files/copy  copy_api_files
+        links[:copy] = copy_api_files_path
+      end
+
+      if object.license.present? && !object.license_status?(current_user, "active")
+        if object.license.approval_required
+          unless object.license_status?(current_user, "pending")
+            # GET|POST /licenses/:id/request_approval
+            links[:request_approval_license] =
+              request_approval_license_path(object.license.id)
+            links[:request_approval_action] = "api/licenses/:id/request_approval"
+          end
+        else
+          # POST /api/licenses/:id/accept
+          links[:accept_license_action] =
+            object.license && accept_api_license_path(object.license.id)
+        end
+      end
 
       # POST: Add file
       links[:add_file] = api_create_file_path
@@ -74,6 +94,8 @@ class UserFileSerializer < NodeSerializer
 
       if object.owned_by_user?(current_user)
         unless object.in_space? && member_viewer?
+          # publish single file if it is not public already
+          links[:publish] = publish_object unless object.public?
           links[:rename] = rename_file_path(object)
           # POST: /api/files/remove - Delete file(s) & folder(s), being selected
           links[:remove] = remove_api_files_path
@@ -88,6 +110,7 @@ class UserFileSerializer < NodeSerializer
           # POST: Move file(s) and folder()s) to other folder
           links[:organize] = move_api_files_path
         end
+
         # PUT edit a single file
         links[:update] = api_files_path(object)
 

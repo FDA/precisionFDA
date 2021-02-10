@@ -29,6 +29,7 @@ import {
   editFileTags,
   filesMove,
   filesLicenseAction,
+  filesAcceptLicenseAction,
 } from '../../../../../actions/home'
 import { getSelectedTab } from '../../../../../helpers/home'
 import HomeLicense from '../../../../components/Home/HomeLicense'
@@ -36,7 +37,7 @@ import HomeLicense from '../../../../components/Home/HomeLicense'
 
 const HomeFilesSinglePage = (props) => {
   const { fileDetails, currentTab, uid, fetchFileDetails, deleteFiles, copyToSpace, filesAttachTo, attachLicense, renameFile } = props
-  const { editTagsModal, showFileEditTagsModal, hideFileEditTagsModal, editFileTags, filesMove, filesLicenseAction } = props
+  const { editTagsModal, showFileEditTagsModal, hideFileEditTagsModal, editFileTags, filesMove, filesLicenseAction, filesAcceptLicenseAction } = props
 
   useLayoutEffect(() => {
     if (uid) fetchFileDetails(uid)
@@ -168,6 +169,7 @@ const HomeFilesSinglePage = (props) => {
                   editTags={meta.links.edit_tags && showFileEditTagsModal}
                   filesMove={filesMove}
                   filesLicenseAction={filesLicenseAction}
+                  filesAcceptLicenseAction={filesAcceptLicenseAction}
                 />
               </div>
             </div>
@@ -215,6 +217,7 @@ HomeFilesSinglePage.propTypes = {
   editFileTags: PropTypes.func,
   filesMove: PropTypes.func,
   filesLicenseAction: PropTypes.func,
+  filesAcceptLicenseAction: PropTypes.func,
 }
 
 HomeFilesSinglePage.defaultProps = {
@@ -253,6 +256,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (statusIsOK) dispatch(fetchFileDetails(ownProps.uid))
   }),
   filesLicenseAction: (link) => dispatch(filesLicenseAction(link)).then(({ statusIsOK }) => {
+    if (statusIsOK) dispatch(fetchFileDetails(ownProps.uid))
+  }),
+  filesAcceptLicenseAction: (link) => dispatch(filesAcceptLicenseAction(link)).then(({ statusIsOK }) => {
     if (statusIsOK) dispatch(fetchFileDetails(ownProps.uid))
   }),
 })

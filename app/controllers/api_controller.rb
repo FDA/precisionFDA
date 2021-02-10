@@ -1465,6 +1465,7 @@ class ApiController < ApplicationController
   def invert_feature
     raise ApiError, "Only Site Admin can perform this action" unless @context.can_administer_site?
 
+    # rubocop:disable Style/Next
     featured = !params[:featured].nil?
     items = pick_values(params[:item_ids]).map do |uid|
       item = item_from_uid(uid)
@@ -1474,6 +1475,7 @@ class ApiController < ApplicationController
       item.current_user = @context.user
       item
     end.compact
+    # rubocop:enable Style/Next
 
     messages =
       if items.count.positive?

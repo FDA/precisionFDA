@@ -22,6 +22,8 @@ import {
   fetchFilesByAction,
   showFilesLicenseModal,
   hideFilesLicenseModal,
+  showFilesAcceptLicenseModal,
+  hideFilesAcceptLicenseModal,
 } from '../../../../../actions/home'
 import {
   homeFilesRenameModalSelector,
@@ -33,6 +35,7 @@ import {
   homeFilesAttachLicenseModalSelector,
   homeFilesActionModalSelector,
   homeFilesLicenseModalSelector,
+  homeFilesAcceptLicenseModalSelector,
 } from '../../../../../reducers/home/files/selectors'
 import {
   contextSelector,
@@ -141,6 +144,16 @@ const ActionsDropdown = (props) => {
       hide: files.length !== 1 || !links.detach_license,
     },
     {
+      text: 'Request license approval',
+      link: links.request_approval_license,
+      hide: !links.request_approval_license || page !== 'details',
+    },
+    {
+      text: 'Accept License',
+      onClick: () => props.showFilesAcceptLicenseModal(),
+      hide: !links.accept_license_action || page !== 'details',
+    },
+    {
       text: 'Edit tags',
       onClick: () => props.editTags(),
       hide: !props.editTags,
@@ -228,6 +241,15 @@ const ActionsDropdown = (props) => {
         fileLicense={files[0] && files[0].fileLicense}
         modalAction={(link) => props.filesLicenseAction(link)}
       />
+      <HomeLicenseModal
+        isLoading={props.acceptLicenseModal.isLoading}
+        isOpen={props.acceptLicenseModal.isOpen}
+        hideAction={() => props.hideFilesAcceptLicenseModal()}
+        fileLicense={files[0] && files[0].fileLicense}
+        modalAction={() => props.filesAcceptLicenseAction(links.accept_license_action)}
+        actionType='accept'
+        title='Accept License'
+      />
     </>
   )
 }
@@ -272,6 +294,10 @@ ActionsDropdown.propTypes = {
   licenseModal: PropTypes.object,
   showFilesLicenseModal: PropTypes.func,
   hideFilesLicenseModal: PropTypes.func,
+  acceptLicenseModal: PropTypes.object,
+  showFilesAcceptLicenseModal: PropTypes.func,
+  hideFilesAcceptLicenseModal: PropTypes.func,
+  filesAcceptLicenseAction: PropTypes.func,
 }
 
 ActionsDropdown.defaultProps = {
@@ -287,6 +313,7 @@ ActionsDropdown.defaultProps = {
   attachLicenseModal: {},
   homeFilesActionModalSelector: {},
   licenseModal: {},
+  acceptLicenseModal: {},
 }
 
 const mapStateToProps = (state) => ({
@@ -300,6 +327,7 @@ const mapStateToProps = (state) => ({
   attachLicenseModal: homeFilesAttachLicenseModalSelector(state),
   homeFilesActionModalSelector: homeFilesActionModalSelector(state),
   licenseModal: homeFilesLicenseModalSelector(state),
+  acceptLicenseModal: homeFilesAcceptLicenseModalSelector(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -321,6 +349,8 @@ const mapDispatchToProps = (dispatch) => ({
   fetchFilesByAction: (ids, action) => dispatch(fetchFilesByAction(ids, action, 'private')),
   showFilesLicenseModal: () => dispatch(showFilesLicenseModal()),
   hideFilesLicenseModal: () => dispatch(hideFilesLicenseModal()),
+  showFilesAcceptLicenseModal: () => dispatch(showFilesAcceptLicenseModal()),
+  hideFilesAcceptLicenseModal: () => dispatch(hideFilesAcceptLicenseModal()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionsDropdown)

@@ -18,6 +18,8 @@ import {
   hideAssetsAttachLicenseModal,
   showAssetsLicenseModal,
   hideAssetsLicenseModal,
+  showAssetsAcceptLicenseModal,
+  hideAssetsAcceptLicenseModal,
 } from '../../../../../actions/home'
 import {
   homeAssetsEditTagsModalSelector,
@@ -27,6 +29,7 @@ import {
   homeAssetsDeleteModalSelector,
   homeAssetsAttachLicenseModalSelector,
   homeAssetsLicenseModalSelector,
+  homeAssetsAcceptLicenseModalSelector,
 } from '../../../../../reducers/home/assets/selectors'
 import {
   contextSelector,
@@ -118,6 +121,16 @@ const ActionsDropdown = (props) => {
       hide: assets.length !== 1 || !links.detach_license,
     },
     {
+      text: 'Request license approval',
+      link: links.request_approval_license,
+      hide: !links.request_approval_license || page !== 'details',
+    },
+    {
+      text: 'Accept License',
+      onClick: () => props.showAssetsAcceptLicenseModal(),
+      hide: !links.accept_license_action || page !== 'details',
+    },
+    {
       text: 'Edit tags',
       onClick: () => props.showEditTagsModal(),
       hide: !props.editTags,
@@ -197,6 +210,15 @@ const ActionsDropdown = (props) => {
         fileLicense={assets[0] && assets[0].fileLicense}
         modalAction={(link) => props.assetsLicenseAction(link)}
       />
+      <HomeLicenseModal
+        isLoading={props.acceptLicenseModal.isLoading}
+        isOpen={props.acceptLicenseModal.isOpen}
+        hideAction={() => props.hideAssetsAcceptLicenseModal()}
+        fileLicense={assets[0] && assets[0].fileLicense}
+        modalAction={() => props.assetsAcceptLicenseAction(links.accept_license_action)}
+        actionType='accept'
+        title='Accept License'
+      />
     </>
   )
 }
@@ -234,6 +256,10 @@ ActionsDropdown.propTypes = {
   showAssetsLicenseModal: PropTypes.func,
   hideAssetsLicenseModal: PropTypes.func,
   assetsLicenseAction: PropTypes.func,
+  acceptLicenseModal: PropTypes.object,
+  showAssetsAcceptLicenseModal: PropTypes.func,
+  hideAssetsAcceptLicenseModal: PropTypes.func,
+  assetsAcceptLicenseAction: PropTypes.func,
 }
 
 ActionsDropdown.defaultProps = {
@@ -246,6 +272,7 @@ ActionsDropdown.defaultProps = {
   attachLicenseModal: {},
   context: {},
   licenseModal: {},
+  acceptLicenseModal: {},
 }
 
 const mapStateToProps = (state) => ({
@@ -257,6 +284,7 @@ const mapStateToProps = (state) => ({
   attachLicenseModal: homeAssetsAttachLicenseModalSelector(state),
   context: contextSelector(state),
   licenseModal: homeAssetsLicenseModalSelector(state),
+  acceptLicenseModal: homeAssetsAcceptLicenseModalSelector(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -274,6 +302,8 @@ const mapDispatchToProps = (dispatch) => ({
   hideAttachLicenseModal: () => dispatch(hideAssetsAttachLicenseModal()),
   showAssetsLicenseModal: () => dispatch(showAssetsLicenseModal()),
   hideAssetsLicenseModal: () => dispatch(hideAssetsLicenseModal()),
+  showAssetsAcceptLicenseModal: () => dispatch(showAssetsAcceptLicenseModal()),
+  hideAssetsAcceptLicenseModal: () => dispatch(hideAssetsAcceptLicenseModal()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionsDropdown)

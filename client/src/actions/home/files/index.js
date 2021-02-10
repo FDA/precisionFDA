@@ -75,6 +75,9 @@ const hideFileEditTagsModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FIL
 const showFilesLicenseModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.LICENSE)
 const hideFilesLicenseModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.LICENSE)
 
+const showFilesAcceptLicenseModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.ACCEPT_LICENSE)
+const hideFilesAcceptLicenseModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.ACCEPT_LICENSE)
+
 export {
   fetchFiles,
   fetchFilesFeatured,
@@ -125,4 +128,6 @@ export {
   hideFileEditTagsModal,
   showFilesLicenseModal,
   hideFilesLicenseModal,
+  showFilesAcceptLicenseModal,
+  hideFilesAcceptLicenseModal,
 }
