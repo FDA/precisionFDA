@@ -4,7 +4,7 @@ import { User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/utils/test'
 import type { SyncFoldersInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
-import { PARENT_TYPE } from 'shared/src/domain/user-file/user-file.enum'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.enum'
 
 describe('syncFolders operation', () => {
   let em: EntityManager<MySqlDriver>
@@ -44,6 +44,7 @@ describe('syncFolders operation', () => {
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('name', 'foo')
     expect(res[0]).to.have.property('parentFolderId', undefined)
+    expect(res[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
   })
 
   it('creates two subfolders with the same name', async () => {
