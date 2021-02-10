@@ -1,13 +1,12 @@
 module Api
   # Front controller that delegates call for Count per Section.
   class CountersController < ApiController
-
     CONTROLLERS = {
-        "apps" => AppsController,
-        "assets" => AssetsController,
-        "jobs" => JobsController,
-        "files" => FilesController,
-        "workflows" => WorkflowsController,
+      "apps" => AppsController,
+      "assets" => AssetsController,
+      "jobs" => JobsController,
+      "files" => FilesController,
+      "workflows" => WorkflowsController,
     }.freeze
 
     def index
