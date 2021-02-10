@@ -56,7 +56,7 @@ class Workflow
       opts = app_presenter.build
 
       AppService.create_app(context.user, context.api, opts)
-    rescue => e
+    rescue StandardError
       errors.add(:base, "Can't create App for the task '#{task.name}'")
       nil
     end
