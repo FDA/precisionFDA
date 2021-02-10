@@ -38,8 +38,8 @@ class Node < ApplicationRecord
   # pFDA internal state, used for files that are being removing by a worker.
   STATE_REMOVING = "removing".freeze
 
-  TYPE_REGULAR = "regular".freeze # only for UserFile
-  TYPE_SNAPSHOT = "snapshot".freeze # only for UserFile
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
 
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
@@ -51,7 +51,7 @@ class Node < ApplicationRecord
 
   enum entity_type: {
     TYPE_REGULAR => 0,
-    TYPE_SNAPSHOT => 1,
+    TYPE_HTTPS => 1,
   }
 
   acts_as_taggable
@@ -87,6 +87,11 @@ class Node < ApplicationRecord
     def folder_content(files, folders)
       Node.where(id: (files + folders).map(&:id))
     end
+  end
+
+  # TODO: remove this after Karolina add https folders / files labeling.
+  def https?
+    parent.is_a?(Job) && parent.https?
   end
 
   private

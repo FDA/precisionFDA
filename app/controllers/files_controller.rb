@@ -14,7 +14,12 @@ class FilesController < ApplicationController
       return
     end
 
-    # Refresh state of files, if needed
+    @parent_folder = begin
+      @parent_folder_id && Folder.find(@parent_folder_id)
+    rescue ActiveRecord::RecordNotFound => e
+      redirect_to files_path, alert: e.message
+    end
+
     User.sync_files!(@context)
 
     files = UserFile
@@ -237,9 +242,7 @@ class FilesController < ApplicationController
       return
     end
 
-    service = FolderService.new(@context)
-
-    res = service.remove([@file])
+    res = folder_service.remove([@file])
 
     if res.success?
       flash[:success] = "File \"#{@file.name}\" has been successfully deleted"
@@ -253,24 +256,24 @@ class FilesController < ApplicationController
   end
 
   def create_folder
-    is_public_folder = unsafe_params[:public] == "true"
+    is_public_folder = params[:public] == "true"
+    scope = is_public_folder ? Scopes::SCOPE_PUBLIC : Scopes::SCOPE_PRIVATE
 
-    if is_public_folder
-      if @context.user.can_administer_site?
-        parent_folder = Folder.accessible_by_public.find_by(id: unsafe_params[:parent_folder_id])
-        scope = "public"
+    parent_folder =
+      if is_public_folder
+        if @context.can_administer_site?
+          Folder.accessible_by_public.find_by(id: unsafe_params[:parent_folder_id])
+        else
+          flash[:error] = "You're not allowed to create public folders"
+          redirect_to(explore_files_path) && return
+        end
       else
-        flash[:error] = "You are not allowed to create public folders"
-        redirect_to explore_files_path
-        return
+        Folder.editable_by(@context).find_by(id: unsafe_params[:parent_folder_id])
       end
-    else
-      parent_folder = Folder.editable_by(@context).find_by(id: unsafe_params[:parent_folder_id])
-      scope = "private"
-    end
 
-    service = FolderService.new(@context)
-    result = service.add_folder(unsafe_params[:name], parent_folder, scope)
+    computed_scope = parent_folder&.scope || scope
+
+    result = folder_service.add_folder(unsafe_params[:name], parent_folder, computed_scope)
 
     if result.failure?
       flash[:error] = result.value.values
@@ -278,18 +281,18 @@ class FilesController < ApplicationController
       flash[:success] = "Folder '#{result.value.name}' successfully created."
     end
 
-    redirect_target = if parent_folder.present?
-                        pathify_folder(parent_folder)
-                      else
-                        scope == "public" ? explore_files_path : files_path
-                      end
+    redirect_target =
+      if parent_folder
+        pathify_folder(parent_folder)
+      else
+        computed_scope == Scopes::SCOPE_PUBLIC ? explore_files_path : files_path
+      end
 
     redirect_to redirect_target
   end
 
   def rename_folder
     folder = Folder.editable_by(@context).find(params[:id])
-    folder_service = FolderService.new(@context)
     result = folder_service.rename(folder, file_params[:name])
     parent_folder = folder.parent_folder
 
@@ -309,28 +312,32 @@ class FilesController < ApplicationController
   end
 
   def move
-    target_folder_id = unsafe_params[:target_id] == 'root' ? nil : unsafe_params[:target_id]
-    target_folder = target_folder_id ? Folder.editable_by(@context).find(target_folder_id) : nil
-    service = FolderService.new(@context)
+    target_folder_id = params[:target_id] unless params[:target_id] == FolderService::ROOT_DIR
+    target_folder = target_folder_id && Folder.editable_by(@context).find(target_folder_id)
 
-    result = service.move(
-      Node.where(id: unsafe_params[:nodes]),
-      target_folder,
-      unsafe_params[:scope]
-    )
+    nodes = Node.where(id: unsafe_params[:nodes])
+    parent_folder = nodes.first.parent_folder
+
+    computed_scope = target_folder&.scope || params[:scope]
+
+    result = folder_service.move(nodes, target_folder, computed_scope)
 
     if result.success?
-      target_folder_name = target_folder.present? ? target_folder.name : "root directory"
-      flash[:success] = "Successfully moved #{result.value[:count]} item(s) to #{target_folder_name}"
+      target_folder_name = target_folder&.name || "the #{FolderService::ROOT_DIR}"
+      flash[:success] =
+        "Successfully moved #{result.value[:count]} item(s) to #{target_folder_name} folder"
     else
-      flash[:error] = result.value.values
+      flash[:error] = result.value[:message]
     end
 
-    redirect_target = if target_folder.present?
-                        pathify_folder(target_folder)
-                      else
-                        result.value[:scope] == "public" ? explore_files_path : files_path
-                      end
+    redirect_target =
+      if result.failure?
+        nodes.present? && parent_folder ? pathify_folder(parent_folder) : files_path
+      elsif target_folder
+        pathify_folder(target_folder)
+      else
+        computed_scope == Scopes::SCOPE_PUBLIC ? explore_files_path : files_path
+      end
 
     redirect_to redirect_target
   end
@@ -379,9 +386,9 @@ class FilesController < ApplicationController
   end
 
   def remove
-    service = FolderService.new(@context)
     files = Node.editable_by(@context).where(id: unsafe_params[:ids])
-    res = service.remove(files)
+
+    res = folder_service.remove(files)
 
     if res.success?
       flash[:success] = "Node(s) successfully removed"
@@ -389,7 +396,7 @@ class FilesController < ApplicationController
       flash[:error] = res.value.values
     end
 
-    redirect_path = unsafe_params[:scope] == "public" ? explore_files_path : files_path
+    redirect_path = params[:scope] == Scopes::SCOPE_PUBLIC ? explore_files_path : files_path
     redirect_to redirect_path
   end
 
@@ -435,7 +442,8 @@ class FilesController < ApplicationController
       name: ERB::Util.h(node.name),
       rename_path: node.is_a?(Folder) ? rename_folder_file_path(node) : rename_file_path(node),
       type: node.klass,
-      in_verified_space: in_verified_space?(node)
+      in_verified_space: in_verified_space?(node),
+      entity_type: node.entity_type,
     }
   end
 
@@ -483,5 +491,9 @@ class FilesController < ApplicationController
     file = UserFile.not_blocked.find_by(uid: params[:id])
 
     not_found! unless file
+  end
+
+  def folder_service
+    @folder_service ||= FolderService.new(@context)
   end
 end
