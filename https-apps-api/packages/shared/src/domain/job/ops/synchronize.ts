@@ -9,7 +9,7 @@ import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { User, Tagging, UserFile, Tag, Folder } from '../..'
 import { errors } from '../../..'
-import { FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
 import { createJobClosed } from '../../event/event.helper'
 import {
   SyncFilesInFolderOperation,
@@ -119,7 +119,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
             scope: job.scope,
             parentType: PARENT_TYPE.JOB,
             parentId: job.id,
-            entityType: FILE_TYPE.REGULAR,
+            entityType: FILE_ORIGIN_TYPE.HTTPS,
             runRemove: true,
             runAdd: false,
           })
@@ -146,7 +146,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
             scope: job.scope,
             parentType: PARENT_TYPE.JOB,
             parentId: job.id,
-            entityType: FILE_TYPE.REGULAR,
+            entityType: FILE_ORIGIN_TYPE.HTTPS,
             runRemove: false,
             runAdd: true,
           })
@@ -165,7 +165,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
           if (folderPath.includes('/.Notebook_snapshots')) {
             const newSnapshotTagsCnt = await this.assignTags(files, jupyterSnapshotTag)
             jupyterSnapshotTag.taggingCount += newSnapshotTagsCnt
-            this.changeEntityType(files)
+            // this.changeEntityType(files)
           }
           // all files get this for now
           const newHttpsTagsCnt = await this.assignTags(files, httpsFilesTag)
@@ -187,11 +187,11 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     this.ctx.log.debug({ job: updatedJob }, 'updated job')
   }
 
-  private changeEntityType(files: UserFile[]): void {
-    files.forEach(file => {
-      file.entityType = FILE_TYPE.SNAPSHOT
-    })
-  }
+  // private changeEntityType(files: UserFile[]): void {
+  //   files.forEach(file => {
+  //     file.entityType = FILE_TYPE.SNAPSHOT
+  //   })
+  // }
 
   private async assignTags(files: UserFile[], tag: Tag): Promise<number> {
     const em = this.ctx.em.fork(true)

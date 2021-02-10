@@ -1,6 +1,6 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { FILE_TYPE, PARENT_TYPE } from './user-file.enum'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]
@@ -16,7 +16,7 @@ type SyncFilesInFolderInput = {
   scope: string
   parentId: number
   parentType: PARENT_TYPE
-  entityType: FILE_TYPE
+  entityType: FILE_ORIGIN_TYPE
   runAdd: boolean
   runRemove: boolean
 }

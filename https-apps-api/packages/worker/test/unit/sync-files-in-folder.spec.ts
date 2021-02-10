@@ -1,11 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { User, Folder, Job, UserFile } from '@pfda/https-apps-shared/src/domain'
-import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/utils/test'
 import type { SyncFilesInFolderInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
-import { FILE_TYPE, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+import {
+  FILE_ORIGIN_TYPE,
+  PARENT_TYPE,
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import {
   FILES_DESC_RES,
   FILES_LIST_RES_ROOT,
@@ -47,7 +50,7 @@ describe('syncFilesInFolder operation', () => {
       scope: job.scope,
       parentId: job.id,
       parentType: PARENT_TYPE.JOB,
-      entityType: FILE_TYPE.REGULAR,
+      entityType: FILE_ORIGIN_TYPE.HTTPS,
     }
     mocksReset()
   })
@@ -143,6 +146,7 @@ describe('syncFilesInFolder operation', () => {
     expect(res).to.have.property('files')
     expect(res.files.map(f => f.dxid)).to.have.members([createdFileDesc.id])
     expect(fakes.client.filesListFake.calledOnce).to.be.true()
+    expect(res.files[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
   })
 
   it('creates one more new file in a subfolder', async () => {
