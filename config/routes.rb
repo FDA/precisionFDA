@@ -287,6 +287,13 @@ Rails.application.routes.draw do
         end
       end
 
+      resource :counters do
+        get :index
+        get :featured
+        get :everybody
+        get :spaces
+      end
+
       post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
