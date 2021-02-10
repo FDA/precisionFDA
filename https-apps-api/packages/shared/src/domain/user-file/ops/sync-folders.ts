@@ -14,6 +14,7 @@ import {
 } from '../user-file.helper'
 import { User, UserFile } from '../..'
 import { errors } from '../../..'
+import { FILE_ORIGIN_TYPE } from '../user-file.enum'
 
 // todo: maybe another operation type for "can be called from another operation"
 export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder[]> {
@@ -51,6 +52,7 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
           parentId: input.parentId,
           scope: input.scope,
           project: input.projectDxid,
+          entityType: FILE_ORIGIN_TYPE.HTTPS,
         }),
       )
       newFolders = newFolders.concat(res)

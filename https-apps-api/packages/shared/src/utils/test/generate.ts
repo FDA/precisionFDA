@@ -162,7 +162,7 @@ const folder = {
     project: undefined,
     dxid: undefined,
     scope: 'private',
-    entityType: FILE_ORIGIN_TYPE.REGULAR,
+    entityType: FILE_ORIGIN_TYPE.HTTPS,
     parentId: 1,
     parentType: PARENT_TYPE.JOB,
     stiType: FILE_STI_TYPE.FOLDER,
