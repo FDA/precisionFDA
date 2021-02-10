@@ -30,6 +30,7 @@ import Markdown from '../../../../components/Markdown'
 import ArchiveContents from '../../../../components/Home/Assets/ArchiveContents'
 import ActionsDropdown from '../../../../components/Home/Assets/ActionsDropdown'
 import HomeLicense from '../../../../components/Home/HomeLicense'
+import HomeLabel from '../../../../components/Home/HomeLabel'
 
 
 const HomeAssetSinglePage = (props) => {
@@ -142,6 +143,7 @@ const HomeAssetSinglePage = (props) => {
                 <div className='home-single-page__header-section_title'>
                   <Icon icon='fa-file-zip-o' />&nbsp;
                   {asset.origin && asset.origin.text}
+                  {asset.showLicensePending && <HomeLabel value='License Pending Approval' icon='fa-clock-o' type='warning'/>}
                 </div>
               </div>
               <div className='home-single-page__header-section_right-block'>

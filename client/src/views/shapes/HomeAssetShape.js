@@ -16,6 +16,7 @@ const HomeAssetShape = {
   description: PropTypes.string,
   archiveContent: PropTypes.arrayOf(PropTypes.string),
   fileLicense: PropTypes.object,
+  showLicensePending: PropTypes.bool,
   isChecked: PropTypes.bool,
 }
 
@@ -34,6 +35,7 @@ const mapToHomeAsset = (data) => ({
   description: data.description,
   archiveContent: data.archive_content,
   fileLicense: data.file_license,
+  showLicensePending: data.show_license_pending,
   isChecked: false,
 })
 
