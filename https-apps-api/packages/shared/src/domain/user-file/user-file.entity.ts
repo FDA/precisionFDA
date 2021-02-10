@@ -9,10 +9,9 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { isNil } from 'ramda'
-import { User, Tagging, Folder } from '..'
+import { User, Tagging } from '..'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_TYPE, PARENT_TYPE, FILE_STI_TYPE } from './user-file.enum'
+import { FILE_STATE, FILE_ORIGIN_TYPE, PARENT_TYPE, FILE_STI_TYPE } from './user-file.enum'
 import { UserFileRepository } from './user-file.repository'
 
 @Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
@@ -31,7 +30,7 @@ export class UserFile extends Node {
   state: FILE_STATE
 
   @Property()
-  entityType: FILE_TYPE
+  entityType: FILE_ORIGIN_TYPE
 
   @Property()
   uid: string

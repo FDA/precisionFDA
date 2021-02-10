@@ -7,7 +7,7 @@ import type { AnyObject } from '../../types'
 import {
   FILE_STATE,
   FILE_STI_TYPE,
-  FILE_TYPE,
+  FILE_ORIGIN_TYPE,
   PARENT_TYPE,
 } from '../../domain/user-file/user-file.enum'
 
@@ -148,24 +148,9 @@ const userFile = {
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       scope: 'private',
-      entityType: FILE_TYPE.REGULAR,
+      entityType: FILE_ORIGIN_TYPE.HTTPS,
       state: FILE_STATE.CLOSED,
       parentType: PARENT_TYPE.USER,
-      stiType: FILE_STI_TYPE.USERFILE,
-    }
-  },
-  snapshot: (): Partial<InstanceType<typeof entities.UserFile>> => {
-    const dxid = `file-${random.dxstr()}`
-    return {
-      dxid,
-      uid: `${dxid}-1`,
-      project: `project-${random.dxstr()}`,
-      name: `snapshot-${chance.name()}`,
-      scope: 'private',
-      entityType: FILE_TYPE.SNAPSHOT,
-      state: FILE_STATE.CLOSED,
-      parentId: 1,
-      parentType: PARENT_TYPE.JOB,
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
@@ -177,7 +162,7 @@ const folder = {
     project: undefined,
     dxid: undefined,
     scope: 'private',
-    entityType: FILE_TYPE.REGULAR,
+    entityType: FILE_ORIGIN_TYPE.REGULAR,
     parentId: 1,
     parentType: PARENT_TYPE.JOB,
     stiType: FILE_STI_TYPE.FOLDER,

@@ -5,7 +5,7 @@ import { BaseOperation } from '../../../utils'
 import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { errors, client } from '../../..'
-import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../user-file.enum'
+import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
 
 export type SyncFolderFilesOutput = {
   folderPath: string
@@ -111,7 +111,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
             parentFolderId: current?.id,
             state: FILE_STATE.CLOSED,
             stiType: FILE_STI_TYPE.USERFILE,
-            entityType: FILE_TYPE.REGULAR,
+            entityType: FILE_ORIGIN_TYPE.HTTPS,
           },
           { em },
         )

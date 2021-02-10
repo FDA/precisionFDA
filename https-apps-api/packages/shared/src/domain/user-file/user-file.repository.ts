@@ -1,16 +1,17 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from './user-file.enum'
+import { FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'
 
 export class UserFileRepository extends EntityRepository<UserFile> {
-  async findSnapshot(input: { userId: number; project: string }): Promise<UserFile | null> {
-    const file = await this.findOne({
-      user: input.userId,
-      project: input.project,
-      entityType: FILE_TYPE.SNAPSHOT,
-    })
-    return file
-  }
+  // ???? find another way
+  // async findSnapshot(input: { userId: number; project: string }): Promise<UserFile | null> {
+  //   const file = await this.findOne({
+  //     user: input.userId,
+  //     project: input.project,
+  //     entityType: FILE_ORIGIN_TYPE.REGULAR,
+  //   })
+  //   return file
+  // }
 
   async findProjectFiles(input: { project: string }): Promise<UserFile[]> {
     return await this.find(

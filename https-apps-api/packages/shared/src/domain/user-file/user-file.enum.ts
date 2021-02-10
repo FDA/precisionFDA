@@ -5,9 +5,9 @@ enum FILE_STATE {
   OPEN = 'open',
 }
 
-enum FILE_TYPE {
+enum FILE_ORIGIN_TYPE {
   REGULAR = 0,
-  SNAPSHOT = 1,
+  HTTPS = 1,
 }
 
 enum FILE_STI_TYPE {
@@ -23,4 +23,4 @@ enum PARENT_TYPE {
   COMPARISON = 'Comparison',
 }
 
-export { FILE_STATE, FILE_TYPE, PARENT_TYPE, FILE_STI_TYPE }
+export { FILE_STATE, FILE_ORIGIN_TYPE, PARENT_TYPE, FILE_STI_TYPE }
