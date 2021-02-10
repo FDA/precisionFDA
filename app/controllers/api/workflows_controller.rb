@@ -36,7 +36,7 @@ module Api
         end
 
         if show_count
-          render plain:  page_meta.dig(:pagination,:total_count) || 0
+          render plain: page_meta.dig(:pagination, :total_count) || 0
         else
           render json: workflows, root: "workflows",
                  meta: workflows_meta.merge(page_meta), adapter: :json

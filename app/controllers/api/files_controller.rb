@@ -89,8 +89,8 @@ module Api
         else
           render json: user_files, root: "files", adapter: :json,
                  meta: files_meta.
-                     merge(count(UserFile.private_count(@context.user))).
-                     merge({ pagination: page_dict })
+                   merge(count(UserFile.private_count(@context.user))).
+                   merge({ pagination: page_dict })
         end
       end
     end
@@ -433,8 +433,8 @@ module Api
       else
         render json: user_files, root: "files", adapter: :json,
                meta: files_meta.
-                   merge(count(page_dict[:total_count])).
-                   merge({pagination: page_dict})
+                 merge(count(page_dict[:total_count])).
+                 merge({ pagination: page_dict })
       end
     end
 
