@@ -262,26 +262,10 @@ module Api
     # Provide a call to DNAnexusAPI - to terminate an accessible job.
     # @param id [Integer] Param for job fetch.
     def terminate
-      find_job
-      if @job.nil?
-        type = :error
-        text = "Sorry, this job does not exist or is not accessible by you"
-        path = api_jobs_path
+      service = Jobs::TerminateService.call(unsafe_params.dig(:job, :id), @context)
+      raise ApiError, service.message unless service.success?
 
-        render json: { path: path, message: { type: type, text: text } }, adapter: :json
-        return
-      end
-      if !@job.terminal?
-        DNAnexusAPI.new(@context.token).call(@job.dxid, "terminate")
-        type = :success
-        text = "Job was successfully terminated"
-      else
-        type = :warning
-        text = "Job is in terminal state and can not be terminated"
-      end
-      path = api_job_path(@job)
-
-      render json: { path: path, message: { type: type, text: text } }, adapter: :json
+      render json: { message: { type: service.status, text: service.message } }, adapter: :json
     end
 
     # POST /api/jobs/copy
