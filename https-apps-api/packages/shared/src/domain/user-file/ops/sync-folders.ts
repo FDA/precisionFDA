@@ -92,7 +92,7 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
           { populate: ['taggings.tag'] },
         )
         em.getRepository(UserFile).removeFilesWithTags(files)
-        em.remove(folder)
+        repo.removeWithTags(folder)
       }),
     )
     await em.flush()

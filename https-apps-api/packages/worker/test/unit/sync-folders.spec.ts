@@ -1,6 +1,6 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { User } from '@pfda/https-apps-shared/src/domain'
+import { Tagging, User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/utils/test'
 import type { SyncFoldersInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
@@ -84,8 +84,19 @@ describe('syncFolders operation', () => {
 
   it('removes a subfolder', async () => {
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
-    create.filesHelper.createFolder(em, { user, parent: folder }, { name: 'bar', project })
+    const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
     await em.flush()
+    const subfolder = create.filesHelper.createFolder(
+      em,
+      { user },
+      { name: 'bar', project, parentFolderId: folder.id },
+    )
+    await em.flush()
+    // add taggings to both
+    create.tagsHelper.createTagging(em, { tag }, { folder, tagger: user })
+    create.tagsHelper.createTagging(em, { tag }, { folder: subfolder, tagger: user })
+    await em.flush()
+
     const op = new userFile.SyncFoldersOperation({
       em,
       log,
@@ -95,17 +106,34 @@ describe('syncFolders operation', () => {
     const res = await op.execute(input)
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('id', folder.id)
+    em.clear()
+    const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
+    expect(taggingsInDb).to.have.lengthOf(1)
+    expect(taggingsInDb[0]).to.have.property('taggableId', folder.id)
+    expect(taggingsInDb[0].tag).to.have.property('taggingCount', 1)
   })
 
   it('removes two nested subfolders', async () => {
+    const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
+    await em.flush()
     const sub = create.filesHelper.createFolder(
       em,
-      { user, parent: folder },
-      { name: 'bar', project },
+      { user },
+      { name: 'bar', project, parentFolderId: folder.id },
     )
-    create.filesHelper.createFolder(em, { user, parent: sub }, { name: 'baz', project })
     await em.flush()
+    const sub2 = create.filesHelper.createFolder(
+      em,
+      { user },
+      { name: 'baz', project, parentFolderId: sub.id },
+    )
+    await em.flush()
+    create.tagsHelper.createTagging(em, { tag }, { folder, tagger: user })
+    create.tagsHelper.createTagging(em, { tag }, { folder: sub, tagger: user })
+    create.tagsHelper.createTagging(em, { tag }, { folder: sub2, tagger: user })
+    await em.flush()
+
     const op = new userFile.SyncFoldersOperation({
       em,
       log,

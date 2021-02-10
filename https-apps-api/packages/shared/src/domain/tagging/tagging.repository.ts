@@ -1,12 +1,17 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from '..'
+import { FILE_STI_TYPE } from '../user-file/user-file.enum'
 import { Tagging } from './tagging.entity'
 
 type FindInput = {
   fileId: number
   tagId: number
   userId: number
+}
+
+type UpsertInput = FindInput & {
+  nodeType: FILE_STI_TYPE
 }
 
 type FindMultipleInput = {
@@ -35,14 +40,18 @@ export class TaggingRepository extends EntityRepository<Tagging> {
     )
   }
 
-  upsertForFile(input: FindInput): Tagging {
+  upsertForFile(input: UpsertInput): Tagging {
     const fileTagging = new Tagging()
+    const taggableRef =
+      input.nodeType === FILE_STI_TYPE.FOLDER
+        ? { folder: this.em.getReference(UserFile, input.fileId) }
+        : { userFile: this.em.getReference(UserFile, input.fileId) }
     wrap(fileTagging).assign(
       {
         // refs
         tag: input.tagId,
         tagger: input.userId,
-        userFile: this.em.getReference(UserFile, input.fileId),
+        ...taggableRef,
         // hardcoded
         taggableType: 'Node',
         taggerType: 'User',

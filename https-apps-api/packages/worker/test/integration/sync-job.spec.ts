@@ -286,7 +286,7 @@ describe('TASK: sync_job_status', () => {
       expect(resultTagging.tag).to.have.property('taggingCount', 1)
     })
 
-    it('creates regular file in the database - subfolder', async () => {
+    it('creates regular file in the database - and also subfolder', async () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
@@ -316,7 +316,7 @@ describe('TASK: sync_job_status', () => {
       const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'] })
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
       expect(foldersInDb).to.be.an('array').with.lengthOf(1)
-      // // converted to JSON to remove user reference
+      // converted to JSON to remove user reference
       const resultFile = wrap(filesInDb[0]).toJSON()
       const resultFolder = wrap(foldersInDb[0]).toJSON()
       expect(resultFile).to.have.property('dxid', firstFileDxid)
@@ -327,12 +327,22 @@ describe('TASK: sync_job_status', () => {
       expect(resultFile).to.have.property('stiType', FILE_STI_TYPE.USERFILE)
 
       const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
-      expect(taggingsInDb).to.be.an('array').with.lengthOf(1)
-      const resultTagging = wrap(taggingsInDb[0]).toJSON()
-      expect(resultTagging).to.have.property('taggableId', resultFile.id)
-      expect(resultTagging).to.have.property('tag')
-      expect(resultTagging.tag).to.have.property('name', 'HTTPS File')
-      expect(resultTagging.tag).to.have.property('taggingCount', 1)
+      expect(taggingsInDb).to.be.an('array').with.lengthOf(2)
+      const fileTagging = wrap(
+        taggingsInDb.find(tagging => tagging.taggableId === resultFile.id),
+      ).toJSON()
+      const folderTagging = wrap(
+        taggingsInDb.find(tagging => tagging.taggableId === resultFolder.id),
+      ).toJSON()
+      expect(fileTagging).to.exist()
+      expect(folderTagging).to.exist()
+      expect(fileTagging).to.have.property('tag')
+      expect(fileTagging.tag).to.have.property('name', 'HTTPS File')
+      expect(fileTagging.tag).to.have.property('taggingCount', 2)
+
+      expect(folderTagging).to.have.property('tag')
+      expect(folderTagging.tag).to.have.property('name', 'HTTPS File')
+      expect(folderTagging.tag).to.have.property('taggingCount', 2)
     })
 
     it('creates snapshot file', async () => {
@@ -363,9 +373,14 @@ describe('TASK: sync_job_status', () => {
       expect(filesInDb[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
       expect(filesInDb[0].parentFolderId).to.be.equal(snapshotsFolder.id)
       const taggings = await em.find(Tagging, {}, { populate: ['tag'] })
-      expect(taggings).to.be.an('array').with.lengthOf(2)
-      expect(taggings.map(t => t.taggableId)).to.have.members([filesInDb[0].id, filesInDb[0].id])
-      expect(taggings.map(t => t.tag.taggingCount)).to.have.members([1, 1])
+      expect(taggings).to.be.an('array').with.lengthOf(4)
+      expect(taggings.map(t => t.taggableId)).to.have.members([
+        filesInDb[0].id,
+        filesInDb[0].id,
+        ...foldersInDb.map(f => f.id),
+      ])
+      // two folder + one file = 3, the file is a snapshot = 1
+      expect(taggings.map(t => t.tag.taggingCount)).to.have.members([1, 3, 3, 3])
     })
     // todo: create snapshot in a subfolder
 
@@ -428,11 +443,12 @@ describe('TASK: sync_job_status', () => {
       expect(resultFile).to.have.property('parentFolderId', subfolder.id)
       // tagging also correctly recreated
       const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
-      expect(taggingsInDb).to.be.an('array').with.lengthOf(1)
-      const resultTagging = wrap(taggingsInDb[0]).toJSON()
-      expect(resultTagging).to.have.property('taggableId', resultFile.id)
+      // one file, two folders
+      expect(taggingsInDb).to.be.an('array').with.lengthOf(3)
+      const resultTagging = wrap(taggingsInDb.find(t => t.taggableId === resultFile.id)).toJSON()
+      expect(resultTagging).to.exist()
       expect(resultTagging).to.have.property('tag')
-      expect(resultTagging.tag).to.have.property('taggingCount', 1)
+      expect(resultTagging.tag).to.have.property('taggingCount', 3)
     })
 
     it('deletes regular file from the database', async () => {

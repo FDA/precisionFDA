@@ -9,8 +9,7 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { isNil } from 'ramda'
-import { Tagging, User, UserFile } from '..'
+import { Tagging, User } from '..'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
 import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'

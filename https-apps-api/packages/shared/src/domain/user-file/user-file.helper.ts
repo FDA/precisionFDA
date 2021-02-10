@@ -1,7 +1,18 @@
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { User } from '..'
+import { User, Node, UserFile } from '..'
 import { Folder } from './folder.entity'
 import { FolderRepository } from './folder.repository'
+import { FILE_STI_TYPE } from './user-file.enum'
+
+const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
+  if (node instanceof Folder) {
+    return FILE_STI_TYPE.FOLDER
+  }
+  if (node instanceof UserFile) {
+    return FILE_STI_TYPE.USERFILE
+  }
+  throw new Error('Unsupported entity instance')
+}
 
 const getFolders = (pathStr: string) => pathStr.split('/').slice(1)
 
@@ -149,4 +160,5 @@ export {
   filterDuplicities,
   getFolderPath,
   childrenTraverse,
+  getStiEnumTypeFromInstance,
 }
