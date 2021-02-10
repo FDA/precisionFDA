@@ -8,6 +8,13 @@ Because when you first get started in a new system,
 there is no existing user. So you can't log in to provision new accounts.
 This requires manually "bootstrapping" the situation in steps described below.
 
+## Certificate and Key
+- `brew install mkcert` - Install MKCert on your computer: https://github.com/FiloSottile/mkcert
+- `mkcert -install`
+- From project root run: `mkcert -key-file key.pem -cert-file cert.pem localhost 0.0.0.0 pfda.dev`
+- This will create two files `key.pem` and `cert.pem`. They need to be generated on your machine to
+  get rid of the annoying unprotected site warning in the browser.
+
 ## New account registration
 Register for a new user account at [https://staging.dnanexus.com/register](https://staging.dnanexus.com/register).
 Note: the first time you visit this, you will be prompted to enter the credentials 

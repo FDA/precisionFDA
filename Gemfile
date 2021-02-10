@@ -144,7 +144,7 @@ end
 
 group :development, :test, :ui_test do
   gem "dotenv-rails", ">= 2.7.6"
-  gem "thin"
+  gem "thin", "1.8.0"
 end
 
 group :test do
