@@ -37,7 +37,11 @@ class UserFileSerializer < NodeSerializer
   end
 
   def show_license_pending
-    object.license_status?(current_user, "pending")
+    if object.license&.approval_required
+      object.license_status?(current_user, "pending")
+    else
+      false
+    end
   end
 
   # Builds links to files.

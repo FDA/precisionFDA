@@ -33,6 +33,7 @@ import {
 } from '../../../../../actions/home'
 import { getSelectedTab } from '../../../../../helpers/home'
 import HomeLicense from '../../../../components/Home/HomeLicense'
+import HomeLabel from '../../../../components/Home/HomeLabel'
 
 
 const HomeFilesSinglePage = (props) => {
@@ -153,6 +154,7 @@ const HomeFilesSinglePage = (props) => {
                 <div className='home-single-page__header-section_title'>
                   <Icon icon='fa-files-o' />&nbsp;
                   {file.name}
+                  {file.showLicensePending && <HomeLabel value='License Pending Approval' icon='fa-clock-o' type='warning'/>}
                   <h3 className="description">{file.desc}</h3>
                 </div>
                 <div className='home-single-page__header-section_description'>{file.description ? file.description : 'This file has no description.'}</div>
