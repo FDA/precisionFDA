@@ -13,7 +13,7 @@ import { isNil } from 'ramda'
 import { Tagging, User, UserFile } from '..'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from './user-file.enum'
+import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'
 
 @Entity({ tableName: 'nodes', customRepository: () => FolderRepository })
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
@@ -31,7 +31,7 @@ export class Folder extends Node {
   state: FILE_STATE
 
   @Property()
-  entityType: FILE_TYPE
+  entityType: FILE_ORIGIN_TYPE
 
   @Property()
   uid: string
