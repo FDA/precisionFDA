@@ -1,7 +1,7 @@
 /* globals module __dirname */
 
 const path = require('path')
-
+const fs = require('fs')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -22,5 +22,9 @@ module.exports = merge(development, {
     compress: true,
     port: 9000,
     hot: true,
+    https: {
+      key: fs.readFileSync(path.resolve('../key.pem')),
+      cert: fs.readFileSync(path.resolve('../cert.pem')),
+    }
   },
 })

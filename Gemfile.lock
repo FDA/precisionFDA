@@ -477,7 +477,7 @@ GEM
     therubyracer (0.12.3)
       libv8 (~> 3.16.14.15)
       ref
-    thin (1.7.2)
+    thin (1.8.0)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
       rack (>= 1, < 3)
@@ -589,7 +589,7 @@ DEPENDENCIES
   soapforce
   sprockets (= 3.7.2)
   therubyracer
-  thin
+  thin (= 1.8.0)
   turbolinks (~> 5)
   uglifier (>= 1.3.0)
   unicorn (~> 4.9.0)
