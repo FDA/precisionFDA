@@ -210,6 +210,10 @@ Rails.application.routes.draw do
       end
 
       resources :licenses, only: %i(index show) do
+        post "accept",
+             on: :member,
+             action: :accept,
+             as: "accept"
         post "remove_item/:item_uid",
              on: :member,
              action: :remove_item,
@@ -218,6 +222,11 @@ Rails.application.routes.draw do
              on: :member,
              action: :license_item,
              as: "license_item"
+        match "request_approval",
+              on: :member,
+              action: :request_approval,
+              as: "request_approval",
+              via: %i(get post)
       end
 
       resources :files, param: :uid, only: %i(index update show) do

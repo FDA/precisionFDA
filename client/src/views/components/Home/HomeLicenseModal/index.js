@@ -17,6 +17,13 @@ const SwitchFooter = ({ actionType, hideAction, modalAction, actionLink }) => {
           <Button type='danger' onClick={() => modalAction(actionLink)}>Detach</Button>
         </>
       )
+    case 'accept':
+      return (
+        <>
+          <Button onClick={hideAction}>Cancel</Button>
+          <Button type='success' onClick={() => modalAction(actionLink)}>Accept</Button>
+        </>
+      )
     default:
       return (
         <>
@@ -32,6 +39,9 @@ const getMessage = (actionType, title) => {
   switch (actionType) {
     case 'detach':
       message = 'Are you sure you want to detach the license '
+      break
+    case 'accept':
+      message = 'Are you sure you want to accept the license '
       break
     default:
       break

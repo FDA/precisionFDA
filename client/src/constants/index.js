@@ -119,6 +119,7 @@ export const HOME_FILES_MODALS = {
   ATTACH_LICENSE: 'attachLicenseModal',
   EDIT_TAGS: 'editTagsModal',
   LICENSE: 'licenseModal',
+  ACCEPT_LICENSE: 'acceptLicenseModal',
 }
 
 export const HOME_FILES_ACTIONS = {
@@ -186,4 +187,5 @@ export const HOME_ASSETS_MODALS = {
   DOWNLOAD: 'downloadModal',
   ATTACH_LICENSE: 'attachLicenseModal',
   LICENSE: 'licenseModal',
+  ACCEPT_LICENSE: 'acceptLicenseModal',
 }

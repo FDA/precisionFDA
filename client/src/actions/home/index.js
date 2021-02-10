@@ -61,7 +61,7 @@ import {
   HOME_SET_IS_LEFT_MENU_OPEN,
   HOME_SELECT_ACCESSIBLE_LICENSE,
 } from './types'
-import { OBJECT_TYPES } from '../../constants'
+import { OBJECT_TYPES, HOME_ASSETS_MODALS, HOME_FILES_MODALS } from '../../constants'
 import {
   fetchFiles,
   fetchFilesFeatured,
@@ -112,6 +112,8 @@ import {
   fetchSubfolders,
   showFilesLicenseModal,
   hideFilesLicenseModal,
+  showFilesAcceptLicenseModal,
+  hideFilesAcceptLicenseModal,
 } from './files'
 import {
   fetchWorkflows,
@@ -225,6 +227,8 @@ import {
   hideAssetsAttachLicenseModal,
   showAssetsLicenseModal,
   hideAssetsLicenseModal,
+  showAssetsAcceptLicenseModal,
+  hideAssetsAcceptLicenseModal,
 } from './assets'
 
 
@@ -247,7 +251,8 @@ const filesAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.FILE, items, no
 const attachLicenseFiles = (scope, ids, link) => attachLicense(link, OBJECT_TYPES.FILE, scope, ids)
 const selectAccessibleSpace = (scope) => createAction(HOME_SELECT_ACCESSIBLE_SPACE, scope)
 const selectAccessibleLicense = (id) => createAction(HOME_SELECT_ACCESSIBLE_LICENSE, id)
-const filesLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.FILE)
+const filesLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.FILE, HOME_FILES_MODALS.LICENSE)
+const filesAcceptLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.FILE, HOME_FILES_MODALS.ACCEPT_LICENSE)
 
 const copyToSpaceExecutions = (scope, ids) => copyToSpace('/api/jobs/copy', OBJECT_TYPES.JOB, scope, ids)
 const executionsAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.JOB, items, noteUids)
@@ -260,6 +265,7 @@ const assetsAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.ASSET, items, 
 const editAssetTags = (uid, tags, suggestedTags) => editTags(uid, tags, suggestedTags, OBJECT_TYPES.ASSET)
 const assetsAttachLicence = (link, scope, ids) => attachLicense(ids, OBJECT_TYPES.ASSET, link)
 const assetsLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.ASSET)
+const assetsAcceptLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.ASSET, HOME_ASSETS_MODALS.ACCEPT_LICENSE)
 
 export {
   setCurrentTab,
@@ -375,6 +381,9 @@ export {
   showFilesLicenseModal,
   hideFilesLicenseModal,
   filesLicenseAction,
+  showFilesAcceptLicenseModal,
+  hideFilesAcceptLicenseModal,
+  filesAcceptLicenseAction,
 }
 
 export {
@@ -502,4 +511,7 @@ export {
   assetsLicenseAction,
   showAssetsLicenseModal,
   hideAssetsLicenseModal,
+  showAssetsAcceptLicenseModal,
+  hideAssetsAcceptLicenseModal,
+  assetsAcceptLicenseAction,
 }

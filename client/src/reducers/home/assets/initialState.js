@@ -41,4 +41,5 @@ export default {
   downloadModal: modalState,
   attachLicenseModal: modalState,
   licenseModal: modalState,
+  acceptLicenseModal: modalState,
 }

@@ -30,3 +30,4 @@ export const homeAssetsDownloadModalSelector = (state) => state.home.assets.down
 export const homeAssetsDeleteModalSelector = (state) => state.home.assets.deleteModal
 export const homeAssetsAttachLicenseModalSelector = (state) => state.home.assets.attachLicenseModal
 export const homeAssetsLicenseModalSelector = (state) => state.home.assets.licenseModal
+export const homeAssetsAcceptLicenseModalSelector = (state) => state.home.assets.acceptLicenseModal

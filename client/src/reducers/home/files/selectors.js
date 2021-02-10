@@ -38,3 +38,4 @@ export const homeFilesAttachLicenseModalSelector = (state) => state.home.files.a
 export const homeFilesActionModalSelector = (state) => state.home.files.actionModal
 export const homeFilesEditTagsModalSelector = (state) => state.home.files.editTagsModal
 export const homeFilesLicenseModalSelector = (state) => state.home.files.licenseModal
+export const homeFilesAcceptLicenseModalSelector = (state) => state.home.files.acceptLicenseModal

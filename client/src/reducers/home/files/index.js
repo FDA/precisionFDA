@@ -501,27 +501,27 @@ export default createReducer(initialState, {
     }
   },
 
-  [HOME_LICENSE_ACTION_START]: (state) => ({
+  [HOME_LICENSE_ACTION_START]: (state, modal) => ({
     ...state,
-    licenseModal: {
-      ...state.licenseModal,
+    [modal]: {
+      ...state[modal],
       isLoading: true,
     },
   }),
 
-  [HOME_LICENSE_ACTION_SUCCESS]: (state) => ({
+  [HOME_LICENSE_ACTION_SUCCESS]: (state, modal) => ({
     ...state,
-    licenseModal: {
-      ...state.licenseModal,
+    [modal]: {
+      ...state[modal],
       isOpen: false,
       isLoading: false,
     },
   }),
 
-  [HOME_LICENSE_ACTION_FAILURE]: (state) => ({
+  [HOME_LICENSE_ACTION_FAILURE]: (state, modal) => ({
     ...state,
-    licenseModal: {
-      ...state.licenseModal,
+    [modal]: {
+      ...state[modal],
       isLoading: false,
     },
   }),

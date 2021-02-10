@@ -21,43 +21,69 @@ class AssetSerializer < UserFileSerializer
 
   # Builds links to files.
   # @return [Hash] Links.
+  # rubocop:disable Metrics/MethodLength
   def links
     return {} unless current_user
 
+    # rubocop:disable Metrics/BlockLength
     {}.tap do |links|
       links[:show] = api_asset_path(object)
       links[:user] = user_path(object.user.dxuser)
       links[:space] = space_path if object.in_space?
 
-      # GET download single file #
-      links[:download] = download_api_file_path(object)
-      # POST download_list files #
+      # POST download_list asset
       links[:download_list] = download_list_api_files_path
-      # POST Authorize URL - to move to api #
-      links[:link] = link_file_path(object)
+      # POST /api/files/copy  copy_api_files
+      links[:copy] = copy_api_files_path
+
+      unless object.license&.approval_required
+        # GET download single asset
+        links[:download] = download_api_file_path(object)
+        # POST Authorize URL - to move to api
+        links[:link] = link_file_path(object)
+      end
+
+      if object.license.present? && !object.license_status?(current_user, "active")
+        if object.license.approval_required
+          unless object.license_status?(current_user, "pending")
+            # GET|POST /licenses/:id/request_approval
+            links[:request_approval_license] =
+              request_approval_license_path(object.license.id)
+            links[:request_approval_action] = "api/licenses/:id/request_approval"
+          end
+        else
+          # POST /api/licenses/:id/accept
+          links[:accept_license_action] =
+            object.license && accept_api_license_path(object.license.id)
+        end
+      end
 
       # GET asset license page if exists
       links[:show_license] = license_path(object.license.id) if object.license
 
       if object.owned_by_user?(current_user)
-        # POST: /api/assets/rename
-        links[:rename] = rename_api_assets_path(object)
-        # publish single asset if it is not public already
-        links[:publish] = publish_object unless object.public?
-        # PUT /api/assets/:id update single asset: title and description permitted
-        links[:update] = api_asset_path(object)
-        # DELETE: /api/assets/:id - Delete single asset
-        links[:remove] = api_asset_path(object)
-        if object.license
-          # GET asset license object if exists
-          links[:object_license] = api_license_path(object.license&.id)
-          # POST detach license from item
-          links[:detach_license] = "/api/licenses/:id/remove_item/:item_uid"
+        unless object.in_space? && member_viewer?
+          # publish single asset if it is not public already
+          links[:publish] = publish_object unless object.public?
+          # POST: /api/assets/rename
+          links[:rename] = rename_api_assets_path(object)
+          # DELETE: /api/assets/:id - Delete single asset
+          links[:remove] = api_asset_path(object)
+          # POST associate item to a license
+          links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
+          if object.license
+            # GET asset license object if exists
+            links[:object_license] = api_license_path(object.license&.id)
+            # POST detach license from item
+            links[:detach_license] = "/api/licenses/:id/remove_item/:item_uid"
+          end
+          # PUT /api/assets/:id update single asset: title and description permitted
+          links[:update] = api_asset_path(object)
         end
-        # POST associate item to a license
-        links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
+
         # POST /api/attach_to: api_attach_to_notes, discussions, answers
         links[:attach_to] = api_attach_to_notes_path
+
         # POST /api/files/copy copy_api_files
         links[:copy] = copy_api_files_path
       end
@@ -66,8 +92,10 @@ class AssetSerializer < UserFileSerializer
         # PUT /api/assets/feature #
         links[:feature] = feature_api_assets_path
       end
+      # rubocop:enable Metrics/BlockLength
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   delegate :all_tags_list, to: :object
 end

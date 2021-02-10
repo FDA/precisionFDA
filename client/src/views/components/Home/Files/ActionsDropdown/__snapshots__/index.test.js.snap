@@ -72,6 +72,16 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "hide": true,
+          "link": undefined,
+          "text": "Request license approval",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Accept License",
+        },
+        Object {
+          "hide": true,
           "onClick": [Function],
           "text": "Edit tags",
         },
@@ -120,6 +130,12 @@ exports[`ActionsDropdown test should render 1`] = `
   <Connect(HomeLicenseModal)
     hideAction={[Function]}
     modalAction={[Function]}
+  />
+  <Connect(HomeLicenseModal)
+    actionType="accept"
+    hideAction={[Function]}
+    modalAction={[Function]}
+    title="Accept License"
   />
 </Fragment>
 `;
