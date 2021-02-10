@@ -138,7 +138,7 @@ module Api
     # @param add_meta [Hash] Hash of additional meta params.
     def render_apps_list(apps, add_meta = {})
       if show_count
-        render plain: add_meta.dig(:pagination,:total_count) || 0
+        render plain: add_meta.dig(:pagination, :total_count) || 0
       else
         render json: apps, root: "apps", meta: apps_meta(apps).merge(add_meta), adapter: :json
       end
