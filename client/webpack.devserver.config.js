@@ -25,6 +25,6 @@ module.exports = merge(development, {
     https: {
       key: fs.readFileSync(path.resolve('../key.pem')),
       cert: fs.readFileSync(path.resolve('../cert.pem')),
-    }
+    },
   },
 })
