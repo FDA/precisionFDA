@@ -51,6 +51,7 @@ class Folder < Node # :nodoc:
   # rubocop:enable Style/FormatStringToken
 
   scope :not_removing, -> { where.not(state: STATE_REMOVING).or(where(state: nil)) }
+  scope :https, -> { where.not(project: nil).where(parent_type: Job.name) }
 
   class << self
     # Returns folder count of user 'private' scope.
@@ -134,10 +135,5 @@ class Folder < Node # :nodoc:
     collected = children.merge(where).to_a
     sub_folders.each { |folder| collected += folder.all_children(where).to_a }
     collected
-  end
-
-  # FIXME: find other way to distinguish https folders from the rest.
-  def https?
-    parent_type == Job.name && project.present?
   end
 end

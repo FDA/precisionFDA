@@ -7,7 +7,7 @@ class HttpsAppsClient
     end
 
     def message
-      @error_body["message"] || "Jupyter Labs service client error."
+      @error_body["message"] || "JupyterLab client error."
     end
 
     private
@@ -26,7 +26,7 @@ class HttpsAppsClient
     @user = user
   end
 
-  # Run app.
+  # Run an app.
   # @param app_dxid [String] App dxid.
   # @param opts [Hash] Request body options.
   def app_run(app_dxid, opts)
@@ -37,7 +37,7 @@ class HttpsAppsClient
     )
   end
 
-  # Terminate the job.
+  # Terminate a job.
   # @param job_dxid [String] Job dxid to terminate.
   # @param opts [Hash] Request body options.
   def job_terminate(job_dxid)
@@ -48,11 +48,24 @@ class HttpsAppsClient
     )
   end
 
+  # Rename a folder.
+  # @param folder_id [Integer] Folder ID.
+  # @param new_name [String] New folder name.
   def folder_rename(folder_id, new_name)
     request(
       "/folders/#{folder_id}/rename",
       { newName: new_name },
       Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  # Delete a folder.
+  # @param folder_id [Integer] Folder ID.
+  def folder_remove(folder_id)
+    request(
+      "/folders/#{folder_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
     )
   end
 

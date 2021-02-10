@@ -358,7 +358,7 @@ class WorkflowsController < ApplicationController
     end
 
     service = FolderService.new(@context)
-    result = service.add_folder(unsafe_params[:name], parent_folder, scope)
+    result = service.add_folder(unsafe_params[:name], parent_folder, parent_folder&.scope || scope)
 
     if result.failure?
       full_messages =
