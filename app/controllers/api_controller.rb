@@ -41,6 +41,9 @@ class ApiController < ApplicationController
 
   rescue_from ApiError, with: :render_error_method
 
+  attr_accessor :show_count
+  attr_writer :context
+
   # rubocop:disable Style/SignalException
 
   # A common method to add Objects count into api response

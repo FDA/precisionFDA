@@ -64,8 +64,12 @@ module Api
 
         page_dict = pagination_dict(jobs)
 
-        render json: jobs, root: "jobs", meta: count(page_dict[:total_count]).
-          merge({ pagination: page_dict }), adapter: :json
+        if show_count
+          render plain: page_dict[:total_count]
+        else
+          render json: jobs, root: "jobs", meta: count(page_dict[:total_count]).
+            merge({ pagination: page_dict }), adapter: :json
+        end
       else
         # Fetches all user 'private' jobs.
         jobs = Job.
@@ -140,11 +144,15 @@ module Api
         end
       end.flatten!
 
-      page_array = paginate_array(sort_array_by_fields(workflow_with_jobs))
-      page_meta = pagination_meta(workflow_with_jobs.count)
-      page_meta[:count] = page_meta.dig(:pagination, :total_count)
+      if show_count
+        render plain: workflow_with_jobs.count
+      else
+        page_array = paginate_array(sort_array_by_fields(workflow_with_jobs))
+        page_meta = pagination_meta(workflow_with_jobs.count)
+        page_meta[:count] = page_meta.dig(:pagination, :total_count)
 
-      render json: { jobs: page_array, meta: page_meta }, adapter: :json
+        render json: { jobs: page_array, meta: page_meta }, adapter: :json
+      end
     end
     # rubocop:enable Metrics/MethodLength
 
