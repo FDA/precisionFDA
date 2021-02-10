@@ -29,7 +29,14 @@ export class FolderRepository extends EntityRepository<Folder> {
     // implicit conditions on how to find folders :)
     return await this.find(
       { user: this.getReference(userId), project: projectDxid },
-      { filters: ['folder'], orderBy: { id: 'ASC' } },
+      { filters: ['folder'], orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
     )
+  }
+
+  removeWithTags(folder: Folder): Folder {
+    this.remove(folder)
+    folder.taggings.getItems().forEach(tagging => tagging.tag.taggingCount--)
+    folder.taggings.removeAll()
+    return folder
   }
 }

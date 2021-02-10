@@ -38,4 +38,4 @@ export * as event from './event'
 
 export * as org from './org'
 
-export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization }
+export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node }

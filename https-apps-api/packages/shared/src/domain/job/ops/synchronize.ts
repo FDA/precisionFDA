@@ -15,6 +15,7 @@ import {
   SyncFilesInFolderOperation,
   SyncFolderFilesOutput,
   SyncFoldersOperation,
+  helper,
 } from '../../user-file'
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
@@ -157,6 +158,8 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
 
       const httpsFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
       const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
+      const createdFolderTags = await this.assignTags(localFolders, httpsFilesTag)
+      httpsFilesTag.taggingCount += createdFolderTags
       await Promise.all(
         syncFilesResp.map(async ({ folderPath, files }) => {
           // files were created in a different identity map
@@ -187,33 +190,28 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     this.ctx.log.debug({ job: updatedJob }, 'updated job')
   }
 
-  // private changeEntityType(files: UserFile[]): void {
-  //   files.forEach(file => {
-  //     file.entityType = FILE_TYPE.SNAPSHOT
-  //   })
-  // }
-
-  private async assignTags(files: UserFile[], tag: Tag): Promise<number> {
+  private async assignTags(nodes: Array<UserFile | Folder>, tag: Tag): Promise<number> {
     const em = this.ctx.em.fork(true)
     const taggingRepo = em.getRepository(Tagging)
     const existingRefs = await taggingRepo.findForFiles({
-      fileIds: files.map(f => f.id),
+      fileIds: nodes.map(f => f.id),
       tagId: tag.id,
       userId: this.ctx.user.id,
     })
     let createdTags = 0
-    files.forEach(file => {
-      const existing = existingRefs.find(tagging => tagging.taggableId === file.id)
+    nodes.forEach(node => {
+      const existing = existingRefs.find(tagging => tagging.taggableId === node.id)
       if (!isNil(existing)) {
         return
       }
       const tagging = taggingRepo.upsertForFile({
         tagId: tag.id,
-        fileId: file.id,
+        fileId: node.id,
         userId: this.ctx.user.id,
+        nodeType: helper.getStiEnumTypeFromInstance(node),
       })
       // tagging.tag.taggingCount++
-      file.taggings.add(tagging)
+      node.taggings.add(tagging)
       em.persist(tagging)
       createdTags++
     })
