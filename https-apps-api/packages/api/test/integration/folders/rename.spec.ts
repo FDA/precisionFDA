@@ -5,10 +5,13 @@ import { App, Folder, Job, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { database } from '@pfda/https-apps-shared'
+import {
+  FILE_STI_TYPE,
+  FILE_ORIGIN_TYPE,
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
 import { api } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { database } from '@pfda/https-apps-shared'
-import { FILE_STI_TYPE, FILE_ORIGIN_TYPE } from 'shared/src/domain/user-file/user-file.enum'
 
 describe('PATCH /folders/:id/rename', () => {
   let em: EntityManager
@@ -51,6 +54,7 @@ describe('PATCH /folders/:id/rename', () => {
       user: user.id,
       entityType: FILE_ORIGIN_TYPE.HTTPS,
       stiType: FILE_STI_TYPE.FOLDER,
+      taggings: [],
       scope: 'private',
       parentId: job.id,
       parentType: 'Job',
