@@ -8,7 +8,17 @@ class CommentsController < ApplicationController
     if @item.accessible_by?(@context)
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
-      @comments = @item.root_comments.page(unsafe_params[:comments_page])
+      if @item.in_space?
+        space = item_from_uid(@item.scope)
+        @comments = Comment.
+          where(commentable: space, content_object: @item).
+          order(id: :desc).
+          page unsafe_params[:comments_page]
+      else
+        @comments = @item.
+          root_comments.order(id: :desc).
+          page unsafe_params[:comments_page]
+      end
     else
       flash[:error] = "You do not have permissions to comment on this item"
       redirect_to root_url
