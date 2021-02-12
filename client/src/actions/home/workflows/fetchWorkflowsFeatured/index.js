@@ -11,7 +11,7 @@ import {
 } from '../../workflows/types'
 import { setPageCounters } from '../../index'
 import { homeWorkflowsFeaturedFiltersSelector } from '../../../../reducers/home/workflows/selectors'
-import { HOME_WORKFLOW_TYPES } from '../../../../constants'
+import { HOME_WORKFLOW_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -51,7 +51,7 @@ export default () => (
           const counters = {
             workflows: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.FEATURED))
         }
 
         dispatch(fetchWorkflowsFeaturedSuccess(workflows, pagination))
