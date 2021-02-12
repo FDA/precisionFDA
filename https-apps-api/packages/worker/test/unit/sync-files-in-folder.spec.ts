@@ -195,6 +195,7 @@ describe('syncFilesInFolder operation', () => {
     expect(res.files.map(f => f.dxid)).to.have.members([createdFileDesc.id, file.dxid])
     expect(res.files.map(f => f.parentFolderId)).to.have.members([subfolder.id, subfolder.id])
     expect(fakes.client.filesListFake.calledOnce).to.be.true()
+    expect(fakes.client.filesDescFake.notCalled).to.be.true()
   })
 
   it('deletes file', async () => {
