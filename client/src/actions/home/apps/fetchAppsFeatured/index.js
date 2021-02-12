@@ -11,7 +11,7 @@ import {
 } from '../../types'
 import { setPageCounters } from '../../index'
 import { homeAppsFeaturedFiltersSelector } from '../../../../reducers/home/apps/selectors'
-import { HOME_APP_TYPES } from '../../../../constants'
+import { HOME_APP_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -42,7 +42,7 @@ export default () => (
 
     try {
       const response = await API.getAppsFeatured(params)
-      
+
       if (response.status === httpStatusCodes.OK) {
         const apps = response.payload.apps ? response.payload.apps.map(mapToHomeApp) : []
         const pagination = response.payload.meta ? mapToPagination(response.payload.meta.pagination) : {}
@@ -51,7 +51,7 @@ export default () => (
           const counters = {
             apps: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.FEATURED))
         }
 
         dispatch(fetchAppsFeaturedSuccess(apps, pagination))

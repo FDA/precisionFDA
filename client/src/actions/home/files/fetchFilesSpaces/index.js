@@ -11,7 +11,7 @@ import {
 } from '../../types'
 import { setPageCounters } from '../../index'
 import { homeFilesSpacesFiltersSelector } from '../../../../reducers/home/files/selectors'
-import { HOME_FILE_TYPES } from '../../../../constants'
+import { HOME_FILE_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -52,7 +52,7 @@ export default (folderId) => (
           const counters = {
             files: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.SPACES))
         }
 
         dispatch(fetchFilesSuccess(files, pagination, path))

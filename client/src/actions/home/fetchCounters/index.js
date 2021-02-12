@@ -8,6 +8,7 @@ import {
 import { showAlertAboveAll } from '../../alertNotifications'
 import { HOME_TABS } from '../../../constants'
 
+
 const fetchCountersSuccess = (counters, tab) => createAction(HOME_FETCH_COUNTERS_SUCCESS, { counters, tab })
 
 export default (tab) => (

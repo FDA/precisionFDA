@@ -9,9 +9,9 @@ import {
   HOME_FILES_FETCH_SUCCESS,
   HOME_FILES_FETCH_FAILURE,
 } from '../../types'
-import { setPageCounters, setInitialPageCounters } from '../../index'
+import { setPageCounters } from '../../index'
 import { homeFilesFiltersSelector } from '../../../../reducers/home/files/selectors'
-import { HOME_FILE_TYPES } from '../../../../constants'
+import { HOME_FILE_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -50,8 +50,7 @@ export default (folderId) => (
           const counters = {
             files: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
-          dispatch(setInitialPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.PRIVATE))
         }
 
         dispatch(fetchFilesSuccess(files, pagination, path))

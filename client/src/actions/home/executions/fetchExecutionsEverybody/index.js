@@ -11,7 +11,7 @@ import {
 } from '../types'
 import { setPageCounters } from '../../index'
 import { homeExecutionsEverybodyFiltersSelector } from '../../../../reducers/home/executions/selectors'
-import { HOME_ENTRIES_TYPES } from '../../../../constants'
+import { HOME_ENTRIES_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -51,7 +51,7 @@ export default () => (
           const counters = {
             jobs: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.EVERYBODY))
         }
 
         dispatch(fetchExecutionsSuccess(executions, pagination))
