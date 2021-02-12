@@ -161,7 +161,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     const folderId = getFolderId(ownProps.location)
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
   }),
-  filesMove: (nodeIds, targetId, link) => dispatch(filesMove(nodeIds, targetId, link)).then(({ statusIsOK }) => {
+  filesMove: (nodeIds, targetId, link) => dispatch(filesMove(nodeIds, targetId, link, 'public')).then(({ statusIsOK }) => {
     const folderId = getFolderId(ownProps.location)
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
   }),

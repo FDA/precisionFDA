@@ -122,9 +122,14 @@ class UserFileSerializer < NodeSerializer
         links[:attach_to] = api_attach_to_notes_path
       end
 
+      # POST: Move file(s) and folder()s) to other folder
+      links[:organize] = move_api_files_path if object.public?
+
       if current_user.can_administer_site?
         # PUT /api/files/feature
         links[:feature] = feature_api_files_path
+        # POST: Move file(s) and folder()s) to other folder
+        links[:organize] = move_api_files_path
       end
     end
     # rubocop:enable Metrics/BlockLength
