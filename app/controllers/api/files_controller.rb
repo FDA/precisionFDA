@@ -418,7 +418,7 @@ module Api
 
     def render_files_list(files:, folders:)
       user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
 
       page_dict = pagination_dict(user_files)
 
