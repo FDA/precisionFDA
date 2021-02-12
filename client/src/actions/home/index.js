@@ -237,7 +237,6 @@ const copyToSpaceWorkflows = (scope, ids) => copyToSpace('/api/workflows/copy', 
 const setCurrentTab = (tab) => createAction(HOME_SET_CURRENT_TAB, tab)
 const setCurrentPage = (page) => createAction(HOME_SET_CURRENT_PAGE, page)
 const setPageCounters = (counters, tab) => createAction(HOME_SET_PAGE_COUNTERS, { counters, tab })
-const setInitialPageCounters = (counters) => createAction(HOME_SET_INITIAL_PAGE_COUNTERS, counters)
 const setInitialPageAdminStatus = (status) => createAction(HOME_SET_INITIAL_PAGE_ADMIN_STATUS, status)
 const setIsLeftMenuOpen = (value) => createAction(HOME_SET_IS_LEFT_MENU_OPEN, value)
 
@@ -272,7 +271,6 @@ export {
   setCurrentTab,
   setCurrentPage,
   setPageCounters,
-  setInitialPageCounters,
   setIsLeftMenuOpen,
   fetchCounters,
   fetchApps,
