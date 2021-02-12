@@ -8,7 +8,7 @@ import {
   CONTEXT_FETCH_START,
   CONTEXT_FETCH_SUCCESS,
 } from './types'
-import { HOME_SET_INITIAL_PAGE_COUNTERS, HOME_SET_INITIAL_PAGE_ADMIN_STATUS } from '../home/types' 
+import { HOME_SET_INITIAL_PAGE_ADMIN_STATUS } from '../home/types' 
 
 
 describe('createSpace()', () => {
@@ -22,7 +22,6 @@ describe('createSpace()', () => {
   it('dispatches correct actions on success', () => {
     const response = {
       meta: {
-        counters: {},
         admin: false,
       },
       user: 'some user',
@@ -36,7 +35,6 @@ describe('createSpace()', () => {
       expect(actions).toEqual([
         { type: CONTEXT_FETCH_START, payload: {}},
         { type: CONTEXT_FETCH_SUCCESS, payload: response },
-        { type: HOME_SET_INITIAL_PAGE_COUNTERS, payload: response.meta.counters },
         { type: HOME_SET_INITIAL_PAGE_ADMIN_STATUS, payload: response.meta.admin },
       ])
     })
