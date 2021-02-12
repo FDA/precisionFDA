@@ -97,18 +97,20 @@ const ActionsDropdown = (props) => {
     {
       text: 'Make public',
       isDisabled: files.length !== 1 || !links.publish,
-      link: `${links.publish}&scope=public`,
+      link: `${links.publish}&public=true`,
       method: 'post',
     },
     {
       text: 'Feature',
-      onClick: () => props.makeFeatured(files[0].links.feature, filesUids, true),
+      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, true):
+      props.makeFeatured(files[0].links.feature, filesUids, true),
       isDisabled: files.length === 0 || !files.every(e => !e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public',
     },
     {
       text: 'Unfeature',
-      onClick: () => props.makeFeatured(files[0].links.feature, filesUids, false),
+      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, false):
+      props.makeFeatured(files[0].links.feature, filesUids, true),
       isDisabled: files.length === 0 || !files.every(e => e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public' && page !== 'featured',
     },
