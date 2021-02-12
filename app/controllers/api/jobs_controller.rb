@@ -93,6 +93,8 @@ module Api
     # or 2. just single job [Job]
     # rubocop:disable Metrics/MethodLength
     def render_jobs_list(jobs)
+      render plain: jobs.size and return if show_count
+
       workflow_with_jobs = []
       workflow_batch = {}
 
@@ -144,15 +146,11 @@ module Api
         end
       end.flatten!
 
-      if show_count
-        render plain: workflow_with_jobs.count
-      else
-        page_array = paginate_array(sort_array_by_fields(workflow_with_jobs))
-        page_meta = pagination_meta(workflow_with_jobs.count)
-        page_meta[:count] = page_meta.dig(:pagination, :total_count)
+      page_array = paginate_array(sort_array_by_fields(workflow_with_jobs))
+      page_meta = pagination_meta(workflow_with_jobs.count)
+      page_meta[:count] = page_meta.dig(:pagination, :total_count)
 
-        render json: { jobs: page_array, meta: page_meta }, adapter: :json
-      end
+      render json: { jobs: page_array, meta: page_meta }, adapter: :json
     end
     # rubocop:enable Metrics/MethodLength
 

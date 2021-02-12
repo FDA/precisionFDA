@@ -85,7 +85,7 @@ module Api
         page_dict = pagination_dict(user_files)
 
         if show_count
-          render plain: page_dict[:total_count]
+          render plain: files.size
         else
           render json: user_files, root: "files", adapter: :json,
                  meta: files_meta.
@@ -116,10 +116,7 @@ module Api
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-
-      render_files_list user_files
+      render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/everybody
@@ -141,10 +138,7 @@ module Api
         eager_load(user: :org).search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-
-      render_files_list user_files
+      render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/spaces
@@ -172,10 +166,7 @@ module Api
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-
-      render_files_list user_files
+      render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/:id
@@ -425,11 +416,14 @@ module Api
 
     private
 
-    def render_files_list(user_files)
+    def render_files_list(files:, folders:)
+      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
+          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+
       page_dict = pagination_dict(user_files)
 
       if show_count
-        render plain: page_dict[:total_count]
+        render plain: files.size
       else
         render json: user_files, root: "files", adapter: :json,
                meta: files_meta.
