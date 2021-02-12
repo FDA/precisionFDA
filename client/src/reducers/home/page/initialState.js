@@ -21,7 +21,6 @@ export default {
     [HOME_TABS.EVERYBODY]: countersState,
     [HOME_TABS.SPACES]: countersState,
   },
-  privateCounters: {},
   adminStatus: false,
   attachingItems: {
     isLoading: false,
