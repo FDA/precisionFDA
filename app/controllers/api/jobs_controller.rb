@@ -93,7 +93,7 @@ module Api
     # or 2. just single job [Job]
     # rubocop:disable Metrics/MethodLength
     def render_jobs_list(jobs)
-      render plain: jobs.size && return if show_count
+      render :plain && (return jobs.size) if show_count
 
       workflow_with_jobs = []
       workflow_batch = {}
