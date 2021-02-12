@@ -54,29 +54,18 @@ const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesMod
 
   const checkedFiles = files.filter(file => file.isChecked)
   const createFolderLink = '/api/files/create_folder'
-  const filderIdLink = folderId ? `?folder_id=${folderId}&public="true"` : '?public="true"'
-  
+
   return (
     <HomeLayout>
       <div className='home-page-layout__header-row'>
         <div className="home-page-layout__actions">
           {isAdmin &&
-            <> 
             <Button type="primary" onClick={showAddFolderModal}>
               <span>
                 <Icon icon="fa-plus"/>&nbsp;
                 Add Folder
               </span>
             </Button>
-            <a href={`/api/create_file${filderIdLink}`}>
-              <Button type="primary">
-                <span>
-                  <Icon icon="fa-plus" />&nbsp;
-                  Add Files
-                </span>
-              </Button>
-            </a>
-          </>
           }
         </div>
         <div className='home-page-layout__actions--right'>
