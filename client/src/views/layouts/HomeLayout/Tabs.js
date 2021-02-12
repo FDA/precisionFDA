@@ -4,8 +4,8 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import { homeCurrentTabSelector } from '../../../reducers/home/page/selectors'
-import { setCurrentTab } from '../../../actions/home'
+import { homeCurrentTabSelector, homePageCountersSelector } from '../../../reducers/home/page/selectors'
+import { setCurrentTab, fetchCounters } from '../../../actions/home'
 import { HOME_TABS } from '../../../constants'
 
 
@@ -39,7 +39,7 @@ const Tab = ({ url, text, tab, currentTab, setCurrentTab, isDisabled, ...rest })
   )
 }
 
-const Tabs = ({ match, currentTab, setCurrentTab }) => {
+const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters }) => {
   const page = match.params.page
 
   useEffect(() => {
@@ -48,6 +48,8 @@ const Tabs = ({ match, currentTab, setCurrentTab }) => {
       const selectedTab = HOME_TABS[tab.toUpperCase()] || null
       setCurrentTab(selectedTab)
     }
+
+    if (currentTab && !counters[currentTab].isFetched) fetchCounters(currentTab)
   }, [currentTab])
 
   return (
@@ -97,14 +99,18 @@ Tabs.propTypes = {
   match: PropTypes.object,
   currentTab: PropTypes.string,
   setCurrentTab: PropTypes.func,
+  counters: PropTypes.object,
+  fetchCounters: PropTypes.func,
 }
 
 const mapStateToProps = (state) => ({
   currentTab: homeCurrentTabSelector(state),
+  counters: homePageCountersSelector(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({
   setCurrentTab: (tab) => dispatch(setCurrentTab(tab)),
+  fetchCounters: (tab) => dispatch(fetchCounters(tab)),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Tabs))
