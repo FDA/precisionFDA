@@ -46,7 +46,7 @@ const mocksSetup = () => {
   sandbox.replace(client, 'jobDescribe', fakes.client.jobDescribeFake)
   sandbox.replace(client, 'jobCreate', fakes.client.jobCreateFake)
   sandbox.replace(client, 'jobTerminate', fakes.client.jobTerminateFake)
-  sandbox.replace(client, 'filesList', fakes.client.filesListFake)
+  sandbox.replace(client, 'filesListPaginated', fakes.client.filesListFake)
   sandbox.replace(client, 'filesDescribe', fakes.client.filesDescFake)
   sandbox.replace(client, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client, 'renameFolder', fakes.client.folderRenameFake)

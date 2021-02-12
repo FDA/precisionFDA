@@ -51,7 +51,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     // todo: handle possible pagination here
 
     // find remote file ids in a given subfolder
-    const remoteFiles = await client.filesList({
+    const remoteFiles = await client.filesListPaginated({
       accessToken: this.ctx.user.accessToken,
       folder: folderPath,
       project: input.projectDxid,

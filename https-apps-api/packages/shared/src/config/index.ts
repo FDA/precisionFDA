@@ -55,6 +55,7 @@ const defaultConfig = {
     apiUrl: 'https://stagingapi.dnanexus.com',
     authApiUrl: 'https://stagingauth.dnanexus.com',
     adminUser: 'precisionfda.admin_dev',
+    findDataObjectsQueryLimit: 100,
   },
   redis: {
     url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
