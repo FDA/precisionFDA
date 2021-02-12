@@ -89,11 +89,6 @@ class Node < ApplicationRecord
     end
   end
 
-  # TODO: remove this after Karolina add https folders / files labeling.
-  def https?
-    parent.is_a?(Job) && parent.https?
-  end
-
   private
 
   def build_ancestors_tree(start_from, scope)

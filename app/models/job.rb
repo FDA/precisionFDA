@@ -90,11 +90,6 @@ class Job < ApplicationRecord
     TYPE_HTTPS => 1,
   }
 
-  enum entity_type: {
-    TYPE_REGULAR => 0,
-    TYPE_HTTPS => 1,
-  }
-
   delegate :input_spec, :output_spec, to: :app
 
   attr_accessor :current_user
