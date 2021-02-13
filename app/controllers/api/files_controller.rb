@@ -69,24 +69,25 @@ module Api
         files = UserFile.
           real_files.
           editable_by(@context).
-          where(parent_folder_id: @parent_folder_id).
           accessible_by_private.
           where.not(parent_type: ["Comparison", nil]).
           includes(:taggings).eager_load(user: :org).
           search_by_tags(filter_tags)
-        files = FileService::FilesFilter.call(files, params[:filters])
-
-        folders = private_folders(@parent_folder_id).includes(:taggings).
-          eager_load(user: :org).search_by_tags(filter_tags)
-        folders = FileService::FilesFilter.call(folders, params[:filters])
-
-        user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-        page_dict = pagination_dict(user_files)
 
         if show_count
           render plain: files.size
         else
+          files = files.where(scoped_parent_folder_id: @parent_folder_id)
+          files = FileService::FilesFilter.call(files, params[:filters])
+
+          folders = private_folders(@parent_folder_id).includes(:taggings).
+            eager_load(user: :org).search_by_tags(filter_tags)
+          folders = FileService::FilesFilter.call(folders, params[:filters])
+
+          user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
+            order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+          page_dict = pagination_dict(user_files)
+
           render json: user_files, root: "files", adapter: :json,
                  meta: files_meta.
                    merge(count(UserFile.private_count(@context.user))).
@@ -130,8 +131,9 @@ module Api
         UserFile.real_files.
           accessible_by_public.
           includes(:taggings).eager_load(user: :org).
-          where(parent_folder_id: @parent_folder_id).
           search_by_tags(filter_tags)
+
+      files = files.where(scoped_parent_folder_id: @parent_folder_id) unless show_count
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = explore_folders(@parent_folder_id).includes(:taggings).
@@ -154,8 +156,9 @@ module Api
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         accessible_by(@context).
         includes(:taggings).eager_load(user: :org).
-        where(scoped_parent_folder_id: @parent_folder_id).
         search_by_tags(filter_tags)
+
+      files = files.where(scoped_parent_folder_id: @parent_folder_id) unless show_count
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = Folder.
@@ -417,14 +420,17 @@ module Api
     private
 
     def render_files_list(files:, folders:)
-      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-
-      page_dict = pagination_dict(user_files)
+      files_size = files.size
 
       if show_count
-        render plain: files.size
+        render plain: files_size
       else
+        user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
+          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+
+        page_dict = pagination_dict(user_files)
+        page_dict[:pagination][:total_count] = files_size
+
         render json: user_files, root: "files", adapter: :json,
                meta: files_meta.
                  merge(count(page_dict[:total_count])).
