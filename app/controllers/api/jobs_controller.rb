@@ -275,7 +275,7 @@ module Api
       service = Jobs::TerminateService.call(unsafe_params.dig(:job, :id), @context)
       raise ApiError, service.message unless service.success?
 
-      render json: { message: { type: service.status, text: service.message } }, adapter: :json
+      render json: { message: { type: service.status, text: service.message } }
     end
 
     # POST /api/jobs/copy
