@@ -28,6 +28,7 @@ class JobSerializer < ApplicationSerializer
     :launched_on,
     :featured,
     :links,
+    :entity_type,
     :logged_dxuser,
   )
 
@@ -187,6 +188,10 @@ class JobSerializer < ApplicationSerializer
       links[:copy] = copy_api_jobs_path
       # POST /api/jobs/terminate
       links[:terminate] = terminate_api_jobs_path unless object.terminal?
+
+      # GET /api/jobs/:id/open_external
+      links[:open_external] = open_external_api_job_path(object) if object.https? && object.running?
+
       # this job's app single run
       if object.in_space?
         unless member_viewer?
@@ -200,6 +205,7 @@ class JobSerializer < ApplicationSerializer
           object.app.app_series.latest_version_app || object.app.app_series.latest_revision_app,
         )
       end
+
       if logged_user.can_administer_site?
         # PUT /api/jobs/feature
         links[:feature] = feature_api_jobs_path
