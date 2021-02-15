@@ -36,7 +36,16 @@ class AssetSerializer < UserFileSerializer
       # POST /api/files/copy  copy_api_files
       links[:copy] = copy_api_files_path
 
-      unless object.license&.approval_required
+      if object.license.present? && object.license_status?(current_user, "active")
+        unless object.license.owned_by_user?(current_user) || object.in_space?
+          # GET download single asset
+          links[:download] = download_api_file_path(object)
+          # POST Authorize URL - to move to api
+          links[:link] = link_file_path(object)
+        end
+      end
+
+      if object.license.blank? && object.owned_by_user?(current_user) # ? AAb
         # GET download single asset
         links[:download] = download_api_file_path(object)
         # POST Authorize URL - to move to api
@@ -71,7 +80,7 @@ class AssetSerializer < UserFileSerializer
           links[:remove] = api_asset_path(object)
           # POST associate item to a license
           links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
-          if object.license
+          if object.license&.owned_by_user?(current_user)
             # GET asset license object if exists
             links[:object_license] = api_license_path(object.license&.id)
             # POST detach license from item
@@ -81,12 +90,9 @@ class AssetSerializer < UserFileSerializer
           links[:update] = api_asset_path(object)
         end
 
-        # POST /api/attach_to: api_attach_to_notes, discussions, answers
-        links[:attach_to] = api_attach_to_notes_path
-
-        # POST /api/files/copy copy_api_files
-        links[:copy] = copy_api_files_path
       end
+      # POST /api/attach_to: api_attach_to_notes, discussions, answers
+      links[:attach_to] = api_attach_to_notes_path
 
       if current_user.can_administer_site?
         # PUT /api/assets/feature #

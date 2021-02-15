@@ -61,17 +61,29 @@ class UserFileSerializer < NodeSerializer
       # POST download_list files
       links[:download_list] = download_list_api_files_path
 
-      unless object.license&.approval_required
-        # GET download single file
-        links[:download] = download_api_file_path(object)
-        # POST Authorize URL - to move to api
-        links[:link] = link_file_path(object)
-        # POST /api/files/copy  copy_api_files
-        links[:copy] = copy_api_files_path
+      # POST: Add file
+      links[:add_file] = api_create_file_path
+      # POST: Add folder
+      links[:add_folder] = create_folder_api_files_path
+
+      # GET: File origin object data { type, uid }
+      links[:origin_object] = origin_object
+
+      # link to license page if exists
+      links[:show_license] = license_path(object.license.id) if object.license
+
+      if object.license.present? && object.license_status?(current_user, "active")
+        unless object.license.owned_by_user?(current_user) || object.in_space?
+          links[:download] = download_api_file_path(object)
+          # POST Authorize URL - to move to api
+          links[:link] = link_file_path(object)
+          # POST /api/files/copy  copy_api_files
+          links[:copy] = copy_api_files_path
+        end
       end
 
       if object.license.present? && !object.license_status?(current_user, "active")
-        if object.license.approval_required
+        if object.license&.approval_required
           unless object.license_status?(current_user, "pending")
             # GET|POST /licenses/:id/request_approval
             links[:request_approval_license] =
@@ -85,16 +97,14 @@ class UserFileSerializer < NodeSerializer
         end
       end
 
-      # POST: Add file
-      links[:add_file] = api_create_file_path
-      # POST: Add folder
-      links[:add_folder] = create_folder_api_files_path
-
-      # GET: File origin object data { type, uid }
-      links[:origin_object] = origin_object
-
-      # link to license page if exists
-      links[:show_license] = license_path(object.license.id) if object.license
+      if object.license.blank? && object.owned_by_user?(current_user)
+        # GET download single file
+        links[:download] = download_api_file_path(object)
+        # POST Authorize URL - to move to api
+        links[:link] = link_file_path(object)
+        # POST /api/files/copy  copy_api_files
+        links[:copy] = copy_api_files_path
+      end
 
       if object.owned_by_user?(current_user)
         unless object.in_space? && member_viewer?
@@ -105,7 +115,7 @@ class UserFileSerializer < NodeSerializer
           links[:remove] = remove_api_files_path
           # POST associate item to a license
           links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
-          if object.license
+          if object.license&.owned_by_user?(current_user)
             # GET UserFile license object if exists
             links[:object_license] = api_license_path(object.license&.id)
             # POST detach license from item
@@ -114,16 +124,12 @@ class UserFileSerializer < NodeSerializer
           # POST: Move file(s) and folder()s) to other folder
           links[:organize] = move_api_files_path
         end
-
-        # PUT edit a single file
-        links[:update] = api_files_path(object)
-
-        # POST /api/attach_to: api_attach_to_notes, discussions, answers
-        links[:attach_to] = api_attach_to_notes_path
       end
 
-      # POST: Move file(s) and folder()s) to other folder
-      links[:organize] = move_api_files_path if object.public?
+      # PUT edit a single file
+      links[:update] = api_files_path(object)
+      # POST /api/attach_to: api_attach_to_notes, discussions, answers
+      links[:attach_to] = api_attach_to_notes_path
 
       if current_user.can_administer_site?
         # PUT /api/files/feature
