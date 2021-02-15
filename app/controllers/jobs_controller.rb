@@ -155,32 +155,7 @@ class JobsController < ApplicationController
     redirect_to job_path(@job)
   end
 
-  # Open HTTPS external job url.
-  def open_external
-    job = Job.accessible_by(@context).find_by(uid: params[:id])
-
-    redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
-    redirect_to(job.https_job_external_url) && return unless stage_or_prod_env?
-
-    api = DIContainer.resolve("api.auth_user")
-    code = api.get_https_job_auth_token(job)
-    authorized_job_uri = URI.join(
-      job.https_job_external_url,
-      "oauth2/access",
-      "?#{URI.encode_www_form(code: code)}",
-    )
-
-    redirect_to authorized_job_uri.to_s
-  end
-
   private
-
-  # rubocop:todo Rails/UnknownEnv
-  def stage_or_prod_env?
-    ENV["DNANEXUS_BACKEND"] == "production" ||
-      !(Rails.env.development? || Rails.env.ui_test? || ENV["DEV_HOST"])
-  end
-  # rubocop:enable Rails/UnknownEnv
 
   def sync_job!
     return if @job.terminal? || @job.https?
