@@ -196,7 +196,11 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
   })
 
   const onHeartClick = () => {
-    if (isAdmin) makeFeatured(file.links.feature, [file.uid], !file.featured)
+    if (isAdmin) {
+      if (file.type === 'Folder'){
+        makeFeatured(file.links.feature, [file.id], !file.featured)
+      } else makeFeatured(file.links.feature, [file.uid], !file.featured)
+    }
   }
 
   let originLink = ''
