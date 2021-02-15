@@ -1,13 +1,19 @@
 # The client for communicating with JupiterLab service.
 class HttpsAppsClient
   # Client's specific error.
-  class Error < Net::HTTPClientException
-    def initialize(response_body)
-      @error_body = parsed_body(response_body)
+  class Error < StandardError
+    DEFAULT_ERROR_MSG = "JupyterLab client error.".freeze
+
+    def initialize(msg)
+      @msg = msg
     end
 
     def message
-      @error_body["message"] || "JupyterLab client error."
+      if @msg.is_a?(Net::HTTPResponse)
+        return parsed_body(@msg.body)["message"].presence || DEFAULT_ERROR_MSG
+      end
+
+      @msg
     end
 
     private
@@ -76,11 +82,13 @@ class HttpsAppsClient
     use_ssl = uri.scheme == "https"
 
     conn_opts = connection_opts.merge(use_ssl: use_ssl)
-    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if !production_env? && use_ssl
+    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if !Utils.production_env? && use_ssl
 
     Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
       handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
     end
+  rescue Errno::ECONNREFUSED => e
+    raise Error, "Can't connect to JupyterLab service"
   end
 
   # Returns connection options.
@@ -100,13 +108,7 @@ class HttpsAppsClient
   # Returns HTTP headers to be sent during every request.
   # @return [Hash] Headers to be sent.
   def headers
-    @headers ||= {
-      "Content-Type" => "application/json",
-    }
-  end
-
-  def production_env?
-    ENV["DNANEXUS_BACKEND"] == "production"
+    @headers ||= { "Content-Type" => "application/json" }
   end
 
   # Builds hash from response.
@@ -115,10 +117,8 @@ class HttpsAppsClient
   def handle_response(response)
     response.value
     JSON.parse(response.body)
-  rescue Errno::ECONNREFUSED => e
-    raise Error, e.message
   rescue Net::HTTPClientException
-    raise Error, response.body
+    raise Error, response
   rescue StandardError
     raise Error, "Something went wrong"
   end
