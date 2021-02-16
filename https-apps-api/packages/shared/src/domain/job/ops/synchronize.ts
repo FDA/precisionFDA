@@ -42,6 +42,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     // todo: check users ownership -> we should have a helper for it
     this.job = job
     this.user = user
+    this.ctx.log.info({ jobId: job.id }, 'processing job')
 
     if (!shouldSyncStatus(job)) {
       this.ctx.log.info({ input, job }, 'Job is already finished')
