@@ -305,6 +305,10 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
             name={filter}
             options={options}
             autoComplete='off'
+            value={fieldsSearch.get(filter) || ''}
+            onChange={(e) => {
+              onChangeFieldsValue(fieldsSearch.set(filter, e.target.value))
+            }}
           />
         </td>
       )

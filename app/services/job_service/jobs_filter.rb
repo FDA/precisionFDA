@@ -14,6 +14,7 @@ module JobService
       end,
       "state" => ->(value) { condition(JOB_TABLE[:state], value) },
       "apptitle" => ->(value) { condition(APP_TABLE[:title], value) },
+      "featured" => ->(value) { JOB_TABLE[:featured].eq(to_bool(value)) },
       "username" => lambda do |value|
         condition(USER_TABLE[:first_name], value).or(condition(USER_TABLE[:last_name], value))
       end,
