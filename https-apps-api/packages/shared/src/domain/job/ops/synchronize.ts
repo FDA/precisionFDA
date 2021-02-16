@@ -4,7 +4,7 @@ import { CheckStatusJob } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
 import { isStateTerminal, shouldSyncStatus } from '../job.helper'
-import * as client from '../../../platform-client'
+import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { User, Tagging, UserFile, Tag, Folder } from '../..'
@@ -21,6 +21,7 @@ import {
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
   protected user: User
   protected job: Job
+  protected client: PlatformClient
 
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
@@ -42,6 +43,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     // todo: check users ownership -> we should have a helper for it
     this.job = job
     this.user = user
+    this.client = new PlatformClient(this.ctx.log)
     this.ctx.log.info({ jobId: job.id }, 'processing job')
 
     if (!shouldSyncStatus(job)) {
@@ -50,9 +52,9 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       return
     }
     // we want to synchronize the job status if it is not yet terminated
-    let platformJobData: client.JobDescribeResponse
+    let platformJobData: JobDescribeResponse
     try {
-      platformJobData = await client.jobDescribe({
+      platformJobData = await this.client.jobDescribe({
         jobId: input.dxid,
         accessToken: this.ctx.user.accessToken,
       })
@@ -85,7 +87,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       em.persist(eventEntity)
 
       // FOLDERS AND FILES SYNC
-      const projectDesc = await client.foldersList({
+      const projectDesc = await this.client.foldersList({
         projectId: job.project,
         accessToken: this.ctx.user.accessToken,
       })

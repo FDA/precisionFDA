@@ -10,6 +10,8 @@ import { User } from '../../user'
 export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
   async run(input: DescribeJobInput): Promise<Job> {
     const em = this.ctx.em
+    const platformClient = new client.PlatformClient(this.ctx.log)
+
     const jobRepo = em.getRepository(Job)
     const job = await jobRepo.findOne({
       dxid: input.dxid,
@@ -28,7 +30,7 @@ export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
       return job
     }
 
-    const platformJobData = await client.jobDescribe({
+    const platformJobData = await platformClient.jobDescribe({
       jobId: input.dxid,
       accessToken: this.ctx.user.accessToken,
     })

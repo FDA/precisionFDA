@@ -7,6 +7,8 @@ import { IdInput } from '../../../types'
 export class FolderDeleteOperation extends BaseOperation<IdInput, number> {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
+    const platformClient = new client.PlatformClient(this.ctx.log)
+
     await em.begin()
     try {
       const repo = em.getRepository(Folder)
@@ -33,7 +35,7 @@ export class FolderDeleteOperation extends BaseOperation<IdInput, number> {
           'Too many nodes to remove, removeFolder API call may not work',
         )
       }
-      await client.removeFolderRec({
+      await platformClient.removeFolderRec({
         projectId: existingFolder.project,
         folderPath,
         accessToken: this.ctx.user.accessToken,
