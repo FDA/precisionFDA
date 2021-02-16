@@ -51,7 +51,6 @@ class Folder < Node # :nodoc:
   # rubocop:enable Style/FormatStringToken
 
   scope :not_removing, -> { where.not(state: STATE_REMOVING).or(where(state: nil)) }
-  scope :https, -> { where.not(project: nil).where(parent_type: Job.name) }
 
   class << self
     # Returns folder count of user 'private' scope.

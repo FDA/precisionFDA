@@ -45,7 +45,7 @@ class FolderService
     return rename_https_folder(folder, new_name) if folder.https?
 
     folder.name = new_name
-    folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
+    folder.save ? Rats.success(folder) : Rats.failure(message: folder.errors.messages.first)
   end
 
   def move(nodes, target_folder = nil, scope = Scopes::SCOPE_PRIVATE)

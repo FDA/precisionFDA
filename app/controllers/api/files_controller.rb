@@ -403,17 +403,18 @@ module Api
     # @param scope [String] - 'public', 'private' or 'space-XX'.
     def remove
       service = FolderService.new(@context)
-      files = Node.editable_by(@context).where(id: unsafe_params[:ids])
-      res = service.remove(files)
+      nodes = Node.editable_by(@context).where(id: unsafe_params[:ids])
+      result = service.remove(nodes)
 
-      if res.success?
+      if result.success?
         type = :success
         text = "Node(s) successfully removed."
       else
         type = :error
-        text = "Error when Node(s) removing: '#{res.value.values}'."
+        text = "Error when Node(s) removing: #{result.value[:message]}."
       end
-      path = unsafe_params[:scope] == "public" ? everybody_api_files_path : api_files_path
+
+      path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
 
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
