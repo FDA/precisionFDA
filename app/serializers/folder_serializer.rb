@@ -18,11 +18,13 @@ class FolderSerializer < NodeSerializer
     {}.tap do |links|
       unless object.in_space? && member_viewer?
         # POST /api/folders/rename_folder
-        links[:rename_folder] = rename_folder_api_folders_path(object)
-        # POST: Move file(s) and folder()s) to other folder
-        links[:organize] = move_api_files_path
-        # POST: /api/files/remove - Delete file(s) & folder(s), being selected
-        links[:remove] = remove_api_files_path
+        if object.owned_by_user?(current_user)
+          links[:rename_folder] = rename_folder_api_folders_path(object)
+          # POST: Move file(s) and folder()s) to other folder
+          links[:organize] = move_api_files_path
+          # POST: /api/files/remove - Delete file(s) & folder(s), being selected
+          links[:remove] = remove_api_files_path
+        end
       end
       links[:publish] = publish_folders_api_folders_path if current_user.can_administer_site?
       links[:user] = user_path(object.user.dxuser)
@@ -33,6 +35,8 @@ class FolderSerializer < NodeSerializer
       if current_user.can_administer_site?
         # PUT /api/files/feature
         links[:feature] = feature_api_files_path
+        # POST: Move file(s) and folder()s) to other folder
+        links[:organize] = move_api_files_path
       end
     end
   end
