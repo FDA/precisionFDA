@@ -177,13 +177,9 @@ class FolderService
   end
 
   def rename_https_folder(folder, new_name)
-    old_name = folder.name
-    folder.update!(name: new_name)
-
     begin
       https_apps_client.folder_rename(folder.id, new_name)
     rescue HttpsAppsClient::Error => e
-      folder.update!(name: old_name)
       return Rats.failure(message: e.message)
     end
 
