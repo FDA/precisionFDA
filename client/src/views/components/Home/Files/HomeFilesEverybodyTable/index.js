@@ -259,7 +259,7 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
         <Input
           style={{ maxWidth: 100 }}
           name={filter}
-          placeholder='--'
+          placeholder='Min (KB)'
           value={fieldsSearch.get(filter) || ''}
           autoComplete='off'
           onChange={(e) => {
@@ -269,7 +269,7 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
         <Input
           style={{ maxWidth: 100 }}
           name={filter + 2}
-          placeholder='--'
+          placeholder='Max (KB)'
           value={fieldsSearchTwo.get(filter + 2) || ''}
           autoComplete='off'
           onChange={(e) => {
