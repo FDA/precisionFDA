@@ -21,7 +21,6 @@
     "core-js": "^3.8.2",
     "history": "^4.10.1",
     "http-status-codes": "^1.4.0",
-    "lodash": "^4.17.20",
     "prop-types": "^15.7.2",
     "query-string": "^6.13.8",
     "ramda": "^0.27.0",
