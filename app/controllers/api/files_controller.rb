@@ -429,7 +429,7 @@ module Api
           order(order_from_params).page(page_from_params).per(PAGE_SIZE)
 
         page_dict = pagination_dict(user_files)
-        page_dict[:pagination][:total_count] = files_size
+        page_dict[:total_count] = files_size
 
         render json: user_files, root: "files", adapter: :json,
                meta: files_meta.
