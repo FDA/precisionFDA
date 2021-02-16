@@ -25,6 +25,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   async run(input: RunAppInput): Promise<Job> {
     this.input = input
     const em = this.ctx.em
+    const platformClient = new client.PlatformClient(this.ctx.log)
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
     // whitelist https public apps
@@ -63,7 +64,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     }
 
     const repo = this.ctx.em.getRepository(Job)
-    const newJobClientRes = await client.jobCreate(runDxInput)
+    const newJobClientRes = await platformClient.jobCreate(runDxInput)
     // add all the data to the database
     await em.begin()
     let job: Job

@@ -10,6 +10,8 @@ import { ENTITY_TYPE } from '../../app/app.enum'
 export class RequestTerminateJobOperation extends BaseOperation<DxIdInput, Job> {
   async run(input: DxIdInput): Promise<Job> {
     const em = this.ctx.em
+    const platformClient = new client.PlatformClient(this.ctx.log)
+
     const jobRepo = em.getRepository(Job)
     // scope is private/scope-x so this should work
     // no further checks, client-facing API should resolve whether given user can terminate given job (scopes)
@@ -29,7 +31,7 @@ export class RequestTerminateJobOperation extends BaseOperation<DxIdInput, Job> 
       return job
     }
     // call the platform API
-    const apiResult = await client.jobTerminate({
+    const apiResult = await platformClient.jobTerminate({
       jobId: job.dxid,
       accessToken: this.ctx.user.accessToken,
     })

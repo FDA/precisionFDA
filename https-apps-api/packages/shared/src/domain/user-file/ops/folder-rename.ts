@@ -7,6 +7,8 @@ import { getFolderPath } from '../user-file.helper'
 export class FolderRenameOperation extends BaseOperation<RenameFolderInput, Folder> {
   async run(input: RenameFolderInput): Promise<Folder> {
     const em = this.ctx.em
+    const platformClient = new client.PlatformClient(this.ctx.log)
+
     const folderRepo = em.getRepository(Folder)
     const existingFolder = await folderRepo.findOneWithProject(input.id)
     if (!existingFolder) {
@@ -23,7 +25,7 @@ export class FolderRenameOperation extends BaseOperation<RenameFolderInput, Fold
     })
     const folderPath = getFolderPath(folders, existingFolder)
     // client api call
-    await client.renameFolder({
+    await platformClient.renameFolder({
       accessToken: this.ctx.user.accessToken,
       folderPath,
       newName: input.newName,
