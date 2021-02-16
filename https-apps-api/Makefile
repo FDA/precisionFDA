@@ -39,6 +39,9 @@ test-worker-task:
 watch:
 	$(bin)nodemon --watch ./packages/api/src --ext ts --exec make run-dev
 
+watch-worker:
+	$(bin)nodemon --watch ./packages/worker/src --ext ts --exec make run-worker-dev
+
 # maps to npm script build commands in every package
 build:
 	$(bin)lerna run build
