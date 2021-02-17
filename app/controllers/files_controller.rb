@@ -248,7 +248,7 @@ class FilesController < ApplicationController
       flash[:success] = "File \"#{@file.name}\" has been successfully deleted"
       redirect_path = files_path
     else
-      flash[:error] = res.value.values.first
+      flash[:error] = res.value[:message]
       redirect_path = file_path(@file)
     end
 
@@ -393,7 +393,7 @@ class FilesController < ApplicationController
     if res.success?
       flash[:success] = "Node(s) successfully removed"
     else
-      flash[:error] = res.value.values
+      flash[:error] = res.value[:message]
     end
 
     redirect_path = params[:scope] == Scopes::SCOPE_PUBLIC ? explore_files_path : files_path
