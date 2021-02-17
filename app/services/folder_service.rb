@@ -171,19 +171,17 @@ class FolderService
   def remove_https_folder(folder)
     https_apps_client.folder_remove(folder.id)
 
-    Rats.success(folder.reload)
+    Rats.success(folder)
   rescue HttpsAppsClient::Error => e
     return Rats.failure(message: e.message)
   end
 
   def rename_https_folder(folder, new_name)
-    begin
-      https_apps_client.folder_rename(folder.id, new_name)
-    rescue HttpsAppsClient::Error => e
-      return Rats.failure(message: e.message)
-    end
+    https_apps_client.folder_rename(folder.id, new_name)
 
     Rats.success(folder)
+  rescue HttpsAppsClient::Error => e
+    return Rats.failure(message: e.message)
   end
 
   def remove_file(file)
