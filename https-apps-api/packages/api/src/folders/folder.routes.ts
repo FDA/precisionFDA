@@ -22,10 +22,11 @@ router.patch(
 )
 
 router.delete('/:id', makeValidationMdw({ params: utils.schemas.idInputSchema }), async ctx => {
-  await new userFile.FolderDeleteOperation(pickOpsCtx(ctx)).execute({
+  const removedFoldersCnt = await new userFile.FolderDeleteOperation(pickOpsCtx(ctx)).execute({
     id: ctx.params.id,
   })
-  ctx.status = 204
+  ctx.status = 200
+  ctx.body = removedFoldersCnt
 })
 
 export { router }
