@@ -35,8 +35,12 @@ module Api
           page_meta = { pagination: pagination_dict(workflows) }
         end
 
-        render json: workflows, root: "workflows",
-               meta: workflows_meta.merge(page_meta), adapter: :json
+        if show_count
+          render plain: page_meta.dig(:pagination, :total_count) || 0
+        else
+          render json: workflows, root: "workflows",
+                 meta: workflows_meta.merge(page_meta), adapter: :json
+        end
       else
         filters = params[:filters]
         workflows = WorkflowSeries.accessible_by(@context).
@@ -51,11 +55,7 @@ module Api
           end.compact
         workflows.each { |workflow| workflow.current_user = @context.user }
 
-        workflows = sort_array_by_fields(workflows)
-        page_meta = pagination_meta(workflows.count)
-        workflows = paginate_array(workflows)
-
-        render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+        render_workflows_list workflows
       end
     end
     # rubocop:enable Metrics/MethodLength
@@ -74,11 +74,7 @@ module Api
         end.compact
       workflows.each { |workflow| workflow.current_user = @context.user }
 
-      workflows = sort_array_by_fields(workflows)
-      page_meta = pagination_meta(workflows.count)
-      workflows = paginate_array(workflows)
-
-      render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      render_workflows_list workflows
     end
 
     # GET /api/workflows/everybody
@@ -98,11 +94,7 @@ module Api
         end.compact
       workflows.each { |workflow| workflow.current_user = @context.user }
 
-      workflows = sort_array_by_fields(workflows)
-      page_meta = pagination_meta(workflows.count)
-      workflows = paginate_array(workflows)
-
-      render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      render_workflows_list workflows
     end
 
     # GET /api/workflows/spaces
@@ -127,11 +119,7 @@ module Api
         end.compact
       workflows.each { |workflow| workflow.current_user = @context.user }
 
-      workflows = sort_array_by_fields(workflows)
-      page_meta = pagination_meta(workflows.count)
-      workflows = paginate_array(workflows)
-
-      render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      render_workflows_list workflows
     end
 
     # GET /api/workflows/:id (show)
@@ -225,6 +213,18 @@ module Api
     end
 
     private
+
+    def render_workflows_list(workflows)
+      if show_count
+        render plain: workflows.count
+      else
+        workflows = sort_array_by_fields(workflows)
+        page_meta = pagination_meta(workflows.count)
+        workflows = paginate_array(workflows)
+
+        render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      end
+    end
 
     def presenter
       @presenter ||= begin

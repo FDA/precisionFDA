@@ -105,10 +105,15 @@ module Api
     # @return render assets as json with meta
     def render_assets_list(assets)
       page_dict = pagination_dict(assets)
-      render json: assets, root: "assets", adapter: :json,
-             meta: assets_meta.
-               merge(count(page_dict[:total_count])).
-               merge({ pagination: page_dict })
+
+      if show_count
+        render plain: page_dict[:total_count]
+      else
+        render json: assets, root: "assets", adapter: :json,
+               meta: assets_meta.
+                 merge(count(page_dict[:total_count])).
+                 merge({ pagination: page_dict })
+      end
     end
 
     # GET /api/asset/:id  api_asset_path
