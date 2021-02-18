@@ -11,6 +11,7 @@ module FileService
       "state" => ->(value) { condition(NODE_TABLE[:state], value) },
       "size" => ->(value) { NODE_TABLE[:file_size].gteq(value.to_i * 1024) }, # in Kb
       "size2" => ->(value) { NODE_TABLE[:file_size].lteq(value.to_i * 1024) }, # in Kb
+      "featured" => ->(value) { NODE_TABLE[:featured].eq(to_bool(value)) },
       "username" => lambda do |value|
         condition(USER_TABLE[:first_name], value).or(condition(USER_TABLE[:last_name], value))
       end,

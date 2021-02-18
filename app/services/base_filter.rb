@@ -59,4 +59,8 @@ module BaseFilter
   def sanitize(query)
     "%" + ActiveRecord::Base.sanitize_sql_like(query) + "%"
   end
+
+  def to_bool(value)
+    ActiveModel::Type::Boolean.new.cast(value)
+  end
 end

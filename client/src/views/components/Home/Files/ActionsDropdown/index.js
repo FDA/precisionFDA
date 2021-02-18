@@ -75,17 +75,17 @@ const ActionsDropdown = (props) => {
   const actions = [
     {
       text: 'Track',
-      isDisabled: files.length !== 1 || !links.publish,
+      isDisabled: files.length !== 1 || !links.track,
       link: links.track,
     },
     {
       text: 'Download',
-      isDisabled: files.length === 0,
+      isDisabled: files.length === 0 || files.some(e => e.type === 'UserFile' && !e.links.download),
       onClick: () => setIsExportModalOpen(true),
     },
     {
       text: 'Authorize URL',
-      isDisabled: files.length !== 1 || isFolder,
+      isDisabled: files.length !== 1 || isFolder || !links.link,
       link: links.link,
       method: 'post',
     },
@@ -97,18 +97,20 @@ const ActionsDropdown = (props) => {
     {
       text: 'Make public',
       isDisabled: files.length !== 1 || !links.publish,
-      link: `${links.publish}&scope=public`,
+      link: `${links.publish}&public=true`,
       method: 'post',
     },
     {
       text: 'Feature',
-      onClick: () => props.makeFeatured(files[0].links.feature, filesUids, true),
+      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, true):
+      props.makeFeatured(files[0].links.feature, filesUids, true),
       isDisabled: files.length === 0 || !files.every(e => !e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public',
     },
     {
       text: 'Unfeature',
-      onClick: () => props.makeFeatured(files[0].links.feature, filesUids, false),
+      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, false):
+      props.makeFeatured(files[0].links.feature, filesUids, true),
       isDisabled: files.length === 0 || !files.every(e => e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public' && page !== 'featured',
     },
@@ -124,12 +126,12 @@ const ActionsDropdown = (props) => {
     },
     {
       text: 'Copy to space',
-      isDisabled: files.length === 0,
+      isDisabled: files.length === 0 || files.some(e => !e.links.copy),
       onClick: () => props.showCopyToSpaceModal(),
     },
     {
       text: 'Attach to...',
-      isDisabled: !links.publish || files.length === 0 || !props.filesAttachTo || !files.every(e => e.links.publish),
+      isDisabled: files.length === 0 || !props.filesAttachTo || files.some(e => !e.links.attach_to),
       onClick: () => props.showFilesAttachToModal(),
     },
     {
