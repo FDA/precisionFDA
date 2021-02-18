@@ -110,7 +110,7 @@ const ActionsDropdown = (props) => {
     {
       text: 'Unfeature',
       onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, false):
-      props.makeFeatured(files[0].links.feature, filesUids, true),
+      props.makeFeatured(files[0].links.feature, filesUids, false),
       isDisabled: files.length === 0 || !files.every(e => e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public' && page !== 'featured',
     },
