@@ -1,9 +1,8 @@
 import reducer from './index'
-import { 
+import {
   HOME_SET_CURRENT_TAB,
   HOME_SET_CURRENT_PAGE,
   HOME_SET_PAGE_COUNTERS,
-  HOME_SET_INITIAL_PAGE_COUNTERS,
   HOME_FETCH_ATTACHING_ITEMS_SUCCESS,
   HOME_FETCH_ATTACHING_ITEMS_START,
   HOME_FETCH_ATTACHING_ITEMS_FAILURE,
@@ -24,34 +23,28 @@ describe('set current home tab', () => {
 
 describe('set current home page', () => {
   it('HOME_SET_CURRENT_PAGE', () => {
-    const initialState = { privateCounters: {}}
+    const initialState = {}
     const action = { type: HOME_SET_CURRENT_PAGE, payload: 'page' }
 
     expect(reducer(initialState, action)).toEqual({
       currentPage: 'page',
-      counters: {},
-      privateCounters: {},
     })
   })
 })
 
 describe('set page counters', () => {
   it('HOME_SET_PAGE_COUNTERS', () => {
-    const initialState = {}
-    const action = { type: HOME_SET_PAGE_COUNTERS, payload: {}}
+    const initialState = {
+      counters: {
+        tab: {},
+      },
+    }
+    const action = { type: HOME_SET_PAGE_COUNTERS, payload: { counters: {}, tab: 'tab' }}
 
     expect(reducer(initialState, action)).toEqual({
-      counters: {},
-    })
-  })
-
-  it('HOME_SET_INITIAL_PAGE_COUNTERS', () => {
-    const initialState = {}
-    const action = { type: HOME_SET_INITIAL_PAGE_COUNTERS, payload: {}}
-
-    expect(reducer(initialState, action)).toEqual({
-      counters: {},
-      privateCounters: {},
+      counters: {
+        tab: {},
+      },
     })
   })
 })

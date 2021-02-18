@@ -9,9 +9,9 @@ import {
   HOME_APPS_FETCH_SUCCESS,
   HOME_APPS_FETCH_FAILURE,
 } from '../../types'
-import { setInitialPageCounters, setPageCounters } from '../../index'
+import { setPageCounters } from '../../index'
 import { homeAppsFiltersSelector } from '../../../../reducers/home/apps/selectors'
-import { HOME_APP_TYPES } from '../../../../constants'
+import { HOME_APP_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -51,8 +51,7 @@ export default () => (
           const counters = {
             apps: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
-          dispatch(setInitialPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.PRIVATE))
         }
 
         dispatch(fetchAppsSuccess(apps, pagination))

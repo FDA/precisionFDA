@@ -8,7 +8,6 @@ import {
   HOME_FETCH_ACCESSIBLE_SPACES_FAILURE,
   HOME_SELECT_ACCESSIBLE_SPACE,
   HOME_SET_PAGE_COUNTERS,
-  HOME_SET_INITIAL_PAGE_COUNTERS,
   HOME_SET_INITIAL_PAGE_ADMIN_STATUS,
   HOME_FETCH_ATTACHING_ITEMS_SUCCESS,
   HOME_FETCH_ATTACHING_ITEMS_START,
@@ -18,6 +17,7 @@ import {
   HOME_FETCH_ACCESSIBLE_LICENSE_START,
   HOME_FETCH_ACCESSIBLE_LICENSE_FAILURE,
   HOME_SELECT_ACCESSIBLE_LICENSE,
+  HOME_FETCH_COUNTERS_SUCCESS,
 } from '../../../actions/home/types'
 
 
@@ -30,9 +30,6 @@ export default createReducer(initialState, {
   [HOME_SET_CURRENT_PAGE]: (state, page) => ({
     ...state,
     currentPage: page,
-    counters: {
-      ...state.privateCounters,
-    },
   }),
 
   [HOME_FETCH_ACCESSIBLE_SPACES_START]: (state) => ({
@@ -60,7 +57,7 @@ export default createReducer(initialState, {
       }
       return space
     })
-    
+
     return {
       ...state,
       accessibleSpaces: spaces,
@@ -92,30 +89,21 @@ export default createReducer(initialState, {
       }
       return license
     })
-    
+
     return {
       ...state,
       accessibleLicense: license,
     }
   },
 
-  [HOME_SET_PAGE_COUNTERS]: (state, counters) => ({
+  [HOME_SET_PAGE_COUNTERS]: (state, { counters, tab }) => ({
     ...state,
     counters: {
       ...state.counters,
-      ...counters,
-    },
-  }),
-
-  [HOME_SET_INITIAL_PAGE_COUNTERS]: (state, counters) => ({
-    ...state,
-    counters: {
-      ...state.counters,
-      ...counters,
-    },
-    privateCounters: {
-      ...state.privateCounters,
-      ...counters,
+      [tab]: {
+        ...state.counters[tab],
+        ...counters,
+      },
     },
   }),
 
@@ -152,5 +140,16 @@ export default createReducer(initialState, {
   [HOME_SET_IS_LEFT_MENU_OPEN]: (state, value) => ({
     ...state,
     isLeftMenuOpen: value,
+  }),
+
+  [HOME_FETCH_COUNTERS_SUCCESS]: (state, { counters, tab }) => ({
+    ...state,
+    counters: {
+      ...state.counters,
+      [tab]: {
+        ...counters,
+        isFetched: true,
+      },
+    },
   }),
 })

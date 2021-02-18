@@ -51,12 +51,12 @@ import makeFeatured from './makeFeatured'
 import attachLicense from './attachLicense'
 import editTags from './editTags'
 import licenseAction from './licenseAction'
+import fetchCounters from './fetchCounters'
 import {
   HOME_SET_CURRENT_TAB,
   HOME_SET_CURRENT_PAGE,
   HOME_SELECT_ACCESSIBLE_SPACE,
   HOME_SET_PAGE_COUNTERS,
-  HOME_SET_INITIAL_PAGE_COUNTERS,
   HOME_SET_INITIAL_PAGE_ADMIN_STATUS,
   HOME_SET_IS_LEFT_MENU_OPEN,
   HOME_SELECT_ACCESSIBLE_LICENSE,
@@ -235,8 +235,7 @@ import {
 const copyToSpaceWorkflows = (scope, ids) => copyToSpace('/api/workflows/copy', OBJECT_TYPES.WORKFLOW, scope, ids)
 const setCurrentTab = (tab) => createAction(HOME_SET_CURRENT_TAB, tab)
 const setCurrentPage = (page) => createAction(HOME_SET_CURRENT_PAGE, page)
-const setPageCounters = (counters) => createAction(HOME_SET_PAGE_COUNTERS, counters)
-const setInitialPageCounters = (counters) => createAction(HOME_SET_INITIAL_PAGE_COUNTERS, counters)
+const setPageCounters = (counters, tab) => createAction(HOME_SET_PAGE_COUNTERS, { counters, tab })
 const setInitialPageAdminStatus = (status) => createAction(HOME_SET_INITIAL_PAGE_ADMIN_STATUS, status)
 const setIsLeftMenuOpen = (value) => createAction(HOME_SET_IS_LEFT_MENU_OPEN, value)
 
@@ -271,8 +270,8 @@ export {
   setCurrentTab,
   setCurrentPage,
   setPageCounters,
-  setInitialPageCounters,
   setIsLeftMenuOpen,
+  fetchCounters,
   fetchApps,
   fetchAppsFeatured,
   fetchAppsEverybody,
