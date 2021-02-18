@@ -71,3 +71,6 @@ app/assets/packs
 
 # Foreman's Procfile
 /Procfile
+
+cert.pem
+key.pem
