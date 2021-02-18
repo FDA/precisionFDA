@@ -124,11 +124,6 @@ const ActionsDropdown = (props) => {
       onClick: () => props.showAppsAttachToModal(),
     },
     {
-      text: 'Attach License',
-      isDisabled: apps.length === 0,
-      hide: true,
-    },
-    {
       text: 'Comments',
       link: props.comments,
       hide: !props.comments,

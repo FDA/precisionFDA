@@ -196,7 +196,11 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
   })
 
   const onHeartClick = () => {
-    if (isAdmin) makeFeatured(file.links.feature, [file.uid], !file.featured)
+    if (isAdmin) {
+      if (file.type === 'Folder'){
+        makeFeatured(file.links.feature, [file.id], !file.featured)
+      } else makeFeatured(file.links.feature, [file.uid], !file.featured)
+    }
   }
 
   let originLink = ''
@@ -301,6 +305,10 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
             name={filter}
             options={options}
             autoComplete='off'
+            value={fieldsSearch.get(filter) || ''}
+            onChange={(e) => {
+              onChangeFieldsValue(fieldsSearch.set(filter, e.target.value))
+            }}
           />
         </td>
       )

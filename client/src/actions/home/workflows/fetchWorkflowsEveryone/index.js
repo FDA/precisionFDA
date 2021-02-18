@@ -10,7 +10,7 @@ import {
   HOME_WORKFLOWS_FETCH_FAILURE,
 } from '../../workflows/types'
 import { setPageCounters } from '../../index'
-import { homeWorkflowsFiltersSelector } from '../../../../reducers/home/workflows/selectors'
+import { homeWorkflowsEveryoneFiltersSelector } from '../../../../reducers/home/workflows/selectors'
 import { HOME_WORKFLOW_TYPES } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
@@ -23,7 +23,7 @@ const fetchWorkflowsFailure = () => createAction(HOME_WORKFLOWS_FETCH_FAILURE, H
 
 export default () => (
   async (dispatch, getState) => {
-    const filters = homeWorkflowsFiltersSelector(getState())
+    const filters = homeWorkflowsEveryoneFiltersSelector(getState())
     const { sortType, sortDirection, currentPage, fields } = filters
 
     const params = { page: currentPage }
