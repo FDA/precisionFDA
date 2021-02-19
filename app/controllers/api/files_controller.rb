@@ -77,7 +77,7 @@ module Api
         if show_count
           render plain: files.size
         else
-          files = files.where(scoped_parent_folder_id: @parent_folder_id)
+          files = files.where(parent_folder_id: @parent_folder_id)
           files = FileService::FilesFilter.call(files, params[:filters])
 
           folders = private_folders(@parent_folder_id).includes(:taggings).
@@ -133,7 +133,7 @@ module Api
           includes(:taggings).eager_load(user: :org).
           search_by_tags(filter_tags)
 
-      files = files.where(scoped_parent_folder_id: @parent_folder_id) unless show_count
+      files = files.where(parent_folder_id: @parent_folder_id) unless show_count
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = explore_folders(@parent_folder_id).includes(:taggings).
