@@ -37,19 +37,19 @@ import HomeLabel from '../../../../components/Home/HomeLabel'
 
 
 const HomeFilesSinglePage = (props) => {
-  const { fileDetails, currentTab, uid, fetchFileDetails, deleteFiles, copyToSpace, filesAttachTo, attachLicense, renameFile } = props
+  const { fileDetails, currentTab, uid, fetchFileDetails, deleteFiles, copyToSpace, filesAttachTo, attachLicense, renameFile, setCurrentTab } = props
   const { editTagsModal, showFileEditTagsModal, hideFileEditTagsModal, editFileTags, filesMove, filesLicenseAction, filesAcceptLicenseAction } = props
 
   useLayoutEffect(() => {
-    if (uid) fetchFileDetails(uid)
+    if (uid) fetchFileDetails(uid).then(({ statusIsOK, payload }) => {
+      if (statusIsOK) {
+        const selectedTab = getSelectedTab(payload.files.location, payload.files.links.space)
+        setCurrentTab(selectedTab)
+      }
+    })
   }, [uid])
 
   const { file, meta, isFetching } = fileDetails
-
-  if (!currentTab && file && file.links) {
-    const selectedTab = getSelectedTab(file.location, file.links.space)
-    setCurrentTab(selectedTab)
-  }
 
   if (isFetching) {
     return (
@@ -134,6 +134,8 @@ const HomeFilesSinglePage = (props) => {
   ]
 
   const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
+  const scope = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
+  const spaceId = file.spaceId?.split('-')[1]
 
   return (
     <HomeLayout hideTabs>
@@ -172,6 +174,8 @@ const HomeFilesSinglePage = (props) => {
                   filesMove={filesMove}
                   filesLicenseAction={filesLicenseAction}
                   filesAcceptLicenseAction={filesAcceptLicenseAction}
+                  scope={scope}
+                  spaceId={spaceId}
                 />
               </div>
             </div>
@@ -220,6 +224,7 @@ HomeFilesSinglePage.propTypes = {
   filesMove: PropTypes.func,
   filesLicenseAction: PropTypes.func,
   filesAcceptLicenseAction: PropTypes.func,
+  setCurrentTab: PropTypes.func,
 }
 
 HomeFilesSinglePage.defaultProps = {
@@ -263,6 +268,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   filesAcceptLicenseAction: (link) => dispatch(filesAcceptLicenseAction(link)).then(({ statusIsOK }) => {
     if (statusIsOK) dispatch(fetchFileDetails(ownProps.uid))
   }),
+  setCurrentTab: (tab) => dispatch(setCurrentTab(tab)),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(HomeFilesSinglePage))

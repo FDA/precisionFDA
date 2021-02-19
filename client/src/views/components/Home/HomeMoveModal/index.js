@@ -11,7 +11,7 @@ import { fetchSubfolders } from '../../../../actions/home'
 import FileTree from '../../Space/Files/FileTree'
 
 
-const HomeMoveModal = ({ hideAction, isOpen, isLoading, modal = {}, fetchSubfolders, moveAction, scope }) => {
+const HomeMoveModal = ({ hideAction, isOpen, isLoading, modal = {}, fetchSubfolders, moveAction, scope, spaceId }) => {
   const folders = modal.nodes
   const [targetId, setTargetId] = useState(null)
 
@@ -35,7 +35,7 @@ const HomeMoveModal = ({ hideAction, isOpen, isLoading, modal = {}, fetchSubfold
       isLoading={isLoading}
       hideModalHandler={hideAction}>
       <FileTree
-        loadData={(node) => fetchSubfolders(node.key, scope)}
+        loadData={(node) => fetchSubfolders(node.key, scope, spaceId)}
         treeData={folders}
         onSelect={onFolderSelect}
       />
@@ -53,6 +53,7 @@ HomeMoveModal.propTypes = {
   fetchSubfolders: PropTypes.func,
   moveAction: PropTypes.func,
   scope: PropTypes.string,
+  spaceId: PropTypes.string,
 }
 
 const mapStateToProps = (state) => ({
@@ -60,7 +61,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  fetchSubfolders: (key, scope) => dispatch(fetchSubfolders(key, scope)),
+  fetchSubfolders: (key, scope, spaceId) => dispatch(fetchSubfolders(key, scope, spaceId)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeMoveModal)

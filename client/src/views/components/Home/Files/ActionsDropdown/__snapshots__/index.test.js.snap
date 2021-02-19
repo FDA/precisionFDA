@@ -45,6 +45,7 @@ exports[`ActionsDropdown test should render 1`] = `
           "text": "Delete",
         },
         Object {
+          "hide": false,
           "isDisabled": true,
           "onClick": [Function],
           "text": "Organize",

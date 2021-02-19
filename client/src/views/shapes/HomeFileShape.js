@@ -29,6 +29,7 @@ const HomeFileShape = {
   downloadURL: PropTypes.string,
   fileLicense: PropTypes.object,
   showLicensePending: PropTypes.bool,
+  spaceId: PropTypes.string,
 }
 
 const mapToHomeFile = (data) => ({
@@ -53,6 +54,7 @@ const mapToHomeFile = (data) => ({
   featured: data.featured,
   fileLicense: data.file_license,
   showLicensePending: data.show_license_pending,
+  spaceId: data.space_id,
 })
 
 export default HomeFileShape

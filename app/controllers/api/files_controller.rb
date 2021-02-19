@@ -369,7 +369,8 @@ module Api
     # @return { path: path, message: { type: type, text: text } } - standard path object
     def move
       target_folder_id = params[:target_id] == "root" ? nil : params[:target_id]
-      target_folder = target_folder_id ? Folder.editable_by(@context).find(target_folder_id) : nil
+      target_folder =
+        target_folder_id ? Folder.accessible_by_user(@context.user).find(target_folder_id) : nil
       service = FolderService.new(@context)
 
       result = service.move(
