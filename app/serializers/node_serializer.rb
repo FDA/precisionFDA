@@ -10,9 +10,15 @@ class NodeSerializer < ApplicationSerializer
     :created_at,
     :all_tags_list,
     :featured,
+    :space_id,
   )
 
   attribute :sti_type, key: :type
+
+  # Returns object's space id - when object is in space
+  def space_id
+    object.space_object&.scope if object.in_space?
+  end
 
   # Returns a user who has created this node.
   # @return [String] User full name.

@@ -2,6 +2,7 @@ import httpStatusCodes from 'http-status-codes'
 
 import { createAction } from '../../../../utils/redux'
 import { getSubfolders, postApiCall } from '../../../../api/home'
+import { getSubfolders as getSpacesSubFolders } from '../../../../api/spaces'
 import {
   showAlertAboveAll,
   showAlertAboveAllSuccess,
@@ -62,14 +63,20 @@ export const filesMove = (nodeIds, targetId, link, scope) =>
     }
   }
 
-export const fetchSubfolders = (folderId, scope) =>
+export const fetchSubfolders = (folderId, scope, spaceId) =>
   async (dispatch) => {
     try {
       const data = {}
       if (folderId) data.folder_id = folderId
       if (scope) data.scope = scope
 
-      const response = await getSubfolders(data)
+      let response
+      if (spaceId) {
+        response = await getSpacesSubFolders(spaceId, folderId)
+      } else {
+        response = await getSubfolders(data)
+      }
+
       const { status, payload } = response
 
       if (status === httpStatusCodes.OK) {

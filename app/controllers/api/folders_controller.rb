@@ -8,8 +8,14 @@ module Api
     def children
       params[:scope] ||= "private"
 
-      children = @folder&.children ||
-                 current_user.nodes.where(parent_folder_id: nil)
+      children = if params[:scope] == Scopes::SCOPE_PRIVATE
+        @folder&.children ||
+          current_user.nodes.where(parent_folder_id: nil)
+      elsif params[:scope] == Scopes::SCOPE_PUBLIC
+        @folder&.children ||
+          Node.where(scope: params[:scope], parent_folder_id: nil)
+      end
+
       if [Scopes::SCOPE_PRIVATE, Scopes::SCOPE_PUBLIC].include?(params[:scope])
         children = children.where.not(sti_type: "Asset")
       end

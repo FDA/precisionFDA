@@ -23,15 +23,20 @@ export default (uid) => (
 
     try {
       const response = await API.getFileDetails(uid)
-      if (response.status === httpStatusCodes.OK) {
-        const file = mapToHomeFile(response.payload.files)
-        const meta = response.payload.meta
+      const { status, payload } = response
+      const statusIsOK = status === httpStatusCodes.OK
+
+      if (statusIsOK) {
+        const file = mapToHomeFile(payload.files)
+        const meta = payload.meta
 
         dispatch(fetchFileDetailsSuccess(file, meta))
       } else {
         dispatch(fetchFileDetailsFailure())
         dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
       }
+
+      return { statusIsOK, payload }
     } catch (e) {
       console.error(e)
       dispatch(fetchFileDetailsFailure())

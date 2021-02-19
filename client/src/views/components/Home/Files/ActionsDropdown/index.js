@@ -61,7 +61,7 @@ const ACTIONS_TO_REMOVE = {
 
 const ActionsDropdown = (props) => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
-  const { files, page = 'private' } = props
+  const { files, page = 'private', scope } = props
   const filesIds = files.map(file => file.id)
   const filesUids = files.map(file => file.uid)
   const isFolder = files.every(e => e.type === 'Folder')
@@ -123,6 +123,7 @@ const ActionsDropdown = (props) => {
       text: 'Organize',
       isDisabled: files.length === 0 || files.some((e) => !e.links.organize),
       onClick: () => props.showFilesMoveModal(),
+      hide: !isAdmin && (['featured', 'public'].includes(page) || page === 'details' && files[0]?.location === 'Public'),
     },
     {
       text: 'Copy to space',
@@ -204,7 +205,8 @@ const ActionsDropdown = (props) => {
         currentFolderId={filesUids}
         hideAction={() => props.hideFilesMoveModal()}
         moveAction={(targetId) => props.filesMove(filesIds, targetId, links.organize)}
-        scope={page}
+        scope={page === 'details' ? scope : page}
+        spaceId={props.spaceId}
       />
       <AttachLicenseModal
         isLoading={props.attachLicenseModal.isLoading}
@@ -300,6 +302,8 @@ ActionsDropdown.propTypes = {
   showFilesAcceptLicenseModal: PropTypes.func,
   hideFilesAcceptLicenseModal: PropTypes.func,
   filesAcceptLicenseAction: PropTypes.func,
+  scope: PropTypes.string,
+  spaceId: PropTypes.string,
 }
 
 ActionsDropdown.defaultProps = {
