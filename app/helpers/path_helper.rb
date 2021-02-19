@@ -149,9 +149,10 @@ module PathHelper
       discuss_space_path(item)
     when "task"
       space_task_path(item.space_id, item)
-    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset",
-      "comparison", "answer", "folder"
+    when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"
       pathify(item)
+    when "file", "app", "job", "asset", "folder"
+      concat_path(item)
     else
       raise "Unknown class #{item.klass}"
     end
