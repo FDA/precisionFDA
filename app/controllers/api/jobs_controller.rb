@@ -206,7 +206,7 @@ module Api
     # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
     def app
       jobs = App.find_by(uid: unsafe_params[:id]).
-        app_series.jobs.editable_by(@context).
+        app_series.jobs.accessible_by(@context).
         eager_load(:app, user: :org, analysis: :workflow).
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags)).
