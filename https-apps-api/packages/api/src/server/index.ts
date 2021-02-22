@@ -3,10 +3,10 @@ import https from 'https'
 import fs from 'fs'
 import Koa from 'koa'
 import koaBody from 'koa-bodyparser'
+import { config } from '@pfda/https-apps-shared'
 import { log } from '../logger'
 import * as mdw from './middleware'
 import { router } from './routes'
-import { config } from '@pfda/https-apps-shared'
 
 const koa = new Koa<Koa.DefaultState, Api.Ctx>()
 // todo: security, compression middlewares
@@ -26,7 +26,9 @@ let server: http.Server | null
 
 const startHttpServer = async (): Promise<void> => {
   await new Promise(done => {
-    const startedServer = http.createServer(koa.callback()).listen(config.api.port, done)
+    const startedServer = http
+      .createServer(koa.callback())
+      .listen(config.api.port, done as () => void)
     server = startedServer
   })
   log.info(`HTTP Server: started (port: ${config.api.port.toString()})`)
@@ -44,7 +46,7 @@ const startHttpsServer = async (): Promise<void> => {
         },
         koa.callback(),
       )
-      .listen(config.api.port, done)
+      .listen(config.api.port, done as () => void)
     server = startedServer
   })
   log.info(`HTTPS Server: started (port: ${config.api.port.toString()})`)
