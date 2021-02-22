@@ -25,6 +25,7 @@ declare global {
       log: Logger
       em: EntityManager
       user: UserCtx
+      validatedQuery: AnyObject
     }
 
     export type Mdw = (...args: readonly any[]) => (ctx: Api.Ctx, next: () => any) => Promise<any>

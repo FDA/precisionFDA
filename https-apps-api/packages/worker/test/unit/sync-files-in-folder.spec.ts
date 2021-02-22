@@ -29,6 +29,7 @@ describe('syncFilesInFolder operation', () => {
     em = database.orm().em
     user = create.userHelper.create(em)
     job = create.jobHelper.create(em, { user })
+    await em.flush()
     folder = create.filesHelper.createFolder(
       em,
       { user },

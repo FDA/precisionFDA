@@ -8,8 +8,8 @@ const router = new Router<DefaultState, Api.Ctx>()
 
 router.get('/', makeValidationMdw({ query: utils.schemas.paginationSchema }), async ctx => {
   const jobs = await new jobDomain.ListJobsOperation(pickOpsCtx(ctx)).execute({
-    page: ctx.query.page ?? 1,
-    limit: ctx.query.limit ?? 10,
+    page: ctx.validatedQuery.page ?? 1,
+    limit: ctx.validatedQuery.limit ?? 10,
   })
   ctx.body = jobs
 })

@@ -12,7 +12,7 @@ export class Node extends BaseEntity {
   id: number
 
   @Property()
-  dxid: string
+  dxid?: string
 
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options

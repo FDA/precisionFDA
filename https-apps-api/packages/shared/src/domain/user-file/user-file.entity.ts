@@ -18,6 +18,9 @@ import { UserFileRepository } from './user-file.repository'
 @Entity({ tableName: 'nodes', customRepository: () => UserFileRepository })
 export class UserFile extends Node {
   @Property()
+  dxid: string
+
+  @Property()
   project: string
 
   @Property()

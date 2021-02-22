@@ -157,16 +157,20 @@ const userFile = {
 }
 
 const folder = {
-  simple: (): Partial<InstanceType<typeof entities.Folder>> => ({
-    name: chance.name(),
-    project: undefined,
-    dxid: undefined,
-    scope: 'private',
-    entityType: FILE_ORIGIN_TYPE.HTTPS,
-    parentId: 1,
-    parentType: PARENT_TYPE.JOB,
-    stiType: FILE_STI_TYPE.FOLDER,
-  }),
+  simple: (): Partial<InstanceType<typeof entities.Folder>> => {
+    // folders do not have it
+    // const dxid = `file-${random.dxstr()}`
+    return {
+      name: chance.name(),
+      project: undefined,
+      dxid: undefined,
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.HTTPS,
+      parentId: 1,
+      parentType: PARENT_TYPE.JOB,
+      stiType: FILE_STI_TYPE.FOLDER,
+    }
+  },
 }
 
 const tag = {

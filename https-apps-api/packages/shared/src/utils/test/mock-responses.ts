@@ -45,6 +45,11 @@ const FILES_LIST_RES_SNAPSHOT = {
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyz76Q80f24p444q33Fg7ggz',
+      describe: {
+        id: 'file-Fyz76Q80f24p444q33Fg7ggz',
+        name: 'snapshot',
+        size: 0,
+      },
     },
   ],
   next: null,
@@ -55,6 +60,11 @@ const FILES_LIST_RES_TEST_FOLDER = {
     {
       project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
       id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
+      describe: {
+        id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
+        name: 'test-file',
+        size: 0,
+      },
     },
   ],
   next: null,

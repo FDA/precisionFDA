@@ -31,6 +31,11 @@ export const makeValidationMdw = (schema: SchemaWithSource, sanitizeInput?: Sani
     const results: AnyObject = {}
     Object.entries(validatorFunctions).forEach(([key, validationFn]) => {
       results[key] = validationFn(ctx.request[key])
+      // fixme: just a proof of concept
+      if (key === 'query') {
+        // store differently
+        ctx.validatedQuery = { ...ctx.request.query }
+      }
     })
     const isValid = Object.values(results).every(validationResult => validationResult === true)
 

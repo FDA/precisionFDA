@@ -18,7 +18,7 @@ import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
 export class Folder extends Node {
   @Property()
-  project: string
+  project?: string
 
   @Property()
   name: string

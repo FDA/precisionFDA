@@ -12,6 +12,7 @@ export const makeUserContextMdw = () => {
 
   return (ctx: Api.Ctx, next) => {
     const isValid = validatorFn(ctx.request.query)
+    ctx.validatedQuery = { ...ctx.request.query }
     if (!isValid) {
       ctx.log.warn(
         {
@@ -29,9 +30,9 @@ export const makeUserContextMdw = () => {
       })
     }
     ctx.user = {
-      id: ctx.request.query.id,
-      accessToken: ctx.request.query.accessToken,
-      dxuser: ctx.request.query.dxuser,
+      id: ctx.validatedQuery.id,
+      accessToken: ctx.validatedQuery.accessToken,
+      dxuser: ctx.validatedQuery.dxuser,
     }
     ctx.log.debug({ userId: ctx.user.id }, 'User context retrieved')
     return next()

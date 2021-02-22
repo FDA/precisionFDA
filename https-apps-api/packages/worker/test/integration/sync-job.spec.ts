@@ -57,6 +57,8 @@ describe('TASK: sync_job_status', () => {
   it('processes a queue task - calls the queue handlers', async () => {
     const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
     await em.flush()
+    fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+
     await createSyncJobTask(
       { dxid: job.dxid },
       { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
@@ -71,6 +73,8 @@ describe('TASK: sync_job_status', () => {
       { ...generate.job.simple, state: JOB_STATE.IDLE },
     )
     await em.flush()
+    fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+
     await createSyncJobTask(
       { dxid: job.dxid },
       { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
