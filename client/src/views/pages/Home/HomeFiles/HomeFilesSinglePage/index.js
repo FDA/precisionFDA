@@ -176,6 +176,7 @@ const HomeFilesSinglePage = (props) => {
                   filesAcceptLicenseAction={filesAcceptLicenseAction}
                   scope={scope}
                   spaceId={spaceId}
+                  comments={meta.links?.comments}
                 />
               </div>
             </div>

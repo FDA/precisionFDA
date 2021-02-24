@@ -83,6 +83,11 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "hide": true,
+          "link": undefined,
+          "text": "Comments",
+        },
+        Object {
+          "hide": true,
           "onClick": [Function],
           "text": "Edit tags",
         },
