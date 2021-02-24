@@ -111,7 +111,7 @@ export const HOME_FILE_TYPES = {
 export const HOME_FILES_MODALS = {
   RENAME: 'renameModal',
   COPY_TO_SPACE: 'copyToSpaceModal',
-  MAKE_PUBLIC: 'makePublicModal',
+  MAKE_PUBLIC_FOLDER: 'makePublicFolderModal',
   ADD_FOLDER: 'addFolderModal',
   DELETE: 'deleteModal',
   ATTACH_TO: 'filesAttachToModal',

@@ -28,9 +28,16 @@ exports[`ActionsDropdown test should render 1`] = `
           "text": "Rename",
         },
         Object {
+          "hide": true,
           "isDisabled": true,
           "link": "undefined&public=true",
           "method": "post",
+          "text": "Make public",
+        },
+        Object {
+          "hide": false,
+          "isDisabled": true,
+          "onClick": [Function],
           "text": "Make public",
         },
         Object {
@@ -142,6 +149,13 @@ exports[`ActionsDropdown test should render 1`] = `
     hideAction={[Function]}
     modalAction={[Function]}
     title="Accept License"
+  />
+  <FilesActionModal
+    fetchFilesByAction={[Function]}
+    files={Array []}
+    hideAction={[Function]}
+    modal={Object {}}
+    modalAction={[Function]}
   />
 </Fragment>
 `;

@@ -7,7 +7,7 @@ exports[`FilesActionModal test should render 1`] = `
   <Modal
     modalFooterContent={<SwitchFooter />}
     noPadding={true}
-    title="Some Action undefined Item(s)?"
+    title="Make Public undefined Item(s)?"
   >
     <FilesList />
   </Modal>

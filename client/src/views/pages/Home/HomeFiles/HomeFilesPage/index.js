@@ -22,6 +22,7 @@ import {
   setFileFilterValue,
   renameFile,
   filesMove,
+  makePublicFolder,
   filesLicenseAction,
 } from '../../../../../actions/home'
 import { OBJECT_TYPES } from '../../../../../constants'
@@ -34,7 +35,7 @@ import { getFolderId } from '../../../../../helpers/home'
 import FilesAddFolderModal from '../../../../components/Files/AddFolderModal'
 
 
-const HomeFilesPage = ({ files = [], fetchFiles, resetFilesModals, resetFilesFiltersValue, location, showAddFolderModal, folderModal, createFolder, hideAddFolderModal, deleteFiles, copyToSpace, filesAttachTo, attachLicense, setFileFilterValue, renameFile, filesMove, filesLicenseAction }) => {
+const HomeFilesPage = ({ files = [], fetchFiles, resetFilesModals, resetFilesFiltersValue, location, showAddFolderModal, folderModal, createFolder, hideAddFolderModal, deleteFiles, copyToSpace, filesAttachTo, attachLicense, setFileFilterValue, renameFile, filesMove, filesLicenseAction, makePublicFolder }) => {
   const folderId = getFolderId(location)
   useLayoutEffect(() => {
     resetFilesModals()
@@ -82,6 +83,7 @@ const HomeFilesPage = ({ files = [], fetchFiles, resetFilesModals, resetFilesFil
           renameFile={renameFile} 
           filesMove={filesMove}
           filesLicenseAction={filesLicenseAction}
+          makePublicFolder={makePublicFolder}
         />
         </div>
       </div>
@@ -120,6 +122,7 @@ HomeFilesPage.propTypes = {
   renameFile: PropTypes.func,
   filesMove: PropTypes.func,
   filesLicenseAction: PropTypes.func,
+  makePublicFolder: PropTypes.func,
 }
 
 HomeFilesPage.defaultProps = {
@@ -162,6 +165,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (statusIsOK) dispatch(fetchFiles(folderId))
   }),
   filesLicenseAction: (link) => dispatch(filesLicenseAction(link)).then(({ statusIsOK }) => {
+    const folderId = getFolderId(ownProps.location)
+    if (statusIsOK) dispatch(fetchFiles(folderId))
+  }),
+  makePublicFolder: (link, ids) => dispatch(makePublicFolder(link, ids)).then(({ statusIsOK }) => {
     const folderId = getFolderId(ownProps.location)
     if (statusIsOK) dispatch(fetchFiles(folderId))
   }),
