@@ -1593,9 +1593,7 @@ class ApiController < ApplicationController
       raise_api_error "You don't have permissions to add files to the folder."
     end
 
-    if @folder&.https?
-      raise_api_error "You're not allowed to create a file in an HTTPS folder."
-    end
+    raise_api_error "You're not allowed to create a file in an HTTPS folder." if @folder&.https?
 
     file_name = params[:name].presence
     if file_name.blank? || !file_name.is_a?(String)

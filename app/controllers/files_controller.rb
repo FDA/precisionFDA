@@ -14,11 +14,12 @@ class FilesController < ApplicationController
       return
     end
 
-    @parent_folder = begin
-      @parent_folder_id && Folder.find(@parent_folder_id)
-    rescue ActiveRecord::RecordNotFound => e
-      redirect_to files_path, alert: e.message
-    end
+    @parent_folder =
+      begin
+        @parent_folder_id && Folder.find(@parent_folder_id)
+      rescue ActiveRecord::RecordNotFound => e
+        redirect_to files_path, alert: e.message
+      end
 
     User.sync_files!(@context)
 

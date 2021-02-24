@@ -74,38 +74,29 @@ class DNAnexusAPI
   end
 
   def user_exists?(username)
-    begin
-      call("user-#{username}", "describe")
-    rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
-      raise e
-    end
+    call("user-#{username}", "describe")
     true
+  rescue Net::HTTPClientException => e
+    return false if e.message =~ /^404/
+
+    raise e
   end
 
   def org_exists?(orgname)
-    begin
-      call("org-#{orgname}", "describe")
-    rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
-      raise e
-    end
+    call("org-#{orgname}", "describe")
     true
+  rescue Net::HTTPClientException => e
+    return false if e.message =~ /^404/
+
+    raise e
   end
 
   def entity_exists?(entity)
-    begin
-      call(entity.to_s, "describe")
-    rescue Net::HTTPClientException => e
-      if e.message =~ /^404/
-        return false
-      end
-      raise e
-    end
+    call(entity.to_s, "describe")
     true
+  rescue Net::HTTPClientException => e
+    return false if e.message =~ /^404/
+
+    raise e
   end
 end

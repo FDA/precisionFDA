@@ -87,7 +87,7 @@ class HttpsAppsClient
     Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
       handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
     end
-  rescue Errno::ECONNREFUSED => e
+  rescue Errno::ECONNREFUSED
     raise Error, "Can't connect to JupyterLab service"
   end
 

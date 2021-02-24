@@ -10,7 +10,7 @@ class FolderService
   def add_folder(name, parent_folder = nil, scope = Scopes::SCOPE_PRIVATE)
     if parent_folder && !parent_folder.editable_by?(context)
       return Rats.failure(
-        message: "You have no permissions to add objects to #{parent_folder.name}."
+        message: "You have no permissions to add objects to #{parent_folder.name}.",
       )
     elsif parent_folder&.https?
       return Rats.failure(message: "You're not allowed to add objects to an HTTPS folder.")
@@ -100,9 +100,7 @@ class FolderService
   # @param nodes [ActiveRecord::Relation<Node>] Nodes to move.
   def validate_nodes_to_move!(nodes, target_folder, target_scope)
     nodes.each do |node|
-      if node.https?
-        raise Error, "You're not allowed to move an HTTPS #{node.klass}."
-      end
+      raise Error, "You're not allowed to move an HTTPS #{node.klass}." if node.https?
 
       if node.public? && !context.can_administer_site? || !node.editable_by?(context)
         raise Error, "You have no permissions to move '#{node.name}'."
@@ -114,14 +112,12 @@ class FolderService
                      "as it is part of Locked Verification space."
       end
 
-      if node.is_a?(Folder)
-        if node.scope != target_scope && !node.private?
-          raise Error, "Unexpected scope."
-        end
+      next unless node.is_a?(Folder)
 
-        if target_folder && (node == target_folder || node.has_in_children?(target_folder))
-          raise Error, "Unable to move folder into itself or its child folder."
-        end
+      raise Error, "Unexpected scope." if node.scope != target_scope && !node.private?
+
+      if target_folder && (node == target_folder || node.has_in_children?(target_folder))
+        raise Error, "Unable to move folder into itself or its child folder."
       end
     end
   end
@@ -131,11 +127,11 @@ class FolderService
   def validate_target_folder!(target_folder)
     return unless target_folder
 
-    if target_folder.https?
-      raise Error, "You're not allowed to move to an HTTPS folder."
-    elsif !target_folder.editable_by?(context)
-      raise Error, "You have no permissions to add objects to '#{target_folder.name}'."
-    end
+    raise Error, "You're not allowed to move to an HTTPS folder." if target_folder.https?
+
+    return if target_folder.editable_by?(context)
+
+    raise Error, "You have no permissions to add objects to '#{target_folder.name}'."
   end
 
   def remove_folder(folder)
@@ -173,7 +169,7 @@ class FolderService
 
     Rats.success(folder)
   rescue HttpsAppsClient::Error => e
-    return Rats.failure(message: e.message)
+    Rats.failure(message: e.message)
   end
 
   def rename_https_folder(folder, new_name)
@@ -181,7 +177,7 @@ class FolderService
 
     Rats.success(folder)
   rescue HttpsAppsClient::Error => e
-    return Rats.failure(message: e.message)
+    Rats.failure(message: e.message)
   end
 
   def remove_file(file)
