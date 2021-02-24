@@ -64,9 +64,9 @@ class App < ApplicationRecord
   # Jobs are serialized.
   #  @param context [Context] The user context.
   #  @return jobs [Array of serialized Job objects.
-  def editable_jobs(context)
+  def accessible_jobs(context)
     app_series.jobs.
-      editable_by(context).
+      accessible_by(context).
       includes(:taggings).
       order(created_at: :desc).
       map { |job| JobSerializer.new(job) }
