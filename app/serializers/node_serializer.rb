@@ -1,5 +1,10 @@
 # Node serializer.
 class NodeSerializer < ApplicationSerializer
+  include ActionView::Helpers::NumberHelper
+  include FilesHelper
+
+  delegate :all_tags_list, to: :object
+
   attributes(
     :id,
     :name,
@@ -8,12 +13,24 @@ class NodeSerializer < ApplicationSerializer
     :location,
     :added_by,
     :created_at,
-    :all_tags_list,
     :featured,
     :space_id,
   )
 
   attribute :sti_type, key: :type
+  attribute :origin, if: -> { object.is_a?(UserFile) || object.is_a?(Folder) && object.https? }
+  attribute :all_tags_list, key: :tags
+
+  # Builds links to files.
+  # @return [Hash] Links.
+  # rubocop:disable Metrics/MethodLength
+  def links
+    return {} unless current_user
+
+    {}.tap do |links|
+      links[:origin_object] = origin_object
+    end
+  end
 
   # Returns object's space id - when object is in space
   def space_id
@@ -30,5 +47,20 @@ class NodeSerializer < ApplicationSerializer
   # @return [String] Formatted time.
   def created_at
     formatted_time(object.created_at)
+  end
+
+  # Returns a file's origin: one of Executable, Uploaded or Job origin data.
+  # @return [String] origin name.
+  def origin
+    return unless current_user
+
+    node_origin(object)
+  end
+
+  def origin_object
+    {
+      origin_type: object.parent&.class&.name,
+      origin_uid: object.parent&.uid,
+    }
   end
 end
