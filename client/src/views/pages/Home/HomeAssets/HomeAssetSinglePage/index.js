@@ -157,6 +157,7 @@ const HomeAssetSinglePage = (props) => {
                   assetsLicenseAction={assetsLicenseAction}
                   assetsAcceptLicenseAction={assetsAcceptLicenseAction}
                   page='details'
+                  comments={meta.links?.comments}
                 />
               </div>
             </div>

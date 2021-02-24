@@ -124,6 +124,11 @@ const ActionsDropdown = (props) => {
       },
     },
     {
+      text: 'Comments',
+      link: props.comments,
+      hide: !props.comments,
+    },
+    {
       text: 'Edit tags',
       onClick: () => props.editTags(),
       hide: !props.editTags,
@@ -218,6 +223,7 @@ ActionsDropdown.propTypes = {
   hideWorkflowsCopyToSpaceModal: PropTypes.func,
   showWorkflowsDeleteModal: PropTypes.func,
   deleteModal: PropTypes.object,
+  comments: PropTypes.string,
 }
 
 ActionsDropdown.defaultProps = {
