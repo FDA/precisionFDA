@@ -9,7 +9,7 @@ import FilesList from './FilesList'
 
 const switchTitle = (action) => {
   switch (action) {
-    case HOME_FILES_ACTIONS.MAKE_PUBLIC:
+    case HOME_FILES_ACTIONS.MAKE_PUBLIC_FOLDER:
       return 'Make Public'
     case HOME_FILES_ACTIONS.DELETE:
       return 'Delete'
@@ -22,7 +22,7 @@ const switchTitle = (action) => {
 
 const SwitchFooter = ({ action, hideAction, modalAction }) => {
   switch (action) {
-    case HOME_FILES_ACTIONS.MAKE_PUBLIC:
+    case HOME_FILES_ACTIONS.MAKE_PUBLIC_FOLDER:
       return (
         <>
           <Button onClick={hideAction}>Cancel</Button>

@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 
 import HomeFileShape from '../../../../shapes/HomeFileShape'
 import {
-  makePublicFiles,
   showFilesCopyToSpaceModal,
   hideFilesCopyToSpaceModal,
   showFilesRenameModal,
@@ -17,8 +16,8 @@ import {
   hideFilesMoveModal,
   showFilesAttachLicenseModal,
   hideFilesAttachLicenseModal,
-  showFilesMakePublicModal,
-  hideFilesMakePublicModal,
+  showFilesMakePublicFolderModal,
+  hideFilesMakePublicFolderModal,
   fetchFilesByAction,
   showFilesLicenseModal,
   hideFilesLicenseModal,
@@ -28,7 +27,7 @@ import {
 import {
   homeFilesRenameModalSelector,
   homeFilesCopyToSpaceModalSelector,
-  homeFilesMakePublicModalSelector,
+  homeFilesMakePublicFolderModalSelector,
   homeFilesDeleteModalSelector,
   homeFilesAttachToModalSelector,
   homeFilesModalSelector,
@@ -99,18 +98,25 @@ const ActionsDropdown = (props) => {
       isDisabled: files.length !== 1 || !links.publish,
       link: `${links.publish}&public=true`,
       method: 'post',
+      hide: isFolder,
+    },
+    {
+      text: 'Make public',
+      isDisabled: !isAdmin || files.length !== 1 || !links.publish,
+      onClick: () => props.showFilesMakePublicFolderModal(),
+      hide: !isFolder,
     },
     {
       text: 'Feature',
-      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, true):
-      props.makeFeatured(files[0].links.feature, filesUids, true),
+      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, true) :
+        props.makeFeatured(files[0].links.feature, filesUids, true),
       isDisabled: files.length === 0 || !files.every(e => !e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public',
     },
     {
       text: 'Unfeature',
-      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, false):
-      props.makeFeatured(files[0].links.feature, filesUids, false),
+      onClick: () => isFolder ? props.makeFeatured(files[0].links.feature, filesIds, false) :
+        props.makeFeatured(files[0].links.feature, filesUids, false),
       isDisabled: files.length === 0 || !files.every(e => e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public' && page !== 'featured',
     },
@@ -259,26 +265,35 @@ const ActionsDropdown = (props) => {
         actionType='accept'
         title='Accept License'
       />
+      <FilesActionModal
+        isOpen={props.makePublicFolderModal.isOpen}
+        isLoading={props.makePublicFolderModal.isLoading}
+        hideAction={() => props.hideFilesMakePublicFolderModal()}
+        modalAction={() => props.makePublicFolder(links.publish, filesIds)}
+        files={files}
+        action={HOME_FILES_ACTIONS.MAKE_PUBLIC_FOLDER}
+        fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, 'private')}
+        modal={props.homeFilesActionModalSelector}
+      />
     </>
   )
 }
 
 ActionsDropdown.propTypes = {
   files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
-  makePublic: PropTypes.func,
   copyToSpace: PropTypes.func,
   renameFile: PropTypes.func,
   attachLicense: PropTypes.func,
   renameModal: PropTypes.object,
   copyToSpaceModal: PropTypes.object,
-  makePublicModal: PropTypes.object,
+  makePublicFolderModal: PropTypes.object,
   attachLicenseModal: PropTypes.object,
   hideFilesRenameModal: PropTypes.func,
   showFilesRenameModal: PropTypes.func,
   showCopyToSpaceModal: PropTypes.func,
   hideCopyToSpaceModal: PropTypes.func,
-  showFilesMakePublicModal: PropTypes.func,
-  hideFilesMakePublicModal: PropTypes.func,
+  showFilesMakePublicFolderModal: PropTypes.func,
+  hideFilesMakePublicFolderModal: PropTypes.func,
   makeFeatured: PropTypes.func,
   context: PropTypes.object,
   page: PropTypes.string,
@@ -310,6 +325,7 @@ ActionsDropdown.propTypes = {
   scope: PropTypes.string,
   spaceId: PropTypes.string,
   comments: PropTypes.string,
+  makePublicFolder: PropTypes.func,
 }
 
 ActionsDropdown.defaultProps = {
@@ -317,7 +333,7 @@ ActionsDropdown.defaultProps = {
   context: {},
   page: 'private',
   copyToSpaceModal: {},
-  makePublicModal: {},
+  makePublicFolderModal: {},
   renameModal: {},
   deleteModal: {},
   filesAttachToModal: {},
@@ -331,7 +347,7 @@ ActionsDropdown.defaultProps = {
 const mapStateToProps = (state) => ({
   renameModal: homeFilesRenameModalSelector(state),
   copyToSpaceModal: homeFilesCopyToSpaceModalSelector(state),
-  makePublicModal: homeFilesMakePublicModalSelector(state),
+  makePublicFolderModal: homeFilesMakePublicFolderModalSelector(state),
   context: contextSelector(state),
   deleteModal: homeFilesDeleteModalSelector(state),
   filesAttachToModal: homeFilesAttachToModalSelector(state),
@@ -343,13 +359,12 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  makePublic: (ids) => dispatch(makePublicFiles(ids)),
   showCopyToSpaceModal: () => dispatch(showFilesCopyToSpaceModal()),
   hideCopyToSpaceModal: () => dispatch(hideFilesCopyToSpaceModal()),
   showFilesRenameModal: () => dispatch(showFilesRenameModal()),
   hideFilesRenameModal: () => dispatch(hideFilesRenameModal()),
-  showFilesMakePublicModal: () => dispatch(showFilesMakePublicModal()),
-  hideFilesMakePublicModal: () => dispatch(hideFilesMakePublicModal()),
+  showFilesMakePublicFolderModal: () => dispatch(showFilesMakePublicFolderModal()),
+  hideFilesMakePublicFolderModal: () => dispatch(hideFilesMakePublicFolderModal()),
   showFilesDeleteModal: () => dispatch(showFilesDeleteModal()),
   hideFilesDeleteModal: () => dispatch(hideFilesDeleteModal()),
   showFilesAttachToModal: () => dispatch(showFilesAttachToModal()),

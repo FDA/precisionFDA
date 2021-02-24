@@ -23,28 +23,28 @@ exports[`DropdownMenu matches snapshot 1`] = `
     >
       <Item
         isDisabled={false}
-        key="action1"
+        key="0"
         onClick={[Function]}
         text="action1"
       />
       <Item
         isDisabled={false}
-        key="action2"
+        key="1"
         text="action2"
       />
       <Item
         isDisabled={false}
-        key="action3"
+        key="2"
         text="action3"
       />
       <Item
         isDisabled={false}
-        key="action4"
+        key="3"
         text="action4"
       />
       <Item
         isDisabled={false}
-        key="action5"
+        key="4"
         text="action5"
       />
     </ul>

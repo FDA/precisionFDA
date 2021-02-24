@@ -88,8 +88,8 @@ import {
   resetFilesModals,
   showFilesRenameModal,
   hideFilesRenameModal,
-  showFilesMakePublicModal,
-  hideFilesMakePublicModal,
+  showFilesMakePublicFolderModal,
+  hideFilesMakePublicFolderModal,
   showFilesAddFolderModal,
   hideFilesAddFolderModal,
   showUploadModal,
@@ -244,7 +244,7 @@ const appsAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.APP, items, note
 const editAppTags = (uid, tags, suggestedTags) => editTags(uid, tags, suggestedTags, OBJECT_TYPES.APP)
 const editFileTags = (uid, tags, suggestedTags) => editTags(uid, tags, suggestedTags, OBJECT_TYPES.FILE)
 
-const makePublicFiles = (ids) => makePublic('/api/files/copy', OBJECT_TYPES.FILE, ids)
+const makePublicFolder = (link, ids) => makePublic(link, OBJECT_TYPES.FILE, ids)
 const copyToSpaceFiles = (scope, ids) => copyToSpace('/api/files/copy', OBJECT_TYPES.FILE, scope, ids)
 const filesAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.FILE, items, noteUids)
 const attachLicenseFiles = (scope, ids, link) => attachLicense(link, OBJECT_TYPES.FILE, scope, ids)
@@ -351,9 +351,9 @@ export {
   resetFilesModals,
   showFilesRenameModal,
   hideFilesRenameModal,
-  showFilesMakePublicModal,
-  hideFilesMakePublicModal,
-  makePublicFiles,
+  showFilesMakePublicFolderModal,
+  hideFilesMakePublicFolderModal,
+  makePublicFolder,
   copyToSpaceFiles,
   showFilesAddFolderModal,
   hideFilesAddFolderModal,

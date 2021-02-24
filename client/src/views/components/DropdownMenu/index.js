@@ -63,8 +63,8 @@ const Item = ({ text, icon, isDisabled, onClick, link, method, hide }) => {
 const DropdownMenu = ({ icon, title, options, className, message = '' }) => {
   const menuOptions = options ? options : tmpOptions
 
-  const list = menuOptions.map((e) => {
-    return <Item {...e} key={e.text} />
+  const list = menuOptions.map((e, i) => {
+    return <Item {...e} key={i} />
   })
 
   if (message) list.unshift(

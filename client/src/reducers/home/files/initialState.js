@@ -31,7 +31,7 @@ export default {
   isFetchFiles: false,
   renameModal: modalState,
   copyToSpaceModal: modalState,
-  makePublicModal: modalState,
+  makePublicFolderModal: modalState,
   addFolderModal: modalState,
   deleteModal: modalState,
   filesAttachToModal: modalState,
