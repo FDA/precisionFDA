@@ -1,3 +1,4 @@
+# Collection of methods that can be used accross the whole project.
 module Utils
   extend self
 

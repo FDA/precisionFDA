@@ -23,7 +23,6 @@ class NodeSerializer < ApplicationSerializer
 
   # Builds links to files.
   # @return [Hash] Links.
-  # rubocop:disable Metrics/MethodLength
   def links
     return {} unless current_user
 
@@ -49,7 +48,7 @@ class NodeSerializer < ApplicationSerializer
     formatted_time(object.created_at)
   end
 
-  # Returns a file's origin: one of Executable, Uploaded or Job origin data.
+  # Returns a node's origin: one of Executable, Uploaded or Job origin data.
   # @return [String] origin name.
   def origin
     return unless current_user
