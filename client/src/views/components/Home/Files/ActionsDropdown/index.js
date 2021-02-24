@@ -157,6 +157,11 @@ const ActionsDropdown = (props) => {
       hide: !links.accept_license_action || page !== 'details',
     },
     {
+      text: 'Comments',
+      link: props.comments,
+      hide: !props.comments,
+    },
+    {
       text: 'Edit tags',
       onClick: () => props.editTags(),
       hide: !props.editTags,
@@ -304,6 +309,7 @@ ActionsDropdown.propTypes = {
   filesAcceptLicenseAction: PropTypes.func,
   scope: PropTypes.string,
   spaceId: PropTypes.string,
+  comments: PropTypes.string,
 }
 
 ActionsDropdown.defaultProps = {
