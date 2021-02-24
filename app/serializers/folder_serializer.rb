@@ -15,7 +15,7 @@ class FolderSerializer < NodeSerializer
   def links
     return {} unless current_user
 
-    {}.tap do |links|
+    super.tap do |links|
       unless object.in_space? && member_viewer?
         # POST /api/folders/rename_folder
         if object.owned_by_user?(current_user)

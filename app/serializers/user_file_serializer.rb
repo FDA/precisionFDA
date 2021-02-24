@@ -1,33 +1,19 @@
 # UserFile serializer.
 class UserFileSerializer < NodeSerializer
-  include ActionView::Helpers::NumberHelper
-  include FilesHelper
-
   attributes(
     :uid,
     :file_size,
     :created_at,
     :created_at_date_time,
     :description,
-    :origin,
     :location,
     :links,
     :file_license,
     :show_license_pending,
   )
 
-  attribute :all_tags_list, key: :tags
-
   def file_size
     number_to_human_size(object.file_size)
-  end
-
-  # Returns a file's origin: one of Executable, Uploaded or Job origin data.
-  # @return [String] origin name.
-  def origin
-    return unless current_user
-
-    node_origin(object)
   end
 
   # Returns formatted created_at time.
@@ -51,7 +37,7 @@ class UserFileSerializer < NodeSerializer
     return {} unless current_user
 
     # rubocop:disable Metrics/BlockLength
-    {}.tap do |links|
+    super.tap do |links|
       links[:show] = file_path(object)
       links[:user] = user_path(object.user.dxuser)
       links[:space] = space_path if object.in_space?
@@ -65,9 +51,6 @@ class UserFileSerializer < NodeSerializer
       links[:add_file] = api_create_file_path
       # POST: Add folder
       links[:add_folder] = create_folder_api_files_path
-
-      # GET: File origin object data { type, uid }
-      links[:origin_object] = origin_object
 
       # link to license page if exists
       links[:show_license] = license_path(object.license.id) if object.license
@@ -141,13 +124,4 @@ class UserFileSerializer < NodeSerializer
     # rubocop:enable Metrics/BlockLength
   end
   # rubocop:enable Metrics/MethodLength
-
-  def origin_object
-    {
-      origin_type: object.parent&.class&.name,
-      origin_uid: object.parent&.uid,
-    }
-  end
-
-  delegate :all_tags_list, to: :object
 end
