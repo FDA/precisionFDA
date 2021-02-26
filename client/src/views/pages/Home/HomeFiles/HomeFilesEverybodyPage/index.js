@@ -7,7 +7,7 @@ import HomeFileShape from '../../../../shapes/HomeFileShape'
 import {
   homeFilesEverybodyListSelector,
   homeFilesAddFolderModalSelector,
- } from '../../../../../reducers/home/files/selectors'
+} from '../../../../../reducers/home/files/selectors'
 import { homePageAdminStatusSelector } from '../../../../../reducers/home/page/selectors'
 import {
   fetchFilesEverybody,
@@ -26,6 +26,7 @@ import {
   createFolder,
   hideFilesAddFolderModal,
 } from '../../../../../actions/home'
+import { showUploadModal } from '../../../../../features/space/fileUpload/actions'
 import Icon from '../../../../components/Icon'
 import Button from '../../../../components/Button'
 import HomeLayout from '../../../../layouts/HomeLayout'
@@ -34,9 +35,10 @@ import ActionsDropdown from '../../../../components/Home/Files/ActionsDropdown'
 import { OBJECT_TYPES } from '../../../../../constants'
 import { getFolderId } from '../../../../../helpers/home'
 import FilesAddFolderModal from '../../../../components/Files/AddFolderModal'
+import UploadModal from '../../../../../features/space/fileUpload/UploadModal'
 
 
-const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesModals, resetFilesEverybodyFiltersValue, isAdmin, location, deleteFiles, copyToSpace, filesAttachTo, makeFeatured, setFileEverybodyFilterValue, renameFile, filesMove, attachLicense, filesLicenseAction, showAddFolderModal, folderModal, createFolder, hideAddFolderModal }) => {  
+const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesModals, resetFilesEverybodyFiltersValue, isAdmin, location, deleteFiles, copyToSpace, filesAttachTo, makeFeatured, setFileEverybodyFilterValue, renameFile, filesMove, attachLicense, filesLicenseAction, showAddFolderModal, folderModal, createFolder, hideAddFolderModal, showUploadModal }) => {
   const folderId = getFolderId(location)
   useLayoutEffect(() => {
     resetFilesModals()
@@ -60,27 +62,35 @@ const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesMod
       <div className='home-page-layout__header-row'>
         <div className="home-page-layout__actions">
           {isAdmin &&
-            <Button type="primary" onClick={showAddFolderModal}>
-              <span>
-                <Icon icon="fa-plus"/>&nbsp;
-                Add Folder
-              </span>
-            </Button>
+            <>
+              <Button type="primary" onClick={showAddFolderModal}>
+                <span>
+                  <Icon icon="fa-plus" />&nbsp;
+                  Add Folder
+                </span>
+              </Button>
+              <Button type="primary" onClick={showUploadModal}>
+                <span>
+                  <Icon icon="fa-plus" />&nbsp;
+                  Add Files
+                </span>
+              </Button>
+            </>
           }
         </div>
         <div className='home-page-layout__actions--right'>
-        <ActionsDropdown
-          files={checkedFiles}
-          copyToSpace={copyToSpace}
-          filesAttachTo={filesAttachTo}
-          deleteFiles={(link, ids) => deleteFiles(link, ids)}
-          page='public'
-          makeFeatured={makeFeatured}
-          renameFile={renameFile}
-          filesMove={filesMove}
-          attachLicense={attachLicense}
-          filesLicenseAction={filesLicenseAction}
-        />
+          <ActionsDropdown
+            files={checkedFiles}
+            copyToSpace={copyToSpace}
+            filesAttachTo={filesAttachTo}
+            deleteFiles={(link, ids) => deleteFiles(link, ids)}
+            page='public'
+            makeFeatured={makeFeatured}
+            renameFile={renameFile}
+            filesMove={filesMove}
+            attachLicense={attachLicense}
+            filesLicenseAction={filesLicenseAction}
+          />
         </div>
       </div>
       <div className='pfda-padded-t20'>
@@ -88,13 +98,16 @@ const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesMod
       </div>
       {
         folderModal &&
-          <FilesAddFolderModal
+        <FilesAddFolderModal
           isOpen={folderModal.isOpen}
           isLoading={folderModal.isLoading}
           addFolderAction={(folderName) => createFolder(createFolderLink, folderName, folderId, 'true')}
-          hideAction={() => {hideAddFolderModal()}}
-      />
+          hideAction={() => { hideAddFolderModal() }}
+        />
       }
+      <div className='home-page-layout__upload-files-modal' >
+        <UploadModal scope='public' onClose={() => fetchFilesEverybody(folderId)} />
+      </div>
     </HomeLayout>
   )
 }
@@ -119,6 +132,7 @@ HomeFilesEverybodyPage.propTypes = {
   folderModal: PropTypes.object,
   createFolder: PropTypes.func,
   hideAddFolderModal: PropTypes.func,
+  showUploadModal: PropTypes.func,
 }
 
 HomeFilesEverybodyPage.defaultProps = {
@@ -166,6 +180,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
   }),
   hideAddFolderModal: () => dispatch(hideFilesAddFolderModal()),
+  showUploadModal: () => dispatch(showUploadModal()),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(HomeFilesEverybodyPage))

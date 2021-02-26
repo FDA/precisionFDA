@@ -26,5 +26,13 @@ exports[`HomeFilesEverybodyPage test should render 1`] = `
       handleFilterValue={[Function]}
     />
   </div>
+  <div
+    className="home-page-layout__upload-files-modal"
+  >
+    <UploadModal
+      onClose={[Function]}
+      scope="public"
+    />
+  </div>
 </HomeLayout>
 `;

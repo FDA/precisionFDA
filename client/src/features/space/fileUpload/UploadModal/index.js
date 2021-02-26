@@ -29,11 +29,11 @@ import { spaceDataSelector } from '../../../../reducers/spaces/space/selectors'
 
 const idGenerator = createSequenceGenerator()
 
-const uploadAcceptedFiles = (dispatch, files, spaceId, folderId) => {
-  dispatch(uploadFiles(files, spaceId, folderId))
+const uploadAcceptedFiles = (dispatch, files, spaceId, folderId, scope) => {
+  dispatch(uploadFiles(files, spaceId, folderId, scope))
 }
 
-const Footer = ({ dispatch, files, blobs, setBlobs, spaceId, uploadDisabled, uploadInProgress }) => {
+const Footer = ({ dispatch, files, blobs, setBlobs, spaceId, uploadDisabled, uploadInProgress, scope, onClose }) => {
   const allUploaded = files.length && all(file => file.status === FILE_STATUS.UPLOADED)(files)
   const location = useLocation('folderId')
   const folderId = parseInt(getQueryParam(location.search, 'folderId'))
@@ -46,6 +46,7 @@ const Footer = ({ dispatch, files, blobs, setBlobs, spaceId, uploadDisabled, upl
           onClick={() => {
             dispatch(hideUploadModal())
             setBlobs([])
+            onClose()
           }}
         >Close</Button>
       </div>
@@ -59,11 +60,12 @@ const Footer = ({ dispatch, files, blobs, setBlobs, spaceId, uploadDisabled, upl
           onClick={() => {
             dispatch(hideUploadModal())
             setBlobs([])
+            onClose()
           }}>Cancel</Button>
         <Button
           type="primary"
           disabled={uploadDisabled}
-          onClick={() => uploadAcceptedFiles(dispatch, blobs, spaceId, folderId)}
+          onClick={() => uploadAcceptedFiles(dispatch, blobs, spaceId, folderId, scope)}
         >Upload</Button>
       </div>
     )
@@ -77,6 +79,8 @@ Footer.propTypes = {
   setBlobs: PropTypes.func.isRequired,
   spaceId: PropTypes.number,
   uploadInProgress: PropTypes.bool,
+  scope: PropTypes.string,
+  onClose: PropTypes.func,
 }
 
 const isUniqFile = (blobs, file) => (
@@ -89,7 +93,7 @@ const isUniqFile = (blobs, file) => (
   ))
 )
 
-const UploadModal = () => {
+const UploadModal = ({ scope, onClose }) => {
   const dispatch = useDispatch()
   const [blobs, setBlobs] = useState([])
   const isOpen = useSelector(uploadModalShownSelector)
@@ -122,7 +126,10 @@ const UploadModal = () => {
     <Modal
       className="upload-modal"
       isOpen={isOpen}
-      hideModalHandler={() => dispatch(hideUploadModal())}
+      hideModalHandler={() => {
+        dispatch(hideUploadModal())
+        onClose()
+      }}
       title={`Upload files to ${space.isPrivate ? 'Private' : 'Shared'} Area`}
       subTitle={`You can upload up to ${MAX_UPLOADABLE_FILES} files in a time`}
       noPadding={true}
@@ -137,6 +144,8 @@ const UploadModal = () => {
           spaceId={space.id}
           uploadDisabled={uploadDisabled}
           uploadInProgress={uploadInProgress}
+          scope={scope}
+          onClose={onClose}
         />
       }
     >
@@ -194,6 +203,16 @@ const UploadModal = () => {
       </div>
     </Modal>
   )
+}
+
+UploadModal.propTypes = {
+  scope: PropTypes.string,
+  onClose: PropTypes.func,
+}
+
+UploadModal.defaultProps = {
+  scope: '',
+  onClose: () => {},
 }
 
 export default UploadModal
