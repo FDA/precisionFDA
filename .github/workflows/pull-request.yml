@@ -121,6 +121,11 @@ jobs:
       - run: cd ./https-apps-api && make install
       - run: cd ./https-apps-api && make test-api
       - run: cd ./https-apps-api && make test-worker
+      - uses: snyk/actions/node@master
+      - name: Snyk test
+        run: cd ./https-apps-api && snyk test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   react-app:
     name: React App
