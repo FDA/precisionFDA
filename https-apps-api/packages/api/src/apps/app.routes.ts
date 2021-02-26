@@ -6,11 +6,6 @@ import { pickOpsCtx } from '../utils/pick-ops-ctx'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
-// router.get('/', async ctx => {
-//   const res = await new appDomain.ListAppsOperation(pickOpsCtx(ctx)).execute()
-//   ctx.body = res
-// })
-
 router.post(
   '/:appDxId/run',
   makeValidationMdw({

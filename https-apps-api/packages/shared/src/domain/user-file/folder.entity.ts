@@ -60,16 +60,6 @@ export class Folder extends Node {
   @OneToMany(() => Tagging, tagging => tagging.folder, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
-  // todo: could be User etc..
-  // @ManyToOne()
-  // parent?: IdentifiedReference<Job>
-
-  // @OneToMany(() => UserFile, userfile => userfile.parentFolder)
-  // userFiles = new Collection<UserFile>(this)
-
-  // @ManyToOne()
-  // parentFolder?: IdentifiedReference<Folder>
-
   @ManyToOne()
   user!: IdentifiedReference<User>;
 
