@@ -33,13 +33,6 @@ declare global {
     export type SyncMdw = (...args: readonly any[]) => (ctx: Api.Ctx, next: () => any) => any
   }
 
-  // namespace Ops {
-  //   export interface OpsCtx {
-  //     log: Logger
-  //     em: EntityManager
-  //     user: UserCtx
-  //   }
-  // }
   export type AnyObject = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [s: string]: any
