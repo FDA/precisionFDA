@@ -20,7 +20,7 @@ export const spacesMiddleware = ({ dispatch, getState }) => next => action => {
     case LOCK_SPACE_SUCCESS:
     case UNLOCK_SPACE_SUCCESS:
     case hideUploadModal.type:
-      dispatch(fetchSpace(spaceId))
+      if (spaceId) dispatch(fetchSpace(spaceId))
     // eslint-disable-next-line no-fallthrough
     default:
       return next(action)
