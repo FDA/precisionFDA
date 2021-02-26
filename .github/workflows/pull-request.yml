@@ -121,9 +121,8 @@ jobs:
       - run: cd ./https-apps-api && make install
       - run: cd ./https-apps-api && make test-api
       - run: cd ./https-apps-api && make test-worker
-      - uses: snyk/actions/setup@master
       - name: Snyk test
-        run: cd ./https-apps-api && snyk test
+        run: cd ./https-apps-api && ./node_modules/.bin/snyk test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
