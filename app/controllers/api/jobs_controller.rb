@@ -275,7 +275,7 @@ module Api
       service = Jobs::TerminateService.call(unsafe_params.dig(:job, :id), @context)
       raise ApiError, service.message unless service.success?
 
-      render json: { message: { type: service.status, text: service.message } }, adapter: :json
+      render json: { message: { type: service.status, text: service.message } }
     end
 
     # POST /api/jobs/copy
@@ -288,6 +288,24 @@ module Api
 
       render json: copies.all, root: "jobs", adapter: :json,
              meta: { messages: build_copy_messages(copies) }
+    end
+
+    # Open HTTPS external job url.
+    def open_external
+      job = Job.accessible_by(@context).find_by(uid: params[:id])
+
+      redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
+      redirect_to(job.https_job_external_url) && return unless Utils.stage_or_prod_env?
+
+      api = DIContainer.resolve("api.auth_user")
+      code = api.get_https_job_auth_token(job)
+      authorized_job_uri = URI.join(
+        job.https_job_external_url,
+        "oauth2/access",
+        "?#{URI.encode_www_form(code: code)}",
+      )
+
+      redirect_to authorized_job_uri.to_s
     end
 
     private

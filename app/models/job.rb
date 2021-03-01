@@ -20,6 +20,7 @@
 #  uid             :string(255)
 #  local_folder_id :integer
 #  featured        :boolean          default(FALSE)
+#  entity_type     :integer          default("regular"), not null
 #
 
 class Job < ApplicationRecord
@@ -52,10 +53,14 @@ class Job < ApplicationRecord
   STATE_DONE = "done".freeze
   STATE_FAILED = "failed".freeze
   STATE_IDLE = "idle".freeze
+  STATE_RUNNING = "running".freeze
   STATE_TERMINATED = "terminated".freeze
   STATE_TERMINATING = "terminating".freeze
 
   TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED].freeze
+
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
 
   belongs_to :app
   belongs_to :user
@@ -78,7 +83,12 @@ class Job < ApplicationRecord
   acts_as_votable
 
   scope :done, -> { where(state: STATE_DONE) }
-  scope :terminal, -> { where(state: [TERMINAL_STATES]) }
+  scope :terminal, -> { where(state: TERMINAL_STATES) }
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
 
   delegate :input_spec, :output_spec, to: :app
 
@@ -112,6 +122,10 @@ class Job < ApplicationRecord
     state == STATE_DONE
   end
 
+  def running?
+    state == STATE_RUNNING
+  end
+
   def failed?
     state == STATE_FAILED
   end
@@ -136,6 +150,12 @@ class Job < ApplicationRecord
 
   def energy_string
     (energy || "TBD").to_s
+  end
+
+  def https_job_external_url
+    return unless https?
+
+    describe.dig(:httpsApp, :dns, :url)
   end
 
   def update_provenance!

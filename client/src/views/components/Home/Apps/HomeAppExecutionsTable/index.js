@@ -36,7 +36,7 @@ const HomeAppsExecutionsTable = ({ uid, appExecutions, resetAppExecutionsFilters
     setAppExecutionsFilterValue(value)
     fetchAppExecutions(uid)
   }
-  
+
   const { isFetching, jobs, filters } = appExecutions
   const { sortType, sortDirection, currentPage, nextPage, prevPage, totalPages, totalCount, fields } = filters
 

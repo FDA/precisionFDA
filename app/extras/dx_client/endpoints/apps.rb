@@ -61,6 +61,15 @@ module DXClient
       def app_add_developers(app_dxid, developers)
         call(app_dxid, "addDevelopers", developers: developers)
       end
+
+      # Describe the app.
+      # @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-describe
+      # @param app_dxid [String] App's dxid.
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def app_describe(app_dxid, opts = {})
+        call(app_dxid, "describe", opts)
+      end
     end
   end
 end

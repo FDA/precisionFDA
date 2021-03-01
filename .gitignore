@@ -64,13 +64,18 @@
 # Ignore local scripts
 run-ui-test.sh
 
-# Ignore client node_modules
-client/node_modules
-client/coverage
-app/assets/packs
-
 # Foreman's Procfile
 /Procfile
+
+###### nodejs server
+dist/
+# mikro-orm metadata provider helper
+temp/
+
+*.tsbuildinfo
+node_modules/
+
+lerna-debug.log
 
 cert.pem
 key.pem

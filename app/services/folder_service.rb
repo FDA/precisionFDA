@@ -1,32 +1,31 @@
 class FolderService
+  class Error < StandardError; end
+
+  ROOT_DIR = "root".freeze
+
   def initialize(context)
     @context = context
   end
 
-  def add_folder(name, parent_folder = nil, scope = "private")
-    if parent_folder
-      unless parent_folder.editable_by?(context)
-        return Rats.failure(
-          message: "You have no permissions to add objects to #{parent_folder.name}."
-        )
-      end
-
-      computed_scope = parent_folder.scope
-      parent_folder_id = parent_folder.id
-    else
-      computed_scope = scope
-      parent_folder_id = nil
+  def add_folder(name, parent_folder = nil, scope = Scopes::SCOPE_PRIVATE)
+    if parent_folder && !parent_folder.editable_by?(context)
+      return Rats.failure(
+        message: "You have no permissions to add objects to #{parent_folder.name}.",
+      )
+    elsif parent_folder&.https?
+      return Rats.failure(message: "You're not allowed to add objects to an HTTPS folder.")
     end
 
+    computed_scope = parent_folder&.scope || scope
     scope_column_name = Node.scope_column_name(computed_scope)
 
     folder = Folder.new(
       name: name,
       parent: context.user,
       scope: computed_scope,
-      user: context.user
+      user: context.user,
+      scope_column_name => parent_folder&.id,
     )
-    folder[scope_column_name] = parent_folder_id
 
     folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
   end
@@ -43,61 +42,30 @@ class FolderService
       )
     end
 
+    return rename_https_folder(folder, new_name) if folder.https?
+
     folder.name = new_name
-    folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
+    folder.save ? Rats.success(folder) : Rats.failure(message: folder.errors.messages.first)
   end
 
-  # rubocop:disable Metrics/MethodLength
-  def move(nodes, target_folder = nil, scope = nil)
-    scope ||= "private"
-    return Rats.failure(message: "No files selected.") unless nodes.present?
+  def move(nodes, target_folder = nil, scope = Scopes::SCOPE_PRIVATE)
+    return Rats.failure(message: "No files/folders selected.") if nodes.empty?
 
-    if target_folder
-      unless target_folder.editable_by?(context)
-        return Rats.failure(
-          message: "You have no permissions to add objects to '#{target_folder.name}'."
-        )
-      end
-      computed_scope = target_folder.scope
-      target_folder_id = target_folder.id
-    else
-      computed_scope = scope
-      target_folder_id = nil
-    end
-    scope_column_name = Node.scope_column_name(computed_scope)
-    errors = []
+    validate_target_folder!(target_folder)
+    validate_nodes_to_move!(nodes, target_folder, scope)
 
-    nodes.each do |node|
-      unless (node.public? && context.user.can_administer_site?) || node.editable_by?(context)
-        errors << "You have no permissions to move '#{node.name}'."
-        break
-      end
+    nodes.update(Node.scope_column_name(scope) => target_folder&.id)
 
-      if node.in_locked_verification_space?
-        errors << "You have no permissions to move '#{node.name}', " \
-                  "as it is part of Locked Verification space."
-      end
-
-      if node.is_a?(Folder)
-        if node.scope != computed_scope && !node.private?
-          return Rats.failure(message: "Unexpected scope.")
-        end
-        if target_folder.present? && (node == target_folder || node.has_in_children?(target_folder))
-          return Rats.failure(message: "Unable to move folder into itself or its child folder.")
-        end
-      end
-
-      node[scope_column_name] = target_folder_id
-      errors << node.errors.messages.values unless node.save
-    end
-
-    if errors.empty?
+    if nodes.all?(&:valid?)
       Rats.success(count: nodes.size, scope: scope)
     else
-      Rats.failure(messages: errors.uniq)
+      Rats.failure(messages: "An error occurred during the saving to the database.")
     end
+  rescue Error => e
+    Rats.failure(message: e.message)
+  rescue StandardError
+    Rats.failure(message: "Something went wrong.")
   end
-  # rubocop:enable Metrics/MethodLength
 
   def remove(nodes)
     return Rats.failure(message: "No objects selected.") if nodes.blank?
@@ -128,11 +96,53 @@ class FolderService
 
   attr_reader :context
 
+  # Validates nodes.
+  # @param nodes [ActiveRecord::Relation<Node>] Nodes to move.
+  def validate_nodes_to_move!(nodes, target_folder, target_scope)
+    nodes.each do |node|
+      raise Error, "You're not allowed to move an HTTPS #{node.klass}." if node.https?
+
+      if node.public? && !context.can_administer_site? || !node.editable_by?(context)
+        raise Error, "You have no permissions to move '#{node.name}'."
+      end
+
+      # Verification spaces are deprecated.
+      if node.in_locked_verification_space?
+        raise Error, "You have no permissions to move '#{node.name}', " \
+                     "as it is part of Locked Verification space."
+      end
+
+      next unless node.is_a?(Folder)
+
+      raise Error, "Unexpected scope." if node.scope != target_scope && !node.private?
+
+      if target_folder && (node == target_folder || node.has_in_children?(target_folder))
+        raise Error, "Unable to move folder into itself or its child folder."
+      end
+    end
+  end
+
+  # Validates target folder for moving nodes.
+  # @param target_folder [Folder] The target folder.
+  def validate_target_folder!(target_folder)
+    return unless target_folder
+
+    raise Error, "You're not allowed to move to an HTTPS folder." if target_folder.https?
+
+    return if target_folder.editable_by?(context)
+
+    raise Error, "You have no permissions to add objects to '#{target_folder.name}'."
+  end
+
   def remove_folder(folder)
     if folder.public? && folder.all_files.present?
       return Rats.failure(message: "#{folder.name}: folder or any of its subfolders contain files.")
     end
 
+    folder.https? ? remove_https_folder(folder) : remove_regular_folder(folder)
+  end
+
+  def remove_regular_folder(folder)
     folder.sub_folders.each do |sub_folder|
       res = remove_folder(sub_folder)
       return res if res.failure?
@@ -150,6 +160,24 @@ class FolderService
     else
       Rats.failure(message: "#{folder.name}: folder removal error.")
     end
+  end
+
+  # Removes https folder and all its childs via Https Apps service.
+  # @param folder [Folder] A folder.
+  def remove_https_folder(folder)
+    https_apps_client.folder_remove(folder.id)
+
+    Rats.success(folder)
+  rescue HttpsAppsClient::Error => e
+    Rats.failure(message: e.message)
+  end
+
+  def rename_https_folder(folder, new_name)
+    https_apps_client.folder_rename(folder.id, new_name)
+
+    Rats.success(folder)
+  rescue HttpsAppsClient::Error => e
+    Rats.failure(message: e.message)
   end
 
   def remove_file(file)
@@ -185,5 +213,9 @@ class FolderService
     end
 
     Rats.success(file)
+  end
+
+  def https_apps_client
+    @https_apps_client ||= DIContainer.resolve("https_apps_client")
   end
 end

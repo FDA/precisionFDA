@@ -1581,16 +1581,6 @@ class ApiController < ApplicationController
   # Validates and initializes parameters for a file creation.
   # rubocop:disable Metrics/MethodLength
   def validate_create_file
-    file_name = params[:name].presence
-    if file_name.blank? || !file_name.is_a?(String)
-      raise_api_error "File name needs to be a non-empty String"
-    end
-
-    description = params[:description].presence
-    if description && !description.is_a?(String)
-      raise_api_error "File description needs to be a String"
-    end
-
     folder_id = params[:folder_id].presence
     @folder =
       begin
@@ -1601,6 +1591,18 @@ class ApiController < ApplicationController
 
     if @folder && !@folder.editable_by?(@context)
       raise_api_error "You don't have permissions to add files to the folder."
+    end
+
+    raise_api_error "You're not allowed to create a file in an HTTPS folder." if @folder&.https?
+
+    file_name = params[:name].presence
+    if file_name.blank? || !file_name.is_a?(String)
+      raise_api_error "File name needs to be a non-empty String"
+    end
+
+    description = params[:description].presence
+    if description && !description.is_a?(String)
+      raise_api_error "File description needs to be a String"
     end
 
     @scope = if ActiveModel::Type::Boolean.new.cast(params[:public_scope])

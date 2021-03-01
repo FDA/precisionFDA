@@ -6,13 +6,38 @@ class LoginTasksProcessor
   # Constructor.
   # @param leave_org_processor [OrgService::LeaveOrgProcess] Processor of leaving organization
   #   by user.
-  def initialize(leave_org_processor)
+  # @param https_apps_projects_creator [UserService::HttpsAppsProjectsCreator] Https App projects
+  #   creation service.
+  def initialize(leave_org_processor, https_apps_projects_creator)
     @leave_org_processor = leave_org_processor
+    @https_apps_projects_creator = https_apps_projects_creator
   end
 
   # Invokes tasks for provided user.
-  # @param user User to process tasks for.
+  # @param user [User] User to process tasks for.
   def call(user)
+    process_https_apps_projects_creation!(user)
+    process_org_leave_and_dissolve!(user)
+  end
+
+  private
+
+  attr_reader :request
+
+  # Process https apps projects creation for a user.
+  def process_https_apps_projects_creation!(user)
+    @https_apps_projects_creator.call
+  rescue StandardError => e
+    Rails.logger.warn([
+      "Can't create https apps projects for a user '#{user.dxuser}'",
+      e.message,
+      e.backtrace.join("\n"),
+    ].join("\n"))
+  end
+
+  # Process Org leaving and dissolving.
+  # @param user [User] User to process tasks for.
+  def process_org_leave_and_dissolve!(user)
     @user = user
     @request = find_request
 
@@ -22,10 +47,6 @@ class LoginTasksProcessor
     process_org_leaving!
     process_org_dissolving! if org.admin == @user
   end
-
-  private
-
-  attr_reader :request
 
   # Checks if admin tries to leave non-empty organization.
   # @return [true, false] Returns true if user is an admin and admin tries to leave an org

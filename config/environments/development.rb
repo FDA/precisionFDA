@@ -39,6 +39,10 @@ Rails.application.configure do
   config.action_mailer.delivery_method = ENV.fetch("DELIVERY_METHOD", :file).to_sym
   config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
 
+  # debugging
+  # config.action_mailer.delivery_method = :salesforce
+  # config.action_mailer.perform_deliveries = true
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

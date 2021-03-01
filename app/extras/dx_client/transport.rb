@@ -13,11 +13,12 @@ module DXClient
     # @param method [String] Method to invoke on subject.
     # @param body [Hash] HTTP POST body.
     # @return [Hash] The response from API server.
-    def call(subject, method, body = {})
+    def call(subject, method, body = {}, extra_headers = {})
       uri = URI("#{@api_server}#{subject}/#{method}")
+      conn_opts = connection_opts.merge(use_ssl: uri.scheme == "https")
 
-      Net::HTTP.start(uri.host, uri.port, connection_opts) do |http|
-        handle_response(http.post(uri.path, body.to_json, headers))
+      Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
+        handle_response(http.post(uri.path, body.to_json, headers.merge(extra_headers)))
       end
     end
 
@@ -26,7 +27,7 @@ module DXClient
     # Returns connection options.
     # @return [Hash] Connection options.
     def connection_opts
-      @connection_opts ||= { read_timeout: 180, use_ssl: true }
+      @connection_opts ||= { read_timeout: 180 }
     end
 
     # Returns HTTP headers to be sent during every request.

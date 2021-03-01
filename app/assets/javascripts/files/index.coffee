@@ -70,6 +70,11 @@ class FilesListView
       @nodes[node].in_verified_space == true
     )
 
+  anyOfHttpsType: (ids) ->
+    ids.some((node) ->
+      @nodes[node].entity_type == 'https'
+    )
+
   isRenamingAllowed: ->
     return false if @anyInVerifiedSpace(@selectedItems())
     @selectedItems().length == 1
@@ -87,7 +92,7 @@ class FilesListView
     $('#rename_form').attr('action', selected.rename_path)
 
   isMovingAllowed: ->
-    return false if @anyInVerifiedSpace(@selectedItems())
+    return false if @anyInVerifiedSpace(@selectedItems()) || @anyOfHttpsType(@selectedItems())
     @selectedItems().length > 0
 
   showMoveModal: ->
@@ -112,7 +117,7 @@ class FilesListView
       @deleteModal.modal('show')
 
   isPublishingAllowed: ->
-    return false if @anyInVerifiedSpace(@selectedItems())
+    return false if @anyInVerifiedSpace(@selectedItems()) || @anyOfHttpsType(@selectedItems())
     @selectedItems().length > 0
 
   showPublishModal: ->

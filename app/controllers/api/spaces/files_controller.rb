@@ -30,7 +30,7 @@ module Api
         result = folder_service.move(
           nodes,
           target_folder,
-          @space.uid,
+          target_folder&.scope || @space.uid,
         )
 
         raise ApiError, result.value[:message] if result.failure?
@@ -74,7 +74,8 @@ module Api
       def create_folder
         parent_folder = @space.folders.find_by(id: params[:parent_folder_id])
 
-        result = folder_service.add_folder(params[:name], parent_folder, @space.uid)
+        scope = parent_folder&.scope || @space.uid
+        result = folder_service.add_folder(params[:name], parent_folder, scope)
 
         raise ApiError, result.value.values.flatten.first if result.failure?
 

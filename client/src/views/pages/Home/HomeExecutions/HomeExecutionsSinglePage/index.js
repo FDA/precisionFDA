@@ -121,7 +121,17 @@ const HomeExecutionsSinglePage = (props) => {
         <ul className='home-single-page__object-options'>{firstList}</ul>
       </div>
       <div className='home-single-page__main-info-container_item'>
-        <ul className='home-single-page__object-options home-single-page__object-options--second-line'>{secondList}</ul>
+        <ul className='home-single-page__object-options home-single-page__object-options--second-line'>
+          {secondList}
+          {execution.links.open_external &&
+            <li>
+              <div className='home-single-page__object-options_header'>URL</div>
+              <Link to={execution.links.open_external} target='_blank' className='home-single-page__object-options_value'>
+                <span className="fa fa-external-link"></span> open
+              </Link>
+            </li>
+          }
+        </ul>
       </div>
     </>
   }
