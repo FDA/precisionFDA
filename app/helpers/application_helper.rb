@@ -156,7 +156,7 @@ module ApplicationHelper
       if opts[:nolink]
         icon_span + item.title.to_s
       else
-        link_to(icon_span + item.title.to_s, concat_path(item, opts[:no_home]), html_opts)
+        link_to(icon_span + item.title.to_s, home_path_to_item(item, opts[:no_home]), html_opts)
       end
     else
       icon_span + item.title.to_s # do not show item uid if unaccessible
@@ -165,7 +165,7 @@ module ApplicationHelper
   end
 
   # Concat item path with '/home' to create a link to Home - for specific items
-  def concat_path(item, no_home = false)
+  def home_path_to_item(item, no_home = false)
     if !no_home && (%w(file folder app app-series job
                        asset workflow workflow-series).include? item.klass)
       "/home".concat(pathify(item))
