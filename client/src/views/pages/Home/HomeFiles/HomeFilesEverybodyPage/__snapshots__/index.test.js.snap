@@ -32,6 +32,7 @@ exports[`HomeFilesEverybodyPage test should render 1`] = `
     <UploadModal
       onClose={[Function]}
       scope="public"
+      title="Upload files to Public Area"
     />
   </div>
 </HomeLayout>

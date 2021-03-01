@@ -93,7 +93,7 @@ const isUniqFile = (blobs, file) => (
   ))
 )
 
-const UploadModal = ({ scope, onClose }) => {
+const UploadModal = ({ scope, onClose, title }) => {
   const dispatch = useDispatch()
   const [blobs, setBlobs] = useState([])
   const isOpen = useSelector(uploadModalShownSelector)
@@ -130,7 +130,7 @@ const UploadModal = ({ scope, onClose }) => {
         dispatch(hideUploadModal())
         onClose()
       }}
-      title={`Upload files to ${space.isPrivate ? 'Private' : 'Shared'} Area`}
+      title={title || `Upload files to ${space.isPrivate ? 'Private' : 'Shared'} Area`}
       subTitle={`You can upload up to ${MAX_UPLOADABLE_FILES} files in a time`}
       noPadding={true}
       shouldCloseOnOverlayClick={!uploadInProgress}
@@ -208,6 +208,7 @@ const UploadModal = ({ scope, onClose }) => {
 UploadModal.propTypes = {
   scope: PropTypes.string,
   onClose: PropTypes.func,
+  title: PropTypes.string,
 }
 
 UploadModal.defaultProps = {

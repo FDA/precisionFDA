@@ -19,20 +19,16 @@ exports[`HomeFilesPage test should render 1`] = `
             Add Folder
         </span>
       </Button>
-      <a
-        href="/files/new"
+      <Button
+        type="primary"
       >
-        <Button
-          type="primary"
-        >
-          <span>
-            <Icon
-              icon="fa-plus"
-            />
-              Add Files
-          </span>
-        </Button>
-      </a>
+        <span>
+          <Icon
+            icon="fa-plus"
+          />
+            Add Files
+        </span>
+      </Button>
     </div>
     <div
       className="home-page-layout__actions--right"
@@ -49,6 +45,15 @@ exports[`HomeFilesPage test should render 1`] = `
     <Connect(HomeFilesTable)
       files={Array []}
       handleFilterValue={[Function]}
+    />
+  </div>
+  <div
+    className="home-page-layout__upload-files-modal"
+  >
+    <UploadModal
+      onClose={[Function]}
+      scope="private"
+      title="Upload files to Private Area"
     />
   </div>
 </HomeLayout>

@@ -106,7 +106,11 @@ const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesMod
         />
       }
       <div className='home-page-layout__upload-files-modal' >
-        <UploadModal scope='public' onClose={() => fetchFilesEverybody(folderId)} />
+        <UploadModal
+          scope='public'
+          onClose={() => fetchFilesEverybody(folderId)}
+          title='Upload files to Public Area'
+        />
       </div>
     </HomeLayout>
   )
