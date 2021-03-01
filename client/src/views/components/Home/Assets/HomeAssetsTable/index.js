@@ -77,7 +77,7 @@ const HomeAssetsTable = ({ assets, isFetching, isCheckedAll, toggleAllAssetsChec
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='size'>size</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
