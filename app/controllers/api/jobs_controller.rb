@@ -80,6 +80,7 @@ module Api
           search_by_tags(params.dig(:filters, :tags)).
           order(ORDER_GROUP_FIELDS)
         jobs = JobService::JobsFilter.call(jobs, params[:filters])
+        sync_jobs(jobs)
 
         render_jobs_list(jobs)
       end
