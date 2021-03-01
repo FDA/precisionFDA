@@ -8,7 +8,7 @@
 #  app_owner_id    :integer
 #  app_id          :integer
 #  description     :text(65535)
-#  meta            :text(65535)
+#  meta            :text(16777215)
 #  start_at        :datetime
 #  end_at          :datetime
 #  created_at      :datetime         not null
@@ -17,8 +17,8 @@
 #  automated       :boolean          default(TRUE)
 #  card_image_url  :string(255)
 #  card_image_id   :string(255)
-#  specified_order :integer
 #  space_id        :integer
+#  specified_order :integer
 #
 
 class Challenge < ApplicationRecord

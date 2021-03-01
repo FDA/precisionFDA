@@ -116,6 +116,7 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.string "uid"
     t.string "dev_group"
     t.string "release", null: false
+    t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.boolean "deleted", default: false, null: false
     t.index ["app_series_id"], name: "index_apps_on_app_series_id"
@@ -379,6 +380,7 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.integer "analysis_id"
     t.string "uid"
     t.integer "local_folder_id"
+    t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.index ["analysis_id"], name: "fk_rails_0a95efec7a"
     t.index ["app_id"], name: "index_jobs_on_app_id"
@@ -456,6 +458,7 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.string "sti_type"
     t.integer "scoped_parent_folder_id"
     t.string "uid"
+    t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
@@ -809,6 +812,8 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.integer "user_state", default: 0, null: false
     t.integer "expiration"
     t.string "disable_message"
+    t.string "jupyter_project"
+    t.string "ttyd_project"
     t.index ["dxuser"], name: "index_users_on_dxuser", unique: true
     t.index ["normalized_email"], name: "index_users_on_normalized_email"
     t.index ["org_id"], name: "index_users_on_org_id"

@@ -1,0 +1,311 @@
+import { expect } from 'chai'
+import { EntityManager } from '@mikro-orm/mysql'
+import supertest from 'supertest'
+import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
+import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
+import {
+  JOB_STATE,
+  JOB_DB_ENTITY_TYPE,
+  DEFAULT_INSTANCE_TYPE,
+  allowedFeatures,
+  allowedInstanceTypes,
+} from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
+import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { api } from '../../../src/server'
+import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
+
+describe('POST /apps/:id/run', () => {
+  let em: EntityManager
+  let user: User
+  let app: App
+
+  beforeEach(async () => {
+    await db.dropData(database.connection())
+    // create DB mocks
+    em = database.orm().em
+    em.clear()
+    user = create.userHelper.create(em)
+    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    await em.flush()
+    // handle the stubs
+    mocksReset()
+  })
+
+  it('response shape', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runAppInput())
+      .expect(201)
+    expect(body).to.deep.equal({
+      id: 1,
+      app: app.id,
+      // appSeriesId: null,
+      name: app.title,
+      dxid: generate.job.jobId(),
+      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+      user: user.id,
+      // default app type
+      project: user.jupyterProject,
+      state: JOB_STATE.IDLE,
+      scope: 'private',
+    })
+  })
+
+  it('builds json fields in the db', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runAppInput())
+      .expect(201)
+    const jobInDb = await em.findOne(Job, body.id)
+    expect(jobInDb).to.have.property('uid', `${generate.job.jobId()}-1`)
+    expect(jobInDb).to.have.property('describe', '{}')
+    expect(jobInDb).to.have.property(
+      'runData',
+      JSON.stringify({
+        run_instance_type: DEFAULT_INSTANCE_TYPE,
+        run_inputs: {
+          duration: generate.app.runAppInput().input.duration,
+          feature: 'PYTHON_R', // default from the specs
+        },
+        run_outputs: {},
+      }),
+    )
+    expect(jobInDb).to.have.property(
+      'provenance',
+      JSON.stringify({
+        [generate.job.jobId()]: {
+          app_dxid: app.dxid,
+          app_id: app.id,
+          inputs: {},
+        },
+      }),
+    )
+  })
+
+  it('response shape - ttyd app', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runTtydAppInput())
+      .expect(201)
+    expect(stripEntityDates(body)).to.deep.equal({
+      id: 1,
+      app: app.id,
+      name: app.title,
+      dxid: generate.job.jobId(),
+      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+      user: user.id,
+      // default app type
+      project: user.ttydProject,
+      state: JOB_STATE.IDLE,
+      scope: 'private',
+    })
+  })
+
+  it('accepts snapshot file dxid', async () => {
+    const snapshotFile = create.filesHelper.create(em, { user })
+    await em.flush()
+    const input = {
+      ...generate.app.runAppInput(),
+      input: {
+        snapshot: snapshotFile.uid,
+      },
+    }
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(input)
+      .expect(201)
+    const jobInDb = await em.findOne(Job, { id: body.id })
+    expect(jobInDb).to.have.property('provenance')
+    const provenance = JSON.parse((jobInDb.provenance as unknown) as string)
+    expect(provenance).to.be.deep.equal({
+      [generate.job.jobId()]: {
+        app_dxid: app.dxid,
+        app_id: app.id,
+        inputs: { snapshot: snapshotFile.dxid },
+      },
+    })
+    const jobFileRows = await em.createQueryBuilder('job_inputs').select('*').execute()
+    expect(jobFileRows).to.be.an('array').with.lengthOf(1)
+    expect(jobFileRows[0]).to.have.property('job_id', body.id)
+    expect(jobFileRows[0]).to.have.property('user_file_id', snapshotFile.id)
+    // correct API call shape
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('input')
+    expect(platformCall.input)
+      .to.have.property('snapshot')
+      .that.deep.equals({
+        $dnanexus_link: { id: snapshotFile.dxid, project: user.jupyterProject },
+      })
+  })
+
+  it('accepts all input params (uses all overrides and optionals)', async () => {
+    const inputComplete = {
+      ...generate.app.runAppInput(),
+      instanceType: 'himem-2',
+      name: 'my-job-name',
+      input: {
+        duration: 60,
+        feature: 'ML_IP',
+        imagename: 'my-imagename',
+        cmd: 'my-command-override',
+      },
+    }
+    await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(inputComplete)
+      .expect(201)
+    // all overrides took place
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('name', inputComplete.name)
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      duration: inputComplete.input.duration,
+      feature: allowedFeatures.ML_IP,
+      imagename: inputComplete.input.imagename,
+      cmd: inputComplete.input.cmd,
+    })
+    expect(platformCall)
+      .to.have.property('systemRequirements')
+      .that.deep.equals({
+        '*': { instanceType: allowedInstanceTypes[inputComplete.instanceType] },
+      })
+  })
+
+  it('accepts minimal input params (uses all defaults)', async () => {
+    const inputComplete = {
+      httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
+      scope: 'private',
+      input: {},
+    }
+    await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(inputComplete)
+      .expect(201)
+    // all defaults took place
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('name').that.is.undefined()
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      duration: 240,
+      feature: allowedFeatures.PYTHON_R,
+    })
+    expect(platformCall)
+      .to.have.property('systemRequirements')
+      .that.deep.equals({
+        '*': { instanceType: DEFAULT_INSTANCE_TYPE },
+      })
+  })
+
+  it('calls the platform API', async () => {
+    await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runAppInput())
+      .expect(201)
+    expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
+  })
+
+  it('calls queue helper', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runAppInput())
+      .expect(201)
+    expect(fakes.queue.createJobSyncTaskFake.calledOnce).to.be.true()
+    const fakeCallArgs = fakes.queue.createJobSyncTaskFake.getCall(0).args
+    expect(fakeCallArgs[0]).to.deep.equal({
+      dxid: body.dxid,
+    })
+    expect(fakeCallArgs[1]).to.deep.equal({
+      id: user.id,
+      accessToken: 'fake-token',
+      dxuser: user.dxuser,
+    })
+  })
+
+  it('uses correct project reference based on app type', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({
+        ...generate.app.runAppInput(),
+        httpsAppType: appDomain.enums.APP_HTTPS_SUBTYPE.TTYD,
+      })
+      .expect(201)
+    expect(body).to.have.property('project', user.ttydProject)
+    const fakeCallArgs = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(fakeCallArgs).to.have.property('project', user.ttydProject)
+  })
+
+  context('error states', () => {
+    it('throws 404 when user does not exist', async () => {
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${app.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+          id: user.id + 1,
+        })
+        .send(generate.app.runAppInput())
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
+    })
+
+    it('throws 404 when user does not have the project set', async () => {
+      user.jupyterProject = null
+      await em.flush()
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${app.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+          id: user.id,
+        })
+        .send(generate.app.runAppInput())
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
+    })
+
+    // deprecated, admin owns the apps
+    it.skip('throws 401 when user does not own the app', async () => {
+      const anotherUser = create.userHelper.create(em)
+      const anotherApp = create.appHelper.create(em, { user: anotherUser })
+      await em.flush()
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${anotherApp.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+        })
+        .send(generate.app.runAppInput())
+      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+    })
+
+    it('throws 404 if requested app does not follow the requirements', async () => {
+      const anotherApp = create.appHelper.create(em, { user }, { scope: 'private' })
+      await em.flush()
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${anotherApp.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+        })
+        .send(generate.app.runAppInput())
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+    })
+
+    it('throws 404 when snapshot is provided but file does not exist', async () => {
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${app.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+        })
+        .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
+    })
+  })
+})

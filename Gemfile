@@ -108,6 +108,8 @@ gem "sidekiq"
 
 gem "whenever", require: false
 
+gem "soapforce"
+
 group :development do
   # Annotate models
   gem "annotate"
@@ -158,6 +160,6 @@ end
 
 group :production do
   gem "exception_notification", "4.1.1"
-  gem "soapforce", ">= 0.8.0"
+  # gem "soapforce"
   gem "unicorn", "~> 4.9.0"
 end

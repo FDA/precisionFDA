@@ -7,6 +7,7 @@ class AppEditorModel
 
     @ubuntuReleases = ko.observableArray(ubuntuReleases)
     @dxid = app?.dxid
+    @entityType = app?.entity_type
     @name = ko.observable(app?.name)
     @name.cache = ko.computed(
       read: () =>
@@ -205,6 +206,7 @@ class AppEditorModel
       ordered_assets: @getAssetsForSave()
       packages: @packages.peek()
       code: @code.peek() ? ""
+      entity_type: @entityType
 
     Precision.api('/api/apps', params)
       .done((data) =>

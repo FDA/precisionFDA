@@ -23,6 +23,8 @@
 #  user_state                  :integer          default("enabled"), not null
 #  expiration                  :integer
 #  disable_message             :string(255)
+#  jupyter_project             :string(255)
+#  ttyd_project                :string(255)
 #
 
 class User < ApplicationRecord
@@ -400,65 +402,75 @@ class User < ApplicationRecord
 
   def self.sync_challenge_job!(job_id)
     user = User.challenge_bot
-    token = CHALLENGE_BOT_TOKEN
     job = user.jobs.find(job_id) # Re-check job id
-    unless job.terminal?
-      result = DNAnexusAPI.new(token).call("system", "findJobs",
-                                           includeSubjobs: false,
-                                           id: [job.dxid],
-                                           project: user.private_files_project,
-                                           parentJob: nil,
-                                           parentAnalysis: nil,
-                                           describe: true)["results"][0]
-      sync_job_state(result, job, user, token)
-    end
+
+    return if job.terminal? || job.https?
+
+    api = DIContainer.resolve("api.challenge_bot")
+
+    result = api.system_find_jobs(
+      includeSubjobs: false,
+      id: [job.dxid],
+      project: user.private_files_project,
+      parentJob: nil,
+      parentAnalysis: nil,
+      describe: true,
+    )["results"].first
+
+    sync_job_state(result, job, user, api)
   end
 
   def self.sync_job!(context, job_id)
     return if context.guest?
 
-    user = context.user
-    token = context.token
     job = Job.accessible_by(context).find(job_id) # Re-check job id
-    return if job.terminal?
+    return if job.terminal? || job.https?
 
-    result = DNAnexusAPI.new(token).call("system", "findJobs",
-                                         includeSubjobs: false,
-                                         id: [job.dxid],
-                                         project:  job.project || user.private_files_project,
-                                         parentJob: nil,
-                                         parentAnalysis: job.analysis.try(:dxid),
-                                         describe: true)["results"][0]
+    user = context.user
+    api = DIContainer.resolve("api.user")
+
+    result = api.system_find_jobs(
+      includeSubjobs: false,
+      id: [job.dxid],
+      project:  job.project || user.private_files_project,
+      parentJob: nil,
+      parentAnalysis: job.analysis.try(:dxid),
+      describe: true,
+    )["results"].first
+
     return if result.blank?
 
-    sync_job_state(result, job, user, token)
+    sync_job_state(result, job, user, api)
   end
 
   def self.sync_jobs!(context, jobs = Job.includes(:analysis), project = nil)
     return if context.guest?
 
-    user_id = context.user_id
-    token = context.token
-    user = User.find(user_id)
+    user = context.user
+    api = DIContainer.resolve("api.user")
+
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
-      jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
+    jobs.regular.where(user_id: user.id).
+      where.not(state: Job::TERMINAL_STATES).
+      limit(SYNC_JOBS_LIMIT).
+      each_slice(1000) do |jobs_batch|
+      jobs_hash = jobs_batch.map { |job| [job.dxid, job] }.to_h
+
       jobs_hash.keys.each do |job_dxid|
         job_project = project || Job.find_by(dxid: job_dxid).project
 
-        response = DNAnexusAPI.new(token).call(
-          "system",
-          "findJobs",
+        response = api.system_find_jobs(
           includeSubjobs: false,
           id: [job_dxid],
           project: job_project || user.private_files_project,
           parentJob: nil,
           describe: true,
         )
+
         response["results"].each do |result|
           next if result.blank?
 
-          sync_job_state(result, jobs_hash[result["id"]], user, token)
+          sync_job_state(result, jobs_hash[result["id"]], user, api)
         end
       end
     end
@@ -466,17 +478,22 @@ class User < ApplicationRecord
 
   def self.sync_challenge_jobs!
     user = User.challenge_bot
+    api = DIContainer.resolve("api.challenge_bot")
+
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Job.where(user_id: user.id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
-      jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
-      DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("system", "findJobs",
-                                                includeSubjobs: false,
-                                                id: jobs_hash.keys,
-                                                project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
-                                                parentJob: nil,
-                                                parentAnalysis: nil,
-                                                describe: true)["results"].each do |result|
-        sync_job_state(result, jobs_hash[result["id"]], user, CHALLENGE_BOT_TOKEN)
+    Job.regular.where(user_id: user.id).
+      where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+      jobs_hash = jobs.map { |job| [job.dxid, job] }.to_h
+
+      api.system_find_jobs(
+        includeSubjobs: false,
+        id: jobs_hash.keys,
+        project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true,
+      )["results"].each do |result|
+        sync_job_state(result, jobs_hash[result["id"]], user, api)
       end
     end
   end
@@ -493,8 +510,6 @@ class User < ApplicationRecord
   def self.user_helper_attribute(id, attribute)
     find(id)[attribute]
   end
-
-  private
 
   def self.sync_file_state(result, file, user)
     if result["statusCode"] == 404
@@ -537,12 +552,15 @@ class User < ApplicationRecord
     end
   end
 
-  def self.sync_job_state(result, job, user, token)
+  private_class_method :sync_file_state
+
+  # rubocop:todo Metrics/MethodLength
+  def self.sync_job_state(result, job, user, api)
     state = result["describe"]["state"]
     # Only do anything if local job state is stale
     return if state == job.state
 
-    if state == "done"
+    if state == Job::STATE_DONE
       # Use serialization to deep copy result since output will be modified
       output = JSON.parse(result["describe"]["output"].to_json)
       output_file_ids = []
@@ -559,7 +577,8 @@ class User < ApplicationRecord
       end
       output_file_ids.uniq!
       output_file_ids.each_slice(1000) do |slice_of_file_ids|
-        DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: slice_of_file_ids)["results"].each_with_index do |api_result, i|
+        api.system_describe_data_objects(slice_of_file_ids)["results"].
+          each_with_index do |api_result, i|
           # Push avoids creating a new array as opposed to +/+=
           output_file_cache.push(
             dxid: slice_of_file_ids[i],
@@ -610,6 +629,9 @@ class User < ApplicationRecord
       end
     end
   end
+  # rubocop:enable Metrics/MethodLength
+
+  private_class_method :sync_job_state
 
   alias_method :site_admin?, :can_administer_site?
 end

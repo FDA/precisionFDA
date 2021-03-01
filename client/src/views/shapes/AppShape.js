@@ -14,6 +14,7 @@ const AppShape = {
   runByYou: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
   title: PropTypes.string,
+  entityType: PropTypes.string,
   links: PropTypes.object,
   isChecked: PropTypes.bool,
 }
@@ -31,6 +32,7 @@ const mapToApp = (data) => ({
   runByYou: data.run_by_you,
   tags: data.tags || [],
   title: data.title,
+  entityType: data.entity_type,
   links: data.links,
   isChecked: false,
 })

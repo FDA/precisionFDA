@@ -29,11 +29,22 @@ module IOC
         )
       end
 
+      register("https_apps_client") { HttpsAppsClient.new(config[:token], config[:user]) }
+
       namespace "api" do
         register("user", memoize: true) { DNAnexusAPI.new(config[:token]) }
         register("admin", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN) }
         register("challenge_bot", memoize: true) { DNAnexusAPI.new(CHALLENGE_BOT_TOKEN) }
         register("auth", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI) }
+        register("auth_user", memoize: true) do
+          DNAnexusAPI.new(config[:token], DNANEXUS_AUTHSERVER_URI)
+        end
+      end
+
+      namespace "users" do
+        register("https_apps_projects_creator") do
+          UserService::HttpsAppsProjectsCreator.new(container.resolve("api.user"), config[:user])
+        end
       end
 
       namespace "orgs" do # rubocop:todo Metrics/BlockLength
@@ -56,7 +67,10 @@ module IOC
         end
 
         register("login_tasks_processor") do
-          LoginTasksProcessor.new(resolve("org_leave_processor"))
+          LoginTasksProcessor.new(
+            resolve("org_leave_processor"),
+            container.resolve("users.https_apps_projects_creator"),
+          )
         end
 
         register("leave_org_request_creator") do

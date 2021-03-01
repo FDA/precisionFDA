@@ -158,11 +158,11 @@ class AppsController < ApplicationController
 
     if @app.nil?
       flash[:error] = I18n.t("app_not_accessible")
-      redirect_to apps_path && return
+      redirect_to(apps_path) && return
     elsif @app.id != @app.app_series.latest_revision_app_id
       redirect_to edit_app_path(@app.app_series.latest_revision_app) && return
     else
-      attrs = %i(dxid name scope title version revision readme spec internal release)
+      attrs = %i(dxid name scope title version revision readme spec internal release entity_type)
       js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
     end
   end
@@ -231,12 +231,13 @@ class AppsController < ApplicationController
     if @app.nil?
       flash[:error] = I18n.t("app_fork_forbidden")
       redirect_to apps_path && return
-    else
-      attrs = %i(dxid name title version revision readme spec internal release)
-      js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
     end
+
+    attrs = %i(dxid name title version revision readme spec internal release entity_type)
+    js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
   end
 
+  # TODO: do refactoring of this method later!
   # Inputs
   #
   # id (string, required): the dxid of the app to run
@@ -262,6 +263,11 @@ class AppsController < ApplicationController
     inputs = unsafe_params["inputs"]
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
+    run_instance_type = unsafe_params[:instance_type]
+    if run_instance_type
+      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(run_instance_type)
+    end
+
     # App should exist and be accessible and runnable by a user.
     @app = App.find_by!(uid: id)
 
@@ -270,6 +276,32 @@ class AppsController < ApplicationController
     # Check if asset licenses have been accepted
     unless @app.assets.all? { |a| a.license.blank? || a.licensed_by?(@context) }
       fail "Asset licenses must be accepted"
+    end
+
+    # Call JupiterLab service if https app is running
+    if @app.https?
+      https_apps_client = DIContainer.resolve("https_apps_client")
+      input_info = input_spec_preparer.run(@app, inputs)
+
+      fail input_spec_preparer.first_error unless input_spec_preparer.valid?
+
+      result =
+        begin
+          https_apps_client.app_run(
+            @app.dxid,
+            name: name,
+            httpsAppType: @app.https_subtype,
+            instanceType: run_instance_type,
+            scope: Scopes::SCOPE_PRIVATE,
+            input: input_info.run_inputs,
+          )
+        rescue HttpsAppsClient::Error => e
+          fail e.message
+        end
+
+      job = Job.find_by!(dxid: result["dxid"])
+
+      render(json: { id: job.uid }) && return
     end
 
     space_id = unsafe_params[:space_id]
@@ -282,13 +314,6 @@ class AppsController < ApplicationController
     input_info = input_spec_preparer.run(@app, inputs, space&.accessible_scopes)
 
     fail input_spec_preparer.first_error unless input_spec_preparer.valid?
-
-    run_instance_type = unsafe_params[:instance_type]
-
-    # User can override the instance type
-    if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(run_instance_type)
-    end
 
     if space
       project = space.project_for_user(@context.user)

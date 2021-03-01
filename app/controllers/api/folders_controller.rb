@@ -44,7 +44,7 @@ module Api
     def rename_folder
       result = folder_service.rename(@folder, params[:name])
 
-      raise ApiError, result.value.values if result.failure?
+      raise ApiError, result.value[:message] if result.failure?
 
       render json: result.value, adapter: :json
     end

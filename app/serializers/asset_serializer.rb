@@ -1,8 +1,5 @@
 # Asset serializer.
 class AssetSerializer < UserFileSerializer
-  include ActionView::Helpers::NumberHelper
-  include FilesHelper
-
   attributes(
     :uid,
     :created_at_date_time,
@@ -11,8 +8,6 @@ class AssetSerializer < UserFileSerializer
     :links,
     :file_license,
   )
-
-  attribute :all_tags_list, key: :tags
 
   # get array of asset archive_entries
   def archive_content
@@ -26,7 +21,7 @@ class AssetSerializer < UserFileSerializer
     return {} unless current_user
 
     # rubocop:disable Metrics/BlockLength
-    {}.tap do |links|
+    super.tap do |links|
       links[:show] = api_asset_path(object)
       links[:user] = user_path(object.user.dxuser)
       links[:space] = space_path if object.in_space?
@@ -102,6 +97,4 @@ class AssetSerializer < UserFileSerializer
     end
   end
   # rubocop:enable Metrics/MethodLength
-
-  delegate :all_tags_list, to: :object
 end

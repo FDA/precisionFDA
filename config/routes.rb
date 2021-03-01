@@ -248,13 +248,13 @@ Rails.application.routes.draw do
       end
 
       resources :jobs, only: %i(index show create) do
+        get :open_external, on: :member
+
         collection do
           get :featured
           get :everybody
           get :spaces
-
           get :log
-
           post :copy
           post :terminate
           put :feature, to: "jobs#invert_feature"
@@ -391,7 +391,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :jobs, except: :index do
+    resources :jobs, except: %i(index update edit) do
       member do
         get "log"
       end
