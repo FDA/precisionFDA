@@ -1,9 +1,37 @@
 # rubocop:disable Metrics/BlockLength
 # rubocop:disable Metrics/MethodLength
 namespace :apps do
+  # The apps codes could be not relevant, please find the way to fetch the actual scripts.
   TTYD_CODE = <<~CODE.freeze
     #!/bin/bash
+
     set -e -x -o pipefail
+
+    # interactive apps should run sub-jobs detached automatically.
+    echo "export DX_RUN_DETACH=1" >> /home/dnanexus/.bashrc
+
+    # Create a manifest file for dxfuse
+    echo "{
+      \"files\" : [],
+      \"directories\" : [
+         {
+          \"proj_id\" : \"$DX_PROJECT_CONTEXT_ID\",
+          \"folder\" : \"/\",
+          \"dirname\" : \"/project\"
+         }
+      ]
+    }" > .dxfuse_manifest.json
+
+    # Create a mount point for the project
+    MOUNTDIR=/mnt
+    sudo mkdir -p $MOUNTDIR
+
+    # Mount the current project
+    dxfuse $MOUNTDIR .dxfuse_manifest.json &
+
+    # Wait for mount to start
+    sleep 2
+
     ttyd -p 443 dx-su-contrib
   CODE
 
@@ -141,12 +169,14 @@ namespace :apps do
     "baseline-4" => "mem1_ssd1_v2_x4",
   }.freeze
 
-  def run(app_dxid)
+  def run(app_name)
     api = DNAnexusAPI.for_admin
 
-    abort "Can't find public app '*#{app_dxid}*' in the Platform" unless app_dxid
+    app_dxid = api.system_find_apps(name: app_name)["results"].first&.fetch("id", nil)
 
-    p "Found #{app_dxid} app in the Platform"
+    abort "Can't find the app '#{app_name}' on the Platform" unless app_dxid
+
+    print "Found the app with dxid #{app_dxid} on the Platform.\n"
 
     app_info = api.app_describe(app_dxid)
 
@@ -154,34 +184,47 @@ namespace :apps do
                  ENV["CREATED_BY"].present? && User.find_by(dxuser: ENV["CREATED_BY"]) ||
                  User.find_by(dxuser: ADMIN_USER.sub(/^user-/, ""))
 
-    abort "Can't find createdBy user for the app" unless created_by
+    abort "Can't determine a createdBy user for the app" unless created_by
 
     app_scope = Scopes::SCOPE_PUBLIC
 
-    instance_type = app_info.dig("runSpec", "systemRequirements").values.first["instanceType"]
-    baseline = INSTANCE_TYPES.invert[instance_type] || "baseline-4"
-
-    internet_access = app_info.dig("access", "network").first == "*"
-    release = app_info.dig("runSpec", "release")
-
-    input_spec = app_info["inputSpec"].select do |spec|
-      is_supported = %w(string file int boolean float).include?(spec["class"])
-      p "Unhandled class #{spec['class']}" unless is_supported
-      is_supported
-    end
-
-    output_spec = app_info["outputSpec"].select do |spec|
-      spec["class"] = spec["class"].sub(/^array:/, "")
-      %w(string file int boolean float).include?(spec["class"])
-    end
-
-    packages = app_info.dig("runSpec", "execDepends").map do |package|
-      if package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"])
-        package["name"]
-      end
-    end.compact
-
     ActiveRecord::Base.transaction do
+      app_series = create_app_series(app_info["name"], created_by, app_scope)
+      latest_revision_app = app_series.latest_revision_app
+      latest_revision = latest_revision_app&.revision.to_i
+
+      if latest_revision > 0
+        print "Found already existing '#{app_name}' app with the last revision #{latest_revision}.\n"
+
+        if app_info["version"] == latest_revision_app.version
+          abort "The app on the platform has the same version as the existing one. " +
+                "Nothing to transfer."
+        end
+      end
+
+      instance_type = app_info.dig("runSpec", "systemRequirements").values.first["instanceType"]
+      baseline = INSTANCE_TYPES.invert[instance_type] || "baseline-4"
+
+      internet_access = app_info.dig("access", "network").first == "*"
+      release = app_info.dig("runSpec", "release")
+
+      input_spec = app_info["inputSpec"].select do |spec|
+        is_supported = %w(string file int boolean float).include?(spec["class"])
+        print "Unhandled class #{spec['class']}\n" unless is_supported
+        is_supported
+      end
+
+      output_spec = app_info["outputSpec"].select do |spec|
+        spec["class"] = spec["class"].sub(/^array:/, "")
+        %w(string file int boolean float).include?(spec["class"])
+      end
+
+      packages = app_info.dig("runSpec", "execDepends").map do |package|
+        if package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"])
+          package["name"]
+        end
+      end.compact
+
       assets = app_info.dig("runSpec", "bundledDepends").map do |asset_data|
         asset_dxid = asset_data.dig("id", "$dnanexus_link")
         asset_name = asset_data["name"]
@@ -207,12 +250,14 @@ namespace :apps do
         asset
       end.compact
 
-      app_series = create_app_series(app_info["name"], created_by, app_scope)
+      revision = latest_revision + 1
+
+      print "The new app will be created with the revision #{revision}\n"
 
       app = App.create!(
         dxid: app_dxid,
         version: app_info["version"],
-        revision: 1,
+        revision: revision,
         title: app_info["title"],
         readme: app_info["description"],
         user: created_by,
@@ -224,7 +269,7 @@ namespace :apps do
         instance_type: baseline,
         ordered_assets: assets.map(&:uid),
         packages: packages,
-        code: code(app_info["title"]),
+        code: code(app_name),
         assets: assets,
         release: app_info.dig("runSpec", "release"),
         entity_type: app_info["httpsApp"].present? ? App::TYPE_HTTPS : App::TYPE_REGULAR,
@@ -234,12 +279,11 @@ namespace :apps do
     end
   end
 
-  def code(app_title)
-    case app_title
+  # ideally, we can fetch the actual app's code from some external source
+  def code(app_name)
+    case app_name
     when "ttyd" then TTYD_CODE
-    when "DNAnexus JupyterLab Server" then JUPYTER_CODE
-    else
-      p "The code will be empty for this app."
+    when "dxjupyterlab" then JUPYTER_CODE
     end
   end
 
@@ -255,12 +299,18 @@ namespace :apps do
     )
   end
 
-  desc "Transfer app from the Platform by ID"
-  task :transfer, [:app_dxid] => :environment do |_, args|
-    abort "Please provide APP DXID to transfer" unless args.app_dxid
-    abort "App already exists in pFDA" if App.find_by(dxid: args.app_dxid)
+  desc "Transfer a public app from the Platform by name. " +
+       "Create a new revision if app version is changed."
+  task :transfer, [:app_name] => :environment do |_, args|
+    supported_apps = ["ttyd", "dxjupyterlab"]
 
-    run(args.app_dxid)
+    abort "Please provide the app name to transfer" unless args.app_name
+
+    unless supported_apps.include?(args.app_name)
+      abort "The supported apps to transfer: #{supported_apps.join(', ')}"
+    end
+
+    run(args.app_name)
   end
 end
 # rubocop:enable Metrics/BlockLength
