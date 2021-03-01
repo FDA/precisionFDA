@@ -39,7 +39,7 @@ const Tab = ({ url, text, tab, currentTab, setCurrentTab, isDisabled, ...rest })
   )
 }
 
-const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters }) => {
+const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters, hideTabs }) => {
   const page = match.params.page
 
   useEffect(() => {
@@ -51,6 +51,8 @@ const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters }) => 
 
     if (currentTab && !counters[currentTab].isFetched) fetchCounters(currentTab)
   }, [currentTab])
+
+  if (hideTabs) return null
 
   return (
     <div className='home-page-layout__tabs'>
@@ -101,6 +103,7 @@ Tabs.propTypes = {
   setCurrentTab: PropTypes.func,
   counters: PropTypes.object,
   fetchCounters: PropTypes.func,
+  hideTabs: PropTypes.bool,
 }
 
 const mapStateToProps = (state) => ({
