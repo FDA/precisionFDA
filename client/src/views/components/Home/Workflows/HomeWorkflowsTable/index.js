@@ -78,7 +78,7 @@ const HomeWorkflowsTable = ({ workflows, isFetching, isCheckedAll, toggleAllWork
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='title'>title</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>

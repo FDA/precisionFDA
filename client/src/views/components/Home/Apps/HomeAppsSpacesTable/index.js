@@ -79,7 +79,7 @@ const HomeAppsSpacesTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsChec
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='username'>added by</Th>
             <Th>location</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>

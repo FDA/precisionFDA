@@ -100,7 +100,7 @@ const HomeFilesTable = ({ files, isFetching, isCheckedAll, toggleAllFilesCheckbo
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='size'>size</Th>
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='created_at'>created</Th>
               <Th>origin</Th>
-              <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='tags'>tags</Th>
+              <Th>tags</Th>
             </Thead>
             <Tbody>
               <>

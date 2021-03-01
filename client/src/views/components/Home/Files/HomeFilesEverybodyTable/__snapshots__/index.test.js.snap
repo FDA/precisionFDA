@@ -63,10 +63,7 @@ exports[`HomeFilesEverybodyTable test should render 1`] = `
           <Th>
             origin
           </Th>
-          <Th
-            sortHandler={[Function]}
-            type="tags"
-          >
+          <Th>
             tags
           </Th>
         </Thead>
