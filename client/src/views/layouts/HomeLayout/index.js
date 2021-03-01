@@ -15,11 +15,9 @@ const HomeLayout = ({ children, hideTabs }) => {
         <div className='home-page-layout__container'>
           <Menu />
           <div className="home-page-layout__content">
-            {!hideTabs &&
-              <div>
-                <Tabs />
-              </div>
-            }
+            <div>
+              <Tabs hideTabs={hideTabs} />
+            </div>
             <div className="pfda-padded-20">
               {children}
             </div>
