@@ -508,6 +508,8 @@ module Api
     def find_user_file
       @file = UserFile.not_assets.accessible_by(@context).
         includes(:user).find_by!(uid: params[:uid])
+    rescue ActiveRecord::RecordNotFound => e
+      raise ApiError, Message.not_found(e.exception.model)
     end
 
     def can_edit?

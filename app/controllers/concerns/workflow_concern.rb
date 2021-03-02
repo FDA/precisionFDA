@@ -137,7 +137,7 @@ module WorkflowConcern
 
     analysis_dxid = response["id"]
     analysis = Analysis.create!(
-      name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id
+      name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id,
     )
 
     response["stages"].each_with_index do |job_id, idx|
@@ -150,7 +150,7 @@ module WorkflowConcern
         if input_value.is_a?(Hash)
           if input_value["$dnanexus_link"].is_a?(String) && /^file-/.match(input_value["$dnanexus_link"])
             input_file_dxids << input_value["$dnanexus_link"]
-            run_inputs[input_name] = input_value["$dnanexus_link"]
+            run_inputs[input_name] = inputs.dig(idx, :input_value)
           end
         else
           run_inputs[input_name] = input_value
