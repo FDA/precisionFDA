@@ -31,7 +31,7 @@ class Job::IOCollection::Input
   def file
     return nil unless file?
 
-    UserFile.find_by_uid(value)
+    UserFile.find_by(uid: value)
   end
 
   private
