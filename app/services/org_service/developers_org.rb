@@ -25,7 +25,7 @@ module OrgService
     end
 
     def self.choose_dxorg(papi, handle = "app_developers")
-      new_handle = "#{handle}_#{SecureRandom.hex}"
+      new_handle = "#{handle}_#{SecureRandom.hex[0..9]}"
       dxorg = Org.construct_dxorg(new_handle)
 
       if papi.entity_exists?(dxorg)
