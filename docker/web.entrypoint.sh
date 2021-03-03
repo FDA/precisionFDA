@@ -5,5 +5,8 @@ sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVE
 # Install gems if needed
 bundle check || bundle install
 
-# Run webserver
-bundle exec thin --debug start --ssl --ssl-key-file ./key.pem --ssl-cert-file ./cert.pem
+if [[ -f ./key.pem && -f ./cert.pem ]]; then
+  bundle exec thin --debug start --ssl --ssl-key-file ./key.pem --ssl-cert-file ./cert.pem
+else
+  bundle exec thin --ssl --debug start
+fi
