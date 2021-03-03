@@ -2,6 +2,7 @@
 
 const path = require('path')
 const fs = require('fs')
+
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
