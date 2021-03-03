@@ -53,7 +53,7 @@ class Challenge < ApplicationRecord
     if context.challenge_admin?
       all
     else
-      not_status([STATUS_SETUP, STATUS_ARCHIVED]).
+      not_status(STATUS_SETUP).
         where(scope: [Scopes::SCOPE_PUBLIC] + (context.user&.space_uids || []))
     end
   }
