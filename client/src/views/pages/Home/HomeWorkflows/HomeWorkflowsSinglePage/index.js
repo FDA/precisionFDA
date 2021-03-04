@@ -68,6 +68,10 @@ const HomeWorkflowsSinglePage = (props) => {
         link: workflow.links.space && `${workflow.links.space}/workflows`,
       },
       {
+        header: 'name',
+        value: 'name',
+      },
+      {
         header: 'id',
         value: 'uid',
       },
