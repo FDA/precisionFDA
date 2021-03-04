@@ -79,6 +79,10 @@ const HomeAppsSinglePage = (props) => {
         link: app.links.space && `${app.links.space}/apps`,
       },
       {
+        header: 'name',
+        value: 'name',
+      },
+      {
         header: 'id',
         value: 'uid',
       },
