@@ -295,6 +295,8 @@ module Api
     def open_external
       job = Job.accessible_by(@context).find_by(uid: params[:id])
 
+      raise ApiError, "You have no permissions to access this job" unless job
+
       redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
       redirect_to(job.https_job_external_url) && return unless Utils.stage_or_prod_env?
 

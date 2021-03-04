@@ -16,12 +16,11 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                destroy
                                                presskit
                                                news
-                                               mislabeling)
+                                               mislabeling
+                                               track
+                                               ae_anomaly_detection)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  # rubocop:todo Rails/LexicallyScopedActionFilter
-  skip_before_action :require_login, only: %i(track ae_anomaly_detection)
-  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
@@ -204,9 +203,25 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def login
     if @context.guest?
-      render "_partials/_error", status: :forbidden, locals: { message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, your user account must be provisioned. Your account is currently being reviewed by an FDA administrator for provisioning. If you do not receive full access within 14 days, please contact precisionfda@fda.hhs.gov to request an upgraded account with end-level access." }
+      render "_partials/_error", status: :forbidden,
+                                 locals: { message: I18n.t("main.login_as_guest_warning") }
     else
-      redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode_www_form_component(OAUTH2_REDIRECT_URI)}"
+      user_return_to = params[:user_return_to].presence
+
+      uri_attrs = [OAUTH2_REDIRECT_URI]
+      uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
+
+      query_params = URI.encode_www_form(
+        response_type: "code",
+        client_id: OAUTH2_CLIENT_ID,
+        redirect_uri: URI.join(*uri_attrs),
+      )
+
+      redirect_to URI.join(
+        DNANEXUS_AUTHSERVER_URI,
+        "oauth2/authorize",
+        "?#{query_params}",
+      ).to_s
     end
   end
 
@@ -306,18 +321,32 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
       Session.delete_expired
 
+      redirect_url = root_url
+
       if Session.limit_reached?(user)
         flash[:error] = "You have reached a limit for login. You can use only #{SESSIONS_LIMIT} active sessions."
       else
+        redirect_url = params[:redirect_uri].presence || redirect_url
         Session.where(key: session_id).delete_all
         reset_session
         save_session(user.id, username, token, expiration_time, user.org_id)
         log_session("User #{username} logged in")
         Event::UserLoggedIn.create_for(user)
       end
+
       distribute_results user, token
-      redirect_to root_url
+      redirect_to redirect_url
     end
+  end
+
+  def check_webapp
+    job_dxid = (params[:redirect_uri].presence || "")[/job-[^\.]+/]
+    head(:unprocessable_entity) && return unless job_dxid
+
+    job = Job.accessible_by(@context).find_by(dxid: job_dxid)
+    head(:forbidden) && return unless job
+
+    redirect_to open_external_api_job_path(job)
   end
 
   def distribute_results(user, token) # rubocop:todo Metrics/MethodLength
