@@ -91,6 +91,7 @@ Rails.application.routes.draw do
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
+    get "check_webapp" => "main#check_webapp"
     post "publish" => "main#publish"
     get "track" => "main#track"
     get "request_access" => "main#request_access"

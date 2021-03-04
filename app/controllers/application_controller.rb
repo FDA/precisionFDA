@@ -102,12 +102,19 @@ class ApplicationController < ActionController::Base
 
   # Redirects user to login page if user is not logged in.
   def require_login
-    redirect_to login_url unless @context.logged_in?
+    redirect_to return_to_login_url unless @context.logged_in?
   end
 
   # Redirect user to login page if user is not either guest or logged in.
   def require_login_or_guest
-    redirect_to login_url unless @context.logged_in_or_guest?
+    redirect_to return_to_login_url unless @context.logged_in_or_guest?
+  end
+
+  def return_to_login_url
+    URI.join(
+      login_url,
+      "?#{URI.encode_www_form(user_return_to: request.original_fullpath)}",
+    ).to_s
   end
 
   # Tries to authorize user if the user is not authorized or guest one yet.
