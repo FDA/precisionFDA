@@ -12,6 +12,9 @@ export const config: ConfigOverride = {
     // debug: true,
     debug: false,
   },
+  redis: {
+    url: 'redis://localhost:6379',
+  },
   workerJobs: {
     queues: {
       default: {
