@@ -25,6 +25,7 @@ const fakes = {
   bull: {
     // process cannot be blocking in tests
     processFake: sinon.fake(),
+    isReadyFake: sinon.fake(),
   },
 }
 
@@ -53,6 +54,7 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'removeFolderRec', fakes.client.folderRemoveFake)
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
+  sandbox.replace(Bull.prototype, 'isReady', fakes.bull.isReadyFake)
   // stub queue helpers
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
   sandbox.replace(queue, 'createJobSyncTask', fakes.queue.createJobSyncTaskFake)
@@ -71,6 +73,7 @@ const mocksReset = () => {
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()
   fakes.bull.processFake.resetHistory()
+  fakes.bull.isReadyFake.resetHistory()
 
   mocksSetDefaultBehaviour()
 }
