@@ -81,7 +81,11 @@ class Node < ApplicationRecord
 
   class << self
     def scope_column_name(scope)
-      [SCOPE_PRIVATE, SCOPE_PUBLIC, nil].include?(scope) ? :parent_folder_id : :scoped_parent_folder_id
+      if [SCOPE_PRIVATE, SCOPE_PUBLIC, nil].include?(scope)
+        :parent_folder_id
+      else
+        :scoped_parent_folder_id
+      end
     end
 
     def folder_content(files, folders)
