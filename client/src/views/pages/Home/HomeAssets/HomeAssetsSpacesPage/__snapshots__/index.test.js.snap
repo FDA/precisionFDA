@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAssetsSpacesPage test should render 1`] = `
+<HomeLayout>
+  <div
+    className="home-page-layout__header-row"
+  >
+    <div
+      className="home-page-layout__actions"
+    >
+      <LinkTargetBlank
+        url="/assets/new"
+      >
+        <Button
+          type="primary"
+        >
+          <span>
+            <Icon
+              icon="fa-question"
+            />
+              How to create assets
+          </span>
+        </Button>
+      </LinkTargetBlank>
+    </div>
+    <div
+      className="home-page-layout__actions--right"
+    >
+      <Connect(ActionsDropdown)
+        assets={Array []}
+        page="spaces"
+      />
+    </div>
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Connect(HomeAssetsSpacesTable)
+      assets={Array []}
+      handleFilterValue={[Function]}
+    />
+  </div>
+</HomeLayout>
+`;

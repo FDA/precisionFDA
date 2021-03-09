@@ -5,6 +5,7 @@ import {
   SPACE_JOBS_FETCH_FAILURE,
   SPACE_JOBS_TABLE_SORT,
   SPACE_JOBS_RESET_FILTERS,
+  SPACE_JOBS_SET_CURRENT_PAGE_VALUE,
 } from '../../../actions/spaces/types'
 
 
@@ -56,6 +57,17 @@ describe('reducer actions processing', () => {
     expect(reducer(initialState, action)).toEqual({
       sortType: null,
       sortDirection: null,
+    })
+  })
+
+  it('SPACE_JOBS_SET_CURRENT_PAGE_VALUE', () => {
+    const initialState = {}
+    const action = { type: SPACE_JOBS_SET_CURRENT_PAGE_VALUE, payload: 2 }
+
+    expect(reducer(initialState, action)).toEqual({
+      pagination: {
+        currentPage: 2,
+      },
     })
   })
 })

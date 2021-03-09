@@ -4,16 +4,16 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "2.7.1"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "~> 6.0.3.2"
+gem "rails", "~> 6.0.3.4"
 # Use SCSS for stylesheets
-gem "sass-rails", "~> 6.0"
+gem "sass-rails", "~> 6.0", ">= 6.0.0"
 # Use Uglifier as compressor for JavaScript assets
 gem "uglifier", ">= 1.3.0"
 # Use CoffeeScript for .coffee assets and views
-gem "coffee-rails", "~> 5.0"
+gem "coffee-rails", "~> 5.0", ">= 5.0.0"
 
 # Use jquery as the JavaScript library
-gem "jquery-rails", "~> 4.4"
+gem "jquery-rails", "~> 4.4", ">= 4.4.0"
 # Turbolinks makes navigating your web application faster
 gem "turbolinks", "~> 5"
 # Build JSON APIs with ease
@@ -26,7 +26,7 @@ gem "bootsnap", ">= 1.4.6", require: false
 gem "sdoc", ">= 1.0.0", group: :doc
 
 # ActiveModelSerializers brings convention over configuration to your JSON generation.
-gem "active_model_serializers", "~> 0.10.0"
+gem "active_model_serializers", "~> 0.10.10"
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -37,7 +37,7 @@ gem "rails_param"
 # WiceGrid is a Rails grid plugin.
 #   Wice Grid doesn't support Rails 6 now, so we use the patched version from here:
 #   https://github.com/patricklindsay/wice_grid/issues/74
-gem "wice_grid", "~> 4.1", github: "kreintjes/wice_grid", branch: "fix/all"
+gem "wice_grid", "~> 4.1", ">= 4.1.0", github: "kreintjes/wice_grid", branch: "fix/all"
 
 # Page-specific javascript for Rails done right
 gem "paloma", "~> 5.1.0"
@@ -63,7 +63,7 @@ gem "secure_headers", "~> 6.3"
 gem "gravtastic"
 
 # Adds pagination support to models
-gem "bootstrap-kaminari-views"
+gem "bootstrap-kaminari-views", ">= 0.0.5"
 gem "kaminari", ">= 1.2.1", "< 2.0"
 
 # For getting user's local time
@@ -78,19 +78,19 @@ gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
 gem "acts_as_votable"
 
 # For inline-css in emails
-gem "inky-rb", require: "inky"
-gem "premailer-rails"
+gem "inky-rb", ">= 1.3.8.0", require: "inky"
+gem "premailer-rails", ">= 1.11.1"
 
 gem "mysql2"
 
-gem "gretel"
+gem "gretel", ">= 4.0.2"
 
 gem "rack-utf8_sanitizer", "~> 1.7"
 
 # View outgoing HTTP requests
 gem "httplog"
 
-gem "simple_form", "~> 5.0.0"
+gem "simple_form", "~> 5.0.2"
 
 # PDF builder
 gem "prawn"
@@ -114,7 +114,7 @@ group :development do
   gem "brakeman"
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
-  gem "web-console"
+  gem "web-console", ">= 4.0.4"
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
@@ -141,16 +141,16 @@ group :development do
 end
 
 group :development, :test, :ui_test do
-  gem "dotenv-rails"
+  gem "dotenv-rails", ">= 2.7.6"
   gem "thin"
 end
 
 group :test do
   gem "database_cleaner", "~> 1.5", ">= 1.5.3"
-  gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
+  gem "factory_bot_rails", "~> 4.11", ">= 4.11.1"
   gem "ffaker"
-  gem "rails-controller-testing"
-  gem "rspec-rails", "~> 4.0.0"
+  gem "rails-controller-testing", ">= 1.0.5"
+  gem "rspec-rails", "~> 4.0.1"
   gem "shoulda-matchers"
   gem "simplecov", ">= 0.18.5", require: false
   gem "webmock", "~> 3.1", ">= 3.1.1"
@@ -158,6 +158,6 @@ end
 
 group :production do
   gem "exception_notification", "4.1.1"
-  gem "soapforce"
+  gem "soapforce", ">= 0.8.0"
   gem "unicorn", "~> 4.9.0"
 end

@@ -1,76 +1,55 @@
 <ul class="nav-links nav navbar-nav">
-    <li class="<%= 'active' if controller_name == 'main' && action_name == 'index' %>" role="presentation">
-      <%= link_to root_path, "aria-label": 'Application overview link' do %>
-        <div class="nav-icon fa fa-2x fa-home"></div>
-        <div class="nav-pill-title">Overview</div>
-      <% end %>
-    </li>
-    <li class="<%= 'active' if %w(discussions answers).include?(controller_name) %>" role="presentation">
-      <%= link_to discussions_path, "aria-label": 'Application navigation link' do %>
-        <div class="nav-icon fa fa-2x fa-comments-o"></div>
-        <div class="nav-pill-title">Discussions</div>
-      <% end %>
-    </li>
-    <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(controller_name) %>" role="presentation">
-      <%= link_to challenges_path, "aria-label": 'Application challenges link' do %>
-        <div class="nav-icon fa fa-2x fa-trophy"></div>
-        <div class="nav-pill-title">Challenges</div>
-      <% end %>
-    </li>
-    <li class="<%= 'active' if %w(experts expert_questions).include?(controller_name) %>" role="presentation">
-      <%= link_to experts_path, "aria-label": 'Application experts link' do %>
-        <div class="nav-icon fa fa-2x fa-star-o"></div>
-        <div class="nav-pill-title">Experts</div>
-      <% end %>
-    </li>
+  <li class="<%= 'active' if controller_name == 'main' && action_name == 'index' %>" role="presentation">
+    <%= link_to root_path do %>
+      <div class="nav-icon fa fa-2x fa-home"></div>
+      <div class="nav-pill-title">Overview</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if %w(discussions answers).include?(controller_name) %>" role="presentation">
+    <%= link_to discussions_path do %>
+      <div class="nav-icon fa fa-2x fa-comments-o"></div>
+      <div class="nav-pill-title">Discussions</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(controller_name) %>" role="presentation">
+    <%= link_to challenges_path do %>
+      <div class="nav-icon fa fa-2x fa-trophy"></div>
+      <div class="nav-pill-title">Challenges</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if %w(experts expert_questions).include?(controller_name) %>" role="presentation">
+    <%= link_to experts_path do %>
+      <div class="nav-icon fa fa-2x fa-star-o"></div>
+      <div class="nav-pill-title">Experts</div>
+    <% end %>
+  </li>
+  <li class="nav-spacer"></li>
+  <li class="<%= 'active' if controller_name == 'notes' %>" role="presentation">
+    <%= link_to notes_path do %>
+      <div class="nav-icon fa fa-2x fa-sticky-note"></div>
+      <div class="nav-pill-title">Notes</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if controller_name == 'comparisons' %>" role="presentation">
+    <%= link_to comparisons_path, "aria-label": 'Application comparisons link' do %>
+      <div class="nav-icon fa fa-2x fa-bullseye"></div>
+      <div class="nav-pill-title">Comparisons</div>
+    <% end %>
+  </li>
+  <li class="nav-spacer"></li>
+  <li class="<%= 'active' if (controller_name == 'home' || controller_name == 'main') %>" role="presentation">
+    <%= link_to home_path, data: { turbolinks: false }, notice: "Book not found" do %>
+      <div class="nav-icon fa fa-2x fa-fort-awesome"></div>
+      <div class="nav-pill-title">My Home</div>
+    <% end %>
+  </li>
+  <% if UserPolicy.can_see_spaces?(@context) %>
     <li class="nav-spacer"></li>
-    <li class="<%= 'active' if controller_name == 'notes' %>" role="presentation">
-      <%= link_to notes_path, "aria-label": 'Application notes link' do %>
-        <div class="nav-icon fa fa-2x fa-sticky-note"></div>
-        <div class="nav-pill-title">Notes</div>
+    <li class="<%= 'active' if controller_name == 'spaces' %>" role="presentation">
+      <%= link_to spaces_path, data: { turbolinks: false }, "aria-label": 'Application spaces link' do %>
+        <div class="nav-icon fa fa-2x fa-object-group"></div>
+        <div class="nav-pill-title">Spaces</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if controller_name == 'files' %>" role="presentation">
-      <%= link_to files_path, "aria-label": 'Application files link' do %>
-        <div class="nav-icon fa fa-2x fa-files-o"></div>
-        <div class="nav-pill-title">Files</div>
-      <% end %>
-    </li>
-    <li class="<%= 'active' if controller_name == 'comparisons' %>" role="presentation">
-      <%= link_to comparisons_path, "aria-label": 'Application comparisons link' do %>
-        <div class="nav-icon fa fa-2x fa-bullseye"></div>
-        <div class="nav-pill-title">Comparisons</div>
-      <% end %>
-    </li>
-    <li class="<%= 'active' if %w(apps jobs assets).include?(controller_name) %>" role="presentation">
-      <%= link_to apps_path, "aria-label": 'Application apps link' do %>
-        <div class="nav-icon fa fa-2x fa-cubes"></div>
-        <div class="nav-pill-title">Apps</div>
-      <% end %>
-    </li>
-    <li class="<%= 'active' if controller_name == 'workflows' %>" role="presentation">
-      <%= link_to workflows_path, "aria-label": 'Application workflows link' do %>
-        <div class="nav-icon fa fa-2x fa-flash"></div>
-        <div class="nav-pill-title">Workflows</div>
-      <% end %>
-    </li>
-    <!--  TODO: take away this condition when final merge be ready -->
-    <% if Rails.env.development? || Rails.env.ui_test? %>
-      <li class="nav-spacer"></li>
-      <li class="<%= 'active' if (controller_name == 'home' || controller_name == 'main') %>" role="presentation">
-        <%= link_to home_path, data: { turbolinks: false }, notice: "Book not found" do %>
-          <div class="nav-icon fa fa-2x fa-fort-awesome"></div>
-          <div class="nav-pill-title">My Home</div>
-        <% end %>
-      </li>
-    <% end %>
-    <% if UserPolicy.can_see_spaces?(@context) %>
-      <li class="nav-spacer"></li>
-      <li class="<%= 'active' if controller_name == 'spaces' %>" role="presentation">
-        <%= link_to spaces_path, data: { turbolinks: false }, "aria-label": 'Application spaces link' do %>
-          <div class="nav-icon fa fa-2x fa-object-group"></div>
-          <div class="nav-pill-title">Spaces</div>
-        <% end %>
-      </li>
-    <% end %>
-  </ul>
+  <% end %>
+</ul>

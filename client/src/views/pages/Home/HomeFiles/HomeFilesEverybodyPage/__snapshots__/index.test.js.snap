@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeFilesEverybodyPage test should render 1`] = `
+<HomeLayout>
+  <div
+    className="home-page-layout__header-row"
+  >
+    <div
+      className="home-page-layout__actions"
+    />
+    <div
+      className="home-page-layout__actions--right"
+    >
+      <Connect(ActionsDropdown)
+        deleteFiles={[Function]}
+        files={Array []}
+        page="public"
+      />
+    </div>
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Connect(HomeFilesEverybodyTable)
+      files={Array []}
+      handleFilterValue={[Function]}
+    />
+  </div>
+</HomeLayout>
+`;

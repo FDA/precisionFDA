@@ -2,6 +2,7 @@
 class SubmissionsController < ApplicationController
   skip_before_action :require_login, only: []
   before_action :require_login_or_guest, only: []
+  before_action :check_challenge_access
 
   def new
     @challenge = Challenge.find(unsafe_params[:challenge_id])
@@ -325,6 +326,10 @@ class SubmissionsController < ApplicationController
 
   # Clones user's submission files into challenge space.
   def clone_inputs_to_space
+    files = UserFile.accessible_by(@context).where(uid: @inputs.values)
+
+    return if files.empty?
+
     api = DIContainer.resolve("api.user")
 
     api.project_invite(
@@ -335,15 +340,15 @@ class SubmissionsController < ApplicationController
       suppressAllNotifications: true,
     )
 
-    files = UserFile.accessible_by(@context).where(uid: @inputs.values)
-
-    challenge_bot_copy_service.copy(files, @challenge.space.scope)
-
-    api.project_decrease_permissions(
-      @context.user.private_files_project,
-      DNAnexusAPI::PROJECT_ACCESS_NONE,
-      "user-#{CHALLENGE_BOT_DX_USER}",
-    )
+    begin
+      challenge_bot_copy_service.copy(files, @challenge.space.scope)
+    ensure
+      api.project_decrease_permissions(
+        @context.user.private_files_project,
+        DNAnexusAPI::PROJECT_ACCESS_NONE,
+        "user-#{CHALLENGE_BOT_DX_USER}",
+      )
+    end
   end
 
   def challenge_bot_copy_service
@@ -360,5 +365,11 @@ class SubmissionsController < ApplicationController
       user: User.challenge_bot,
       project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     )
+  end
+
+  def check_challenge_access
+    return if Challenge.accessible_by(@context).exists?(params[:challenge_id].to_i)
+
+    redirect_to challenges_path, alert: "The challenge is not accessible to you"
   end
 end

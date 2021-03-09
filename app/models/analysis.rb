@@ -15,6 +15,7 @@
 class Analysis < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   extend ApplicationHelper
 
   belongs_to :workflow
@@ -58,11 +59,16 @@ class Analysis < ApplicationRecord
                  state: job.state,
                  uid: job.uid,
                  execution: job.name,
+                 instance_type: job.resolved_instance_type,
+                 energy_consumption: job.energy_string,
+                 launched_by: job.user.full_name,
+                 location: ApplicationSerializer.new(job).location,
                  app_uid: job.app.uid,
                  app_title: job.app.title,
                  batch_id: batch_item.batch_id,
                  duration: humanize_seconds(job.runtime),
-                 created: job.created_at.to_s(:db)
+                 created: job.created_at.to_s(:db),
+                 links: analysis.job_links(job),
               }
             end
             }
@@ -85,13 +91,20 @@ class Analysis < ApplicationRecord
           state: job.state,
           uid: job.uid,
           execution: job.name,
+          analysis_name: analysis.name,
           app_uid: job.app.uid,
+          instance_type: job.resolved_instance_type,
+          energy_consumption: job.energy_string,
+          launched_by: job.user.full_name,
+          location: ApplicationSerializer.new(job).location,
           app_title: job.app.title,
           batch_id: analysis.batch_id,
           batch_children: options[:stop].nil? && analysis.batch_id.present? ? self.job_hash(analysis.batch_items, options.merge({stop: true})) : nil,
           duration: humanize_seconds(job.runtime),
           created: job.created_at.to_s(:db)
         }
+        formatted_job[:links] = analysis.job_links(job)
+
         if job.public?
           formatted_job[:icon] = "fa-globe"
         elsif job.in_space?
@@ -108,6 +121,18 @@ class Analysis < ApplicationRecord
         formatted_job
       end
       acc.merge(analysis.id => formatted_jobs)
+    end
+  end
+
+  # create links for single job of analysis
+  # @param job [Job] - object of Job class
+  # @return links [Hash] - object of job's links
+  def job_links(job)
+    {}.tap do |links|
+      links[:space] = ApplicationSerializer.new(job).space_path if job.in_space?
+      links[:show] = "/jobs/#{job.uid}"
+      links[:app] = "/apps/#{job.app.uid}"
+      links[:user] = "/user/#{job.user.dxuser}"
     end
   end
 

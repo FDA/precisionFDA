@@ -14,13 +14,15 @@ class Job::IOCollection
     records = []
 
     spec.each do |piece_of_spec|
-      data.each do |name, value|
+      data&.each do |name, value|
         next unless piece_of_spec[:name] == name
         records.push(record_class.new(piece_of_spec, value, options))
       end
     end
 
     new(records)
+  rescue NoMethodError
+    []
   end
 
   attr_reader :records

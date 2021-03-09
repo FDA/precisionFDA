@@ -46,8 +46,17 @@ class Challenge < ApplicationRecord
   store :meta, accessors: [:regions], coder: JSON
 
   scope :automated, -> { where(automated: true) }
+  scope :not_status, ->(status) { where.not(status: status) }
   scope :archived, -> { where(status: STATUS_ARCHIVED) }
-  scope :not_archived, -> { where.not(status: STATUS_ARCHIVED) }
+
+  scope :accessible_by, lambda { |context|
+    if context.challenge_admin?
+      all
+    else
+      not_status([STATUS_SETUP, STATUS_ARCHIVED]).
+        where(scope: [Scopes::SCOPE_PUBLIC] + (context.user&.space_uids || []))
+    end
+  }
 
   delegate :setup?, :active?, :coming_soon?, :paused?, :closed?, :archived?, :result_announced?, to: :state
 
@@ -63,41 +72,44 @@ class Challenge < ApplicationRecord
   validate :validate_end_at
   validate :validate_start_at
   validate :can_open?
+  validate :scope_should_be_valid
+
   attr_accessor :host_lead_dxuser, :guest_lead_dxuser
 
-  def self.available_statuses
-    [STATUS_SETUP, STATUS_OPEN, STATUS_PAUSED, STATUS_ARCHIVED, STATUS_RESULT_ANNOUNCED]
-  end
-
-  def self.add_app_dev(context, challenge_id, app_id)
-    result = false
-    api = DNAnexusAPI.new(context.token)
-
-    Challenge.transaction do
-      app = App.find_by(id: app_id)
-      user = User.challenge_bot
-      api.call(app.dxid, "addDevelopers", developers: [user.dxid])
-      challenge = Challenge.find_by!(id: challenge_id)
-      challenge.update!(app_id: app_id)
-      result = true
+  class << self
+    def available_statuses
+      [STATUS_SETUP, STATUS_OPEN, STATUS_PAUSED, STATUS_ARCHIVED, STATUS_RESULT_ANNOUNCED]
     end
 
-    result
-  end
+    def add_app_dev(context, challenge_id, app_id)
+      result = false
+      api = DNAnexusAPI.new(context.token)
 
-  def self.featured(context)
-    challenges = context.challenge_admin? ? not_archived : where.not(status: [STATUS_SETUP, STATUS_ARCHIVED])
-    challenges.order(specified_order: "desc")
-  end
+      transaction do
+        app = App.find_by(id: app_id)
+        user = User.challenge_bot
+        api.call(app.dxid, "addDevelopers", developers: [user.dxid])
+        challenge = Challenge.find_by!(id: challenge_id)
+        challenge.update!(app_id: app_id)
+        result = true
+      end
 
-  def self.app_owned_by(context)
-    return none unless context.logged_in?
+      result
+    end
 
-    where(app_owner_id: context.user_id).where("end_at > ?", DateTime.now)
-  end
+    def featured(context)
+      accessible_by(context).order(specified_order: "desc")
+    end
 
-  def self.current
-    not_archived.last
+    def app_owned_by(context)
+      return none unless context.logged_in?
+
+      where(app_owner_id: context.user_id).where("end_at > ?", DateTime.now)
+    end
+
+    def current
+      not_status(STATUS_ARCHIVED).last
+    end
   end
 
   def regions
@@ -130,7 +142,7 @@ class Challenge < ApplicationRecord
   end
 
   def accessible_by?(context)
-    context.logged_in?
+    self.class.accessible_by(context).exists?(id)
   end
 
   def editable_by?(context)
@@ -217,8 +229,12 @@ class Challenge < ApplicationRecord
     end
   end
 
-  def is_viewable?(context)
-    !setup? || context.challenge_admin?
+  def public?
+    scope == Scopes::SCOPE_PUBLIC
+  end
+
+  def space_challenge?
+    Space.valid_scope?(scope)
   end
 
   def member_ids
@@ -323,5 +339,11 @@ class Challenge < ApplicationRecord
   # space not accepted by leads
   def can_open?
     errors.add(:status, "Can't open challenge unless space is accepted") if active? && !space&.accepted?
+  end
+
+  def scope_should_be_valid
+    return if scope == Scopes::SCOPE_PUBLIC || space_challenge?
+
+    errors.add(:scope, "can be either 'public' or 'space-x")
   end
 end

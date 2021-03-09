@@ -47,7 +47,9 @@ class FolderService
     folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
   end
 
-  def move(nodes, target_folder = nil, scope = "private")
+  # rubocop:disable Metrics/MethodLength
+  def move(nodes, target_folder = nil, scope = nil)
+    scope ||= "private"
     return Rats.failure(message: "No files selected.") unless nodes.present?
 
     if target_folder
@@ -56,14 +58,12 @@ class FolderService
           message: "You have no permissions to add objects to '#{target_folder.name}'."
         )
       end
-
       computed_scope = target_folder.scope
       target_folder_id = target_folder.id
     else
       computed_scope = scope
       target_folder_id = nil
     end
-
     scope_column_name = Node.scope_column_name(computed_scope)
     errors = []
 
@@ -82,7 +82,6 @@ class FolderService
         if node.scope != computed_scope && !node.private?
           return Rats.failure(message: "Unexpected scope.")
         end
-
         if target_folder.present? && (node == target_folder || node.has_in_children?(target_folder))
           return Rats.failure(message: "Unable to move folder into itself or its child folder.")
         end
@@ -98,6 +97,7 @@ class FolderService
       Rats.failure(messages: errors.uniq)
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def remove(nodes)
     return Rats.failure(message: "No objects selected.") if nodes.blank?

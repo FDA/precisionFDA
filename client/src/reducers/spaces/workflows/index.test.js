@@ -15,6 +15,7 @@ import {
   COPY_OBJECTS_TO_SPACE_START,
   COPY_OBJECTS_TO_SPACE_SUCCESS,
   COPY_OBJECTS_TO_SPACE_FAILURE,
+  SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE,
 } from '../../../actions/spaces/types'
 
 
@@ -193,6 +194,17 @@ describe('reducer actions processing', () => {
     expect(reducer(initialState, action)).toEqual({
       copyModal: {
         isLoading: false,
+      },
+    })
+  })
+
+  it('SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE', () => {
+    const initialState = {}
+    const action = { type: SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE, payload: 3 }
+
+    expect(reducer(initialState, action)).toEqual({
+      pagination: {
+        currentPage: 3,
       },
     })
   })

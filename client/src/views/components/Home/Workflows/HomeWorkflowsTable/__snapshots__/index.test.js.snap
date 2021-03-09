@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeWorkflowsTable test should render 1`] = `
+<div
+  className="home-page-layout__data-table"
+>
+  <div
+    className="home-page-layout__table-wrapper"
+  >
+    <Table>
+      <Thead>
+        <th
+          className="pfda-padded-l10"
+        >
+          <Icon
+            icon="fa-square-o home-page-layout__data-table_checkbox"
+            onClick={[Function]}
+          />
+        </th>
+        <Th
+          sortHandler={[Function]}
+          type="name"
+        >
+          name
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="title"
+        >
+          title
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="username"
+        >
+          added by
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="created_at"
+        >
+          created
+        </Th>
+        <Th
+          sortHandler={[Function]}
+          type="tags"
+        >
+          tags
+        </Th>
+      </Thead>
+      <Tbody>
+        <FilterRow
+          onChangeFieldsValue={[Function]}
+        />
+      </Tbody>
+    </Table>
+  </div>
+  <div
+    className="pfda-padded-t20 text-center"
+  >
+    No workflows found.
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Pagination
+      data={
+        Object {
+          "currentPage": undefined,
+          "nextPage": undefined,
+          "prevPage": undefined,
+          "totalPages": undefined,
+        }
+      }
+      setPageHandler={[Function]}
+    />
+  </div>
+</div>
+`;

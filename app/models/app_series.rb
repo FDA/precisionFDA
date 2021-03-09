@@ -19,6 +19,10 @@ class AppSeries < ApplicationRecord
 
   include Auditor
   include Permissions
+  include CommonPermissions
+  include Featured
+  include SoftRemovable
+  include TagsContainer
 
   has_many :apps
   has_many :jobs
@@ -27,7 +31,6 @@ class AppSeries < ApplicationRecord
   belongs_to :user
 
   acts_as_votable
-  acts_as_taggable
 
   alias_attribute :title, :name
 
@@ -44,6 +47,23 @@ class AppSeries < ApplicationRecord
   ].freeze
 
   class << self
+    # Returns apps count of user 'private' scope.
+    # Is used in for user serializer in Home
+    # @param [User] User object
+    # @return [Integer] Apps count.
+    # TODO: add rspec
+    def private_count(user)
+      count = 0
+      app_series = accessible_by_private.
+        where(user_id: user.id)
+      app_series.each do |app_serie|
+        latest = app_serie.latest_revision_app
+        count += 1 if latest&.scope == "private" && latest&.not_deleted?
+      end
+
+      count
+    end
+
     def construct_dxid(username, app_name, scope)
       "app-#{construct_dxname(username, app_name, scope)}"
     end

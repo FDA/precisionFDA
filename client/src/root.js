@@ -18,7 +18,7 @@ const root = ({ store }) => (
     <Router history={history}>
       <ErrorWrapper>
         <Switch>
-          <Redirect exact from='/home' to='/home/apps' />
+          <Redirect exact from='/home' to='/home/files' />
           <Route path='/home/:page/:tab?' render={(props) => <HomePage {...props} />} />
           <Route exact path='/spaces'>
             <SpacesListPage />

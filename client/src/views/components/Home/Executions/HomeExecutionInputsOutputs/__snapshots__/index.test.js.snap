@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeExecutionInputsOutputs test should render 1`] = `
+<div
+  className="home-execution-inp-out__container"
+>
+  <Table
+    config={Array []}
+    title="inputs"
+  />
+  <Table
+    config={Array []}
+    title="outputs"
+  />
+</div>
+`;

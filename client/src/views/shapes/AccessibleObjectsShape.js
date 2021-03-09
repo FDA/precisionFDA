@@ -13,6 +13,34 @@ const mapToAccessibleSpace = (space) => ({
   isSelected: false,
 })
 
+const AccessibleLicenseShape = {
+  added_by: PropTypes.string,
+  added_by_fullname: PropTypes.string,
+  approval_required: PropTypes.bool,
+  content: PropTypes.string,
+  created_at: PropTypes.string,
+  created_at_date_time: PropTypes.string,
+  id: PropTypes.number,
+  location: PropTypes.string,
+  tags: PropTypes.array,
+  title: PropTypes.string,
+  isSelected: PropTypes.bool,
+}
+
+const mapToAccessibleLicense = (license) => ({
+  added_by: license.added_by,
+  added_by_fullname: license.added_by_fullname,
+  approval_required: license.approval_required,
+  content: license.content,
+  created_at: license.created_at,
+  created_at_date_time: license.created_at_date_time,
+  id: license.id,
+  location: license.location,
+  tags: license.tags,
+  title: license.title,
+  isSelected: false,
+})
+
 const AccessibleFileShape = {
   id: PropTypes.number,
   uid: PropTypes.string,
@@ -70,8 +98,10 @@ export {
   AccessibleFileShape,
   AccessibleAppShape,
   AccessibleWorkflowShape,
+  AccessibleLicenseShape,
   mapToAccessibleSpace,
   mapToAccessibleFile,
   mapToAccessibleApp,
   mapToAccessibleWorkflow,
+  mapToAccessibleLicense,
 }

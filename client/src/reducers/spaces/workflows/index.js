@@ -16,6 +16,7 @@ import {
   COPY_OBJECTS_TO_SPACE_START,
   COPY_OBJECTS_TO_SPACE_SUCCESS,
   COPY_OBJECTS_TO_SPACE_FAILURE,
+  SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE,
 } from '../../../actions/spaces/types'
 import { isCheckedAllCheckboxes } from '../../../helpers'
 
@@ -26,11 +27,12 @@ export default createReducer(initialState, {
     isFetching: true,
   }),
 
-  [SPACE_WORKFLOWS_FETCH_SUCCESS]: (state, { workflows, links }) => ({
+  [SPACE_WORKFLOWS_FETCH_SUCCESS]: (state, { workflows, links, pagination }) => ({
     ...state,
     entries: [...workflows],
     isFetching: false,
     links,
+    pagination,
   }),
 
   [SPACE_WORKFLOWS_FETCH_FAILURE]: state => ({
@@ -42,6 +44,14 @@ export default createReducer(initialState, {
     ...state,
     sortType: type,
     sortDirection: direction,
+  }),
+
+  [SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE]: (state, value) => ({
+    ...state,
+    pagination: {
+      ...state.pagination,
+      currentPage: value,
+    },
   }),
 
   [SPACE_WORKFLOWS_RESET_FILTERS]: (state) => ({

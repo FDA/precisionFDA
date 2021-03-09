@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeAttachToModal matches snapshot 1`] = `
+<Modal
+  className="resource_type__modal"
+  hideModalHandler={[Function]}
+  modalFooterContent={
+    <Footer
+      attachAction={[Function]}
+      hideAction={[Function]}
+      isCopyDisabled={true}
+    />
+  }
+  noPadding={true}
+  title="Select a note or answer to attach to"
+>
+  <div
+    className="home-attach-to-modal"
+  >
+    <div
+      className="home-attach-to-modal__menu-container"
+    >
+      <div
+        className="home-attach-to-modal__menu-item"
+      >
+        <Input
+          autoComplete="off"
+          lg={false}
+          name="search"
+          onChange={[Function]}
+          placeholder="Search..."
+          type="text"
+          value=""
+        />
+        <span
+          className="home-attach-to-modal__menu-item_search-icons"
+        >
+          <Icon
+            icon="fa-search"
+          />
+        </span>
+      </div>
+      <div>
+        <ul
+          className="home-attach-to-modal__items-list"
+        >
+          <div
+            className="home-attach-to-modal__menu-item"
+          >
+            <span
+              className="text-muted"
+            >
+              No results found
+            </span>
+            <span
+              className="home-attach-to-modal__menu-item_clear"
+              onClick={[Function]}
+            >
+              Clear query
+            </span>
+          </div>
+        </ul>
+      </div>
+    </div>
+    <div
+      className="home-attach-to-modal__note-container"
+    >
+      <div
+        className="home-attach-to-modal__note-container_title"
+      >
+        <a />
+      </div>
+      <Markdown />
+      <div
+        className="home-attach-to-modal__note-container_no-content"
+      >
+        No content written for this item
+      </div>
+    </div>
+  </div>
+</Modal>
+`;

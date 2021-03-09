@@ -5,6 +5,7 @@ import classNames from 'classnames/bind'
 import { Link } from 'react-router-dom'
 
 import AppShape from '../../../../shapes/AppShape'
+import PaginationShape from '../../../../shapes/PaginationShape'
 import Loader from '../../../Loader'
 import TagsList from '../../../TagsList'
 import {
@@ -12,6 +13,7 @@ import {
   spaceAppsListSortTypeSelector,
   spaceAppsListSortDirectionSelector,
   spaceAppsCheckedAllSelector,
+  spaceAppsListPaginationSelector,
 } from '../../../../../reducers/spaces/apps/selectors'
 import { spaceDataSelector } from '../../../../../reducers/spaces/space/selectors'
 import {
@@ -19,6 +21,7 @@ import {
   sortApps,
   toggleAppCheckbox,
   toggleAllAppCheckboxes,
+  setAppsCurrentPageValue,
 } from '../../../../../actions/spaces'
 import { Table, Thead, Tbody, Th } from '../../../TableComponents'
 import './style.sass'
@@ -26,15 +29,20 @@ import Icon from '../../../Icon'
 import LinkTargetBlank from '../../../LinkTargetBlank'
 import Button from '../../../Button'
 import { getSpacesIcon } from '../../../../../helpers/spaces'
+import Counters from '../../../TableComponents/Counters'
+import Pagination from '../../../TableComponents/Pagination'
 
 
-const SpaceAppsList = ({ spaceId, apps, isFetching, sortType, sortDir, sortHandler, toggleCheckbox, toggleAllCheckboxes, isCheckedAll }) => {
+const SpaceAppsList = ({ spaceId, apps, isFetching, sortType, sortDir, sortHandler, toggleCheckbox, toggleAllCheckboxes, isCheckedAll, pagination, pageHandler }) => {
   const checkboxClasses = classNames({
     'fa-square-o': !isCheckedAll,
     'fa-check-square-o': isCheckedAll,
   }, 'space-apps-list__checkbox')
 
+  const { currentPage, nextPage, totalPages, totalCount } = pagination
+
   const sortAppsHandler = (type) => sortHandler(spaceId, type)
+  const pageAppsHandler = (value) => pageHandler(spaceId, value)
 
   if (isFetching) {
     return (
@@ -47,25 +55,37 @@ const SpaceAppsList = ({ spaceId, apps, isFetching, sortType, sortDir, sortHandl
   if (apps.length) {
     return (
       <div className="space-apps-list">
-        <Table>
-          <Thead>
-            <th className="pfda-padded-l10">
-              <Icon onClick={toggleAllCheckboxes} icon={checkboxClasses} />
-            </th>
-            <Th sortType={sortType} sortDir={sortDir} type='name' sortHandler={sortAppsHandler}>name</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='title' sortHandler={sortAppsHandler}>title</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='revision' sortHandler={sortAppsHandler}>revision</Th>
-            <Th>explorers</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='org' sortHandler={sortAppsHandler}>org</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='added_by' sortHandler={sortAppsHandler}>added by</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='created_at' sortHandler={sortAppsHandler}>created</Th>
-            <Th>run by you?</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='tags' sortHandler={sortAppsHandler}>tags</Th>
-          </Thead>
-          <Tbody>
-            {apps.map((app) => <Row app={app} key={app.id} toggleCheckbox={toggleCheckbox} /> )}
-          </Tbody>
-        </Table>
+        <div className='space-page-layout__list-wrapper'>
+          <Table>
+            <Thead>
+              <th className="pfda-padded-l10">
+                <Icon onClick={toggleAllCheckboxes} icon={checkboxClasses} />
+              </th>
+              <Th sortType={sortType} sortDir={sortDir} type='name' sortHandler={sortAppsHandler}>name</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='title' sortHandler={sortAppsHandler}>title</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='revision' sortHandler={sortAppsHandler}>revision</Th>
+              <Th>explorers</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='org' sortHandler={sortAppsHandler}>org</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='added_by' sortHandler={sortAppsHandler}>added by</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='created_at' sortHandler={sortAppsHandler}>created</Th>
+              <Th>run by you?</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='tags' sortHandler={sortAppsHandler}>tags</Th>
+            </Thead>
+            <Tbody>
+              {apps.map((app) => <Row app={app} key={app.id} toggleCheckbox={toggleCheckbox} />)}
+            </Tbody>
+          </Table>
+        </div>
+        <Counters
+          currentPage={currentPage}
+          nextPage={nextPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          count={apps.length}
+        />
+        <div className='pfda-padded-t20'>
+          <Pagination data={pagination} setPageHandler={pageAppsHandler} />
+        </div>
       </div>
     )
   }
@@ -94,6 +114,7 @@ const Row = ({ app, toggleCheckbox }) => {
   }, 'space-apps-list__checkbox')
 
   const toggleHandler = () => toggleCheckbox(app.id)
+  const linkShow = app.links.show ? `/home${app.links.show}` : null
 
   return (
     <tr>
@@ -102,8 +123,8 @@ const Row = ({ app, toggleCheckbox }) => {
       </td>
       <td>{app.name}</td>
       <td>
-        <LinkTargetBlank url={app.links.show}>
-          <Icon icon={getSpacesIcon('apps')} fw/>
+        <LinkTargetBlank url={linkShow}>
+          <Icon icon={getSpacesIcon('apps')} fw />
           <span>{app.title}</span>
         </LinkTargetBlank>
       </td>
@@ -137,6 +158,8 @@ SpaceAppsList.propTypes = {
   sortHandler: PropTypes.func,
   toggleCheckbox: PropTypes.func,
   toggleAllCheckboxes: PropTypes.func,
+  pagination: PropTypes.exact(PaginationShape),
+  pageHandler: PropTypes.func,
 }
 
 SpaceAppsList.defaultProps = {
@@ -144,6 +167,8 @@ SpaceAppsList.defaultProps = {
   sortHandler: () => {},
   toggleCheckbox: () => {},
   toggleAllCheckboxes: () => {},
+  pageHandler: () => {},
+  pagination: {},
 }
 
 Row.propTypes = {
@@ -162,11 +187,16 @@ const mapStateToProps = state => ({
   sortDir: spaceAppsListSortDirectionSelector(state),
   spaceId: spaceDataSelector(state).id,
   isCheckedAll: spaceAppsCheckedAllSelector(state),
+  pagination: spaceAppsListPaginationSelector(state),
 })
 
 const mapDispatchToProps = dispatch => ({
   sortHandler: (spaceId, type) => {
     dispatch(sortApps(type))
+    dispatch(fetchApps(spaceId))
+  },
+  pageHandler: (spaceId, value) => {
+    dispatch(setAppsCurrentPageValue(value))
     dispatch(fetchApps(spaceId))
   },
   toggleCheckbox: (id) => dispatch(toggleAppCheckbox(id)),

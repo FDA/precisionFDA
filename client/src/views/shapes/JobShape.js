@@ -13,6 +13,7 @@ const JobShape = {
   createdAt: PropTypes.string,
   scope: PropTypes.string,
   links: PropTypes.object,
+  tags: PropTypes.arrayOf(PropTypes.string),
 }
 
 const mapToJob = (data) => {
@@ -28,6 +29,7 @@ const mapToJob = (data) => {
     createdAt: data.created_at,
     scope: data.scope,
     links: data.links,
+    tags: data.tags,
   }
 }
 
