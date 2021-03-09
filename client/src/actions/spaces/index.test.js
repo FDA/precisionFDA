@@ -37,6 +37,10 @@ import {
   hideAppsCopyModal,
   showWorkflowsCopyModal,
   hideWorkflowsCopyModal,
+  setAppsCurrentPageValue,
+  setWorkflowsCurrentPageValue,
+  setJobsCurrentPageValue,
+  setFilesCurrentPageValue,
 } from '.'
 import {
   SPACES_SWITCH_LIST_VIEW_TYPE,
@@ -77,6 +81,10 @@ import {
   SPACE_APPS_HIDE_COPY_MODAL,
   SPACE_WORKFLOWS_SHOW_COPY_MODAL,
   SPACE_WORKFLOWS_HIDE_COPY_MODAL,
+  SPACE_APPS_SET_CURRENT_PAGE_VALUE,
+  SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE,
+  SPACE_JOBS_SET_CURRENT_PAGE_VALUE,
+  SPACE_FILES_SET_CURRENT_PAGE_VALUE,
 } from './types'
 
 
@@ -434,6 +442,42 @@ describe('hideWorkflowsCopyModal()', () => {
     expect(hideWorkflowsCopyModal()).toEqual({
       type: SPACE_WORKFLOWS_HIDE_COPY_MODAL,
       payload: {},
+    })
+  })
+})
+
+describe('setAppsCurrentPageValue()', () => {
+  it('creates correct action', () => {
+    expect(setAppsCurrentPageValue(2)).toEqual({
+      type: SPACE_APPS_SET_CURRENT_PAGE_VALUE,
+      payload: 2,
+    })
+  })
+})
+
+describe('setWorkflowsCurrentPageValue()', () => {
+  it('creates correct action', () => {
+    expect(setWorkflowsCurrentPageValue(2)).toEqual({
+      type: SPACE_WORKFLOWS_SET_CURRENT_PAGE_VALUE,
+      payload: 2,
+    })
+  })
+})
+
+describe('setJobsCurrentPageValue()', () => {
+  it('creates correct action', () => {
+    expect(setJobsCurrentPageValue(2)).toEqual({
+      type: SPACE_JOBS_SET_CURRENT_PAGE_VALUE,
+      payload: 2,
+    })
+  })
+})
+
+describe('setFilesCurrentPageValue()', () => {
+  it('creates correct action', () => {
+    expect(setFilesCurrentPageValue(2)).toEqual({
+      type: SPACE_FILES_SET_CURRENT_PAGE_VALUE,
+      payload: 2,
     })
   })
 })

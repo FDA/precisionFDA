@@ -32,10 +32,34 @@
 .pfda-pagination
   text-align: right
   margin-top: 10px
+  display: flex
 
   &__page
-    margin-left: 5px
-    color: $color-not-active-el
+    color: #1F70B5
+    border: 1px solid #1F70B5
+    border-right: none
+    height: 35px
+    width: 35px
+    display: flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    margin: 0
+
+    &:last-child
+      border-right: 1px solid #1F70B5
 
     &--active
-      color: $color-primary
+      color: #FFFFFF
+      background: #1F70B5
+
+.pfda-table-counters
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  height: 35px
+  border-bottom: 1px solid #DDDDDD
+  border-top: 1px solid #DDDDDD
+  color: #8198BC
+  font-size: 12px
+  padding-right: 10px

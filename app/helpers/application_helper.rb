@@ -1,4 +1,5 @@
 module ApplicationHelper
+  include PathHelper
   include VerifiedSpaceHelper
   include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
@@ -94,15 +95,43 @@ module ApplicationHelper
     end
   end
 
+  # Provide a node origin links to use on Home (Space) Files page
+  # @param node [Node] Node to get origin for.
+  # @return [String] - file link object node of type "UserFile"
+  def node_origin(node)
+    if node.klass == "folder"
+      nil
+    elsif node.parent_type == "Node" && node.parent.blank?
+      "Copied"
+    elsif node.parent_type != "User"
+      node_origin_link(unilinkfw(node.parent, { no_home: true }))
+    else
+      "Uploaded"
+    end
+  end
+
+  def node_origin_link(html_link)
+    parsed_html_link = Nokogiri::HTML(html_link)
+    parsed_a_element = parsed_html_link.at("a")
+    parsed_span_element = parsed_html_link.at("span")
+
+    origin_link = {}
+    origin_link[:href] = parsed_a_element["href"] if parsed_a_element
+    origin_link[:fa] = parsed_span_element.to_h["class"] if parsed_span_element
+    origin_link[:text] = parsed_html_link.text
+
+    origin_link
+  end
+
   # Valid options
   # icon_class: "fa-fw fa-2x"  # Appends to span class
   # scope_icon: true           # Displays scope icon instead of fa_class(item) as icon
   # title_class                # CSS class to apply to title
   # nolink: true               # Show a label, not a link
   # noicon: false              # Show/hide the icon
-  #
   def unilink(item, opts = {})
     return if item.nil?
+
     icon = fa_class(item)
     if opts[:scope_icon]
       if item.public?
@@ -120,12 +149,28 @@ module ApplicationHelper
       icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     end
 
-    if item.accessible_by?(@context) || (item.try(:user).try(:dxuser) == CHALLENGE_BOT_DX_USER && @context.logged_in? && @context.user.is_challenge_evaluator?)
+    # rubocop:disable Rails/HelperInstanceVariable
+    if item.check_accessibility(@context)
       html_opts = { class: opts[:title_class] }
       html_opts[:data] = opts[:data] if opts[:data]
-      opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), html_opts)
+      if opts[:nolink]
+        icon_span + item.title.to_s
+      else
+        link_to(icon_span + item.title.to_s, concat_path(item, opts[:no_home]), html_opts)
+      end
     else
-      icon_span + item.uid
+      icon_span + item.title.to_s # do not show item uid if unaccessible
+    end
+    # rubocop:enable Rails/HelperInstanceVariable
+  end
+
+  # Concat item path with '/home' to create a link to Home - for specific items
+  def concat_path(item, no_home = false)
+    if !no_home && (%w(file folder app app-series job
+                       asset workflow workflow-series).include? item.klass)
+      "/home".concat(pathify(item))
+    else
+      pathify(item)
     end
   end
 

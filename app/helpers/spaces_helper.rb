@@ -35,7 +35,7 @@ module SpacesHelper
     return 'Verification' if space.verification?
     return 'Group' if space.groups?
 
-    space.confidential? ? 'Confidential' : 'Cooperative'
+    space.confidential? ? "Private" : "Shared"
   end
 
   def is_active(current_action, item_action, params = nil, status = nil)
@@ -362,7 +362,7 @@ module SpacesHelper
     elsif node.parent_type == "Node" && node.parent.blank?
       "Copied"
     elsif node.parent_type != "User"
-      node_origin_link(unilinkfw(node.parent))
+      node_origin_link(unilinkfw(node.parent, { no_home: true }))
     else
       "Uploaded"
     end
@@ -391,7 +391,8 @@ module SpacesHelper
     origin_link
   end
 
-  # Get a node, mapped to attributes, used in /client on Space Files page
+  # Get a node, mapped to attributes, used in /client on Space Files page,
+  # links crated for every node: UserFile or Folder.
   # @param node [Node] Node to get origin for.
   # @param space [Space] A space.
   # @param current_user [User] A current_user.
@@ -412,10 +413,10 @@ module SpacesHelper
       size: node.is_a?(UserFile) ? number_to_human_size(node.file_size) : "",
       created: node.created_at.strftime("%m/%d/%Y"),
       state: node.state,
-      tags: node.tag_list,
+      tags: node.all_tags_list,
       links: {}.tap do |links|
         links[:filePath] = node.is_a?(UserFile) ? file_path(node) : ""
-        links[:user] = node.is_a?(UserFile) ? user_path(node.user.dxuser) : ""
+        links[:user] = user_path(node.user.dxuser)
         links[:originPath] = node.is_a?(UserFile) ? node_origin(node) : ""
         links[:renamePath] = rename_path if space.editable_by?(current_user)
       end,

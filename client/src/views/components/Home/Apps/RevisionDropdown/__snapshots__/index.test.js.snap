@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RevisionDropdown matches snapshot 1`] = `
+<div
+  className="btn-group"
+>
+  <div
+    className="dropdown revision-dropdown"
+  >
+    <Button
+      data-toggle="dropdown"
+    >
+      <Icon
+        cssClasses="revision-dropdown__history-icon"
+        icon="fa-history"
+      />
+       
+      <span
+        className="revision-dropdown__label"
+      >
+        Revision: 
+      </span>
+      <span
+        className="revision-dropdown__value"
+      />
+      <span
+        className="caret revision-dropdown__caret"
+      />
+    </Button>
+    <ul
+      className="dropdown-menu dropdown-menu-right revision-dropdown__options"
+    >
+      <li
+        className="revision-dropdown__options_revisions"
+      >
+        Revisions
+      </li>
+    </ul>
+  </div>
+</div>
+`;

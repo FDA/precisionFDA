@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsDropdown test should render 1`] = `
+<Fragment>
+  <DropdownMenu
+    message=""
+    options={
+      Array [
+        Object {
+          "isDisabled": true,
+          "link": "undefined/analyses/new",
+          "text": "Run",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Run Batch",
+        },
+        Object {
+          "isDisabled": true,
+          "text": "Diagram",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Edit",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Fork",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Export to",
+        },
+        Object {
+          "isDisabled": true,
+          "method": "put",
+          "onClick": [Function],
+          "text": "Delete",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Copy to space",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Edit tags",
+        },
+      ]
+    }
+    title="Actions"
+  />
+  <Connect(CopyToSpaceModal)
+    copyAction={[Function]}
+    hideAction={[Function]}
+    ids={Array []}
+  />
+  <HomeExportModal
+    hideAction={[Function]}
+    isOpen={false}
+    options={
+      Array [
+        Object {
+          "label": "CWL Tool",
+          "link": undefined,
+          "value": "cwl",
+        },
+        Object {
+          "label": "WDL Task",
+          "link": undefined,
+          "value": "wdl",
+        },
+      ]
+    }
+    title="Export to"
+  />
+  <WorkflowsActionModal
+    action="delete"
+    hideAction={[Function]}
+    modalAction={[Function]}
+    workflows={Array []}
+  />
+  <WorkflowsActionModal
+    action="makePublic"
+    hideAction={[Function]}
+    modalAction={[Function]}
+    workflows={Array []}
+  />
+  <Connect(HomeAttachToModal)
+    attachAction={[Function]}
+    hideAction={[Function]}
+    ids={Array []}
+    itemsType="WORKFLOW"
+  />
+</Fragment>
+`;

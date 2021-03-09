@@ -1,4 +1,5 @@
 class WorkflowsController < ApplicationController
+  include CommonConcern
   include WorkflowConcern
   include ErrorProcessable
 
@@ -23,15 +24,9 @@ class WorkflowsController < ApplicationController
       return
     end
 
-    comment_data
-    @revisions = @workflow.workflow_series.accessible_revisions(@context).select(:title, :id, :dxid, :uid, :revision)
-
-    if @workflow.in_space?
-      User.sync_jobs!(@context, @workflow.jobs, @workflow.project)
-      @space = @workflow.space_object
-    else
-      User.sync_jobs!(@context)
-    end
+    comments_data(@workflow)
+    revisions_data
+    jobs_sync
 
     a = Analysis.arel_table
     batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
@@ -102,7 +97,7 @@ class WorkflowsController < ApplicationController
       batch_hash = Analysis.batch_hash(analyses.where("analyses.batch_id is not NULL"))
       js_param[:batch_hash] = batch_hash
 
-      comment_data
+      comments_data(@workflow)
 
       js_param[:analyses_jobs] = Analysis.job_hash(analyses.where(batch_id: nil), workflow_details: true, batches: batch_hash)
     else
@@ -255,7 +250,7 @@ class WorkflowsController < ApplicationController
       list_analyses.each { |a| a.reload; a.jobs.each { |j| j.local_folder_id = folder.id; j.save } }
     end
 
-    render json: { url: workflow_path(workflow_object) }
+    render json: { url: "/home".concat(workflow_path(workflow_object)) }
   end
 
   def terminate_batch
@@ -431,18 +426,5 @@ class WorkflowsController < ApplicationController
       context: @context,
       workflow: @workflow,
     )
-  end
-
-  def comment_data
-    @items_from_params = [@workflow]
-    @item_path = pathify(@workflow)
-    @item_comments_path = pathify_comments(@workflow)
-
-    if @workflow.in_space?
-      space = item_from_uid(@workflow.scope)
-      @comments = Comment.where(commentable: space, content_object: @workflow).order(id: :desc).page unsafe_params[:comments_page]
-    else
-      @comments = @workflow.root_comments.order(id: :desc).page unsafe_params[:comments_page]
-    end
   end
 end

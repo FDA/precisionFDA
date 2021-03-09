@@ -30,13 +30,26 @@ const tmpOptions = [
   },
 ]
 
-const Item = ({ text, icon, isDisabled, onClick }) => {
+const Item = ({ text, icon, isDisabled, onClick, link, method, hide }) => {
+  if (hide) return null
+
   const classes = classNames({
     'dropdown-menu__item--disabled': isDisabled,
   }, 'dropdown-menu__item')
 
   const handler = () => {
     if (!isDisabled && typeof onClick === 'function') onClick()
+  }
+
+  if (link && !isDisabled) {
+    return (
+      <li className={classes}>
+        <a style={{ padding: 0 }} href={link} data-method={method}>
+          {icon && <Icon icon={icon} />}&nbsp;
+          {text}
+        </a>
+      </li>
+    )
   }
 
   return (
@@ -47,16 +60,25 @@ const Item = ({ text, icon, isDisabled, onClick }) => {
   )
 }
 
-const DropdownMenu = ({ icon, title, options }) => {
+const DropdownMenu = ({ icon, title, options, className, message = '' }) => {
   const menuOptions = options ? options : tmpOptions
 
   const list = menuOptions.map((e) => {
-    return <Item {...e} key={e.text} onClick={e.onClick} />
+    return <Item {...e} key={e.text} />
   })
+
+  if (message) list.unshift(
+    <React.Fragment key='message'>
+      <li style={{ padding: '3px 20px', fontStyle: 'italic' }}>{message}</li>
+      <li className='divider'></li>
+    </React.Fragment>,
+  )
+
+  const classes = classNames('dropdown', className)
 
   return (
     <div className='btn-group'>
-      <div className='dropdown'>
+      <div className={classes}>
         <Button type='primary' data-toggle='dropdown'>
           <>
             {icon && <Icon icon={icon} />}&nbsp;
@@ -78,12 +100,17 @@ Item.propTypes = {
   title: PropTypes.string,
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
+  link: PropTypes.string,
+  method: PropTypes.string,
+  hide: PropTypes.bool,
 }
 
 DropdownMenu.propTypes = {
   icon: PropTypes.string,
   title: PropTypes.string,
   options: PropTypes.array,
+  className: PropTypes.string,
+  message: PropTypes.string,
 }
 
 export default DropdownMenu

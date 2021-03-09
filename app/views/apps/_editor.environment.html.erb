@@ -35,7 +35,7 @@
             </div>
             <!-- ko foreach: assets -->
             <div class="list-group-item list-group-item-removeable clearfix">
-              <a data-bind="attr: {href: '/app_assets/' + uid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <a class="pull-right btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></a>
+              <a data-bind="attr: {href: '/assets/' + uid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <a class="pull-right btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></a>
             </div>
             <!-- /ko -->
          </div>

@@ -84,15 +84,6 @@ Rails.application.routes.draw do
       resources :admin_memberships, only: %i(index create destroy new)
     end
 
-    # My Home (Redesign)
-    get "home" => "home#index"
-    get "home/files", to: redirect(path: "home")
-    get "home/apps", to: redirect(path: "home")
-    get "home/assets", to: redirect(path: "home")
-    get "home/workflows", to: redirect(path: "home")
-    get "home/executions", to: redirect(path: "home")
-    get "home/notes", to: redirect(path: "home")
-
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
@@ -123,6 +114,10 @@ Rails.application.routes.draw do
       end
     end
 
+    # My Home (Site-Wide UI & API Redesign)
+    get "home" => "home#index"
+    get "/home/*all", to: "home#index"
+
     # API
     namespace "api" do
       get "update_active", to: "base#update_active"
@@ -151,12 +146,19 @@ Rails.application.routes.draw do
       end
 
       resources :apps do
+        get :jobs, on: :member, to: "jobs#app"
+
         collection do
           post "copy"
           post "import"
           get "accessible_apps"
-          get "featured"
-          get "everybody"
+
+          get :featured
+          get :everybody
+          get :spaces
+
+          put :feature, to: "apps#invert_feature"
+          put :delete, to: "apps#soft_delete"
         end
       end
 
@@ -167,9 +169,7 @@ Rails.application.routes.draw do
         end
 
         member do
-          get :files
           get :jobs
-          get :workflows
           get :members
           put :tags
           post :accept
@@ -205,19 +205,77 @@ Rails.application.routes.draw do
 
       resources :folders, only: [] do
         get :children, on: :collection
+        post :rename_folder, on: :collection
+        post :publish_folders, on: :collection
       end
 
-      resources :files, param: :uid, only: %i(update) do
+      resources :licenses, only: %i(index show) do
+        post "remove_item/:item_uid",
+             on: :member,
+             action: :remove_item,
+             as: "remove_item"
+        post "license_item/:item_uid",
+             on: :member,
+             action: :license_item,
+             as: "license_item"
+      end
+
+      resources :files, param: :uid, only: %i(index update show) do
         get :download, on: :member
 
         collection do
+          get :featured
+          get :everybody
+          get :spaces
+
           post :copy
           post :download_list
+          post :create_folder
+          post :remove
+          post :move
+
+          put :feature, to: "files#invert_feature"
         end
       end
 
-      resources :workflows, only: %w(create) do
-        post :copy, on: :collection
+      resources :jobs, only: %i(index show create) do
+        collection do
+          get :featured
+          get :everybody
+          get :spaces
+
+          get :log
+
+          post :copy
+          post :terminate
+          put :feature, to: "jobs#invert_feature"
+        end
+      end
+
+      resources :workflows, only: %i(index show create) do
+        collection do
+          get :featured
+          get :everybody
+          get :spaces
+
+          post :copy
+
+          put :feature, to: "workflows#invert_feature"
+          post :delete, to: "workflows#soft_delete"
+        end
+      end
+
+      resources :assets do
+        collection do
+          get :featured
+          get :everybody
+          get :spaces
+
+          post :rename
+          # post :copy
+          # post :terminate
+          put :feature, to: "assets#invert_feature"
+        end
       end
 
       post "related_to_publish"
@@ -240,6 +298,9 @@ Rails.application.routes.draw do
       post "list_workflows"
       post "describe_license"
       post "accept_licenses"
+      post "license_items/:license_id/:items_to_license",
+           action: :license_items,
+           as: "license_items"
       post "run_workflow"
       post "get_app_spec"
       post "get_app_script"
@@ -258,6 +319,9 @@ Rails.application.routes.draw do
       post "update_time_zone"
       post "create_challenge_resource"
       post "create_resource_link"
+      post "set_tags"
+      post "assign_app"
+      get "list_licenses"
     end
 
     # FHIR
@@ -354,7 +418,8 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :assets, path: "/app_assets" do
+    resources :assets, path: "/assets" do
+      # resources :assets, path: "/app_assets" do
       post "rename", on: :member
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"

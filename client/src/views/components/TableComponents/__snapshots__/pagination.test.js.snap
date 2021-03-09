@@ -8,7 +8,7 @@ exports[`SpacesListPage test should render 1`] = `
     key="0"
     page={
       Object {
-        "label": "prev",
+        "label": "<<",
         "value": 11,
       }
     }
@@ -67,7 +67,7 @@ exports[`SpacesListPage test should render 1`] = `
     key="6"
     page={
       Object {
-        "label": "next",
+        "label": ">>",
         "value": 9,
       }
     }

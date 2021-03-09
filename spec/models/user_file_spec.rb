@@ -47,6 +47,87 @@ RSpec.describe UserFile, type: :model do
     )
   end
 
+  describe "return private_count of user's files" do
+    subject(:private_files_count) { described_class.private_count(user) }
+
+    before do
+      file_private_one.update(user_id: user.id)
+      file_private_three.update(user_id: user.id)
+      file_private_four.update(user_id: user.id)
+    end
+
+    let(:folder_one) { create(:folder, :private) }
+    let(:folder_two) { create(:folder) }
+
+    let(:file_private_one) do
+      create(:user_file, :private, parent_folder_id: nil, scoped_parent_folder_id: folder_two.id)
+    end
+    let(:file_private_two) do
+      create(:user_file, :private, parent_folder_id: folder_one.id, scoped_parent_folder_id: nil)
+    end
+    let(:file_private_three) do
+      create(
+        :user_file,
+        :private,
+        parent_type: "Comparison",
+        parent_folder_id: nil,
+        scoped_parent_folder_id: nil,
+      )
+    end
+    let(:file_private_four) do
+      create(
+        :user_file,
+        :private,
+        parent_type: "Asset",
+        parent_folder_id: nil,
+        scoped_parent_folder_id: nil,
+      )
+    end
+
+    let(:other_user_id) { FFaker::Random.rand(5) }
+
+    context "when all files scopes are private" do
+      context "when two files are of UserFile parent_type" do
+        before { file_private_two.update(user_id: user.id) }
+
+        it "returns correct count" do
+          expect(private_files_count).to eq(2)
+        end
+      end
+
+      context "when two files are in root folder" do
+        before { file_private_two.update(parent_folder_id: nil, user_id: user.id) }
+
+        it "returns correct count" do
+          expect(private_files_count).to eq(2)
+        end
+      end
+
+      context "when one file does not belong to user and all have UserFile parent_type" do
+        before do
+          file_private_two.update(user_id: other_user_id)
+          file_private_three.update(parent_type: "UserFile")
+          file_private_four.update(parent_type: "UserFile")
+        end
+
+        it "returns correct count" do
+          expect(file_private_two.user_id).to eq(other_user_id)
+          expect(private_files_count).to eq(3)
+        end
+      end
+    end
+
+    context "when not all files scopes are private" do
+      before { file_private_two.update(scope: "public", user_id: user.id) }
+
+      context "when one public file belongs to user" do
+        it "returns correct count" do
+          expect(private_files_count).to eq(1)
+        end
+      end
+    end
+  end
+
   describe "passes_consistency_check?" do
     context "when user_file is private" do
       subject(:passes_consistency_check) { file_private_one.passes_consistency_check?(user) }

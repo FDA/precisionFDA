@@ -42,7 +42,7 @@ module SpaceService
     attr_reader :user, :api, :notification_mailer
 
     def build_space(space_form)
-      uuid = SecureRandom.hex
+      uuid = SecureRandom.hex[0..9]
 
       space = Space.new(
         name: space_form.name,

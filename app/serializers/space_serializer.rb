@@ -52,9 +52,9 @@ class SpaceSerializer < ApplicationSerializer
       links[:update] = api_space_path(object) if can_update?
       links[:update_tags] = tags_api_space_path(object) if can_update?
       links[:apps] = api_apps_path(object) if can_access?
-      links[:files] = files_api_space_path(object) if can_access?
-      links[:workflows] = workflows_api_space_path(object) if can_access?
-      links[:jobs] = jobs_api_space_path(object) if can_access?
+      links[:files] = api_files_path(object) if can_access?
+      links[:workflows] = api_workflows_path(object) if can_access?
+      links[:jobs] = api_jobs_path(object) if can_access?
       links[:members] = members_api_space_path(object) if can_access?
       links[:show_shared] = api_space_path(object.space) if object.confidential?
 
@@ -115,7 +115,7 @@ class SpaceSerializer < ApplicationSerializer
   # Returns apps count.
   # @return [Integer] Apps count.
   def apps_count
-    object.latest_revision_apps.count
+    object.latest_revision_apps.unremoved.count
   end
 
   # Returns files count.
@@ -139,7 +139,7 @@ class SpaceSerializer < ApplicationSerializer
   # Returns workflows count.
   # @return [Integer] Workflows count.
   def workflows_count
-    object.workflows.count
+    object.workflows.unremoved.count
   end
 
   # Returns current user space membership

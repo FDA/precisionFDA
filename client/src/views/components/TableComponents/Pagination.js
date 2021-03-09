@@ -12,7 +12,7 @@ const getPages = ({ currentPage, nextPage, prevPage, totalPages }) => {
 
   if (prevPage) {
     pages.push({
-      label: 'prev',
+      label: '<<',
       value: prevPage,
     })
   }
@@ -27,6 +27,8 @@ const getPages = ({ currentPage, nextPage, prevPage, totalPages }) => {
     }
   }
 
+  if (startFromNumber <= 0) startFromNumber = 1
+
   for (let i = 1; i <= pagesToShow; i++) {
     const num = startFromNumber++
     pages.push({
@@ -38,7 +40,7 @@ const getPages = ({ currentPage, nextPage, prevPage, totalPages }) => {
 
   if (nextPage) {
     pages.push({
-      label: 'next',
+      label: '>>',
       value: nextPage,
     })
   }

@@ -1,0 +1,31 @@
+@import '../../../../styles/variables' 
+  
+.home-label
+  font-size: 14px
+  padding: 2px 5px
+  color: #ffffff
+  border-radius: 4px
+
+  &--success
+    background: #56d699
+
+  &--default
+    background: #777777
+
+  &--warning
+    background: #f0ad4e
+
+  &__state-running, &__state-idle
+    color: $brand-running-bg
+    background-color: $brand-running-color
+
+  &__state-done
+    color: $brand-done-color
+    background-color: $brand-done-bg
+
+  &__state-failed, &__state-terminated
+    color: $brand-failed-color
+    background-color: $brand-failed-bg
+
+  i
+    margin-right: 5px

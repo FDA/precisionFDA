@@ -3,11 +3,38 @@ class ApiController < ApplicationController
   include WorkflowConcern
   include FilesConcern
   include UidFindable
+  include ApiExceptionHandler
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
-  before_action :require_api_login, except: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_notes, :list_related, :describe, :search_assets]
-  before_action :require_api_login_or_guest, only: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_related, :describe, :search_assets]
+  # rubocop:disable Rails/LexicallyScopedActionFilter
+  before_action :require_api_login,
+                except: %i(
+                  destroy
+                  list_apps
+                  list_assets
+                  list_comparisons
+                  list_files
+                  list_jobs
+                  list_workflows
+                  list_notes
+                  list_related
+                  describe
+                  search_assets
+                )
+  # rubocop:enable Rails/LexicallyScopedActionFilter
+  before_action :require_api_login_or_guest,
+                only: %i(
+                  list_apps
+                  list_assets
+                  list_comparisons
+                  list_files
+                  list_jobs
+                  list_workflows
+                  list_related
+                  describe
+                  search_assets
+                )
   before_action :validate_create_asset, only: :create_asset
   before_action :validate_create_file, only: :create_file
   before_action :validate_get_upload_url, only: :get_upload_url
@@ -15,6 +42,13 @@ class ApiController < ApplicationController
   rescue_from ApiError, with: :render_error_method
 
   # rubocop:disable Style/SignalException
+
+  # A common method to add Objects count into api response
+  # @param count [Integer] Object's count
+  # @return Object { count: Object's count }
+  def count(count)
+    { count: count }
+  end
 
   # Collects an Array of children for object in params.
   # @param uid [Object Id].
@@ -423,13 +457,33 @@ class ApiController < ApplicationController
     render json: result
   end
 
+  # GET - Returns user accessible list_licenses according to input filters.
+  #   Used in license dialogs.
+  # @param scopes [Array], optional - array of valid scopes on the licenses,
+  #   e.g. ["private", "public", "space-1234"] or leave blank for all
+  # @return licenses [License] An array of hashes - License object, with its connected data.
+  def list_licenses
+    check_scope!
+    licenses = License.
+      editable_by(@context).
+      eager_load(user: :org).
+      includes(:taggings).
+      order(:title)
+
+    licenses = licenses.where(scope: params[:scopes]) if params[:scopes].present?
+
+    render json: licenses, root: "licenses", adapter: :json
+  end
+
   # Returns user accessible apps according to input filters.
   #   Used in Notes 'Attach to Note' and Spaces 'Add Apps' dialogs.
   #
   # Inputs
   #
-  # scopes (Array, optional): array of valid scopes on the App e.g. ["private", "public", "space-1234"] or leave blank for all
-  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # scopes (Array, optional): array of valid scopes on the App e.g.
+  #   ["private", "public", "space-1234"] or leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user,
+  #   otherwise accessible_by
   # describe (object, optional)
   #     fields (array, optional):
   #         Array containing field name [field_1, field_2, ...]
@@ -447,7 +501,7 @@ class ApiController < ApplicationController
   def list_apps
     check_scope!
 
-    apps = App.accessible_by(@context).includes(:app_series).order(:title)
+    apps = App.accessible_by(@context).unremoved.includes(:app_series).order(:title)
     apps = apps.where(scope: params[:scopes]) if params[:scopes].present?
 
     # Filter by latest revisions or versions.
@@ -565,7 +619,8 @@ class ApiController < ApplicationController
       WorkflowSeries.accessible_by(@context)
     end
 
-    workflow_series = workflow_series.eager_load(:latest_revision_workflow).order(id: :desc)
+    workflow_series = workflow_series.unremoved.
+      eager_load(:latest_revision_workflow).order(id: :desc)
     workflows = workflow_series.map { |series| series.latest_accessible(@context) }.compact
 
     if unsafe_params[:scopes].present?
@@ -578,6 +633,43 @@ class ApiController < ApplicationController
     end
 
     render json: result
+  end
+
+  # Inputs
+  #
+  # taggable_uid (string, required): the uid of the item to tag
+  # tags (string, required): comma-separated string containing tags to update to,
+  #                this will replace existing tags
+  # suggested_tags (array[strings], optional): array of tags
+  # tag_context (string, optional): indicates the tag context to use
+  def set_tags
+    taggable_uid = unsafe_params[:taggable_uid]
+    unless taggable_uid.is_a?(String) && taggable_uid != ""
+      raise ApiError, "Taggable uid needs to be a non-empty string"
+    end
+
+    tags = unsafe_params[:tags]
+    raise ApiError, "Tags need to be comma-separated strings" unless tags.is_a?(String)
+
+    suggested_tags = unsafe_params[:suggested_tags] # Optional
+    tags = (tags.split(",") + suggested_tags).join(",") if suggested_tags.is_a?(Array)
+
+    tag_context = unsafe_params[:tag_context] # Optional
+
+    taggable = item_from_uid(taggable_uid)
+
+    if taggable.editable_by?(@context) || @context.can_administer_site?
+      path = pathify(taggable)
+      message = "redirect to item"
+      @context.user.tag(taggable, with: tags, on: tag_context.presence || :tags)
+    else
+      path = home_path
+      message = "This item is not accessible by you"
+    end
+
+    render json: { path: path, message: message }
+  rescue RuntimeError => e
+    raise ApiError, e.message
   end
 
   # Inputs
@@ -648,22 +740,28 @@ class ApiController < ApplicationController
   #
   def license_items
     license_id = unsafe_params["license_id"]
-    fail "License license_id needs to be an Integer" unless license_id.is_a?(Numeric) && (license_id.to_i == license_id)
+    unless license_id.is_a?(Numeric) && (license_id.to_i == license_id) ||
+           license_id.is_a?(String) && license_id.to_i.positive?
+      raise "License license_id needs to be an Integer"
+    end
 
     # Check if the license exists and is editable by the user. Throw 404 if otherwise.
     License.editable_by(@context).find(license_id)
 
     items_to_license = unsafe_params["items_to_license"]
-    fail "License items_o_license needs to be an Array of Strings" unless items_to_license.is_a?(Array) && items_to_license.all? do |item|
-                                                                             item.is_a?(String)
-                                                                           end
+    if items_to_license.is_a?(String)
+      items_to_license = [items_to_license]
+    elsif items_to_license.is_a?(Array) && items_to_license.any? { |item| item.is_a?(String) }
+      raise "License items_o_license needs to be an Array of Strings"
+    end
 
     items_licensed = []
-    LicensedItems.transaction do
+    LicensedItem.transaction do
       items_to_license.each do |item_uid|
         item = item_from_uid(item_uid)
-        if item.editable_by(@context) && %w(asset file).include?(item.klass)
-          items_licensed << LicensedItems.find_or_create_by(license_id: license_id, licenseable: item).uid
+        if item.editable_by?(@context) && %w(asset file).include?(item.klass)
+          items_licensed << LicensedItem.find_or_create_by(license_id: license_id,
+                                                           licenseable: item).id
         end
       end
     end
@@ -1100,6 +1198,45 @@ class ApiController < ApplicationController
     }
   end
 
+  # Performs app assigning to the challenge
+  # @param id [Integer] Challenge id
+  # @param app_id [Integer] App id
+  # @param @context [Context] - user logged in
+  # @return json { path: path(), message: { type: type, text: text } }
+  def assign_app
+    return unless @context.logged_in?
+
+    challenge = Challenge.find_by!(id: unsafe_params[:id])
+    app = App.editable_by(@context).find_by(id: unsafe_params[:app_id])
+
+    unless challenge.can_assign_specific_app?(@context, app)
+      path = app_path(app)
+      type = :error
+      text = "This app cannot be assigned to the current challenge."
+
+      render json: { path: path, message: { type: type, text: text } }
+    end
+
+    if app
+      path = jobs_api_app_path(app)
+      if Challenge.add_app_dev(@context, challenge.id, app.id)
+        type = :success
+        text = "Your app '#{app.title}' was successfully assigned to: #{challenge.name}"
+      else
+        type = :error
+        text = "The specified app could not be assigned to the current \
+          challenge: #{challenge.name} due to an internal error."
+      end
+    else
+      path = app_path(app)
+      type = :error
+      text = "The specified app was not found and could not be assigned \
+        to the current challenge: #{challenge.name}."
+    end
+
+    render json: { path: path, message: { type: type, text: text } }
+  end
+
   # Inputs
   #
   # id (integer, required): the id of the submission to be updated
@@ -1109,6 +1246,7 @@ class ApiController < ApplicationController
   # Outputs:
   # id: the submission id
   #
+  # rubocop:disable Style/SignalException
   def update_submission
     id = unsafe_params[:id].to_i
     fail "id needs to be an Integer" unless id.is_a?(Integer)
@@ -1131,6 +1269,7 @@ class ApiController < ApplicationController
       id: submission.id,
     }
   end
+  # rubocop:enable Style/SignalException
 
   # Inputs
   #
@@ -1319,6 +1458,61 @@ class ApiController < ApplicationController
     render json: { success: true }
   end
 
+  # Mark Item(s) as 'featured' or 'un-featured'.
+  # @param item_ids [Array] array of [String] uid-s.
+  # @param featured [Boolean] new 'feature' value, false if empty.
+  # @return items [Array] list of items with inverted 'feature' flag
+  def invert_feature
+    raise ApiError, "Only Site Admin can perform this action" unless @context.can_administer_site?
+
+    featured = !params[:featured].nil?
+    items = pick_values(params[:item_ids]).map do |uid|
+      item = item_from_uid(uid)
+      next unless item.scope == Scopes::SCOPE_PUBLIC && item.featured ^ featured
+
+      item.update(featured: featured)
+      item.current_user = @context.user
+      item
+    end.compact
+
+    messages =
+      if items.count.positive?
+        message_key =
+          if items.first.featured?
+            "api.feature.messages.featured"
+          else
+            "api.feature.messages.un_featured"
+          end
+        [{ type: "success", message: I18n.t(message_key) }]
+      else
+        [{ type: "error", message: I18n.t("api.feature.messages.failed") }]
+      end
+
+    render json: items, root: "items", adapter: :json, meta: messages
+  end
+
+  # Soft-deletion for Items.
+  # @param item_ids [Array] array of [String] uid-s.
+  # @return items [Array] list of deleted items (active: false)
+  def soft_delete
+    items = pick_values(params[:item_ids]).map do |uid|
+      item = item_from_uid(uid)
+      if item.editable_by?(@context)
+        item.update(deleted: true)
+        item
+      end
+    end.compact
+
+    messages =
+      if items.count.positive?
+        [{ type: "success", message: I18n.t("api.delete.messages.deleted") }]
+      else
+        [{ type: "error", message: I18n.t("api.delete.messages.not_deleted") }]
+      end
+
+    render json: items, root: "items", adapter: :json, meta: { messages: messages }
+  end
+
   protected
 
   def check_scope!
@@ -1422,6 +1616,19 @@ class ApiController < ApplicationController
     return if @folder.nil? || @folder.scope == @scope
 
     raise_api_error "The folder doesn't belong to a scope #{@scope}."
+  end
+
+  private
+
+  # Convert input value to array.
+  # @param order
+  # @return [Array] with order inside.
+  def pick_values(order)
+    case order
+    when Array then order
+    when String then [order]
+    else []
+    end
   end
   # rubocop:enable all
 end

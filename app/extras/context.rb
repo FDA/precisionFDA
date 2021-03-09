@@ -56,6 +56,10 @@ class Context
     return (@user_id == -1 && @username.start_with?("Guest-") && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
   end
 
+  def can_create_challenges?
+    logged_in? && (user.can_administer_site? || user.is_challenge_admin?)
+  end
+
   def can_create_spaces?
     logged_in? && user.can_create_spaces?
   end

@@ -6,6 +6,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
                                                index
                                                about
+                                               terms
                                                login
                                                return_from_login
                                                request_access
@@ -496,11 +497,16 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         " items have been published."
       end
       flash[:success] = message
-      redirect_to pathify(item_from_uid(id))
+      item = item_from_uid(id)
+      path = concat_path(item)
+
+      redirect_to path
       return
     end
 
     item = item_from_uid(id)
+    path_item = concat_path(item)
+
     unless item.editable_by?(@context)
       flash[:error] = "This item is not owned by you."
       redirect_back(fallback_location: root_path) && return
@@ -508,12 +514,12 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     if item.public?
       flash[:error] = "This item is already public."
-      redirect_to(pathify(item)) && return
+      redirect_to(path_item) && return
     end
 
     unless item.publishable_by?(@context, scope)
       flash[:error] = "This item cannot be published in this state."
-      redirect_to(pathify(item)) && return
+      redirect_to(path_item) && return
     end
 
     js graph: GraphDecorator.for_publisher(@context, item, scope),
@@ -572,6 +578,16 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   private
+
+  # Concat item path with '/home' to create a link to Home - for specific items
+  def concat_path(item)
+    if ["file", "folder", "app", "app-series", "job", "asset", "workflow", "workflow-series"].
+        include? item.klass
+      "/home".concat(pathify(item))
+    else
+      pathify(item)
+    end
+  end
 
   def init_countries
     @countries = Country.pluck(:name, :id)

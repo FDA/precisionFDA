@@ -32,5 +32,9 @@ FactoryBot.define do
     trait :private do
       scope { :private }
     end
+
+    trait :public do
+      scope { :public }
+    end
   end
 end

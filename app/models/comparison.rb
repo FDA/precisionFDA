@@ -20,7 +20,9 @@
 class Comparison < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include Scopes
+  include TagsContainer
 
   DESCRIPTION_MAX_LENGTH = 1000
 
@@ -53,7 +55,6 @@ class Comparison < ApplicationRecord
   store :run_input, coder: JSON
 
   acts_as_commentable
-  acts_as_taggable
   acts_as_votable
 
   validates :name, presence: { message: "Name could not be blank" }
@@ -166,4 +167,12 @@ class Comparison < ApplicationRecord
     in_confidential_space?
   end
 
+  # Determine, whether a comparison is accessible by a user.
+  # @param context [Context] A user context.
+  # @return [Boolean] Returns true if user has access to a comparison, false otherwise.
+  def accessible_by?(user)
+    return false unless user&.logged_in?
+
+    accessible_by_user?(user)
+  end
 end

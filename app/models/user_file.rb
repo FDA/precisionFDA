@@ -19,6 +19,7 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  featured                :boolean          default(FALSE)
 #
 
 # Parent types:
@@ -46,6 +47,8 @@
 class UserFile < Node
   include Licenses
   include InternalUid
+  include CommonPermissions
+  include TagsContainer
 
   require "uri"
 
@@ -81,6 +84,8 @@ class UserFile < Node
   acts_as_commentable
   acts_as_votable
 
+  attr_accessor :current_user
+
   validates :name, presence: { message: "Name could not be blank" }
   validates :description,
             allow_blank: true,
@@ -103,6 +108,17 @@ class UserFile < Node
   scope :not_comparison_inputs, -> { includes(:comparisons).where(comparisons: { id: nil }) }
 
   class << self
+    # Returns files count of user 'private' scope.
+    # Is used in for user serializer in Home
+    # @param [User] User object
+    # @return [Integer] UserFile count.
+    def private_count(user)
+      accessible_by_private.
+        where(user_id: user.id).
+        where.not(parent_type: ["Comparison", "Asset", nil]).
+        count
+    end
+
     def model_name
       ActiveModel::Name.new(self, nil, "File")
     end
@@ -379,13 +395,6 @@ class UserFile < Node
   def deletable?
     %w(User Node Job).include?(parent_type) &&
       (scope.in?([SCOPE_PUBLIC, SCOPE_PRIVATE]) || !(in_space? && space_object.verified?))
-  end
-
-  # Check, whether file is publishable. A file should be 'private' or in space.
-  # @param user [User] A user who is going to publish.
-  # @return [Boolean] Returns true if a file can be published by a user, false otherwise.
-  def publishable?(user)
-    user.present? && !public?
   end
 
   # Check, whether file is publishable. A file should be 'private' or in space.

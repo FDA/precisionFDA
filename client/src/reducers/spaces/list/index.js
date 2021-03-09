@@ -11,6 +11,7 @@ import {
   SPACE_LOCK_TOGGLE_START,
   SPACE_LOCK_TOGGLE_SUCCESS,
   SPACE_LOCK_TOGGLE_FAILURE,
+  SPACES_SET_PAGE,
 } from '../../../actions/spaces/types'
 
 
@@ -74,5 +75,13 @@ export default createReducer(initialState, {
   [SPACE_LOCK_TOGGLE_FAILURE]: (state, payload) => ({
     ...state,
     entries: [...payload.spaces],
+  }),
+
+  [SPACES_SET_PAGE]: (state, page) => ({
+    ...state,
+    pagination: {
+      ...state.pagination,
+      currentPage: page,
+    },
   }),
 })

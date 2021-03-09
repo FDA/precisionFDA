@@ -349,7 +349,7 @@ class AppsController < ApplicationController
         {
           id: challenge.id,
           name: challenge.name,
-          link: challenge.is_viewable?(@context) ? challenge_path(challenge.id) : nil,
+          link: challenge.accessible_by?(@context) ? challenge_path(challenge.id) : nil,
           assign_link: assign_app_challenge_path(id: challenge.id, app_id: app.id),
           app: {
             id: ch_app&.dxid,

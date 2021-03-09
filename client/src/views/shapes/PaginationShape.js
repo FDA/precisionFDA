@@ -6,6 +6,7 @@ const PaginationShape = {
   nextPage: PropTypes.number,
   prevPage: PropTypes.number,
   totalPages: PropTypes.number,
+  totalCount: PropTypes.number,
 }
 
 const mapToPagination = (data) => {
@@ -14,6 +15,7 @@ const mapToPagination = (data) => {
     nextPage: data.next_page,
     prevPage: data.prev_page,
     totalPages: data.total_pages,
+    totalCount: data.total_count,
   }
 }
 

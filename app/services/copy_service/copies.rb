@@ -44,7 +44,7 @@ class CopyService
       copies.first.object
     end
 
-    delegate :size, :select, :[], :empty?, :present?, to: :copies
+    delegate :size, :select, :reject, :[], :empty?, :present?, to: :copies
 
     attr_reader :copies
   end

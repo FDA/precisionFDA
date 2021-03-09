@@ -18,12 +18,18 @@
 #  updated_at         :datetime         not null
 #  uid                :string(255)
 #  project            :string(255)
+#  featured           :boolean          default(FALSE)
+#  deleted            :boolean          default(FALSE)
 #
 
 class Workflow < ApplicationRecord
   include Auditor
   include Permissions
+  include CommonPermissions
   include InternalUid
+  include Featured
+  include SoftRemovable
+  include TagsContainer
 
   belongs_to :user
   belongs_to :workflow_series
@@ -32,6 +38,11 @@ class Workflow < ApplicationRecord
   store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 
   acts_as_commentable
+
+  attr_accessor :current_user
+
+  before_update { |workflow| workflow.update_series_featured_status if workflow.featured_changed? }
+  before_update { |workflow| workflow.update_series_deleted_status if workflow.deleted_changed? }
 
   class << self
     # TODO: this method looks similar to the same methods in other models.
@@ -54,6 +65,7 @@ class Workflow < ApplicationRecord
 
   def allow_batch_run?
     return unless stages.any?
+
     batch_input_spec.select { |s| s["allow_batch"] }.any?
   end
 
@@ -151,5 +163,13 @@ class Workflow < ApplicationRecord
 
   def describe_fields
     %w(title name edit_version revision readme spec dxid uid)
+  end
+
+  def update_series_featured_status
+    workflow_series.update(featured: featured)
+  end
+
+  def update_series_deleted_status
+    workflow_series.update(deleted: deleted)
   end
 end

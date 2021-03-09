@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeWorkflowsSpacesPage test should render 1`] = `
+<HomeLayout>
+  <div
+    className="home-page-layout__header-row"
+  >
+    <div
+      className="home-page-layout__actions--right"
+    >
+      <Connect(ActionsDropdown)
+        file={Array []}
+        makeFeatured={[Function]}
+        page="spaces"
+        workflows={Array []}
+      />
+    </div>
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Connect(HomeWorkflowsSpacesTable)
+      handleFilterValue={[Function]}
+      workflows={Array []}
+    />
+  </div>
+</HomeLayout>
+`;

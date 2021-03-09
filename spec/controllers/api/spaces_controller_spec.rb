@@ -484,17 +484,34 @@ RSpec.describe Api::SpacesController, type: :controller do
       create(:space, :group, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
     end
 
-    let(:app) { create(:app, scope: space.uid, user_id: host_lead.id) }
+    let(:app) do
+      create(
+        :app,
+        scope: space.uid,
+        user_id: host_lead.id,
+        input_spec: {},
+        output_spec: {},
+      )
+    end
+    let(:app_series) do
+      create(
+        :app_series,
+        scope: space.uid,
+        user_id: host_lead.id,
+        latest_revision_app_id: app.id,
+        latest_version_app_id: nil,
+      )
+    end
     let(:jobs_size) { 2 }
 
     before do
       authenticate!(host_lead)
-
+      app.update(app_series_id: app_series.id)
       create_list(:job, jobs_size, scope: space.uid, app_id: app.id, user: host_lead)
     end
 
     it "renders jobs" do
-      get :jobs, params: { id: space }
+      get :jobs, params: { id: space, app_id: app.id }
 
       expect(response).to be_successful
       expect(parsed_response["jobs"].size).to eq(jobs_size)
