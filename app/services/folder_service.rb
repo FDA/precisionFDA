@@ -102,7 +102,7 @@ class FolderService
     nodes.each do |node|
       raise Error, "You're not allowed to move an HTTPS #{node.klass}." if node.https?
 
-      if node.public? && !context.can_administer_site? || !node.editable_by?(context)
+      if node.public? && !context.can_administer_site? || !node.accessible_by?(context)
         raise Error, "You have no permissions to move '#{node.name}'."
       end
 
