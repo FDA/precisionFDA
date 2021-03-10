@@ -151,7 +151,7 @@ module ApplicationHelper
 
     # rubocop:disable Rails/HelperInstanceVariable
     if item.check_accessibility(@context)
-      html_opts = { class: opts[:title_class] }
+      html_opts = { class: opts[:title_class], target: opts[:target] }
       html_opts[:data] = opts[:data] if opts[:data]
       if opts[:nolink]
         icon_span + item.title.to_s

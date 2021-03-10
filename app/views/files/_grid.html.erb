@@ -27,7 +27,7 @@
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
-    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: file.blocked?)
+    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: file.blocked?, target: "_blank")
   end
 
   g.column name: toggle_all_descriptions do |file|
@@ -65,7 +65,7 @@
     elsif file.parent_type == "Node" && file.parent.blank?
       "Copied"
     elsif file.parent_type != "User"
-      unilinkfw(file.parent)
+      unilinkfw(file.parent, target: "_blank")
     else
       "Uploaded"
     end
