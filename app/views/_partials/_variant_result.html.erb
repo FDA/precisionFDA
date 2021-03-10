@@ -19,7 +19,7 @@
     <% if defined?(input) and input %>
       <span class="text-muted"><%= input[1] %></span>
     <% elsif defined?(file) and file %>
-      <%= unilinkfw(file, scope_icon: true, icon_class: 'access-icon') %>
+      <%= unilinkfw(file, scope_icon: true, icon_class: 'access-icon', target: "_blank") %>
     <% else %>
       <span class="text-muted">not set</span>
     <% end %>

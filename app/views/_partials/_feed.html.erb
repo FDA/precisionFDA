@@ -15,7 +15,7 @@
               from <span class="pfda-post-org"><%= post.user.org.name %></span> shared <span class="pfda-post-timestamp"><%= time_ago_in_words(post.created_at) %> ago</span>
             </li>
           </ul>
-          <%= unilinkfw(post, {title_class: 'pfda-post-title', noicon: true}) %>
+          <%= unilinkfw(post, {title_class: 'pfda-post-title', noicon: true, target: "_blank"}) %>
           <ul class="pfda-post-actions list-inline list-inline-bullets">
             <li class="pfda-post-comments">
               <%= link_to pathify_comments(post), class: 'link-muted' do %>

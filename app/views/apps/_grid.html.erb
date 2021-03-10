@@ -10,7 +10,7 @@
   end
 
   g.column name: 'Title', attribute: 'title', assoc: :latest_version_app do |series|
-    unilink(series.latest_version_app, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+    unilink(series.latest_version_app, scope_icon: (defined?(scope_icon) ? scope_icon : true), target: "_blank")
   end
 
   g.column name: 'Revision', attribute: 'revision', assoc: :latest_version_app do |series|
