@@ -57,23 +57,23 @@ class Context
   end
 
   def can_create_challenges?
-    user && user.can_create_challenges?
+    user&.can_create_challenges?
   end
 
   def can_create_spaces?
-    user && user.can_create_spaces?
+    user&.can_create_spaces?
   end
 
   def can_administer_site?
-    user && user.can_administer_site?
+    user&.can_administer_site?
   end
 
   def challenge_admin?
-    user && user.site_or_challenge_admin?
+    user&.site_or_challenge_admin?
   end
 
   def challenge_evaluator?
-    user && user.is_challenge_evaluator?
+    user&.is_challenge_evaluator?
   end
 
   def logged_in_or_guest?

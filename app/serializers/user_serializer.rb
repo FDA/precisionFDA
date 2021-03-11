@@ -46,7 +46,5 @@ class UserSerializer < ApplicationSerializer
     end
   end
 
-  def can_create_challenges?
-    object.can_create_challenges?
-  end
+  delegate :can_create_challenges?, to: :object
 end
