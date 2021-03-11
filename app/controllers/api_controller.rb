@@ -932,12 +932,10 @@ class ApiController < ApplicationController
     if file.state != "closed"
       if file.parent_type == "Asset"
         User.sync_asset!(@context, file.id)
+      elsif file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
+        User.sync_challenge_file!(file.id)
       else
-        if file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-          User.sync_challenge_file!(file.id)
-        else
-          User.sync_file!(@context, file.id)
-        end
+        User.sync_file!(@context, file.id)
       end
       file.reload
     end
