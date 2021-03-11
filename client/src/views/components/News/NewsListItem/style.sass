@@ -1,0 +1,65 @@
+@import "../../../../styles/common.sass"
+@import "../../../../styles/variables.sass"
+
+.news-list-item
+  display: flex
+  flex-flow: row nowrap
+  list-style: none
+  margin-bottom: $pfda-main-content-vertical-padding
+
+  .left-column
+    width: $pfda-small-column-width
+    flex: 0 0 $pfda-small-column-width
+    align-items: flex-start
+    padding: 0
+
+    hr
+      border: 0.5px solid #646464
+      margin-top: 4px
+      margin-bottom: 8px
+  
+    .news-item-date
+      @extend .pfda-subsection-heading
+      text-transform: uppercase
+      margin-top: 0
+
+  .right-column
+    flex-grow: 1
+    align-items: flex-start
+    padding-left: 0
+    padding-right: $pfda-main-content-horizontal-padding
+
+  .news-item-image
+    cursor: pointer
+    padding: 0px
+
+    img
+      width: $pfda-thumbnail-width
+      height: $pfda-thumbnail-height
+      object-fit: cover
+      overflow: hidden
+
+  .news-item-content
+    flex-grow: 1
+    vertical-align: top
+    padding: 0 0 0 $pfda-main-content-horizontal-padding
+
+    h1
+      font-size: 20px
+      font-weight: 400
+      color: $pfda-text-black
+      padding-top: 0px
+      margin-top: 0px
+      margin-bottom: 8px
+
+    p
+      font-size: $pfda-font-size-body
+      font-weight: 400
+      color: $pfda-text-medium-grey
+      margin-top: 5px
+
+    button
+      margin-right: $pfda-button-spacing
+
+  @media (min-width: 768px)
+    flex-flow: row nowrap

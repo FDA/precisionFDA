@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewsYearList matches snapshot 1`] = `
+<div>
+  <div
+    className="pfda-subsection-heading"
+  >
+    PREVIOUS NEWS
+  </div>
+  <ul
+    className="news-year-list"
+  />
+</div>
+`;
