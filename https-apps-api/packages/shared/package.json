@@ -33,6 +33,7 @@
     "@mikro-orm/core": "^4.2.3",
     "@mikro-orm/mysql": "^4.2.3",
     "@mikro-orm/reflection": "^4.2.3",
+    "ajv": "^7.2.1",
     "axios": "^0.21.0",
     "bull": "^3.18.1",
     "dotenv": "^8.2.0",

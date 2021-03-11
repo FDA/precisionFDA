@@ -87,7 +87,7 @@ type DescribeFilesResponse = {
 
 type DescribeFoldersResponse = {
   id: string
-  folders: Array<string>
+  folders: string[]
 }
 
 type JobCreateResponse = {
