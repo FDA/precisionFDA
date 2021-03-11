@@ -142,6 +142,10 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
+      resources :news_items, path: "news", only: %i(index show) do
+        get :years, on: :collection
+      end
+
       resources :challenges, only: %i(index show) do
         get :years, on: :collection
         post :save_editor_page, on: :member

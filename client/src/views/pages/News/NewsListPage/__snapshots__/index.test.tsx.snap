@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewsListPage test should render 1`] = `
+<PublicLayout>
+  <NavigationBarPublic
+    subtitle="Announcements and press for precisionFDA."
+    title="News"
+  />
+  <div
+    className="challenges-page-layout"
+  >
+    <div
+      className="left-column"
+    >
+      <Connect(NewsList) />
+    </div>
+    <div
+      className="right-column right-column--override pfda-main-content-sidebar"
+    >
+      <Connect(NewsYearList)
+        setYearHandler={[Function]}
+      />
+      <hr />
+      <div
+        className="pfda-subsection-heading"
+      >
+        COMMUNITY NEWS
+      </div>
+      <p>
+        If you have newsworthy updates of value to the precisionFDA community, let us know!
+      </p>
+    </div>
+  </div>
+</PublicLayout>
+`;
