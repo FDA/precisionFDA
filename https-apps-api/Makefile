@@ -37,7 +37,7 @@ test-worker-task:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
 
 watch:
-	$(bin)nodemon --watch ./packages/api/src --ext ts --exec make run-dev
+	$(bin)nodemon --watch ./packages/api/src --watch ./packages/shared/src --ext ts --exec make run-dev
 
 watch-worker:
 	$(bin)nodemon --watch ./packages/worker/src --ext ts --exec make run-worker-dev

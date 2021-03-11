@@ -8,6 +8,7 @@ import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
 import { JobClosedEvent } from './event/job-closed.entity'
 import { Organization } from './org/org.entity'
+import { EmailNotification } from './email/email-notification.entity'
 
 const entities = {
   App,
@@ -20,6 +21,7 @@ const entities = {
   UserFile,
   JobClosedEvent,
   Organization,
+  EmailNotification,
 }
 
 export * as app from './app'
@@ -37,5 +39,7 @@ export * as userFile from './user-file'
 export * as event from './event'
 
 export * as org from './org'
+
+export * as email from './email'
 
 export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node }
