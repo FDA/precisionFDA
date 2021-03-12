@@ -13,7 +13,10 @@ export class EmailProcessOperation extends BaseOperation<EmailSendInput, boolean
     // throws an error
     emailTemplate.validate(input.input)
     const receivers = await emailTemplate.getReceivers(input.receiverUserIds)
-    // console.log(receivers, 'validated and allowed to send')
+    console.log(
+      receivers.map(user => user.id),
+      'validated and allowed to send',
+    )
     // determine email type
     // validate input for this email
     // determine receivers (can be logged-in user or someone else)
