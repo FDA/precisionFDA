@@ -1021,7 +1021,7 @@ class ApiController < ApplicationController
     token = @context.token
     if file.user_id != @context.user_id
       have_access = file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-      fail "The current user does not have access to the file." unless have_access
+      raise "The current user does not have access to the file." unless have_access
 
       token = CHALLENGE_BOT_TOKEN
     end
