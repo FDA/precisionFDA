@@ -4,4 +4,4 @@ export * as inputs from './email.input'
 
 export * as emailConfig from './email.config'
 
-export { EmailProcessOperation } from './ops/email-send'
+export { EmailProcessOperation } from './ops/email-process'
