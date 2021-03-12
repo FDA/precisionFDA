@@ -42,10 +42,10 @@ class UploadUrlFetcher
   def token
     @token ||= begin
       if file.user_id != context.user_id
-        if file.created_by_challenge_bot? && context.user.site_or_challenge_admin?
-          CHALLENGE_BOT_TOKEN
-        else
-          raise "The current user does not have access to the file."
+        have_access = file.created_by_challenge_bot? && context.user.site_or_challenge_admin?
+        raise "The current user does not have access to the file." unless have_access
+
+        CHALLENGE_BOT_TOKEN
         end
       else
         context.token

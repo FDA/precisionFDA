@@ -1020,11 +1020,10 @@ class ApiController < ApplicationController
     file = UserFile.where(parent_type: "User").find_by_uid!(id)
     token = @context.token
     if file.user_id != @context.user_id
-      if file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-        token = CHALLENGE_BOT_TOKEN
-      else
-        fail "The current user does not have access to the file."
-      end
+      have_access = file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
+      fail "The current user does not have access to the file." unless have_access
+
+      token = CHALLENGE_BOT_TOKEN
     end
 
     if file.state == "open"
