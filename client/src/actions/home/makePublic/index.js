@@ -64,8 +64,7 @@ export default (link, objectType, ids) => (
       const statusIsOK = status === httpStatusCodes.OK
 
       if (statusIsOK) {
-        const messages = payload.meta?.messages
-
+        const messages = payload.messages
         dispatch(makePublicSuccess(objectType))
 
         if (messages) {
@@ -73,7 +72,7 @@ export default (link, objectType, ids) => (
             if (message.type === 'success')
               dispatch(showAlertAboveAllSuccess({ message: message.message }))
             else if (message.type === 'warning')
-              dispatch(showAlertAboveAllWarning({ message: message.message }))
+              dispatch(showAlertAboveAllWarning({ message: message.text }))
           })
         } else {
           dispatch(showAlertAboveAllSuccess({ message: 'Objects are successfully published.' }))

@@ -7,6 +7,16 @@ class FolderService
     @context = context
   end
 
+  # Find a set of matched names between folders to be published and
+  #   all public folders exist.
+  # @param folders_names [Array] - a collection of Folder objects.
+  # @return [Array] - a set of matched names
+  def find_match_names(folders)
+    folders_names = folders_names(folders)
+    public_folders_names = Folder.accessible_by_public.pluck(:name).uniq
+    folders_names & public_folders_names
+  end
+
   def add_folder(name, parent_folder = nil, scope = Scopes::SCOPE_PRIVATE)
     if parent_folder && !parent_folder.editable_by?(context)
       return Rats.failure(
@@ -95,6 +105,22 @@ class FolderService
   private
 
   attr_reader :context
+
+  # Collect names of folders and folder's children - use for names check when publishing.
+  # @param folders [A collection of Folder objects]
+  # @return folders_children_names [Array] - names of folder's children folders
+  def folders_names(folders)
+    folders_names = folders.pluck(:name)
+
+    folders_children_names = []
+    folders.each do |folder|
+      sub_folders = folder.sub_folders.pluck(:name)
+      folders_children_names += sub_folders unless sub_folders.empty?
+    end
+
+    folders_names += folders_children_names unless folders_children_names.empty?
+    folders_names
+  end
 
   # Validates nodes.
   # @param nodes [ActiveRecord::Relation<Node>] Nodes to move.
