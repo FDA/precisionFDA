@@ -29,14 +29,34 @@ describe('makePublic()', () => {
 
     it('dispatches correct actions on success response', () => {
       const messages = [
-        { type: 'warning', message: 'message 1' },
-        { type: 'success', message: 'message 2' },
+        { type: 'success', message: 'Objects are successfully published.' },
       ]
-      fetchMock.post(link, { meta: { messages }})
+      fetchMock.post(link, messages)
 
       return store.dispatch(makePublic(link, objectType, ids)).then(() => {
         const actions = store.getActions()
+        expect(actions).toEqual([
+          { type: HOME_MAKE_PUBLIC_FOLDER_START, payload: {}},
+          { type: HOME_MAKE_PUBLIC_FOLDER_SUCCESS, payload: {}},
+          {
+            type: ALERT_SHOW_ABOVE_ALL, payload: {
+              message: 'Objects are successfully published.',
+              style: 'success',
+              type: ALERT_ABOVE_ALL,
+            },
+          },
+        ])
+      })
+    })
 
+    it('dispatches correct actions on warning response', () => {
+      const messages = [
+        { messages: [{ type: 'warning', text: 'message 1' }]},
+      ]
+      fetchMock.post(link, messages[0])
+
+      return store.dispatch(makePublic(link, objectType, ids)).then(() => {
+        const actions = store.getActions()
         expect(actions).toEqual([
           { type: HOME_MAKE_PUBLIC_FOLDER_START, payload: {}},
           { type: HOME_MAKE_PUBLIC_FOLDER_SUCCESS, payload: {}},
@@ -44,13 +64,6 @@ describe('makePublic()', () => {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'message 1',
               style: 'warning',
-              type: ALERT_ABOVE_ALL,
-            },
-          },
-          {
-            type: ALERT_SHOW_ABOVE_ALL, payload: {
-              message: 'message 2',
-              style: 'success',
               type: ALERT_ABOVE_ALL,
             },
           },
