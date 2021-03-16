@@ -56,7 +56,7 @@ class UserFileSerializer < NodeSerializer
       links[:show_license] = license_path(object.license.id) if object.license
 
       if object.license.present? && object.license_status?(current_user, "active")
-        unless object.license.owned_by_user?(current_user) || object.in_space?
+        unless object.license.owned_by_user?(current_user)
           links[:download] = download_api_file_path(object)
           # POST Authorize URL - to move to api
           links[:link] = link_file_path(object)
