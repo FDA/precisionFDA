@@ -42,25 +42,6 @@ RSpec.describe IOC::Container do
       end
     end
 
-    describe "Users" do
-      before do
-        container.stub("api.user", user_api)
-      end
-
-      describe("user https apps projects creator") do
-        before do
-          allow(UserService::HttpsAppsProjectsCreator).to receive(:new).and_call_original
-        end
-
-        it "resolves https apps projects creator" do
-          expect(container.resolve("users.https_apps_projects_creator")).
-            to(be_instance_of(UserService::HttpsAppsProjectsCreator))
-
-          expect(UserService::HttpsAppsProjectsCreator).to(have_received(:new).with(user_api, user))
-        end
-      end
-    end
-
     describe "Organizations" do
       before do
         container.stub("api.user", user_api)
@@ -121,23 +102,18 @@ RSpec.describe IOC::Container do
 
       describe("login tasks processor") do
         let(:org_leave_processor) { "Organization leave processor" }
-        let(:https_apps_projects_creator) { "Https apps creator" }
 
         before do
           allow(LoginTasksProcessor).to receive(:new).and_call_original
 
           container.stub("orgs.org_leave_processor", org_leave_processor)
-          container.stub("users.https_apps_projects_creator", https_apps_projects_creator)
         end
 
         it "resolves login tasks processor" do
           expect(container.resolve("orgs.login_tasks_processor")).
             to(be_instance_of(LoginTasksProcessor))
 
-          expect(LoginTasksProcessor).to have_received(:new).with(
-            org_leave_processor,
-            https_apps_projects_creator,
-          )
+          expect(LoginTasksProcessor).to have_received(:new).with(org_leave_processor)
         end
       end
 

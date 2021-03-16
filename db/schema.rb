@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_16_201523) do
+ActiveRecord::Schema.define(version: 2021_03_16_165856) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -812,8 +812,6 @@ ActiveRecord::Schema.define(version: 2020_12_16_201523) do
     t.integer "user_state", default: 0, null: false
     t.integer "expiration"
     t.string "disable_message"
-    t.string "jupyter_project"
-    t.string "ttyd_project"
     t.index ["dxuser"], name: "index_users_on_dxuser", unique: true
     t.index ["normalized_email"], name: "index_users_on_normalized_email"
     t.index ["org_id"], name: "index_users_on_org_id"
