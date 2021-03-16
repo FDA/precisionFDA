@@ -46,7 +46,6 @@ class UploadUrlFetcher
         raise "The current user does not have access to the file." unless have_access
 
         CHALLENGE_BOT_TOKEN
-        end
       else
         context.token
       end
