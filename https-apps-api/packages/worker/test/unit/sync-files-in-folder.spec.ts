@@ -323,6 +323,7 @@ describe('syncFilesInFolder operation', () => {
 
   it('works with uploaded files as well', async () => {
     const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
     // file was uploaded to the project manually
     const file = create.filesHelper.createUploaded(
       em,
@@ -335,10 +336,21 @@ describe('syncFilesInFolder operation', () => {
         parentType: PARENT_TYPE.USER,
       },
     )
+    const remoteFile = create.filesHelper.create(
+      em,
+      { user },
+      {
+        name: 'b',
+        project,
+        dxid: secondFileDxid,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+      },
+    )
     await em.flush()
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 1), next: null })
+      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
     const op = new userFile.SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
@@ -347,12 +359,65 @@ describe('syncFilesInFolder operation', () => {
     const input = { ...defaultInput, folderId: null }
     const res = await op.execute(input)
     // no additions and deletions should happen
-    expect(res.files.map(f => f.dxid)).to.have.members([firstFileDxid])
-    // file was not recreated
-    expect(res.files.map(f => f.id)).to.have.members([file.id])
+    // op only returns HTTPS files
+    expect(res.files.map(f => f.dxid)).to.have.members([secondFileDxid])
+    expect(res.files.map(f => f.id)).to.have.members([remoteFile.id])
+    const filesInDb = await em.find(UserFile, { user })
+    // op did not operate with local files, did not recreate or delete it
+    // even though the file was returned from the api call
+    expect(filesInDb.map(f => f.id)).to.have.members([file.id, remoteFile.id])
+  })
+
+  it('works with uploaded files even in wrong subfolder', async () => {
+    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
+    // file was uploaded to the project manually
+    const file = create.filesHelper.createUploaded(
+      em,
+      { user },
+      {
+        name: 'a',
+        project,
+        dxid: firstFileDxid,
+        parentFolderId: folder.id,
+        parentId: user.id,
+        parentType: PARENT_TYPE.USER,
+      },
+    )
+    const remoteFile = create.filesHelper.create(
+      em,
+      { user },
+      {
+        name: 'b',
+        project,
+        dxid: secondFileDxid,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+      },
+    )
+    await em.flush()
+    fakes.client.filesListFake
+      .onCall(0)
+      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
+    const op = new userFile.SyncFilesInFolderOperation({
+      em: database.orm().em.fork(),
+      log,
+      user: userCtx,
+    })
+    // operation runs for "/" and it still handles local file in a subfolder
+    // because that is how it is represented right now remotely
+    const input = { ...defaultInput, folderId: null }
+    const res = await op.execute(input)
+    // no additions and deletions should happen
+    // op only returns HTTPS files
+    expect(res.files.map(f => f.dxid)).to.have.members([secondFileDxid])
+    expect(res.files.map(f => f.id)).to.have.members([remoteFile.id])
+    const filesInDb = await em.find(UserFile, { user })
+    // op did not operate with local files, did not recreate or delete it
+    // even though the file was returned from the api call
+    expect(filesInDb.map(f => f.id)).to.have.members([file.id, remoteFile.id])
   })
 
   // todo: deletes file when folder is deleted
-  // todo: other files (created by user) are left out/not deleted
   // todo: error states - folder does not exist etc, rollback happens
 })
