@@ -7,7 +7,7 @@ describe AssetSerializer do
   let(:admin) { create(:user, :admin) }
   let(:asset) { build(:asset, created_at: Time.current, user: user) }
 
-  # rubocop:disable RSpec/SubjectStub
+  # rubocop:todo RSpec/SubjectStub
   before do
     allow(asset_serializer).to receive(:current_user).and_return(user)
   end
@@ -96,7 +96,7 @@ describe AssetSerializer do
 
       before do
         allow(admin).to receive(:logged_in?).and_return(true)
-        # rubocop:disable RSpec/SubjectStub
+        # rubocop:todo RSpec/SubjectStub
         allow(asset_serializer).to receive(:current_user).and_return(admin)
         # rubocop:enable RSpec/SubjectStub
       end
