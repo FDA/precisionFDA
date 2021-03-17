@@ -159,7 +159,6 @@ describe UserFileSerializer do
                 to eq("/api/licenses/:id/license_item/:item_uid")
             end
           end
-          # rubocop:enable RSpec/NestedGroups
         end
       end
 
@@ -229,7 +228,7 @@ describe UserFileSerializer do
           it "user_file has inactive license of a proper user with approval required" do
             expect(user_file.license.title).to eq(license.title)
             expect(accepted_license.user_id).to eq(user.id)
-            expect(accepted_license.state).to_not eq("active")
+            expect(accepted_license.state).not_to eq("active")
           end
 
           it "user_file has a license with approval required" do
@@ -254,6 +253,7 @@ describe UserFileSerializer do
             end
           end
         end
+        # rubocop:enable RSpec/NestedGroups
 
         context "when license is not active and approval not required" do
           before do
@@ -267,7 +267,7 @@ describe UserFileSerializer do
 
           it "user_file has inactive license of a proper user with approval required" do
             expect(accepted_license.user_id).to eq(user.id)
-            expect(accepted_license.state).to_not eq("active")
+            expect(accepted_license.state).not_to eq("active")
             expect(user_file_serialized["links"]["accept_license_action"]).
               to eq("/api/licenses/#{license.id}/accept")
           end
@@ -303,7 +303,9 @@ describe UserFileSerializer do
     context "when user is admin" do
       before do
         allow(admin).to receive(:logged_in?).and_return(true)
+        # rubocop:disable RSpec/SubjectStub
         allow(user_file_serializer).to receive(:current_user).and_return(admin)
+        # rubocop:enable RSpec/SubjectStub
       end
 
       it "links[feature] exist" do
