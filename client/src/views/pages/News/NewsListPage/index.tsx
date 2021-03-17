@@ -65,6 +65,7 @@ class NewsListPage extends Component<INewsListPageProps> {
               <button className='btn btn-primary btn-block' onClick={() => window.location.assign('/admin/news')}>Administer News</button>
               </>
             )}
+            <div className="pfda-subsection-heading">NEWS BACKLOG</div>
             <NewsYearList setYearHandler={setYearHandler} />
             <hr />
             <div className="pfda-subsection-heading">COMMUNITY NEWS</div>

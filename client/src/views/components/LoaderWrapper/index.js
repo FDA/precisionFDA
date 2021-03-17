@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import ContainerLoader from '../ContainerLoader'
 import { contextIsFetchingSelector, isInitializedSelector } from '../../../reducers/context/selectors'
 import fetchContext from '../../../actions/context'
+import './style.sass'
 
 
 class LoaderWrapper extends React.Component {

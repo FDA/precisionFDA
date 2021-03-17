@@ -11,68 +11,16 @@ import {
   newsYearListIsFetchingSelector,
 } from '../../../../reducers/news/yearList/selectors'
 import './style.sass'
+import { YearList } from '../../List/YearList'
 
 
-interface INewsYearListProps {
-  years: number[],
-  isFetching: boolean,
-  setYearHandler: (year: number) => void,
-  fetchYearList: () => void,
-}
-
-
-class NewsYearList extends React.Component<INewsYearListProps> {
+class NewsYearList extends YearList {
   static defaultProps = {
+    elementName: 'news',
     years: [],
     isFetching: false,
     setYearHandler: () => {},
     fetchYearList: () => {},
-  }
-
-  componentDidMount() {
-    const { fetchYearList } = this.props
-    fetchYearList()
-  }
-
-  render() {
-    const { years, isFetching, setYearHandler } = this.props
-    const classes = classNames(['news-year-list'])
-    const heading = "PREVIOUS NEWS"
-
-    if (isFetching) {
-      return (
-        <div>
-          <div className="pfda-subsection-heading">{heading}</div>
-          <div className='text-center'>
-            <Loader />
-          </div>
-        </div>
-      )
-    }
-
-    if (!years) {
-      return (
-        <div>
-          <div className="pfda-subsection-heading">{heading}</div>
-          <div className='text-center'>
-            No previous news
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div>
-        <div className="pfda-subsection-heading">{heading}</div>
-        <ul className={classes}>
-          {years.map((year: number) => (
-            <li key={year}>
-              <a onClick={() => setYearHandler(year)}>{year}</a>
-            </li>
-          ), this)}
-        </ul>
-      </div>
-    )
   }
 }
 
