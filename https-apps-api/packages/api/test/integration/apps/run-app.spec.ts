@@ -1,7 +1,7 @@
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
+import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
-import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
+import { errors, database } from '@pfda/https-apps-shared'
 import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
 import {
   JOB_STATE,
@@ -48,7 +48,7 @@ describe('POST /apps/:id/run', () => {
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
       // default app type
-      project: user.jupyterProject,
+      project: user.privateFilesProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
     })
@@ -86,7 +86,7 @@ describe('POST /apps/:id/run', () => {
     )
   })
 
-  it('response shape - ttyd app', async () => {
+  it('response shape - ttyd app (still user.private project)', async () => {
     const { body } = await supertest(api.getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
@@ -100,7 +100,7 @@ describe('POST /apps/:id/run', () => {
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
       // default app type
-      project: user.ttydProject,
+      project: user.privateFilesProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
     })
@@ -140,7 +140,7 @@ describe('POST /apps/:id/run', () => {
     expect(platformCall.input)
       .to.have.property('snapshot')
       .that.deep.equals({
-        $dnanexus_link: { id: snapshotFile.dxid, project: user.jupyterProject },
+        $dnanexus_link: { id: snapshotFile.dxid, project: user.privateFilesProject },
       })
   })
 
@@ -229,19 +229,7 @@ describe('POST /apps/:id/run', () => {
     })
   })
 
-  it('uses correct project reference based on app type', async () => {
-    const { body } = await supertest(api.getServer())
-      .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
-      .send({
-        ...generate.app.runAppInput(),
-        httpsAppType: appDomain.enums.APP_HTTPS_SUBTYPE.TTYD,
-      })
-      .expect(201)
-    expect(body).to.have.property('project', user.ttydProject)
-    const fakeCallArgs = fakes.client.jobCreateFake.getCall(0).args[0]
-    expect(fakeCallArgs).to.have.property('project', user.ttydProject)
-  })
+  // todo: should test different project selection anyways
 
   context('error states', () => {
     it('throws 404 when user does not exist', async () => {
@@ -257,7 +245,7 @@ describe('POST /apps/:id/run', () => {
     })
 
     it('throws 404 when user does not have the project set', async () => {
-      user.jupyterProject = null
+      user.privateFilesProject = null
       await em.flush()
       const { body } = await supertest(api.getServer())
         .post(`/apps/${app.dxid}/run`)

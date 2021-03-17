@@ -30,10 +30,7 @@ const user = {
     firstName: random.firstName(),
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
-    jupyterProject: `project-${random.dxstr()}`,
-    ttydProject: `project-${random.dxstr()}`,
-    // cloudWorkstationProject: `project-${random.dxstr()}`,
-    // httpsProject: `project-${random.dxstr()}`,
+    privateFilesProject: `project-${random.dxstr()}`,
   }),
 }
 
