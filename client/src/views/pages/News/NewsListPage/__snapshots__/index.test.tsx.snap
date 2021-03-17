@@ -17,6 +17,11 @@ exports[`NewsListPage test should render 1`] = `
     <div
       className="right-column right-column--override pfda-main-content-sidebar"
     >
+      <div
+        className="pfda-subsection-heading"
+      >
+        NEWS BACKLOG
+      </div>
       <Connect(NewsYearList)
         setYearHandler={[Function]}
       />

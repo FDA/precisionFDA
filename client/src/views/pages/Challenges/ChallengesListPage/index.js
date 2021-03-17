@@ -74,6 +74,7 @@ class ChallengesListPage extends Component {
             )}
             <CollapsibleMenu title="CHALLENGES" options={sideMenuOptions} />
             <hr />
+            <div className="pfda-subsection-heading">PREVIOUS CHALLENGES</div>
             <ChallengesYearList setYearHandler={setYearHandler} />
             <hr />
             <div className="pfda-subsection-heading">PROPOSE A CHALLEGNE</div>

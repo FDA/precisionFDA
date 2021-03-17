@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NewsYearList matches snapshot 1`] = `
+exports[`YearList matches snapshot 1`] = `
 <div>
   <ul
     className="year-list"
