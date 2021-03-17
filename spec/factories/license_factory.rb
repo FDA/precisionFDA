@@ -20,7 +20,7 @@ FactoryBot.define do
     content { "default_content" }
 
     trait :public do
-      scope { License::SCOPE_PUBLIC }
+      scope { Scopes::SCOPE_PUBLIC }
     end
 
     trait :approval_required do

@@ -18,7 +18,6 @@ class License < ApplicationRecord
   include Permissions
   include CommonPermissions
   include Licenses
-  include Scopes
 
   belongs_to :user
   has_many :licensed_items, dependent: :destroy

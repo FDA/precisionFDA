@@ -28,7 +28,7 @@ FactoryBot.define do
 
     sequence(:dxid) { "file-#{SecureRandom.hex(12)}" }
     sequence(:name) { |n| "file-#{n}" }
-    sequence(:uid) { "#{dxid}-1" }
+    sequence(:uid) { |n| "#{dxid}-#{n}" }
     sequence(:project) { "project-#{SecureRandom.hex(12)}" }
 
     state { UserFile::STATE_CLOSED }
