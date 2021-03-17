@@ -108,7 +108,7 @@ describe UserFileSerializer do
             expect(user_file_serialized["links"]["copy"]).to eq("/api/files/copy")
           end
 
-          # rubocop:disable RSpec/NestedGroups
+          # rubocop:todo RSpec/NestedGroups
           context "when user_file is a space viewer" do
             before do
               allow(user).to receive(:member_viewer?).and_return(false)
@@ -303,7 +303,7 @@ describe UserFileSerializer do
     context "when user is admin" do
       before do
         allow(admin).to receive(:logged_in?).and_return(true)
-        # rubocop:disable RSpec/SubjectStub
+        # rubocop:todo RSpec/SubjectStub
         allow(user_file_serializer).to receive(:current_user).and_return(admin)
         # rubocop:enable RSpec/SubjectStub
       end
