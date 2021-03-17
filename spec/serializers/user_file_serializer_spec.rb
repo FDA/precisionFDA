@@ -7,7 +7,7 @@ describe UserFileSerializer do
   let(:admin) { create(:user, :admin) }
   let(:user_file) { create(:user_file, :private, created_at: Time.current, user: user) }
 
-  # rubocop:disable RSpec/SubjectStub
+  # rubocop:todo RSpec/SubjectStub
   before do
     allow(user_file_serializer).to receive(:current_user).and_return(user)
   end
