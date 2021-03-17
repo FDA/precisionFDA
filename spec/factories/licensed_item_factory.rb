@@ -13,10 +13,5 @@
 FactoryBot.define do
   factory :licensed_item do
     license
-    # user_file
-    # trait :with_user_file do
-    #   # licenseable { user_file }
-    #   user_file
-    # end
   end
 end

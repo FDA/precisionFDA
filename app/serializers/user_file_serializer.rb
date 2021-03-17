@@ -41,23 +41,18 @@ class UserFileSerializer < NodeSerializer
       links[:show] = file_path(object)
       links[:user] = user_path(object.user.dxuser)
       links[:track] = track_object
-
       links[:space] = space_path if object.in_space?
 
       # POST download_list files
       links[:download_list] = download_list_api_files_path
       # POST /api/attach_to: api_attach_to_notes, discussions, answers
       links[:attach_to] = api_attach_to_notes_path
-
       # POST: Add file
       links[:add_file] = api_create_file_path
       # POST: Add folder
       links[:add_folder] = create_folder_api_files_path
       # PUT edit a single file
       links[:update] = api_files_path(object)
-      p "SERR: object.license = #{object.license.inspect}"
-      p "SERR: object = #{object.inspect}"
-
       # link to license page if exists
       links[:show_license] = license_path(object.license.id) if object.license
 
