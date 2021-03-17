@@ -31,8 +31,20 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         // since we merged old projects (with uploaded files) this condition no longer makes sense
         // parentType: PARENT_TYPE.JOB,
         parentFolderId: input.folderId,
+        entityType: FILE_ORIGIN_TYPE.HTTPS,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
+    )
+  }
+
+  async findLocalFilesInProject(input: { project: string }): Promise<UserFile[]> {
+    return await this.find(
+      {
+        project: input.project,
+        stiType: { $ne: FILE_STI_TYPE.FOLDER },
+        entityType: FILE_ORIGIN_TYPE.REGULAR,
+      },
+      { populate: [], orderBy: { id: 'ASC' } },
     )
   }
 
