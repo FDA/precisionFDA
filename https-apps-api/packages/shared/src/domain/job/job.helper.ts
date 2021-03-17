@@ -1,6 +1,3 @@
-import { User } from '../user'
-import { InternalError } from '../../errors'
-import { APP_HTTPS_SUBTYPE } from '../app/app.enum'
 import { Job } from './job.entity'
 import { JOB_STATE, TERMINAL_STATES } from './job.enum'
 
@@ -15,22 +12,4 @@ const shouldSyncStatus = (job: Job): boolean => {
   return true
 }
 
-const getJobSubtype = (job: Job, user: User): APP_HTTPS_SUBTYPE => {
-  if (job.user.id !== user.id) {
-    throw new InternalError('getJobSubtype: Job user.id does not equal to the provided user.id')
-  }
-  const jobProject = job.project
-  if (jobProject === user.jupyterProject) {
-    return APP_HTTPS_SUBTYPE.JUPYTER
-  } else if (jobProject === user.ttydProject) {
-    return APP_HTTPS_SUBTYPE.TTYD
-  } else {
-    // return shiny
-  }
-  throw new InternalError('Job project dxid did not match any of the users projects', {
-    userId: user.id,
-    jobId: job.id,
-  })
-}
-
-export { shouldSyncStatus, isStateTerminal, getJobSubtype }
+export { shouldSyncStatus, isStateTerminal }

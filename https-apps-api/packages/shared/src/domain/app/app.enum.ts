@@ -3,6 +3,7 @@ enum ENTITY_TYPE {
   HTTPS = 1,
 }
 
+// DEPRECATED
 enum APP_HTTPS_SUBTYPE {
   JUPYTER = 'jupyter',
   TTYD = 'ttyd',

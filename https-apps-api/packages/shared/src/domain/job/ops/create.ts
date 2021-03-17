@@ -41,7 +41,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       })
     }
     const platformAppId = app.dxid
-    this.projectId = userHelper.getProjectForAppType(user, input.httpsAppType)
+    this.projectId = userHelper.getProjectForAppType(user)
     const runWithInstanceType =
       this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
         ? allowedInstanceTypes[this.input.instanceType]
