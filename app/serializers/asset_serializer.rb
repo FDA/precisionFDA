@@ -84,7 +84,6 @@ class AssetSerializer < UserFileSerializer
           # PUT /api/assets/:id update single asset: title and description permitted
           links[:update] = api_asset_path(object)
         end
-
       end
       # POST /api/attach_to: api_attach_to_notes, discussions, answers
       links[:attach_to] = api_attach_to_notes_path
