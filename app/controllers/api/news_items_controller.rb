@@ -1,7 +1,8 @@
 module Api
+  # News Items API controller.
   class NewsItemsController < BaseController
     include Paginationable
-    
+
     skip_before_action :require_api_login
 
     def index
