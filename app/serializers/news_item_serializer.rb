@@ -12,5 +12,5 @@ class NewsItemSerializer < ApplicationSerializer
     :published,
     :created_at,
     :updated_at,
-)
+  )
 end
