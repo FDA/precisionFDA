@@ -523,12 +523,12 @@ PLATFORMS
 
 DEPENDENCIES
   active_model_serializers (~> 0.10.10)
-  activerecord-import
-  acts-as-taggable-on (~> 6.5)!
-  acts_as_commentable_with_threading
+  activerecord-import (>= 1.0.6)
+  acts-as-taggable-on (~> 6.5, >= 6.5.0)!
+  acts_as_commentable_with_threading (>= 2.0.1)
   acts_as_follower!
   acts_as_votable
-  annotate
+  annotate (>= 3.1.1)
   awesome_nested_set!
   aws-sdk-sns
   axlsx (= 3.0.0.pre)

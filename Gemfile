@@ -29,7 +29,7 @@ gem "sdoc", ">= 1.0.0", group: :doc
 gem "active_model_serializers", "~> 0.10.10"
 
 # Support for bulk inserting data using ActiveRecord
-gem "activerecord-import"
+gem "activerecord-import", ">= 1.0.6"
 
 # Parameter validation for the API (used only in comparisons controller)
 gem "rails_param"
@@ -70,8 +70,8 @@ gem "kaminari", ">= 1.2.1", "< 2.0"
 gem "local_time"
 
 # Add comments on any model
-gem "acts-as-taggable-on", "~> 6.5", github: "mbleigh/acts-as-taggable-on"
-gem "acts_as_commentable_with_threading"
+gem "acts-as-taggable-on", "~> 6.5", ">= 6.5.0", github: "mbleigh/acts-as-taggable-on"
+gem "acts_as_commentable_with_threading", ">= 2.0.1"
 gem "awesome_nested_set", github: "collectiveidea/awesome_nested_set"
 
 gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
@@ -112,7 +112,7 @@ gem "soapforce"
 
 group :development do
   # Annotate models
-  gem "annotate"
+  gem "annotate", ">= 3.1.1"
   gem "brakeman"
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
