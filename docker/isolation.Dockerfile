@@ -1,4 +1,4 @@
-FROM ruby:2.7.1
+FROM ruby:2.7.2
 
 ENV DOCKERIZE_VERSION v0.6.0
 ENV APP_DIR /precision-fda

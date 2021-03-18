@@ -30,7 +30,7 @@ jobs:
   test-ruby:
     name: Test (Ruby)
     runs-on: ubuntu-latest
-    container: ruby:2.7.1
+    container: ruby:2.7.2
 
     services:
       mysql:
@@ -85,7 +85,7 @@ jobs:
   test-nodejs-api:
     name: Test HTTPS Apps api
     runs-on: ubuntu-latest
-    container: ruby:2.7.1
+    container: ruby:2.7.2
 
     services:
       mysql:
