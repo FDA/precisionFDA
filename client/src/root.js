@@ -13,6 +13,7 @@ import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
 import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
 import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
 import NewsListPage from './views/pages/News/NewsListPage'
+import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 
@@ -47,6 +48,9 @@ const root = ({ store }) => (
           <Route path='/challenges/:challengeId' render={(props) => <ChallengeDetailsPage challengeId={props.match.params.challengeId} />} />
           <Route exact path='/news'>
             <NewsListPage />
+          </Route>
+          <Route exact path='/experts'>
+            <ExpertsListPage />
           </Route>
           <Route path="*">
             <NoFoundPage />

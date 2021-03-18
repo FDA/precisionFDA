@@ -90,8 +90,8 @@ const NavigationBarPublic = ({ children, title, subtitle, showLogoOnNavbar, user
             <div className="center-buttons">
               <a href="/">Overview</a>
               <Link to={'/challenges'} className={getLinkClassName('/challenges')}>Challenges</Link>
-              <a className={getLinkClassName('/experts')} href='/experts'>Experts</a>
               <Link to={'/news'} className={getLinkClassName('/news')}>News</Link>
+              <Link to={'/experts'} className={getLinkClassName('/experts')}>Experts</Link>
               <a className={getLinkClassName('/about')} href='/about'>About</a>
             </div>
             <div className="right-buttons">
