@@ -8,7 +8,7 @@ AllCops:
   - 'vendor/**/*'
   DisplayCopNames: true
   StyleGuideCopsOnly: false
-  TargetRubyVersion: 2.7.1
+  TargetRubyVersion: 2.7.2
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
