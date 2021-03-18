@@ -29,21 +29,21 @@ describe AssetSerializer do
 
     context "when user is not authenticated exist" do
       it "links[show, copy, update]" do
-        expect(asset_serialized["links"]["show"]).to eq("/api/assets/#{asset.uid}")
-        expect(asset_serialized["links"]["copy"]).to eq("/api/files/copy")
-        expect(asset_serialized["links"]["update"]).to eq("/api/files")
+        expect(asset_serialized["links"]["show"]).to eq(api_asset_path(asset))
+        expect(asset_serialized["links"]["copy"]).to eq(copy_api_files_path)
+        expect(asset_serialized["links"]["update"]).to eq(api_files_path(asset))
       end
 
       it "links[attach_to, add_file, add_folder] exist" do
-        expect(asset_serialized["links"]["attach_to"]).to eq("/api/attach_to_notes")
-        expect(asset_serialized["links"]["add_file"]).to eq("/api/create_file")
-        expect(asset_serialized["links"]["add_folder"]).to eq("/api/files/create_folder")
+        expect(asset_serialized["links"]["attach_to"]).to eq(api_attach_to_notes_path)
+        expect(asset_serialized["links"]["add_file"]).to eq(api_create_file_path)
+        expect(asset_serialized["links"]["add_folder"]).to eq(create_folder_api_files_path)
       end
 
       it "links[user, track, download_list] exist" do
-        expect(asset_serialized["links"]["user"]).to eq("/users/#{user.dxuser}")
+        expect(asset_serialized["links"]["user"]).to eq(user_path(user.dxuser))
         expect(asset_serialized["links"]["track"]).to eq("/track?id=#{asset.uid}")
-        expect(asset_serialized["links"]["download_list"]).to eq("/api/files/download_list")
+        expect(asset_serialized["links"]["download_list"]).to eq(download_list_api_files_path)
       end
 
       it "links[download, link, publish] are nil" do
@@ -72,20 +72,20 @@ describe AssetSerializer do
       end
 
       it "links[download, link, publish] exist" do
-        expect(asset_serialized["links"]["download"]).to eq("/api/files/#{asset.uid}/download")
-        expect(asset_serialized["links"]["link"]).to eq("/files/#{asset.uid}/link")
+        expect(asset_serialized["links"]["download"]).to eq(download_api_file_path(asset))
+        expect(asset_serialized["links"]["link"]).to eq(link_file_path(asset))
         expect(asset_serialized["links"]["publish"]).to eq("/publish?id=#{asset.uid}")
       end
 
       it "links[rename, remove] exist" do
-        expect(asset_serialized["links"]["rename"]).to eq("/api/assets/rename")
-        expect(asset_serialized["links"]["remove"]).to eq("/api/assets/#{asset.uid}")
+        expect(asset_serialized["links"]["rename"]).to eq(rename_api_assets_path(asset))
+        expect(asset_serialized["links"]["remove"]).to eq(api_asset_path(asset))
       end
 
       it "links[license, organize] exist" do
         expect(asset_serialized["links"]["license"]).
-          to eq("/api/licenses/:id/license_item/:item_uid")
-        expect(asset_serialized["links"]["organize"]).to eq("/api/files/move")
+          to eq(license_item_api_license_path(":id", ":item_uid"))
+        expect(asset_serialized["links"]["organize"]).to eq(move_api_files_path)
       end
     end
 
@@ -102,7 +102,7 @@ describe AssetSerializer do
       end
 
       it "links[feature] exist" do
-        expect(asset_serialized["links"]["feature"]).to eq("/api/assets/feature")
+        expect(asset_serialized["links"]["feature"]).to eq(feature_api_assets_path)
       end
     end
   end

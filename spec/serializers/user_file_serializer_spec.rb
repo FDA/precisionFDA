@@ -29,20 +29,20 @@ describe UserFileSerializer do
 
     context "when user is not authenticated" do
       it "links[show, user, track] exist" do
-        expect(user_file_serialized["links"]["show"]).to eq("/files/#{user_file.uid}")
-        expect(user_file_serialized["links"]["user"]).to eq("/users/#{user.dxuser}")
+        expect(user_file_serialized["links"]["show"]).to eq(file_path(user_file))
+        expect(user_file_serialized["links"]["user"]).to eq(user_path(user.dxuser))
         expect(user_file_serialized["links"]["track"]).to eq("/track?id=#{user_file.uid}")
       end
 
       it "links[download_list, attach_to] exist" do
-        expect(user_file_serialized["links"]["download_list"]).to eq("/api/files/download_list")
-        expect(user_file_serialized["links"]["attach_to"]).to eq("/api/attach_to_notes")
+        expect(user_file_serialized["links"]["download_list"]).to eq(download_list_api_files_path)
+        expect(user_file_serialized["links"]["attach_to"]).to eq(api_attach_to_notes_path)
       end
 
       it "links[add_file, add_folder, update] exist" do
-        expect(user_file_serialized["links"]["add_file"]).to eq("/api/create_file")
-        expect(user_file_serialized["links"]["add_folder"]).to eq("/api/files/create_folder")
-        expect(user_file_serialized["links"]["update"]).to eq("/api/files")
+        expect(user_file_serialized["links"]["add_file"]).to eq(api_create_file_path)
+        expect(user_file_serialized["links"]["add_folder"]).to eq(create_folder_api_files_path)
+        expect(user_file_serialized["links"]["update"]).to eq(api_files_path)
       end
 
       it "links[download, link, publish] are nil" do
@@ -103,9 +103,9 @@ describe UserFileSerializer do
 
           it "links[download, link, copy] exist" do
             expect(user_file_serialized["links"]["download"]).
-              to eq("/api/files/#{user_file.uid}/download")
-            expect(user_file_serialized["links"]["link"]).to eq("/files/#{user_file.uid}/link")
-            expect(user_file_serialized["links"]["copy"]).to eq("/api/files/copy")
+              to eq(download_api_file_path(user_file))
+            expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
+            expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
           end
 
           # rubocop:todo RSpec/NestedGroups
@@ -138,12 +138,12 @@ describe UserFileSerializer do
               expect(user_file_serialized["links"]["publish"]).
                 to eq("/publish?id=#{user_file.uid}")
               expect(user_file_serialized["links"]["rename"]).
-                to eq("/files/#{user_file.uid}/rename")
+                to eq(rename_file_path(user_file))
             end
 
             it "links[remove, organize] exist" do
-              expect(user_file_serialized["links"]["remove"]).to eq("/api/files/remove")
-              expect(user_file_serialized["links"]["organize"]).to eq("/api/files/move")
+              expect(user_file_serialized["links"]["remove"]).to eq(remove_api_files_path)
+              expect(user_file_serialized["links"]["organize"]).to eq(move_api_files_path)
             end
           end
 
@@ -156,7 +156,7 @@ describe UserFileSerializer do
 
             it "link[license] exist" do
               expect(user_file_serialized["links"]["license"]).
-                to eq("/api/licenses/:id/license_item/:item_uid")
+                to eq(license_item_api_license_path(":id", ":item_uid"))
             end
           end
         end
@@ -208,9 +208,9 @@ describe UserFileSerializer do
 
             it "links[download, link, copy] exist" do
               expect(user_file_serialized["links"]["download"]).
-                to eq("/api/files/#{user_file.uid}/download")
-              expect(user_file_serialized["links"]["link"]).to eq("/files/#{user_file.uid}/link")
-              expect(user_file_serialized["links"]["copy"]).to eq("/api/files/copy")
+                to eq(download_api_file_path(user_file))
+              expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
+              expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
             end
           end
         end
@@ -269,7 +269,7 @@ describe UserFileSerializer do
             expect(accepted_license.user_id).to eq(user.id)
             expect(accepted_license.state).not_to eq("active")
             expect(user_file_serialized["links"]["accept_license_action"]).
-              to eq("/api/licenses/#{license.id}/accept")
+              to eq(accept_api_license_path(license.id))
           end
         end
       end
@@ -282,21 +282,21 @@ describe UserFileSerializer do
 
       it "links[download, link, publish] exist" do
         expect(user_file_serialized["links"]["download"]).
-          to eq("/api/files/#{user_file.uid}/download")
-        expect(user_file_serialized["links"]["link"]).to eq("/files/#{user_file.uid}/link")
+          to eq(download_api_file_path(user_file))
+        expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
         expect(user_file_serialized["links"]["publish"]).to eq("/publish?id=#{user_file.uid}")
       end
 
       it "links[rename, remove] exist" do
-        expect(user_file_serialized["links"]["rename"]).to eq("/files/#{user_file.uid}/rename")
-        expect(user_file_serialized["links"]["remove"]).to eq("/api/files/remove")
+        expect(user_file_serialized["links"]["rename"]).to eq(rename_file_path(user_file))
+        expect(user_file_serialized["links"]["remove"]).to eq(remove_api_files_path)
       end
 
       it "links[license, organize, copy] exist" do
         expect(user_file_serialized["links"]["license"]).
-          to eq("/api/licenses/:id/license_item/:item_uid")
-        expect(user_file_serialized["links"]["organize"]).to eq("/api/files/move")
-        expect(user_file_serialized["links"]["copy"]).to eq("/api/files/copy")
+          to eq(license_item_api_license_path(":id", ":item_uid"))
+        expect(user_file_serialized["links"]["organize"]).to eq(move_api_files_path)
+        expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
       end
     end
 
@@ -309,8 +309,8 @@ describe UserFileSerializer do
       end
 
       it "links[feature] exist" do
-        expect(user_file_serialized["links"]["feature"]).to eq("/api/files/feature")
-        expect(user_file_serialized["links"]["organize"]).to eq("/api/files/move")
+        expect(user_file_serialized["links"]["feature"]).to eq(feature_api_files_path)
+        expect(user_file_serialized["links"]["organize"]).to eq(move_api_files_path)
       end
     end
   end
