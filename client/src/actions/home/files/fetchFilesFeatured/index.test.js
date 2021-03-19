@@ -22,6 +22,7 @@ describe('fetchFilesFeatured()', () => {
   describe('dispatch actions', () => {
     const files = ['file1', 'file2']
     const pagination = {}
+    const path = []
 
     const store = mockStore(reducer({}, { type: undefined }))
     const url = '/api/files/featured?page=1'
@@ -32,15 +33,15 @@ describe('fetchFilesFeatured()', () => {
     })
 
     it('dispatches correct actions on success response', () => {
-      fetchMock.get(url, { files, pagination })
+      fetchMock.get(url, { files, pagination, path })
 
       return store.dispatch(fetchFilesFeatured()).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
           { type: HOME_FILES_FETCH_START, payload: HOME_FILE_TYPES.FEATURED },
-          { type: HOME_FILES_FETCH_SUCCESS, payload: { filesType: HOME_FILE_TYPES.FEATURED, files, pagination }},
-        ]) 
+          { type: HOME_FILES_FETCH_SUCCESS, payload: { filesType: HOME_FILE_TYPES.FEATURED, files, pagination, path }},
+        ])
       })
     })
 
