@@ -1468,17 +1468,7 @@ class ApiController < ApplicationController
   def invert_feature
     raise ApiError, "Only Site Admin can perform this action" unless @context.can_administer_site?
 
-    # rubocop:disable Style/Next
-    featured = !params[:featured].nil?
-    items = pick_values(params[:item_ids]).map do |uid|
-      item = item_from_uid(uid)
-      next unless item.scope == Scopes::SCOPE_PUBLIC && item.featured ^ featured
-
-      item.update(featured: featured)
-      item.current_user = @context.user
-      item
-    end.compact
-    # rubocop:enable Style/Next
+    items = update_feature_flag
 
     messages =
       if items.count.positive?
@@ -1494,6 +1484,22 @@ class ApiController < ApplicationController
       end
 
     render json: items, root: "items", adapter: :json, meta: messages
+  end
+
+  # Iterate over params[:item_ids], try to find items by uid and feature/un-feature PUBLIC
+  # @param item_ids [Array] array of [String] uid-s.
+  # @param featured [Boolean] new 'feature' value, false if empty.
+  # @return items [Array] list of items with inverted 'feature' flag
+  def update_feature_flag
+    featured = !params[:featured].nil?
+    pick_values(params[:item_ids]).map do |uid|
+      item = item_from_uid(uid)
+      next unless item.scope == Scopes::SCOPE_PUBLIC && item.featured ^ featured
+
+      item.update(featured: featured)
+      item.current_user = @context.user
+      item
+    end.compact
   end
 
   # Soft-deletion for Items.

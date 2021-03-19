@@ -4,7 +4,10 @@ import { mockStore } from '../../../../test/helper'
 import makeFeatured from '.'
 import reducer from '../../../reducers'
 import {
-  HOME_APPS_MAKE_FEATURED_SUCCESS,
+  HOME_FILES_FETCH_FAILURE,
+  HOME_FILES_FETCH_START,
+  HOME_FILES_FETCH_SUCCESS,
+  HOME_FILES_MAKE_FEATURED_SUCCESS,
 } from '../types'
 import { ALERT_SHOW_ABOVE_ALL } from '../../alertNotifications/types'
 import { ALERT_ABOVE_ALL, OBJECT_TYPES } from '../../../constants'
@@ -15,12 +18,12 @@ describe('makeFeatured()', () => {
     fetchMock.reset()
   })
 
-  describe('dispatch actions', () => {
+  describe('dispatch files feature actions', () => {
     const store = mockStore(reducer({}, { type: undefined }))
     const uids = [1, 2, 3]
     const featured = true
-    const objectType = OBJECT_TYPES.APP
-    const link = '/api/apps/feature'
+    const objectType = OBJECT_TYPES.FILE
+    const link = '/api/files/feature'
 
     afterEach(() => {
       store.clearActions()
@@ -38,7 +41,9 @@ describe('makeFeatured()', () => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
-          { type: HOME_APPS_MAKE_FEATURED_SUCCESS, payload: []},
+          { type: HOME_FILES_FETCH_START, payload: 'everybodyFiles' },
+          { type: HOME_FILES_MAKE_FEATURED_SUCCESS, payload: []},
+          { type: HOME_FILES_FETCH_SUCCESS, payload: {}},
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'message 1',
@@ -46,6 +51,7 @@ describe('makeFeatured()', () => {
               type: ALERT_ABOVE_ALL,
             },
           },
+          { type: HOME_FILES_FETCH_SUCCESS, payload: {}},
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'message 2',
@@ -64,6 +70,8 @@ describe('makeFeatured()', () => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
+          { type: HOME_FILES_FETCH_START, payload: 'everybodyFiles' },
+          { type: HOME_FILES_FETCH_FAILURE, payload: 'everybodyFiles' },
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'Something went wrong!',

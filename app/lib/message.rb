@@ -10,5 +10,9 @@ class Message
     def bad_request(error = "")
       ["Bad request", error].compact.join(" ")
     end
+
+    def not_allowed(message = "")
+      ["You are not allowed to perform this request.", message].compact.join(" ")
+    end
   end
 end
