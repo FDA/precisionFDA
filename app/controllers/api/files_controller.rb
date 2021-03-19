@@ -106,12 +106,14 @@ module Api
 
       files = UserFile.real_files.
         featured.accessible_by(@context).
+        where(parent_folder_id: @parent_folder_id).
         includes(:user, :taggings).eager_load(user: :org).
         search_by_tags(filter_tags)
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = Folder.
         featured.accessible_by(@context).
+        where(parent_folder_id: @parent_folder_id).
         includes(:taggings).eager_load(user: :org).
         eager_load(user: :org).
         search_by_tags(filter_tags)
@@ -417,6 +419,18 @@ module Api
       path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
 
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
+    end
+
+    # Overridden version: it accepts not only file-uids, but also folder id.
+    # Result of this operation not only invert flag of folder(s),
+    # but also all PUBLIC children items.
+    # @param item_ids [Array] array of [String] uid-s.
+    # @param featured [Boolean] new 'feature' value, false if empty.
+    # @return items [Array] list of folder/files with inverted 'feature' flag
+    def update_feature_flag
+      raise ApiExceptionHandler, Message.not_allowed unless @context.user.site_admin?
+
+      FileService::ToggleFeaturePublicFolderService.new(params, @context).call
     end
 
     private
