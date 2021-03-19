@@ -28,7 +28,7 @@ FactoryBot.define do
 
     sequence(:dxid) { |n| "file-A1S1#{n}" }
     sequence(:name) { |n| "asset-#{n}" }
-    sequence(:uid) { "#{dxid}-1" }
+    sequence(:uid) { |n| "#{dxid}-#{n}" }
     state { UserFile::STATE_CLOSED }
     parent_type { "Asset" }
     scope { :private }
