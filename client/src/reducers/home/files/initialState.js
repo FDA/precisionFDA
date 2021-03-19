@@ -15,6 +15,7 @@ const filesState = {
     totalCount: null,
     fields: new Map(),
   },
+  path: [],
 }
 
 const modalState = {

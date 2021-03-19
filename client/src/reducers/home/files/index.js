@@ -430,8 +430,9 @@ export default createReducer(initialState, {
       ...state,
       [HOME_FILE_TYPES.EVERYBODY]: {
         ...state[HOME_FILE_TYPES.EVERYBODY],
-        files,
+        items,
         isCheckedAll,
+        isFetching: false,
       },
     }
   },
@@ -452,7 +453,7 @@ export default createReducer(initialState, {
         files,
       },
     }),
-  
+
 
   [HOME_FETCH_FILES_BY_ACTION_FAILURE]: (state) => ({
     ...state,

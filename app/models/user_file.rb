@@ -85,8 +85,6 @@ class UserFile < Node
   acts_as_commentable
   acts_as_votable
 
-  attr_accessor :current_user
-
   validates :name, presence: { message: "Name could not be blank" }
   validates :description,
             allow_blank: true,

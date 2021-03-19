@@ -106,6 +106,7 @@ export const HOME_FILE_TYPES = {
   FEATURED: 'featuredFiles',
   EVERYBODY: 'everybodyFiles',
   SPACES: 'spacesFiles',
+  FOLDERS: 'folders',
 }
 
 export const HOME_FILES_MODALS = {

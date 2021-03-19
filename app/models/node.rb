@@ -45,6 +45,8 @@ class Node < ApplicationRecord
   belongs_to :parent, polymorphic: true
   belongs_to :scoped_parent_folder, class_name: "Folder"
 
+  attr_accessor :current_user
+
   scope :files_and_folders, -> { where(sti_type: %w(Folder UserFile)) }
   scope :files, -> { where(sti_type: %w(UserFile)) }
   scope :folders, -> { where(sti_type: %w(Folder)) }
