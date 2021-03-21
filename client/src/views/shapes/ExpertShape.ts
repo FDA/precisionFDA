@@ -11,6 +11,7 @@ interface IExpert {
   about: string,
   blog: string,
   blogTitle: string,
+  blogPreview: string,
   totalAnswerCount: number,
   totalCommentCount: number,
 }
@@ -28,6 +29,7 @@ const mapToExpert = (data: any) => {
     about: data.about,
     blog: data.blog,
     blogTitle: data.blog_title,
+    blogPreview: data.blog_preview,
     totalAnswerCount: data.total_answer_count,
     totalCommentCount: data.total_comment_count,
   }

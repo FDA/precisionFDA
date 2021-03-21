@@ -18,7 +18,13 @@ exports[`ExpertsListItem test should render ExpertsListItemType.BlogEntry 1`] = 
     <h1>
       Blog Title 1
     </h1>
-    <div>
+    <div
+      style={
+        Object {
+          "marginTop": "4px",
+        }
+      }
+    >
       <span
         className="expert-name"
       >
@@ -31,10 +37,15 @@ exports[`ExpertsListItem test should render ExpertsListItemType.BlogEntry 1`] = 
       </span>
     </div>
     <p>
-      Blog 1
+      Blog Preview 1
     </p>
     <div
       className="pull-left"
+      style={
+        Object {
+          "marginTop": "6px",
+        }
+      }
     >
       <Button
         className=""
@@ -44,12 +55,11 @@ exports[`ExpertsListItem test should render ExpertsListItemType.BlogEntry 1`] = 
       >
         Expert Q&A
       </Button>
-      <Link
-        className="btn-borderless"
-        to="/experts/1"
+      <a
+        href="/experts/1"
       >
         About This Expert
-      </Link>
+      </a>
       <a
         href="/experts/1/blog"
       >
@@ -68,7 +78,7 @@ exports[`ExpertsListItem test should render ExpertsListItemType.QuestionsAndAnsw
     className="experts-list-item-small__left-column"
   >
     <img
-      className="expert-image"
+      className="expert-image img-circle"
       src=""
     />
   </div>
@@ -79,7 +89,7 @@ exports[`ExpertsListItem test should render ExpertsListItemType.QuestionsAndAnsw
       className="expert-name"
     >
       <a
-        href=""
+        href="/experts/1"
       >
         Experts 1
       </a>
