@@ -12,6 +12,7 @@ describe('ExpertsListItem test', () => {
       user_id: i,
       title: 'Experts '+i,
       blogTitle: 'Blog Title '+i,
+      blogPreview: 'Blog Preview '+i,
       blog: 'Blog '+i,
       about: '',
       image: '',
@@ -27,14 +28,14 @@ describe('ExpertsListItem test', () => {
 
   it('should render ExpertsListItemType.BlogEntry', () => {
     const mockExpert = getMockExpert()
-    const wrapper = shallow(<ExpertsListItem expert={mockExpert} type={ExpertsListItemType.BlogEntry} />)
+    const wrapper = shallow(<ExpertsListItem expert={mockExpert} type={ExpertsListItemType.BlogEntry} userCanEdit={false} />)
 
     expect(wrapper).toMatchSnapshot()
   })
 
   it('should render ExpertsListItemType.QuestionsAndAnswers', () => {
     const mockExpert = getMockExpert()
-    const wrapper = shallow(<ExpertsListItem expert={mockExpert} type={ExpertsListItemType.QuestionsAndAnswers} />)
+    const wrapper = shallow(<ExpertsListItem expert={mockExpert} type={ExpertsListItemType.QuestionsAndAnswers} userCanEdit={false} />)
 
     expect(wrapper).toMatchSnapshot()
   })

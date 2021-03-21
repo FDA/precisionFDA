@@ -3,7 +3,6 @@ import classNames from 'classnames/bind'
 
 import { IExpert } from '../../../shapes/ExpertShape'
 import Button from '../../Button'
-import { Link } from 'react-router-dom'
 import './style.sass'
 
 import { format } from 'date-fns'
@@ -19,14 +18,14 @@ enum ExpertsListItemType {
 type ExpertsListItemProps = {
   expert: IExpert,
   type: ExpertsListItemType,
-  userIsAdmin: boolean,
+  userCanEdit: boolean,
 }
 
 
 class ExpertsListItem extends Component<ExpertsListItemProps> {
   renderBlogEntry() {
     const expert = this.props.expert
-    const userIsAdmin = this.props.userIsAdmin
+    const userCanEdit = this.props.userCanEdit
     const classes = classNames('experts-list-item')
     return (
       <div className={classes}>
@@ -35,20 +34,20 @@ class ExpertsListItem extends Component<ExpertsListItemProps> {
         </div>
         <div className="experts-list-item__right-column experts-item-content">
           <h1>{expert.blogTitle}</h1>
-          <div>
+          <div style={{ marginTop: '4px' }}>
             <span className="expert-name">{expert.title}</span>
             <span className="expert-date">{format(expert.createdAt, 'MMM dd, yyyy')}</span>
           </div>
-          <p>{expert.blog}</p>
-          <div className="pull-left">
+          <p>{expert.blogPreview}</p>
+          <div className="pull-left" style={{ marginTop: '6px' }}>
             <Button className="" size="md" type="default" onClick={() => window.location.assign(`/experts/${expert.id}`)}>Expert Q&amp;A</Button>
-            <Link to={`/experts/${expert.id}`} className="btn-borderless">About This Expert</Link>
+            <a href={`/experts/${expert.id}`}>About This Expert</a>
             <a href={`/experts/${expert.id}/blog`}>Read Expert Blog Post &#x2197;</a> 
           </div>
-          {userIsAdmin && (
-            <div className="pull-right">
-              <Button className="" size="md" type="default" onClick={() => window.location.assign(`/experts/${expert.id}/edit`)}><span className="fa fa-pencil"></span> Edit Expert</Button>
-              <Button className="" size="md" type="default" onClick={() => window.location.assign(`/experts/${expert.id}/dashboard`)}><span className="fa fa-dashboard fa-fw"></span> Dashboard</Button>
+          {userCanEdit && (
+            <div className="pull-right" style={{ marginTop: '4px' }}>
+              <a className="btn btn-default" href={`/experts/${expert.id}/edit`}><span className="fa fa-pencil"></span> Edit Expert</a>
+              <a className="btn btn-default" href={`/experts/${expert.id}/dashboard`}><span className="fa fa-dashboard fa-fw"></span> Dashboard</a>
             </div>
           )}
         </div>
@@ -79,7 +78,7 @@ class ExpertsListItem extends Component<ExpertsListItemProps> {
     return (
       <div className={classes}>
         <div className="experts-list-item-small__left-column">
-          <img className="expert-image" src={expert.image} />
+          <img className="expert-image img-circle" src={expert.image} />
         </div>
         <div className="experts-list-item-small__right-column experts-item-content">
           <div className="expert-name"><a href={`/experts/${expert.id}`}>{expert.title}</a></div>

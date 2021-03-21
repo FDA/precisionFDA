@@ -18,7 +18,7 @@ describe('reducer actions processing', () => {
 
   it('EXPERTS_LIST_FETCH_SUCCESS', () => {
     const initialState = { pagination: {} }
-    const payload = { items: [{'id': 1, name: 'news item 1'}], pagination: { currentPage: 2}}
+    const payload = { items: [{'id': 1, title: 'Expert 1'}], pagination: { currentPage: 2}}
     const action = { type: EXPERTS_LIST_FETCH_SUCCESS, payload }
 
     expect(reducer(initialState, action)).toEqual({

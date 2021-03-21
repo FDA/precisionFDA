@@ -42,13 +42,15 @@ const ExpertsList: FunctionComponent<IExpertsListProps> = ({ experts=[], isFetch
   }
 
   const isLoggedIn = user && Object.keys(user).length > 0
-  const userIsAdmin = isLoggedIn && user.can_administer_site
+  const userCanEdit = (expert: IExpert) => {
+    return isLoggedIn && (user.can_administer_site || user.id == expert.user_id)
+  }
 
   if (experts.length) {
     return (
       <div>
         <ul className={classes}>
-          {experts.map((expert) => <ExpertsListItem type={listItemType} key={expert.id} expert={expert} userIsAdmin={userIsAdmin} />)}
+          {experts.map((expert) => <ExpertsListItem type={listItemType} key={expert.id} expert={expert} userCanEdit={userCanEdit(expert)} />)}
         </ul>
         <Pagination data={pagination} setPageHandler={setPageHandler} />
       </div>
