@@ -13,7 +13,7 @@ class ApplicationSerializer < ActiveModel::Serializer
   end
 
   # license of the file with selected attributes
-  # when file doe not have license - return {}
+  # when file does not have license - return {}
   def file_license
     object.license&.slice(:id, :uid, :title) || {}
   end

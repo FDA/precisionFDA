@@ -51,7 +51,7 @@ module Api
       if license.editable_by?(@context) && item.editable_by?(@context)
         LicensedItem.transaction do
           licensed_item = LicensedItem.find_by(licenseable: item)
-          licensed_item&.destroy # unless licensed_item.nil?
+          licensed_item&.destroy
 
           if LicensedItem.create!(license_id: license.id, licenseable: item)
             type = :success
