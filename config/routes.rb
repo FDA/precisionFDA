@@ -282,8 +282,6 @@ Rails.application.routes.draw do
           get :spaces
 
           post :rename
-          # post :copy
-          # post :terminate
           put :feature, to: "assets#invert_feature"
         end
       end

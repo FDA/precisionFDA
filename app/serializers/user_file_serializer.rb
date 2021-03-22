@@ -40,23 +40,24 @@ class UserFileSerializer < NodeSerializer
     super.tap do |links|
       links[:show] = file_path(object)
       links[:user] = user_path(object.user.dxuser)
-      links[:space] = space_path if object.in_space?
-      # track single object
       links[:track] = track_object
+      links[:space] = space_path if object.in_space?
 
       # POST download_list files
       links[:download_list] = download_list_api_files_path
-
+      # POST /api/attach_to: api_attach_to_notes, discussions, answers
+      links[:attach_to] = api_attach_to_notes_path
       # POST: Add file
       links[:add_file] = api_create_file_path
       # POST: Add folder
       links[:add_folder] = create_folder_api_files_path
-
+      # PUT edit a single file
+      links[:update] = api_files_path(object)
       # link to license page if exists
       links[:show_license] = license_path(object.license.id) if object.license
 
       if object.license.present? && object.license_status?(current_user, "active")
-        unless object.license.owned_by_user?(current_user) || object.in_space?
+        unless object.license.owned_by_user?(current_user)
           links[:download] = download_api_file_path(object)
           # POST Authorize URL - to move to api
           links[:link] = link_file_path(object)
@@ -108,11 +109,6 @@ class UserFileSerializer < NodeSerializer
           links[:organize] = move_api_files_path
         end
       end
-
-      # PUT edit a single file
-      links[:update] = api_files_path(object)
-      # POST /api/attach_to: api_attach_to_notes, discussions, answers
-      links[:attach_to] = api_attach_to_notes_path
 
       if current_user.can_administer_site?
         # PUT /api/files/feature
