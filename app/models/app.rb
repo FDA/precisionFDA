@@ -33,9 +33,6 @@ class App < ApplicationRecord
   include SoftRemovable
   include TagsContainer
 
-  HTTPS_JUPYTER = "jupyter".freeze
-  HTTPS_TTYD = "ttyd".freeze
-
   TYPE_REGULAR = "regular".freeze
   TYPE_HTTPS = "https".freeze
 
@@ -204,21 +201,6 @@ class App < ApplicationRecord
 
   def update_series_deleted_status
     app_series.update(deleted: deleted)
-  end
-
-  # FIXME: this is a temporary solution while we send httpsAppType to JupyterLab service,
-  #   and is only for testing purposes!
-  def https_subtype
-    @https_subtype ||=
-      begin
-        return "" unless https?
-
-        if readme.include?("DXJupyterLab")
-          HTTPS_JUPYTER
-        elsif readme.include?("TTYD")
-          HTTPS_TTYD
-        end
-      end
   end
 
   delegate :name, to: :app_series
