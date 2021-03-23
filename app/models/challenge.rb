@@ -22,6 +22,7 @@
 #
 
 class Challenge < ApplicationRecord
+  paginates_per 5
   include Auditor
 
   STATUS_SETUP =    "setup".freeze

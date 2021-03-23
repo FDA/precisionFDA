@@ -184,12 +184,12 @@ class NotificationsMailer < ApplicationMailer
   end
 
   def challenge_proposal_received(proposal)
-    recipients = ["precisionfda-support@dnanexus.com"]
+    recipients = [SUPPORT_EMAIL]
     recipients << "precisionfda@fda.hhs.gov" if ENV["DNANEXUS_BACKEND"] == "production"
 
     email_body = proposal.map { |e| e.join(" = ") }.join("\n")
     mail to: recipients,
-         reply_to: "precisionfda-support@dnanexus.com",
+         reply_to: SUPPORT_EMAIL,
          subject: "New challenge proposal received from #{proposal.name} (#{proposal.email})",
          body: email_body
   end
