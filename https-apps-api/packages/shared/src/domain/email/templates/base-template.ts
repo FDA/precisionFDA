@@ -1,10 +1,12 @@
 import { difference, isNil } from 'ramda'
+import mjml2html from 'mjml'
 import { User } from '../..'
 import { errors } from '../../..'
 import { AnyObject, Maybe, OpsCtx } from '../../../types'
 import { ajv } from '../../../utils/validator'
 import { EmailNotification } from '../email-notification.entity'
-import { EMAIL_TYPES, getEmailConfig, EmailConfigItem } from '../email.config'
+import { EMAIL_TYPES, getEmailConfig, EmailConfigItem, EmailSendInput } from '../email.config'
+import { jobFinishedTemplate } from './mjml/job-finished-template'
 
 export class EmailTemplate {
   emailType: EMAIL_TYPES
@@ -15,6 +17,7 @@ export class EmailTemplate {
     this.ctx = ctx
     this.config = getEmailConfig(emailTypeId)
     this.emailType = this.config.name
+    this.ctx.log.info({ emailType: this.emailType }, 'Email template build')
   }
 
   validate<T = AnyObject>(payload: T): T {
@@ -43,6 +46,7 @@ export class EmailTemplate {
       this.ctx.log.debug('Notifications object not found, applying default')
       return defaultValue
     }
+    const dbValues = notificationsConfig.data
     const settingValue: Maybe<boolean> = notificationsConfig.data[this.config.notificationKey]
     if (isNil(settingValue)) {
       this.ctx.log.debug(
@@ -92,7 +96,15 @@ export class EmailTemplate {
     })
   }
 
-  template(payload: AnyObject) {
-    // return subject, body of the email
+  // todo: return subject, body of the email
+  template(receiverData: { user: User }, payload: AnyObject): EmailSendInput {
+    const test = jobFinishedTemplate({ receiver: receiverData.user })
+    const result = mjml2html(test)
+    const body = result.html
+    return {
+      to: receiverData.user.email,
+      subject: 'Someone finished a job',
+      body,
+    }
   }
 }

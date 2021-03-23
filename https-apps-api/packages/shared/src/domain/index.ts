@@ -9,6 +9,8 @@ import { UserFile } from './user-file/user-file.entity'
 import { JobClosedEvent } from './event/job-closed.entity'
 import { Organization } from './org/org.entity'
 import { EmailNotification } from './email/email-notification.entity'
+import { SpaceEvent } from './space-event/space-event.entity'
+import { Space } from './space/space.entity'
 
 const entities = {
   App,
@@ -22,6 +24,8 @@ const entities = {
   JobClosedEvent,
   Organization,
   EmailNotification,
+  SpaceEvent,
+  Space,
 }
 
 export * as app from './app'
@@ -42,4 +46,4 @@ export * as org from './org'
 
 export * as email from './email'
 
-export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node }
+export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node, Space }
