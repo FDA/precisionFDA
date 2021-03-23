@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { errors, database } from '@pfda/https-apps-shared'
 import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
@@ -10,7 +10,6 @@ import {
   allowedFeatures,
   allowedInstanceTypes,
 } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
 import { api } from '../../../src/server'
@@ -69,7 +68,6 @@ describe('POST /apps/:id/run', () => {
         run_instance_type: DEFAULT_INSTANCE_TYPE,
         run_inputs: {
           duration: generate.app.runAppInput().input.duration,
-          feature: 'PYTHON_R', // default from the specs
         },
         run_outputs: {},
       }),
@@ -179,7 +177,6 @@ describe('POST /apps/:id/run', () => {
 
   it('accepts minimal input params (uses all defaults)', async () => {
     const inputComplete = {
-      httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
       scope: 'private',
       input: {},
     }
@@ -191,10 +188,7 @@ describe('POST /apps/:id/run', () => {
     // all defaults took place
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
     expect(platformCall).to.have.property('name').that.is.undefined()
-    expect(platformCall).to.have.property('input').that.deep.equals({
-      duration: 240,
-      feature: allowedFeatures.PYTHON_R,
-    })
+    expect(platformCall).to.have.property('input').that.deep.equals({})
     expect(platformCall)
       .to.have.property('systemRequirements')
       .that.deep.equals({

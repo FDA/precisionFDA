@@ -2,7 +2,7 @@ import Chance from 'chance'
 import { nanoid } from 'nanoid'
 import { entities } from '../../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../../domain/job/job.enum'
-import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from '../../domain/app/app.enum'
+import { ENTITY_TYPE } from '../../domain/app/app.enum'
 import type { AnyObject } from '../../types'
 import {
   FILE_STATE,
@@ -106,14 +106,12 @@ const app = {
     }
   },
   runAppInput: (): AnyObject => ({
-    httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
     scope: 'private',
     input: {
       duration: 30,
     },
   }),
   runTtydAppInput: () => ({
-    httpsAppType: APP_HTTPS_SUBTYPE.TTYD,
     scope: 'private',
     input: {},
   }),
