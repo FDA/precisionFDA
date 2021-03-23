@@ -68,6 +68,9 @@ const defaultConfig = {
       default: {
         name: 'https-apps-worker-queue',
       },
+      emails: {
+        name: 'https-apps-worker-emails-queue',
+      },
     },
     syncJob: {
       // every two minutes

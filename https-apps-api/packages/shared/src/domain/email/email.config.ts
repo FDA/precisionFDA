@@ -66,10 +66,9 @@ const jobFinishedEmailSchema: JSONSchema7 = {
 const contentAddedEmailSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    // todo: expand the enum, also it will want more props
-    entityType: { type: 'string', enum: ['job', 'workflow'] },
+    spaceEventId: schemas.idProp,
   },
-  required: ['entityType'],
+  required: ['spaceEventId'],
   additionalProperties: false,
 }
 
@@ -80,10 +79,16 @@ const emailInputSchemas = {
 
 // EMAIL ENUMS
 
-type EmailSendInput = {
+type EmailProcessInput = {
   emailTypeId: number
   receiverUserIds: number[]
   input: AnyObject
+}
+
+type EmailSendInput = {
+  to: string
+  subject: string
+  body: string
 }
 
 // fixme: NOTIFICATION_TYPES into EMAIL_TYPES mapping
@@ -96,9 +101,8 @@ type EmailConfigItem = {
   name: EMAIL_TYPES
   // API param value -> EMAIL_TYPE, must be also unique
   emailId: number
-  // db control field of the notification
-  // fixme: might actually be an array
-  notificationKey: string
+  // db control field(s) of the notification
+  notificationKeys: readonly string[]
   // schema used from ajv validation
   // optional, some emails may not require any dynamic content
   schema?: JSONSchema7
@@ -108,13 +112,13 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
   jobFinished: {
     name: 'jobFinished',
     emailId: 1,
-    notificationKey: 'job_finished',
+    notificationKeys: ['job_finished'],
     schema: emailInputSchemas.jobFinishedEmailSchema,
   },
   newContentAdded: {
     name: 'newContentAdded',
     emailId: 2,
-    notificationKey: 'all_content_added_or_deleted',
+    notificationKeys: ['all_content_added_or_deleted'],
     schema: emailInputSchemas.contentAddedEmailSchema,
   },
 } as const
@@ -152,5 +156,6 @@ export {
   EmailConfigItem,
   EMAIL_TYPES,
   NOTIFICATION_TYPES,
+  EmailProcessInput,
   EmailSendInput,
 }
