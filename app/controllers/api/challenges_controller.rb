@@ -10,7 +10,7 @@ module Api
       page = params[:page].presence || 1
       year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
 
-      challenges = accessible_challenges.order(start_at: :desc).page(page).per(5)
+      challenges = accessible_challenges.order(start_at: :desc).page(page)
       challenges = challenges.where(Arel.sql("YEAR(start_at) = #{year}")) if year
 
       render json: challenges,
@@ -60,9 +60,9 @@ module Api
     end
 
     def propose
-      proposal = params.to_unsafe_h.slice(:name, :email, :organisation,
-                                          :specific_question, :specific_question_text,
-                                          :data_details, :data_details_text)
+      proposal = params.unsafe_params.slice(:name, :email, :organisation,
+                                            :specific_question, :specific_question_text,
+                                            :data_details, :data_details_text)
       NotificationsMailer.challenge_proposal_received(proposal)
       render json: {}
     end

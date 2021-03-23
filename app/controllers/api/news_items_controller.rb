@@ -9,7 +9,7 @@ module Api
       page = params[:page].presence || 1
       year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
 
-      news_items = NewsItem.published.order(created_at: :desc).page(page) || []
+      news_items = NewsItem.published.order(created_at: :desc).page(page)
       news_items = news_items.where(Arel.sql("YEAR(created_at) = #{year}")) if year
 
       render json: news_items,
