@@ -71,6 +71,7 @@ run-ui-test.sh
 dist/
 # mikro-orm metadata provider helper
 temp/
+test-emails/
 
 *.tsbuildinfo
 node_modules/
