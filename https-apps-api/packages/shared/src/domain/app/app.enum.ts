@@ -1,16 +1,23 @@
+import { AnyObject } from '../../types'
+
 enum ENTITY_TYPE {
   NORMAL = 0,
   HTTPS = 1,
 }
 
-// DEPRECATED
-enum APP_HTTPS_SUBTYPE {
-  JUPYTER = 'jupyter',
-  TTYD = 'ttyd',
-  SHINY = 'r_shiny',
-  // out of scope
-  // CLOUDWS = 'cloud_workstation',
-  // CUSTOM = 'custom',
+type AppSpec = AnyObject & {
+  input_spec: AppInputSpecItem[]
+  output_spec: any[]
 }
 
-export { ENTITY_TYPE, APP_HTTPS_SUBTYPE }
+type AppInputSpecItem = {
+  name: string
+  // todo: from the docs this is not accurate
+  class: 'int' | 'string' | 'file'
+  default: number | string
+  label: string
+  help: string
+  optional: boolean
+}
+
+export { ENTITY_TYPE, AppSpec, AppInputSpecItem }

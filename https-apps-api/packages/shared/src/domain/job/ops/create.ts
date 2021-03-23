@@ -1,4 +1,4 @@
-import { prop } from 'ramda'
+import { difference, intersection, isNil, prop } from 'ramda'
 import * as client from '../../../platform-client'
 import * as errors from '../../../errors'
 import type { RunAppInput, Provenance } from '../job.input'
@@ -8,22 +8,25 @@ import { App } from '../../app'
 import { User, helper as userHelper } from '../../user'
 import {
   JOB_STATE,
-  allowedFeatures,
   allowedInstanceTypes,
   JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
 } from '../job.enum'
 import { createJobSyncTask } from '../../../queue'
-import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
-import { AnyObject, Maybe } from '../../../types'
+import { AppInputSpecItem } from '../../app/app.enum'
+import { AnyObject } from '../../../types'
 import { UserFile } from '../..'
 
 export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   private input: RunAppInput
+  private jobInput: AnyObject
   private projectId: string
+  private instance: typeof allowedInstanceTypes
+  private readonly inputFiles: UserFile[] = []
 
   async run(input: RunAppInput): Promise<Job> {
     this.input = input
+    this.jobInput = input.input ?? {}
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)
 
@@ -40,28 +43,32 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         code: errors.ErrorCodes.APP_NOT_FOUND,
       })
     }
-    const platformAppId = app.dxid
-    this.projectId = userHelper.getProjectForAppType(user)
-    const runWithInstanceType =
+
+    // check snapshot file
+    // fixme: transfer to any "file" input types
+    let snapshotFile: UserFile | null = null
+    if (prop('snapshot', this.jobInput)) {
+      // fixme: kind of weak condition, user might not own this file etc..
+      snapshotFile = await em.findOne(UserFile, { uid: this.jobInput.snapshot })
+      if (!snapshotFile) {
+        throw new errors.NotFoundError(`User file dxid: ${this.jobInput.snapshot} not found`, {
+          code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+        })
+      }
+      // inputFiles should be used as a "cache" for all file links from app inputs in future
+      this.inputFiles.push(snapshotFile)
+    }
+
+    this.projectId = userHelper.getProjectToRunApp(user)
+    this.instance =
       this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
         ? allowedInstanceTypes[this.input.instanceType]
         : DEFAULT_INSTANCE_TYPE
 
-    const snapshotFile =
-      input.input && input.input.snapshot
-        ? await em.findOne(UserFile, { uid: input.input?.snapshot })
-        : null
-    const runInputDb = this.buildJobRunInput({ app, snapshot: snapshotFile })
-    const runDxInput = this.buildClientApiCall({ app, platformAppId, snapshot: snapshotFile })
+    const runInputDb = this.buildJobInput(app)
+    const runDxInput = this.buildClientApiCall(app)
     const jobName = input.name ?? app.title
     // todo: more conditions, user can use the file -> could be the spaces again etc
-
-    // todo: should be only allowed for apps that work with snapshots
-    if (input.input?.snapshot && !snapshotFile) {
-      throw new errors.NotFoundError(`User file dxid: ${input.input.snapshot} not found`, {
-        code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
-      })
-    }
 
     const repo = this.ctx.em.getRepository(Job)
     const newJobClientRes = await platformClient.jobCreate(runDxInput)
@@ -81,7 +88,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         scope: input.scope,
         entityType: JOB_DB_ENTITY_TYPE.HTTPS,
         runData: {
-          run_instance_type: runWithInstanceType,
+          run_instance_type: this.instance,
           run_inputs: runInputDb,
           run_outputs: {},
         },
@@ -108,17 +115,49 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     return job
   }
 
-  private parseAppSpec(app: App): AnyObject {
+  private getAppInputSpec(app: App): AppInputSpecItem[] {
     const appSpec = app.spec
-    return JSON.parse(appSpec)
-  }
-
-  private getDefaultSpecValue(app: App, key: string): string | number {
-    const inputSpec: any[] = prop('input_spec', this.parseAppSpec(app))
+    const inputSpec: AppInputSpecItem[] = prop('input_spec', JSON.parse(appSpec))
     if (!inputSpec || !Array.isArray(inputSpec)) {
       throw new errors.InternalError('Input spec is not set or it is not an array')
     }
+    return inputSpec
+  }
 
+  private getInputFieldNames(app: App): string[] {
+    const inputSpec = this.getAppInputSpec(app)
+    const inputSpecFieldNames = inputSpec.map(spec => spec.name)
+    const mandatorySpecFields = inputSpec.filter(spec => spec.optional === false)
+    const inputFieldNames = Object.keys(this.jobInput)
+    // these are set in endpoint payload
+    const presentInputFields = intersection(inputFieldNames, inputSpecFieldNames)
+    // these are required by app spec and are NOT set in the endpoint payload
+    const missingMandatoryInputFields = difference(
+      mandatorySpecFields.map(spec => spec.name),
+      inputFieldNames,
+    )
+
+    return presentInputFields.concat(missingMandatoryInputFields)
+  }
+
+  private buildJobInput(app: App): AnyObject {
+    const inputFieldNames = this.getInputFieldNames(app)
+    // todo: we can validate inputs with simple pre-built validation functions
+    // e.g greater than 0 for duration, max string lenght for string values etc
+
+    // jobInput must include mandatory fields and user overrides
+    const jobInput = inputFieldNames.reduce(
+      (obj, key) => ({
+        ...obj,
+        [key]: !isNil(this.jobInput[key]) ? this.jobInput[key] : this.getDefaultSpecValue(app, key),
+      }),
+      {},
+    )
+    return jobInput
+  }
+
+  private getDefaultSpecValue(app: App, key: string): string | number {
+    const inputSpec = this.getAppInputSpec(app)
     const value = inputSpec.find(entry => entry.name === key)
     if (!value) {
       throw new errors.InternalError(`Unknown input spec key ${key}`)
@@ -138,7 +177,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   }: {
     app: App
     job: Job
-    snapshot: Maybe<UserFile>
+    snapshot: UserFile | null
   }): Provenance {
     const initValue = { [job.dxid]: { app_dxid: app.dxid, app_id: app.id, inputs: {} } }
     if (snapshot) {
@@ -148,100 +187,50 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     return initValue
   }
 
-  // job.run_data JSON field
-  private buildJobRunInput({ app, snapshot }: { app: App; snapshot: Maybe<UserFile> }) {
-    // todo: switch?
-    if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.TTYD) {
-      return {}
-    } else if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.SHINY) {
-      throw new Error('not yet supported')
-    } else if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.JUPYTER) {
-      // const appSpec = app.spec
-      // const inputSpec: any[] = prop('input_spec', JSON.parse(appSpec))
-      // const findInputProp = (key: string) => inputSpec.find(entry => entry.name === key)
-      const jobSpecificInput = this.input.input
-      const runInput = {
-        duration:
-          jobSpecificInput && jobSpecificInput.duration
-            ? jobSpecificInput.duration
-            : this.getDefaultSpecValue(app, 'duration'),
-        feature:
-          jobSpecificInput && jobSpecificInput.feature
-            ? allowedFeatures[jobSpecificInput.feature]
-            : this.getDefaultSpecValue(app, 'feature'),
-      }
-      if (jobSpecificInput?.snapshot && snapshot) {
-        runInput['snapshot'] = snapshot.dxid
-      }
-      if (jobSpecificInput?.cmd) {
-        runInput['cmd'] = jobSpecificInput.cmd
-      }
-      if (jobSpecificInput?.imagename) {
-        runInput['imagename'] = jobSpecificInput.imagename
-      }
-      return runInput
-    } else {
-      throw new Error(`Unsupported app type ${this.input.httpsAppType}`)
-    }
-  }
-
-  private buildClientApiCall({
-    app,
-    platformAppId,
-    snapshot,
-  }: {
-    app: App
-    platformAppId: string
-    snapshot: Maybe<UserFile>
-  }): client.JobCreateParams {
-    const runWithInstanceType =
-      this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
-        ? allowedInstanceTypes[this.input.instanceType]
-        : DEFAULT_INSTANCE_TYPE
+  private buildClientApiCall(app: App): client.JobCreateParams {
     // shared payload here
     const payload: client.JobCreateParams = {
       project: this.projectId,
       accessToken: this.ctx.user.accessToken,
-      appId: platformAppId,
+      appId: app.dxid,
       systemRequirements: {
         '*': {
-          instanceType: runWithInstanceType,
+          instanceType: this.instance,
         },
       },
       name: this.input.name,
       input: {},
     }
-    // customizations based on app type
-    if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.JUPYTER) {
-      const jobInputs = this.input.input
-      // mandatory input fields
-      const feature =
-        jobInputs?.feature && allowedFeatures[jobInputs.feature]
-          ? allowedFeatures[jobInputs.feature]
-          : this.getDefaultSpecValue(app, 'feature')
-      const duration = jobInputs?.duration ?? this.getDefaultSpecValue(app, 'duration')
-      payload.input = {
-        duration,
-        feature,
-      }
-      // optional input fields
-      if (jobInputs?.snapshot && snapshot) {
-        payload['input']['snapshot'] = {
-          $dnanexus_link: {
-            id: snapshot.dxid,
-            project: this.projectId,
-          },
+    const inputSpec = this.getAppInputSpec(app)
+    const inputFieldNames = this.getInputFieldNames(app)
+    payload.input = inputFieldNames.reduce((obj, key) => {
+      const specItem = inputSpec.find(spec => spec.name === key)
+      let newField: AnyObject
+      if (specItem?.class === 'file') {
+        // the input provided are actually uids, not dxids
+        const fileUid: string = this.jobInput[key]
+        const inputFile = this.inputFiles.find(f => f.uid === fileUid)
+        if (!inputFile) {
+          throw new errors.NotFoundError(`User file uid: ${fileUid} not found`, {
+            code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+          })
+        }
+        newField = {
+          // fixme: no default value applied here
+          [key]: { $dnanexus_link: { id: inputFile.dxid, project: this.projectId } },
+        }
+      } else {
+        newField = {
+          [key]: !isNil(this.jobInput[key])
+            ? this.jobInput[key]
+            : this.getDefaultSpecValue(app, key),
         }
       }
-      if (jobInputs?.cmd) {
-        payload['input']['cmd'] = jobInputs.cmd
+      return {
+        ...obj,
+        ...newField,
       }
-      if (jobInputs?.imagename) {
-        payload['input']['imagename'] = jobInputs.imagename
-      }
-    } else if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.TTYD) {
-      payload.input = {}
-    }
+    }, {})
     return payload
   }
 }

@@ -1,7 +1,6 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
 import { schemas } from '../../utils'
-import { APP_HTTPS_SUBTYPE } from '../app/app.enum'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 
@@ -11,7 +10,6 @@ type DxIdInput = {
 
 type RunAppInput = {
   scope: string
-  httpsAppType: APP_HTTPS_SUBTYPE
   name?: string
   instanceType?: string
   input?: {
@@ -54,10 +52,11 @@ type PageJobs = {
 const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    httpsAppType: { type: 'string', enum: Object.values(APP_HTTPS_SUBTYPE) },
     instanceType: { type: 'string', enum: Object.keys(allowedInstanceTypes) },
     scope: { type: 'string', maxLength: config.validation.maxStrLen },
     name: { type: 'string', maxLength: config.validation.maxStrLen },
+    // keeping this for now, since we do not have any other apps
+    // but the contents of input field should be dynamic
     input: {
       type: 'object',
       additionalProperties: false,
@@ -76,7 +75,7 @@ const runAppSchema: JSONSchema7 = {
       },
     },
   },
-  required: ['httpsAppType', 'scope'],
+  required: ['scope'],
   additionalProperties: false,
 }
 
