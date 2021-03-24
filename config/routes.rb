@@ -565,7 +565,6 @@ Rails.application.routes.draw do
     end
 
     get "/spaces/*all", to: "spaces#index"
-    
     get "/account/*all", to: "spaces#index"
 
     resources :notification_preferences, only: [:index] do
