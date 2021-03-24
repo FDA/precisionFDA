@@ -321,6 +321,37 @@ describe('syncFilesInFolder operation', () => {
     expect(res.files.map(f => f.dxid)).to.have.members([secondFileDxid])
   })
 
+  it('works with uploaded files as well', async () => {
+    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    // file was uploaded to the project manually
+    const file = create.filesHelper.createUploaded(
+      em,
+      { user },
+      {
+        name: 'a',
+        project,
+        dxid: firstFileDxid,
+        parentId: user.id,
+        parentType: PARENT_TYPE.USER,
+      },
+    )
+    await em.flush()
+    fakes.client.filesListFake
+      .onCall(0)
+      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 1), next: null })
+    const op = new userFile.SyncFilesInFolderOperation({
+      em: database.orm().em.fork(),
+      log,
+      user: userCtx,
+    })
+    const input = { ...defaultInput, folderId: null }
+    const res = await op.execute(input)
+    // no additions and deletions should happen
+    expect(res.files.map(f => f.dxid)).to.have.members([firstFileDxid])
+    // file was not recreated
+    expect(res.files.map(f => f.id)).to.have.members([file.id])
+  })
+
   // todo: deletes file when folder is deleted
   // todo: other files (created by user) are left out/not deleted
   // todo: error states - folder does not exist etc, rollback happens

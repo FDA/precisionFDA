@@ -19,6 +19,7 @@ const random = {
   email: () => chance.email(),
   password: () => chance.string({ length: 20 }),
   dxstr: (): string => nanoid(),
+  word: () => chance.word(),
   chance,
 }
 
@@ -140,8 +141,8 @@ const job = {
 }
 
 const userFile = {
-  simple: (): Partial<InstanceType<typeof entities.UserFile>> => {
-    const dxid = `file-${random.dxstr()}`
+  simple: (customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
       uid: `${dxid}-1`,
@@ -149,6 +150,20 @@ const userFile = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.HTTPS,
+      state: FILE_STATE.CLOSED,
+      parentType: PARENT_TYPE.USER,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
+  simpleUploaded: (customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
       state: FILE_STATE.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
@@ -168,6 +183,18 @@ const folder = {
       entityType: FILE_ORIGIN_TYPE.HTTPS,
       parentId: 1,
       parentType: PARENT_TYPE.JOB,
+      stiType: FILE_STI_TYPE.FOLDER,
+    }
+  },
+  simpleLocal: (): Partial<InstanceType<typeof entities.Folder>> => {
+    return {
+      name: chance.word(),
+      project: undefined,
+      dxid: undefined,
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      parentId: 1,
+      parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.FOLDER,
     }
   },
