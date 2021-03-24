@@ -163,7 +163,11 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   }),
   filesAttachTo: (items, noteUids) => dispatch(filesAttachTo(items, noteUids)),
   setFileEverybodyFilterValue: (value) => dispatch(setFileEverybodyFilterValue(value)),
-  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)),
+  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)).then(({ statusIsOK }) => {
+    const folderId = getFolderId(ownProps.location)
+    if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
+  }),
+
   renameFile: (link, name, description, type, folderId) => dispatch(renameFile(link, name, description, type, folderId)).then(({ statusIsOK }) => {
     const folderId = getFolderId(ownProps.location)
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
