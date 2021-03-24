@@ -38,13 +38,13 @@ const root = ({ store }) => (
           </Route>
           <Redirect exact from='/spaces/:spaceId' to='/spaces/:spaceId/files' />
           <Route path='/spaces/:spaceId/:page' render={(props) => <SpacePage {...props} />} />
-          <Route exact path='/new_challenges'>
+          <Route exact path='/challenges'>
             <ChallengesListPage />
           </Route>
-          <Route exact path='/new_challenges/propose'>
+          <Route exact path='/challenges/propose'>
             <ChallengeProposePage />
           </Route>
-          <Route path='/new_challenges/:challengeId' render={(props) => <ChallengeDetailsPage challengeId={props.match.params.challengeId} />} />
+          <Route path='/challenges/:challengeId' render={(props) => <ChallengeDetailsPage challengeId={props.match.params.challengeId} />} />
           <Route exact path='/news'>
             <NewsListPage />
           </Route>

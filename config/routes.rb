@@ -470,8 +470,6 @@ Rails.application.routes.draw do
       post "announce_result", on: :member
     end
 
-    resources :new_challenges, only: %i(index)
-
     resources :discussions, constraints: { answer_id: %r{[^/]+} } do
       get "followers", on: :member
       post "rename", on: :member
@@ -575,7 +573,6 @@ Rails.application.routes.draw do
     end
 
     get "/spaces/*all", to: "spaces#index"
-    get "/new_challenges/*all", to: "new_challenges#index"
 
     resources :notification_preferences, only: [:index] do
       post "change", on: :collection

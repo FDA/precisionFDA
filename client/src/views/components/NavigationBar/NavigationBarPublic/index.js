@@ -89,7 +89,7 @@ const NavigationBarPublic = ({ children, title, subtitle, showLogoOnNavbar, user
             <img className="pfda-navbar-logo logo-img logo-img-dark" src={precisionFDADark} />
             <div className="center-buttons">
               <a href="/">Overview</a>
-              <Link to={'/new_challenges'} className={getLinkClassName('/new_challenges')}>Challenges</Link>
+              <Link to={'/challenges'} className={getLinkClassName('/challenges')}>Challenges</Link>
               <a className={getLinkClassName('/experts')} href='/experts'>Experts</a>
               <Link to={'/news'} className={getLinkClassName('/news')}>News</Link>
               <a className={getLinkClassName('/about')} href='/about'>About</a>

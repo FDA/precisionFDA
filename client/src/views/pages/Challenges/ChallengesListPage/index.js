@@ -54,7 +54,7 @@ class ChallengesListPage extends Component {
       },
       {
         text: 'Propose a Challenge',
-        target: '/new_challenges/propose',
+        target: '/challenges/propose',
       },
     ]
 
@@ -79,7 +79,7 @@ class ChallengesListPage extends Component {
             <hr />
             <div className="pfda-subsection-heading">PROPOSE A CHALLEGNE</div>
             <p>If you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.</p>
-            <Link to={{ pathname: '/new_challenges/propose' }}>
+            <Link to={{ pathname: '/challenges/propose' }}>
               Propose a Challenge &rarr;
             </Link>
           </div>
