@@ -11,15 +11,18 @@ import NewSpacePage from './views/pages/Spaces/NewSpacePage'
 import HomePage from './views/pages/Home'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
+import { NotificationsPage } from './views/pages/Account/Notifications'
 
-
-const root = ({ store }) => (
+const root = ({ store }: any) => (
   <Provider store={store}>
     <Router history={history}>
       <ErrorWrapper>
         <Switch>
           <Redirect exact from='/home' to='/home/files' />
-          <Route path='/home/:page/:tab?' render={(props) => <HomePage {...props} />} />
+          <Route path='/home/:page/:tab?' render={(props: any) => <HomePage {...props} />} />
+          <Route path='/account/notifications'>
+            <NotificationsPage />
+          </Route>
           <Route exact path='/spaces'>
             <SpacesListPage />
           </Route>
@@ -33,7 +36,7 @@ const root = ({ store }) => (
             <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.EDIT} />
           </Route>
           <Redirect exact from='/spaces/:spaceId' to='/spaces/:spaceId/files' />
-          <Route path='/spaces/:spaceId/:page' render={(props) => <SpacePage {...props} />} />
+          <Route path='/spaces/:spaceId/:page' render={(props: any) => <SpacePage {...props} />} />
           <Route path="*">
             <NoFoundPage />
           </Route>
