@@ -63,7 +63,6 @@ describe('PATCH /folders/:id/rename', () => {
       scopedParentFolderId: null,
       description: null,
       state: null,
-      fileSize: null,
     })
   })
 

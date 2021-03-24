@@ -42,7 +42,7 @@ export class UserFile extends Node {
   scope: string
 
   @Property({ type: 'bigint' })
-  fileSize: number
+  fileSize?: number
 
   // unused FK references
   // resolves into User/Job/Asset and other entities in PFDA

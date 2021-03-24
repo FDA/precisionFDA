@@ -29,6 +29,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     })
     let folderPath: string
     let current: Folder | null | undefined
+    // sanitize operation inputs
     if (input.folderId) {
       current = foldersInProject.find(f => f.id === input.folderId)
       if (!current) {
@@ -62,6 +63,13 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     const localFileDxids = map(prop('dxid'))(localFiles)
     const toAdd = difference(remoteFileDxids, localFileDxids)
     const toRemove = difference(localFileDxids, remoteFileDxids)
+
+    this.ctx.log.debug({ localFileDxids, folderPath }, 'local files detected in given subfolder')
+    this.ctx.log.debug({ remoteFileDxids, folderPath }, 'remote files detected in given subfolder')
+    this.ctx.log.info(
+      { folderPath, toAdd, toRemove },
+      'files detected to add/remove under given subfolder path',
+    )
 
     // update existing files
     localFiles.forEach(userfile => {
@@ -98,6 +106,12 @@ export class SyncFilesInFolderOperation extends BaseOperation<
         if (!remoteDetails) {
           throw new Error('remote details not found for file dxid')
         }
+        if (remoteDetails.describe && !remoteDetails.describe.size) {
+          this.ctx.log.warn(
+            { file: remoteDetails },
+            'File may be in a wrong state, size property is missing',
+          )
+        }
         const newFile = wrap(new UserFile(em.getReference(User, this.ctx.user.id))).assign(
           {
             dxid: remoteDetails?.id,
@@ -122,10 +136,6 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       await em.flush()
     }
 
-    this.ctx.log.info(
-      { folderPath, toAdd, toRemove },
-      'files detected to add/remove under given subfolder path',
-    )
     // final result
     const files = await fileRepo.findProjectFilesInSubfolder({
       project: input.projectDxid,
