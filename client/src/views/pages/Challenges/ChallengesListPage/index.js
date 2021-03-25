@@ -50,7 +50,10 @@ class ChallengesListPage extends Component {
       },
       {
         text: 'Upcoming',
-        onClick: () => console.log('Upcoming clicked'),
+        onClick: () => {
+          resetFilters()
+          loadChallenges()
+        },
       },
       {
         text: 'Propose a Challenge',
