@@ -73,7 +73,7 @@ class ChallengesListPage extends Component {
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateChallenge && (
-              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')}>Create a new challenge</button>
+              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')} style={{ marginBottom: '12px' }}>Create a new challenge</button>
             )}
             <CollapsibleMenu title="CHALLENGES" options={sideMenuOptions} />
             <hr />
