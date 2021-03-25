@@ -48,6 +48,7 @@ class ChallengeProposePage extends React.Component {
           <div className="right-column">
             <CollapsibleMenu title="Challenges" options={sideMenuOptions} />
             <hr />
+            <div className="pfda-subsection-heading">PREVIOUS CHALLENGES</div>
             <ChallengesYearList setYearHandler={(year) => {history.push('/challenges/?year='+year)}} />
           </div>
         </div>
