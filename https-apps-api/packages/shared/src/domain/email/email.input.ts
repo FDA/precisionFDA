@@ -1,5 +1,4 @@
 import type { JSONSchema7 } from 'json-schema'
-import { schemas } from '../../utils'
 import { emailTypeIds } from './email.config'
 
 const sendEmailParamSchema: JSONSchema7 = {
@@ -14,10 +13,9 @@ const sendEmailParamSchema: JSONSchema7 = {
 const sendEmailBodySchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    receiverUserIds: { type: 'array', items: schemas.idProp, minItems: 1, uniqueItems: true },
     input: { type: 'object', additionalProperties: true },
   },
-  required: ['receiverUserIds', 'input'],
+  required: ['input'],
   additionalProperties: false,
 }
 

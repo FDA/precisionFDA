@@ -1,8 +1,10 @@
 /* eslint-disable id-length */
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import type { JSONSchema7 } from 'json-schema'
-import { AnyObject } from '../../types'
+import { AnyObject, OpsCtx } from '../../types'
 import { schemas } from '../../utils'
+import { User } from '..'
+import { JobFinishedEmailTemplate, SpaceNotificationEmailTemplate } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -77,6 +79,8 @@ const emailInputSchemas = {
   contentAddedEmailSchema,
 }
 
+type NewContentAdded = { spaceEventId: number }
+
 // EMAIL ENUMS
 
 type EmailProcessInput = {
@@ -91,9 +95,30 @@ type EmailSendInput = {
   body: string
 }
 
+type EmailTemplateInput = { receiver: User }
+
 // fixme: NOTIFICATION_TYPES into EMAIL_TYPES mapping
 
 // EMAIL CONFIG AND HELPERS
+type EmailTemplateContructor = new (
+  emailTypeId: number,
+  emailInput: any,
+  ctx: OpsCtx,
+) => EmailTemplate
+
+interface EmailTemplate {
+  config: EmailConfigItem
+  emailType: EMAIL_TYPES
+  ctx: OpsCtx
+  templateFile: (data: any) => string
+
+  validate(payload: any): void
+  // todo: make this one abstract maybe?
+  determineReceivers(...args: any[]): Promise<User[]>
+  // determineReceivers(spaceEventId: number): Promise<User[]>
+  // getReceivers(): Promise<User[]>
+  template(receiver: User): Promise<EmailSendInput>
+}
 
 type EMAIL_TYPES = 'jobFinished' | 'newContentAdded'
 type EmailConfigItem = {
@@ -102,24 +127,31 @@ type EmailConfigItem = {
   // API param value -> EMAIL_TYPE, must be also unique
   emailId: number
   // db control field(s) of the notification
-  notificationKeys: readonly string[]
+  notificationKey: string
+  // todo: keep this option in mind for later
+  // notificationKeys: readonly string[]
   // schema used from ajv validation
   // optional, some emails may not require any dynamic content
   schema?: JSONSchema7
+  templateClass: EmailTemplateContructor
 }
 
 const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
   jobFinished: {
     name: 'jobFinished',
     emailId: 1,
-    notificationKeys: ['job_finished'],
+    notificationKey: 'job_finished',
+    // notificationKeys: ['job_finished'],
     schema: emailInputSchemas.jobFinishedEmailSchema,
+    templateClass: JobFinishedEmailTemplate,
   },
   newContentAdded: {
     name: 'newContentAdded',
     emailId: 2,
-    notificationKeys: ['all_content_added_or_deleted'],
+    // notificationKeys: ['all_content_added_or_deleted'],
+    notificationKey: 'all_content_added_or_deleted',
     schema: emailInputSchemas.contentAddedEmailSchema,
+    templateClass: SpaceNotificationEmailTemplate,
   },
 } as const
 
@@ -158,4 +190,8 @@ export {
   NOTIFICATION_TYPES,
   EmailProcessInput,
   EmailSendInput,
+  EmailTemplateInput,
+  EmailTemplate,
+  EmailTemplateContructor,
+  NewContentAdded,
 }

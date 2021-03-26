@@ -2,30 +2,33 @@ import { difference, isNil } from 'ramda'
 import mjml2html from 'mjml'
 import { User } from '../..'
 import { errors } from '../../..'
-import { AnyObject, Maybe, OpsCtx } from '../../../types'
+import { Maybe, OpsCtx } from '../../../types'
 import { ajv } from '../../../utils/validator'
 import { EmailNotification } from '../email-notification.entity'
-import { EMAIL_TYPES, getEmailConfig, EmailConfigItem, EmailSendInput } from '../email.config'
-import { jobFinishedTemplate } from './mjml/job-finished-template'
+import { EMAIL_TYPES, getEmailConfig, EmailConfigItem } from '../email.config'
 
-export class EmailTemplate {
+export class BaseTemplate<T, N = any> {
   emailType: EMAIL_TYPES
   config: EmailConfigItem
   ctx: OpsCtx
+  validatedInput: T
+  templateFile: (data: any) => string
 
-  constructor(emailTypeId: number, ctx: OpsCtx) {
+  constructor(emailTypeId: number, input: unknown, ctx: OpsCtx) {
     this.ctx = ctx
     this.config = getEmailConfig(emailTypeId)
     this.emailType = this.config.name
     this.ctx.log.info({ emailType: this.emailType }, 'Email template build')
+
+    this.validatedInput = this.validate(input)
   }
 
-  validate<T = AnyObject>(payload: T): T {
+  validate(payload: unknown): T {
     const { schema } = this.config
     // run against validation schema, if applicable
     if (!schema) {
       // nothing to validate, payload should be also empty
-      return payload
+      return payload as T
     }
     const validateFn = ajv.compile(schema)
     if (!validateFn(payload)) {
@@ -35,8 +38,7 @@ export class EmailTemplate {
         validationErrors,
       })
     }
-
-    return payload
+    return payload as T
   }
 
   isEnabled(notificationsConfig: Maybe<EmailNotification>): boolean {
@@ -46,7 +48,7 @@ export class EmailTemplate {
       this.ctx.log.debug('Notifications object not found, applying default')
       return defaultValue
     }
-    const dbValues = notificationsConfig.data
+    // const dbValues = notificationsConfig.data
     const settingValue: Maybe<boolean> = notificationsConfig.data[this.config.notificationKey]
     if (isNil(settingValue)) {
       this.ctx.log.debug(
@@ -65,10 +67,6 @@ export class EmailTemplate {
     )
     return settingValue
   }
-
-  // todo: maybe our flow can just accept list of recipients and send it in a bulk
-  // depends how we want to plug in into app logic
-  // todo: maybe this is too much -> leave in the business logic
 
   async getReceivers(receiverUserIds: number[]): Promise<User[]> {
     // find users
@@ -96,15 +94,10 @@ export class EmailTemplate {
     })
   }
 
-  // todo: return subject, body of the email
-  template(receiverData: { user: User }, payload: AnyObject): EmailSendInput {
-    const test = jobFinishedTemplate({ receiver: receiverData.user })
+  buildTemplateHtml(payload: N): string {
+    // input ??? there is more...
+    const test = this.templateFile(payload)
     const result = mjml2html(test)
-    const body = result.html
-    return {
-      to: receiverData.user.email,
-      subject: 'Someone finished a job',
-      body,
-    }
+    return result.html
   }
 }

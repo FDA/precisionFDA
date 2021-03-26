@@ -9,5 +9,8 @@ export class Space extends BaseEntity {
   @Property()
   name: string
 
+  @Property()
+  title: string
+
   // todo: and much more
 }
