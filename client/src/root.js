@@ -9,6 +9,10 @@ import SpacePage from './views/pages/Spaces/SpacePage'
 import NoFoundPage from './views/pages/NoFoundPage'
 import NewSpacePage from './views/pages/Spaces/NewSpacePage'
 import HomePage from './views/pages/Home'
+import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
+import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
+import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
+import NewsListPage from './views/pages/News/NewsListPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 
@@ -34,6 +38,16 @@ const root = ({ store }) => (
           </Route>
           <Redirect exact from='/spaces/:spaceId' to='/spaces/:spaceId/files' />
           <Route path='/spaces/:spaceId/:page' render={(props) => <SpacePage {...props} />} />
+          <Route exact path='/new_challenges'>
+            <ChallengesListPage />
+          </Route>
+          <Route exact path='/new_challenges/propose'>
+            <ChallengeProposePage />
+          </Route>
+          <Route path='/new_challenges/:challengeId' render={(props) => <ChallengeDetailsPage challengeId={props.match.params.challengeId} />} />
+          <Route exact path='/news'>
+            <NewsListPage />
+          </Route>
           <Route path="*">
             <NoFoundPage />
           </Route>

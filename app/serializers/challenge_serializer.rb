@@ -1,0 +1,37 @@
+# Challenge serializer.
+class ChallengeSerializer < ApplicationSerializer
+  attributes(
+    :id,
+    :name,
+    :description,
+    :meta,
+    :start_at,
+    :end_at,
+    :created_at,
+    :updated_at,
+    :status,
+    :card_image_url,
+    :card_image_id,
+    :links,
+  )
+
+  attribute :followed?, key: :is_followed
+  attribute :can_edit?, key: :can_edit
+
+  def can_edit?
+    current_user && object.editable_by?(current_user)
+  end
+
+  def followed?
+    current_user && object.followed_by?(current_user)
+  end
+
+  def links
+    return unless current_user
+
+    {}.tap do |links|
+      links[:edit] = edit_challenge_path(object) if object.editable_by?(current_user)
+      links[:editor] = edit_page_challenge_path(object) if object.editable_by?(current_user)
+    end
+  end
+end
