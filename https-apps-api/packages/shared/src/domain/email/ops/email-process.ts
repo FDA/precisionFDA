@@ -1,6 +1,6 @@
 import { BaseOperation } from '../../../utils'
 import { EmailProcessInput, getEmailConfig, EmailTemplate } from '../email.config'
-import { createSendEmailTask } from 'shared/src/queue'
+import { createSendEmailTask } from '../../../queue'
 
 export class EmailProcessOperation extends BaseOperation<EmailProcessInput, boolean> {
   input: EmailProcessInput

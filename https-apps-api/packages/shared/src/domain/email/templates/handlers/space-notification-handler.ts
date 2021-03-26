@@ -1,12 +1,12 @@
 import { isNil } from 'ramda'
-import { EmailSendInput, EmailTemplate, NewContentAdded } from '../email.config'
-import { User } from '../..'
-import { errors } from '../../..'
-import { SpaceEvent } from '../../space-event'
-import { newContentTemplate, NewContentTemplateInput } from './mjml/new-content-template'
-import { BaseTemplate } from '.'
+import { EmailSendInput, EmailTemplate, NewContentAdded } from '../../email.config'
+import { User } from '../../..'
+import { errors } from '../../../..'
+import { SpaceEvent } from '../../../space-event'
+import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content-template'
+import { BaseTemplate } from '..'
 
-export class SpaceNotificationEmailTemplate
+export class SpaceNotificationEmailHandler
   extends BaseTemplate<NewContentAdded, NewContentTemplateInput>
   implements EmailTemplate {
   templateFile = newContentTemplate

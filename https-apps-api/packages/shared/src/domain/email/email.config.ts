@@ -4,7 +4,7 @@ import type { JSONSchema7 } from 'json-schema'
 import { AnyObject, OpsCtx } from '../../types'
 import { schemas } from '../../utils'
 import { User } from '..'
-import { JobFinishedEmailTemplate, SpaceNotificationEmailTemplate } from './templates'
+import { handlers } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -143,7 +143,7 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
     notificationKey: 'job_finished',
     // notificationKeys: ['job_finished'],
     schema: emailInputSchemas.jobFinishedEmailSchema,
-    templateClass: JobFinishedEmailTemplate,
+    templateClass: handlers.JobFinishedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
@@ -151,7 +151,7 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
     // notificationKeys: ['all_content_added_or_deleted'],
     notificationKey: 'all_content_added_or_deleted',
     schema: emailInputSchemas.contentAddedEmailSchema,
-    templateClass: SpaceNotificationEmailTemplate,
+    templateClass: handlers.SpaceNotificationEmailHandler,
   },
 } as const
 
