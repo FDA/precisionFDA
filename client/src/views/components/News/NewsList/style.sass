@@ -1,0 +1,61 @@
+@import "../../../../styles/common.sass"
+@import "../../../../styles/variables.sass"
+
+.news-list
+  display: flex
+  flex-direction: column
+  flex-wrap: nowrap
+  align-content: stretch
+  justify-content: center
+
+  list-style: none
+  padding-inline-start: 0px
+
+
+.pfda-pagination
+  display: flex
+  justify-content: center
+  margin: 0 auto
+
+  &__page
+    color: black
+    display: flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    padding: 6px
+    margin: 0 6px
+    width: auto
+    background: none
+    border: none
+
+    &:last-child
+
+    &--active
+      color: $pfda-highlight-blue
+
+    &--prev, &--next
+      cursor: pointer
+      color: $color-primary
+      background-image: none
+      background-color: #ffffff
+      border: 1px solid $color-primary
+      border-radius: 3px
+      white-space: nowrap
+      padding: 6px 12px
+      font-size: 14px
+      font-weight: bold
+      text-transform: capitalize
+      line-height: 1.428571429
+
+      &:not(.disabled)
+        &:hover, &:focus, &:active, &.active
+          color: $pfda-highlight-blue
+          border-color: #63a5de
+          background-color: rgb(244, 248, 253)
+
+    &--prev::after
+      content: ' Prev'
+
+    &--next::before
+      content: 'Next '

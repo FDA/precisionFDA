@@ -142,8 +142,14 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
-      resources :challenges, only: [] do
-        post "save_editor_page", on: :member
+      resources :news_items, path: "news", only: %i(index show) do
+        get :years, on: :collection
+      end
+
+      resources :challenges, only: %i(index show) do
+        get :years, on: :collection
+        post :save_editor_page, on: :member
+        post :propose, on: :collection
       end
 
       resources :apps do
@@ -462,6 +468,8 @@ Rails.application.routes.draw do
       post "announce_result", on: :member
     end
 
+    resources :new_challenges, only: %i(index)
+
     resources :discussions, constraints: { answer_id: %r{[^/]+} } do
       get "followers", on: :member
       post "rename", on: :member
@@ -565,6 +573,7 @@ Rails.application.routes.draw do
     end
 
     get "/spaces/*all", to: "spaces#index"
+    get "/new_challenges/*all", to: "new_challenges#index"
 
     resources :notification_preferences, only: [:index] do
       post "change", on: :collection

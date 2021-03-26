@@ -1,0 +1,76 @@
+import PropTypes from 'prop-types'
+import { parseISO } from 'date-fns'
+import { utcToZonedTime } from 'date-fns-tz'
+
+import { CHALLENGE_TIME_STATUS } from '../../constants'
+
+
+const ChallengeShape = {
+  id: PropTypes.number,
+  name: PropTypes.string,
+  appOwnerId: PropTypes.number,
+  appId: PropTypes.number,
+  description: PropTypes.string,
+  meta: PropTypes.object,
+  startAt: PropTypes.object,
+  endAt: PropTypes.object,
+  createdAt: PropTypes.object,
+  updatedAt: PropTypes.object,
+  status: PropTypes.string,
+  automated: PropTypes.bool,
+  cardImageUrl: PropTypes.string,
+  cardImageId: PropTypes.string,
+  specifiedOrder: PropTypes.number,
+  spaceId: PropTypes.number,
+  isFollowed: PropTypes.bool, // True if user has joined the challenge
+  canEdit: PropTypes.bool,
+  links: PropTypes.object,
+}
+
+const computeChallengeTimeStatus = (challenge) => {
+  const timeNow = (new Date()).getTime()
+  challenge.hasStarted = timeNow > challenge.startAt.getTime()
+  challenge.hasEnded = timeNow > challenge.endAt.getTime()
+  if (!challenge.hasStarted) {
+    challenge.timeStatus = CHALLENGE_TIME_STATUS.UPCOMING
+  }
+  else if (!challenge.hasEnded) {
+    challenge.timeStatus = CHALLENGE_TIME_STATUS.CURRENT
+  }
+  else {
+    challenge.timeStatus = CHALLENGE_TIME_STATUS.ENDED
+  }
+}
+
+const convertDateToUserTime = (date) => {
+  const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
+  return utcToZonedTime(parseISO(date), userTimeZone)
+}
+
+const mapToChallenge = (data) => {
+  const challenge = {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    meta: data.meta,
+    startAt: convertDateToUserTime(data.start_at),
+    endAt: convertDateToUserTime(data.end_at),
+    createdAt: convertDateToUserTime(data.created_at),
+    updatedAt: convertDateToUserTime(data.updated_at),
+    status: data.status,
+    cardImageUrl: data.card_image_url,
+    cardImageId: data.card_image_id,
+    isFollowed: data.is_followed,
+    canEdit: data.can_edit,
+    links: data.links,
+  }
+  computeChallengeTimeStatus(challenge)
+  return challenge
+}
+
+export default ChallengeShape
+
+export {
+  ChallengeShape,
+  mapToChallenge,
+}

@@ -3,8 +3,9 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import ContainerLoader from '../ContainerLoader'
-import { isInitializedSelector } from '../../../reducers/context/selectors'
+import { contextIsFetchingSelector, isInitializedSelector } from '../../../reducers/context/selectors'
 import fetchContext from '../../../actions/context'
+import './style.sass'
 
 
 class LoaderWrapper extends React.Component {
@@ -14,8 +15,11 @@ class LoaderWrapper extends React.Component {
   }
 
   render() {
-    const { isInitialized, children } = this.props
-    const content = isInitialized ? children : <ContainerLoader text="Loading precisionFDA" />
+    const { isFetching, children } = this.props
+
+    // When context fetching is done but context not intialized (due to 401 unauthorized response
+    // from server), we still load the page such that public pages are visible
+    const content = !isFetching ? children : <ContainerLoader text="Loading precisionFDA" />
 
     return <div className="pfda-loader-wrapper">{content}</div>
   }
@@ -24,6 +28,7 @@ class LoaderWrapper extends React.Component {
 LoaderWrapper.propTypes = {
   children: PropTypes.element.isRequired,
   onMount: PropTypes.func,
+  isFetching: PropTypes.bool,
   isInitialized: PropTypes.bool,
 }
 
@@ -32,6 +37,7 @@ LoaderWrapper.defaultProps = {
 }
 
 const mapStateToProps = state => ({
+  isFetching: contextIsFetchingSelector(state),
   isInitialized: isInitializedSelector(state),
 })
 
