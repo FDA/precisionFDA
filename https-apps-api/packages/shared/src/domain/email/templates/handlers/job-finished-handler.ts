@@ -1,12 +1,12 @@
-import { EmailSendInput, EmailTemplate } from '../email.config'
-import { User } from '../..'
-import { JobFinishedInputTemplate, jobFinishedTemplate } from './mjml/job-finished-template'
-import { BaseTemplate } from '.'
+import { EmailSendInput, EmailTemplate } from '../../email.config'
+import { User } from '../../..'
+import { JobFinishedInputTemplate, jobFinishedTemplate } from '../mjml/job-finished-template'
+import { BaseTemplate } from '..'
 
 // fixme:
 type Foo = { jobId: number }
 
-export class JobFinishedEmailTemplate
+export class JobFinishedEmailHandler
   extends BaseTemplate<Foo, JobFinishedInputTemplate>
   implements EmailTemplate {
   templateFile = jobFinishedTemplate
