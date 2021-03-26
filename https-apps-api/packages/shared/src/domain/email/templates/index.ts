@@ -1,1 +1,5 @@
-export { EmailTemplate as BaseTemplate } from './base-template'
+export { BaseTemplate } from './base-template'
+
+export { SpaceNotificationEmailTemplate } from './space-notification-template'
+
+export { JobFinishedEmailTemplate } from './job-finished-template'

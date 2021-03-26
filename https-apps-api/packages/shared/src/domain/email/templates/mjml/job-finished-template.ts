@@ -1,7 +1,10 @@
-import { AnyObject } from '../../../../types'
+import { EmailTemplateInput } from '../../email.config'
 
-// todo: come up with smart typings for data
-export const jobFinishedTemplate = (data: AnyObject): string => `
+export type JobFinishedInputTemplate = EmailTemplateInput & {
+  content: {}
+}
+
+export const jobFinishedTemplate = (data: JobFinishedInputTemplate): string => `
   <mjml>
     <mj-body>
       <mj-section>

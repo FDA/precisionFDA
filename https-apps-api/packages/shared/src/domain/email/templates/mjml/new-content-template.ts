@@ -1,7 +1,19 @@
-import { AnyObject } from '../../../../types'
+import { EmailTemplateInput } from '../../email.config'
 
-// todo: come up with smart typings for data
-export const newContentTemplate = (data: AnyObject): string => `
+export type NewContentTemplateInput = EmailTemplateInput & {
+  content: {
+    entityType: string
+    user: {
+      firstName: string
+      lastName: string
+    }
+    space: {
+      name: string
+    }
+  }
+}
+
+export const newContentTemplate = (data: NewContentTemplateInput): string => `
   <mjml>
     <mj-body>
       <mj-section>
@@ -10,8 +22,8 @@ export const newContentTemplate = (data: AnyObject): string => `
             Hello ${data.receiver.firstName}!
           </mj-text>
           <mj-text>
-            New ${data.contentType} added by ${data.user.fullName}
-            to the space ${data.space.title}
+            New ${data.content.entityType} added by ${data.content.user.firstName}
+            to the space ${data.content.space.name}
           </mj-text>
         </mj-column>
       </mj-section>

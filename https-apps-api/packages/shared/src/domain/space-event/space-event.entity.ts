@@ -46,7 +46,7 @@ export class SpaceEvent extends BaseEntity {
   @ManyToOne()
   user: IdentifiedReference<User>
 
-  @Property()
+  @ManyToOne()
   space: IdentifiedReference<Space>
 
   constructor(user: User, space: Space) {
