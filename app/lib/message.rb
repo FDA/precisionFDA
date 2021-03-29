@@ -11,8 +11,8 @@ class Message
       ["Bad request", error].compact.join(" ")
     end
 
-    def not_allowed(message = "")
-      ["You are not allowed to perform this request.", message].compact.join(" ")
+    def can_not_serialize
+      "Record can not be serialized"
     end
   end
 end

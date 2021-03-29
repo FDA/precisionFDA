@@ -30,8 +30,13 @@ import {
   HOME_EDIT_WORKFLOW_TAGS_START,
   HOME_EDIT_WORKFLOW_TAGS_SUCCESS,
   HOME_EDIT_WORKFLOW_TAGS_FAILURE,
+  HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_START,
+  HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_SUCCESS,
+  HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_FAILURE,
+  HOME_WORKFLOWS_EXECUTIONS_EXPAND_EXECUTION,
+  HOME_WORKFLOWS_EXECUTIONS_EXPAND_ALL_EXECUTIONS,
 } from '../../../actions/home/workflows/types'
-import { isCheckedAllCheckboxes } from '../../../helpers'
+import { isCheckedAllCheckboxes, isExpandedAllItems } from '../../../helpers'
 import { HOME_WORKFLOW_TYPES } from '../../../constants'
 
 
@@ -335,4 +340,69 @@ export default createReducer(initialState, {
     },
   }),
 
+  [HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_START]: (state) => ({
+    ...state,
+    workflowExecutions: {
+      ...state.workflowExecutions,
+      isFetching: true,
+      jobs: [],
+      pagination: {},
+    },
+  }),
+
+  [HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_SUCCESS]: (state, { jobs, pagination }) => ({
+    ...state,
+    workflowExecutions: {
+      ...state.workflowExecutions,
+      isFetching: false,
+      jobs,
+      filters: {
+        ...state.workflowExecutions.filters,
+        ...pagination,
+      },
+    },
+  }),
+
+  [HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_FAILURE]: (state) => ({
+    ...state,
+    workflowExecutions: {
+      ...state.workflowExecutions,
+      isFetching: false,
+    },
+  }),
+
+  [HOME_WORKFLOWS_EXECUTIONS_EXPAND_EXECUTION]: (state, { key }) => {
+    const executions = state.workflowExecutions.jobs.map((exec) => {
+      if (exec.key === key) exec.isExpanded = !exec.isExpanded
+      return exec
+    })
+
+    const isExpandedAll = isExpandedAllItems(executions)
+
+    return {
+      ...state,
+      workflowExecutions: {
+        ...state.workflowExecutions,
+        isExpandedAll,
+        executions,
+      },
+    }
+  },
+
+  [HOME_WORKFLOWS_EXECUTIONS_EXPAND_ALL_EXECUTIONS]: (state) => {
+    const isExpandedAll = isExpandedAllItems(state.workflowExecutions.jobs)
+
+    return {
+      ...state,
+      workflowExecutions: {
+        ...state.workflowExecutions,
+        executions: state.workflowExecutions.jobs.map((execution) => {
+          execution.isExpanded = !isExpandedAll
+          return execution
+        }),
+        isExpandedAll: !isExpandedAll,
+      },
+    }
+  },
 })
+
