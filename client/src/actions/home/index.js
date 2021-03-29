@@ -149,6 +149,9 @@ import {
   fetchWorkflowDetails,
   showWorkflowEditTagsModal,
   hideWorkflowEditTagsModal,
+  fetchWorkflowExecutions,
+  resetWorkflowExecutionsFiltersValue,
+  setWorkflowExecutionsFilterValue,
 } from './workflows'
 import {
   fetchExecutions,
@@ -422,6 +425,9 @@ export {
   showWorkflowEditTagsModal,
   hideWorkflowEditTagsModal,
   editWorkflowTags,
+  fetchWorkflowExecutions,
+  resetWorkflowExecutionsFiltersValue,
+  setWorkflowExecutionsFilterValue,
 }
 
 export {

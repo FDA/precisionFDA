@@ -269,6 +269,8 @@ Rails.application.routes.draw do
       end
 
       resources :workflows, only: %i(index show create) do
+        get :jobs, on: :member, to: "jobs#workflow"
+
         collection do
           get :featured
           get :everybody
