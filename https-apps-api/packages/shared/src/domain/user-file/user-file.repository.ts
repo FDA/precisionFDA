@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_STI_TYPE } from './user-file.enum'
+import { FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.enum'
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   // ???? find another way
