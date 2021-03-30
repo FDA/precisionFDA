@@ -94,9 +94,5 @@ RSpec.describe CopyService::NodeCopier, type: :service do
         expect(nodes_in_folder).to contain_exactly("file_two", "folder_two")
       end
     end
-
-    context "when files and folders already exist in the destination scope" do
-      pending "doesn't copy such nodes"
-    end
   end
 end
