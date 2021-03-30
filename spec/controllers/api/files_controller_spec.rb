@@ -113,10 +113,6 @@ RSpec.describe Api::FilesController, type: :controller do
     end
   end
 
-  describe "POST download_list" do
-    pending
-  end
-
   describe "POST copy" do
     context "when user is authenticated" do
       let(:space) { create(:space, :review, :active, host_lead_id: user.id) }
