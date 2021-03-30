@@ -23,7 +23,7 @@ RSpec.shared_examples "not_admin_user" do
     end
 
     it "returns 403 status code" do
-      expect(response).to be_forbidden
+      expect(response).to redirect_to(root_path)
     end
   end
 end
