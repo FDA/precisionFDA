@@ -4,7 +4,6 @@ const path = require('path')
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
-
 module.exports = {
   entry: './src/index.tsx',
   output: {
@@ -16,9 +15,6 @@ module.exports = {
       filename: 'bundle.css',
     }),
   ],
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', 'jsx', '.json']
-  },
   module: {
     rules: [
       {
@@ -28,18 +24,11 @@ module.exports = {
       },
       {
         test: /\.sass$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'sass-loader',
-        ],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
         test: /\.css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-        ],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(png|jpg)$/,
@@ -52,6 +41,6 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.ts', '.tsx', '.js', 'jsx', '.json'],
   },
 }
