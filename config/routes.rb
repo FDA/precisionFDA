@@ -50,8 +50,14 @@ Rails.application.routes.draw do
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
-      post "comparison_app", to: "apps#comparison_app"
-      post "restore_comparison_app", to: "apps#restore_comparison_app"
+
+      resources :apps, only: [], param: :uid do
+        collection do
+          post :set_comparison_app
+          post :remove_from_comparators
+          post :add_to_comparators
+        end
+      end
 
       resources :invitations, only: %i(index) do
         collection do
@@ -60,6 +66,8 @@ Rails.application.routes.draw do
           post "browse"
         end
       end
+
+      get "comparator_settings", to: "comparator_settings#index"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection
