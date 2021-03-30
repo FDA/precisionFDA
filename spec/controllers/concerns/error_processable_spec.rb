@@ -59,7 +59,7 @@ RSpec.describe ErrorProcessable do
       end
 
       it "get array of error messages of proper size" do
-        expect(errors.size).to eq 3
+        expect(errors.size).to eq 4
       end
 
       it "get error messages describing first name" do
