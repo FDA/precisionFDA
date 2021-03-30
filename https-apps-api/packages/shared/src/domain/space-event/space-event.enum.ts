@@ -3,19 +3,6 @@ enum PARENT_TYPE {
   JOB = 'Job',
 }
 
-// refers to SpaceMembership enum in Rails
-enum SPACE_EVENT_SIDE {
-  HOST = 0,
-  GUEST = 1,
-}
-
-enum SPACE_EVENT_ROLE {
-  ADMIN = 0,
-  CONTRIBUTOR = 1,
-  VIEWER = 2,
-  LEAD = 3,
-}
-
 enum SPACE_EVENT_OBJECT_TYPE {
   SPACE = 0,
   MEMBERSHIP = 1,
@@ -62,10 +49,4 @@ enum SPACE_EVENT_ACTIVITY_TYPE {
   membership_enabled,
 }
 
-export {
-  PARENT_TYPE,
-  SPACE_EVENT_SIDE,
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_ROLE,
-  SPACE_EVENT_OBJECT_TYPE,
-}
+export { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }

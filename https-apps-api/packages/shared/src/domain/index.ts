@@ -11,6 +11,7 @@ import { Organization } from './org/org.entity'
 import { EmailNotification } from './email/email-notification.entity'
 import { SpaceEvent } from './space-event/space-event.entity'
 import { Space } from './space/space.entity'
+import { SpaceMembership } from './space-membership/space-membership.entity'
 
 const entities = {
   App,
@@ -25,6 +26,7 @@ const entities = {
   Organization,
   EmailNotification,
   SpaceEvent,
+  SpaceMembership,
   Space,
 }
 
@@ -46,4 +48,18 @@ export * as org from './org'
 
 export * as email from './email'
 
-export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node, Space }
+export {
+  entities,
+  Job,
+  App,
+  User,
+  UserFile,
+  Folder,
+  Tag,
+  Tagging,
+  Organization,
+  Node,
+  Space,
+  SpaceMembership,
+  SpaceEvent,
+}

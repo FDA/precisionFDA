@@ -1,4 +1,4 @@
-import { difference, isNil } from 'ramda'
+import { isNil } from 'ramda'
 import mjml2html from 'mjml'
 import { User } from '../..'
 import { errors } from '../../..'
@@ -68,20 +68,9 @@ export class BaseTemplate<T, N = any> {
     return settingValue
   }
 
-  async getReceivers(receiverUserIds: number[]): Promise<User[]> {
-    // find users
-    const users = await this.ctx.em.getRepository(User).findWithEmailSettings(receiverUserIds)
-    // check if all exist
-    const nonExistingUserIds = difference(
-      receiverUserIds,
-      users.map(u => u.id),
-    )
-    if (nonExistingUserIds.length > 0) {
-      throw new errors.NotFoundError(`User ids ${nonExistingUserIds.join(', ')} not found`, {
-        code: errors.ErrorCodes.USER_NOT_FOUND,
-      })
-    }
-    // filter by this.isEnabled
+  filterByUserSettings(users: User[]): User[] {
+    console.log(users, 'users')
+    console.log(this, '!!')
     return users.filter(user => {
       const emailTypeIsEnabled = this.isEnabled(user.emailNotificationSettings?.unwrap())
       if (!emailTypeIsEnabled) {

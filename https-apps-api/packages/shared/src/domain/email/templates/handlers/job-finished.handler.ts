@@ -1,6 +1,6 @@
 import { EmailSendInput, EmailTemplate } from '../../email.config'
 import { User } from '../../..'
-import { JobFinishedInputTemplate, jobFinishedTemplate } from '../mjml/job-finished-template'
+import { JobFinishedInputTemplate, jobFinishedTemplate } from '../mjml/job-finished.template'
 import { BaseTemplate } from '..'
 
 // fixme:

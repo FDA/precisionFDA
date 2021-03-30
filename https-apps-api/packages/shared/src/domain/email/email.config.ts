@@ -74,12 +74,24 @@ const contentAddedEmailSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
+const memberChangedEmailSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    spaceEventId: schemas.idProp,
+  },
+  required: ['spaceEventId'],
+  additionalProperties: false,
+}
+
 const emailInputSchemas = {
   jobFinishedEmailSchema,
   contentAddedEmailSchema,
+  memberChangedEmailSchema,
 }
 
 type NewContentAdded = { spaceEventId: number }
+
+type MemberChanged = { spaceEventId: number }
 
 // EMAIL ENUMS
 
@@ -120,7 +132,7 @@ interface EmailTemplate {
   template(receiver: User): Promise<EmailSendInput>
 }
 
-type EMAIL_TYPES = 'jobFinished' | 'newContentAdded'
+type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChanged'
 type EmailConfigItem = {
   // unique name
   name: EMAIL_TYPES
@@ -152,6 +164,13 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
     notificationKey: 'all_content_added_or_deleted',
     schema: emailInputSchemas.contentAddedEmailSchema,
     templateClass: handlers.SpaceNotificationEmailHandler,
+  },
+  memberChanged: {
+    name: 'memberChanged',
+    emailId: 3,
+    notificationKey: '',
+    schema: emailInputSchemas.memberChangedEmailSchema,
+    templateClass: handlers.MemberChangedEmailHandler,
   },
 } as const
 
@@ -194,4 +213,5 @@ export {
   EmailTemplate,
   EmailTemplateContructor,
   NewContentAdded,
+  MemberChanged,
 }

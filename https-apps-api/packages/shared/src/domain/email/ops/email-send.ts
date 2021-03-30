@@ -11,6 +11,6 @@ export class EmailSendOperation extends WorkerBaseOperation<
     console.log(input, 'EMAIL JOB INPUT')
     console.log(this.ctx.user, 'EMAIL JOB INPUT user')
     // for now, it only prints to a file
-    await helper.saveEmailToFile(input)
+    await helper.saveEmailToFile(input, `test-${Date.now()}`)
   }
 }
