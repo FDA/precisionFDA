@@ -17,3 +17,5 @@ export { FolderDeleteOperation } from './ops/folder-delete'
 export { SyncFoldersOperation } from './ops/sync-folders'
 
 export { SyncFilesInFolderOperation, SyncFolderFilesOutput } from './ops/sync-folder-files'
+
+export { FolderRecreateOperation } from './ops/folder-recreate'

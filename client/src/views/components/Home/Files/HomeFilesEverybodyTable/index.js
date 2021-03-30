@@ -21,6 +21,7 @@ import {
   toggleFileEverybodyCheckbox,
   setFileEverybodyFilterValue,
   makeFeatured,
+  fetchFilesEverybody,
 } from '../../../../../actions/home'
 import { getOrder } from '../../../../../helpers'
 import { OBJECT_TYPES } from '../../../../../constants'
@@ -31,6 +32,7 @@ import Pagination from '../../../../components/TableComponents/Pagination'
 import Counters from '../../../../components/TableComponents/Counters'
 import Icon from '../../../Icon'
 import { debounce } from '../../../../../utils'
+import { getFolderId } from '../../../../../helpers/home'
 
 
 const breadcrumbs = (path) => (
@@ -38,9 +40,9 @@ const breadcrumbs = (path) => (
     <span className="space-files-table__breadcrumbs-label">You are here:</span>
     {
       ([{ id: 0, name: 'Files', href: '/home/files/everybody' }]
-        .concat((path || [])
-          .map(folder => ({
-            id: folder.id,
+          .concat((path || [])
+            .map(folder => ({
+              id: folder.id,
             name: folder.name,
             href: `/home/files/everybody?folderId=${folder.id}`,
           }))).map(folder => <Link key={`folder-${folder.id}`} to={folder.href || ''}>{folder.name}</Link>)
@@ -380,11 +382,14 @@ const mapStateToProps = (state) => ({
   path: homePathEverybodySelector(state),
 })
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch, ownProps) => ({
   toggleAllFilesCheckboxes: () => dispatch(toggleAllFilesEverybodyCheckboxes()),
   toggleFileCheckbox: (id) => dispatch(toggleFileEverybodyCheckbox(id)),
   setFileFilterValue: (filter, value) => dispatch(setFileEverybodyFilterValue(filter, value)),
-  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)),
+  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)).then(({ statusIsOK }) => {
+    const folderId = getFolderId(ownProps.location)
+    if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
+  }),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeFilesEverybodyTable)

@@ -41,6 +41,17 @@ module.exports = {
           'css-loader',
         ],
       },
+      {
+        test: /\.(png|jpg)$/,
+        exclude: /node_modules/,
+        loader: 'url-loader',
+        options: {
+          limit: Infinity,
+        },
+      },
     ],
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
 }

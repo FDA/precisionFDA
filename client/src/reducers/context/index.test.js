@@ -15,6 +15,7 @@ describe('reducer', () => {
   it('processes CONTEXT_FETCH_START', () => {
     const action = { type: CONTEXT_FETCH_START }
     const expectedState = {
+      isFetching: true,
       isInitialized: false,
     }
 
@@ -29,6 +30,7 @@ describe('reducer', () => {
       links: {
         new_space: 'some link',
       },
+      isFetching: false,
       isInitialized: true,
     }
 
@@ -38,6 +40,7 @@ describe('reducer', () => {
   it('processes CONTEXT_FETCH_FAILURE', () => {
     const action = { type: CONTEXT_FETCH_FAILURE }
     const expectedState = {
+      isFetching: false,
       isInitialized: false,
     }
 

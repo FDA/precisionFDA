@@ -11,8 +11,10 @@ class ChallengesController < ApplicationController
     @consistency_challenge = FixedChallenge.consistency(@context)
     @truth_challenge = FixedChallenge.truth(@context)
     @appathons_challenge = FixedChallenge.appathons(@context)
-    @featured_challenges = Challenge.featured(@context)
-    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge] + challenge_cards
+    # this includes the archived challenges as well
+    @featured_challenges = Challenge.accessible_by(@context).order(specified_order: "desc")
+    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge] +
+                  archived_challenges
   end
 
   def new
@@ -378,7 +380,7 @@ class ChallengesController < ApplicationController
     }
   end
 
-  def challenge_cards
+  def archived_challenges
     Challenge.accessible_by(@context).archived.map do |challenge|
       ChallengeCard.by_context(challenge, @context)
     end

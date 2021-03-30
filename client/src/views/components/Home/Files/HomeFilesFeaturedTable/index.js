@@ -276,7 +276,7 @@ HomeFilesFeaturedTable.propTypes = {
   filters: PropTypes.object,
   setFileFilterValue: PropTypes.func,
   handleFilterValue: PropTypes.func,
-  path: PropTypes.string,
+  path: PropTypes.array,
 }
 
 HomeFilesFeaturedTable.defaultProps = {

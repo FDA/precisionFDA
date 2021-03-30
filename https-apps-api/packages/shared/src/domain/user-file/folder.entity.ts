@@ -38,9 +38,6 @@ export class Folder extends Node {
   @Property()
   scope: string
 
-  @Property({ type: 'bigint' })
-  fileSize: number
-
   // unused FK references
   // resolves into User/Job/Asset and other entities in PFDA
   @Property()

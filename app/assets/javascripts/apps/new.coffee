@@ -150,6 +150,14 @@ class NewAppViewModel extends Precision.models.AppEditorModel
           Precision.alert.showAboveAll(text)
     })
 
+  hideAppModal: () ->
+    window.open("/home/apps/#{@newAppUid()}")
+    @importSuccessModal.modal('hide')
+
+  hideAssetModal: () ->
+    window.open("/home/assets/#{@newAssetUid()}")
+    @importSuccessModal.modal('hide')
+
   wdlTextValueOnInput: (root, e) =>
     @wdlTextValue(e.target.value)
 
@@ -164,8 +172,8 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     @wdlTextValue = ko.observable()
     @newAppUid = ko.observable()
     @newAssetUid = ko.observable()
-    @newAppURL = ko.computed(=> "/apps/#{@newAppUid()}")
-    @newAssetURL = ko.computed(=> "/assets/#{@newAssetUid()}")
+    @newAppURL = ko.computed(=> "/home/apps/#{@newAppUid()}")
+    @newAssetURL = ko.computed(=> "/home/assets/#{@newAssetUid()}")
     @dockerImage = ko.observable(null)
     @modalTitle = ko.computed(() =>
       switch @importType()

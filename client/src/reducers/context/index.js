@@ -10,6 +10,7 @@ import {
 export default createReducer(initialState, {
   [CONTEXT_FETCH_START]: (state) => ({
     ...state,
+    isFetching: true,
     isInitialized: false,
   }),
 
@@ -23,11 +24,13 @@ export default createReducer(initialState, {
       ...state.links,
       ...meta.links,
     },
+    isFetching: false,
     isInitialized: true,
   }),
 
   [CONTEXT_FETCH_FAILURE]: (state) => ({
     ...state,
+    isFetching: false,
     isInitialized: false,
   }),
 })
