@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+import { Collection, Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
+import { SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
 
 @Entity({ tableName: 'spaces' })
@@ -12,5 +13,9 @@ export class Space extends BaseEntity {
   @Property()
   title: string
 
-  // todo: and much more
+  @ManyToMany(() => SpaceMembership, 'spaces', {
+    pivotTable: 'space_memberships_spaces',
+    owner: true,
+  })
+  spaceMemberships = new Collection<SpaceMembership>(this)
 }

@@ -10,6 +10,8 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
+import { config } from '../../config'
+import { SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
 import { EmailNotification } from '../email'
 import { Job } from '../job/job.entity'
@@ -62,6 +64,9 @@ export class User extends BaseEntity {
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
   jobs = new Collection<Job>(this)
 
+  @OneToMany({ entity: () => SpaceMembership, mappedBy: 'user' })
+  spaceMemberships = new Collection<SpaceMembership>(this)
+
   @ManyToOne({ fieldName: 'org_id' })
   organization!: IdentifiedReference<Organization>
 
@@ -80,5 +85,15 @@ export class User extends BaseEntity {
     if (emailNotificationSettings) {
       this.emailNotificationSettings = Reference.create(emailNotificationSettings)
     }
+  }
+
+  @Property({ persist: false })
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`
+  }
+
+  isChallengeBot(): boolean {
+    console.log('fn triggered ', this.dxuser)
+    return this.dxuser === config.users.challengeBotDxUser
   }
 }

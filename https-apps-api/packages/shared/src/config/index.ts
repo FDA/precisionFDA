@@ -57,6 +57,9 @@ const defaultConfig = {
     adminUser: 'precisionfda.admin_dev',
     findDataObjectsQueryLimit: 100,
   },
+  users: {
+    challengeBotDxUser: 'challenge.bot.2',
+  },
   redis: {
     url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
     isSecure: false,

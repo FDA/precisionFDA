@@ -10,12 +10,10 @@ import {
 import { User, Space } from '..'
 import { BaseEntity } from '../../database/base-entity'
 import {
-  PARENT_TYPE,
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-  SPACE_EVENT_ROLE,
-  SPACE_EVENT_SIDE,
-} from './space-event.enum'
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '../space-membership/space-membership.enum'
+import { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from './space-event.enum'
 
 @Entity({ tableName: 'space_events' })
 export class SpaceEvent extends BaseEntity {
@@ -35,10 +33,10 @@ export class SpaceEvent extends BaseEntity {
   objectType: SPACE_EVENT_OBJECT_TYPE
 
   @Property()
-  role: SPACE_EVENT_ROLE
+  role: SPACE_MEMBERSHIP_ROLE
 
   @Property()
-  side: SPACE_EVENT_SIDE
+  side: SPACE_MEMBERSHIP_SIDE
 
   @Property()
   data: JsonType
