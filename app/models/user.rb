@@ -227,10 +227,8 @@ class User < ApplicationRecord
     admin_groups.any?(&:site?)
   end
 
-  # Checks if a user can create spaces.
-  # @return [Boolean] Returns true if a user can create spaces, false otherwise.
-  def can_create_spaces?
-    can_administer_site? || review_space_admin?
+  def challenge_admin?
+    admin_groups.any?(&:challenge_admin?)
   end
 
   def is_challenge_evaluator?
@@ -245,17 +243,23 @@ class User < ApplicationRecord
     admin_groups.any?(&:space?)
   end
 
+  def site_or_challenge_admin?
+    can_administer_site? || challenge_admin?
+  end
+
+  # Checks if a user can create spaces.
+  # @return [Boolean] Returns true if a user can create spaces, false otherwise.
+  def can_create_spaces?
+    can_administer_site? || review_space_admin?
+  end
+
+  def can_create_challenges?
+    site_or_challenge_admin?
+  end
+
   # @param time_zone [String] new time zone
   def update_time_zone(time_zone)
     update(time_zone: time_zone) if Time.find_zone(time_zone)
-  end
-
-  def is_challenge_admin?
-    can_administer_site? || admin_groups.any?(&:challenge_admin?)
-  end
-
-  def challenge_admin?
-    admin_groups.any?(&:challenge_admin?)
   end
 
   # Selects users, according search string.

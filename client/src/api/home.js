@@ -24,6 +24,7 @@ const getWorkflow = (uid, data) => backendCall(`/api/workflows/${uid}`, 'GET', d
 const getWorkflowsEveryone = (data) => backendCall('/api/workflows/everybody', 'GET', data)
 const getWorkflowsFeatured = (data) => backendCall('/api/workflows/featured', 'GET', data)
 const getWorkflowsSpaces = (data) => backendCall('/api/workflows/spaces', 'GET', data)
+const getWorkflowExecutions = (uid, data) => backendCall(`/api/workflows/${uid}/jobs`, 'GET', data)
 const getWorkflowDetails = (uid, data) => backendCall(`/api/workflows/${uid}`, 'GET', data)
 
 const getExecutions = (data) => backendCall('/api/jobs', 'GET', data)
@@ -65,6 +66,7 @@ export {
   getExecutionDetails,
   getAppExecutions,
   getWorkflowDetails,
+  getWorkflowExecutions,
   getAssets,
   getAssetsFeatured,
   getAssetsEverybody,

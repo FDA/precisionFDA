@@ -17,6 +17,8 @@ const fakes = {
     foldersListFake: sinon.stub(),
     folderRenameFake: sinon.stub(),
     folderRemoveFake: sinon.stub(),
+    folderCreateFake: sinon.stub(),
+    filesMoveFake: sinon.stub(),
   },
   queue: {
     removeRepeatableFake: sinon.fake(),
@@ -36,6 +38,8 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderRemoveFake.callsFake(() => ({ id: generate.job.jobId() }))
+  fakes.client.folderCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
+  fakes.client.filesMoveFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
   fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
@@ -48,6 +52,8 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'jobCreate', fakes.client.jobCreateFake)
   sandbox.replace(client.PlatformClient.prototype, 'jobTerminate', fakes.client.jobTerminateFake)
   sandbox.replace(client.PlatformClient.prototype, 'filesListPaginated', fakes.client.filesListFake)
+  sandbox.replace(client.PlatformClient.prototype, 'folderCreate', fakes.client.folderCreateFake)
+  sandbox.replace(client.PlatformClient.prototype, 'filesMoveToFolder', fakes.client.filesMoveFake)
   // sandbox.replace(client.PlatformClient.prototype, 'filesDescribe', fakes.client.filesDescFake)
   sandbox.replace(client.PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client.PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
@@ -69,6 +75,8 @@ const mocksReset = () => {
   fakes.client.foldersListFake.reset()
   fakes.client.folderRenameFake.reset()
   fakes.client.folderRemoveFake.reset()
+  fakes.client.folderCreateFake.reset()
+  fakes.client.filesMoveFake.reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()

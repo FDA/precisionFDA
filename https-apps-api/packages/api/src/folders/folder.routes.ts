@@ -29,4 +29,12 @@ router.delete('/:id', makeValidationMdw({ params: utils.schemas.idInputSchema })
   ctx.body = removedFoldersCnt
 })
 
+router.post('/recreate', async ctx => {
+  await new userFile.FolderRecreateOperation(pickOpsCtx(ctx)).execute({
+    userId: ctx.request.body.userId,
+    projectId: ctx.request.body.projectId,
+  })
+  ctx.status = 204
+})
+
 export { router }

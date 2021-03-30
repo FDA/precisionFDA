@@ -2,7 +2,7 @@ import Chance from 'chance'
 import { nanoid } from 'nanoid'
 import { entities } from '../../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../../domain/job/job.enum'
-import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from '../../domain/app/app.enum'
+import { ENTITY_TYPE } from '../../domain/app/app.enum'
 import type { AnyObject } from '../../types'
 import {
   FILE_STATE,
@@ -19,6 +19,7 @@ const random = {
   email: () => chance.email(),
   password: () => chance.string({ length: 20 }),
   dxstr: (): string => nanoid(),
+  word: () => chance.word(),
   chance,
 }
 
@@ -29,10 +30,7 @@ const user = {
     firstName: random.firstName(),
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
-    jupyterProject: `project-${random.dxstr()}`,
-    ttydProject: `project-${random.dxstr()}`,
-    // cloudWorkstationProject: `project-${random.dxstr()}`,
-    // httpsProject: `project-${random.dxstr()}`,
+    privateFilesProject: `project-${random.dxstr()}`,
   }),
 }
 
@@ -108,14 +106,12 @@ const app = {
     }
   },
   runAppInput: (): AnyObject => ({
-    httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
     scope: 'private',
     input: {
       duration: 30,
     },
   }),
   runTtydAppInput: () => ({
-    httpsAppType: APP_HTTPS_SUBTYPE.TTYD,
     scope: 'private',
     input: {},
   }),
@@ -140,8 +136,8 @@ const job = {
 }
 
 const userFile = {
-  simple: (): Partial<InstanceType<typeof entities.UserFile>> => {
-    const dxid = `file-${random.dxstr()}`
+  simple: (customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
       uid: `${dxid}-1`,
@@ -149,6 +145,20 @@ const userFile = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.HTTPS,
+      state: FILE_STATE.CLOSED,
+      parentType: PARENT_TYPE.USER,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
+  simpleUploaded: (customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
       state: FILE_STATE.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
@@ -168,6 +178,18 @@ const folder = {
       entityType: FILE_ORIGIN_TYPE.HTTPS,
       parentId: 1,
       parentType: PARENT_TYPE.JOB,
+      stiType: FILE_STI_TYPE.FOLDER,
+    }
+  },
+  simpleLocal: (): Partial<InstanceType<typeof entities.Folder>> => {
+    return {
+      name: chance.word(),
+      project: undefined,
+      dxid: undefined,
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      parentId: 1,
+      parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.FOLDER,
     }
   },

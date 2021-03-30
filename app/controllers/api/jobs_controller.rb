@@ -201,6 +201,24 @@ module Api
       render_jobs_list(jobs)
     end
 
+    # GET /api/workflows/:id/jobs
+    # A fetch method for jobs from apps.
+    # @param uid [Integer] Param for Workflows fetch.
+    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
+    def workflow
+      workflow = Workflow.find_by(uid: unsafe_params[:id])
+      analyses = workflow.analyses.
+        eager_load(:jobs, :workflow, :batch_items).order(created_at: order_dir)
+
+      presenter = Presenters::WorkflowExecutionsPresenter.
+        new(analyses, @context, unsafe_params).call
+      payload = { jobs: presenter.response, meta: pagination_meta(presenter.size) }
+
+      render json: payload, adapter: :json
+    rescue StandardError => e
+      raise ApiError, Message.bad_request(e.message)
+    end
+
     # GET /api/apps/:id/jobs
     # A fetch method for jobs from apps.
     # @param uid [Integer] Param for App fetch.
@@ -378,6 +396,10 @@ module Api
       end || batch.size
 
       workflow_batch[analysis.batch_id].insert(insert_at, new_item)
+    end
+
+    def order_dir
+      unsafe_params[:order_dir] || :DESC
     end
 
     # Enumerate Workflow title based on batch side (like "Title (1 of 3)")

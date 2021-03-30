@@ -169,6 +169,14 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
           Precision.alert.showAboveAll(text)
     })
 
+  hideWorkflowModal: () ->
+    window.open("/home/workflows/#{@newWorkflowUid()}")
+    @importSuccessModal.modal('hide')
+
+  hideAssetModal: (data) ->
+    window.open("/home/assets/#{data}")
+    @importSuccessModal.modal('hide')
+
   wdlTextValueOnInput: (root, e) =>
     @wdlTextValue(e.target.value)
 
@@ -183,7 +191,7 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
     @wdlTextValue = ko.observable()
     @newWorkflowUid = ko.observable()
     @newAssetUids = ko.observableArray()
-    @newWorkflowURL = ko.computed(=> "/workflows/#{@newWorkflowUid()}")
+    @newWorkflowURL = ko.computed(=> "/home/workflows/#{@newWorkflowUid()}")
     @dockerImage = ko.observable(null)
     @dockerImagesArray = ko.observableArray([])
     @modalTitle = ko.computed(() =>

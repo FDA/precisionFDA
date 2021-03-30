@@ -22,8 +22,13 @@ module BaseFilter
   # @param filters [Hash] Filter object.
   # @return [ActiveRecord::Relation<AppSeries>] or [ActiveRecord::Relation<App>] Filtered nodes.
   def call(records, filters)
+    return records if filters.nil?
+
     records = records.where(build_where(filters.except(:tags))) if filters.present?
+
     records
+  rescue StandardError
+    []
   end
 
   # Builds AREL where clause.

@@ -217,7 +217,7 @@ RSpec.describe Api::FilesController, type: :controller do
 
         expect(response).to be_successful
         expect { file_two.reload }.to change(file_two, :featured).from(false).to(true)
-        expect(file_one.reload.featured).to be false
+        expect(file_one.reload.featured).to be true
       end
     end
 

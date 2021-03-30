@@ -24,10 +24,10 @@ class Analysis < ApplicationRecord
   belongs_to :user
   has_many :batch_items, class_name: "Analysis", foreign_key: :batch_id, primary_key: :batch_id
 
+  attr_accessor :current_user
+
   def batch_jobs
-    batch_items.map do |i|
-      i.jobs
-    end
+    batch_items.map(&:jobs)
   end
 
   def self.editable_by(context)
