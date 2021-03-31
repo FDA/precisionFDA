@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { theme } from '../styles/theme'
 
 const StyledAvatar = styled.div`
+  margin: 10px;
   border-radius: 50%;
   background-color: ${theme.primaryLite};
   width: 40px;
