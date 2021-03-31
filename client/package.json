@@ -7,7 +7,7 @@
     "build:production": "webpack --config webpack.production.config.js",
     "build": "webpack --progress --config webpack.development.config.js",
     "watch": "webpack --watch --config webpack.development.config.js",
-    "server": "webpack-dev-server --config webpack.devserver.config.js",
+    "server": "webpack-dev-server --mode development --config webpack.devserver.config.js --liveReload",
     "lint": "eslint",
     "test": "jest"
   },
@@ -27,6 +27,7 @@
     "core-js": "^3.8.2",
     "date-fns": "^2.16.1",
     "date-fns-tz": "^1.1.2",
+    "formik": "^2.2.6",
     "history": "^4.10.1",
     "http-status-codes": "^1.4.0",
     "immer": "8.0.1",
