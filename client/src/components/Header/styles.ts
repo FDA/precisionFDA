@@ -10,6 +10,7 @@ export const StyledHeader = styled.header`
 export const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
   min-height: 68px;
   color: rgba(227, 243, 252, 0.6);
@@ -79,19 +80,20 @@ export const HeaderSpacer = styled.div`
 
 export const HeaderLeft = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  justify-self: flex-start;
   align-items: center;
   gap: 10px;
+  &::after {
+    content: "";
+    width: 20px;
+  }
 `
 export const HeaderRight = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
   justify-self: flex-end;
-
-  &::before {
-    content: "";
-    width: 20px;
-  }
 `
 
 export const StyledDropMenuLinks = styled.div`

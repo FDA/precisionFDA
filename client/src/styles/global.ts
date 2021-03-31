@@ -6,6 +6,8 @@ const GlobalStyle = createGlobalStyle`
     padding: 0;
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
+  #app-root {
+  }
 `;
  
 export default GlobalStyle;
