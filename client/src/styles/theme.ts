@@ -3,4 +3,6 @@ export const theme = {
   primary: '#1F70B5',
   primaryShade: '#185589',
   white: '#F4F8FD',
+  grey: '#eee',
+  darkerGrey: '#929090',
 }
