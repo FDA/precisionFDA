@@ -11,12 +11,13 @@ export const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 68px;
+  min-height: 68px;
   color: rgba(227, 243, 252, 0.6);
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
   white-space: nowrap;
+  flex-wrap: wrap;
 
   a {
     color: inherit;
@@ -48,6 +49,7 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
 export const MenuItem = styled(HeaderItem)`
   align-self: flex-end;
   flex-direction: column;
+  padding: 10px;
 `
 
 export const StyledSupport = styled(HeaderItem)`
@@ -57,7 +59,10 @@ export const StyledSupport = styled(HeaderItem)`
 `
 
 export const StyledUsername = styled(HeaderItem)`
-  align-items: center;
+  padding: 10px;
+  &:hover {
+    background-color: ${theme.primaryShade};
+  }
 
   ${Svg} {
     margin-left: 5px;
@@ -75,15 +80,30 @@ export const HeaderSpacer = styled.div`
 export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 `
 export const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
+  justify-self: flex-end;
 
   &::before {
     content: "";
     width: 20px;
   }
+`
+
+export const StyledDropMenuLinks = styled.div`
+  padding: 1rem;
+  padding-top: 0px;
+  line-height: 2.8rem;
+`
+
+export const StyledLinkWrapper = styled.div`
+  color: ${theme.darkerGrey};
+  transition: color 0.3s ease;
+`
+
+export const StyledLink = styled.a`
 `
