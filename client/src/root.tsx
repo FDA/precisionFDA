@@ -16,9 +16,11 @@ import NewsListPage from './views/pages/News/NewsListPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
+import GlobalStyle from './styles/global'
 
 const root = ({ store }: any) => (
   <Provider store={store}>
+    <GlobalStyle />
     <Router history={history}>
       <ErrorWrapper>
         <Switch>
