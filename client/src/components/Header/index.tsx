@@ -2,7 +2,7 @@ import React from 'react'
 import { Logo } from '../Logo'
 import { Avatar } from '../Avatar'
 import { PageContainer } from '../Page/styles'
-import { HeaderItem, HeaderItemText, HeaderLeft, HeaderRight, HeaderSpacer, Nav, StyledHeader, StyledSupport, StyledUsername } from './styles'
+import { HeaderItem, HeaderItemText, HeaderLeft, MenuItem, HeaderRight, HeaderSpacer, Nav, StyledHeader, StyledSupport, StyledUsername } from './styles'
 import { HomeIcon } from '../icons/HomeIcon'
 import { CommentIcon } from '../icons/CommentIcon'
 import { TrophyIcon } from '../icons/TrophyIcon'
@@ -21,41 +21,41 @@ export const Header = () => {
         <Nav>
           <HeaderLeft>
             <Logo />
-            <HeaderItem active={true}>
+            <MenuItem active={true}>
               <HomeIcon />
               <HeaderItemText>Overview</HeaderItemText>
-            </HeaderItem>
-            <HeaderItem>
+            </MenuItem>
+            <MenuItem>
               <CommentIcon />
                <HeaderItemText>Discussions</HeaderItemText>
-            </HeaderItem>
-            <HeaderItem>
+            </MenuItem>
+            <MenuItem>
               <TrophyIcon />
                <HeaderItemText>Challenges</HeaderItemText>
-            </HeaderItem>
-            <HeaderItem>
+            </MenuItem>
+            <MenuItem>
               <StarIcon />
                <HeaderItemText>Experts</HeaderItemText>
-            </HeaderItem>
+            </MenuItem>
             <HeaderSpacer />
-            <HeaderItem>
+            <MenuItem>
               <StickyNoteIcon />
                <HeaderItemText>Notes</HeaderItemText>
-            </HeaderItem>
-            <HeaderItem>
+            </MenuItem>
+            <MenuItem>
               <BullsEyeIcon />
                <HeaderItemText>Comparisons</HeaderItemText>
-            </HeaderItem>
+            </MenuItem>
             <HeaderSpacer />
-            <HeaderItem>
+            <MenuItem>
               <FortIcon />
                <HeaderItemText>My Home</HeaderItemText>
-            </HeaderItem>
+            </MenuItem>
             <HeaderSpacer />
-            <HeaderItem>
+            <MenuItem>
               <ObjectGroupIcon />
                <HeaderItemText>Spaces</HeaderItemText>
-            </HeaderItem>
+            </MenuItem>
           </HeaderLeft>
           <HeaderRight>
             <StyledSupport>
