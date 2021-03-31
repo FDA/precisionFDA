@@ -81,4 +81,9 @@ export const HeaderRight = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
+
+  &::before {
+    content: "";
+    width: 20px;
+  }
 `
