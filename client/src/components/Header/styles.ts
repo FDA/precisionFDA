@@ -1,6 +1,6 @@
-import styled, { css } from "styled-components";
-import { theme } from "../../styles/theme";
-import { Svg } from "../icons/Svg";
+import styled, { css } from 'styled-components'
+import { theme } from '../../styles/theme'
+import { Svg } from '../icons/Svg'
 
 export const StyledHeader = styled.header`
   background-color: ${theme.primary};
@@ -24,16 +24,39 @@ export const Nav = styled.nav`
   }
 `
 
-export const StyledSupport = styled.div`
+export const HeaderItem = styled.div<{ active?: boolean }>`
   display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
 
+  &:hover {
+    color: ${theme.white};
+  }
+
+  ${({ active = false }) =>
+    active &&
+    css`
+      color: ${theme.white};
+
+      ${Svg} {
+        color: rgb(235, 119, 111);
+      }
+    `}
+`
+
+export const MenuItem = styled(HeaderItem)`
+  align-self: flex-end;
+  flex-direction: column;
+`
+
+export const StyledSupport = styled(HeaderItem)`
   ${Svg} {
     margin-right: 5px;
   }
 `
 
-export const StyledUsername = styled.div`
-  display: flex;
+export const StyledUsername = styled(HeaderItem)`
   align-items: center;
 
   ${Svg} {
@@ -42,29 +65,7 @@ export const StyledUsername = styled.div`
   }
 `
 
-export const HeaderItem = styled.div<{ active?: boolean }>`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  align-self: flex-end;
-  cursor: pointer;
-
-  &:hover {
-    color: ${theme.white}
-  }
-
-  ${({ active = false }) => active && css`
-    color: ${theme.white};
-
-    ${Svg} {
-      color: rgb(235, 119, 111);
-    }
-  `}
-`
-
-export const HeaderItemText = styled.div`
-`
+export const HeaderItemText = styled.div``
 
 export const HeaderSpacer = styled.div`
   border-right: 1px solid rgba(227, 243, 252, 0.2);
