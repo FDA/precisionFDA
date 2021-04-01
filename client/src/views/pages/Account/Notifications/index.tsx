@@ -1,34 +1,97 @@
-import React from 'react'
-import { Formik, Form, Field } from 'formik'
-import { PageContainer, PageHeader, PageTitle, PageActions } from '../../../../components/Page/styles'
-import { FieldGroup, SectionTitle, StyledNotifications } from './styles'
+import React, { useState } from 'react'
+import {
+  PageContainer,
+  PageHeader,
+  PageTitle,
+  PageActions,
+} from '../../../../components/Page/styles'
+import { FieldGroup, SectionTitle, StyledNotifications, StyledSelectWrap } from './styles'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import Select from 'react-select'
+import { Checkbox } from '../../../../components/Checkbox'
 
-interface FormValues {
-  [key: string]: boolean
+enum Roles {
+  'review_space_admin' = 'review_space_admin',
+  'lead_reviewer' = 'lead_reviewer',
+  'reviewer' = 'reviewer',
+}
+
+const RoleLabel = {
+  [Roles['review_space_admin']]: 'Review Space Admin',
+  [Roles['lead_reviewer']]: 'Lead Reviewer',
+  [Roles['reviewer']]: 'Reviewer',
+}
+
+const NotificationLabel: any = {
+  admin_membership_changed: 'Membership Changed',
+  admin_new_task_assigned: 'New Task Assigned',
+  admin_task_status_changed: 'Task Status Changed',
+  admin_comment_activity: 'Comment Activity',
+  admin_content_added_or_deleted: 'Content Added Or Deleted',
+  admin_member_added_or_removed_from_space: 'Member Added Or Removed From Space',
+  admin_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+  admin_space_lock_unlock_delete_requests: 'Space Locked, Unlocked, or Deleted Request',
+  lead_membership_changed: 'Membership Changed',
+  lead_new_task_assigned: 'New Task Assigned',
+  lead_task_status_changed: 'Task Status Changed',
+  lead_comment_activity: 'Comment Activity',
+  lead_content_added_or_deleted: 'Content Added Or Deleted',
+  lead_member_added_or_removed_from_space: 'Member Added Or Removed From Space',
+  lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+  all_membership_changed: 'Membership Changed',
+  all_new_task_assigned: 'New Task Assigned',
+  all_task_status_changed: 'Task Status Changed',
+  all_comment_activity: 'Comment Activity',
+  all_content_added_or_deleted: 'Content Added or Deleted',
+}
+
+const preference = {
+  review_space_admin: {
+    admin_membership_changed: true,
+    admin_new_task_assigned: true,
+    admin_task_status_changed: true,
+    admin_comment_activity: true,
+    admin_content_added_or_deleted: true,
+    admin_member_added_or_removed_from_space: true,
+    admin_space_locked_unlocked_deleted: true,
+    admin_space_lock_unlock_delete_requests: true,
+  },
+  lead_reviewer: {
+    lead_membership_changed: true,
+    lead_new_task_assigned: true,
+    lead_task_status_changed: true,
+    lead_comment_activity: true,
+    lead_content_added_or_deleted: true,
+    lead_member_added_or_removed_from_space: true,
+    lead_space_locked_unlocked_deleted: true,
+  },
+  reviewer: {
+    all_membership_changed: false,
+    all_new_task_assigned: false,
+    all_task_status_changed: true,
+    all_comment_activity: true,
+    all_content_added_or_deleted: true,
+  },
 }
 
 export const NotificationsPage = () => {
-  const initialValues: FormValues = {
-      newChallenge: false,
-      finishedExecution: false,
-      membershipChanged: false,
-      newTaskAssigned: false,
-      taskStatusChanged: false,
-      commentActivity: false,
-      contentAddedOrDeleted: false,
-      memberAddedOrRemovedFromSpace: false,
-  } 
+  const [localPrefSelection, setLocalPrefSelection] = useState<any>(preference)
+  const roles = Object.keys(localPrefSelection) as Array<Roles>
+  const options = roles.map(value => ({ value, label: RoleLabel[value] }))
+  const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
+
+  const handleSelection = (role: Roles, notification: string) => {
+    setLocalPrefSelection({
+      ...localPrefSelection,
+      [role]: {
+        ...localPrefSelection[role],
+        [notification]: !localPrefSelection[role][notification]
+      }
+    })
+  }
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={(values, actions) => {
-        console.log({ values, actions })
-        alert(JSON.stringify(values, null, 2))
-        actions.setSubmitting(false)
-      }}
-    >
+    <form>
       <PageContainer>
         <PageHeader>
           <PageTitle>Notification Preferences</PageTitle>
@@ -38,90 +101,57 @@ export const NotificationsPage = () => {
           </PageActions>
         </PageHeader>
 
-        <Form>
-          <StyledNotifications>
-            <SectionTitle>Site Notifications</SectionTitle>
+        <StyledNotifications>
+          <SectionTitle>Site Notifications</SectionTitle>
 
-            <FieldGroup>
-              <Field
-                id="newChallenge"
-                name="newChallenge"
-                type="checkbox"
-              />
-              <label htmlFor="newChallenge">Notify me when a new precisionFDA challenge is created.</label>
-            </FieldGroup>
+          <FieldGroup>
+            <Checkbox id="newChallenge" name="newChallenge" type="checkbox" />
+            <label htmlFor="newChallenge">
+              Notify me when a new precisionFDA challenge is created.
+            </label>
+          </FieldGroup>
 
-            <FieldGroup>
-              <Field
-                id="finishedExecution"
-                name="finishedExecution"
-                type="checkbox"
-              />
-              <label htmlFor="finishedExecution">Notify me when an execution has finished.</label>
-            </FieldGroup>
+          <FieldGroup>
+            <Checkbox
+              id="finishedExecution"
+              name="finishedExecution"
+              type="checkbox"
+            />
+            <label htmlFor="finishedExecution">
+              Notify me when an execution has finished.
+            </label>
+          </FieldGroup>
 
-            <SectionTitle>Space Notifications</SectionTitle>
+          <SectionTitle>Space Notifications</SectionTitle>
 
-            <FieldGroup>
-              <Field
-                id="membershipChanged"
-                name="membershipChanged"
-                type="checkbox"
-              />
-              <label htmlFor="membershipChanged">Membership Changed</label>
-            </FieldGroup>
+          <StyledSelectWrap>
+            <Select
+              options={options}
+              defaultValue={{
+                value: selectedRole,
+                label: RoleLabel[selectedRole],
+              }}
+              onChange={(selected: any) => setSelectedRole(selected?.value)}
+            />
+          </StyledSelectWrap>
 
-            <FieldGroup>
-              <Field
-                id="newTaskAssigned"
-                name="newTaskAssigned"
-                type="checkbox"
-              />
-              <label htmlFor="newTaskAssigned">New Task Assigned</label>
-            </FieldGroup>
-
-            <FieldGroup>
-              <Field
-                id="taskStatusChanged"
-                name="taskStatusChanged"
-                type="checkbox"
-              />
-              <label htmlFor="taskStatusChanged">Task Status Changed</label>
-            </FieldGroup>
-
-            <FieldGroup>
-              <Field
-                id="commentActivity"
-                name="commentActivity"
-                type="checkbox"
-              />
-              <label htmlFor="commentActivity">Comment Activity</label>
-            </FieldGroup>
-
-            <FieldGroup>
-              <Field
-                id="contentAddedOrDeleted"
-                name="contentAddedOrDeleted"
-                type="checkbox"
-              />
-              <label htmlFor="contentAddedOrDeleted">
-                Content Added Or Deleted
-              </label>
-            </FieldGroup>
-
-            <FieldGroup>
-              <Field
-                id="memberAddedOrRemovedFromSpace"
-                name="memberAddedOrRemovedFromSpace"
-                type="checkbox"
-              />
-              <label htmlFor="memberAddedOrRemovedFromSpace">
-                Member Added Or Removed From Space
-              </label>
-            </FieldGroup>
-          </StyledNotifications>
-        </Form>
+          {Object.keys(localPrefSelection[selectedRole]).map(notification => {
+              const key = `${localPrefSelection[selectedRole]}.${notification}`
+              return (
+                <FieldGroup key={key}>
+                  <Checkbox
+                    id={key}
+                    name={key}
+                    type="checkbox"
+                    checked={localPrefSelection[selectedRole][notification]}
+                    onChange={() => handleSelection(selectedRole, notification)}
+                  />
+                  <label htmlFor={key}>{NotificationLabel[notification]}</label>
+                </FieldGroup>
+              )
+            })}
+        </StyledNotifications>
       </PageContainer>
-    </Formik>
+    </form>
   )
 }
