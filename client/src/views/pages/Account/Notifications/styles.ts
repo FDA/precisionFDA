@@ -16,3 +16,8 @@ export const FieldGroup = styled.fieldset`
 export const SectionTitle = styled.h2`
   color: ${theme.black};
 `
+
+export const StyledSelectWrap = styled.div`
+  width: 400px;
+  margin-bottom: 20px;
+`
