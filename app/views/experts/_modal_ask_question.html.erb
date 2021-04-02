@@ -20,7 +20,7 @@
           <div class="form-group required">
             <%= f.text_area (:question), rows: 4, class: "form-control input-lg", placeholder: "Ask a question...", required: "required"  %>
           </div>
-          <% if !@context.logged_in? %>
+          <% if !@context.logged_in? && !Utils.development_or_test? %>
             <%= recaptcha_tags %>
           <% end %>
         </div>
