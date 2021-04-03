@@ -152,7 +152,7 @@ Rails.application.routes.draw do
         post :propose, on: :collection
       end
 
-      resources :experts, path: "experts", only: %i(index show) do
+      resources :experts, only: %i(index show) do
         get :years, on: :collection
       end
 
