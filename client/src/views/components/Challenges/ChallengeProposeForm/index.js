@@ -8,6 +8,7 @@ import Radio from '../../../components/FormComponents/Radio'
 import TextField from '../../../components/FormComponents/TextField'
 import TextareaField from '../../../components/FormComponents/TextareaField'
 import { proposeChallenge } from '../../../../actions/challenges/proposeChallenge'
+import { resetProposeChallengeForm } from '../../../../actions/challenges'
 import {
   challengeProposeIsSubmittingSelector,
   challengeProposeSubmissionSuccessSelector,
@@ -44,6 +45,28 @@ class ChallengeProposeForm extends React.Component {
       formErrors: {
       },
     }
+  }
+
+  componentDidMount() {
+    const { resetProposeChallengeForm } = this.props
+    resetProposeChallengeForm()
+    this.resetState()
+  }
+
+  resetState() {
+    this.setState({
+      formData: {
+        name: '',
+        email: '',
+        organisation: '',
+        specific_question: 'Yes',
+        specific_question_text: '',
+        data_details: 'Yes',
+        data_details_text: '',
+      },
+      formErrors: {
+      },
+    })
   }
 
   onChangeHandler = (e) => {
@@ -169,12 +192,14 @@ ChallengeProposeForm.propTypes = {
   isSubmitting: PropTypes.bool,
   submissionSuccess: PropTypes.bool,
   proposeChallenge: PropTypes.func,
+  resetProposeChallengeForm: PropTypes.func,
 }
 
 ChallengeProposeForm.defaultProps = {
   isSubmitting: false,
   submissionSuccess: false,
   proposeChallenge: () => {},
+  resetProposeChallengeForm: () => {},
 }
 
 const mapStateToProps = (state) => ({
@@ -184,6 +209,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   proposeChallenge: (params) => dispatch(proposeChallenge(params)),
+  resetProposeChallengeForm: () => dispatch(resetProposeChallengeForm()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChallengeProposeForm)

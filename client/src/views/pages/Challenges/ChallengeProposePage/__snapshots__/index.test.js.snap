@@ -52,6 +52,11 @@ exports[`ChallengeProposePage test should render 1`] = `
         title="Challenges"
       />
       <hr />
+      <div
+        className="pfda-subsection-heading"
+      >
+        PREVIOUS CHALLENGES
+      </div>
       <Connect(ChallengesYearList)
         setYearHandler={[Function]}
       />

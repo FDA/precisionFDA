@@ -163,7 +163,7 @@ class ChallengeDetailsPage extends React.Component {
         <PublicLayout>
           <NavigationBarPublic showLogoOnNavbar={true} />
           <div className="error-container">
-            <Link to={{ pathname: '/new_challenges' }}>
+            <Link to={{ pathname: '/challenges' }}>
                 &larr; Back to All Challenges
             </Link>
             <div className="text-center">
@@ -228,7 +228,7 @@ class ChallengeDetailsPage extends React.Component {
           <div className={bannerClasses}>
             <div className="left-column">
               <div>
-                <Link to={{ pathname: '/new_challenges' }}>
+                <Link to={{ pathname: '/challenges' }}>
                   &larr; Back to All Challenges
                 </Link>
                 <div style={{ 'marginTop': '20px' }}><span className="challenge-state-label">{stateLabel}</span></div>

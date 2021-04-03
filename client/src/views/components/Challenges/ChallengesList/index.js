@@ -42,8 +42,6 @@ const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, us
     //   if challenge.isFirstItemInSection = true , insers a header before the list item to
     //   denote the section header, using the challenge.sectionHeading attribute
     //
-    // TODO: Consider using an enum for challenge.hasStarted and challenge.hasEnded,
-    //       would make the code neater
     let foundFirstUpcomingChallenge = false
     let foundFirstCurrentChallenge = false
     let foundFirstClosedChallenge = false
@@ -77,7 +75,7 @@ const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, us
     challenges = [...currentChallenges, ...challenges.filter(x => !currentChallenges.includes(x))]
 
     const handleItemDetails = (id) => {
-      history.push(`/new_challenges/${id}`)
+      history.push(`/challenges/${id}`)
     }
 
     const handleJoinChallenge = (id) => {
