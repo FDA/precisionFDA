@@ -29,7 +29,7 @@ exports[`ChallengesListPage test should render 1`] = `
               "text": "Upcoming",
             },
             Object {
-              "target": "/new_challenges/propose",
+              "target": "/challenges/propose",
               "text": "Propose a Challenge",
             },
           ]
@@ -57,7 +57,7 @@ exports[`ChallengesListPage test should render 1`] = `
       <Link
         to={
           Object {
-            "pathname": "/new_challenges/propose",
+            "pathname": "/challenges/propose",
           }
         }
       >
