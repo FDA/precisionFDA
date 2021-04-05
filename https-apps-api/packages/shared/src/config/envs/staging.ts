@@ -10,6 +10,9 @@ export const config: ConfigOverride = {
     syncJob: {
       repeatPattern: '*/2 * * * *',
     },
+    queues: {
+      default: { name: 'https-apps-worker-queue-stg' },
+    },
   },
   redis: {
     isSecure: true,
