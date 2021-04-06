@@ -38,12 +38,10 @@ class PageInvitationsView
     noErrors = true
     @undoneInvitations().forEach((invitation) ->
       errors = data[invitation.id].errors
-      console.log 'errors', errors
       invitation.errors(errors)
       invitation.success(errors.length == 0)
       noErrors = false if errors.length
     )
-    console.log 'noErrors', noErrors
     return noErrors
 
   provisionUsers: () ->
@@ -73,9 +71,16 @@ class PageInvitationsView
             window.location.reload()
           else
             $('#disable-screen-modal').modal('hide')
-            Precision.alert.showAboveAll('Some fields filled incorrectly.', 'alert-warning')
+            Precision.alert.showAboveAll('Some fields filled in incorrectly.', 'alert-warning')
         (error) ->
-          Precision.alert.showAboveAll('Something went wrong while provisioning users')
+          try
+            message = JSON.parse(error.responseText)["error"]
+          catch
+            message = null
+
+          message = message || 'Something went wrong while provisioning users'
+
+          Precision.alert.showAboveAll(message)
           $('#disable-screen-modal').modal('hide')
       )
 
@@ -135,7 +140,7 @@ class PageInvitationsView
         }
       ]
     })
-
+    @searchDataGridContainer = $('#invitations_data_grid_filter input', @gridModal)
     @searchValue = document.getElementById('search_input')
     @searchedInvitations = []
     @search = new Precision.autocomplete({
@@ -171,6 +176,7 @@ class PageInvitationsView
 
     @gridModal.on 'hidden.bs.modal', () =>
       @selectedInvitations([])
+      @invitationsDataGrid.search("").draw() if @searchDataGridContainer.val()
 
 AdminProvisionController = Paloma.controller('Admin/Invitations', {
   index: ->

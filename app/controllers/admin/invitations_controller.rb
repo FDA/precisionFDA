@@ -4,7 +4,7 @@ module Admin
     include ErrorProcessable
     include Naming
 
-    ERROR_KEYS = %i(first_name last_name email org org_handle).freeze
+    ERROR_KEYS = %i(first_name last_name email org org_handle username).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
 
     before_action :redirect_to_list,
@@ -31,21 +31,20 @@ module Admin
     def provision
       results = {}
 
-      unsafe_params[:invitations].each do |id, opts|
-        invitation = Invitation.find(id)
-        first_name = opts[:first_name]
-        last_name = opts[:last_name]
-        username = User.construct_username(first_name, last_name)
-        org = "#{first_name.capitalize} #{last_name.capitalize}"
+      # rubocop:todo Lint/NonLocalExitFromIterator
+      Utils.each_with_delay(unsafe_params[:invitations].to_a, rand(1..1.5)) do |inv_params|
+        invitation_id = inv_params.first
+        opts = inv_params.last
 
-        full_opts = opts.merge(
-          username: username,
-          org: org,
-          org_handle: username,
-        )
+        invitation = Invitation.find(invitation_id)
 
-        results[id] = provision_user(invitation, full_opts)
+        begin
+          results[invitation_id] = provision_user(invitation, opts)
+        rescue DXClient::Errors::TooManyRequestsError => e
+          render(json: { error: e.message }, status: :bad_request) && return
+        end
       end
+      # rubocop:enable Lint/NonLocalExitFromIterator
 
       render json: results
     end
@@ -78,11 +77,23 @@ module Admin
     # @param opts [Hash] Options to use for provision.
     # @return [Hash] Hash containing array of errors if any.
     def provision_user(invitation, opts)
-      result = { errors: errors(opts) }
+      first_name = opts[:first_name]
+      last_name = opts[:last_name]
+
+      username = find_unused_username(User.construct_username(first_name, last_name))
+      org = "#{first_name.capitalize} #{last_name.capitalize}"
+
+      full_opts = opts.merge(
+        username: username,
+        org: org,
+        org_handle: username,
+      )
+
+      result = { errors: errors(full_opts) }
 
       return result if result[:errors].present?
 
-      save_user(invitation, opts)
+      save_user(invitation, full_opts)
 
       result
     end

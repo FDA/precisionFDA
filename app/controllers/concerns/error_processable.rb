@@ -18,15 +18,14 @@ module ErrorProcessable
   alias_method :raise_api_error, :fail
 
   def add_errors(attributes)
-    first_name = attributes[:first_name]
-    last_name = attributes[:last_name]
-    email = attributes[:email]
+    username = attributes[:username] ||
+               User.construct_username(attributes[:first_name], attributes[:last_name])
 
     errors = []
-    errors += user_invalid_errors(first_name: first_name, last_name: last_name, email: email)
-    errors << user_name_pattern_error(first_name, last_name)
+    errors << username_pattern_error(username)
+    errors += user_invalid_errors(attributes.slice(:first_name, :last_name, :email))
     errors += org_errors(attributes[:org], attributes[:org_handle])
-    errors << email_exists_error(email)
+    errors << email_exists_error(attributes[:email])
     errors.reject(&:blank?)
   end
 
@@ -35,14 +34,13 @@ module ErrorProcessable
     new_user.invalid? ? new_user.errors.full_messages : []
   end
 
-  def user_name_pattern_error(first_name, last_name)
-    username = User.construct_username(first_name, last_name)
+  def username_pattern_error(username)
     return if User.authserver_acceptable?(username)
 
     "Internal precisionFDA policies require that usernames be formed according" \
     "to the pattern <first_name>.<last_name> using only lowercase English letters. " \
-    "\nBased on the name provided (#{first_name} #{last_name}), the constructed username" \
-    " ('#{username}') would not have been acceptable. \nPlease adjust the name accordingly."
+    "\nThe constructed username ('#{username}') would not have been acceptable. \nPlease " \
+    "adjust the name accordingly."
   end
 
   def org_errors(org, org_handle)
