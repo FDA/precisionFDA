@@ -40,6 +40,7 @@ export const homeWorkflowsAttachToModalSelector = (state) => state.home.workflow
 export const homeWorkflowsWorkflowDetailsSelector = (state) => state.home.workflows.workflowDetails
 export const homeWorkflowsEditTagsModalSelector = (state) => state.home.workflows.editTagsModal
 
+export const homeWorkflowsWorkflowDiagramSelector = (state) => state.home.workflows.workflowDiagram
 export const homeWorkflowsWorkflowExecutionsSelector = (state) => state.home.workflows.workflowExecutions
 export const homeWorkflowsWorkflowExecutionsIsExpandedAllSelector = (state) => state.home.workflows.workflowExecutions.isExpandedAll
 export const homeWorkflowsWorkflowExecutionsFiltersSelector = (state) => state.home.workflows.workflowExecutions.filters

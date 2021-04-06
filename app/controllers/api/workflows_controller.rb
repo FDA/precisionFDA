@@ -212,6 +212,14 @@ module Api
       render json: { errors: [message] }, status: :unprocessable_entity
     end
 
+    def diagram
+      workflow = Workflow.accessible_by(@context).find_by!(uid: unsafe_params[:id])
+
+      render json: WorkflowDiagramPresenter.call(workflow)
+    rescue ActiveRecord::RecordNotFound => e
+      raise ApiError, Message.bad_request(e.message)
+    end
+
     private
 
     def render_workflows_list(workflows)
