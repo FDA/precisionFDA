@@ -5,7 +5,7 @@ module DXClient
       # Invites user to provided organization.
       # @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
       # @param org_dxid [String] Organization to invite user to.
-      # @param invitee_dxid [String] Invitee's dxid.
+      # @param invitee_dxid [String] Invitee's dxid or email.
       # @param opts [Hash] Additional options.
       # @return [Hash]
       def org_invite(org_dxid, invitee_dxid, opts = {})
