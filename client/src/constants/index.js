@@ -190,3 +190,17 @@ export const HOME_ASSETS_MODALS = {
   LICENSE: 'licenseModal',
   ACCEPT_LICENSE: 'acceptLicenseModal',
 }
+
+export const CHALLENGE_STATUS = {
+  SETUP: 'setup',
+  OPEN: 'open',
+  PAUSED: 'paused',
+  ARCHIVED: 'archived',
+  RESULT_ANNOUNCED: 'result_announced',
+}
+
+export const CHALLENGE_TIME_STATUS = {
+  UPCOMING: 'upcoming',
+  CURRENT: 'current',
+  ENDED: 'ended',
+}

@@ -57,6 +57,17 @@ type RemoveFolderParams = BaseParams & {
   projectId: string
 }
 
+type CreateFolderParams = BaseParams & {
+  folderPath: string
+  projectId: string
+}
+
+type MoveFilesParams = BaseParams & {
+  destinationFolderPath: string
+  fileIds: string[]
+  projectId: string
+}
+
 type ListFilesResponse = {
   results: Array<{
     id: string
@@ -247,6 +258,51 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: { fields: { folders: true } },
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.log.warn({ requestOptions: options }, 'Failed request options')
+      return this.handleFailed(err)
+    }
+  }
+
+  async folderCreate(params: CreateFolderParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.projectId}/newFolder`
+    const data: AnyObject = {
+      folder: params.folderPath,
+      parents: true,
+    }
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.log.warn({ requestOptions: options }, 'Failed request options')
+      return this.handleFailed(err)
+    }
+  }
+
+  async filesMoveToFolder(params: MoveFilesParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.projectId}/move`
+    // todo: keep in mind max. amounts of files
+    const data: AnyObject = {
+      objects: params.fileIds,
+      destination: params.destinationFolderPath,
+    }
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
       url,
       headers: this.setupHeaders(params),
     }

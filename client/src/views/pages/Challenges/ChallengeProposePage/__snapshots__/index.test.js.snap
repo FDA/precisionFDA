@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChallengeProposePage test should render 1`] = `
+<PublicLayout>
+  <withRouter(Connect(NavigationBarPublic))
+    subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."
+    title="Challenges"
+  />
+  <div
+    className="challenge-propose-main-container"
+  >
+    <div
+      className="left-column"
+    >
+      <h1
+        className="pfda-section-heading"
+      >
+        Propose a Challenge
+      </h1>
+      <p>
+        Do you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.
+      </p>
+      <p>
+        Feel free to let us know! We would love to discuss this with you.
+      </p>
+    </div>
+    <div
+      className="middle-column"
+    >
+      <Connect(ChallengeProposeForm) />
+    </div>
+    <div
+      className="right-column"
+    >
+      <CollapsibleMenu
+        options={
+          Array [
+            Object {
+              "onClick": [Function],
+              "text": "Currently Open",
+            },
+            Object {
+              "onClick": [Function],
+              "text": "Upcoming",
+            },
+            Object {
+              "onClick": [Function],
+              "text": "Propose a Challenge",
+            },
+          ]
+        }
+        title="Challenges"
+      />
+      <hr />
+      <div
+        className="pfda-subsection-heading"
+      >
+        PREVIOUS CHALLENGES
+      </div>
+      <Connect(ChallengesYearList)
+        setYearHandler={[Function]}
+      />
+    </div>
+  </div>
+</PublicLayout>
+`;

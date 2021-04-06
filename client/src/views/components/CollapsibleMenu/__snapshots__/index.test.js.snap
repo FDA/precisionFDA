@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CollapsibleMenu matches snapshot 1`] = `
+<div
+  className="accordion collapsible-menu"
+  id="collapseMenu83cd99b9-51ea-48b8-a2ba-f4f01e335d08"
+>
+  <div
+    aria-controls="collapseBody83cd99b9-51ea-48b8-a2ba-f4f01e335d08"
+    aria-expanded="true"
+    className="collapsible-header collapsed"
+    data-target="#collapseBody83cd99b9-51ea-48b8-a2ba-f4f01e335d08"
+    data-toggle="collapse"
+  >
+    <Icon
+      icon="fa-angle-down"
+      id="toggle-icon"
+    />
+    <div
+      className="title"
+    />
+     
+  </div>
+  <div
+    aria-labelledby="collapsibleMenuHeading"
+    className="collapse"
+    data-parent="#collapseMenu83cd99b9-51ea-48b8-a2ba-f4f01e335d08"
+    id="collapseBody83cd99b9-51ea-48b8-a2ba-f4f01e335d08"
+  >
+    <Item
+      isDisabled={false}
+      key="action1"
+      onClick={[Function]}
+      text="action1"
+    />
+    <Item
+      isDisabled={false}
+      key="action2"
+      text="action2"
+    />
+    <Item
+      isDisabled={false}
+      key="action3"
+      text="action3"
+    />
+    <Item
+      isDisabled={false}
+      key="action4"
+      text="action4"
+    />
+    <Item
+      isDisabled={false}
+      key="action5"
+      text="action5"
+    />
+  </div>
+</div>
+`;

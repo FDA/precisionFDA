@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewsListItem test should render 1`] = `
+<div
+  className="news-list-item"
+>
+  <div
+    className="left-column"
+  >
+    <hr />
+    <div
+      className="news-item-date"
+    >
+      Mar 01, 2021
+    </div>
+  </div>
+  <div
+    className="right-column news-item-content"
+  >
+    <h1>
+      News Item 1
+    </h1>
+    <p>
+      News Content
+    </p>
+    <a
+      href="News Link 1"
+      target="_blank"
+    >
+      View News Source ↗
+    </a>
+  </div>
+</div>
+`;

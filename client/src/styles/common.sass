@@ -1,3 +1,6 @@
+@import './variables.sass'
+
+
 .objects-actions-modal
 
   &__help-block
@@ -18,3 +21,100 @@
       tr:first-child
         td
           border-top: none
+
+
+.main-container-two-columns
+  display: flex
+  flex-flow: row wrap
+  justify-content: space-around
+  align-items: stretch
+  max-width: $pfda-main-container-max-width
+  margin-left: auto
+  margin-right: auto
+
+  font-family: Lato, Helvetica, sans-serif
+
+  .left-column
+    flex-grow: 1
+    padding-left: $pfda-main-content-horizontal-padding
+    padding-right: $pfda-main-content-horizontal-padding
+    padding-top: 24px
+    padding-bottom: 24px
+
+  .right-column
+    width: $pfda-right-column-width
+    flex: 0 0 $pfda-right-column-width
+    padding-left: 0
+    padding-right: $pfda-main-content-horizontal-padding
+    padding-top: 24px
+    padding-bottom: 24px
+
+  @media (min-width: 1024px)
+    flex-flow: row nowrap
+
+
+.main-container-three-columns
+  display: flex
+  flex-flow: row wrap
+  justify-content: space-around
+  align-items: stretch
+  max-width: $pfda-main-container-max-width
+  margin-left: auto
+  margin-right: auto
+
+  .left-column
+    width: $pfda-right-column-width
+    flex: 0 0 $pfda-right-column-width
+    padding-top: 24px
+    padding-bottom: 24px
+    padding-left: $pfda-main-content-horizontal-padding
+    padding-right: 0
+
+  .middle-column
+    flex-grow: 1
+    padding-left: $pfda-main-content-horizontal-padding
+    padding-right: $pfda-main-content-horizontal-padding
+    padding-top: 24px
+    padding-bottom: 24px
+
+  .right-column
+    width: $pfda-right-column-width
+    flex: 0 0 $pfda-right-column-width
+    padding-left: 0
+    padding-right: $pfda-main-content-horizontal-padding
+    padding-top: 24px
+    padding-bottom: 24px
+
+  @media (min-width: 1024px)
+    flex-flow: row nowrap
+
+
+.pfda-main-content-sidebar
+  hr
+    margin-top: 24px
+    margin-bottom: 12px
+    border: 0.5px solid #646464
+  
+  p
+    font-size: $pfda-font-size-body
+    color: $pfda-text-medium-grey
+
+.pfda-section-heading
+  font-size: $pfda-font-size-h1
+  font-weight: 600
+  color: $pfda-text-black
+
+.pfda-subsection-heading
+  color: $pfda-text-medium-grey
+  font-weight: 700
+  font-size: $pfda-subheading-text-size
+  letter-spacing: 0.05em
+  margin-top: 12px
+
+.pfda-subsection-item
+  color: $pfda-text-medium-grey
+  font-weight: 400
+
+.pfda-list-title
+  font-size: 28px
+  font-weight: 600

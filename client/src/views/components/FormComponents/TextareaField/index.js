@@ -7,7 +7,7 @@ import TextArea from '../TextArea'
 
 
 const TextareaField = ({ children, text, name, label, status, helpText, ...rest }) => (
-  <div className={classNames('form-group', { [`has-${status}`]: status })}>
+  <div className={classNames('form-group', 'required', { [`has-${status}`]: status })}>
     <label className="control-label" htmlFor={name}>{label}</label>
     <TextArea id={name} name={name} className="form-control" {...rest}>{text}</TextArea>
     {!!helpText && <span className="help-block">{helpText}</span>}

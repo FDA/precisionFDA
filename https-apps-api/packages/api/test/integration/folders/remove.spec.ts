@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
+import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
 import { App, Folder, Job, Tag, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -28,7 +28,7 @@ describe('DELETE /folders/:id', () => {
     folder = create.filesHelper.createFolder(
       em,
       { user },
-      { name: 'a', project: user.jupyterProject, parentId: job.id },
+      { name: 'a', project: user.privateFilesProject, parentId: job.id },
     )
     await em.flush()
     mocksReset()

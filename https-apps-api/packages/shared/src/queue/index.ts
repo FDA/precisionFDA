@@ -14,7 +14,7 @@ const getQueue = (): Bull.Queue => statusQueue
 const getQueues = (): Bull.Queue[] => [statusQueue, emailsQueue]
 
 // set up the queues
-const createQueues = (): void => {
+const createQueues = async (): Promise<void> => {
   // other config passed into IORedis constructor
   const redisOptions: QueueOptions['redis'] = {
     tls: config.redis.isSecure as any,
@@ -38,6 +38,8 @@ const createQueues = (): void => {
       removeOnFail: false,
     },
   })
+  await statusQueue.isReady()
+  await emailsQueue.isReady()
 }
 
 const disconnectQueues = async (): Promise<void> => {

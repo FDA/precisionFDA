@@ -1,5 +1,5 @@
 module FileService
-  # The ToggleFeaturePublicFolderService udes for toggling files and folders
+  # The ToggleFeaturePublicFolderService used for toggling files and folders
   # it toggles all available records Nodes#featured
   #
   class ToggleFeaturePublicFolderService
@@ -27,12 +27,14 @@ module FileService
     end
 
     def records
-      Node.where(
+      nodes = Node.where(
         (node[:id].in ids).
-        or((node[:uid].in ids)).
-        or((node[:parent_folder_id].in ids)).
-        and((node[:scope].in ::Scopes::SCOPE_PUBLIC)),
+          or((node[:uid].in ids)).
+          or((node[:parent_folder_id].in ids)).
+          and((node[:scope].in ::Scopes::SCOPE_PUBLIC)),
       )
+      children = nodes.folders.flat_map(&:children)
+      nodes.to_a.concat(children).uniq
     end
 
     def toggle_records

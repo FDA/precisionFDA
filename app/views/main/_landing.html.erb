@@ -50,18 +50,18 @@
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
         <% if Challenge.current.present? && Challenge.current.active? %>
-          <a class="btn accessible-btn-success btn-lg btn-block" href="<%= challenge_path(Challenge.current) %>" style="white-space: normal">
+          <a class="btn accessible-btn-success btn-lg btn-block" href="<%= challenge_path(Challenge.current) %>" style="white-space: normal" data-turbolinks="false">
             <span class="fa fa-user-plus"></span>
             &nbsp;Participate in the Current Challenge
           </a>
           <br/>
-          <a class="btn accessible-btn-primary btn-md btn-block" href="/challenges" style="white-space: normal">
+          <a class="btn accessible-btn-primary btn-md btn-block" href="/challenges" style="white-space: normal" data-turbolinks="false">
             <span class="fa fa-info-circle"></span>
             &nbsp;Learn About Previous Challenges
           </a>
         <% else %>
           <div class="h1">
-            <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges">Learn About Challenges</a>
+            <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges" data-turbolinks="false">Learn About Challenges</a>
           </div>
         <% end %>
       </div>
@@ -82,7 +82,7 @@
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
         <div class="h1">
-          <a class="btn accessible-btn-default btn-lg btn-block" href="<%= news_path %>">
+          <a class="btn accessible-btn-default btn-lg btn-block" href="<%= news_path %>" data-turbolinks="false">
             <span class="fa fa-newspaper-o"></span> &nbsp;View News
           </a>
         </div>

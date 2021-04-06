@@ -18,6 +18,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
   SyncFolderFilesOutput
 > {
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
+    this.ctx.log.debug({ input }, 'input params')
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)
 
@@ -29,6 +30,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     })
     let folderPath: string
     let current: Folder | null | undefined
+    // sanitize operation inputs
     if (input.folderId) {
       current = foldersInProject.find(f => f.id === input.folderId)
       if (!current) {
@@ -49,6 +51,12 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       project: input.projectDxid,
       folderId: input.folderId,
     })
+    // just all REGULAR files in the project
+    // there will be conflicts with synced status and locallCreatedFiles
+    // point is not to try to recreate them
+    const locallyCreatedFiles = await fileRepo.findLocalFilesInProject({
+      project: input.projectDxid,
+    })
     // todo: handle possible pagination here
 
     // find remote file ids in a given subfolder
@@ -60,8 +68,20 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     })
     const remoteFileDxids = map(prop('id'))(remoteFiles.results)
     const localFileDxids = map(prop('dxid'))(localFiles)
+    const locallyCreatedFileDxids = map(prop('dxid'))(locallyCreatedFiles)
     const toAdd = difference(remoteFileDxids, localFileDxids)
     const toRemove = difference(localFileDxids, remoteFileDxids)
+
+    this.ctx.log.debug({ localFileDxids, folderPath }, 'local files detected in given subfolder')
+    this.ctx.log.debug({ remoteFileDxids, folderPath }, 'remote files detected in given subfolder')
+    this.ctx.log.debug(
+      { locallyCreatedFileDxids, folderPath },
+      'Local NORMAL type files to consider',
+    )
+    this.ctx.log.info(
+      { folderPath, toAdd, toRemove },
+      'files detected to add/remove under given subfolder path',
+    )
 
     // update existing files
     localFiles.forEach(userfile => {
@@ -94,9 +114,22 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     // add new files
     if (input.runAdd) {
       toAdd.forEach(dxid => {
+        if (locallyCreatedFileDxids.includes(dxid)) {
+          this.ctx.log.warn(
+            { dxid },
+            'File already exists in local database, but it is not HTTPS file. Recreating would crash the op.',
+          )
+          return
+        }
         const remoteDetails = remoteFiles.results.find(remoteFile => remoteFile.id === dxid)
         if (!remoteDetails) {
           throw new Error('remote details not found for file dxid')
+        }
+        if (remoteDetails.describe && !remoteDetails.describe.size) {
+          this.ctx.log.warn(
+            { file: remoteDetails },
+            'File may be in a wrong state, size property is missing',
+          )
         }
         const newFile = wrap(new UserFile(em.getReference(User, this.ctx.user.id))).assign(
           {
@@ -122,10 +155,6 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       await em.flush()
     }
 
-    this.ctx.log.info(
-      { folderPath, toAdd, toRemove },
-      'files detected to add/remove under given subfolder path',
-    )
     // final result
     const files = await fileRepo.findProjectFilesInSubfolder({
       project: input.projectDxid,
