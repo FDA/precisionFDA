@@ -3,7 +3,7 @@ import { entities } from '../../domain'
 import * as generate from './generate'
 
 const userHelper = {
-  create: (em: EntityManager, data?: Partial<typeof entities.User>) => {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
     const org = wrap(new entities.Organization()).assign({
       handle: `org-${generate.random.dxstr()}`,
       name: generate.random.chance.name(),
@@ -68,7 +68,23 @@ const filesHelper = {
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
-    const defaults = generate.userFile.simple()
+    const defaults = generate.userFile.simple(data?.dxid)
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    em.persist(file)
+    return file
+  },
+  createUploaded: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof entities.User>
+    },
+    data?: Partial<InstanceType<typeof entities.UserFile>>,
+  ) => {
+    const defaults = generate.userFile.simpleUploaded(data?.dxid)
     const input = {
       ...defaults,
       ...data,
@@ -84,9 +100,25 @@ const filesHelper = {
       // todo: remove
       parent?: InstanceType<typeof entities.Folder>
     },
-    data?: Partial<InstanceType<typeof entities.UserFile>>,
+    data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
     const defaults = generate.folder.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const folder = wrap(new entities.Folder(references.user)).assign(input)
+    em.persist(folder)
+    return folder
+  },
+  createLocalOnlyFolder: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof entities.User>
+    },
+    data?: Partial<InstanceType<typeof entities.Folder>>,
+  ) => {
+    const defaults = generate.folder.simpleLocal()
     const input = {
       ...defaults,
       ...data,

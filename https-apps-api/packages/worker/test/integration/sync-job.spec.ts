@@ -1,5 +1,4 @@
-import { wrap } from '@mikro-orm/core'
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { wrap, EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User, Job, UserFile, Tag, Tagging, Folder } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -37,7 +36,7 @@ const createSyncJobTask = async (
 }
 
 describe('TASK: sync_job_status', () => {
-  let em: EntityManager<MySqlDriver>
+  let em: EntityManager
   let user: User
   let app: App
 
@@ -120,7 +119,7 @@ describe('TASK: sync_job_status', () => {
     const job = create.jobHelper.create(
       em,
       { user, app },
-      { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+      { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
     )
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
     // no folders created in the job
@@ -158,7 +157,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -195,7 +194,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         prepareEm,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await prepareEm.flush()
       const tag = create.tagsHelper.create(prepareEm, { name: 'HTTPS File' })
@@ -249,7 +248,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -294,7 +293,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -353,7 +352,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -392,7 +391,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
@@ -459,7 +458,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
@@ -524,7 +523,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
@@ -593,7 +592,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       create.filesHelper.createFolder(
@@ -634,7 +633,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       const folder = create.filesHelper.createFolder(
@@ -692,7 +691,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -745,7 +744,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -791,7 +790,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -837,7 +836,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
       const firstFile = create.filesHelper.create(

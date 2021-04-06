@@ -13,7 +13,7 @@ import {
 import { BaseEntity } from '../../database/base-entity'
 import { Job } from '../job/job.entity'
 import { User } from '../user/user.entity'
-import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from './app.enum'
+import { ENTITY_TYPE } from './app.enum'
 import { AppRepository } from './app.repository'
 
 @Entity({ tableName: 'apps', customRepository: () => AppRepository })
@@ -76,12 +76,5 @@ export class App extends BaseEntity {
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
-  }
-
-  // dynamic fields - only temporary
-  @Property({ name: 'httpsSubtype', nullable: true })
-  getSubType() {
-    // fixme: should be in the database later
-    return APP_HTTPS_SUBTYPE.JUPYTER
   }
 }

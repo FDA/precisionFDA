@@ -13,6 +13,7 @@ import TabsSwitch from '../../../../components/TabsSwitch'
 import Loader from '../../../../components/Loader'
 import TagsList from '../../../../components/TagsList'
 import HomeEditTagsModal from '../../../../components/Home/HomeEditTagsModal'
+import HomeWorkflowExecutionsTable from '../../../../components/Home/Workflows/HomeWorkflowsExecutionsTable'
 import {
   homeWorkflowsWorkflowDetailsSelector,
   homeWorkflowsEditTagsModalSelector,
@@ -113,6 +114,13 @@ const HomeWorkflowsSinglePage = (props) => {
     {
       header: 'Spec',
       tab: <HomeWorkflowsSpec spec={meta.spec} />,
+    },
+    {
+      header: 'Executions',
+      tab: <HomeWorkflowExecutionsTable
+        uid={uid}
+        space={workflow.links.space && workflow.location}
+      />,
     },
     {
       header: 'Diagram',

@@ -15,6 +15,7 @@ module Api
         meta[:links][:accessible_apps] = api_list_apps_path
         meta[:links][:accessible_workflows] = api_list_workflows_path
         meta[:links][:accessible_files] = api_list_files_path
+        meta[:links][:challenge_new] = new_challenge_path if current_user.can_create_challenges?
       end
     end
   end

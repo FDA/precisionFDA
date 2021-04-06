@@ -5,8 +5,6 @@ import * as API from '../../../api/home'
 import {
   HOME_APPS_MAKE_FEATURED_SUCCESS,
   HOME_FILES_FETCH_FAILURE,
-  HOME_FILES_FETCH_START,
-  HOME_FILES_FETCH_SUCCESS,
   HOME_FILES_MAKE_FEATURED_SUCCESS,
 } from '../types'
 import { HOME_ASSETS_MAKE_FEATURED_SUCCESS } from '../assets/types'
@@ -22,8 +20,10 @@ import {
   showAlertAboveAllSuccess,
   showAlertAboveAllWarning,
 } from '../../alertNotifications'
-import { OBJECT_TYPES } from '../../../constants'
-import { HOME_FILE_TYPES } from '../../../constants'
+import {
+  OBJECT_TYPES,
+  HOME_FILE_TYPES,
+} from '../../../constants'
 
 
 const makeFeaturedSuccess = (objectType, items) => {
@@ -43,14 +43,10 @@ const makeFeaturedSuccess = (objectType, items) => {
   }
 }
 
-
-const homeFilesFetchStart = () => createAction(HOME_FILES_FETCH_START, HOME_FILE_TYPES.EVERYBODY)
-const homeFilesFetchSuccess = () => createAction(HOME_FILES_FETCH_SUCCESS)
 const homeFilesFetchFailure = () => createAction(HOME_FILES_FETCH_FAILURE, HOME_FILE_TYPES.EVERYBODY)
 
 export default (link, objectType, uids, featured) => (
   async (dispatch) => {
-    dispatch(homeFilesFetchStart(objectType))
 
     try {
       const data = {
@@ -58,9 +54,11 @@ export default (link, objectType, uids, featured) => (
       }
       if (featured) data.featured = true
 
-      const { status, payload } = await API.putApiCall(link, data)
+      const response = await API.putApiCall(link, data)
+      const statusIsOK = response.status === httpStatusCodes.OK
+      const payload = response.payload
 
-      if (status === httpStatusCodes.OK) {
+      if (statusIsOK) {
         const messages = payload.meta
         let items = []
         switch (objectType) {
@@ -88,17 +86,14 @@ export default (link, objectType, uids, featured) => (
         if (messages) {
           messages.forEach(message => {
             if (message.type === 'success') {
-              dispatch(homeFilesFetchSuccess())
               dispatch(showAlertAboveAllSuccess({ message: message.message }))
             }
             if (message.type === 'warning') {
-              dispatch(homeFilesFetchSuccess())
               dispatch(showAlertAboveAllWarning({ message: message.message }))
             }
           })
         } else {
-          dispatch(homeFilesFetchSuccess())
-          dispatch(showAlertAboveAllSuccess({ message: 'Objects are successfully copied.' }))
+          dispatch(showAlertAboveAllSuccess({ message: 'Objects are successfully featured.' }))
         }
       } else {
         if (payload?.error) {
@@ -111,7 +106,7 @@ export default (link, objectType, uids, featured) => (
         }
       }
 
-      return { status, payload }
+      return { statusIsOK }
     } catch (e) {
       console.error(e)
       dispatch(homeFilesFetchFailure())

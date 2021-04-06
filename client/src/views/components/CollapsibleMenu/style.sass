@@ -1,0 +1,41 @@
+@import "../../../styles/common.sass"
+@import "../../../styles/variables.sass"
+
+.collapsible-menu
+  .title
+    @extend .pfda-subsection-heading
+    display: inline-block
+
+.collapsible-header
+  .title
+    @extend .pfda-subsection-heading
+
+    &:hover
+      color: $pfda-text-dark-grey
+      cursor: pointer
+
+  #toggle-icon
+    cursor: pointer
+    margin-right: 6px
+    transition: all 0.5s;
+    -webkit-transform: rotate(0deg)
+    -moz-transform: rotate(0deg)
+    transform: rotate(0deg)
+
+  &.collapsed #toggle-icon
+    -webkit-transform: rotate(180deg)
+    -moz-transform: rotate(180deg)
+    transform: rotate(180deg)
+
+.collapsible-menu__item
+  display: block
+  padding-left: 16px
+  
+  &--disabled
+    color: #888
+
+  a
+    color: $pfda-text-medium-grey
+
+    &:hover
+      color: $pfda-text-dark-grey

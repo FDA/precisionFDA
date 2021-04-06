@@ -1,5 +1,14 @@
 <% content_for :title do %><%= @challenge.name %><% end %>
 
+<% if !["submissions", "my_entries"].include?(params[:tab]) %>
+
+<!-- Currently only 'introduction' and 'results' tabs are handled by react -->
+<div id="app-root"></div>
+
+<%= render "_partials/fda_footer" %>
+
+<% else %>
+
 <%= render "challenges/header", challenge: @challenge, challenge_index_page: false %>
 
 <div class="container container-padded">
@@ -7,11 +16,11 @@
     <div class="col-md-16">
       <!-- Nav tabs -->
       <ul class="nav nav-pills nav-pills-lg nav-tabs-contained" role="tablist">
-        <li role="presentation" class="<%= !["submissions", "my_entries", "results"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge) %>" class="tab-label" aria-controls="info" role="tab">Introduction</a></li>
+        <li role="presentation" class="<%= !["submissions", "my_entries", "results"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge) %>" class="tab-label" aria-controls="info" role="tab" data-turbolinks="false">Introduction</a></li>
         <li role="presentation" class="<%= params[:tab] == 'submissions' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'submissions') %>" class="tab-label" aria-controls="submissions" role="tab">Submissions</a></li>
         <li role="presentation" class="<%= params[:tab] == 'my_entries' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'my_entries') %>" class="tab-label" aria-controls="my_entries" role="tab">My Entries</a></li>
         <% if @challenge.can_show_results?(@context) %>
-          <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'results') %>" class="tab-label" aria-controls="results" role="tab">Results</a></li>
+          <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge) + "#results"  %>" class="tab-label" aria-controls="results" role="tab">Results</a></li>
         <% end %>
       </ul>
     </div>
@@ -66,3 +75,5 @@
     <% end %>
   </div>
 </div>
+
+<% end %>

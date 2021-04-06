@@ -30,7 +30,7 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
 
       __OR__ to keep the current bundler version from Gemfile.lock, run
 
-      `gem install bundler -v 2.1.4`
+      `gem install bundler -v 2.2.10`
 
 * (Mac) To overcome `bundle install` errors, you may need to install the following dependencies manually:
     * `cmake` (required to build `rugged` gem)

@@ -29,7 +29,7 @@
 !/storage/.keep
 
 /node_modules
-/yarn-error.log
+yarn-error.log
 
 # Ignore generated assets
 /public/assets

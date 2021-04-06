@@ -1,0 +1,167 @@
+@import "../../../../styles/common.sass"
+@import "../../../../styles/variables.sass"
+
+
+.challenge-details-main-container
+  @extend .main-container-two-columns
+
+.challenge-details-banner
+  flex-flow: row nowrap
+
+  .right-column
+    width: auto
+    padding: 0 $pfda-main-content-horizontal-padding 0 0
+    margin: auto 0
+
+  .challenge-state-label
+    @extend .pfda-subsection-heading
+    text-transform: uppercase
+    padding: 3px 0px
+    color: white
+
+  h1
+    @extend .pfda-list-title
+    margin: 12px 0px 12px 0px
+    color: white
+
+  p
+    font-size: $pfda-font-size-body
+      font-weight: 400
+    color: white
+    margin-top: 12px
+
+  .challenge-thumbnail
+    width: $pfda-thumbnail-width
+    height: $pfda-thumbnail-height
+    object-fit: contain
+    overflow: hidden
+    -webkit-appearance: none;
+    -webkit-box-shadow: 0px 0px 16px #000
+    box-shadow: 0px 0px 16px #000
+
+  .date-area
+    display: flex
+    align-items: flex-end
+    font-size: 12px
+    color: white
+
+    .challenge-date-label
+      font-size: 10px
+      text-transform: uppercase
+      letter-spacing: 0.1em
+
+    .challenge-date
+      padding: 4px 0px
+      padding-right: 20px
+      font-size: 13px
+      font-weight: 500
+      text-align: left
+
+    .challenge-date-remaining
+      padding: 4px 0px
+      font-weight: 600
+      margin-left: 24px
+
+  &.upcoming
+    .challenge-state-label
+      color: $pfda-highlight-yellow
+      border-top: $pfda-highlight-bar-width solid $pfda-highlight-yellow
+
+    .challenge-date
+      color: $pfda-highlight-yellow
+
+  &.current
+    .challenge-state-label
+      color: $pfda-highlight-green
+      border-top: $pfda-highlight-bar-width solid $pfda-highlight-green
+
+    .challenge-date
+      color: $pfda-highlight-green
+
+  &.ended
+    .challenge-state-label
+      color: $pfda-text-medium-grey
+      border-top: $pfda-highlight-bar-width solid $pfda-text-medium-grey
+
+    .challenge-date
+      color: $pfda-text-medium-grey
+
+.react-tabs
+  &__tab-list
+    list-style: none
+    padding: 0
+    margin-bottom: 24px
+
+  &__tab, a
+    @extend .pfda-subsection-heading
+    display: inline-block
+    border-bottom: 3px solid transparent
+    color: $pfda-highlight-blue
+    text-transform: uppercase
+    letter-spacing: 0
+    margin-right: 12px
+    padding: 0 0 2px 0
+    cursor: pointer
+
+    &:hover
+      border-bottom: 3px solid $pfda-text-medium-grey
+
+    &--selected
+      color: $pfda-highlight-blue
+      border-bottom: 3px solid $color-danger
+
+      &:hover
+        border-bottom: 3px solid $color-danger
+
+
+.challenge-details-content
+
+  h1
+    font-size: $pfda-font-size-h1
+    line-height: 24px
+
+  h2
+    font-size: $pfda-font-size-h2
+    line-height: 20px
+
+  p
+    font-size: $pfda-font-size-body
+    font-weight: 400
+    line-height: 20px
+  
+
+.challenge-details-outline
+  .outline-item-h1
+    margin-top: 3px
+
+    a
+      color: $pfda-text-dark-grey
+      font-weight: 400
+      font-size: $pfda-subheading-text-size
+      margin-top: 12px
+
+      &:hover
+        color: $pfda-text-medium-grey
+
+  .outline-item-h2
+    margin-top: 3px
+    margin-left: 16px
+
+    a
+      color: $pfda-text-dark-grey
+      font-weight: 400
+      font-size: $pfda-subheading-text-size
+      margin-top: 12px
+
+      &:hover
+        color: $pfda-text-medium-grey
+
+
+.challenge-join-button
+  display: block
+  width: 100%
+  margin-bottom: 24px
+
+.error-container
+  min-height: 320px
+  padding: 40px

@@ -83,6 +83,28 @@ const parseFoldersFromDatabase = (folders: Folder[]): string[] => {
   return folderPaths
 }
 
+const filterLeafPaths = (folderPaths: string[]): string[] => {
+  // slice to remove the first "/"
+  const folderPathNames = folderPaths.map(folderPath => folderPath.split('/').slice(1))
+  return folderPathNames
+    .filter((fp, idx) => {
+      const isIncluded = folderPathNames.some((tp, innerIdx) => {
+        if (idx === innerIdx) {
+          // we are not interested in this, passing through
+          return false
+        }
+        if (fp.length > tp.length) {
+          // fp cannot be substring of tp because fp is longer
+          return false
+        }
+        // every item in fp equals to something in given tp
+        return fp.every((fpItem, fpInnerIdx) => fpItem === tp[fpInnerIdx])
+      })
+      return !isIncluded
+    })
+    .map(fp => `/${fp.join('/')}`)
+}
+
 const getFolderPath = (folders: Folder[], current: Folder): string => {
   const chain = folderTraverse(folders, current, [])
   return `/${chain.join('/')}`
@@ -161,4 +183,5 @@ export {
   getFolderPath,
   childrenTraverse,
   getStiEnumTypeFromInstance,
+  filterLeafPaths,
 }

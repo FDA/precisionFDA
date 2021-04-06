@@ -12,6 +12,6 @@ RUN apt-get update && \
     wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
     tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
     rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
-    gem install bundler -v 2.1.4
+    gem install bundler -v 2.2.10
 
 CMD $APP_DIR/docker/isolation.docker-entrypoint.sh

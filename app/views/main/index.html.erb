@@ -92,7 +92,7 @@
       <div class="overview-header">Learn More</div>
       <div class="main-section pfda-cards pfda-cards-news">
         <% @challenges.each do |challenge| %>
-          <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= challenge_path(challenge) %>">
+          <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= challenge_path(challenge) %>" data-turbolinks="false">
             <div class="pfda-card-header lead text-center">
               <%= challenge.active? ? 'Participate in the' : 'Read about the' %>
             </div>

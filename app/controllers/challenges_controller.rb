@@ -7,13 +7,7 @@ class ChallengesController < ApplicationController
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
   before_action :check_scope_accessibility, only: %i(create update)
 
-  def index
-    @consistency_challenge = FixedChallenge.consistency(@context)
-    @truth_challenge = FixedChallenge.truth(@context)
-    @appathons_challenge = FixedChallenge.appathons(@context)
-    @featured_challenges = Challenge.featured(@context)
-    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge] + challenge_cards
-  end
+  def index; end
 
   def new
     @challenge = Challenge.new
@@ -378,7 +372,7 @@ class ChallengesController < ApplicationController
     }
   end
 
-  def challenge_cards
+  def archived_challenges
     Challenge.accessible_by(@context).archived.map do |challenge|
       ChallengeCard.by_context(challenge, @context)
     end

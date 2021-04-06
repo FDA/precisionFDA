@@ -1,0 +1,4 @@
+en:
+  api:
+    challenges:
+      not_found_or_forbidden: The challenge isn't found or you don't have permissions to access it.

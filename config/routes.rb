@@ -142,8 +142,18 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
-      resources :challenges, only: [] do
-        post "save_editor_page", on: :member
+      resources :news_items, path: "news", only: %i(index show) do
+        get :years, on: :collection
+      end
+
+      resources :challenges, only: %i(index show) do
+        get :years, on: :collection
+        post :save_editor_page, on: :member
+        post :propose, on: :collection
+      end
+
+      resources :experts, only: %i(index show) do
+        get :years, on: :collection
       end
 
       resources :apps do
@@ -263,6 +273,8 @@ Rails.application.routes.draw do
       end
 
       resources :workflows, only: %i(index show create) do
+        get :jobs, on: :member, to: "jobs#workflow"
+
         collection do
           get :featured
           get :everybody
