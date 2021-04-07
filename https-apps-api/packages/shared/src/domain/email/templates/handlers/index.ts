@@ -1,5 +1,5 @@
 export { JobFinishedEmailHandler } from './job-finished.handler'
 
-export { SpaceNotificationEmailHandler } from './space-notification.handler'
+export { ContentChangedEmailHandler } from './content-change.handler'
 
 export { MemberChangedEmailHandler } from './member-change.handler'

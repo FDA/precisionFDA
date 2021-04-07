@@ -1,4 +1,3 @@
-/* eslint-disable id-length */
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import type { JSONSchema7 } from 'json-schema'
 import { AnyObject, OpsCtx } from '../../types'
@@ -8,7 +7,53 @@ import { handlers } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
-// todo: review, some are deprecated probably
+/**
+ * List of all notification bases, which may be applied to a role.
+ */
+const NOTIFICATION_TYPES_BASE = {
+  // space event based
+  membership_changed: true,
+  member_added_or_removed_from_space: true,
+  comment_activity: true,
+  content_added_or_deleted: true,
+  space_locked_unlocked_deleted: true,
+  space_lock_unlock_delete_requests: true,
+  // deprecated
+  new_task_assigned: true,
+  task_status_changed: true,
+  // jobs
+  job_finished: true,
+  // challenges
+  challenge_added: true,
+} as const
+
+/**
+ * List of notification roles, roles are represented by a prefix in the DB column,
+ * so we want to document this mapping.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const NOTIFICATION_ROLE_PREFIXES = {
+  spaceLead: 'lead',
+  spaceAdmin: 'admin',
+  spaceMember: 'all',
+  privateScope: 'private',
+} as const
+/**
+ * notification types should be build with this combination:
+ *  `${NOTIFICATION_ROLE_PREFIXES[something]}_${NOTIFICATION_TYPES_BASE[something]}`
+ *
+ * the enum with prefixes will be used to determine if user (and their role in given context)
+ * should receive the notification.
+ *
+ * Example:
+ *  - user 1, space 1, 2
+ *  - user 1 is lead in space 1, member of space 2
+ *  - space event of "new content added" occurs in space 1
+ *    -> "lead_content_added_or_deleted" notification key is used to determine if email is sent
+ *  - space event of "new content added" occurs in space 2
+ *    -> "all_content_added_or_deleted" key is used
+ */
+
 const NOTIFICATION_TYPES_COMMON = {
   all_membership_changed: true,
   all_new_task_assigned: true,
@@ -39,19 +84,19 @@ const NOTIFICATION_TYPES_ADMIN = {
 }
 
 // todo: extend with more email types
-const NOTIFICATION_JOB = {
-  job_finished: true,
+const NOTIFICATION_PRIVATE = {
+  private_job_finished: true,
 }
 
 // we use as any here to overwrite mergeAll type declaration
 const NOTIFICATION_TYPES: typeof NOTIFICATION_TYPES_COMMON &
   typeof NOTIFICATION_TYPES_LEAD &
   typeof NOTIFICATION_TYPES_ADMIN &
-  typeof NOTIFICATION_JOB = mergeAll([
+  typeof NOTIFICATION_PRIVATE = mergeAll([
   NOTIFICATION_TYPES_COMMON,
   NOTIFICATION_TYPES_LEAD,
   NOTIFICATION_TYPES_ADMIN,
-  NOTIFICATION_JOB,
+  NOTIFICATION_PRIVATE,
 ]) as any
 
 // EMAIL VALIDATION SCHEMAS
@@ -65,16 +110,7 @@ const jobFinishedEmailSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
-const contentAddedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    spaceEventId: schemas.idProp,
-  },
-  required: ['spaceEventId'],
-  additionalProperties: false,
-}
-
-const memberChangedEmailSchema: JSONSchema7 = {
+const spaceEventEmailSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     spaceEventId: schemas.idProp,
@@ -85,15 +121,14 @@ const memberChangedEmailSchema: JSONSchema7 = {
 
 const emailInputSchemas = {
   jobFinishedEmailSchema,
-  contentAddedEmailSchema,
-  memberChangedEmailSchema,
+  spaceEventEmailSchema,
 }
 
 type NewContentAdded = { spaceEventId: number }
 
 type MemberChanged = { spaceEventId: number }
 
-// EMAIL ENUMS
+// EMAIL OPERATIONS INPUTS
 
 type EmailProcessInput = {
   emailTypeId: number
@@ -124,27 +159,25 @@ interface EmailTemplate {
   ctx: OpsCtx
   templateFile: (data: any) => string
 
-  validate(payload: any): void
+  // validate(payload: any): void
   // todo: make this one abstract maybe?
   determineReceivers(...args: any[]): Promise<User[]>
   // determineReceivers(spaceEventId: number): Promise<User[]>
   // getReceivers(): Promise<User[]>
   template(receiver: User): Promise<EmailSendInput>
+  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE
 }
 
-type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChanged'
+type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChangedAddedRemoved'
 type EmailConfigItem = {
   // unique name
   name: EMAIL_TYPES
   // API param value -> EMAIL_TYPE, must be also unique
   emailId: number
-  // db control field(s) of the notification
-  notificationKey: string
-  // todo: keep this option in mind for later
-  // notificationKeys: readonly string[]
   // schema used from ajv validation
   // optional, some emails may not require any dynamic content
   schema?: JSONSchema7
+  // handler for given email type
   templateClass: EmailTemplateContructor
 }
 
@@ -152,24 +185,19 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
   jobFinished: {
     name: 'jobFinished',
     emailId: 1,
-    notificationKey: 'job_finished',
-    // notificationKeys: ['job_finished'],
     schema: emailInputSchemas.jobFinishedEmailSchema,
     templateClass: handlers.JobFinishedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
     emailId: 2,
-    // notificationKeys: ['all_content_added_or_deleted'],
-    notificationKey: 'all_content_added_or_deleted',
-    schema: emailInputSchemas.contentAddedEmailSchema,
-    templateClass: handlers.SpaceNotificationEmailHandler,
+    schema: emailInputSchemas.spaceEventEmailSchema,
+    templateClass: handlers.ContentChangedEmailHandler,
   },
-  memberChanged: {
-    name: 'memberChanged',
+  memberChangedAddedRemoved: {
+    name: 'memberChangedAddedRemoved',
     emailId: 3,
-    notificationKey: '',
-    schema: emailInputSchemas.memberChangedEmailSchema,
+    schema: emailInputSchemas.spaceEventEmailSchema,
     templateClass: handlers.MemberChangedEmailHandler,
   },
 } as const
@@ -207,6 +235,8 @@ export {
   EmailConfigItem,
   EMAIL_TYPES,
   NOTIFICATION_TYPES,
+  NOTIFICATION_TYPES_BASE,
+  NOTIFICATION_ROLE_PREFIXES,
   EmailProcessInput,
   EmailSendInput,
   EmailTemplateInput,

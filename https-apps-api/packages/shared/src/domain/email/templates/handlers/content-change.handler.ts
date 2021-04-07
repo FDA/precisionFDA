@@ -1,16 +1,30 @@
-import { filter, map, pipe, uniqBy, isNil } from 'ramda'
-import { EmailSendInput, EmailTemplate, NewContentAdded } from '../../email.config'
+import { filter, pipe, uniqBy } from 'ramda'
+import {
+  EmailSendInput,
+  EmailTemplate,
+  NewContentAdded,
+  NOTIFICATION_TYPES_BASE,
+} from '../../email.config'
+import {
+  buildIsNotificationEnabled,
+  buildFilterByUserSettings,
+  buildEmailTemplate,
+} from '../../email.helper'
 import { SpaceMembership, User } from '../../..'
 import { errors } from '../../../..'
 import { SpaceEvent } from '../../../space-event'
 import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content.template'
 import { BaseTemplate } from '..'
 
-export class SpaceNotificationEmailHandler
-  extends BaseTemplate<NewContentAdded, NewContentTemplateInput>
+export class ContentChangedEmailHandler
+  extends BaseTemplate<NewContentAdded>
   implements EmailTemplate {
   templateFile = newContentTemplate
   templateContent?: NewContentTemplateInput['content']
+
+  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
+    return 'content_added_or_deleted'
+  }
 
   async determineReceivers(): Promise<User[]> {
     const spaceEvent = await this.ctx.em.findOneOrFail(
@@ -26,18 +40,25 @@ export class SpaceNotificationEmailHandler
       { spaces: spaceEvent.space.id, active: true },
       { populate: ['user.emailNotificationSettings'] },
     )
+    console.log(
+      memberships.map(m => m.user.id),
+      'users in the space',
+    )
+
+    // build determine filter functions
+    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
+    const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
+    // fetch users with memberships, filter function should have extra param for it
     // this has to be bound to local
-    const scopedFn: () => User[] = this.filterByUserSettings.bind(this)
+    // maybe remove from base template, maybe we do not need base template
     const filterUsers = pipe(
-      map((m: SpaceMembership) => m.user.unwrap()),
-      // this user triggered the SpaceEvent
+      // SpaceMembership[] -> User[]
+      filterFn,
       filter((u: User) => u.id !== spaceEvent.user.id),
       uniqBy((user: User) => user.id),
-      scopedFn,
     )
     const result = filterUsers(memberships)
-    // based on email type, find who will be the receiver
-    // users who are in the space + active ?
+
     return result
   }
 
@@ -81,7 +102,10 @@ export class SpaceNotificationEmailHandler
      * consider calling the getTemplateContent() externally in email-process
      */
     const content = await this.getTemplateContent()
-    const body = this.buildTemplateHtml({ receiver, content })
+    const body = buildEmailTemplate<NewContentTemplateInput>(this.templateFile, {
+      receiver,
+      content,
+    })
     return {
       to: receiver.email,
       body,
