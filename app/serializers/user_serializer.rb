@@ -5,16 +5,20 @@ class UserSerializer < ApplicationSerializer
     :dxuser,
     :first_name,
     :last_name,
+    :full_name,
     :email,
     :admin,
     :counters,
     :links,
     :is_guest,
+    :gravatar_url,
   )
 
   attribute :guest?, key: :is_guest
   attribute :can_administer_site?, key: :can_administer_site
   attribute :can_create_challenges?, key: :can_create_challenges
+  attribute :can_see_spaces?, key: :can_see_spaces
+  attribute :can_access_notification_preference?, key: :can_access_notification_preference
 
   has_one :org
 
@@ -53,4 +57,9 @@ class UserSerializer < ApplicationSerializer
 
   delegate :can_administer_site?, to: :object
   delegate :can_create_challenges?, to: :object
+  delegate :can_see_spaces?, to: :object
+  delegate :can_access_notification_preference?, to: :object
+
+  delegate :full_name, to: :object
+  delegate :gravatar_url, to: :object
 end

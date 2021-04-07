@@ -168,6 +168,10 @@ Rails.application.routes.draw do
         get :years, on: :collection
       end
 
+      resources :participants, path: "participants" do
+        get :index
+      end
+
       resources :apps do
         get :jobs, on: :member, to: "jobs#app"
 

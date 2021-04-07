@@ -1,6 +1,5 @@
 import { backendCall } from '../utils/api'
-// Maybe not so good to import from views … consider pushing up IPagination to a lower level
-import { IPagination } from '../views/shapes/IPagination'
+import { IPagination } from '../types/pagination'
 
 
 interface IGetNewsParams {

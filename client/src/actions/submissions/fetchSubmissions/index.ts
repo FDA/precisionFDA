@@ -6,8 +6,9 @@ import {
   SUBMISSIONS_FETCH_ACTIONS,
   MY_ENTRIES_FETCH_ACTIONS,
 } from '../types'
-import { ISubmission, mapToSubmission } from '../../../views/shapes/SubmissionShape'
+import { mapToSubmission } from '../../../views/shapes/SubmissionShape'
 import { showAlertAboveAll } from '../../alertNotifications'
+import { ISubmission } from '../../../types/submission'
 
 
 const fetchSubmissionsStart = (fetchActions: any) => createAction(fetchActions.start)
