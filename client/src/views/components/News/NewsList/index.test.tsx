@@ -1,9 +1,9 @@
 import React from 'react'
-import { shallow } from 'enzyme'
+import { shallow, mount } from 'enzyme'
 
 import Loader from '../../Loader'
 import { NewsList } from '.'
-import { NewsListItem } from '../NewsListItem'
+import { NewsListItem, NewsListItemLarge } from '../NewsListItem'
 
 
 const getMockNews = () => {
@@ -31,13 +31,13 @@ const getMockNews = () => {
 
 describe('NewsList test', () => {
   it('should render', () => {
-    const wrapper = shallow(<NewsList />)
+    const wrapper = shallow(<NewsList newsItems={[]} isFetching={false} listItemComponent={NewsListItemLarge} />)
 
     expect(wrapper).toMatchSnapshot()
   })
 
   it('should show loader when isFetching and not show NewsList', () => {
-    const wrapper = mount(<NewsList isFetching={true} />)
+    const wrapper = mount(<NewsList newsItems={[]} isFetching={true} listItemComponent={NewsListItemLarge} />)
 
     // console.log(wrapper.debug())
     expect(wrapper.find(Loader)).toHaveLength(1)
@@ -46,7 +46,7 @@ describe('NewsList test', () => {
   })
 
   it('should not show loader when not fetching and show NewsList with no rows', () => {
-    const wrapper = mount(<NewsList news={[]} isFetching={false} />)
+    const wrapper = mount(<NewsList newsItems={[]} isFetching={false} listItemComponent={NewsListItemLarge} />)
     // console.log(wrapper.debug())
 
     expect(wrapper.find(Loader)).toHaveLength(0)
@@ -60,20 +60,22 @@ describe('NewsList test', () => {
     const mockNews = getMockNews()
     const mockPagination = {
       currentPage: 1,
-      totalPages: 1
+      totalPages: 3,
+      nextPage: 2,
+      prevPage: 1,
+      totalCount: 25,
     }
     const wrapper = mount (
-      <NewsList newsItems={mockNews} pagination={mockPagination} isFetching={false} />
+      <NewsList newsItems={mockNews} pagination={mockPagination} isFetching={false} listItemComponent={NewsListItemLarge} />
     )
     // console.log(wrapper.debug())
 
     // Test items
     expect(wrapper.find('ul')).toHaveLength(1)
     expect(wrapper.find('.news-list')).toHaveLength(1)
-    expect(wrapper.find('.news-list-item')).toHaveLength(10)
 
     // Test item props
-    const items = wrapper.find(NewsListItem)
+    const items = wrapper.find(NewsListItemLarge)
     expect(items).toHaveLength(10)
     expect(items.at(0)).toHaveProp('newsItem')
     // console.log(items.at(0).props())

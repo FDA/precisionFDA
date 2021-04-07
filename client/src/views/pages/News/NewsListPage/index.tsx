@@ -2,27 +2,34 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import { NavigationBarPublic } from '../../../components/NavigationBar/NavigationBarPublic'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import NewsList from '../../../components/News/NewsList'
 import NewsYearList from '../../../components/News/NewsYearList'
 import {
   fetchNews,
+  newsListResetFilters,
   newsListSetYear
 } from '../../../../actions/news'
 import './style.sass'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
+import { NewsListItemLarge } from '../../../components/News/NewsListItem'
+import { SectionHeading } from '../../../components/Controls/SectionHeading'
+import { newsListYearSelector } from '../../../../reducers/news/list/selectors'
 
 
 interface INewsListPageProps {
   loadNews: () => void,
+  resetFilters: () => void,
   setYearHandler: (year: number) => void,
   user: any,
+  year: number | null,
 }
 
 
 class NewsListPage extends Component<INewsListPageProps> {
   static defaultProps = {
     loadNews: () => {},
+    resetFilters: () => {},
     setYearHandler: () => {},
   }
 
@@ -40,23 +47,29 @@ class NewsListPage extends Component<INewsListPageProps> {
   }
 
   render() {
-    const { setYearHandler, user } = this.props
+    const { loadNews, resetFilters, setYearHandler, user, year } = this.props
 
     const userCanCreateNews = user && user.can_administer_site
+
+    const filterActive = year
+    const handleResetClicked = () => {
+      resetFilters()
+      loadNews()
+    }
 
     const title = 'News'
     const subtitle = 'Announcements and press for precisionFDA.'
 
-    // N.B. Explicitly passing in user={user} in NavigationBarPublic is a workaround:
-    //      Unlike ChallengesListPage where the set up is identical, the NavigationBarPublic
-    //      here somehow gets an undefined state.context even though fetchContext is successful
     return (
       <PublicLayout>
-        <NavigationBarPublic title={title} subtitle={subtitle} user={user} />
+        <NavigationBar title={title} subtitle={subtitle} user={user} />
 
         <div className="challenges-page-layout">
           <div className="left-column">
-            <NewsList />
+            {filterActive &&
+              <a onClick={handleResetClicked}>&larr; Back to All News</a>
+            }
+            <NewsList listItemComponent={NewsListItemLarge} />
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateNews && (
@@ -65,10 +78,10 @@ class NewsListPage extends Component<INewsListPageProps> {
               <button className='btn btn-primary btn-block' onClick={() => window.location.assign('/admin/news')}>Administer News</button>
               </>
             )}
-            <div className="pfda-subsection-heading">NEWS BACKLOG</div>
+            <SectionHeading>NEWS BACKLOG</SectionHeading>
             <NewsYearList setYearHandler={setYearHandler} />
             <hr />
-            <div className="pfda-subsection-heading">COMMUNITY NEWS</div>
+            <SectionHeading>COMMUNITY NEWS</SectionHeading>
             <p>If you have newsworthy updates of value to the precisionFDA community, let us know!</p>
           </div>
         </div>
@@ -79,6 +92,7 @@ class NewsListPage extends Component<INewsListPageProps> {
 
 const mapDispatchToProps = (dispatch: any) => ({
   loadNews: () => dispatch(fetchNews()),
+  resetFilters: () => dispatch(newsListResetFilters()),
   setYearHandler: (year: number) => {
     dispatch(newsListSetYear(year))
     dispatch(fetchNews())
@@ -87,6 +101,7 @@ const mapDispatchToProps = (dispatch: any) => ({
 
 const mapStateToProps = (state: any) => ({
   user: contextUserSelector(state),
+  year: newsListYearSelector(state),
 })
 
 export {

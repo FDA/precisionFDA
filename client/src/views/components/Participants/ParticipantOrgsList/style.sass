@@ -1,0 +1,24 @@
+@import "../../../../styles/common.sass"
+@import "../../../../styles/variables.sass"
+
+.participant-orgs-list
+	display: grid
+	grid-template-rows: 72px 72px
+	grid-auto-flow: column
+	grid-auto-columns: 160px
+	grid-gap: 5px
+	overflow-x: auto
+	list-style-type: none
+	padding: 20px
+
+	li
+		display: inline-block
+		margin: 12px
+
+		&:nth-child(2n+1)
+			transform: translateX(50%)
+
+	img
+		object-fit: contain
+		width: 128px
+		height: 60px

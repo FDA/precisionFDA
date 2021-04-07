@@ -1,11 +1,10 @@
 import React, { FunctionComponent } from 'react'
 import { connect } from 'react-redux'
-import classNames from 'classnames/bind'
 
 import history from '../../../../utils/history'
-import NewsListItem from '../NewsListItem'
-import { INewsItem } from '../../../shapes/NewsItemShape'
-import { IPagination } from '../../../shapes/IPagination'
+import { NewsListItem, NewsListItemLarge } from '../NewsListItem'
+import { INewsItem } from '../../../../types/newsItem'
+import { IPagination } from '../../../../types/pagination'
 import Pagination from '../../TableComponents/Pagination'
 import Loader from '../../Loader'
 import {
@@ -17,19 +16,21 @@ import {
   newsListIsFetchingSelector,
   newsListPaginationSelector
 } from '../../../../reducers/news/list/selectors'
-import './style.sass'
+import { StyledNewsListContainer } from './styles'
 
 
 interface INewsListProps {
+  listItemComponent: typeof NewsListItem,
   newsItems: INewsItem[],
   isFetching: boolean,
-  pagination: IPagination,
-  setPageHandler: (page: number) => void,
+  filter?: (item: INewsItem[]) => INewsItem[],
+  allowPagination?: boolean,
+  pagination?: IPagination,
+  setPageHandler?: (page: number) => void,
 }
 
 
-const NewsList: FunctionComponent<INewsListProps> = ({ newsItems, isFetching, pagination, setPageHandler }: INewsListProps) => {
-  const classes = classNames(['news-list'])
+const NewsList: FunctionComponent<INewsListProps> = ({ newsItems, isFetching, listItemComponent=NewsListItemLarge, filter, allowPagination=true, pagination, setPageHandler }: INewsListProps) => {
 
   if (isFetching) {
     return (
@@ -40,13 +41,21 @@ const NewsList: FunctionComponent<INewsListProps> = ({ newsItems, isFetching, pa
   }
 
   if (newsItems.length) {
+    let itemsToShow = newsItems
+    if (filter) {
+      itemsToShow = filter(newsItems)
+    }
+    const ListItem = listItemComponent
+
     return (
-      <div>
-        <ul className={classes}>
-          {newsItems.map((newsItem) => <NewsListItem key={newsItem.id} newsItem={newsItem} />)}
+      <StyledNewsListContainer>
+        <ul className="news-list">
+          {itemsToShow.map((newsItem) => <ListItem key={newsItem.id} newsItem={newsItem} />)}
         </ul>
-        <Pagination data={pagination} setPageHandler={setPageHandler} />
-      </div>
+        {allowPagination ??
+          <Pagination data={pagination} setPageHandler={setPageHandler} />
+        }
+      </StyledNewsListContainer>
     )
   }
 
@@ -55,7 +64,8 @@ const NewsList: FunctionComponent<INewsListProps> = ({ newsItems, isFetching, pa
 
 NewsList.defaultProps = {
   newsItems: [],
-  isFetching: false
+  listItemComponent: NewsListItemLarge,
+  isFetching: false,
 }
 
 const mapStateToProps = (state: any) => ({
