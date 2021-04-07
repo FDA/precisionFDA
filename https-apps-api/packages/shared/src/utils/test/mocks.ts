@@ -23,6 +23,7 @@ const fakes = {
   queue: {
     removeRepeatableFake: sinon.fake(),
     createJobSyncTaskFake: sinon.fake(),
+    createEmailSendTaskFake: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
@@ -64,6 +65,7 @@ const mocksSetup = () => {
   // stub queue helpers
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
   sandbox.replace(queue, 'createJobSyncTask', fakes.queue.createJobSyncTaskFake)
+  sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
 }
 
 const mocksReset = () => {
@@ -80,6 +82,7 @@ const mocksReset = () => {
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()
+  fakes.queue.createEmailSendTaskFake.resetHistory()
   fakes.bull.processFake.resetHistory()
   fakes.bull.isReadyFake.resetHistory()
 

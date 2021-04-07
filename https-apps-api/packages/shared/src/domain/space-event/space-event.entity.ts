@@ -8,7 +8,6 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { User, Space } from '..'
-import { BaseEntity } from '../../database/base-entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
@@ -16,9 +15,12 @@ import {
 import { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from './space-event.enum'
 
 @Entity({ tableName: 'space_events' })
-export class SpaceEvent extends BaseEntity {
+export class SpaceEvent {
   @PrimaryKey()
   id: number
+
+  @Property({ hidden: true })
+  createdAt = new Date()
 
   @Property()
   entityId: number
@@ -48,7 +50,6 @@ export class SpaceEvent extends BaseEntity {
   space: IdentifiedReference<Space>
 
   constructor(user: User, space: Space) {
-    super()
     this.user = Reference.create(user)
     this.space = Reference.create(space)
   }

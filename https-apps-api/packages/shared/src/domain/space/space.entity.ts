@@ -13,6 +13,12 @@ export class Space extends BaseEntity {
   @Property()
   title: string
 
+  @Property()
+  state: number
+
+  @Property({ fieldName: 'space_type' })
+  type: number
+
   @ManyToMany(() => SpaceMembership, 'spaces', {
     pivotTable: 'space_memberships_spaces',
     owner: true,

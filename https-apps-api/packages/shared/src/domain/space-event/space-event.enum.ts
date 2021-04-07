@@ -1,6 +1,7 @@
 enum PARENT_TYPE {
   USER = 'User',
   JOB = 'Job',
+  COMMENT = 'Comment',
 }
 
 enum SPACE_EVENT_OBJECT_TYPE {

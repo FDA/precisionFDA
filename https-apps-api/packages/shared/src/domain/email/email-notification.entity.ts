@@ -10,7 +10,6 @@ import {
 } from '@mikro-orm/core'
 import { isNil } from 'ramda'
 import { User } from '..'
-import { BaseEntity } from '../../database/base-entity'
 import { NOTIFICATION_TYPES } from './email.config'
 
 class NotificationType extends JsonType {
@@ -25,7 +24,7 @@ class NotificationType extends JsonType {
 }
 
 @Entity({ tableName: 'notification_preferences' })
-export class EmailNotification extends BaseEntity {
+export class EmailNotification {
   @PrimaryKey()
   id: number
 
@@ -36,7 +35,6 @@ export class EmailNotification extends BaseEntity {
   data: typeof NOTIFICATION_TYPES
 
   constructor({ user }: { user: User }) {
-    super()
     this.user = Reference.create(user)
   }
 }
