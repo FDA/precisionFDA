@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import AlertNotifications from '../../components/AlertNotifications'
 import LoaderWrapper from '../../components/LoaderWrapper'
+import PFDAFooter from '../../components/Footer'
 
 
 const PublicLayout = ({ children }) =>
@@ -11,6 +12,7 @@ const PublicLayout = ({ children }) =>
       <div>
         {children}
         <AlertNotifications />
+        <PFDAFooter />
       </div>
     </LoaderWrapper>
   </>

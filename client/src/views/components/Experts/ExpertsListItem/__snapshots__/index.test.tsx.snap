@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ExpertsListItem test should render ExpertsListItemType.BlogEntry 1`] = `
+exports[`ExpertsListItem test should render ExpertsListItemBlogEntry 1`] = `
 <div
   className="experts-list-item"
 >
@@ -40,7 +40,7 @@ exports[`ExpertsListItem test should render ExpertsListItemType.BlogEntry 1`] = 
       Blog Preview 1
     </p>
     <div
-      className="pull-left"
+      className="experts-list-item__buttons pull-left"
       style={
         Object {
           "marginTop": "6px",
@@ -70,7 +70,41 @@ exports[`ExpertsListItem test should render ExpertsListItemType.BlogEntry 1`] = 
 </div>
 `;
 
-exports[`ExpertsListItem test should render ExpertsListItemType.QuestionsAndAnswers 1`] = `
+exports[`ExpertsListItem test should render ExpertsListItemBlogEntrySmall 1`] = `
+<div
+  className="experts-list-item-small"
+>
+  <div
+    className="experts-list-item-small__left-column"
+  >
+    <img
+      className="expert-image img-circle"
+      src=""
+    />
+  </div>
+  <div
+    className="experts-list-item-small__right-column experts-item-content"
+  >
+    <div
+      className="expert-name"
+    >
+      Experts 1
+    </div>
+    <div
+      className="expert-blog-title"
+    >
+      Blog Title 1
+    </div>
+    <div
+      className="expert-date"
+    >
+      Mar 01, 2021
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ExpertsListItem test should render ExpertsListItemQuestionsAndAnswers 1`] = `
 <div
   className="experts-list-item-small"
 >

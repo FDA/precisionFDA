@@ -2,7 +2,7 @@
 
 exports[`NewsListPage test should render 1`] = `
 <PublicLayout>
-  <NavigationBarPublic
+  <withRouter(NavigationBar)
     subtitle="Announcements and press for precisionFDA."
     title="News"
   />
@@ -12,25 +12,25 @@ exports[`NewsListPage test should render 1`] = `
     <div
       className="left-column"
     >
-      <Connect(NewsList) />
+      <Connect(NewsList)
+        listItemComponent={[Function]}
+      />
     </div>
     <div
       className="right-column right-column--override pfda-main-content-sidebar"
     >
-      <div
-        className="pfda-subsection-heading"
-      >
+      <SectionHeading>
         NEWS BACKLOG
-      </div>
-      <Connect(NewsYearList)
+      </SectionHeading>
+      <NewsYearList
+        elementName="news"
+        query={[Function]}
         setYearHandler={[Function]}
       />
       <hr />
-      <div
-        className="pfda-subsection-heading"
-      >
+      <SectionHeading>
         COMMUNITY NEWS
-      </div>
+      </SectionHeading>
       <p>
         If you have newsworthy updates of value to the precisionFDA community, let us know!
       </p>
