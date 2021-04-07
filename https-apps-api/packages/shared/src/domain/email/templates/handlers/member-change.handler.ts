@@ -1,10 +1,20 @@
-import { pipe, map, filter, uniqBy } from 'ramda'
+import { pipe, filter, uniqBy } from 'ramda'
 import { errors } from '../../../..'
 import { User, SpaceEvent, SpaceMembership } from '../../..'
-import { EmailSendInput, EmailTemplate, MemberChanged } from '../../email.config'
+import {
+  EmailSendInput,
+  EmailTemplate,
+  MemberChanged,
+  NOTIFICATION_TYPES_BASE,
+} from '../../email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../../space-event/space-event.enum'
 import { BaseTemplate } from '../base-template'
 import { memberChangedTemplate, MemberChangeTemplateInput } from '../mjml/member-change.template'
+import {
+  buildEmailTemplate,
+  buildFilterByUserSettings,
+  buildIsNotificationEnabled,
+} from '../../email.helper'
 
 type ActionNames = {
   [s in keyof typeof SPACE_EVENT_ACTIVITY_TYPE]?: string
@@ -17,9 +27,15 @@ const ACTION_NAMES: ActionNames = {
 } as const
 
 export class MemberChangedEmailHandler
-  extends BaseTemplate<MemberChanged, MemberChangeTemplateInput>
+  extends BaseTemplate<MemberChanged>
   implements EmailTemplate {
   templateFile = memberChangedTemplate
+
+  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
+    // return 'member_added_or_removed_from_space'
+    // fixme: this will be dynamic, based on SpaceEvent data
+    return 'membership_changed'
+  }
 
   async determineReceivers(): Promise<User[]> {
     const spaceEvent = await this.ctx.em.findOneOrFail(
@@ -35,15 +51,17 @@ export class MemberChangedEmailHandler
       { spaces: spaceEvent.space.id, active: true },
       { populate: ['user.emailNotificationSettings'] },
     )
+    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
+    const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
+
     // this has to be bound to local
-    const scopedFn: () => User[] = this.filterByUserSettings.bind(this)
     const filterUsers = pipe(
-      map((m: SpaceMembership) => m.user.unwrap()),
+      // SpaceMembership[] -> User[]
+      filterFn,
       // this user triggered the SpaceEvent
       filter((u: User) => u.id !== spaceEvent.user.id),
       filter((u: User) => u.isChallengeBot()),
       uniqBy((user: User) => user.id),
-      scopedFn,
     )
     const result = filterUsers(memberships)
     // based on email type, find who will be the receiver
@@ -94,7 +112,10 @@ export class MemberChangedEmailHandler
 
   async template(receiver: User): Promise<EmailSendInput> {
     const content = await this.getTemplateContent()
-    const body = this.buildTemplateHtml({ receiver, content })
+    const body = buildEmailTemplate<MemberChangeTemplateInput>(this.templateFile, {
+      receiver,
+      content,
+    })
     return {
       to: receiver.email,
       body,
