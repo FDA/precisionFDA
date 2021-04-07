@@ -25,7 +25,7 @@ const NOTIFICATION_TYPES_BASE = {
   job_finished: true,
   // challenges
   challenge_added: true,
-} as const
+}
 
 /**
  * List of notification roles, roles are represented by a prefix in the DB column,
@@ -37,7 +37,7 @@ const NOTIFICATION_ROLE_PREFIXES = {
   spaceAdmin: 'admin',
   spaceMember: 'all',
   privateScope: 'private',
-} as const
+}
 /**
  * notification types should be build with this combination:
  *  `${NOTIFICATION_ROLE_PREFIXES[something]}_${NOTIFICATION_TYPES_BASE[something]}`
@@ -60,7 +60,7 @@ const NOTIFICATION_TYPES_COMMON = {
   all_task_status_changed: true,
   all_comment_activity: true,
   all_content_added_or_deleted: true,
-} as const
+}
 
 const NOTIFICATION_TYPES_LEAD = {
   lead_membership_changed: true,
@@ -70,7 +70,7 @@ const NOTIFICATION_TYPES_LEAD = {
   lead_content_added_or_deleted: true,
   lead_member_added_or_removed_from_space: true,
   lead_space_locked_unlocked_deleted: true,
-} as const
+}
 
 const NOTIFICATION_TYPES_ADMIN = {
   admin_membership_changed: true,
@@ -89,10 +89,10 @@ const NOTIFICATION_PRIVATE = {
 }
 
 // we use as any here to overwrite mergeAll type declaration
-const NOTIFICATION_TYPES: typeof NOTIFICATION_TYPES_COMMON &
-  typeof NOTIFICATION_TYPES_LEAD &
-  typeof NOTIFICATION_TYPES_ADMIN &
-  typeof NOTIFICATION_PRIVATE = mergeAll([
+const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_COMMON> &
+  Partial<typeof NOTIFICATION_TYPES_LEAD> &
+  Partial<typeof NOTIFICATION_TYPES_ADMIN> &
+  Partial<typeof NOTIFICATION_PRIVATE> = mergeAll([
   NOTIFICATION_TYPES_COMMON,
   NOTIFICATION_TYPES_LEAD,
   NOTIFICATION_TYPES_ADMIN,
@@ -234,6 +234,7 @@ export {
   getEmailConfig,
   EmailConfigItem,
   EMAIL_TYPES,
+  EMAIL_CONFIG,
   NOTIFICATION_TYPES,
   NOTIFICATION_TYPES_BASE,
   NOTIFICATION_ROLE_PREFIXES,

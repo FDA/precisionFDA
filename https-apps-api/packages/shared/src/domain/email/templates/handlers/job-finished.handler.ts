@@ -15,7 +15,9 @@ export class JobFinishedEmailHandler extends BaseTemplate<Foo> implements EmailT
   }
 
   async determineReceivers(): Promise<User[]> {
-    return []
+    const owner = await this.ctx.em.findOneOrFail(User, { id: this.ctx.user.id })
+    // todo: check db settings
+    return [owner]
   }
 
   async template(receiver: User): Promise<EmailSendInput> {

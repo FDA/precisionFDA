@@ -10,6 +10,15 @@ import {
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
 } from '../../domain/user-file/user-file.enum'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '../../domain/space-membership/space-membership.enum'
+import {
+  PARENT_TYPE as SPACE_EVENT_PARENT_TYPE,
+  SPACE_EVENT_ACTIVITY_TYPE,
+  SPACE_EVENT_OBJECT_TYPE,
+} from '../../domain/space-event/space-event.enum'
 
 const chance = new Chance()
 
@@ -210,4 +219,51 @@ const tagging = {
   }),
 }
 
-export { random, user, job, app, userFile, folder, tag, tagging }
+const space = {
+  simple: (): Partial<InstanceType<typeof entities.Space>> => ({
+    name: chance.word(),
+    state: 1, // ACTIVE,
+    type: 1, // review type
+  }),
+}
+
+const spaceMembership = {
+  simple: (): Partial<InstanceType<typeof entities.SpaceMembership>> => ({
+    active: true,
+    side: SPACE_MEMBERSHIP_SIDE.GUEST,
+    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+  }),
+}
+
+const spaceEvent = {
+  commentAdded: (): Partial<InstanceType<typeof entities.SpaceEvent>> => ({
+    entityId: 1,
+    entityType: SPACE_EVENT_PARENT_TYPE.COMMENT,
+    activityType: SPACE_EVENT_ACTIVITY_TYPE.comment_added,
+    objectType: SPACE_EVENT_OBJECT_TYPE.COMMENT,
+    side: SPACE_MEMBERSHIP_SIDE.GUEST,
+    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+  }),
+  contentAdded: (): Partial<InstanceType<typeof entities.SpaceEvent>> => ({
+    entityId: 1,
+    entityType: SPACE_EVENT_PARENT_TYPE.JOB,
+    activityType: SPACE_EVENT_ACTIVITY_TYPE.job_added,
+    objectType: SPACE_EVENT_OBJECT_TYPE.JOB,
+    side: SPACE_MEMBERSHIP_SIDE.GUEST,
+    role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+  }),
+}
+
+export {
+  random,
+  user,
+  job,
+  app,
+  userFile,
+  folder,
+  tag,
+  tagging,
+  space,
+  spaceMembership,
+  spaceEvent,
+}
