@@ -12,8 +12,9 @@
     "build": "lerna run build"
   },
   "devDependencies": {
-    "lerna": "^3.22.1",
+    "lerna": "^4.0.0",
     "nodemon": "^2.0.5",
+    "snyk": "^1.520.0",
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.0.3"
