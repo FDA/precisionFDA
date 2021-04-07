@@ -4,7 +4,7 @@ import { shallow, mount } from 'enzyme'
 
 import Loader from '../../Loader'
 import { ExpertsList } from '.'
-import { ExpertsListItem } from '../ExpertsListItem'
+import { ExpertsListItemBlogEntry } from '../ExpertsListItem'
 
 
 const getMockExperts = () => {
@@ -21,6 +21,7 @@ const getMockExperts = () => {
       about: '',
       title: 'Expert '+i,
       blogTitle: 'Blog Title '+i,
+      blogPreview: 'Blog Preview '+i,
       blog: 'Blog '+i,
       createdAt: dateNow,
       updatedAt: dateNow,
@@ -40,7 +41,7 @@ describe('ExpertsList test', () => {
   })
 
   it('should show loader when isFetching and not show ExpertsList', () => {
-    const wrapper = mount(<ExpertsList isFetching={true} />)
+    const wrapper = mount(<ExpertsList isFetching={true} listItemComponent={ExpertsListItemBlogEntry} />)
 
     // console.log(wrapper.debug())
     expect(wrapper.find(Loader)).toHaveLength(1)
@@ -49,7 +50,7 @@ describe('ExpertsList test', () => {
   })
 
   it('should not show loader when not fetching and show ExpertsList with no rows', () => {
-    const wrapper = mount(<ExpertsList experts={[]} isFetching={false} />)
+    const wrapper = mount(<ExpertsList experts={[]} isFetching={false} listItemComponent={ExpertsListItemBlogEntry} />)
     // console.log(wrapper.debug())
 
     expect(wrapper.find(Loader)).toHaveLength(0)
@@ -70,7 +71,7 @@ describe('ExpertsList test', () => {
     }
     const wrapper = mount (
       <BrowserRouter>
-        <ExpertsList experts={mockExperts} pagination={mockPagination} isFetching={false} />
+        <ExpertsList experts={mockExperts} pagination={mockPagination} isFetching={false} listItemComponent={ExpertsListItemBlogEntry} />
       </BrowserRouter>
     )
     // console.log(wrapper.debug())
@@ -81,7 +82,7 @@ describe('ExpertsList test', () => {
     expect(wrapper.find('.experts-list-item')).toHaveLength(10)
 
     // Test item props
-    const items = wrapper.find(ExpertsListItem)
+    const items = wrapper.find(ExpertsListItemBlogEntry)
     expect(items).toHaveLength(10)
     expect(items.at(9).props().expert.id).toEqual(9)
     expect(items.at(8).props().expert.title).toEqual('Expert 8')

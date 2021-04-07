@@ -13,7 +13,7 @@ import {
   MY_ENTRIES_FETCH_SUCCESS,
   MY_ENTRIES_FETCH_FAILURE,
 } from '../../../actions/submissions/types'
-import { ISubmission } from '../../../views/shapes/SubmissionShape'
+import { ISubmission } from '../../../types/submission'
 
 
 export default createReducer(initialState, {

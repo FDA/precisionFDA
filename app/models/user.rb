@@ -293,8 +293,18 @@ class User < ApplicationRecord
     can_administer_site? || review_space_admin?
   end
 
+  def can_see_spaces?
+    return true if can_create_spaces?
+
+    space_memberships.active.count.positive?
+  end
+
   def can_create_challenges?
     site_or_challenge_admin?
+  end
+
+  def can_access_notification_preference?
+    spaces.review.any?
   end
 
   # @param time_zone [String] new time zone

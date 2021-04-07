@@ -12,21 +12,21 @@ h1
   padding-right: 12px
 
   a
-    color: black
+    color: $color-text-black
 
 .expert-date
   font-size: 13px
-  color: $pfda-text-medium-grey
+  color: $color-text-medium-grey
 
 .experts-list-item
   display: flex
   flex-flow: row nowrap
   list-style: none
-  margin-bottom: $pfda-main-content-vertical-padding
+  margin-bottom: $padding-main-content-vertical
 
   &__left-column
-    width: $pfda-smaller-column-width
-    flex: 0 0 $pfda-smaller-column-width
+    width: $sizing-smaller-column-width
+    flex: 0 0 $sizing-smaller-column-width
     align-items: flex-start
     padding: 0
 
@@ -34,18 +34,18 @@ h1
     flex-grow: 1
     align-items: flex-start
     padding-left: 0
-    padding-right: $pfda-main-content-horizontal-padding
+    padding-right: $padding-main-content-horizontal
 
   .expert-image
-    width: $pfda-smaller-column-width
-    height: $pfda-smaller-column-width
+    width: $sizing-smaller-column-width
+    height: $sizing-smaller-column-width
     object-fit: cover
     overflow: hidden
 
   .experts-item-content
     flex-grow: 1
     vertical-align: top
-    padding: 0 0 0 $pfda-main-content-horizontal-padding
+    padding: 0 0 0 $padding-main-content-horizontal
 
     h1
       @extend .pfda-section-heading
@@ -54,14 +54,16 @@ h1
     p
       font-size: $pfda-font-size-body
       font-weight: 400
-      color: $pfda-text-medium-grey
+      color: $color-text-medium-grey
       margin-top: 5px
 
+  &__buttons
     button
-      margin-right: $pfda-button-spacing * 1.5
+      margin-right: $padding-button-spacing * 1.5
 
     a
-      margin-right: $pfda-button-spacing * 1.5
+      margin-right: $padding-button-spacing * 1.5
+
 
   @media (min-width: 768px)
     flex-flow: row nowrap
@@ -69,7 +71,7 @@ h1
 
 .experts-list-item-small
   display: flex
-  margin-bottom: $pfda-main-content-vertical-padding / 2
+  margin-bottom: $padding-main-content-vertical / 2
 
   &__left-column
     width: 60x
@@ -85,8 +87,8 @@ h1
     font-size: 12px
 
   .expert-image
-    width: 56px
-    height: 56px
+    width: $sizing-icon-small
+    height: $sizing-icon-small
     margin: auto
     object-fit: cover
     overflow: hidden
@@ -109,7 +111,7 @@ h1
       width: 50%
 
     .answers-comments
-      color: $pfda-text-medium-grey
+      color: $color-text-medium-grey
       margin-left: 3px
       margin-right: 6px
 

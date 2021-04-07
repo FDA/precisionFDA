@@ -8,11 +8,11 @@ import {
   EXPERTS_LIST_FETCH_FAILURE,
 } from '../types'
 import * as C from '../../../constants'
-import { IExpert, mapToExpert } from '../../../views/shapes/ExpertShape'
+import { mapToExpert } from '../../../types/expert'
 import { mapToPagination } from '../../../views/shapes/PaginationShape'
 import { showAlertAboveAll } from '../../alertNotifications'
 import { expertsListPaginationSelector, expertsListYearSelector } from '../../../reducers/experts/list/selectors'
-import { IExpertsListActionPayload } from '../../../reducers/experts/list'
+import { IExpertsListActionPayload } from '../../../reducers/experts/list/IExpertsListActionPayload'
 
 
 
@@ -45,7 +45,6 @@ const fetchExperts = () => (
           const actionPayload = {
             items: response.payload.experts.map(mapToExpert),
             pagination: mapToPagination(response.payload.meta),
-            year: response.payload.year
           }
           dispatch(fetchExpertsSuccess(actionPayload))
         } else {

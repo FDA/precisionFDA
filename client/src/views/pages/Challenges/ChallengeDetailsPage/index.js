@@ -11,7 +11,7 @@ import enUS from 'date-fns/locale/en-US'
 import { fetchChallenge } from '../../../../actions/challenges'
 import ChallengeShape from '../../../shapes/ChallengeShape'
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBarPublic from '../../../components/NavigationBar/NavigationBarPublic'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import Loader from '../../../components/Loader'
 import CollapsibleMenu from '../../../components/CollapsibleMenu'
 import ChallengeTimeRemaining from '../../../components/Challenges/ChallengeTimeRemaining'
@@ -25,6 +25,7 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import ChallengeSubmissionsTable from '../../../components/Challenges/ChallengeSubmissionsTable'
 import ChallengeMyEntriesTable from '../../../components/Challenges/ChallengeMyEntriesTable'
+import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
 
 
 class ChallengeContent {
@@ -169,7 +170,7 @@ class ChallengeDetailsPage extends React.Component {
     if (error != undefined) {
       return (
         <PublicLayout>
-          <NavigationBarPublic showLogoOnNavbar={true} />
+          <NavigationBar showLogoOnNavbar={true} />
           <div className="error-container">
             <Link to={{ pathname: '/challenges' }}>
                 &larr; Back to All Challenges
@@ -246,7 +247,7 @@ class ChallengeDetailsPage extends React.Component {
 
     return (
       <PublicLayout>
-        <NavigationBarPublic showLogoOnNavbar={true}>
+        <NavigationBar user={user} showLogoOnNavbar={true}>
           <div className={bannerClasses}>
             <div className="left-column">
               <div>
@@ -273,21 +274,21 @@ class ChallengeDetailsPage extends React.Component {
               <img className="challenge-thumbnail" src={challenge.cardImageUrl} />
             </div>
           </div>
-        </NavigationBarPublic>
+        </NavigationBar>
         
         <div className="challenge-details-main-container">
           <div className="left-column">
             <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
-              <TabList>
-                <Tab>INTRODUCTION</Tab>
+              <TabList className="challenge-details-tabs__tab-list">
+                <Tab className="challenge-details-tabs__tab" selectedClassName="challenge-details-tabs__tab--selected">INTRODUCTION</Tab>
                 {userCanSeeSubmissions && (
                   <>
-                  <Tab>SUBMISSIONS</Tab>
-                  <Tab>MY ENTRIES</Tab>
+                  <Tab className="challenge-details-tabs__tab">SUBMISSIONS</Tab>
+                  <Tab className="challenge-details-tabs__tab">MY ENTRIES</Tab>
                   </>
                 )}
                 {userCanSeeResults && (
-                <Tab>RESULTS</Tab>
+                <Tab className="challenge-details-tabs__tab" selectedClassName="challenge-details-tabs__tab--selected">RESULTS</Tab>
                 )}
               </TabList>
 
@@ -312,7 +313,11 @@ class ChallengeDetailsPage extends React.Component {
             </Tabs>
           </div>
           <div className="right-column pfda-main-content-sidebar">
-            <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+            {user.is_guest ?
+              <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className={joinChallengeButtonClasses}>Join Challenge</GuestRestrictedLink> 
+              :
+              <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+            }
             {userCanSubmitEntry && (
               <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} href={challenge.links.new_submission}>Submit Challenge Entry</a>
             )}

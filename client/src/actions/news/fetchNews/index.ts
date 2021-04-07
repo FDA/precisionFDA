@@ -8,7 +8,7 @@ import {
   NEWS_LIST_FETCH_FAILURE,
 } from '../types'
 import * as C from '../../../constants'
-import { mapToNewsItem } from '../../../views/shapes/NewsItemShape'
+import { mapToNewsItem } from '../../../types/newsItem'
 import { mapToPagination } from '../../../views/shapes/PaginationShape'
 import {
   newsListPaginationSelector,
@@ -47,7 +47,6 @@ const fetchNews = () => (
           const actionPayload: INewsListActionPayload = {
             items: response.payload.news_items.map(mapToNewsItem),
             pagination: mapToPagination(response.payload.meta),
-            year: response.payload.year,
           }
           dispatch(fetchNewsSuccess(actionPayload))
         } else {

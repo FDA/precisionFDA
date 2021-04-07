@@ -1,0 +1,28 @@
+@import "../../../../styles/variables.sass"
+
+.pfda-navbar-loggedin
+  background-color: $color-dark-blue
+
+  &::after
+    clear: both
+
+  .pfda-navbar-logo
+    display: inline-block
+    width: 162px
+    height: 36px
+    margin: auto $padding-main-content-horizontal
+
+  a
+    color: white
+    height: $sizing-navigation-bar-height
+
+    &:hover
+      color: $color-text-dark-grey
+      background-color: transparent
+
+  li.active
+    color: white
+    background-color: #093E7C
+
+  .nav-spacer
+    border-color: $color-light-blue
