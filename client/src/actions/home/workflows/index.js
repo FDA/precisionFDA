@@ -18,6 +18,7 @@ import fetchWorkflowsFeatured from './fetchWorkflowsFeatured'
 import fetchWorkflowsEveryone from './fetchWorkflowsEveryone'
 import fetchWorkflowsSpaces from './fetchWorkflowsSpaces'
 import fetchWorkflowDetails from './fetchWorkflowDetails'
+import fetchWorkflowDiagram from './fetchWorkflowDiagram'
 import fetchWorkflowExecutions from './fetchWorkflowExecutions'
 
 
@@ -76,7 +77,6 @@ const workflowsAttachTo = (items, noteUids) => createAction(OBJECT_TYPES.WORKFLO
 const showWorkflowEditTagsModal = () => createAction(HOME_WORKFLOWS_SHOW_MODAL, HOME_WORKFLOWS_MODALS.EDIT_TAGS)
 const hideWorkflowEditTagsModal = () => createAction(HOME_WORKFLOWS_HIDE_MODAL, HOME_WORKFLOWS_MODALS.EDIT_TAGS)
 
-
 export {
   showWorkflowEditTagsModal,
   hideWorkflowEditTagsModal,
@@ -85,6 +85,7 @@ export {
   fetchWorkflowsEveryone,
   fetchWorkflowsSpaces,
   fetchWorkflowDetails,
+  fetchWorkflowDiagram,
   fetchWorkflowExecutions,
   toggleAllWorkflowsCheckboxes,
   toggleWorkflowCheckbox,

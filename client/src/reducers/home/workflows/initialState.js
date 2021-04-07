@@ -58,6 +58,10 @@ export default {
     workflow: {},
     meta: {},
   },
+  workflowDiagram: {
+    isFetching: false,
+    stages: [],
+  },
   workflowExecutions: {
     isFetching: false,
     isExpandedAll: false,

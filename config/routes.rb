@@ -273,6 +273,7 @@ Rails.application.routes.draw do
       end
 
       resources :workflows, only: %i(index show create) do
+        get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
 
         collection do
