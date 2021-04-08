@@ -1,15 +1,15 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { entities } from '../../domain'
-import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../../domain/job/job.enum'
-import { ENTITY_TYPE } from '../../domain/app/app.enum'
-import type { AnyObject } from '../../types'
+import { entities } from '../domain'
+import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
+import { ENTITY_TYPE } from '../domain/app/app.enum'
+import type { AnyObject } from '../types'
 import {
   FILE_STATE,
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-} from '../../domain/user-file/user-file.enum'
+} from '../domain/user-file/user-file.enum'
 
 const chance = new Chance()
 

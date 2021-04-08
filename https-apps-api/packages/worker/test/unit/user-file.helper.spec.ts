@@ -2,7 +2,7 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database } from '@pfda/https-apps-shared'
-import { create, db } from '@pfda/https-apps-shared/src/utils/test'
+import { create, db } from '@pfda/https-apps-shared/src/test'
 
 describe('user-file.helper', () => {
   context('parseFoldersFromClient()', () => {

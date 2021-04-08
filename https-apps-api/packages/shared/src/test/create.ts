@@ -1,5 +1,5 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
-import { entities } from '../../domain'
+import { entities } from '../domain'
 import * as generate from './generate'
 
 const userHelper = {
