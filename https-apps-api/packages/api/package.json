@@ -18,6 +18,8 @@
     "uninstall": "rm -rf ./node_modules"
   },
   "dependencies": {
+    "@types/koa": "^2.11.5",
+    "@types/koa-bodyparser": "^4.3.0",
     "@mikro-orm/core": "^4.2.3",
     "@mikro-orm/mysql": "^4.1.0",
     "@mikro-orm/reflection": "^4.2.3",
@@ -40,8 +42,6 @@
     "@types/chance": "^1.1.0",
     "@types/dirty-chai": "^2.0.2",
     "@types/json-schema": "^7.0.6",
-    "@types/koa": "^2.11.5",
-    "@types/koa-bodyparser": "^4.3.0",
     "@types/koa-router": "^7.4.1",
     "@types/luxon": "^1.25.0",
     "@types/mocha": "^8.0.3",
