@@ -3,8 +3,8 @@ import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
 import { App, Folder, Job, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
-import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { create, generate, db } from '@pfda/https-apps-shared/src/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database } from '@pfda/https-apps-shared'
 import {
   FILE_STI_TYPE,
