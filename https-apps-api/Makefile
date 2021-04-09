@@ -1,4 +1,3 @@
-# will need to be refactored so it uses "lerna exec" command -> for example, run make clean in every package...
 # Defining shell is necessary in order to modify PATH
 SHELL := sh
 bin := node_modules/.bin/
@@ -9,7 +8,6 @@ export PATH := $(bin):$(PATH)
 # node_modules: package.json
 # 	npm install && touch node_modules
 
-# when using yarn workspaces, this is the same as running "lerna bootstrap"
 install:
 	yarn
 
@@ -47,7 +45,7 @@ watch-worker:
 
 # maps to npm script build commands in every package
 build:
-	$(bin)lerna run build
+	yarn workspaces run build
 
 run-prettier:
 	$(bin)prettier --write ./packages/**/src/**/*.ts
@@ -67,11 +65,11 @@ test: test-api
 	make test-worker
 
 clean:
-	$(bin)lerna run clean
+	yarn workspaces run clean
 
 pristine:
-	$(bin)lerna run clean
-	$(bin)lerna run uninstall
+	yarn workspaces run clean
+	yarn workspaces run uninstall
 	rm -rf ./temp && rm -rf ./node_modules
 
 .PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker run-worker-repl test run-dev-dist run-worker-dev-dist
