@@ -13,6 +13,9 @@ export PATH := $(bin):$(PATH)
 install:
 	yarn
 
+install-test-prod:
+	yarn install --production
+
 # a demonstration on how to run built API
 run-dist:
 	node ./packages/api/dist/index.js

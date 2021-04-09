@@ -10,8 +10,8 @@ import {
   allowedFeatures,
   allowedInstanceTypes,
 } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
-import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { create, generate, db } from '@pfda/https-apps-shared/src/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { api } from '../../../src/server'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 

@@ -55,7 +55,7 @@ exports[`HomeExecutionsTable test should render 1`] = `
         </Th>
         <Th
           sortHandler={[Function]}
-          type="created_at"
+          type="launched_on"
         >
           launched on
         </Th>

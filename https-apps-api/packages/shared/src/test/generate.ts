@@ -1,24 +1,24 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { entities } from '../../domain'
-import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../../domain/job/job.enum'
-import { ENTITY_TYPE } from '../../domain/app/app.enum'
-import type { AnyObject } from '../../types'
+import { entities } from '../domain'
+import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
+import { ENTITY_TYPE } from '../domain/app/app.enum'
+import type { AnyObject } from '../types'
 import {
   FILE_STATE,
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-} from '../../domain/user-file/user-file.enum'
+} from '../domain/user-file/user-file.enum'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
-} from '../../domain/space-membership/space-membership.enum'
+} from '../domain/space-membership/space-membership.enum'
 import {
   PARENT_TYPE as SPACE_EVENT_PARENT_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
-} from '../../domain/space-event/space-event.enum'
+} from '../domain/space-event/space-event.enum'
 
 const chance = new Chance()
 
