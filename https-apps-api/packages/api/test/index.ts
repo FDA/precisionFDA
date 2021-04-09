@@ -2,7 +2,7 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
 import { database } from '@pfda/https-apps-shared'
-import { db, mocks } from '@pfda/https-apps-shared/src/utils/test'
+import { db, mocks } from '@pfda/https-apps-shared/src/test'
 import { api } from '../src/server'
 
 chai.use(chaiAsPromised)

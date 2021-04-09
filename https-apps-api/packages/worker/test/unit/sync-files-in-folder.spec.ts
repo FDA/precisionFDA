@@ -1,18 +1,18 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { User, Folder, Job, UserFile } from '@pfda/https-apps-shared/src/domain'
-import { create, db } from '@pfda/https-apps-shared/src/utils/test'
+import { create, db } from '@pfda/https-apps-shared/src/test'
 import type { SyncFilesInFolderInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
 import {
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
-import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import {
   FILES_DESC_RES,
   FILES_LIST_RES_ROOT,
-} from '@pfda/https-apps-shared/src/utils/test/mock-responses'
+} from '@pfda/https-apps-shared/src/test/mock-responses'
 
 describe('syncFilesInFolder operation', () => {
   let em: EntityManager<MySqlDriver>
