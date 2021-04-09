@@ -14,6 +14,10 @@ export const config: ConfigOverride = {
       default: { name: 'https-apps-worker-queue-prod' },
     },
   },
+  platform: {
+    apiUrl: 'https://api.dnanexus.com',
+    authApiUrl: 'https://auth.dnanexus.com',
+  },
   redis: {
     isSecure: true,
   },
