@@ -9,6 +9,9 @@ import {
   HOME_WORKFLOWS_FETCH_WORKFLOW_DETAILS_START,
   HOME_WORKFLOWS_FETCH_WORKFLOW_DETAILS_SUCCESS,
   HOME_WORKFLOWS_FETCH_WORKFLOW_DETAILS_FAILURE,
+  HOME_WORKFLOWS_FETCH_WORKFLOW_DIAGRAM_START,
+  HOME_WORKFLOWS_FETCH_WORKFLOW_DIAGRAM_SUCCESS,
+  HOME_WORKFLOWS_FETCH_WORKFLOW_DIAGRAM_FAILURE,
   HOME_WORKFLOWS_RESET_MODALS,
   HOME_WORKFLOWS_SHOW_MODAL,
   HOME_WORKFLOWS_HIDE_MODAL,
@@ -340,6 +343,32 @@ export default createReducer(initialState, {
     },
   }),
 
+  [HOME_WORKFLOWS_FETCH_WORKFLOW_DIAGRAM_START]: (state) => ({
+    ...state,
+    workflowDiagram: {
+      ...state.workflowDiagram,
+      isFetching: true,
+      stages: [],
+    },
+  }),
+
+  [HOME_WORKFLOWS_FETCH_WORKFLOW_DIAGRAM_SUCCESS]: (state, { stages }) => ({
+    ...state,
+    workflowDiagram: {
+      ...state.workflowDiagram,
+      isFetching: false,
+      stages,
+    },
+  }),
+
+  [HOME_WORKFLOWS_FETCH_WORKFLOW_DIAGRAM_FAILURE]: (state) => ({
+    ...state,
+    workflowDiagram: {
+      ...state.workflowDiagram,
+      isFetching: false,
+    },
+  }),
+
   [HOME_WORKFLOWS_FETCH_WORKFLOW_EXECUTIONS_START]: (state) => ({
     ...state,
     workflowExecutions: {
@@ -371,7 +400,8 @@ export default createReducer(initialState, {
     },
   }),
 
-  [HOME_WORKFLOWS_EXECUTIONS_EXPAND_EXECUTION]: (state, { key }) => {
+
+ [HOME_WORKFLOWS_EXECUTIONS_EXPAND_EXECUTION]: (state, { key }) => {
     const executions = state.workflowExecutions.jobs.map((exec) => {
       if (exec.key === key) exec.isExpanded = !exec.isExpanded
       return exec

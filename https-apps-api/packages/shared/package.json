@@ -26,8 +26,7 @@
     "chance": "^1.1.7",
     "eslint": "^6.0.0",
     "prettier": "^2.1.2",
-    "sinon": "^9.2.3",
-    "snyk": "^1.440.4"
+    "sinon": "^9.2.3"
   },
   "dependencies": {
     "@mikro-orm/core": "^4.2.3",

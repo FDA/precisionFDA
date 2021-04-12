@@ -13,5 +13,9 @@ module Utils
     ENV["DNANEXUS_BACKEND"] == PRODUCTION_ENV ||
       !(Rails.env.development? || Rails.env.ui_test? || ENV["DEV_HOST"])
   end
+
+  def development_or_test?
+    Rails.env.development? || Rails.env.test? || Rails.env.ui_test?
+  end
   # rubocop:enable Rails/UnknownEnv
 end

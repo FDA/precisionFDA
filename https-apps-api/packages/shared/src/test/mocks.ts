@@ -1,6 +1,6 @@
 import sinon from 'sinon'
 import Bull from 'bull'
-import { client, queue } from '../..'
+import { client, queue } from '..'
 // import { handler } from '../../src/jobs'
 import * as generate from './generate'
 import { FILES_DESC_RES, FILES_LIST_RES_ROOT, FOLDERS_LIST_RES } from './mock-responses'

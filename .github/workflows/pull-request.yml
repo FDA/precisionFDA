@@ -74,7 +74,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: "12.16.1"
+          node-version: '12.16.1'
 
       - name: Install
         run: yarn
@@ -119,8 +119,9 @@ jobs:
       - name: Install yarn
         run: npm install -g yarn
       - run: cd ./https-apps-api && make install
-      - run: cd ./https-apps-api && make test-api
+      - run: echo $DATABASE_TEST_URL
       - run: cd ./https-apps-api && make test-worker
+      - run: cd ./https-apps-api && make test-api
       - name: Snyk test
         run: cd ./https-apps-api && ./node_modules/.bin/snyk test
         env:
@@ -134,7 +135,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: "12.16.1"
+          node-version: '12.16.1'
 
       - name: Install
         run: yarn --frozen-lockfile

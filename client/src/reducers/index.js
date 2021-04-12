@@ -6,6 +6,7 @@ import alertNotifications from './alertNotifications'
 import home from './home'
 import challenges from './challenges'
 import news from './news'
+import experts from './experts'
 import error from '../views/components/ErrorWrapper/reducer'
 
 
@@ -17,4 +18,5 @@ export default combineReducers({
   home,
   challenges,
   news,
+  experts,
 })

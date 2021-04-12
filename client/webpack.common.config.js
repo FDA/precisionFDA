@@ -4,6 +4,7 @@ const path = require('path')
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
+
 module.exports = {
   entry: './src/index.tsx',
   output: {
@@ -23,8 +24,12 @@ module.exports = {
         loader: 'babel-loader',
       },
       {
-        test: /\.sass$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        test: /\.s(a|c)ss$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+        ],
       },
       {
         test: /\.css$/,

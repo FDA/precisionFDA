@@ -26,14 +26,21 @@ describe('fetchNews()', () => {
 
     it('dispatches correct actions on success response', () => {
       const news = []
-      fetchMock.get('/api/news', { news_items: news, meta: {}})
+      const pagination = {
+        currentPage: 2,
+        nextPage: 3,
+        prevPage: 1,
+        totalCount: 42,
+        totalPages: 5,
+      }
+      fetchMock.get('/api/news', { news_items: news, meta: pagination })
 
       store.dispatch(fetchNews()).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
           { type: NEWS_LIST_FETCH_START, payload: {}},
-          { type: NEWS_LIST_FETCH_SUCCESS, payload: { news: news, pagination: {}, year: undefined }},
+          { type: NEWS_LIST_FETCH_SUCCESS, payload: { items: news, pagination: pagination, year: undefined }},
         ])
       })
     })
