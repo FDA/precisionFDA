@@ -26,6 +26,7 @@ const getWorkflowsFeatured = (data) => backendCall('/api/workflows/featured', 'G
 const getWorkflowsSpaces = (data) => backendCall('/api/workflows/spaces', 'GET', data)
 const getWorkflowExecutions = (uid, data) => backendCall(`/api/workflows/${uid}/jobs`, 'GET', data)
 const getWorkflowDetails = (uid, data) => backendCall(`/api/workflows/${uid}`, 'GET', data)
+const getWorkflowDiagram = (uid, data) => backendCall(`/api/workflows/${uid}/diagram`, 'GET', data)
 
 const getExecutions = (data) => backendCall('/api/jobs', 'GET', data)
 const getExecutionsSpaces = (data) => backendCall('/api/jobs/spaces', 'GET', data)
@@ -66,6 +67,7 @@ export {
   getExecutionDetails,
   getAppExecutions,
   getWorkflowDetails,
+  getWorkflowDiagram,
   getWorkflowExecutions,
   getAssets,
   getAssetsFeatured,

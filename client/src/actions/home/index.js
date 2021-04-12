@@ -147,6 +147,7 @@ import {
   showWorkflowsAttachToModal,
   hideWorkflowsAttachToModal,
   fetchWorkflowDetails,
+  fetchWorkflowDiagram,
   showWorkflowEditTagsModal,
   hideWorkflowEditTagsModal,
   fetchWorkflowExecutions,
@@ -473,6 +474,7 @@ export {
   setExecutionsFeaturedFilterValue,
   resetExecutionsFeaturedFiltersValue,
   fetchWorkflowDetails,
+  fetchWorkflowDiagram,
 }
 
 export {
