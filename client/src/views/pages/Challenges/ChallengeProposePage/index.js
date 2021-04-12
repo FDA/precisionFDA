@@ -20,11 +20,11 @@ class ChallengeProposePage extends React.Component {
     const sideMenuOptions = [
       {
         text: 'Currently Open',
-        onClick: () => history.push('/new_challenges'),
+        onClick: () => history.push('/challenges'),
       },
       {
         text: 'Upcoming',
-        onClick: () => history.push('/new_challenges'),
+        onClick: () => history.push('/challenges'),
       },
       {
         text: 'Propose a Challenge',
@@ -48,7 +48,8 @@ class ChallengeProposePage extends React.Component {
           <div className="right-column">
             <CollapsibleMenu title="Challenges" options={sideMenuOptions} />
             <hr />
-            <ChallengesYearList setYearHandler={(year) => {history.push('/new_challenges/?year='+year)}} />
+            <div className="pfda-subsection-heading">PREVIOUS CHALLENGES</div>
+            <ChallengesYearList setYearHandler={(year) => {history.push('/challenges/?year='+year)}} />
           </div>
         </div>
       </PublicLayout>

@@ -32,6 +32,7 @@ import {
 import { OBJECT_TYPES } from '../../../../../constants'
 import { getSelectedTab } from '../../../../../helpers/home'
 import ActionsDropdown from '../../../../components/Home/Workflows/ActionsDropdown'
+import HomeWorkflowsDiagram from '../../../../components/Home/Workflows/HomeWorkflowsDiagram'
 
 
 const HomeWorkflowsSinglePage = (props) => {
@@ -124,7 +125,7 @@ const HomeWorkflowsSinglePage = (props) => {
     },
     {
       header: 'Diagram',
-      tab: <div>Executions</div>,
+      tab: <HomeWorkflowsDiagram uid={workflow.uid}/>,
     },
   ]
 

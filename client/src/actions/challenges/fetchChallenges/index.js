@@ -10,7 +10,6 @@ import {
 import { mapToChallenge } from '../../../views/shapes/ChallengeShape'
 import { mapToPagination } from '../../../views/shapes/PaginationShape'
 import {
-  // challengesListSearchStringSelector,
   challengesListPaginationSelector,
   challengesListYearSelector,
 } from '../../../reducers/challenges/list/selectors'
@@ -26,13 +25,8 @@ const fetchChallengesFailure = () => createAction(CHALLENGES_FETCH_FAILURE)
 const fetchChallenges = () => (
   (dispatch, getState) => {
     const state = getState()
-    // const searchString = challengesListSearchStringSelector(state)
     const pagination = challengesListPaginationSelector(state)
     let params = {}
-
-    // if (searchString && searchString.length) {
-    //   params = { query: searchString }
-    // }
 
     const year = challengesListYearSelector(state)
     if (year) {
@@ -48,7 +42,6 @@ const fetchChallenges = () => (
     return API.getChallenges(params)
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
-          // console.log(response.payload)
           const challenges = response.payload.challenges.map(mapToChallenge)
           const pagination = mapToPagination(response.payload.meta)
           dispatch(fetchChallengesSuccess(challenges, pagination))

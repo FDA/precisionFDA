@@ -67,11 +67,11 @@ const CollapsibleMenu = ({ title, children, options }) => {
 
   return (
     <div className="accordion collapsible-menu" id={collapseMenuId}>
-      <div className="collapsible-header collapsed" data-toggle="collapse" data-target={'#'+collapseBodyId} aria-expanded="true" aria-controls={collapseBodyId}>
+      <div className="accordion-header collapsible-header" data-toggle="collapse" data-target={'#'+collapseBodyId} aria-expanded="true" aria-controls={collapseBodyId}>
         <Icon id='toggle-icon' icon='fa-angle-down' />
         <div className='title'>{title}</div>&nbsp;
       </div>
-      <div id={collapseBodyId} className="collapse" aria-labelledby="collapsibleMenuHeading" data-parent={'#'+collapseMenuId}>
+      <div id={collapseBodyId} className="accordion-collapse collapse in" aria-labelledby="collapsibleMenuHeading" data-parent={'#'+collapseMenuId}>
         {children ? children : generateList()}
       </div>
     </div>

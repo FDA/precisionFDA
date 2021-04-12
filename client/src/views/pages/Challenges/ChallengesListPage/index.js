@@ -50,11 +50,14 @@ class ChallengesListPage extends Component {
       },
       {
         text: 'Upcoming',
-        onClick: () => console.log('Upcoming clicked'),
+        onClick: () => {
+          resetFilters()
+          loadChallenges()
+        },
       },
       {
         text: 'Propose a Challenge',
-        target: '/new_challenges/propose',
+        target: '/challenges/propose',
       },
     ]
 
@@ -70,7 +73,7 @@ class ChallengesListPage extends Component {
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateChallenge && (
-              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')}>Create a new challenge</button>
+              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')} style={{ marginBottom: '12px' }}>Create a new challenge</button>
             )}
             <CollapsibleMenu title="CHALLENGES" options={sideMenuOptions} />
             <hr />
@@ -79,7 +82,7 @@ class ChallengesListPage extends Component {
             <hr />
             <div className="pfda-subsection-heading">PROPOSE A CHALLEGNE</div>
             <p>If you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.</p>
-            <Link to={{ pathname: '/new_challenges/propose' }}>
+            <Link to={{ pathname: '/challenges/propose' }}>
               Propose a Challenge &rarr;
             </Link>
           </div>

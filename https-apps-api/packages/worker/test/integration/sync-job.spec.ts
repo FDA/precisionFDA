@@ -4,15 +4,15 @@ import { App, User, Job, UserFile, Tag, Tagging, Folder } from '@pfda/https-apps
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
-import { create, generate, db } from '@pfda/https-apps-shared/src/utils/test'
-import { fakes, mocksReset } from '@pfda/https-apps-shared/src/utils/test/mocks'
+import { create, generate, db } from '@pfda/https-apps-shared/src/test'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import {
   FILES_DESC_RES,
   FILES_LIST_RES_ROOT,
   FILES_LIST_RES_SNAPSHOT,
   FILES_LIST_RES_TEST_FOLDER,
   FOLDERS_LIST_RES,
-} from '@pfda/https-apps-shared/src/utils/test/mock-responses'
+} from '@pfda/https-apps-shared/src/test/mock-responses'
 import {
   FILE_STATE,
   FILE_STI_TYPE,
