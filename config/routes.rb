@@ -152,6 +152,10 @@ Rails.application.routes.draw do
         post :propose, on: :collection
       end
 
+      resources :experts, only: %i(index show) do
+        get :years, on: :collection
+      end
+
       resources :apps do
         get :jobs, on: :member, to: "jobs#app"
 
@@ -269,6 +273,7 @@ Rails.application.routes.draw do
       end
 
       resources :workflows, only: %i(index show create) do
+        get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
 
         collection do
@@ -470,8 +475,6 @@ Rails.application.routes.draw do
       post "announce_result", on: :member
     end
 
-    resources :new_challenges, only: %i(index)
-
     resources :discussions, constraints: { answer_id: %r{[^/]+} } do
       get "followers", on: :member
       post "rename", on: :member
@@ -575,7 +578,6 @@ Rails.application.routes.draw do
     end
 
     get "/spaces/*all", to: "spaces#index"
-    get "/new_challenges/*all", to: "new_challenges#index"
 
     resources :notification_preferences, only: [:index] do
       post "change", on: :collection
