@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { mapValues } from 'lodash'
 import {
   PageContainer,
   PageHeader,
@@ -49,7 +50,7 @@ const preference = {
   review_space_admin: {
     admin_membership_changed: true,
     admin_new_task_assigned: true,
-    admin_task_status_changed: true,
+    admin_task_status_changed: false,
     admin_comment_activity: true,
     admin_content_added_or_deleted: true,
     admin_member_added_or_removed_from_space: true,
@@ -66,7 +67,7 @@ const preference = {
     lead_space_locked_unlocked_deleted: true,
   },
   reviewer: {
-    all_membership_changed: false,
+    all_membership_changed: true,
     all_new_task_assigned: false,
     all_task_status_changed: true,
     all_comment_activity: true,
@@ -80,12 +81,27 @@ export const NotificationsPage = () => {
   const options = roles.map(value => ({ value, label: RoleLabel[value] }))
   const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
 
+  const isAllChecked = (keys: {[key: string]: boolean}) => {
+    const includesFalse = Object.keys(keys).map(k => keys[k]).includes(false)
+    return !includesFalse
+  }
+
   const handleSelection = (role: Roles, notification: string) => {
     setLocalPrefSelection({
       ...localPrefSelection,
       [role]: {
         ...localPrefSelection[role],
         [notification]: !localPrefSelection[role][notification]
+      }
+    })
+  }
+
+  const handleCheckAll = (role: Roles) => {
+    const newVals = mapValues(localPrefSelection[role], () => !isAllChecked(localPrefSelection[role]));
+    setLocalPrefSelection({
+      ...localPrefSelection,
+      [role]: {
+        ...newVals
       }
     })
   }
@@ -134,6 +150,17 @@ export const NotificationsPage = () => {
               onChange={(selected: any) => setSelectedRole(selected?.value)}
             />
           </StyledSelectWrap>
+
+          <FieldGroup>
+            <Checkbox
+              id="all"
+              name="all"
+              type="checkbox"
+              checked={isAllChecked(localPrefSelection[selectedRole])}
+              onChange={() => handleCheckAll(selectedRole)}
+            />
+            <label htmlFor="all">All</label>
+          </FieldGroup>
 
           {Object.keys(localPrefSelection[selectedRole]).map(notification => {
               const key = `${localPrefSelection[selectedRole]}.${notification}`
