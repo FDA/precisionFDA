@@ -9,7 +9,6 @@ import Root from './root'
 import store from './store'
 import './styles/style.sass'
 
-
 const renderApp = () => {
   let container = document.getElementById('app-root')
 

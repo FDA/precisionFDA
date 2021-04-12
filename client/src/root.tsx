@@ -16,15 +16,20 @@ import NewsListPage from './views/pages/News/NewsListPage'
 import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
+import { NotificationsPage } from './views/pages/Account/Notifications'
+import GlobalStyle from './styles/global'
 
-
-const root = ({ store }) => (
+const root = ({ store }: any) => (
   <Provider store={store}>
+    <GlobalStyle />
     <Router history={history}>
       <ErrorWrapper>
         <Switch>
           <Redirect exact from='/home' to='/home/files' />
-          <Route path='/home/:page/:tab?' render={(props) => <HomePage {...props} />} />
+          <Route path='/home/:page/:tab?' render={(props: any) => <HomePage {...props} />} />
+          <Route path='/account/notifications'>
+            <NotificationsPage />
+          </Route>
           <Route exact path='/spaces'>
             <SpacesListPage />
           </Route>
