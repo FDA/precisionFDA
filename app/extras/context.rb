@@ -40,7 +40,8 @@ class Context
   end
 
   def user
-    raise "context.user called for guest context" if guest?
+    return if guest?
+
     @user
   end
 
@@ -76,15 +77,15 @@ class Context
     user&.is_challenge_evaluator?
   end
 
+  def review_space_admin?
+    user&.review_space_admin?
+  end
+
   def logged_in_or_guest?
     return logged_in? || guest?
   end
 
   def api
     @api ||= DNAnexusAPI.new(token)
-  end
-
-  def review_space_admin?
-    logged_in? && user.review_space_admin?
   end
 end
