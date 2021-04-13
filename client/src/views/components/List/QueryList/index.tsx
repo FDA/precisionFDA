@@ -10,12 +10,12 @@ import { IListItem } from '../../../../types/listItem'
 interface IQueryListProps<T extends IListItem> {
   query: () => UseQueryResult<any, Error>,
   listExtractor: (queryResult: any) => T[],
-  template: (item: T) => React.ReactNode
+  template: (item: T) => React.ReactNode,
+  emptyMessage?: string,
+  className?: string,
 }
 
-const QueryList: FunctionComponent<IQueryListProps<any>> = ({ query, listExtractor, template }: IQueryListProps<IListItem>) => {
-  const classes = classNames(['query-list'])
-
+const QueryList: FunctionComponent<IQueryListProps<any>> = ({ query, listExtractor, template, emptyMessage='No items', className='query-list' }: IQueryListProps<IListItem>) => {
   const { status, error, data } = query()
 
   if (error) {
@@ -34,6 +34,11 @@ const QueryList: FunctionComponent<IQueryListProps<any>> = ({ query, listExtract
 
   if (data) { 
     const items = listExtractor(data)
+    if (items.length == 0) {
+      return <div>{emptyMessage}</div>
+    }
+
+    const classes = classNames(className)
     return (
       <ul className={classes}>
         {items.map((item: IListItem) =>

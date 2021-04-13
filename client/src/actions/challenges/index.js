@@ -1,6 +1,5 @@
 import { createAction } from '../../utils/redux'
 import { fetchChallenges } from './fetchChallenges'
-import { fetchChallengesYearList } from './fetchChallengesYearList'
 import { fetchChallenge } from './fetchChallenge'
 import {
   CHALLENGES_SET_PAGE,
@@ -20,7 +19,6 @@ const resetProposeChallengeForm = () => createAction(PROPOSE_CHALLENGE_FORM_RESE
 
 export {
   fetchChallenges,
-  fetchChallengesYearList,
   fetchChallenge,
   challengesSetPage,
   challengesSetYear,

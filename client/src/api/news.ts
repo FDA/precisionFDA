@@ -1,5 +1,6 @@
 import { backendCall } from '../utils/api'
 import { IPagination } from '../types/pagination'
+import { queryYearList } from './yearList'
 
 
 interface IGetNewsParams {
@@ -8,9 +9,13 @@ interface IGetNewsParams {
 }
 
 const getNews = (data: IGetNewsParams) => backendCall('/api/news', 'GET', data)
-const getNewsYearList = () => backendCall('/api/news/years', 'GET')
+
+const queryNewsYearList = () => {
+  return queryYearList('/api/news/years/')
+}
+
 
 export {
   getNews,
-  getNewsYearList
+  queryNewsYearList,
 }
