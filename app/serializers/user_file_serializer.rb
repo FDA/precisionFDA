@@ -92,8 +92,8 @@ class UserFileSerializer < NodeSerializer
 
       if object.owned_by_user?(current_user)
         unless object.in_space? && member_viewer?
-          # publish single file if it is not public already
-          links[:publish] = publish_object unless object.public?
+          # publish single file if it is not public already and in a root folder
+          links[:publish] = publish_object unless object.public? || object.parent_folder_id
           links[:rename] = rename_file_path(object)
           # POST: /api/files/remove - Delete file(s) & folder(s), being selected
           links[:remove] = remove_api_files_path
