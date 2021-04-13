@@ -81,11 +81,11 @@ module Admin
       last_name = opts[:last_name]
 
       username = find_unused_username(User.construct_username(first_name, last_name))
-      org = "#{first_name.capitalize} #{last_name.capitalize}"
+      org_name = username.titleize.gsub(".", " ")
 
       full_opts = opts.merge(
         username: username,
-        org: org,
+        org: org_name,
         org_handle: username,
       )
 
