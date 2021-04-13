@@ -57,7 +57,9 @@ exports[`ChallengeProposePage test should render 1`] = `
       >
         PREVIOUS CHALLENGES
       </div>
-      <Connect(ChallengesYearList)
+      <ChallengesYearList
+        elementName="challenges"
+        query={[Function]}
         setYearHandler={[Function]}
       />
     </div>

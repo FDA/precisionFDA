@@ -1,37 +1,16 @@
-import { connect } from 'react-redux'
-
-import {
-  fetchExpertsYearList,
-} from '../../../../actions/experts'
-import {
-  expertsYearListSelector,
-  expertsYearListIsFetchingSelector,
-} from '../../../../reducers/experts/yearList/selectors'
-import './style.sass'
 import { YearList } from '../../List/YearList'
+import { queryExpertsYearList } from '../../../../api/experts'
 
 
 class ExpertsYearList extends YearList {
   static defaultProps = {
     elementName: 'experts',
-    years: [],
-    isFetching: false,
+    query: queryExpertsYearList,
     setYearHandler: () => {},
-    fetchYearList: () => {},
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  years: expertsYearListSelector(state),
-  isFetching: expertsYearListIsFetchingSelector(state),
-})
-
-const mapDispatchToProps = (dispatch: any) => ({
-  fetchYearList: () => dispatch(fetchExpertsYearList()),
-})
-
 export {
-  ExpertsYearList
+  ExpertsYearList,
 }
-
-export default connect(mapStateToProps, mapDispatchToProps)(ExpertsYearList)
+export default ExpertsYearList
