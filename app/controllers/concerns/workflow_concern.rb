@@ -23,10 +23,10 @@ module WorkflowConcern
   # Proceed with workflow jobs sync
   def jobs_sync
     if @workflow.in_space?
-      User.sync_jobs!(@context, @workflow.jobs, @workflow.project)
+      Job.sync_jobs!(@context, @workflow.jobs, @workflow.project)
       @space = @workflow.space_object
     else
-      User.sync_jobs!(@context)
+      Job.sync_jobs!(@context)
     end
   end
 
