@@ -5,6 +5,7 @@ export const config: ConfigOverride = {
   logs: {
     pretty: false,
     level: 'info',
+    maskSensitive: true,
   },
   workerJobs: {
     syncJob: {
