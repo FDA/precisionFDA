@@ -93,6 +93,22 @@ const filesHelper = {
     em.persist(file)
     return file
   },
+  createUploadedAsset: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof entities.User>
+    },
+    data?: Partial<InstanceType<typeof entities.Asset>>,
+  ) => {
+    const defaults = generate.asset.simple(data?.dxid)
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const file = wrap(new entities.Asset(references.user)).assign(input, { em })
+    em.persist(file)
+    return file
+  },
   createFolder: (
     em: EntityManager,
     references: {

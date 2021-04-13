@@ -8,6 +8,8 @@ export { UserFile } from './user-file.entity'
 
 export { Folder } from './folder.entity'
 
+export { Asset } from './asset.entity'
+
 export * as helper from './user-file.helper'
 
 export { FolderRenameOperation } from './ops/folder-rename'
