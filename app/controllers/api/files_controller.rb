@@ -349,7 +349,8 @@ module Api
 
       if result.failure?
         type = :error
-        text = result.value.values
+        text = result.value[:name]
+
       else
         type = :success
         text = "Folder '#{result.value.name}' successfully created."
