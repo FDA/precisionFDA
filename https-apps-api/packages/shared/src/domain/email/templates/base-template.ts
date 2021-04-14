@@ -34,6 +34,6 @@ export class BaseTemplate<T> {
         validationErrors,
       })
     }
-    return payload as T
+    return (payload as any) as T
   }
 }

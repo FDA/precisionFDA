@@ -7,7 +7,7 @@ export class EmailProcessOperation extends BaseOperation<EmailProcessInput, bool
 
   async run(input: EmailProcessInput): Promise<boolean> {
     this.input = input
-    const emailTemplate = this.getEmailTemplate()
+    const emailTemplate = await this.getEmailTemplate()
     const receivers = await emailTemplate.determineReceivers()
     console.log(
       receivers.map(user => user.id),
@@ -29,11 +29,13 @@ export class EmailProcessOperation extends BaseOperation<EmailProcessInput, bool
   /**
    * @returns class that implements EmailTemplate
    */
-  private getEmailTemplate(): EmailTemplate {
+  private async getEmailTemplate(): Promise<EmailTemplate> {
     const emailTypeId = this.input.emailTypeId
     const emailConfig = getEmailConfig(emailTypeId)
     const template = emailConfig.templateClass
     // this also runs input validation
-    return new template(emailTypeId, this.input.input, this.ctx)
+    const instance = new template(emailTypeId, this.input.input, this.ctx)
+    await instance.setupContext()
+    return instance
   }
 }

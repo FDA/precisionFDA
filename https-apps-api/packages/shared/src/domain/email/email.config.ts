@@ -2,7 +2,7 @@ import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import type { JSONSchema7 } from 'json-schema'
 import { AnyObject, OpsCtx } from '../../types'
 import { schemas } from '../../utils'
-import { User } from '..'
+import { SpaceEvent, User } from '..'
 import { handlers } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
@@ -165,7 +165,8 @@ interface EmailTemplate {
   // determineReceivers(spaceEventId: number): Promise<User[]>
   // getReceivers(): Promise<User[]>
   template(receiver: User): Promise<EmailSendInput>
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE
+  getNotificationKey(spaceEvent?: SpaceEvent): keyof typeof NOTIFICATION_TYPES_BASE
+  setupContext(): Promise<void>
 }
 
 type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChangedAddedRemoved'
