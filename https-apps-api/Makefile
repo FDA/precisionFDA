@@ -64,6 +64,10 @@ test-worker:
 test: test-api
 	make test-worker
 
+.PHONY:
+test-snyk:
+	$(bin)snyk test --yarn-workspaces --strict-out-of-sync=false --policy_path=./.snyk
+
 clean:
 	yarn workspaces run clean
 
