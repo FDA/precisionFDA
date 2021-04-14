@@ -45,7 +45,6 @@ describe('member-change.handler', () => {
       { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
     )
     await em.flush()
-    console.log('----------setup')
 
     ctx = {
       em: database.orm().em.fork(true),
@@ -96,7 +95,6 @@ describe('member-change.handler', () => {
       // user id 1 added user id 2 to the space
       const input = { spaceEventId: spaceEventMemberAdded.id }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
-      // todo: pridat tohle cca vsude
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
@@ -154,6 +152,35 @@ describe('member-change.handler', () => {
       const receivers = await handler.determineReceivers()
       // all_membership_changed: false is applied
       expect(receivers).to.have.lengthOf(0)
+    })
+
+    it('member added notification does not exist for VIEWER, CONTRIBUTOR', async () => {
+      const anotherLeadUser = create.userHelper.create(em, { email: generate.random.email() })
+      create.spacesHelper.addMember(
+        em,
+        { user: anotherLeadUser, space },
+        { role: SPACE_MEMBERSHIP_ROLE.LEAD },
+      )
+      const spaceEventMemberAdded = create.spacesHelper.createEvent(
+        em,
+        { user, space },
+        {
+          entityId: anotherUserMembership.id,
+          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+          // matches spaceMembership.role
+          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+        },
+      )
+      await em.flush()
+      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
+      await handler.setupContext()
+      const receivers = await handler.determineReceivers()
+
+      expect(receivers).to.have.lengthOf(1)
+      expect(receivers.map(r => r.id)).to.have.all.members([anotherLeadUser.id])
     })
   })
 

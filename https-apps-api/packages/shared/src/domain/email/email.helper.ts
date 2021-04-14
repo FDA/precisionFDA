@@ -10,6 +10,7 @@ import {
   EmailSendInput,
   NOTIFICATION_ROLE_PREFIXES,
   NOTIFICATION_TYPES_BASE,
+  NOTIFICATION_TYPES,
 } from './email.config'
 
 type EmailHelperCtx = OpsCtx & {
@@ -47,6 +48,10 @@ const buildIsNotificationEnabled = (
     ? null
     : user.emailNotificationSettings.unwrap()
   const notificationKey = getKeyForUserSpaceRole(membership, notificationKeyBase)
+  if (!Object.keys(NOTIFICATION_TYPES).includes(notificationKey)) {
+    // notification TYPE does not even exist, we cannot send the email
+    return false
+  }
   // for now, we know all default values are set to true
   const defaultValue = true
   if (isNil(userConfig) || isNil(userConfig.data)) {
