@@ -15,10 +15,21 @@ const Footer = ({ hideHandler, renameHandler, disableButton, isFolder }) => {
   )
 }
 
-const RenameObjectModal = ({ renameAction, hideAction, isOpen, isLoading, defaultFileName, defaultFileDescription, isFolder }) => {
+const RenameObjectModal = (
+  {
+    renameAction,
+    hideAction,
+    isOpen,
+    isLoading,
+    defaultFileName,
+    defaultFileDescription,
+    isFolder,
+    isAsset,
+  }) => {
+
   const [fileName, setFileName] = useState(defaultFileName)
   const changeFileName = (e) => setFileName(e.target.value)
-  
+
   const [fileDescription, setFileDescription] = useState(defaultFileDescription)
   const changeFileDescription = (e) => setFileDescription(e.target.value)
 
@@ -34,22 +45,36 @@ const RenameObjectModal = ({ renameAction, hideAction, isOpen, isLoading, defaul
   )
 
   const enterKeyDownHandler = (e) => {
-    if(e.key === 'Enter') { renameHandler() }
+    if (e.key === 'Enter') {
+      renameHandler()
+    }
   }
-  
+
   const disableButton = !fileName || !fileName.length
-  const title = `Edit ${isFolder ? 'Folder' : 'File'} Info`
+  const titleCore = () => {
+    if (isFolder) {
+      return 'Folder'
+    } else if (isAsset) {
+      return 'Asset'
+    } else {
+      return 'File'
+    }
+  }
+  const title = `Edit ${titleCore()} Info`
+  const label = `${titleCore()} Name`
+
   return (
     <Modal
       isOpen={isOpen}
       isLoading={isLoading}
       title={title}
-      modalFooterContent={<Footer hideHandler={hideHandler} renameHandler={renameHandler} disableButton={disableButton} isFolder={isFolder}/>}
+      modalFooterContent={<Footer hideHandler={hideHandler} renameHandler={renameHandler} disableButton={disableButton}
+                                  isFolder={isFolder}/>}
       hideModalHandler={hideHandler}
     >
       <>
         <div className="form-group">
-          <label className="control-label">{isFolder ? 'Folder Name' : 'File Name'}</label>
+          <label className="control-label">{label}</label>
           <Input
             name="space-file-rename"
             placeholder="Rename..."
@@ -90,6 +115,7 @@ RenameObjectModal.propTypes = {
   defaultFileName: PropTypes.string,
   defaultFileDescription: PropTypes.string,
   isFolder: PropTypes.bool,
+  isAsset: PropTypes.bool,
 }
 
 Footer.propTypes = {
