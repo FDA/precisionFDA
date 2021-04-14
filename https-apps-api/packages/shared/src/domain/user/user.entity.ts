@@ -87,7 +87,6 @@ export class User extends BaseEntity {
   }
 
   isChallengeBot(): boolean {
-    console.log('fn triggered ', this.dxuser)
     return this.dxuser === config.users.challengeBotDxUser
   }
 }

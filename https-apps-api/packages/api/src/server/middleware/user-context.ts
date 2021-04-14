@@ -1,5 +1,4 @@
-import { errors, utils } from '@pfda/https-apps-shared'
-import { ajv } from '../../utils'
+import { errors, utils, ajv } from '@pfda/https-apps-shared'
 
 /**
  * This middleware expects some user data in the query

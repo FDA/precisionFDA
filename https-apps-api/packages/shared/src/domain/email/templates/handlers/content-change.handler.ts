@@ -22,6 +22,8 @@ export class ContentChangedEmailHandler
   templateFile = newContentTemplate
   templateContent?: NewContentTemplateInput['content']
 
+  async setupContext(): Promise<void> {}
+
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'content_added_or_deleted'
   }
@@ -63,11 +65,6 @@ export class ContentChangedEmailHandler
   }
 
   async getTemplateContent(): Promise<NewContentTemplateInput['content']> {
-    // if (!isNil(this.templateContent)) {
-    //   console.log('returning content from "cache"')
-    //   // does not really work now if .template() is called in parallel but maybe eventually
-    //   return this.templateContent
-    // }
     const spaceEvent = await this.ctx.em.findOne(
       SpaceEvent,
       {
@@ -84,8 +81,7 @@ export class ContentChangedEmailHandler
     this.templateContent = {
       entityType: spaceEvent.entityType,
       user: {
-        firstName: spaceEvent.user.unwrap().firstName,
-        lastName: spaceEvent.user.unwrap().lastName,
+        fullName: spaceEvent.user.unwrap().fullName,
       },
       space: {
         name: spaceEvent.space.unwrap().name,
