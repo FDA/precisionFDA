@@ -119,6 +119,7 @@ describe('member-change.handler', () => {
 
       const input = { spaceEventId: spaceEventMemberAdded.id }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
+      await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(0)
     })
