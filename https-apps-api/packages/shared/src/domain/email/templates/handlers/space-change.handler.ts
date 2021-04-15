@@ -15,7 +15,7 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
-import { SPACE_EVENT_ACTIVITY_TYPE } from 'shared/dist/domain/space-event/space-event.enum'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '../../../space-event/space-event.enum'
 
 export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> implements EmailTemplate {
   templateFile = spaceChangedTemplate
