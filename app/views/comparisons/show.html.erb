@@ -303,10 +303,10 @@
   <div class="tab-pane" id="tab-outputs">
     <div class="comparison-outputs panel">
       <%= grid(@outputs_grid) do |g|
-        g.blank_slate partial:  "_partials/empty_grid"
+        g.blank_slate partial: "_partials/empty_grid"
 
         g.column name: 'Name' do |file|
-          unilinkfw(file)
+          unilinkfw(file, target: "_blank")
         end
 
         g.column name: 'Size' do |file|
