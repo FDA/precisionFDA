@@ -78,7 +78,8 @@ describe('member-change.handler', () => {
   })
 
   context('determineReceivers()', () => {
-    it('other users from the space', async () => {
+    it('other users from the space (admin or leads)', async () => {
+      anotherUserMembership.role = SPACE_MEMBERSHIP_ROLE.LEAD
       const spaceEventMemberAdded = create.spacesHelper.createEvent(
         em,
         { user, space },

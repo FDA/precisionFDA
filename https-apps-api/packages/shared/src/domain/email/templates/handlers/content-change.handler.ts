@@ -42,10 +42,6 @@ export class ContentChangedEmailHandler
       { spaces: spaceEvent.space.id, active: true },
       { populate: ['user.emailNotificationSettings'] },
     )
-    console.log(
-      memberships.map(m => m.user.id),
-      'users in the space',
-    )
 
     // build determine filter functions
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
