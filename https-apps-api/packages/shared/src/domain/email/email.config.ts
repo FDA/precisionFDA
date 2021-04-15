@@ -17,6 +17,7 @@ const NOTIFICATION_TYPES_BASE = {
   comment_activity: true,
   content_added_or_deleted: true,
   space_locked_unlocked_deleted: true,
+  // todo: deprecated?
   space_lock_unlock_delete_requests: true,
   // deprecated
   new_task_assigned: true,
@@ -128,6 +129,8 @@ type NewContentAdded = { spaceEventId: number }
 
 type MemberChanged = { spaceEventId: number }
 
+type SpaceChanged = { spaceEventId: number }
+
 // EMAIL OPERATIONS INPUTS
 
 type EmailProcessInput = {
@@ -169,7 +172,7 @@ interface EmailTemplate {
   setupContext(): Promise<void>
 }
 
-type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChangedAddedRemoved'
+type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChangedAddedRemoved' | 'spaceChanged'
 type EmailConfigItem = {
   // unique name
   name: EMAIL_TYPES
@@ -200,6 +203,12 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
     emailId: 3,
     schema: emailInputSchemas.spaceEventEmailSchema,
     templateClass: handlers.MemberChangedEmailHandler,
+  },
+  spaceChanged: {
+    name: 'spaceChanged',
+    emailId: 4,
+    schema: emailInputSchemas.spaceEventEmailSchema,
+    templateClass: handlers.SpaceChangedEmailHandler,
   },
 } as const
 
@@ -246,4 +255,5 @@ export {
   EmailTemplateContructor,
   NewContentAdded,
   MemberChanged,
+  SpaceChanged,
 }
