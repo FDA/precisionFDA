@@ -1,0 +1,139 @@
+import { expect } from 'chai'
+import { EntityManager } from '@mikro-orm/core'
+import { database } from '@pfda/https-apps-shared'
+import { App, Job, User, Space } from '@pfda/https-apps-shared/src/domain'
+import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { create, generate, db } from '@pfda/https-apps-shared/src/test'
+import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
+import { SpaceChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
+import { OpsCtx } from '@pfda/https-apps-shared/src/types'
+import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
+import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
+import {
+  PARENT_TYPE,
+  SPACE_EVENT_ACTIVITY_TYPE,
+  SPACE_EVENT_OBJECT_TYPE,
+} from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
+
+describe('space-change.handler', () => {
+  let em: EntityManager
+  let user: User
+  let anotherUser: User
+  let anotherUserLead: User
+  let app: App
+  let job: Job
+  let space: Space
+  let ctx: OpsCtx
+  // let anotherUserMembership: SpaceMembership
+  const emailConfig = EMAIL_CONFIG.spaceChanged
+
+  beforeEach(async () => {
+    await db.dropData(database.connection())
+    // create DB mocks
+    em = database.orm().em
+    em.clear()
+    user = create.userHelper.create(em, { email: generate.random.email() })
+    anotherUser = create.userHelper.create(em, { email: generate.random.email() })
+    anotherUserLead = create.userHelper.create(em, { email: generate.random.chance.email() })
+
+    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
+    space = create.spacesHelper.create(em, { name: 'my-test-space' })
+    create.spacesHelper.addMember(em, { user, space })
+    create.spacesHelper.addMember(
+      em,
+      { user: anotherUser, space },
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: anotherUserLead, space },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
+    )
+    await em.flush()
+
+    ctx = {
+      em: database.orm().em.fork(true),
+      log: defaultLogger,
+      user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
+    }
+  })
+
+  context('getTemplateContent()', () => {
+    it('content shape', async () => {
+      const spaceEventSpaceLocked = create.spacesHelper.createEvent(
+        em,
+        { user, space },
+        {
+          entityId: space.id,
+          entityType: PARENT_TYPE.SPACE,
+          activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
+          objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
+          // dunno what is this supposed to match
+          role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+        },
+      )
+      await em.flush()
+      // user id 1 added user id 2 to the space
+      const input = { spaceEventId: spaceEventSpaceLocked.id }
+      const handler = new SpaceChangedEmailHandler(emailConfig.emailId, input, ctx)
+      await handler.setupContext()
+      const content = await handler.getTemplateContent()
+
+      expect(content).to.be.deep.equal({
+        initiator: { fullName: user.fullName },
+        action: 'space locked',
+        space: { name: space.name },
+      })
+    })
+  })
+
+  context('determineReceivers()', () => {
+    it('returns other users who are leads/admins', async () => {
+      const spaceEventSpaceLocked = create.spacesHelper.createEvent(
+        em,
+        { user, space },
+        {
+          entityId: space.id,
+          entityType: PARENT_TYPE.SPACE,
+          activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
+          objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
+          // dunno what is this supposed to match
+          role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+        },
+      )
+      await em.flush()
+      // user id 1 added user id 2 to the space
+      const input = { spaceEventId: spaceEventSpaceLocked.id }
+      const handler = new SpaceChangedEmailHandler(emailConfig.emailId, input, ctx)
+      await handler.setupContext()
+      const receivers = await handler.determineReceivers()
+      expect(receivers).to.have.lengthOf(1)
+      expect(receivers.map(r => r.id)).to.have.all.members([anotherUserLead.id])
+    })
+  })
+
+  context('setupContext()', () => {
+    it('sets spaceEvent to the handler', async () => {
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
+      // await em.flush()
+      // // user id 1 added user id 2 to the space
+      // const input = { spaceEventId: spaceEventMemberAdded.id }
+      // const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
+      // await handler.setupContext()
+      // expect(handler.spaceEvent).to.exist()
+      // expect(handler.spaceEvent).to.have.property('id', spaceEventMemberAdded.id)
+    })
+  })
+})

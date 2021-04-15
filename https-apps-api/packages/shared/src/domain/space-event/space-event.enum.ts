@@ -3,6 +3,7 @@ enum PARENT_TYPE {
   JOB = 'Job',
   COMMENT = 'Comment',
   SPACE_MEMBERSHIP = 'SpaceMembership',
+  SPACE = 'Space',
 }
 
 enum SPACE_EVENT_OBJECT_TYPE {
