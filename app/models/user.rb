@@ -209,6 +209,10 @@ class User < ApplicationRecord
 
   delegate :real_files, to: :user_files
 
+  def guest?
+    dxuser.start_with?("Guest-")
+  end
+
   def singular?
     org_id.blank? || org.singular
   end
