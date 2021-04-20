@@ -5,11 +5,18 @@
 </div>
 
 <div class="pfda-padded invitations-search">
-  <div class="invitations-search-browse">
-    <button class="btn btn-success btn-lg" data-bind="click: showGridModal, disable: selectionDisabled">Show all pending users</button>
+  <div class="invitations-search-show-pending">
+    <button class="btn btn-success btn-lg" data-bind="click: showGridModal, disable: selectionDisabled">
+      Show all pending users
+    </button>
+    <div id="invitations-back-btn">
+      <button class="btn btn-sm">
+        <%= link_to "Back", admin_users_path, data: { turbolinks: false } %>
+      </button>
+    </div>
     <%= render "admin/invitations/grid_modal" %>
   </div>
-  <div class="invitations-search-input">
+  <div id="invitations-search-input">
     <input
       type="text"
       id="search_input"
@@ -33,4 +40,4 @@
     <button class="btn btn-default btn-lg" data-bind="click: clearInvitations">Clear</button>
   </div>
 </div>
-  <!-- /ko -->
+<!-- /ko -->
