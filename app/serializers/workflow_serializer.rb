@@ -13,6 +13,7 @@ class WorkflowSerializer < ApplicationSerializer
     :app_title,
     :location,
     :revision,
+    :readme,
     :workflow_series_id,
     :version,
     :scope,
