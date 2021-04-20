@@ -145,7 +145,8 @@ class PageInvitationsView
           render: (data) ->
             "<input value=\"#{data}\" type=\"checkbox\" class=\"select-user\" />"
         }
-      ]
+      ],
+      order: [[ 12, "desc" ]]
     })
     @searchDataGridContainer = $('#invitations_data_grid_filter input', @gridModal)
     @searchValue = document.getElementById('search_input')
