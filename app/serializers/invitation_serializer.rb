@@ -18,6 +18,7 @@ class InvitationSerializer
       postal_code: invitation.postal_code,
       phone: invitation.full_phone,
       duns: invitation.duns,
+      created_at: invitation.created_at.strftime("%Y-%m-%d %H:%M"),
       organize_intent: invitation.organize_intent,
       participate_intent: invitation.participate_intent,
     }
