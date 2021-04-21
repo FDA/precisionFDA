@@ -75,14 +75,9 @@ module Api
       page = params[:page].presence || 1
       year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
 
-      time_status =
-        if TIME_STATUSES.include?(params[:time_status].presence)
-          params[:time_status]
-        else
-          CHALLENGE_CURRENT
-        end
+      time_status = params[:time_status] if TIME_STATUSES.include?(params[:time_status].presence)
 
-      challenges = accessible_challenges.order(start_at: :desc).page(page)
+      challenges = accessible_challenges.order(end_at: :desc).page(page)
       challenges = Challenge.where(Arel.sql("YEAR(start_at) = #{year}")) if year
 
       current_time = Time.current
@@ -94,6 +89,8 @@ module Api
         challenges.where("start_at < ?", current_time).where("end_at > ?", current_time)
       when CHALLENGE_ENDED
         challenges.where("end_at < ?", current_time)
+      else
+        challenges
       end
     end
   end

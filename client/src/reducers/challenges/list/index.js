@@ -7,6 +7,7 @@ import {
   CHALLENGES_SET_PAGE,
   CHALLENGES_SET_YEAR,
   CHALLENGES_LIST_RESET_FILTERS,
+  CHALLENGES_SET_TIME_STATUS,
 } from '../../../actions/challenges/types'
 
 
@@ -23,7 +24,6 @@ export default createReducer(initialState, {
       ...state.pagination,
       ...payload.pagination,
     },
-    year: payload.year,
     isFetching: false,
   }),
 
@@ -45,9 +45,15 @@ export default createReducer(initialState, {
     year: year,
   }),
 
+  [CHALLENGES_SET_TIME_STATUS]: (state, timeStatus) => ({
+    ...state,
+    timeStatus: timeStatus,
+  }),
+
   [CHALLENGES_LIST_RESET_FILTERS]: (state) => ({
     ...state,
     year: null,
+    timeStatus: null,
     pagination: null,
   }),
 })
