@@ -254,6 +254,16 @@ const spaceEvent = {
   }),
 }
 
+const comment = {
+  simple: (): Partial<InstanceType<typeof entities.Comment>> => ({
+    body: chance.sentence(),
+    commentableType: 'Space',
+    contentObjectType: 'Job',
+    commentableId: 1,
+    contentObjectId: 1,
+  }),
+}
+
 export {
   random,
   user,
@@ -266,4 +276,5 @@ export {
   space,
   spaceMembership,
   spaceEvent,
+  comment,
 }

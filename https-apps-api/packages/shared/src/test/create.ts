@@ -209,4 +209,21 @@ const spacesHelper = {
   },
 }
 
-export { userHelper, jobHelper, appHelper, filesHelper, tagsHelper, spacesHelper }
+const commentHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Comment>>,
+  ) => {
+    const defaults = generate.comment.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const comment = wrap(new entities.Comment(references.user)).assign(input)
+    em.persist(comment)
+    return comment
+  },
+}
+
+export { userHelper, jobHelper, appHelper, filesHelper, tagsHelper, spacesHelper, commentHelper }

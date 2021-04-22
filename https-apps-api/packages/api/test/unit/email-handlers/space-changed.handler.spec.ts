@@ -9,11 +9,7 @@ import { SpaceChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/ema
 import { OpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
-import {
-  PARENT_TYPE,
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-} from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
 
 describe('space-change.handler', () => {
   let em: EntityManager
@@ -61,28 +57,32 @@ describe('space-change.handler', () => {
 
   context('getTemplateContent()', () => {
     it('content shape', async () => {
-      const spaceEventSpaceLocked = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: space.id,
-          entityType: PARENT_TYPE.SPACE,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
-          objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
-          // dunno what is this supposed to match
-          role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventSpaceLocked = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: space.id,
+      //     entityType: PARENT_TYPE.SPACE,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
+      //     // dunno what is this supposed to match
+      //     role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventSpaceLocked.id }
+      const input = {
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
+      }
       const handler = new SpaceChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const content = await handler.getTemplateContent()
 
       expect(content).to.be.deep.equal({
         initiator: { fullName: user.fullName },
-        action: 'space locked',
+        action: 'locked',
         space: { name: space.name },
       })
     })
@@ -90,21 +90,25 @@ describe('space-change.handler', () => {
 
   context('determineReceivers()', () => {
     it('returns other users who are leads/admins', async () => {
-      const spaceEventSpaceLocked = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: space.id,
-          entityType: PARENT_TYPE.SPACE,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
-          objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
-          // dunno what is this supposed to match
-          role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventSpaceLocked = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: space.id,
+      //     entityType: PARENT_TYPE.SPACE,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
+      //     // dunno what is this supposed to match
+      //     role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventSpaceLocked.id }
+      const input = {
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
+      }
       const handler = new SpaceChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
@@ -114,7 +118,7 @@ describe('space-change.handler', () => {
   })
 
   context('setupContext()', () => {
-    it('sets spaceEvent to the handler', async () => {
+    it('setups the handler', async () => {
       // const spaceEventMemberAdded = create.spacesHelper.createEvent(
       //   em,
       //   { user, space },
@@ -129,11 +133,15 @@ describe('space-change.handler', () => {
       // )
       // await em.flush()
       // // user id 1 added user id 2 to the space
-      // const input = { spaceEventId: spaceEventMemberAdded.id }
-      // const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
-      // await handler.setupContext()
-      // expect(handler.spaceEvent).to.exist()
-      // expect(handler.spaceEvent).to.have.property('id', spaceEventMemberAdded.id)
+      const input = {
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
+      }
+      const handler = new SpaceChangedEmailHandler(emailConfig.emailId, input, ctx)
+      await handler.setupContext()
+      expect(handler.space).to.exist()
+      expect(handler.user).to.exist()
     })
   })
 })

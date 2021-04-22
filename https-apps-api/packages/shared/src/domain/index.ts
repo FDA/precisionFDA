@@ -1,4 +1,5 @@
 import { App } from './app/app.entity'
+import { Comment } from './comment/comment.entity'
 import { Job } from './job/job.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
@@ -15,6 +16,7 @@ import { SpaceMembership } from './space-membership/space-membership.entity'
 
 const entities = {
   App,
+  Comment,
   Job,
   User,
   Tag,
@@ -48,10 +50,13 @@ export * as org from './org'
 
 export * as email from './email'
 
+export * as comment from './comment'
+
 export {
   entities,
   Job,
   App,
+  Comment,
   User,
   UserFile,
   Folder,

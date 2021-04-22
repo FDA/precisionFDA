@@ -43,8 +43,10 @@ const createQueues = async (): Promise<void> => {
 }
 
 const disconnectQueues = async (): Promise<void> => {
-  await statusQueue.close()
-  await emailsQueue.close()
+  log.info('Disconnecting queues')
+  await statusQueue.close(true)
+  await emailsQueue.close(true)
+  log.info('Queues disconnected')
 }
 
 const addToQueue = async (

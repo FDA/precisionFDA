@@ -19,6 +19,7 @@ export class JobFinishedEmailHandler
 
   async determineReceivers(): Promise<User[]> {
     const owner = await this.ctx.em.findOneOrFail(User, { id: this.ctx.user.id })
+    // todo: if this run in a space, more people than the owner should be notified?
     // todo: check db settings
     return [owner]
   }

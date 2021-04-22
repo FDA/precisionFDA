@@ -1,7 +1,6 @@
 import { pipe, filter, uniqBy } from 'ramda'
-import type { LoadedReference } from '@mikro-orm/core'
 import { errors } from '../../../..'
-import { User, SpaceEvent, SpaceMembership, Space } from '../../..'
+import { User, SpaceMembership, Space } from '../../..'
 import {
   EmailSendInput,
   EmailTemplate,
@@ -15,28 +14,30 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '../../../space-event/space-event.enum'
 
 export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> implements EmailTemplate {
   templateFile = spaceChangedTemplate
-  spaceEvent: SpaceEvent & {
-    space: LoadedReference<Space, Space>
-    user: LoadedReference<User, User>
-  }
+  space: Space
+  user: User
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'space_locked_unlocked_deleted'
   }
 
   async setupContext(): Promise<void> {
-    this.spaceEvent = await this.ctx.em.findOneOrFail(
-      SpaceEvent,
-      { id: this.validatedInput.spaceEventId },
-      { populate: ['space', 'user'] },
-    )
-    if (!this.spaceEvent || !this.spaceEvent.user.unwrap() || !this.spaceEvent.space.unwrap()) {
+    this.space = await this.ctx.em.findOneOrFail(Space, {
+      id: this.validatedInput.spaceId,
+    })
+    if (!this.space) {
       throw new errors.NotFoundError(
-        `SpaceEvent id ${this.validatedInput.spaceEventId.toString()} not found`,
+        `Space id ${this.validatedInput.spaceId.toString()} not found`,
+        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+      )
+    }
+    this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
+    if (!this.user) {
+      throw new errors.NotFoundError(
+        `User id ${this.validatedInput.initUserId.toString()} not found`,
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
@@ -45,13 +46,13 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
   async determineReceivers(): Promise<User[]> {
     const memberships = await this.ctx.em.find(
       SpaceMembership,
-      { spaces: this.spaceEvent.space.id, active: true },
+      { spaces: this.space.id, active: true },
       { populate: ['user.emailNotificationSettings'] },
     )
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
 
-    const spaceEventUserId = this.spaceEvent.user.id
+    const spaceEventUserId = this.user.id
     // this has to be bound to local
     const filterUsers = pipe(
       // SpaceMembership[] -> User[]
@@ -68,13 +69,13 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
 
   // eslint-disable-next-line @typescript-eslint/require-await, require-await
   async getTemplateContent(): Promise<SpaceChangeTemplateInput['content']> {
-    const actionKey = SPACE_EVENT_ACTIVITY_TYPE[this.spaceEvent.activityType]
     // todo: validate the incoming action?
-    const action = actionKey.split('_').join(' ')
+    const actionKey = this.validatedInput.activityType
+    const action = actionKey.split('_').slice(1).join(' ')
     return {
-      space: { name: this.spaceEvent.space.unwrap().name },
+      space: { name: this.space.name },
       action,
-      initiator: { fullName: this.spaceEvent.user.unwrap().fullName },
+      initiator: { fullName: this.user.fullName },
     }
   }
 
