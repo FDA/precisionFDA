@@ -1,8 +1,10 @@
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import type { JSONSchema7 } from 'json-schema'
 import { AnyObject, OpsCtx } from '../../types'
-import { schemas } from '../../utils'
+import { schemas, enumUtils } from '../../utils'
 import { SpaceEvent, User } from '..'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { handlers } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
@@ -120,16 +122,57 @@ const spaceEventEmailSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
+const spaceChangedEmailSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    initUserId: schemas.idProp,
+    spaceId: schemas.idProp,
+    activityType: { type: 'string', enum: enumUtils.stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
+  },
+  required: ['initUserId', 'spaceId', 'activityType'],
+  additionalProperties: false,
+}
+
+const membershipChangedEmailSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    initUserId: schemas.idProp,
+    spaceId: schemas.idProp,
+    updatedMembershipId: schemas.idProp,
+    activityType: { type: 'string', enum: enumUtils.stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
+    newMembershipRole: {
+      type: 'string',
+      enum: enumUtils.stringValuesDowncased(SPACE_MEMBERSHIP_ROLE),
+    },
+  },
+  required: ['initUserId', 'spaceId', 'activityType', 'updatedMembershipId'],
+  additionalProperties: false,
+}
+
 const emailInputSchemas = {
   jobFinishedEmailSchema,
   spaceEventEmailSchema,
+  spaceChangedEmailSchema,
+  membershipChangedEmailSchema,
 }
 
 type NewContentAdded = { spaceEventId: number }
 
-type MemberChanged = { spaceEventId: number }
+type CommentAdded = { spaceEventId: number }
 
-type SpaceChanged = { spaceEventId: number }
+type MemberChanged = {
+  updatedMembershipId: number
+  initUserId: number
+  spaceId: number
+  activityType: keyof typeof SPACE_EVENT_ACTIVITY_TYPE
+  newMembershipRole?: keyof typeof SPACE_MEMBERSHIP_ROLE
+}
+
+type SpaceChanged = {
+  initUserId: number
+  spaceId: number
+  activityType: string
+}
 
 // EMAIL OPERATIONS INPUTS
 
@@ -165,14 +208,17 @@ interface EmailTemplate {
   // validate(payload: any): void
   // todo: make this one abstract maybe?
   determineReceivers(...args: any[]): Promise<User[]>
-  // determineReceivers(spaceEventId: number): Promise<User[]>
-  // getReceivers(): Promise<User[]>
   template(receiver: User): Promise<EmailSendInput>
   getNotificationKey(spaceEvent?: SpaceEvent): keyof typeof NOTIFICATION_TYPES_BASE
   setupContext(): Promise<void>
 }
 
-type EMAIL_TYPES = 'jobFinished' | 'newContentAdded' | 'memberChangedAddedRemoved' | 'spaceChanged'
+type EMAIL_TYPES =
+  | 'jobFinished'
+  | 'newContentAdded'
+  | 'memberChangedAddedRemoved'
+  | 'spaceChanged'
+  | 'commentAdded'
 type EmailConfigItem = {
   // unique name
   name: EMAIL_TYPES
@@ -201,14 +247,20 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
   memberChangedAddedRemoved: {
     name: 'memberChangedAddedRemoved',
     emailId: 3,
-    schema: emailInputSchemas.spaceEventEmailSchema,
+    schema: emailInputSchemas.membershipChangedEmailSchema,
     templateClass: handlers.MemberChangedEmailHandler,
   },
   spaceChanged: {
     name: 'spaceChanged',
     emailId: 4,
-    schema: emailInputSchemas.spaceEventEmailSchema,
+    schema: emailInputSchemas.spaceChangedEmailSchema,
     templateClass: handlers.SpaceChangedEmailHandler,
+  },
+  commentAdded: {
+    name: 'commentAdded',
+    emailId: 5,
+    schema: emailInputSchemas.spaceEventEmailSchema,
+    templateClass: handlers.CommentAddedEmailHandler,
   },
 } as const
 
@@ -256,4 +308,5 @@ export {
   NewContentAdded,
   MemberChanged,
   SpaceChanged,
+  CommentAdded,
 }

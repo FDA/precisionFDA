@@ -9,11 +9,7 @@ import { MemberChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/em
 import { OpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
-import {
-  PARENT_TYPE,
-  SPACE_EVENT_ACTIVITY_TYPE,
-  SPACE_EVENT_OBJECT_TYPE,
-} from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
 import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 
 describe('member-change.handler', () => {
@@ -25,7 +21,7 @@ describe('member-change.handler', () => {
   let space: Space
   let ctx: OpsCtx
   let anotherUserMembership: SpaceMembership
-  const emailConfig = EMAIL_CONFIG.newContentAdded
+  const emailConfig = EMAIL_CONFIG.memberChangedAddedRemoved
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -54,47 +50,65 @@ describe('member-change.handler', () => {
   })
 
   context('setupContext()', () => {
-    it('sets spaceEvent to the handler', async () => {
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
+    it('setups the handler', async () => {
+      // the event does not exist in the DB when this email handler is called
+      // transaction issue in the rails app...
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      // input simulates data in the shape they are in the rails app
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
-      expect(handler.spaceEvent).to.exist()
-      expect(handler.spaceEvent).to.have.property('id', spaceEventMemberAdded.id)
+      expect(handler.space).to.exist()
+      expect(handler.user).to.exist()
+      expect(handler.updatedMembership).to.exist()
+      expect(handler.updatedMembership.user.getEntity()).to.exist()
     })
   })
 
   context('determineReceivers()', () => {
     it('other users from the space (admin or leads)', async () => {
       anotherUserMembership.role = SPACE_MEMBERSHIP_ROLE.LEAD
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       await em.flush()
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
@@ -104,21 +118,28 @@ describe('member-change.handler', () => {
 
     it('if other user is challenge bot, it is filter out', async () => {
       anotherUser.dxuser = config.users.challengeBotDxUser
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       await em.flush()
 
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
@@ -126,19 +147,19 @@ describe('member-change.handler', () => {
     })
 
     it('based on user settings', async () => {
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       // the key prefix has to match anotherUser's membership role in the space
       const settings = {
         all_membership_changed: false,
@@ -148,7 +169,13 @@ describe('member-change.handler', () => {
       anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
       await em.flush()
 
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
@@ -163,20 +190,27 @@ describe('member-change.handler', () => {
         { user: anotherLeadUser, space },
         { role: SPACE_MEMBERSHIP_ROLE.LEAD },
       )
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       await em.flush()
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
@@ -188,89 +222,97 @@ describe('member-change.handler', () => {
 
   context('getNotificationKey()', () => {
     it('based on space event type (member added)', async () => {
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
-      const key = handler.getNotificationKey(spaceEventMemberAdded)
+      const key = handler.getNotificationKey()
       expect(key).to.equal('member_added_or_removed_from_space')
     })
 
     it('based on space event type (member changed)', async () => {
       // someone changed member role from something to VIEWER
-      const spaceEventMemberChanged = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberChanged = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventMemberChanged.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_changed],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
-      const key = handler.getNotificationKey(spaceEventMemberChanged)
+      const key = handler.getNotificationKey()
       expect(key).to.equal('membership_changed')
     })
     // todo: complete list of space event actions
 
     it('throws if spaceEvent.activityType is unknown', async () => {
-      // someone changed member role from something to VIEWER
-      const spaceEventChanged = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          // invalid activity_type
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
-      // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventChanged.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
-      expect(() => handler.getNotificationKey(spaceEventChanged)).to.throw()
+      expect(() => handler.getNotificationKey()).to.throw()
     })
   })
 
   context('getTemplateContent()', () => {
     it('content shape', async () => {
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const content = await handler.getTemplateContent()
@@ -279,7 +321,7 @@ describe('member-change.handler', () => {
         initiator: { fullName: user.fullName },
         newMember: {
           fullName: anotherUser.fullName,
-          role: SPACE_MEMBERSHIP_ROLE[anotherUserMembership.role],
+          role: SPACE_MEMBERSHIP_ROLE[anotherUserMembership.role].toLowerCase(),
         },
         action: 'added a new member',
         space: { name: space.name },
@@ -287,21 +329,27 @@ describe('member-change.handler', () => {
     })
 
     it('action based on event activityType', async () => {
-      const spaceEventMemberAdded = create.spacesHelper.createEvent(
-        em,
-        { user, space },
-        {
-          entityId: anotherUserMembership.id,
-          entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-          objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-          // matches spaceMembership.role
-          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-        },
-      )
-      await em.flush()
+      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
+      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
+      //   em,
+      //   { user, space },
+      //   {
+      //     entityId: anotherUserMembership.id,
+      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
+      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
+      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
+      //     // matches spaceMembership.role
+      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+      //   },
+      // )
       // user id 1 added user id 2 to the space
-      const input = { spaceEventId: spaceEventMemberAdded.id }
+      const input = {
+        updatedMembershipId: anotherUserMembership.id,
+        initUserId: user.id,
+        spaceId: space.id,
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_changed],
+        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
+      }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const content = await handler.getTemplateContent()

@@ -1,6 +1,7 @@
 import { pipe, filter, uniqBy } from 'ramda'
+import { LoadedReference } from '@mikro-orm/core'
 import { errors } from '../../../..'
-import { User, SpaceEvent, SpaceMembership } from '../../..'
+import { User, SpaceMembership, Space } from '../../..'
 import {
   EmailSendInput,
   EmailTemplate,
@@ -31,28 +32,51 @@ export class MemberChangedEmailHandler
   extends BaseTemplate<MemberChanged>
   implements EmailTemplate {
   templateFile = memberChangedTemplate
-  spaceEvent: SpaceEvent
+  space: Space
+  user: User
+  updatedMembership: SpaceMembership & {
+    user: LoadedReference<User, User>
+  }
 
   async setupContext(): Promise<void> {
-    this.spaceEvent = await this.ctx.em.findOneOrFail(
-      SpaceEvent,
-      { id: this.validatedInput.spaceEventId },
-      { populate: ['space', 'user'] },
-    )
-    if (!this.spaceEvent || !this.spaceEvent.user.unwrap() || !this.spaceEvent.space.unwrap()) {
+    this.space = await this.ctx.em.findOneOrFail(Space, {
+      id: this.validatedInput.spaceId,
+    })
+    if (!this.space) {
       throw new errors.NotFoundError(
-        `SpaceEvent id ${this.validatedInput.spaceEventId.toString()} not found`,
+        `Space id ${this.validatedInput.spaceId.toString()} not found`,
+        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+      )
+    }
+    this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
+    if (!this.user) {
+      throw new errors.NotFoundError(
+        `User id ${this.validatedInput.initUserId.toString()} not found`,
+        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+      )
+    }
+    this.updatedMembership = await this.ctx.em.findOneOrFail(
+      SpaceMembership,
+      {
+        id: this.validatedInput.updatedMembershipId,
+      },
+      { populate: ['user'] },
+    )
+    if (!this.updatedMembership) {
+      throw new errors.NotFoundError(
+        `Space membership id ${this.validatedInput.updatedMembershipId.toString()} not found`,
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
   }
 
   getActionStr(): string {
-    const activityKey = SPACE_EVENT_ACTIVITY_TYPE[this.spaceEvent.activityType]
+    // todo: should filter if activityType belongs here
+    const activityKey = this.validatedInput.activityType
     const actionValue = ACTION_NAMES[activityKey]
     if (!actionValue) {
       throw new errors.NotFoundError(
-        `SpaceEvent id ${this.validatedInput.spaceEventId.toString()} does not
+        `SpaceEvent with activityType id ${activityKey.toString()} does not
         correspond with action types for the email`,
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
@@ -60,36 +84,34 @@ export class MemberChangedEmailHandler
     return actionValue
   }
 
-  getNotificationKey(spaceEvent: SpaceEvent): keyof typeof NOTIFICATION_TYPES_BASE {
+  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     const membershipChangeKeys = [
       SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
       SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
       SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
     ]
     const membershipAddedRemovedKeys = [SPACE_EVENT_ACTIVITY_TYPE.membership_added]
+    const currentKey = SPACE_EVENT_ACTIVITY_TYPE[this.validatedInput.activityType]
     // todo: member removed space event key ???
-    if (membershipChangeKeys.includes(spaceEvent.activityType)) {
+    if (membershipChangeKeys.includes(currentKey)) {
       return 'membership_changed'
     }
-    if (membershipAddedRemovedKeys.includes(spaceEvent.activityType)) {
+    if (membershipAddedRemovedKeys.includes(currentKey)) {
       return 'member_added_or_removed_from_space'
     }
-    throw new Error(`Unknown activityType value ${spaceEvent.activityType}`)
+    throw new Error(`Unknown activityType value ${this.validatedInput.activityType}`)
   }
 
   async determineReceivers(): Promise<User[]> {
     const memberships = await this.ctx.em.find(
       SpaceMembership,
-      { spaces: this.spaceEvent.space.id, active: true },
+      { spaces: this.space.id, active: true },
       { populate: ['user.emailNotificationSettings'] },
     )
-    const isEnabledFn = buildIsNotificationEnabled(
-      this.getNotificationKey(this.spaceEvent),
-      this.ctx,
-    )
+    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
 
-    const spaceEventUserId = this.spaceEvent.user.id
+    const spaceEventUserId = this.user.id
     // this has to be bound to local
     const filterUsers = pipe(
       // SpaceMembership[] -> User[]
@@ -106,27 +128,25 @@ export class MemberChangedEmailHandler
   }
 
   async getTemplateContent(): Promise<MemberChangeTemplateInput['content']> {
-    const membership = await this.ctx.em.findOne(
-      SpaceMembership,
-      { id: this.spaceEvent.entityId },
-      { populate: ['user'] },
-    )
+    const membership = this.updatedMembership
     if (!membership || !membership.user.unwrap()) {
       throw new errors.NotFoundError(
-        `New space member id ${this.spaceEvent.entityId.toString()} not found`,
+        `New space member id ${this.validatedInput.updatedMembershipId.toString()} not found`,
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
 
     const action = this.getActionStr()
+    // an override from request input can be provided
+    const role = this.validatedInput.newMembershipRole ?? SPACE_MEMBERSHIP_ROLE[membership.role]
 
     return {
-      initiator: { fullName: this.spaceEvent.user.unwrap().fullName },
+      initiator: { fullName: this.user.fullName },
       action,
-      space: { name: this.spaceEvent.space.unwrap().name },
+      space: { name: this.space.name },
       newMember: {
         fullName: membership.user.unwrap().fullName,
-        role: SPACE_MEMBERSHIP_ROLE[membership.role],
+        role,
       },
     }
   }
