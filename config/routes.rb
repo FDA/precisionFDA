@@ -158,6 +158,10 @@ Rails.application.routes.draw do
         post :propose, on: :collection
       end
 
+      resources :submissions, only: %i(index) do
+        get :my_entries, on: :collection
+      end
+
       resources :experts, only: %i(index show) do
         get :years, on: :collection
       end

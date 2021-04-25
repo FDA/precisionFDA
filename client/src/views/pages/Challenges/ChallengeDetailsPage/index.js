@@ -23,6 +23,8 @@ import {
 } from '../../../../reducers/challenges/challenge/selectors'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
+import ChallengeSubmissionsTable from '../../../components/Challenges/ChallengeSubmissionsTable'
+import ChallengeMyEntriesTable from '../../../components/Challenges/ChallengeMyEntriesTable'
 
 
 class ChallengeContent {
@@ -197,14 +199,20 @@ class ChallengeDetailsPage extends React.Component {
     const userCanSubmitEntry =  isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
 
     const userCanSeeSubmissions = isLoggedIn
-    const userCanSeeMyEntries  = isLoggedIn && challenge.isFollowed
     // Results are visible to:
     //  - site admins who are logged on
     //  - or when results are announced
     //  - or when challenge is archived
     const userCanSeeResults = (isLoggedIn && user.can_create_challenges) || challenge.status == CHALLENGE_STATUS.RESULT_ANNOUNCED || challenge.status == CHALLENGE_STATUS.ARCHIVED
 
-    const tabIndex = (window.location.hash == '#results') ? 1 : 0
+    const tabHashes = userCanSeeSubmissions ? ['#intro', '#submissions', '#my_entries', '#results']
+                                            : ['#intro', '#results']
+
+    const tabIndex = tabHashes.includes(window.location.hash) ? tabHashes.indexOf(window.location.hash) : 0
+    const onSelectTab = (index) => {
+      history.pushState(null, null, tabHashes[index])
+      this.setState({ tabIndex: tabIndex })
+    }
 
     const joinChallengeButtonTitle = (challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED)
       ? 'Challenge Ended'
@@ -221,6 +229,8 @@ class ChallengeDetailsPage extends React.Component {
     //      See https://stackoverflow.com/questions/65416339/how-to-detect-timezone-abbreviation-using-date-fns-tz
     const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
     // console.log("userTimeZone = "+userTimeZone)
+
+    document.title = `${challenge.name} - PrecisionFDA Challenge`
 
     return (
       <PublicLayout>
@@ -255,14 +265,14 @@ class ChallengeDetailsPage extends React.Component {
         
         <div className="challenge-details-main-container">
           <div className="left-column">
-            <Tabs defaultIndex={tabIndex} onSelect={index => { window.location.hash = (index == 1) ? '#results' : '#intro' }}>
+            <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
               <TabList>
                 <Tab>INTRODUCTION</Tab>
                 {userCanSeeSubmissions && (
-                <a href={`/challenges/${challenge.id}/view/submissions`}>SUBMISSIONS</a>
-                )}
-                {userCanSeeMyEntries && (
-                <a href={`/challenges/${challenge.id}/view/my_entries`}>MY ENTRIES</a>
+                  <>
+                  <Tab>SUBMISSIONS</Tab>
+                  <Tab>MY ENTRIES</Tab>
+                  </>
                 )}
                 {userCanSeeResults && (
                 <Tab>RESULTS</Tab>
@@ -272,6 +282,16 @@ class ChallengeDetailsPage extends React.Component {
               <TabPanel>
                 <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.introContent }}></div>
               </TabPanel>
+              {userCanSeeSubmissions && (
+                <>
+                <TabPanel>
+                  <ChallengeSubmissionsTable challengeId={challenge.id} />
+                </TabPanel>
+                <TabPanel>
+                  <ChallengeMyEntriesTable challengeId={challenge.id} />
+                </TabPanel>
+                </>
+              )}
               {userCanSeeResults && (
               <TabPanel>
                 <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.resultsContent }}></div>
@@ -282,12 +302,16 @@ class ChallengeDetailsPage extends React.Component {
           <div className="right-column pfda-main-content-sidebar">
             <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
             {userCanSubmitEntry && (
-              <a className="btn btn-primary btn-block" href={challenge.links.new_submission}>Submit Challenge Entry</a>
+              <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} href={challenge.links.new_submission}>Submit Challenge Entry</a>
             )}
-            <hr />
-            <div className="challenge-details-outline">
-              {challengeContent.renderAnchors()}
-            </div>
+            {tabIndex == 0 && (
+            <>
+              <hr style={{ marginTop: '24px' }} />
+              <div className="challenge-details-outline">
+                {challengeContent.renderAnchors()}
+              </div>
+            </>
+            )}
             {challenge.canEdit && (
             <div className="btn-group" style={{ marginTop: '24px', width: '100%' }}>
               <a className="btn btn-default btn-block" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
