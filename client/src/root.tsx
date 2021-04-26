@@ -17,11 +17,13 @@ import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
+import { Header } from './components/Header'
 import GlobalStyle from './styles/global'
 
 const root = ({ store }: any) => (
   <Provider store={store}>
     <GlobalStyle />
+    <Header />
     <Router history={history}>
       <ErrorWrapper>
         <Switch>
