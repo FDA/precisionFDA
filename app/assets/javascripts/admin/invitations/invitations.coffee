@@ -36,11 +36,12 @@ class PageInvitationsView
 
   handleResponse: (data) =>
     noErrors = true
-    @undoneInvitations().forEach((invitation) ->
+    @undoneInvitations().forEach((invitation) =>
       errors = data[invitation.id].errors
       invitation.errors(errors)
       invitation.success(errors.length == 0)
       noErrors = false if errors.length
+      @provisionedUsernames.push(data[invitation.id].user.username) if invitation.success()
     )
     return noErrors
 
@@ -66,12 +67,16 @@ class PageInvitationsView
       .then(
         (data) =>
           responseIsOk = @handleResponse(data)
+
           if responseIsOk
-            Precision.alert.showAfterReload('Users successfully provisioned!', 'alert-success')
+            successMessage = "You have successfully provisioned the following users: " +
+                              @provisionedUsernames().join(", ")
+            Precision.alert.showAfterReload(successMessage, 'alert-success', true)
             window.location.reload()
           else
             $('#disable-screen-modal').modal('hide')
             Precision.alert.showAboveAll('Some fields filled in incorrectly.', 'alert-warning')
+          @provisionedUsernames([])
         (error) ->
           try
             message = JSON.parse(error.responseText)["error"]
@@ -101,6 +106,7 @@ class PageInvitationsView
     @invitationGridLoading = ko.observable(false)
     @selectedInvitations = ko.observableArray([])
     @invitations = ko.observableArray([])
+    @provisionedUsernames = ko.observableArray([])
     @undoneInvitations = ko.computed(() =>
       @invitations().filter((invitation) -> !invitation.success())
     )
@@ -129,6 +135,7 @@ class PageInvitationsView
         { data: 'postal_code' },
         { data: 'phone' },
         { data: 'duns' },
+        { data: 'created_at' },
       ],
       "columnDefs": [
         {
@@ -138,7 +145,8 @@ class PageInvitationsView
           render: (data) ->
             "<input value=\"#{data}\" type=\"checkbox\" class=\"select-user\" />"
         }
-      ]
+      ],
+      order: [[ 12, "desc" ]]
     })
     @searchDataGridContainer = $('#invitations_data_grid_filter input', @gridModal)
     @searchValue = document.getElementById('search_input')

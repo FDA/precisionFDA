@@ -87,7 +87,7 @@ export const HeaderLeft = styled.div`
   flex-wrap: wrap;
   justify-self: flex-start;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   &::after {
     content: "";
     width: 20px;

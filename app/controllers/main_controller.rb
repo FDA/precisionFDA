@@ -428,7 +428,13 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     end
 
     if request.post? # rubocop:todo Style/GuardClause
-      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
+      save_session(
+        -1,
+        "Guest-#{@invitation.id}",
+        Context::INVALID_TOKEN,
+        @invitation.expires_at.to_i,
+        -1,
+      )
       auditor_data = {
         action: "create",
         record_type: "Access Request",

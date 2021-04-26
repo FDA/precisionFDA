@@ -11,7 +11,7 @@ $invitations-search-width: 900px
       max-width: $invitations-search-width
       width: 100%
       margin-right: 10px
-    &-browse
+    &-show-pending
       padding-bottom: 16px
     &-info
       max-width: $invitations-search-width
@@ -20,7 +20,7 @@ $invitations-search-width: 900px
   .invitations
     table
       select.form-control
-        padding: 6px 8px;
+        padding: 6px 8px
     &-original-values
       td
         margin-right: 20px
@@ -28,6 +28,11 @@ $invitations-search-width: 900px
         padding-left: 20px
         padding-bottom: 10px
         white-space: nowrap
+  #invitations-search-input
+    position: relative
+  #invitations-back-btn
+    float: right
+    margin-top: 7px
   .wide-modal
     .table
       width: 100% !important

@@ -89,7 +89,7 @@ module Admin
         org_handle: username,
       )
 
-      result = { errors: errors(full_opts) }
+      result = { errors: errors(full_opts), user: { username: username } }
 
       return result if result[:errors].present?
 
