@@ -10,4 +10,5 @@ export default {
     totalPages: 1,
   },
   year: null,
+  timeStatus: null,
 }

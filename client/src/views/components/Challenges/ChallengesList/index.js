@@ -25,12 +25,12 @@ import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import './style.sass'
 
 
-const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, user }) => {
+const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, user, emptyListMessage }) => {
   const classes = classNames(['challenges-list'])
 
   if (isFetching) {
     return (
-      <div className='text-center'>
+      <div className='text-center' style={{ margin: '32px' }}>
         <Loader />
       </div>
     )
@@ -95,7 +95,7 @@ const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, us
     )
   }
 
-  return <div className='text-center'>No challenges found.</div>
+  return <div className='text-center' style={{ margin: '32px' }}>{emptyListMessage ? emptyListMessage : 'No challenges found.'}</div>
 }
 
 ChallengesList.propTypes = {
@@ -104,11 +104,13 @@ ChallengesList.propTypes = {
   pagination: PropTypes.exact(PaginationShape),
   setPageHandler: PropTypes.func,
   user: PropTypes.object,
+  emptyListMessage: PropTypes.string,
 }
 
 ChallengesList.defaultProps = {
   challenges: [],
   isFetching: false,
+  emptyListMessage: null,
 }
 
 const mapStateToProps = state => ({
