@@ -27,17 +27,32 @@ import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
 import { CommentingIcon } from '../icons/CommentingIcon'
 import { CaretIcon } from '../icons/CaretIcon'
 import Dropdown from '../Dropdown'
+import { Link } from 'react-router-dom'
 
 export const Header = () => {
   const renderUserMenu = () => (
     <StyledDropMenuLinks>
-      <StyledLinkWrapper><StyledLink href="/profile">Profile</StyledLink></StyledLinkWrapper>
-      <StyledLinkWrapper><StyledLink href="/profile">Public Profile</StyledLink></StyledLinkWrapper>
-      <StyledLinkWrapper><StyledLink href="/profile">Manage Licenses</StyledLink></StyledLinkWrapper>
-      <StyledLinkWrapper><StyledLink href="/profile">About</StyledLink></StyledLinkWrapper>
-      <StyledLinkWrapper><StyledLink href="/profile">Guidelines</StyledLink></StyledLinkWrapper>
-      <StyledLinkWrapper><StyledLink href="/profile">Docs</StyledLink></StyledLinkWrapper>
-      <StyledLinkWrapper><StyledLink href="/profile">Log out</StyledLink></StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">Profile</StyledLink>
+      </StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">Public Profile</StyledLink>
+      </StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">Manage Licenses</StyledLink>
+      </StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">About</StyledLink>
+      </StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">Guidelines</StyledLink>
+      </StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">Docs</StyledLink>
+      </StyledLinkWrapper>
+      <StyledLinkWrapper>
+        <StyledLink href="/profile">Log out</StyledLink>
+      </StyledLinkWrapper>
     </StyledDropMenuLinks>
   )
 
@@ -47,41 +62,57 @@ export const Header = () => {
         <Nav>
           <HeaderLeft>
             <Logo />
-            <MenuItem active={true}>
-              <HomeIcon />
-              <HeaderItemText>Overview</HeaderItemText>
-            </MenuItem>
-            <MenuItem>
-              <CommentIcon />
-              <HeaderItemText>Discussions</HeaderItemText>
-            </MenuItem>
-            <MenuItem>
-              <TrophyIcon />
-              <HeaderItemText>Challenges</HeaderItemText>
-            </MenuItem>
-            <MenuItem>
-              <StarIcon />
-              <HeaderItemText>Experts</HeaderItemText>
-            </MenuItem>
+            <Link to="/">
+              <MenuItem active={true}>
+                <HomeIcon />
+                <HeaderItemText>Overview</HeaderItemText>
+              </MenuItem>
+            </Link>
+            <Link to="/discussions">
+              <MenuItem>
+                <CommentIcon />
+                <HeaderItemText>Discussions</HeaderItemText>
+              </MenuItem>
+            </Link>
+            <Link to="/challenges">
+              <MenuItem>
+                <TrophyIcon />
+                <HeaderItemText>Challenges</HeaderItemText>
+              </MenuItem>
+            </Link>
+            <Link to="/experts">
+              <MenuItem>
+                <StarIcon />
+                <HeaderItemText>Experts</HeaderItemText>
+              </MenuItem>
+            </Link>
             <HeaderSpacer />
-            <MenuItem>
-              <StickyNoteIcon />
-              <HeaderItemText>Notes</HeaderItemText>
-            </MenuItem>
-            <MenuItem>
-              <BullsEyeIcon />
-              <HeaderItemText>Comparisons</HeaderItemText>
-            </MenuItem>
+            <Link to="/notes">
+              <MenuItem>
+                <StickyNoteIcon />
+                <HeaderItemText>Notes</HeaderItemText>
+              </MenuItem>
+            </Link>
+            <Link to="/comparisons">
+              <MenuItem>
+                <BullsEyeIcon />
+                <HeaderItemText>Comparisons</HeaderItemText>
+              </MenuItem>
+            </Link>
             <HeaderSpacer />
-            <MenuItem>
-              <FortIcon />
-              <HeaderItemText>My Home</HeaderItemText>
-            </MenuItem>
+            <Link to="/home">
+              <MenuItem>
+                <FortIcon />
+                <HeaderItemText>My Home</HeaderItemText>
+              </MenuItem>
+            </Link>
             <HeaderSpacer />
-            <MenuItem>
-              <ObjectGroupIcon />
-              <HeaderItemText>Spaces</HeaderItemText>
-            </MenuItem>
+            <Link to="/spaces">
+              <MenuItem>
+                <ObjectGroupIcon />
+                <HeaderItemText>Spaces</HeaderItemText>
+              </MenuItem>
+            </Link>
           </HeaderLeft>
           <HeaderRight>
             <StyledSupport>

@@ -18,13 +18,14 @@ import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
 import { Header } from './components/Header'
-import GlobalStyle from './styles/global'
+import GlobalStyle, { LayoutBody } from './styles/global'
 
 const root = ({ store }: any) => (
   <Provider store={store}>
-    <GlobalStyle />
-    <Header />
     <Router history={history}>
+      <GlobalStyle />
+      <Header />
+      <LayoutBody>
       <ErrorWrapper>
         <Switch>
           <Redirect exact from='/home' to='/home/files' />
@@ -64,6 +65,7 @@ const root = ({ store }: any) => (
           </Route>
         </Switch>
       </ErrorWrapper>
+      </LayoutBody>
     </Router>
   </Provider>
 )
