@@ -7,7 +7,7 @@
     "build:production": "webpack --config webpack.production.config.js",
     "build": "webpack --progress --config webpack.development.config.js",
     "watch": "webpack --watch --config webpack.development.config.js",
-    "server": "webpack-dev-server --config webpack.devserver.config.js",
+    "server": "webpack-dev-server --config webpack.devserver.config.js --liveReload",
     "lint": "eslint",
     "test": "jest"
   },
