@@ -3,6 +3,10 @@ import { theme } from '../../styles/theme'
 import { Svg } from '../icons/Svg'
 
 export const StyledHeader = styled.header`
+  /* position: fixed;
+  top: 0;
+  left: 0;
+  right: 0; */
   background-color: ${theme.primary};
   border-bottom: 1px solid ${theme.primaryShade};
 `
