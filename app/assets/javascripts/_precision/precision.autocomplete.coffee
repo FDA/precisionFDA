@@ -64,7 +64,7 @@ class AutocompleteModel
 
   renderInputGroup = () ->
     inputGroup = document.createElement('div')
-    inputGroup.classList.add('#{PREFIX}--input-group')
+    inputGroup.classList.add("#{PREFIX}--input-group")
     return inputGroup
 
   renderRootNode = (inputNode) ->
