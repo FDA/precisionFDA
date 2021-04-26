@@ -24,7 +24,6 @@ const root = ({ store }: any) => (
   <Provider store={store}>
     <Router history={history}>
       <GlobalStyle />
-      <Header />
       <LayoutBody>
       <ErrorWrapper>
         <Switch>
