@@ -18,7 +18,9 @@
 class Org < ApplicationRecord
   default_scope { where.not(state: "deleted") }
 
-  PFDA_PREFIX = "org-pfda..".freeze
+  ORG_PREFIX = "org-".freeze
+  PFDA_PREFIX = "pfda..".freeze
+  HANDLE_MAX_LENGTH = 33
 
   include Auditor
 
@@ -39,7 +41,7 @@ class Org < ApplicationRecord
     def construct_dxorg(handle)
       raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
 
-      PFDA_PREFIX + handle
+      ORG_PREFIX + PFDA_PREFIX + handle
     end
 
     def handle_by_id(id)
@@ -102,10 +104,10 @@ class Org < ApplicationRecord
   end
 
   def dxid
-    PFDA_PREFIX + handle
+    ORG_PREFIX + PFDA_PREFIX + handle
   end
 
   def dxorg
-    Org.construct_dxorg(handle)
+    self.class.construct_dxorg(handle)
   end
 end
