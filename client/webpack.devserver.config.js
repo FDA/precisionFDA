@@ -31,10 +31,15 @@ module.exports = merge(development, {
     host: '0.0.0.0', // See https://github.com/webpack/webpack-dev-server/issues/547
     port: 9000,
     publicPath: '/',
-    // hot: true,
     https: {
       key: fs.readFileSync(path.resolve('../key.pem')),
       cert: fs.readFileSync(path.resolve('../cert.pem')),
     },
+    proxy: {
+      '/api': {
+        target: 'https://localhost:3000',
+        secure: false
+      }
+    }
   },
 })
