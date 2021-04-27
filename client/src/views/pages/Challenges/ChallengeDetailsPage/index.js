@@ -282,7 +282,7 @@ class ChallengeDetailsPage extends React.Component {
           <div className="right-column pfda-main-content-sidebar">
             <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
             {userCanSubmitEntry && (
-              <button className="btn btn-primary btn-block" onClick={() => window.location.assign(`/challenges/${challenge.id}/submissions/new`)}>Submit Challenge Entry</button>
+              <a className="btn btn-primary btn-block" href={challenge.links.new_submission}>Submit Challenge Entry</a>
             )}
             <hr />
             <div className="challenge-details-outline">
