@@ -132,10 +132,16 @@ class ChallengeContent {
 
 
 class ChallengeDetailsPage extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { tabIndex: -1 }
+  }
 
   componentDidMount() {
-    const { loadChallenge, challengeId } = this.props
-    loadChallenge(parseInt(challengeId))
+    const { match, loadChallenge } = this.props
+    if (match && match.params) {
+      loadChallenge(parseInt(match.params.challengeId))
+    }
   }
 
   handleJoinChallenge = () => {
@@ -148,7 +154,7 @@ class ChallengeDetailsPage extends React.Component {
   }
 
   render() {
-    const { isFetching, user, challenge, error } = this.props
+    const { match, isFetching, user, challenge, error } = this.props
 
     if (isFetching) {
       return (
@@ -205,13 +211,20 @@ class ChallengeDetailsPage extends React.Component {
     //  - or when challenge is archived
     const userCanSeeResults = (isLoggedIn && user.can_create_challenges) || challenge.status == CHALLENGE_STATUS.RESULT_ANNOUNCED || challenge.status == CHALLENGE_STATUS.ARCHIVED
 
-    const tabHashes = userCanSeeSubmissions ? ['#intro', '#submissions', '#my_entries', '#results']
-                                            : ['#intro', '#results']
+    const page = match.params.page
+    const tabPages = userCanSeeSubmissions ? ['', '/submissions', '/my_entries', '/results']
+                                           : ['', '/results']
 
-    const tabIndex = tabHashes.includes(window.location.hash) ? tabHashes.indexOf(window.location.hash) : 0
+    let tabIndex = this.state.tabIndex
+    if (tabIndex < 0) {
+      const pageRoute = `/${page}`
+      tabIndex = tabPages.includes(pageRoute) ? tabPages.indexOf(pageRoute) : 0
+    }
+
     const onSelectTab = (index) => {
-      history.pushState(null, null, tabHashes[index])
-      this.setState({ tabIndex: tabIndex })
+      const url = `/challenges/${challenge.id}${tabPages[index]}`
+      history.pushState(null, null, url)
+      this.setState({ tabIndex: index })
     }
 
     const joinChallengeButtonTitle = (challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED)
@@ -228,7 +241,6 @@ class ChallengeDetailsPage extends React.Component {
     //      depends on the locale
     //      See https://stackoverflow.com/questions/65416339/how-to-detect-timezone-abbreviation-using-date-fns-tz
     const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-    // console.log("userTimeZone = "+userTimeZone)
 
     document.title = `${challenge.name} - PrecisionFDA Challenge`
 
@@ -327,7 +339,12 @@ class ChallengeDetailsPage extends React.Component {
 
 ChallengeDetailsPage.propTypes = {
   isFetching: PropTypes.bool,
-  challengeId: PropTypes.string,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      challengeId: PropTypes.string.isRequired,
+      page: PropTypes.string,
+    }),
+  }),
   challenge: PropTypes.shape(ChallengeShape),
   history: PropTypes.object,
   error: PropTypes.string,
