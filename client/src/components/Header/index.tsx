@@ -13,8 +13,8 @@ import {
   StyledSupport,
   StyledUsername,
   StyledDropMenuLinks,
-  StyledLinkWrapper,
   StyledLink,
+  StyledDivider,
 } from './styles'
 import { HomeIcon } from '../icons/HomeIcon'
 import { CommentIcon } from '../icons/CommentIcon'
@@ -32,27 +32,15 @@ import { Link } from 'react-router-dom'
 export const Header = () => {
   const renderUserMenu = () => (
     <StyledDropMenuLinks>
-      <StyledLinkWrapper>
         <StyledLink href="/profile">Profile</StyledLink>
-      </StyledLinkWrapper>
-      <StyledLinkWrapper>
         <StyledLink href="/profile">Public Profile</StyledLink>
-      </StyledLinkWrapper>
-      <StyledLinkWrapper>
         <StyledLink href="/profile">Manage Licenses</StyledLink>
-      </StyledLinkWrapper>
-      <StyledLinkWrapper>
+        <StyledDivider />
         <StyledLink href="/profile">About</StyledLink>
-      </StyledLinkWrapper>
-      <StyledLinkWrapper>
         <StyledLink href="/profile">Guidelines</StyledLink>
-      </StyledLinkWrapper>
-      <StyledLinkWrapper>
         <StyledLink href="/profile">Docs</StyledLink>
-      </StyledLinkWrapper>
-      <StyledLinkWrapper>
+        <StyledDivider />
         <StyledLink href="/profile">Log out</StyledLink>
-      </StyledLinkWrapper>
     </StyledDropMenuLinks>
   )
 
