@@ -55,6 +55,7 @@ export const MenuItem = styled(HeaderItem)`
   align-self: flex-end;
   flex-direction: column;
   padding: 10px;
+  height: 50px;
 `
 
 export const StyledSupport = styled(HeaderItem)`
@@ -101,15 +102,27 @@ export const HeaderRight = styled.div`
 `
 
 export const StyledDropMenuLinks = styled.div`
-  padding: 1rem;
   padding-top: 0px;
-  line-height: 2.8rem;
+  line-height: 28px;
+  display: flex;
+  flex-direction: column;
+  color: ${theme.darkerGrey};
+
 `
 
-export const StyledLinkWrapper = styled.div`
-  color: ${theme.darkerGrey};
-  transition: color 0.3s ease;
+export const StyledDivider = styled.div`
+  border-bottom: 1px solid ${theme.whiteGrey};
+  padding-top: 5px;
+  margin-bottom: 5px;
 `
 
 export const StyledLink = styled.a`
+  width: auto;
+  transition: color 0.3s ease;
+  padding-left: 5px;
+  padding-right: 5px;
+  line-height: 30px;
+  &:hover {
+    background-color: ${theme.whiteGrey};
+  }
 `
