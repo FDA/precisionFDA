@@ -42,6 +42,8 @@ class SubmissionSerializer < ApplicationSerializer
   end
 
   def user_can_access_space
+    return false unless object.challenge.space
+
     object.challenge.space.accessible_by_user?(current_user)
   end
 end
