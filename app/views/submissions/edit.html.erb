@@ -37,7 +37,7 @@
 
 <div class="pfda-toolbar clearfix">
   <div class="pull-right">
-    <%= link_to "Back to your entries", show_challenge_path(@submission.challenge, "my_entries"), class: "btn btn-link" %>
+    <%= link_to "Back to your entries", "/challenges/#{@submission.challenge.id}#my_entries", class: "btn btn-link" %>
     <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}, text: saveBtnText"></a>
   </div>
 </div>
