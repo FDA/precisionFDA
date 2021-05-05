@@ -18,15 +18,14 @@ module ErrorProcessable
   alias_method :raise_api_error, :fail
 
   def add_errors(attributes)
-    first_name = attributes[:first_name]
-    last_name = attributes[:last_name]
-    email = attributes[:email]
+    username = attributes[:username] ||
+               User.construct_username(attributes[:first_name], attributes[:last_name])
 
     errors = []
-    errors += user_invalid_errors(first_name: first_name, last_name: last_name, email: email)
-    errors << user_name_pattern_error(first_name, last_name)
+    errors << username_pattern_error(username)
+    errors += user_invalid_errors(attributes.slice(:first_name, :last_name, :email))
     errors += org_errors(attributes[:org], attributes[:org_handle])
-    errors << email_exists_error(email)
+    errors << email_exists_error(attributes[:email])
     errors.reject(&:blank?)
   end
 
@@ -35,14 +34,13 @@ module ErrorProcessable
     new_user.invalid? ? new_user.errors.full_messages : []
   end
 
-  def user_name_pattern_error(first_name, last_name)
-    username = User.construct_username(first_name, last_name)
+  def username_pattern_error(username)
     return if User.authserver_acceptable?(username)
 
     "Internal precisionFDA policies require that usernames be formed according" \
     "to the pattern <first_name>.<last_name> using only lowercase English letters. " \
-    "\nBased on the name provided (#{first_name} #{last_name}), the constructed username" \
-    " ('#{username}') would not have been acceptable. \nPlease adjust the name accordingly."
+    "\nThe constructed username ('#{username}') would not have been acceptable. \nPlease " \
+    "adjust the name accordingly."
   end
 
   def org_errors(org, org_handle)
@@ -84,7 +82,43 @@ module ErrorProcessable
     return if email.blank? || !DNAnexusAPI.email_exists?(email)
 
     name = User.find_by(email: email) ? "precisionFDA" : "DNAnexus"
-    "Error: This email address is already being used for a #{name} account." \
-    "Please choose a different email address for precisionFDA."
+    I18n.t("email_taken", side: name)
+  end
+
+  def add_warnings(invitation, org, org_handle, suggested_username)
+    warnings = []
+
+    if User.find_by(dxuser: suggested_username).present?
+      link = view_context.link_to(
+        I18n.t("provision.profile_link"),
+        user_path(suggested_username),
+        target: "_blank",
+        rel: "noopener",
+      )
+
+      warnings << I18n.t("provision.dxuser_already_used", link: link, username: suggested_username)
+    end
+
+    if invitation.singular && invitation.org.present?
+      warnings << I18n.t("provision.org_invitation_but_self_represented_on")
+    end
+
+    if invitation.singular && invitation.organization_admin
+      warnings << I18n.t("provision.both_org_admin_and_self_represented_on")
+    end
+
+    if invitation.singular && invitation.org.blank? && org.present?
+      warnings << I18n.t("provision.self_represented_on_but_org")
+    end
+
+    if !invitation.singular && invitation.org.present? && org.blank? && org_handle.blank?
+      warnings << I18n.t("provision.org_but_self_represented_on")
+    end
+
+    if invitation.organization_admin && org.blank?
+      warnings << I18n.t("provision.org_admin_but_self_represented_on")
+    end
+
+    warnings
   end
 end

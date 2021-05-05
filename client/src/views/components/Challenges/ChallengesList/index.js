@@ -25,12 +25,12 @@ import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import './style.sass'
 
 
-const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, user }) => {
+const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, user, emptyListMessage }) => {
   const classes = classNames(['challenges-list'])
 
   if (isFetching) {
     return (
-      <div className='text-center'>
+      <div className='text-center' style={{ margin: '32px' }}>
         <Loader />
       </div>
     )
@@ -42,8 +42,6 @@ const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, us
     //   if challenge.isFirstItemInSection = true , insers a header before the list item to
     //   denote the section header, using the challenge.sectionHeading attribute
     //
-    // TODO: Consider using an enum for challenge.hasStarted and challenge.hasEnded,
-    //       would make the code neater
     let foundFirstUpcomingChallenge = false
     let foundFirstCurrentChallenge = false
     let foundFirstClosedChallenge = false
@@ -77,7 +75,7 @@ const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, us
     challenges = [...currentChallenges, ...challenges.filter(x => !currentChallenges.includes(x))]
 
     const handleItemDetails = (id) => {
-      history.push(`/new_challenges/${id}`)
+      history.push(`/challenges/${id}`)
     }
 
     const handleJoinChallenge = (id) => {
@@ -97,7 +95,7 @@ const ChallengesList = ({ challenges, isFetching, pagination, setPageHandler, us
     )
   }
 
-  return <div className='text-center'>No challenges found.</div>
+  return <div className='text-center' style={{ margin: '32px' }}>{emptyListMessage ? emptyListMessage : 'No challenges found.'}</div>
 }
 
 ChallengesList.propTypes = {
@@ -106,11 +104,13 @@ ChallengesList.propTypes = {
   pagination: PropTypes.exact(PaginationShape),
   setPageHandler: PropTypes.func,
   user: PropTypes.object,
+  emptyListMessage: PropTypes.string,
 }
 
 ChallengesList.defaultProps = {
   challenges: [],
   isFetching: false,
+  emptyListMessage: null,
 }
 
 const mapStateToProps = state => ({

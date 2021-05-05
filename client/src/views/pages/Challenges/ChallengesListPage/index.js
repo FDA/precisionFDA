@@ -12,9 +12,12 @@ import {
   fetchChallenges,
   challengesSetYear,
   challengesListResetFilters,
+  challengesSetTimeStatus,
 } from '../../../../actions/challenges'
 import './style.sass'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
+import { CHALLENGE_TIME_STATUS } from '../../../../constants'
+import { challengesListTimeStatusSelector, challengesListYearSelector } from '../../../../reducers/challenges/list/selectors'
 
 
 class ChallengesListPage extends Component {
@@ -33,10 +36,12 @@ class ChallengesListPage extends Component {
     else {
       loadChallenges()
     }
+
+    document.title = 'PrecisionFDA Challenges'
   }
 
   render() {
-    const { loadChallenges, setYearHandler, resetFilters, user } = this.props
+    const { loadChallenges, setYearHandler, setTimeStatusHandler, resetFilters, user, year, timeStatus } = this.props
 
     const title = 'Challenges'
     const subtitle = 'Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science.'
@@ -45,20 +50,46 @@ class ChallengesListPage extends Component {
         text: 'Currently Open',
         onClick: () => {
           resetFilters()
+          setTimeStatusHandler(CHALLENGE_TIME_STATUS.CURRENT)
           loadChallenges()
         },
       },
       {
         text: 'Upcoming',
-        onClick: () => console.log('Upcoming clicked'),
+        onClick: () => {
+          resetFilters()
+          setTimeStatusHandler(CHALLENGE_TIME_STATUS.UPCOMING)
+          loadChallenges()
+        },
       },
       {
-        text: 'Propose a Challenge',
-        target: '/new_challenges/propose',
+        text: 'Ended',
+        onClick: () => {
+          resetFilters()
+          setTimeStatusHandler(CHALLENGE_TIME_STATUS.ENDED)
+          loadChallenges()
+        },
       },
     ]
 
     const userCanCreateChallenge = user && user.can_create_challenges
+    const filterActive = year || timeStatus
+    const handleResetClicked = () => {
+      resetFilters()
+      loadChallenges()
+    }
+
+    const getEmptyListMessage = (timeStatus) => {
+      switch(timeStatus) {
+        case CHALLENGE_TIME_STATUS.CURRENT:
+        case CHALLENGE_TIME_STATUS.UPCOMING:
+          return `There are no ${timeStatus} challenges on precisionFDA at the moment.  Check back regularly or subscribe to the mailing list to be informed of new community challenges.`
+        case CHALLENGE_TIME_STATUS.ENDED:
+          return 'No ended challenges.'
+        default:
+          return 'No challenges found.'
+      }
+    }
 
     return (
       <PublicLayout>
@@ -66,11 +97,14 @@ class ChallengesListPage extends Component {
 
         <div className="challenges-page-layout">
           <div className="left-column">
-            <ChallengesList />
+            {filterActive &&
+            <a onClick={handleResetClicked}>&larr; Back to All Challenges</a>
+            }
+            <ChallengesList emptyListMessage={getEmptyListMessage(timeStatus)} />
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateChallenge && (
-              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')}>Create a new challenge</button>
+              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')} style={{ marginBottom: '12px' }}>Create a new challenge</button>
             )}
             <CollapsibleMenu title="CHALLENGES" options={sideMenuOptions} />
             <hr />
@@ -79,7 +113,7 @@ class ChallengesListPage extends Component {
             <hr />
             <div className="pfda-subsection-heading">PROPOSE A CHALLEGNE</div>
             <p>If you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.</p>
-            <Link to={{ pathname: '/new_challenges/propose' }}>
+            <Link to={{ pathname: '/challenges/propose' }}>
               Propose a Challenge &rarr;
             </Link>
           </div>
@@ -92,26 +126,38 @@ class ChallengesListPage extends Component {
 ChallengesListPage.propTypes = {
   loadChallenges: PropTypes.func,
   setYearHandler: PropTypes.func,
+  setTimeStatusHandler: PropTypes.func,
   resetFilters: PropTypes.func,
   user: PropTypes.object,
+  year: PropTypes.number,
+  timeStatus: PropTypes.string,
 }
 
 ChallengesListPage.defaultProps = {
   loadChallenges: () => {},
   setYearHandler: () => {},
+  setTimeStatusHandler: () => {},
   resetFilters: () => {},
 }
 
 const mapStateToProps = state => ({
   user: contextUserSelector(state),
+  year: challengesListYearSelector(state),
+  timeStatus: challengesListTimeStatusSelector(state),
 })
 
 const mapDispatchToProps = dispatch => ({
   loadChallenges: () => dispatch(fetchChallenges()),
   resetFilters: () => dispatch(challengesListResetFilters()),
-//   filterChallenges: (searchString) => dispatch(searchChallengesList(searchString)),
   setYearHandler: (year) => {
+    dispatch(challengesListResetFilters())
+    dispatch(challengesSetTimeStatus(CHALLENGE_TIME_STATUS.ENDED))
     dispatch(challengesSetYear(year))
+    dispatch(fetchChallenges())
+  },
+  setTimeStatusHandler: (timeStatus) => {
+    dispatch(challengesListResetFilters())
+    dispatch(challengesSetTimeStatus(timeStatus))
     dispatch(fetchChallenges())
   },
 })

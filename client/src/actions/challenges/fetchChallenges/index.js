@@ -10,9 +10,9 @@ import {
 import { mapToChallenge } from '../../../views/shapes/ChallengeShape'
 import { mapToPagination } from '../../../views/shapes/PaginationShape'
 import {
-  // challengesListSearchStringSelector,
   challengesListPaginationSelector,
   challengesListYearSelector,
+  challengesListTimeStatusSelector,
 } from '../../../reducers/challenges/list/selectors'
 import { showAlertAboveAll } from '../../alertNotifications'
 
@@ -26,17 +26,17 @@ const fetchChallengesFailure = () => createAction(CHALLENGES_FETCH_FAILURE)
 const fetchChallenges = () => (
   (dispatch, getState) => {
     const state = getState()
-    // const searchString = challengesListSearchStringSelector(state)
     const pagination = challengesListPaginationSelector(state)
     let params = {}
-
-    // if (searchString && searchString.length) {
-    //   params = { query: searchString }
-    // }
 
     const year = challengesListYearSelector(state)
     if (year) {
       params = { ...params, year: year }
+    }
+
+    const timeStatus = challengesListTimeStatusSelector(state)
+    if (timeStatus) {
+      params = { ...params, time_status: timeStatus }
     }
 
     if (pagination && pagination.currentPage > 1) {
@@ -48,7 +48,6 @@ const fetchChallenges = () => (
     return API.getChallenges(params)
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
-          // console.log(response.payload)
           const challenges = response.payload.challenges.map(mapToChallenge)
           const pagination = mapToPagination(response.payload.meta)
           dispatch(fetchChallengesSuccess(challenges, pagination))

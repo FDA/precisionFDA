@@ -12,7 +12,7 @@ namespace :apps do
 
     abort "Can't find the app '#{app_name}' on the Platform" unless app_dxid
 
-    print "Found the app with dxid #{app_dxid} on the Platform.\n"
+    puts "Found the app with dxid #{app_dxid} on the Platform"
 
     app_info = api.app_describe(app_dxid)
 
@@ -30,11 +30,11 @@ namespace :apps do
       latest_revision = latest_revision_app&.revision.to_i
 
       if latest_revision > 0
-        print "Found already existing '#{app_name}' app with the last revision #{latest_revision}.\n"
+        puts "Found already existing '#{app_name}' app with the last revision #{latest_revision}"
 
         if app_info["version"] == latest_revision_app.version
           abort "The app on the platform has the same version as the existing one. " +
-                "Nothing to transfer."
+                "Nothing to transfer"
         end
       end
 
@@ -46,7 +46,7 @@ namespace :apps do
 
       input_spec = app_info["inputSpec"].select do |spec|
         is_supported = %w(string file int boolean float).include?(spec["class"])
-        print "Unhandled class #{spec['class']}\n" unless is_supported
+        puts "Unhandled class #{spec['class']}" unless is_supported
         is_supported
       end
 
@@ -88,7 +88,7 @@ namespace :apps do
 
       revision = latest_revision + 1
 
-      print "The new app will be created with the revision #{revision}\n"
+      puts "The new app will be created with the revision #{revision}"
 
       app = App.create!(
         dxid: app_dxid,

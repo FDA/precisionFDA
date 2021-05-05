@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExpertsListPage test should render 1`] = `
+<PublicLayout>
+  <NavigationBarPublic
+    subtitle="Insights from academic, industry, and FDA experts from the precisionFDA Community."
+    title="Expert Blogs"
+    user={Object {}}
+  />
+  <div
+    className="experts-page-layout"
+  >
+    <div
+      className="left-column"
+    >
+      <div
+        className="pfda-subsection-heading expert-highlight-heading"
+      >
+        EXPERT HIGHLIGHT
+      </div>
+      <Connect(ExpertsList)
+        listItemType={0}
+      />
+    </div>
+    <div
+      className="right-column right-column--override pfda-main-content-sidebar"
+    >
+      <div
+        className="pfda-subsection-heading"
+      >
+        PREVIOUS EXPERT BLOGS
+      </div>
+      <Connect(ExpertsYearList)
+        setYearHandler={[Function]}
+      />
+      <hr />
+      <div
+        className="pfda-subsection-heading"
+      >
+        EXPERTS
+      </div>
+      <Connect(ExpertsList)
+        listItemType={2}
+      />
+    </div>
+  </div>
+</PublicLayout>
+`;

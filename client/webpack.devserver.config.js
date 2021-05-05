@@ -11,7 +11,7 @@ const development = require('./webpack.development.config')
 
 
 module.exports = merge(development, {
-  entry: './src/index.js',
+  entry: './src/index.tsx',
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({

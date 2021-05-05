@@ -6,12 +6,14 @@ module Api
     skip_before_action :require_api_login, except: :save_editor_page
     before_action :check_admin, only: :save_editor_page
 
-    def index
-      page = params[:page].presence || 1
-      year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
+    CHALLENGE_UPCOMING = "upcoming".freeze
+    CHALLENGE_CURRENT = "current".freeze
+    CHALLENGE_ENDED = "ended".freeze
 
-      challenges = accessible_challenges.order(start_at: :desc).page(page)
-      challenges = challenges.where(Arel.sql("YEAR(start_at) = #{year}")) if year
+    TIME_STATUSES = [CHALLENGE_UPCOMING, CHALLENGE_CURRENT, CHALLENGE_ENDED].freeze
+
+    def index
+      challenges = filter_challenges
 
       render json: challenges,
              meta: pagination_dict(challenges),
@@ -60,11 +62,36 @@ module Api
     end
 
     def propose
-      proposal = params.unsafe_params.slice(:name, :email, :organisation,
-                                            :specific_question, :specific_question_text,
-                                            :data_details, :data_details_text)
+      proposal = unsafe_params.slice(:name, :email, :organisation,
+                                     :specific_question, :specific_question_text,
+                                     :data_details, :data_details_text)
       NotificationsMailer.challenge_proposal_received(proposal)
       render json: {}
+    end
+
+    private
+
+    def filter_challenges
+      page = params[:page].presence || 1
+      year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
+
+      time_status = params[:time_status] if TIME_STATUSES.include?(params[:time_status].presence)
+
+      challenges = accessible_challenges.order(end_at: :desc).page(page)
+      challenges = Challenge.where(Arel.sql("YEAR(start_at) = #{year}")) if year
+
+      current_time = Time.current
+
+      case time_status
+      when CHALLENGE_UPCOMING
+        challenges.where("start_at > ?", current_time)
+      when CHALLENGE_CURRENT
+        challenges.where("start_at < ?", current_time).where("end_at > ?", current_time)
+      when CHALLENGE_ENDED
+        challenges.where("end_at < ?", current_time)
+      else
+        challenges
+      end
     end
   end
 end
