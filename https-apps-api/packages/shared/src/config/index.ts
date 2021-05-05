@@ -4,7 +4,7 @@ import { default as dotenv } from 'dotenv'
 // load process.env values
 dotenv.config()
 
-// eslint-disable-next-line import/first
+// eslint-disable-next-line import/first, import/order
 import path from 'path'
 // eslint-disable-next-line import/first
 import { mergeDeepRight } from 'ramda'
@@ -60,10 +60,11 @@ const defaultConfig = {
   emails: {
     salesforce: {
       isEnabled: true,
-      apiUrl: 'https://dnanexus--pFDAemail.cs33.my.salesforce.com',
+      apiUrl: process.env.SALESFORCE_HOST ?? 'https://dnanexus--pFDAemail.cs33.my.salesforce.com',
       username: process.env.SALESFORCE_USERNAME ?? 'sf-username',
       password: process.env.SALESFORCE_PASSWORD ?? 'sf-password',
       secretToken: process.env.SALESFORCE_SECRET_TOKEN ?? 'sf-secret',
+      fromAddress: process.env.SALESFORCE_FDA_EMAIL_ID ?? 'sf-org-id',
     },
   },
   users: {
