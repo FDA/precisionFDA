@@ -7,3 +7,5 @@ Recaptcha.configure do |config|
     config.secret_key = ENV["RECAPTCHA_SECRET_TEST_KEY"]
   end
 end
+
+Recaptcha.configuration.skip_verify_env += %w(development ui_test)

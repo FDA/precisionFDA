@@ -7,15 +7,7 @@ class ChallengesController < ApplicationController
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
   before_action :check_scope_accessibility, only: %i(create update)
 
-  def index
-    @consistency_challenge = FixedChallenge.consistency(@context)
-    @truth_challenge = FixedChallenge.truth(@context)
-    @appathons_challenge = FixedChallenge.appathons(@context)
-    # this includes the archived challenges as well
-    @featured_challenges = Challenge.accessible_by(@context).order(specified_order: "desc")
-    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge] +
-                  archived_challenges
-  end
+  def index; end
 
   def new
     @challenge = Challenge.new
@@ -76,7 +68,7 @@ class ChallengesController < ApplicationController
       return
     end
 
-    User.sync_challenge_jobs!
+    Job.sync_challenge_jobs!
     @tab = unsafe_params[:tab]
     @submissions = Submission.none
     @my_entries = false

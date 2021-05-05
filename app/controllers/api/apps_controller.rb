@@ -155,7 +155,7 @@ module Api
       load_relations(@app)
       load_challenges
 
-      User.sync_jobs!(@context)
+      Job.sync_jobs!(@context)
 
       render json:
         @app, adapter: :json,

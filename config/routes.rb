@@ -50,14 +50,20 @@ Rails.application.routes.draw do
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
-      get "edit_user", to: "users#edit"
-      get "update_user", to: "users#update"
 
       resources :apps, only: [], param: :uid do
         collection do
           post :set_comparison_app
           post :remove_from_comparators
           post :add_to_comparators
+        end
+      end
+
+      resources :invitations, only: %i(index) do
+        collection do
+          post "search"
+          post "provision"
+          post "browse"
         end
       end
 
@@ -87,6 +93,8 @@ Rails.application.routes.draw do
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
+    get "/challenges/13" => "main#tmb"
+
     # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
@@ -150,6 +158,14 @@ Rails.application.routes.draw do
         get :years, on: :collection
         post :save_editor_page, on: :member
         post :propose, on: :collection
+      end
+
+      resources :submissions, only: %i(index) do
+        get :my_entries, on: :collection
+      end
+
+      resources :experts, only: %i(index show) do
+        get :years, on: :collection
       end
 
       resources :apps do
@@ -269,6 +285,7 @@ Rails.application.routes.draw do
       end
 
       resources :workflows, only: %i(index show create) do
+        get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
 
         collection do
@@ -358,8 +375,6 @@ Rails.application.routes.draw do
     get "profile", to: "profile#index"
     put "profile", to: "profile#update"
     post "profile/provision_user", to: "profile#provision_user", as: "provision_user"
-    get "profile/provision_new_user", to: "profile#provision_new_user"
-    post "profile/provision_new_user", to: "profile#provision_new_user", as: "provision_new_user"
     get "profile/provision_org", to: "profile#provision_org"
     post "profile/provision_org", to: "profile#provision_org", as: "provision_org"
     post "profile/run_report", to: "profile#run_report", as: "run_report"
@@ -452,13 +467,16 @@ Rails.application.routes.draw do
     get "challenges/mislabeling" => redirect("/mislabeling")
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: "active_meta_appathon"
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: "appathon_in_a_box"
+    get "challenges", to: "challenges#index"
     resources :challenges do
       get "consistency(/:tab)", on: :collection, action: :consistency, as: "consistency"
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
+      get "new", on: :collection, as: "new"
       get "join", on: :member
-      get "view(/:tab)", on: :member, action: :show, as: "show"
+      get "edit", on: :member
       get "editor(/:tab)", on: :member, action: :edit_page, as: "edit_page"
       post "editor/save_page", on: :member, action: :save_page, as: "save_page"
+      get "(/:tab)", on: :member, action: :show, as: "show"
       resources :challenge_resources, only: %i(new create destroy) do
         post "rename", on: :member
       end
@@ -469,8 +487,6 @@ Rails.application.routes.draw do
       post "assign_app", on: :member
       post "announce_result", on: :member
     end
-
-    resources :new_challenges, only: %i(index)
 
     resources :discussions, constraints: { answer_id: %r{[^/]+} } do
       get "followers", on: :member
@@ -575,7 +591,6 @@ Rails.application.routes.draw do
     end
 
     get "/spaces/*all", to: "spaces#index"
-    get "/new_challenges/*all", to: "new_challenges#index"
 
     resources :notification_preferences, only: [:index] do
       post "change", on: :collection

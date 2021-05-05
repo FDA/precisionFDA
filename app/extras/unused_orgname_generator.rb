@@ -1,4 +1,4 @@
-# Generates unused username by adding and increasing sequence number for provided username,
+# Generates unused orgname by adding and increasing sequence number for provided username,
 class UnusedOrgnameGenerator
   # Constructor.
   # @param api [DNAnexusAPI] API client to use for checks.
@@ -6,7 +6,7 @@ class UnusedOrgnameGenerator
     @api = api
   end
 
-  # Performs generation of unused username. Checks provided username first.
+  # Performs generation of unused orgname. Checks provided username first.
   # @param username [String] Initial username to check,
   # @param delay [Integer] delay between the requests to the platform
   # @return [String] Unused username.
