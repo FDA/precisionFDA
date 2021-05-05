@@ -57,6 +57,15 @@ const defaultConfig = {
     adminUser: 'precisionfda.admin_dev',
     findDataObjectsQueryLimit: 100,
   },
+  emails: {
+    salesforce: {
+      isEnabled: true,
+      apiUrl: 'https://dnanexus--pFDAemail.cs33.my.salesforce.com',
+      username: process.env.SALESFORCE_USERNAME ?? 'sf-username',
+      password: process.env.SALESFORCE_PASSWORD ?? 'sf-password',
+      secretToken: process.env.SALESFORCE_SECRET_TOKEN ?? 'sf-secret',
+    },
+  },
   users: {
     challengeBotDxUser: 'challenge.bot.2',
   },
