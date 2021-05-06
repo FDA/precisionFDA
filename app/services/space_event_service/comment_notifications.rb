@@ -7,10 +7,8 @@ module SpaceEventService
         email_type_id = NotificationPreference.email_types[:notification_comment]
         api = DIContainer.resolve("https_apps_client")
         api.email_send(email_type_id, {
-          spaceEventId: event.id
+          spaceEventId: event.id,
         })
-      rescue HttpsAppsClient::Error => e
-        puts e.message
       end
 
       private
