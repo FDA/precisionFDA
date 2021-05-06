@@ -55,7 +55,11 @@ RSpec.describe CommentsController, type: :controller do
   end
 
   describe "DELETE comments" do
-    before { authenticate!(host_lead) }
+    before do
+      authenticate!(host_lead)
+      allow(HttpsAppsClient).to receive(:new).and_return(node_client)
+      allow(node_client).to receive(:email_send).and_return({})
+    end
 
     context "deleted comments are displayed in threads as DELETED" do
 

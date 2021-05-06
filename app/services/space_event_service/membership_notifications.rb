@@ -4,9 +4,15 @@ module SpaceEventService
     class << self
 
       def send(event)
-        receivers(event).each do |receiver|
-          ReviewSpaceMailer.member_email(event, receiver, action(event)).deliver_now!
-        end
+        email_type_id = NotificationPreference.email_types[:notification_space_membership]
+        api = DIContainer.resolve("https_apps_client")
+        api.email_send(email_type_id, {
+          initUserId: event.user_id,
+          spaceId: event.space_id,
+          updatedMembershipId: event.entity_id,
+          activityType: event.activity_type,
+          newMembershipRole: event.entity.role,
+        })
       end
 
       private
