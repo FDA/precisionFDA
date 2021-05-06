@@ -108,7 +108,7 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
             spaceId: event.space_id,
             updatedMembershipId: event.entity_id,
             newMembershipRole: role,
-            activityType: 'membership_changed',
+            activityType: "membership_changed",
           })
         end
       end
@@ -137,7 +137,7 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
             spaceId: event.space_id,
             updatedMembershipId: event.entity_id,
             newMembershipRole: role,
-            activityType: 'membership_changed',
+            activityType: "membership_changed",
           })
         end
       end
@@ -166,7 +166,7 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
             spaceId: event.space_id,
             updatedMembershipId: event.entity_id,
             newMembershipRole: role,
-            activityType: 'membership_changed',
+            activityType: "membership_changed",
           })
         end
       end
@@ -195,7 +195,7 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
             spaceId: event.space_id,
             updatedMembershipId: event.entity_id,
             newMembershipRole: role,
-            activityType: 'membership_changed',
+            activityType: "membership_changed",
           })
         end
       end
@@ -224,7 +224,7 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
             spaceId: event.space_id,
             updatedMembershipId: event.entity_id,
             newMembershipRole: membership.role,
-            activityType: 'membership_disabled',
+            activityType: "membership_disabled",
           })
         end
 
