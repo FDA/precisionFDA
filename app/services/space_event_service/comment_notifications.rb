@@ -4,9 +4,13 @@ module SpaceEventService
     class << self
 
       def send(event)
-        receivers(event).each do |receiver|
-          ReviewSpaceMailer.new_comment_email(event.entity, receiver).deliver_now!
-        end
+        email_type_id = NotificationPreference.email_types[:notification_comment]
+        api = DIContainer.resolve("https_apps_client")
+        api.email_send(email_type_id, {
+          spaceEventId: event.id
+        })
+      rescue HttpsAppsClient::Error => e
+        puts e.message
       end
 
       private

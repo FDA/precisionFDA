@@ -75,6 +75,15 @@ class HttpsAppsClient
     )
   end
 
+  # Send notification email
+  def email_send(email_type_id, opts)
+    request(
+      "/emails/#{email_type_id}/send",
+      { input: opts },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   private
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
