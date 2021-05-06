@@ -42,11 +42,11 @@ class NotificationPreference < ApplicationRecord
   ]
   # email types currently handled by nodejs app
   EMAIL_TYPES = {
-    :notification_job => 1,
-    :notification_content => 2,
-    :notification_space_membership => 3,
-    :notification_space_event => 4,
-    :notification_comment => 5,
+    notification_job => 1,
+    notification_content => 2,
+    notification_space_membership => 3,
+    notification_space_event => 4,
+    notification_comment => 5,
   }.freeze
 
   ALL_KEYS = COMMON_KEYS + LEAD_KEYS + ADMIN_KEYS
