@@ -6,7 +6,10 @@ RSpec.describe CommentsController, type: :controller do
   let(:space) { create(:space, :review, :accepted, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
 
   describe "create comment in space" do
-    before { authenticate!(host_lead) }
+    before do
+      authenticate!(host_lead)
+      stub_request(:post, /emails/).to_return(status: 200, body: "true")
+    end
 
     context "create comment without associated obj" do
 
