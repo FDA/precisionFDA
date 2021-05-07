@@ -25,12 +25,24 @@ export default (link, name, folderId, isPublic) => (
       const statusIsOK = response.status === httpStatusCodes.OK
       if (statusIsOK) {
         dispatch(createFolderSuccess())
-        dispatch(showAlertAboveAllSuccess({ message: 'Folder successfully created.' }))
+        if (response.payload && response.payload.message) {
+          const { type, text } = response.payload.message
+          var textString
+          if (Array.isArray(text)) {
+            textString = text.join(' \n')
+          } else {
+            textString = text
+          }
+          if (type === 'error') dispatch(showAlertAboveAll({ message: textString }))
+          if (type === 'success') dispatch(showAlertAboveAllSuccess({ message: textString }))
+        } else {
+          dispatch(showAlertAboveAllSuccess({ message: 'Folder successfully created.' }))
+        }
       } else {
         dispatch(createFolderFailure())
-        if (response.payload && response.payload.error) {
-          const { message } = response.payload.error
-          dispatch(showAlertAboveAll({ message }))
+        if (response.payload && response.payload.message) {
+          const { type, text } = response.payload.message
+          if (type === 'error') dispatch(showAlertAboveAll({ message: text }))
         } else {
           dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
         }

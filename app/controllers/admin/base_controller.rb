@@ -3,9 +3,7 @@ module Admin
     before_action :check_admin
 
     def check_admin
-      return if current_context.can_administer_site?
-
-      head :forbidden
+      redirect_to root_path unless current_context.can_administer_site?
     end
   end
 end
