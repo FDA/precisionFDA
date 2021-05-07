@@ -3,6 +3,11 @@
 exports[`ChallengesList test should render 1`] = `
 <div
   className="text-center"
+  style={
+    Object {
+      "margin": "32px",
+    }
+  }
 >
   No challenges found.
 </div>

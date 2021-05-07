@@ -1,0 +1,43 @@
+<% content_for :title, "Invitations" %>
+
+<div class="page-header">
+  <div class="page-title">Invitations</div>
+</div>
+
+<div class="pfda-padded invitations-search">
+  <div class="invitations-search-show-pending">
+    <button class="btn btn-success btn-lg" data-bind="click: showGridModal, disable: selectionDisabled">
+      Show all pending users
+    </button>
+    <div id="invitations-back-btn">
+      <button class="btn btn-sm">
+        <%= link_to "Back to the Admin Dashboard", admin_root_path, data: { turbolinks: false } %>
+      </button>
+    </div>
+    <%= render "admin/invitations/grid_modal" %>
+  </div>
+  <div id="invitations-search-input">
+    <input
+      type="text"
+      id="search_input"
+      class="form-control input-lg"
+      placeholder="Search user by First name, Last name or Email..."
+    />
+  </div>
+</div>
+
+<div class="alert alert-info invitations-search-info">
+  <i class="fa fa-info-circle"></i>
+  <span>Find users with search field or browse from user list. You can handle not more than <b>five</b> users at the same time.</span>
+</div>
+
+<!-- ko if: invitations().length -->
+<div class="pfda-padded invitations">
+  <%= render "admin/invitations/invitations_table" %>
+  <%= render "admin/invitations/disable_screen_modal" %>
+  <div class="pfda-padded-v">
+    <button class="btn btn-primary btn-lg" data-bind="click: provisionUsers">Submit</button>
+    <button class="btn btn-default btn-lg" data-bind="click: clearInvitations">Clear</button>
+  </div>
+</div>
+<!-- /ko -->
