@@ -30,6 +30,8 @@ RSpec.describe SpacesController, type: :controller do
     }
   end
 
+  let(:node_client) { instance_double(HttpsAppsClient) }
+
   describe "POST invite" do
     let(:space) do
       create(:space, :group, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
@@ -62,7 +64,11 @@ RSpec.describe SpacesController, type: :controller do
     end
 
     context "with host_admin" do
-      before { authenticate!(host_lead) }
+      before do
+        authenticate!(host_lead)
+        allow(HttpsAppsClient).to receive(:new).and_return(node_client)
+        allow(node_client).to receive(:email_send).and_return({})
+      end
 
       it "invites a user as a contributor" do
         post :invite, params: {
@@ -110,10 +116,32 @@ RSpec.describe SpacesController, type: :controller do
             },
           )
       end
+
+      it "triggers email notification" do
+        post :invite, params: {
+          id: space.id,
+          space: { invitees: user.dxuser, invitees_role: "admin" },
+        }
+
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").
+          with(
+            body: {
+              invitee: user.dxid,
+              level: "ADMIN",
+              suppressEmailNotification: true,
+            },
+          )
+        expect(node_client).to have_received(:email_send)
+      end
     end
 
     context "when review space" do
-      before { authenticate!(host_lead) }
+      before do
+        authenticate!(host_lead)
+        allow(HttpsAppsClient).to receive(:new).and_return(node_client)
+        allow(node_client).to receive(:email_send).and_return({})
+      end
 
       it "invites an user as a contributor" do
         post :invite, params: {
@@ -139,6 +167,19 @@ RSpec.describe SpacesController, type: :controller do
           with(body: member_view_invite)
 
         expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
+      end
+
+      it "triggers email notification" do
+        post :invite, params: {
+          id: review_space.id,
+          space: { invitees: user.dxuser, invitees_role: "viewer" },
+        }
+
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").
+          with(body: member_view_invite)
+
+        expect(node_client).to have_received(:email_send)
       end
     end
   end

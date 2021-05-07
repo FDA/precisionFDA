@@ -23,14 +23,16 @@ RSpec.describe CommentsController, type: :controller do
 
     end
 
-    context "create comment and trigger notification" do
+    context "with trigger notification" do
       it "triggers notification email" do
         post :create, params: { space_id: space, comment: { body: "test" } }
 
         space_events = SpaceEvent.all
         expect(space_events.count).to eq(1)
         email_type_id = NotificationPreference.email_types[:notification_comment]
-        expect(node_client).to have_received(:email_send).with(email_type_id, { spaceEventId: space_events.first.id })
+        expect(node_client).to have_received(:email_send).with(email_type_id, {
+          spaceEventId: space_events.first.id
+        })
       end
     end
 

@@ -102,7 +102,6 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
 
           email_type_id = NotificationPreference.email_types[:notification_space_membership]
           event = SpaceEvent.first
-          puts event.to_json
           expect(node_client).to have_received(:email_send).with(email_type_id, {
             initUserId: event.user_id,
             spaceId: event.space_id,
@@ -131,7 +130,6 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
 
           email_type_id = NotificationPreference.email_types[:notification_space_membership]
           event = SpaceEvent.first
-          puts event.to_json
           expect(node_client).to have_received(:email_send).with(email_type_id, {
             initUserId: event.user_id,
             spaceId: event.space_id,
@@ -160,7 +158,6 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
 
           email_type_id = NotificationPreference.email_types[:notification_space_membership]
           event = SpaceEvent.first
-          puts event.to_json
           expect(node_client).to have_received(:email_send).with(email_type_id, {
             initUserId: event.user_id,
             spaceId: event.space_id,
@@ -189,7 +186,6 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
 
           email_type_id = NotificationPreference.email_types[:notification_space_membership]
           event = SpaceEvent.first
-          puts event.to_json
           expect(node_client).to have_received(:email_send).with(email_type_id, {
             initUserId: event.user_id,
             spaceId: event.space_id,
