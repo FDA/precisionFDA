@@ -126,6 +126,7 @@ Rails.application.routes.draw do
     # My Home (Site-Wide UI & API Redesign)
     get "home" => "home#index"
     get "/home/*all", to: "home#index"
+    get "/account/*all", to: "home#index"
 
     # API
     namespace "api" do
