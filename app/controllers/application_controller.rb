@@ -121,8 +121,6 @@ class ApplicationController < ActionController::Base
   # Renders Unauthorized if it was unable to authorize user.
   def require_api_login_or_guest
     if @context.logged_in_or_guest?
-      return if verified_request?
-    else
       process_authorization_header
       return if @context.logged_in?
     end
@@ -134,8 +132,6 @@ class ApplicationController < ActionController::Base
   # Renders Unauthorized if it was unable to authorize user.
   def require_api_login
     if @context.logged_in?
-      return if verified_request?
-    else
       process_authorization_header
       return if @context.logged_in?
     end

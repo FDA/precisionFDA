@@ -2,6 +2,10 @@ import React from 'react'
 import { Router, Switch, Route, Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Provider } from 'react-redux'
+import {
+  QueryClient,
+  QueryClientProvider,
+} from 'react-query'
 
 import history from './utils/history'
 import SpacesListPage from './views/pages/Spaces/SpacesListPage'
@@ -19,8 +23,11 @@ import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
 import GlobalStyle from './styles/global'
 
+const queryClient = new QueryClient()
+
 const root = ({ store }: any) => (
   <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
     <GlobalStyle />
     <Router history={history}>
       <ErrorWrapper>
@@ -64,6 +71,7 @@ const root = ({ store }: any) => (
         </Switch>
       </ErrorWrapper>
     </Router>
+    </QueryClientProvider>
   </Provider>
 )
 

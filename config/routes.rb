@@ -319,6 +319,11 @@ Rails.application.routes.draw do
         get :spaces
       end
 
+      resources :notification_preferences do
+        get :index
+        post "change", on: :collection
+      end
+
       post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
@@ -592,10 +597,6 @@ Rails.application.routes.draw do
     end
 
     get "/spaces/*all", to: "spaces#index"
-
-    resources :notification_preferences, only: [:index] do
-      post "change", on: :collection
-    end
 
     resources :meta_appathons, constraints: { appathon_id: %r{[^/]+} } do
       post "rename", on: :member
