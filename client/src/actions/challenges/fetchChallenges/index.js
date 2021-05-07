@@ -12,6 +12,7 @@ import { mapToPagination } from '../../../views/shapes/PaginationShape'
 import {
   challengesListPaginationSelector,
   challengesListYearSelector,
+  challengesListTimeStatusSelector,
 } from '../../../reducers/challenges/list/selectors'
 import { showAlertAboveAll } from '../../alertNotifications'
 
@@ -31,6 +32,11 @@ const fetchChallenges = () => (
     const year = challengesListYearSelector(state)
     if (year) {
       params = { ...params, year: year }
+    }
+
+    const timeStatus = challengesListTimeStatusSelector(state)
+    if (timeStatus) {
+      params = { ...params, time_status: timeStatus }
     }
 
     if (pagination && pagination.currentPage > 1) {

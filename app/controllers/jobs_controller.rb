@@ -162,9 +162,9 @@ class JobsController < ApplicationController
     return if @job.terminal? || @job.https?
 
     if @job.from_submission?
-      User.sync_challenge_job!(@job.id)
+      Job.sync_challenge_job!(@job.id)
     else
-      User.sync_job!(@context, @job.id)
+      Job.sync_job!(@context, @job.id)
     end
   end
 end

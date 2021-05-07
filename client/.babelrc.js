@@ -12,6 +12,7 @@ module.exports = {
     ["@babel/preset-typescript", { "allExtensions": true, "isTSX": true }],
   ],
   plugins: [
+    "babel-plugin-styled-components",
     "@babel/plugin-proposal-class-properties",
     ["@babel/plugin-transform-runtime", { "regenerator": true }]
   ],

@@ -6,11 +6,13 @@ class UserSerializer < ApplicationSerializer
     :first_name,
     :last_name,
     :email,
-    :counters,
     :admin,
+    :counters,
     :links,
+    :is_guest,
   )
 
+  attribute :guest?, key: :is_guest
   attribute :can_administer_site?, key: :can_administer_site
   attribute :can_create_challenges?, key: :can_create_challenges
 
@@ -25,6 +27,8 @@ class UserSerializer < ApplicationSerializer
   # Returns user counters for related objects.
   # @return [Hash] User counters for files, apps, workflows, etc.
   def counters
+    return {} if object.guest?
+
     {
       files: files_private_count,
       folders: folders_private_count,
@@ -39,7 +43,7 @@ class UserSerializer < ApplicationSerializer
   # Builds links to user.
   # @return [Hash] Links.
   def links
-    return unless current_user
+    return unless current_user && !current_user.guest?
 
     {}.tap do |links|
       # GET user accessible licenses list - show this link when current user has licenses
