@@ -169,7 +169,7 @@ const ActionsDropdown = (props) => {
       />
       {assets.length === 1 &&
         <RenameObjectModal
-          isFolder
+          isAsset
           defaultFileName={assets[0] && assets[0].origin.text}
           isOpen={props.renameModal.isOpen}
           isLoading={props.renameModal.isLoading}

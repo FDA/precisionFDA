@@ -32,6 +32,10 @@ class ChallengeSerializer < ApplicationSerializer
     {}.tap do |links|
       links[:edit] = edit_challenge_path(object) if object.editable_by?(current_user)
       links[:editor] = edit_page_challenge_path(object) if object.editable_by?(current_user)
+      if object.accepting_submissions?
+        links[:new_submission] = new_challenge_submission_path(challenge_id: object.id,
+                                                                   app_dxid: object.app)
+      end
     end
   end
 end

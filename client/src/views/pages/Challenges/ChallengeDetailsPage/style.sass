@@ -87,12 +87,15 @@
       color: $pfda-text-medium-grey
 
 .react-tabs
+  width: 100%
+  overflow-x: hidden
+
   &__tab-list
     list-style: none
     padding: 0
     margin-bottom: 24px
 
-  &__tab, a
+  &__tab
     @extend .pfda-subsection-heading
     display: inline-block
     border-bottom: 3px solid transparent
@@ -160,7 +163,7 @@
 .challenge-join-button
   display: block
   width: 100%
-  margin-bottom: 24px
+  margin-bottom: 0px
 
 .error-container
   min-height: 320px

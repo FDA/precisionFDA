@@ -1,5 +1,6 @@
 # Platform API client.
 class DNAnexusAPI
+  extend DXClient::Constants
   include DXClient::Constants
   include DXClient::Endpoints::Apps
   include DXClient::Endpoints::Applets
@@ -24,15 +25,14 @@ class DNAnexusAPI
       api = for_admin
 
       begin
-        api.call(ORG_DUMMY, "invite", invitee: email, suppressEmailNotification: true)
-      rescue Net::HTTPClientException => e
-        return false if e.message =~ /^404/
-
-        raise e
+        api.org_invite(ORG_DUMMY, email, suppressEmailNotification: true)
+      rescue DXClient::Errors::NotFoundError
+        return false
       end
 
-      api.call(ORG_DUMMY, "findMembers")["results"].each do |result|
-        api.call(ORG_DUMMY, "removeMember", user: result["id"]) if result["level"] == "MEMBER"
+      members = api.org_find_members(ORG_DUMMY)["results"]
+      Utils.each_with_delay(members, 0.5) do |result|
+        api.org_remove_member(ORG_DUMMY, result["id"]) if result["level"] == ORG_MEMBERSHIP_MEMBER
       end
 
       true
@@ -40,7 +40,7 @@ class DNAnexusAPI
   end
 
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
-    raise "Bearer is nil" if bearer_token.nil?
+    raise "Bearer token is null" if bearer_token.nil?
 
     @transport = DXClient::Transport.new(bearer_token, apiserver_url)
   end
@@ -76,27 +76,21 @@ class DNAnexusAPI
   def user_exists?(username)
     call("user-#{username}", "describe")
     true
-  rescue Net::HTTPClientException => e
-    return false if e.message =~ /^404/
-
-    raise e
+  rescue DXClient::Errors::NotFoundError
+    false
   end
 
   def org_exists?(orgname)
     call("org-#{orgname}", "describe")
     true
-  rescue Net::HTTPClientException => e
-    return false if e.message =~ /^404/
-
-    raise e
+  rescue DXClient::Errors::NotFoundError
+    false
   end
 
   def entity_exists?(entity)
     call(entity.to_s, "describe")
     true
-  rescue Net::HTTPClientException => e
-    return false if e.message =~ /^404/
-
-    raise e
+  rescue DXClient::Errors::NotFoundError
+    false
   end
 end
