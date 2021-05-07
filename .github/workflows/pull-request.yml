@@ -119,9 +119,8 @@ jobs:
       - name: Install yarn
         run: npm install -g yarn
       - run: cd ./https-apps-api && make install
-      - run: echo $DATABASE_TEST_URL
-      - run: cd ./https-apps-api && make test-worker
       - run: cd ./https-apps-api && make test-api
+      - run: cd ./https-apps-api && make test-worker
       - name: Snyk test
         run: cd ./https-apps-api && ./node_modules/.bin/snyk test
         env:
