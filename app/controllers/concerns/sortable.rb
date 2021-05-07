@@ -39,17 +39,18 @@ module Sortable
   # @param sort_fields list of lambdas.
   # @return sorted array.
   def sort_array_by_fields(array)
-    sort_by = self.class::SORT_FIELDS[params[:order_by] || "created_at"]
+    sort_by = self.class::SORT_FIELDS[params[:order_by] || "launched_on"]
     array = array.sort(&sort_by)
 
     params[:order_dir] != Sortable::DIRECTION_ASC ? array.reverse : array
   end
 
   # Prepare Order/OrderDirection pair from params (only allowed values).
-  # @return { order => order_dir }, { :created_at => 'DESC' } if no param values provided.
+  # @return { order => order_dir }, { :launched_on => 'DESC' }
+  #   if no param values provided.
   def order_from_params
     order_field_values = self.class::ORDER_FIELDS.values.flatten
-    order_query(self.class::ORDER_FIELDS[params[:order_by] || "created_at"],
+    order_query(self.class::ORDER_FIELDS[params[:order_by] || "launched_on"],
                 params[:order_dir], order_field_values)
   end
 

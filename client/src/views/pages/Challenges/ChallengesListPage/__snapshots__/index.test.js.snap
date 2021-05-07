@@ -12,7 +12,9 @@ exports[`ChallengesListPage test should render 1`] = `
     <div
       className="left-column"
     >
-      <Connect(ChallengesList) />
+      <Connect(ChallengesList)
+        emptyListMessage="No challenges found."
+      />
     </div>
     <div
       className="right-column right-column--override pfda-main-content-sidebar"
@@ -29,8 +31,8 @@ exports[`ChallengesListPage test should render 1`] = `
               "text": "Upcoming",
             },
             Object {
-              "target": "/challenges/propose",
-              "text": "Propose a Challenge",
+              "onClick": [Function],
+              "text": "Ended",
             },
           ]
         }

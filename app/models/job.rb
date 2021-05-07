@@ -27,8 +27,9 @@ class Job < ApplicationRecord
   include Auditor
   include Permissions
   include CommonPermissions
-  include InternalUid
   include Featured
+  include InternalUid
+  include JobsSyncing
   include Scopes
   include TagsContainer
 
