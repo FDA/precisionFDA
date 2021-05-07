@@ -98,7 +98,6 @@ RSpec.describe Api::SpaceRequestsController, type: :controller do
         it "fires the notification" do
           email_type_id = NotificationPreference.email_types[:notification_space_action]
           event = SpaceEvent.first
-          puts event.to_json
           expect(node_client).to have_received(:email_send).with(email_type_id, {
             initUserId: event.user_id,
             spaceId: space.id,
