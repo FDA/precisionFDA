@@ -4,6 +4,11 @@
 #
 
 class Context
+  GRAVATAR_GUEST_AVATAR =
+    "https://secure.gravatar.com/avatar/00000000000000000000000000000000.png?d=mm&r=PG".freeze
+
+  INVALID_TOKEN = "INVALID".freeze
+
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
   class << self
@@ -40,32 +45,41 @@ class Context
   end
 
   def user
-    raise "context.user called for guest context" if guest?
-    @user
+    @user ||= begin
+      User.new(dxuser: @username, expiration: @expiration) if guest?
+    end
   end
 
   def gravatar_url
-    guest? ? "https://secure.gravatar.com/avatar/00000000000000000000000000000000.png?d=mm&r=PG" : @user.gravatar_url
+    return GRAVATAR_GUEST_AVATAR if guest?
+
+    @user.gravatar_url
   end
 
   def logged_in?
-    return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id.present?) && (@user_id != -1 && @token != "INVALID" && @org_id != -1) && (@user.present? ? @user.user_state == 'enabled' : true)
+    @user_id.present? &&
+      @username.present? &&
+      @token.present? &&
+      @expiration.present? &&
+      (@expiration - Time.now.to_i) > 5.minutes &&
+      @org_id.present? &&
+      @user_id != -1 &&
+      @token != INVALID_TOKEN &&
+      @org_id != -1 &&
+      (@user ? @user.enabled? : true)
   end
 
   def guest?
-    return (@user_id == -1 && @username.start_with?("Guest-") && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
+    @user_id == -1 &&
+      @username.start_with?("Guest-") &&
+      @token == INVALID_TOKEN &&
+      @expiration.present? &&
+      ((@expiration - Time.now.to_i) > 5.minutes) &&
+      @org_id == -1
   end
 
-  def can_create_challenges?
-    user&.can_create_challenges?
-  end
-
-  def can_create_spaces?
-    user&.can_create_spaces?
-  end
-
-  def can_administer_site?
-    user&.can_administer_site?
+  def logged_in_or_guest?
+    logged_in? || guest?
   end
 
   def challenge_admin?
@@ -76,15 +90,11 @@ class Context
     user&.is_challenge_evaluator?
   end
 
-  def logged_in_or_guest?
-    return logged_in? || guest?
-  end
-
   def api
     @api ||= DNAnexusAPI.new(token)
   end
 
-  def review_space_admin?
-    logged_in? && user.review_space_admin?
-  end
+  delegate :can_create_challenges?, :can_create_spaces?,
+           :can_administer_site?, :review_space_admin?,
+           to: :user, allow_nil: true
 end

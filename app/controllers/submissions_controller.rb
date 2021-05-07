@@ -197,7 +197,7 @@ class SubmissionsController < ApplicationController
       return
     end
     unless @submission.job.terminal?
-      User.sync_challenge_jobs!
+      Job.sync_challenge_jobs!
       @submission.job.reload
     end
 

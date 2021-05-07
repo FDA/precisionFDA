@@ -58,7 +58,6 @@ module Api
           jobs.each { |job| job.current_user = @context.user }
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
-
           sync_jobs(jobs)
         end
 
@@ -180,6 +179,7 @@ module Api
         search_by_tags(params.dig(:filters, :tags)).
         order(ORDER_GROUP_FIELDS)
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      sync_jobs(jobs)
 
       render_jobs_list(jobs)
     end
@@ -197,6 +197,7 @@ module Api
         search_by_tags(params.dig(:filters, :tags)).
         order(ORDER_GROUP_FIELDS)
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      sync_jobs(jobs)
 
       render_jobs_list(jobs)
     end
@@ -255,6 +256,7 @@ module Api
         order(order_from_params)
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      sync_jobs(jobs)
 
       render_jobs_list(jobs)
     rescue StandardError => e
