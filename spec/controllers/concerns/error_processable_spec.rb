@@ -59,7 +59,7 @@ RSpec.describe ErrorProcessable do
       end
 
       it "get array of error messages of proper size" do
-        expect(errors.size).to eq 3
+        expect(errors.size).to eq 4
       end
 
       it "get error messages describing first name" do
@@ -75,22 +75,16 @@ RSpec.describe ErrorProcessable do
       end
     end
 
-    context "when user_name_pattern_error and name is valid" do
-      let(:first_name) { FFaker::Name.first_name }
-      let(:last_name) { FFaker::Name.last_name }
-
+    context "when username_pattern_error and name is valid" do
       it "do not show any error message" do
-        expect(controller_class.user_name_pattern_error(first_name, last_name)).to be_nil
+        expect(controller_class.username_pattern_error("harry.potter")).to be_nil
       end
     end
 
-    context "when user_name_pattern_error and name is invalid" do
-      let(:first_name) { "###" }
-      let(:last_name) { "%%%" }
-      let(:errors) { controller_class.user_name_pattern_error(first_name, last_name) }
-
+    context "when username_pattern_error and name is invalid" do
       it "get error messages describing first name" do
-        expect(errors).to include "not have been acceptable"
+        expect(controller_class.username_pattern_error("###.potter")).to include \
+          "not have been acceptable"
       end
     end
   end

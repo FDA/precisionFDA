@@ -287,6 +287,22 @@ describe UserFileSerializer do
         expect(user_file_serialized["links"]["publish"]).to eq("/publish?id=#{user_file.uid}")
       end
 
+      context "when user_file is not in root folder" do
+        before { user_file.update(parent_folder_id: FFaker::Random.rand(3)) }
+
+        it "links[publish] is nil" do
+          expect(user_file_serialized["links"]["publish"]).to be_nil
+        end
+      end
+
+      context "when user_file is public" do
+        before { user_file.update(scope: Scopes::SCOPE_PUBLIC) }
+
+        it "links[download, link, publish] exist" do
+          expect(user_file_serialized["links"]["publish"]).to be_nil
+        end
+      end
+
       it "links[rename, remove] exist" do
         expect(user_file_serialized["links"]["rename"]).to eq(rename_file_path(user_file))
         expect(user_file_serialized["links"]["remove"]).to eq(remove_api_files_path)
@@ -308,7 +324,7 @@ describe UserFileSerializer do
         # rubocop:enable RSpec/SubjectStub
       end
 
-      it "links[feature] exist" do
+      it "links[feature, organize] exist" do
         expect(user_file_serialized["links"]["feature"]).to eq(feature_api_files_path)
         expect(user_file_serialized["links"]["organize"]).to eq(move_api_files_path)
       end

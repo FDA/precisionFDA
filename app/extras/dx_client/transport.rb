@@ -46,7 +46,28 @@ module DXClient
       response.value
       JSON.parse(response.body)
     rescue Net::HTTPClientException => e
-      raise e, "#{e.message}. #{response.body}", e.backtrace
+      raise_error(e)
+    end
+
+    # @param exception [Exception] Exception raised.
+    def raise_error(exception)
+      message =
+        begin
+          JSON.parse(exception.try(:response)&.body).dig("error", "message")
+        rescue JSON::ParserError
+          nil
+        end
+
+      message ||= exception.message
+
+      case exception.response
+      when Net::HTTPNotFound
+        raise DXClient::Errors::NotFoundError, message
+      when Net::HTTPTooManyRequests
+        raise DXClient::Errors::TooManyRequestsError, "Too many requests, please try later."
+      end
+
+      raise exception, message, exception.backtrace
     end
   end
 end

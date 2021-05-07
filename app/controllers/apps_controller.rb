@@ -51,7 +51,7 @@ class AppsController < ApplicationController
       where(jobs: { user_id: @context.user_id }).
       map { |series| series.latest_accessible(@context) }.compact
 
-    User.sync_jobs!(@context)
+    Job.sync_jobs!(@context)
 
     jobs = if @app.present?
       @app.app_series.jobs.origin.editable_by(@context).order(created_at: :desc)
@@ -136,7 +136,7 @@ class AppsController < ApplicationController
         page(unsafe_params[:comments_page])
     end
 
-    User.sync_jobs!(@context)
+    Job.sync_jobs!(@context)
 
     jobs = @app.app_series.jobs.editable_by(@context).includes(:taggings).order(created_at: :desc)
     @jobs_grid = jobs_grid(jobs)
