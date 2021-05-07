@@ -11,6 +11,10 @@ export const FieldGroup = styled.fieldset`
   display: flex;
   border: none;
   padding: none;
+
+  label {
+    margin-left: 5px;
+  }
 `
 
 export const SectionTitle = styled.h2`
