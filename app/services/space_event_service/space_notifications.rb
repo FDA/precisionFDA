@@ -4,9 +4,13 @@ module SpaceEventService
     class << self
 
       def send(event)
-        receivers(event).each do |receiver|
-          ReviewSpaceMailer.space_transition_email(event.entity, event.user, receiver, action(event)).deliver_now!
-        end
+        email_type_id = NotificationPreference.email_types[:notification_space_action]
+        api = DIContainer.resolve("https_apps_client")
+        api.email_send(email_type_id, {
+          initUserId: event.user_id,
+          spaceId: event.space_id,
+          activityType: event.activity_type,
+        })
       end
 
       private

@@ -45,7 +45,7 @@ class NotificationPreference < ApplicationRecord
     notification_job: 1,
     notification_content: 2,
     notification_space_membership: 3,
-    notification_space_event: 4,
+    notification_space_action: 4,
     notification_comment: 5,
   }.freeze
 

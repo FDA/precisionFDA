@@ -4,13 +4,11 @@ module SpaceEventService
     class << self
 
       def send(event)
-        receivers(event).each do |receiver|
-          if action(event) == "added"
-            ReviewSpaceMailer.new_content_email(event.entity, receiver).deliver_now!
-          else
-            ReviewSpaceMailer.content_deleted_email(event.entity, receiver).deliver_now!
-          end
-        end
+        email_type_id = NotificationPreference.email_types[:notification_content]
+        api = DIContainer.resolve("https_apps_client")
+        api.email_send(email_type_id, {
+          spaceEventId: event.id,
+        })
       end
 
       private
