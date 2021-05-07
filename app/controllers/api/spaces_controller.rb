@@ -136,7 +136,7 @@ module Api
 
       jobs = @space.jobs.order(order)
 
-      User.sync_jobs!(@context, jobs)
+      Job.sync_jobs!(@context, jobs)
 
       render json: jobs, adapter: :json
     end

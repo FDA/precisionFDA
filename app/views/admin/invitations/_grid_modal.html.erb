@@ -1,0 +1,26 @@
+<div id="invitation_grid_modal" class="modal fade modal-with-loader wide-modal" data-bind="css: {loading: invitationGridLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Select Users</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div id="invitation_grid_container">
+          <%= render "admin/invitations/invitations_data_grid" %>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-bind="click: addSelectedUsers, enable: addSelectedEnabled()" tabindex="-1" >Select</button>
+        <button class="btn btn-default" data-dismiss="modal" tabindex="-1" >Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
