@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { withRouter, Link } from 'react-router-dom'
-import { HashLink } from 'react-router-hash-link'
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs'
 import classNames from 'classnames/bind'
 import { format } from 'date-fns-tz'
@@ -13,7 +12,6 @@ import ChallengeShape from '../../../shapes/ChallengeShape'
 import PublicLayout from '../../../layouts/PublicLayout'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import Loader from '../../../components/Loader'
-import CollapsibleMenu from '../../../components/CollapsibleMenu'
 import ChallengeTimeRemaining from '../../../components/Challenges/ChallengeTimeRemaining'
 import './style.sass'
 import {
@@ -25,13 +23,21 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import ChallengeSubmissionsTable from '../../../components/Challenges/ChallengeSubmissionsTable'
 import ChallengeMyEntriesTable from '../../../components/Challenges/ChallengeMyEntriesTable'
+import ChallengOutline from '../../../components/Challenges/ChallengeOutline'
+import ChallengeUserContent from '../../../components/Challenges/ChallengeUserContent'
+import ChallengeResults from '../../../components/Challenges/ChallengeResults'
 import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
 
 
+// Helper class to analyse the Introduction and Results content of a challenge
+//
+// The output are:
+//   introContent - the challenge description in HTML, with anchors inserted to h1 and h2 links
+//   anchors -  a hierarchical list of anchors that can be used to populate the introduction outline
+//   resultsContent - Combination of the 'results' and 'results-details' regions
 class ChallengeContent {
   constructor(challenge) {
     this.challenge = challenge
-    this.content = ''
     this.anchors = []
     this.parseChallengeMeta(challenge)
   }
@@ -44,26 +50,12 @@ class ChallengeContent {
   //     'results-details': "The results area is separated into two sections",
   // }}
   //
-  parseChallengeMeta = (challenge) => {
-    if (challenge == undefined || challenge.meta == undefined || challenge.meta.regions == undefined) {
+  parseChallengeMeta(challenge) {
+    if (!challenge || !challenge.meta || !challenge.meta.regions) {
       return
     }
 
-    let introContent = ''
-    let resultsContent = ''
-
-    Object.keys(challenge.meta.regions).forEach(function(key) {
-      const value = challenge.meta.regions[key]
-      if (key === 'intro') {
-        introContent = value
-      }
-      else if (key.startsWith('results')) {
-        resultsContent += value
-      }
-      else {
-        console.error(`Unexpected key ${key} found in challenge.meta. Challenge = `+challenge)
-      }
-    })
+    let introContent = challenge.meta.regions['intro'] ? challenge.meta.regions['intro'] : ''
 
     // In challenges.meta, we extract <h1> and <h2> tags for the introduction section
     // to create href anchors and buttons to navigate to them in the side bar
@@ -94,40 +86,6 @@ class ChallengeContent {
 
     this.anchors = anchors
     this.introContent = el.innerHTML
-    this.resultsContent = resultsContent
-  }
-
-  renderAnchors = () => {
-    // Translate the flat list of h1, h2, etc tags into hierarchical menu structure
-    // that can be converted to a list of CollapsibleMenu components
-    // console.log(this.anchors)
-    const menus = []
-    let items = []
-    for (const element of this.anchors) {
-      const tag = element['tag'].toLowerCase()
-      if (tag == 'h1') {
-        items = []
-        const currentMenu = { ...element, 'items': items }
-        menus.push(currentMenu)
-      }
-      else {
-        items.push(element)
-      }
-    }
-
-    return (
-      menus.map((menu, index) => {
-        return <CollapsibleMenu title={menu['content']} key={index}>
-                { menu['items'].map((item, index) => {
-                  return (
-                    <div className={ 'outline-item-'+item['tag'].toLowerCase() } key={index}>
-                      <HashLink smooth to={'#'+item['anchorId']}>{item['content']}</HashLink>
-                    </div>
-                  )
-                })}
-              </CollapsibleMenu>
-      })
-    )
   }
 }
 
@@ -167,7 +125,7 @@ class ChallengeDetailsPage extends React.Component {
       )
     }
 
-    if (error != undefined) {
+    if (error) {
       return (
         <PublicLayout>
           <NavigationBar showLogoOnNavbar={true} />
@@ -293,7 +251,7 @@ class ChallengeDetailsPage extends React.Component {
               </TabList>
 
               <TabPanel>
-                <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.introContent }}></div>
+                <ChallengeUserContent html={challengeContent.introContent} />
               </TabPanel>
               {userCanSeeSubmissions && (
                 <>
@@ -307,7 +265,7 @@ class ChallengeDetailsPage extends React.Component {
               )}
               {userCanSeeResults && (
               <TabPanel>
-                <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.resultsContent }}></div>
+                <ChallengeResults challenge={challenge} />
               </TabPanel>
               )}
             </Tabs>
@@ -324,9 +282,7 @@ class ChallengeDetailsPage extends React.Component {
             {tabIndex == 0 && (
             <>
               <hr style={{ marginTop: '24px' }} />
-              <div className="challenge-details-outline">
-                {challengeContent.renderAnchors()}
-              </div>
+              <ChallengOutline anchors={challengeContent.anchors} />
             </>
             )}
             {challenge.canEdit && (
