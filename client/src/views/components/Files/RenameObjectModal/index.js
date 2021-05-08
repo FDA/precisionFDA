@@ -86,17 +86,17 @@ const RenameObjectModal = (
           />
         </div>
         {
-          !isFolder &&
-            <div className="form-group">
-              <label className="control-label">Description</label>
-              <Input
-                name="space-file-description"
-                placeholder="Description"
-                value={fileDescription}
-                onChange={changeFileDescription}
-                onKeyDown={enterKeyDownHandler}
-                autoFocus
-                lg
+          !isFolder && !isAsset &&
+          <div className="form-group">
+            <label className="control-label">Description</label>
+            <Input
+              name="space-file-description"
+              placeholder="Description"
+              value={fileDescription}
+              onChange={changeFileDescription}
+              onKeyDown={enterKeyDownHandler}
+              autoFocus
+              lg
               />
             </div>
         }

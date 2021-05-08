@@ -53,7 +53,8 @@ const root = ({ store }: any) => (
           <Route exact path='/challenges/propose'>
             <ChallengeProposePage />
           </Route>
-          <Route path='/challenges/:challengeId' render={(props) => <ChallengeDetailsPage challengeId={props.match.params.challengeId} />} />
+          <Route path='/challenges/:challengeId/:page' render={(props) => <ChallengeDetailsPage {...props} />} />
+          <Route path='/challenges/:challengeId' render={(props) => <ChallengeDetailsPage {...props} />} />
           <Route exact path='/news'>
             <NewsListPage />
           </Route>

@@ -93,6 +93,8 @@ Rails.application.routes.draw do
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
+    get "/challenges/13" => "main#tmb"
+
     # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
@@ -156,6 +158,10 @@ Rails.application.routes.draw do
         get :years, on: :collection
         post :save_editor_page, on: :member
         post :propose, on: :collection
+      end
+
+      resources :submissions, only: %i(index) do
+        get :my_entries, on: :collection
       end
 
       resources :experts, only: %i(index show) do
@@ -461,13 +467,16 @@ Rails.application.routes.draw do
     get "challenges/mislabeling" => redirect("/mislabeling")
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: "active_meta_appathon"
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: "appathon_in_a_box"
+    get "challenges", to: "challenges#index"
     resources :challenges do
       get "consistency(/:tab)", on: :collection, action: :consistency, as: "consistency"
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
+      get "new", on: :collection, as: "new"
       get "join", on: :member
-      get "view(/:tab)", on: :member, action: :show, as: "show"
+      get "edit", on: :member
       get "editor(/:tab)", on: :member, action: :edit_page, as: "edit_page"
       post "editor/save_page", on: :member, action: :save_page, as: "save_page"
+      get "(/:tab)", on: :member, action: :show, as: "show"
       resources :challenge_resources, only: %i(new create destroy) do
         post "rename", on: :member
       end
