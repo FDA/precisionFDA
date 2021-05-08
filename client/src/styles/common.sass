@@ -118,3 +118,7 @@
 .pfda-list-title
   font-size: 28px
   font-weight: 600
+
+// This is to fix an issue with ReactModal where it adds a 15px padding on body upon opening
+body.ReactModal__Body--open
+  padding-right: 0px !important

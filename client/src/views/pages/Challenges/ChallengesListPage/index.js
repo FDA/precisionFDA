@@ -36,6 +36,8 @@ class ChallengesListPage extends Component {
     else {
       loadChallenges()
     }
+
+    document.title = 'PrecisionFDA Challenges'
   }
 
   render() {
