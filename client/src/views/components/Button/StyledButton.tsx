@@ -17,7 +17,6 @@ export const StyledButton = styled.button<IButton>`
   text-align: center;
   background-image: none;
   border: 1px solid transparent;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   user-select: none;
