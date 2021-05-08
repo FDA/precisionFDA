@@ -81,17 +81,15 @@
     "y18n": "^4.0.0"
   },
   "devDependencies": {
-<<<<<<< HEAD
     "@types/lodash": "^4.14.168",
-=======
     "@types/jest": "^26.0.20",
->>>>>>> [PFDA-2301] Landing Page Redesign
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.11",
     "@types/react-modal": "^3.12.0",
     "@types/react-redux": "^7.1.16",
     "@types/react-router-dom": "^5.1.7",
     "@types/react-select": "^4.0.13",
+    "@types/react-router-hash-link": "^2.0.0",
     "@types/styled-components": "^5.1.9",
     "@types/webpack-env": "^1.16.0",
     "babel-eslint": "^10.1.0",
