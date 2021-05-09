@@ -1,26 +1,30 @@
 import React, { FunctionComponent } from 'react'
 import styled from 'styled-components'
 
+import { theme } from '../../../../styles/theme'
+
 
 const StyledUserContent = styled.div`
 h1 {
-  font-size: 20px; // $pfda-font-size-h1;
-  line-height: 24px
+  font-size: ${theme.fontSize.h1};
+  line-height: 24px;
+  margin-top: ${theme.padding.mainContentVertical};
 }
 
 h2 {
-  font-size: 18px; // $pfda-font-size-h2;
-  line-height: 20px
+  font-size: ${theme.fontSize.h2};
+  line-height: 20px;
+  margin-top: ${theme.padding.contentMarginLarge};
 }
 
 p {
-  font-size: 14px; // $pfda-font-size-body;
+  font-size: ${theme.fontSize.body};
   font-weight: 400;
   line-height: 20px;
 }
       
 img {
-  max-width: 820px;
+  max-width: ${theme.sizing.mainColumnMaxImageSize};
   object-fit: contain;
 }
 `

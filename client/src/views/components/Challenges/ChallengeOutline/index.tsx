@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react'
 import { HashLink } from 'react-router-hash-link'
 import styled from 'styled-components'
 
+import { theme } from '../../../../styles/theme'
 import CollapsibleMenu from '../../CollapsibleMenu'
 
 
@@ -10,13 +11,13 @@ const StyledChallengOutline = styled.div`
   margin-top: 3px;
 
   a {
-    color: #272727; // $pfda-text-dark-grey
+    color: ${theme.colors.textDarkGrey};
     font-weight: 400;
-    font-size: 14px; // $pfda-subheading-text-size;
+    font-size: ${theme.fontSize.subheading};
     margin-top: 12px;
 
     &:hover {
-      color: #646464; // $pfda-text-medium-grey;
+      color: ${theme.colors.textMediumGrey};
     }
   }
 }
@@ -26,13 +27,13 @@ const StyledChallengOutline = styled.div`
   margin-left: 16px;
 
   a {
-    color: #272727; /* $pfda-text-dark-grey */
+    color: ${theme.colors.textDarkGrey};
     font-weight: 400;
-    font-size: 14px; // $pfda-subheading-text-size;
+    font-size: ${theme.fontSize.subheading};
     margin-top: 12px;
 
     &:hover {
-      color: #646464; // $pfda-text-medium-grey;
+      color: ${theme.colors.textMediumGrey};
     }
   }
 }
@@ -41,8 +42,8 @@ const StyledChallengOutline = styled.div`
 interface IOutlineAnchor {
   tag: string,
   content: string,
-  anchorId: string,
-  action: () => void,
+  anchorId?: string,
+  action?: () => void,
 }
 
 interface IChallengOutline {
@@ -70,10 +71,10 @@ export const ChallengOutline: FunctionComponent<IChallengOutline> = ({ anchors }
   return (
     <StyledChallengOutline>
     {menus.map((menu, index) => {
-      return <CollapsibleMenu title={menu['content']} key={index}>
+      return <CollapsibleMenu title={menu['content']} titleAnchor={'#'+menu['anchorId']} key={index}>
               { menu['items'].map((item: any, index: number) => {
                 return (
-                  <div className={ 'outline-item-'+item['tag'].toLowerCase() } key={index}>
+                  <div className={ 'outline-item-'+item['tag'].toLowerCase() } key={index} onClick={item['action'] ? item['action'] : null}>
                     <HashLink smooth to={'#'+item['anchorId']}>{item['content']}</HashLink>
                   </div>
                 )

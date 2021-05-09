@@ -8,6 +8,7 @@ const values = {
   smallerColumnWidth: 96,
   thumbnailWidth: 288,
   thumbnailHeight: 148,
+  navigationBarHeight: 64,
 }
 
 const colors = {
@@ -49,11 +50,12 @@ const padding = {
 
 const sizing = {
   mainContainerMaxWidth: '1330px',
-  navigationBarHeight: '64px',
+  navigationBarHeight: `${values.navigationBarHeight}px`,
   navigationBarHeightNarrow: '48px',
   largeColumnWidth: `${values.largeColumnWidth}px`,
   smallColumnWidth: `${values.smallColumnWidth}px`,
   smallerColumnWidth: `${values.smallerColumnWidth}px`,
+  mainColumnMaxImageSize: '820px',
   thumbnailWidth: `${values.thumbnailWidth}px`,
   thumbnailHeight: `${values.thumbnailHeight}px`,
   thumbnailWidthSmall: '172px',
