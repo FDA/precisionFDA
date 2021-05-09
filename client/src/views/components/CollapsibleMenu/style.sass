@@ -5,10 +5,18 @@
   .title
     @extend .pfda-subsection-heading
     display: inline-block
+    letter-spacing: 0
+
+    a
+      color: $color-text-medium-grey
+
+      &:hover
+        color: $color-text-dark-grey
 
 .collapsible-header
   .title
     @extend .pfda-subsection-heading
+    letter-spacing: 0
 
     &:hover
       color: $color-text-dark-grey
@@ -22,15 +30,15 @@
     -moz-transform: rotate(0deg)
     transform: rotate(0deg)
 
-  &.collapsed #toggle-icon
-    -webkit-transform: rotate(180deg)
-    -moz-transform: rotate(180deg)
-    transform: rotate(180deg)
+    &.collapsed
+      -webkit-transform: rotate(180deg)
+      -moz-transform: rotate(180deg)
+      transform: rotate(180deg)
 
 .collapsible-menu__item
   display: block
   padding-left: 16px
-  
+
   &--disabled
     color: #888
 
