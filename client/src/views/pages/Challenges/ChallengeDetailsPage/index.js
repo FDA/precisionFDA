@@ -27,7 +27,16 @@ import ChallengOutline from '../../../components/Challenges/ChallengeOutline'
 import ChallengeUserContent from '../../../components/Challenges/ChallengeUserContent'
 import ChallengeResults from '../../../components/Challenges/ChallengeResults'
 import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
+import { theme } from '../../../../styles/theme'
 
+
+// Stripping HTML code in case user inserts links in the header
+// See https://jira.internal.dnanexus.com/browse/PFDA-2396
+//
+export const stripHTML = (html) => {
+  let doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
 
 // Helper class to analyse the Introduction and Results content of a challenge
 //
@@ -36,10 +45,9 @@ import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLin
 //   anchors -  a hierarchical list of anchors that can be used to populate the introduction outline
 //   resultsContent - Combination of the 'results' and 'results-details' regions
 class ChallengeContent {
-  constructor(challenge) {
-    this.challenge = challenge
+  constructor() {
     this.anchors = []
-    this.parseChallengeMeta(challenge)
+    this.introContent = ''
   }
 
   // challenge.meta contains the body/content of the challenge details
@@ -50,7 +58,7 @@ class ChallengeContent {
   //     'results-details': "The results area is separated into two sections",
   // }}
   //
-  parseChallengeMeta(challenge) {
+  parseChallengeMeta(challenge, isLoggedIn) {
     if (!challenge || !challenge.meta || !challenge.meta.regions) {
       return
     }
@@ -66,22 +74,36 @@ class ChallengeContent {
     const headingElements = el.querySelectorAll('h1, h2')
 
     let anchorId = 0
-    const getNextAnchorId = () => {
+    const getNextAnchorId = (content) => {
       anchorId += 1
-      return 'anchor'+anchorId
+      const maxAnchorIdLength = 20
+      let slug = stripHTML(content).replace(/ /g, '_')
+      slug = encodeURIComponent(slug.slice(0, maxAnchorIdLength))
+      const idTagContent = anchorId.toString() + '__' + slug
+      return idTagContent
     }
 
     const anchors = Array.from(headingElements).map((el) => {
       const tag = el.tagName
       const content = (el.innerHTML ? el.innerHTML.trim() : '')
-      const anchorId = getNextAnchorId()
-      el.setAttribute('id', anchorId.toString())
-      const scrollToElement = () => {
-        // console.log('tag clicked' + tag)
-        document.getElementById(anchorId).scrollIntoView({ behavior: 'smooth' }) 
+      const anchorId = getNextAnchorId(content)
+
+      // If user is not logged in, add a hidden anchor element to take the sticky header
+      // into account by inserting a hidden anchor to scroll to
+      if (isLoggedIn) {
+        el.setAttribute('id', anchorId)
       }
-      el.onClick = () => { scrollToElement() }
-      return { 'tag': tag, 'content': content, 'anchorId': anchorId, 'action': scrollToElement }
+      else {
+        var hiddenAnchor = document.createElement('section')
+        hiddenAnchor.setAttribute('id', anchorId)
+        hiddenAnchor.style.position = 'relative'
+        hiddenAnchor.style.top = `-${theme.values.navigationBarHeight+theme.values.contentMargin}px`
+        hiddenAnchor.style.visibility = 'hidden'
+        hiddenAnchor.style.zIndex = '321'
+        el.parentElement.insertBefore(hiddenAnchor, el)
+      }
+
+      return { 'tag': tag, 'content': stripHTML(content), 'anchorId': anchorId }
     })
 
     this.anchors = anchors
@@ -141,7 +163,10 @@ class ChallengeDetailsPage extends React.Component {
       )
     }
 
-    const challengeContent = new ChallengeContent(challenge)
+    const isLoggedIn = user && Object.keys(user).length > 0
+
+    const challengeContent = new ChallengeContent()
+    challengeContent.parseChallengeMeta(challenge, isLoggedIn)
 
     let stateLabel = 'Previous precisionFDA Challenge'
     switch (challenge.timeStatus) {
@@ -159,7 +184,6 @@ class ChallengeDetailsPage extends React.Component {
       'ended': challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED,
     })
 
-    const isLoggedIn = user && Object.keys(user).length > 0
     const userCanJoin = isLoggedIn && !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
     const userCanSubmitEntry =  isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
 

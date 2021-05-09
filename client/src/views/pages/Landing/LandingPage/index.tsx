@@ -4,6 +4,7 @@ import styled from 'styled-components'
 
 import PublicLayout from '../../../layouts/PublicLayout'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { PFDALogoLight } from '../../../components/NavigationBar/PFDALogo'
 import NewsList from '../../../components/News/NewsList'
 import { NewsListItemSmall } from '../../../components/News/NewsListItem'
 import ChallengesBanner from '../../../components/Challenges/ChallengesBanner'
@@ -159,7 +160,7 @@ const LandingPage : FunctionComponent = () => {
         <NavigationBar>
           <div className="navigation-bar-banner">
             <NavigationBarPublicLandingTitle>
-              <img className="pfda-navbar-logo" src="/assets/precisionFDA.white.navbar-guest.png" />
+              <PFDALogoLight className="pfda-navbar-logo" />
               <h2>{pFDATagLine}</h2>
             </NavigationBarPublicLandingTitle>
             <div className="navigation-bar-social-media-buttons">
