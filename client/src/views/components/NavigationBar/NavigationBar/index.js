@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames/bind'
 import { withRouter, useLocation, Link } from 'react-router-dom'
 
-import pfdaNavbarBackground from './pfdaNavbarBackground.png'
 import './style.sass'
 import Button from '../../Button'
 import ExternalLink from '../../Controls/ExternalLink'
@@ -98,7 +97,7 @@ const NavigationBar = ({ children, title, subtitle, showLogoOnNavbar, user }) =>
   }, [])
 
   return (
-    <div className="navigation-bar" id="navigation-bar" style={{ backgroundImage: `url(${pfdaNavbarBackground})` }}>
+    <div className="navigation-bar" id="navigation-bar" style={{ backgroundImage: `url("/assets/navbar/NavbarBackground.png")` }}>
       {showLoggedInNavBar && (
         <NavigationBarLoggedIn />
       )}
