@@ -38,8 +38,8 @@ module.exports = merge(development, {
     proxy: {
       '/api': {
         target: 'https://localhost:3000',
-        secure: false
-      }
-    }
+        secure: false,
+      },
+    },
   },
 })
