@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { mapValues } from 'lodash'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import {
   PageContainer,
   PageHeader,
@@ -10,6 +11,7 @@ import { FieldGroup, SectionTitle, StyledNotifications, StyledSelectWrap } from 
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import Select from 'react-select'
 import { Checkbox } from '../../../../components/Checkbox'
+import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 
 enum Roles {
   'review_space_admin' = 'review_space_admin',
@@ -48,30 +50,30 @@ const NotificationLabel: any = {
 
 const preference = {
   review_space_admin: {
-    admin_membership_changed: true,
-    admin_new_task_assigned: true,
+    admin_membership_changed: false,
+    admin_new_task_assigned: false,
     admin_task_status_changed: false,
-    admin_comment_activity: true,
-    admin_content_added_or_deleted: true,
-    admin_member_added_or_removed_from_space: true,
-    admin_space_locked_unlocked_deleted: true,
-    admin_space_lock_unlock_delete_requests: true,
+    admin_comment_activity: false,
+    admin_content_added_or_deleted: false,
+    admin_member_added_or_removed_from_space: false,
+    admin_space_locked_unlocked_deleted: false,
+    admin_space_lock_unlock_delete_requests: false,
   },
   lead_reviewer: {
-    lead_membership_changed: true,
-    lead_new_task_assigned: true,
-    lead_task_status_changed: true,
-    lead_comment_activity: true,
-    lead_content_added_or_deleted: true,
-    lead_member_added_or_removed_from_space: true,
-    lead_space_locked_unlocked_deleted: true,
+    lead_membership_changed: false,
+    lead_new_task_assigned: false,
+    lead_task_status_changed: false,
+    lead_comment_activity: false,
+    lead_content_added_or_deleted: false,
+    lead_member_added_or_removed_from_space: false,
+    lead_space_locked_unlocked_deleted: false,
   },
   reviewer: {
-    all_membership_changed: true,
+    all_membership_changed: false,
     all_new_task_assigned: false,
-    all_task_status_changed: true,
-    all_comment_activity: true,
-    all_content_added_or_deleted: true,
+    all_task_status_changed: false,
+    all_comment_activity: false,
+    all_content_added_or_deleted: false,
   },
 }
 
@@ -80,6 +82,28 @@ export const NotificationsPage = () => {
   const roles = Object.keys(localPrefSelection) as Array<Roles>
   const options = roles.map(value => ({ value, label: RoleLabel[value] }))
   const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
+
+  const { data, status, error } = useQuery<any>('notifications', fetchNotificationsPreferences)
+
+  const queryCache = useQueryClient()
+  const {mutateAsync: notificationsMutation } = useMutation(
+    saveNotificationsPreferences,
+    {
+      onSuccess: () => {
+        queryCache.invalidateQueries('notifications')
+        // showInfoAlert('Saved!')
+      },
+      onError: () => {
+        // showErrorAlert('Error saving')
+      }
+    }
+  )
+
+  useEffect(() => {
+    if(data?.preference) {
+      setLocalPrefSelection(data?.preference)
+    }
+  }, [data])
 
   const isAllChecked = (keys: {[key: string]: boolean}) => {
     const includesFalse = Object.keys(keys).map(k => keys[k]).includes(false)
@@ -106,14 +130,18 @@ export const NotificationsPage = () => {
     })
   }
 
+  const handleSave = () => {
+    notificationsMutation(localPrefSelection)
+  }
+
   return (
     <form>
       <PageContainer>
         <PageHeader>
           <PageTitle>Notification Preferences</PageTitle>
           <PageActions>
-            <Button type="submit">Cancel</Button>
-            <ButtonSolidBlue type="submit">Save Settings</ButtonSolidBlue>
+            <Button type="button">Cancel</Button>
+            <ButtonSolidBlue type="button" onClick={handleSave}>Save Settings</ButtonSolidBlue>
           </PageActions>
         </PageHeader>
 
