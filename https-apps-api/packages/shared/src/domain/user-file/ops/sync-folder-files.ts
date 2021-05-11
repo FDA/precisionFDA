@@ -74,13 +74,13 @@ export class SyncFilesInFolderOperation extends BaseOperation<
 
     this.ctx.log.debug({ localFileDxids, folderPath }, 'local files detected in given subfolder')
     this.ctx.log.debug({ remoteFileDxids, folderPath }, 'remote files detected in given subfolder')
-    this.ctx.log.debug(
-      { locallyCreatedFileDxids, folderPath },
-      'Local NORMAL type files to consider',
-    )
     this.ctx.log.info(
       { folderPath, toAdd, toRemove },
       'files detected to add/remove under given subfolder path',
+    )
+    this.ctx.log.info(
+      { locallyCreatedFileDxids, folderPath },
+      'Local NORMAL type files to consider',
     )
 
     // update existing files
