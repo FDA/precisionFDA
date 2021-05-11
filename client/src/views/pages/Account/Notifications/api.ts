@@ -1,4 +1,4 @@
-import { backendCall } from "../../../../utils/api"
+import { backendCall } from '../../../../utils/api'
 
 export const fetchNotificationsPreferences = async () => {
   const res = await backendCall('/api/notification_preferences', 'GET')
@@ -6,6 +6,15 @@ export const fetchNotificationsPreferences = async () => {
 }
 
 export const saveNotificationsPreferences = async (preference: any) => {
-  const res = await backendCall('/api/notification_preferences/change', 'POST', { ...preference })
+  const input = {
+    ...preference.reviewer,
+    ...preference.lead_reviewer,
+    ...preference.review_space_admin,
+  }
+  const res = await backendCall(
+    '/api/notification_preferences/change',
+    'POST',
+    { ...input },
+  )
   return res?.payload
 }
