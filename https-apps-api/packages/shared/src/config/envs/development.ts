@@ -12,6 +12,7 @@ export const config: ConfigOverride = {
     },
     queues: {
       default: { name: 'https-apps-worker-queue-dev' },
+      emails: { name: 'https-apps-worker-emails-queue-dev' },
     },
   },
   redis: {
