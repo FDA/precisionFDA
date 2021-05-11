@@ -2,7 +2,7 @@
 
 exports[`NewsListPage test should render 1`] = `
 <PublicLayout>
-  <withRouter(NavigationBar)
+  <NavigationBar
     subtitle="Announcements and press for precisionFDA."
     title="News"
   />
