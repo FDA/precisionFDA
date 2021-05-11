@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import NavigationBar, { NavigationBarBanner } from '../../../components/NavigationBar/NavigationBar'
 import { PFDALogoLight } from '../../../components/NavigationBar/PFDALogo'
 import NewsList from '../../../components/News/NewsList'
 import { NewsListItemSmall } from '../../../components/News/NewsListItem'
@@ -26,6 +26,7 @@ import { commonStyles } from '../../../../styles/commonStyles'
 import { ViewAllButton } from '../../../components/Controls/ViewAllButton'
 import { SectionHeading } from '../../../components/Controls/SectionHeading'
 import ExternalLink from '../../../components/Controls/ExternalLink'
+import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
 
 
 const pFDATagLine = 'A secure, collaborative, high-performance computing platform that builds a community of experts around the analysis of biological datasets in order to advance precision medicine.'
@@ -113,6 +114,11 @@ const NavigationBarPublicLandingTitle = styled.div`
     padding-bottom: 0px;
     margin-bottom: 0px;
   }
+
+  .pfda-navbar-logo {
+    width: 180px;
+    height: 40px;
+  }
 `
 
 
@@ -158,17 +164,13 @@ const LandingPage : FunctionComponent = () => {
     return (
       <PublicLayout>
         <NavigationBar>
-          <div className="navigation-bar-banner">
+          <NavigationBarBanner>
             <NavigationBarPublicLandingTitle>
               <PFDALogoLight className="pfda-navbar-logo" />
               <h2>{pFDATagLine}</h2>
             </NavigationBarPublicLandingTitle>
-            <div className="navigation-bar-social-media-buttons">
-              <a href="mailto:precisionfda@fda.hhs.gov" className="fa fa-envelope"></a>
-              <ExternalLink to="https://twitter.com/precisionfda" className="fa fa-twitter"></ExternalLink>
-              <ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin"></ExternalLink>
-            </div>
-          </div>
+            <SocialMediaButtons showText={false} />
+          </NavigationBarBanner>
         </NavigationBar>
 
         <LandingPageLayout>
