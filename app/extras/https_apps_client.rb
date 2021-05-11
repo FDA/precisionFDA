@@ -91,7 +91,7 @@ class HttpsAppsClient
     use_ssl = uri.scheme == "https"
 
     conn_opts = connection_opts.merge(use_ssl: use_ssl)
-    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if !Utils.production_env? && use_ssl
+    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if use_ssl
 
     Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
       handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))

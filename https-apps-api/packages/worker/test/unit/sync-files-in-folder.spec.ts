@@ -1,6 +1,6 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { User, Folder, Job, UserFile } from '@pfda/https-apps-shared/src/domain'
+import { User, Folder, Job, UserFile, Asset } from '@pfda/https-apps-shared/src/domain'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import type { SyncFilesInFolderInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
 import {
@@ -416,6 +416,56 @@ describe('syncFilesInFolder operation', () => {
     // op did not operate with local files, did not recreate or delete it
     // even though the file was returned from the api call
     expect(filesInDb.map(f => f.id)).to.have.members([file.id, remoteFile.id])
+  })
+
+  it('works with local asset files as well', async () => {
+    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
+    // file was uploaded to the project manually
+    const file = create.filesHelper.createUploadedAsset(
+      em,
+      { user },
+      {
+        name: 'a',
+        project,
+        dxid: firstFileDxid,
+        parentId: user.id,
+        parentType: PARENT_TYPE.USER,
+      },
+    )
+    await em.flush()
+    const remoteFile = create.filesHelper.create(
+      em,
+      { user },
+      {
+        name: 'b',
+        project,
+        dxid: secondFileDxid,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+      },
+    )
+    await em.flush()
+    fakes.client.filesListFake
+      .onCall(0)
+      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
+    const op = new userFile.SyncFilesInFolderOperation({
+      em: database.orm().em.fork(),
+      log,
+      user: userCtx,
+    })
+    const input = { ...defaultInput, folderId: null }
+    const res = await op.execute(input)
+    // no additions and deletions should happen
+    // op only returns HTTPS files
+    expect(res.files.map(f => f.dxid)).to.have.members([secondFileDxid])
+    expect(res.files.map(f => f.id)).to.have.members([remoteFile.id])
+    const filesInDb = await em.find(UserFile, { user })
+    const assetsInDb = await em.find(Asset, { user })
+    // op did not operate with local files, did not recreate or delete it
+    // even though the file was returned from the api call
+    expect(filesInDb.map(f => f.id)).to.have.members([remoteFile.id])
+    expect(assetsInDb.map(f => f.id)).to.have.members([file.id])
   })
 
   // todo: deletes file when folder is deleted

@@ -16,8 +16,7 @@ export const makeUserContextMdw = () => {
       ctx.log.warn(
         {
           url: ctx.request.url,
-          // sanitize?
-          input: ctx.request.query,
+          input: utils.maskAccessTokenUserCtx(ctx.validatedQuery),
           errors: validatorFn.errors,
         },
         'User context - validation failed',
