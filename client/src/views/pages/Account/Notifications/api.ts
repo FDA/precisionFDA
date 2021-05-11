@@ -11,7 +11,10 @@ export const saveNotificationsPreferences = async (preference: any) => {
     ...preference.lead_reviewer,
     ...preference.review_space_admin,
   }
-  console.log(input)
+  Object.entries(input).forEach(([key, value]) => {
+    const newValue = value === true ? 1 : 0
+    input[key] = newValue
+  })
   const res = await backendCall(
     '/api/notification_preferences/change',
     'POST',
