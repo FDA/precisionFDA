@@ -50,7 +50,6 @@ export * as event from './event'
 
 export * as org from './org'
 
-<<<<<<< HEAD
 export * as email from './email'
 
 export * as comment from './comment'
@@ -67,10 +66,8 @@ export {
   Tagging,
   Organization,
   Node,
+  Asset,
   Space,
   SpaceMembership,
   SpaceEvent,
 }
-=======
-export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node, Asset }
->>>>>>> master
