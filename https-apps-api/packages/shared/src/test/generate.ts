@@ -175,6 +175,23 @@ const userFile = {
   },
 }
 
+const asset = {
+  simple: (customDxid?: string): Partial<InstanceType<typeof entities.Asset>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      state: FILE_STATE.CLOSED,
+      parentType: PARENT_TYPE.USER,
+      stiType: FILE_STI_TYPE.ASSET,
+    }
+  },
+}
+
 const folder = {
   simple: (): Partial<InstanceType<typeof entities.Folder>> => {
     // folders do not have it
@@ -273,6 +290,7 @@ export {
   folder,
   tag,
   tagging,
+  asset,
   space,
   spaceMembership,
   spaceEvent,

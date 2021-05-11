@@ -7,6 +7,7 @@ export const config: ConfigOverride = {
   },
   logs: {
     pretty: true,
+    maskSensitive: false,
   },
   redis: {
     isSecure: false,

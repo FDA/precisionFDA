@@ -13,6 +13,7 @@ import { EmailNotification } from './email/email-notification.entity'
 import { SpaceEvent } from './space-event/space-event.entity'
 import { Space } from './space/space.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
+import { Asset } from './user-file/asset.entity'
 
 const entities = {
   App,
@@ -23,6 +24,7 @@ const entities = {
   Tagging,
   Node,
   Folder,
+  Asset,
   UserFile,
   JobClosedEvent,
   Organization,
@@ -48,6 +50,7 @@ export * as event from './event'
 
 export * as org from './org'
 
+<<<<<<< HEAD
 export * as email from './email'
 
 export * as comment from './comment'
@@ -68,3 +71,6 @@ export {
   SpaceMembership,
   SpaceEvent,
 }
+=======
+export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node, Asset }
+>>>>>>> master

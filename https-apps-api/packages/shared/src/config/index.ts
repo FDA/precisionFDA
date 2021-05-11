@@ -39,6 +39,7 @@ const defaultConfig = {
   logs: {
     pretty: true,
     level: 'debug',
+    maskSensitive: true,
   },
   database: {
     // it is used for testing, not for default DB connection
