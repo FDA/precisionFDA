@@ -11,6 +11,7 @@ export const saveNotificationsPreferences = async (preference: any) => {
     ...preference.lead_reviewer,
     ...preference.review_space_admin,
   }
+  console.log(input)
   const res = await backendCall(
     '/api/notification_preferences/change',
     'POST',

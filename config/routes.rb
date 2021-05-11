@@ -599,6 +599,11 @@ Rails.application.routes.draw do
 
     get "/spaces/*all", to: "spaces#index"
 
+    # to debug
+    # resources :notification_preferences, only: [:index] do
+    #   post "change", on: :collection
+    # end
+
     resources :meta_appathons, constraints: { appathon_id: %r{[^/]+} } do
       post "rename", on: :member
       resources :appathons, constraints: { id: %r{[^/]+} }
