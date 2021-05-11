@@ -1,19 +1,12 @@
 module Api
 
   class NotificationPreferencesController < ApiController
-    # wrap_parameters format: []
 
     def index
       render json: { preference: preference.all_attributes }
     end
 
     def change
-      puts params
-      puts "permitted params"
-      puts permitted_params
-      # preference.data = permitted_params
-      # todo: update or create?
-      # preference.update!(permitted_params)
       preference.attributes = permitted_params
       render json: { success: preference.save }
     end
