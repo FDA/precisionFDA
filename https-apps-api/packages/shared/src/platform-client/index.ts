@@ -6,6 +6,7 @@ import { errors } from '..'
 import { config } from '../config'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
+import { maskAuthHeader } from '../utils/logging'
 
 type BaseParams = {
   accessToken: string
@@ -98,7 +99,7 @@ type DescribeFilesResponse = {
 
 type DescribeFoldersResponse = {
   id: string
-  folders: Array<string>
+  folders: string[]
 }
 
 type JobCreateResponse = {
@@ -144,11 +145,11 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -162,11 +163,11 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -187,7 +188,7 @@ class PlatformClient {
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -204,11 +205,11 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -222,11 +223,11 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -262,11 +263,11 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -288,7 +289,7 @@ class PlatformClient {
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -307,11 +308,11 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
   }
@@ -344,13 +345,26 @@ class PlatformClient {
       headers: this.setupHeaders(params),
     }
     try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+      this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
-      this.log.warn({ requestOptions: options }, 'Failed request options')
+      this.logClientFailed(options)
       return this.handleFailed(err)
     }
+  }
+
+  private logClientRequest(options: AxiosRequestConfig, url: string): void {
+    const sanitized = maskAuthHeader(options.headers)
+    this.log.info(
+      { requestOptions: { ...options, headers: sanitized }, url },
+      'Running DNANexus API request',
+    )
+  }
+
+  private logClientFailed(options: AxiosRequestConfig): void {
+    const sanitized = {}
+    this.log.warn({ requestOptions: { ...options, headers: sanitized } }, 'Failed request options')
   }
 
   private setupHeaders(params: BaseParams): AnyObject {

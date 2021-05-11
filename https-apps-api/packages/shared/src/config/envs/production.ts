@@ -5,6 +5,7 @@ export const config: ConfigOverride = {
   logs: {
     pretty: false,
     level: 'info',
+    maskSensitive: true,
   },
   workerJobs: {
     syncJob: {
@@ -13,6 +14,10 @@ export const config: ConfigOverride = {
     queues: {
       default: { name: 'https-apps-worker-queue-prod' },
     },
+  },
+  platform: {
+    apiUrl: 'https://api.dnanexus.com',
+    authApiUrl: 'https://auth.dnanexus.com',
   },
   redis: {
     isSecure: true,

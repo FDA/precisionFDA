@@ -3,10 +3,10 @@ import https from 'https'
 import fs from 'fs'
 import Koa from 'koa'
 import koaBody from 'koa-bodyparser'
-import { config } from '@pfda/https-apps-shared'
 import { log } from '../logger'
 import * as mdw from './middleware'
 import { router } from './routes'
+import { config } from '@pfda/https-apps-shared'
 
 const koa = new Koa<Koa.DefaultState, Api.Ctx>()
 // todo: security, compression middlewares

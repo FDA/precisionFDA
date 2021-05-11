@@ -8,6 +8,7 @@ import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
 import { JobClosedEvent } from './event/job-closed.entity'
 import { Organization } from './org/org.entity'
+import { Asset } from './user-file/asset.entity'
 
 const entities = {
   App,
@@ -17,6 +18,7 @@ const entities = {
   Tagging,
   Node,
   Folder,
+  Asset,
   UserFile,
   JobClosedEvent,
   Organization,
@@ -38,4 +40,4 @@ export * as event from './event'
 
 export * as org from './org'
 
-export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node }
+export { entities, Job, App, User, UserFile, Folder, Tag, Tagging, Organization, Node, Asset }
