@@ -162,9 +162,12 @@ module JobsSyncing
             Event::JobClosed.create_for(job, user)
           end
         end
+
         if job.scope =~ /^space-(\d+)$/
           SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, job, :job_completed)
         end
+
+        send_job_done_email(job.id)
       else
         # Job state changed but not done (no outputs)
         Job.transaction do
@@ -181,6 +184,15 @@ module JobsSyncing
     # rubocop:enable Metrics/MethodLength
   end
 
-  included { private_class_method :sync_job_state }
+  def send_job_done_email(job_id)
+    email_type_id = NotificationPreference.email_types[:notification_job]
+    client = DIContainer.resolve("https_apps_client")
+    client.email_send(email_type_id, { jobId: job_id })
+  end
+
+  included do
+    private_class_method :sync_job_state
+    private_class_method :send_job_done_email
+  end
 end
 # rubocop:enable Metrics/ModuleLength
