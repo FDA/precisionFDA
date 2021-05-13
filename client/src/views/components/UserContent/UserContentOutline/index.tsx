@@ -6,7 +6,7 @@ import { theme } from '../../../../styles/theme'
 import CollapsibleMenu from '../../CollapsibleMenu'
 
 
-const StyledChallengOutline = styled.div`
+const StyledUserContentOutline = styled.div`
 .outline-item-h1 {
   margin-top: 3px;
 
@@ -46,11 +46,11 @@ interface IOutlineAnchor {
   action?: () => void,
 }
 
-interface IChallengOutline {
+interface IUserContentOutline {
   anchors: IOutlineAnchor[],
 }
 
-export const ChallengOutline: FunctionComponent<IChallengOutline> = ({ anchors }) => {
+export const UserContentOutline: FunctionComponent<IUserContentOutline> = ({ anchors }) => {
   // Translate the flat list of h1, h2, etc tags into hierarchical menu structure
   // that can be converted to a list of CollapsibleMenu components
   //
@@ -69,7 +69,7 @@ export const ChallengOutline: FunctionComponent<IChallengOutline> = ({ anchors }
   }
 
   return (
-    <StyledChallengOutline>
+    <StyledUserContentOutline>
     {menus.map((menu, index) => {
       return <CollapsibleMenu title={menu['content']} titleAnchor={'#'+menu['anchorId']} key={index}>
               { menu['items'].map((item: any, index: number) => {
@@ -81,8 +81,10 @@ export const ChallengOutline: FunctionComponent<IChallengOutline> = ({ anchors }
               })}
             </CollapsibleMenu>
     })}
-    </StyledChallengOutline>
+    </StyledUserContentOutline>
   )
 }
 
-export default ChallengOutline
+export type {
+  IOutlineAnchor,
+}

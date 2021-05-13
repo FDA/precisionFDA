@@ -193,6 +193,7 @@ export const HOME_ASSETS_MODALS = {
 
 export const CHALLENGE_STATUS = {
   SETUP: 'setup',
+  PRE_REGISTRATION: 'pre-registration',
   OPEN: 'open',
   PAUSED: 'paused',
   ARCHIVED: 'archived',
