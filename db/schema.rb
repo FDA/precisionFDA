@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_16_165856) do
+ActiveRecord::Schema.define(version: 2021_05_22_144105) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -182,6 +182,7 @@ ActiveRecord::Schema.define(version: 2021_03_16_165856) do
     t.integer "space_id"
     t.integer "specified_order"
     t.string "scope", default: "public", null: false
+    t.string "pre_registration_url"
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
