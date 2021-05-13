@@ -1,4 +1,4 @@
-import { filter, pipe, uniqBy } from 'ramda'
+import { filter, pipe, uniqBy, isNil } from 'ramda'
 import {
   EmailSendInput,
   EmailTemplate,
@@ -13,6 +13,10 @@ import {
 import { SpaceMembership, User } from '../../..'
 import { errors } from '../../../..'
 import { SpaceEvent } from '../../../space-event'
+import {
+  SPACE_EVENT_ACTIVITY_TYPE,
+  SPACE_EVENT_OBJECT_TYPE,
+} from '../../../space-event/space-event.enum'
 import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content.template'
 import { BaseTemplate } from '..'
 
@@ -74,8 +78,18 @@ export class ContentChangedEmailHandler
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
+    const action = SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType].split('_')[1]
+    if (isNil(action)) {
+      throw new errors.ValidationError(
+        `Action code name ${SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType]} is not applicable`,
+        { code: errors.ErrorCodes.EMAIL_VALIDATION },
+      )
+    }
+    const objectType = SPACE_EVENT_OBJECT_TYPE[spaceEvent.objectType].toLowerCase()
     this.templateContent = {
       entityType: spaceEvent.entityType,
+      action,
+      objectType,
       user: {
         fullName: spaceEvent.user.unwrap().fullName,
       },
@@ -101,7 +115,7 @@ export class ContentChangedEmailHandler
     return {
       to: receiver.email,
       body,
-      subject: 'Added content',
+      subject: 'Content changed',
     }
   }
 }
