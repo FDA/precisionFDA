@@ -182,13 +182,14 @@ module JobsSyncing
       end
     end
     # rubocop:enable Metrics/MethodLength
+
+    def send_job_done_email(job_id)
+      email_type_id = NotificationPreference.email_types[:notification_job]
+      client = DIContainer.resolve("https_apps_client")
+      client.email_send(email_type_id, { jobId: job_id })
+    end
   end
 
-  def send_job_done_email(job_id)
-    email_type_id = NotificationPreference.email_types[:notification_job]
-    client = DIContainer.resolve("https_apps_client")
-    client.email_send(email_type_id, { jobId: job_id })
-  end
 
   included do
     private_class_method :sync_job_state
