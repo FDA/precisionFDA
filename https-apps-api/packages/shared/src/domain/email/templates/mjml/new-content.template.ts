@@ -3,6 +3,8 @@ import { EmailTemplateInput } from '../../email.config'
 export type NewContentTemplateInput = EmailTemplateInput & {
   content: {
     entityType: string
+    objectType: string
+    action: string
     user: {
       fullName: string
     }
@@ -21,8 +23,8 @@ export const newContentTemplate = (data: NewContentTemplateInput): string => `
             Hello ${data.receiver.firstName}!
           </mj-text>
           <mj-text>
-            New ${data.content.entityType} added by ${data.content.user.fullName}
-            to the space ${data.content.space.name}
+            ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}
+            to the space ${data.content.space.name}.
           </mj-text>
         </mj-column>
       </mj-section>
