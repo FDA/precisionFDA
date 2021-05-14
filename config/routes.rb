@@ -94,6 +94,7 @@ Rails.application.routes.draw do
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
     get "/challenges/13" => "main#tmb"
+    get "/challenges/14" => "challenges#food_traceability"
 
     # Mains controller
     get "login" => "main#login"
