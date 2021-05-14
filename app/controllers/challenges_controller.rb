@@ -1,7 +1,8 @@
 # Challenges controller.
 # rubocop:todo Metrics/ClassLength
 class ChallengesController < ApplicationController
-  skip_before_action :require_login, only: %i(index consistency truth appathons join show)
+  skip_before_action :require_login,
+                     only: %i(index consistency truth appathons join show food_traceability)
   before_action :require_login_or_guest, only: []
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
@@ -294,6 +295,8 @@ class ChallengesController < ApplicationController
     @discussion = Discussion.find_by(id: APPATHON_IN_A_BOX_DISCUSSION_ID)
     redirect_to active_meta_appathon_path
   end
+
+  def food_traceability; end
 
   private
 
