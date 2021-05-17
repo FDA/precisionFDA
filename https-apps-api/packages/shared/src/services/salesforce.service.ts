@@ -17,7 +17,8 @@ const log = getLogger('salesforce-logger')
 class EmailClient {
   connection: jsforce.Connection
   constructor() {
-    this.connection = new jsforce.Connection({ loginUrl: config.emails.salesforce.apiUrl })
+    const completeUrl = new URL(`https://${config.emails.salesforce.apiUrl}`)
+    this.connection = new jsforce.Connection({ loginUrl: completeUrl.href })
   }
 
   async login(): Promise<jsforce.UserInfo> {
