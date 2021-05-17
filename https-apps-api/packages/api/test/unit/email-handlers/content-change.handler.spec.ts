@@ -139,6 +139,8 @@ describe('content-change.handler', () => {
         entityType: PARENT_TYPE.JOB,
         space: { name: space.name },
         user: { fullName: user.fullName },
+        action: 'added',
+        objectType: 'job',
       })
     })
   })

@@ -67,7 +67,7 @@ describe('POST /emails/:id/send', () => {
     // user - the owner is filtered out
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
     expect(taskInput).to.have.property('to', anotherUser.email)
-    expect(taskInput).to.have.property('subject', 'Added content')
+    expect(taskInput).to.have.property('subject', 'Content changed')
     expect(taskInput).to.have.property('body').that.is.a('string')
   })
 
