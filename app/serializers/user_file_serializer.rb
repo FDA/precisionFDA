@@ -81,7 +81,13 @@ class UserFileSerializer < NodeSerializer
         end
       end
 
-      if object.license.blank? && object.owned_by_user?(current_user)
+      # license exists and accepted
+      if object.license.present? && object.license.accepted_licenses.exists?(user_id: current_user.id)
+        links[:download] = download_api_file_path(object)
+      end
+
+      # any file without license
+      if object.license.blank?
         # GET download single file
         links[:download] = download_api_file_path(object)
         # POST Authorize URL - to move to api
