@@ -228,17 +228,17 @@ const LandingPage : FunctionComponent = () => {
       <PublicLayout>
         {user.is_guest ? 
           <NavigationBar user={user}>
-            <div className="navigation-bar-banner">
+            <NavigationBarBanner>
               <NavigationBarPublicLandingTitle>
                 <h1>{guestWelcomeTitle}</h1>
                 <h2>{pFDATagLine}</h2>
               </NavigationBarPublicLandingTitle>
-              <div className="navigation-bar-social-media-buttons">
+              <SocialMediaButtons>
                 <a href="mailto:precisionfda@fda.hhs.gov" className="fa fa-envelope"></a>
                 <ExternalLink to="https://twitter.com/precisionfda" className="fa fa-twitter"></ExternalLink>
                 <ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin"></ExternalLink>
-              </div>
-            </div>
+              </SocialMediaButtons>
+            </NavigationBarBanner>
           </NavigationBar>
           :
           <NavigationBar user={user} />
