@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { withRouter } from 'react-router-dom'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBarPublic from '../../../components/NavigationBar/NavigationBarPublic'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import ChallengeProposeForm from '../../../components/Challenges/ChallengeProposeForm'
 import ChallengesYearList from '../../../components/Challenges/ChallengesYearList'
 import CollapsibleMenu from '../../../components/CollapsibleMenu'
@@ -34,7 +34,7 @@ class ChallengeProposePage extends React.Component {
 
     return (
       <PublicLayout>
-        <NavigationBarPublic title={title} subtitle={subtitle}/>
+        <NavigationBar title={title} subtitle={subtitle}/>
         
         <div className="challenge-propose-main-container">
           <div className="left-column">

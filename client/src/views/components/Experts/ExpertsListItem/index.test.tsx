@@ -1,8 +1,8 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import { ExpertsListItem, ExpertsListItemType } from '.'
-import { IExpert } from '../../../shapes/ExpertShape'
+import { ExpertsListItemBlogEntry, ExpertsListItemBlogEntrySmall, ExpertsListItemQuestionsAndAnswers } from '.'
+import { IExpert } from '../../../../types/expert'
 
 describe('ExpertsListItem test', () => {
   const getMockExpert = () => {
@@ -26,16 +26,23 @@ describe('ExpertsListItem test', () => {
     return mockExpert
   }
 
-  it('should render ExpertsListItemType.BlogEntry', () => {
+  it('should render ExpertsListItemBlogEntry', () => {
     const mockExpert = getMockExpert()
-    const wrapper = shallow(<ExpertsListItem expert={mockExpert} type={ExpertsListItemType.BlogEntry} userCanEdit={false} />)
+    const wrapper = shallow(<ExpertsListItemBlogEntry expert={mockExpert} userCanEdit={false} />)
 
     expect(wrapper).toMatchSnapshot()
   })
 
-  it('should render ExpertsListItemType.QuestionsAndAnswers', () => {
+  it('should render ExpertsListItemBlogEntrySmall', () => {
     const mockExpert = getMockExpert()
-    const wrapper = shallow(<ExpertsListItem expert={mockExpert} type={ExpertsListItemType.QuestionsAndAnswers} userCanEdit={false} />)
+    const wrapper = shallow(<ExpertsListItemBlogEntrySmall expert={mockExpert} userCanEdit={false} />)
+
+    expect(wrapper).toMatchSnapshot()
+  })
+
+  it('should render ExpertsListItemQuestionsAndAnswers', () => {
+    const mockExpert = getMockExpert()
+    const wrapper = shallow(<ExpertsListItemQuestionsAndAnswers expert={mockExpert} userCanEdit={false} />)
 
     expect(wrapper).toMatchSnapshot()
   })

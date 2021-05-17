@@ -24,7 +24,6 @@ export default createReducer(initialState, {
       ...state.pagination,
       ...payload.pagination,
     },
-    year: payload.year,
     isFetching: false,
   }),
 
