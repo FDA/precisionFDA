@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
+import HomeFileShape from '../../../../shapes/HomeFileShape'
 import Modal from '../../../Modal'
 import Button from '../../../Button'
 import { HOME_FILES_ACTIONS } from '../../../../../constants'
@@ -43,12 +44,15 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
   }
 }
 
+// This component logic - is for My page
 const FilesActionModal = ({ modalAction, hideAction, action, files = [], isOpen, isLoading, fetchFilesByAction, modal = {}}) => {
   const title = switchTitle(action)
   const getFilesAction = () => fetchFilesByAction()
+
   useEffect(() => {
     if (isOpen) getFilesAction()
   }, [isOpen, files])
+
   return (
     <div className="objects-actions-modal">
       <Modal
@@ -66,7 +70,7 @@ const FilesActionModal = ({ modalAction, hideAction, action, files = [], isOpen,
 }
 
 FilesActionModal.propTypes = {
-  files: PropTypes.array,
+  files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
   modalAction: PropTypes.func,
   hideAction: PropTypes.func,
   action: PropTypes.string,

@@ -10,6 +10,9 @@ const FileActionItemShape = {
   type: PropTypes.string,
   viewURL: PropTypes.string,
   downloadURL: PropTypes.string,
+  createdBy: PropTypes.string,
+  addedBy: PropTypes.string,
+  createdAtDateTime: PropTypes.string,
 }
 
 const mapToFileActionItem = (file) => ({
@@ -19,6 +22,9 @@ const mapToFileActionItem = (file) => ({
   type: file.type,
   viewURL: file.viewURL,
   downloadURL: file.downloadURL,
+  createdBy: file.added_by_fullname,
+  addedBy: file.added_by,
+  createdAtDateTime: file.created_at_date_time,
 })
 
 const FileShape = {
@@ -30,6 +36,7 @@ const FileShape = {
   org: PropTypes.string,
   addedBy: PropTypes.string,
   size: PropTypes.string,
+  createdAtDateTime: PropTypes.string,
   created: PropTypes.string,
   state: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
@@ -47,6 +54,7 @@ const mapToFile = (file) => ({
   addedBy: file.added_by,
   size: file.size,
   created: file.created,
+  createdAtDateTime: file.created_at_date_time,
   state: file.state,
   tags: file.tags || [],
   links: file.links,

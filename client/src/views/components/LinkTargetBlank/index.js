@@ -16,6 +16,7 @@ LinkTargetBlank.propTypes = {
   url: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.element),
+    PropTypes.array,
     PropTypes.element,
     PropTypes.string,
   ]),
