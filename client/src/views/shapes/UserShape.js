@@ -8,6 +8,7 @@ const UserShape = {
   name: PropTypes.string,
   org: PropTypes.string,
   url: PropTypes.string,
+  isGuest: PropTypes.bool,
   isAccepted: PropTypes.bool,
   dxuser: PropTypes.string,
 }

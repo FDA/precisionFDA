@@ -1,11 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { FileActionItemShape } from '../../../shapes/FileShape'
 import Modal from '../../Modal'
 import Button from '../../Button'
 import { SPACE_FILES_ACTIONS } from '../../../../constants'
 import FilesList from './FilesList'
+import HomeFileShape from '../../../shapes/HomeFileShape'
 
 
 const switchTitle = (action) => {
@@ -52,7 +52,7 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
       )
   }
 }
-
+// This component logic - is for Everybody, Featured page
 const FilesActionModal = ({ modalAction, hideAction, action, files, isOpen, isLoading }) => {
   const title = switchTitle(action)
   return (
@@ -77,7 +77,7 @@ FilesActionModal.propTypes = {
   modalAction: PropTypes.func,
   hideAction: PropTypes.func,
   action: PropTypes.string,
-  files: PropTypes.arrayOf(PropTypes.exact(FileActionItemShape)),
+  files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
   isOpen: PropTypes.bool,
   isLoading: PropTypes.bool,
 }
