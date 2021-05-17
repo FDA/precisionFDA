@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 import Modal from '../../Modal'
 import Button from '../../Button'
+import { PFDA_EMAIL } from '../../../../constants'
 
 
 interface IGuestRestrictedLinkProps {
@@ -44,7 +45,7 @@ const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to
         hideModalHandler={closeModal}
       >
         <p>You are currently browsing precisionFDA as a guest. To log in and complete this action, your user account must be provisioned. Your account is currently being reviewed by an FDA administrator for provisioning.</p>
-        <p>If you do not receive full access within 14 days, please contact <a href="mailto:precisionfda@fda.hhs.gov">precisionfda@fda.hhs.gov</a> to request an upgraded account with end-level access.</p>
+        <p>If you do not receive full access within 14 days, please contact <a href={`mailto:${PFDA_EMAIL}`}>{PFDA_EMAIL}</a> to request an upgraded account with end-level access.</p>
       </Modal>
     </>
   )
