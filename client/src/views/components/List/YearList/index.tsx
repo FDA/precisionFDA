@@ -1,71 +1,43 @@
 import React from 'react'
-import classNames from 'classnames/bind'
 
-import Loader from '../../Loader'
+import { IYearListPayload } from '../../../../api/yearList'
+import { UseQueryResult } from 'react-query'
+import QueryList from '../QueryList'
 import './style.sass'
 
 
 interface IYearListProps {
   elementName: string,
-  years: number[],
-  isFetching: boolean,
+  query: () => UseQueryResult<IYearListPayload, Error>,
   setYearHandler: (year: number) => void,
-  fetchYearList: () => void,
 }
-
 
 class YearList extends React.Component<IYearListProps> {
   static defaultProps = {
     elementName: 'years',
-    years: [],
-    isFetching: false,
+    query: () => {},
     setYearHandler: () => {},
-    fetchYearList: () => {},
-  }
-
-  componentDidMount() {
-    const { fetchYearList } = this.props
-    fetchYearList()
   }
 
   render() {
-    const { elementName, years, isFetching, setYearHandler } = this.props
-    const classes = classNames(['year-list'])
-
-    if (isFetching) {
+    const { elementName, query, setYearHandler } = this.props
+    const className = 'year-list'
+    const emptyMessage = 'No previous ' + elementName
+    const listExtractor = (payload: IYearListPayload) => {
+      return payload.yearList
+    }
+    const ItemTemplate = (year: number) => {
       return (
-        <div>
-          <div className='text-center'>
-            <Loader />
-          </div>
-        </div>
+        <li key={year}>
+          <a onClick={() => setYearHandler(year)}>{year}</a>
+        </li>
       )
     }
-
-    if (!years) {
-      return (
-        <div>
-          <div className='text-center'>
-            No previous {elementName}
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div>
-        <ul className={classes}>
-          {years.map((year: number) => (
-            <li key={year}>
-              <a onClick={() => setYearHandler(year)}>{year}</a>
-            </li>
-          ), this)}
-        </ul>
-      </div>
-    )
+  
+    return <QueryList query={query} listExtractor={listExtractor} template={ItemTemplate} emptyMessage={emptyMessage} className={className} />
   }
 }
 
 export {
-  YearList
+  YearList,
 }
