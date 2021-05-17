@@ -46,69 +46,69 @@ const ChallengesList: FunctionComponent<IChallengesListProps> = ({ listItemCompo
   }
 
   let challengesToShow = challenges as IChallengeListItem[]
-  if (challengesToShow && challengesToShow.length) {
-    if (filter) {
-      challengesToShow = filter(challengesToShow)
-    }
-
-    // Do some property injection to determine the first of different sections
-    //
-    //   if challenge.isFirstItemInSection = true , insers a header before the list item to
-    //   denote the section header, using the challenge.sectionHeading attribute
-    //
-    let foundFirstUpcomingChallenge = false
-    let foundFirstCurrentChallenge = false
-    let foundFirstClosedChallenge = false
-    challengesToShow.map((challenge) => {
-      if (!foundFirstUpcomingChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.UPCOMING) {
-        challenge.isFirstItemInSection = true
-        challenge.sectionHeading = 'Upcoming Challenges'
-        foundFirstUpcomingChallenge = true
-      }
-      else if (!foundFirstCurrentChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT) {
-        challenge.isFirstItemInSection = true
-        challenge.sectionHeading = 'Current Challenges'
-        foundFirstCurrentChallenge = true
-      }
-      else if (!foundFirstClosedChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED) {
-        challenge.isFirstItemInSection = true
-        challenge.sectionHeading = 'Previous Challenges'
-        foundFirstClosedChallenge = true
-      }
-      else {
-        challenge.isFirstItemInSection = false
-      }
-    })
-
-    // The following reorders the response to put all current challenges in front
-    // as specified by the mock ups
-    //
-    challengesToShow = reorderChallengesListWithCurrentChallengesOnTop(challengesToShow)
-
-    const handleItemDetails = (id: number) => {
-      history.push(`/challenges/${id}`)
-    }
-
-    const handleJoinChallenge = (id: number) => {
-      window.location.assign(`/challenges/${id}/join`)
-    }
-
-    const canUserJoin = (challenge: IChallenge) => !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
-    const ListItem = listItemComponent
-
-    return (
-      <StyledChallengesListContainer>
-        <ul className="challenges-list">
-          {challengesToShow.map((challenge) => <ListItem key={challenge.id} challenge={challenge} handleItemDetails={handleItemDetails} userCanJoin={canUserJoin(challenge)} />, this)}
-        </ul>
-        {allowPagination &&
-          <Pagination data={pagination} setPageHandler={setPageHandler} />
-        }
-      </StyledChallengesListContainer>
-    )
+  if (challengesToShow && filter) {
+    challengesToShow = filter(challengesToShow)
   }
 
-  return <div className='text-center' style={{ margin: '32px' }}>{emptyListMessage ? emptyListMessage : 'No challenges found.'}</div>
+  if (!challengesToShow || challengesToShow.length == 0) {
+    return <div className='text-center' style={{ margin: '32px' }}>{emptyListMessage ? emptyListMessage : 'No challenges found.'}</div>
+  }
+
+  // Do some property injection to determine the first of different sections
+  //
+  //   if challenge.isFirstItemInSection = true , insers a header before the list item to
+  //   denote the section header, using the challenge.sectionHeading attribute
+  //
+  let foundFirstUpcomingChallenge = false
+  let foundFirstCurrentChallenge = false
+  let foundFirstClosedChallenge = false
+  challengesToShow.map((challenge) => {
+    if (!foundFirstUpcomingChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.UPCOMING) {
+      challenge.isFirstItemInSection = true
+      challenge.sectionHeading = 'Upcoming Challenges'
+      foundFirstUpcomingChallenge = true
+    }
+    else if (!foundFirstCurrentChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT) {
+      challenge.isFirstItemInSection = true
+      challenge.sectionHeading = 'Current Challenges'
+      foundFirstCurrentChallenge = true
+    }
+    else if (!foundFirstClosedChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED) {
+      challenge.isFirstItemInSection = true
+      challenge.sectionHeading = 'Previous Challenges'
+      foundFirstClosedChallenge = true
+    }
+    else {
+      challenge.isFirstItemInSection = false
+    }
+  })
+
+  // The following reorders the response to put all current challenges in front
+  // as specified by the mock ups
+  //
+  challengesToShow = reorderChallengesListWithCurrentChallengesOnTop(challengesToShow)
+
+  const handleItemDetails = (id: number) => {
+    history.push(`/challenges/${id}`)
+  }
+
+  const handleJoinChallenge = (id: number) => {
+    window.location.assign(`/challenges/${id}/join`)
+  }
+
+  const canUserJoin = (challenge: IChallenge) => !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
+  const ListItem = listItemComponent
+
+  return (
+    <StyledChallengesListContainer>
+      <ul className="challenges-list">
+        {challengesToShow.map((challenge) => <ListItem key={challenge.id} challenge={challenge} handleItemDetails={handleItemDetails} userCanJoin={canUserJoin(challenge)} />, this)}
+      </ul>
+      {allowPagination &&
+        <Pagination data={pagination} setPageHandler={setPageHandler} />
+      }
+    </StyledChallengesListContainer>
+  )
 }
 
 
