@@ -13,6 +13,8 @@ module Api
     include ErrorProcessable
     include Scopes
 
+    skip_before_action :require_api_login, only: %i(everybody featured)
+    before_action :require_api_login_or_guest, only: %i(everybody featured)
     before_action :validate_app, only: :create
     before_action :can_copy_to_scope?, only: %i(copy)
     before_action :user_notes_objects, only: %i(index spaces everybody)

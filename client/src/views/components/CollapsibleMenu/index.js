@@ -2,6 +2,7 @@ import React from 'react'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
+import { HashLink } from 'react-router-hash-link'
 import { v4 as uuidv4 } from 'uuid'
 
 import Icon from '../Icon'
@@ -10,8 +11,10 @@ import './style.sass'
 
 // Usage: either set the 'children' or the 'options' property
 //        if both are set children takes precedent
+//        In options dict, either use onClick and target for the links
 //
-// In options dict, either use onClick and target for the links
+//        If titleAnchor is defined, a HashLink is displayed using that anchor
+//        If not, title is used
 
 const exampleOptions = [
   {
@@ -54,7 +57,8 @@ const Item = ({ text, isDisabled, target, onClick }) => {
   )
 }
 
-const CollapsibleMenu = ({ title, children, options }) => {
+
+const CollapsibleMenu = ({ title, titleAnchor, children, options }) => {
   const menuOptions = options ? options : exampleOptions
 
   const generateList = () => { return menuOptions.map((e) => {
@@ -67,10 +71,23 @@ const CollapsibleMenu = ({ title, children, options }) => {
 
   return (
     <div className="accordion collapsible-menu" id={collapseMenuId}>
+      {titleAnchor ? (
+      <div className="accordion-header collapsible-header">
+        <div style={{ display: 'flex' }}>
+          <div style={{ flex: '0 0 16px', marginTop: '12px' }}>
+            <Icon id='toggle-icon' icon='fa-angle-down' data-toggle="collapse" data-target={'#'+collapseBodyId} aria-expanded="true" aria-controls={collapseBodyId} />
+          </div>
+          <div className='title'>
+            <HashLink smooth to={titleAnchor}>{title}</HashLink>
+          </div>
+        </div>
+      </div>
+      ) : (
       <div className="accordion-header collapsible-header" data-toggle="collapse" data-target={'#'+collapseBodyId} aria-expanded="true" aria-controls={collapseBodyId}>
         <Icon id='toggle-icon' icon='fa-angle-down' />
-        <div className='title'>{title}</div>&nbsp;
+        <div className='title'>{title}</div>
       </div>
+      )}
       <div id={collapseBodyId} className="accordion-collapse collapse in" aria-labelledby="collapsibleMenuHeading" data-parent={'#'+collapseMenuId}>
         {children ? children : generateList()}
       </div>
@@ -88,6 +105,7 @@ Item.propTypes = {
 
 CollapsibleMenu.propTypes = {
   title: PropTypes.string,
+  titleAnchor: PropTypes.string,
   options: PropTypes.array,
   children: PropTypes.oneOfType([
     PropTypes.string,

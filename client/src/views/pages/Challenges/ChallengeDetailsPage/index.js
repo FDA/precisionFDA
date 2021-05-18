@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { withRouter, Link } from 'react-router-dom'
-import { HashLink } from 'react-router-hash-link'
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs'
 import classNames from 'classnames/bind'
 import { format } from 'date-fns-tz'
@@ -11,9 +10,8 @@ import enUS from 'date-fns/locale/en-US'
 import { fetchChallenge } from '../../../../actions/challenges'
 import ChallengeShape from '../../../shapes/ChallengeShape'
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBarPublic from '../../../components/NavigationBar/NavigationBarPublic'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import Loader from '../../../components/Loader'
-import CollapsibleMenu from '../../../components/CollapsibleMenu'
 import ChallengeTimeRemaining from '../../../components/Challenges/ChallengeTimeRemaining'
 import './style.sass'
 import {
@@ -25,14 +23,31 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import ChallengeSubmissionsTable from '../../../components/Challenges/ChallengeSubmissionsTable'
 import ChallengeMyEntriesTable from '../../../components/Challenges/ChallengeMyEntriesTable'
+import ChallengOutline from '../../../components/Challenges/ChallengeOutline'
+import ChallengeUserContent from '../../../components/Challenges/ChallengeUserContent'
+import ChallengeResults from '../../../components/Challenges/ChallengeResults'
+import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
+import { theme } from '../../../../styles/theme'
 
 
+// Stripping HTML code in case user inserts links in the header
+// See https://jira.internal.dnanexus.com/browse/PFDA-2396
+//
+export const stripHTML = (html) => {
+  let doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
+
+// Helper class to analyse the Introduction and Results content of a challenge
+//
+// The output are:
+//   introContent - the challenge description in HTML, with anchors inserted to h1 and h2 links
+//   anchors -  a hierarchical list of anchors that can be used to populate the introduction outline
+//   resultsContent - Combination of the 'results' and 'results-details' regions
 class ChallengeContent {
-  constructor(challenge) {
-    this.challenge = challenge
-    this.content = ''
+  constructor() {
     this.anchors = []
-    this.parseChallengeMeta(challenge)
+    this.introContent = ''
   }
 
   // challenge.meta contains the body/content of the challenge details
@@ -43,26 +58,12 @@ class ChallengeContent {
   //     'results-details': "The results area is separated into two sections",
   // }}
   //
-  parseChallengeMeta = (challenge) => {
-    if (challenge == undefined || challenge.meta == undefined || challenge.meta.regions == undefined) {
+  parseChallengeMeta(challenge, isLoggedIn) {
+    if (!challenge || !challenge.meta || !challenge.meta.regions) {
       return
     }
 
-    let introContent = ''
-    let resultsContent = ''
-
-    Object.keys(challenge.meta.regions).forEach(function(key) {
-      const value = challenge.meta.regions[key]
-      if (key === 'intro') {
-        introContent = value
-      }
-      else if (key.startsWith('results')) {
-        resultsContent += value
-      }
-      else {
-        console.error(`Unexpected key ${key} found in challenge.meta. Challenge = `+challenge)
-      }
-    })
+    let introContent = challenge.meta.regions['intro'] ? challenge.meta.regions['intro'] : ''
 
     // In challenges.meta, we extract <h1> and <h2> tags for the introduction section
     // to create href anchors and buttons to navigate to them in the side bar
@@ -73,60 +74,40 @@ class ChallengeContent {
     const headingElements = el.querySelectorAll('h1, h2')
 
     let anchorId = 0
-    const getNextAnchorId = () => {
+    const getNextAnchorId = (content) => {
       anchorId += 1
-      return 'anchor'+anchorId
+      const maxAnchorIdLength = 20
+      let slug = stripHTML(content).replace(/ /g, '_')
+      slug = encodeURIComponent(slug.slice(0, maxAnchorIdLength))
+      const idTagContent = anchorId.toString() + '__' + slug
+      return idTagContent
     }
 
     const anchors = Array.from(headingElements).map((el) => {
       const tag = el.tagName
       const content = (el.innerHTML ? el.innerHTML.trim() : '')
-      const anchorId = getNextAnchorId()
-      el.setAttribute('id', anchorId.toString())
-      const scrollToElement = () => {
-        // console.log('tag clicked' + tag)
-        document.getElementById(anchorId).scrollIntoView({ behavior: 'smooth' }) 
+      const anchorId = getNextAnchorId(content)
+
+      // If user is not logged in, add a hidden anchor element to take the sticky header
+      // into account by inserting a hidden anchor to scroll to
+      if (isLoggedIn) {
+        el.setAttribute('id', anchorId)
       }
-      el.onClick = () => { scrollToElement() }
-      return { 'tag': tag, 'content': content, 'anchorId': anchorId, 'action': scrollToElement }
+      else {
+        var hiddenAnchor = document.createElement('section')
+        hiddenAnchor.setAttribute('id', anchorId)
+        hiddenAnchor.style.position = 'relative'
+        hiddenAnchor.style.top = `-${theme.values.navigationBarHeight+theme.values.contentMargin}px`
+        hiddenAnchor.style.visibility = 'hidden'
+        hiddenAnchor.style.zIndex = '321'
+        el.parentElement.insertBefore(hiddenAnchor, el)
+      }
+
+      return { 'tag': tag, 'content': stripHTML(content), 'anchorId': anchorId }
     })
 
     this.anchors = anchors
     this.introContent = el.innerHTML
-    this.resultsContent = resultsContent
-  }
-
-  renderAnchors = () => {
-    // Translate the flat list of h1, h2, etc tags into hierarchical menu structure
-    // that can be converted to a list of CollapsibleMenu components
-    // console.log(this.anchors)
-    const menus = []
-    let items = []
-    for (const element of this.anchors) {
-      const tag = element['tag'].toLowerCase()
-      if (tag == 'h1') {
-        items = []
-        const currentMenu = { ...element, 'items': items }
-        menus.push(currentMenu)
-      }
-      else {
-        items.push(element)
-      }
-    }
-
-    return (
-      menus.map((menu, index) => {
-        return <CollapsibleMenu title={menu['content']} key={index}>
-                { menu['items'].map((item, index) => {
-                  return (
-                    <div className={ 'outline-item-'+item['tag'].toLowerCase() } key={index}>
-                      <HashLink smooth to={'#'+item['anchorId']}>{item['content']}</HashLink>
-                    </div>
-                  )
-                })}
-              </CollapsibleMenu>
-      })
-    )
   }
 }
 
@@ -166,10 +147,10 @@ class ChallengeDetailsPage extends React.Component {
       )
     }
 
-    if (error != undefined) {
+    if (error) {
       return (
         <PublicLayout>
-          <NavigationBarPublic showLogoOnNavbar={true} />
+          <NavigationBar showLogoOnNavbar={true} />
           <div className="error-container">
             <Link to={{ pathname: '/challenges' }}>
                 &larr; Back to All Challenges
@@ -182,7 +163,10 @@ class ChallengeDetailsPage extends React.Component {
       )
     }
 
-    const challengeContent = new ChallengeContent(challenge)
+    const isLoggedIn = user && Object.keys(user).length > 0
+
+    const challengeContent = new ChallengeContent()
+    challengeContent.parseChallengeMeta(challenge, isLoggedIn)
 
     let stateLabel = 'Previous precisionFDA Challenge'
     switch (challenge.timeStatus) {
@@ -200,7 +184,6 @@ class ChallengeDetailsPage extends React.Component {
       'ended': challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED,
     })
 
-    const isLoggedIn = user && Object.keys(user).length > 0
     const userCanJoin = isLoggedIn && !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
     const userCanSubmitEntry =  isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
 
@@ -246,7 +229,7 @@ class ChallengeDetailsPage extends React.Component {
 
     return (
       <PublicLayout>
-        <NavigationBarPublic showLogoOnNavbar={true}>
+        <NavigationBar user={user} showLogoOnNavbar={true}>
           <div className={bannerClasses}>
             <div className="left-column">
               <div>
@@ -273,26 +256,26 @@ class ChallengeDetailsPage extends React.Component {
               <img className="challenge-thumbnail" src={challenge.cardImageUrl} />
             </div>
           </div>
-        </NavigationBarPublic>
+        </NavigationBar>
         
         <div className="challenge-details-main-container">
           <div className="left-column">
             <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
-              <TabList>
-                <Tab>INTRODUCTION</Tab>
+              <TabList className="challenge-details-tabs__tab-list">
+                <Tab className="challenge-details-tabs__tab" selectedClassName="challenge-details-tabs__tab--selected">INTRODUCTION</Tab>
                 {userCanSeeSubmissions && (
                   <>
-                  <Tab>SUBMISSIONS</Tab>
-                  <Tab>MY ENTRIES</Tab>
+                  <Tab className="challenge-details-tabs__tab">SUBMISSIONS</Tab>
+                  <Tab className="challenge-details-tabs__tab">MY ENTRIES</Tab>
                   </>
                 )}
                 {userCanSeeResults && (
-                <Tab>RESULTS</Tab>
+                <Tab className="challenge-details-tabs__tab" selectedClassName="challenge-details-tabs__tab--selected">RESULTS</Tab>
                 )}
               </TabList>
 
               <TabPanel>
-                <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.introContent }}></div>
+                <ChallengeUserContent html={challengeContent.introContent} />
               </TabPanel>
               {userCanSeeSubmissions && (
                 <>
@@ -306,22 +289,24 @@ class ChallengeDetailsPage extends React.Component {
               )}
               {userCanSeeResults && (
               <TabPanel>
-                <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.resultsContent }}></div>
+                <ChallengeResults challenge={challenge} />
               </TabPanel>
               )}
             </Tabs>
           </div>
           <div className="right-column pfda-main-content-sidebar">
-            <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+            {user.is_guest ?
+              <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className={joinChallengeButtonClasses}>Join Challenge</GuestRestrictedLink> 
+              :
+              <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+            }
             {userCanSubmitEntry && (
               <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} href={challenge.links.new_submission}>Submit Challenge Entry</a>
             )}
             {tabIndex == 0 && (
             <>
               <hr style={{ marginTop: '24px' }} />
-              <div className="challenge-details-outline">
-                {challengeContent.renderAnchors()}
-              </div>
+              <ChallengOutline anchors={challengeContent.anchors} />
             </>
             )}
             {challenge.canEdit && (
