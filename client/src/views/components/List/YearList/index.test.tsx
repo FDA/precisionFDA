@@ -6,7 +6,7 @@ import { YearList } from '.'
 
 describe('YearList', () => {
     it('matches snapshot', () => {
-      const wrapper = shallow(<YearList fetchYearList={() => {}} />)
+      const wrapper = shallow(<YearList setYearHandler={() => {}} />)
   
       expect(wrapper).toMatchSnapshot()
     })

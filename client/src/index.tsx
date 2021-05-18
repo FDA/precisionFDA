@@ -4,6 +4,7 @@ import 'regenerator-runtime/runtime'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
+import ReactModal from 'react-modal'
 
 import Root from './root'
 import store from './store'
@@ -13,6 +14,7 @@ const renderApp = () => {
   let container = document.getElementById('app-root')
 
   if (container) {
+    ReactModal.setAppElement('#app-root')
     ReactDOM.render(<Root store={store} />, container)
   }
 }

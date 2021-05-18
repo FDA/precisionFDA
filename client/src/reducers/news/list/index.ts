@@ -8,14 +8,13 @@ import {
   NEWS_LIST_SET_YEAR,
   NEWS_LIST_RESET_FILTERS,
 } from '../../../actions/news/types'
-import { IPagination } from '../../../views/shapes/IPagination'
-import { INewsItem } from '../../../views/shapes/NewsItemShape'
+import { IPagination } from '../../../types/pagination'
+import { INewsItem } from '../../../types/newsItem'
 
 
 interface INewsListActionPayload {
   items: INewsItem[],
   pagination: IPagination,
-  year: number,
 }
 
 
@@ -32,7 +31,6 @@ export default createReducer(initialState, {
       ...state.pagination,
       ...payload.pagination,
     },
-    year: payload.year,
     isFetching: false,
   }),
 
