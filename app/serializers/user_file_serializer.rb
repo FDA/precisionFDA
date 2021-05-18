@@ -83,7 +83,7 @@ class UserFileSerializer < NodeSerializer
 
       # license exists and accepted
       if object.license.present? &&
-        object.license.accepted_licenses.exists?(user_id: current_user.id)
+         object.license.accepted_licenses.exists?(user_id: current_user.id)
         links[:download] = download_api_file_path(object)
       end
 
