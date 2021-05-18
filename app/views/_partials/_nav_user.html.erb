@@ -14,7 +14,7 @@
       <% end %>
       <li><%= link_to "Manage Licenses", licenses_path %></li>
       <% if @context.logged_in? && UserPolicy.access_notification_preference?(@context.user) %>
-        <li><a href="#" data-toggle="modal" data-target="#notification_settings_modal">Notification Settings</a></li>
+        <li><%= link_to "Notification Settings", '/account/notifications', data: { no_turbolink: true } %></li>
       <% end %>
       <li role="separator" class="divider"></li>
       <li><a href="<%= about_path %>"><span class="fa fa-fw fa-info-circle"></span> About</a></li>

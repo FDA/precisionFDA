@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { commonStyles } from "../../../../styles/commonStyles";
 import { theme } from "../../../../styles/theme";
 
 export const StyledNotifications = styled.div`
@@ -18,7 +19,9 @@ export const FieldGroup = styled.fieldset`
 `
 
 export const SectionTitle = styled.h2`
-  color: ${theme.black};
+  ${commonStyles.sectionHeading};
+  font-size: 16px;
+  text-transform: uppercase;
 `
 
 export const StyledSelectWrap = styled.div`

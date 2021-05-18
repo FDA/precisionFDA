@@ -134,6 +134,9 @@ export const NotificationsPage = () => {
     notificationsMutation(localPrefSelection)
   }
 
+  const enableJobNotificationSettings = false
+  const enableChallengeNotificationSettins = false
+
   return (
     <form>
       <PageContainer>
@@ -146,15 +149,20 @@ export const NotificationsPage = () => {
         </PageHeader>
 
         <StyledNotifications>
+          {enableJobNotificationSettings || enableChallengeNotificationSettins &&
           <SectionTitle>Site Notifications</SectionTitle>
+          }
 
+          {enableChallengeNotificationSettins &&
           <FieldGroup>
             <Checkbox id="newChallenge" name="newChallenge" type="checkbox" />
             <label htmlFor="newChallenge">
               Notify me when a new precisionFDA challenge is created.
             </label>
           </FieldGroup>
+          }
 
+          {enableJobNotificationSettings &&
           <FieldGroup>
             <Checkbox
               id="finishedExecution"
@@ -165,6 +173,7 @@ export const NotificationsPage = () => {
               Notify me when an execution has finished.
             </label>
           </FieldGroup>
+          }
 
           <SectionTitle>Space Notifications</SectionTitle>
 
