@@ -1,4 +1,5 @@
 import { EmailTemplateInput } from '../../email.config'
+import { header, footer } from './common'
 
 export type NewContentTemplateInput = EmailTemplateInput & {
   content: {
@@ -15,19 +16,15 @@ export type NewContentTemplateInput = EmailTemplateInput & {
 }
 
 export const newContentTemplate = (data: NewContentTemplateInput): string => `
-  <mjml>
-    <mj-body>
-      <mj-section>
-        <mj-column>
-          <mj-text>
-            Hello ${data.receiver.firstName}!
-          </mj-text>
-          <mj-text>
-            ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}
-            to the space ${data.content.space.name}.
-          </mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-body>
-  </mjml>
+  ${header}
+    <mj-column>
+      <mj-text>
+        Hello ${data.receiver.firstName}!
+      </mj-text>
+      <mj-text>
+        ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}
+        to the space ${data.content.space.name}.
+      </mj-text>
+    </mj-column>
+  ${footer}
 `

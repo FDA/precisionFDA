@@ -1,4 +1,5 @@
 import { EmailTemplateInput } from '../../email.config'
+import { header, footer } from './common'
 
 export type CommentAddedTemplateInput = EmailTemplateInput & {
   content: {
@@ -8,21 +9,17 @@ export type CommentAddedTemplateInput = EmailTemplateInput & {
 }
 
 export const commentAddedTemplate = (data: CommentAddedTemplateInput): string => `
-  <mjml>
-      <mj-body>
-        <mj-section>
-          <mj-column>
-            <mj-text>
-              Hello ${data.receiver.firstName}!
-            </mj-text>
-            <mj-text>
-             User ${data.content.initiator.fullName} added a new comment. (todo: link)
-            </mj-text>
-            <mj-text>
-              ${data.content.comment.body}
-            </mj-text>
-          </mj-column>
-        </mj-section>
-      </mj-body>
-    </mjml>
+  ${header}
+    <mj-column>
+      <mj-text>
+        Hello ${data.receiver.firstName}!
+      </mj-text>
+      <mj-text>
+        User ${data.content.initiator.fullName} added a new comment. (todo: link)
+      </mj-text>
+      <mj-text>
+        ${data.content.comment.body}
+      </mj-text>
+    </mj-column>
+  ${footer}
 `
