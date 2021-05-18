@@ -143,7 +143,7 @@ export class MemberChangedEmailHandler
     return {
       initiator: { fullName: this.user.fullName },
       action,
-      space: { name: this.space.name },
+      space: { name: this.space.name, id: this.space.id },
       newMember: {
         fullName: membership.user.unwrap().fullName,
         role,

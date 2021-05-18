@@ -73,7 +73,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     const actionKey = this.validatedInput.activityType
     const action = actionKey.split('_').slice(1).join(' ')
     return {
-      space: { name: this.space.name },
+      space: { name: this.space.name, id: this.space.id },
       action,
       initiator: { fullName: this.user.fullName },
     }

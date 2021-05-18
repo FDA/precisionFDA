@@ -83,7 +83,7 @@ describe('space-change.handler', () => {
       expect(content).to.be.deep.equal({
         initiator: { fullName: user.fullName },
         action: 'locked',
-        space: { name: space.name },
+        space: { name: space.name, id: space.id },
       })
     })
   })

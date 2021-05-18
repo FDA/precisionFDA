@@ -62,7 +62,8 @@ export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> impleme
       receiver,
       content: {
         initiator: { fullName: this.comment.user.unwrap().fullName },
-        comment: { body: this.comment.body },
+        comment: { body: this.comment.body, id: this.comment.id },
+        space: { id: this.spaceEvent.space.id },
       },
     })
     return {

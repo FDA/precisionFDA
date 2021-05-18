@@ -95,6 +95,7 @@ export class ContentChangedEmailHandler
       },
       space: {
         name: spaceEvent.space.unwrap().name,
+        id: spaceEvent.space.id,
       },
     }
     return this.templateContent
