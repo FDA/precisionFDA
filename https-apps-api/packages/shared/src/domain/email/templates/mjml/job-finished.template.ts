@@ -1,19 +1,16 @@
 import { EmailTemplateInput } from '../../email.config'
+import { header, footer } from './common'
 
 export type JobFinishedInputTemplate = EmailTemplateInput & {
   content: {}
 }
 
 export const jobFinishedTemplate = (data: JobFinishedInputTemplate): string => `
-  <mjml>
-    <mj-body>
-      <mj-section>
-        <mj-column>
-          <mj-text>
-            Hello ${data.receiver.firstName}!
-          </mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-body>
-  </mjml>
+  ${header}
+    <mj-column>
+      <mj-text>
+        Hello ${data.receiver.firstName}!
+      </mj-text>
+    </mj-column>
+  ${footer}
 `
