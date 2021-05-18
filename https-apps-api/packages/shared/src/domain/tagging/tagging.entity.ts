@@ -1,5 +1,6 @@
 import { Entity, EntityRepositoryType, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { UserFile, User, Tag, Folder } from '..'
+import { Asset } from '../user-file'
 import { TaggingRepository } from './tagging.repository'
 
 @Entity({ tableName: 'taggings', customRepository: () => TaggingRepository })
@@ -42,6 +43,9 @@ export class Tagging {
 
   @ManyToOne(() => Folder, { joinColumn: 'taggable_id' })
   folder: Folder
+
+  @ManyToOne(() => Asset, { joinColumn: 'taggable_id' })
+  asset: Asset
 
   @ManyToOne(() => Tag, { joinColumn: 'tag_id' })
   tag: Tag
