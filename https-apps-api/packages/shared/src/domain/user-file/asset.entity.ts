@@ -1,8 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
-  Filter,
   IdentifiedReference,
   ManyToOne,
   OneToMany,
@@ -10,15 +8,16 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { Tagging, User } from '..'
-import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'
+import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE } from './user-file.enum'
 
-@Entity({ tableName: 'nodes', customRepository: () => FolderRepository })
-@Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
-export class Folder extends Node {
+@Entity({ tableName: 'nodes' })
+export class Asset extends Node {
   @Property()
-  project?: string
+  dxid: string
+
+  @Property()
+  project: string
 
   @Property()
   name: string
@@ -38,7 +37,7 @@ export class Folder extends Node {
   @Property()
   scope: string
 
-  @Property({ type: 'bigint', hidden: true })
+  @Property({ type: 'bigint' })
   fileSize?: number
 
   // unused FK references
@@ -49,21 +48,17 @@ export class Folder extends Node {
   @Property()
   parentType: PARENT_TYPE
 
-  @Property()
+  @Property({ fieldName: 'parent_folder_id' })
   parentFolderId?: number
 
   @Property()
   scopedParentFolderId?: number
 
-  // todo: micro-orm can do single table inheritance
-
-  @OneToMany(() => Tagging, tagging => tagging.folder, { orphanRemoval: true })
-  taggings = new Collection<Tagging>(this)
-
   @ManyToOne()
-  user!: IdentifiedReference<User>;
+  user!: IdentifiedReference<User>
 
-  [EntityRepositoryType]?: FolderRepository
+  @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })
+  taggings = new Collection<Tagging>(this)
 
   constructor(user: User) {
     super()
