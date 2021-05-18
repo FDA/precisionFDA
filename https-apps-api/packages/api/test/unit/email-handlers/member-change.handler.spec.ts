@@ -324,7 +324,7 @@ describe('member-change.handler', () => {
           role: SPACE_MEMBERSHIP_ROLE[anotherUserMembership.role].toLowerCase(),
         },
         action: 'added a new member',
-        space: { name: space.name },
+        space: { name: space.name, id: space.id },
       })
     })
 

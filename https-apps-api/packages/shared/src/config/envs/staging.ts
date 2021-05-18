@@ -2,6 +2,9 @@ import { ConfigOverride } from '..'
 
 export const config: ConfigOverride = {
   appName: 'https-apps-worker-stg',
+  api: {
+    railsHost: 'https://precisionfda-staging.dnanexus.com',
+  },
   logs: {
     pretty: false,
     level: 'debug',

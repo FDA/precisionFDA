@@ -137,7 +137,7 @@ describe('content-change.handler', () => {
 
       expect(content).to.be.deep.equal({
         entityType: PARENT_TYPE.JOB,
-        space: { name: space.name },
+        space: { name: space.name, id: space.id },
         user: { fullName: user.fullName },
         action: 'added',
         objectType: 'job',

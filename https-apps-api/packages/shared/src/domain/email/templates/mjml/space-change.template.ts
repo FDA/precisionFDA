@@ -1,11 +1,11 @@
 import { EmailTemplateInput } from '../../email.config'
-import { header, footer } from './common'
+import { header, footer, generateSpaceLink } from './common'
 
 export type SpaceChangeTemplateInput = EmailTemplateInput & {
   content: {
     initiator: { fullName: string }
     action: string
-    space: { name: string }
+    space: { name: string; id: number }
   }
 }
 
@@ -19,7 +19,9 @@ export const spaceChangedTemplate = (data: SpaceChangeTemplateInput): string => 
         The space ${data.content.space.name} was ${data.content.action}
       </mj-text>
       <mj-text>
-        View space ${data.content.space.name} (todo: link)
+        View space <a href="${generateSpaceLink(data.content.space.id)}">${
+  data.content.space.name
+}</a>
       </mj-text>
   ${footer}
 `
