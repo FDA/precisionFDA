@@ -13,7 +13,7 @@
         <li><%= link_to "Public Profile", user_path(@context.username) %></li>
       <% end %>
       <li><%= link_to "Manage Licenses", licenses_path %></li>
-      <% if @context.logged_in? && UserPolicy.access_notification_preference?(@context.user) %>
+      <% if @context.logged_in? %>
         <li><%= link_to "Notification Settings", '/account/notifications', data: { no_turbolink: true } %></li>
       <% end %>
       <li role="separator" class="divider"></li>
