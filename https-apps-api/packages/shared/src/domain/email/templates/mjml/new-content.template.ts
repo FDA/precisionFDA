@@ -1,5 +1,5 @@
 import { EmailTemplateInput } from '../../email.config'
-import { header, footer, generateSpaceLink } from './common'
+import { header, footer, getBottomSpacer, getViewSpaceButton } from './common'
 
 export type NewContentTemplateInput = EmailTemplateInput & {
   content: {
@@ -18,19 +18,25 @@ export type NewContentTemplateInput = EmailTemplateInput & {
 
 export const newContentTemplate = (data: NewContentTemplateInput): string => `
   ${header}
-    <mj-column>
-      <mj-text>
-        Hello ${data.receiver.firstName}!
-      </mj-text>
-      <mj-text>
-        ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}
-        to the space ${data.content.space.name}.
-      </mj-text>
-      <mj-text>
-        View space <a href="${generateSpaceLink(data.content.space.id)}">${
-  data.content.space.name
-}</a>
-      </mj-text>
-    </mj-column>
+    <mj-section css-class="header-title">
+      <mj-column>
+        <mj-text align="right">
+          ${data.content.objectType} ${data.content.action}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section css-class="body-section">
+      <mj-column>
+        <mj-text>
+          Hello ${data.receiver.firstName}!
+        </mj-text>
+        <mj-text>
+          ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}
+          to the space ${data.content.space.name}.
+        </mj-text>
+        ${getViewSpaceButton(data.content.space.id)}
+        ${getBottomSpacer()}
+      </mj-column>
+    </mj-section>
   ${footer}
 `
