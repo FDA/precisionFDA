@@ -9,7 +9,7 @@ class UserPolicy
     end
 
     def access_notification_preference?(user)
-      user.spaces.review.any?
+      user.spaces.any?
     end
 
   end
