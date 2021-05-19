@@ -1,5 +1,5 @@
 import { EmailTemplateInput } from '../../email.config'
-import { header, footer, generateSpaceLink } from './common'
+import { header, footer, getBottomSpacer, getViewSpaceButton } from './common'
 
 export type MemberChangeTemplateInput = EmailTemplateInput & {
   content: {
@@ -12,24 +12,30 @@ export type MemberChangeTemplateInput = EmailTemplateInput & {
 
 export const memberChangedTemplate = (data: MemberChangeTemplateInput): string => `
   ${header}
-    <mj-column>
-      <mj-text>
-        Hello ${data.receiver.firstName}!
-      </mj-text>
-      <mj-text>
-        Space member ${data.content.initiator.fullName} ${data.content.action}:
-      </mj-text>
-      <mj-text>
-        name: ${data.content.newMember.fullName}
-      </mj-text>
-      <mj-text>
-        role: ${data.content.newMember.role}
-      </mj-text>
-      <mj-text>
-        View space <a href="${generateSpaceLink(data.content.space.id)}">${
-  data.content.space.name
-}</a>
-      </mj-text>
-    </mj-column>
+    <mj-section css-class="header-title">
+      <mj-column>
+        <mj-text align="right">
+          ${data.content.action}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section css-class="body-section">
+      <mj-column>
+        <mj-text>
+          Hello ${data.receiver.firstName}!
+        </mj-text>
+        <mj-text>
+          Space member ${data.content.initiator.fullName} ${data.content.action}:
+        </mj-text>
+        <mj-text>
+          name: ${data.content.newMember.fullName}
+        </mj-text>
+        <mj-text>
+          role: ${data.content.newMember.role}
+        </mj-text>
+          ${getViewSpaceButton(data.content.space.id)}
+          ${getBottomSpacer()}
+        </mj-column>
+    </mj-section>
   ${footer}
 `
