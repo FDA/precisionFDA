@@ -17,7 +17,7 @@ import {
   publishFiles,
   copyToPrivate,
 } from '../../../../../actions/spaces'
-import FilesActionModal from '../../../Files/FilesActionModal'
+import FilesActionModal from '../../../Home/Files/FilesActionModal'
 import { SPACE_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
 
 
@@ -60,6 +60,8 @@ const ActionModal = ({ files, loadFilesHandler }) => {
       files={modal.files}
       isOpen={modal.isOpen}
       isLoading={modal.isLoading}
+      modal={modal}
+      fetchFilesByAction={() => fetchFilesByAction(ids, modal.action, scope)}
     />
   )
 }

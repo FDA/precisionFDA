@@ -223,7 +223,6 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
             activityType: "membership_disabled",
           })
         end
-
       end
     end
 
@@ -234,6 +233,5 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
         expect(response).to be_unauthorized
       end
     end
-
   end
 end
