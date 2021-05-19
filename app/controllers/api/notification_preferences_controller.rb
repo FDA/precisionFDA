@@ -1,7 +1,6 @@
 module Api
-
+  # Notification Preferences API controller.
   class NotificationPreferencesController < ApiController
-
     def index
       render json: { preference: preference.all_attributes }
     end
@@ -21,12 +20,10 @@ module Api
       params.require(:notification_preference).permit(*preference.available_keys)
     end
 
-    private
-
     def check_user
       return if UserPolicy.access_notification_preference?(current_user)
+
       redirect_to root_url
     end
-
   end
 end

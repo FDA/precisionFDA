@@ -10,7 +10,6 @@ const FileActionItemShape = {
   type: PropTypes.string,
   viewURL: PropTypes.string,
   downloadURL: PropTypes.string,
-  createdBy: PropTypes.string,
   addedBy: PropTypes.string,
   createdAtDateTime: PropTypes.string,
 }
@@ -22,7 +21,6 @@ const mapToFileActionItem = (file) => ({
   type: file.type,
   viewURL: file.viewURL,
   downloadURL: file.downloadURL,
-  createdBy: file.added_by_fullname,
   addedBy: file.added_by,
   createdAtDateTime: file.created_at_date_time,
 })

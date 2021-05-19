@@ -190,7 +190,6 @@ module JobsSyncing
     end
   end
 
-
   included do
     private_class_method :sync_job_state
     private_class_method :send_job_done_email

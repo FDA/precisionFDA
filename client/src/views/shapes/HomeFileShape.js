@@ -5,7 +5,7 @@ const HomeFileShape = {
   id: PropTypes.number,
   addedBy: PropTypes.string,
   createdAtDateTime: PropTypes.string,
-  createdAt: PropTypes.string, 
+  createdAt: PropTypes.string,
   name: PropTypes.string,
   revision: PropTypes.number,
   tags: PropTypes.arrayOf(PropTypes.string),
