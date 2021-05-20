@@ -8,6 +8,10 @@
     "node": ">=12.16.1",
     "npm": "^6.14.0"
   },
+  "resolutions": {
+    "**/@mikro-orm/core/**/glob-parent": "^5.1.2",
+    "**/mjml/**/glob-parent": "^5.1.2"
+  },
   "scripts": {},
   "dependencies": {
     "typescript": "^4.0.3"

@@ -12,16 +12,26 @@ const values = {
 }
 
 const colors = {
+  primaryBlue: '#1F70B5',
   primaryGreen: '#3c763d',
+  primaryRed: '#eb776f',
+  primaryYellow: '#f0ad4e',
   highlightBlue: '#3a80ba',
   highlightYellow: '#edad58',
   highlightGreen: '#44b150',
   subtleBlue: '#f4f8fd',
+  lightRed: '#e3405b',
+  lightGreen: '#52c41a',
   lightBlue: '#a0c2e0',
+  lightYellow: '#efe5d7',
+  darkRed: '#c41331',
   darkBlue: '#343E4D',
+  darkGreen: '#1d764c',
+  darkYellow: '#ec971f',
   textBlack: '#000',
   textDarkGrey: '#272727',
   textMediumGrey: '#646464',
+  textWhite: '#fff',
   backgroundLightGray: 'rgb(242, 242, 242)',
   borderDefault: '#ddd',
   stateRunningBackground: '#f0f9fd',
@@ -33,10 +43,19 @@ const colors = {
 }
 
 const fontSize = {
+  pageTitle: '32px',
   h1: '20px',
   h2: '18px',
   body: '14px',
   subheading: '14px',
+}
+
+export const fontWeight = {
+  light: 300,
+  regular: 400,
+  medium: 500,
+  bold: 600,
+  black: 700,
 }
 
 const padding = {
@@ -68,14 +87,21 @@ export const theme = {
   fontFamily: 'Lato, Helvetica, sans-serif',
 
   primaryLite: '#7891b7',
-  primary: '#1F70B5',
   primaryShade: '#185589',
   white: '#F4F8FD',
+  black: '#000000',
   grey: '#eee',
-  darkerGrey: '#929090',
+  darkRed: '#c41331',
+  lightRed: '#e3405b',
+  lightGreen: '#52c41a',
+  lightGreenDisabled: '#7fd455',
+  lightYellow: '#e29714',
+  darkerYellow: '#c87813',
+  lightLightYellow: '#efe5d7',
 
   colors: colors,
   fontSize: fontSize,
+  fontWeight: fontWeight,
   padding: padding,
   sizing: sizing,
   values: values,

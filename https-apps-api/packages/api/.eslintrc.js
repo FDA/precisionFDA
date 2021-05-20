@@ -15,6 +15,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 0,
     '@typescript-eslint/promise-function-async': 0,
     'new-cap': 0,
+    'id-length': 0,
     'import/no-unused-modules': [1, { unusedExports: true, ignorePaths: ['./src/index.ts'] }],
     // does not play well with koa.context
     '@typescript-eslint/prefer-readonly-parameter-types': 0,

@@ -12,7 +12,7 @@ install:
 	yarn
 
 install-test-prod:
-	yarn install --production
+	yarn install --production --frozen-lockfile
 
 # a demonstration on how to run built API
 run-dist:
@@ -38,7 +38,7 @@ test-worker-task:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
 
 watch:
-	$(bin)nodemon --watch ./packages/api/src --ext ts --exec make run-dev
+	$(bin)nodemon --watch ./packages/api/src --watch ./packages/shared/src --ext ts --exec make run-dev
 
 watch-worker:
 	$(bin)nodemon --watch ./packages/worker/src --ext ts --exec make run-worker-dev
@@ -63,6 +63,10 @@ test-worker:
 
 test: test-api
 	make test-worker
+
+.PHONY:
+test-snyk:
+	$(bin)snyk test --yarn-workspaces --strict-out-of-sync=false --policy_path=./.snyk
 
 clean:
 	yarn workspaces run clean

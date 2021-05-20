@@ -23,9 +23,9 @@ import { NotificationsPage } from './views/pages/Account/Notifications'
 import GlobalStyle from './styles/global'
 
 
-
 const root = ({ store }: any) => {
   const queryClient = new QueryClient()
+
   return (
   <Provider store={store}>
     <GlobalStyle />
