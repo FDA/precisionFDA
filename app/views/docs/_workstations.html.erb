@@ -67,8 +67,8 @@
           an asterisk to indicate multiple files.</p>
         <p><code>dx upload <$filename></code> will upload a file from the local worker to your precisionFDA private
           area. You may upload multiple files using an asterisk.</p>
-        <p>NOTE: your files will not appear on precisionFDA until file synching occurs, which happens only upon
-          termination of the Workstation execution.</p>
+        <p><i>NOTE: your files will not appear on precisionFDA until file synching occurs, which happens only upon
+          termination of the Workstation execution.</i></p>
       </div>
       <div id="workstation-snapshots" class="h2">Creating snapshots on Workstations</div>
       <div class="bs-docs-section">
@@ -86,6 +86,10 @@
         <p>Once created and synched (via termination of the Workstation), a snapshot file will appear in your private
           Files area. You can recognize these files, as they will end in ".snapshot". This file may be an optional input
           to a new Workstation execution.</p>
+        <p><i>NOTE: In order to run the snapshot generation command, Python2.7 must be included in the $PYTHONPATH
+          variable. Installing Python managers, such as Conda/BioConda, may alter this path. If you see a failure to
+          generate the snapshot, check to see if this path has been changed by running <code>echo $PYTHONPATH</code>.
+        </i></p>
       </div>
       <div id="workstation-terminating" class="h2">Terminating Workstations</div>
       <div class="bs-docs-section">
