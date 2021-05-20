@@ -28,6 +28,10 @@ export enum ErrorCodes {
   USER_NOT_FOUND = 'E_USER_NOT_FOUND',
   USER_FILE_NOT_FOUND = 'E_USER_FILE_NOT_FOUND',
   NEXUS_REQUEST_FAILED = 'E_DNANEXUS_PLATFORM_REQUEST_FAILED',
+  EMAIL_VALIDATION = 'E_EMAIL_VALIDATION',
+  EMAIL_PAYLOAD_NOT_FOUND = 'E_EMAIL_PAYLOAD_NOT_FOUND',
+  EXTERNAL_SERVICE_ERROR = 'E_EXTERNAL_SERVICE_FAILED',
+  SALESFORCE_SERVICE_ERROR = 'E_SALESFORCE_SERVICE_FAILED',
 }
 
 export class BaseError extends Error {
@@ -118,6 +122,16 @@ export class ClientRequestError extends BaseError {
   constructor(message: string, props: ClientErrorProps) {
     super(message, {
       code: ErrorCodes.NEXUS_REQUEST_FAILED,
+      statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class ServiceError extends BaseError {
+  constructor(message: string, props: ClientErrorProps) {
+    super(message, {
+      code: ErrorCodes.EXTERNAL_SERVICE_ERROR,
       statusCode: 400,
       ...props,
     })

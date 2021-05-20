@@ -7,6 +7,7 @@ import { NavigationBarLoggedIn } from '../NavigationBarLoggedIn'
 import { PFDALogoLight } from '../PFDALogo'
 import { theme } from '../../../../styles/theme'
 import { PublicNavbar } from '../PublicNavbar'
+import { commonStyles } from '../../../../styles/commonStyles'
 
 
 const StyledNavigationBar = styled.div`
@@ -44,9 +45,8 @@ const NavigationBarLogoAndTitle = styled.div`
   }
 
   h1 {
+    ${commonStyles.pageTitle}
     color: #fff;
-    font-size: 32px;
-    font-weight: 400;
     margin: 0;
   }
 

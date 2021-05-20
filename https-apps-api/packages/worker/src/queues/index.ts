@@ -5,11 +5,13 @@ import { log } from '../utils'
 // starts all the queues, defined in shared, attaches the handlers
 const setupHandlers = async (): Promise<void> => {
   await queue.createQueues()
+  // todo: better logging here, log both
   log.info(
     { queueStatus: queue.getQueue().client.status },
     `${config.workerJobs.queues.default.name} status`,
   )
-  await queue.getQueue().process(handler)
+  // eslint-disable-next-line @typescript-eslint/return-await, require-await, id-length
+  await Promise.all(queue.getQueues().map(async q => q.process(handler)))
 }
 
 export { setupHandlers }
