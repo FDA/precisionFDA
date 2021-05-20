@@ -127,6 +127,8 @@ Rails.application.routes.draw do
     # My Home (Site-Wide UI & API Redesign)
     get "home" => "home#index"
     get "/home/*all", to: "home#index"
+    get "/account/*all", to: "home#index"
+
 
     # API
     namespace "api" do
@@ -321,6 +323,11 @@ Rails.application.routes.draw do
         get :featured
         get :everybody
         get :spaces
+      end
+
+      resources :notification_preferences do
+        get :index
+        post "change", on: :collection
       end
 
       post "related_to_publish"
@@ -597,9 +604,10 @@ Rails.application.routes.draw do
 
     get "/spaces/*all", to: "spaces#index"
 
-    resources :notification_preferences, only: [:index] do
-      post "change", on: :collection
-    end
+    # to debug
+    # resources :notification_preferences, only: [:index] do
+    #   post "change", on: :collection
+    # end
 
     resources :meta_appathons, constraints: { appathon_id: %r{[^/]+} } do
       post "rename", on: :member

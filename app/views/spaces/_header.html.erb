@@ -96,10 +96,6 @@
         <h5 class="list-group-item-heading">Created</h5>
         <p class="list-group-item-text"><%= @space.created_at.to_s(:human) %></p>
       </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">&nbsp;</h5>
-        <p class="list-group-item-text"><%= @space.created_at_in_ny.to_s(:human) %></p>
-      </li>
     </ul>
   </div>
 
@@ -123,11 +119,6 @@
       <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
         <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
           <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
-        </a>
-      </li>
-      <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
-        <a href="<%= members_space_path(@space, filter: 'all') %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
-          <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
         </a>
       </li>
     </ul>
@@ -168,20 +159,6 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
         <h3 class="modal-title">Verify Space</h3>
       </div>
-      <%= form_for @space, url: verify_space_url, method: :post, html: {class: 'form form-horizontal'} do |f|%>
-        <%= f.hidden_field :verified, value: true %>
-        <div class="modal-body">
-          <h4>
-            Verifying a space will lock the space and now will be visible to all reviewers<br>
-            Would you like to lock the space?
-          </h4>
-        </div>
-        <div class="modal-footer">
-          <div class="col-lg-14"></div>
-          <button type="submit" class="btn btn-primary col-lg-4">Yes</button>
-          <button type="button" class="btn btn-default col-lg-4" data-dismiss="modal" tabindex="-1">Cancel</button>
-        </div>
-      <% end %>
     </div>
   </div>
 </div>

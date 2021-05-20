@@ -7,8 +7,11 @@ import { TASKS } from './task.enum'
 import * as types from './task.input'
 
 let statusQueue: Bull.Queue
+let emailsQueue: Bull.Queue
 
 const getQueue = (): Bull.Queue => statusQueue
+
+const getQueues = (): Bull.Queue[] => [statusQueue, emailsQueue]
 
 // set up the queues
 const createQueues = async (): Promise<void> => {
@@ -28,22 +31,40 @@ const createQueues = async (): Promise<void> => {
       removeOnFail: true,
     },
   })
+  emailsQueue = new Bull(config.workerJobs.queues.emails.name, config.redis.url, {
+    redis: redisOptions,
+    defaultJobOptions: {
+      removeOnComplete: true,
+      removeOnFail: false,
+    },
+  })
   await statusQueue.isReady()
+  await emailsQueue.isReady()
 }
 
 const disconnectQueues = async (): Promise<void> => {
-  await statusQueue.close()
+  log.info('Disconnecting queues')
+  await statusQueue.close(true)
+  await emailsQueue.close(true)
+  log.info('Queues disconnected')
 }
 
-const addToQueue = async (task: AnyObject, options?: JobOptions): Promise<Job> => {
-  if (typeof statusQueue === 'undefined') {
+const addToQueue = async (
+  task: AnyObject,
+  queue: Bull.Queue,
+  options?: JobOptions,
+  payloadFn?: (payload: AnyObject) => AnyObject,
+): Promise<Job> => {
+  if (typeof queue === 'undefined') {
     throw new Error('The queue was not started')
   }
+  // default noop function
+  const whitelistPayloadFn = payloadFn ? payloadFn : payload => payload
   log.info(
     {
       task: {
         type: task.type,
-        payload: task.payload,
+        payload: whitelistPayloadFn(task.payload),
         userId: task.user?.id,
       },
       job: {
@@ -52,7 +73,7 @@ const addToQueue = async (task: AnyObject, options?: JobOptions): Promise<Job> =
     },
     'adding a task to queue',
   )
-  const job = await statusQueue.add(task, options)
+  const job = await queue.add(task, options)
   return job
 }
 
@@ -83,14 +104,35 @@ const createJobSyncTask = async (
     jobId: nanoid(),
     repeat: { cron: config.workerJobs.syncJob.repeatPattern },
   }
-  return await addToQueue(wrapped, options)
+  return await addToQueue(wrapped, statusQueue, options)
+}
+
+const createSendEmailTask = async (
+  data: types.SendEmailJob['payload'],
+  user: UserCtx,
+): Promise<Job> => {
+  const wrapped = {
+    type: TASKS.SEND_EMAIL,
+    payload: data,
+    user,
+  }
+  const options: JobOptions = {}
+  const handlePayloadFn = (
+    payload: types.SendEmailJob['payload'],
+  ): types.SendEmailJob['payload'] => ({
+    ...payload,
+    body: '[too-long]',
+  })
+  return await addToQueue(wrapped, emailsQueue, options, handlePayloadFn)
 }
 
 export {
   createJobSyncTask,
+  createSendEmailTask,
   TASKS,
   createQueues,
   getQueue,
+  getQueues,
   disconnectQueues,
   types,
   removeRepeatable,

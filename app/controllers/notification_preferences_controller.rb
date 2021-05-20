@@ -21,11 +21,9 @@ class NotificationPreferencesController < ApplicationController
     params.permit(*preference.available_keys)
   end
 
-  private
-
   def check_user
     return if UserPolicy.access_notification_preference?(current_user)
+
     redirect_to root_url
   end
-
 end
