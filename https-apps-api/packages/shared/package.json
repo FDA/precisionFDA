@@ -24,13 +24,13 @@
     "@types/bull": "^3.14.4",
     "@types/dotenv": "^8.2.0",
     "@types/mjml": "^4.7.0",
-    "@types/ramda": "^0.27.28",
     "chance": "^1.1.7",
     "eslint": "^6.0.0",
     "prettier": "^2.1.2",
     "sinon": "^9.2.3"
   },
   "dependencies": {
+    "@types/ramda": "^0.27.28",
     "@mikro-orm/core": "^4.5.2",
     "@mikro-orm/mysql": "^4.5.2",
     "@mikro-orm/reflection": "^4.5.2",
