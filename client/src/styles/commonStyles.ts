@@ -3,21 +3,26 @@ import { theme } from './theme'
 
 
 export const commonStyles = {
+  pageTitle: css`
+    font-size: ${theme.fontSize.pageTitle};
+    font-weight: ${theme.fontWeight.regular};
+  `,
+
   titleStyle: css`
     font-size: ${theme.fontSize.h1};
-    font-weight: 600;
+    font-weight: ${theme.fontWeight.bold};
     color: ${theme.colors.textBlack};
   `,
 
   bodyTextStyle: css`
     font-size: ${theme.fontSize.body};
-    font-weight: 400;
+    font-weight: ${theme.fontWeight.regular};
     color: ${theme.colors.textMediumGrey};
   `,
 
   sectionHeading: css`
     color: ${theme.colors.textMediumGrey};
-    font-weight: 700;
+    font-weight: ${theme.fontWeight.black};
     font-size: ${theme.fontSize.subheading};
     letter-spacing: 0.05em;
     margin-top: ${theme.padding.contentMargin};

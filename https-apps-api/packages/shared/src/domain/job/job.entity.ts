@@ -1,5 +1,4 @@
 import {
-  Collection,
   Entity,
   EntityRepositoryType,
   IdentifiedReference,

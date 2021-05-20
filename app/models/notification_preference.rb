@@ -40,6 +40,14 @@ class NotificationPreference < ApplicationRecord
     :admin_space_locked_unlocked_deleted,
     :admin_space_lock_unlock_delete_requests,
   ]
+  # email types currently handled by nodejs app
+  EMAIL_TYPES = {
+    notification_job: 1,
+    notification_content: 2,
+    notification_space_membership: 3,
+    notification_space_action: 4,
+    notification_comment: 5,
+  }.freeze
 
   ALL_KEYS = COMMON_KEYS + LEAD_KEYS + ADMIN_KEYS
 
@@ -79,5 +87,9 @@ class NotificationPreference < ApplicationRecord
 
   def available_keys
     ALL_KEYS
+  end
+
+  def self.email_types
+    EMAIL_TYPES
   end
 end

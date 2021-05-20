@@ -4,8 +4,9 @@ import type { Task } from '@pfda/https-apps-shared/src/queue/task.input'
 import { Job } from 'bull'
 import { log } from '../utils'
 import { jobStatusHandler } from './job-status-handler'
+import { sendEmailHandler } from './send-email-handler'
 
-export const handler = async (job: Job<Task>) => {
+export const handler = async (job: Job<Task<any>>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
     log.warn({ jobData: job.data }, 'Invalid job.data format')
     throw new errors.WorkerError('Job data does not specify task type', { jobData: job.data })
@@ -14,6 +15,9 @@ export const handler = async (job: Job<Task>) => {
   switch (job.data.type) {
     case queue.TASKS.SYNC_JOB_STATUS:
       await jobStatusHandler(job)
+      return await Promise.resolve()
+    case queue.TASKS.SEND_EMAIL:
+      await sendEmailHandler(job)
       return await Promise.resolve()
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')
