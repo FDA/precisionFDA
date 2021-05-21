@@ -21,7 +21,8 @@ export class JobFinishedEmailHandler
     const owner = await this.ctx.em.findOneOrFail(User, { id: this.ctx.user.id })
     // todo: if this run in a space, more people than the owner should be notified?
     // todo: check db settings
-    return [owner]
+    this.ctx.log.info({ ownerId: owner.id }, 'Will send the job email to user')
+    return []
   }
 
   async template(receiver: User): Promise<EmailSendInput> {
