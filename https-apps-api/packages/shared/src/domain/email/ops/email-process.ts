@@ -9,11 +9,6 @@ export class EmailProcessOperation extends BaseOperation<EmailProcessInput, bool
     this.input = input
     const emailTemplate = await this.getEmailTemplate()
     const receivers = await emailTemplate.determineReceivers()
-    console.log(
-      receivers.map(user => user.id),
-      'validated and allowed to send',
-    )
-
     const emailObjects = await Promise.all(
       receivers.map(async receiver => {
         const template = await emailTemplate.template(receiver)
