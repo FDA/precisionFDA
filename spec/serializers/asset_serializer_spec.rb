@@ -47,8 +47,8 @@ describe AssetSerializer do
       end
 
       it "links[download, link, publish] are nil" do
-        expect(asset_serialized["links"]["download"]).to be_nil
-        expect(asset_serialized["links"]["link"]).to be_nil
+        expect(asset_serialized["links"]["download"]).to eq(download_api_file_path(asset))
+        expect(asset_serialized["links"]["link"]).to eq(link_file_path(asset))
         expect(asset_serialized["links"]["publish"]).to be_nil
       end
 
