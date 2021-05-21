@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types'
-import { parseISO } from 'date-fns'
-import { utcToZonedTime } from 'date-fns-tz'
 
 import { CHALLENGE_TIME_STATUS } from '../../constants'
+import { convertDateToUserTime } from '../../utils/datetime'
 
 
 const ChallengeShape = {
@@ -40,11 +39,6 @@ const computeChallengeTimeStatus = (challenge) => {
   else {
     challenge.timeStatus = CHALLENGE_TIME_STATUS.ENDED
   }
-}
-
-const convertDateToUserTime = (date) => {
-  const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-  return utcToZonedTime(parseISO(date), userTimeZone)
 }
 
 const mapToChallenge = (data) => {

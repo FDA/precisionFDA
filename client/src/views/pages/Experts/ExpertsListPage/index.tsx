@@ -2,29 +2,35 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import { NavigationBarPublic } from '../../../components/NavigationBar/NavigationBarPublic'
-import { ExpertsListItemType } from '../../../components/Experts/ExpertsListItem'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { ExpertsListItemBlogEntry, ExpertsListItemQuestionsAndAnswers } from '../../../components/Experts/ExpertsListItem'
 import ExpertsList from '../../../components/Experts/ExpertsList'
 import ExpertsYearList from '../../../components/Experts/ExpertsYearList'
 import {
   fetchExperts,
-  expertsListSetYear
+  expertsListSetYear,
+  expertsListResetFilters
 } from '../../../../actions/experts'
 import './style.sass'
 
 import { contextUserSelector } from '../../../../reducers/context/selectors'
+import { SectionHeading } from '../../../components/Controls/SectionHeading'
+import { expertsListYearSelector } from '../../../../reducers/experts/list/selectors'
 
 
 interface IExpertsListPageProps {
   loadExperts: () => void,
+  resetFilters: () => void,
   setYearHandler: (year: number) => void,
   user: any,
+  year: number | null,
 }
 
 
 class ExpertsListPage extends Component<IExpertsListPageProps> {
   static defaultProps = {
     loadExperts: () => {},
+    resetFilters: () => {},
     setYearHandler: () => {},
   }
 
@@ -42,34 +48,40 @@ class ExpertsListPage extends Component<IExpertsListPageProps> {
   }
 
   render() {
-    const { setYearHandler, user } = this.props
+    const { loadExperts, resetFilters, setYearHandler, user, year } = this.props
 
     const title = 'Expert Blogs'
     const subtitle = 'Insights from academic, industry, and FDA experts from the precisionFDA Community.'
 
     const userCanCreateExpert = user && user.can_administer_site
 
-    // N.B. Explicitly passing in user={user} in NavigationBarPublic is a workaround:
-    //      Unlike ChallengesListPage where the set up is identical, the NavigationBarPublic
-    //      here somehow gets an undefined state.context even though fetchContext is successful
+    const filterActive = year
+    const handleResetClicked = () => {
+      resetFilters()
+      loadExperts()
+    }
+
     return (
       <PublicLayout>
-        <NavigationBarPublic title={title} subtitle={subtitle} user={user} />
+        <NavigationBar title={title} subtitle={subtitle} user={user} />
 
         <div className="experts-page-layout">
           <div className="left-column">
-            <div className="pfda-subsection-heading expert-highlight-heading">EXPERT HIGHLIGHT</div>
-            <ExpertsList listItemType={ExpertsListItemType.BlogEntry} />
+            {filterActive &&
+              <a onClick={handleResetClicked}>&larr; Back to All Experts</a>
+            }
+            <div className="expert-highlight-heading">EXPERT HIGHLIGHT</div>
+            <ExpertsList listItemComponent={ExpertsListItemBlogEntry} />
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateExpert && (
               <button className='btn btn-primary btn-block' onClick={event => window.location.assign('/experts/new')}>Create a new expert</button>
             )}
-            <div className="pfda-subsection-heading">PREVIOUS EXPERT BLOGS</div>
+            <SectionHeading>PREVIOUS EXPERT BLOGS</SectionHeading>
             <ExpertsYearList setYearHandler={setYearHandler} />
             <hr />
-            <div className="pfda-subsection-heading">EXPERTS</div>
-            <ExpertsList listItemType={ExpertsListItemType.QuestionsAndAnswers} />
+            <SectionHeading>EXPERTS</SectionHeading>
+            <ExpertsList listItemComponent={ExpertsListItemQuestionsAndAnswers} />
           </div>
         </div>
       </PublicLayout>
@@ -78,11 +90,13 @@ class ExpertsListPage extends Component<IExpertsListPageProps> {
 }
 
 const mapStateToProps = (state: any) => ({
-  user: contextUserSelector(state)
+  user: contextUserSelector(state),
+  year: expertsListYearSelector(state),
 })
 
 const mapDispatchToProps = (dispatch: any) => ({
   loadExperts: () => dispatch(fetchExperts()),
+  resetFilters: () => dispatch(expertsListResetFilters()),
   setYearHandler: (year: number) => {
     dispatch(expertsListSetYear(year))
     dispatch(fetchExperts())

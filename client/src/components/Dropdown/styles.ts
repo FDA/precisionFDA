@@ -45,10 +45,10 @@ export const DropdownList = styled.div`
 export const DropdownItem = styled.div`
   padding: 0.4rem;
   min-width: 10rem;
-  border-bottom: 0.1rem solid ${theme.grey};
+  border-bottom: 0.1rem solid ${theme.colors.textDarkGrey};
   cursor: pointer;
 
   &:hover {
-    color: ${theme.darkerGrey};
+    color: ${theme.colors.textMediumGrey};
   }
 `;

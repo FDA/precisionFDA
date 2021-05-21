@@ -1,6 +1,6 @@
+import { database, queue } from '@pfda/https-apps-shared'
 import { api } from './server'
 import { log } from './logger'
-import { database, queue } from '@pfda/https-apps-shared'
 
 const handleFatalError = (err: Error): void => {
   process.removeAllListeners('uncaughtException')
@@ -39,7 +39,7 @@ const startAll = async (): Promise<void> => {
 
   // start the services in correct order
   await database.start()
-  queue.createQueues()
+  await queue.createQueues()
   await api.startHttpsServer()
 }
 

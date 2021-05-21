@@ -12,8 +12,11 @@ export { getLogger } from './logger'
 
 export { database } from './database'
 
-export { entities, job, app, user, userFile } from './domain'
+export { entities, job, app, user, userFile, email } from './domain'
 
 export * as utils from './utils'
+
+// eslint-disable-next-line no-duplicate-imports
+export { ajv } from './utils'
 
 export * as queue from './queue'

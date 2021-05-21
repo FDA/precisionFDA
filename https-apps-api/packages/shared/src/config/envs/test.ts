@@ -15,6 +15,9 @@ export const config: ConfigOverride = {
   redis: {
     url: 'redis://localhost:6379',
   },
+  users: {
+    challengeBotDxUser: 'challenge-bot-test',
+  },
   workerJobs: {
     queues: {
       default: {

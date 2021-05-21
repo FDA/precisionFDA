@@ -1,5 +1,4 @@
-import { errors, utils } from '@pfda/https-apps-shared'
-import { ajv } from '../../utils'
+import { errors, utils, ajv } from '@pfda/https-apps-shared'
 
 /**
  * This middleware expects some user data in the query
@@ -17,8 +16,7 @@ export const makeUserContextMdw = () => {
       ctx.log.warn(
         {
           url: ctx.request.url,
-          // sanitize?
-          input: ctx.request.query,
+          input: utils.maskAccessTokenUserCtx(ctx.validatedQuery),
           errors: validatorFn.errors,
         },
         'User context - validation failed',
