@@ -129,6 +129,7 @@ Rails.application.routes.draw do
     get "/home/*all", to: "home#index"
     get "/account/*all", to: "home#index"
 
+    match "/ginas/*path", to: "ginas#index", via: :all unless Utils.development_or_test?
 
     # API
     namespace "api" do
