@@ -46,8 +46,10 @@ describe('job-finished.handler', () => {
       const input = { jobId: job.id }
       const handler = new JobFinishedEmailHandler(config.emailId, input, ctx)
       const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([user.id])
+      expect(receivers).to.have.lengthOf(0)
+      // todo: use this once the email is not deprecated
+      // expect(receivers).to.have.lengthOf(1)
+      // expect(receivers.map(r => r.id)).to.have.all.members([user.id])
     })
   })
 
