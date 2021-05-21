@@ -1,9 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NewsYearList matches snapshot 1`] = `
-<div>
-  <ul
-    className="year-list"
-  />
-</div>
+<QueryList
+  className="year-list"
+  emptyMessage="No previous news"
+  listExtractor={[Function]}
+  query={[Function]}
+  template={[Function]}
+/>
 `;

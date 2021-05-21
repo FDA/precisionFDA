@@ -1,14 +1,19 @@
 import React from 'react'
 import { Router, Route } from 'react-router-dom'
-import { shallow, mount } from 'enzyme'
+import { mount } from 'enzyme'
 import { createMemoryHistory } from 'history'
 import { addDays, subDays, addHours } from 'date-fns'
+import { Provider } from 'react-redux'
+import configureStore from 'redux-mock-store'
 
 import Loader from '../../Loader'
-import { ChallengesList, ChallengesListItem } from '.'
+import { ChallengesList } from '.'
+import { ChallengesListItem } from '../ChallengesListItem'
 import { ChallengesListPage } from '../../../pages/Challenges/ChallengesListPage'
 import { ChallengeDetailsPage } from '../../../pages/Challenges/ChallengeDetailsPage'
 
+
+const mockStore = configureStore([])
 
 const getMockChallenges = () => {
   let mockChallenges = []
@@ -35,22 +40,45 @@ const getMockChallenges = () => {
 
 describe('ChallengesList test', () => {
   it('should render', () => {
-    const wrapper = shallow(<ChallengesList />)
-
+    const store = mockStore({
+      challenges: {
+        list: {
+          isFetching: false,
+        },
+      },
+    })
+    const wrapper = mount(<Provider store={store}><ChallengesList /></Provider>)
     expect(wrapper).toMatchSnapshot()
   })
 
-  it('should show loader when isFetching and not show ChallengeList', () => {
-    const wrapper = mount(<ChallengesList isFetching={true} />)
+  it('should show loader when isFetching', () => {
+    const store = mockStore({
+      challenges: {
+        list: {
+          isFetching: true,
+        },
+      },
+    })
+
+    const wrapper = mount(<Provider store={store}><ChallengesList /></Provider>)
+    wrapper.update()
 
     // console.log(wrapper.debug())
     expect(wrapper.find(Loader)).toHaveLength(1)
-    expect(wrapper.find('.challenges-list')).toHaveLength(0)
-    expect(wrapper.find('.challenges-list-item')).toHaveLength(0)
+    expect(wrapper.find(ChallengesListItem)).toHaveLength(0)
   })
 
   it('should not show loader when not fetching and show ChallengesList with no rows', () => {
-    const wrapper = mount(<ChallengesList challenges={[]} isFetching={false} />)
+    const store = mockStore({
+      challenges: {
+        list: {
+          isFetching: false,
+          items: [],
+        },
+      },
+    })
+
+    const wrapper = mount(<Provider store={store}><ChallengesList /></Provider>)
     // console.log(wrapper.debug())
 
     expect(wrapper.find(Loader)).toHaveLength(0)
@@ -64,15 +92,26 @@ describe('ChallengesList test', () => {
     const mockChallenges = getMockChallenges()
     const mockPagination = {
       currentPage: 1,
-      totalPages: 1,
+      totalPages: 2,
+      nextPage: 2,
+      prevPage: null,
+      totalCount: 20,
     }
-    const wrapper = mount(<ChallengesList challenges={mockChallenges} pagination={mockPagination} />)
+    const store = mockStore({
+      challenges: {
+        list: {
+          isFetching: false,
+          items: mockChallenges,
+          pagination: mockPagination,
+        },
+      },
+    })
+
+    const wrapper = mount(<Provider store={store}><ChallengesList /></Provider>)
     // console.log(wrapper.debug())
 
     // Test items
     expect(wrapper.find('ul')).toHaveLength(1)
-    expect(wrapper.find('.challenges-list')).toHaveLength(1)
-    expect(wrapper.find('.challenges-list-item')).toHaveLength(10)
 
     // Test item props
     const items = wrapper.find(ChallengesListItem)

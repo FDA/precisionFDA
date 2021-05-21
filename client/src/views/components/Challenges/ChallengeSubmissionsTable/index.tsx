@@ -12,12 +12,13 @@ import {
   challengeSubmissionsIsFetchingSelector,
 } from '../../../../reducers/challenges/challenge/selectors'
 import { Table, Thead, Tbody, Th } from '../../TableComponents'
-import { ISubmission, JobState } from '../../../shapes/SubmissionShape'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 import './style.sass'
 import Markdown from '../../Markdown'
 import { getOrder } from '../../../../helpers'
 import * as C from '../../../../constants'
+import { JobState } from '../../../../types/job'
+import { ISubmission } from '../../../../types/submission'
 
 
 interface IChallengeSubmissionsTableProps {

@@ -1,14 +1,26 @@
 import styled from 'styled-components'
+import { commonStyles } from '../../styles/commonStyles'
 import { theme } from '../../styles/theme'
 
 export const PageContainer = styled.div`
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: ${theme.padding.mainContentHorizontal};
+  padding-right: ${theme.padding.mainContentHorizontal};
 `
 
 export const PageTitle = styled.h1`
-  font-size: 30px;
+  ${commonStyles.pageTitle};
+  color: ${theme.colors.textBlack};
   margin: 0;
-  word-wrap: break-word;
-  color: ${theme.primaryLite};
+`
+
+export const PageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: ${theme.padding.mainContentVertical};
+`
+
+export const PageActions = styled.div`
+  display: flex;
+  gap: 10px;
 `

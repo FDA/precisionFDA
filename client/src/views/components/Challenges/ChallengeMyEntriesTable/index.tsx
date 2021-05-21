@@ -19,7 +19,7 @@ import {
   challengeMyEntriesDataSelector,
   challengeMyEntriesIsFetchingSelector,
 } from '../../../../reducers/challenges/challenge/selectors'
-import { ISubmission } from '../../../shapes/SubmissionShape'
+import { ISubmission } from '../../../../types/submission'
 
 
 class MyEntryRow extends Component<ISubmissionElementProps> {

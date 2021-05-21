@@ -1,34 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NewsListItem test should render 1`] = `
-<div
-  className="news-list-item"
->
-  <div
-    className="left-column"
-  >
+exports[`NewsListItemLarge test should render 1`] = `
+<NewsListItem__StyledNewsListItemLarge>
+  <NewsListItem__LeftColumn>
     <hr />
     <div
       className="news-item-date"
     >
       Mar 01, 2021
     </div>
-  </div>
-  <div
-    className="right-column news-item-content"
-  >
+  </NewsListItem__LeftColumn>
+  <NewsListItem__RightColumn>
     <h1>
       News Item 1
     </h1>
     <p>
       News Content
     </p>
-    <a
-      href="News Link 1"
-      target="_blank"
+    <ExternalLink
+      to="News Link 1"
     >
       View News Source ↗
-    </a>
+    </ExternalLink>
+  </NewsListItem__RightColumn>
+</NewsListItem__StyledNewsListItemLarge>
+`;
+
+exports[`NewsListItemSmall test should render 1`] = `
+<NewsListItem__StyledNewsListItemSmall>
+  <div
+    className="news-item-title"
+  >
+    News Item 1
   </div>
-</div>
+  <div
+    style={
+      Object {
+        "display": "flex",
+      }
+    }
+  >
+    <div
+      className="news-item-date"
+    >
+      Mar 01, 2021
+    </div>
+    <ExternalLink
+      to="News Link 1"
+    >
+      View →
+    </ExternalLink>
+  </div>
+</NewsListItem__StyledNewsListItemSmall>
 `;

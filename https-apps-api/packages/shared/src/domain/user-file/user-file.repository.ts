@@ -1,25 +1,9 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
 import { FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.enum'
+import { Asset } from '.'
 
 export class UserFileRepository extends EntityRepository<UserFile> {
-  // ???? find another way
-  // async findSnapshot(input: { userId: number; project: string }): Promise<UserFile | null> {
-  //   const file = await this.findOne({
-  //     user: input.userId,
-  //     project: input.project,
-  //     entityType: FILE_ORIGIN_TYPE.REGULAR,
-  //   })
-  //   return file
-  // }
-
-  async findProjectFiles(input: { project: string }): Promise<UserFile[]> {
-    return await this.find(
-      { project: input.project, stiType: { $ne: FILE_STI_TYPE.FOLDER } },
-      { populate: ['taggings.tag'] },
-    )
-  }
-
   async findProjectFilesInSubfolder(input: {
     project: string
     folderId: number | null
@@ -27,7 +11,8 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     return await this.find(
       {
         project: input.project,
-        stiType: { $ne: FILE_STI_TYPE.FOLDER },
+        // there is implicit condition sti_type = 'UserFile'
+        // stiType: { $ne: FILE_STI_TYPE.FOLDER },
         // since we merged old projects (with uploaded files) this condition no longer makes sense
         // parentType: PARENT_TYPE.JOB,
         parentFolderId: input.folderId,
@@ -37,15 +22,19 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     )
   }
 
-  async findLocalFilesInProject(input: { project: string }): Promise<UserFile[]> {
-    return await this.find(
-      {
-        project: input.project,
-        stiType: { $ne: FILE_STI_TYPE.FOLDER },
-        entityType: FILE_ORIGIN_TYPE.REGULAR,
-      },
-      { populate: [], orderBy: { id: 'ASC' } },
-    )
+  async findLocalFilesInProject(input: { project: string }): Promise<Array<UserFile | Asset>> {
+    /**
+     * workaround with querybuilder to avoid implicit sti_type = 'UserFile'
+     * that is introduced thanks to STI mikro-orm feature.
+     * We want to make sure this query returns sti_type = 'UserFile', 'Asset'
+     */
+    const qb = this.createQueryBuilder()
+    qb.where({
+      project: input.project,
+      stiType: { $ne: FILE_STI_TYPE.FOLDER },
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+    })
+    return await qb.execute()
   }
 
   async findFilesInFolders(input: { folderIds: number[] }): Promise<UserFile[]> {

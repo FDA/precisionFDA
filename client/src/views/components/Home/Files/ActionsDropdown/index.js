@@ -46,7 +46,8 @@ import RenameObjectModal from '../../../Files/RenameObjectModal'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeMoveModal from '../../../../../views/components/Home/HomeMoveModal'
 import AttachLicenseModal from '../../AttachLicenseModal'
-import FilesActionModal from '../FilesActionModal'
+import MyFilesActionModal from '../FilesActionModal'
+import FilesActionModal from '../../../../../views/components/Files/FilesActionModal'
 import HomeLicenseModal from '../../HomeLicenseModal'
 
 
@@ -226,16 +227,30 @@ const ActionsDropdown = (props) => {
         link={links.license}
         objectLicense={files[0] && files[0].fileLicense}
       />
-      <FilesActionModal
-        isOpen={props.deleteModal.isOpen}
-        isLoading={props.deleteModal.isLoading}
-        hideAction={() => props.hideFilesDeleteModal()}
-        modalAction={() => props.deleteFiles(files[0].links.remove, filesIds)}
-        files={files}
-        action={HOME_FILES_ACTIONS.DELETE}
-        fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, 'private')}
-        modal={props.homeFilesActionModalSelector}
-      />
+      {page === 'private' &&
+        <MyFilesActionModal
+          isOpen={props.deleteModal.isOpen}
+          isLoading={props.deleteModal.isLoading}
+          hideAction={() => props.hideFilesDeleteModal()}
+          modalAction={() => props.deleteFiles(files[0].links.remove, filesIds)}
+          files={files}
+          action={HOME_FILES_ACTIONS.DELETE}
+          fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, 'private')}
+          modal={props.homeFilesActionModalSelector}
+        />
+      }
+      {page !== 'private' &&
+        <FilesActionModal
+          isOpen={props.deleteModal.isOpen}
+          isLoading={props.deleteModal.isLoading}
+          hideAction={() => props.hideFilesDeleteModal()}
+          modalAction={() => props.deleteFiles(files[0].links.remove, filesIds)}
+          files={files}
+          action={HOME_FILES_ACTIONS.DELETE}
+          fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, page)}
+          modal={props.homeFilesActionModalSelector}
+        />
+      }
       <FilesActionModal
         isOpen={isExportModalOpen}
         isLoading={props.deleteModal.isLoading}
@@ -371,7 +386,7 @@ const mapDispatchToProps = (dispatch) => ({
   hideFilesMoveModal: () => dispatch(hideFilesMoveModal()),
   showAttachLicenseModal: () => dispatch(showFilesAttachLicenseModal()),
   hideAttachLicenseModal: () => dispatch(hideFilesAttachLicenseModal()),
-  fetchFilesByAction: (ids, action) => dispatch(fetchFilesByAction(ids, action, 'private')),
+  fetchFilesByAction: (ids, action, scope) => dispatch(fetchFilesByAction(ids, action, scope)),
   showFilesLicenseModal: () => dispatch(showFilesLicenseModal()),
   hideFilesLicenseModal: () => dispatch(hideFilesLicenseModal()),
   showFilesAcceptLicenseModal: () => dispatch(showFilesAcceptLicenseModal()),

@@ -1,10 +1,9 @@
 import React, { FunctionComponent } from 'react'
 import { connect } from 'react-redux'
-import classNames from 'classnames/bind'
 
-import { ExpertsListItem, ExpertsListItemType } from '../ExpertsListItem'
-import { IExpert } from '../../../shapes/ExpertShape'
-import { IPagination } from '../../../shapes/IPagination'
+import { ExpertsListItem, ExpertsListItemBlogEntry } from '../ExpertsListItem'
+import { IExpert } from '../../../../types/expert'
+import { IPagination } from '../../../../types/pagination'
 import Pagination from '../../TableComponents/Pagination'
 import Loader from '../../Loader'
 import {
@@ -16,22 +15,23 @@ import {
   expertsListIsFetchingSelector,
   expertsListPaginationSelector
 } from '../../../../reducers/experts/list/selectors'
-import './style.sass'
+import { StyledExpertsListContainer } from './styles'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 
 
 interface IExpertsListProps {
-  listItemType?: ExpertsListItemType,
+  listItemComponent?: typeof ExpertsListItem,
   experts?: IExpert[],
   isFetching?: boolean,
+  filter?: (item: IExpert[]) => IExpert[],
+  allowPagination?: boolean,
   pagination?: IPagination | undefined,
   setPageHandler?: (page: number) => void,
   user: any,
 }
 
 
-const ExpertsList: FunctionComponent<IExpertsListProps> = ({ experts=[], isFetching=false, pagination=undefined, setPageHandler=() => {}, listItemType=ExpertsListItemType.BlogEntry, user=undefined }: IExpertsListProps) => {
-  const classes = classNames(['experts-list'])
+const ExpertsList: FunctionComponent<IExpertsListProps> = ({ experts=[], isFetching=false, filter, allowPagination=true, pagination=undefined, setPageHandler=() => {}, listItemComponent=ExpertsListItemBlogEntry, user=undefined }: IExpertsListProps) => {
 
   if (isFetching) {
     return (
@@ -47,13 +47,22 @@ const ExpertsList: FunctionComponent<IExpertsListProps> = ({ experts=[], isFetch
   }
 
   if (experts.length) {
+    let itemsToShow = experts
+    if (filter) {
+      itemsToShow = filter(experts)
+    }
+
+    const ListItem = listItemComponent
+
     return (
-      <div>
-        <ul className={classes}>
-          {experts.map((expert) => <ExpertsListItem type={listItemType} key={expert.id} expert={expert} userCanEdit={userCanEdit(expert)} />)}
+      <StyledExpertsListContainer>
+        <ul className="experts-list">
+          {itemsToShow.map((expert) => <ListItem key={expert.id} expert={expert} userCanEdit={userCanEdit(expert)} />)}
         </ul>
-        <Pagination data={pagination} setPageHandler={setPageHandler} />
-      </div>
+        {allowPagination &&
+          <Pagination data={pagination} setPageHandler={setPageHandler} />
+        }
+      </StyledExpertsListContainer>
     )
   }
 
@@ -61,7 +70,7 @@ const ExpertsList: FunctionComponent<IExpertsListProps> = ({ experts=[], isFetch
 }
 
 ExpertsList.defaultProps = {
-  listItemType: ExpertsListItemType.BlogEntry,
+  listItemComponent: ExpertsListItemBlogEntry,
   experts: [],
   isFetching: false,
   setPageHandler: () => {},

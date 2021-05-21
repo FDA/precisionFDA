@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<NavigationBar /> matches snapshot 1`] = `
+<NavigationBar__StyledNavigationBar
+  id="navigation-bar"
+>
+  <NavigationBar__PublicNavbarWrapper>
+    <PublicNavbar />
+  </NavigationBar__PublicNavbarWrapper>
+</NavigationBar__StyledNavigationBar>
+`;

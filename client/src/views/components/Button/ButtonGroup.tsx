@@ -1,16 +1,16 @@
 import styled from 'styled-components'
-import { StyledButton } from './StyledButton'
+import { Button } from '../../../components/Button'
 
 export const ButtonGroup = styled.div`
-  ${StyledButton}{
+  ${Button}{
     border-radius: 0;
   }
 
-  ${StyledButton}:first-child {
+  ${Button}:first-child {
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
   }
-  ${StyledButton}:last-child {
+  ${Button}:last-child {
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
   }
