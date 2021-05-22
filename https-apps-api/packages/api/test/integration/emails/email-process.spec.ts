@@ -41,19 +41,19 @@ describe('POST /emails/:id/send', () => {
     mocksReset()
   })
 
-  it('response shape & mocks call shape (JOB_FINISHED email)', async () => {
+  it('response shape & mocks call shape (JOB_FINISHED email) - is now deprecated', async () => {
     const { body } = await supertest(api.getServer())
       .post(`/emails/${EMAIL_ID_JOB}/send`)
       .query({ ...getDefaultQueryData(user) })
       .send({ input: { jobId: job.id } })
       .expect(200)
     expect(body).to.be.true()
-    expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
-    const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
+    expect(fakes.queue.createEmailSendTaskFake.notCalled).to.be.true()
+    // const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
 
-    expect(taskInput).to.have.property('to', user.email)
-    expect(taskInput).to.have.property('subject', 'Job finished')
-    expect(taskInput).to.have.property('body').that.is.a('string')
+    // expect(taskInput).to.have.property('to', user.email)
+    // expect(taskInput).to.have.property('subject', 'Job finished')
+    // expect(taskInput).to.have.property('body').that.is.a('string')
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {
