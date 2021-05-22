@@ -1,14 +1,54 @@
 import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
+import { PFDALogoLight } from '../../views/components/NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
+
+
+const smallestHeader = '@media(max-width: 800px)'  // TODO: Move to theme.ts
+const smallHeader = '@media(max-width: 1024px)'  // TODO: Move to theme.ts
+const mediumHeader = '@media(max-width: 1280px)'  // TODO: Move to theme.ts
 
 export const StyledHeader = styled.header`
   /* position: fixed;
   top: 0;
   left: 0;
   right: 0; */
-  background-color: ${theme.primary};
-  border-bottom: 1px solid ${theme.primaryShade};
+  background-color: ${theme.colors.darkBlue};
+  color: ${theme.colors.textWhite};
+  padding: 0px ${theme.padding.mainContentHorizontal};
+
+  ${mediumHeader} {
+    padding: 0px;
+  }
+`
+
+export const HeaderLeft = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-self: flex-start;
+  align-items: center;
+  &::after {
+    content: "";
+    width: ${theme.padding.contentMargin};
+  }
+`
+
+export const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  justify-self: flex-end;
+  margin-left: auto;
+`
+
+export const StyledHeaderLogo = styled(PFDALogoLight)`
+  width: 162px;
+  height: 36px;
+  margin: 0px ${theme.padding.contentMargin};
+
+  ${smallestHeader} {
+    width: 108px;
+    height: 24px;
+  }
 `
 
 export const Nav = styled.nav`
@@ -16,17 +56,18 @@ export const Nav = styled.nav`
   justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
-  min-height: 68px;
-  color: rgba(227, 243, 252, 0.6);
   font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
+  font-weight: ${theme.fontWeight.regular};
   white-space: nowrap;
-  flex-wrap: wrap;
+  transition: all .18s ease-in-out;
 
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  ${smallHeader} {
+    font-size: 11px;
   }
 `
 
@@ -35,27 +76,43 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
   justify-content: flex-end;
   align-items: center;
   cursor: pointer;
+  color: ${theme.colors.textWhite};
+  max-height: ${theme.sizing.navigationBarHeight};
 
-  &:hover {
-    color: ${theme.white};
+  ${smallestHeader} {
+    max-height: ${theme.sizing.navigationBarHeightNarrow};
   }
 
-  ${({ active = false }) =>
-    active &&
-    css`
-      color: ${theme.white};
-
-      ${Svg} {
-        color: rgb(235, 119, 111);
-      }
-    `}
+  ${({ active = false }) => {
+    if (active) {
+      return css`
+        background-color: ${theme.colors.mediumDarkBlue};
+      `
+    }
+    else {
+      return css`
+        &:hover {
+          color: ${theme.colors.textLightGrey};
+        }
+      `
+    }
+  }}
 `
 
 export const MenuItem = styled(HeaderItem)`
   align-self: flex-end;
   flex-direction: column;
-  padding: 10px;
-  height: 50px;
+  padding: ${theme.padding.contentMargin} ${theme.padding.contentMargin} ${theme.padding.contentMarginHalf} ${theme.padding.contentMargin};
+
+  ${mediumHeader} {
+    padding-left: ${theme.padding.contentMarginHalf};
+    padding-right: ${theme.padding.contentMarginHalf};
+  }
+
+  ${smallHeader} {
+    padding-left: ${theme.padding.contentMarginThird};
+    padding-right: ${theme.padding.contentMarginThird};
+  }
 `
 
 export const StyledSupport = styled(HeaderItem)`
@@ -65,40 +122,32 @@ export const StyledSupport = styled(HeaderItem)`
 `
 
 export const StyledUsername = styled(HeaderItem)`
-  padding: 10px;
   &:hover {
-    background-color: ${theme.primaryShade};
+    background-color: ${theme.colors.mediumDarkBlue};
   }
 
   ${Svg} {
     margin-left: 5px;
     padding-top: 2px;
   }
-`
 
-export const HeaderItemText = styled.div``
-
-export const HeaderSpacer = styled.div`
-  border-right: 1px solid rgba(227, 243, 252, 0.2);
-  height: 40px;
-`
-
-export const HeaderLeft = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-self: flex-start;
-  align-items: center;
-  gap: 5px;
-  &::after {
-    content: "";
-    width: 20px;
+  ${smallestHeader} {
+    display: none;
   }
 `
-export const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-self: flex-end;
+
+export const HeaderItemText = styled.div`
+  margin-top: ${theme.padding.contentMarginThird};
+
+  ${smallestHeader} {
+    display: none;
+  }
+`
+
+export const HeaderSpacer = styled.div`
+  border-right: 1px solid ${theme.colors.lightBlue};
+  margin: 0px ${theme.padding.contentMarginThird};
+  height: 38px;
 `
 
 export const StyledDropMenuLinks = styled.div`
@@ -106,23 +155,21 @@ export const StyledDropMenuLinks = styled.div`
   line-height: 28px;
   display: flex;
   flex-direction: column;
-  color: ${theme.darkerGrey};
-
+  color: ${theme.colors.textDarkGrey};
 `
 
 export const StyledDivider = styled.div`
-  border-bottom: 1px solid ${theme.whiteGrey};
-  padding-top: 5px;
-  margin-bottom: 5px;
+  border-bottom: 1px solid ${theme.colors.borderDefault};
+  padding-top: ${theme.padding.contentMarginHalf};
+  margin-bottom: ${theme.padding.contentMarginHalf};
 `
 
 export const StyledLink = styled.a`
   width: auto;
   transition: color 0.3s ease;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 0px ${theme.padding.contentMargin};
   line-height: 30px;
   &:hover {
-    background-color: ${theme.whiteGrey};
+    color: ${theme.colors.textMediumGrey};
   }
 `

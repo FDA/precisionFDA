@@ -15,7 +15,7 @@
     "y18n": "^4.0.1"
   },
   "scripts": {
-    "test": "jest",
+    "test": "TZ=America/New_York jest",
     "test:watch": "jest --watch"
   },
   "jest": {

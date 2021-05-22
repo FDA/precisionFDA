@@ -166,7 +166,7 @@ const LandingPage : FunctionComponent = () => {
         <NavigationBar>
           <NavigationBarBanner>
             <NavigationBarPublicLandingTitle>
-              <PFDALogoLight className="pfda-navbar-logo" />
+              <PFDALogoLight />
               <h2>{pFDATagLine}</h2>
             </NavigationBarPublicLandingTitle>
             <SocialMediaButtons showText={false} />
