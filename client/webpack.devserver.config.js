@@ -26,7 +26,6 @@ module.exports = merge(development, {
   devServer: {
     index: 'index.html',
     contentBase: path.resolve(__dirname, './dist'),
-    // compress: true,
     historyApiFallback: true, // See https://stackoverflow.com/questions/56573363/react-router-v4-nested-routes-not-work-with-webpack-dev-server
     host: '0.0.0.0', // See https://github.com/webpack/webpack-dev-server/issues/547
     port: 9000,
