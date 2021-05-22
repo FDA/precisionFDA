@@ -100,6 +100,7 @@ export const ButtonSolidBlue = styled(Button)`
       color: ${theme.colors.textWhite};
     `}
     ${({ disabled }) => disabled && css`
+      background-color: ${theme.colors.lightBlue};
       cursor: not-allowed;
     `}
   }

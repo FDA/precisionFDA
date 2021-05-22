@@ -3,11 +3,11 @@ import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { SocialMediaButtons } from '../SocialMediaButtons'
-import { NavigationBarLoggedIn } from '../NavigationBarLoggedIn'
 import { PFDALogoLight } from '../PFDALogo'
 import { theme } from '../../../../styles/theme'
 import { PublicNavbar } from '../PublicNavbar'
 import { commonStyles } from '../../../../styles/commonStyles'
+import { Header } from '../../../../components/Header'
 
 
 const StyledNavigationBar = styled.div`
@@ -117,7 +117,7 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
       return (
         <NavigationBarBanner>
           <NavigationBarLogoAndTitle>
-            {showLogoAboveTitle ? <PFDALogoLight className="pfda-navbar-logo" /> : <div className="pfda-navbar-logo logo-img logo-img-none" />}
+            {showLogoAboveTitle ? <PFDALogoLight /> : <div className="pfda-navbar-logo logo-img logo-img-none" />}
             <h1>{title}</h1>
           </NavigationBarLogoAndTitle>
           {!showSocialMediaButtonText &&
@@ -134,13 +134,13 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
     return ''
   }
 
-  // TODO: NavigationBarLoggedIn is WIP and not ready but will replace _navbar.html.erb in Rails eventually
+  // TODO: WIP and not ready but will replace _navbar.html.erb in Rails eventually
   const showLoggedInNavBar = isLoggedIn && false
 
   return (
     <StyledNavigationBar id="navigation-bar">
       {showLoggedInNavBar && (
-        <NavigationBarLoggedIn />
+        <Header user={user} />
       )}
       {!isLoggedIn && (
         <PublicNavbarWrapper>

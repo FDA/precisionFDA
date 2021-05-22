@@ -20,6 +20,7 @@ import AboutPage from './views/pages/Landing/AboutPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
+import { Header } from './components/Header'
 import GlobalStyle from './styles/global'
 
 
@@ -29,6 +30,7 @@ const root = ({ store }: any) => {
   return (
   <Provider store={store}>
     <GlobalStyle />
+    {/* <Header /> */}
     <QueryClientProvider client={queryClient}>
       <Router history={history}>
         <ErrorWrapper>
