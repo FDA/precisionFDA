@@ -174,7 +174,7 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
   }
 
   const pathname = useLocation().pathname
-  const getLinkClassName = (linkPath) => {
+  const getLinkClassName = (linkPath: string) => {
     if (linkPath == '/') { // Special case
       return classNames({
         'current': pathname == linkPath,

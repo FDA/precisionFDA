@@ -8,7 +8,7 @@ export const CommentingIcon = () => (
     role="img"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 512 512"
-    width="14"
+    width="28"
   >
     <path
       fill="currentColor"

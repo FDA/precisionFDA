@@ -1,15 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
+
 import { theme } from '../styles/theme'
 
-const StyledAvatar = styled.div`
-  margin: 10px;
+
+const StyledAvatar = styled.img`
   border-radius: 50%;
-  background-color: ${theme.primaryLite};
-  width: 40px;
-  height: 40px;
+  background-color: ${theme.colors.mediumDarkBlue};
+  width: 28px;
+  height: 28px;
 `
 
-export const Avatar = () => (
-  <StyledAvatar></StyledAvatar>
+interface IAvatar {
+  imgUrl?: string,
+}
+
+export const Avatar: React.FC<IAvatar> = ({ imgUrl='' }) => (
+  <StyledAvatar src={imgUrl}></StyledAvatar>
 )
