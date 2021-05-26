@@ -73,7 +73,11 @@ RSpec.describe SpacesController, type: :controller do
       it "invites a user as a contributor" do
         post :invite, params: {
           id: space.id,
-          space: { invitees: user.dxuser, invitees_role: "contributor" },
+          space: {
+            invitees: user.dxuser,
+            invitees_role: "contributor",
+            side: SpaceMembership::SIDE_HOST,
+          },
         }
         be_contributor = SpaceMembership.where(user_id: user.id).first.contributor?
 
@@ -88,7 +92,11 @@ RSpec.describe SpacesController, type: :controller do
       it "invites a user as a viewer" do
         post :invite, params: {
           id: space.id,
-          space: { invitees: user.dxuser, invitees_role: "viewer" },
+          space: {
+            invitees: user.dxuser,
+            invitees_role: "viewer",
+            side: SpaceMembership::SIDE_HOST,
+          },
         }
         be_viewer = SpaceMembership.where(user_id: user.id).first.viewer?
 
@@ -103,7 +111,11 @@ RSpec.describe SpacesController, type: :controller do
       it "invites a user as an admin" do
         post :invite, params: {
           id: space.id,
-          space: { invitees: user.dxuser, invitees_role: "admin" },
+          space: {
+            invitees: user.dxuser,
+            invitees_role: "admin",
+            side: SpaceMembership::SIDE_HOST,
+          },
         }
 
         expect(WebMock).
@@ -146,7 +158,11 @@ RSpec.describe SpacesController, type: :controller do
       it "invites an user as a contributor" do
         post :invite, params: {
           id: review_space.id,
-          space: { invitees: user.dxuser, invitees_role: "contributor" },
+          space: {
+            invitees: user.dxuser,
+            invitees_role: "contributor",
+            side: SpaceMembership::SIDE_HOST,
+          },
         }
 
         expect(WebMock).
@@ -159,7 +175,11 @@ RSpec.describe SpacesController, type: :controller do
       it "invites an user as a viewer" do
         post :invite, params: {
           id: review_space.id,
-          space: { invitees: user.dxuser, invitees_role: "viewer" },
+          space: {
+            invitees: user.dxuser,
+            invitees_role: "viewer",
+            side: SpaceMembership::SIDE_HOST,
+          },
         }
 
         expect(WebMock).
