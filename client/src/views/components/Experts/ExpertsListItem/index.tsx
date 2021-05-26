@@ -75,6 +75,7 @@ class ExpertsListItem extends Component<ExpertsListItemProps> {
   renderQuestionsAndAnswers() {
     const expert = this.props.expert
     const classes = classNames('experts-list-item-small')
+    const showQuestionsCommentsCount = expert.totalAnswerCount > 0 || expert.totalCommentCount > 0
     return (
       <div className={classes}>
         <div className="experts-list-item-small__left-column">
@@ -82,10 +83,12 @@ class ExpertsListItem extends Component<ExpertsListItemProps> {
         </div>
         <div className="experts-list-item-small__right-column experts-item-content">
           <div className="expert-name"><a href={`/experts/${expert.id}`}>{expert.title}</a></div>
+          {showQuestionsCommentsCount &&
           <div className="answers-comments-container">
             <div><span>{expert.totalAnswerCount}</span>&nbsp;<span className="answers-comments">Answers</span></div>
             <div><span>{expert.totalCommentCount}</span>&nbsp;<span className="answers-comments">Comments</span></div>
           </div>
+          }
         </div>
       </div>
     )
