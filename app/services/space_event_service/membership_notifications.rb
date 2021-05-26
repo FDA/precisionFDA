@@ -13,6 +13,10 @@ module SpaceEventService
           activityType: event.activity_type,
           newMembershipRole: event.entity.role,
         })
+      rescue HttpsAppsClient::Error => e
+        raise e unless e.code == HttpsAppsClient::Error.space_not_found_error_code
+
+        {}
       end
 
     end
