@@ -1,6 +1,7 @@
 module SpaceService
   class Create
-    # @param [SpaceForm] space_form
+    # @param space_form [SpaceForm] Space form.
+    # @param options [Hash] Options.
     def self.call(space_form, options = {})
       new(**options).call(space_form)
     end
@@ -12,16 +13,13 @@ module SpaceService
     end
 
     # Creates a space based on space_form data and returns new space
-    # @param [
-    #   SpaceForm, #name, #description, #space_type, #cts, #host_lead_dxuser,
-    #   #guest_lead_dxuser, #sponsor_org
-    # ] space_form
-    # @return [Space]
+    # @param space_form [SpaceForm] Space form object.
+    # @return [Space] Created space.
     def call(space_form)
       Space.transaction do
         space = build_space(space_form)
-        org_dxs = [space.host_dxorg, space.guest_dxorg].uniq.compact
-        create_orgs(org_dxs)
+        dxorgs = [space.host_dxorg, space.guest_dxorg].uniq.compact
+        create_orgs(dxorgs)
         space.save!
         add_leads(space, space_form)
 
@@ -29,7 +27,7 @@ module SpaceService
           create_reviewer_cooperative_project(space)
           create_reviewer_confidential_space(space, space_form)
         else
-          remove_pfda_admin_user(org_dxs)
+          remove_pfda_admin_user(space, space_form)
         end
 
         send_emails(space)
@@ -43,61 +41,65 @@ module SpaceService
 
     def build_space(space_form)
       uuid = SecureRandom.hex[0..9]
-      space = Space.new(
+
+      Space.new(
         name: space_form.name,
         description: space_form.description,
         host_dxorg: Org.construct_dxorg("space_host_#{uuid}"),
+        guest_dxorg: Org.construct_dxorg("space_guest_#{uuid}"),
+        sponsor_org_id: space_form.space_sponsor&.org_id,
         space_type: space_form.space_type,
         cts: space_form.cts,
         restrict_to_template: space_form.restrict_to_template,
       )
-      space.guest_dxorg = guest_dx_org(uuid, space, space_form)
-      space.sponsor_org_id = space_form.space_sponsor.org_id if space.review?
-      # TODO: set up a migration to add sponsor_lead_dxuser?
-      # space.sponsor_lead_dxuser = space_form.sponsor.id if space.review?
-      space
     end
 
     # Provision Host and Guest orgs
     def create_orgs(orgs_dxs)
-      orgs_dxs.each { |dxorg| OrgService::Create.call(api, dxorg) }
+      orgs_dxs.each { |dxorg| OrgService::Create.call(dxorg) }
     end
 
     # Add host and guest leads as ADMINs
     # @param [Space]
     # @param [SpaceForm]
     def add_leads(space, space_form)
-      form_host_lead_dxuser = space_form.host_lead_dxuser
       add_lead(
         space,
-        User.find_by!(dxuser: form_host_lead_dxuser),
+        space_form.host_admin,
         SpaceMembership::SIDE_HOST,
       )
-      return if guest_blank?(space, space_form)
 
-      form_guest_lead_dxuser = space_form.guest_lead_dxuser
       add_lead(
         space,
-        space.review? ? space_form.space_sponsor : User.find_by!(dxuser: form_guest_lead_dxuser),
+        space.review? ? space_form.space_sponsor : space_form.guest_admin,
         SpaceMembership::SIDE_GUEST,
       )
     end
 
-    def add_lead(space, user, side)
+    def add_lead(space, lead, side)
       SpaceMembershipService::CreateLead.call(
         papi,
         space,
-        user,
+        lead,
         side,
       )
     end
 
-    # Remove pfda admin from orgs
-    # Skip if the host user is actual ADMIN_USER
-    def remove_pfda_admin_user(orgs_dxs)
+    # Remove pfda admin from orgs.
+    # Skip removing if:
+    #   - admin is a current user
+    #   - admin is a host lead - skip removing from a host org
+    #   - admin is a guest lead - skip removing from a guest org
+    def remove_pfda_admin_user(space, space_form)
       return if user.dxid == ADMIN_USER
 
-      orgs_dxs.each { |dxorg| papi.org_remove_member(dxorg, ADMIN_USER) }
+      unless space_form.host_admin.dxid == ADMIN_USER
+        papi.org_remove_member(space.host_dxorg, ADMIN_USER)
+      end
+
+      return if space_form.guest_admin.dxid == ADMIN_USER
+
+      papi.org_remove_member(space.guest_dxorg, ADMIN_USER)
     end
 
     # Send an activation email to all space leads
@@ -211,20 +213,7 @@ module SpaceService
     end
 
     def guest_dx_org(uuid, space, space_form)
-      return if guest_blank?(space, space_form)
-      return Org.construct_dxorg("space_host_#{uuid}") if guest_and_host_equal?(space, space_form)
-
       Org.construct_dxorg("space_guest_#{uuid}")
-    end
-
-    def guest_and_host_equal?(space, space_form)
-      return false unless space.verification?
-
-      space_form.guest_lead_dxuser == space_form.host_lead_dxuser
-    end
-
-    def guest_blank?(space, space_form)
-      space.verification? && space_form.guest_lead_dxuser.blank?
     end
   end
 end
