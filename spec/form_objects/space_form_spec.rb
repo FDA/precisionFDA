@@ -111,43 +111,4 @@ RSpec.describe SpaceForm, type: :model do
       it { is_expected.not_to be_valid }
     end
   end
-
-  describe "validations in verification space" do
-    let(:guest_lead) { create(:user, dxuser: "user_guest") }
-
-    before { params.merge!(space_type: "verification") }
-
-    context "when Host Lead and Guest Lead are valid" do
-      before do
-        params.merge!(
-          host_lead_dxuser: host_lead.dxuser,
-          guest_lead_dxuser: guest_lead.dxuser,
-        )
-      end
-
-      it { is_expected.to be_valid }
-    end
-
-    context "when Host Lead is invalid" do
-      before do
-        params.merge!(
-          host_lead_dxuser: "",
-          guest_lead_dxuser: guest_lead.dxuser,
-        )
-      end
-
-      it { is_expected.not_to be_valid }
-    end
-
-    context "when Host Lead and Guest Lead are the same" do
-      before do
-        params.merge!(
-          host_lead_dxuser: host_lead.dxuser,
-          guest_lead_dxuser: host_lead.dxuser,
-        )
-      end
-
-      it { is_expected.not_to be_valid }
-    end
-  end
 end

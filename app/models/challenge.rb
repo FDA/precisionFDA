@@ -302,17 +302,17 @@ class Challenge < ApplicationRecord
       description: description,
       host_lead_dxuser: host_lead_dxuser,
       guest_lead_dxuser: guest_lead_dxuser,
-      space_type: "groups",
+      space_type: SpaceForm::TYPE_GROUPS,
     )
 
     space = SpaceService::Create.call(space_form, api: context.api, user: context.user)
     membership = space.space_memberships.find_by(user_id: space.host_lead.id)
 
     SpaceService::Invite.call(
-      context.api,
+      DIContainer.resolve("api.admin"),
       space,
       membership,
-      User.find_by(dxuser: CHALLENGE_BOT_DX_USER),
+      User.challenge_bot,
       SpaceMembership::ROLE_ADMIN,
     )
 
