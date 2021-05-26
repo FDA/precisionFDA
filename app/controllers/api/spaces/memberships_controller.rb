@@ -58,7 +58,7 @@ module Api
 
       # Adds invitees attributes to fit SpaceInviteForm.
       def space_invite_params
-        params.permit(:invitees, :invitees_role, :space_id)
+        params.permit(:invitees, :invitees_role, :space_id, :side)
       end
 
       # Collects validation errors from SpaceInviteForm.
