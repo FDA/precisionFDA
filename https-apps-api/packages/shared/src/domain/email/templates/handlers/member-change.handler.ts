@@ -39,30 +39,39 @@ export class MemberChangedEmailHandler
   }
 
   async setupContext(): Promise<void> {
-    this.space = await this.ctx.em.findOneOrFail(Space, {
-      id: this.validatedInput.spaceId,
-    })
-    if (!this.space) {
+    try {
+      this.space = await this.ctx.em.findOneOrFail(Space, {
+        id: this.validatedInput.spaceId,
+      })
+    } catch (err) {
+      this.ctx.log.error({ err }, 'space not found - DB error')
       throw new errors.NotFoundError(
         `Space id ${this.validatedInput.spaceId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        {
+          code: errors.ErrorCodes.SPACE_NOT_FOUND,
+        },
       )
     }
-    this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
-    if (!this.user) {
+    try {
+      this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
+    } catch (err) {
+      this.ctx.log.error({ err }, 'user in space not found - DB error')
       throw new errors.NotFoundError(
         `User id ${this.validatedInput.initUserId.toString()} not found`,
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
-    this.updatedMembership = await this.ctx.em.findOneOrFail(
-      SpaceMembership,
-      {
-        id: this.validatedInput.updatedMembershipId,
-      },
-      { populate: ['user'] },
-    )
-    if (!this.updatedMembership) {
+
+    try {
+      this.updatedMembership = await this.ctx.em.findOneOrFail(
+        SpaceMembership,
+        {
+          id: this.validatedInput.updatedMembershipId,
+        },
+        { populate: ['user'] },
+      )
+    } catch (err) {
+      this.ctx.log.error({ err }, 'updated space membership in space not found - DB error')
       throw new errors.NotFoundError(
         `Space membership id ${this.validatedInput.updatedMembershipId.toString()} not found`,
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
