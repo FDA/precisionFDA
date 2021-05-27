@@ -3,7 +3,7 @@ import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
 import { AngleDownIcon } from '../../../components/icons/AngleDownIcon'
 import Icon from '../Icon'
-import { Divider, StyledItem, StyledMenu } from './styles'
+import { Divider, StyledItem, StyledMenu, StyledMessageItem } from './styles'
 
 interface IItemOption {
   text: string,
@@ -58,7 +58,7 @@ export const DropdownMenu = ({ icon, title, options = [], message = '' }: IDropd
 
   if (message) list.unshift(
     <React.Fragment key='message'>
-      <li style={{ padding: '3px 20px', fontStyle: 'italic' }}>{message}</li>
+      <StyledMessageItem>{message}</StyledMessageItem>
       <Divider />
     </React.Fragment>,
   )
