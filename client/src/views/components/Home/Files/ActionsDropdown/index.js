@@ -180,7 +180,7 @@ const ActionsDropdown = (props) => {
       <DropdownMenu
         title='Actions'
         options={availableActions}
-        message={page === 'spaces' ? 'To perform other actions on this files, access it from the Space' : ''} />
+        message={page === 'spaces' ? 'To perform other actions on these files, access it from the Space' : ''} />
       <CopyToSpaceModal
         isLoading={props.copyToSpaceModal.isLoading}
         isOpen={props.copyToSpaceModal.isOpen}

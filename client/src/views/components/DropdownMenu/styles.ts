@@ -14,6 +14,15 @@ export const StyledMenu = styled.ul`
 export const Divider = styled.div`
   width: 100%;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 4px;
+`
+
+export const StyledMessageItem = styled.li`
+  line-height: 23px;
+  padding: 0px 20px;
+  list-style: none;
+  font-style: italic;
+  max-width: 200px;
 `
 
 export const StyledItem = styled.li<{isDisabled?: boolean}>`

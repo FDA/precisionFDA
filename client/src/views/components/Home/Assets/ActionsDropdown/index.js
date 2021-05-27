@@ -149,7 +149,7 @@ const ActionsDropdown = (props) => {
       <DropdownMenu
         title='Actions'
         options={availableActions}
-        message={page === 'spaces' ? 'To perform other actions on this assets, access it from the Space' : ''}
+        message={page === 'spaces' ? 'To perform other actions on these assets, access it from the Space' : ''}
       />
       <HomeAttachToModal
         isOpen={props.attachToModal.isOpen}
