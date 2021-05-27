@@ -11,11 +11,12 @@ export interface IButton {
 
 export const Button = styled.button<IButton>`
   position: relative;
-  display: inline-block;
-  font-weight: ${fontWeight.bold};
+  display: flex;
+  align-items: center;
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: ${fontWeight.regular};
   white-space: nowrap;
   text-align: center;
-  verticle-align: middle;
   background-image: none;
   border: 1px solid transparent;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);

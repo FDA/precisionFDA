@@ -1,7 +1,7 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const FileIcon = ({ width, height }: { width?: number, height?: number }) => (
+export const FileIcon = ({ width, height = 16 }: { width?: number, height?: number }) => (
   <Svg
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
