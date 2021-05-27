@@ -40,7 +40,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import RenameObjectModal from '../../../Files/RenameObjectModal'
 import HomeAttachToModal from '../../HomeAttachToModal'

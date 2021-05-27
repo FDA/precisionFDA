@@ -10,7 +10,7 @@ export const TransparentButton = styled.button`
   padding: 0;
   &:active {
     position: relative;
-    top: 0.1rem;
+    top: 1px;
     outline: none;
   }
   &:focus {
@@ -33,7 +33,7 @@ export const DropdownMenu = styled.div`
 export const PopperContainer = styled.div`
   position: relative;
   z-index: 50;
-  padding-top: 0.5rem;
+  padding-top: 2px;
   min-height: auto;
 `;
 
@@ -43,9 +43,9 @@ export const DropdownList = styled.div`
 `;
 
 export const DropdownItem = styled.div`
-  padding: 0.4rem;
-  min-width: 10rem;
-  border-bottom: 0.1rem solid ${theme.colors.textDarkGrey};
+  padding: 4px;
+  min-width: 100px;
+  border-bottom: 1px solid ${theme.colors.textDarkGrey};
   cursor: pointer;
 
   &:hover {

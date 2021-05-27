@@ -25,7 +25,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_WORKFLOWS_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import WorkflowsActionModal from '../../Workflows/WorkflowsActionModal'
 import HomeExportModal from '../../HomeExportModal'

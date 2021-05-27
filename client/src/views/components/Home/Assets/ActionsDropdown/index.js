@@ -35,7 +35,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { OBJECT_TYPES, HOME_FILES_ACTIONS } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeEditTagsModal from '../../HomeEditTagsModal'
 import RenameObjectModal from '../../../Files/RenameObjectModal'
