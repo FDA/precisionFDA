@@ -13,7 +13,7 @@ export const Button = styled.button<IButton>`
   position: relative;
   display: flex;
   align-items: center;
-  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: ${theme.fontFamily};
   font-weight: ${fontWeight.regular};
   white-space: nowrap;
   text-align: center;
