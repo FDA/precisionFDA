@@ -109,7 +109,7 @@ class ChallengesListPage extends Component {
             <div className="pfda-subsection-heading">PREVIOUS CHALLENGES</div>
             <ChallengesYearList setYearHandler={setYearHandler} />
             <hr />
-            <div className="pfda-subsection-heading">PROPOSE A CHALLEGNE</div>
+            <div className="pfda-subsection-heading">PROPOSE A CHALLENGE</div>
             <p>If you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.</p>
             <Link to={{ pathname: '/challenges/propose' }}>
               Propose a Challenge &rarr;
