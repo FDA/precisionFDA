@@ -46,15 +46,15 @@ describe UserFileSerializer do
       end
 
       it "links[download, link, publish] are nil" do
-        expect(user_file_serialized["links"]["download"]).to be_nil
-        expect(user_file_serialized["links"]["link"]).to be_nil
+        expect(user_file_serialized["links"]["download"]).to eq(download_api_file_path(user_file))
+        expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
         expect(user_file_serialized["links"]["publish"]).to be_nil
       end
 
       it "links[rename, remove, copy] are nil" do
         expect(user_file_serialized["links"]["rename"]).to be_nil
         expect(user_file_serialized["links"]["remove"]).to be_nil
-        expect(user_file_serialized["links"]["copy"]).to be_nil
+        expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
       end
 
       it "links[license, organize, feature] are nil" do
