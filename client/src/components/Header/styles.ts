@@ -77,10 +77,9 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
   align-items: center;
   cursor: pointer;
   color: ${theme.colors.textWhite};
-  max-height: ${theme.sizing.navigationBarHeight};
 
   ${smallestHeader} {
-    max-height: ${theme.sizing.navigationBarHeightNarrow};
+    height: ${theme.sizing.navigationBarHeightNarrow};
   }
 
   ${({ active = false }) => {
@@ -115,10 +114,41 @@ export const MenuItem = styled(HeaderItem)`
   }
 `
 
-export const StyledSupport = styled(HeaderItem)`
+export const HeaderItemText = styled.div`
+  margin-top: ${theme.padding.contentMarginThird};
+
+  ${smallestHeader} {
+    display: none;
+  }
+`
+
+export const StyledRightMenu = styled(HeaderItem)`
+  align-items: center;
+
+  padding-left: ${theme.padding.contentMargin};
+  padding-right: ${theme.padding.contentMargin};
+
+  ${mediumHeader} {
+    margin-left: ${theme.padding.contentMarginHalf};
+    margin-right: ${theme.padding.contentMarginHalf};
+  }
+
+  ${smallHeader} {
+    margin-left: ${theme.padding.contentMarginThird};
+    margin-right: ${theme.padding.contentMarginThird};
+  }
+
   ${Svg} {
     margin-right: 5px;
   }
+
+  ${HeaderItemText} {
+    margin: 0;
+  }
+`
+
+export const AvatarMenuItem = styled(StyledRightMenu)`
+  padding-right: 0;
 `
 
 export const StyledUsername = styled(HeaderItem)`
@@ -136,13 +166,11 @@ export const StyledUsername = styled(HeaderItem)`
   }
 `
 
-export const HeaderItemText = styled.div`
-  margin-top: ${theme.padding.contentMarginThird};
-
-  ${smallestHeader} {
-    display: none;
-  }
+export const IconWrap = styled.div`
+  height: 28px;
 `
+
+
 
 export const HeaderSpacer = styled.div`
   border-right: 1px solid ${theme.colors.lightBlue};

@@ -30,9 +30,9 @@ const root = ({ store }: any) => {
   return (
   <Provider store={store}>
     <GlobalStyle />
-    {/* <Header /> */}
     <QueryClientProvider client={queryClient}>
       <Router history={history}>
+        <Header />
         <ErrorWrapper>
           <Switch>
             <Route exact path='/'>
