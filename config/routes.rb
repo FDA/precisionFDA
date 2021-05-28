@@ -93,8 +93,9 @@ Rails.application.routes.draw do
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
-    get "/challenges/13" => "main#tmb"
-    get "/challenges/14" => "challenges#food_traceability"
+    # hotfix for PFDA-2432
+    get "/challenges/14" => redirect("/challenges/13")
+    get "/challenges/17" => "main#tmb"
 
     # Mains controller
     get "login" => "main#login"

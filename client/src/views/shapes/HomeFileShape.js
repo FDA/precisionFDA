@@ -55,6 +55,7 @@ const mapToHomeFile = (data) => ({
   fileLicense: data.file_license,
   showLicensePending: data.show_license_pending,
   spaceId: data.space_id,
+  downloadURL: data.links.download,
 })
 
 export default HomeFileShape
