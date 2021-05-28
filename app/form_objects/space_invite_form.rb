@@ -11,9 +11,10 @@ class SpaceInviteForm
            :check_emails_already_in_space,
            :check_dxusers_already_in_space
 
-  # @param [SpaceMembership, #side, #user] membership
+  # @param membership [SpaceMembership] Inviter's membership object.
+  # @param api [DNAnexusAPI] Inviter's api object.
   def invite(membership, api)
-    # rubocop:disable Style/SymbolProc
+    # rubocop:todo Style/SymbolProc
     return if invalid?
 
     existing_users.find_each do |user|
