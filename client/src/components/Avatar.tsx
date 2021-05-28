@@ -16,8 +16,6 @@ interface IAvatar {
 }
 
 export const Avatar: React.FC<IAvatar> = ({ imgUrl }) => {
-  console.log(imgUrl);
-  
   return (
   <StyledAvatar src={imgUrl}></StyledAvatar>
 )}
