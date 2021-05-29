@@ -29,14 +29,14 @@ img {
 }
 `
 
-interface IChallengeUserContent {
+interface IUserContentDisplay {
   html: string,
 }
 
-// ChallengeUserContent renders the html contained within the
-//    'intro' and 'results' regions in the meta attributes into a container
-export const ChallengeUserContent: FunctionComponent<IChallengeUserContent> = ({ html }) => {
+// UserContentDisplay renders the user html contained within the database into a container
+//
+// For example, challenge introduction and results sections, or expert blog entries
+//
+export const UserContentDisplay: FunctionComponent<IUserContentDisplay> = ({ html }) => {
   return <StyledUserContent dangerouslySetInnerHTML={{ __html: html }} />
 }
-
-export default ChallengeUserContent
