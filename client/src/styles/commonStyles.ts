@@ -8,6 +8,11 @@ export const commonStyles = {
     font-weight: ${theme.fontWeight.regular};
   `,
 
+  bannerTitle: css`
+    font-size: ${theme.fontSize.bannerTitle};
+    font-weight: ${theme.fontWeight.bold};
+  `,
+
   titleStyle: css`
     font-size: ${theme.fontSize.h1};
     font-weight: ${theme.fontWeight.bold};

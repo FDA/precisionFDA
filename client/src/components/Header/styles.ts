@@ -198,6 +198,6 @@ export const StyledLink = styled.a`
   padding: 0px ${theme.padding.contentMargin};
   line-height: 30px;
   &:hover {
-    color: ${theme.colors.textMediumGrey};
+    background-color: ${theme.colors.textLightGrey};
   }
 `
