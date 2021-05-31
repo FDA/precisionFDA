@@ -40,7 +40,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import RenameObjectModal from '../../../Files/RenameObjectModal'
 import HomeAttachToModal from '../../HomeAttachToModal'
@@ -180,7 +180,7 @@ const ActionsDropdown = (props) => {
       <DropdownMenu
         title='Actions'
         options={availableActions}
-        message={page === 'spaces' ? 'To perform other actions on this files, access it from the Space' : ''} />
+        message={page === 'spaces' ? 'To perform other actions on these files, access it from the Space' : ''} />
       <CopyToSpaceModal
         isLoading={props.copyToSpaceModal.isLoading}
         isOpen={props.copyToSpaceModal.isOpen}
