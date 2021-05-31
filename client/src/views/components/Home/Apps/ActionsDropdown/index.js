@@ -23,7 +23,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_APPS_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import AppsActionModal from '../AppsActionModal'
 import HomeExportModal from '../../HomeExportModal'

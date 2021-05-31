@@ -6,9 +6,9 @@ import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
 export const Dropdown: FC<{
   content: React.ReactNode
   forceShowPopper?: boolean
-  trigger?: 'click'
+  trigger?: 'click' | 'hover'
   children: ({}: any) => React.ReactNode
-}> = ({ forceShowPopper, trigger, content, children }) => {
+}> = ({ forceShowPopper, trigger = 'hover', content, children }) => {
   const [showPopper, setShowPopper] = useState(false)
 
   const [delayHandler, setDelayHandler] = useState<any>(null)
@@ -59,16 +59,16 @@ export const Dropdown: FC<{
         style: { cursor: 'pointer' },
         ref: buttonRef,
         onClick: () => trigger === 'click' && setShowPopper(!showPopper),
-        onMouseEnter: () => setShowPopper(true),
-        onMouseLeave: () => setShowPopper(false),
+        onMouseEnter: () => trigger === 'hover' && setShowPopper(true),
+        onMouseLeave: () => trigger === 'hover' && setShowPopper(false),
       })}
       {forceShowPopper || showPopper && (
         <PopperContainer
           ref={popperRef}
           style={{ ...styles.popper }}
           {...attributes.popper}
-          onMouseEnter={() => setShowPopper(true)}
-          onMouseLeave={() => setShowPopper(false)}
+          onMouseEnter={() => trigger === 'hover' && setShowPopper(true)}
+          onMouseLeave={() => trigger === 'hover' && setShowPopper(false)}
         >
           <DropdownMenu>
             <div ref={setArrowRef as any} style={styles.arrow} id="arrow" />
