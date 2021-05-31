@@ -46,6 +46,7 @@ const colors = {
 
 const fontSize = {
   pageTitle: '32px',
+  bannerTitle: '28px',
   h1: '20px',
   h2: '18px',
   body: '14px',
