@@ -305,15 +305,11 @@ class Challenge < ApplicationRecord
       space_type: SpaceForm::TYPE_GROUPS,
     )
 
-    space = SpaceService::Create.call(space_form, api: context.api, user: context.user)
-    membership = space.space_memberships.find_by(user_id: space.host_lead.id)
-
-    SpaceService::Invite.call(
-      DIContainer.resolve("api.admin"),
-      space,
-      membership,
-      User.challenge_bot,
-      SpaceMembership::ROLE_ADMIN,
+    space = SpaceService::Create.call(
+      space_form,
+      api: context.api,
+      user: context.user,
+      for_challenge: true,
     )
 
     update!(space: space)

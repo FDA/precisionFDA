@@ -6,10 +6,12 @@ module SpaceService
       new(**options).call(space_form)
     end
 
-    def initialize(user:, api:, notification_mailer: NotificationsMailer)
+    def initialize(user:, api:, for_challenge: false, notification_mailer: NotificationsMailer)
       @api = api
+      @admin_api = DIContainer.resolve("api.admin")
       @notification_mailer = notification_mailer
       @user = user
+      @for_challenge = for_challenge
     end
 
     # Creates a space based on space_form data and returns new space
@@ -22,6 +24,7 @@ module SpaceService
         create_orgs(dxorgs)
         space.save!
         add_leads(space, space_form)
+        invite_challenge_bot(space) if @for_challenge
 
         if space.review?
           create_reviewer_cooperative_project(space)
@@ -37,7 +40,19 @@ module SpaceService
 
     private
 
-    attr_reader :user, :api, :notification_mailer
+    attr_reader :user, :api, :notification_mailer, :admin_api
+
+    def invite_challenge_bot(space)
+      membership = space.space_memberships.find_by(user_id: space.host_lead.id)
+
+      SpaceService::Invite.call(
+        admin_api,
+        space,
+        membership,
+        User.challenge_bot,
+        SpaceMembership::ROLE_ADMIN,
+      )
+    end
 
     def build_space(space_form)
       uuid = SecureRandom.hex[0..9]
@@ -78,14 +93,14 @@ module SpaceService
 
     def add_lead(space, lead, side)
       SpaceMembershipService::CreateLead.call(
-        papi,
+        admin_api,
         space,
         lead,
         side,
       )
     end
 
-    # Remove pfda admin from orgs.
+    # Remove pfda admin from orgs (only for group spaces).
     # Skip removing if:
     #   - admin is a current user
     #   - admin is a host lead - skip removing from a host org
@@ -94,12 +109,12 @@ module SpaceService
       return if user.dxid == ADMIN_USER
 
       unless space_form.host_admin.dxid == ADMIN_USER
-        papi.org_remove_member(space.host_dxorg, ADMIN_USER)
+        admin_api.org_remove_member(space.host_dxorg, ADMIN_USER)
       end
 
       return if space_form.guest_admin.dxid == ADMIN_USER
 
-      papi.org_remove_member(space.guest_dxorg, ADMIN_USER)
+      admin_api.org_remove_member(space.guest_dxorg, ADMIN_USER)
     end
 
     # Send an activation email to all space leads
@@ -114,7 +129,7 @@ module SpaceService
     # @param [Space]
     def create_reviewer_cooperative_project(space)
       if ADMIN_USER != user.dxid
-        papi.org_invite(
+        admin_api.org_invite(
           space.host_dxorg,
           user.dxid,
           level: DNAnexusAPI::ORG_MEMBERSHIP_ADMIN,
@@ -206,10 +221,6 @@ module SpaceService
 
       space_copier = CopyService::SpaceCopier.new(api: api, user: user)
       space_copier.copy(space, source_space)
-    end
-
-    def papi
-      @papi ||= DIContainer.resolve("api.admin")
     end
 
     def guest_dx_org(uuid, space, space_form)
