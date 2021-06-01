@@ -1,9 +1,33 @@
 # PFDA HTTPS apps module
 
+## Run from Docker (via docker-compose)
+
+Use this if you want to run nodejs-api and nodejs-worker as services while developing other sections of PFDA (client, Rails app) or for local testing. Docker builds two images for worker and api (with just different CMD). If you want to make any changes to nodejs code or `.env` file or `key.pem/cert.pem` the image has to be rebuilt. We do not use "live-reload" via Docker volume-bind because of variety of issues (the reload is very slow on MacOX, problem with shadowing `node_modules` folder). If you wanna make changes to the nodejs code, follow the setup in "Development" section.
+
+Files `.env` and `key.pem` and `cert.pem` are required to successfully build the images. The `.env` file can be created from `.env.example` or retrieved from a colleague, for the cert files follow instructions below.
+
+Follow these instructions from PFDA root folder:
+
+```bash
+$ docker-compose up -d nodejs-api
+$ docker-compose up -d nodejs-worker
+```
+
 ## Development
 
-- make sure you have the components from root `docker-compose` up and running. Specifically, database and redis service.
-- make sure you have the basic `.env` file prepared.
+- make sure you have the components from root `docker-compose` up and running. Specifically, `db` and `redis` service.
+- make sure you have the basic `.env` file prepared. The file has to be located in `./https-apps-api` folder. You can copy it from PFDA root folder or ask your team member for one :)
+- make sure ENV vars are ready for local development instead of containerized run. Namely make sure `db` and `redis` addresses work (notice the host change):
+
+```bash
+# EXAMPLE - WHEN RUNNING VIA DOCKER
+NODE_DATABASE_URL="mysql://root:password@db:3306/precision-fda"
+
+# EXAMPLE - WHEN RUNNING OUT OF DOCKER
+NODE_DATABASE_URL="mysql://root:password@localhost:3306/precision-fda"
+```
+
+- make sure paths to key.pem and cert.pem are correct (you might need to change the route from `./key.pem` to `../key.pem`)
 - `https-apps-api` folder contains a Makefile with all the necessary commands.
 - run from within the folder:
 
@@ -23,7 +47,18 @@ $ make test-api
 
 ### Certificate
 
-- the API uses self-generated certificate. It should be included (both `key` and `cert` files in the API package root folder)
+- the API uses self-generated certificate.
+- The certificates can be either sent to you from your fellow colleague or you can generate them using mkcert (https://github.com/FiloSottile/mkcert).
+- Run following steps from the root project folder:
+
+```bash
+$ brew install mkcert
+$ mkcert -install
+$ mkcert localhost
+# rename or otherwise make sure naming matches your .env file
+$ mv localhost.pem cert.pem
+$ mv localhost-key.pem key.pem
+```
 
 ### Endpoints
 
