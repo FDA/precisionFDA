@@ -4,12 +4,13 @@ import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBarPublic from '../../../components/NavigationBar/NavigationBarPublic'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import ChallengesList from '../../../components/Challenges/ChallengesList'
 import ChallengesYearList from '../../../components/Challenges/ChallengesYearList'
 import CollapsibleMenu from '../../../components/CollapsibleMenu'
 import {
   fetchChallenges,
+  challengesSetPage,
   challengesSetYear,
   challengesListResetFilters,
   challengesSetTimeStatus,
@@ -21,9 +22,6 @@ import { challengesListTimeStatusSelector, challengesListYearSelector } from '..
 
 
 class ChallengesListPage extends Component {
-  constructor(props) {
-    super(props)
-  }
 
   componentDidMount() {
     const { loadChallenges, setYearHandler } = this.props
@@ -41,7 +39,7 @@ class ChallengesListPage extends Component {
   }
 
   render() {
-    const { loadChallenges, setYearHandler, setTimeStatusHandler, resetFilters, user, year, timeStatus } = this.props
+    const { loadChallenges, setPageHandler, setYearHandler, setTimeStatusHandler, resetFilters, user, year, timeStatus } = this.props
 
     const title = 'Challenges'
     const subtitle = 'Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science.'
@@ -93,14 +91,14 @@ class ChallengesListPage extends Component {
 
     return (
       <PublicLayout>
-        <NavigationBarPublic title={title} subtitle={subtitle} />
+        <NavigationBar title={title} subtitle={subtitle} user={user} />
 
         <div className="challenges-page-layout">
           <div className="left-column">
             {filterActive &&
             <a onClick={handleResetClicked}>&larr; Back to All Challenges</a>
             }
-            <ChallengesList emptyListMessage={getEmptyListMessage(timeStatus)} />
+            <ChallengesList emptyListMessage={getEmptyListMessage(timeStatus)} setPageHandler={setPageHandler} />
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateChallenge && (
@@ -125,6 +123,7 @@ class ChallengesListPage extends Component {
 
 ChallengesListPage.propTypes = {
   loadChallenges: PropTypes.func,
+  setPageHandler: PropTypes.func,
   setYearHandler: PropTypes.func,
   setTimeStatusHandler: PropTypes.func,
   resetFilters: PropTypes.func,
@@ -135,6 +134,7 @@ ChallengesListPage.propTypes = {
 
 ChallengesListPage.defaultProps = {
   loadChallenges: () => {},
+  setPageHandler: () => {},
   setYearHandler: () => {},
   setTimeStatusHandler: () => {},
   resetFilters: () => {},
@@ -149,6 +149,10 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   loadChallenges: () => dispatch(fetchChallenges()),
   resetFilters: () => dispatch(challengesListResetFilters()),
+  setPageHandler: (page) => {
+    dispatch(challengesSetPage(page))
+    dispatch(fetchChallenges())
+  },
   setYearHandler: (year) => {
     dispatch(challengesListResetFilters())
     dispatch(challengesSetTimeStatus(CHALLENGE_TIME_STATUS.ENDED))

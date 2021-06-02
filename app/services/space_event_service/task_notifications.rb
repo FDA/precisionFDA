@@ -1,4 +1,5 @@
 module SpaceEventService
+  # deprecated
   class TaskNotifications
 
     class << self

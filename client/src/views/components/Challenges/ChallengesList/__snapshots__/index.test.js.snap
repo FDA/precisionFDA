@@ -1,14 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ChallengesList test should render 1`] = `
-<div
-  className="text-center"
-  style={
+<Provider
+  store={
     Object {
-      "margin": "32px",
+      "clearActions": [Function],
+      "dispatch": [Function],
+      "getActions": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
     }
   }
 >
-  No challenges found.
-</div>
+  <ChallengesList>
+    <div
+      className="text-center"
+      style={
+        Object {
+          "margin": "32px",
+        }
+      }
+    >
+      No challenges found.
+    </div>
+  </ChallengesList>
+</Provider>
 `;

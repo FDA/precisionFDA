@@ -12,6 +12,7 @@ class ChallengeSerializer < ApplicationSerializer
     :status,
     :card_image_url,
     :card_image_id,
+    :pre_registration_url,
     :links,
   )
 

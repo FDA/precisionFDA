@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { HomeFileShape } from '../../../../shapes/HomeFileShape'
+import { FileActionItemShape } from '../../../../shapes/FileShape'
 import Icon from '../../../Icon'
 import { HOME_FILES_ACTIONS } from '../../../../../constants'
 import LinkTargetBlank from '../../../LinkTargetBlank'
@@ -28,11 +28,15 @@ const Item = ({ file, action }) => (
     :
       <>
         <td>
-          <Icon icon='fa-file-o' fw />
+          {file.type === 'UserFile' ?
+            <Icon icon="fa-file-o" fw/>
+            :
+            <Icon icon="fa-folder" fw/>
+          }&nbsp;
           <span>{file.name}</span>
         </td>
         <td>
-          <a href={file.links.user} className='objects-actions-modal__help-block'>{file.createdBy}</a>
+          <a href={file.links.user} className='objects-actions-modal__help-block'>{file.addedBy}</a>
         </td>
       </> 
     }
@@ -56,12 +60,12 @@ const FilesList = ({ files = [], action }) => (
 )
 
 FilesList.propTypes = {
-  files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
+  files: PropTypes.arrayOf(PropTypes.exact(FileActionItemShape)),
   action: PropTypes.string,
 }
 
 Item.propTypes = {
-  file: PropTypes.exact(HomeFileShape),
+  file: PropTypes.exact(FileActionItemShape),
   action: PropTypes.string,
 }
 

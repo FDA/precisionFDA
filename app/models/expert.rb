@@ -14,6 +14,7 @@
 
 class Expert < ApplicationRecord
   include Auditor
+  paginates_per 10
 
   has_many :expert_questions, dependent: :destroy
   has_many :expert_answers, through: :expert_questions, dependent: :destroy

@@ -1,6 +1,5 @@
 import { createAction } from '../../utils/redux'
 import { fetchNews } from './fetchNews'
-import { fetchNewsYearList } from './fetchNewsYearList'
 import {
   NEWS_LIST_SET_PAGE,
   NEWS_LIST_SET_YEAR,
@@ -13,7 +12,6 @@ const newsListResetFilters = () => createAction(NEWS_LIST_RESET_FILTERS)
 
 export {
   fetchNews,
-  fetchNewsYearList,
   newsListSetPage,
   newsListSetYear,
   newsListResetFilters,

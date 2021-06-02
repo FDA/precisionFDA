@@ -4,7 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "2.7.2"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "~> 6.0.3.5"
+gem "rails", "~> 6.0.3.7"
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0", ">= 6.0.0"
 # Use Uglifier as compressor for JavaScript assets
@@ -18,6 +18,8 @@ gem "jquery-rails", "~> 4.4", ">= 4.4.0"
 gem "turbolinks", "~> 5"
 # Build JSON APIs with ease
 gem "jbuilder", "~> 2.5"
+
+gem "rails-reverse-proxy"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", ">= 1.4.6", require: false

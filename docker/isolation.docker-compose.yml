@@ -1,7 +1,6 @@
-version: "3.7"
+version: '3.7'
 
-x-shared:
-  &shared
+x-shared: &shared
   build:
     context: ../
     dockerfile: docker/isolation.Dockerfile
@@ -30,6 +29,31 @@ services:
       - redis
       - sidekiq
     entrypoint: ./docker/isolation.docker-entrypoint.sh
+
+  nodejs-api:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
+      args:
+        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
+    command: ['make', 'run-dist']
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+      - redis
+
+  nodejs-worker:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
+      args:
+        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
+
+    command: ['make', 'run-worker-dist']
+    depends_on:
+      - db
+      - redis
 
   db:
     image: mysql:5.6
