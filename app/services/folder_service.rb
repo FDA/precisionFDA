@@ -174,8 +174,10 @@ class FolderService
       return res if res.failure?
     end
 
-    folder.files.each do |file|
+    folder_files = folder.files.where(scope: folder.scope)
+    folder_files.each do |file|
       res = remove_file(file)
+
       return res if res.failure?
     end
 

@@ -4,6 +4,9 @@ import { shallowEqual, useSelector, useDispatch } from 'react-redux'
 
 import FileShape from '../../../../shapes/FileShape'
 import {
+  spaceDataSelector,
+} from '../../../../../reducers/spaces/space/selectors'
+import {
   spaceFilesActionModalSelector,
   spaceFilesLinksSelector,
 } from '../../../../../reducers/spaces/files/selectors'
@@ -14,7 +17,7 @@ import {
   publishFiles,
   copyToPrivate,
 } from '../../../../../actions/spaces'
-import FilesActionModal from '../../../Files/FilesActionModal'
+import FilesActionModal from '../../../Home/Files/FilesActionModal'
 import { SPACE_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
 
 
@@ -22,10 +25,11 @@ const ActionModal = ({ files, loadFilesHandler }) => {
   const modal = useSelector(spaceFilesActionModalSelector, shallowEqual)
   const links = useSelector(spaceFilesLinksSelector, shallowEqual)
   const ids = files.map((file) => file.id)
+  const scope = useSelector(spaceDataSelector, shallowEqual).scope
 
   const dispatch = useDispatch()
   const hideAction = () => dispatch(hideFilesActionModal())
-  const getFilesAction = () => dispatch(fetchFilesByAction(ids, modal.action, 'private'))
+  const getFilesAction = () => dispatch(fetchFilesByAction(ids, modal.action, scope))
 
   const modalAction = () => {
     switch (modal.action) {
@@ -56,6 +60,8 @@ const ActionModal = ({ files, loadFilesHandler }) => {
       files={modal.files}
       isOpen={modal.isOpen}
       isLoading={modal.isLoading}
+      modal={modal}
+      fetchFilesByAction={() => fetchFilesByAction(ids, modal.action, scope)}
     />
   )
 }

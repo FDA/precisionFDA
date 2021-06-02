@@ -2,19 +2,14 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { withRouter, Link } from 'react-router-dom'
-import { HashLink } from 'react-router-hash-link'
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs'
 import classNames from 'classnames/bind'
-import { format } from 'date-fns-tz'
-import enUS from 'date-fns/locale/en-US'
 
 import { fetchChallenge } from '../../../../actions/challenges'
 import ChallengeShape from '../../../shapes/ChallengeShape'
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBarPublic from '../../../components/NavigationBar/NavigationBarPublic'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import Loader from '../../../components/Loader'
-import CollapsibleMenu from '../../../components/CollapsibleMenu'
-import ChallengeTimeRemaining from '../../../components/Challenges/ChallengeTimeRemaining'
 import './style.sass'
 import {
   challengeDataSelector,
@@ -25,109 +20,17 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import ChallengeSubmissionsTable from '../../../components/Challenges/ChallengeSubmissionsTable'
 import ChallengeMyEntriesTable from '../../../components/Challenges/ChallengeMyEntriesTable'
+import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
+import { CallToActionButton } from './styles'
+import UserContent from '../../../components/UserContent'
+import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
 
 
-class ChallengeContent {
-  constructor(challenge) {
-    this.challenge = challenge
-    this.content = ''
-    this.anchors = []
-    this.parseChallengeMeta(challenge)
+const extractChallengeContent = (challenge, regionName) => {
+  if (!challenge || !challenge.meta || !challenge.meta.regions) {
+    return ''
   }
-
-  // challenge.meta contains the body/content of the challenge details
-  // This is structured as a dict as such:
-  // { 'regions' : {
-  //     'intro': "This is the introduction section of a challenge",
-  //     'results': "Populated by challenge admin for the results section",
-  //     'results-details': "The results area is separated into two sections",
-  // }}
-  //
-  parseChallengeMeta = (challenge) => {
-    if (challenge == undefined || challenge.meta == undefined || challenge.meta.regions == undefined) {
-      return
-    }
-
-    let introContent = ''
-    let resultsContent = ''
-
-    Object.keys(challenge.meta.regions).forEach(function(key) {
-      const value = challenge.meta.regions[key]
-      if (key === 'intro') {
-        introContent = value
-      }
-      else if (key.startsWith('results')) {
-        resultsContent += value
-      }
-      else {
-        console.error(`Unexpected key ${key} found in challenge.meta. Challenge = `+challenge)
-      }
-    })
-
-    // In challenges.meta, we extract <h1> and <h2> tags for the introduction section
-    // to create href anchors and buttons to navigate to them in the side bar
-    //
-    const el = document.createElement('html')
-    el.innerHTML = introContent
-
-    const headingElements = el.querySelectorAll('h1, h2')
-
-    let anchorId = 0
-    const getNextAnchorId = () => {
-      anchorId += 1
-      return 'anchor'+anchorId
-    }
-
-    const anchors = Array.from(headingElements).map((el) => {
-      const tag = el.tagName
-      const content = (el.innerHTML ? el.innerHTML.trim() : '')
-      const anchorId = getNextAnchorId()
-      el.setAttribute('id', anchorId.toString())
-      const scrollToElement = () => {
-        // console.log('tag clicked' + tag)
-        document.getElementById(anchorId).scrollIntoView({ behavior: 'smooth' }) 
-      }
-      el.onClick = () => { scrollToElement() }
-      return { 'tag': tag, 'content': content, 'anchorId': anchorId, 'action': scrollToElement }
-    })
-
-    this.anchors = anchors
-    this.introContent = el.innerHTML
-    this.resultsContent = resultsContent
-  }
-
-  renderAnchors = () => {
-    // Translate the flat list of h1, h2, etc tags into hierarchical menu structure
-    // that can be converted to a list of CollapsibleMenu components
-    // console.log(this.anchors)
-    const menus = []
-    let items = []
-    for (const element of this.anchors) {
-      const tag = element['tag'].toLowerCase()
-      if (tag == 'h1') {
-        items = []
-        const currentMenu = { ...element, 'items': items }
-        menus.push(currentMenu)
-      }
-      else {
-        items.push(element)
-      }
-    }
-
-    return (
-      menus.map((menu, index) => {
-        return <CollapsibleMenu title={menu['content']} key={index}>
-                { menu['items'].map((item, index) => {
-                  return (
-                    <div className={ 'outline-item-'+item['tag'].toLowerCase() } key={index}>
-                      <HashLink smooth to={'#'+item['anchorId']}>{item['content']}</HashLink>
-                    </div>
-                  )
-                })}
-              </CollapsibleMenu>
-      })
-    )
-  }
+  return challenge.meta.regions[regionName]
 }
 
 
@@ -166,10 +69,10 @@ class ChallengeDetailsPage extends React.Component {
       )
     }
 
-    if (error != undefined) {
+    if (error) {
       return (
         <PublicLayout>
-          <NavigationBarPublic showLogoOnNavbar={true} />
+          <NavigationBar showLogoOnNavbar={true} />
           <div className="error-container">
             <Link to={{ pathname: '/challenges' }}>
                 &larr; Back to All Challenges
@@ -182,25 +85,10 @@ class ChallengeDetailsPage extends React.Component {
       )
     }
 
-    const challengeContent = new ChallengeContent(challenge)
-
-    let stateLabel = 'Previous precisionFDA Challenge'
-    switch (challenge.timeStatus) {
-      case CHALLENGE_TIME_STATUS.UPCOMING:
-        stateLabel = 'Upcoming precisionFDA Challenge'
-        break
-      case CHALLENGE_TIME_STATUS.CURRENT:
-        stateLabel = 'Current precisionFDA Challenge'
-        break
-    }
-
-    const bannerClasses = classNames('challenge-details-main-container', 'challenge-details-banner', {
-      'upcoming': challenge.timeStatus == CHALLENGE_TIME_STATUS.UPCOMING,
-      'current': challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT,
-      'ended': challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED,
-    })
-
     const isLoggedIn = user && Object.keys(user).length > 0
+
+    const challengePreRegistration = challenge.status == CHALLENGE_STATUS.PRE_REGISTRATION
+
     const userCanJoin = isLoggedIn && !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
     const userCanSubmitEntry =  isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
 
@@ -211,20 +99,75 @@ class ChallengeDetailsPage extends React.Component {
     //  - or when challenge is archived
     const userCanSeeResults = (isLoggedIn && user.can_create_challenges) || challenge.status == CHALLENGE_STATUS.RESULT_ANNOUNCED || challenge.status == CHALLENGE_STATUS.ARCHIVED
 
-    const page = match.params.page
-    const tabPages = userCanSeeSubmissions ? ['', '/submissions', '/my_entries', '/results']
-                                           : ['', '/results']
+    const tabs = []
+    if (challengePreRegistration) {
+      const preRegistrationContent = extractChallengeContent(challenge, 'pre-registration')
+      const userContent = new UserContent(preRegistrationContent, isLoggedIn)
+
+      tabs.push({
+        title: 'PRE-REGISTRATION',
+        subroute: '',
+        content: userContent.createDisplayElement(),
+        outline: userContent.createOutlineElement(),
+      })
+    }
+    else {
+      const introductionContent = extractChallengeContent(challenge, 'intro')
+      const userContent = new UserContent(introductionContent, isLoggedIn)
+      tabs.push({
+        title: 'INTRODUCTION',
+        subroute: '',
+        content: userContent.createDisplayElement(),
+        outline: userContent.createOutlineElement(),
+      })
+
+      if (userCanSeeSubmissions) {
+        tabs.push({
+          title: 'SUBMISSIONS',
+          subroute: '/submissions',
+          content: (<ChallengeSubmissionsTable challengeId={challenge.id} />),
+        })
+        tabs.push({
+          title: 'MY ENTRIES',
+          subroute: '/my_entries',
+          content: (<ChallengeMyEntriesTable challengeId={challenge.id} />),
+        })
+      }
+
+      if (userCanSeeResults) {
+        const resultsContent = extractChallengeContent(challenge, 'results') + extractChallengeContent(challenge, 'results-details')
+        const userContent = new UserContent(resultsContent, isLoggedIn)
+
+        tabs.push({
+          title: 'RESULTS',
+          subroute: '/results',
+          content: userContent.createDisplayElement(),
+          outline: userContent.createOutlineElement(),
+          })
+      }
+    }
+
+    const tabSubroutes = tabs.map(x => x['subroute'])
 
     let tabIndex = this.state.tabIndex
     if (tabIndex < 0) {
+      const page = match.params.page
       const pageRoute = `/${page}`
-      tabIndex = tabPages.includes(pageRoute) ? tabPages.indexOf(pageRoute) : 0
+      tabIndex = tabSubroutes.includes(pageRoute) ? tabSubroutes.indexOf(pageRoute) : 0
     }
 
+    const currentTab = tabs[tabIndex]
+
     const onSelectTab = (index) => {
-      const url = `/challenges/${challenge.id}${tabPages[index]}`
+      const url = `/challenges/${challenge.id}${tabSubroutes[index]}`
       history.pushState(null, null, url)
       this.setState({ tabIndex: index })
+    }
+
+    const onClickPreRegistrationButton = () => {
+      if (challenge.preRegistrationUrl) {
+        window.location.assign(challenge.preRegistrationUrl)
+      }
     }
 
     const joinChallengeButtonTitle = (challenge.timeStatus == CHALLENGE_TIME_STATUS.ENDED)
@@ -237,91 +180,46 @@ class ChallengeDetailsPage extends React.Component {
       'disabled': !userCanJoin,
     }, 'btn', 'btn-primary', 'challenge-join-button')
 
-    // N.B. it's not enough to specify timeZone to date-fns-tz's format function, as it also
-    //      depends on the locale
-    //      See https://stackoverflow.com/questions/65416339/how-to-detect-timezone-abbreviation-using-date-fns-tz
-    const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-
     document.title = `${challenge.name} - PrecisionFDA Challenge`
 
     return (
       <PublicLayout>
-        <NavigationBarPublic showLogoOnNavbar={true}>
-          <div className={bannerClasses}>
-            <div className="left-column">
-              <div>
-                <Link to={{ pathname: '/challenges' }}>
-                  &larr; Back to All Challenges
-                </Link>
-                <div style={{ 'marginTop': '20px' }}><span className="challenge-state-label">{stateLabel}</span></div>
-                <h1 className="challenge-name">{challenge.name}</h1>
-                <p className="challenge-description">{challenge.description}</p>
-              </div>
-              <div className="date-area">
-                <div>
-                  <div className="challenge-date-label">Starts</div>
-                  <div className="challenge-date">{format(challenge.startAt, 'MM/dd/yyyy HH:mm:ss z', { timeZone: userTimeZone, locale: enUS })}</div>
-                </div>
-                <div>
-                  <div className="challenge-date-label">Ends</div>
-                  <div className="challenge-date">{format(challenge.endAt, 'MM/dd/yyyy HH:mm:ss z', { timeZone: userTimeZone, locale: enUS })}</div>
-                </div>
-                <div className="challenge-date-remaining"><ChallengeTimeRemaining challenge={challenge} /></div>
-              </div>
-            </div>
-            <div className="right-column">
-              <img className="challenge-thumbnail" src={challenge.cardImageUrl} />
-            </div>
-          </div>
-        </NavigationBarPublic>
+        <NavigationBar user={user} showLogoOnNavbar={true}>
+          <ChallengeDetailsBanner challenge={challenge} />
+        </NavigationBar>
         
         <div className="challenge-details-main-container">
           <div className="left-column">
             <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
-              <TabList>
-                <Tab>INTRODUCTION</Tab>
-                {userCanSeeSubmissions && (
-                  <>
-                  <Tab>SUBMISSIONS</Tab>
-                  <Tab>MY ENTRIES</Tab>
-                  </>
-                )}
-                {userCanSeeResults && (
-                <Tab>RESULTS</Tab>
-                )}
+              <TabList className="challenge-details-tabs__tab-list">
+                {tabs.map((tab, index) => (
+                  <Tab key={index} className="challenge-details-tabs__tab" selectedClassName="challenge-details-tabs__tab--selected">{tab.title}</Tab>
+                ))}
               </TabList>
 
-              <TabPanel>
-                <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.introContent }}></div>
-              </TabPanel>
-              {userCanSeeSubmissions && (
-                <>
-                <TabPanel>
-                  <ChallengeSubmissionsTable challengeId={challenge.id} />
+              {tabs.map((tab, index) => (
+                <TabPanel key={index}>
+                  {tab.content}
                 </TabPanel>
-                <TabPanel>
-                  <ChallengeMyEntriesTable challengeId={challenge.id} />
-                </TabPanel>
-                </>
-              )}
-              {userCanSeeResults && (
-              <TabPanel>
-                <div className="challenge-details-content" dangerouslySetInnerHTML={{ __html: challengeContent.resultsContent }}></div>
-              </TabPanel>
-              )}
+              ))}
             </Tabs>
           </div>
           <div className="right-column pfda-main-content-sidebar">
-            <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+            {challengePreRegistration ?
+              <CallToActionButton onClick={onClickPreRegistrationButton}>Sign Up for Pre-Registration</CallToActionButton>
+              :
+              user.is_guest ?
+                <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className={joinChallengeButtonClasses}>Join Challenge</GuestRestrictedLink> 
+                :
+                <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+            }
             {userCanSubmitEntry && (
               <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} href={challenge.links.new_submission}>Submit Challenge Entry</a>
             )}
-            {tabIndex == 0 && (
+            {currentTab && (
             <>
               <hr style={{ marginTop: '24px' }} />
-              <div className="challenge-details-outline">
-                {challengeContent.renderAnchors()}
-              </div>
+              {currentTab.outline}
             </>
             )}
             {challenge.canEdit && (

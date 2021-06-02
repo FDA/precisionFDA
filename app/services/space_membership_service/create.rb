@@ -33,8 +33,9 @@ module SpaceMembershipService
       if space.confidential?
         space.space.space_memberships << membership
       else
+        # add initial leads
         private_space = space.confidential_space(membership)
-        private_space.space_memberships << membership if private_space # initial leads
+        private_space.space_memberships << membership if private_space&.space_memberships.blank?
       end
 
       membership

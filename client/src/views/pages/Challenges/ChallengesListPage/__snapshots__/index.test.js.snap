@@ -2,7 +2,7 @@
 
 exports[`ChallengesListPage test should render 1`] = `
 <PublicLayout>
-  <withRouter(Connect(NavigationBarPublic))
+  <NavigationBar
     subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."
     title="Challenges"
   />
@@ -12,8 +12,9 @@ exports[`ChallengesListPage test should render 1`] = `
     <div
       className="left-column"
     >
-      <Connect(ChallengesList)
+      <ChallengesList
         emptyListMessage="No challenges found."
+        setPageHandler={[Function]}
       />
     </div>
     <div
@@ -44,7 +45,9 @@ exports[`ChallengesListPage test should render 1`] = `
       >
         PREVIOUS CHALLENGES
       </div>
-      <Connect(ChallengesYearList)
+      <ChallengesYearList
+        elementName="challenges"
+        query={[Function]}
         setYearHandler={[Function]}
       />
       <hr />

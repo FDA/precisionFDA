@@ -1,17 +1,15 @@
-import { AnyObject, UserCtx } from '../types'
+import { EmailSendInput } from '../domain/email/email.config'
+import { UserCtx } from '../types'
 import { TASKS } from './task.enum'
 
-type Task = {
+type Task<T> = {
   type: TASKS
-  payload: AnyObject
+  payload: T
   user: UserCtx
 }
 
 // will be used in the sub-handler
-type CheckStatusJob = Task & {
-  payload: {
-    dxid: string
-  }
-}
+type CheckStatusJob = Task<{ dxid: string }>
+type SendEmailJob = Task<EmailSendInput>
 
-export { Task, CheckStatusJob }
+export { Task, CheckStatusJob, SendEmailJob }

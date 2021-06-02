@@ -156,7 +156,7 @@ const mapDispatchToProps = dispatch => ({
   loadMembers: (spaceId, side) => dispatch(fetchMembers(spaceId, side)),
   showAddMembersModal: () => dispatch(showAddMembersModal()),
   addMembers: (spaceId, side, fieldsValues) => {
-    dispatch(inviteMembers(spaceId, fieldsValues)).then((statusIsOk) => {
+    dispatch(inviteMembers(spaceId, fieldsValues, side)).then((statusIsOk) => {
       if (statusIsOk) {
         dispatch(fetchMembers(spaceId, side))
       }
