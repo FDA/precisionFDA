@@ -169,7 +169,7 @@ RSpec.describe SpacesController, type: :controller do
           to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").
           with(body: member_contribute_invite)
 
-        expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(1)
+        expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
       end
 
       it "invites an user as a viewer" do
@@ -186,7 +186,7 @@ RSpec.describe SpacesController, type: :controller do
           to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").
           with(body: member_view_invite)
 
-        expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(1)
+        expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
       end
 
       it "triggers email notification" do

@@ -14,52 +14,32 @@ RSpec.describe SpaceService::Accept, type: :service do
   end
 
   describe "#call" do
-    context "when guest is empty" do
-      let(:space) { create(:space, :verification, guest_dxorg: nil, host_lead_id: host_lead.id) }
+    let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+    let(:guest_response) do
+      described_class.call(DNAnexusAPI.new(SecureRandom.uuid), space, space.leads.guest.first)
+    end
 
-      before { space.leads.guest.first.destroy }
-
-      it "it makes the space active" do
-        expect { host_response }.to change(space, :state).from(Space::STATES.first.to_s)
-          .to(Space::STATES.second.to_s)
+    context "when only host accepted the space" do
+      it "doesn't make the space active" do
+        expect { host_response }.not_to change(space, :state).from(Space::STATE_UNACTIVATED)
       end
     end
 
-    context "when guest is the same as host" do
-      let(:space) { create(:space, :verification, host_lead_id: host_lead.id, guest_lead_id: host_lead.id) }
-
-      it "it makes the space active" do
-        expect { host_response }.to change(space, :state).from(Space::STATES.first.to_s)
-          .to(Space::STATES.second.to_s)
+    context "when only guest accepted the space" do
+      it "doesn't make the space active" do
+        expect { guest_response }.not_to change(space, :state).from(Space::STATE_UNACTIVATED)
       end
     end
 
-    context "when guest and host are different" do
-      let(:space) { create(:space, :verification, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
-      let(:guest_response) { described_class.call(DNAnexusAPI.new(SecureRandom.uuid), space, space.leads.guest.first) }
-
-      context "and only host accepted the space" do
-        it "it doesn't make the space active" do
-          expect { host_response }.not_to change(space, :state).from(Space::STATES.first.to_s)
-        end
+    context "when the both accepted the space" do
+      let(:common_response) do
+        host_response
+        guest_response
       end
 
-      context "and only guest accepted the space" do
-        it "it doesn't make the space active" do
-          expect { guest_response }.not_to change(space, :state).from(Space::STATES.first.to_s)
-        end
-      end
-
-      context "and the both accepted the space" do
-        let(:common_response) do
-          host_response
-          guest_response
-        end
-
-        it "it makes the space active" do
-          expect { common_response }.to change(space, :state).from(Space::STATES.first.to_s)
-            .to(Space::STATES.second.to_s)
-        end
+      it "makes the space active" do
+        expect { common_response }.to change(space, :state).from(Space::STATE_UNACTIVATED).
+          to(Space::STATE_ACTIVE)
       end
     end
   end
