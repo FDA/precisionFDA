@@ -27,23 +27,17 @@ const RoleLabel = {
 
 const NotificationLabel: any = {
   admin_membership_changed: 'Membership Changed',
-  admin_new_task_assigned: 'New Task Assigned',
-  admin_task_status_changed: 'Task Status Changed',
   admin_comment_activity: 'Comment Activity',
   admin_content_added_or_deleted: 'Content Added Or Deleted',
   admin_member_added_or_removed_from_space: 'Member Added Or Removed From Space',
   admin_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
   admin_space_lock_unlock_delete_requests: 'Space Locked, Unlocked, or Deleted Request',
   lead_membership_changed: 'Membership Changed',
-  lead_new_task_assigned: 'New Task Assigned',
-  lead_task_status_changed: 'Task Status Changed',
   lead_comment_activity: 'Comment Activity',
   lead_content_added_or_deleted: 'Content Added Or Deleted',
   lead_member_added_or_removed_from_space: 'Member Added Or Removed From Space',
   lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
   all_membership_changed: 'Membership Changed',
-  all_new_task_assigned: 'New Task Assigned',
-  all_task_status_changed: 'Task Status Changed',
   all_comment_activity: 'Comment Activity',
   all_content_added_or_deleted: 'Content Added or Deleted',
 }
@@ -51,8 +45,6 @@ const NotificationLabel: any = {
 const preference = {
   review_space_admin: {
     admin_membership_changed: false,
-    admin_new_task_assigned: false,
-    admin_task_status_changed: false,
     admin_comment_activity: false,
     admin_content_added_or_deleted: false,
     admin_member_added_or_removed_from_space: false,
@@ -61,8 +53,6 @@ const preference = {
   },
   lead_reviewer: {
     lead_membership_changed: false,
-    lead_new_task_assigned: false,
-    lead_task_status_changed: false,
     lead_comment_activity: false,
     lead_content_added_or_deleted: false,
     lead_member_added_or_removed_from_space: false,
@@ -70,8 +60,6 @@ const preference = {
   },
   reviewer: {
     all_membership_changed: false,
-    all_new_task_assigned: false,
-    all_task_status_changed: false,
     all_comment_activity: false,
     all_content_added_or_deleted: false,
   },
