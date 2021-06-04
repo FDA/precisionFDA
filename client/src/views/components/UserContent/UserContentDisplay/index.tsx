@@ -25,6 +25,9 @@ p {
       
 img {
   max-width: ${theme.sizing.mainColumnMaxImageSize};
+  width: 100%;
+  height: auto;
+  margin: ${theme.padding.contentMargin} 0;
   object-fit: contain;
 }
 `
