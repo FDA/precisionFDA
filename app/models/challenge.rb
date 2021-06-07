@@ -71,7 +71,10 @@ class Challenge < ApplicationRecord
   validates :meta, meta: true
   validates :app_id,
             presence: true,
-            unless: :status_setup?
+            unless: :status_setup_or_pre_registration?
+  validates :pre_registration_url,
+            presence: true,
+            if: :status_pre_registration?
   validate :validate_end_at
   validate :validate_start_at
   validate :can_open?
@@ -165,6 +168,10 @@ class Challenge < ApplicationRecord
     status == STATUS_PRE_REGISTRATION
   end
 
+  def status_setup_or_pre_registration?
+    status == STATUS_SETUP || status == STATUS_PRE_REGISTRATION
+  end
+
   def status_open?
     status == STATUS_OPEN
   end
@@ -194,7 +201,7 @@ class Challenge < ApplicationRecord
     return [STATUS_RESULT_ANNOUNCED, STATUS_ARCHIVED, status].uniq if over?
     return [STATUS_OPEN, STATUS_PAUSED, status].uniq if started?
 
-    [STATUS_PRE_REGISTRATION, STATUS_OPEN, STATUS_PAUSED, status].uniq
+    [STATUS_SETUP, STATUS_PRE_REGISTRATION, STATUS_OPEN, STATUS_PAUSED, status].uniq
   end
 
   # not available statuses for select!
