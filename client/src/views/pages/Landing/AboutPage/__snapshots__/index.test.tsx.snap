@@ -139,13 +139,7 @@ exports[`AboutPage test should render 1`] = `
               <p
                 className="lead"
               >
-                To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), 
-                <a
-                  href="http://www.fda.gov<%= about_path %>FDA/CentersOffices/ucm349836.htm"
-                >
-                  Taha Kass-Hout, M.D.
-                </a>
-                , began investigating the concept of a research and development portal that would allow community members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of genomic data that is collected using Next Generation Sequencing (NGS) technology.
+                To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), Taha Kass-Hout, M.D., began investigating the concept of a research and development portal that would allow community members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of genomic data that is collected using Next Generation Sequencing (NGS) technology.
               </p>
               <p
                 className="lead"
