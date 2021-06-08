@@ -51,7 +51,7 @@ const AboutPage = () => {
                 </div>
                 <hr/>
                 <div className="col-md-12">
-                  <p className="lead">To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), <a href="http://www.fda.gov<%= about_path %>FDA/CentersOffices/ucm349836.htm">Taha Kass-Hout, M.D.</a>, began investigating the concept of a research and development portal that would allow community members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of genomic data that is collected using Next Generation Sequencing (NGS) technology.
+                  <p className="lead">To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), Taha Kass-Hout, M.D., began investigating the concept of a research and development portal that would allow community members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of genomic data that is collected using Next Generation Sequencing (NGS) technology.
                   </p>
                   <p className="lead">
                     After conducting market research, collaborating with FDA’s <a href="http://www.fda.gov<%= about_path %>FDA/CentersOffices/OfficeofMedicalProductsandTobacco/CDRH/">Center for Devices and Radiological Health</a> and assembling a project team, the precisionFDA project was initiated on July 22, 2015 with a scheduled beta launch date of December 15, 2015.
