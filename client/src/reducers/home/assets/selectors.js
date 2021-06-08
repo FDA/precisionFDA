@@ -27,6 +27,7 @@ export const homeAssetsEditTagsModalSelector = (state) => state.home.assets.edit
 export const homeAssetsAttachToModalSelector = (state) => state.home.assets.attachToModal
 export const homeAssetsRenameModalSelector = (state) => state.home.assets.renameModal
 export const homeAssetsDownloadModalSelector = (state) => state.home.assets.downloadModal
+export const homeAssetsOpenModalSelector = (state) => state.home.assets.openModal
 export const homeAssetsDeleteModalSelector = (state) => state.home.assets.deleteModal
 export const homeAssetsAttachLicenseModalSelector = (state) => state.home.assets.attachLicenseModal
 export const homeAssetsLicenseModalSelector = (state) => state.home.assets.licenseModal

@@ -24,6 +24,14 @@ const Item = ({ asset, action }) => (
         </LinkTargetBlank>
       </td>
     )}
+    {(action === HOME_FILES_ACTIONS.OPEN) && (
+      <td style={{ textAlign: 'center' }}>
+        <LinkTargetBlank url={`${asset.links.download}?inline=true`}>
+          <Icon icon="fa-download" fw />
+          <span style={{ marginLeft: 5 }} >open</span>
+        </LinkTargetBlank>
+      </td>
+    )}
   </tr>
 )
 

@@ -14,6 +14,8 @@ const switchTitle = (action) => {
       return 'Delete'
     case HOME_FILES_ACTIONS.DOWNLOAD:
       return 'Download'
+     case HOME_FILES_ACTIONS.OPEN:
+      return 'Open'
     default:
       return 'Some Action'
   }
@@ -37,7 +39,7 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
 
 const AssetsActionModal = ({ modalAction, hideAction, action, assets = [], isOpen, isLoading }) => {
   const title = switchTitle(action)
-  
+
   return (
     <div className="objects-actions-modal">
       <Modal

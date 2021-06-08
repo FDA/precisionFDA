@@ -14,6 +14,8 @@ import {
   hideAssetsDeleteModal,
   showAssetsDownloadModal,
   hideAssetsDownloadModal,
+  showAssetsOpenModal,
+  hideAssetsOpenModal,
   showAssetsAttachLicenseModal,
   hideAssetsAttachLicenseModal,
   showAssetsLicenseModal,
@@ -26,6 +28,7 @@ import {
   homeAssetsAttachToModalSelector,
   homeAssetsRenameModalSelector,
   homeAssetsDownloadModalSelector,
+  homeAssetsOpenModalSelector,
   homeAssetsDeleteModalSelector,
   homeAssetsAttachLicenseModalSelector,
   homeAssetsLicenseModalSelector,
@@ -69,6 +72,11 @@ const ActionsDropdown = (props) => {
       text: 'Rename',
       isDisabled: assets.length !== 1 || !links.rename,
       onClick: () => props.showRenameModal(),
+    },
+    {
+      text: 'Open',
+      isDisabled: assets.length === 0 || assets.some(e => !e.links.download),
+      onClick: () => props.showOpenModal(),
     },
     {
       text: 'Download',
@@ -187,6 +195,13 @@ const ActionsDropdown = (props) => {
       />
       <AssetsActionModal
         assets={assets}
+        action={HOME_FILES_ACTIONS.OPEN}
+        hideAction={() => props.hideOpenModal()}
+        isOpen={props.openModal.isOpen}
+        isLoading={props.openModal.isLoading}
+      />
+      <AssetsActionModal
+        assets={assets}
         action={HOME_FILES_ACTIONS.DOWNLOAD}
         hideAction={() => props.hideDownloadModal()}
         isOpen={props.downloadModal.isOpen}
@@ -238,6 +253,8 @@ ActionsDropdown.propTypes = {
   hideDeleteModal: PropTypes.func,
   showDownloadModal: PropTypes.func,
   hideDownloadModal: PropTypes.func,
+  showOpenModal: PropTypes.func,
+  hideOpenModal: PropTypes.func,
   showAttachLicenseModal: PropTypes.func,
   hideAttachLicenseModal: PropTypes.func,
   context: PropTypes.object,
@@ -248,6 +265,7 @@ ActionsDropdown.propTypes = {
   renameModal: PropTypes.object,
   deleteModal: PropTypes.object,
   downloadModal: PropTypes.object,
+  openModal: PropTypes.object,
   attachLicenseModal: PropTypes.object,
   rename: PropTypes.func,
   deleteAsset: PropTypes.func,
@@ -269,6 +287,7 @@ ActionsDropdown.defaultProps = {
   renameModal: {},
   deleteModal: {},
   downloadModal: {},
+  openModal: {},
   attachLicenseModal: {},
   context: {},
   licenseModal: {},
@@ -281,6 +300,7 @@ const mapStateToProps = (state) => ({
   renameModal: homeAssetsRenameModalSelector(state),
   deleteModal: homeAssetsDeleteModalSelector(state),
   downloadModal: homeAssetsDownloadModalSelector(state),
+  openModal: homeAssetsOpenModalSelector(state),
   attachLicenseModal: homeAssetsAttachLicenseModalSelector(state),
   context: contextSelector(state),
   licenseModal: homeAssetsLicenseModalSelector(state),
@@ -298,6 +318,8 @@ const mapDispatchToProps = (dispatch) => ({
   hideDeleteModal: () => dispatch(hideAssetsDeleteModal()),
   showDownloadModal: () => dispatch(showAssetsDownloadModal()),
   hideDownloadModal: () => dispatch(hideAssetsDownloadModal()),
+  showOpenModal: () => dispatch(showAssetsOpenModal()),
+  hideOpenModal: () => dispatch(hideAssetsOpenModal()),
   showAttachLicenseModal: () => dispatch(showAssetsAttachLicenseModal()),
   hideAttachLicenseModal: () => dispatch(hideAssetsAttachLicenseModal()),
   showAssetsLicenseModal: () => dispatch(showAssetsLicenseModal()),
