@@ -55,10 +55,10 @@ exports[`ChallengesListItem test should render 1`] = `
             Object {
               "cardImageUrl": "https://images.newscientist.com/wp-content/uploads/2019/05/03155847/gettyimages-932737574-2.jpg",
               "description": "This is challenge number 1",
-              "endAt": 2021-03-09T02:21:00.000Z,
+              "endAt": 2021-03-08T23:21:00.000Z,
               "id": 1,
               "name": "Challenge 1",
-              "startAt": 2021-03-01T20:21:00.000Z,
+              "startAt": 2021-03-01T17:21:00.000Z,
             }
           }
         />

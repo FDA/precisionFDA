@@ -14,6 +14,11 @@ exports[`ActionsDropdown test should render 1`] = `
         Object {
           "isDisabled": true,
           "onClick": [Function],
+          "text": "Open",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
           "text": "Download",
         },
         Object {
@@ -131,6 +136,14 @@ exports[`ActionsDropdown test should render 1`] = `
     hideAction={[Function]}
     modal={Object {}}
     modalAction={[Function]}
+  />
+  <FilesActionModal
+    action="open"
+    fetchFilesByAction={[Function]}
+    files={Array []}
+    hideAction={[Function]}
+    isOpen={false}
+    modal={Object {}}
   />
   <FilesActionModal
     action="download"

@@ -269,7 +269,7 @@ class UserFile < Node
       filename: name,
       duration: 86_400,
     }
-    inline_attribute = inline == "true" ? "?inline" : ""
+    inline_attribute = inline.present? ? "?inline" : ""
 
     token = challenge_file? ? CHALLENGE_BOT_TOKEN : context.token
     api = DNAnexusAPI.new(token)

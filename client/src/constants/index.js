@@ -27,6 +27,7 @@ export const SPACE_FILES_ACTIONS = {
   DELETE: 'delete',
   PUBLISH: 'publish',
   DOWNLOAD: 'download',
+  OPEN: 'open',
   COPY: 'copy',
   COPY_TO_PRIVATE: 'copy_to_private',
 }
@@ -128,6 +129,7 @@ export const HOME_FILES_ACTIONS = {
   EXPORT: 'export',
   DELETE: 'delete',
   DOWNLOAD: 'download',
+  OPEN: 'open',
 }
 
 // WORKFLOWS
@@ -186,6 +188,7 @@ export const HOME_ASSETS_MODALS = {
   RENAME: 'renameModal',
   DELETE: 'deleteModal',
   DOWNLOAD: 'downloadModal',
+  OPEN: 'openModal',
   ATTACH_LICENSE: 'attachLicenseModal',
   LICENSE: 'licenseModal',
   ACCEPT_LICENSE: 'acceptLicenseModal',

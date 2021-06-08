@@ -60,7 +60,9 @@ const ACTIONS_TO_REMOVE = {
 }
 
 const ActionsDropdown = (props) => {
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false)
+  const [isFileOpenModalOpen, setIsFileOpenModalOpen] = useState(false)
+
   const { files, page = 'private', scope } = props
   const filesIds = files.map(file => file.id)
   const filesUids = files.map(file => file.uid)
@@ -79,9 +81,14 @@ const ActionsDropdown = (props) => {
       link: links.track,
     },
     {
+      text: 'Open',
+      isDisabled: files.length === 0 || files.some(e => e.type === 'UserFile' && !e.links.download),
+      onClick: () => setIsFileOpenModalOpen(true),
+    },
+    {
       text: 'Download',
       isDisabled: files.length === 0 || files.some(e => e.type === 'UserFile' && !e.links.download),
-      onClick: () => setIsExportModalOpen(true),
+      onClick: () => setIsDownloadModalOpen(true),
     },
     {
       text: 'Authorize URL',
@@ -252,9 +259,18 @@ const ActionsDropdown = (props) => {
         />
       }
       <FilesActionModal
-        isOpen={isExportModalOpen}
+        isOpen={isFileOpenModalOpen}
         isLoading={props.deleteModal.isLoading}
-        hideAction={() => setIsExportModalOpen(false)}
+        hideAction={() => setIsFileOpenModalOpen(false)}
+        files={files}
+        action={HOME_FILES_ACTIONS.OPEN}
+        fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.OPEN, 'private')}
+        modal={props.homeFilesActionModalSelector}
+      />
+      <FilesActionModal
+        isOpen={isDownloadModalOpen}
+        isLoading={props.deleteModal.isLoading}
+        hideAction={() => setIsDownloadModalOpen(false)}
         files={files}
         action={HOME_FILES_ACTIONS.DOWNLOAD}
         fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DOWNLOAD, 'private')}
