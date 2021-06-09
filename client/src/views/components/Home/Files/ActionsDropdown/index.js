@@ -84,12 +84,6 @@ const ActionsDropdown = (props) => {
       onClick: () => setIsExportModalOpen(true),
     },
     {
-      text: 'Authorize URL',
-      isDisabled: files.length !== 1 || isFolder || !links.link,
-      link: links.link,
-      method: 'post',
-    },
-    {
       text: isFolder ? 'Rename' : 'Edit File Info',
       isDisabled: files.length !== 1 || (isFolder ? !links.rename_folder : !links.rename),
       onClick: () => props.showFilesRenameModal(),
