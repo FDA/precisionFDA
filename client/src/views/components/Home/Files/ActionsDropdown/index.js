@@ -82,12 +82,14 @@ const ActionsDropdown = (props) => {
     },
     {
       text: 'Open',
-      isDisabled: files.length === 0 || files.some(e => e.type === 'UserFile' && !e.links.download),
+      isDisabled: files.length === 0 ||
+                  files.some(e => e.type === 'Folder' || e.type === 'UserFile' && !e.links.download),
       onClick: () => setIsFileOpenModalOpen(true),
     },
     {
       text: 'Download',
-      isDisabled: files.length === 0 || files.some(e => e.type === 'UserFile' && !e.links.download),
+      isDisabled: files.length === 0 ||
+                  files.some(e => e.type === 'Folder' || e.type === 'UserFile' && !e.links.download),
       onClick: () => setIsDownloadModalOpen(true),
     },
     {
