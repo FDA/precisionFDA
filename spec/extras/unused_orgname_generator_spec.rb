@@ -1,7 +1,8 @@
 require "rails_helper"
 
 describe UnusedOrgnameGenerator do
-  let(:orgname) { "some.orgname" }
+  let(:username) { "some.username" }
+  let(:orgname) { "someusername" }
 
   context "when orgnamename is unused" do
     subject(:generator) { described_class.new(api) }
@@ -9,13 +10,13 @@ describe UnusedOrgnameGenerator do
     let(:api) { instance_double("DNAnexusAPI", org_exists?: false) }
 
     it "calls API with provided orgname" do
-      generator.call(orgname)
+      generator.call(username)
 
       expect(api).to have_received(:org_exists?).with("pfda..#{orgname}")
     end
 
     it "returns provided orgname" do
-      expect(generator.call(orgname)).to eq(orgname)
+      expect(generator.call(username)).to eq(orgname)
     end
   end
 
@@ -30,14 +31,14 @@ describe UnusedOrgnameGenerator do
     end
 
     it "generates orgname and calls API with it until API says orgname is unused" do
-      generator.call(orgname)
+      generator.call(username)
 
       expect(api).to have_received(:org_exists?).with("pfda..#{orgname}")
       expect(api).to have_received(:org_exists?).with("pfda..#{generated_orgname}")
     end
 
     it "returns generated orgname" do
-      expect(generator.call(orgname)).to eq(generated_orgname)
+      expect(generator.call(username)).to eq(generated_orgname)
     end
   end
 end
