@@ -71,7 +71,8 @@ class Space < ActiveRecord::Base
   attr_accessor :invitees,
                 :invitees_role,
                 :host_lead_dxuser,
-                :guest_lead_dxuser
+                :guest_lead_dxuser,
+                :sponsor_lead_dxuser
 
   scope :top_level, -> { where(space_id: nil) }
   scope :shared, -> { review.top_level }
@@ -248,6 +249,74 @@ class Space < ActiveRecord::Base
 
   def uid
     "space-#{id}"
+  end
+
+  # @param update_space_params [Object] - consists of SpaceEditForm attributes
+  # @param api [DNAnexusAPI]
+  def leads_updates(update_space_params, api)
+    return unless review?
+
+    lead_invite_and_update(
+      host_lead_dxuser,
+      update_space_params.host_lead_dxuser,
+      SpaceMembership::SIDE_HOST,
+      api,
+    )
+
+    lead_invite_and_update(
+      guest_lead_dxuser,
+      update_space_params.sponsor_lead_dxuser,
+      SpaceMembership::SIDE_GUEST,
+      api,
+    )
+  end
+
+  # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
+  # @param updated_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
+  # @param side [String] dxuser of a current space lead - to be changed to Admin.
+  # @param api [DNAnexusAPI]
+  def lead_invite_and_update(space_lead_dxuser, updated_lead_dxuser, side, api)
+    return if space_lead_dxuser == updated_lead_dxuser
+
+    membership = leads.find_by(side: side)
+    invite(membership, updated_lead_dxuser, api) if user_member(updated_lead_dxuser).blank?
+
+    update_role(updated_lead_dxuser, side, api)
+  end
+
+  def user_member(dxuser)
+    space_memberships.joins(:user).find_by(users: { dxuser: dxuser })
+  end
+
+  # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
+  # @param new_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
+  # @param api [DNAnexusAPI]
+  def update_role(new_lead_dxuser, side, api)
+    admin_member = leads.find_by(side: side)
+    # A user member changing to be Lead
+    member = space_memberships.joins(:user).find_by(users: { dxuser: new_lead_dxuser })
+    SpaceMembershipService::ToLead.call(api, self, member, admin_member)
+  end
+
+  def space_sponsor
+    User.find_by(dxuser: sponsor_lead_dxuser)
+  end
+
+  def invite(membership, dxuser, api)
+    space_invite_form = SpaceInviteForm.new(
+      space: self,
+      invitees_role: SpaceMembership::ROLE_ADMIN,
+      space_id: id,
+      invitees: dxuser,
+    )
+
+    return unless space_invite_form.valid?
+
+    begin
+      space_invite_form.invite(membership, api)
+    rescue StandardError
+      "An error has occurred during inviting"
+    end
   end
 
   alias_method :scope, :uid
