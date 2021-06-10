@@ -46,8 +46,6 @@ const showAssetsDeleteModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_AS
 const hideAssetsDeleteModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.DELETE)
 const showAssetsDownloadModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_ASSETS_MODALS.DOWNLOAD)
 const hideAssetsDownloadModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.DOWNLOAD)
-const showAssetsOpenModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_ASSETS_MODALS.OPEN)
-const hideAssetsOpenModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.OPEN)
 const showAssetsAttachLicenseModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_ASSETS_MODALS.ATTACH_LICENSE)
 const hideAssetsAttachLicenseModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.ATTACH_LICENSE)
 const showAssetsLicenseModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_ASSETS_MODALS.LICENSE)
@@ -88,8 +86,6 @@ export {
   hideAssetsDeleteModal,
   showAssetsDownloadModal,
   hideAssetsDownloadModal,
-  showAssetsOpenModal,
-  hideAssetsOpenModal,
   showAssetsAttachLicenseModal,
   hideAssetsAttachLicenseModal,
   showAssetsLicenseModal,

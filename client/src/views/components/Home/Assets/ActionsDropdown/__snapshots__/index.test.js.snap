@@ -14,11 +14,6 @@ exports[`ActionsDropdown test should render 1`] = `
         Object {
           "isDisabled": true,
           "onClick": [Function],
-          "text": "Open",
-        },
-        Object {
-          "isDisabled": true,
-          "onClick": [Function],
           "text": "Download",
         },
         Object {
@@ -99,11 +94,6 @@ exports[`ActionsDropdown test should render 1`] = `
     assets={Array []}
     hideAction={[Function]}
     modalAction={[Function]}
-  />
-  <AssetsActionModal
-    action="open"
-    assets={Array []}
-    hideAction={[Function]}
   />
   <AssetsActionModal
     action="download"
