@@ -19,8 +19,6 @@ gem "turbolinks", "~> 5"
 # Build JSON APIs with ease
 gem "jbuilder", "~> 2.5"
 
-gem "rails-reverse-proxy"
-
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", ">= 1.4.6", require: false
 
