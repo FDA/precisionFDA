@@ -13,11 +13,11 @@
         <li><%= link_to "Public Profile", user_path(@context.username) %></li>
       <% end %>
       <li><%= link_to "Manage Licenses", licenses_path %></li>
-      <% if @context.logged_in? && UserPolicy.access_notification_preference?(@context.user) %>
-        <li><a href="#" data-toggle="modal" data-target="#notification_settings_modal">Notification Settings</a></li>
+      <% if @context.logged_in? %>
+        <li><%= link_to "Notification Settings", '/account/notifications', data: { turbolinks: false } %></li>
       <% end %>
       <li role="separator" class="divider"></li>
-      <li><a href="<%= about_path %>"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
+      <li><a href="<%= about_path %>" data-turbolinks="false"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
       <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
       <li><a href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
       <li role="separator" class="divider"></li>

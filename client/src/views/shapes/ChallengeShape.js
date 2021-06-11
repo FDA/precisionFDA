@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types'
-import { parseISO } from 'date-fns'
-import { utcToZonedTime } from 'date-fns-tz'
 
 import { CHALLENGE_TIME_STATUS } from '../../constants'
+import { convertDateToUserTime } from '../../utils/datetime'
 
 
 const ChallengeShape = {
@@ -22,6 +21,7 @@ const ChallengeShape = {
   cardImageId: PropTypes.string,
   specifiedOrder: PropTypes.number,
   spaceId: PropTypes.number,
+  preRegistrationUrl: PropTypes.string,
   isFollowed: PropTypes.bool, // True if user has joined the challenge
   canEdit: PropTypes.bool,
   links: PropTypes.object,
@@ -42,11 +42,6 @@ const computeChallengeTimeStatus = (challenge) => {
   }
 }
 
-const convertDateToUserTime = (date) => {
-  const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-  return utcToZonedTime(parseISO(date), userTimeZone)
-}
-
 const mapToChallenge = (data) => {
   const challenge = {
     id: data.id,
@@ -60,6 +55,7 @@ const mapToChallenge = (data) => {
     status: data.status,
     cardImageUrl: data.card_image_url,
     cardImageId: data.card_image_id,
+    preRegistrationUrl: data.pre_registration_url,
     isFollowed: data.is_followed,
     canEdit: data.can_edit,
     links: data.links,

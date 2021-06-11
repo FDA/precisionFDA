@@ -3,42 +3,6 @@ import PropTypes from 'prop-types'
 import UserShape, { mapToUser } from './UserShape'
 
 
-// fixme: Once PFDA-2301 is merged, move the following type definitions to its dedicated path
-//        in the meantime, JobShape and UserShape are not in Typescript
-interface IUser {
-  id: number,
-  name: string,
-  org: string,
-  url: string,
-  isAccepted: boolean,
-  dxuser: string,
-}
-
-enum JobState {
-  Done = "done",
-  Failed = "failed",
-  Idle = "idle",
-  Running = "running",
-  Terminated = "terminated",
-  Terminating = "terminating",
-}
-
-interface ISubmission {
-  id: number,
-  challengeId: number,
-  name: string,
-  desc: string,
-  createdAt: string,
-  updatedAt: string,
-  user: IUser,
-  username: string,
-  inputs: string[],
-  jobState: JobState,
-  jobName: string,
-  jobInputFiles: object[],
-  userCanAccessSpace: boolean,
-}
-
 const SubmissionShape = {
   id: PropTypes.number,
   challengeId: PropTypes.number,
@@ -75,13 +39,7 @@ const mapToSubmission = (data: any) => {
 
 export default SubmissionShape
 
-export type {
-  IUser,
-  ISubmission,
-}
-
 export {
-  JobState,
   SubmissionShape,
   mapToSubmission,
 }

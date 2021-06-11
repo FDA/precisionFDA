@@ -112,3 +112,11 @@
     %>
   </div>
 </div>
+<% if !@challenge.status.present? || @challenge.status_setup_or_pre_registration? %>
+  <div class="form-group required">
+    <%= f.label :pre_registration_url, "Pre-Registration Link", class: 'control-label col-sm-2' %>
+    <div class="col-sm-11 col-sm-offset-1">
+      <%= f.text_field :pre_registration_url, class: "form-control input-md", placeholder: "URL for challenge pre-registration" %>
+    </div>
+  </div>
+<% end %>

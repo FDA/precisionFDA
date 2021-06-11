@@ -1,27 +1,38 @@
 import React from 'react'
-import { Router, Route } from 'react-router-dom'
 import { shallow } from 'enzyme'
 
-import Loader from '../../Loader'
-import { NewsListItem } from '.'
-import { INewsItem } from '../../../shapes/NewsItemShape'
+import { NewsListItemSmall, NewsListItemLarge } from '.'
+import { INewsItem } from '../../../../types/newsItem'
 
-describe('NewsListItem test', () => {
+
+const getMockNewsItem = () => {
+  const mockNewsItem: INewsItem = {
+    id: 1,
+    title: 'News Item 1',
+    link: 'News Link 1',
+    when: undefined,
+    content: 'News Content',
+    userId: 123,
+    video: '',
+    position: 1,
+    published: true,
+    createdAt: new Date('March 1, 2021 20:21:00'),
+    updatedAt: new Date('March 1, 2021 20:21:00'),
+  }
+  return mockNewsItem
+}
+
+describe('NewsListItemSmall test', () => {
   it('should render', () => {
-    const mockNewsItem: INewsItem = {
-      id: 1,
-      title: 'News Item 1',
-      link: 'News Link 1',
-      when: undefined,
-      content: 'News Content',
-      userId: 123,
-      video: '',
-      position: 1,
-      published: true,
-      createdAt: new Date('March 1, 2021 20:21:00'),
-      updatedAt: new Date('March 1, 2021 20:21:00'),
-    }
-    const wrapper = shallow(<NewsListItem newsItem={mockNewsItem} />)
+    const wrapper = shallow(<NewsListItemSmall newsItem={getMockNewsItem()} />)
+
+    expect(wrapper).toMatchSnapshot()
+  })
+})
+
+describe('NewsListItemLarge test', () => {
+  it('should render', () => {
+    const wrapper = shallow(<NewsListItemLarge newsItem={getMockNewsItem()} />)
 
     expect(wrapper).toMatchSnapshot()
   })

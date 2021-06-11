@@ -1,49 +1,49 @@
 module SpaceMembershipService
   module Create
-    # @param [DNAnexusAPI] api
-    # @param [Space] space
-    # @param [SpaceMembership] membership
-    def self.call(api, space, membership)
-      invitee = membership.user.dxid
-      org_dxid = space.org_dxid(membership)
+    class << self
+      # @param api [DNAnexusAPI]
+      # @param space [Space]
+      # @param membership [SpaceMembership]
+      def call(api, space, membership)
+        invitee = membership.user.dxid
+        org_dxid = space.org_dxid(membership)
 
-      if ADMIN_USER != invitee || !admin_user_member?(api, org_dxid)
-        attrs = {
-          invitee: invitee,
-          level: "ADMIN",
-          suppressEmailNotification: true,
-        }
+        if ADMIN_USER != invitee || !admin_user_member?(api, org_dxid)
+          attrs = {
+            level: "ADMIN",
+            suppressEmailNotification: true,
+          }
 
-        unless membership.lead_or_admin?
-          attrs.merge!(
-            level: "MEMBER",
-            projectAccess: membership.contributor? ? "CONTRIBUTE" : "VIEW",
-            allowBillableActivities: false,
-            appAccess: membership.contributor?,
-          )
+          unless membership.lead_or_admin?
+            attrs.merge!(
+              level: "MEMBER",
+              projectAccess: membership.contributor? ? "CONTRIBUTE" : "VIEW",
+              allowBillableActivities: false,
+              appAccess: membership.contributor?,
+            )
+          end
+
+          api.org_invite(org_dxid, invitee, attrs)
         end
 
-        api.call(org_dxid, "invite", attrs)
-      end
+        space.space_memberships << membership
 
-      space.space_memberships << membership
+        return membership if !space.review? || !space.accepted?
 
-      return membership if !space.review? || !space.accepted?
-
-      if space.confidential?
-        space.space.space_memberships << membership
-      else
         private_space = space.confidential_space(membership)
-        private_space.space_memberships << membership if private_space # initial leads
+
+        private_space.space_memberships.create_with(
+          membership.attributes.slice("meta", "role", "side"),
+        ).find_or_create_by!(user: membership.user)
       end
 
-      membership
+      def admin_user_member?(api, org_dxid)
+        api.org_find_members(org_dxid, id: [ADMIN_USER])["results"].present?
+      rescue StandardError
+        false
+      end
     end
 
-    def self.admin_user_member?(api, org_dxid)
-      api.call(org_dxid, "findMembers", id: [ADMIN_USER])["results"].present?
-    rescue
-      false
-    end
+    private_class_method :admin_user_member?
   end
 end

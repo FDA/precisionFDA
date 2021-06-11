@@ -291,6 +291,7 @@ module Api
         nodes = Node.editable_by(@context).where(id: params[:ids]).to_a
         files += nodes
         nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
+        files.filter! { |file| file.scope == params[:scope] }
       else
         raise ApiError, "Parameter 'task' is not defined!"
       end

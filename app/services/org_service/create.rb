@@ -1,13 +1,13 @@
 module OrgService
   module Create
-    # @param id [String] ID of the organization ("org-" + handle)
-    def self.call(api, id, billable = false)
-      papi = DNAnexusAPI.new(ADMIN_TOKEN)
+    # @param dxid [String] ID of the organization ("org-" + handle)
+    def self.call(dxid, billable = false)
+      papi = DIContainer.resolve("api.admin")
 
-      raise "We did not expect #{id} to exist on DNAnexus" if api.entity_exists?(id)
+      raise "The org #{dxid} already exists!" if papi.entity_exists?(dxid)
 
-      handle = Org.handle_by_id(id)
-      org = papi.call("org", "new", handle: handle, name: handle)
+      handle = Org.handle_by_id(dxid)
+      org = papi.org_new(handle, handle)
 
       auditor_data = {
         action: "create",
@@ -16,14 +16,16 @@ module OrgService
           message: "The system is about to start provisioning a new dxorg '#{org[:id]}'",
         },
       }
+
       Auditor.perform_audit(auditor_data)
 
       if billable
-        auth = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-        auth.call(
-          org[:dxorg], "updateBillingInformation",
-          billingInformation: BILLING_INFO,
-          autoConfirm: BILLING_CONFIRMATION
+        auth = DIContainer.resolve("api.auth")
+
+        auth.org_update_billing_info(
+          org[:dxorg],
+          BILLING_INFO,
+          autoConfirm: BILLING_CONFIRMATION,
         )
       end
 

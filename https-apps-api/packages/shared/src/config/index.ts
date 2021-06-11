@@ -4,7 +4,7 @@ import { default as dotenv } from 'dotenv'
 // load process.env values
 dotenv.config()
 
-// eslint-disable-next-line import/first
+// eslint-disable-next-line import/first, import/order
 import path from 'path'
 // eslint-disable-next-line import/first
 import { mergeDeepRight } from 'ramda'
@@ -35,6 +35,7 @@ const defaultConfig = {
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
+    railsHost: 'https://localhost:3000',
   },
   logs: {
     pretty: true,
@@ -58,6 +59,19 @@ const defaultConfig = {
     adminUser: 'precisionfda.admin_dev',
     findDataObjectsQueryLimit: 100,
   },
+  emails: {
+    salesforce: {
+      isEnabled: true,
+      apiUrl: process.env.SALESFORCE_HOST ?? 'https://dnanexus--pFDAemail.cs33.my.salesforce.com',
+      username: process.env.SALESFORCE_USERNAME ?? 'sf-username',
+      password: process.env.SALESFORCE_PASSWORD ?? 'sf-password',
+      secretToken: process.env.SALESFORCE_SECRET_TOKEN ?? 'sf-secret',
+      fromAddress: process.env.SALESFORCE_FDA_EMAIL_ID ?? 'sf-org-id',
+    },
+  },
+  users: {
+    challengeBotDxUser: 'challenge.bot.2',
+  },
   redis: {
     url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
     isSecure: false,
@@ -68,6 +82,9 @@ const defaultConfig = {
     queues: {
       default: {
         name: 'https-apps-worker-queue',
+      },
+      emails: {
+        name: 'https-apps-worker-emails-queue',
       },
     },
     syncJob: {

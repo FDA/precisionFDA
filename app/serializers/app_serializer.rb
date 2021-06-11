@@ -11,6 +11,7 @@ class AppSerializer < ApplicationSerializer
     :added_by_fullname,
     :created_at,
     :created_at_date_time,
+    :updated_at,
     :location,
     :readme,
     :revision,
@@ -24,6 +25,8 @@ class AppSerializer < ApplicationSerializer
   )
 
   attribute :all_tags_list, key: :tags
+
+  delegate :updated_at, to: :object
 
   # Returns a tags list for an App
   def all_tags_list
