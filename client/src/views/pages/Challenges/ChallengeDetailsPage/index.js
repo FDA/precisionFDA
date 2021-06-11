@@ -88,19 +88,33 @@ class ChallengeDetailsPage extends React.Component {
     const isLoggedIn = user && Object.keys(user).length > 0
 
     const challengePreRegistration = challenge.status == CHALLENGE_STATUS.PRE_REGISTRATION
+    const challengeSetupOrPreRegistration = (challenge.status == CHALLENGE_STATUS.SETUP) || challengePreRegistration
 
     const userCanJoin = isLoggedIn && !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
     const userCanSubmitEntry =  isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
+    const userIsChallengeAdmin = (isLoggedIn && user.can_create_challenges)
 
-    const userCanSeeSubmissions = isLoggedIn
+    const userCanSeePreRegistration = challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration)
+
+    // Introduction is visible to:
+    //  - everyone when a challenge is not in pre-registration phase
+    //  - challenge admins in all phases of a challenge
+    const userCanSeeIntroduction = !challengePreRegistration || userIsChallengeAdmin
+
+    // Submissions are visible to:
+    //  - any logged in users when challenge is not in setup or pre-registration phase
+    const userCanSeeSubmissions = isLoggedIn && !challengeSetupOrPreRegistration
+
     // Results are visible to:
-    //  - site admins who are logged on
-    //  - or when results are announced
-    //  - or when challenge is archived
-    const userCanSeeResults = (isLoggedIn && user.can_create_challenges) || challenge.status == CHALLENGE_STATUS.RESULT_ANNOUNCED || challenge.status == CHALLENGE_STATUS.ARCHIVED
+    //  - challenge admins
+    //  - everyone when results are announced or challenge is archived
+    const userCanSeeResults = userIsChallengeAdmin
+                              || challenge.status == CHALLENGE_STATUS.RESULT_ANNOUNCED
+                              || challenge.status == CHALLENGE_STATUS.ARCHIVED
 
     const tabs = []
-    if (challengePreRegistration) {
+
+    if (userCanSeePreRegistration) {
       const preRegistrationContent = extractChallengeContent(challenge, 'pre-registration')
       const userContent = new UserContent(preRegistrationContent, isLoggedIn)
 
@@ -111,7 +125,8 @@ class ChallengeDetailsPage extends React.Component {
         outline: userContent.createOutlineElement(),
       })
     }
-    else {
+
+    if (userCanSeeIntroduction) {
       const introductionContent = extractChallengeContent(challenge, 'intro')
       const userContent = new UserContent(introductionContent, isLoggedIn)
       tabs.push({
@@ -120,31 +135,30 @@ class ChallengeDetailsPage extends React.Component {
         content: userContent.createDisplayElement(),
         outline: userContent.createOutlineElement(),
       })
+    }
 
-      if (userCanSeeSubmissions) {
-        tabs.push({
-          title: 'SUBMISSIONS',
-          subroute: '/submissions',
-          content: (<ChallengeSubmissionsTable challengeId={challenge.id} />),
-        })
-        tabs.push({
-          title: 'MY ENTRIES',
-          subroute: '/my_entries',
-          content: (<ChallengeMyEntriesTable challengeId={challenge.id} />),
-        })
-      }
+    if (userCanSeeSubmissions) {
+      tabs.push({
+        title: 'SUBMISSIONS',
+        subroute: '/submissions',
+        content: (<ChallengeSubmissionsTable challengeId={challenge.id} />),
+      })
+      tabs.push({
+        title: 'MY ENTRIES',
+        subroute: '/my_entries',
+        content: (<ChallengeMyEntriesTable challengeId={challenge.id} />),
+      })
+    }
 
-      if (userCanSeeResults) {
-        const resultsContent = extractChallengeContent(challenge, 'results') + extractChallengeContent(challenge, 'results-details')
-        const userContent = new UserContent(resultsContent, isLoggedIn)
-
-        tabs.push({
-          title: 'RESULTS',
-          subroute: '/results',
-          content: userContent.createDisplayElement(),
-          outline: userContent.createOutlineElement(),
-          })
-      }
+    if (userCanSeeResults) {
+      const resultsContent = extractChallengeContent(challenge, 'results') + extractChallengeContent(challenge, 'results-details')
+      const userContent = new UserContent(resultsContent, isLoggedIn)
+      tabs.push({
+        title: 'RESULTS',
+        subroute: '/results',
+        content: userContent.createDisplayElement(),
+        outline: userContent.createOutlineElement(),
+      })
     }
 
     const tabSubroutes = tabs.map(x => x['subroute'])
@@ -166,7 +180,7 @@ class ChallengeDetailsPage extends React.Component {
 
     const onClickPreRegistrationButton = () => {
       if (challenge.preRegistrationUrl) {
-        window.location.assign(challenge.preRegistrationUrl)
+        window.open(challenge.preRegistrationUrl, '_blank').focus()
       }
     }
 

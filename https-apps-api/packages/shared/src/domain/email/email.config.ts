@@ -21,9 +21,6 @@ const NOTIFICATION_TYPES_BASE = {
   space_locked_unlocked_deleted: true,
   // todo: deprecated?
   space_lock_unlock_delete_requests: true,
-  // deprecated
-  new_task_assigned: true,
-  task_status_changed: true,
   // jobs
   job_finished: true,
   // challenges
@@ -59,16 +56,12 @@ const NOTIFICATION_ROLE_PREFIXES = {
 
 const NOTIFICATION_TYPES_COMMON = {
   all_membership_changed: true,
-  all_new_task_assigned: true,
-  all_task_status_changed: true,
   all_comment_activity: true,
   all_content_added_or_deleted: true,
 }
 
 const NOTIFICATION_TYPES_LEAD = {
   lead_membership_changed: true,
-  lead_new_task_assigned: true,
-  lead_task_status_changed: true,
   lead_comment_activity: true,
   lead_content_added_or_deleted: true,
   lead_member_added_or_removed_from_space: true,
@@ -77,8 +70,6 @@ const NOTIFICATION_TYPES_LEAD = {
 
 const NOTIFICATION_TYPES_ADMIN = {
   admin_membership_changed: true,
-  admin_new_task_assigned: true,
-  admin_task_status_changed: true,
   admin_comment_activity: true,
   admin_content_added_or_deleted: true,
   admin_member_added_or_removed_from_space: true,

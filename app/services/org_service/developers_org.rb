@@ -12,15 +12,16 @@ module OrgService
     def self.update_members(dxorg)
       papi = DNAnexusAPI.for_admin
       users = User.review_space_admins.where.not(review_app_developers_org: dxorg)
-      users.pluck(:dxuser).each do |dxuser|
-        papi.call(
-          dxorg, "invite",
-          invitee: "user-#{dxuser}",
+      users.find_each do |user|
+        next if user.dxid == ADMIN_USER
+
+        papi.org_invite(
+          dxorg,
+          user.dxid,
           level: "ADMIN",
-          suppressEmailNotification: true
+          suppressEmailNotification: true,
         )
       end
-
       users.update_all(review_app_developers_org: dxorg)
     end
 

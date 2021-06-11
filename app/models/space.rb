@@ -207,6 +207,10 @@ class Space < ActiveRecord::Base
     confidential_spaces.reviewer.first
   end
 
+  def confidential_sponsor_space
+    confidential_spaces.sponsor.first
+  end
+
   def reviewer?
     review? && host_dxorg.present?
   end
@@ -219,32 +223,41 @@ class Space < ActiveRecord::Base
     review? && !confidential?
   end
 
+  # Find a space, oposite to a given area of a current review space:
+  #   if a current space is confidential and reviewer,
+  #   then opposite space will be a sponsor one. And vice versa.
+  # @param shared_space [Space object] shared space for self space
+  # @return space [Space object] the opposite space
+  def opposite_private_space(shared_space)
+    if reviewer? && confidential?
+      shared_space.confidential_spaces.sponsor.first
+    else
+      shared_space.confidential_spaces.reviewer.first
+    end
+  end
+
   def verified?
     return false if space_type != "verification"
     verified ? true : false
   end
 
+  # this is always false for confidential review spaces
   def accepted?
-    accepted_by_host = accepted_by?(host_lead_member)
-    condition = verification?
-    condition &&= (guest_lead_member.blank? || host_lead_member.user == guest_lead_member.user)
-    return accepted_by_host if condition
-    accepted_by_host && accepted_by?(guest_lead_member)
+    accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
   end
 
   def accepted_by?(member)
-    return false if member.blank?
-    if member.host?
-      return false if host_project.blank?
-      return true unless review?
-      return true if confidential?
-      confidential_reviewer_space.host_lead_member.present?
-    else
-      return false if guest_project.blank?
-      return true unless review?
-      confidential_spaces.sponsor.first.guest_lead_member.present? unless confidential?
-      guest_lead_member.present?
+    return false unless member
+    return true if review? && confidential?
+
+    if groups?
+      return member.host? && host_project.present? ||
+             member.guest? && guest_project.present?
     end
+
+    # below are the checks for a shared review space
+    member.host? && confidential_reviewer_space&.host_lead_member ||
+      member.guest? && confidential_sponsor_space&.guest_lead_member
   end
 
   def uid
