@@ -58,31 +58,59 @@ class SpaceInviteForm
     errors.add(:invitees, "List of invitees is empty!") if invitees.values.flatten.blank?
   end
 
-  # Validates a case to prevent a user from being added to both private areas of a review space
-  # @param side [String] s side selected by a client, provided from UI
+  # Validates a case to prevent a user from being added to both private and
+  #   shared areas of a review space
+  # @param side [String] a side selected by a client, provided from UI, when adding to shared area
+  # @param space [Space object] current space
   # @return The validation result. Passed Ok or errors [Object] with a list of messages.
   def validate_users_sides
-    all_members = space.space_memberships
-    invalid_users = other_side_members = []
-    members = all_members.where(side: selected_side) if side
-    other_side_members = (all_members - members).pluck(:user_id) if members
+    members_ids_exist = []
 
-    invitees[:dxuser].each do |dxuser|
-      user = User.find_by(dxuser: dxuser)
-      invalid_users << user.dxuser if user && other_side_members.include?(user.id)
+    if space.review?
+      if space.shared?
+        all_members = space.space_memberships.active
+
+        members = all_members.where(side: selected_side) if side
+        members_ids_exist = (all_members - members).pluck(:user_id) if members
+      else
+        shared_space = space.shared_space
+        space_members_ids = space.space_memberships.active.pluck(:user_id)
+        opposite_private_space = space.opposite_private_space(shared_space)
+        private_members_ids = opposite_private_space.space_memberships.active.pluck(:user_id)
+        members_ids_exist = space_members_ids + private_members_ids if private_members_ids
+      end
     end
-    invitees[:email].each do |email|
-      user = User.find_by(email: email)
-      invalid_users << user.email if user && other_side_members.include?(user.id)
-    end
+
+    invalid_users = collect_invalid_users(members_ids_exist)
 
     return if invalid_users.empty?
 
     errors.add(
       :base,
-      "The following user's could not be added because they exist in other space side already: " \
-      "#{invalid_users.to_sentence}",
+      "The following users could not be added because they exist in other space side already: " \
+        "#{invalid_users.to_sentence}",
     )
+  end
+
+  # Collects users ids, which are considered as invalid when a user is trying
+  #   to add them to space.
+  # @param members_ids_exist [Array of Integers] - array of users ids
+  # @param invitees [String] - string, contains added user's emails or dxusers,
+  #   separated by space or comma
+  # @return invalid_users [Array of Integers] - array of users ids
+  def collect_invalid_users(members_ids_exist)
+    invalid_users = []
+
+    invitees[:dxuser].each do |dxuser|
+      user = User.find_by(dxuser: dxuser)
+      invalid_users << user.dxuser if user && members_ids_exist.include?(user.id)
+    end
+    invitees[:email].each do |email|
+      user = User.find_by(email: email)
+      invalid_users << user.email if user && members_ids_exist.include?(user.id)
+    end
+
+    invalid_users
   end
 
   # Determines a proper Side in case of selected one by a user.
@@ -102,15 +130,17 @@ class SpaceInviteForm
 
     errors.add(
       :base,
-      "The following username's could not be added because they do not exist: " \
+      "The following usernames could not be added because they do not exist: " \
       "#{invalid_dxusers.to_sentence}",
     )
   end
 
   def check_emails_already_in_space
-    emails_in_space = (space.users & User.where(email: invitees[:email])).pluck(:email)
+    emails_in_space = space.
+      space_memberships.active.joins(:user).
+      where(users: { email: invitees[:email] }).pluck(:email)
 
-    return if emails_in_space.empty?
+    return if emails_in_space.blank?
 
     errors.add(
       :base,
@@ -120,9 +150,11 @@ class SpaceInviteForm
   end
 
   def check_dxusers_already_in_space
-    dxusers_in_space = (space.users & User.where(dxuser: invitees[:dxuser])).pluck(:dxuser)
+    dxusers_in_space = space.
+      space_memberships.active.joins(:user).
+      where(users: { dxuser: invitees[:dxuser] }).pluck(:dxuser)
 
-    return if dxusers_in_space.empty?
+    return if dxusers_in_space.blank?
 
     errors.add(
       :base,

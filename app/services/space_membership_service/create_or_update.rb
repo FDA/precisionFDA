@@ -4,7 +4,7 @@ module SpaceMembershipService
     # @param [String] target_side
     # @param [SpaceMembership] admin_member
     def self.call(api, space, user, target_role, admin_member)
-      membership = space.space_memberships.where(user_id: user.id).first_or_initialize
+      membership = space.space_memberships.active.where(user_id: user.id).first_or_initialize
       membership.attributes = { role: target_role, side: admin_member.side }
 
       return if membership.lead?
@@ -22,6 +22,5 @@ module SpaceMembershipService
     def self.create_event(space, member, admin_member)
       SpaceEventService.call(space.id, admin_member.user_id, admin_member, member, :membership_added)
     end
-
   end
 end

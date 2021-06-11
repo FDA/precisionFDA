@@ -86,7 +86,7 @@ module Admin
       full_opts = opts.merge(
         username: username,
         org: org_name,
-        org_handle: username[0...Org::HANDLE_MAX_LENGTH - Org::PFDA_PREFIX.size],
+        org_handle: find_unused_orgname(username),
       )
 
       result = { errors: errors(full_opts), user: { username: username } }

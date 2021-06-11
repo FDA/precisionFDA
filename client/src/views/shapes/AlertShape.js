@@ -12,7 +12,7 @@ const AlertShape = {
   duration: PropTypes.number,
 }
 
-const mapToAlertNotification = ({ id, message, style = 'danger', type, duration = 5000 }) => ({
+const mapToAlertNotification = ({ id, message, style = 'danger', type, duration = 25000 }) => ({
   id: id || uniqid('alert-'),
   message,
   style,

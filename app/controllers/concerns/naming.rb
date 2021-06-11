@@ -15,7 +15,7 @@ module Naming
     # @param username [String] Base name.
     # @return [String] Unused org handle.
     def find_unused_orgname(username)
-      service = DIContainer.resolve("unused_orgname_generator")
+      service = DIContainer.resolve("orgs.unused_orgname_generator")
       service.call(username)
     end
   end
