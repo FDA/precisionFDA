@@ -26,15 +26,24 @@ module SpaceMembershipService
           api.org_invite(org_dxid, invitee, attrs)
         end
 
+        # add a new member to the space given
         space.space_memberships << membership
 
-        return membership if !space.review? || !space.accepted?
+        # Skip adding to second space area when:
+        #   space is of `groups` type or
+        #   space is accepted (check in the Shared area only)
+        return membership if !space.review? || space.shared? && !space.accepted?
 
-        private_space = space.confidential_space(membership)
+        if space.confidential?
+          # add a new member to the Shared space
+          space.space.space_memberships << membership
+        else
+          # add a new member to a Private area of member side
+          private_space = space.confidential_space(membership)
+          private_space.space_memberships << membership if private_space
+        end
 
-        private_space.space_memberships.create_with(
-          membership.attributes.slice("meta", "role", "side"),
-        ).find_or_create_by!(user: membership.user)
+        membership
       end
 
       def admin_user_member?(api, org_dxid)

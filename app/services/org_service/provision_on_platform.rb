@@ -28,11 +28,7 @@ module OrgService
         raise "We did not expect #{dxuserid} to exist on DNAnexus"
       end
 
-      if Org.find_by(name: org).present?
-        raise "We did not expect org name '#{org}' to exist in the database"
-      end
-
-      if Org.find_by(handle: org_handle).present?
+      if Org.where(handle: org_handle).exists?
         raise "We did not expect org handle '#{org_handle}' to exist in the database"
       end
 
