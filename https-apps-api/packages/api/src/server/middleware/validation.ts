@@ -1,7 +1,6 @@
 import type { JSONSchema7 } from 'json-schema'
 import { isEmpty } from 'ramda'
-import { errors } from '@pfda/https-apps-shared'
-import { ajv } from '../../utils'
+import { errors, ajv } from '@pfda/https-apps-shared'
 
 type SanitizeInputFn = (props: any) => typeof props
 type SchemaWithSource = {

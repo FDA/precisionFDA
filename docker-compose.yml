@@ -1,7 +1,6 @@
-version: "3.7"
+version: '3.7'
 
-x-shared:
-  &shared
+x-shared: &shared
   build:
     context: .
   volumes:
@@ -33,6 +32,26 @@ services:
         target: /precision-fda
     working_dir: /precision-fda/client
     command: bash -c "yarn && yarn watch"
+
+  nodejs-api:
+    build:
+      context: .
+      dockerfile: ./https-apps-api/docker/node.isolated.Dockerfile
+    command: ['make', 'run-dist']
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+      - redis
+
+  nodejs-worker:
+    build:
+      context: .
+      dockerfile: ./https-apps-api/docker/node.isolated.Dockerfile
+    command: ['make', 'run-worker-dist']
+    depends_on:
+      - db
+      - redis
 
   db:
     image: mysql:5.6

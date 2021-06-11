@@ -1,10 +1,15 @@
 import { backendCall } from '../utils/api'
+import { queryYearList } from './yearList'
 
 
 const getExperts = (data: any) => backendCall('/api/experts', 'GET', data)
-const getExpertsYearList = () => backendCall('/api/experts/years', 'GET')
+
+const queryExpertsYearList = () => {
+  return queryYearList('/api/experts/years/')
+}
+
 
 export {
   getExperts,
-  getExpertsYearList
+  queryExpertsYearList,
 }

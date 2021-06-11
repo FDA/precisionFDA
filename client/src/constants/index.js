@@ -193,6 +193,7 @@ export const HOME_ASSETS_MODALS = {
 
 export const CHALLENGE_STATUS = {
   SETUP: 'setup',
+  PRE_REGISTRATION: 'pre-registration',
   OPEN: 'open',
   PAUSED: 'paused',
   ARCHIVED: 'archived',
@@ -204,3 +205,7 @@ export const CHALLENGE_TIME_STATUS = {
   CURRENT: 'current',
   ENDED: 'ended',
 }
+
+export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
+export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'
+export const MAILING_LIST = 'https://list.nih.gov/cgi-bin/wa.exe?SUBED1=PRECISIONFDA&A=1'

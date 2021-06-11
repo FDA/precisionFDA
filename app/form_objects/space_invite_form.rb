@@ -1,18 +1,20 @@
 class SpaceInviteForm
   include ActiveModel::Model
 
-  attr_accessor :invitees_role, :space, :space_id
+  attr_accessor :invitees_role, :space, :space_id, :side
   attr_reader :invitees
 
   validates :invitees_role, presence: true, inclusion: { in: SpaceMembership.roles.keys }
   validate :validate_invitees,
            :validate_dxusers,
+           :validate_users_sides,
            :check_emails_already_in_space,
            :check_dxusers_already_in_space
 
-  # @param [SpaceMembership, #side, #user] membership
+  # @param membership [SpaceMembership] Inviter's membership object.
+  # @param api [DNAnexusAPI] Inviter's api object.
   def invite(membership, api)
-    # rubocop:disable Style/SymbolProc
+    # rubocop:todo Style/SymbolProc
     return if invalid?
 
     existing_users.find_each do |user|
@@ -54,6 +56,43 @@ class SpaceInviteForm
 
   def validate_invitees
     errors.add(:invitees, "List of invitees is empty!") if invitees.values.flatten.blank?
+  end
+
+  # Validates a case to prevent a user from being added to both private areas of a review space
+  # @param side [String] s side selected by a client, provided from UI
+  # @return The validation result. Passed Ok or errors [Object] with a list of messages.
+  def validate_users_sides
+    all_members = space.space_memberships
+    invalid_users = other_side_members = []
+    members = all_members.where(side: selected_side) if side
+    other_side_members = (all_members - members).pluck(:user_id) if members
+
+    invitees[:dxuser].each do |dxuser|
+      user = User.find_by(dxuser: dxuser)
+      invalid_users << user.dxuser if user && other_side_members.include?(user.id)
+    end
+    invitees[:email].each do |email|
+      user = User.find_by(email: email)
+      invalid_users << user.email if user && other_side_members.include?(user.id)
+    end
+
+    return if invalid_users.empty?
+
+    errors.add(
+      :base,
+      "The following user's could not be added because they exist in other space side already: " \
+      "#{invalid_users.to_sentence}",
+    )
+  end
+
+  # Determines a proper Side in case of selected one by a user.
+  # @return selected_side [String] "host" or "guest"
+  def selected_side
+    if side == SpaceMembership::SIDE_HOST_ALIAS
+      SpaceMembership::SIDE_HOST
+    elsif side == SpaceMembership::SIDE_GUEST_ALIAS
+      SpaceMembership::SIDE_GUEST
+    end
   end
 
   def validate_dxusers

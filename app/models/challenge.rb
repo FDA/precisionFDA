@@ -15,6 +15,7 @@
 #  updated_at      :datetime         not null
 #  status          :string(255)
 #  automated       :boolean          default(TRUE)
+#  pre_registration_url :string(255)
 #  card_image_url  :string(255)
 #  card_image_id   :string(255)
 #  space_id        :integer
@@ -26,6 +27,7 @@ class Challenge < ApplicationRecord
   include Auditor
 
   STATUS_SETUP =    "setup".freeze
+  STATUS_PRE_REGISTRATION = "pre-registration".freeze
   STATUS_OPEN =     "open".freeze
   STATUS_PAUSED =   "paused".freeze
   STATUS_ARCHIVED = "archived".freeze
@@ -69,7 +71,10 @@ class Challenge < ApplicationRecord
   validates :meta, meta: true
   validates :app_id,
             presence: true,
-            unless: :status_setup?
+            unless: :status_setup_or_pre_registration?
+  validates :pre_registration_url,
+            presence: true,
+            if: :status_pre_registration?
   validate :validate_end_at
   validate :validate_start_at
   validate :can_open?
@@ -79,7 +84,14 @@ class Challenge < ApplicationRecord
 
   class << self
     def available_statuses
-      [STATUS_SETUP, STATUS_OPEN, STATUS_PAUSED, STATUS_ARCHIVED, STATUS_RESULT_ANNOUNCED]
+      [
+        STATUS_SETUP,
+        STATUS_PRE_REGISTRATION,
+        STATUS_OPEN,
+        STATUS_PAUSED,
+        STATUS_ARCHIVED,
+        STATUS_RESULT_ANNOUNCED,
+      ]
     end
 
     def add_app_dev(context, challenge_id, app_id)
@@ -152,6 +164,14 @@ class Challenge < ApplicationRecord
     status == STATUS_SETUP
   end
 
+  def status_pre_registration?
+    status == STATUS_PRE_REGISTRATION
+  end
+
+  def status_setup_or_pre_registration?
+    status == STATUS_SETUP || status == STATUS_PRE_REGISTRATION
+  end
+
   def status_open?
     status == STATUS_OPEN
   end
@@ -177,11 +197,11 @@ class Challenge < ApplicationRecord
   end
 
   def available_statuses
-    return [STATUS_SETUP] if new_record?
+    return [STATUS_SETUP, STATUS_PRE_REGISTRATION] if new_record?
     return [STATUS_RESULT_ANNOUNCED, STATUS_ARCHIVED, status].uniq if over?
     return [STATUS_OPEN, STATUS_PAUSED, status].uniq if started?
 
-    [STATUS_OPEN, STATUS_PAUSED, status].uniq
+    [STATUS_SETUP, STATUS_PRE_REGISTRATION, STATUS_OPEN, STATUS_PAUSED, status].uniq
   end
 
   # not available statuses for select!
@@ -219,7 +239,7 @@ class Challenge < ApplicationRecord
   def can_assign_specific_app?(context, checked_app)
     if !context.logged_in? ||
        over? ||
-       ![STATUS_PAUSED, STATUS_SETUP].include?(status) ||
+       ![STATUS_PAUSED, STATUS_SETUP, STATUS_PRE_REGISTRATION].include?(status) ||
        app_owner != context.user ||
        app_id == checked_app.id
       false
@@ -289,18 +309,14 @@ class Challenge < ApplicationRecord
       description: description,
       host_lead_dxuser: host_lead_dxuser,
       guest_lead_dxuser: guest_lead_dxuser,
-      space_type: "groups",
+      space_type: SpaceForm::TYPE_GROUPS,
     )
 
-    space = SpaceService::Create.call(space_form, api: context.api, user: context.user)
-    membership = space.space_memberships.find_by(user_id: space.host_lead.id)
-
-    SpaceService::Invite.call(
-      context.api,
-      space,
-      membership,
-      User.find_by(dxuser: CHALLENGE_BOT_DX_USER),
-      SpaceMembership::ROLE_ADMIN,
+    space = SpaceService::Create.call(
+      space_form,
+      api: context.api,
+      user: context.user,
+      for_challenge: true,
     )
 
     update!(space: space)

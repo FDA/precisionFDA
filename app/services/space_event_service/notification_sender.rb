@@ -47,6 +47,7 @@ module SpaceEventService
 
       def notification_class(event)
         case event.activity_type
+        # deprecated
         when *TASK_TYPES       then SpaceEventService::TaskNotifications
         when *CONTENT_TYPES    then SpaceEventService::ContentNotifications
         when *COMMENT_TYPES    then SpaceEventService::CommentNotifications

@@ -344,6 +344,7 @@ class ChallengesController < ApplicationController
         :replacement_id,
         :host_lead_dxuser,
         :guest_lead_dxuser,
+        :pre_registration_url,
       )
   end
 
@@ -360,6 +361,7 @@ class ChallengesController < ApplicationController
         :card_image_id,
         :card_image_url,
         :replacement_id,
+        :pre_registration_url,
       )
   end
 

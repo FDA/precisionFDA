@@ -15,7 +15,7 @@ module Api
         space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: @space))
 
         if space_invite_form.valid?
-          api = @membership.persisted? ? @context.api : DNAnexusAPI.for_admin
+          api = @membership.persisted? ? @context.api : DIContainer.resolve("api.admin")
           begin
             invited_emails = space_invite_form.invite(@membership, api)
           rescue StandardError
@@ -58,7 +58,7 @@ module Api
 
       # Adds invitees attributes to fit SpaceInviteForm.
       def space_invite_params
-        params.permit(:invitees, :invitees_role, :space_id)
+        params.permit(:invitees, :invitees_role, :space_id, :side)
       end
 
       # Collects validation errors from SpaceInviteForm.

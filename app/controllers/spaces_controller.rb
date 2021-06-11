@@ -219,7 +219,7 @@ class SpacesController < ApplicationController
   end
 
   def space_invite_params
-    params.require(:space).permit(:invitees, :invitees_role)
+    params.require(:space).permit(:invitees, :invitees_role, :side)
   end
 
   def fetch_membership

@@ -1,6 +1,5 @@
 import { createAction } from '../../utils/redux'
 import { fetchExperts } from './fetchExperts'
-import { fetchExpertsYearList } from './fetchExpertsYearList'
 import {
   EXPERTS_LIST_SET_PAGE,
   EXPERTS_LIST_SET_YEAR,
@@ -13,7 +12,6 @@ const expertsListResetFilters = () => createAction(EXPERTS_LIST_RESET_FILTERS)
 
 export {
   fetchExperts,
-  fetchExpertsYearList,
   expertsListSetPage,
   expertsListSetYear,
   expertsListResetFilters,

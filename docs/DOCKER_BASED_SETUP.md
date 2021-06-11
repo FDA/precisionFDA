@@ -13,8 +13,8 @@ The first step you have to do is to install docker and docker-compose
 in your OS.
 
 Depending on OS you're using, installation process can vary so
-please follow instructions for [docker](https://docs.docker.com/install/) 
-and [docker-compose](https://docs.docker.com/compose/install/) related to 
+please follow instructions for [docker](https://docs.docker.com/install/)
+and [docker-compose](https://docs.docker.com/compose/install/) related to
 your OS.
 
 ## Setting up
@@ -23,7 +23,7 @@ your OS.
 
 - Create a `config/database.yml` file containing the database configuration for the portal.
   - You can use [`database.yml.sample` file](../config/database.yml.sample) as a template.
-  - *Optionally*, update the configuration copied from the sample file as needed.
+  - _Optionally_, update the configuration copied from the sample file as needed.
 - Create a `.env` file in the project root with an additional environment variables to be passed into Docker containers.
   - See [`.env.sample` file](../.env.sample) for a reference.
   - To run the portal on a local machine, configure at least:
@@ -37,7 +37,7 @@ Execute the following command from project's root:
 
 `$ docker-compose up --build`
 
-This could take a while since during first run all required software 
+This could take a while since during first run all required software
 will be installed.
 
 ### 3. Prepare the database
@@ -55,6 +55,7 @@ To use your own account to log-in to the system, run the command to
 create database with the environment variables set with your account's data (if you don't have
 an account yet, please refer to
 [New account registration](DEVELOPMENT_SETUP.md#new-account-registration)):
+
 ```
 docker-compose exec \
     -e PFDA_USER_FIRST_NAME=Florante \
@@ -68,6 +69,7 @@ docker-compose exec \
 ### 4. Validate the setup
 
 Once the application is correctly installed & configured, you should be able to access the portal at:
+
 ```
 https://localhost:3000/
 ```
@@ -80,17 +82,17 @@ To run application just use this command:
 
 ## QA testing environment
 
-In order to run app in QA environment, use this command:
+In order to run app in QA environment, use this command (from the project root):
 
 `docker-compose -f docker/isolation.docker-compose.yml up --build`
 
 ## Some useful commands
 
-* Getting to MySQL container:
+- Getting to MySQL container:
 
   `docker-compose exec db bash`
-  
-* Getting to MySQL console:
+
+- Getting to MySQL console:
 
   First get to MySQL container then run `mysql -u root -p` (password is set
   in docker-compose.yml file)

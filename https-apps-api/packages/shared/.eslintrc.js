@@ -12,5 +12,6 @@ module.exports = {
     '@typescript-eslint/consistent-type-definitions': 0,
     // does not work for decorators
     'new-cap': 0,
+    'id-length': 0,
   },
 }
