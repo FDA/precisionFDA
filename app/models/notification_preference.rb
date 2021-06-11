@@ -13,16 +13,12 @@ class NotificationPreference < ApplicationRecord
 
   COMMON_KEYS = [
     :all_membership_changed,
-    :all_new_task_assigned,
-    :all_task_status_changed,
     :all_comment_activity, #mentioned in a comment, someone replies to their comment
     :all_content_added_or_deleted,
     # :all_app_or_workflow_status_changed, #job started, job completed, job failed, job terminated
   ]
   LEAD_KEYS = [
     :lead_membership_changed,
-    :lead_new_task_assigned,
-    :lead_task_status_changed,
     :lead_comment_activity, #mentioned in a comment, someone replies to their comment
     :lead_content_added_or_deleted,
     # :lead_app_or_workflow_status_changed, #job started, job completed, job failed, job terminated
@@ -31,8 +27,6 @@ class NotificationPreference < ApplicationRecord
   ]
   ADMIN_KEYS = [
     :admin_membership_changed,
-    :admin_new_task_assigned,
-    :admin_task_status_changed,
     :admin_comment_activity, #mentioned in a comment, someone replies to their comment
     :admin_content_added_or_deleted,
     # :admin_app_or_workflow_status_changed, #job started, job completed, job failed, job terminated
