@@ -23,12 +23,6 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "isDisabled": true,
-          "link": undefined,
-          "method": "post",
-          "text": "Authorize URL",
-        },
-        Object {
-          "isDisabled": true,
           "onClick": [Function],
           "text": "Rename",
         },
