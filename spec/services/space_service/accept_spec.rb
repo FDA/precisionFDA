@@ -29,17 +29,17 @@ RSpec.describe SpaceService::Accept, type: :service do
       it "doesn't make the space active" do
         expect { guest_response }.not_to change(space, :state).from(Space::STATE_UNACTIVATED)
       end
+    end
 
-      context "when the both accepted the space" do
-        let(:common_response) do
-          host_response
-          guest_response
-        end
+    context "when the both accepted the space" do
+      let(:common_response) do
+        host_response
+        guest_response
+      end
 
-        it "makes the space active" do
-          expect { common_response }.to change(space, :state).from(Space::STATE_UNACTIVATED).
-            to(Space::STATE_ACTIVE)
-        end
+      it "makes the space active" do
+        expect { common_response }.to change(space, :state).from(Space::STATE_UNACTIVATED).
+          to(Space::STATE_ACTIVE)
       end
     end
   end
