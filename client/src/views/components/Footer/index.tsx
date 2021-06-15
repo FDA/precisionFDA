@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { theme } from '../../../styles/theme'
 import ExternalLink from '../Controls/ExternalLink'
 
+import fdaLogo from '../../../assets/logo-fda-2016.png'
 
 const StyledFooterContainer = styled.div`
   width: 100%;
@@ -40,7 +41,7 @@ const PFDAFooter = () => {
         <StyledFooter role="contentInfo">
           <div>
             <StyledFDALogo href="http://www.fda.gov" title="FDA Home Page">
-              <img src="/assets/logo-fda-2016.png" alt="FDA Home Page" width="41px" height="46px"/>
+              <img src={fdaLogo} alt="FDA Home Page" width="41px" height="46px"/>
             </StyledFDALogo>
           </div>
           <div>
