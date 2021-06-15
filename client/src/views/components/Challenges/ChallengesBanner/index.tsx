@@ -2,6 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 import { theme } from '../../../../styles/theme'
 import { ViewAllButton } from '../../Controls/ViewAllButton'
+import challengesBannerLeft from '../../../../assets/ChallengesBannerBackground-Left.png'
+import challengesBannerRight from '../../../../assets/ChallengesBannerBackground-Right.png'
 
 
 const StyledChallengesBanner = styled.div`
@@ -15,7 +17,7 @@ const StyledChallengesBannerLeft = styled.div`
   flex-grow: 1;
   text-align: left;
   padding: 20px 0 20px ${theme.padding.mainContentHorizontal};
-  background-image: url('/assets/challenges/ChallengesBannerBackground-Left.png');
+  background-image: url(${challengesBannerLeft});
   background-repeat: no-repeat;
   background-position: 0% 50%;
   background-size: contain;
@@ -38,7 +40,7 @@ const StyledChallengesBannerLeft = styled.div`
 const StyledChallengesBannerRight = styled.div`
   align-self: stretch;
   padding: 32px ${theme.values.paddingMainContentVertical*2}px 0 0;
-  background-image: url('/assets/challenges/ChallengesBannerBackground-Right.png');
+  background-image: url(${challengesBannerRight});
   background-repeat: no-repeat;
   background-position: 100% 50%;
   background-size: contain;
