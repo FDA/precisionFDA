@@ -3,6 +3,7 @@ import { commonStyles } from '../../../../styles/commonStyles'
 
 
 export const StyledExpertsListContainer = styled.div`
+  padding-top: 12px;
   .experts-list {
     ${commonStyles.listContainer}
   }

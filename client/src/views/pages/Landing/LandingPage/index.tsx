@@ -21,12 +21,13 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { queryRecentApps, queryFeaturedApps } from '../../../../api/apps'
 import { TopAppsList } from '../../../components/Apps/TopAppsList'
 import { CHALLENGE_TIME_STATUS, MAILING_LIST } from '../../../../constants'
-import { theme } from '../../../../styles/theme'
+import { breakPoints, theme } from '../../../../styles/theme'
 import { commonStyles } from '../../../../styles/commonStyles'
 import { ViewAllButton } from '../../../components/Controls/ViewAllButton'
 import { SectionHeading } from '../../../components/Controls/SectionHeading'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
+import { PageContainer } from '../../../../components/Page/styles'
 
 
 const pFDATagLine = 'A secure, collaborative, high-performance computing platform that builds a community of experts around the analysis of biological datasets in order to advance precision medicine.'
@@ -43,29 +44,31 @@ const challengeListFilter = (items: IChallengeListItem[]) => {
 }
 
 
-const LandingPageLayout = styled.div`
-  ${commonStyles.mainContainerTwoColumns};
+const LandingPageLayout = styled(PageContainer)`
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+
+  @media(min-width: ${breakPoints.large}px) {
+    flex-direction: row;
+  }
 `
 
-const LandingPageLayout_LeftColumn = styled.div`
-  ${commonStyles.mainContainerTwoColumns_LeftColumn};
+const LeftColumn = styled.div`
+  flex-grow: 1;
+  margin-bottom: 32px;
+  @media(min-width: ${breakPoints.large}px) {
+    padding-right: 16px;
+  }
 `
 
-const LandingPageLayout_RightColumn = styled.div`
-  ${commonStyles.mainContainerTwoColumns_RightColumn};
+const RightColumn = styled.div`
+  min-width: 300px;
+  max-width: 300px;
 
   p {
     padding-top: 8px;
   }
-`
-
-const LandingPageRightColumnHr = styled.hr`
-  border-color: ${theme.colors.textMediumGrey};
-  margin: 16px 0 0 0;
-`
-
-const StyledViewAllButton  = styled(ViewAllButton)`
-  margin-top: 12px;
 `
 
 const SmallLeftMarginContainer = styled.div`
@@ -120,7 +123,10 @@ const NavigationBarPublicLandingTitle = styled.div`
     height: 40px;
   }
 `
-
+const LandingPageRightColumnHr = styled.hr`
+  border-color: ${theme.colors.textMediumGrey};
+  margin: 32px 0 0 0;
+`
 
 const TopAppsContainer = styled.div`
   display: flex;
@@ -133,7 +139,6 @@ const TopAppsColumn = styled.div`
 
 const GettingStarted = styled.div`
   background-color: ${theme.colors.backgroundLightGray};
-  margin: -6px -16px -12px -16px;
   padding: 6px 16px 12px 16px;
 
   a {
@@ -157,6 +162,10 @@ const MediumGreyHr = styled.hr`
   border-color: ${theme.colors.textMediumGrey};
 `
 
+export const StyledViewAllButton  = styled(ViewAllButton)`
+  margin-top: 12px;
+`
+
 
 const LandingPage : FunctionComponent = () => {
 
@@ -174,32 +183,26 @@ const LandingPage : FunctionComponent = () => {
         </NavigationBar>
 
         <LandingPageLayout>
-          <LandingPageLayout_LeftColumn>
+          <LeftColumn>
             <SmallLeftMarginContainer>
               <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
             </SmallLeftMarginContainer>
             <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
-            <div style={{ marginTop: '12px' }}>
-              <ChallengesBanner />
-            </div>
-            <div style={{ marginTop: '12px' }}>
-              <ChallengesList listItemComponent={ChallengesListItemLanding} filter={challengeListFilter} allowPagination={false} />
-            </div>
+            <ChallengesBanner />
+            <ChallengesList listItemComponent={ChallengesListItemLanding} filter={challengeListFilter} allowPagination={false} />
             <SmallLeftMarginContainer>
               <StyledViewAllButton title="View All Challenges" url="/challenges" />
             </SmallLeftMarginContainer>
-          </LandingPageLayout_LeftColumn>
-          <LandingPageLayout_RightColumn>
+          </LeftColumn>
+          <RightColumn>
             <SectionHeading>RECENT EXPERT BLOGS</SectionHeading>
-            <div style={{ marginTop: '12px' }}>
             <ExpertsList listItemComponent={ExpertsListItemBlogEntrySmall} filter={(items) => { return items.slice(1, 2) }} allowPagination={false} />
-            </div>
             <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
-            <LandingPageRightColumnHr style={{ marginTop: '40px' }} />
+            <LandingPageRightColumnHr />
             <SectionHeading>LATEST NEWS</SectionHeading>
             <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 3) }} allowPagination={false} />
             <StyledViewAllButton title="View All News" url="/news" />
-          </LandingPageLayout_RightColumn>
+          </RightColumn>
         </LandingPageLayout>
 
         <CommunityParticipants>
@@ -245,7 +248,7 @@ const LandingPage : FunctionComponent = () => {
         }
 
         <LandingPageLayout>
-          <LandingPageLayout_LeftColumn>
+          <LeftColumn>
             <TopAppsContainer>
               <TopAppsColumn>
                 <SectionHeading>MOST RECENT APPS</SectionHeading>
@@ -275,8 +278,8 @@ const LandingPage : FunctionComponent = () => {
             <SmallLeftMarginContainer>
               <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
             </SmallLeftMarginContainer>
-          </LandingPageLayout_LeftColumn>
-          <LandingPageLayout_RightColumn>
+          </LeftColumn>
+          <RightColumn>
             <GettingStarted>
               <GettingStartedHeading>GETTING STARTED</GettingStartedHeading>
               <a href={'/docs'}>For New Users</a>
@@ -293,12 +296,11 @@ const LandingPage : FunctionComponent = () => {
               <GettingStartedHr />
               <a href={MAILING_LIST} target="_blank">precisionFDA Mailing List</a>
             </GettingStarted>
-            <div style={{ height: '32px' }}></div>
             <LandingPageRightColumnHr />
             <SectionHeading>LATEST NEWS</SectionHeading>
             <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 8) }} allowPagination={false} />
             <StyledViewAllButton title="View All News" url="/news" />
-          </LandingPageLayout_RightColumn>
+          </RightColumn>
         </LandingPageLayout>
       </PublicLayout>
     )

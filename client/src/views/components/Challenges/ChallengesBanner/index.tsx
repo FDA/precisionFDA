@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { theme } from '../../../../styles/theme'
+import { colors, padding, theme, values } from '../../../../styles/theme'
 import { ViewAllButton } from '../../Controls/ViewAllButton'
 import challengesBannerLeft from '../../../../assets/ChallengesBannerBackground-Left.png'
 import challengesBannerRight from '../../../../assets/ChallengesBannerBackground-Right.png'
@@ -9,12 +9,13 @@ import challengesBannerRight from '../../../../assets/ChallengesBannerBackground
 const StyledChallengesBanner = styled.div`
   display: flex;
   align-items: center;
-  background-color: ${theme.colors.subtleBlue};
-  margin: ${theme.padding.mainContentVertical} 0 ${theme.values.paddingMainContentVertical/2}px ${0-theme.values.paddingMainContentHorizontal}px;
+  background-color: ${colors.subtleBlue};
+  justify-content: space-between;
+  margin-top: 12px;
 `
 
 const StyledChallengesBannerLeft = styled.div`
-  flex-grow: 1;
+  flex: 1 1 auto;
   text-align: left;
   padding: 20px 0 20px ${theme.padding.mainContentHorizontal};
   background-image: url(${challengesBannerLeft});
@@ -23,14 +24,14 @@ const StyledChallengesBannerLeft = styled.div`
   background-size: contain;
 
   h4 {
-    color: ${theme.colors.textBlack};
+    color: ${colors.textBlack};
     font-size: 16px;
     font-weight: bold;
     margin: 0 0 4px 0;
   }
 
   h2 {
-    color: ${theme.colors.textBlack};
+    color: ${colors.textBlack};
     font-size: 20px;
     font-weight: bold;
     margin: 4px 0 0 0;
