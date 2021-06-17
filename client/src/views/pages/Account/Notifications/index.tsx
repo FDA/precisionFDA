@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { mapValues } from 'lodash'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import {
-  PageContainer,
   PageHeader,
   PageTitle,
   PageActions,
 } from '../../../../components/Page/styles'
-import { FieldGroup, SectionTitle, StyledNotifications, StyledSelectWrap } from './styles'
+import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import Select from 'react-select'
 import { Checkbox } from '../../../../components/Checkbox'
@@ -127,7 +126,7 @@ export const NotificationsPage = () => {
 
   return (
     <form>
-      <PageContainer>
+      <StyledPageContainer>
         <PageHeader>
           <PageTitle>Notification Preferences</PageTitle>
           <PageActions>
@@ -203,7 +202,7 @@ export const NotificationsPage = () => {
               )
             })}
         </StyledNotifications>
-      </PageContainer>
+      </StyledPageContainer>
     </form>
   )
 }
