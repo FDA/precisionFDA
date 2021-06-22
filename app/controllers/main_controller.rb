@@ -17,8 +17,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                presskit
                                                news
                                                mislabeling
-                                               track
-                                               tmb)
+                                               track)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
   before_action :require_login_or_guest, only: %i(track)
