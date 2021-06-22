@@ -25,8 +25,7 @@ const Item = ({ uid, revision, isLatest, isCurrent }) => {
 }
 
 const RevisionDropdown = ({ revisions = [], revision, className }) => {
-  const lastRevision = revisions.length
-
+  const lastRevision = revisions.reduce((acc, shot) => acc > shot.revision ? acc : shot.revision, 0)
   const list = revisions.map((e) => {
     const isLatest = e.revision === lastRevision
     const isCurrent = e.revision === revision
