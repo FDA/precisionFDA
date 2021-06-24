@@ -15,9 +15,9 @@ describe('UserContent', () => {
 
     const userContent = new UserContent(testHtml, false)
     expect(userContent.anchors).toEqual([
-      { tag: 'H1', content: 'Heading 1', anchorId: '1__Heading_1' },
-      { tag: 'H2', content: 'Heading 2', anchorId: '2__Heading_2' },
-      { tag: 'H2', content: 'Finally, another heading', anchorId: '3__Finally%2C_another_hea' },
+      { tag: 'h1', content: 'Heading 1', anchorId: '1__Heading_1' },
+      { tag: 'h2', content: 'Heading 2', anchorId: '2__Heading_2' },
+      { tag: 'h2', content: 'Finally, another heading', anchorId: '3__Finally%2C_another_hea' },
     ])
 
     const contentWrapper = mount(userContent.createDisplayElement())
@@ -35,10 +35,10 @@ describe('UserContent', () => {
 
     const userContent = new UserContent(testHtml, false)
     expect(userContent.anchors).toEqual([
-      { tag: 'H1',
+      { tag: 'h1',
         content: 'Heading 1 that is really quite long and one wonders if the writer of this content can be more succinct',
         anchorId: '1__Heading_1_that_is_re' },
-      { tag: 'H2',
+      { tag: 'h2',
         content: 'Heading 2 that is equally if not even more long, and one starts to wonder if the writer is doing it deliberately',
         anchorId: '2__Heading_2_that_is_eq' },
     ])
@@ -52,8 +52,8 @@ describe('UserContent', () => {
 
     const userContent = new UserContent(testHtml, false)
     expect(userContent.anchors).toEqual([
-      { tag: 'H1', content: 'Heading 1', anchorId: '1__Heading_1' },
-      { tag: 'H2', content: 'Heading 2', anchorId: '2__Heading_2' },
+      { tag: 'h1', content: 'Heading 1', anchorId: '1__Heading_1' },
+      { tag: 'h2', content: 'Heading 2', anchorId: '2__Heading_2' },
     ])
   })
 })
