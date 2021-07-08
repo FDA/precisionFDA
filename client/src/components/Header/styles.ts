@@ -1,97 +1,55 @@
+import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
 import { PFDALogoLight } from '../../views/components/NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
 
-
-const smallestHeader = '@media(max-width: 800px)'  // TODO: Move to theme.ts
-const smallHeader = '@media(max-width: 1024px)'  // TODO: Move to theme.ts
-const mediumHeader = '@media(max-width: 1280px)'  // TODO: Move to theme.ts
-
-export const StyledHeader = styled.header`
-  /* position: fixed;
-  top: 0;
-  left: 0;
-  right: 0; */
-  background-color: ${theme.colors.darkBlue};
-  color: ${theme.colors.textWhite};
-  padding: 0px ${theme.padding.mainContentHorizontal};
-
-  ${mediumHeader} {
-    padding: 0px;
-  }
-`
-
-export const HeaderLeft = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-self: flex-start;
-  align-items: center;
-  &::after {
-    content: "";
-    width: ${theme.padding.contentMargin};
-  }
-`
-
-export const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  justify-self: flex-end;
-  margin-left: auto;
-`
+const bpSmall = `@media(min-width: 850px)`
+const bpMedium = `@media(min-width: 1045px)`
+const bpLarge = `@media(min-width: 1200px)`
+const bpSuper = `@media(min-width: 1340px)`
 
 export const StyledHeaderLogo = styled(PFDALogoLight)`
-  width: 162px;
-  height: 36px;
-  margin: 0px ${theme.padding.contentMargin};
+  padding: 4px 0;
+`
 
-  ${smallestHeader} {
-    width: 108px;
-    height: 24px;
-  }
+export const LogoWrap = styled.div`
+  margin-right: 10px;
 `
 
 export const Nav = styled.nav`
   display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: ${theme.fontWeight.regular};
   white-space: nowrap;
-  transition: all .18s ease-in-out;
+  transition: all 0.18s ease-in-out;
 
   a {
     color: inherit;
     text-decoration: none;
   }
-
-  ${smallHeader} {
-    font-size: 11px;
-  }
 `
 
 export const HeaderItem = styled.div<{ active?: boolean }>`
   display: flex;
+  flex-direction: column;
   justify-content: flex-end;
   align-items: center;
   cursor: pointer;
-  color: ${theme.colors.textWhite};
-
-  ${smallestHeader} {
-    height: ${theme.sizing.navigationBarHeightNarrow};
-  }
+  color: ${theme.colors.inactiveBlue};
 
   ${({ active = false }) => {
     if (active) {
       return css`
         background-color: ${theme.colors.mediumDarkBlue};
+        color: ${theme.colors.textWhite};
       `
-    }
-    else {
+    } else {
       return css`
         &:hover {
-          color: ${theme.colors.textLightGrey};
+          color: ${theme.colors.textWhite};
         }
       `
     }
@@ -101,85 +59,52 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
 export const MenuItem = styled(HeaderItem)`
   align-self: flex-end;
   flex-direction: column;
-  padding: ${theme.padding.contentMargin} ${theme.padding.contentMargin} ${theme.padding.contentMarginHalf} ${theme.padding.contentMargin};
-
-  ${mediumHeader} {
-    padding-left: ${theme.padding.contentMarginHalf};
-    padding-right: ${theme.padding.contentMarginHalf};
-  }
-
-  ${smallHeader} {
-    padding-left: ${theme.padding.contentMarginThird};
-    padding-right: ${theme.padding.contentMarginThird};
-  }
+  justify-content: center;
+  padding: 12px;
 `
 
 export const HeaderItemText = styled.div`
-  margin-top: ${theme.padding.contentMarginThird};
-
-  ${smallestHeader} {
-    display: none;
-  }
-`
-
-export const StyledRightMenu = styled(HeaderItem)`
-  align-items: center;
-
-  padding-left: ${theme.padding.contentMargin};
-  padding-right: ${theme.padding.contentMargin};
-
-  ${mediumHeader} {
-    margin-left: ${theme.padding.contentMarginHalf};
-    margin-right: ${theme.padding.contentMarginHalf};
-  }
-
-  ${smallHeader} {
-    margin-left: ${theme.padding.contentMarginThird};
-    margin-right: ${theme.padding.contentMarginThird};
-  }
-
-  ${Svg} {
-    margin-right: 5px;
-  }
-
-  ${HeaderItemText} {
-    margin: 0;
-  }
-`
-
-export const AvatarMenuItem = styled(StyledRightMenu)`
-  padding-right: 0;
+  margin-top: 4px;
+  display: none;
 `
 
 export const StyledUsername = styled(HeaderItem)`
+  display: none;
+
   &:hover {
     background-color: ${theme.colors.mediumDarkBlue};
   }
 
   ${Svg} {
     margin-left: 5px;
-    padding-top: 2px;
-  }
-
-  ${smallestHeader} {
-    display: none;
+    margin-right: 5px;
   }
 `
 
 export const IconWrap = styled.div`
-  height: 28px;
+  height: 16px;
+  display: flex;
+  align-items: center;
 `
 
+export const AvatarMenuItem = styled(MenuItem)`
+  ${HeaderItemText} {
+    ${Svg} {
+      margin-left: 5px;
+      margin-bottom: 1px;
+    }
+  }
 
+`
 
 export const HeaderSpacer = styled.div`
-  border-right: 1px solid ${theme.colors.lightBlue};
-  margin: 0px ${theme.padding.contentMarginThird};
+  border-right: 1px solid #5f768a;
+  margin: 0 4px;
   height: 38px;
 `
 
 export const StyledDropMenuLinks = styled.div`
-  padding-top: 0px;
+  padding-top: 0;
   line-height: 28px;
   display: flex;
   flex-direction: column;
@@ -188,16 +113,100 @@ export const StyledDropMenuLinks = styled.div`
 
 export const StyledDivider = styled.div`
   border-bottom: 1px solid ${theme.colors.borderDefault};
-  padding-top: ${theme.padding.contentMarginHalf};
-  margin-bottom: ${theme.padding.contentMarginHalf};
+  padding-top: 6px;
+  margin-bottom: 6px;
 `
 
-export const StyledLink = styled.a`
+const linkCss = css`
   width: auto;
   transition: color 0.3s ease;
-  padding: 0px ${theme.padding.contentMargin};
+  padding: 0 12px;
   line-height: 30px;
   &:hover {
     background-color: ${theme.colors.textLightGrey};
+  }
+`
+
+export const StyledLinkReactRoute = styled(Link)`
+  ${linkCss}
+`
+
+export const StyledLink = styled.a`
+  ${linkCss}
+  cursor: pointer;
+`
+
+export const HeaderLeft = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-self: flex-start;
+  align-items: center;
+
+  &::after {
+    content: '';
+    width: 12px;
+  }
+
+  ${bpSmall} {
+    ${HeaderItemText} {
+      display: inline;
+    }
+    ${IconWrap} {
+      align-items: flex-end;
+    }
+  }
+`
+
+export const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  justify-self: flex-end;
+  margin-left: auto;
+
+  ${bpMedium} {
+    ${HeaderItemText} {
+      display: inline;
+    }
+
+    ${IconWrap} {
+      align-items: flex-end;
+    }
+  }
+`
+
+export const StyledHeader = styled.header`
+  background-color: ${theme.colors.darkBlue};
+  color: ${theme.colors.textWhite};
+  padding: 0 8px;
+
+  ${bpSmall} {
+    padding: 0 16px;
+
+    ${HeaderItem} {
+      padding: 8px 6px;
+    }
+
+    ${StyledUsername} {
+      display: flex;
+      padding-left: 5px;
+    }
+  }
+
+  ${bpLarge} {
+    padding: 0 32px;
+
+    ${Nav} {
+      font-size: 14px;
+    }
+
+    ${MenuItem} {
+      padding: 10px 6px;
+    }
+  }
+
+  ${bpSuper} {
+    ${MenuItem} {
+      padding: 13px 10px;
+    }
   }
 `
