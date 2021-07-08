@@ -3,7 +3,7 @@ import { Svg } from './Svg'
 
 export const QuestionIcon = ({
   width,
-  height,
+  height = 16,
 }: {
   width?: number
   height?: number
@@ -12,6 +12,7 @@ export const QuestionIcon = ({
     aria-hidden="true"
     height={height}
     width={width}
+    viewBox="0 0 512 512"
   >
     <path
       fill="currentColor"

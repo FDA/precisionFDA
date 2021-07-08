@@ -54,13 +54,14 @@ export const Dropdown: FC<{
   )
 
   return (
-    <div ref={clickRef} className="TETE">
+    <div ref={clickRef}>
       {children({
         style: { cursor: 'pointer' },
         ref: buttonRef,
         onClick: () => trigger === 'click' && setShowPopper(!showPopper),
         onMouseEnter: () => trigger === 'hover' && setShowPopper(true),
         onMouseLeave: () => trigger === 'hover' && setShowPopper(false),
+        isActive: showPopper,
       })}
       {forceShowPopper || showPopper && (
         <PopperContainer

@@ -11,16 +11,14 @@ import './style.sass'
 const HomeLayout = ({ children, hideTabs }) => {
   return (
     <DefaultLayout>
-      <div className="home-page-layout pfda-margin-t-20">
-        <div className='home-page-layout__container'>
-          <Menu />
-          <div className="home-page-layout__content">
-            <div>
-              <Tabs hideTabs={hideTabs} />
-            </div>
-            <div className="pfda-padded-20">
-              {children}
-            </div>
+      <div className='home-page-layout home-page-layout__container'>
+        <Menu />
+        <div className="home-page-layout__content">
+          <div>
+            <Tabs hideTabs={hideTabs} />
+          </div>
+          <div className="pfda-padded-20">
+            {children}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 class NotificationPreferencesController < ApplicationController
-
   before_action :check_user
+  layout "react"
 
   def index
     render json: { preference: preference.all_attributes }

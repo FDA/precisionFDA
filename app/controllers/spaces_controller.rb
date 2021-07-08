@@ -7,8 +7,8 @@ class SpacesController < ApplicationController
     feed tasks notes assets comparisons reports
   )
 
-  layout "space_content", only: %i(
-    feed tasks notes assets comparisons reports
+  layout "react", only: %i(
+    index feed tasks notes assets comparisons reports
   )
 
   def index; end

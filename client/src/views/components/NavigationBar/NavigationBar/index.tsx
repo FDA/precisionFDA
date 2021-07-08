@@ -141,7 +141,7 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
   return (
     <StyledNavigationBar id="navigation-bar">
       {showLoggedInNavBar && (
-        <Header user={user} />
+        <Header />
       )}
       {!isLoggedIn && (
         <PublicNavbarWrapper>
