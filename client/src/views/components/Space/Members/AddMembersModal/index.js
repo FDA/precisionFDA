@@ -82,6 +82,7 @@ export default AddMembersModal
 AddMembersModal.propTypes = {
   hideAction: PropTypes.func,
   addMembersAction: PropTypes.func,
+  space: PropTypes.object,
   isOpen: PropTypes.bool,
   isLoading: PropTypes.bool,
 }

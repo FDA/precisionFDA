@@ -1,12 +1,13 @@
 class SpaceInviteForm
   include ActiveModel::Model
 
-  attr_accessor :invitees_role, :space, :space_id, :side
+  attr_accessor :invitees_role, :space, :space_id, :side, :current_user
   attr_reader :invitees
 
   validates :invitees_role, presence: true, inclusion: { in: SpaceMembership.roles.keys }
   validate :validate_invitees,
            :validate_dxusers,
+           :validate_space_admin,
            :validate_users_sides,
            :check_emails_already_in_space,
            :check_dxusers_already_in_space
@@ -52,6 +53,22 @@ class SpaceInviteForm
 
   def non_existing_emails
     invitees[:email] - existing_users.pluck(:email)
+  end
+
+  # Validates if a current user is RSA. If yes, - then check, whether it is already a member.
+  # If yes, then validation passed.
+  # If no, the warning for RSA will display
+  def validate_space_admin
+    membership = space.space_memberships.active.find_by(user: current_user)
+
+    return unless current_user.review_space_admin? && membership.blank? &&
+                  !invitees[:dxuser].include?(current_user.dxuser)
+
+    errors.add(
+      :base,
+      "You must add your own account #{current_user.dxuser} as admin before " \
+        " you may add other members.",
+    )
   end
 
   def validate_invitees

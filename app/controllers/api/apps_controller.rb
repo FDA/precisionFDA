@@ -29,7 +29,6 @@ module Api
     # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def index
       apps = []
-      page_meta = {}
 
       if params[:space_id]
         if find_user_space
@@ -38,9 +37,8 @@ module Api
             search_by_tags(params.dig(:filters, :tags)).
             order(order_from_params).page(page_from_params).per(PAGE_SIZE)
           apps = AppSeriesService::AppSeriesFilter.call(apps, params[:filters])
-
-          page_meta = { pagination: pagination_dict(apps) }
         end
+        page_meta = { pagination: pagination_dict(apps) }
       else
         apps_series = AppSeries.
           accessible_by(@context).

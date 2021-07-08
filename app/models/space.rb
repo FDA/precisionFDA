@@ -246,6 +246,8 @@ class Space < ActiveRecord::Base
     accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
   end
 
+  # @param member [SpaceMembership object] - space member, host- or guest- lead.
+  # @return [true, false] depends upon member acceptance of a space
   def accepted_by?(member)
     return false unless member
     return true if review? && confidential?
@@ -256,8 +258,8 @@ class Space < ActiveRecord::Base
     end
 
     # below are the checks for a shared review space
-    member.host? && confidential_reviewer_space&.host_lead_member ||
-      member.guest? && confidential_sponsor_space&.guest_lead_member
+    member.host? && confidential_reviewer_space&.host_lead_member.present? ||
+      member.guest? && confidential_sponsor_space&.guest_lead_member.present?
   end
 
   def uid
@@ -462,11 +464,26 @@ class Space < ActiveRecord::Base
       !(restrict_to_template? && confidential?)
   end
 
+  # def updatable_by?(user)
+  #   active? && (user.review_space_admin? && reviewer? ||
+  #     space_memberships.active.lead_or_admin.exists?(user: user))
+  # end
+
   # Checks if user is able to update a space via Edit page.
   # @return [Boolean] Returns true if user is able to update a space, false otherwise.
   def updatable_by?(user)
-    active? && (user.review_space_admin? && reviewer? ||
-      space_memberships.active.lead_or_admin.exists?(user: user))
+    active? &&
+      updatable_by_rsa?(user) || space_memberships.active.lead_or_admin.exists?(user: user)
+  end
+
+  # Checks if user is RSA and able to update a space via Edit page.
+  # @return [Boolean] Returns true if user is RSA in review space and:
+  #   does not member of a space (to be able to add himself) or
+  #   is member of a space already, with 'lead' or 'admin' role.
+  def updatable_by_rsa?(user)
+    user.review_space_admin? && reviewer? &&
+      (!space_memberships.active.exists?(user: user) ||
+        space_memberships.active.lead_or_admin.exists?(user: user))
   end
 
   # Scopes of files that can be used to run an app.
