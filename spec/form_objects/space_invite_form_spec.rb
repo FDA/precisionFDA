@@ -34,6 +34,7 @@ RSpec.describe SpaceInviteForm, type: :model do
       space: review_space,
       space_id: review_space.id,
       side: SpaceMembership::SIDE_GUEST,
+      current_user: host_lead,
     }
   end
 

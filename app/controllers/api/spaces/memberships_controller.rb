@@ -12,12 +12,23 @@ module Api
       # POST /api/spaces/:id/invite
       # Creates new space members.
       def invite
-        space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: @space))
+        space_invite_form = SpaceInviteForm.new(space_invite_params.merge(
+          space: @space,
+          current_user: @context.user,
+        ))
 
         if space_invite_form.valid?
-          api = @membership.persisted? ? @context.api : DIContainer.resolve("api.admin")
+          membership =
+            if @membership.nil? && @context.user.review_space_admin?
+              @space.space_memberships.active.find_by(user: @space.host_lead)
+            else
+              @membership
+            end
+
+          api = membership.persisted? ? @context.api : DIContainer.resolve("api.admin")
+
           begin
-            invited_emails = space_invite_form.invite(@membership, api)
+            invited_emails = space_invite_form.invite(membership, api)
           rescue StandardError
             error = "An error has occurred during inviting"
           end
@@ -53,7 +64,7 @@ module Api
       def fetch_membership
         @membership = @space.space_memberships.active.find_by(user: current_user)
 
-        head(:forbidden) unless @membership
+        head(:forbidden) unless @membership || current_user.review_space_admin?
       end
 
       # Adds invitees attributes to fit SpaceInviteForm.

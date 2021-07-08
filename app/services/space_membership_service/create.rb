@@ -23,7 +23,11 @@ module SpaceMembershipService
             )
           end
 
-          api.org_invite(org_dxid, invitee, attrs)
+          # To avoid invite yourself to an organization when user is RSA and
+          #   space is created and active already
+          unless membership.user.review_space_admin? && space.state == Space::STATE_ACTIVE
+            api.org_invite(org_dxid, invitee, attrs)
+          end
         end
 
         # add a new member to the space given
