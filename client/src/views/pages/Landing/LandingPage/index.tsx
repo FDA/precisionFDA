@@ -21,7 +21,7 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { queryRecentApps, queryFeaturedApps } from '../../../../api/apps'
 import { TopAppsList } from '../../../components/Apps/TopAppsList'
 import { CHALLENGE_TIME_STATUS, MAILING_LIST } from '../../../../constants'
-import { breakPoints, theme } from '../../../../styles/theme'
+import { breakPoints, padding, theme } from '../../../../styles/theme'
 import { commonStyles } from '../../../../styles/commonStyles'
 import { ViewAllButton } from '../../../components/Controls/ViewAllButton'
 import { SectionHeading } from '../../../components/Controls/SectionHeading'
@@ -47,7 +47,7 @@ const challengeListFilter = (items: IChallengeListItem[]) => {
 const LandingPageLayout = styled(PageContainer)`
   display: flex;
   flex-direction: column;
-  padding: 24px 16px;
+  padding: 24px 0px;
 
   @media(min-width: ${breakPoints.large}px) {
     flex-direction: row;
@@ -56,19 +56,36 @@ const LandingPageLayout = styled(PageContainer)`
 
 const LeftColumn = styled.div`
   flex-grow: 1;
-  margin-bottom: 32px;
+  margin-bottom: ${padding.contentMargin};
   @media(min-width: ${breakPoints.large}px) {
     padding-right: 16px;
   }
 `
 
-const RightColumn = styled.div`
-  min-width: 300px;
-  max-width: 300px;
+// LeftColumnInset is used as a container for all components other than ChallengesBanner
+// which is to extend to the edge of the parent container
+const LeftColumnInset = styled.div`
+  margin: 0px ${padding.mainContentHorizontalHalf};
 
+  @media(min-width: ${breakPoints.small}px) {
+    margin: 0px ${padding.mainContentHorizontal};
+  }
+`
+
+const RightColumn = styled.div`
   p {
     padding-top: 8px;
   }
+
+  @media(min-width: ${breakPoints.medium}px) {
+    min-width: ${theme.sizing.largeColumnWidth};
+    max-width: ${theme.sizing.largeColumnWidth};
+    margin-right: ${padding.mainContentHorizontal};
+  }
+`
+
+const RightColumnInset = styled.div`
+  margin: 0px ${padding.mainContentHorizontalHalf};
 `
 
 const SmallLeftMarginContainer = styled.div`
@@ -77,7 +94,6 @@ const SmallLeftMarginContainer = styled.div`
 const LargeLeftMarginContainer = styled.div`
   margin-left: ${theme.values.largeColumnWidth + theme.values.paddingMainContentHorizontal}px;
 `
-
 const CommunityParticipants = styled.div`
   background-color: ${theme.colors.subtleBlue};
   margin: ${theme.padding.mainContentVertical} 0;
@@ -139,7 +155,8 @@ const TopAppsColumn = styled.div`
 
 const GettingStarted = styled.div`
   background-color: ${theme.colors.backgroundLightGray};
-  padding: 6px 16px 12px 16px;
+  padding: ${padding.mainContentHorizontalHalf};
+  padding-top: ${padding.contentMarginHalf};
 
   a {
     display: block;
@@ -184,24 +201,30 @@ const LandingPage : FunctionComponent = () => {
 
         <LandingPageLayout>
           <LeftColumn>
-            <SmallLeftMarginContainer>
-              <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
-            </SmallLeftMarginContainer>
-            <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
+            <LeftColumnInset>
+              <SmallLeftMarginContainer>
+                <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
+              </SmallLeftMarginContainer>
+              <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
+            </LeftColumnInset>
             <ChallengesBanner />
-            <ChallengesList listItemComponent={ChallengesListItemLanding} filter={challengeListFilter} allowPagination={false} />
-            <SmallLeftMarginContainer>
-              <StyledViewAllButton title="View All Challenges" url="/challenges" />
-            </SmallLeftMarginContainer>
+            <LeftColumnInset>
+              <ChallengesList listItemComponent={ChallengesListItemLanding} filter={challengeListFilter} allowPagination={false} />
+              <SmallLeftMarginContainer>
+                <StyledViewAllButton title="View All Challenges" url="/challenges" />
+              </SmallLeftMarginContainer>
+            </LeftColumnInset>
           </LeftColumn>
           <RightColumn>
-            <SectionHeading>RECENT EXPERT BLOGS</SectionHeading>
-            <ExpertsList listItemComponent={ExpertsListItemBlogEntrySmall} filter={(items) => { return items.slice(1, 2) }} allowPagination={false} />
-            <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
-            <LandingPageRightColumnHr />
-            <SectionHeading>LATEST NEWS</SectionHeading>
-            <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 3) }} allowPagination={false} />
-            <StyledViewAllButton title="View All News" url="/news" />
+            <RightColumnInset>
+              <SectionHeading>RECENT EXPERT BLOGS</SectionHeading>
+              <ExpertsList listItemComponent={ExpertsListItemBlogEntrySmall} filter={(items) => { return items.slice(1, 3) }} allowPagination={false} />
+              <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
+              <LandingPageRightColumnHr />
+              <SectionHeading>LATEST NEWS</SectionHeading>
+              <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 3) }} allowPagination={false} />
+              <StyledViewAllButton title="View All News" url="/news" />
+            </RightColumnInset>
           </RightColumn>
         </LandingPageLayout>
 
@@ -249,35 +272,35 @@ const LandingPage : FunctionComponent = () => {
 
         <LandingPageLayout>
           <LeftColumn>
-            <TopAppsContainer>
-              <TopAppsColumn>
-                <SectionHeading>MOST RECENT APPS</SectionHeading>
-                <TopAppsList query={queryRecentApps} />
-              </TopAppsColumn>
-              <TopAppsColumn>
-                <SectionHeading>TOP FEATURED APPS</SectionHeading>
-                <TopAppsList query={queryFeaturedApps} />
-              </TopAppsColumn>
-              {/* <TopAppsColumn>
-                <SectionHeading>TOP REVIEWER APPS</SectionHeading>
-                <TopAppsList query={queryTopReviewerApps} />
-              </TopAppsColumn> */}
-            </TopAppsContainer>
+            <LeftColumnInset>
+              <TopAppsContainer>
+                <TopAppsColumn>
+                  <SectionHeading>MOST RECENT APPS</SectionHeading>
+                  <TopAppsList query={queryRecentApps} />
+                </TopAppsColumn>
+                <TopAppsColumn>
+                  <SectionHeading>TOP FEATURED APPS</SectionHeading>
+                  <TopAppsList query={queryFeaturedApps} />
+                </TopAppsColumn>
+              </TopAppsContainer>
+            </LeftColumnInset>
             <div style={{ marginTop: '12px' }}>
               <ChallengesBanner />
             </div>
-            <div style={{ marginTop: '12px' }}>
-              <ChallengesList filter={challengeListFilter} allowPagination={false} />
-            </div>
-            <LargeLeftMarginContainer>
-              <StyledViewAllButton title="View All Challenges" url="/challenges" />
-            </LargeLeftMarginContainer>
-            <MediumGreyHr />
-            <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
-            <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
-            <SmallLeftMarginContainer>
-              <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
-            </SmallLeftMarginContainer>
+            <LeftColumnInset>
+              <div style={{ marginTop: '12px' }}>
+                <ChallengesList filter={challengeListFilter} allowPagination={false} />
+              </div>
+              <LargeLeftMarginContainer>
+                <StyledViewAllButton title="View All Challenges" url="/challenges" />
+              </LargeLeftMarginContainer>
+              <MediumGreyHr />
+              <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
+              <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
+              <SmallLeftMarginContainer>
+                <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
+              </SmallLeftMarginContainer>
+            </LeftColumnInset>
           </LeftColumn>
           <RightColumn>
             <GettingStarted>
@@ -296,10 +319,12 @@ const LandingPage : FunctionComponent = () => {
               <GettingStartedHr />
               <a href={MAILING_LIST} target="_blank">precisionFDA Mailing List</a>
             </GettingStarted>
-            <LandingPageRightColumnHr />
-            <SectionHeading>LATEST NEWS</SectionHeading>
-            <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 8) }} allowPagination={false} />
-            <StyledViewAllButton title="View All News" url="/news" />
+            <RightColumnInset>
+              <LandingPageRightColumnHr />
+              <SectionHeading>LATEST NEWS</SectionHeading>
+              <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 8) }} allowPagination={false} />
+              <StyledViewAllButton title="View All News" url="/news" />
+            </RightColumnInset>
           </RightColumn>
         </LandingPageLayout>
       </PublicLayout>
