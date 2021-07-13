@@ -72,7 +72,10 @@ export const fontWeight = {
 
 export const padding = {
   mainContentHorizontal: `${values.paddingMainContentHorizontal}px`,
+  mainContentHorizontalHalf: `${values.paddingMainContentHorizontal/2}px`,
   mainContentVertical: `${values.paddingMainContentVertical}px`,
+  // TODO: Rename contentMargin to something like controlSpacing to be more accurate
+  //       In fact mainContentHorizontal above can be named contentMargin instead
   contentMarginLarge: `${values.contentMargin*2}px`,
   contentMargin: `${values.contentMargin}px`,
   contentMarginHalf: `${values.contentMargin/2}px`,

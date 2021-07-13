@@ -38,7 +38,7 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
   justify-content: flex-end;
   align-items: center;
   cursor: pointer;
-  color: ${theme.colors.inactiveBlue};
+  color: ${theme.colors.textWhite};
 
   ${({ active = false }) => {
     if (active) {
@@ -49,11 +49,15 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
     } else {
       return css`
         &:hover {
-          color: ${theme.colors.textWhite};
+          color: ${theme.colors.lightBlue};
         }
       `
     }
   }}
+
+  ${bpMedium} {
+    height: ${theme.sizing.navigationBarHeight};
+  }
 `
 
 export const MenuItem = styled(HeaderItem)`
@@ -83,6 +87,7 @@ export const StyledUsername = styled(HeaderItem)`
 
 export const IconWrap = styled.div`
   height: 16px;
+  margin-top: 3px;
   display: flex;
   align-items: center;
 `
@@ -192,9 +197,11 @@ export const StyledHeader = styled.header`
     }
   }
 
-  ${bpLarge} {
-    padding: 0 32px;
+  ${bpMedium} {
+    padding: 0 ${theme.padding.mainContentHorizontal};
+  }
 
+  ${bpLarge} {
     ${Nav} {
       font-size: 14px;
     }
