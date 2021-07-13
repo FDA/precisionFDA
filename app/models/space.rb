@@ -274,6 +274,7 @@ class Space < ActiveRecord::Base
     lead_invite_and_update(
       host_lead_dxuser,
       update_space_params.host_lead_dxuser,
+      update_space_params.current_user,
       SpaceMembership::SIDE_HOST,
       api,
     )
@@ -281,6 +282,7 @@ class Space < ActiveRecord::Base
     lead_invite_and_update(
       guest_lead_dxuser,
       update_space_params.sponsor_lead_dxuser,
+      update_space_params.current_user,
       SpaceMembership::SIDE_GUEST,
       api,
     )
@@ -290,17 +292,20 @@ class Space < ActiveRecord::Base
   # @param updated_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
   # @param side [String] dxuser of a current space lead - to be changed to Admin.
   # @param api [DNAnexusAPI]
-  def lead_invite_and_update(space_lead_dxuser, updated_lead_dxuser, side, api)
+  def lead_invite_and_update(space_lead_dxuser, updated_lead_dxuser, current_user, side, api)
     return if space_lead_dxuser == updated_lead_dxuser
 
     membership = leads.find_by(side: side)
-    invite(membership, updated_lead_dxuser, api) if user_member(updated_lead_dxuser).blank?
 
+    return if user_member(updated_lead_dxuser).present?
+
+    invite(membership, updated_lead_dxuser, current_user, api)
     update_role(updated_lead_dxuser, side, api)
   end
 
   def user_member(dxuser)
-    space_memberships.joins(:user).find_by(users: { dxuser: dxuser })
+    # An active user's space memberships
+    space_memberships.active.joins(:user).find_by(users: { dxuser: dxuser })
   end
 
   # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
@@ -308,8 +313,8 @@ class Space < ActiveRecord::Base
   # @param api [DNAnexusAPI]
   def update_role(new_lead_dxuser, side, api)
     admin_member = leads.find_by(side: side)
-    # A user member changing to be Lead
-    member = space_memberships.joins(:user).find_by(users: { dxuser: new_lead_dxuser })
+    # An active user member changing to be Lead
+    member = space_memberships.active.joins(:user).find_by(users: { dxuser: new_lead_dxuser })
     SpaceMembershipService::ToLead.call(api, self, member, admin_member)
   end
 
@@ -317,12 +322,13 @@ class Space < ActiveRecord::Base
     User.find_by(dxuser: sponsor_lead_dxuser)
   end
 
-  def invite(membership, dxuser, api)
+  def invite(membership, dxuser, current_user, api)
     space_invite_form = SpaceInviteForm.new(
       space: self,
       invitees_role: SpaceMembership::ROLE_ADMIN,
       space_id: id,
       invitees: dxuser,
+      current_user: current_user,
     )
 
     return unless space_invite_form.valid?
