@@ -3,7 +3,7 @@
 .navbar
   background-color: $navbar-bg-color
   padding-left: $navbar-padding-horizontal
-  padding-right: $navbar-padding-horizontal
+  padding-right: $navbar-padding-horizontal-react
 
   .nav-icon
     color: $navbar-inverse-link-color
@@ -25,19 +25,21 @@
   li > a
     color: $navbar-inverse-link-color
     font-weight: 400
+    color: #fff
 
     .nav-icon
       font-size: 16px
+      color: #fff
 
     &:hover, &:hover .nav-icon
-      color: $brand-blue-subtler
+      color: $brand-blue-tertiary
 
-  li.active
-    > a, > a:hover, > a:focus
-      background-color: transparent
+  li.active > a
+    background-color: $navbar-active-color
+
+    &:hover, &:hover .nav-icon
       color: #fff
-      .nav-icon
-        color: #fff
+
   .dropdown-menu
     li > a
       color: $gray-dark
@@ -50,14 +52,13 @@
   @media (min-width: $grid-float-breakpoint)
     > li
       > a
-        padding-top:    15px
-        padding-bottom: 10px
+        padding: 14px 6px
 
 .nav-spacer
   margin: 10px 0
   padding: 24px 0
-  padding-left: $padding-base-horizontal
-  margin-right: $padding-base-horizontal
+  padding-left: $padding-base-horizontal/2
+  margin-right: $padding-base-horizontal/2
   border-right: 1px solid $navbar-spacer-color
 
 @media (max-width: $screen-sm-min)
