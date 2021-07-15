@@ -53,7 +53,7 @@ describe('editSpace()', () => {
   })
 
   it('dispatches correct actions on failure', () => {
-    const response = { errors: 'some errors' }
+    const response = { errors: { messages: ['some errors']}}
     const params = {}
 
     fetchMock.put('/space/update', { body: response, status: 400 })
@@ -63,7 +63,11 @@ describe('editSpace()', () => {
 
       expect(actions).toEqual([
         { type: SPACE_EDITING_START, payload: {}},
-        { type: SPACE_EDITING_FAILURE, payload: response },
+        { type: SPACE_EDITING_FAILURE,payload: { errors: { messages:['some errors']}}},
+         {
+          type: 'ALERT_SHOW_ABOVE_ALL',
+          payload: { message: 'some errors', type: 'ALERT_ABOVE_ALL' },
+        },
       ])
     })
   })

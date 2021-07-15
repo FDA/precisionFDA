@@ -6,6 +6,7 @@ import { any, isEmpty, isNil } from 'ramda'
 
 import SpaceShape from '../../../shapes/SpaceShape'
 import { spaceDataSelector, spaceIsFetchingSelector } from '../../../../reducers/spaces/space/selectors'
+import { contextUserSelector } from '../../../../reducers/context/selectors'
 import Button from '../../Button'
 import { createSpace, editSpace, fetchNewSpaceInfo, fetchSpace } from '../../../../actions/spaces'
 import TextField from '../../FormComponents/TextField'
@@ -120,11 +121,27 @@ class NewSpaceForm extends React.Component {
   }
 
   editClickHandler = () => {
-    const { name, description, cts } = this.state.formData
+    const {
+      name,
+      space_type,
+      description,
+      cts,
+      host_lead_dxuser,
+      guest_lead_dxuser,
+      sponsor_lead_dxuser,
+    } = this.state.formData
     const { onEditClick, loadSpace, match } = this.props
     const { spaceId } = match.params
 
-    onEditClick({ name, description, cts }, spaceId).then((statusIsOk) => {
+    onEditClick({
+      name,
+      space_type,
+      description,
+      cts,
+      host_lead_dxuser,
+      guest_lead_dxuser,
+      sponsor_lead_dxuser,
+    }, spaceId).then((statusIsOk) => {
       if (statusIsOk) loadSpace(spaceId)
     })
   }
@@ -140,11 +157,33 @@ class NewSpaceForm extends React.Component {
   }
 
   render() {
-    const { space, errors, isSubmitting, info, onCancelClick, spaceIsFetching, action } = this.props
+    const { space, errors, contextUser, isSubmitting, info, onCancelClick, spaceIsFetching, action } = this.props
     const disableButtons = isSubmitting || info.isFetching || (spaceIsFetching && RESTORE_DATA_ACTIONS.includes(action))
-    const { space_type, name, description, host_lead_dxuser, guest_lead_dxuser, sponsor_lead_dxuser } = this.state.formData
+    const {
+      space_type,
+      name,
+      description,
+      host_lead_dxuser,
+      guest_lead_dxuser,
+      sponsor_lead_dxuser,
+    } = this.state.formData
     const requiredParams = [space_type, name, description, host_lead_dxuser]
-    const isEditing = !!space?.id
+
+    const currentUserDxuser = contextUser?.dxuser
+    const spaceTypeEditing = !!space?.id
+
+    if (space_type === SPACE_REVIEW) {
+      var isEditing = false
+    } else if (space_type === SPACE_GROUPS && action === NEW_SPACE_PAGE_ACTIONS.EDIT) {
+      isEditing = true
+    }
+
+    if (action === NEW_SPACE_PAGE_ACTIONS.EDIT) {
+      if (space.hostLead !== undefined && space_type === SPACE_REVIEW) {
+        const hostLeadCurrentUser = space?.hostLead.dxuser !== currentUserDxuser
+        isEditing = spaceTypeEditing && hostLeadCurrentUser
+      }
+    }
 
     if (space_type === SPACE_REVIEW) {
       requiredParams.push(sponsor_lead_dxuser)
@@ -158,7 +197,11 @@ class NewSpaceForm extends React.Component {
       return (<LoaderWrapper><span>Loading space...</span></LoaderWrapper>)
     }
 
-    const allowedTypes = isEditing ? [space.type] : info.allowed_types
+    var allowedTypes = info.allowed_types
+
+    if (space.type) {
+      allowedTypes = [space.type]
+    }
 
     return (
       <div className="form new-space-form">
@@ -169,7 +212,7 @@ class NewSpaceForm extends React.Component {
               <SpaceTypeSwitch
                 key={type}
                 label={type}
-                disabled={isEditing}
+                disabled={spaceTypeEditing}
                 name="space_type"
                 checked={space_type === type}
                 value={type}
@@ -266,6 +309,7 @@ class NewSpaceForm extends React.Component {
 
 NewSpaceForm.propTypes = {
   space: PropTypes.shape(SpaceShape),
+  contextUser: PropTypes.object,
   isSubmitting: PropTypes.bool,
   info: PropTypes.shape({
     allowed_types: PropTypes.array,
@@ -299,6 +343,7 @@ const mapStateToProps = (state, { onCancelClick }) => ({
   ...state.spaces.newSpace,
   space: spaceDataSelector(state),
   spaceIsFetching: spaceIsFetchingSelector(state),
+  contextUser: contextUserSelector(state),
   onCancelClick,
 })
 

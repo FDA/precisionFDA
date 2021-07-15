@@ -23,15 +23,14 @@ import { NotificationsPage } from './views/pages/Account/Notifications'
 import GlobalStyle from './styles/global'
 
 
-const root = ({ store }: any) => {
-  const queryClient = new QueryClient()
+const queryClient = new QueryClient()
 
+const root = ({ store }: any) => {
   return (
   <Provider store={store}>
     <GlobalStyle />
     <QueryClientProvider client={queryClient}>
       <Router history={history}>
-        {/* <Header /> */}
         <ErrorWrapper>
           <Switch>
             <Route exact path='/'>

@@ -46,7 +46,7 @@ export const Button = styled.button<IButton>`
       textColor = theme.colors.primaryYellow
       borderColor = theme.colors.darkYellow
       borderColorHover = theme.colors.primaryYellow
-      backgroundColorHover = theme.lightLightYellow
+      backgroundColorHover = theme.colors.lightYellow
     }
     else if (role === "danger") {
       // TODO: the colours are not based on mockups and are not final

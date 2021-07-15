@@ -25,13 +25,17 @@ export default (spaceId, side) => (
 
     return API.getMembers(spaceId, params)
       .then(response => {
-        if (response.status === httpStatusCodes.OK) {
+        const statusIsOk = response.status === httpStatusCodes.OK
+
+        if (statusIsOk) {
           const members = response.payload.space_memberships.map(mapToMember)
           dispatch(fetchMembersSuccess(members))
         } else {
           dispatch(fetchMembersFailure())
           dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
         }
+
+        return statusIsOk
       })
       .catch(e => {
         console.error(e)

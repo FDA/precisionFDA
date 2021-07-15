@@ -1,5 +1,5 @@
 
-const values = {
+export const values = {
   paddingMainContentHorizontal: 32,
   paddingMainContentVertical: 32,
   contentMargin: 12,
@@ -11,7 +11,7 @@ const values = {
   navigationBarHeight: 64,
 }
 
-const colors = {
+export const colors = {
   primaryBlue: '#1F70B5',
   primaryGreen: '#3c763d',
   primaryRed: '#eb776f',
@@ -23,8 +23,9 @@ const colors = {
   lightRed: '#e3405b',
   lightGreen: '#52c41a',
   lightBlue: '#a0c2e0',
+  inactiveBlue: '#8c9ba8',
   lightYellow: '#efe5d7',
-  mediumDarkBlue: '#0e4170',
+  mediumDarkBlue: '#2f5373',
   darkRed: '#c41331',
   darkBlue: '#343E4D',
   darkGreen: '#1d764c',
@@ -44,13 +45,21 @@ const colors = {
   stateDoneColor: 'darken(#3c763d, 5%)',
 }
 
-const fontSize = {
+export const fontSize = {
   pageTitle: '32px',
   bannerTitle: '28px',
   h1: '20px',
   h2: '18px',
   body: '14px',
   subheading: '14px',
+}
+
+export const breakPoints = {
+  xsmall: 320,
+  small: 481,
+  medium: 769,
+  large: 1025,
+  xlarge: 1201,
 }
 
 export const fontWeight = {
@@ -61,16 +70,19 @@ export const fontWeight = {
   black: 700,
 }
 
-const padding = {
+export const padding = {
   mainContentHorizontal: `${values.paddingMainContentHorizontal}px`,
+  mainContentHorizontalHalf: `${values.paddingMainContentHorizontal/2}px`,
   mainContentVertical: `${values.paddingMainContentVertical}px`,
+  // TODO: Rename contentMargin to something like controlSpacing to be more accurate
+  //       In fact mainContentHorizontal above can be named contentMargin instead
   contentMarginLarge: `${values.contentMargin*2}px`,
   contentMargin: `${values.contentMargin}px`,
   contentMarginHalf: `${values.contentMargin/2}px`,
   contentMarginThird: `${values.contentMargin/3}px`,
 }
 
-const sizing = {
+export const sizing = {
   mainContainerMaxWidth: '1330px',
   navigationBarHeight: `${values.navigationBarHeight}px`,
   navigationBarHeightNarrow: '50px',
@@ -78,8 +90,6 @@ const sizing = {
   smallColumnWidth: `${values.smallColumnWidth}px`,
   smallerColumnWidth: `${values.smallerColumnWidth}px`,
   mainColumnMaxImageSize: '820px',
-  logoWidth: '180px',
-  logoHeight: '40px',
   thumbnailWidth: `${values.thumbnailWidth}px`,
   thumbnailHeight: `${values.thumbnailHeight}px`,
   thumbnailWidthSmall: '172px',
@@ -90,14 +100,11 @@ const sizing = {
 
 export const theme = {
   fontFamily: 'Lato, Helvetica, sans-serif',
-
-  primaryShade: '#185589',
-  lightLightYellow: '#efe5d7',
-
-  colors: colors,
-  fontSize: fontSize,
-  fontWeight: fontWeight,
-  padding: padding,
-  sizing: sizing,
-  values: values,
+  colors,
+  fontSize,
+  fontWeight,
+  padding,
+  sizing,
+  values,
+  breakPoints,
 }

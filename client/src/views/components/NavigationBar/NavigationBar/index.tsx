@@ -8,12 +8,13 @@ import { theme } from '../../../../styles/theme'
 import { PublicNavbar } from '../PublicNavbar'
 import { commonStyles } from '../../../../styles/commonStyles'
 import { Header } from '../../../../components/Header'
+import navBackground from '../../../../assets/NavbarBackground.png'
 
 
 const StyledNavigationBar = styled.div`
   width: 100%;
   background-color: rgb(22,19,14);
-  background-image: url("/assets/navbar/NavbarBackground.png");
+  background-image: url(${navBackground});
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -140,7 +141,7 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
   return (
     <StyledNavigationBar id="navigation-bar">
       {showLoggedInNavBar && (
-        <Header user={user} />
+        <Header />
       )}
       {!isLoggedIn && (
         <PublicNavbarWrapper>

@@ -49,6 +49,7 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
 
   const showPublishModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.PUBLISH))
   const showDownloadModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.DOWNLOAD))
+  const showOpenModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.OPEN))
   const showDeleteModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.DELETE))
   const showCopyToPrivateModal = () => {
     dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.COPY_TO_PRIVATE))
@@ -93,6 +94,9 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
           <Divider />
           <Item isDisabled={!isAnyFileChecked}
             icon="fa-download" text="Download" handler={showDownloadModal} />
+          <Divider />
+          <Item isDisabled={!isAnyFileChecked}
+            icon="fa-download" text="Download" handler={showOpenModal} />
         </ul>
       </div>
       <ActionModal files={checkedFiles} loadFilesHandler={loadFilesHandler} />

@@ -14,6 +14,8 @@ const switchTitle = (action) => {
       return 'Publish'
     case SPACE_FILES_ACTIONS.DOWNLOAD:
       return 'Download'
+    case SPACE_FILES_ACTIONS.OPEN:
+      return 'Open'
     case SPACE_FILES_ACTIONS.DELETE:
       return 'Delete'
     case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:

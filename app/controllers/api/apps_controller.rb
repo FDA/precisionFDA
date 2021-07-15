@@ -29,7 +29,6 @@ module Api
     # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def index
       apps = []
-      page_meta = {}
 
       if params[:space_id]
         if find_user_space
@@ -38,11 +37,12 @@ module Api
             search_by_tags(params.dig(:filters, :tags)).
             order(order_from_params).page(page_from_params).per(PAGE_SIZE)
           apps = AppSeriesService::AppSeriesFilter.call(apps, params[:filters])
-
-          page_meta = { pagination: pagination_dict(apps) }
         end
+        page_meta = { pagination: pagination_dict(apps) }
       else
-        apps_series = AppSeries.accessible_by(@context).accessible_by_private.unremoved.
+        apps_series = AppSeries.
+          accessible_by(@context).
+          unremoved.
           eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
         filters = params[:filters]
@@ -90,7 +90,9 @@ module Api
     # @param order_by, order_dir [String] Params for ordering.
     # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def everybody
-      apps_series = AppSeries.unremoved.
+      apps_series = AppSeries.
+        unremoved.
+        accessible_by_public.
         eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
       filters = params[:filters]

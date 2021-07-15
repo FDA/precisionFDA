@@ -40,7 +40,9 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'url-loader',
         options: {
-          limit: Infinity,
+          limit: 2000,
+          outputPath: 'assets/', 
+          publicPath: '/assets/',
         },
       },
     ],

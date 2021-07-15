@@ -34,6 +34,10 @@ $link-muted-hover-color: darken($brand-blue-secondary, 10%);
 $brand-font-family:  "Quicksand", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 
 $nav-height: 74px;
+$navbar-padding-horizontal-react:  32px !default;
+$navbar-bg-color :#343E4D;
+$navbar-active-color: #2f5373;
+$navbar-spacer-color: #5f768a;
 
 $border-header-color: darken($brand-blue-subtler, 4%);
 $border-default-color: #ddd;
