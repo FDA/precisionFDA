@@ -28,17 +28,19 @@ import { FortIcon } from '../icons/FortIcon'
 import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
 import { CommentingIcon } from '../icons/CommentingIcon'
 import { CaretIcon } from '../icons/CaretIcon'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, matchPath, useLocation } from 'react-router-dom'
 import { SUPPORT_EMAIL } from '../../constants'
 import { QuestionIcon } from '../icons/QuestionIcon'
 import { useSelector } from 'react-redux'
-import { contextUserSelector, isInitializedSelector } from '../../reducers/context/selectors'
+import {
+  contextUserSelector,
+  isInitializedSelector,
+} from '../../reducers/context/selectors'
 import { logout } from '../../features/auth/api'
 
-
 const getUsername = (user: any) => {
-  if(user) {
-    if(user.full_name === ' ') {
+  if (user) {
+    if (user.full_name === ' ') {
       return user.dxuser
     } else {
       return user.full_name
@@ -51,13 +53,14 @@ export const Header: React.FC = () => {
   const pathname = useLocation().pathname
   const init = useSelector(isInitializedSelector)
   const user = useSelector(contextUserSelector)
-  
+
   const userCanAdministerSite = user?.can_administer_site
   const userCanSeeSpaces = user?.can_see_spaces
   const userIsGuest = user?.is_guest
+  const isSpacesPath = pathname.startsWith('/spaces')
 
   const handleLogout = async () => {
-    await logout().then(()=>{
+    await logout().then(() => {
       window.location.replace('/')
     })
   }
@@ -65,9 +68,15 @@ export const Header: React.FC = () => {
   const renderUserMenu = () => (
     <StyledDropMenuLinks>
       <StyledLink href="/profile">Profile</StyledLink>
-      {user && !userIsGuest && <StyledLink href={`/users/${user!.dxuser}`}>Public Profile</StyledLink>}
+      {user && !userIsGuest && (
+        <StyledLink href={`/users/${user!.dxuser}`}>Public Profile</StyledLink>
+      )}
       <StyledLink href="/licenses">Manage Licenses</StyledLink>
-      {!userIsGuest && <StyledLinkReactRoute to="/account/notifications">Notification Settings</StyledLinkReactRoute>}
+      {!userIsGuest && (
+        <StyledLinkReactRoute to="/account/notifications">
+          Notification Settings
+        </StyledLinkReactRoute>
+      )}
       <StyledDivider />
       <StyledLink href="/about">About</StyledLink>
       <StyledLink href="/guidelines">Guidelines</StyledLink>
@@ -79,7 +88,9 @@ export const Header: React.FC = () => {
           <StyledDivider />
         </>
       )}
-      <StyledLink as="div" onClick={() => handleLogout()}>Log Out</StyledLink>
+      <StyledLink as="div" onClick={() => handleLogout()}>
+        Log Out
+      </StyledLink>
     </StyledDropMenuLinks>
   )
 
@@ -91,71 +102,79 @@ export const Header: React.FC = () => {
     return pathname.startsWith(linkPath)
   }
 
-  if(!init) return null
+  if (!init) return null
 
   return (
     <StyledHeader>
       <Nav>
-        <LogoWrap as={Link} to="/"><StyledHeaderLogo /></LogoWrap>
+        <LogoWrap as={Link} to="/">
+          <StyledHeaderLogo />
+        </LogoWrap>
         <HeaderLeft>
           <Link to="/" title="Overview">
             <MenuItem active={isActiveLink('/')}>
               <IconWrap>
                 <HomeIcon height={16} />
               </IconWrap>
-              <HeaderItemText>Overview</HeaderItemText>
+              <HeaderItemText>
+                {isSpacesPath ? 'Back Home' : 'Overview'}
+              </HeaderItemText>
             </MenuItem>
           </Link>
-          <a href="/discussions" title="Discussions">
-            <MenuItem active={isActiveLink('/discussions')}>
-              <IconWrap>
-                <CommentIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Discussions</HeaderItemText>
-            </MenuItem>
-          </a>
-          <Link to="/challenges" title="Challenges">
-            <MenuItem active={isActiveLink('/challenges')}>
-              <IconWrap>
-                <TrophyIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Challenges</HeaderItemText>
-            </MenuItem>
-          </Link>
-          <Link to="/experts" title="Exoerts">
-            <MenuItem active={isActiveLink('/experts')}>
-              <IconWrap>
-                <StarIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Experts</HeaderItemText>
-            </MenuItem>
-          </Link>
-          <HeaderSpacer />
-          <Link to="/home" title="My Home">
-            <MenuItem active={isActiveLink('/home')}>
-              <IconWrap>
-                <FortIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>My Home</HeaderItemText>
-            </MenuItem>
-          </Link>
-          <HeaderSpacer />
-          <a href="/notes" title="Notes">
-            <MenuItem active={isActiveLink('/notes')}>
-              <IconWrap>
-                <StickyNoteIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Notes</HeaderItemText>
-            </MenuItem>
-          </a>
-          <a href="/comparisons" title="Comparisons">
-            <MenuItem active={isActiveLink('/comparisons')}>
-              <IconWrap>
-                <BullsEyeIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Comparisons</HeaderItemText>
-            </MenuItem>
-          </a>
+          {!isSpacesPath && (
+            <>
+              <a href="/discussions" title="Discussions">
+                <MenuItem active={isActiveLink('/discussions')}>
+                  <IconWrap>
+                    <CommentIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>Discussions</HeaderItemText>
+                </MenuItem>
+              </a>
+              <Link to="/challenges" title="Challenges">
+                <MenuItem active={isActiveLink('/challenges')}>
+                  <IconWrap>
+                    <TrophyIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>Challenges</HeaderItemText>
+                </MenuItem>
+              </Link>
+              <Link to="/experts" title="Exoerts">
+                <MenuItem active={isActiveLink('/experts')}>
+                  <IconWrap>
+                    <StarIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>Experts</HeaderItemText>
+                </MenuItem>
+              </Link>
+              <HeaderSpacer />
+              <Link to="/home" title="My Home">
+                <MenuItem active={isActiveLink('/home')}>
+                  <IconWrap>
+                    <FortIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>My Home</HeaderItemText>
+                </MenuItem>
+              </Link>
+              <HeaderSpacer />
+              <a href="/notes" title="Notes">
+                <MenuItem active={isActiveLink('/notes')}>
+                  <IconWrap>
+                    <StickyNoteIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>Notes</HeaderItemText>
+                </MenuItem>
+              </a>
+              <a href="/comparisons" title="Comparisons">
+                <MenuItem active={isActiveLink('/comparisons')}>
+                  <IconWrap>
+                    <BullsEyeIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>Comparisons</HeaderItemText>
+                </MenuItem>
+              </a>
+            </>
+          )}
           {userCanSeeSpaces && (
             <>
               <HeaderSpacer />
@@ -173,8 +192,8 @@ export const Header: React.FC = () => {
         <HeaderRight>
           <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support">
             <MenuItem>
-            <IconWrap>
-              <CommentingIcon height={16} />
+              <IconWrap>
+                <CommentingIcon height={16} />
               </IconWrap>
               <HeaderItemText>Support</HeaderItemText>
             </MenuItem>
@@ -189,7 +208,10 @@ export const Header: React.FC = () => {
           </a>
           <Dropdown trigger="click" content={renderUserMenu()}>
             {dropdownProps => (
-              <AvatarMenuItem {...dropdownProps} active={dropdownProps.isActive}>
+              <AvatarMenuItem
+                {...dropdownProps}
+                active={dropdownProps.isActive}
+              >
                 <IconWrap>
                   <ProfileIcon height={16} />
                 </IconWrap>
