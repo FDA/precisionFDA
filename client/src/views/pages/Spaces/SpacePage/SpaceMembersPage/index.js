@@ -14,7 +14,7 @@ import {
 } from '../../../../../reducers/spaces/members/selectors'
 import SpaceLayout from '../../../../layouts/SpaceLayout'
 import {
-  fetchMembers,
+  fetchMembers, fetchSpace,
   showAddMembersModal,
 } from '../../../../../actions/spaces'
 import { inviteMembers } from '../../../../../actions/spaces/members'
@@ -124,7 +124,7 @@ class SpaceMembersPage extends Component {
           )}
           <SpaceMembersList />
         </div>
-        <AddMembersModal addMembersAction={this.addMembersAction} />
+        <AddMembersModal addMembersAction={this.addMembersAction}/>
       </SpaceLayout>
     )
   }
@@ -158,7 +158,11 @@ const mapDispatchToProps = dispatch => ({
   addMembers: (spaceId, side, fieldsValues) => {
     dispatch(inviteMembers(spaceId, fieldsValues, side)).then((statusIsOk) => {
       if (statusIsOk) {
-        dispatch(fetchMembers(spaceId, side))
+        dispatch(fetchMembers(spaceId, side)).then((statusOk) => {
+          if (statusOk) {
+            dispatch(fetchSpace(spaceId))
+          }
+        })
       }
     })
   },

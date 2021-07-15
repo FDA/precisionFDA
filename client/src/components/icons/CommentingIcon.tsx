@@ -1,7 +1,7 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const CommentingIcon = ({ width = 24, height }: { width?: number, height?: number }) => (
+export const CommentingIcon = ({ width, height = 16 }: { width?: number, height?: number }) => (
   <Svg
     aria-hidden="true"
     focusable="false"

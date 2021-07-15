@@ -1,14 +1,21 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const HomeIcon = () => (
+export const HomeIcon = ({
+  width,
+  height = 16,
+}: {
+  width?: number
+  height?: number
+}) => (
   <Svg
     aria-hidden="true"
     focusable="false"
     role="img"
     xmlns="http://www.w3.org/2000/svg"
-    width="26"
     viewBox="0 0 576 512"
+    height={height}
+    width={width}
   >
     <path
       fill="currentColor"

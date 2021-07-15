@@ -231,9 +231,9 @@ module Api
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags)).
         order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-      jobs.each { |job| job.current_user = @context.user }
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      jobs.each { |job| job.current_user = @context.user }
 
       page_dict = pagination_dict(jobs)
 

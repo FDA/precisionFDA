@@ -6,7 +6,7 @@ import challenge from '../../../../reducers/challenges/challenge'
 
 
 const getMockChallenge = () => {
-  const startDate = new Date('March 1, 2021 20:21:00')
+  const startDate = new Date('2021-03-01Z20:21:00')
   const endDate = addHours(addDays(startDate, 7), 6)
   return {
     id: 1,

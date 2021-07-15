@@ -4,12 +4,10 @@ import styled from 'styled-components'
 
 import precisionFDALight from './precisionFDA.white.png'
 import precisionFDADark from './precisionFDA.dark.png'
-import { theme } from '../../../../styles/theme'
 
 
 const StyledImg = styled.img`
-  width: ${theme.sizing.logoWidth};
-  height: ${theme.sizing.logoHeight};
+  height: 40px;
 `
 
 const PFDALogoLight = ({ className='' }) => {

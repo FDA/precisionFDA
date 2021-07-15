@@ -38,13 +38,21 @@ const Item = ({ file, action }) => (
         <td>
           <a href={file.links.user} className='objects-actions-modal__help-block'>{file.addedBy}</a>
         </td>
-      </> 
+      </>
     }
     {(action === HOME_FILES_ACTIONS.DOWNLOAD) && (
       <td style={{ textAlign: 'center' }}>
         <a href={file.downloadURL} target="_blank" rel="noopener noreferrer">
           <Icon icon="fa-download" fw />&nbsp;
-          download
+          open
+        </a>
+      </td>
+    )}
+    {(action === HOME_FILES_ACTIONS.OPEN) && (
+      <td style={{ textAlign: 'center' }}>
+        <a href={`${file.downloadURL}?inline=true`} target="_blank" rel="noopener noreferrer">
+          <Icon icon="fa-download" fw />&nbsp;
+          open
         </a>
       </td>
     )}

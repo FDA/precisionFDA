@@ -21,9 +21,10 @@ import { CHALLENGE_STATUS, CHALLENGE_TIME_STATUS } from '../../../../constants'
 import ChallengeSubmissionsTable from '../../../components/Challenges/ChallengeSubmissionsTable'
 import ChallengeMyEntriesTable from '../../../components/Challenges/ChallengeMyEntriesTable'
 import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
-import { CallToActionButton } from './styles'
+import { CallToActionButton, StyledPageContainer } from './styles'
 import UserContent from '../../../components/UserContent'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
+import { PageRightColumn, PageLeftColumn } from '../../../../components/Page/styles'
 
 
 const extractChallengeContent = (challenge, regionName) => {
@@ -202,8 +203,8 @@ class ChallengeDetailsPage extends React.Component {
           <ChallengeDetailsBanner challenge={challenge} />
         </NavigationBar>
         
-        <div className="challenge-details-main-container">
-          <div className="left-column">
+        <StyledPageContainer>
+          <PageLeftColumn>
             <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
               <TabList className="challenge-details-tabs__tab-list">
                 {tabs.map((tab, index) => (
@@ -217,8 +218,8 @@ class ChallengeDetailsPage extends React.Component {
                 </TabPanel>
               ))}
             </Tabs>
-          </div>
-          <div className="right-column pfda-main-content-sidebar">
+          </PageLeftColumn>
+          <PageRightColumn>
             {challengePreRegistration ?
               <CallToActionButton onClick={onClickPreRegistrationButton}>Sign Up for Pre-Registration</CallToActionButton>
               :
@@ -242,8 +243,8 @@ class ChallengeDetailsPage extends React.Component {
               <a className="btn btn-default btn-block" href={`/challenges/${challenge.id}/editor`} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
             </div>
             )}
-          </div>
-        </div>
+          </PageRightColumn>
+        </StyledPageContainer>
       </PublicLayout>
     )
   }

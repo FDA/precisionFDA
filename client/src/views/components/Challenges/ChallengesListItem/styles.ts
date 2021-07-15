@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 import { CHALLENGE_TIME_STATUS } from '../../../../constants'
-import { theme } from '../../../../styles/theme'
+import { breakPoints, colors, fontSize, padding, sizing, values } from '../../../../styles/theme'
 import { commonStyles } from '../../../../styles/commonStyles'
 
 
@@ -9,59 +9,8 @@ interface IChallengesListItemComponent {
   timeStatus: string,
 }
 
-export const ChallengeListItem = styled.li<IChallengesListItemComponent>`
-  display: flex;
-  flex-flow: row nowrap;
-  list-style: none;
-  margin-bottom: ${theme.padding.mainContentVertical};
-
-  @media (max-width: 768px) {
-    flex-flow: row nowrap;
-  }
-`
-
-export const ChallengeListItemThumbnail = styled.div<IChallengesListItemComponent>`
-  cursor: pointer;
-  padding: 0px;
-
-  img {
-    width: ${theme.sizing.thumbnailWidth};
-    height: ${theme.sizing.thumbnailHeight};
-    object-fit: contain;
-    overflow: hidden;
-  }
-
-  @media (max-width: 768px) {
-    img {
-      width: ${theme.sizing.thumbnailWidthSmall};
-      height: ${theme.sizing.thumbnailHeightSmall};
-    }
-  }
-
-  ${(props) => {
-		if (props.timeStatus === CHALLENGE_TIME_STATUS.CURRENT) {
-			const marginTop = -theme.values.thumbnailHeight + theme.values.contentMargin
-			return `
-        &:after {
-          display: block;
-          position: absolute;
-          margin-top: ${marginTop}px;
-          padding: 2px 4px;
-          background: ${theme.colors.highlightGreen};
-          content: 'OPEN';
-          color: white;
-          font-weight: bold;
-          font-size: 12px;
-        }
-      `
-		}
-	}};
-`
-
 export const ChallengeListItemContent = styled.div`
   flex-grow: 1;
-  vertical-align: top;
-  padding: 0 0 0 ${theme.padding.mainContentHorizontal};
 
   h1 {
     ${commonStyles.titleStyle};
@@ -71,17 +20,17 @@ export const ChallengeListItemContent = styled.div`
     margin-bottom: 8px;
 
     &:hover {
-      color: ${theme.colors.textDarkGrey};
+      color: ${colors.textDarkGrey};
     }
   }
 
   .date-area {
     font-size: 12px;
-    color: ${theme.colors.textDarkGrey};
+    color: ${colors.textDarkGrey};
 
     .challenge-date-label {
       font-size: 10px;
-      color: ${theme.colors.textMediumGrey};
+      color: ${colors.textMediumGrey};
       text-transform: uppercase;
     }
 
@@ -99,15 +48,67 @@ export const ChallengeListItemContent = styled.div`
   }
 
   p {
-    font-size: ${theme.fontSize.body};
+    font-size: ${fontSize.body};
     font-weight: 400;
-    color: ${theme.colors.textMediumGrey};
+    color: ${colors.textMediumGrey};
     margin-top: 5px;
   }
 
   a, button {
-    margin-right: ${theme.padding.contentMargin};
+    margin-right: ${padding.contentMargin};
   }
+`
+
+export const ChallengeListItem = styled.li<IChallengesListItemComponent>`
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin-bottom: 32px;
+
+  @media (min-width: ${breakPoints.medium}px) {
+    flex-direction: row;
+    ${ChallengeListItemContent} {
+      padding-left: 32px;
+    }
+  }
+`
+
+export const ChallengeListItemThumbnail = styled.div<IChallengesListItemComponent>`
+  cursor: pointer;
+  padding: 0px;
+
+  img {
+    width: ${sizing.thumbnailWidth};
+    height: ${sizing.thumbnailHeight};
+    object-fit: contain;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    img {
+      width: ${sizing.thumbnailWidthSmall};
+      height: ${sizing.thumbnailHeightSmall};
+    }
+  }
+
+  ${(props) => {
+		if (props.timeStatus === CHALLENGE_TIME_STATUS.CURRENT) {
+			const marginTop = -values.thumbnailHeight + values.contentMargin
+			return `
+        &:after {
+          display: block;
+          position: absolute;
+          margin-top: ${marginTop}px;
+          padding: 2px 4px;
+          background: ${colors.highlightGreen};
+          content: 'OPEN';
+          color: white;
+          font-weight: bold;
+          font-size: 12px;
+        }
+      `
+		}
+	}};
 `
 
 export const ChallengesListSectionHeader = styled.div<IChallengesListItemComponent>`
@@ -116,15 +117,15 @@ export const ChallengesListSectionHeader = styled.div<IChallengesListItemCompone
 
   hr {
     border: 0;
-    height: ${theme.sizing.highlightBarWidth};
-    background: ${theme.colors.highlightYellow};
+    height: ${sizing.highlightBarWidth};
+    background: ${colors.highlightYellow};
     margin: 10px 0 0 0;
     vertical-align: middle;
   }
 
   @media (max-width: 768px) {
     hr {
-      width: ${theme.sizing.thumbnailWidthSmall};
+      width: ${sizing.thumbnailWidthSmall};
     }
   }
 
@@ -132,21 +133,21 @@ export const ChallengesListSectionHeader = styled.div<IChallengesListItemCompone
 		if (props.timeStatus === CHALLENGE_TIME_STATUS.UPCOMING) {
 			return `
         hr {
-          background-color: ${theme.colors.highlightYellow};
+          background-color: ${colors.highlightYellow};
         }
       `
 		}
 		if (props.timeStatus === CHALLENGE_TIME_STATUS.CURRENT) {
 			return `
         hr {
-          background-color: ${theme.colors.highlightGreen};
+          background-color: ${colors.highlightGreen};
         }
       `
 		}
 		if (props.timeStatus === CHALLENGE_TIME_STATUS.ENDED) {
 			return `
         hr {
-          background-color: ${theme.colors.highlightBlue};
+          background-color: ${colors.highlightBlue};
         }
       `
 		}
@@ -165,11 +166,11 @@ export const SectionHeaderLabel = styled.span`
 // For Landing page list item
 //
 export const ChallengeListItemLanding_LeftColumn = styled.div`
-  width: ${theme.sizing.smallerColumnWidth};
-  flex: 0 0 ${theme.sizing.smallerColumnWidth};
+  width: ${sizing.smallerColumnWidth};
+  flex: 0 0 ${sizing.smallerColumnWidth};
 `
 
 export const SectionHeaderLabel_LeftColumn = styled(SectionHeaderLabel)`
-  color: ${theme.colors.textBlack};
+  color: ${colors.textBlack};
   white-space: normal;
 `

@@ -7,24 +7,40 @@ import enUS from 'date-fns/locale/en-US'
 import ChallengeTimeRemaining from '../../../../components/Challenges/ChallengeTimeRemaining'
 import { CHALLENGE_TIME_STATUS } from '../../../../../constants'
 import { IChallenge } from '../../../../../types/challenge'
-import { theme } from '../../../../../styles/theme'
+import { breakPoints, theme } from '../../../../../styles/theme'
 import { commonStyles } from '../../../../../styles/commonStyles'
+import { PageContainer, pagePadding } from '../../../../../components/Page/styles'
 
-
-const StyledChallengeDetailsBanner = styled.div`
-  ${commonStyles.mainContainerTwoColumns};
-  flex-flow: row nowrap;
-`
 
 const LeftColumn = styled.div`
-  ${commonStyles.mainContainerTwoColumns_LeftColumn};
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+  min-width: 300px;
+  max-width: 720px;
+  flex: 1 1 auto;
 `
 
 const RightColumn = styled.div`
-  ${commonStyles.mainContainerTwoColumns_RightColumn};
-  width: auto;
-  padding: 0 ${theme.padding.mainContentHorizontal} 0 0;
-  margin: auto 0;
+  padding: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 320px;
+  flex: 1 1 auto;
+`
+
+const StyledChallengeDetailsBanner = styled(PageContainer)`
+  ${pagePadding}
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+
+  @media (min-width: ${breakPoints.medium}px) {
+    flex-direction: row;
+  }
 `
 
 const ChallengeName = styled.h1`
