@@ -211,4 +211,4 @@ export const CHALLENGE_TIME_STATUS = {
 
 export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
 export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'
-export const MAILING_LIST = 'https://list.nih.gov/cgi-bin/wa.exe?SUBED1=PRECISIONFDA&A=1'
+export const MAILING_LIST = 'https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564'
