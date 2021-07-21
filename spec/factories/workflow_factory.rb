@@ -18,6 +18,8 @@
 #  updated_at         :datetime         not null
 #  uid                :string(255)
 #  project            :string(255)
+#  featured           :boolean          default(FALSE)
+#  deleted            :boolean          default(FALSE), not null
 #
 
 FactoryBot.define do

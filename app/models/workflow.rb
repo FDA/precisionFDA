@@ -19,7 +19,7 @@
 #  uid                :string(255)
 #  project            :string(255)
 #  featured           :boolean          default(FALSE)
-#  deleted            :boolean          default(FALSE)
+#  deleted            :boolean          default(FALSE), not null
 #
 
 class Workflow < ApplicationRecord
