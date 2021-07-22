@@ -152,6 +152,7 @@ describe('POST /apps/:id/run', () => {
         feature: 'ML_IP',
         imagename: 'my-imagename',
         cmd: 'my-command-override',
+        app_gz: 'my-app-gzip-filename',
       },
     }
     await supertest(api.getServer())
