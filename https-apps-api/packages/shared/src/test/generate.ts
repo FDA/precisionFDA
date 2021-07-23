@@ -114,6 +114,18 @@ const app = {
       entityType: ENTITY_TYPE.HTTPS,
     }
   },
+  rshiny: (): Partial<InstanceType<typeof entities.App>> => {
+    const dxid = `app-${random.dxstr()}`
+    return {
+      dxid,
+      title: 'app-rshiny-title',
+      scope: 'public',
+      entityType: ENTITY_TYPE.HTTPS,
+      release: 'default-release-value',
+      spec:
+        '{"input_spec":[{"name":"app_gz","class":"file","label":"Gzip archive of Shiny app containing R script(s)","help":"","optional":false,"patterns":["*.tar.gz"]}],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+    }
+  },
   runAppInput: (): AnyObject => ({
     scope: 'private',
     input: {
@@ -123,6 +135,12 @@ const app = {
   runTtydAppInput: () => ({
     scope: 'private',
     input: {},
+  }),
+  runRshinyAppInput: () => ({
+    scope: 'private',
+    input: {
+      app_gz: 'app-gzipped-file',
+    },
   }),
 }
 

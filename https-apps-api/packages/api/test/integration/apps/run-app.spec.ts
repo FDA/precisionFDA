@@ -152,7 +152,6 @@ describe('POST /apps/:id/run', () => {
         feature: 'ML_IP',
         imagename: 'my-imagename',
         cmd: 'my-command-override',
-        app_gz: 'my-app-gzip-filename',
       },
     }
     await supertest(api.getServer())
@@ -174,6 +173,43 @@ describe('POST /apps/:id/run', () => {
       .that.deep.equals({
         '*': { instanceType: allowedInstanceTypes[inputComplete.instanceType] },
       })
+  })
+
+  it('accepts params for rshiny app', async () => {
+    const rshinyApp = create.appHelper.create(em, { user }, { ...generate.app.rshiny() })
+    const gzipFile = create.filesHelper.create(em, { user })
+    await em.flush()
+    const input = {
+      ...generate.app.runRshinyAppInput(),
+      input: {
+        app_gz: gzipFile.uid,
+      },
+    }
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${rshinyApp.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(input)
+      .expect(201)
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall)
+      .to.have.property('input')
+      .that.deep.equals({
+        app_gz: { $dnanexus_link: { id: gzipFile.dxid, project: user.privateFilesProject } },
+      })
+    const jobInDb = await em.findOne(Job, { id: body.id })
+    expect(jobInDb).to.have.property('provenance')
+    const provenance = JSON.parse((jobInDb.provenance as unknown) as string)
+    expect(provenance).to.be.deep.equal({
+      [generate.job.jobId()]: {
+        app_dxid: rshinyApp.dxid,
+        app_id: rshinyApp.id,
+        inputs: { app_gz: gzipFile.dxid },
+      },
+    })
+    const jobFileRows = await em.createQueryBuilder('job_inputs').select('*').execute()
+    expect(jobFileRows).to.be.an('array').with.lengthOf(1)
+    expect(jobFileRows[0]).to.have.property('job_id', body.id)
+    expect(jobFileRows[0]).to.have.property('user_file_id', gzipFile.id)
   })
 
   it('accepts minimal input params (uses all defaults)', async () => {
