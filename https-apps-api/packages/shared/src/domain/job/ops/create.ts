@@ -45,18 +45,26 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     }
 
     // check snapshot file
-    // fixme: transfer to any "file" input types
-    let snapshotFile: UserFile | null = null
     if (prop('snapshot', this.jobInput)) {
       // fixme: kind of weak condition, user might not own this file etc..
-      snapshotFile = await em.findOne(UserFile, { uid: this.jobInput.snapshot })
-      if (!snapshotFile) {
+      const file = await em.findOne(UserFile, { uid: this.jobInput.snapshot })
+      if (!file) {
         throw new errors.NotFoundError(`User file dxid: ${this.jobInput.snapshot} not found`, {
           code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
         })
       }
       // inputFiles should be used as a "cache" for all file links from app inputs in future
-      this.inputFiles.push(snapshotFile)
+      this.inputFiles.push(file)
+    }
+
+    if (prop('app_gz', this.jobInput)) {
+      const file = await em.findOne(UserFile, { uid: this.jobInput.app_gz })
+      if (!file) {
+        throw new errors.NotFoundError(`User file dxid: ${this.jobInput.app_gz} not found`, {
+          code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+        })
+      }
+      this.inputFiles.push(file)
     }
 
     this.projectId = userHelper.getProjectToRunApp(user)
@@ -98,12 +106,16 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       })
       // todo: create Event entry -> low priority probably
       em.persist(job)
-      job.provenance = this.buildProvenance({ app, job, snapshot: snapshotFile })
+      job.provenance = this.buildProvenance({ app, job })
       await em.flush()
 
-      if (snapshotFile) {
-        const jobFilesRepo = this.ctx.em.getRepository(UserFile)
-        await jobFilesRepo.createUserFileJobRefs([snapshotFile.id], job.id)
+      const jobFilesRepo = this.ctx.em.getRepository(UserFile)
+      if (this.inputFiles.length > 0) {
+        const qb = jobFilesRepo.createUserFileJobRefs(
+          this.inputFiles.map(file => file.id),
+          job.id,
+        )
+        await qb.execute()
       }
       await em.commit()
     } catch (err) {
@@ -170,19 +182,30 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     return value.default
   }
 
-  private buildProvenance({
-    app,
-    job,
-    snapshot,
-  }: {
-    app: App
-    job: Job
-    snapshot: UserFile | null
-  }): Provenance {
+  private buildProvenance({ app, job }: { app: App; job: Job }): Provenance {
     const initValue = { [job.dxid]: { app_dxid: app.dxid, app_id: app.id, inputs: {} } }
-    if (snapshot) {
-      initValue[job.dxid].inputs = { snapshot: snapshot.dxid }
-    }
+    const inputSpec = this.getAppInputSpec(app)
+    const inputFieldNames = this.getInputFieldNames(app)
+
+    const inputs = inputFieldNames.reduce((obj, key) => {
+      const specItem = inputSpec.find(spec => spec.name === key)
+      if (specItem?.class === 'file') {
+        const fileUid: string = this.jobInput[key]
+        const inputFile = this.inputFiles.find(f => f.uid === fileUid)
+        if (!inputFile) {
+          throw new errors.NotFoundError(`User file uid: ${fileUid} not found`, {
+            code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+          })
+        }
+        const newField = { [key]: inputFile.dxid }
+        return {
+          ...obj,
+          ...newField,
+        }
+      }
+      return obj
+    }, {})
+    initValue[job.dxid].inputs = inputs
     // todo: add parent files provenance?
     return initValue
   }
