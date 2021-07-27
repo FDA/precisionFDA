@@ -47,6 +47,7 @@ window.Precision.INSTANCES = [
   {value: "hidisk-8", label: "High Disk 8"}
   {value: "hidisk-16", label: "High Disk 16"}
   {value: "hidisk-36", label: "High Disk 36"}
+  {value: "gpu-8", label: "GPU 8"}
 ]
 
 window.Precision.carousel =
