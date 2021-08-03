@@ -30,6 +30,7 @@ class Job < ApplicationRecord
   include Featured
   include InternalUid
   include JobsSyncing
+  include ObjectLocation
   include Scopes
   include TagsContainer
 

@@ -30,6 +30,7 @@ class App < ApplicationRecord
   include CommonPermissions
   include InternalUid
   include Featured
+  include ObjectLocation
   include Scopes
   include SoftRemovable
   include TagsContainer

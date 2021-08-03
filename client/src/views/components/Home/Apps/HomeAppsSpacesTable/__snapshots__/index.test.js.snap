@@ -41,7 +41,10 @@ exports[`HomeAppsSpacesTable test should render 1`] = `
         >
           added by
         </Th>
-        <Th>
+        <Th
+          sortHandler={[Function]}
+          type="location"
+        >
           location
         </Th>
         <Th
