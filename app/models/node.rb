@@ -28,6 +28,7 @@ class Node < ApplicationRecord
   extend Scopes
   include Scopes
   include Featured
+  include ObjectLocation
   include TagsContainer
 
   self.inheritance_column = :sti_type

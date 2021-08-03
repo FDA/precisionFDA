@@ -97,7 +97,7 @@ const HomeFilesSpacesTable = ({ files, isFetching, isCheckedAll, toggleAllFilesC
                 <Icon onClick={toggleAllFilesCheckboxes} icon={checkboxClasses} />
               </th>
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='name'>name</Th>
-              <Th>location</Th>
+              <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='location'>location</Th>
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='username'>added by</Th>
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='size'>size</Th>
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='created_at'>created</Th>
@@ -228,7 +228,7 @@ const FileLink = ({ file }) => {
 }
 
 const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChangeFieldsValueTwo }) => {
-  const filtersConfig = ['', 'name', '', 'username', 'size', '', '', 'tags']
+  const filtersConfig = ['', 'name', 'location', 'username', 'size', '', '', 'tags']
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>

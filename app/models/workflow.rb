@@ -28,6 +28,7 @@ class Workflow < ApplicationRecord
   include CommonPermissions
   include InternalUid
   include Featured
+  include ObjectLocation
   include SoftRemovable
   include TagsContainer
 

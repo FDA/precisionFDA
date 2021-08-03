@@ -24,6 +24,9 @@ module Workflows
       "username" => ->(work, value) { work.user.full_name.downcase.include? value },
       "addedBy" => ->(work, value) { work.user.full_name.downcase.include? value },
       "featured" => ->(app, value) { app.featured.to_s == value },
+      "location" => lambda do |workflow, value|
+        workflow.in_space? && workflow.space_object.name.downcase.include?(value)
+      end,
       "tags" => ->(work, value) { work.workflow_series.all_tags_list.to_s.downcase.include? value },
     }.freeze
   end
