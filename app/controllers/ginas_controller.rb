@@ -67,7 +67,7 @@ class GinasController < ApplicationController
   end
 
   def beta_redirectable?
-    BETA_ROUTES.find { |route| Regexp.new("\\A#{route}\\Z") =~ request.path.chomp("/") }
+    BETA_ROUTES.find { |route| Regexp.new("^#{route}$") =~ request.path.chomp("/") }
   end
 
   def create_substances_file
