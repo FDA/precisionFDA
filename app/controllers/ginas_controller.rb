@@ -9,8 +9,39 @@ class GinasController < ApplicationController
     ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME_EMAIL", "AUTHENTICATION_HEADER_NAME_EMAIL")
   GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
   SUBSTANCES_PATH = "/ginas/app/api/v1/substances".freeze
+  BETA_ROUTES = %w(
+    /ginas/app
+    /ginas/app/webjars/.+
+    /ginas/app/assets/.+
+    /ginas/app/lock
+    /ginas/app/register
+    /ginas/app/structure
+    /ginas/app/structureSearch
+    /ginas/app/sequence
+    /ginas/app/wizard
+    /ginas/app/structureSearch
+    /ginas/app/substance
+    /ginas/app/substance/.+
+    /ginas/app/substances
+    /ginas/app/load
+    /ginas/app/loadSDF
+    /ginas/app/loadSDF/.+
+    /ginas/app/monitor
+    /ginas/app/monitor/.+
+    /ginas/app/relationships/[^\/]+
+    /ginas/app/cv
+    /ginas/app/cv/.+
+    /ginas/app/_updateIndex
+    /ginas/app/_updateIndex/.+
+    /ginas/app/admin
+    /ginas/app/admin/.+
+    /ginas/app/profile
+    /ginas/app/myDownloads
+    /ginas/app/myDownloads/.+
+  ).freeze
 
   skip_before_action :verify_authenticity_token
+  before_action :beta_redirect, if: -> { beta_redirectable? }
   before_action :create_substances_file, if: -> { substance_submit_request? }
 
   def index
@@ -30,6 +61,14 @@ class GinasController < ApplicationController
   end
 
   private
+
+  def beta_redirect
+    redirect_to request.fullpath.sub("/ginas/app", "/ginas/app/beta")
+  end
+
+  def beta_redirectable?
+    BETA_ROUTES.find { |route| Regexp.new("\\A#{route}\\Z") =~ request.path.chomp("/") }
+  end
 
   def create_substances_file
     substance_creator = Ginas::SubstanceFileCreator.new(@context)

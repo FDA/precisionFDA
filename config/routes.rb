@@ -129,7 +129,7 @@ Rails.application.routes.draw do
     get "/home/*all", to: "home#index"
     get "/account/*all", to: "home#index"
 
-    unless ENV["GSRS_DISABLED"]
+    if ENV["GSRS_ENABLED"]
       match "/ginas/app/logout", to: "main#destroy", via: :all
       match "/ginas/*path", to: "ginas#index", via: :all
     end
