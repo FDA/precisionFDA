@@ -102,7 +102,7 @@ const HomeFilesEverybodyTable = ({ files, isFetching, isCheckedAll, toggleAllFil
         <Table>
           <Thead>
             <th className="pfda-padded-l10">
-              <Icon onClick={toggleAllFilesCheckboxes} icon={checkboxClasses} />
+            <Icon onClick={toggleAllFilesCheckboxes} icon={checkboxClasses} />
             </th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='name'>name</Th>
             <Th>featured</Th>
@@ -201,7 +201,8 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
     if (isAdmin) {
       if (file.type === 'Folder'){
         makeFeatured(file.links.feature, [file.id], !file.featured)
-      } else makeFeatured(file.links.feature, [file.uid], !file.featured)
+      } else 
+          makeFeatured(file.links.feature, [file.uid], !file.featured)
     }
   }
 
@@ -224,7 +225,7 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
       <td>
         <FileLink file={file} />
       </td>
-      <td className='home-page-layout__data-table_featured'>
+      <td align='center' className='home-page-layout__data-table_featured'>
         <span className={classNames({ 'home-page-layout__data-table_action': isAdmin })}>
           <Icon icon={heartClasses} onClick={() => onHeartClick()} />
         </span>

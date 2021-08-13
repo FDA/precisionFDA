@@ -25,6 +25,14 @@ module Api
       "username" => %w(users.first_name users.last_name),
     }.freeze
 
+    SORT_FIELDS = {
+      "created_at" => ->(left, right) { left.created_at <=> right.created_at },
+      "name" => ->(left, right) { left.name <=> right.name },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
+      "size" => ->(left, right) { left.file_size <=> right.file_size },
+      "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
+    }.freeze
+
     PAGE_SIZE = Paginationable::PAGE_SIZE
 
     # GET /api/assets
@@ -92,12 +100,19 @@ module Api
         editable_by(@context).where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         eager_load(user: :org).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).
-        page(page_from_params).per(PAGE_SIZE)
-      assets = FileService::FilesFilter.call(assets, params[:filters])
+        search_by_tags(params.dig(:filters, :tags))
 
-      render_assets_list assets
+      assets = FileService::FilesFilter.call(assets, params[:filters]).to_a
+
+      if show_count
+        render plain: assets.count
+      else
+        assets = sort_array_by_fields(assets, "created_at")
+        page_meta = pagination_meta(assets.count)
+        assets = paginate_array(assets)
+
+        render json: assets, meta: page_meta, root: "assets", adapter: :json
+      end
     end
 
     # A common method for assets list json rendering.

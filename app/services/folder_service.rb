@@ -64,7 +64,7 @@ class FolderService
     validate_target_folder!(target_folder)
     validate_nodes_to_move!(nodes, target_folder, scope)
 
-    nodes.update(Node.scope_column_name(scope) => target_folder&.id)
+    nodes.each { |node| node.update(Node.scope_column_name(scope) => target_folder&.id) }
 
     if nodes.all?(&:valid?)
       Rats.success(count: nodes.size, scope: scope)
