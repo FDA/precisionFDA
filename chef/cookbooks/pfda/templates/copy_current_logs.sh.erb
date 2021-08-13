@@ -1,0 +1,13 @@
+cd /tmp
+newdir=$(date +%Y-%m-%d_%H-%M-%S)
+instanceid=$(curl --silent http://169.254.169.254/latest/meta-data/instance-id)
+mkdir $newdir
+cd $newdir
+cp /srv/www/precision_fda/current/log/*audit.log .
+cp /srv/www/precision_fda/current/log/*production.log .
+cp /srv/www/precision_fda/current/log/https-api-0.log .
+cp /srv/www/precision_fda/current/log/https-worker-1.log .
+cp /var/log/nginx/nginx_error.log .
+cp /var/log/nginx/precision.fda.gov-modsec.audit.log .
+tar cvzf "${instanceid}-${newdir}.tgz" * --remove-files
+AWS_ACCESS_KEY_ID=<%= node[:logrotate][:postrotate][:aws_access_key_id] %> AWS_SECRET_ACCESS_KEY=<%= node[:logrotate][:postrotate][:aws_secret_access_key] %> aws s3 cp ./*.tgz s3://<%= node[:logrotate][:postrotate][:log_bucket] %>/current-logs/

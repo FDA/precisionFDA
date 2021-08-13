@@ -6,6 +6,7 @@ AllCops:
   Exclude:
   - 'db/schema.rb'
   - 'vendor/**/*'
+  - 'chef/**/*'
   DisplayCopNames: true
   StyleGuideCopsOnly: false
   TargetRubyVersion: 2.7.2
