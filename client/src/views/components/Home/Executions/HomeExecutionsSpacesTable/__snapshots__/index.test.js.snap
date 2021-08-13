@@ -44,7 +44,10 @@ exports[`HomeExecutionsSpacesTable test should render 1`] = `
         >
           launched by
         </Th>
-        <Th>
+        <Th
+          sortHandler={[Function]}
+          type="location"
+        >
           location
         </Th>
         <Th>
