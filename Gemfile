@@ -110,6 +110,8 @@ gem "whenever", require: false
 
 gem "soapforce"
 
+gem "dotenv-rails", ">= 2.7.6"
+
 group :development do
   # Annotate models
   gem "annotate", ">= 3.1.1"
@@ -143,7 +145,6 @@ group :development do
 end
 
 group :development, :test, :ui_test do
-  gem "dotenv-rails", ">= 2.7.6"
   gem "thin", "1.8.0"
 end
 
@@ -160,6 +161,5 @@ end
 
 group :production do
   gem "exception_notification", "4.1.1"
-  # gem "soapforce"
-  gem "unicorn", "~> 4.9.0"
+  gem "puma", "~> 5.3.2"
 end

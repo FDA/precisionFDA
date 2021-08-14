@@ -29,8 +29,9 @@ module Api
 
           begin
             invited_emails = space_invite_form.invite(membership, api)
-          rescue StandardError
-            error = "An error has occurred during inviting"
+          rescue StandardError => e
+            error = e.message
+            logger.error error
           end
 
           if invited_emails.present?

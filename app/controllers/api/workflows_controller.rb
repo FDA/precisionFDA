@@ -107,7 +107,6 @@ module Api
         eager_load(latest_revision_workflow: [user: :org]).
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         unremoved.includes(:taggings).
-        order(order_from_params).
         map do |series|
           series_wf = series.latest_accessible(@context)
           if series_wf.in_space? && Workflows::WorkflowFilter.

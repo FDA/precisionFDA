@@ -111,7 +111,7 @@ export const Header: React.FC = () => {
           <StyledHeaderLogo />
         </LogoWrap>
         <HeaderLeft>
-          <Link to="/" title="Overview">
+          <Link to={isSpacesPath ? '/home' : '/'} title={isSpacesPath ? 'Back Home' : 'Overview'}>
             <MenuItem active={isActiveLink('/')}>
               <IconWrap>
                 <HomeIcon height={16} />

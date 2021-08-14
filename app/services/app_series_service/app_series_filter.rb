@@ -23,6 +23,9 @@ module AppSeriesService
       "revision" => ->(app, value) { app.revision == value.to_i },
       "username" => ->(app, value) { app.user.full_name.downcase.include? value },
       "featured" => ->(app, value) { app.featured.to_s == value },
+      "location" => lambda do |app, value|
+        app.in_space? && app.space_object.name.downcase.include?(value)
+      end,
       "tags" => ->(app, value) { app.app_series.all_tags_list.to_s.downcase.include? value },
     }.freeze
   end

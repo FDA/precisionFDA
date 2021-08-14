@@ -129,7 +129,7 @@ const Row = ({ app, toggleAppCheckbox }) => {
           <span>{app.title}</span>
         </Link>
       </td>
-      <td style={{ width: 150 }}>{app.revision}</td>
+      <td align='center' style={{ width: 150 }}>{app.revision}</td>
       <td className='home-page-layout__data-table_full-name'>
         <a href={app.links.user}>
           <span>{app.addedByFullname}</span>

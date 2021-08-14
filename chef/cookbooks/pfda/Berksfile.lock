@@ -1,0 +1,24 @@
+DEPENDENCIES
+  pfda
+    path: .
+    metadata: true
+
+GRAPH
+  application (5.2.0)
+    poise (~> 2.4)
+    poise-service (~> 1.0)
+  ark (6.0.2)
+    seven_zip (>= 3.1)
+  aws (8.4.0)
+  chocolatey (3.0.0)
+  nodejs (7.3.2)
+    ark (>= 2.0.2)
+    chocolatey (>= 3.0)
+  pfda (0.1.0)
+    application (~> 5.2.0)
+    aws (~> 8.4.0)
+    nodejs (~> 7.3.2)
+  poise (2.8.2)
+  poise-service (1.5.2)
+    poise (~> 2.0)
+  seven_zip (4.2.1)

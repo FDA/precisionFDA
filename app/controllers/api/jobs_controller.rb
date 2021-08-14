@@ -33,6 +33,7 @@ module Api
       "name" => ->(left, right) { left.name <=> right.name },
       "apptitle" => ->(left, right) { left.app_title <=> right.app_title },
       "username" => ->(left, right) { left.launched_by <=> right.launched_by },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
     }.freeze
 
     PAGE_SIZE = Paginationable::PAGE_SIZE
