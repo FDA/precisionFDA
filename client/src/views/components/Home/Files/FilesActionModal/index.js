@@ -14,6 +14,8 @@ const switchTitle = (action) => {
       return 'Make Public'
     case HOME_FILES_ACTIONS.DELETE:
       return 'Delete'
+    case HOME_FILES_ACTIONS.OPEN:
+      return 'Open'
     case HOME_FILES_ACTIONS.DOWNLOAD:
       return 'Download'
     default:

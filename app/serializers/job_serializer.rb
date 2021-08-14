@@ -35,7 +35,7 @@ class JobSerializer < ApplicationSerializer
   attribute :all_tags_list, key: :tags
   attr_reader :launched_on
 
-  delegate :name, to: :object
+  delegate :name, :location, to: :object
 
   # Returns a run input_data for each input.
   # @return [Array] of objects [

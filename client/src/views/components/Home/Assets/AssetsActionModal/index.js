@@ -37,7 +37,7 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
 
 const AssetsActionModal = ({ modalAction, hideAction, action, assets = [], isOpen, isLoading }) => {
   const title = switchTitle(action)
-  
+
   return (
     <div className="objects-actions-modal">
       <Modal

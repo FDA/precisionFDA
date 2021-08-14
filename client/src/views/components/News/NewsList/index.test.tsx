@@ -1,5 +1,6 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import Loader from '../../Loader'
 import { NewsList } from '.'
@@ -31,13 +32,13 @@ const getMockNews = () => {
 
 describe('NewsList test', () => {
   it('should render', () => {
-    const wrapper = shallow(<NewsList newsItems={[]} isFetching={false} listItemComponent={NewsListItemLarge} />)
+    const wrapper = shallow(<Router><NewsList newsItems={[]} isFetching={false} listItemComponent={NewsListItemLarge} /></Router>)
 
     expect(wrapper).toMatchSnapshot()
   })
 
   it('should show loader when isFetching and not show NewsList', () => {
-    const wrapper = mount(<NewsList newsItems={[]} isFetching={true} listItemComponent={NewsListItemLarge} />)
+    const wrapper = mount(<Router><NewsList newsItems={[]} isFetching={true} listItemComponent={NewsListItemLarge} /></Router>)
 
     // console.log(wrapper.debug())
     expect(wrapper.find(Loader)).toHaveLength(1)
@@ -46,7 +47,7 @@ describe('NewsList test', () => {
   })
 
   it('should not show loader when not fetching and show NewsList with no rows', () => {
-    const wrapper = mount(<NewsList newsItems={[]} isFetching={false} listItemComponent={NewsListItemLarge} />)
+    const wrapper = mount(<Router><NewsList newsItems={[]} isFetching={false} listItemComponent={NewsListItemLarge} /></Router>)
     // console.log(wrapper.debug())
 
     expect(wrapper.find(Loader)).toHaveLength(0)
@@ -66,7 +67,7 @@ describe('NewsList test', () => {
       totalCount: 25,
     }
     const wrapper = mount (
-      <NewsList newsItems={mockNews} pagination={mockPagination} isFetching={false} listItemComponent={NewsListItemLarge} />
+      <Router><NewsList newsItems={mockNews} pagination={mockPagination} isFetching={false} listItemComponent={NewsListItemLarge} /></Router>
     )
     // console.log(wrapper.debug())
 

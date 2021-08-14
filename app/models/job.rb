@@ -30,6 +30,7 @@ class Job < ApplicationRecord
   include Featured
   include InternalUid
   include JobsSyncing
+  include ObjectLocation
   include Scopes
   include TagsContainer
 
@@ -49,6 +50,7 @@ class Job < ApplicationRecord
     "hidisk-8" => "mem1_ssd2_x8_fedramp",
     "hidisk-16" => "mem1_ssd2_x16_fedramp",
     "hidisk-36" => "mem1_ssd2_x36_fedramp",
+    "gpu-8" => "mem3_ssd1_gpu_x8_fedramp",
   }.freeze
 
   STATE_DONE = "done".freeze

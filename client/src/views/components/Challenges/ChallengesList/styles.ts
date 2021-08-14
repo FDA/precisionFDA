@@ -3,6 +3,7 @@ import { commonStyles } from '../../../../styles/commonStyles'
 
 
 export const StyledChallengesListContainer = styled.div`
+  margin-top: 12px;
   .challenges-list {
     ${commonStyles.listContainer}
   }

@@ -77,6 +77,7 @@ class NotificationsMailer < ApplicationMailer
     @membership = membership
     @user = membership.user
     @admin = admin
+
     mail to: @user.email,
          reply_to: admin.user.email,
          subject: "#{admin.user.full_name} added you to the space \"#{space.title}\""

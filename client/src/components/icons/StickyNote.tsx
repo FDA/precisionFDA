@@ -1,14 +1,15 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const StickyNoteIcon = () => (
+export const StickyNoteIcon = ({ width, height = 16 }: { width?: number, height?: number }) => (
   <Svg
     aria-hidden="true"
     focusable="false"
     role="img"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 448 512"
-    height="28"
+    height={height}
+    width={width}
   >
     <path
       fill="currentColor"

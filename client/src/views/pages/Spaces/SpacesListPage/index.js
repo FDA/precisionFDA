@@ -8,13 +8,14 @@ import SpacesList from '../../../components/Spaces/SpacesList'
 import SpacesListSwitcher from '../../../components/Spaces/SpacesListSwitcher'
 import SpacesListSearch from '../../../components/Spaces/SpacesListSearch'
 import Button from '../../../components/Button'
-import { createSpaceLinkSelector } from '../../../../reducers/context/selectors'
+import { contextUserSelector, createSpaceLinkSelector } from '../../../../reducers/context/selectors'
 import {
   resetSpacesListFilters,
   fetchSpaces,
   searchSpacesList,
 } from '../../../../actions/spaces'
 import './style.sass'
+import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
 
 
 class SpacesListPage extends Component {
@@ -34,7 +35,11 @@ class SpacesListPage extends Component {
   }
 
   render() {
-    const { createSpaceLink } = this.props
+    const { createSpaceLink, user } = this.props
+
+    if(user?.is_guest) {
+      return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
+    }
 
     return (
       <DefaultLayout>
@@ -68,6 +73,7 @@ SpacesListPage.propTypes = {
   loadSpaces: PropTypes.func,
   resetFilters: PropTypes.func,
   filterSpaces: PropTypes.func,
+  user: PropTypes.any,
 }
 
 SpacesListPage.defaultProps = {
@@ -79,6 +85,7 @@ SpacesListPage.defaultProps = {
 
 const mapStateToProps = state => ({
   createSpaceLink: createSpaceLinkSelector(state),
+  user: contextUserSelector(state),
 })
 
 const mapDispatchToProps = dispatch => ({

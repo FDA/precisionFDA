@@ -1,9 +1,10 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const CaretIcon = ({ width = 8 }: { width?: number }) => (
+export const CaretIcon = ({ width, height = 16 }: { width?: number, height?: number }) => (
   <Svg
     width={width}
+    height={height}
     viewBox="0 0 24 12"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

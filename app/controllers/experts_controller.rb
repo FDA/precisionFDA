@@ -2,6 +2,8 @@ class ExpertsController < ApplicationController
   skip_before_action :require_login,     only: [:index, :show, :ask_question, :blog]
   before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
 
+  layout "react", only: %i(index)
+
   def index
     @experts = Expert.viewable_by(@context).order(id: :desc)
   end

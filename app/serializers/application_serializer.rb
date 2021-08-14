@@ -79,22 +79,6 @@ class ApplicationSerializer < ActiveModel::Serializer
     "/licenses/:id/license_item?items_to_license=#{[object.uid]}"
   end
 
-  # Returns object's location - its scope
-  # @return [String] Scope - a value on of: 'public', 'private' or 'space-xxx'.
-  #   Scope or Space name are titleized.
-  def location
-    if object.in_space?
-      space_name = object.space_object.name
-      if object.space_object.confidential?
-        space_name + " - Private"
-      else
-        space_name + " - Shared"
-      end
-    else
-      object.scope.titleize
-    end
-  end
-
   # Returns a user who has created this app.
   # @return [String] User full_name.
   def added_by_fullname

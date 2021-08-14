@@ -71,7 +71,8 @@ class Space < ActiveRecord::Base
   attr_accessor :invitees,
                 :invitees_role,
                 :host_lead_dxuser,
-                :guest_lead_dxuser
+                :guest_lead_dxuser,
+                :sponsor_lead_dxuser
 
   scope :top_level, -> { where(space_id: nil) }
   scope :shared, -> { review.top_level }
@@ -222,6 +223,19 @@ class Space < ActiveRecord::Base
     review? && !confidential?
   end
 
+  # Find a space, oposite to a given area of a current review space:
+  #   if a current space is confidential and reviewer,
+  #   then opposite space will be a sponsor one. And vice versa.
+  # @param shared_space [Space object] shared space for self space
+  # @return space [Space object] the opposite space
+  def opposite_private_space(shared_space)
+    if reviewer? && confidential?
+      shared_space.confidential_spaces.sponsor.first
+    else
+      shared_space.confidential_spaces.reviewer.first
+    end
+  end
+
   def verified?
     return false if space_type != "verification"
     verified ? true : false
@@ -232,6 +246,8 @@ class Space < ActiveRecord::Base
     accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
   end
 
+  # @param member [SpaceMembership object] - space member, host- or guest- lead.
+  # @return [true, false] depends upon member acceptance of a space
   def accepted_by?(member)
     return false unless member
     return true if review? && confidential?
@@ -242,12 +258,86 @@ class Space < ActiveRecord::Base
     end
 
     # below are the checks for a shared review space
-    member.host? && confidential_reviewer_space&.host_lead_member ||
-      member.guest? && confidential_sponsor_space&.guest_lead_member
+    member.host? && confidential_reviewer_space&.host_lead_member.present? ||
+      member.guest? && confidential_sponsor_space&.guest_lead_member.present?
   end
 
   def uid
     "space-#{id}"
+  end
+
+  # @param update_space_params [Object] - consists of SpaceEditForm attributes
+  # @param api [DNAnexusAPI]
+  def leads_updates(update_space_params, api)
+    return unless review?
+
+    lead_invite_and_update(
+      host_lead_dxuser,
+      update_space_params.host_lead_dxuser,
+      update_space_params.current_user,
+      SpaceMembership::SIDE_HOST,
+      api,
+    )
+
+    lead_invite_and_update(
+      guest_lead_dxuser,
+      update_space_params.sponsor_lead_dxuser,
+      update_space_params.current_user,
+      SpaceMembership::SIDE_GUEST,
+      api,
+    )
+  end
+
+  # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
+  # @param updated_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
+  # @param side [String] dxuser of a current space lead - to be changed to Admin.
+  # @param api [DNAnexusAPI]
+  def lead_invite_and_update(space_lead_dxuser, updated_lead_dxuser, current_user, side, api)
+    return if space_lead_dxuser == updated_lead_dxuser
+
+    membership = leads.find_by(side: side)
+
+    return if user_member(updated_lead_dxuser).present?
+
+    invite(membership, updated_lead_dxuser, current_user, api)
+    update_role(updated_lead_dxuser, side, api)
+  end
+
+  def user_member(dxuser)
+    # An active user's space memberships
+    space_memberships.active.joins(:user).find_by(users: { dxuser: dxuser })
+  end
+
+  # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
+  # @param new_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
+  # @param api [DNAnexusAPI]
+  def update_role(new_lead_dxuser, side, api)
+    admin_member = leads.find_by(side: side)
+    # An active user member changing to be Lead
+    member = space_memberships.active.joins(:user).find_by(users: { dxuser: new_lead_dxuser })
+    SpaceMembershipService::ToLead.call(api, self, member, admin_member)
+  end
+
+  def space_sponsor
+    User.find_by(dxuser: sponsor_lead_dxuser)
+  end
+
+  def invite(membership, dxuser, current_user, api)
+    space_invite_form = SpaceInviteForm.new(
+      space: self,
+      invitees_role: SpaceMembership::ROLE_ADMIN,
+      space_id: id,
+      invitees: dxuser,
+      current_user: current_user,
+    )
+
+    return unless space_invite_form.valid?
+
+    begin
+      space_invite_form.invite(membership, api)
+    rescue StandardError
+      "An error has occurred during inviting"
+    end
   end
 
   alias_method :scope, :uid
@@ -380,11 +470,26 @@ class Space < ActiveRecord::Base
       !(restrict_to_template? && confidential?)
   end
 
+  # def updatable_by?(user)
+  #   active? && (user.review_space_admin? && reviewer? ||
+  #     space_memberships.active.lead_or_admin.exists?(user: user))
+  # end
+
   # Checks if user is able to update a space via Edit page.
   # @return [Boolean] Returns true if user is able to update a space, false otherwise.
   def updatable_by?(user)
-    active? && (user.review_space_admin? && reviewer? ||
-      space_memberships.active.lead_or_admin.exists?(user: user))
+    active? &&
+      updatable_by_rsa?(user) || space_memberships.active.lead_or_admin.exists?(user: user)
+  end
+
+  # Checks if user is RSA and able to update a space via Edit page.
+  # @return [Boolean] Returns true if user is RSA in review space and:
+  #   does not member of a space (to be able to add himself) or
+  #   is member of a space already, with 'lead' or 'admin' role.
+  def updatable_by_rsa?(user)
+    user.review_space_admin? && reviewer? &&
+      (!space_memberships.active.exists?(user: user) ||
+        space_memberships.active.lead_or_admin.exists?(user: user))
   end
 
   # Scopes of files that can be used to run an app.

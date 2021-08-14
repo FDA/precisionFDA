@@ -1,0 +1,13 @@
+{
+  "apps": [
+    {
+      name: "https_apps_api",
+      script: "./packages/api/dist/index.js",
+      instances: 1,
+      exec_mode: "fork",
+      watch: false,
+  	  log_file: "../log/https-api.log",
+  	  time: true
+    }
+  ]
+}
