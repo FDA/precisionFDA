@@ -7,8 +7,8 @@ class SpacesController < ApplicationController
     feed tasks notes assets comparisons reports
   )
 
-  layout "space_content", only: %i(
-    feed tasks notes assets comparisons reports
+  layout "react", only: %i(
+    index feed tasks notes assets comparisons reports
   )
 
   def index; end
@@ -35,7 +35,10 @@ class SpacesController < ApplicationController
   # TODO: Move to API.
   def invite
     if @membership
-      space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: @space))
+      space_invite_form = SpaceInviteForm.new(space_invite_params.merge(
+        space: @space,
+        current_user: @context.user,
+      ))
 
       if space_invite_form.valid?
         api = @membership.persisted? ? @context.api : DNAnexusAPI.for_admin

@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import { homeCurrentTabSelector } from '../../../reducers/home/page/selectors'
 import HomeAppsPage from './HomeApps/HomeAppsPage'
@@ -29,10 +29,19 @@ import HomeAssetsFeaturedPage from './HomeAssets/HomeAssetsFeaturedPage'
 import HomeAssetsEverybodyPage from './HomeAssets/HomeAssetsEverybodyPage'
 import HomeAssetsSpacesPage from './HomeAssets/HomeAssetsSpacesPage'
 import HomeAssetSinglePage from './HomeAssets/HomeAssetSinglePage'
+import { contextUserSelector } from '../../../reducers/context/selectors'
+import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
+import DefaultLayout from '../../layouts/DefaultLayout'
 
 
-const HomePage = ({ match, currentTab }) => {
+const HomePage = ({ match }) => {
   let { page } = match.params
+  const currentTab = useSelector(homeCurrentTabSelector)
+  const user = useSelector(contextUserSelector)
+
+  if(user.is_guest) {
+    return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
+  }
 
   let uid
   let tab = match.params.tab ? `/${match.params.tab}` : ''
@@ -114,14 +123,9 @@ const HomePage = ({ match, currentTab }) => {
 
 HomePage.propTypes = {
   match: PropTypes.any,
-  currentTab: PropTypes.string,
 }
 
-const mapStateToProps = (state) => ({
-  currentTab: homeCurrentTabSelector(state),
-})
-
-export default connect(mapStateToProps, null)(HomePage)
+export default HomePage
 
 export {
   HomePage,

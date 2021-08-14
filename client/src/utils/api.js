@@ -1,7 +1,7 @@
 import queryString from 'query-string'
 
 
-const getAuthenticityToken = () => {
+export const getAuthenticityToken = () => {
   const CSRFHolder = document.getElementsByName('csrf-token')[0]
 
   return CSRFHolder ? CSRFHolder.content : null
@@ -19,7 +19,7 @@ const backendCall = (route, method = 'POST', data = {}, token = getAuthenticityT
     },
   }
 
-  if (['POST', 'PUT', 'PATCH'].includes(method)) {
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
     opts['body'] = JSON.stringify(data)
     opts['headers']['X-CSRF-Token'] = token
   } else if (['GET', 'HEAD'].includes(method)) {

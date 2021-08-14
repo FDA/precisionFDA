@@ -31,7 +31,7 @@ class WorkflowSerializer < ApplicationSerializer
   attr_reader :launched_on
   attr_writer :title
 
-  delegate :uid, to: :object
+  delegate :uid, :location, to: :object
 
   def title
     @title || object.title

@@ -2,16 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { mapValues } from 'lodash'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import {
-  PageContainer,
   PageHeader,
   PageTitle,
   PageActions,
 } from '../../../../components/Page/styles'
-import { FieldGroup, SectionTitle, StyledNotifications, StyledSelectWrap } from './styles'
-import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
+import { ButtonSolidBlue } from '../../../../components/Button'
 import Select from 'react-select'
 import { Checkbox } from '../../../../components/Checkbox'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
+import DefaultLayout from '../../../layouts/DefaultLayout'
+import { useSelector } from 'react-redux'
+import { contextUserSelector } from '../../../../reducers/context/selectors'
+import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
 
 enum Roles {
   'review_space_admin' = 'review_space_admin',
@@ -66,6 +69,7 @@ const preference = {
 }
 
 export const NotificationsPage = () => {
+  const user = useSelector(contextUserSelector)
   const [localPrefSelection, setLocalPrefSelection] = useState<any>(preference)
   const roles = Object.keys(localPrefSelection) as Array<Roles>
   const options = roles.map(value => ({ value, label: RoleLabel[value] }))
@@ -125,85 +129,90 @@ export const NotificationsPage = () => {
   const enableJobNotificationSettings = false
   const enableChallengeNotificationSettins = false
 
+  if(user.is_guest) {
+    return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
+  }
+
   return (
-    <form>
-      <PageContainer>
-        <PageHeader>
-          <PageTitle>Notification Preferences</PageTitle>
-          <PageActions>
-            <Button type="button">Cancel</Button>
-            <ButtonSolidBlue type="button" onClick={handleSave}>Save Settings</ButtonSolidBlue>
-          </PageActions>
-        </PageHeader>
+    <DefaultLayout>
+      <form>
+        <StyledPageContainer>
+          <PageHeader>
+            <PageTitle>Notification Preferences</PageTitle>
+            <PageActions>
+              <ButtonSolidBlue type="button" onClick={handleSave}>Save Settings</ButtonSolidBlue>
+            </PageActions>
+          </PageHeader>
 
-        <StyledNotifications>
-          {enableJobNotificationSettings || enableChallengeNotificationSettins &&
-          <SectionTitle>Site Notifications</SectionTitle>
-          }
+          <StyledNotifications>
+            {enableJobNotificationSettings || enableChallengeNotificationSettins &&
+            <SectionTitle>Site Notifications</SectionTitle>
+            }
 
-          {enableChallengeNotificationSettins &&
-          <FieldGroup>
-            <Checkbox id="newChallenge" name="newChallenge" type="checkbox" />
-            <label htmlFor="newChallenge">
-              Notify me when a new precisionFDA challenge is created.
-            </label>
-          </FieldGroup>
-          }
+            {enableChallengeNotificationSettins &&
+            <FieldGroup>
+              <Checkbox id="newChallenge" name="newChallenge" type="checkbox" />
+              <label htmlFor="newChallenge">
+                Notify me when a new precisionFDA challenge is created.
+              </label>
+            </FieldGroup>
+            }
 
-          {enableJobNotificationSettings &&
-          <FieldGroup>
-            <Checkbox
-              id="finishedExecution"
-              name="finishedExecution"
-              type="checkbox"
-            />
-            <label htmlFor="finishedExecution">
-              Notify me when an execution has finished.
-            </label>
-          </FieldGroup>
-          }
+            {enableJobNotificationSettings &&
+            <FieldGroup>
+              <Checkbox
+                id="finishedExecution"
+                name="finishedExecution"
+                type="checkbox"
+              />
+              <label htmlFor="finishedExecution">
+                Notify me when an execution has finished.
+              </label>
+            </FieldGroup>
+            }
 
-          <SectionTitle>Space Notifications</SectionTitle>
+            <SectionTitle>Space Notifications</SectionTitle>
 
-          <StyledSelectWrap>
-            <Select
-              options={options}
-              defaultValue={{
-                value: selectedRole,
-                label: RoleLabel[selectedRole],
-              }}
-              onChange={(selected: any) => setSelectedRole(selected?.value)}
-            />
-          </StyledSelectWrap>
+            <StyledSelectWrap>
+              <Select
+                options={options}
+                defaultValue={{
+                  value: selectedRole,
+                  label: RoleLabel[selectedRole],
+                }}
+                onChange={(selected: any) => setSelectedRole(selected?.value)}
+              />
+            </StyledSelectWrap>
 
-          <FieldGroup>
-            <Checkbox
-              id="all"
-              name="all"
-              type="checkbox"
-              checked={isAllChecked(localPrefSelection[selectedRole])}
-              onChange={() => handleCheckAll(selectedRole)}
-            />
-            <label htmlFor="all">All</label>
-          </FieldGroup>
+            <FieldGroup>
+              <Checkbox
+                id="all"
+                name="all"
+                type="checkbox"
+                checked={isAllChecked(localPrefSelection[selectedRole])}
+                onChange={() => handleCheckAll(selectedRole)}
+              />
+              <label htmlFor="all">All</label>
+            </FieldGroup>
 
-          {Object.keys(localPrefSelection[selectedRole]).map(notification => {
-              const key = `${localPrefSelection[selectedRole]}.${notification}`
-              return (
-                <FieldGroup key={key}>
-                  <Checkbox
-                    id={key}
-                    name={key}
-                    type="checkbox"
-                    checked={localPrefSelection[selectedRole][notification]}
-                    onChange={() => handleSelection(selectedRole, notification)}
-                  />
-                  <label htmlFor={key}>{NotificationLabel[notification]}</label>
-                </FieldGroup>
-              )
-            })}
-        </StyledNotifications>
-      </PageContainer>
-    </form>
+            {Object.keys(localPrefSelection[selectedRole]).map(notification => {
+                const key = `${localPrefSelection[selectedRole]}.${notification}`
+                return (
+                  <FieldGroup key={key}>
+                    <Checkbox
+                      id={key}
+                      name={key}
+                      type="checkbox"
+                      checked={localPrefSelection[selectedRole][notification]}
+                      onChange={() => handleSelection(selectedRole, notification)}
+                    />
+                    <label htmlFor={key}>{NotificationLabel[notification]}</label>
+                  </FieldGroup>
+                )
+              })}
+          </StyledNotifications>
+        </StyledPageContainer>
+      </form>
+    </DefaultLayout>
   )
 }

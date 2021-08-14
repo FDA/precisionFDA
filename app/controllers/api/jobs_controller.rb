@@ -33,6 +33,7 @@ module Api
       "name" => ->(left, right) { left.name <=> right.name },
       "apptitle" => ->(left, right) { left.app_title <=> right.app_title },
       "username" => ->(left, right) { left.launched_by <=> right.launched_by },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
     }.freeze
 
     PAGE_SIZE = Paginationable::PAGE_SIZE
@@ -231,9 +232,9 @@ module Api
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags)).
         order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-      jobs.each { |job| job.current_user = @context.user }
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      jobs.each { |job| job.current_user = @context.user }
 
       page_dict = pagination_dict(jobs)
 

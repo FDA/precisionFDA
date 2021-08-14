@@ -1,6 +1,6 @@
 import styled from "styled-components";
+import { PageContainer, pagePadding } from "../../../../components/Page/styles";
 import { commonStyles } from "../../../../styles/commonStyles";
-import { theme } from "../../../../styles/theme";
 
 export const StyledNotifications = styled.div`
   display: flex;
@@ -27,4 +27,8 @@ export const SectionTitle = styled.h2`
 export const StyledSelectWrap = styled.div`
   width: 400px;
   margin-bottom: 20px;
+`
+
+export const StyledPageContainer = styled(PageContainer)`
+  ${pagePadding}
 `

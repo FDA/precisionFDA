@@ -94,14 +94,32 @@ module Api
 
     # PUT /api/spaces/:id
     # Updates a space.
+    # @param id [String] - space id in a string form: id: "9-spacename"
+    # @param update_space_params [Object] - space params from SpaceEditForm
     def update
       space = Space.undeleted.find(params[:id])
 
       head(:forbidden) && return unless space.updatable_by?(current_user)
+      space_update_form = SpaceEditForm.new(update_space_params.merge(
+        current_user: current_user,
+        space_host_lead: space.host_lead_dxuser,
+        space_guest_lead: space.guest_lead_dxuser,
+        source_space_id: space.id,
+      ))
 
-      space.update!(update_space_params)
+      if space_update_form.valid?
+        space.update!(update_space_naming_params)
+        api = DIContainer.resolve("api.admin")
 
-      render json: space, adapter: :json
+        space.leads_updates(space_update_form, api)
+
+        render json: space, adapter: :json
+      else
+        errors = [space_update_form.errors&.full_messages&.join("\n ")]
+
+        render json: { errors: { messages: errors } },
+               status: :unprocessable_entity, adapter: :json
+      end
     end
 
     # GET /api/spaces/:id/members
@@ -220,7 +238,7 @@ module Api
     def find_space
       @space = Space.undeleted.find(params[:id])
 
-      return if @space.accessible_by_user?(current_user)
+      return if @space.accessible_by_user?(current_user) || current_user.review_space_admin?
 
       raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 
@@ -272,8 +290,13 @@ module Api
       end
     end
 
-    def update_space_params
+    def update_space_naming_params
       params.require(:space).permit(:name, :description, :cts)
+    end
+
+    def update_space_params
+      params.require(:space).permit(:name, :description, :cts, :space_type, :current_user,
+                                    :host_lead_dxuser, :guest_lead_dxuser, :sponsor_lead_dxuser)
     end
 
     def create_space_params

@@ -61,8 +61,8 @@ const runAppSchema: JSONSchema7 = {
       type: 'object',
       additionalProperties: false,
       required: [],
-      // these inputs are for jupyter app only
       properties: {
+        // these inputs are for jupyter app only
         duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
         snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
         feature: {
@@ -72,6 +72,8 @@ const runAppSchema: JSONSchema7 = {
         },
         imagename: { type: 'string', maxLength: config.validation.maxStrLen },
         cmd: { type: 'string', maxLength: config.validation.maxStrLen },
+        // rshiny app
+        app_gz: { type: 'string', maxLength: config.validation.maxStrLen },
       },
     },
   },

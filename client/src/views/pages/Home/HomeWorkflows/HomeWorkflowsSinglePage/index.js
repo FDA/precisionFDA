@@ -118,7 +118,7 @@ const HomeWorkflowsSinglePage = (props) => {
       tab: <HomeWorkflowsSpec spec={meta.spec} />,
     },
     {
-      header: 'Executions',
+      header: `Executions (${Object.keys(meta.executions).length})`,
       tab: <HomeWorkflowExecutionsTable
         uid={uid}
         space={workflow.links.space && workflow.location}

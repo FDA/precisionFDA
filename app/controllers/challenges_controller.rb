@@ -7,6 +7,7 @@ class ChallengesController < ApplicationController
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
   before_action :check_scope_accessibility, only: %i(create update)
+  layout "react", only: %i(index show)
 
   def index; end
 

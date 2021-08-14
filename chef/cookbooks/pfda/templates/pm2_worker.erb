@@ -1,0 +1,13 @@
+{
+  "apps": [
+    {
+      name: "https_apps_worker",
+      script: "./packages/worker/dist/index.js",
+      instances: 1,
+      exec_mode: "fork",
+      watch: false,
+      log_file: "../log/https-worker.log",
+      time: true
+    }
+  ]
+}

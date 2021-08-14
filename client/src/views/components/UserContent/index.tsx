@@ -60,7 +60,7 @@ class UserContent {
         el.parentElement?.insertBefore(hiddenAnchor, el)
       }
 
-      return { 'tag': tag, 'content': stripHTML(content), 'anchorId': anchorId }
+      return { 'tag': tag.toLowerCase(), 'content': stripHTML(content), 'anchorId': anchorId }
     })
 
     this.anchors = anchors

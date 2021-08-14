@@ -10,6 +10,7 @@ import {
 import { showAlertAboveAllSuccess, showAlertAboveAll } from '../../../alertNotifications'
 import { spaceDataSelector } from '../../../../reducers/spaces/space/selectors'
 import { fetchMembers, hideMemberRoleChangeModal } from '../index'
+import { fetchSpace } from '../../fetchSpace'
 
 
 const updateRoleStart = () => createAction(SPACE_MEMBERS_UPDATE_ROLE_START)
@@ -40,6 +41,7 @@ export default (spaceId, updateRoleData) => (
 
         dispatch(updateRoleSuccess())
         dispatch(fetchMembers(spaceId))
+        dispatch(fetchSpace(spaceId))
         dispatch(showAlertAboveAllSuccess({ message: successMessage() }))
       } else if (response.status === httpStatusCodes.FORBIDDEN) {
         dispatch(hideMemberRoleChangeModal())

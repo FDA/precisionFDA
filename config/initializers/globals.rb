@@ -30,7 +30,7 @@ else
     # rubocop:todo Rails/UnknownEnv
     if Rails.env.development? || Rails.env.ui_test?
       # rubocop:enable Rails/UnknownEnv
-      "https://localhost:3000"
+      ENV["DEV_HOST"].present? ? "https://#{ENV['DEV_HOST']}" : "https://localhost:3000"
     elsif ENV["DEV_HOST"]
       "https://#{ENV['DEV_HOST']}"
     else

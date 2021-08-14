@@ -1,0 +1,38 @@
+{
+  "name": "pfda",
+  "description": "Installs/Configures pfda",
+  "long_description": "Installs and configures pFDA server",
+  "maintainer": "DNAnexus",
+  "maintainer_email": "amoroz-cf@dnanexus.com",
+  "license": "All Rights Reserved",
+  "platforms": {
+
+  },
+  "dependencies": {
+    "application": "~> 5.2.0",
+    "aws": "~> 8.4.0",
+    "nodejs": "~> 7.3.2"
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "0.1.0",
+  "source_url": "",
+  "issues_url": "",
+  "privacy": false,
+  "chef_versions": [
+    [
+      "~> 16.0"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ],
+  "eager_load_libraries": true
+}

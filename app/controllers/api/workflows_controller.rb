@@ -19,7 +19,6 @@ module Api
     # @return workflows [App] Array of workflows objects if they exist OR workflows: [].
     # rubocop:disable Metrics/MethodLength
     def index
-      page_meta = {}
       workflows = []
 
       if params[:space_id]
@@ -31,9 +30,8 @@ module Api
             page(page_from_params).per(PAGE_SIZE)
           workflows = Workflows::WorkflowFilter.call(workflows, params[:filters])
           workflows.each { |workflow| workflow.current_user = @context.user }
-
-          page_meta = { pagination: pagination_dict(workflows) }
         end
+        page_meta = { pagination: pagination_dict(workflows) }
 
         if show_count
           render plain: page_meta.dig(:pagination, :total_count) || 0
@@ -109,7 +107,6 @@ module Api
         eager_load(latest_revision_workflow: [user: :org]).
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         unremoved.includes(:taggings).
-        order(order_from_params).
         map do |series|
           series_wf = series.latest_accessible(@context)
           if series_wf.in_space? && Workflows::WorkflowFilter.

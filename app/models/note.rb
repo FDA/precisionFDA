@@ -16,6 +16,7 @@ class Note < ApplicationRecord
   include Auditor
   include Permissions
   include CommonPermissions
+  include ObjectLocation
   include TagsContainer
 
   belongs_to :user, required: true

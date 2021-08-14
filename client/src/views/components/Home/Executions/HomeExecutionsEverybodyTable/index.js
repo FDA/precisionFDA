@@ -213,7 +213,7 @@ const WorkflowRow = ({ execution, expandExecution, toggleExecutionCheckbox, cont
           <span>{execution.title}</span>
         </Link>
       </td>
-      <td className='home-page-layout__data-table_featured'>
+      <td align='center' className='home-page-layout__data-table_featured'>
         <span className={classNames({ 'home-page-layout__data-table_action': isAdmin })} >
           <Icon icon={heartClasses} onClick={() => onHeartClick()} />
         </span>
@@ -275,7 +275,7 @@ const Row = ({ toggleExecutionCheckbox, execution, isWorkflowExecution, context,
         </Link>
       </td>
       {!isWorkflowExecution ?
-        <td className='home-page-layout__data-table_featured'>
+        <td align='center' className='home-page-layout__data-table_featured'>
           <span className={classNames({ 'home-page-layout__data-table_action': isAdmin })} >
             <Icon icon={heartClasses} onClick={() => onHeartClick()} />
           </span>

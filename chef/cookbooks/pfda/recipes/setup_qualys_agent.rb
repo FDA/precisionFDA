@@ -1,0 +1,57 @@
+# This is a functional eqivalent of the following file from the opscode rep:
+#   cookbooks/dnanexus/recipes/qualys_agent.rb
+#
+# Prerequisites
+#
+# 1.  Copy qualys-keys.csv to s3://dnanexus-assets/qualys/keys/
+# 2.  Copy qualys-cloud-agent.x86_64.deb to s3://dnanexus-assets/qualys/1.6.1/
+
+aws_ssm_parameter_store "get qualys params" do
+  path "#{node[:ssm_base_path]}/qualys/"
+  recursive true
+  with_decryption true
+  return_key "qualys"
+  action :get_parameters_by_path
+  region node[:aws_region]
+end
+
+bash "install qualys-cloud-agent" do
+  user "root"
+  code lazy {
+    <<~EOH
+      export AWS_ACCESS_KEY_ID=#{node.run_state["qualys"]["aws_access_key_id"]}
+      export AWS_SECRET_ACCESS_KEY=#{node.run_state["qualys"]["aws_secret_access_key"]}
+      export AWS_DEFAULT_REGION="us-east-1"
+
+      BUCKET="s3://dnanexus-assets"
+
+      aws s3 cp ${BUCKET}/qualys/keys/qualys-keys.csv /tmp
+      aws s3 cp ${BUCKET}/qualys/1.6.1/qualys-cloud-agent.x86_64.deb /tmp
+
+      dpkg --install /tmp/qualys-cloud-agent.x86_64.deb
+    EOH
+  }
+  only_if { node.run_state["qualys"] }
+end
+
+bash "activate qualys-cloud-agent" do
+  user "root"
+  code lazy {
+    <<~EOH
+      environment=#{node.run_state["qualys"]["environment"]}
+
+      customerID="b3603eda-07a6-a94c-e040-10ac13043746"
+      activationID=`awk -F,  '/^'$environment',/ {print $2}' /tmp/qualys-keys.csv`
+
+      if [ -z "$activationID" ] ; then
+          echo "No activation key for environment $environment"
+          exit 1
+      fi
+
+      /usr/local/qualys/cloud-agent/bin/qualys-cloud-agent.sh \
+        CustomerId=$customerID \
+        ActivationId=$activationID
+    EOH
+  }
+  only_if { node.run_state["qualys"] }
+end

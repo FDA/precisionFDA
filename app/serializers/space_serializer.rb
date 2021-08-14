@@ -23,6 +23,7 @@ class SpaceSerializer < ApplicationSerializer
   attribute :tag_list, key: :tags
 
   attribute :can_duplicate, if: -> { object.review? }
+  attribute :current_user_membership, key: :current_user_membership
 
   has_one :host_lead_member,
           key: :host_lead,
@@ -45,7 +46,7 @@ class SpaceSerializer < ApplicationSerializer
     {}.tap do |links|
       links[:accept] = accept_api_space_path(object) if can_accept?
       links[:add_data] = add_data_api_space_path(object) if can_edit?
-      links[:show] = api_space_path(object) if can_access?
+      links[:show] = api_space_path(object) if can_access? || current_user.review_space_admin?
       links[:delete] = delete_api_space_path(object) if can_delete?
       links[:lock] = lock_api_space_path(object) if can_lock?
       links[:unlock] = unlock_api_space_path(object) if can_unlock?
@@ -96,6 +97,12 @@ class SpaceSerializer < ApplicationSerializer
   # @return [Space] Private review space.
   def confidential_space
     space_membership && object.confidential_space(space_membership)
+  end
+
+  # Checks if user is a space member - used for RSA roles selection.
+  # @return [Boolean] Returns true if user is a space member, false otherwise.
+  def current_user_membership
+    space_membership.present?
   end
 
   def can_duplicate
