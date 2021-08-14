@@ -29,6 +29,14 @@ module Api
       "username" => %w(users.first_name users.last_name),
     }.freeze
 
+    SORT_FIELDS = {
+      "created_at" => ->(left, right) { left.created_at <=> right.created_at },
+      "name" => ->(left, right) { left.name <=> right.name },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
+      "size" => ->(left, right) { left.file_size <=> right.file_size },
+      "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
+    }.freeze
+
     # GET /api/files or GET /api/files/?space_id=params[:space_id]
     # A common UserFies fetch method for space and home pages, depends upon @params[:space_id].
     # @param space_id [Integer] Space id for files fetch. When it is nil, then fetching for
@@ -171,7 +179,17 @@ module Api
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      render_files_list(files: files, folders: folders)
+      if show_count
+        render plain: files.size
+      else
+        nodes = Node.where(id: files + folders).eager_load(user: :org).to_a
+
+        nodes = sort_array_by_fields(nodes, "created_at")
+        page_meta = pagination_meta(nodes.count)
+        nodes = paginate_array(nodes)
+
+        render json: nodes, root: "files", adapter: :json, meta: page_meta
+      end
     end
 
     # GET /api/files/:id

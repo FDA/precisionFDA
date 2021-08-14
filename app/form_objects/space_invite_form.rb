@@ -18,19 +18,26 @@ class SpaceInviteForm
     # rubocop:todo Style/SymbolProc
     return if invalid?
 
+    # Do not allow external users for now. See PFDA-2594
+    unless non_existing_emails.empty?
+      raise "Cannot invite users #{non_existing_emails.join(', ')} to this space. " \
+        "Please ensure that they are registered with precisionFDA before inviting them."
+    end
+
     existing_users.find_each do |user|
       SpaceService::Invite.call(api, space, membership, user, invitees_role)
     end
 
     existing_emails = existing_users.map { |user| user.email }
 
-    # invite user from the outside of pFDA
-    non_existing_emails.each do |email|
-      SpaceService::InviteByEmail.call(space, email, membership, invitees_role)
-    end
+    # Disabling invitation of external user to a space until PFDA-2598 is fixed
+    # non_existing_emails.each do |email|
+    #   SpaceService::InviteByEmail.call(space, email, membership, invitees_role)
+    # end
     # rubocop:enable Style/SymbolProc
 
-    non_existing_emails + existing_emails
+    # non_existing_emails + existing_emails
+    existing_emails
   end
 
   # @param [String] value Comma-separated list of invitees (emails or dxusers)

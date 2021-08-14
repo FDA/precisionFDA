@@ -48,9 +48,7 @@ class ChallengesListItem extends Component<IChallengeListItemProps> {
             <div className='challenge-date-remaining'><ChallengeTimeRemaining challenge={challenge} /></div>
           </div>
           <p>{challenge.description}</p>
-          {userCanJoin && (
-            <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className="btn btn-default">Join Challenge</GuestRestrictedLink>
-          )}
+          
           <Button onClick={() => handleItemDetails(challenge.id)}>View Details &rarr;</Button>
           {userCanEdit && (
           <div className="btn-group pull-right">
@@ -94,9 +92,7 @@ class ChallengesListItemLanding extends ChallengesListItem {
             <div className='challenge-date-remaining'><ChallengeTimeRemaining challenge={challenge} /></div>
           </div>
           <p>{challenge.description}</p>
-          {userCanJoin && (
-            <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className="btn btn-default">Join Challenge</GuestRestrictedLink>
-          )}
+
           <Button onClick={() => handleItemDetails(challenge.id)}>View Details &rarr;</Button>
           {userCanEdit && (
           <div className="btn-group pull-right">

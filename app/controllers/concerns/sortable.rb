@@ -18,6 +18,7 @@ module Sortable
     "title" => ->(left, right) { left.title <=> right.title },
     "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
     "revision" => ->(left, right) { left.revision <=> right.revision },
+    "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
   }.freeze
 
   def order_direction(candidate)
@@ -38,8 +39,8 @@ module Sortable
   # @param array input arrays of objects for sort.
   # @param sort_fields list of lambdas.
   # @return sorted array.
-  def sort_array_by_fields(array)
-    sort_by = self.class::SORT_FIELDS[params[:order_by] || "launched_on"]
+  def sort_array_by_fields(array, default_order = "launched_on")
+    sort_by = self.class::SORT_FIELDS[params[:order_by] || default_order]
     array = array.sort(&sort_by)
 
     params[:order_dir] != Sortable::DIRECTION_ASC ? array.reverse : array
