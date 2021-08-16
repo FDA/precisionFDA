@@ -69,6 +69,7 @@ application app_dir do
   end
 
   execute "git checkout ." do
+    user node[:deploy_user]
     cwd app_dir
   end
 
