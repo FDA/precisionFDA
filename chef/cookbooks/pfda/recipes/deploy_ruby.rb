@@ -112,9 +112,11 @@ application app_dir do
   execute "Bundle frontend" do
     only_if { File.directory?(frontend_dir) }
 
+    # See pull request #1556 for explanation on the need to rebuild node-sass
     command %{
       export PATH=#{node[:nodejs][:prefix]}/bin:$PATH && \
       yarn --frozen-lockfile && \
+      npm rebuild node-sass && \
       yarn run build:production
     }
 
