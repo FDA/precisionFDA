@@ -5,4 +5,4 @@ run_list "recipe[pfda::setup_nodejs]",
          "recipe[pfda::configure_nginx]",
          "recipe[pfda::configure_https_app]",
          "recipe[pfda::deploy]",
-         "recipe[pfda::start_gsrs]"
+         "recipe[pfda::deploy_gsrs]"
