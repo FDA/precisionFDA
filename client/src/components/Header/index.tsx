@@ -27,6 +27,7 @@ import { BullsEyeIcon } from '../icons/BullsEyeIcon'
 import { FortIcon } from '../icons/FortIcon'
 import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
 import { CommentingIcon } from '../icons/CommentingIcon'
+import { GSRSIcon } from '../icons/GSRSIcon'
 import { CaretIcon } from '../icons/CaretIcon'
 import { Link, matchPath, useLocation } from 'react-router-dom'
 import { SUPPORT_EMAIL } from '../../constants'
@@ -37,6 +38,7 @@ import {
   isInitializedSelector,
 } from '../../reducers/context/selectors'
 import { logout } from '../../features/auth/api'
+
 
 const getUsername = (user: any) => {
   if (user) {
@@ -175,18 +177,26 @@ export const Header: React.FC = () => {
               </a>
             </>
           )}
+          <HeaderSpacer />
           {userCanSeeSpaces && (
-            <>
-              <HeaderSpacer />
-              <Link to="/spaces" title="Spaces">
-                <MenuItem active={isActiveLink('/spaces')}>
-                  <IconWrap>
-                    <ObjectGroupIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Spaces</HeaderItemText>
-                </MenuItem>
-              </Link>
-            </>
+            <Link to="/spaces" title="Spaces">
+              <MenuItem active={isActiveLink('/spaces')}>
+                <IconWrap>
+                  <ObjectGroupIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>Spaces</HeaderItemText>
+              </MenuItem>
+            </Link>
+          )}
+          {!isSpacesPath && (
+            <a href="/ginas/app/beta" title="GSRS">
+              <MenuItem>
+                <IconWrap>
+                  <GSRSIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>GSRS</HeaderItemText>
+              </MenuItem>
+            </a>
           )}
         </HeaderLeft>
         <HeaderRight>

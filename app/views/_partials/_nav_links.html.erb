@@ -43,8 +43,8 @@
       <div class="nav-pill-title">Comparisons</div>
     <% end %>
   </li>
+  <li class="nav-spacer"></li>
   <% if UserPolicy.can_see_spaces?(@context) %>
-    <li class="nav-spacer"></li>
     <li class="<%= 'active' if controller_name == 'spaces' %>" role="presentation">
       <%= link_to spaces_path, data: { turbolinks: false }, "aria-label": 'Application spaces link' do %>
         <div class="nav-icon fa fa-2x fa-object-group"></div>
@@ -52,4 +52,12 @@
       <% end %>
     </li>
   <% end %>
+  <li role="presentation">
+    <%= link_to "/ginas/app/beta", data: { turbolinks: false }, "aria-label": 'GSRS link' do %>
+      <div class="nav-icon" style="margin-top: -4px; margin-bottom: 4px;">
+        <%= image_tag("navbar/gsrs-logo-round-bw.svg", width:"16", height:"16") %>
+      </div>
+      <div class="nav-pill-title">GSRS</div>
+    <% end %>
+  </li>
 </ul>
