@@ -1,3 +1,5 @@
+include_recipe('::configure_ssh')
+
 aws_ssm_parameter_store "get app params" do
   path "#{node[:ssm_base_path]}/app/"
   recursive true
@@ -10,8 +12,6 @@ end
 app_dir = node["rails_app_dir"]
 https_apps_dir = File.join(app_dir, "https-apps-api")
 nodejs_bin = node["nodejs"]["bin_path"]
-key_path = "/home/#{node[:deploy_user]}/.ssh/id_rsa"
-ssh_wrapper_path = "/tmp/wrap-ssh4git.sh"
 
 application app_dir do
   owner node[:deploy_user]
@@ -22,28 +22,20 @@ application app_dir do
       node.run_state["app"]["environment"].each do |name, val|
         ENV[name] = val
       end
+
+      ENV["HOME"] = "/home/#{node[:deploy_user]}"
+      ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
     end
   end
 
   environment lazy { ENV.to_hash }
 
-  file key_path do
-    content lazy { node.run_state["app"]["app_source"]["ssh_key"] }
-    mode 0600
-  end
-
-  template ssh_wrapper_path do
-    source "wrap-ssh4git.sh.erb"
-    variables key_path: key_path
-    owner node[:deploy_user]
-    mode 0700
-  end
-
   # probably checkout the correct branch
   git app_dir do
     repository lazy { node.run_state["app"]["app_source"]["url"] }
     revision lazy { node.run_state["app"]["app_source"]["revision"] }
-    ssh_wrapper ssh_wrapper_path
+    ssh_wrapper node[:ssh_wrapper_path]
+    depth 1
     user node[:deploy_user]
   end
 
@@ -63,29 +55,29 @@ application app_dir do
 
   execute "make install" do
     cwd https_apps_dir
-    command "#{nodejs_bin}yarn"
+    command "yarn"
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   execute "make build" do
     cwd https_apps_dir
-    command "#{nodejs_bin}yarn workspaces run build"
+    command "yarn workspaces run build"
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   execute "run the api" do
     cwd https_apps_dir
     user node[:deploy_user]
-    command "#{nodejs_bin}pm2 startOrReload ./pm2-api.json"
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    command "pm2 startOrReload ./pm2-api.json"
+    environment lazy { ENV.to_hash }
   end
 
   execute "run the worker" do
     cwd https_apps_dir
     user node[:deploy_user]
-    command "#{nodejs_bin}pm2 startOrReload ./pm2-worker.json"
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    command "pm2 startOrReload ./pm2-worker.json"
+    environment lazy { ENV.to_hash }
   end
 end
