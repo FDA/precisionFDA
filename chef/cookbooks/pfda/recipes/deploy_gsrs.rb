@@ -7,17 +7,21 @@ pfda_src_conf = File.join(gsrs_src_path, "modules/ginas/conf/ginas-pfda.conf")
 pfda_dist_conf = File.join(gsrs_dist_path, "conf/ginas-pfda.conf")
 gsrs_dist_zip = File.join(gsrs_src_path, "modules/ginas/target/universal/ginas-*.zip")
 
-aws_ssm_parameter_store "get qualys params" do
-  path "#{node[:ssm_base_path]}/gsrs/"
+aws_ssm_parameter_store "get params" do
+  path node[:ssm_base_path]
   recursive true
   with_decryption true
-  return_key "gsrs"
+  return_key "params"
   action :get_parameters_by_path
   region node[:aws_region]
 end
 
 ruby_block "set envs" do
   block do
+    node.run_state.dig("params", "app", "environment").each do |name, val|
+      ENV[name] = val
+    end
+
     ENV["HOME"] = "/home/#{node[:deploy_user]}"
     ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
   end
@@ -25,7 +29,7 @@ end
 
 git gsrs_src_path do
   repository node[:gsrs][:repo_url]
-  revision lazy { node.run_state.dig("gsrs", "revision") || node[:gsrs][:revision] }
+  revision lazy { node.run_state.dig("params", "gsrs", "revision") || node[:gsrs][:revision] }
   ssh_wrapper node[:ssh_wrapper_path]
   depth 1
   user node[:deploy_user]
