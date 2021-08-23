@@ -10,7 +10,7 @@ default[:gsrs][:port] = 9000
 default[:gsrs][:app_dist_dir] = "/home/#{deploy_user}/gsrs"
 default[:gsrs][:app_src_dir] = "/home/#{deploy_user}/gsrs-src"
 default[:gsrs][:repo_url] = "https://github.com/ncats/gsrs-play.git"
-default[:gsrs][:revision] = "GSRS_DEV"
+default[:gsrs][:revision] = "precisionFDA_PROD"
 
 default[:deploy_user] = deploy_user
 default[:deploy_user_group] = deploy_user
