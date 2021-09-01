@@ -8,7 +8,7 @@ pfda_dist_conf = File.join(gsrs_dist_path, "conf/ginas-pfda.conf")
 gsrs_dist_zip = File.join(gsrs_src_path, "modules/ginas/target/universal/ginas-*.zip")
 
 aws_ssm_parameter_store "get params" do
-  path node[:ssm_base_path]
+  path "#{node[:ssm_base_path]}/"
   recursive true
   with_decryption true
   return_key "params"
