@@ -42,19 +42,21 @@ template pfda_src_conf do
 end
 
 execute "Stop G-SRS" do
-  user node[:deploy_user]
   command %{
-    PID=`ps -eaf | grep "java -Duser.dir=#{gsrs_dist_path}" | grep -v grep | awk '{print $2}'`
-    if [[ "" !=  "$PID" ]]; then
-      echo "killing $PID"
-      kill $PID
-    fi
+    kill `ps -eaf | \
+          grep 'java -Duser.dir=#{gsrs_dist_path}' | \
+          grep -v grep | \
+          awk '{print $2}'` \
+    > /dev/null 2>&1 \
+    || true
   }
 end
 
 execute "Build G-SRS self-contained distribution" do
   cwd gsrs_src_path
   user node[:deploy_user]
+  group node[:deploy_user]
+
   command %{
     rm -f #{gsrs_dist_zip} && \
     ./activator -Dconfig.file=#{pfda_src_conf} ginas/dist && \
@@ -70,6 +72,8 @@ end
 execute "Run G-SRS" do
   cwd gsrs_dist_path
   user node[:deploy_user]
+  group node[:deploy_user]
+
   command %{
     rm -f RUNNING_PID && \
     nohup bin/ginas \

@@ -32,5 +32,6 @@ execute "Setup G-SRS" do
   cwd gsrs_src_path
   command "./setup.sh"
   user node[:deploy_user]
+  group node[:deploy_user]
   environment lazy { ENV.to_hash }
 end
