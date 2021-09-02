@@ -52,15 +52,21 @@ execute "Stop G-SRS" do
   }
 end
 
+# this should be executed by root
+execute "Remove old GSRS dist folder and package" do
+  command %{
+    rm -f #{gsrs_dist_zip} && \
+    rm -rf #{gsrs_dist_path}
+  }
+end
+
 execute "Build G-SRS self-contained distribution" do
   cwd gsrs_src_path
   user node[:deploy_user]
   group node[:deploy_user]
 
   command %{
-    rm -f #{gsrs_dist_zip} && \
     ./activator -Dconfig.file=#{pfda_src_conf} ginas/dist && \
-    rm -rf #{gsrs_dist_path} && \
     cd /home/#{node[:deploy_user]} && \
     unzip #{gsrs_dist_zip} && \
     mv ginas-* #{gsrs_dist_path} && \
