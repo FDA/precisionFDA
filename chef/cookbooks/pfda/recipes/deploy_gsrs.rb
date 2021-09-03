@@ -55,6 +55,8 @@ end
 # this should be executed by root
 execute "Remove old GSRS dist folder and package" do
   command %{
+    sudo bash -c "echo fs.file-max = 999999 >> /etc/sysctl.conf" && \
+    sysctl -p && \
     rm -f #{gsrs_dist_zip} && \
     rm -rf #{gsrs_dist_path}
   }
@@ -70,7 +72,8 @@ execute "Build G-SRS self-contained distribution" do
     cd /home/#{node[:deploy_user]} && \
     unzip #{gsrs_dist_zip} && \
     mv ginas-* #{gsrs_dist_path} && \
-    chmod 755 #{gsrs_dist_path}/bin/ginas
+    chmod 755 #{gsrs_dist_path}/bin/ginas && \
+    cp -R #{gsrs_dist_path}/conf/beta/ #{pfda_src_conf}/conf/beta/
   }
   environment lazy { ENV.to_hash }
 end
@@ -84,7 +87,7 @@ execute "Run G-SRS" do
     rm -f RUNNING_PID && \
     nohup bin/ginas \
       -J-Xmx4G \
-      -Dconfig.file=#{pfda_dist_conf} \
+      -Dconfig.file=#{pfda_src_conf} \
       -Dhttp.port=#{gsrs_port} \
       -Djava.awt.headless=true > nohup.out 2>&1 &
   }
