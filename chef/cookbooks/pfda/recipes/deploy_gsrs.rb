@@ -5,7 +5,7 @@ gsrs_src_path = node[:gsrs][:app_src_dir]
 gsrs_dist_path = node[:gsrs][:app_dist_dir]
 pfda_src_conf = File.join(gsrs_src_path, "modules/ginas/conf/ginas-pfda.conf")
 pfda_dist_conf = File.join(gsrs_dist_path, "conf/ginas-pfda.conf")
-gsrs_dist_zip = File.join(gsrs_src_path, "modules/ginas/target/universal/ginas-*.zip")
+# gsrs_dist_zip = File.join(gsrs_src_path, "modules/ginas/target/universal/ginas-*.zip")
 
 aws_ssm_parameter_store "get params" do
   path "#{node[:ssm_base_path]}/"
@@ -27,6 +27,20 @@ ruby_block "set envs" do
   end
 end
 
+bash "install git lfs" do
+  user "root"
+  code lazy {
+    <<~EOH
+      apt-get install git-lfs
+    EOH
+  }
+end
+
+execute "setup git lfs" do
+  command 'git lfs install'
+  user node[:deploy_user]
+end
+
 git gsrs_src_path do
   repository node[:gsrs][:repo_url]
   revision lazy { node.run_state.dig("params", "gsrs", "revision") || node[:gsrs][:revision] }
@@ -34,11 +48,6 @@ git gsrs_src_path do
   depth 1
   user node[:deploy_user]
   group node[:deploy_user]
-end
-
-template pfda_src_conf do
-  source "ginas-pfda.conf.erb"
-  variables lazy { ENV.to_hash }
 end
 
 execute "Stop G-SRS" do
@@ -57,7 +66,6 @@ execute "Remove old GSRS dist folder and package" do
   command %{
     sudo bash -c "echo fs.file-max = 999999 >> /etc/sysctl.conf" && \
     sysctl -p && \
-    rm -f #{gsrs_dist_zip} && \
     rm -rf #{gsrs_dist_path}
   }
 end
@@ -68,14 +76,17 @@ execute "Build G-SRS self-contained distribution" do
   group node[:deploy_user]
 
   command %{
-    ./activator -Dconfig.file=#{pfda_src_conf} ginas/dist && \
     cd /home/#{node[:deploy_user]} && \
-    unzip #{gsrs_dist_zip} && \
+    unzip #{gsrs_src_path}/ginas-*.zip && \
     mv ginas-* #{gsrs_dist_path} && \
-    chmod 755 #{gsrs_dist_path}/bin/ginas && \
-    cp -R #{gsrs_dist_path}/conf/beta/ #{pfda_src_conf}/conf/beta/
+    chmod 755 #{gsrs_dist_path}/bin/ginas
   }
   environment lazy { ENV.to_hash }
+end
+
+template pfda_dist_conf do
+  source "ginas-pfda.conf.erb"
+  variables lazy { ENV.to_hash }
 end
 
 execute "Run G-SRS" do
@@ -87,7 +98,7 @@ execute "Run G-SRS" do
     rm -f RUNNING_PID && \
     nohup bin/ginas \
       -J-Xmx4G \
-      -Dconfig.file=#{pfda_src_conf} \
+      -Dconfig.file=#{pfda_dist_conf} \
       -Dhttp.port=#{gsrs_port} \
       -Djava.awt.headless=true > nohup.out 2>&1 &
   }

@@ -9,7 +9,7 @@ default[:app][:shortname] = "precision_fda"
 default[:gsrs][:port] = 9000
 default[:gsrs][:app_dist_dir] = "/home/#{deploy_user}/gsrs"
 default[:gsrs][:app_src_dir] = "/home/#{deploy_user}/gsrs-src"
-default[:gsrs][:repo_url] = "https://github.com/ncats/gsrs-play.git"
+default[:gsrs][:repo_url] = "git@github.com:dnanexus/gsrs-play-dist.git"
 default[:gsrs][:revision] = "precisionFDA_PROD"
 
 default[:deploy_user] = deploy_user

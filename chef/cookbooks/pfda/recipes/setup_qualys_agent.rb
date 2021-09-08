@@ -30,7 +30,7 @@ bash "install qualys-cloud-agent" do
 
       while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do
         echo "apt already running, waiting ..."
-        sleep 30
+        sleep 45
       done
       apt-get install /tmp/qualys-cloud-agent.x86_64.deb
     EOH
