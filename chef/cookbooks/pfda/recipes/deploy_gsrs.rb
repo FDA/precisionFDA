@@ -27,20 +27,6 @@ ruby_block "set envs" do
   end
 end
 
-bash "install git lfs" do
-  user "root"
-  code lazy {
-    <<~EOH
-      apt-get install git-lfs
-    EOH
-  }
-end
-
-execute "setup git lfs" do
-  command 'git lfs install'
-  user node[:deploy_user]
-end
-
 git gsrs_src_path do
   repository node[:gsrs][:repo_url]
   revision lazy { node.run_state.dig("params", "gsrs", "revision") || node[:gsrs][:revision] }
@@ -77,8 +63,7 @@ execute "Build G-SRS self-contained distribution" do
 
   command %{
     cd /home/#{node[:deploy_user]} && \
-    unzip #{gsrs_src_path}/ginas-*.zip && \
-    mv ginas-* #{gsrs_dist_path} && \
+    cp -R #{gsrs_src_path} #{gsrs_dist_path} && \
     chmod 755 #{gsrs_dist_path}/bin/ginas
   }
   environment lazy { ENV.to_hash }
