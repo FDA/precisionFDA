@@ -1,13 +1,22 @@
+deploy_user = "deploy"
+
 default[:ssm_base_path] = "/pfda/#{node.environment}"
 
 default[:aws_region] = "us-east-1"
 default[:app][:enable_ssl] = true
 default[:app][:shortname] = "precision_fda"
 
-default[:gsrs_app_dir] = "/home/deploy/gsrs"
+default[:gsrs][:port] = 9000
+default[:gsrs][:app_dist_dir] = "/home/#{deploy_user}/gsrs"
+default[:gsrs][:app_src_dir] = "/home/#{deploy_user}/gsrs-src"
+default[:gsrs][:repo_url] = "git@github.com:dnanexus/gsrs-play-dist.git"
+default[:gsrs][:revision] = "precisionFDA_PROD"
 
-default[:deploy_user] = "deploy"
-default[:deploy_user_group] = "deploy"
+default[:deploy_user] = deploy_user
+default[:deploy_user_group] = deploy_user
+
+default[:ssh_key_path] = "/home/#{deploy_user}/.ssh/id_rsa"
+default[:ssh_wrapper_path] = "/tmp/wrap-ssh4git.sh"
 
 default[:rails_app_dir] = "/srv/www/precision_fda/current"
 default[:mysql_rds_sslca_path] = "/etc/ssl/certs/rds-combined-ca-bundle.pem"

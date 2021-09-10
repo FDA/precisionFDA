@@ -3,6 +3,8 @@ module Ginas
   class SubstanceFileCreator
     class SubstanceFileCreatorError < StandardError; end
 
+    GSRS_TAG = "GSRS".freeze
+
     def initialize(context)
       @context = context
     end
@@ -24,7 +26,7 @@ module Ginas
         name: substance_file_name(request, substance_name, substance_uuid),
         content: data.to_json,
       )
-      file.tag_list = substance_type
+      file.tag_list.add(GSRS_TAG, substance_type)
       file.save
 
       move_file_to_folder(file, "#{substance_name}_#{substance_uuid}")
@@ -51,6 +53,9 @@ module Ginas
           logger.error "Can't create a folder for the substance file"
           return
         end
+
+        target_folder.tag_list.add(GSRS_TAG)
+        target_folder.save
 
         result = folder_service.move([file], target_folder)
 

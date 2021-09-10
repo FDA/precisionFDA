@@ -1,3 +1,5 @@
+include_recipe('::configure_ssh')
+
 aws_ssm_parameter_store "get app params" do
   path "#{node[:ssm_base_path]}/app/"
   recursive true
@@ -9,8 +11,6 @@ end
 
 app_dir = node[:rails_app_dir]
 frontend_dir = File.join(app_dir, "client")
-key_path = "/home/#{node[:deploy_user]}/.ssh/id_rsa"
-ssh_wrapper_path = "/tmp/wrap-ssh4git.sh"
 env_file = File.join(app_dir, ".env")
 
 application app_dir do
@@ -35,6 +35,9 @@ application app_dir do
 
         node.run_state["app"]["database_config"] = DatabaseUrlParser.call(ENV["DATABASE_URL"])
       end
+
+      ENV["HOME"] = "/home/#{node[:deploy_user]}"
+      ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
     end
   end
 
@@ -50,33 +53,19 @@ application app_dir do
     }
   end
 
-  execute 'export PATH="$(npm bin -g):$PATH"' do
-    user node[:deploy_user]
-  end
-
   environment lazy { ENV.to_hash }
-
-  file key_path do
-    content lazy { node.run_state["app"]["app_source"]["ssh_key"] }
-    mode 0600
-  end
-
-  template ssh_wrapper_path do
-    source "wrap-ssh4git.sh.erb"
-    variables key_path: key_path
-    owner node[:deploy_user]
-    mode 0700
-  end
 
   execute "git checkout ." do
     user node[:deploy_user]
     cwd app_dir
+    user node[:deploy_user]
+    group node[:deploy_user]
   end
 
   git app_dir do
     repository lazy { node.run_state["app"]["app_source"]["url"] }
     revision lazy { node.run_state["app"]["app_source"]["revision"] }
-    ssh_wrapper ssh_wrapper_path
+    ssh_wrapper node[:ssh_wrapper_path]
     depth 1
     user node[:deploy_user]
   end
@@ -90,7 +79,7 @@ application app_dir do
 
     cwd app_dir
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   template ::File.join(app_dir, "config", "database.yml") do
@@ -107,7 +96,7 @@ application app_dir do
   execute "/usr/local/bin/bundle exec rake db:migrate" do
     cwd  app_dir
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   execute "Bundle frontend" do
@@ -123,19 +112,19 @@ application app_dir do
 
     cwd frontend_dir
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   execute "/usr/local/bin/bundle exec rake assets:precompile" do
     cwd  app_dir
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   execute "/usr/local/bin/bundle exec whenever --user #{node[:deploy_user]} --update-crontab" do
     cwd  app_dir
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 
   poise_service "puma" do
@@ -146,17 +135,17 @@ application app_dir do
         "-e #{ENV['RAILS_ENV']}"
     }
     provider :systemd
-    environment lazy {
-      ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}", "PWD" => app_dir })
-    }
+    environment lazy { ENV.to_hash.merge({ "PWD" => app_dir }) }
     user node[:deploy_user]
   end
 
   poise_service "sidekiq" do
     directory app_dir
-    command lazy { "/usr/local/bin/bundle exec sidekiq -e #{ENV['RAILS_ENV']} -C config/sidekiq.yml" }
+    command lazy {
+      "/usr/local/bin/bundle exec sidekiq -e #{ENV['RAILS_ENV']} -C config/sidekiq.yml"
+    }
     provider :systemd
     user node[:deploy_user]
-    environment lazy { ENV.to_hash.merge({ "HOME" => "/home/#{node[:deploy_user]}" }) }
+    environment lazy { ENV.to_hash }
   end
 end
