@@ -28,7 +28,11 @@ bash "install qualys-cloud-agent" do
       aws s3 cp ${BUCKET}/qualys/keys/qualys-keys.csv /tmp
       aws s3 cp ${BUCKET}/qualys/1.6.1/qualys-cloud-agent.x86_64.deb /tmp
 
-      dpkg --install /tmp/qualys-cloud-agent.x86_64.deb
+      while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do
+        echo "apt already running, waiting ..."
+        sleep 45
+      done
+      apt-get install /tmp/qualys-cloud-agent.x86_64.deb
     EOH
   }
   only_if { node.run_state["qualys"] }

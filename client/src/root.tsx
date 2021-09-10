@@ -23,7 +23,14 @@ import { NotificationsPage } from './views/pages/Account/Notifications'
 import GlobalStyle from './styles/global'
 
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // We disable refetching on focus as it can extend the session without user input
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 const root = ({ store }: any) => {
   return (

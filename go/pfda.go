@@ -1,5 +1,5 @@
 // PrecisionFDA Uploader
-// Version 2.0
+// Version 2.0.1
 //
 // Written in Go
 //
@@ -13,6 +13,7 @@ import (
   "encoding/json"
   "flag"
   "fmt"
+  "github.com/gosuri/uilive"
   "github.com/hashicorp/go-cleanhttp"     // required by go-retryablehttp
   "github.com/hashicorp/go-retryablehttp" // use http libraries from hashicorp for implement retry logic
   "io"
@@ -27,6 +28,7 @@ import (
   "strconv"
   "strings"
   "sync"
+  "sync/atomic"
   "time"
 )
 
@@ -35,7 +37,7 @@ import _ "crypto/tls/fipsonly"
 //
 // CONSTANTS
 //
-const userAgent = "Asset and File Uploader/2.0 (precisionFDA) Go-http-client/1.1"
+const userAgent = "Asset and File Uploader/2.0.1 (precisionFDA) Go-http-client/1.1"
 const minRetryTime = 1          // seconds
 const maxRetryTime = 30         // seconds
 const maxRetryCount = 5
@@ -50,7 +52,7 @@ const https = "https://"
 const defaultSkipVerify = "false"
 const usageString = `
 ***********************
-PFDA UPLOADER TOOL v2.0
+PFDA UPLOADER TOOL v2.0.1
 ***********************
 To upload a file:
 
@@ -83,11 +85,11 @@ var baseURL = https + defaultURL
 
 var client = &retryablehttp.Client{
   HTTPClient:   cleanhttp.DefaultClient(),
-  Logger:       log.New(ioutil.Discard, "", 0),   // Throw away retryablehttp internal logging
   RetryWaitMin: minRetryTime * time.Second,
   RetryWaitMax: maxRetryTime * time.Second,
   RetryMax:     maxRetryCount,
   CheckRetry:   retryablehttp.DefaultRetryPolicy,
+  Backoff:      retryablehttp.DefaultBackoff,
 }
 
 // these varaibles are populated by -ldflags -X command line options
@@ -371,7 +373,7 @@ func uploadAsset(rootFolderPath string, name string, readmeFilePath string) {
   check(err)
 
   makeRequestFail("POST", closeURL, jsonData)
-  fmt.Println(">> Done! Access your asset at " + baseURL + "/assets/" + fileID)
+  fmt.Println(">> Done! Access your asset at " + baseURL + "/home/assets/" + fileID)
 }
 
 func uploadFile(path string) {
@@ -387,7 +389,7 @@ func uploadFile(path string) {
   fileID := createFileID(createURL, jsonData)
   chunkPool := make(chan uploadChunk, globalNumRoutines)
 
-  fmt.Print(">> Uploading file |")
+  fmt.Printf(">> Uploading file %s\n", path)
   f, err := os.Open(path)
   check(err)
   defer f.Close()
@@ -409,7 +411,7 @@ func uploadFile(path string) {
   check(err)
 
   makeRequestFail("POST", closeURL, jsonData)
-  fmt.Println(">> Done! Access your file at " + baseURL + "/files/" + fileID)
+  fmt.Println(">> Done! Access your file at " + baseURL + "/home/files/" + fileID)
 }
 
 //
@@ -451,13 +453,23 @@ func createFileID(url string, data []byte) (fileID string) {
 func initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size int64) (wg *sync.WaitGroup) {
   numRoutines := min(globalNumRoutines, int(math.Ceil(float64(size)/float64(globalChunkSize))))
 
+  var totalSent uint64 = 0
+  writer := uilive.New()
+  writer.Start()
+  defer writer.Stop()
+  
   var g sync.WaitGroup
   for i := 0; i < numRoutines; i++ {
     g.Add(1)
     go func() {
       for chunk := range chunkPool {
-        fmt.Printf("=")
         sendToStore(fileID, chunk)
+
+        atomic.AddUint64(&totalSent, uint64(len(chunk.data)))
+        currentSize := atomic.LoadUint64(&totalSent)
+        fmt.Fprintf(writer, "     %.1f%% (%d/%d)\n",
+                   100*float64(currentSize)/float64(size), currentSize, size)
+        writer.Flush()
       }
       g.Done()
     }()
