@@ -1,6 +1,7 @@
 enum TASKS {
   SYNC_JOB_STATUS = 'sync_job_status',
   SEND_EMAIL = 'send_email',
+  CHECK_STALE_JOBS = 'check_stale_jobs',
   OTHER_TASK = 'other',
 }
 

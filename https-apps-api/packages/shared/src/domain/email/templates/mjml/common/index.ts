@@ -55,7 +55,18 @@ const generateCommentLink = (commentId: number, spaceId: number): string =>
 const generateSpaceLink = (spaceId: number): string =>
   `${config.api.railsHost}/spaces/${spaceId.toString()}`
 
-const getViewSpaceButton = (spaceId: number): string => `
+const generateJobDetailLink = (jobUid: string): string =>
+  `${config.api.railsHost}/home/jobs/${jobUid}`
+
+const generateChallengeDetailLink = (challengeId: number): string =>
+  `${config.api.railsHost}/challenges/${challengeId.toString()}`
+
+const generateChallengePreregPageLink = (challengeId: number): string =>
+  `${config.api.railsHost}/challenges/${challengeId.toString()}`
+
+const ctoButton = (text: string, generateLinkFn: (entityId: number | string) => string) => (
+  id: number | string,
+) => `
   <mj-button
     background-color="#1F70B5"
     line-weight="30px"
@@ -63,19 +74,33 @@ const getViewSpaceButton = (spaceId: number): string => `
     font-weight="bold"
     font-size="16px"
     align="left"
-    href="${generateSpaceLink(spaceId)}"
+    href="${generateLinkFn(id)}"
   >
-    View space
+    ${text}
   </mj-button>
 `
 
+const getViewSpaceButton = ctoButton('View space', generateSpaceLink)
+const getChallengeCtoButton = ctoButton('Join challenge', generateChallengeDetailLink)
+const viewChallengePreregPageCtoButton = ctoButton(
+  'Join challenge',
+  generateChallengePreregPageLink,
+)
+const getExecutionDetailButton = ctoButton('Execution detail', generateJobDetailLink)
+
 const getBottomSpacer = (): string => '<mj-spacer height="16px" />'
+const getMiddleSpacer = (): string => '<mj-spacer height="10px" />'
 
 export {
   header,
   footer,
   generateCommentLink,
   generateSpaceLink,
+  generateJobDetailLink,
   getViewSpaceButton,
+  getChallengeCtoButton,
+  getExecutionDetailButton,
+  viewChallengePreregPageCtoButton,
   getBottomSpacer,
+  getMiddleSpacer,
 }

@@ -13,3 +13,5 @@ export { SyncJobOperation } from './ops/synchronize'
 export { ListJobsOperation } from './ops/list'
 
 export { RequestTerminateJobOperation } from './ops/terminate'
+
+export { CheckStaleJobsOperation } from './ops/check-stale'
