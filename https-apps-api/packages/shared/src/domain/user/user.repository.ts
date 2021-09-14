@@ -1,4 +1,5 @@
 import { EntityRepository } from '@mikro-orm/core'
+import { config } from '../../config'
 import { User } from '..'
 
 export class UserRepository extends EntityRepository<User> {
@@ -9,5 +10,9 @@ export class UserRepository extends EntityRepository<User> {
       },
       { populate: ['emailNotificationSettings'] },
     )
+  }
+
+  async findAdminUser(): Promise<User> {
+    return await this.findOneOrFail({ dxuser: config.platform.adminUser })
   }
 }

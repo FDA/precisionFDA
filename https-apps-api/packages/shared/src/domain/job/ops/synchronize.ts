@@ -3,9 +3,14 @@ import { isNil } from 'ramda'
 import { CheckStatusJob } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
-import { isStateTerminal, shouldSyncStatus } from '../job.helper'
+import {
+  buildIsOverMaxDuration,
+  isStateActive,
+  isStateTerminal,
+  shouldSyncStatus,
+} from '../job.helper'
 import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
-import { removeRepeatable } from '../../../queue'
+import { createSendEmailTask, removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { User, Tagging, UserFile, Tag, Folder } from '../..'
 import { errors } from '../../..'
@@ -17,6 +22,13 @@ import {
   SyncFoldersOperation,
   helper,
 } from '../../user-file'
+import { RequestTerminateJobOperation } from '..'
+import {
+  JobStaleInputTemplate,
+  jobStaleTemplate,
+} from '../../email/templates/mjml/job-stale.handler'
+import { buildEmailTemplate } from '../../email/email.helper'
+import { EmailSendInput } from '../../email/email.config'
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
   protected user: User
@@ -73,6 +85,25 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       return
     }
 
+    const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
+    const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
+    if (
+      isStateActive(job.state) &&
+      isOverNotifyMaxDuration(job) &&
+      !isOverTerminateMaxDuration(job)
+    ) {
+      await this.sendTerminationEmail()
+    }
+    if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
+      this.ctx.log.info({ jobId: job.id }, 'Job marked as stale, trying to terminate')
+      const terminateOp = new RequestTerminateJobOperation({
+        log: this.ctx.log,
+        em: this.ctx.em,
+        user: this.ctx.user,
+      })
+      await terminateOp.execute({ dxid: job.dxid })
+      return
+    }
     // fixme: the mapping is not perfect for the https apps
     const remoteState = platformJobData.state
     if (remoteState === job.state) {
@@ -191,6 +222,20 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     )
     await em.flush()
     this.ctx.log.debug({ job: updatedJob }, 'updated job')
+  }
+
+  private async sendTerminationEmail(): Promise<void> {
+    // send email to job owner
+    const body = buildEmailTemplate<JobStaleInputTemplate>(jobStaleTemplate, {
+      receiver: this.user,
+      content: { job: { id: this.job.id, name: this.job.name, uid: this.job.uid } },
+    })
+    const email: EmailSendInput = {
+      to: this.user.email,
+      subject: `precisionFDA Workstation ${this.job.name} will terminate in 24 hours`,
+      body,
+    }
+    await createSendEmailTask(email, this.ctx.user)
   }
 
   private async assignTags(nodes: Array<UserFile | Folder>, tag: Tag): Promise<number> {
