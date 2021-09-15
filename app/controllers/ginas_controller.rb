@@ -51,10 +51,15 @@ class GinasController < ApplicationController
                     GSRS_HEADER_USER_NAME => current_user.full_name,
                     GSRS_HEADER_USER_EMAIL => current_user.email,
                   } do |config|
-                    config.on_response do |_code, response|
-                      if substance_submit_request?
-                        data = JSON.parse(response.body)
-                        response.body = data.merge(fileUrl: @file_url).to_json
+                    config.on_response do |code, response|
+                      if response.is_a? Net::HTTPSuccess
+                        if substance_submit_request?
+                          data = JSON.parse(response.body)
+                          response.body = data.merge(fileUrl: @file_url).to_json
+                        end
+                      else
+                        logger.info("Received GSRS error for path #{request.fullpath}" \
+                          ", code: #{code}")
                       end
                     end
                   end
