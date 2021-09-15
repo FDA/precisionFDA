@@ -36,7 +36,7 @@
     "@mikro-orm/reflection": "^4.5.2",
     "@types/ramda": "^0.27.28",
     "ajv": "^8.0.5",
-    "axios": "^0.21.0",
+    "axios": "^0.21.2",
     "bull": "^3.18.1",
     "dotenv": "^8.2.0",
     "jsforce": "^2.0.0-beta.3",
