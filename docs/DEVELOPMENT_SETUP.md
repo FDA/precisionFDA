@@ -7,7 +7,7 @@ You can skip any section if you have already installed the dependencies.
 * Install XCode
     * Search and install Xcode from the App Store.
         
-        Need different Xcode version? See [list of dmg links](https://stackoverflow.com/a/10335943)
+        Need different Xcode version? See [list of xip archive links](https://stackoverflow.com/a/10335943)
 
 * Install Apple Command Line Tools
     * Open XCode (this just needs to run once to initialize it) and close it.
