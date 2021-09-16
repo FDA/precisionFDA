@@ -17,7 +17,14 @@ You can skip any section if you have already installed the dependencies.
     * Run `brew update` to make sure all your formulas are current
 
 * Install git
-    * `brew install git`
+    * On Mavericks (10.9) or above you can do this simply by trying to run git from the Terminal the very first time:
+
+        `git --version`
+
+        If you don’t have it installed already, it will prompt you to install it.
+    * Installing via Homebrew:
+
+        `brew install git`
 
 ## Ubuntu/Linux specific prerequisites
 * Update software packages definitions
@@ -29,8 +36,8 @@ You can skip any section if you have already installed the dependencies.
 
 ## Common steps (MacOS and Ubuntu Linux)
 
-* Set up git ssh
-    * `ssh-keygen -t rsa -b 4096 -C "your_email@dnanexus.com"`
+* [Set up git ssh](https://docs.github.com/articles/generating-an-ssh-key/)
+    * `ssh-keygen -t ed25519-sk -C "your_email@dnanexus.com"`
 
 * Add generated SSH key to [Github](https://github.com/settings/keys)
 
