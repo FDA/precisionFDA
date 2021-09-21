@@ -32,7 +32,7 @@ bash "install qualys-cloud-agent" do
         echo "apt already running, waiting ..."
         sleep 45
       done
-      apt-get install /tmp/qualys-cloud-agent.x86_64.deb
+      apt-get install -y --allow-downgrades /tmp/qualys-cloud-agent.x86_64.deb
     EOH
   }
   only_if { node.run_state["qualys"] }
