@@ -5,7 +5,7 @@ gsrs_src_path = node[:gsrs][:app_src_dir]
 gsrs_dist_path = node[:gsrs][:app_dist_dir]
 pfda_src_conf = File.join(gsrs_src_path, "modules/ginas/conf/ginas-pfda.conf")
 pfda_dist_conf = File.join(gsrs_dist_path, "conf/ginas-pfda.conf")
-# gsrs_dist_zip = File.join(gsrs_src_path, "modules/ginas/target/universal/ginas-*.zip")
+gsrs_indexes_bucket = node[:gsrs][:indexes_bucket]
 
 aws_ssm_parameter_store "get params" do
   path "#{node[:ssm_base_path]}/"
@@ -24,6 +24,8 @@ ruby_block "set envs" do
 
     ENV["HOME"] = "/home/#{node[:deploy_user]}"
     ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
+    ENV["AWS_ACCESS_KEY_ID"] = node.run_state.dig("params", "gsrs", "aws_access_key_id")
+    ENV["AWS_SECRET_ACCESS_KEY"] = node.run_state.dig("params", "gsrs", "aws_secret_access_key")
   end
 end
 
@@ -72,6 +74,16 @@ end
 template pfda_dist_conf do
   source "ginas-pfda.conf.erb"
   variables lazy { ENV.to_hash }
+end
+
+execute "Copy ginas indexes" do
+  cwd gsrs_dist_path
+  user node[:deploy_user]
+  group node[:deploy_user]
+  command %{
+    aws s3 cp s3://#{gsrs_indexes_bucket}/ginas.ix/ ginas.ix --recursive
+  }
+  environment lazy { ENV.to_hash }
 end
 
 execute "Run G-SRS" do
