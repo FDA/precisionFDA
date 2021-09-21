@@ -22,7 +22,7 @@ en:
         title: Administrator Features
         sections:
           challenge_workbench: Challenge Workbench
-          verification_spaces: Verified Apps
+
           site_activity_reporting: Site Activity Reporting
           site_customization: Site Customization
           site_administration: Site Administration
@@ -92,9 +92,6 @@ en:
         challenge_workbench:
           title: Challenge Workbench
           url: https://www.youtube.com/embed/SKqH5OfO5G8
-        verified_apps:
-          title: Verified Apps
-          url: https://www.youtube.com/embed/9x8JgxpciFY
         site_activity_reporting:
           title: Site Activity Reporting
           url: https://www.youtube.com/embed/KJ-Rk-ejjBM
@@ -104,8 +101,4 @@ en:
         review_spaces:
           title: 'Review Spaces: Step by Step'
           url: https://www.youtube.com/embed/mPW82NtdKuo
-      review_space_admin:
-        <<: *common_videos
-        verified_apps:
-          title: Verified Apps
-          url: https://www.youtube.com/embed/9x8JgxpciFY
+
