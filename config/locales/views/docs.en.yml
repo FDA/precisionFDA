@@ -26,10 +26,6 @@ en:
           site_activity_reporting: Site Activity Reporting
           site_customization: Site Customization
           site_administration: Site Administration
-      review_space_admin:
-        title: Administrator Features
-        sections:
-          verification_spaces: Verified Apps
       org_admin:
         title: Organizations deprecation
         sections:
@@ -101,4 +97,3 @@ en:
         review_spaces:
           title: 'Review Spaces: Step by Step'
           url: https://www.youtube.com/embed/mPW82NtdKuo
-
