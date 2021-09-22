@@ -4,7 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "2.7.2"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "~> 6.0.3.7"
+gem "rails", "~> 6.0.4.1"
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0", ">= 6.0.0"
 # Use Uglifier as compressor for JavaScript assets
@@ -106,7 +106,7 @@ gem "dry-container"
 
 gem "rubyzip", "=1.3.0"
 
-gem "sidekiq"
+gem "sidekiq", "~> 6.2.1"
 
 gem "whenever", require: false
 
