@@ -1,6 +1,26 @@
 {
   "ignored_warnings": [
     {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "32c3781bb33471096864f1d1b0deb3683e4143f15bc566155f2c376415a4f2f9",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/api/jobs_controller.rb",
+      "line": 322,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Job.accessible_by(@context).find_by(:uid => params[:id]).https_job_external_url)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::JobsController",
+        "method": "open_external"
+      },
+      "user_input": "Job.accessible_by(@context).find_by(:uid => params[:id]).https_job_external_url",
+      "confidence": "High",
+      "note": ""
+    },
+    {
       "warning_type": "Weak Hash",
       "warning_code": 90,
       "fingerprint": "788cfa9e741ffde67620a52a7cd027ad5191b6eea3388e4d6dded17d4e8eca07",
@@ -47,39 +67,8 @@
       "user_input": null,
       "confidence": "Medium",
       "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "ff9b129b8bb4d4ff628f16bdeedf133ff776892384ca2945a257ae14453195ad",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/challenges/show.html.erb",
-      "line": 64,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Challenge.find(params[:id]).regions[\"intro\"]",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ChallengesController",
-          "method": "show",
-          "line": 139,
-          "file": "app/controllers/challenges_controller.rb",
-          "rendered": {
-            "name": "challenges/show",
-            "file": "app/views/challenges/show.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "challenges/show"
-      },
-      "user_input": null,
-      "confidence": "High",
-      "note": ""
     }
   ],
-  "updated": "2021-02-08 18:35:32 +0300",
+  "updated": "2021-09-22 00:00:34 +0300",
   "brakeman_version": "4.9.1"
 }
