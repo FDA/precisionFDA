@@ -22,7 +22,6 @@ en:
         title: Administrator Features
         sections:
           challenge_workbench: Challenge Workbench
-
           site_activity_reporting: Site Activity Reporting
           site_customization: Site Customization
           site_administration: Site Administration
@@ -97,3 +96,5 @@ en:
         review_spaces:
           title: 'Review Spaces: Step by Step'
           url: https://www.youtube.com/embed/mPW82NtdKuo
+      review_space_admin:
+        <<: *common_videos
