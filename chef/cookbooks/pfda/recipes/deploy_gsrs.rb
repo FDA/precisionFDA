@@ -67,7 +67,7 @@ template gsrs_run_script do
     gsrs_path: gsrs_path,
     gsrs_pfda_conf: gsrs_pfda_conf,
     gsrs_port: gsrs_port,
-    java_opts: "-J-Xmx4G",
+    java_opts: "-J-Xmx8G",
   )
   mode 0755
 end
