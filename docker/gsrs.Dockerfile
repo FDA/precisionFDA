@@ -1,44 +1,18 @@
-# change it to another image (ubuntu 18)?
-FROM ubuntu:16.04 AS base
+FROM ubuntu:18.04 AS base
 
-# # install software
-RUN apt-get update && \
-    apt-get install -y curl nano wget git mysql-client openjdk-8-jdk
+RUN apt-get -qqy update && \
+    apt-get -qqy --no-install-recommends install mysql-client openjdk-8-jdk git
 
-# instal nodejs v12 and deps
-RUN curl -fsSL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt install -y nodejs && \
-    NG_CLI_ANALYTICS=off npm install -g @angular/cli@latest
+RUN cd /srv && \
+    git clone -b precisionFDA_PROD https://github.com/dnanexus/gsrs-play-dist.git && \
+    cd gsrs-play-dist && \
+    chmod +x bin/ginas
 
-FROM base as frontend
+WORKDIR /srv/gsrs-play-dist
 
-COPY ./GSRSFrontend /srv/GSRSFrontend
-
-WORKDIR /srv/GSRSFrontend
-# setup frontend
-RUN export NG_CLI_ANALYTICS=off && \
-    cp package.dev.json package.json && \
-    npm install && \
-    npm run build-file-select && \
-    npm run build-jsdraw-wrapper && \
-    npm run build-ketcher-wrapper && \
-    cp package.real.json package.json && \
-    npm install && \
-    npm audit fix && \
-    npm i @angular-devkit/build-angular@0.803.25
-
-FROM base as build
-
-COPY --from=frontend /srv/GSRSFrontend /srv/GSRSFrontend
-COPY ./GSRSBackend /srv/GSRSBackend
-
-WORKDIR /srv/GSRSBackend
-# build backend
-RUN ./setup.sh
-
-COPY ./docker/gsrs.entrypoint.sh /gsrs.entrypoint.sh
+COPY docker/ginas-dev.conf /srv/gsrs-play-dist/conf/ginas-dev.conf
+COPY docker/gsrs.entrypoint.sh /tmp/entrypoint.sh
 
 EXPOSE 9000
-EXPOSE 4200
 
-ENTRYPOINT ["/gsrs.entrypoint.sh"]
+ENTRYPOINT ["/tmp/entrypoint.sh"]
