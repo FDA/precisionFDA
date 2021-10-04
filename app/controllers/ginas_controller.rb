@@ -48,7 +48,7 @@ class GinasController < ApplicationController
     reverse_proxy GSRS_URL,
                   path: request.fullpath,
                   headers: {
-                    GSRS_HEADER_USER_NAME => current_user.full_name,
+                    GSRS_HEADER_USER_NAME => current_user.username,
                     GSRS_HEADER_USER_EMAIL => current_user.email,
                   } do |config|
                     config.on_response do |code, response|
