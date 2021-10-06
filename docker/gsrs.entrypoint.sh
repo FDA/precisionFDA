@@ -25,8 +25,6 @@ done
 if [ ! $(mysql -u $MYSQL_USER -h $MYSQL_HOST -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE -sse "SHOW tables like 'ix_core_userprof';") ]; then
   chmod +x bin/evolutions.sh
   bin/evolutions.sh "$GSRS_CONFIG"
-
-  # ЭТО НЕ РОБИТ
   mysql -h $MYSQL_HOST -u $MYSQL_USER -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE -e "$ROLES_TRIGGER"
 fi
 
