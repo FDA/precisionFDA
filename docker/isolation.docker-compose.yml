@@ -37,10 +37,13 @@ services:
     build:
       context: ../
       dockerfile: docker/gsrs.Dockerfile
+    environment:
+      - MYSQL_HOST=gsrsdb
+      - MYSQL_DATABASE=ixginas
+      - MYSQL_ROOT_PASSWORD=password
+      - GSRS_PORT=9000
     ports:
       - 9000:9000
-    environment:
-      JAVA_OPTS: "-Xms4096m -Xmx4096m -XX:ReservedCodeCacheSize=512m -Dpidfile.path=/dev/null -DapplyEvolutions.default=false"
     depends_on:
       - gsrsdb
 
@@ -52,8 +55,8 @@ services:
       - /tmp
       - /run/mysqld
     environment:
-      - MYSQL_ROOT_PASSWORD=password
       - MYSQL_DATABASE=ixginas
+      - MYSQL_ROOT_PASSWORD=password
     ports:
       - 32900:3306
 
