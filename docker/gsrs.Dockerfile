@@ -14,7 +14,7 @@ RUN apt-get -qqy update && \
     apt-get -qqy --no-install-recommends install mysql-client openjdk-8-jdk git
 
 RUN cd /srv && \
-    git clone -b $GSRS_BRANCH https://github.com/dnanexus/gsrs-play-dist.git && \
+    git clone --depth 1 -b $GSRS_BRANCH https://github.com/dnanexus/gsrs-play-dist.git && \
     cd gsrs-play-dist && \
     chmod +x bin/ginas
 
