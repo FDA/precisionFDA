@@ -163,5 +163,5 @@ end
 
 group :production do
   gem "exception_notification", "4.1.1"
-  gem "puma", "~> 5.3.2"
+  gem "puma", "~> 5.5.1"
 end
