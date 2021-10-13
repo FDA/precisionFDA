@@ -137,7 +137,6 @@ class ChallengesController < ApplicationController
 
   def announce_result
     @challenge.jobs.find_each do |job|
-      job.update!(scope: Scopes::SCOPE_PUBLIC) if job.publishable_by_user?(User.challenge_bot)
       file_publisher.publish(job.output_files)
     end
 

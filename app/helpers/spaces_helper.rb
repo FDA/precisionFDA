@@ -356,13 +356,13 @@ module SpacesHelper
   # Provide a node origin links to use on Space Files page
   # @param node [Node] Node to get origin for.
   # @return [String] - file link object node of type "UserFile"
-  def node_origin(node)
+  def node_origin(node, current_user)
     if node.klass == "folder"
       nil
     elsif node.parent_type == "Node" && node.parent.blank?
       "Copied"
     elsif node.parent_type != "User"
-      node_origin_link(unilinkfw(node.parent, { no_home: true }))
+      node_origin_link(unilinkfw(node.parent, { no_home: true, current_user: current_user }))
     else
       "Uploaded"
     end
@@ -417,7 +417,7 @@ module SpacesHelper
       links: {}.tap do |links|
         links[:filePath] = node.is_a?(UserFile) ? file_path(node) : ""
         links[:user] = user_path(node.user.dxuser)
-        links[:originPath] = node.is_a?(UserFile) ? node_origin(node) : ""
+        links[:originPath] = node.is_a?(UserFile) ? node_origin(node, current_user) : ""
         links[:renamePath] = rename_path if space.editable_by?(current_user)
       end,
     }

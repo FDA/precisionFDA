@@ -1,5 +1,6 @@
 module MainHelper
   include OrgAdmin
+  # rubocop:disable Rails/HelperInstanceVariable
 
   def graph_nodes(graph)
     s = ""
@@ -45,11 +46,19 @@ module MainHelper
       else
         classname = item.user_id == @context.user_id ? 'own' : 'not_yours'
       end
-      nodes[uid] = {labelType: 'html', label: content_tag(:div, unilinkfw(item), class: 'track-box'), class: classname}
+      nodes[uid] = {
+        labelType: "html",
+        label: content_tag(
+          :div,
+          unilinkfw(item, { current_user: @context.user }),
+          class: "track-box",
+        ),
+        class: classname,
+      }
     end
     deps.each do |dep|
       graph_nodes_recursive(nodes, dep)
     end
   end
-
+  # rubocop:enable Rails/HelperInstanceVariable
 end
