@@ -22,7 +22,7 @@
     <%= render "_partials/metadata_access", item: @job %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">App</h5>
-      <p class="list-group-item-text"><%= unilink(@job.app) %></p>
+      <p class="list-group-item-text"><%= unilink(@job.app, @context.user) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Launched by</h5>

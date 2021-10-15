@@ -3,6 +3,7 @@ module ApplicationHelper
   include VerifiedSpaceHelper
   include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
+  # rubocop:disable Rails/HelperInstanceVariable
 
   def page_title(separator = " – ")
     [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
@@ -98,13 +99,16 @@ module ApplicationHelper
   # Provide a node origin links to use on Home (Space) Files page
   # @param node [Node] Node to get origin for.
   # @return [String] - file link object node of type "UserFile"
-  def node_origin(node)
+  def node_origin(node, current_user)
     if node.klass == "folder" && !node.https?
       nil
     elsif node.parent_type == "Node" && node.parent.blank?
       "Copied"
     elsif node.parent_type != "User"
-      node_origin_link(unilinkfw(node.parent, { no_home: true }))
+
+      node_origin_link(
+        unilinkfw(node.parent, { no_home: true, current_user: current_user }),
+      )
     else
       "Uploaded"
     end
@@ -129,7 +133,10 @@ module ApplicationHelper
   # title_class                # CSS class to apply to title
   # nolink: true               # Show a label, not a link
   # noicon: false              # Show/hide the icon
-  def unilink(item, opts = {})
+  # rubocop:disable Metrics/MethodLength
+  def unilink(item, opts = {}, context_user = nil)
+    current_user = opts[:current_user] || context_user
+
     return if item.nil?
 
     icon = fa_class(item)
@@ -149,8 +156,7 @@ module ApplicationHelper
       icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     end
 
-    # rubocop:disable Rails/HelperInstanceVariable
-    if item.check_accessibility(@context)
+    if item.check_accessibility(current_user)
       html_opts = { class: opts[:title_class], target: opts[:target] }
       html_opts[:data] = opts[:data] if opts[:data]
       if opts[:nolink]
@@ -161,8 +167,8 @@ module ApplicationHelper
     else
       icon_span + item.title.to_s # do not show item uid if unaccessible
     end
-    # rubocop:enable Rails/HelperInstanceVariable
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def home_path_to_item(item, no_home = false)
@@ -175,15 +181,20 @@ module ApplicationHelper
   end
 
   # Shortcut for unilink(..., icon_class: fa-fw)
-  #
+
   def unilinkfw(item, opts = {})
+    current_user = opts[:current_user] || @context.user
+
     local_opts = opts.deep_dup
     if local_opts[:icon_class].present?
       local_opts[:icon_class] += " fa-fw"
     else
       local_opts[:icon_class] = "fa-fw"
     end
-    unilink(item, local_opts)
+
+    local_opts.merge!(current_user: current_user)
+
+    unilink(item, local_opts, current_user)
   end
 
   def guest_hide
@@ -233,4 +244,5 @@ module ApplicationHelper
       action_name == "show" &&
       space.present?
   end
+  # rubocop:enable Rails/HelperInstanceVariable
 end
