@@ -53,7 +53,7 @@ class NodeSerializer < ApplicationSerializer
   def origin
     return unless current_user
 
-    node_origin(object)
+    node_origin(object, current_user)
   end
 
   def origin_object

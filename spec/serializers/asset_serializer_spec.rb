@@ -4,12 +4,14 @@ describe AssetSerializer do
   subject(:asset_serializer) { described_class.new(asset) }
 
   let(:user) { create(:user) }
+  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:admin) { create(:user, :admin) }
   let(:asset) { create(:asset, created_at: Time.current, user: user) }
 
   # rubocop:todo RSpec/SubjectStub
   before do
     allow(asset_serializer).to receive(:current_user).and_return(user)
+    allow(context).to receive(:user).and_return(user)
   end
   # rubocop:enable RSpec/SubjectStub
 

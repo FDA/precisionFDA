@@ -40,7 +40,7 @@
         <% if @file.parent_type == "Node" && @file.parent.blank? %>
           "Copied"
         <% elsif @file.parent_type != "User" %>
-          <%= unilink(@file.parent) %>
+          <%= unilink(@file.parent, { current_user: @context.user }) %>
         <% else %>
           Uploaded
         <% end %>
