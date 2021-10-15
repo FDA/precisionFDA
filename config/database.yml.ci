@@ -2,7 +2,7 @@ default: &default
   adapter: mysql2
   pool: 5
   timeout: 5000
-  host: mysql
+  host: 127.0.0.1
   username: root
   password: password
   collation: utf8_unicode_ci
