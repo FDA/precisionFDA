@@ -67,8 +67,48 @@
       "user_input": null,
       "confidence": "Medium",
       "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "e1f954ab2d232975d34163addaa3a7195705049f25d3a6c87f760872666eed3a",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/services/files/file_uploader.rb",
+      "line": 119,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`md5sum #{Tempfile.new(\"\").path} | cut -d ' ' -f 1`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Files::FileUploader",
+        "method": "md5sum"
+      },
+      "user_input": "Tempfile.new(\"\").path",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "f841b8b95dbca0b43886ce699567ed0c260aa3b1f9aa2463f0437f821f559b5f",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/services/asset_service.rb",
+      "line": 230,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`md5sum #{Tempfile.new(\"\").path} | cut -d ' ' -f 1`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AssetService",
+        "method": "md5sum"
+      },
+      "user_input": "Tempfile.new(\"\").path",
+      "confidence": "Medium",
+      "note": ""
     }
   ],
-  "updated": "2021-09-22 00:00:34 +0300",
-  "brakeman_version": "4.9.1"
+  "updated": "2021-10-14 20:13:32 +0300",
+  "brakeman_version": "5.1.1"
 }
