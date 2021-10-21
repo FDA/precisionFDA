@@ -30,7 +30,6 @@ class MyEntryRow extends Component<ISubmissionElementProps> {
         <SubmissionStateCell submission={submission} />
         <SubmissionNameCell submission={submission} />
         <td><a href={`/challenges/${submission.challengeId}/submissions/${submission.id}/edit`}>Edit</a></td>
-        <td><a href={`/challenges/${submission.challengeId}/submissions/${submission.id}/log`}>View Log</a></td>
         <SubmissionInputFilesCell submission={submission} user={user} />
         <SubmissionCreatedAtCell submission={submission} />
       </tr>
@@ -60,7 +59,6 @@ class ChallengeMyEntriesTable extends Component<IChallengeSubmissionsTableProps>
             <Thead>
               <Th>State</Th>
               <Th>Name</Th>
-              <Th></Th>
               <Th></Th>
               <Th>Input File</Th>
               <Th>Created</Th>

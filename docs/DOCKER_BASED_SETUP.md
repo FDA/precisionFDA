@@ -31,16 +31,20 @@ your OS.
     - `REDIS_WORKER_URL=redis://redis` - points Sidekiq to a running Redis instance. Use `redis` hostname to point to an instance created with `docker-compose`.
     - `ADMIN_TOKEN` (ask your teammate for this one)
 
-### 2. Build & start
+### 2. Build the docker images
 
 Execute the following command from project's root:
 
-`$ docker-compose up --build`
+`$ docker-compose build`
 
 This could take a while since during first run all required software
 will be installed.
 
 ### 3. Prepare the database
+
+First, start the mysql and backend containers
+
+`$ docker-compose start db web`
 
 #### Quick setup
 
@@ -66,19 +70,17 @@ docker-compose exec \
     web bundle exec rake {db:setup,db:migrate,user:generate_test_users}
 ```
 
-### 4. Validate the setup
+## Running application
+
+To run application just use this command:
+
+`docker-compose up`
 
 Once the application is correctly installed & configured, you should be able to access the portal at:
 
 ```
 https://localhost:3000/
 ```
-
-## Running application
-
-To run application just use this command:
-
-`docker-compose up`
 
 ## QA testing environment
 
@@ -87,6 +89,13 @@ In order to run app in QA environment, use this command (from the project root):
 `docker-compose -f docker/isolation.docker-compose.yml up --build`
 
 ## Some useful commands
+
+- Recreating specific containers:
+  This is needed for containers (such as nodejs-api) that are currently not volume linked to host, so we need to rebuild when the code change
+  `docker-compose build nodejs-api nodejs-worker`
+
+- Reacreate all containers:
+  `docker-compose build`
 
 - Getting to MySQL container:
 

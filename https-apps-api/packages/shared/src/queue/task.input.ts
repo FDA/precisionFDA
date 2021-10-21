@@ -11,5 +11,6 @@ type Task<T> = {
 // will be used in the sub-handler
 type CheckStatusJob = Task<{ dxid: string }>
 type SendEmailJob = Task<EmailSendInput>
+type CheckStaleJobsJob = Omit<Task<null>, 'user'>
 
-export { Task, CheckStatusJob, SendEmailJob }
+export { Task, CheckStatusJob, SendEmailJob, CheckStaleJobsJob }

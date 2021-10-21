@@ -8,10 +8,11 @@ import * as types from './task.input'
 
 let statusQueue: Bull.Queue
 let emailsQueue: Bull.Queue
+let checkStaleJobsQueue: Bull.Queue
 
 const getQueue = (): Bull.Queue => statusQueue
 
-const getQueues = (): Bull.Queue[] => [statusQueue, emailsQueue]
+const getQueues = (): Bull.Queue[] => [statusQueue, emailsQueue, checkStaleJobsQueue]
 
 // set up the queues
 const createQueues = async (): Promise<void> => {
@@ -38,14 +39,23 @@ const createQueues = async (): Promise<void> => {
       removeOnFail: false,
     },
   })
+  checkStaleJobsQueue = new Bull(config.workerJobs.queues.staleJobs.name, config.redis.url, {
+    redis: redisOptions,
+    defaultJobOptions: {
+      removeOnComplete: true,
+      removeOnFail: true,
+    },
+  })
   await statusQueue.isReady()
   await emailsQueue.isReady()
+  await checkStaleJobsQueue.isReady()
 }
 
 const disconnectQueues = async (): Promise<void> => {
   log.info('Disconnecting queues')
   await statusQueue.close(true)
   await emailsQueue.close(true)
+  await checkStaleJobsQueue.close(true)
   log.info('Queues disconnected')
 }
 
@@ -126,9 +136,19 @@ const createSendEmailTask = async (
   return await addToQueue(wrapped, emailsQueue, options, handlePayloadFn)
 }
 
+const createCheckStaleJobsTask = async (data: types.CheckStaleJobsJob['payload']): Promise<Job> => {
+  const wrapped = {
+    type: TASKS.CHECK_STALE_JOBS,
+    payload: data,
+  }
+  const options: JobOptions = {}
+  return await addToQueue(wrapped, checkStaleJobsQueue, options)
+}
+
 export {
   createJobSyncTask,
   createSendEmailTask,
+  createCheckStaleJobsTask,
   TASKS,
   createQueues,
   getQueue,
