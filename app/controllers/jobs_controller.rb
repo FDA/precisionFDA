@@ -78,7 +78,6 @@ class JobsController < ApplicationController
         json = JSON.parse(msg.to_s)
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
-
         if json["code"]
           flash[:error] = "Sorry, something went wrong. Please, try later"
           return

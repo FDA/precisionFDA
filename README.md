@@ -22,7 +22,7 @@ provider.
 ## PrecisionFDA command-line uploader
 
 In addition to the webapp, this repo hosts the precisionFDA
-command-line uploader. It can be found under the `tools` folder.
+command-line uploader. It can be found under the `go` folder.
 
 ## Apps and other content
 
