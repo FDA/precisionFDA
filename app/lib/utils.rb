@@ -2,8 +2,6 @@
 module Utils
   extend self
 
-  PRODUCTION_ENV = "production".freeze
-
   # Iterates an array with a delay between each iteration.
   # @param collection [#each, #last] The collection to iterate on.
   # @param delay [Integer|Float] The delay in seconds.
@@ -15,16 +13,11 @@ module Utils
     end
   end
 
-  def production_env?
-    ENV["DNANEXUS_BACKEND"] == PRODUCTION_ENV
+  def aws_env?
+    Rails.env.production? || Rails.env.staging? || Rails.env.dev?
   end
 
   # rubocop:todo Rails/UnknownEnv
-  def stage_or_prod_env?
-    ENV["DNANEXUS_BACKEND"] == PRODUCTION_ENV ||
-      !(Rails.env.development? || Rails.env.ui_test? || ENV["DEV_HOST"])
-  end
-
   def development_or_test?
     Rails.env.development? || Rails.env.test? || Rails.env.ui_test?
   end

@@ -41,15 +41,11 @@ application app_dir do
     end
   end
 
-  execute "Add DEV_HOST env var" do
-    only_if {
-      File.exists?(env_file) &&
-        File.foreach(env_file).grep(/DEV_HOST=/).none? &&
-        !%w(production staging).include?(node.environment)
-    }
+  execute "Add HOST env var" do
+    only_if { File.exists?(env_file) && File.foreach(env_file).grep(/HOST=/).none? }
 
     command %{
-      echo "DEV_HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)" >> #{env_file}
+      echo "HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)" >> #{env_file}
     }
   end
 

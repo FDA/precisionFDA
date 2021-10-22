@@ -521,6 +521,7 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*.rb'
     - 'config/routes.rb'
+    - 'config/environments/*.rb'
 
 Layout/LineLength:
   Max: 100
@@ -581,6 +582,15 @@ Rails/ActionFilter:
   - filter
   Include:
   - app/controllers/**/*.rb
+
+Rails/UnknownEnv:
+  Environments:
+    - production
+    - staging
+    - dev
+    - development
+    - test
+    - ui_test
 
 Rails/Date:
   EnforcedStyle: flexible

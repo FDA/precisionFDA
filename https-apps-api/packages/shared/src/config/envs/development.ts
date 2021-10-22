@@ -3,7 +3,7 @@ import { ConfigOverride } from '..'
 export const config: ConfigOverride = {
   appName: 'https-apps-worker-dev',
   api: {
-    railsHost: process.env.DEV_HOST,
+    railsHost: process.env.HOST,
   },
   logs: {
     pretty: false,
