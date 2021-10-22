@@ -10,7 +10,7 @@ default[:gsrs][:port] = 9000
 default[:gsrs][:app_dir] = "/home/#{deploy_user}/gsrs"
 default[:gsrs][:repo_url] = "https://github.com/dnanexus/gsrs-play-dist.git"
 default[:gsrs][:revision] = "precisionFDA_PROD"
-default[:gsrs][:indexes_bucket] = "gsrs-indexes-staging"
+default[:gsrs][:indexes_bucket] = "gsrs-indexes-#{node.environment}"
 
 default[:deploy_user] = deploy_user
 default[:deploy_user_group] = deploy_user
