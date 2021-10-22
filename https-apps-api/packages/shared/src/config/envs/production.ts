@@ -3,7 +3,7 @@ import { ConfigOverride } from '..'
 export const config: ConfigOverride = {
   appName: 'https-apps-worker-prod',
   api: {
-    railsHost: 'https://precision.fda.gov',
+    railsHost: process.env.HOST,
   },
   logs: {
     pretty: false,

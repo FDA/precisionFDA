@@ -35,7 +35,7 @@ const defaultConfig = {
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
-    railsHost: 'https://localhost:3000',
+    railsHost: process.env.HOST ?? 'https://localhost:3000',
   },
   logs: {
     pretty: true,

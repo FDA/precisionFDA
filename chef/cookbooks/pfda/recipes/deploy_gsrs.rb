@@ -56,6 +56,8 @@ end
 
 template gsrs_pfda_conf do
   source "ginas-pfda.conf.erb"
+  owner deploy_user
+  group deploy_user
   variables lazy { ENV.to_hash }
 end
 
