@@ -131,6 +131,9 @@ Rails.application.routes.draw do
 
     if ENV["GSRS_ENABLED"]
       match "/ginas/app/logout", to: "main#destroy", via: :all
+      get "/ginas/app/api/v1/substances:path", to: "ginas#skip_request",
+        constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
+      match "/ginas/app/api/v1/substances", to: "ginas#substances", via: %i(put post)
       match "/ginas/*path", to: "ginas#index", via: :all
     end
 

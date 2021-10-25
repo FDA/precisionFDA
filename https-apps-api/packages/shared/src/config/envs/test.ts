@@ -19,6 +19,12 @@ export const config: ConfigOverride = {
     challengeBotDxUser: 'challenge-bot-test',
   },
   workerJobs: {
+    syncJob: {
+      // 2 days
+      staleJobsEmailAfter: 60 * 60 * 24 * 2,
+      // 3 days
+      staleJobsTerminateAfter: 60 * 60 * 24 * 3,
+    },
     queues: {
       default: {
         name: 'https-apps-worker-queue-tests',
