@@ -2,6 +2,7 @@ enum JOB_STATE {
   DONE = 'done',
   FAILED = 'failed',
   IDLE = 'idle',
+  RUNNING = 'running',
   TERMINATED = 'terminated',
   TERMINATING = 'terminating',
 }
@@ -12,6 +13,7 @@ enum JOB_DB_ENTITY_TYPE {
 }
 
 const TERMINAL_STATES = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
+const ACTIVE_STATES = [JOB_STATE.IDLE, JOB_STATE.RUNNING]
 
 const allowedInstanceTypes = {
   'baseline-2': 'mem1_ssd1_x2_fedramp',
@@ -42,6 +44,7 @@ const allowedFeatures = {
 export {
   JOB_STATE,
   TERMINAL_STATES,
+  ACTIVE_STATES,
   JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
   allowedFeatures,

@@ -57,6 +57,7 @@ const defaultConfig = {
     apiUrl: 'https://stagingapi.dnanexus.com',
     authApiUrl: 'https://stagingauth.dnanexus.com',
     adminUser: 'precisionfda.admin_dev',
+    adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
     findDataObjectsQueryLimit: 100,
   },
   emails: {
@@ -86,11 +87,18 @@ const defaultConfig = {
       emails: {
         name: 'https-apps-worker-emails-queue',
       },
+      staleJobs: {
+        name: 'https-apps-stale-jobs-queue',
+      },
     },
     syncJob: {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/1 * * * *',
+      // nine minutes
+      staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60 * 9,
+      // ten minutes
+      staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? 60 * 10,
     },
   },
 }

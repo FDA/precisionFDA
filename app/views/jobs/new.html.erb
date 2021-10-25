@@ -3,7 +3,7 @@
 <div class="affix-spacer">
   <div class="affix-container">
     <div class="page-header clearfix">
-      <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @app.title, home_path_to_item(@app), target: "_blank" %></div>
+      <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @app.title, home_path_to_item(@app), target: "_blank", rel: "noopener noreferrer" %></div>
       <div class="btn-group pull-right">
         <!-- ko if: isInSpace -->
           <button

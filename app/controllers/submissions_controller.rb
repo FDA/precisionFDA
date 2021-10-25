@@ -315,6 +315,8 @@ class SubmissionsController < ApplicationController
       _inputs: input_info.file_dxids,
     )
 
+    job.update!(project: @challenge.space.host_project, scope: @challenge.space.scope)
+
     Event::SubmissionCreated.create_for(submission, @context.user)
 
     flash[:success] = "Your entry was submitted successfully."

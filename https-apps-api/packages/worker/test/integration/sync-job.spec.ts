@@ -1,4 +1,5 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
+import { DateTime } from 'luxon'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User, Job, UserFile, Tag, Tagging, Folder } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -46,7 +47,7 @@ describe('TASK: sync_job_status', () => {
     await db.dropData(database.connection())
     em = database.orm().em
     em.clear()
-    user = create.userHelper.create(em)
+    user = create.userHelper.create(em, { email: generate.random.email() })
     app = create.appHelper.create(em, { user })
     await em.flush()
     // reset fakes
@@ -149,6 +150,46 @@ describe('TASK: sync_job_status', () => {
       param2: app.dxid,
       param3: null,
       param4: null,
+    })
+  })
+
+  context('stale job', () => {
+    it('calls job termination client call when job is running for too long', async () => {
+      const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
+      job.createdAt = DateTime.now().minus({ days: 3, minutes: 1 }).toJSDate()
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.IDLE })
+
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.client.jobDescribeFake.calledOnce).to.be.true()
+      expect(fakes.client.jobTerminateFake.calledOnce).to.be.true()
+      // assuming email notif. was already sent
+      expect(fakes.queue.createEmailSendTaskFake.notCalled).to.be.true()
+    })
+
+    it('sends email to job owner when job is running for too long', async () => {
+      const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
+      job.createdAt = DateTime.now().minus({ days: 2, minutes: 1 }).toJSDate()
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.IDLE })
+
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
+      const [email, userCtx] = fakes.queue.createEmailSendTaskFake.getCall(0).args
+      expect(email).to.have.property('to', user.email)
+      expect(email).to.have.property(
+        'subject',
+        `precisionFDA Workstation ${job.name} will terminate in 24 hours`,
+      )
+      expect(userCtx).to.have.property('id', user.id)
+      // not called - the interval for email is shorter
+      expect(fakes.client.jobTerminateFake.notCalled).to.be.true()
     })
   })
 
