@@ -82,6 +82,13 @@ Once the application is correctly installed & configured, you should be able to 
 https://localhost:3000/
 ```
 
+## Running application with GSRS
+
+GSRS runs as a process on the same instance as pFDA but is completely separate codebase
+To run everything locally via docker, use the following command
+
+`docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml up`
+
 ## QA testing environment
 
 In order to run app in QA environment, use this command (from the project root):
