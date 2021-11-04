@@ -17,6 +17,11 @@ import { errors } from '../../..'
 import { FILE_ORIGIN_TYPE } from '../user-file.enum'
 
 // todo: maybe another operation type for "can be called from another operation"
+
+// Operation sychronizing the folder structure of a dx project to the pfda database
+// Comparison of equivalent folders is done by comparing their full paths
+// Contents of newly created folders (those that exist on dx platform but not pfda) are not synchronized
+// by this operation, but it would remove files contained within deleted folders on the pfda side
 export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder[]> {
   async run(input: SyncFoldersInput): Promise<Folder[]> {
     const em = this.ctx.em
@@ -67,6 +72,8 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
     // paths to keep and then to remove
     localFolderPaths = parseFoldersFromDatabase(localFolders.concat(newFolders))
     const pathsToKeep = getPathsToKeep(remotePaths, localFolderPaths)
+    // TODO: refactor the following block that leads to the creation of foldersToDelete into
+    //       a helper function, so that we can unit test it
     let foldersToKeep: Folder[] = []
     pathsToKeep.forEach(path => {
       const names = getFolders(path)
@@ -82,6 +89,7 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       localFolders.concat(newFolders),
       foldersToKeep,
     )
+
     this.ctx.log.info({ names: foldersToDelete.map(f => f.name) }, 'folders to delete')
     await Promise.all(
       foldersToDelete.map(async folder => {
