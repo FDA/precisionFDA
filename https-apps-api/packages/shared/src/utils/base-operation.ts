@@ -63,7 +63,7 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
         name: this.constructor.name,
         startTime,
         id: this.id,
-        jobType: this.ctx.job.data?.type,
+        jobData: this.ctx.job.data,
         bullJobId: this.ctx.job.id,
         bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
       },

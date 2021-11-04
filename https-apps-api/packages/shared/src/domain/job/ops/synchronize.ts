@@ -79,6 +79,8 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
           return
         }
       }
+
+      this.ctx.log.info('Removing sync job task')
       // handle WORKER dirty state here
       // we could do more efficient error handling and also calls repetition here
       await removeRepeatable(this.ctx.job)
