@@ -3,6 +3,7 @@
 import { nanoid } from 'nanoid'
 import { path } from 'ramda'
 import type { AnyObject, OpsCtx, WorkerOpsCtx } from '../types'
+import { utils } from '@pfda/https-apps-shared'
 
 export type DefaultInput = AnyObject
 
@@ -63,7 +64,11 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
         name: this.constructor.name,
         startTime,
         id: this.id,
-        jobData: this.ctx.job.data,
+        jobData: { 
+          type: this.ctx.job.data?.type,
+          payload: this.ctx.job.data?.payload,
+          user: utils.maskAccessTokenUserCtx(this.ctx.job.data?.user),
+        },
         bullJobId: this.ctx.job.id,
         bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
       },
