@@ -72,6 +72,12 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
     // paths to keep and then to remove
     localFolderPaths = parseFoldersFromDatabase(localFolders.concat(newFolders))
     const pathsToKeep = getPathsToKeep(remotePaths, localFolderPaths)
+    // This log item should be removed once PFDA-2715 is resolved
+    this.ctx.log.info({
+        localFolderPaths: localFolderPaths,
+        pathsToKeep: pathsToKeep,
+      },
+      'About to call pathsToKeep.forEach')
     // TODO: refactor the following block that leads to the creation of foldersToDelete into
     //       a helper function, so that we can unit test it
     let foldersToKeep: Folder[] = []
@@ -80,6 +86,12 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       const res = foldersToKeep.concat(
         detectIntersectedTraverse(localFolders.concat(newFolders), names, undefined, 0, []),
       )
+      // This log item should be removed once PFDA-2715 is resolved
+      this.ctx.log.info({
+          "res.length": res.length,
+          "foldersToKeep.length": foldersToKeep.length,
+        },
+        'Inside pathsToKeep.forEach')
       foldersToKeep = foldersToKeep.concat(res)
     })
     // we can use this -> kept folders are already persisted and have ids
