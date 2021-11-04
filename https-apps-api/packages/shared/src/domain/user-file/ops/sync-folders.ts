@@ -94,6 +94,8 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
         'Inside pathsToKeep.forEach')
       foldersToKeep = foldersToKeep.concat(res)
     })
+    this.ctx.log.info({ foldersToKeep: foldersToKeep }, 'Total foldersToKeep')
+
     // we can use this -> kept folders are already persisted and have ids
     foldersToKeep = filterDuplicities(foldersToKeep)
     const foldersToDelete = differenceWith(
