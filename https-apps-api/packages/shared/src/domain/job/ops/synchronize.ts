@@ -114,7 +114,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     }
 
     if (isStateTerminal(remoteState)) {
-      this.ctx.log.debug({ remoteState }, 'SyncJobOperation: Remote job state  is terminal, will sync folders and files')
+      this.ctx.log.debug({ remoteState }, 'SyncJobOperation: Remote job state is terminal, will sync folders and files')
       // create jobClosed event
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
