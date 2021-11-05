@@ -80,7 +80,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         }
       }
 
-      this.ctx.log.info('Removing sync job task')
+      this.ctx.log.info('SyncJobOperation: Removing sync job task')
       // handle WORKER dirty state here
       // we could do more efficient error handling and also calls repetition here
       await removeRepeatable(this.ctx.job)
@@ -97,7 +97,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       await this.sendTerminationEmail()
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.ctx.log.info({ jobId: job.id }, 'Job marked as stale, trying to terminate')
+      this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Job marked as stale, trying to terminate')
       const terminateOp = new RequestTerminateJobOperation({
         log: this.ctx.log,
         em: this.ctx.em,
@@ -109,12 +109,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     // fixme: the mapping is not perfect for the https apps
     const remoteState = platformJobData.state
     if (remoteState === job.state) {
-      this.ctx.log.info({ remoteState }, 'State has not changed, no updates')
+      this.ctx.log.info({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
       return
     }
 
     if (isStateTerminal(remoteState)) {
-      this.ctx.log.debug({ remoteState }, 'We will do lots of updates')
+      this.ctx.log.debug({ remoteState }, 'SyncJobOperation: Remote job state  is terminal, will sync folders and files')
       // create jobClosed event
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
@@ -214,7 +214,11 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       await em.flush()
       // FOLDERS AND FILES SYNC END
     }
-    this.ctx.log.info({ jobId: input.dxid }, 'Updating job, state change discovered')
+    this.ctx.log.info({ 
+      jobId: input.dxid,
+      fromState: job.state,
+      toState: remoteState,
+    }, 'SyncJobOperation: Updating job state and metadata from platform')
     const updatedJob = wrap(job).assign(
       {
         describe: JSON.stringify(platformJobData),
@@ -223,7 +227,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       { em },
     )
     await em.flush()
-    this.ctx.log.debug({ job: updatedJob }, 'updated job')
+    this.ctx.log.debug({ job: updatedJob }, 'SyncJobOperation: Updated job')
   }
 
   private async sendTerminationEmail(): Promise<void> {
