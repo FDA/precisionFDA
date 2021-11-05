@@ -56,10 +56,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     this.job = job
     this.user = user
     this.client = new PlatformClient(this.ctx.log)
-    this.ctx.log.info({ jobId: job.id }, 'processing job')
+    this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.ctx.log.info({ input, job }, 'Job is already finished')
+      this.ctx.log.info({ input, job }, 'SyncJobOperation: Job is already finished. Removing task')
       await removeRepeatable(this.ctx.job)
       return
     }
@@ -75,17 +75,21 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         // we retrieved response status code
         if (err.props?.clientStatusCode && err.props?.clientStatusCode >= 500) {
           // there was an error on platform side, we will retry later
-          this.ctx.log.info('Will not remove this job - 5xx error code detected')
+          this.ctx.log.info({ error: err.props },
+            'SyncJobOperation: Will not remove this job - 5xx error code detected')
           return
         }
       }
 
-      this.ctx.log.info('SyncJobOperation: Removing sync job task')
+      this.ctx.log.info({ error: err.props },
+        'SyncJobOperation: Error on job/describe Removing sync job task')
       // handle WORKER dirty state here
       // we could do more efficient error handling and also calls repetition here
       await removeRepeatable(this.ctx.job)
       return
     }
+
+    this.ctx.log.info({ platformJobData: platformJobData }, 'SyncJobOperation: Received job/describe from platform')
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
     const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
