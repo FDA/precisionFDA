@@ -66,7 +66,7 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       // (using just a reference without identifier)
       // eslint-disable-next-line no-await-in-loop
       await em.persistAndFlush(res)
-      this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'created new folders with names')
+      this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'SyncFoldersOperation: Created new folders with names')
     }
 
     // paths to keep and then to remove
@@ -104,7 +104,7 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       foldersToKeep,
     )
 
-    this.ctx.log.info({ names: foldersToDelete.map(f => f.name) }, 'folders to delete')
+    this.ctx.log.info({ names: foldersToDelete.map(f => f.name) }, 'SyncFoldersOperation: Folders to delete')
     await Promise.all(
       foldersToDelete.map(async folder => {
         // delete files of given folder
