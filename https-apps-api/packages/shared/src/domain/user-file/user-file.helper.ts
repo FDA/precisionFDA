@@ -15,12 +15,14 @@ const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
 }
 
 const getFolders = (pathStr: string) => pathStr.split('/').slice(1)
+// Split folder path into a list of folder names
 
+// Find the set of paths on dx platform that is not on local
 const getPathsToBuild = (remote: string[], local: string[]): string[] => {
   return difference(remote, local)
 }
 
-// and delete the rest
+// Find the set of paths that exists on both dx platform and pFDA db
 const getPathsToKeep = (remote: string[], local: string[]): string[] => {
   return intersection(local, remote)
 }
@@ -29,6 +31,7 @@ const filterDuplicities = uniqBy((fol: Folder) => fol.id)
 
 /**
  * Prepares folder paths that are fetched from the API.
+ * Removes the root folder and sorts alphabetically
  * @param response DescribeFoldersResponse
  */
 const parseFoldersFromClient = (paths: string[]): string[] => {
@@ -49,10 +52,19 @@ const childrenTraverse = async (
   return acc
 }
 
-// recursion step
+/**
+ * Construct a folder's absolute paths (relative to Files root folder) from local database rows.
+ * This is done recursively starting from the end node and stepping up the tree reaching the root
+ * folder
+ * @param folders Folder[] array that contains all folders
+ * @param current The current folder
+ * @param acc Resultant path string
+ */
 const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): string[] => {
   acc.unshift(current.name)
   if (!current.parentFolderId) {
+    // Folder without parentFolderId, should be the root folder.
+    // Unless orphaned folders are possible (unverified claim)
     return acc
   }
   // fixme: be careful if parent is properly initialized -> so it has the id
@@ -69,7 +81,8 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
 }
 
 /**
- * Prepares folder paths from local database rows.
+ * Returns a list of folder absolute paths (relative to Files root folder) from a list of database Folder rows.
+ * Sorted by name
  * @param folders Folder[]
  */
 const parseFoldersFromDatabase = (folders: Folder[]): string[] => {
@@ -110,6 +123,13 @@ const getFolderPath = (folders: Folder[], current: Folder): string => {
   return `/${chain.join('/')}`
 }
 
+/**
+ * Returns a filter function that checks if an element of pathStr at index currentId
+ * @param parentId id of the parent node
+ * @param pathStr list of path string
+ * @param currentIdx index of pathStr that we should check against
+ *  TODO: Wouldn't it be cleaner if we just pass in pathStr[currentIdx] ?
+ */
 const compareWithParentId = (
   parentId: number | undefined | null,
   pathStr: string[],
@@ -122,6 +142,16 @@ const compareWithParentId = (
   return sameName && f.parentFolderId === parentId
 }
 
+/**
+ * Recursively finds folders specified in 'pathStr' that are not found in 'folders'
+ * @param folders List of existing folders retrieved from the database
+ * @param pathStr List of subfolder names ordered from parent folder to subfolder
+ * @param user User object
+ * @param parent Parent Folder object
+ * @param currentIdx Current index of pathStr
+ * @param result resultant Folder[] list
+ * @returns a list of Folders to be created on the database
+ */
 const createFoldersTraverse = (
   folders: Folder[],
   pathStr: string[],
@@ -139,7 +169,7 @@ const createFoldersTraverse = (
   }
   const current = folders.concat(result).find(compareWithParentId(parent?.id, pathStr, currentIdx))
   if (current) {
-    // we know this
+    // The folder path at pathStr[currentIdx] corresponds with an existing or already created Folder
     createFoldersTraverse(folders, pathStr, user, current, currentIdx + 1, result)
     return result
   }
@@ -151,6 +181,14 @@ const createFoldersTraverse = (
   return result
 }
 
+/**
+ *
+ * @param folders list of Folder database objects
+ * @param approvedPathStr list of folder names
+ * @param parent parent folder
+ * @param currentIdx index of 'approvedPathStr' to be examined
+ * @param result Reference to the running result, returned to caller
+ */
 const detectIntersectedTraverse = (
   folders: Folder[],
   approvedPathStr: string[],
