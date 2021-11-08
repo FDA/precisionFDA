@@ -106,8 +106,7 @@ export const Header: React.FC = () => {
 
   if (!init) return null
 
-  // Remove the false condition once we're ready to deploy GSRS to the public
-  const showGSRSLink = false && !isSpacesPath
+  const showGSRSLink = !isSpacesPath
 
   return (
     <StyledHeader>
