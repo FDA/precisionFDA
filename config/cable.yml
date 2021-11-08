@@ -1,13 +1,27 @@
-development:
+default: &default
   adapter: async
 
-test:
-  adapter: async
-
-ui_test:
-  adapter: async
-
-production:
+redis: &redis
   adapter: redis
   url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: give_production
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+ui_test:
+  <<: *default
+
+dev:
+  <<: *redis
+  channel_prefix: pfda_dev
+
+staging:
+  <<: *redis
+  channel_prefix: pfda_staging
+
+production:
+  <<: *redis
+  channel_prefix: pfda_production
