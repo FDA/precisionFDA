@@ -319,7 +319,7 @@ module Api
       raise ApiError, "You have no permissions to access this job" unless job
 
       redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
-      redirect_to(job.https_job_external_url) && return unless Utils.stage_or_prod_env?
+      redirect_to(job.https_job_external_url) && return if Utils.development_or_test?
 
       api = DIContainer.resolve("api.auth_user")
       code = api.get_https_job_auth_token(job)

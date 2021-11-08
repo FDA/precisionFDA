@@ -2,7 +2,6 @@ set :bundle_command, "/usr/local/bin/bundle exec"
 set :output, "log/cron.log"
 
 %w(
-  DNANEXUS_BACKEND
   SALESFORCE_USERNAME
   SALESFORCE_PASSWORD
   SALESFORCE_SECRET_TOKEN
