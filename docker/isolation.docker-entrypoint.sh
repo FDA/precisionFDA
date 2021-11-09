@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVEL=2/g' /etc/ssl/openssl.cnf
 
@@ -16,4 +16,8 @@ fi
 
 bundle exec rake user:generate_test_users
 
-bundle exec thin --ssl --debug start
+if [[ -f ./key.pem && -f ./cert.pem ]]; then
+  bundle exec thin --debug start --ssl --ssl-key-file ./key.pem --ssl-cert-file ./cert.pem
+else
+  bundle exec thin --ssl --debug start
+fi
