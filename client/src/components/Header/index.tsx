@@ -191,7 +191,7 @@ export const Header: React.FC = () => {
             </Link>
           )}
           {showGSRSLink && (
-            <a href="/ginas/app/beta" title="GSRS">
+            <a href="/ginas/app/beta" target="_blank" title="GSRS">
               <MenuItem>
                 <IconWrap>
                   <GSRSIcon height={16} />
