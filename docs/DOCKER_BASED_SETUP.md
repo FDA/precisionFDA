@@ -85,7 +85,16 @@ https://localhost:3000/
 ## Running application with GSRS
 
 GSRS runs as a process on the same instance as pFDA but is completely separate codebase
-To run everything locally via docker, use the following command
+To run everything locally via docker, you'd need to use a different docker-compose file.
+
+First build and do the database setup as described above using the full docker-compose:
+
+```docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml build
+docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml start db web
+docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml exec web bundle exec rake {db:setup,db:migrate,user:generate_test_users}
+```
+
+Then run the whole application
 
 `docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml up`
 
