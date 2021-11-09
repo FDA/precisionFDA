@@ -161,7 +161,7 @@ group :test do
   gem "webmock", "~> 3.1", ">= 3.1.1"
 end
 
-group :production do
+group :production, :staging, :dev do
   gem "exception_notification", "4.1.1"
   gem "puma", "~> 5.5.1"
 end

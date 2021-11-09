@@ -106,8 +106,7 @@ export const Header: React.FC = () => {
 
   if (!init) return null
 
-  // Remove the false condition once we're ready to deploy GSRS to the public
-  const showGSRSLink = false && !isSpacesPath
+  const showGSRSLink = !isSpacesPath && !userIsGuest
 
   return (
     <StyledHeader>
@@ -192,7 +191,7 @@ export const Header: React.FC = () => {
             </Link>
           )}
           {showGSRSLink && (
-            <a href="/ginas/app/beta" title="GSRS">
+            <a href="/ginas/app/beta" target="_blank" title="GSRS">
               <MenuItem>
                 <IconWrap>
                   <GSRSIcon height={16} />

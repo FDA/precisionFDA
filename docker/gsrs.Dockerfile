@@ -1,6 +1,6 @@
 FROM ubuntu:18.04 AS base
 
-ARG gsrs_branch=precisionFDA_PROD
+ARG gsrs_branch=precisionFDA_STAGE
 ENV GSRS_BRANCH=$gsrs_branch
 
 ARG mysql_user=root

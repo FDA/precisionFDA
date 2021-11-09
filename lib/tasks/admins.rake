@@ -11,7 +11,7 @@ def create_admin_groups!
 end
 
 def file_env
-  Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production" ? "prod" : "stage"
+  Rails.env.production? ? "prod" : "stage"
 end
 
 def load_admins
