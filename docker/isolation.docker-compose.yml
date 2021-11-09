@@ -33,6 +33,15 @@ services:
       - gsrs
     entrypoint: ./docker/isolation.docker-entrypoint.sh
 
+  frontend:
+    image: node:12
+    volumes:
+      - type: bind
+        source: ../
+        target: /precision-fda
+    working_dir: /precision-fda/client
+    command: bash -c "yarn && yarn watch"
+
   gsrs:
     build:
       context: ../
