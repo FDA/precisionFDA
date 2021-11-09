@@ -106,7 +106,7 @@ export const Header: React.FC = () => {
 
   if (!init) return null
 
-  const showGSRSLink = !isSpacesPath
+  const showGSRSLink = !isSpacesPath && !userIsGuest
 
   return (
     <StyledHeader>
