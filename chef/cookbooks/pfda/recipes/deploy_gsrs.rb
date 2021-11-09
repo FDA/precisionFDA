@@ -7,25 +7,16 @@ gsrs_pfda_conf = File.join(gsrs_path, "conf/ginas-pfda.conf")
 gsrs_run_script = File.join(gsrs_path, "start_gsrs.sh")
 gsrs_indexes_bucket = node[:gsrs][:indexes_bucket]
 
-aws_ssm_parameter_store "get all params" do
-  path "#{node[:ssm_base_path]}/"
-  recursive true
-  with_decryption true
-  return_key "params"
-  action :get_parameters_by_path
-  region node[:aws_region]
-end
-
 ruby_block "set envs" do
   block do
-    node.run_state.dig("params", "app", "environment").each do |name, val|
+    node.run_state.dig("ssm_params", "app", "environment").each do |name, val|
       ENV[name] = val
     end
 
     ENV["HOME"] = "/home/#{deploy_user}"
     ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
-    ENV["AWS_ACCESS_KEY_ID"] = node.run_state.dig("params", "gsrs", "aws_access_key_id")
-    ENV["AWS_SECRET_ACCESS_KEY"] = node.run_state.dig("params", "gsrs", "aws_secret_access_key")
+    ENV["AWS_ACCESS_KEY_ID"] = node.run_state.dig("ssm_params", "gsrs", "aws_access_key_id")
+    ENV["AWS_SECRET_ACCESS_KEY"] = node.run_state.dig("ssm_params", "gsrs", "aws_secret_access_key")
   end
 end
 
@@ -36,7 +27,7 @@ end
 
 git gsrs_path do
   repository node[:gsrs][:repo_url]
-  revision lazy { node.run_state.dig("params", "gsrs", "revision") || node[:gsrs][:revision] }
+  revision lazy { node.run_state.dig("ssm_params", "gsrs", "revision") || node[:gsrs][:revision] }
   ssh_wrapper node[:ssh_wrapper_path]
   depth 1
   user deploy_user
@@ -56,6 +47,8 @@ end
 
 template gsrs_pfda_conf do
   source "ginas-pfda.conf.erb"
+  owner deploy_user
+  group deploy_user
   variables lazy { ENV.to_hash }
 end
 

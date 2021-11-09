@@ -10,6 +10,7 @@ class GinasController < ApplicationController
   GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
   BETA_ROUTES = %w(
     /ginas/app
+    /ginas/app/styles.+\.css # fixme: Remove this hack, see PFDA-2815
     /ginas/app/webjars/.+
     /ginas/app/assets/.+
     /ginas/app/lock

@@ -2,7 +2,6 @@ deploy_user = "deploy"
 
 default[:ssm_base_path] = "/pfda/#{node.environment}"
 
-default[:aws_region] = "us-east-1"
 default[:app][:enable_ssl] = true
 default[:app][:shortname] = "precision_fda"
 

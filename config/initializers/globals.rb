@@ -1,20 +1,10 @@
-#
-# Some globally available constants. Could also become env-specific
-# by using: if Rails.env.development? { .... }
-#
+# Some globally available constants
 
-if ENV["DNANEXUS_BACKEND"] == "production"
-  HOST = "https://precision.fda.gov".freeze
+if Rails.env.production?
   DNANEXUS_AUTHSERVER_URI = "https://auth.dnanexus.com/".freeze
   DNANEXUS_APISERVER_URI = "https://api.dnanexus.com/".freeze
   DNANEXUS_PLATFORM_URI = "https://platform.dnanexus.com/".freeze
-  OAUTH2_CLIENT_ID = "precision_fda_gov".freeze
   APPKIT_TGZ = "project-Bk0j9YQ09Zjky196xkJ4Bzgy:/appkit.tgz".freeze
-  ORG_EVERYONE_HANDLE = "precisionfda".freeze
-  ORG_EVERYONE = "org-#{ORG_EVERYONE_HANDLE}".freeze
-  ORG_DUMMY = "org-precisionfda.dummy".freeze
-  ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
-  ADMIN_USER = "user-precisionfda.admin".freeze
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4".freeze
   CONSISTENCY_DISCUSSION_ID = 1
   TRUTH_DISCUSSION_ID = 6
@@ -25,40 +15,11 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   CHALLENGE_BOT_DX_USER = "challenge.bot".freeze
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F5g2fGj0458P90BP9ZbpkpvG".freeze
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F5g2fGj06B2Vy5Yx7pKPVb50".freeze
-else
-  HOST =
-    # rubocop:todo Rails/UnknownEnv
-    if Rails.env.development? || Rails.env.ui_test?
-      # rubocop:enable Rails/UnknownEnv
-      ENV["DEV_HOST"].present? ? "https://#{ENV['DEV_HOST']}" : "https://localhost:3000"
-    elsif ENV["DEV_HOST"]
-      "https://#{ENV['DEV_HOST']}"
-    else
-      "https://precisionfda-staging.dnanexus.com"
-    end
-
-  # rubocop:todo Rails/UnknownEnv
-  if Rails.env.development? || Rails.env.ui_test? || ENV["DEV_HOST"]
-    # rubocop:enable Rails/UnknownEnv
-    OAUTH2_CLIENT_ID = "precision_fda".freeze
-    ORG_EVERYONE_HANDLE = "precisionfda_dev".freeze
-    ADMIN_USER = "user-precisionfda.admin_dev".freeze
-    ORG_DUMMY = "org-precisionfda.dummy_dev".freeze
-  else
-    OAUTH2_CLIENT_ID = "precision_fda_gov".freeze
-    ORG_EVERYONE_HANDLE = "precisionfda".freeze
-    ADMIN_USER = "user-precisionfda.admin".freeze
-    ORG_DUMMY = "org-precisionfda.dummy".freeze
-  end
-
+else # these values are for staging, dev, development and test environments
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/".freeze
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/".freeze
   DNANEXUS_PLATFORM_URI = "https://staging.dnanexus.com/".freeze
   APPKIT_TGZ = "project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz".freeze
-
-  ORG_EVERYONE = "org-#{ORG_EVERYONE_HANDLE}".freeze
-  ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
-
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4".freeze
   CONSISTENCY_DISCUSSION_ID = 1
   TRUTH_DISCUSSION_ID = 4 # TODO: Update this to the discussion id of challenge
@@ -70,6 +31,23 @@ else
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F53j4F806B0v3GjVB81yQY8F".freeze
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F53j4F80PQGQ73yV87JKb0p3".freeze
 end
+
+if Rails.env.production? || Rails.env.staging?
+  OAUTH2_CLIENT_ID = "precision_fda_gov".freeze
+  ORG_EVERYONE_HANDLE = "precisionfda".freeze
+  ADMIN_USER = "user-precisionfda.admin".freeze
+  ORG_DUMMY = "org-precisionfda.dummy".freeze
+else # dev, development and test environments
+  OAUTH2_CLIENT_ID = "precision_fda".freeze
+  ORG_EVERYONE_HANDLE = "precisionfda_dev".freeze
+  ADMIN_USER = "user-precisionfda.admin_dev".freeze
+  ORG_DUMMY = "org-precisionfda.dummy_dev".freeze
+end
+
+HOST = ENV["HOST"].presence || "https://localhost:3000"
+ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
+
+ORG_EVERYONE = "org-#{ORG_EVERYONE_HANDLE}".freeze
 
 OAUTH2_REDIRECT_URI = "#{HOST}/return_from_login".freeze
 
