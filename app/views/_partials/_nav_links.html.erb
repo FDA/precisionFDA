@@ -52,12 +52,14 @@
       <% end %>
     </li>
   <% end %>
-  <li role="presentation">
-    <%= link_to "/ginas/app/beta", data: { turbolinks: false }, "aria-label": 'GSRS link' do %>
-      <div class="nav-icon" style="margin-top: -4px; margin-bottom: 4px;">
-        <%= image_tag("navbar/gsrs-logo-round-bw.svg", width:"16", height:"16") %>
-      </div>
-      <div class="nav-pill-title">GSRS</div>
-    <% end %>
-  </li>
+  <% if UserPolicy.can_see_gsrs?(@context) %>
+    <li role="presentation">
+      <%= link_to "/ginas/app/beta", data: { turbolinks: false }, "aria-label": 'GSRS link' do %>
+        <div class="nav-icon" style="margin-top: -4px; margin-bottom: 4px;">
+          <%= image_tag("navbar/gsrs-logo-round-bw.svg", width:"16", height:"16") %>
+        </div>
+        <div class="nav-pill-title">GSRS</div>
+      <% end %>
+    </li>
+  <% end %>
 </ul>
