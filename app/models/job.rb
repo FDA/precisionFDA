@@ -65,6 +65,8 @@ class Job < ApplicationRecord
   TYPE_REGULAR = "regular".freeze
   TYPE_HTTPS = "https".freeze
 
+  DEFAULT_HTTPS_PORT = 443
+
   belongs_to :app
   belongs_to :user
   belongs_to :app_series
@@ -158,7 +160,8 @@ class Job < ApplicationRecord
   def https_job_external_url
     return unless https?
 
-    describe.dig(:httpsApp, :dns, :url)
+    https_port = describe.dig(:httpsApp, :ports).first || DEFAULT_HTTPS_PORT
+    describe.dig(:httpsApp, :dns, :url).chomp("/") + ":#{https_port}"
   end
 
   def update_provenance!
