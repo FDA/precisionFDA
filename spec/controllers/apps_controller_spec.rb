@@ -25,7 +25,7 @@ RSpec.describe AppsController, type: :controller do
         input: { anything: "foo" },
         project: "project-test",
         timeoutPolicyByExecutable: {
-          app.dxid => { "*": { days: 2 }}
+          app.dxid => { "*": { days: 10 } },
         },
         singleContext: true,
         systemRequirements: {

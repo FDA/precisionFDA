@@ -125,6 +125,9 @@ type JobDescribeResponse = {
       url?: string
     }
   }
+  failureCount?: any
+  failureReason?: string
+  failureMessage?: string
 } & AnyObject
 
 const defaultLog = getLogger('platform-client-logger')
