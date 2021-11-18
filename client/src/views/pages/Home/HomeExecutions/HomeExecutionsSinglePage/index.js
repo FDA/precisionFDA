@@ -172,6 +172,12 @@ const HomeExecutionsSinglePage = (props) => {
                   <HomeLabel value={execution.state} state={execution.state} style={{ textTransform: 'uppercase' }} />&nbsp;
                   {execution.name}
                 </div>
+                <div>
+                  {execution.state == 'failed' &&
+                    <HomeLabel value={`${execution.failureReason}: ${execution.failureMessage}`}
+                               state={execution.state} />
+                  }
+                </div>
               </div>
               <div className='home-single-page__header-section_right-block'>
                 <a href={execution.links.run_job} className='pfda-mr-r20'>

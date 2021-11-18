@@ -68,6 +68,8 @@ const getExecution = (data) => ({
   runDataUpdates: data.run_data_updates,
   runInputData: data.run_input_data,
   runOutputData: data.run_output_data,
+  failureReason: data.failure_reason,
+  failureMessage: data.failure_message,
   uid: data.uid,
   tags: data.tags,
   appRevision: data.app_revision,

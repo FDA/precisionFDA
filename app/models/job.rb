@@ -135,6 +135,12 @@ class Job < ApplicationRecord
     state == STATE_FAILED
   end
 
+  def failure_reason
+    return "" if !failed? || !describe.key?("failureReason")
+
+    describe["failureReason"]
+  end
+
   def failure_message
     return "" if !failed? || !describe.key?("failureMessage")
 

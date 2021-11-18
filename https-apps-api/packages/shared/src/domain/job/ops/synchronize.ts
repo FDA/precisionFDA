@@ -29,7 +29,11 @@ import {
 } from '../../email/templates/mjml/job-stale.handler'
 import { buildEmailTemplate } from '../../email/email.helper'
 import { EmailSendInput } from '../../email/email.config'
+import { JOB_STATE } from '../job.enum'
 
+// N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
+//      In the future we'd need to rename this to something more specific
+//      when normal job syncing is also a part of the nodejs-worker
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
   protected user: User
   protected job: Job
@@ -89,6 +93,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       return
     }
 
+    delete platformJobData["sshHostKey"]
     this.ctx.log.info({ platformJobData: platformJobData }, 'SyncJobOperation: Received job/describe from platform')
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
@@ -122,6 +127,14 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       // create jobClosed event
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
+
+      if (remoteState == JOB_STATE.FAILED) {
+        this.ctx.log.info({
+          failureCounts: platformJobData.failureCounts,
+          failureReason: platformJobData.failureReason,
+          failureMessage: platformJobData.failureMessage,
+        }, 'SyncJobOperation: Detected failed job')
+      }
 
       // FOLDERS AND FILES SYNC
       const projectDesc = await this.client.foldersList({
