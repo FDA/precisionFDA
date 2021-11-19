@@ -14,6 +14,7 @@ import { SpaceEvent } from './space-event/space-event.entity'
 import { Space } from './space/space.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
 import { Asset } from './user-file/asset.entity'
+import { Challenge } from './challenge/challenge.entity'
 
 const entities = {
   App,
@@ -32,6 +33,7 @@ const entities = {
   SpaceEvent,
   SpaceMembership,
   Space,
+  Challenge,
 }
 
 export * as app from './app'
@@ -70,4 +72,5 @@ export {
   Space,
   SpaceMembership,
   SpaceEvent,
+  Challenge,
 }

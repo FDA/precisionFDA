@@ -1,11 +1,11 @@
 // eslint-disable-next-line import/no-named-default
 import { default as dotenv } from 'dotenv'
+// eslint-disable-next-line import/order
+import path from 'path'
 
 // load process.env values
 dotenv.config()
 
-// eslint-disable-next-line import/first, import/order
-import path from 'path'
 // eslint-disable-next-line import/first
 import { mergeDeepRight } from 'ramda'
 // eslint-disable-next-line import/first
