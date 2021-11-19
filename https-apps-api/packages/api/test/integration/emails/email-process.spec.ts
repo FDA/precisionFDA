@@ -48,12 +48,11 @@ describe('POST /emails/:id/send', () => {
       .send({ input: { jobId: job.id } })
       .expect(200)
     expect(body).to.be.true()
-    expect(fakes.queue.createEmailSendTaskFake.notCalled).to.be.true()
-    // const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
+    const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
 
-    // expect(taskInput).to.have.property('to', user.email)
-    // expect(taskInput).to.have.property('subject', 'Job finished')
-    // expect(taskInput).to.have.property('body').that.is.a('string')
+    expect(taskInput).to.have.property('to', user.email)
+    expect(taskInput).to.have.property('subject', `Execution ${job.name} finished`)
+    expect(taskInput).to.have.property('body').that.is.a('string')
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {

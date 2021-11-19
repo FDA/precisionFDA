@@ -27,9 +27,9 @@ export class EmailProcessOperation extends BaseOperation<EmailProcessInput, bool
   private async getEmailTemplate(): Promise<EmailTemplate> {
     const emailTypeId = this.input.emailTypeId
     const emailConfig = getEmailConfig(emailTypeId)
-    const template = emailConfig.templateClass
+    const handler = emailConfig.handlerClass
     // this also runs input validation
-    const instance = new template(emailTypeId, this.input.input, this.ctx)
+    const instance = new handler(emailTypeId, this.input.input, this.ctx)
     await instance.setupContext()
     return instance
   }

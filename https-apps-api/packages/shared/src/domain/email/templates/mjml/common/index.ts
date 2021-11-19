@@ -52,6 +52,9 @@ const footer = `
 const generateCommentLink = (commentId: number, spaceId: number): string =>
   `${config.api.railsHost}/spaces/${spaceId.toString()}/discuss`
 
+const generateObjectCommentsLink = (tableName: string, objectUid: string): string =>
+  `${config.api.railsHost}/${tableName}/${objectUid}/comments`
+
 const generateSpaceLink = (spaceId: number): string =>
   `${config.api.railsHost}/spaces/${spaceId.toString()}`
 
@@ -95,6 +98,7 @@ export {
   header,
   footer,
   generateCommentLink,
+  generateObjectCommentsLink,
   generateSpaceLink,
   generateJobDetailLink,
   getViewSpaceButton,

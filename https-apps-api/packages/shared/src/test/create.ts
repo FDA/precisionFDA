@@ -225,6 +225,25 @@ const spacesHelper = {
   },
 }
 
+const challengeHelper = {
+  create: (
+    em: EntityManager,
+    references: { userAndAdmin: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Challenge>>,
+  ) => {
+    const defaults = generate.challenge.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const challenge = wrap(
+      new entities.Challenge(references.userAndAdmin, references.userAndAdmin),
+    ).assign(input)
+    em.persist(challenge)
+    return challenge
+  },
+}
+
 const commentHelper = {
   create: (
     em: EntityManager,
@@ -242,4 +261,13 @@ const commentHelper = {
   },
 }
 
-export { userHelper, jobHelper, appHelper, filesHelper, tagsHelper, spacesHelper, commentHelper }
+export {
+  userHelper,
+  jobHelper,
+  appHelper,
+  filesHelper,
+  tagsHelper,
+  spacesHelper,
+  commentHelper,
+  challengeHelper,
+}
