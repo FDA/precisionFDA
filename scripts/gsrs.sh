@@ -58,7 +58,7 @@ CREATE TRIGGER ix_core_userprof_update_roles BEFORE INSERT ON ix_core_userprof
 FOR EACH ROW
 BEGIN
   IF NEW.roles_json IS NULL THEN
-    SET NEW.roles_json = '["Query", "Updater", "DataEntry"]';
+    SET NEW.roles_json = '["Query","Updater","SuperUpdate","DataEntry","SuperDataEntry"]';
   END IF;
 END; //
 delimiter ;
