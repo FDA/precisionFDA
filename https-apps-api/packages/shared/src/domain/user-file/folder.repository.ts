@@ -25,6 +25,7 @@ export class FolderRepository extends EntityRepository<Folder> {
     return await this.find({ project: { $ne: null }, parentFolderId }, { filters: ['folder'] })
   }
 
+  // TODO: rename to findFoldersInProject
   async findForSynchronization({ userId, projectDxid }: FindForSynchronization): Promise<Folder[]> {
     // implicit conditions on how to find folders :)
     return await this.find(

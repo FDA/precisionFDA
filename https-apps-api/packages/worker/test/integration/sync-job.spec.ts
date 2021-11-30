@@ -13,6 +13,8 @@ import {
   FILES_LIST_RES_SNAPSHOT,
   FILES_LIST_RES_TEST_FOLDER,
   FOLDERS_LIST_RES,
+  FOLDERS_LIST_RES_MEDIUM,
+  FOLDERS_LIST_RES_LARGE,
 } from '@pfda/https-apps-shared/src/test/mock-responses'
 import {
   FILE_STATE,
@@ -727,6 +729,39 @@ describe('TASK: sync_job_status', () => {
       expect(usedTag.taggings.count()).to.equal(0)
     })
 
+    // See PFDA-2715 for why
+    it('handles more than 32 remote folders', async () => {
+      const job = create.jobHelper.create(em, { user, app },
+        { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
+      )
+      await em.flush()
+
+      // Create a mock terminated job, with 33 folders and no files within the folders
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      fakes.client.foldersListFake.onCall(0).returns(FOLDERS_LIST_RES_LARGE)
+      fakes.client.filesListFake.returns({
+        results: [],
+        next: null,
+      })
+
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      em.clear()
+
+      const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
+      const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
+      expect(filesInDb).to.be.an('array').with.lengthOf(0)
+      expect(foldersInDb).to.be.an('array').with.lengthOf(33)
+      expect(foldersInDb.map((f: Folder) => f.name).slice(0,5)).to.have.ordered.members([
+        'folder-0',
+        'folder-1',
+        'folder-10',
+        'folder-11',
+        'folder-12',
+      ])
+    })
     // old tests - for inspiration (:
     it.skip('creates two regular files with tags', async () => {
       const job = create.jobHelper.create(
