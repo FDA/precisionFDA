@@ -120,6 +120,9 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       await em.commit()
     } catch (err) {
       await em.rollback()
+      this.ctx.log.warn({
+        error: err,
+      }, 'CreateJobOperation: Error creating job')
       throw err
     }
 

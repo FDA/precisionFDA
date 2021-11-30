@@ -13,8 +13,6 @@ export const handler = async (job: Job<Task<any>>) => {
     throw new errors.WorkerError('Job data does not specify task type', { jobData: job.data })
   }
 
-  log.debug({ jobData: job.data }, 'nodejs-worker about to handle job')
-
   switch (job.data.type) {
     case queue.TASKS.SYNC_JOB_STATUS:
       await jobStatusHandler(job)

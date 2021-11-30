@@ -47,12 +47,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
 
     // check input data
     if (!job) {
-      this.ctx.log.warn({ input }, 'Job does not exist')
+      this.ctx.log.warn({ input }, 'Error: Job does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
     if (!user) {
-      this.ctx.log.warn({ input }, 'User does not exist')
+      this.ctx.log.warn({ input }, 'Error: User does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
@@ -153,9 +153,14 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         parentType: PARENT_TYPE.JOB,
         projectDxid: job.project,
       })
+
       // for each local folder query files and check for differences
       // null is added -> root folder
       const folderPathsToCheck: Array<Folder | null> = [null, ...localFolders]
+      this.ctx.log.info({
+        foldersToCheckCount: folderPathsToCheck.length,
+      }, 'SyncJobOperation: About to sync files in folders')
+
       const fileDeletesSeq = async (): Promise<void> => {
         for (const folder of folderPathsToCheck) {
           // !!!
@@ -231,6 +236,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       await em.flush()
       // FOLDERS AND FILES SYNC END
     }
+
     this.ctx.log.info({ 
       jobId: input.dxid,
       fromState: job.state,
