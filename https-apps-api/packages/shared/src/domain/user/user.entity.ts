@@ -28,8 +28,8 @@ export class User extends BaseEntity {
   @Property()
   dxuser: string
 
-  @Property()
-  privateFilesProject: string
+  @Property({ nullable: true })
+  privateFilesProject?: string
 
   @Property()
   publicFilesProject: string
@@ -51,6 +51,9 @@ export class User extends BaseEntity {
 
   @Property()
   normalizedEmail: string
+
+  @Property({ nullable: true })
+  lastLogin?: Date
 
   @Property({ hidden: true })
   userState: number

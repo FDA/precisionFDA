@@ -19,6 +19,7 @@ import {
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
+import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
 
 const chance = new Chance()
 
@@ -260,6 +261,11 @@ const space = {
     state: 1, // ACTIVE,
     type: 1, // review type
   }),
+  group: (): Partial<InstanceType<typeof entities.Space>> => ({
+    name: chance.word(),
+    state: 1,
+    type: 0, // GROUP type
+  }),
 }
 
 const spaceMembership = {
@@ -289,6 +295,14 @@ const spaceEvent = {
   }),
 }
 
+const challenge = {
+  simple: (): Partial<InstanceType<typeof entities.Challenge>> => ({
+    name: 'test-challenge',
+    scope: 'public',
+    status: CHALLENGE_STATUS.SETUP,
+  }),
+}
+
 const comment = {
   simple: (): Partial<InstanceType<typeof entities.Comment>> => ({
     body: chance.sentence(),
@@ -313,4 +327,5 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
+  challenge,
 }

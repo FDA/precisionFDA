@@ -15,7 +15,10 @@ end
 
 template "/usr/local/conf/nginx.conf" do
   source "nginx.conf.erb"
-  variables lazy { { app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0] } }
+  variables lazy { {
+    app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0],
+    unii_host: node.run_state["ssm_params"]["app"]["environment"]["UNII_HOST"]
+  } }
 end
 
 template "/usr/local/conf/modsecurity.conf" do

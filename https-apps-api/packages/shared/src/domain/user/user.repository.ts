@@ -1,3 +1,4 @@
+import { FindOptions } from '@mikro-orm/core'
 import { EntityRepository } from '@mikro-orm/core'
 import { config } from '../../config'
 import { User } from '..'
@@ -9,6 +10,13 @@ export class UserRepository extends EntityRepository<User> {
         id: { $in: userIds },
       },
       { populate: ['emailNotificationSettings'] },
+    )
+  }
+
+  async findActive(findOptions?: FindOptions<User>): Promise<User[]> {
+    return await this.find(
+      { lastLogin: { $ne: null }, privateFilesProject: { $ne: null } },
+      findOptions,
     )
   }
 

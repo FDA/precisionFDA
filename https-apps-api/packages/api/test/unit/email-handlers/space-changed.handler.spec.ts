@@ -1,14 +1,17 @@
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
 import { database } from '@pfda/https-apps-shared'
-import { App, Job, User, Space } from '@pfda/https-apps-shared/src/domain'
+import { App, Job, User, Space, SpaceMembership } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { SpaceChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
 import { OpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
-import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
 
 describe('space-change.handler', () => {
@@ -19,8 +22,9 @@ describe('space-change.handler', () => {
   let app: App
   let job: Job
   let space: Space
+  let spaceMembership: SpaceMembership
+  let addedSpaceMembership: SpaceMembership
   let ctx: OpsCtx
-  // let anotherUserMembership: SpaceMembership
   const emailConfig = EMAIL_CONFIG.spaceChanged
 
   beforeEach(async () => {
@@ -35,11 +39,11 @@ describe('space-change.handler', () => {
     app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
-    create.spacesHelper.addMember(em, { user, space })
-    create.spacesHelper.addMember(
+    spaceMembership = create.spacesHelper.addMember(em, { user, space })
+    addedSpaceMembership = create.spacesHelper.addMember(
       em,
       { user: anotherUser, space },
-      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.GUEST },
     )
     create.spacesHelper.addMember(
       em,
@@ -79,11 +83,14 @@ describe('space-change.handler', () => {
       const handler = new SpaceChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const content = await handler.getTemplateContent()
-
       expect(content).to.be.deep.equal({
         initiator: { fullName: user.fullName },
         action: 'locked',
         space: { name: space.name, id: space.id },
+        receiversSides: {},
+        spaceMembership: { side: spaceMembership.side },
+        spaceMembershipSide: SPACE_MEMBERSHIP_SIDE[spaceMembership.side],
+        receiverMembershipSide: {},
       })
     })
   })

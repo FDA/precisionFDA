@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
 import { database } from '@pfda/https-apps-shared'
-import { App, SpaceMembership, User, Space, Comment } from '@pfda/https-apps-shared/src/domain'
+import { Job, SpaceMembership, User, Space, Comment } from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { CommentAddedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
@@ -16,6 +16,7 @@ describe('member-change.handler', () => {
   let anotherUser: User
   let space: Space
   let comment: Comment
+  let job: Job
   let ctx: OpsCtx
   let anotherUserMembership: SpaceMembership
   const emailConfig = EMAIL_CONFIG.newContentAdded
@@ -30,6 +31,7 @@ describe('member-change.handler', () => {
 
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
     comment = create.commentHelper.create(em, { user })
+    job = create.jobHelper.create(em, { user })
     create.spacesHelper.addMember(em, { user, space })
     anotherUserMembership = create.spacesHelper.addMember(
       em,
@@ -63,6 +65,8 @@ describe('member-change.handler', () => {
       expect(handler.spaceEvent.space.getEntity()).to.exist()
       expect(handler.comment).to.exist()
       expect(handler.comment.user.getEntity()).to.exist()
+      expect(handler.objectCommentsLink).to.exist()
+      expect(handler.objectCommentsLink).includes(job.uid)
     })
   })
 
@@ -95,7 +99,7 @@ describe('member-change.handler', () => {
         },
       )
       const settingsEntity = new EmailNotification({ user: anotherUser })
-      settingsEntity.data = { all_comment_activity: false }
+      settingsEntity.data = { reviewer_comment_activity: true }
       anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
       await em.flush()
 
@@ -104,7 +108,7 @@ describe('member-change.handler', () => {
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       // anotherUser gets filtered out
-      expect(receivers).to.have.lengthOf(0)
+      expect(receivers).to.have.lengthOf(1)
     })
   })
 

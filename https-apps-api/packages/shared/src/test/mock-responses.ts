@@ -75,6 +75,16 @@ const FOLDERS_LIST_RES = {
   folders: ['/', '/.Notebook_snapshots', '/test-folder'],
 }
 
+const FOLDERS_LIST_RES_MEDIUM = {
+  id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  folders: ['/', '/.Notebook_snapshots', '/test-folder', '/foo', '/foo/bar', '/foo/bar/stu'],
+}
+
+const FOLDERS_LIST_RES_LARGE = {
+  id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  folders: ['/'].concat(Array.from(Array(33).keys()).map(i => `/folder-${i}`)),
+}
+
 const FILES_DESC_RES = {
   results: [
     {
@@ -199,5 +209,7 @@ export {
   FILES_LIST_RES_SNAPSHOT,
   FILES_DESC_RES,
   FOLDERS_LIST_RES,
+  FOLDERS_LIST_RES_MEDIUM,
+  FOLDERS_LIST_RES_LARGE,
   FILES_LIST_RES_TEST_FOLDER,
 }
