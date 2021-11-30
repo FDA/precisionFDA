@@ -24,10 +24,10 @@ export class Comment extends BaseEntity {
   body: string
 
   @Property()
-  contentObjectId?: number
+  contentObjectId: number
 
   @Property()
-  contentObjectType?: string
+  contentObjectType: string
 
   @ManyToOne({ fieldName: 'user_id' })
   user!: IdentifiedReference<User>

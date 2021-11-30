@@ -1,11 +1,12 @@
 import { EmailTemplateInput } from '../../email.config'
-import { header, footer, generateCommentLink, getViewSpaceButton, getBottomSpacer } from './common'
+import { header, footer, getViewSpaceButton, getBottomSpacer } from './common'
 
 export type CommentAddedTemplateInput = EmailTemplateInput & {
   content: {
     initiator: { fullName: string }
-    comment: { body: string; id: number }
+    comment: { body: string; id: number, contentObjectId: number, contentObjectType: string }
     space: { id: number }
+    objectCommentsLink: string
   }
 }
 
@@ -24,10 +25,7 @@ export const commentAddedTemplate = (data: CommentAddedTemplateInput): string =>
           Hello ${data.receiver.firstName}!
         </mj-text>
         <mj-text>
-          User ${data.content.initiator.fullName} added a new <a href=${generateCommentLink(
-  data.content.comment.id,
-  data.content.space.id,
-)}>comment</a>:
+          User ${data.content.initiator.fullName} added a new <a href=${data.content.objectCommentsLink}>comment</a>:
         </mj-text>
         <mj-text>
           <blockquote>

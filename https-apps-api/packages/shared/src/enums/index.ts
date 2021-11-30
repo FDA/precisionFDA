@@ -5,4 +5,11 @@ enum ENVS {
   TEST = 'test',
 }
 
-export { ENVS }
+enum STATIC_SCOPE {
+  PRIVATE = 'private',
+  PUBLIC = 'public',
+}
+
+type Scope = STATIC_SCOPE & { [k: string]: string }
+
+export { ENVS, STATIC_SCOPE, Scope }

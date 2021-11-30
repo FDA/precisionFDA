@@ -5,6 +5,7 @@ import { schemas, enumUtils } from '../../utils'
 import { SpaceEvent, User } from '..'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import { config } from '../..'
 import { handlers } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
@@ -15,27 +16,27 @@ import { handlers } from './templates'
 const NOTIFICATION_TYPES_BASE = {
   // space event based
   membership_changed: true,
-  member_added_or_removed_from_space: true,
+  member_added_to_space: true,
   comment_activity: true,
   content_added_or_deleted: true,
   space_locked_unlocked_deleted: true,
-  // todo: deprecated?
-  space_lock_unlock_delete_requests: true,
   // jobs
   job_finished: true,
   // challenges
-  challenge_added: true,
+  challenge_opened: true,
+  challenge_preregister: true,
 }
 
 /**
  * List of notification roles, roles are represented by a prefix in the DB column,
  * so we want to document this mapping.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const NOTIFICATION_ROLE_PREFIXES = {
-  spaceLead: 'lead',
-  spaceAdmin: 'admin',
-  spaceMember: 'all',
+  admin: 'admin',
+  reviewer_lead: 'reviewer_lead',
+  sponsor_lead: 'sponsor_lead',
+  reviewer: 'reviewer',
+  sponsor: 'sponsor',
   privateScope: 'private',
 }
 /**
@@ -54,42 +55,60 @@ const NOTIFICATION_ROLE_PREFIXES = {
  *    -> "all_content_added_or_deleted" key is used
  */
 
-const NOTIFICATION_TYPES_COMMON = {
-  all_membership_changed: true,
-  all_comment_activity: true,
-  all_content_added_or_deleted: true,
+const NOTIFICATION_TYPES_REVIEWER = {
+  reviewer_membership_changed: true,
+  reviewer_comment_activity: true,
+  reviewer_content_added_or_deleted: true,
 }
 
-const NOTIFICATION_TYPES_LEAD = {
-  lead_membership_changed: true,
-  lead_comment_activity: true,
-  lead_content_added_or_deleted: true,
-  lead_member_added_or_removed_from_space: true,
-  lead_space_locked_unlocked_deleted: true,
+const NOTIFICATION_TYPES_SPONSOR = {
+  sponsor_membership_changed: true,
+  sponsor_comment_activity: true,
+  sponsor_content_added_or_deleted: true,
+}
+
+const NOTIFICATION_TYPES_REVIEWER_LEAD = {
+  reviewer_lead_membership_changed: true,
+  reviewer_lead_comment_activity: true,
+  reviewer_lead_content_added_or_deleted: true,
+  reviewer_lead_member_added_to_space: true,
+  reviewer_lead_space_locked_unlocked_deleted: true,
+}
+
+const NOTIFICATION_TYPES_SPONSOR_LEAD = {
+  sponsor_lead_membership_changed: true,
+  sponsor_lead_comment_activity: true,
+  sponsor_lead_content_added_or_deleted: true,
+  sponsor_lead_member_added_to_space: true,
+  sponsor_lead_space_locked_unlocked_deleted: true,
 }
 
 const NOTIFICATION_TYPES_ADMIN = {
   admin_membership_changed: true,
   admin_comment_activity: true,
   admin_content_added_or_deleted: true,
-  admin_member_added_or_removed_from_space: true,
+  admin_member_added_to_space: true,
   admin_space_locked_unlocked_deleted: true,
-  admin_space_lock_unlock_delete_requests: true,
 }
 
-// todo: extend with more email types
 const NOTIFICATION_PRIVATE = {
   private_job_finished: true,
+  private_challenge_opened: true,
+  private_challenge_preregister: true,
 }
 
 // we use as any here to overwrite mergeAll type declaration
-const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_COMMON> &
-  Partial<typeof NOTIFICATION_TYPES_LEAD> &
-  Partial<typeof NOTIFICATION_TYPES_ADMIN> &
+const NOTIFICATION_TYPES:   Partial<typeof NOTIFICATION_TYPES_ADMIN> &
+  Partial<typeof NOTIFICATION_TYPES_REVIEWER> &
+  Partial<typeof NOTIFICATION_TYPES_SPONSOR> &
+  Partial<typeof NOTIFICATION_TYPES_REVIEWER_LEAD> &
+  Partial<typeof NOTIFICATION_TYPES_SPONSOR_LEAD> &
   Partial<typeof NOTIFICATION_PRIVATE> = mergeAll([
-  NOTIFICATION_TYPES_COMMON,
-  NOTIFICATION_TYPES_LEAD,
   NOTIFICATION_TYPES_ADMIN,
+  NOTIFICATION_TYPES_REVIEWER,
+  NOTIFICATION_TYPES_SPONSOR,
+  NOTIFICATION_TYPES_REVIEWER_LEAD,
+  NOTIFICATION_TYPES_SPONSOR_LEAD,
   NOTIFICATION_PRIVATE,
 ]) as any
 
@@ -101,6 +120,26 @@ const jobFinishedEmailSchema: JSONSchema7 = {
     jobId: schemas.idProp,
   },
   required: ['jobId'],
+  additionalProperties: false,
+}
+
+const challengeStartedEmailSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    challengeId: schemas.idProp,
+  },
+  required: ['challengeId'],
+  additionalProperties: false,
+}
+
+const challengeCreatedEmailSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    challengeId: schemas.idProp,
+    name: { type: 'string', maxLength: config.validation.maxStrLen },
+    scope: { type: 'string', maxLength: config.validation.maxStrLen },
+  },
+  required: ['challengeId', 'name', 'scope'],
   additionalProperties: false,
 }
 
@@ -142,9 +181,11 @@ const membershipChangedEmailSchema: JSONSchema7 = {
 
 const emailInputSchemas = {
   jobFinishedEmailSchema,
+  challengeStartedEmailSchema,
   spaceEventEmailSchema,
   spaceChangedEmailSchema,
   membershipChangedEmailSchema,
+  challengeCreatedEmailSchema,
 }
 
 type NewContentAdded = { spaceEventId: number }
@@ -163,7 +204,12 @@ type SpaceChanged = {
   initUserId: number
   spaceId: number
   activityType: string
+  spaceMembershipId: number
 }
+
+type ChallengeOpened = { challengeId: number }
+
+type ChallengeCreated = { challengeId: number; name: string; scope: string }
 
 // EMAIL OPERATIONS INPUTS
 
@@ -206,6 +252,8 @@ interface EmailTemplate {
 
 type EMAIL_TYPES =
   | 'jobFinished'
+  | 'challengeOpened'
+  | 'challengePrereg'
   | 'newContentAdded'
   | 'memberChangedAddedRemoved'
   | 'spaceChanged'
@@ -219,7 +267,7 @@ type EmailConfigItem = {
   // optional, some emails may not require any dynamic content
   schema?: JSONSchema7
   // handler for given email type
-  templateClass: EmailTemplateContructor
+  handlerClass: EmailTemplateContructor
 }
 
 const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
@@ -227,31 +275,43 @@ const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
     name: 'jobFinished',
     emailId: 1,
     schema: emailInputSchemas.jobFinishedEmailSchema,
-    templateClass: handlers.JobFinishedEmailHandler,
+    handlerClass: handlers.JobFinishedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
     emailId: 2,
     schema: emailInputSchemas.spaceEventEmailSchema,
-    templateClass: handlers.ContentChangedEmailHandler,
+    handlerClass: handlers.ContentChangedEmailHandler,
   },
   memberChangedAddedRemoved: {
     name: 'memberChangedAddedRemoved',
     emailId: 3,
     schema: emailInputSchemas.membershipChangedEmailSchema,
-    templateClass: handlers.MemberChangedEmailHandler,
+    handlerClass: handlers.MemberChangedEmailHandler,
   },
   spaceChanged: {
     name: 'spaceChanged',
     emailId: 4,
     schema: emailInputSchemas.spaceChangedEmailSchema,
-    templateClass: handlers.SpaceChangedEmailHandler,
+    handlerClass: handlers.SpaceChangedEmailHandler,
   },
   commentAdded: {
     name: 'commentAdded',
     emailId: 5,
     schema: emailInputSchemas.spaceEventEmailSchema,
-    templateClass: handlers.CommentAddedEmailHandler,
+    handlerClass: handlers.CommentAddedEmailHandler,
+  },
+  challengeOpened: {
+    name: 'challengeOpened',
+    emailId: 6,
+    schema: emailInputSchemas.challengeStartedEmailSchema,
+    handlerClass: handlers.ChallengeOpenedEmailHandler,
+  },
+  challengePrereg: {
+    name: 'challengePrereg',
+    emailId: 7,
+    schema: emailInputSchemas.challengeCreatedEmailSchema,
+    handlerClass: handlers.ChallengePreregEmailHandler,
   },
 } as const
 
@@ -275,11 +335,11 @@ const emailConfigPerId = pipe(
 )(Object.values(EMAIL_CONFIG))
 
 const getEmailConfig = (emailId: number): EmailConfigItem => {
-  const config = emailConfigPerId[emailId.toString()]
-  if (!config) {
+  const emailConfig = emailConfigPerId[emailId.toString()]
+  if (!emailConfig) {
     throw new Error(`Email config for emailId=${emailId} not found`)
   }
-  return config
+  return emailConfig
 }
 
 export {
@@ -300,4 +360,6 @@ export {
   MemberChanged,
   SpaceChanged,
   CommentAdded,
+  ChallengeOpened,
+  ChallengeCreated,
 }

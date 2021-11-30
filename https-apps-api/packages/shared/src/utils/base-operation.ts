@@ -59,21 +59,22 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
 
   async execute(props?: IN): Promise<OUT> {
     const startTime = Date.now()
-    this.ctx.log.info(
-      {
-        name: this.constructor.name,
-        startTime,
-        id: this.id,
-        jobData: { 
-          type: this.ctx.job.data?.type,
-          payload: this.ctx.job.data?.payload,
-          user: maskAccessTokenUserCtx(this.ctx.job.data?.user),
-        },
-        bullJobId: this.ctx.job.id,
-        bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
+    const operationInfo = {
+      name: this.constructor.name,
+      startTime,
+      id: this.id,
+      jobData: {
+        type: this.ctx.job.data?.type,
+        payload: this.ctx.job.data?.payload,
+        user: maskAccessTokenUserCtx(this.ctx.job.data?.user),
       },
+      bullJobId: this.ctx.job.id,
+      bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
+    }
+    this.ctx.log.info({...operationInfo},
       'Worker operation started',
     )
+
     try {
       // run the operation with context
       const res = await this.run(props)
@@ -81,8 +82,12 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
       return res
     } catch (err) {
       this.ctx.log.warn(
-        { executionTime: Date.now() - startTime, err, id: this.id },
-        'Operation failed',
+        {
+          ...operationInfo,
+          executionTime: Date.now() - startTime,
+          error: err,
+        },
+        'Worker operation failed',
       )
       throw err
     }

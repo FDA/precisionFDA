@@ -7,3 +7,7 @@ export { MemberChangedEmailHandler } from './member-change.handler'
 export { SpaceChangedEmailHandler } from './space-change.handler'
 
 export { CommentAddedEmailHandler } from './comment-added.handler'
+
+export { ChallengeOpenedEmailHandler } from './challenge-opened.handler'
+
+export { ChallengePreregEmailHandler } from './challenge-prereg.handler'

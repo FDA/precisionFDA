@@ -59,9 +59,7 @@ export class ContentChangedEmailHandler
       filter((u: User) => u.id !== spaceEvent.user.id),
       uniqBy((user: User) => user.id),
     )
-    const result = filterUsers(memberships)
-
-    return result
+    return filterUsers(memberships)
   }
 
   async getTemplateContent(): Promise<NewContentTemplateInput['content']> {

@@ -35,6 +35,9 @@ const startHttpServer = async (): Promise<void> => {
 }
 
 const startHttpsServer = async (): Promise<void> => {
+  // Uncomment to debug server config
+  // log.info({config: config} , 'HTTP Server config')
+
   await new Promise(done => {
     const startedServer = https
       .createServer(
