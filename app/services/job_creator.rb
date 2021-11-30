@@ -47,7 +47,7 @@ class JobCreator
       name: name,
       input: input_info.dx_run_input,
       project: project,
-      timeoutPolicyByExecutable: { app.dxid => { "*" => { "days" => 2 } } },
+      timeoutPolicyByExecutable: { app.dxid => { "*" => { "days" => 10 } } },
       singleContext: true,
       systemRequirements: system_requirements(run_instance_type),
     }.delete_if { |_, value| value.nil? }

@@ -80,7 +80,7 @@ describe('content-change.handler', () => {
 
     it('based on user settings', async () => {
       // the key prefix has to match anotherUsers role in the space
-      const settings = { all_content_added_or_deleted: false } as const
+      const settings = { reviewer_comment_activity: true } as const
       const settingsEntity = new EmailNotification({ user: anotherUser })
       settingsEntity.data = settings
       anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
@@ -89,7 +89,7 @@ describe('content-change.handler', () => {
       const input = { spaceEventId: spaceEventJobAdded.id }
       const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
       const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(0)
+      expect(receivers).to.have.lengthOf(1)
     })
 
     it('notifications default value = true', async () => {

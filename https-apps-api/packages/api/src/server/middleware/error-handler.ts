@@ -31,11 +31,11 @@ export const makeErrorHandlerMdw: Api.Mdw = () => async (ctx, next) => {
     return await next()
   } catch (err) {
     if (err instanceof errors.BaseError) {
-      ctx.log.warn({ err }, 'request error handler - known error')
+      ctx.log.warn({ err }, 'Error: Request error handler - known error')
       ctx.status = err.props.statusCode || 500
       ctx.body = formatKnownError(err)
     } else {
-      ctx.log.error({ err }, 'request error handler - unknown error')
+      ctx.log.error({ err }, 'Error: Request error handler - unknown error')
       ctx.status = 500
       ctx.body = formatUnknownError(err)
     }

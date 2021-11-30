@@ -125,6 +125,9 @@ type JobDescribeResponse = {
       url?: string
     }
   }
+  failureCount?: any
+  failureReason?: string
+  failureMessage?: string
 } & AnyObject
 
 const defaultLog = getLogger('platform-client-logger')
@@ -364,7 +367,7 @@ class PlatformClient {
 
   private logClientFailed(options: AxiosRequestConfig): void {
     const sanitized = {}
-    this.log.warn({ requestOptions: { ...options, headers: sanitized } }, 'Failed request options')
+    this.log.warn({ requestOptions: { ...options, headers: sanitized } }, 'Error: Failed request options')
   }
 
   private setupHeaders(params: BaseParams): AnyObject {
@@ -380,17 +383,17 @@ class PlatformClient {
           statusCode: err.response.status,
           resHeaders: err.response.headers,
         },
-        'Failed platform response',
+        'Error: Failed platform response',
       )
-      throw new errors.ClientRequestError('DNANexus client API call failed', {
+      throw new errors.ClientRequestError('Error: DNAnexus client API call failed', {
         clientResponse: err.response.data,
         clientStatusCode: err.response.status,
       })
     } else if (err.request) {
       // the request was made but no response was received
-      this.log.error({ err }, 'Failed platform request - no response received')
+      this.log.error({ err }, 'Error: Failed platform request - no response received')
     } else {
-      this.log.error({ err }, 'Failed platform request - different error')
+      this.log.error({ err }, 'Error: Failed platform request - different error')
     }
     // todo: handle this does not result in 500 API error
     throw err

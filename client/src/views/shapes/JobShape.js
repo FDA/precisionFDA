@@ -28,6 +28,8 @@ const mapToJob = (data) => {
     duration: data.duration,
     energyConsumption: data.energy_consumption,
     createdAt: data.created_at,
+    failureReason: data.failure_reason,
+    failureMessage: data.failure_message,
     scope: data.scope,
     links: data.links,
     entityType: data.entity_type,

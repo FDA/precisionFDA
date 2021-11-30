@@ -14,6 +14,12 @@ const shouldSyncStatus = (job: Job): boolean => {
   return true
 }
 
+const isJobPrivate = (job: Job): boolean => job.scope.toLowerCase() === 'private'
+
+const isJobPublic = (job: Job): boolean => job.scope.toLowerCase() === 'public'
+
+const isJobInSpace = (job: Job): boolean => job.scope.toLowerCase().startsWith('space')
+
 const isStateActive = (state: string): boolean =>
   Object.values(ACTIVE_STATES).includes(state as JOB_STATE)
 
@@ -39,4 +45,4 @@ const buildIsOverMaxDuration = (
   }
 }
 
-export { shouldSyncStatus, isStateTerminal, buildIsOverMaxDuration, isStateActive }
+export { shouldSyncStatus, isStateTerminal, buildIsOverMaxDuration, isStateActive, isJobPrivate, isJobPublic, isJobInSpace }

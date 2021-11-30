@@ -20,6 +20,8 @@ class JobSerializer < ApplicationSerializer
     :duration,
     :duration_in_seconds,
     :energy_consumption,
+    :failure_reason,
+    :failure_message,
     :created_at,
     :created_at_date_time,
     :scope,
@@ -36,6 +38,7 @@ class JobSerializer < ApplicationSerializer
   attr_reader :launched_on
 
   delegate :name, :location, to: :object
+  delegate :failure_reason, :failure_message, to: :object
 
   # Returns a run input_data for each input.
   # @return [Array] of objects [

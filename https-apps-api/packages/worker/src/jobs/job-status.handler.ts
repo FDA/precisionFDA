@@ -7,7 +7,9 @@ import { getChildLogger } from '../utils'
 
 export const jobStatusHandler = async (bullJob: Job) => {
   const data = bullJob.data as CheckStatusJob
-  const requestId = nanoid()
+  // This used to be nanoid(), but it makes it hard to track in the logs which
+  // operation invocation is assocated with which task requests in 
+  const requestId = String(bullJob.id)
   const log = getChildLogger(requestId)
   // this is like a router endpoint
   // validation ??
