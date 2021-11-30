@@ -14,11 +14,19 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
+import { LoadedReference } from '@mikro-orm/core'
+import { SPACE_MEMBERSHIP_SIDE } from '../../../space-membership/space-membership.enum'
 
 export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> implements EmailTemplate {
   templateFile = spaceChangedTemplate
   space: Space
   user: User
+  receiversSides: any
+
+  // to take away the following?
+  spaceMembership: SpaceMembership & { user: LoadedReference<User, User> } & { space: LoadedReference<Space, Space> }
+  spaceMembershipSide: any
+  receiverMembershipSide: any
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'space_locked_unlocked_deleted'
@@ -41,6 +49,23 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
         { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
+
+    const spaceMemberships = await this.ctx.em.find(
+      SpaceMembership,
+      { spaces: this.space.id, active: true },
+      { populate: ['user.emailNotificationSettings'] },
+    )
+
+    const spaceMembership: any = spaceMemberships.filter(memberShip => {
+      if (memberShip.user.id === this.user.id) {
+        return memberShip
+      }
+    })
+
+    this.spaceMembership = spaceMembership[0] // future need
+    this.spaceMembershipSide = SPACE_MEMBERSHIP_SIDE[spaceMembership[0].side] // no need
+    this.receiverMembershipSide = {} // future need
+    this.receiversSides = {}
   }
 
   async determineReceivers(): Promise<User[]> {
@@ -51,8 +76,8 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     )
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
-
     const spaceEventUserId = this.user.id
+
     // this has to be bound to local
     const filterUsers = pipe(
       // SpaceMembership[] -> User[]
@@ -61,10 +86,26 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
       filter((u: User) => u.id !== spaceEventUserId),
       uniqBy((user: User) => user.id),
     )
-    const result = filterUsers(memberships)
+    const receivers = filterUsers(memberships)
     // based on email type, find who will be the receiver
     // users who are in the space + active ?
-    return result
+    const receiversSidesArr = receivers.map(a =>
+      [
+        a.id.toString(),
+        // @ts-ignore
+        SPACE_MEMBERSHIP_SIDE[memberships.find(membership => membership.user.id === a.id).side]
+      ]
+    )
+    // @ts-ignore
+    this.receiversSides = Object.fromEntries(receiversSidesArr)
+    const receiverMembership: any = memberships.filter(memberShip => {
+      if (receivers && memberShip.user.id === receivers[0].id) {
+        return memberShip
+      }
+    })
+    this.receiverMembershipSide = SPACE_MEMBERSHIP_SIDE[receiverMembership[0].side]
+
+    return receivers
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await, require-await
@@ -72,10 +113,15 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     // todo: validate the incoming action?
     const actionKey = this.validatedInput.activityType
     const action = actionKey.split('_').slice(1).join(' ')
+
     return {
       space: { name: this.space.name, id: this.space.id },
       action,
       initiator: { fullName: this.user.fullName },
+      spaceMembership: { side: this.spaceMembership.side },
+      spaceMembershipSide: this.spaceMembershipSide,
+      receiverMembershipSide: this.receiverMembershipSide,
+      receiversSides: this.receiversSides,
     }
   }
 

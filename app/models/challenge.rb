@@ -45,6 +45,17 @@ class Challenge < ApplicationRecord
   acts_as_followable
 
   after_create :initialize_order
+  after_save :send_email_on_open,
+             if: proc { |ch|
+                   [
+                     STATUS_SETUP,
+                     STATUS_PRE_REGISTRATION,
+                   ].include?(ch.status_previous_change&.first) &&
+                     ch.status_previous_change&.last == STATUS_OPEN
+                 }
+
+  after_save :send_email_on_prereg,
+             if: proc { |ch| ch.status_previous_change&.last == STATUS_PRE_REGISTRATION }
 
   attr_accessor :replacement_id
   store :meta, accessors: [:regions], coder: JSON
@@ -329,6 +340,18 @@ class Challenge < ApplicationRecord
   # Usage in a challenges create on Challenges#new
   def initialize_order
     self.specified_order = id
+  end
+
+  def send_email_on_open
+    email_type_id = NotificationPreference.email_types[:notification_challenge_opened]
+    client = DIContainer.resolve("https_apps_client")
+    client.email_send(email_type_id, { challengeId: id })
+  end
+
+  def send_email_on_prereg
+    email_type_id = NotificationPreference.email_types[:notification_challenge_preregister]
+    client = DIContainer.resolve("https_apps_client")
+    client.email_send(email_type_id, { challengeId: id, scope: scope, name: name })
   end
 
   def validate_end_at

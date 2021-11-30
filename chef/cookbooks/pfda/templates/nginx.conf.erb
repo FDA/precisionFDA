@@ -51,6 +51,13 @@ http {
     modsecurity on;
     modsecurity_rules_file /usr/local/conf/modsecurity.conf;
 
+    # Reverse proxy to UNII site on CloudFront
+    location /uniisearch {
+      proxy_pass https://<%= @unii_host %>$uri$is_args$args;
+      proxy_set_header Host <%= @unii_host %>;
+      resolver 8.8.8.8;
+    }
+
     root /srv/pfda/public;
 
     try_files $uri/index.html $uri @pfda;

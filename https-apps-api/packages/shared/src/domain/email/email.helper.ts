@@ -4,7 +4,10 @@ import mjml2html from 'mjml'
 import { isNil } from 'ramda'
 import { SpaceMembership, User } from '..'
 import { Maybe, OpsCtx } from '../../types'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '../space-membership/space-membership.enum'
 import {
   EmailConfigItem,
   EmailSendInput,
@@ -24,16 +27,35 @@ const getKeyForUserSpaceRole = (
   keyBase: keyof typeof NOTIFICATION_TYPES_BASE,
 ): string => {
   let prefix: string
-  switch (membership.role) {
-    case SPACE_MEMBERSHIP_ROLE.ADMIN:
-      prefix = NOTIFICATION_ROLE_PREFIXES.spaceAdmin
-      break
-    case SPACE_MEMBERSHIP_ROLE.LEAD:
-      prefix = NOTIFICATION_ROLE_PREFIXES.spaceLead
-      break
-    default:
-      prefix = NOTIFICATION_ROLE_PREFIXES.spaceMember
+  if(membership.side === SPACE_MEMBERSHIP_SIDE.HOST) {
+    switch (membership.role) {
+      case SPACE_MEMBERSHIP_ROLE.ADMIN:
+        prefix = NOTIFICATION_ROLE_PREFIXES.admin
+        break
+      case SPACE_MEMBERSHIP_ROLE.LEAD:
+        prefix = NOTIFICATION_ROLE_PREFIXES.reviewer_lead
+        break
+      default:
+        prefix = NOTIFICATION_ROLE_PREFIXES.reviewer
+    }
+  } else if(membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
+    switch (membership.role) {
+      case SPACE_MEMBERSHIP_ROLE.ADMIN:
+        prefix = NOTIFICATION_ROLE_PREFIXES.admin
+        break
+      case SPACE_MEMBERSHIP_ROLE.LEAD:
+        prefix = NOTIFICATION_ROLE_PREFIXES.sponsor_lead
+        break
+      default:
+        prefix = NOTIFICATION_ROLE_PREFIXES.sponsor
+    }
   }
+  // @ts-ignore
+  return `${prefix}_${keyBase}`
+}
+
+const getKeyForPrivateEvent = (keyBase: keyof typeof NOTIFICATION_TYPES_BASE): string => {
+  const prefix = NOTIFICATION_ROLE_PREFIXES.privateScope
   return `${prefix}_${keyBase}`
 }
 
@@ -41,13 +63,23 @@ const getKeyForUserSpaceRole = (
 const buildIsNotificationEnabled = (
   notificationKeyBase: keyof typeof NOTIFICATION_TYPES_BASE,
   ctx: OpsCtx,
-) => (membership: SpaceMembership): boolean => {
+) => (membershipOrUser: SpaceMembership | User): boolean => {
   const { log } = ctx
-  const user = membership.user.unwrap()
+  let user: User
+  let notificationKey: string
+  if (membershipOrUser instanceof User) {
+    user = membershipOrUser
+    notificationKey = getKeyForPrivateEvent(notificationKeyBase)
+  } else if (membershipOrUser instanceof SpaceMembership) {
+    user = membershipOrUser.user.unwrap()
+    notificationKey = getKeyForUserSpaceRole(membershipOrUser, notificationKeyBase)
+  } else {
+    throw new Error('Invalid entity type - required User or SpaceMembership')
+  }
+
   const userConfig = isNil(user.emailNotificationSettings)
     ? null
     : user.emailNotificationSettings.unwrap()
-  const notificationKey = getKeyForUserSpaceRole(membership, notificationKeyBase)
   if (!Object.keys(NOTIFICATION_TYPES).includes(notificationKey)) {
     // notification TYPE does not even exist, we cannot send the email
     return false
@@ -86,19 +118,26 @@ const buildIsNotificationEnabled = (
 const buildFilterByUserSettings = (
   ctx: EmailHelperCtx,
   isEnabledFn: ReturnType<typeof buildIsNotificationEnabled>,
-) => (memberships: SpaceMembership[]): User[] => {
+) => (membershipOrUsers: Array<SpaceMembership | User>): User[] => {
   const { log, config } = ctx
-  const filtered = memberships.filter(membership => {
-    const emailTypeIsEnabled = isEnabledFn(membership)
+  const filtered = membershipOrUsers.filter(membershipOrUser => {
+    const emailTypeIsEnabled = isEnabledFn(membershipOrUser)
     if (!emailTypeIsEnabled) {
+      const userId =
+        membershipOrUser instanceof SpaceMembership ? membershipOrUser.user.id : membershipOrUser.id
       log.info(
-        { receiverId: membership.user.id, emailTypeId: config.emailId },
+        {
+          receiverId: userId,
+          emailTypeId: config.emailId,
+        },
         'Skipping email type for user because of their config',
       )
     }
     return emailTypeIsEnabled
   })
-  return filtered.map(membership => membership.user.unwrap())
+  return filtered.map(membershipOrUser =>
+    membershipOrUser instanceof SpaceMembership ? membershipOrUser.user.unwrap() : membershipOrUser,
+  )
 }
 
 const buildEmailTemplate = <N>(templateBuilder: (input: N) => string, payload: N): string => {
@@ -123,5 +162,6 @@ export {
   buildIsNotificationEnabled,
   buildFilterByUserSettings,
   getKeyForUserSpaceRole,
+  getKeyForPrivateEvent,
   buildEmailTemplate,
 }

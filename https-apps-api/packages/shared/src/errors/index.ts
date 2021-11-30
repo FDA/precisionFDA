@@ -51,7 +51,7 @@ export class BaseError extends Error {
 }
 
 export class WorkerError extends BaseError {
-  constructor(message = 'Worker processing failed', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Worker processing failed', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.WORKER,
       ...props,
@@ -60,7 +60,7 @@ export class WorkerError extends BaseError {
 }
 
 export class InternalError extends BaseError {
-  constructor(message = 'Internal error', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Internal error', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.GENERIC,
       statusCode: 500,
@@ -70,7 +70,7 @@ export class InternalError extends BaseError {
 }
 
 export class NotFoundError extends BaseError {
-  constructor(message = 'Entity not found', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.NOT_FOUND,
       statusCode: 404,
@@ -81,7 +81,7 @@ export class NotFoundError extends BaseError {
 
 export class ValidationError extends BaseError {
   constructor(
-    message = 'Validation failed',
+    message = 'Error: Validation failed',
     props: MaybeBaseErrorProps & { validationErrors?: any } = {},
   ) {
     super(message, {
@@ -93,7 +93,7 @@ export class ValidationError extends BaseError {
 }
 
 export class JobNotFoundError extends NotFoundError {
-  constructor(message = 'Job entity not found', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Job entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.JOB_NOT_FOUND,
       ...props,
@@ -102,7 +102,7 @@ export class JobNotFoundError extends NotFoundError {
 }
 
 export class FolderNotFoundError extends NotFoundError {
-  constructor(message = 'Folder entity not found', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Folder entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.FOLDER_NOT_FOUND,
       ...props,
@@ -111,7 +111,7 @@ export class FolderNotFoundError extends NotFoundError {
 }
 
 export class UserNotFoundError extends NotFoundError {
-  constructor(message = 'User entity not found', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: User entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.USER_NOT_FOUND,
       ...props,

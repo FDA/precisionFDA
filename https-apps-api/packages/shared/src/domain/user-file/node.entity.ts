@@ -14,6 +14,9 @@ export class Node extends BaseEntity {
   @Property()
   dxid?: string
 
+  @Property()
+  uid: string
+
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
 

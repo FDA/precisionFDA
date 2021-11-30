@@ -245,7 +245,7 @@ describe('member-change.handler', () => {
       }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       const key = handler.getNotificationKey()
-      expect(key).to.equal('member_added_or_removed_from_space')
+      expect(key).to.equal('member_added_to_space')
     })
 
     it('based on space event type (member changed)', async () => {

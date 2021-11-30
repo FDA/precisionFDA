@@ -14,8 +14,8 @@ const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
   throw new Error('Unsupported entity instance')
 }
 
-const getFolders = (pathStr: string) => pathStr.split('/').slice(1)
 // Split folder path into a list of folder names
+const splitFolderPath = (pathStr: string) => pathStr.split('/').slice(1)
 
 // Find the set of paths on dx platform that is not on local
 const getPathsToBuild = (remote: string[], local: string[]): string[] => {
@@ -85,9 +85,8 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
  * Sorted by name
  * @param folders Folder[]
  */
-const parseFoldersFromDatabase = (folders: Folder[]): string[] => {
-  const folderPaths = folders
-    .map(folder => {
+const folderPathsFromFolders = (folders: Folder[]): string[] => {
+  const folderPaths = folders.map(folder => {
       const chain = folderTraverse(folders, folder, [])
       return `/${chain.join('/')}`
     })
@@ -142,6 +141,17 @@ const compareWithParentId = (
   return sameName && f.parentFolderId === parentId
 }
 
+const createNameAndParentIdFilter = (
+  folderName: string,
+  parent: Folder | undefined,
+) => (f: Folder): boolean => {
+  const sameName = f.name === folderName
+  if (isNil(parent)) {
+    return sameName && isNil(f.parentFolderId)
+  }
+  return sameName && f.parentFolderId === parent.id
+}
+
 /**
  * Recursively finds folders specified in 'pathStr' that are not found in 'folders'
  * @param folders List of existing folders retrieved from the database
@@ -167,7 +177,7 @@ const createFoldersTraverse = (
     // todo: log or throw error
     console.log('parent is not yet persisted! Might not create subfolders properly', parent.name)
   }
-  const current = folders.concat(result).find(compareWithParentId(parent?.id, pathStr, currentIdx))
+  const current = folders.concat(result).find(createNameAndParentIdFilter(pathStr[currentIdx], parent))
   if (current) {
     // The folder path at pathStr[currentIdx] corresponds with an existing or already created Folder
     createFoldersTraverse(folders, pathStr, user, current, currentIdx + 1, result)
@@ -199,8 +209,7 @@ const detectIntersectedTraverse = (
   if (currentIdx === approvedPathStr.length) {
     return result
   }
-  const parentId = isNil(parent) ? null : parent.id
-  const current = folders.find(compareWithParentId(parentId, approvedPathStr, currentIdx))
+  const current = folders.find(createNameAndParentIdFilter(approvedPathStr[currentIdx], parent))
   if (!current) {
     throw new Error('folder name was not found in db entries')
   }
@@ -209,10 +218,47 @@ const detectIntersectedTraverse = (
   return result
 }
 
+// This is a replacement for detectIntersectedTraverse
+// TODO: Remove detectIntersectedTraverse if the following replacement works in all cases, but not before veriying
+/**
+ * findFolderForPath
+ * 
+ * This is a recursive function to find the Folder object pertaining to the path described by folderPathComponents
+ * It expects a path split of the target folder, /foo/bar/stu -> ['foo', 'bar', 'stu']
+ * On first recursion it looks for the Folder with name 'foo', followed by Folder with name 'bar' whose parent is 'foo'
+ * and so forth until the last path component ('stu') is processed
+ * 
+ * @param folders list of all available Folders database objects, as the source of lookup
+ * @param folderPathComponents folder path components of the folder
+ * @param parent parent folder, for first invocation this should be undefined
+ * @returns Folder that is defined by the folderPathComponents
+ */
+const findFolderForPath = (
+  folders: Folder[],
+  folderPathComponents: string[],
+  parent: Folder | undefined
+): Folder | undefined  => {
+  const folderName = folderPathComponents[0]
+
+  const currentFolder = folders.find(createNameAndParentIdFilter(folderName, parent))
+  if (!currentFolder) {
+    throw new Error(`Folder ${folderName} was not found in db entries`)
+  }
+
+  if (folderPathComponents.length > 1) {
+    folderPathComponents.shift()
+    return findFolderForPath(folders, folderPathComponents, currentFolder)
+  }
+  else {
+    return currentFolder
+  }
+}
+
+
 export {
   parseFoldersFromClient,
-  parseFoldersFromDatabase,
-  getFolders,
+  folderPathsFromFolders,
+  splitFolderPath,
   createFoldersTraverse,
   detectIntersectedTraverse,
   getPathsToBuild,
@@ -222,4 +268,5 @@ export {
   childrenTraverse,
   getStiEnumTypeFromInstance,
   filterLeafPaths,
+  findFolderForPath,
 }
