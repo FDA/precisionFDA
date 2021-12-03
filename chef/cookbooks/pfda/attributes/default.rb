@@ -36,3 +36,4 @@ default["nodejs"]["binary"]["checksum"] =
   "b2d9787da97d6c0d5cbf24c69fdbbf376b19089f921432c5a61aa323bc070bea"
 
 default["nodejs"]["bin_path"] = "/usr/local/nodejs-binary/bin/"
+default["nodejs"]["worker"]["instances"] = 2
