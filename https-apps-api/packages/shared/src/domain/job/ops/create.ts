@@ -92,7 +92,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         project: this.projectId,
         name: jobName,
         // will be resolved later
-        describe: {},
+        describe: JSON.stringify({}),
         scope: input.scope,
         entityType: JOB_DB_ENTITY_TYPE.HTTPS,
         runData: {

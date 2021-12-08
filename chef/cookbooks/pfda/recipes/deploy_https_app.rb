@@ -46,7 +46,7 @@ application app_dir do
       instances: node.run_state.dig("ssm_params", "app", "environment", "NODE_WORKER_INSTANCES") ||
                  node["nodejs"]["worker"]["instances"],
     } }
-    end
+  end
 
   execute "make install" do
     cwd https_apps_dir

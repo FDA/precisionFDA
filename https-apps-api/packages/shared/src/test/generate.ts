@@ -41,6 +41,9 @@ const user = {
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
     privateFilesProject: `project-${random.dxstr()}`,
+    publicFilesProject: `project-${random.dxstr()}`,
+    // privateComparisonsProject: `project-${random.dxstr()}`,
+    // publicComparisonsProject: `project-${random.dxstr()}`,
   }),
 }
 
