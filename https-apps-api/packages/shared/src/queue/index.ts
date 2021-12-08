@@ -145,6 +145,9 @@ const createCheckStaleJobsTask = async (data: types.CheckStaleJobsJob['payload']
   return await addToQueue(wrapped, checkStaleJobsQueue, options)
 }
 
+
+export * as debug from './queue.debug'
+
 export {
   createJobSyncTask,
   createSendEmailTask,

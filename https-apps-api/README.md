@@ -80,3 +80,32 @@ $ mv localhost-key.pem key.pem
   - input (request query):
     1. `limit` - for pagination (default value 10)
     2. `offset` - pagination (default value 1)
+
+
+### Useful Commands for Debugging
+
+To test API calls from console, first store the user context required in an environment variable
+`export USER_CONTEXT="id=<USER_ID>&dxuser=<DXUSER>&accessToken=<ACCESS_TOKEN>"`
+
+The access token of a particular user is stored in the `sessions` table
+
+
+Start workstation
+`curl -k "https://localhost:3001/apps/$APP_ID/run?$USER_CONTEXT"`
+
+List all jobs for a user
+`curl -k "https://localhost:3001/jobs?$USER_CONTEXT" | python -m json.tool`
+
+Describe a job
+`curl -k "https://localhost:3001/jobs/$JOB_ID?$USER_CONTEXT" | python -m json.tool`
+
+Terminate job
+`curl -k --request PATCH "https://localhost:3001/jobs/$JOB_ID/terminate?$USER_CONTEXT"`
+
+Stale job report task (admin)
+`curl -k "https://localhost:3001/admin/checkStaleJobs?$USER_CONTEXT" | python -m json.tool`
+
+Debug jobs in bull queue
+`curl -k "https://localhost:3001/debug/queue?$USER_CONTEXT" | python -m json.tool`
+
+`curl -k "https://localhost:3001/debug/queue/job/$JOB_ID?$USER_CONTEXT" | python -m json.tool`
