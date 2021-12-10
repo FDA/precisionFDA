@@ -11,7 +11,7 @@ const StyledImg = styled.img`
 `
 
 const PFDALogoLight = ({ className='' }) => {
-  return <StyledImg className={className} src={precisionFDALight} />
+  return <StyledImg className={className} src={precisionFDALight} alt='PFDA Light logo to navigate to home page' />
 }
 
 PFDALogoLight.propTypes = {
@@ -19,7 +19,7 @@ PFDALogoLight.propTypes = {
 }
 
 const PFDALogoDark = ({ className='' }) => {
-  return <StyledImg className={className} src={precisionFDADark} />
+  return <StyledImg className={className} src={precisionFDADark} alt='PFDA Dark logo to navigate to home page' />
 }
 
 PFDALogoDark.propTypes = {
