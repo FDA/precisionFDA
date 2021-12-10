@@ -53,7 +53,7 @@ const SpaceWorkflowsList = ({ spaceId, workflows, isFetching, sortType, sortDir,
   if (workflows.length) {
     return (
       <div className="space-workflows-list">
-        <div className='space-page-layout__list-wrapper'>
+        <div className='space-page-layout__list-wrapper  shared_area_workflows'>
           <Table>
             <Thead>
               <th className="pfda-padded-l10">
@@ -101,10 +101,10 @@ const Row = ({ workflow, toggleCheckbox }) => {
         <Icon icon={checkboxClasses} onClick={toggleHandler} />
       </td>
       <td>
-        <LinkTargetBlank url={linkShow}>
+        <a href={linkShow} target='_blank' rel='noopener noreferrer' aria-label={`Click this link to view the workflow ${workflow.name} in a new tab`}>
           <Icon icon={getSpacesIcon('workflows')} fw />
           <span>{workflow.name}</span>
-        </LinkTargetBlank>
+        </a>
       </td>
       <td>
         <LinkTargetBlank url={workflow.links.user}>

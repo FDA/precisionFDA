@@ -27,7 +27,7 @@ const PrivateCells = ({ space }) => {
     <>
       <td className={classNames(tdClasses)}>
         { isAccessible ?
-          <Link to={`/spaces/${space.id}`}>Private</Link> :
+          <Link to={`/spaces/${space.id}`} aria-label={`Click this link to navigate to Private Space ID ${space.id}`} >Private</Link> :
           <span>Private</span>
         }
       </td>
@@ -50,14 +50,14 @@ const SharedCells = ({ space, hasPrivate }) => {
     <>
       <td className={classNames(tdClasses)} rowSpan={sharedRowspan}>
         { isAccessible ?
-          <Link to={`/spaces/${space.id}`}>Shared</Link> :
+          <Link to={`/spaces/${space.id}`} aria-label={`Click this link to navigate to Space ID ${space.id}`}>Shared</Link> :
           <span>Shared</span>
         }
       </td>
-      <td className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
+      <td aria-label={`Click this link to navigate to the ${space.hostLead.name} profile page`} className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
         {(space.hostLead) && <UserLink user={space.hostLead} />}
       </td>
-      <td className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
+      <td aria-label={`Click this link to navigate to the ${space.guestLead.name} profile page`} className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
         {(space.guestLead) && <UserLink user={space.guestLead} />}
       </td>
     </>
@@ -68,6 +68,7 @@ const ToggleCell = ({ space, lockToggleHandler }) => {
   const classes = classNames(
     'spaces-list-table__switcher',
     `spaces-list-table__switcher--${space.status}`,
+    `remediation-table-switcher-${space.status}`,
   )
   return (
     <td rowSpan="2" className="spaces-list-table__switcher-td">
@@ -96,7 +97,7 @@ const Row = ({ space, lockToggleHandler }) => {
         <ToggleCell space={space.shared} lockToggleHandler={lockToggleHandler} />
         <td className="spaces-list-table__title">
           { space.shared.links.show ?
-            <Link to={`/spaces/${space.shared.id}`}>{space.shared.name}</Link> :
+            <Link aria-label={`This link will navigate to ${space.shared.name} Space`}  to={`/spaces/${space.shared.id}`}>{space.shared.name}</Link> :
             <span>{space.shared.name}</span>
           }
         </td>
@@ -125,15 +126,15 @@ const SpacesTable = (props) => {
     <div className="spaces-list-table">
       <Table>
         <Thead>
-          <Th>space state</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="name" sortHandler={sortHandler}>name</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="type" sortHandler={sortHandler}>type</Th>
-          <Th>tags</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="created_at" sortHandler={sortHandler}>created on</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="updated_at" sortHandler={sortHandler}>modified on</Th>
-          <Th>area type</Th>
-          <Th>reviewer/host lead</Th>
-          <Th>sponsor/guest lead</Th>
+          <Th class_name="spaces-list-headers-grey">space state</Th>
+          <Th sortType={sortType} sortDir={sortDir} type="name" sortHandler={sortHandler} class_name="spaces-list-headers-blue">name</Th>
+          <Th sortType={sortType} sortDir={sortDir} type="type" sortHandler={sortHandler} class_name="spaces-list-headers-blue">type</Th>
+          <Th class_name="spaces-list-headers-grey">tags</Th>
+          <Th sortType={sortType} sortDir={sortDir} type="created_at" sortHandler={sortHandler} class_name="spaces-list-headers-blue">created on</Th>
+          <Th sortType={sortType} sortDir={sortDir} type="updated_at" sortHandler={sortHandler} class_name="spaces-list-headers-blue">modified on</Th>
+          <Th class_name="spaces-list-headers-grey">area type</Th>
+          <Th class_name="spaces-list-headers-grey">reviewer/host lead</Th>
+          <Th class_name="spaces-list-headers-grey">sponsor/guest lead</Th>
         </Thead>
         <Tbody>
           {spaces.map((space) => <Row space={space} key={space.id} lockToggleHandler={lockToggleHandler} />)}

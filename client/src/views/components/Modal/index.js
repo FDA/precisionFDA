@@ -25,6 +25,11 @@ const Modal = ({ children, className, modalFooterContent, isOpen, isLoading, tit
       overlayClassName='pfda-modal__overlay'
       ariaHideApp={false}
       onRequestClose={hideHandler}
+      aria={
+        {
+        label: title,
+        }
+      }
       {...rest}
     >
       <div className="modal-dialog">
@@ -36,7 +41,7 @@ const Modal = ({ children, className, modalFooterContent, isOpen, isLoading, tit
             <h4 className="modal-title">{title}</h4>
             {(subTitle) && (
               <div className="pfda-mr-t10">
-                <small className="text-muted">{subTitle}</small>
+                <small className="text-muted modal-text-color">{subTitle}</small>
               </div>
             )}
           </div>
