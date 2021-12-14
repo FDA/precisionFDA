@@ -33,6 +33,8 @@ export enum ErrorCodes {
   EMAIL_PAYLOAD_NOT_FOUND = 'E_EMAIL_PAYLOAD_NOT_FOUND',
   EXTERNAL_SERVICE_ERROR = 'E_EXTERNAL_SERVICE_FAILED',
   SALESFORCE_SERVICE_ERROR = 'E_SALESFORCE_SERVICE_FAILED',
+  DB_CLUSTER_NOT_FOUND = 'E_DB_CLUSTER_NOT_FOUND',
+  DB_CLUSTER_STATUS_MISMATCH = 'E_DB_CLUSTER_STATUS_MISMATCH',
 }
 
 export class BaseError extends Error {
@@ -96,6 +98,25 @@ export class JobNotFoundError extends NotFoundError {
   constructor(message = 'Error: Job entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.JOB_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
+export class DbClusterNotFoundError extends NotFoundError {
+  constructor(message = 'DB Cluster entity not found', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.DB_CLUSTER_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
+export class DbClusterStatusMismatchError extends BaseError {
+  constructor(message = 'DB Cluster status mismatched', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.DB_CLUSTER_STATUS_MISMATCH,
+      statusCode: 400,
       ...props,
     })
   }

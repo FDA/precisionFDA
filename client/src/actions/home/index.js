@@ -40,6 +40,31 @@ import {
   setAppExecutionsFilterValue,
   resetAppExecutionsFiltersValue,
 } from './apps'
+import {
+  fetchDatabases,
+  fetchDatabaseDetails,
+  toggleAllDatabasesCheckboxes,
+  toggleDatabaseCheckbox,
+  setDatabaseFilterValue,
+  resetDatabasesFiltersValue,
+  setDatabaseSpacesFilterValue,
+  resetDatabasesSpacesFiltersValue,
+  toggleAllDatabasesSpacesCheckboxes,
+  toggleDatabaseSpacesCheckbox,
+  resetDatabasesModals,
+  showDatabaseEditTagsModal,
+  hideDatabaseEditTagsModal,
+  showDatabasesEditInfoModal,
+  hideDatabasesEditInfoModal,
+  editDatabaseInfo,
+  runDatabasesAction,
+  createDatabase,
+  // todo later:
+  // fetchDatabasesSpaces,
+  // showDatabasesCopyToSpaceModal,
+  // hideDatabasesCopyToSpaceModal,
+  // copyToSpaceDatabases,
+} from './databases'
 import fetchAccessibleSpaces from './fetchAccessibleSpaces'
 import fetchAccessibleLicense from './fetchAccessibleLicense'
 import copyToSpace from './copyToSpace'
@@ -248,6 +273,11 @@ const appsAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.APP, items, note
 const editAppTags = (uid, tags, suggestedTags) => editTags(uid, tags, suggestedTags, OBJECT_TYPES.APP)
 const editFileTags = (uid, tags, suggestedTags) => editTags(uid, tags, suggestedTags, OBJECT_TYPES.FILE)
 
+// const copyToSpaceDatabases = (scope, ids) => copyToSpace('/api/databases/copy', OBJECT_TYPES.DATABASE, scope, ids)
+const databasesLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.DATABASE, HOME_FILES_MODALS.LICENSE)
+const databasesAcceptLicenseAction = (link) => licenseAction(link, OBJECT_TYPES.DATABASE, HOME_FILES_MODALS.ACCEPT_LICENSE)
+const editDatabaseTags = (uid, tags, suggestedTags) => editTags(uid, tags, suggestedTags, OBJECT_TYPES.DATABASE)
+
 const makePublicFolder = (link, ids) => makePublic(link, OBJECT_TYPES.FILE, ids)
 const copyToSpaceFiles = (scope, ids) => copyToSpace('/api/files/copy', OBJECT_TYPES.FILE, scope, ids)
 const filesAttachTo = (items, noteUids) => attachTo(OBJECT_TYPES.FILE, items, noteUids)
@@ -327,6 +357,42 @@ export {
   selectAccessibleLicense,
   setAppExecutionsFilterValue,
   resetAppExecutionsFiltersValue,
+}
+export {
+  fetchDatabases,
+  fetchDatabaseDetails,
+
+  toggleAllDatabasesCheckboxes,
+  toggleDatabaseCheckbox,
+
+  setDatabaseFilterValue,
+  resetDatabasesFiltersValue,
+
+  setDatabaseSpacesFilterValue,
+  resetDatabasesSpacesFiltersValue,
+
+  toggleAllDatabasesSpacesCheckboxes,
+  toggleDatabaseSpacesCheckbox,
+
+  databasesLicenseAction,
+  databasesAcceptLicenseAction,
+
+  // fetchDatabasesSpaces,
+  // showDatabasesCopyToSpaceModal,
+  // hideDatabasesCopyToSpaceModal,
+  // copyToSpaceDatabases,
+
+  resetDatabasesModals,
+
+  showDatabaseEditTagsModal,
+  hideDatabaseEditTagsModal,
+  editDatabaseTags,
+
+  showDatabasesEditInfoModal,
+  hideDatabasesEditInfoModal,
+  editDatabaseInfo,
+  runDatabasesAction,
+  createDatabase,
 }
 
 export {

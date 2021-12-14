@@ -3,7 +3,12 @@ import Bull from 'bull'
 import { client, queue } from '..'
 // import { handler } from '../../src/jobs'
 import * as generate from './generate'
-import { FILES_DESC_RES, FILES_LIST_RES_ROOT, FOLDERS_LIST_RES } from './mock-responses'
+import {
+  FILES_DESC_RES,
+  FILES_LIST_RES_ROOT,
+  FOLDERS_LIST_RES,
+  DBCLUSTER_DESC_RES,
+} from './mock-responses'
 
 const sandbox = sinon.createSandbox()
 
@@ -19,6 +24,9 @@ const fakes = {
     folderRemoveFake: sinon.stub(),
     folderCreateFake: sinon.stub(),
     filesMoveFake: sinon.stub(),
+    dbClusterActionFake: sinon.stub(),
+    dbClusterCreateFake: sinon.stub(),
+    dbClusterDescribeFake: sinon.stub(),
   },
   queue: {
     removeRepeatableFake: sinon.fake(),
@@ -44,6 +52,13 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
   fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
+  fakes.client.dbClusterActionFake.callsFake(() => ({
+    id: generate.dbCluster.simple().dxid
+  }))
+  fakes.client.dbClusterCreateFake.callsFake(() => ({
+    id: generate.dbCluster.simple().dxid
+  }))
+  fakes.client.dbClusterDescribeFake.callsFake(() => DBCLUSTER_DESC_RES)
 }
 
 const mocksSetup = () => {
@@ -59,6 +74,21 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client.PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
   sandbox.replace(client.PlatformClient.prototype, 'removeFolderRec', fakes.client.folderRemoveFake)
+  sandbox.replace(
+    client.PlatformClient.prototype,
+    'dbClusterAction',
+    fakes.client.dbClusterActionFake,
+  )
+  sandbox.replace(
+    client.PlatformClient.prototype,
+    'dbClusterCreate',
+    fakes.client.dbClusterCreateFake,
+  )
+  sandbox.replace(
+    client.PlatformClient.prototype,
+    'dbClusterDescribe',
+    fakes.client.dbClusterDescribeFake,
+  )
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
   sandbox.replace(Bull.prototype, 'isReady', fakes.bull.isReadyFake)
@@ -79,6 +109,9 @@ const mocksReset = () => {
   fakes.client.folderRemoveFake.reset()
   fakes.client.folderCreateFake.reset()
   fakes.client.filesMoveFake.reset()
+  fakes.client.dbClusterActionFake.reset()
+  fakes.client.dbClusterCreateFake.reset()
+  fakes.client.dbClusterDescribeFake.reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()

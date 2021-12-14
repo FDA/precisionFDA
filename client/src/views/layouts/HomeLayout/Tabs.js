@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink, withRouter } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
@@ -52,6 +52,20 @@ const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters, hideT
     if (currentTab && !counters[currentTab].isFetched) fetchCounters(currentTab)
   }, [currentTab])
 
+  // In progress - for spaces
+  // eslint-disable-next-line  no-unused-vars
+  const [privateTabDisable, setPrivateTabDisable] = useState(false)
+  const [everybodyTabDisable, setEverybodyTabDisable] = useState(false)
+  const [featuredTabDisable, setFeaturedTabDisable] = useState(false)
+  const [spaceTabDisable, setSpaceTabDisable] = useState(false)
+  useEffect(() => {
+    if (page === 'databases') {
+      setEverybodyTabDisable(true)
+      setFeaturedTabDisable(true)
+      setSpaceTabDisable(true)
+    }
+  }, [])
+
   if (hideTabs) return null
 
   return (
@@ -62,6 +76,7 @@ const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters, hideT
         tab={HOME_TABS.PRIVATE}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        isDisabled={privateTabDisable}
       />
       <Tab
         url={`/home/${page}/featured`}
@@ -69,6 +84,7 @@ const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters, hideT
         tab={HOME_TABS.FEATURED}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        isDisabled={featuredTabDisable}
       />
       <Tab
         url={`/home/${page}/everybody`}
@@ -76,6 +92,7 @@ const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters, hideT
         tab={HOME_TABS.EVERYBODY}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        isDisabled={everybodyTabDisable}
       />
       <Tab
         url={`/home/${page}/spaces`}
@@ -83,6 +100,7 @@ const Tabs = ({ match, currentTab, setCurrentTab, fetchCounters, counters, hideT
         tab={HOME_TABS.SPACES}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        isDisabled={spaceTabDisable}
       />
     </div>
   )

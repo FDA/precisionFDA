@@ -1,8 +1,15 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
+import { DateTime } from 'luxon'
 import { entities } from '../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
+import {
+  STATUS as DB_CLUSTER_STATUS,
+  ENGINE as DB_CLUSTER_ENGINE,
+  ENGINES,
+} from '../domain/db-cluster/db-cluster.enum'
+import { STATIC_SCOPE } from '../enums'
 import type { AnyObject } from '../types'
 import {
   FILE_STATE,
@@ -30,6 +37,7 @@ const random = {
   password: () => chance.string({ length: 20 }),
   dxstr: (): string => nanoid(),
   word: () => chance.word(),
+  description: () => chance.sentence({ words: 2 }),
   chance,
 }
 
@@ -316,6 +324,37 @@ const comment = {
   }),
 }
 
+const dbCluster = {
+  simple: (): Partial<InstanceType<typeof entities.DbCluster>> => {
+    const dxid = `dbcluster-${random.dxstr()}`
+    return {
+      dxid: dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      description: random.description(),
+      scope: STATIC_SCOPE.PRIVATE,
+      dxInstanceClass: 'db_std1_x1',
+      engineVersion: '5.7.12',
+      host: `dbcluster.${chance.word()}.com`,
+      port: chance.pickone(['3306', '3307', '3308']),
+      statusAsOf: DateTime.now().minus({ minutes: chance.natural({ min: 1, max: 30 }) }).toJSDate(),
+      status: DB_CLUSTER_STATUS.AVAILABLE,
+      engine: DB_CLUSTER_ENGINE.MYSQL,
+    }
+  },
+  createInput: (): AnyObject => ({
+    project: `project-${random.dxstr()}`,
+    name: chance.name(),
+    description: random.description(),
+    scope: STATIC_SCOPE.PRIVATE,
+    dxInstanceClass: 'db_std1_x1',
+    engine: ENGINES.MYSQL,
+    engineVersion: '5.7.12',
+    adminPassword: random.password(),
+  }),
+}
+
 export {
   random,
   user,
@@ -331,4 +370,5 @@ export {
   spaceEvent,
   comment,
   challenge,
+  dbCluster,
 }

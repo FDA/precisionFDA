@@ -24,6 +24,8 @@ module PathHelper
       end
     when "app"
       app_comments_path(item)
+    when "db-cluster"
+      api_dbcluster_comments_path(item.dxid)
     when "job"
       job_comments_path(item)
     when "asset"
@@ -67,6 +69,8 @@ module PathHelper
       app_path(item)
     when "app-series"
       pathify(item.latest_accessible(@context))
+    when "db-cluster"
+      "/home/databases/#{item.dxid}"
     when "job"
       job_path(item)
     when "asset"

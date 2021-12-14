@@ -198,7 +198,7 @@ const HomeFilesSinglePage = (props) => {
       <HomeEditTagsModal
         isOpen={editTagsModal.isOpen}
         isLoading={editTagsModal.isLoading}
-        name={file.title}
+        name={file.name}
         tags={file.tags}
         showSuggestedTags
         hideAction={hideFileEditTagsModal}

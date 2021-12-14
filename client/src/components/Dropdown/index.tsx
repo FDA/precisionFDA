@@ -36,6 +36,7 @@ export const Dropdown: FC<{
     popperRef.current,
     {
       placement: 'bottom-end',
+      // placement: 'right', // to be used in db create
       modifiers: [
         {
           name: 'arrow',
@@ -58,7 +59,7 @@ export const Dropdown: FC<{
       {children({
         style: { cursor: 'pointer' },
         ref: buttonRef,
-        onClick: () => trigger === 'click' && setShowPopper(!showPopper),
+        onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
         onMouseEnter: () => trigger === 'hover' && setShowPopper(true),
         onMouseLeave: () => trigger === 'hover' && setShowPopper(false),
         isActive: showPopper,

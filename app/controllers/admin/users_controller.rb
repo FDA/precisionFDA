@@ -92,7 +92,7 @@ module Admin
       begin
         api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
         api.call("account", "resendActivationEmail", usernameOrEmail: user.dxid)
-      rescue Net::HTTPServerException
+      rescue DXClient::Errors::DXClientError
         redirect_back(fallback_location: user_path(user), error: "There was a platform error")
       else
         redirect_back(
@@ -110,7 +110,7 @@ module Admin
       begin
         api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
         api.call(user.dxid, "resetUserMFA", user_id: user.dxid, org_id: ORG_EVERYONE)
-      rescue Net::HTTPServerException => e
+      rescue DXClient::Errors::DXClientError => e
         if e.message =~ /MFA is already reset/
           redirect_back(
             fallback_location: user_path(user),
@@ -140,7 +140,7 @@ module Admin
           user_id: user.dxid,
           org_id: ORG_EVERYONE,
         )
-      rescue Net::HTTPServerException => e
+      rescue DXClient::Errors::DXClientError => e
         if request.post?
           render json: { ok: "error" }, status: :forbidden
         else

@@ -1,5 +1,11 @@
+import { inRange } from 'lodash'
+
 import * as C from '../constants'
 
+
+const isHttpSuccess = (status) => {
+  return inRange(status, 200, 300)
+}
 
 const getOrder = (prevType, type, dir) => {
   if (prevType !== type || dir === null) {
@@ -64,6 +70,7 @@ const convertSecondsToDhms = (seconds) => {
 }
 
 export {
+  isHttpSuccess,
   getOrder,
   isCheckedAllCheckboxes,
   getModalKey,

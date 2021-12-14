@@ -1,0 +1,75 @@
+import { expect } from 'chai'
+import { EntityManager } from '@mikro-orm/mysql'
+import supertest from 'supertest'
+import { errors, database } from '@pfda/https-apps-shared'
+import { create, generate, db } from '@pfda/https-apps-shared/src/test'
+import { DbCluster, User } from '@pfda/https-apps-shared/src/domain'
+import {
+  STATUS as DB_CLUSTER_STATUS,
+  ENGINE as DB_CLUSTER_ENGINE,
+} from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
+import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
+import { api } from '../../../src/server'
+import { getDefaultQueryData } from '../../utils/expect-helper'
+
+describe('POST /dbclusters/start', () => {
+  let em: EntityManager
+  let user: User
+  let dbClusters: Array<DbCluster>
+  let dxids: Array<string>
+
+  beforeEach(async () => {
+    await db.dropData(database.connection())
+    em = database.orm().em
+    em.clear()
+    user = create.userHelper.create(em)
+    dbClusters = [
+      create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED }),
+      create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED }),
+    ]
+    dxids = dbClusters.map(dbCluster => dbCluster.dxid)
+    await em.flush()
+    mocksReset()
+  })
+
+  it('responds with success', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/dbclusters/start`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({ dxids: dxids })
+      .expect(204)
+
+    expect(fakes.client.dbClusterActionFake.calledTwice).to.be.true()
+
+    const fakeCalls = fakes.client.dbClusterActionFake.getCalls()
+
+    expect([fakeCalls[0].args[0]['dxid'], fakeCalls[1].args[0]['dxid']]).to.have.members(dxids)
+    expect(fakeCalls[0].args[1]).to.be.equal('start')
+    expect(fakeCalls[1].args[1]).to.be.equal('start')
+  })
+
+  context('error states', () => {
+    it('throws error when the dbcluster does not exist', async () => {
+      const { body } = await supertest(api.getServer())
+        .post(`/dbclusters/start`)
+        .query({ ...getDefaultQueryData(user) })
+        .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
+        .expect(404)
+
+      expect(body).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_NOT_FOUND)
+    })
+
+    it('throws error when the dbcluster status is not stopped', async () => {
+      dbClusters[0].status = DB_CLUSTER_STATUS.AVAILABLE
+      await em.flush()
+
+      const { body } = await supertest(api.getServer())
+        .post(`/dbclusters/start`)
+        .query({ ...getDefaultQueryData(user) })
+        .send({ dxids: dxids })
+        .expect(400)
+
+      expect(body).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_STATUS_MISMATCH)
+    })
+  })
+})

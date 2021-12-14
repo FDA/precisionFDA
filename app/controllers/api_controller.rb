@@ -368,8 +368,9 @@ class ApiController < ApplicationController
     result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
       describe_for_api(file, unsafe_params[:describe])
     end
-
+    # rubocop:disable Style/NumericPredicate
     render json: unsafe_params[:offset] == 0 ? { objects: result, count: count } : result
+    # rubocop:enable Style/NumericPredicate
   end
 
   # Inputs

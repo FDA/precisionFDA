@@ -23,7 +23,7 @@ module DXClient
 
             api.org_remove_member(ORG_DUMMY, user_dxid)
           end
-        rescue Net::HTTPClientException => e
+        rescue DXClient::Errors::DXClientError => e
           Rails.logger.error([e.message, e.backtrace.join("\n")].join("\n"))
         end
 
