@@ -206,7 +206,7 @@ run_job() {
   local is_running
   local task_message
 
-  sleep 1
+  sleep 3
 
   while true ; do
     job=$(curl -s -H "AUTHENTICATION_HEADER_NAME: admin" $job_url)
