@@ -12,7 +12,7 @@ const TextField = ({ children, type, name, label, row, status, helpText, ...rest
   const inputContainerClass = classNames('control-input-container')
   return (
     <div className={classNames('form-group', 'required', { [`has-${status}`]: status, 'row': row })}>
-      <label className={labelClasses} htmlFor={name}>{label}</label>
+      {label && <label className={labelClasses} htmlFor={name}>{label}</label>}
       <div className={inputContainerClass}>
         <Input type={type} name={name} {...rest} />
         {!!helpText && <span className="help-block">{helpText}</span>}
@@ -25,7 +25,7 @@ const TextField = ({ children, type, name, label, row, status, helpText, ...rest
 TextField.propTypes = {
   type: PropTypes.oneOf(TYPES).isRequired,
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   row: PropTypes.bool,
   status: PropTypes.oneOf(ALERT_STYLES),
   helpText: PropTypes.string,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ButtonSolidBlue } from '../../../components/Button'
+import { ButtonSolidBlue, Button } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
 import { AngleDownIcon } from '../../../components/icons/AngleDownIcon'
 import Icon from '../Icon'
@@ -16,7 +16,7 @@ interface IItemOption {
   hide: boolean,
 }
 
-const Item = ({ option }: {option: IItemOption}) => {
+export const Item = ({ option }: {option: IItemOption}) => {
   const { text, icon, isDisabled, onClick, link, method, hide } = option
   if (hide) return null
 
@@ -46,12 +46,13 @@ const Item = ({ option }: {option: IItemOption}) => {
 interface IDropdownMenu {
   icon: string,
   title: string,
+  page: string,
   options: any[],
   className: string,
   message: string,
 }
 
-export const DropdownMenu = ({ icon, title, options = [], message = '' }: IDropdownMenu) => {
+export const DropdownMenu = ({ icon, title, page, options = [], message = '' }: IDropdownMenu) => {
   const list = options.map((e: any, i: any) => {
     return <Item option={e} key={i} />
   })
@@ -63,18 +64,32 @@ export const DropdownMenu = ({ icon, title, options = [], message = '' }: IDropd
     </React.Fragment>,
   )
 
+  let showButton
+  if (page === 'create') {
+    showButton =
+      (childProps) => (
+        <Button {...childProps}>
+          <span>{title}</span>&nbsp;
+          <AngleDownIcon />
+        </Button>
+      )
+  } else {
+    showButton =
+      (childProps) => (
+        <ButtonSolidBlue {...childProps}>
+          <span>{title}</span>&nbsp;
+          <AngleDownIcon />
+        </ButtonSolidBlue>
+      )
+  }
+
   return (
     <Dropdown trigger="click" content={
       <StyledMenu>
         {list}
       </StyledMenu>
     }>
-      {(childProps) => (
-        <ButtonSolidBlue {...childProps}>
-          <span>{title}</span>&nbsp;
-          <AngleDownIcon />
-        </ButtonSolidBlue>
-      )}
+      {showButton}
     </Dropdown>
   )
 }

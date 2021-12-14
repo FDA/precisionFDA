@@ -45,6 +45,14 @@ Tests should use the configuration environment specified in `@shared/config/envs
 $ make test-api
 ```
 
+Make sure test database ENV vars are configured properly:
+
+```bash
+# EXAMPLE
+DATABASE_TEST_NAME=precisionfda-test
+DATABASE_TEST_URL=mysql://root:password@localhost:3306/precisionfda-test
+```
+
 ### Certificate
 
 - the API uses self-generated certificate.

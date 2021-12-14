@@ -20,6 +20,23 @@ const userHelper = {
   },
 }
 
+const dbClusterHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.DbCluster>>,
+  ) => {
+    const defaults = generate.dbCluster.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const dbCluster = wrap(new entities.DbCluster(references.user)).assign(input, { em })
+    em.persist(dbCluster)
+    return dbCluster
+  },
+}
+
 const jobHelper = {
   create: (
     em: EntityManager,
@@ -270,4 +287,5 @@ export {
   spacesHelper,
   commentHelper,
   challengeHelper,
+  dbClusterHelper,
 }

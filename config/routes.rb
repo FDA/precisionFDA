@@ -325,6 +325,15 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :dbclusters, controller: :db_clusters,
+                             param: :dxid, only: %i(index show create update) do
+        post ":api_method", on: :collection,
+                            to: "db_clusters#run",
+                            as: :run,
+                            api_method: /(start|stop|terminate)/
+        resources :comments
+      end
+
       resource :counters do
         get :index
         get :featured

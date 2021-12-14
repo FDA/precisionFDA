@@ -19,6 +19,7 @@ const Input = ({ type, name, lg, id, placeholder, styleClasses, value, defaultVa
       className={classes}
       value={value}
       defaultValue={defaultValue}
+      maxLength="256"
       autoComplete={autoComplete}
       {...rest}
     />

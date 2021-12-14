@@ -19,6 +19,7 @@ module MainHelper
     deps.each do |dep|
       s += graph_edges(dep)
       s += "g.setEdge(#{dep.uid.inspect}, #{item.uid.inspect}, {label: ''});\n"
+      # s += "g.setEdge(#{dep.uid.inspect}, #{item.dxid.inspect}, {label: ''});\n"
     end
     s
   end
@@ -38,6 +39,7 @@ module MainHelper
     deps = graph.children
     # item is nil ...
     uid = item.uid
+    # uid = item.dxid
     unless nodes.has_key?(uid)
       if item.public?
         classname = 'public'
