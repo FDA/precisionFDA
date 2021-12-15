@@ -1629,6 +1629,10 @@ class ApiController < ApplicationController
     raise_api_error "The folder doesn't belong to a scope #{@scope}."
   end
 
+  def https_apps_client
+    DIContainer.resolve("https_apps_client")
+  end
+
   private
 
   # Convert input value to array.

@@ -31,10 +31,6 @@ module Api
 
       return render(plain: page_dict[:total_count]) if show_count
 
-      dbclusters.find_each do |dbcluster|
-        DbClusters::Synchronizer.call(user_api, dbcluster, with_delete: false)
-      end
-
       render json: dbclusters,
              meta: count(page_dict[:total_count]).merge({ pagination: page_dict }),
              root: "dbclusters",
@@ -48,8 +44,6 @@ module Api
     def spaces; end
 
     def show
-      DbClusters::Synchronizer.call(user_api, @dbcluster, with_delete: false)
-
       render json: @dbcluster, adapter: :json
     end
 
@@ -81,14 +75,6 @@ module Api
     end
 
     private
-
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
-
-    def user_api
-      DIContainer.resolve("api.user")
-    end
 
     def find_db_cluster
       @dbcluster = DbCluster.accessible_by_user(current_user).find_by(dxid: params[:dxid])

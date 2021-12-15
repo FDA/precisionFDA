@@ -76,8 +76,8 @@ describe('POST /dbclusters/create', () => {
       .send(createInput)
       .expect(201)
 
-    let fakeCreateCallArgs = fakes.client.dbClusterCreateFake.getCall(0).args[0]
-    let fakeDescribeCallArgs = fakes.client.dbClusterDescribeFake.getCall(0).args[0]
+    const fakeCreateCallArgs = fakes.client.dbClusterCreateFake.getCall(0).args[0]
+    const fakeDescribeCallArgs = fakes.client.dbClusterDescribeFake.getCall(0).args[0]
 
     expect(fakes.client.dbClusterCreateFake.calledOnce).to.be.true()
     expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
@@ -97,5 +97,30 @@ describe('POST /dbclusters/create', () => {
       dxid: dxid,
       project: createInput.project,
     })
+  })
+
+  it('creates status sync task in a queue', async () => {
+    const userQueryData = getDefaultQueryData(user)
+
+    const describeCallRes = { ...mockResponses.DBCLUSTER_DESC_RES, id: dxid }
+    fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
+
+    const { body } = await supertest(api.getServer())
+      .post(`/dbclusters/create`)
+      .query({ ...userQueryData })
+      .send(generate.dbCluster.createInput())
+      .expect(201)
+
+    expect(fakes.queue.createDbClusterSyncTaskFake.calledOnce).to.be.true()
+    const fakeCreateStatusSyncArgs = fakes.queue.createDbClusterSyncTaskFake.getCall(0).args
+
+    expect(fakeCreateStatusSyncArgs).to.deep.equal([
+      { dxid: dxid },
+      {
+        id: user.id,
+        accessToken: userQueryData.accessToken,
+        dxuser: user.dxuser,
+      }
+    ])
   })
 })

@@ -32,6 +32,7 @@ const fakes = {
     removeRepeatableFake: sinon.fake(),
     createJobSyncTaskFake: sinon.fake(),
     createEmailSendTaskFake: sinon.fake(),
+    createDbClusterSyncTaskFake: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
@@ -96,6 +97,7 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
   sandbox.replace(queue, 'createJobSyncTask', fakes.queue.createJobSyncTaskFake)
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
+  sandbox.replace(queue, 'createDbClusterSyncTask', fakes.queue.createDbClusterSyncTaskFake)
 }
 
 const mocksReset = () => {
@@ -116,6 +118,8 @@ const mocksReset = () => {
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.createJobSyncTaskFake.resetHistory()
   fakes.queue.createEmailSendTaskFake.resetHistory()
+  fakes.queue.createDbClusterSyncTaskFake.resetHistory()
+
   fakes.bull.processFake.resetHistory()
   fakes.bull.isReadyFake.resetHistory()
 

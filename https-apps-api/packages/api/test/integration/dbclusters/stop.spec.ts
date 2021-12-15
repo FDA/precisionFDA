@@ -7,6 +7,7 @@ import { DbCluster, User } from '@pfda/https-apps-shared/src/domain'
 import {
   STATUS as DB_CLUSTER_STATUS,
   ENGINE as DB_CLUSTER_ENGINE,
+  STATUSES,
 } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { api } from '../../../src/server'
@@ -46,6 +47,25 @@ describe('POST /dbclusters/stop', () => {
     expect([fakeCalls[0].args[0]['dxid'], fakeCalls[1].args[0]['dxid']]).to.have.members(dxids)
     expect(fakeCalls[0].args[1]).to.be.equal('stop')
     expect(fakeCalls[1].args[1]).to.be.equal('stop')
+  })
+
+  it('saves new status in the database', async () => {
+    const dxid = dxids[0]
+    const describeCallRes = { status: STATUSES.STOPPING, id: dxid }
+    fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
+
+    const { body } = await supertest(api.getServer())
+      .post(`/dbclusters/stop`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({ dxids: [dxid] })
+      .expect(204)
+
+    expect(fakes.client.dbClusterActionFake.calledOnce).to.be.true()
+    expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
+
+    const afterEm = em.fork()
+    const updated = await afterEm.findOne(DbCluster, { dxid: dxid })
+    expect(updated.status).to.be.equal(DB_CLUSTER_STATUS.STOPPING)
   })
 
   context('error states', () => {
