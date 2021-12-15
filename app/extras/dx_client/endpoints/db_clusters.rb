@@ -2,9 +2,6 @@ module DXClient
   module Endpoints
     # Provides DB clusters related methods.
     module DbClusters
-      DB_CLUSTER_NEW_ALLOWED_PARAMS =
-        %i(name project engine engineVersion dxInstanceClass adminPassword).freeze
-
       # Creates a new dbcluster in the specified project.
       # @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-new
       # @param opts [Hash] Inputs. All of the following are required.

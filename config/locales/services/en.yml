@@ -4,7 +4,3 @@ en:
       OTPMismatchError: The one-time password was incorrect
       UsernameOrPasswordError: The password was incorrect
       InvalidInput: Password or one-time password are not supplied
-  db_clusters:
-    synchronizer:
-      removed_nonexisting: >
-        DB Cluster %{dxid} was removed from the database since it doesn't exist on the Platform.

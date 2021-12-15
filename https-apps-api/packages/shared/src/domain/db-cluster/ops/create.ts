@@ -6,6 +6,7 @@ import type { CreateDbClusterInput } from '../db-cluster.input'
 import { DbCluster } from '../db-cluster.entity'
 import { User } from '../../user'
 import { STATUS, ENGINE, STATUSES, ENGINES } from '../db-cluster.enum'
+import { createDbClusterSyncTask } from '../../../queue'
 
 export class CreateDbClusterOperation extends BaseOperation<CreateDbClusterInput, DbCluster> {
   private input: CreateDbClusterInput
@@ -30,6 +31,8 @@ export class CreateDbClusterOperation extends BaseOperation<CreateDbClusterInput
       })
 
     const dbCluster: DbCluster = await this.persistDbCluster(describeDbClusterRes)
+
+    await createDbClusterSyncTask({ dxid: dbCluster.dxid }, this.ctx.user)
 
     return dbCluster
   }

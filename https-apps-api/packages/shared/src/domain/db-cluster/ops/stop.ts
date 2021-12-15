@@ -1,8 +1,9 @@
+import { invertObj } from 'ramda'
 import * as errors from '../../../errors'
 import { BaseOperation } from '../../../utils'
 import * as client from '../../../platform-client'
 import { DbCluster } from '../db-cluster.entity'
-import { STATUS } from '../db-cluster.enum'
+import { STATUS, STATUSES } from '../db-cluster.enum'
 import { DxIdInput } from '@pfda/https-apps-shared/src/types'
 
 export class StopDbClusterOperation extends BaseOperation<DxIdInput, DbCluster> {
@@ -28,9 +29,18 @@ export class StopDbClusterOperation extends BaseOperation<DxIdInput, DbCluster> 
     }, 'stop')
 
     this.ctx.log.info(
-      { dbClusterId: dbCluster.id, dbClusterDxId: dbCluster.dxid, apiResult },
+      { id: dbCluster.id, dxid: dbCluster.dxid, apiResult },
       'Run stop action for DB Cluster'
     )
+
+    const describeResult = await platformClient.dbClusterDescribe({
+      dxid: dbCluster.dxid,
+      project: dbCluster.project,
+      accessToken: this.ctx.user.accessToken,
+    })
+
+    dbCluster.status = STATUS[invertObj(STATUSES)[describeResult.status]]
+    await em.fork().persistAndFlush(dbCluster)
 
     return dbCluster
   }
