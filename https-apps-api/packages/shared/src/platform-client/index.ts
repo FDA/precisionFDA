@@ -130,6 +130,40 @@ type JobDescribeResponse = {
   failureMessage?: string
 } & AnyObject
 
+type DbClusterActionParams = BaseParams & { dxid: string }
+type DbClusterAction = 'start' | 'stop' | 'terminate'
+
+type DbClusterCreateParams = BaseParams & {
+  name: string
+  project: string
+  engine: string
+  engineVersion: string
+  dxInstanceClass: string
+  adminPassword: string
+}
+
+type DbClusterDescribeParams = BaseParams & {
+  dxid: string
+  project?: string
+}
+
+type DbClusterDescribeResponse = {
+  id: string
+  project: string
+  name: string
+  created: number
+  modified: number
+  createdBy: { user: string }
+  dxInstanceClass: string
+  engine: string
+  engineVersion: string
+  status: string
+  endpoint?: string
+  port?: number
+  statusAsOf?: number
+  failureReason?: string
+} & AnyObject
+
 const defaultLog = getLogger('platform-client-logger')
 
 class PlatformClient {
@@ -320,6 +354,64 @@ class PlatformClient {
     }
   }
 
+  async dbClusterAction(params: DbClusterActionParams,
+                        action: DbClusterAction): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/${action}`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  async dbClusterCreate(params: DbClusterCreateParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/dbcluster/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken'], params) },
+      url,
+      headers: this.setupHeaders(params),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  async dbClusterDescribe(params: DbClusterDescribeParams): Promise<DbClusterDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken', 'dxid'], params) },
+      url,
+      headers: this.setupHeaders(params),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
   private async filesList(params: ListFilesParams): Promise<ListFilesResponse> {
     const data: AnyObject = {
       class: 'file',
@@ -409,4 +501,6 @@ export {
   DescribeFilesResponse,
   JobCreateParams,
   DescribeFoldersResponse,
+  DbClusterCreateParams,
+  DbClusterDescribeResponse,
 }

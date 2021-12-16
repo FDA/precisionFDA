@@ -30,7 +30,7 @@ const DataContainer = ({ space }) => {
       <div className="pfda-padded-b10">
         <div className="spaces-list-card-data__title">
           { space.links.show ?
-            <Link to={`/spaces/${space.id}`}>{typeTitle}</Link> :
+            <Link to={`/spaces/${space.id}`} aria-label={`Click this link to navigate to Space ID ${space.id} `}>{typeTitle}</Link> :
             <span>{typeTitle}</span>
           }
         </div>

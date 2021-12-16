@@ -45,4 +45,32 @@ const buildIsOverMaxDuration = (
   }
 }
 
-export { shouldSyncStatus, isStateTerminal, buildIsOverMaxDuration, isStateActive, isJobPrivate, isJobPublic, isJobInSpace }
+const formatDuration = (duration: number): string => {
+  const elaspsedSeconds = Math.floor(duration / 1000)
+  const days = Math.floor(elaspsedSeconds / 86400)
+  const hours = (elaspsedSeconds % 86400) / 3600
+  const minutes = (hours % 1) * 60
+  const seconds = (minutes % 1) * 60
+
+  let result = Math.floor(minutes) + 'm ' + Math.round(seconds) + 's'
+  const hoursInt = Math.floor(hours)
+  const daysInt = Math.floor(days)
+  if (hoursInt) {
+    result = `${hoursInt}h ${result}`
+  }
+  if (daysInt) {
+    return `${daysInt}d ${result}`
+  }
+  return result
+}
+
+export {
+  shouldSyncStatus,
+  isStateTerminal,
+  buildIsOverMaxDuration,
+  isStateActive,
+  isJobPrivate,
+  isJobPublic,
+  isJobInSpace,
+  formatDuration,
+}

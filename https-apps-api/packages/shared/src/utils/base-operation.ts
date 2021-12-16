@@ -36,12 +36,16 @@ export abstract class BaseOperation<IN, OUT> {
       // run the operation with context
       const res = await this.run(props)
       return res
-    } catch (err) {
-      this.ctx.log.warn(
-        { executionTime: Date.now() - startTime, err, id: this.id },
+    } catch (error) {
+      this.ctx.log.error(
+        {
+          executionTime: Date.now() - startTime,
+          error,
+          id: this.id,
+        },
         'Operation failed',
       )
-      throw err
+      throw error
     }
   }
 
@@ -78,18 +82,23 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
     try {
       // run the operation with context
       const res = await this.run(props)
-      this.ctx.log.info({ id: this.id }, 'Worker operation finished')
-      return res
-    } catch (err) {
-      this.ctx.log.warn(
+      this.ctx.log.info(
         {
           ...operationInfo,
           executionTime: Date.now() - startTime,
-          error: err,
+        },
+        'Worker operation finished')
+      return res
+    } catch (error) {
+      this.ctx.log.error(
+        {
+          ...operationInfo,
+          executionTime: Date.now() - startTime,
+          error,
         },
         'Worker operation failed',
       )
-      throw err
+      throw error
     }
   }
 }

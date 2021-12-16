@@ -1,4 +1,4 @@
-import { isCheckedAllCheckboxes, isExpandedAllItems, convertSecondsToDhms } from '.'
+import { isCheckedAllCheckboxes, isExpandedAllItems, convertSecondsToDhms, isHttpSuccess } from '.'
 
 
 describe('Test index helpers', () => {
@@ -37,5 +37,11 @@ describe('Test index helpers', () => {
   test('convertSecondsToDhms test', () => {
     expect(convertSecondsToDhms(31)).toBe('31 seconds')
     expect(convertSecondsToDhms(65)).toBe('1 minute 5 seconds')
+  })
+
+  test('isHttpSuccess test', () => {
+    expect(isHttpSuccess(200)).toBe(true)
+    expect(isHttpSuccess(207)).toBe(true)
+    expect(isHttpSuccess(300)).toBe(false)
   })
 })

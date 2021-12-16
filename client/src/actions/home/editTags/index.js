@@ -11,6 +11,11 @@ import {
   HOME_EDIT_APP_TAGS_FAILURE,
 } from '../types'
 import {
+  HOME_DATABASES_EDIT_TAGS_START,
+  HOME_DATABASES_EDIT_TAGS_SUCCESS,
+  HOME_DATABASES_EDIT_TAGS_FAILURE,
+} from '../databases/types'
+import {
   HOME_EXECUTION_MODAL_ACTION_START,
   HOME_EXECUTION_MODAL_ACTION_SUCCESS,
   HOME_EXECUTION_MODAL_ACTION_FAILURE,
@@ -35,6 +40,8 @@ const editTagsStart = (objectType) => {
   switch (objectType) {
     case OBJECT_TYPES.APP:
       return createAction(HOME_EDIT_APP_TAGS_START)
+    case OBJECT_TYPES.DATABASE:
+      return createAction(HOME_DATABASES_EDIT_TAGS_START)
     case OBJECT_TYPES.JOB:
       return createAction(HOME_EXECUTION_MODAL_ACTION_START, HOME_EXECUTIONS_MODALS.EDIT_TAGS)
     case OBJECT_TYPES.ASSET:
@@ -52,6 +59,8 @@ const editTagsSuccess = (objectType) => {
   switch (objectType) {
     case OBJECT_TYPES.APP:
       return createAction(HOME_EDIT_APP_TAGS_SUCCESS)
+    case OBJECT_TYPES.DATABASE:
+      return createAction(HOME_DATABASES_EDIT_TAGS_SUCCESS)
     case OBJECT_TYPES.JOB:
       return createAction(HOME_EXECUTION_MODAL_ACTION_SUCCESS, HOME_EXECUTIONS_MODALS.EDIT_TAGS)
     case OBJECT_TYPES.ASSET:
@@ -69,6 +78,8 @@ const editTagsFailure = (objectType) => {
   switch (objectType) {
     case OBJECT_TYPES.APP:
       return createAction(HOME_EDIT_APP_TAGS_FAILURE)
+    case OBJECT_TYPES.DATABASE:
+      return createAction(HOME_DATABASES_EDIT_TAGS_FAILURE)
     case OBJECT_TYPES.JOB:
       return createAction(HOME_EXECUTION_MODAL_ACTION_FAILURE, HOME_EXECUTIONS_MODALS.EDIT_TAGS)
     case OBJECT_TYPES.ASSET:

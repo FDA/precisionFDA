@@ -46,7 +46,7 @@ const SpaceJobsList = ({ spaceId, jobs, isFetching, sortType, sortDir, sortHandl
   if (jobs.length) {
     return (
       <div className={classes}>
-        <div className='space-page-layout__list-wrapper'>
+        <div className='space-page-layout__list-wrapper shared_area_jobs'>
           <Table>
             <Thead>
               <Th sortType={sortType} sortDir={sortDir} type='state' sortHandler={sortJobsHandler}
@@ -111,17 +111,17 @@ const Row = ({ job }) => {
   return (
     <tr>
       <td className={`col-state__state-${job.state}`}>{job.state}</td>
-      <td>
-        <LinkTargetBlank url={linkShow}>
+          <td>
+        <a href={linkShow} target='_blank'  rel='noreferrer' aria-label={`Navigate to ${job.name} Job details page`}>
           <Icon icon={getSpacesIcon('jobs')} fw />
           <span>{job.name}</span>
-        </LinkTargetBlank>
+        </a>
       </td>
       <td>
-        <LinkTargetBlank url={linkApp}>
+        <a href={linkApp} target='_blank' rel='noreferrer' aria-label={`Navigate to ${job.name} App details page`}>
           <Icon icon={getSpacesIcon('apps')} fw />
           <span>{job.appTitle}</span>
-        </LinkTargetBlank>
+        </a>
       </td>
       <td>
         <WorkflowLinkShow

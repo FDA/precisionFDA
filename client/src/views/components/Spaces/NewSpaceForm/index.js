@@ -217,6 +217,7 @@ class NewSpaceForm extends React.Component {
                 checked={space_type === type}
                 value={type}
                 onChange={this.filedChangeHandler}
+                aria-label={type+' radio button'}
               />
             ))}
           </div>

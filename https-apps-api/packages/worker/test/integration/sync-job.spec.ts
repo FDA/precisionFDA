@@ -22,7 +22,7 @@ import {
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
-import { fakes as localFakes } from '../utils/mocks'
+import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
 
 const createSyncJobTask = async (
@@ -54,6 +54,7 @@ describe('TASK: sync_job_status', () => {
     await em.flush()
     // reset fakes
     mocksReset()
+    localMocksReset()
   })
 
   it('processes a queue task - calls the queue handlers', async () => {
