@@ -194,6 +194,9 @@
     &_featured
       min-width: 100px
 
+    &_narrow_field
+      min-width: 70px
+
     &_action
       i
         cursor: pointer
@@ -294,7 +297,7 @@
     &__object-options
       display: flex
       justify-content: space-between
-      padding: 0
+      //padding: 0
       margin: 0
       padding: 10px 15px
 
@@ -302,11 +305,24 @@
         color: #1F70B5
 
       &--second-line
+        display: flex
+        justify-content: space-between // flex-start
+        margin: 0
+        padding: 10px 15px
+
+        li
+          margin-right: 160px
+          list-style-type: none
+
+      &--third-line
+        display: flex
         justify-content: flex-start
+        margin: 0
+        padding: 10px 15px
 
         li
           margin-right: 60px
-
+          list-style-type: none
 
       &_header
         color: #8198BC
@@ -314,6 +330,7 @@
         text-transform: uppercase
 
       &_value
+        //justify-content: flex-start
         color: #52698F
         font-size: 16px
         font-weight: 700

@@ -575,6 +575,9 @@ Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: false
   IgnoreEmptyMethods: true
 
+Lint/SuppressedException:
+  AllowComments: true
+
 Rails/ActionFilter:
   EnforcedStyle: action
   SupportedStyles:

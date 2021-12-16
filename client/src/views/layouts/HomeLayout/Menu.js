@@ -91,6 +91,15 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           setCurrentPage={setCurrentPage}
         />
         <MenuLink
+          url={`/home/databases${tab}`}
+          icon={'fa-cube'}
+          text='Databases'
+          counter={tabCounters.dbclusters}
+          page={HOME_PAGES.DATABASES}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+        <MenuLink
           url={`/home/assets${tab}`}
           icon={'fa-file-zip-o'}
           text='Assets'

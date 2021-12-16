@@ -4,10 +4,8 @@ require 'pp'
 def want_404
   begin
     yield
-  rescue Net::HTTPClientException => e
-    if e.message =~ /^404/
-      return
-    end
+  rescue DXClient::Errors::NotFoundError
+    return
   end
   raise "API call did not return 404"
 end

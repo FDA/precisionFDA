@@ -6,6 +6,7 @@ import { log } from '../utils'
 import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
+import { dbClusterSyncHandler } from './db-cluster-sync.handler'
 
 export const handler = async (job: Job<Task<any>>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -23,6 +24,9 @@ export const handler = async (job: Job<Task<any>>) => {
     case queue.TASKS.CHECK_STALE_JOBS:
       // not used at the moment -> the job is never put to queue
       await checkStaleJobsHandler(job)
+      return await Promise.resolve()
+    case queue.TASKS.SYNC_DBCLUSTER_STATUS:
+      await dbClusterSyncHandler(job)
       return await Promise.resolve()
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')

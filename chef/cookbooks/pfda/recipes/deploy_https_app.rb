@@ -42,6 +42,10 @@ application app_dir do
 
   template File.join(https_apps_dir, "pm2-worker.json") do
     source "pm2_worker.erb"
+    variables lazy { {
+      instances: node.run_state.dig("ssm_params", "app", "environment", "NODE_WORKER_INSTANCES") ||
+                 node["nodejs"]["worker"]["instances"],
+    } }
   end
 
   execute "make install" do

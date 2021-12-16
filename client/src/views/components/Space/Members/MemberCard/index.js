@@ -32,7 +32,7 @@ const MemberCard = ({ member, updateRole, updateRoleData }) => {
         <div className="space-member-card__title">
           <LinkTargetBlank url={member.links.user}>
             <img src={member.links.gravatar} className="img-circle" alt=""/>
-            <span>&nbsp;&nbsp;{member.title}</span>
+            <span className= "member-name-color">&nbsp;&nbsp;{member.title}</span>
           </LinkTargetBlank>
         </div>
       </div>

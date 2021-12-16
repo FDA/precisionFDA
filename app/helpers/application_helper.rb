@@ -67,6 +67,8 @@ module ApplicationHelper
     case item.klass
     when "file"
       "fa-file-o"
+    when "db-cluster"
+      "fa-database"
     when "note"
       "fa-sticky-note"
     when "answer"

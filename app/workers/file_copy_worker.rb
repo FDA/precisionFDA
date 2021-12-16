@@ -33,8 +33,8 @@ class FileCopyWorker < ApplicationWorker
 
       begin
         api.project_remove_objects(project, files.map(&:dxid))
-      rescue Net::HTTPClientException => e
-        raise e unless e.message =~ /^404/
+      rescue DXClient::Errors::NotFoundError
+        # do nothing
       end
 
       files.destroy_all

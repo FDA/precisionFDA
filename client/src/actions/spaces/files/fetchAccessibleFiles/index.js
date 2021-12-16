@@ -19,32 +19,33 @@ const fetchAccessibleFilesSuccess = (files) => createAction(FETCH_ACCESSIBLE_FIL
 const fetchAccessibleFilesFailure = () => createAction(FETCH_ACCESSIBLE_FILES_FAILURE)
 
 export default () => (
-  (dispatch, getState) => {
+  async (dispatch, getState) => {
     const state = getState()
     const links = contextLinksSelector(state)
-    const scopes = ['private']
+    const scopes = [] //['private']
 
     dispatch(fetchAccessibleFilesStart())
-    return API.postApiCall(links.accessible_files, { scopes })
-      .then(response => {
-        const statusIsOK = response.status === httpStatusCodes.OK
-        if (statusIsOK) {
-          const files = response.payload.map(mapToAccessibleFile)
-          dispatch(fetchAccessibleFilesSuccess(files))
+    try {
+      const response = await API.postApiCall(links.accessible_files, { scopes })
+      const statusIsOK = response.status === httpStatusCodes.OK
+      if (statusIsOK) {
+        const files = response.payload.map(mapToAccessibleFile)
+        dispatch(fetchAccessibleFilesSuccess(files))
+      } else {
+        dispatch(fetchAccessibleFilesFailure())
+        if (response.payload && response.payload.error) {
+          const { type, message } = response.payload.error
+          dispatch(showAlertAboveAll({ message: `${type}: ${message}` }))
         } else {
-          dispatch(fetchAccessibleFilesFailure())
-          if (response.payload && response.payload.error) {
-            const { type, message } = response.payload.error
-            dispatch(showAlertAboveAll({ message: `${type}: ${message}` }))
-          } else {
-            dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
-          }
+          dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
         }
-        return statusIsOK
-      })
-      .catch(e => {
-        console.error(e)
-        dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
-      })
+      }
+      return statusIsOK
+    } catch (e)  {
+      console.error(e)
+    dispatch(fetchAccessibleFilesFailure())
+
+    dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
+    }
   }
 )

@@ -224,7 +224,6 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>
-
     if (filter === 'size') return (
       <td key={i} style={{ display: 'flex' }}>
         <Input

@@ -6,12 +6,13 @@ import Modal from '../../../Modal'
 import Button from '../../../Button'
 import { spaceLayoutLockModalSelector } from '../../../../../reducers/spaces/space/selectors'
 import { hideLayoutLockModal, lockSpace } from '../../../../../actions/spaces'
+import './style.sass'
 
 
 const Footer = ({ hideAction, lockAction }) => (
   <>
     <Button onClick={hideAction}>Cancel</Button>
-    <Button type="warning" onClick={lockAction}>Lock Space</Button>
+    <Button type="warning" onClick={lockAction} className="lockspace_btn_background">Lock Space</Button>
   </>
 )
 

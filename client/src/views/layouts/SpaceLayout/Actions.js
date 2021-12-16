@@ -28,17 +28,17 @@ const Actions = ({ links = {}}) => {
 
   return (
     <div className="space-page-layout__actions">
-      <Link to="/spaces">
-        <Button type="primary">Back</Button>
+      <Link to="/spaces" className="btn btn-primary">
+        Back
       </Link>
       {(links.update) &&
-        <Link to={`/spaces/edit/${spaceId}`}>
-          <Button>Edit Space</Button>
+        <Link to={`/spaces/edit/${spaceId}`} className="btn btn-default btn-spaces-margin">
+          Edit Space
         </Link>
       }
       { createSpaceLink && isDuplicable &&
-        <Link to={`/spaces/duplicate/${spaceId}`}>
-          <Button>Duplicate Space</Button>
+        <Link to={`/spaces/duplicate/${spaceId}`} className="btn btn-default btn-spaces-margin">
+          Duplicate Space
         </Link>
       }
       {(links.lock) && <Button onClick={showLockModal}>Lock Space</Button>}

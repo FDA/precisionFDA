@@ -184,7 +184,7 @@ class JobSerializer < ApplicationSerializer
       # GET show job's logs page: TODO: move to api/jobs
       links[:log] = log_job_path(object)
       # GET track single object
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       # POST /api/attach_to: api_attach_to_notes, discussions, answers
       links[:attach_to] = api_attach_to_notes_path
       # POST /api/jobs/copy  copy_api_jobs

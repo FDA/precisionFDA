@@ -12,6 +12,10 @@ const getAppsSpaces = (data) => backendCall('/api/apps/spaces', 'GET', data)
 const getAppDetails = (uid, data) => backendCall(`/api/apps/${uid}`, 'GET', data)
 const getAppExecutions = (uid, data) => backendCall(`/api/apps/${uid}/jobs`, 'GET', data)
 
+const getDatabases = (data) => backendCall('/api/dbclusters', 'GET', data)
+const getDatabaseDetails = (dxid, data) => backendCall(`/api/dbclusters/${dxid}`, 'GET', data)
+// const getDatabasesSpaces = (data) => backendCall('/api/databases/spaces', 'GET', data)
+
 const getFiles = (data) => backendCall('/api/files', 'GET', data)
 const getFilesFeatured = (data) => backendCall('/api/files/featured', 'GET', data)
 const getFilesEverybody = (data) => backendCall('/api/files/everybody', 'GET', data)
@@ -46,6 +50,8 @@ export {
   getAppsEverybody,
   getAppsSpaces,
   getAppDetails,
+  getDatabases,
+  getDatabaseDetails,
   postApiCall,
   putApiCall,
   deleteApiCall,
