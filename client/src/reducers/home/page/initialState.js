@@ -4,6 +4,7 @@ import { HOME_TABS } from '../../../constants'
 const countersState = {
   files: null,
   apps: null,
+  databases: null,
   assets: null,
   workflows: null,
   jobs: null,

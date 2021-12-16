@@ -95,7 +95,7 @@ class Activation extends React.Component {
             </div>
           </div>
 
-          <div className="activation">
+          <div className="activation accept_space">
             <div className="activation__info">
               <Icon cssClasses="activation__icon" icon="fa-warning" />
               <div className="activation__label">

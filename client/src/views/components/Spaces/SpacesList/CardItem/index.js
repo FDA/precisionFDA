@@ -14,7 +14,7 @@ const CardItem = ({ space, lockToggleHandler }) => (
     <div className="spaces-list-card__header">
       <div className="spaces-list-card__title">
         { space.shared.links.show ?
-          <Link to={`/spaces/${space.shared.id}`}>{space.shared.name}</Link> :
+          <Link to={`/spaces/${space.shared.id}`} aria-label={`This link will navigate to ${space.shared.name} Space`}>{space.shared.name}</Link> :
           <span>{space.shared.name}</span>
         }
       </div>

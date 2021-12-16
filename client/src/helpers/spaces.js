@@ -4,6 +4,8 @@ const getSpacesIcon = (type) => {
       return 'fa-group'
     case 'apps':
       return 'fa-cube'
+    case 'databases':
+      return 'fa-database'
     case 'jobs':
       return 'fa-cogs'
     case 'workflows':

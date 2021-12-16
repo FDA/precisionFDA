@@ -225,8 +225,8 @@ class FolderService
 
     begin
       DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
-    rescue Net::HTTPClientException => e
-      raise e unless e.message =~ /^404/
+    rescue DXClient::Errors::NotFoundError
+      # do nothing
     end
 
     UserFile.transaction { file.destroy }

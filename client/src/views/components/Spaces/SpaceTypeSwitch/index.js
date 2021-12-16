@@ -39,7 +39,7 @@ const SpaceTypeSwitch = ({ name, checked, disabled, label, description, ...rest 
           </div>
         </div>
       </div>
-      <input type="radio" checked={checked} disabled={disabled} name={name} {...rest} />
+      <input type='radio' aria-label={`radio button to ${name} files`} checked={checked} disabled={disabled} name={name} {...rest} />
     </div>
   )
 }

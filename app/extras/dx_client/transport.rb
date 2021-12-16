@@ -44,7 +44,7 @@ module DXClient
     # @return [Hash] Response from server converted to hash.
     def handle_response(response)
       response.value
-      JSON.parse(response.body)
+      JSON.parse(response.body).with_indifferent_access
     rescue Net::HTTPClientException => e
       raise_error(e)
     end
@@ -67,7 +67,7 @@ module DXClient
         raise DXClient::Errors::TooManyRequestsError, "Too many requests, please try later."
       end
 
-      raise exception, message, exception.backtrace
+      raise DXClient::Errors::DXClientError, message, exception.backtrace
     end
   end
 end

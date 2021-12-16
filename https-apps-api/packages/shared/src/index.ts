@@ -12,7 +12,7 @@ export { getLogger } from './logger'
 
 export { database } from './database'
 
-export { entities, job, app, user, userFile, email } from './domain'
+export { entities, job, app, user, userFile, email, dbCluster } from './domain'
 
 export * as utils from './utils'
 

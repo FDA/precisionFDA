@@ -83,7 +83,7 @@ class AppSerializer < ApplicationSerializer
       links[:space] = space_path if object.in_space?
       links[:jobs] = jobs_api_app_path(object)
       # GET track single app
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       # GET /apps/:id/fork - fork a single app
       links[:fork] = fork_app_path(object)
       # POST export a single app to a docker container

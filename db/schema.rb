@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_22_144105) do
+ActiveRecord::Schema.define(version: 2021_11_09_084058) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -240,6 +240,28 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
     t.string "name"
     t.string "dial_code"
     t.index ["name"], name: "index_countries_on_name", unique: true
+  end
+
+  create_table "dbclusters", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.string "dxid", null: false
+    t.string "name", null: false
+    t.integer "status", null: false
+    t.string "scope", null: false
+    t.integer "user_id", null: false
+    t.string "project", null: false
+    t.string "dx_instance_class", null: false
+    t.integer "engine", null: false
+    t.string "engine_version", null: false
+    t.string "host"
+    t.string "port"
+    t.string "description"
+    t.datetime "status_as_of"
+    t.string "uid", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
+    t.index ["uid"], name: "index_dbclusters_on_uid", unique: true
+    t.index ["user_id"], name: "index_dbclusters_on_user_id"
   end
 
   create_table "discussions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
@@ -906,6 +928,7 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
   add_foreign_key "comparisons", "users"
+  add_foreign_key "dbclusters", "users"
   add_foreign_key "discussions", "notes"
   add_foreign_key "discussions", "users"
   add_foreign_key "expert_answers", "expert_questions"

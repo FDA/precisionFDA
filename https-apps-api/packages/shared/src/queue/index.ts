@@ -145,10 +145,31 @@ const createCheckStaleJobsTask = async (data: types.CheckStaleJobsJob['payload']
   return await addToQueue(wrapped, checkStaleJobsQueue, options)
 }
 
+const createDbClusterSyncTask = async (
+  data: types.SyncDbClusterJob['payload'],
+  user: UserCtx,
+): Promise<Job> => {
+  const wrapped = {
+    type: TASKS.SYNC_DBCLUSTER_STATUS,
+    payload: data,
+    user,
+  }
+
+  const options: JobOptions = {
+    jobId: nanoid(),
+    repeat: { cron: config.workerJobs.syncJob.repeatPattern },
+  }
+
+  return await addToQueue(wrapped, statusQueue, options)
+}
+
+export * as debug from './queue.debug'
+
 export {
   createJobSyncTask,
   createSendEmailTask,
   createCheckStaleJobsTask,
+  createDbClusterSyncTask,
   TASKS,
   createQueues,
   getQueue,

@@ -88,6 +88,31 @@ module PrecisionFda
       )
     end
 
+    def create_db_clusters!(count)
+      (1..count).each do |i|
+        user = User.where.not(private_files_project: nil).order(Arel.sql("rand()")).first
+
+        cluster = DbCluster.new(
+          user: user,
+          name: "Test db cluster #{i}",
+          status: DbCluster.statuses.keys.sample,
+          dxid: "dbcluster-#{SecureRandom.hex(12)}",
+          project: user.private_files_project,
+          dx_instance_class: DbCluster::DX_INSTANCE_CLASSES.keys.sample,
+          engine: DbCluster.engines.keys.sample,
+          engine_version: ["5.6", "5.7"].sample,
+          host: "my-test-db-#{i}.rds.amazonaws.com",
+          port: "3306",
+          description: "Some description #{i}",
+          status_as_of: Time.current - rand(500_000),
+          scope: Scopes::SCOPE_PRIVATE,
+        )
+
+        cluster.tag_list.add("DB Cluster")
+        cluster.save
+      end
+    end
+
     def load_migrations_data!
       SeedNewsItems.new.up
       CreateGetStartedBoxes.new.up
@@ -102,6 +127,7 @@ module PrecisionFda
         create_notes_and_discussions!(user)
         create_challenge_bot!
         create_various_items!
+        create_db_clusters!(10)
         load_migrations_data!
       end
     end

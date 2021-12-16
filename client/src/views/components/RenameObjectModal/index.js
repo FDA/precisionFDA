@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 
-import Modal from '../../Modal'
-import Button from '../../Button'
-import Input from '../../FormComponents/Input'
+import Modal from '../Modal'
+import Button from '../Button'
+import Input from '../FormComponents/Input'
 
 
 const Footer = ({ hideHandler, renameHandler, disableButton, isFolder }) => {
@@ -25,6 +25,7 @@ const RenameObjectModal = (
     defaultFileDescription,
     isFolder,
     isAsset,
+    isDatabase,
   }) => {
 
   const [fileName, setFileName] = useState(defaultFileName)
@@ -56,12 +57,20 @@ const RenameObjectModal = (
       return 'Folder'
     } else if (isAsset) {
       return 'Asset'
+    } else if (isDatabase) {
+      return 'Database'
     } else {
       return 'File'
     }
   }
   const title = `Edit ${titleCore()} Info`
   const label = `${titleCore()} Name`
+  let placeholder
+  if (isDatabase) {
+    placeholder = 'Name'
+  } else {
+    placeholder = 'Rename...'
+  }
 
   return (
     <Modal
@@ -77,7 +86,7 @@ const RenameObjectModal = (
           <label className="control-label">{label}</label>
           <Input
             name="space-file-rename"
-            placeholder="Rename..."
+            placeholder={placeholder}
             value={fileName}
             onChange={changeFileName}
             onKeyDown={enterKeyDownHandler}
@@ -116,6 +125,7 @@ RenameObjectModal.propTypes = {
   defaultFileDescription: PropTypes.string,
   isFolder: PropTypes.bool,
   isAsset: PropTypes.bool,
+  isDatabase: PropTypes.bool,
 }
 
 Footer.propTypes = {
