@@ -1,44 +1,5 @@
-# The client for communicating with JupiterLab service.
+# The client for communicating with nodejs-api service.
 class HttpsAppsClient
-  # Client's specific error.
-  class Error < StandardError
-    DEFAULT_ERROR_MSG = "JupyterLab client error.".freeze
-    DEFAULT_ERROR_CODE = "E_UNKNOWN".freeze
-    SPACE_NOT_FOUND_ERROR_CODE = "E_SPACE_NOT_FOUND".freeze
-
-    def self.space_not_found_error_code
-      SPACE_NOT_FOUND_ERROR_CODE
-    end
-
-    def initialize(msg)
-      @msg = msg
-    end
-
-    def message
-      if @msg.is_a?(Net::HTTPResponse)
-        return parsed_body(@msg.body)["message"].presence || DEFAULT_ERROR_MSG
-      end
-
-      @msg
-    end
-
-    def code
-      if @msg.is_a?(Net::HTTPResponse)
-        return parsed_body(@msg.body)["code"].presence || DEFAULT_ERROR_CODE
-      end
-
-      @msg
-    end
-
-    private
-
-    def parsed_body(response_body)
-      JSON.parse(response_body)
-    rescue JSON::ParserError
-      {}
-    end
-  end
-
   # @param token [String] User access token.
   # @param user [User] A user.
   def initialize(token, user)
@@ -98,6 +59,38 @@ class HttpsAppsClient
     )
   end
 
+  def dbclusters_start(dxids)
+    request(
+      "/dbclusters/start",
+      { dxids: dxids },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def dbclusters_stop(dxids)
+    request(
+      "/dbclusters/stop",
+      { dxids: dxids },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def dbclusters_terminate(dxids)
+    request(
+      "/dbclusters/terminate",
+      { dxids: dxids },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def dbclusters_create(opts)
+    request(
+      "/dbclusters/create",
+      opts,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   private
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
@@ -139,7 +132,10 @@ class HttpsAppsClient
   # @return [Hash] Response from server converted to hash.
   def handle_response(response)
     response.value
-    JSON.parse(response.body)
+    parsed = JSON.parse(response.body || "")
+    parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+  rescue JSON::ParserError
+    response.body
   rescue Net::HTTPClientException
     raise Error, response
   rescue StandardError

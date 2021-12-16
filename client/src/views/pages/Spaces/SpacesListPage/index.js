@@ -7,7 +7,6 @@ import DefaultLayout from '../../../layouts/DefaultLayout'
 import SpacesList from '../../../components/Spaces/SpacesList'
 import SpacesListSwitcher from '../../../components/Spaces/SpacesListSwitcher'
 import SpacesListSearch from '../../../components/Spaces/SpacesListSearch'
-import Button from '../../../components/Button'
 import { contextUserSelector, createSpaceLinkSelector } from '../../../../reducers/context/selectors'
 import {
   resetSpacesListFilters,
@@ -53,8 +52,8 @@ class SpacesListPage extends Component {
             </div>
             <div className="pull-right">
               {createSpaceLink && (
-                <Link to='/spaces/new'>
-                  <Button type='primary' size='lg'>Create new space</Button>
+                <Link to='/spaces/new' className="btn btn-primary btn-lg">
+                  Create new space
                 </Link>
               )}
             </div>

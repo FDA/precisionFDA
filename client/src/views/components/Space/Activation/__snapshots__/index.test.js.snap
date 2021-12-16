@@ -56,7 +56,7 @@ exports[`<Activation /> renders 1`] = `
       </div>
     </div>
     <div
-      className="activation"
+      className="activation accept_space"
     >
       <div
         className="activation__info"

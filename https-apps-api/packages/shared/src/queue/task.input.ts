@@ -12,5 +12,6 @@ type Task<T> = {
 type CheckStatusJob = Task<{ dxid: string }>
 type SendEmailJob = Task<EmailSendInput>
 type CheckStaleJobsJob = Omit<Task<null>, 'user'>
+type SyncDbClusterJob = Task<{ dxid: string }>
 
-export { Task, CheckStatusJob, SendEmailJob, CheckStaleJobsJob }
+export { Task, CheckStatusJob, SendEmailJob, CheckStaleJobsJob, SyncDbClusterJob }

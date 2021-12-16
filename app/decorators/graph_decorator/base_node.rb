@@ -23,6 +23,10 @@ module GraphDecorator
       }
     end
 
+    def children
+      []
+    end
+
     private
 
     attr_reader :context, :scope

@@ -1,5 +1,6 @@
 import { App } from './app/app.entity'
 import { Comment } from './comment/comment.entity'
+import { DbCluster } from './db-cluster/db-cluster.entity'
 import { Job } from './job/job.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
@@ -19,6 +20,7 @@ import { Challenge } from './challenge/challenge.entity'
 const entities = {
   App,
   Comment,
+  DbCluster,
   Job,
   User,
   Tag,
@@ -56,11 +58,14 @@ export * as email from './email'
 
 export * as comment from './comment'
 
+export * as dbCluster from './db-cluster'
+
 export {
   entities,
   Job,
   App,
   Comment,
+  DbCluster,
   User,
   UserFile,
   Folder,

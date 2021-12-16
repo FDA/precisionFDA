@@ -1,6 +1,7 @@
 import {
   Entity,
   EntityRepositoryType,
+  Filter,
   IdentifiedReference,
   JsonType,
   ManyToOne,
@@ -14,8 +15,10 @@ import { User } from '../user'
 import { JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
+import { formatDuration, isStateActive, isStateTerminal } from './job.helper'
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
+@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
 export class Job extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -41,7 +44,11 @@ export class Job extends BaseEntity {
   @Property({ hidden: true })
   runData: string
 
-  @Property({ hidden: true })
+  @Property({
+    hidden: true,
+    onCreate: (entity: Job) => entity.parseJobDescribe(),
+    onUpdate: (entity: Job) => entity.parseJobDescribe(),
+  })
   describe: string
 
   @Property({ type: JsonType, hidden: true })
@@ -57,8 +64,8 @@ export class Job extends BaseEntity {
   @Property({ hidden: true })
   localFolderId: number
 
-  // @Property()
-  // analysisId: number
+  // @ManyToOne()
+  // analysis!: IdentifiedReference<Analysis>
 
   // relations
   @ManyToOne()
@@ -66,6 +73,9 @@ export class Job extends BaseEntity {
 
   @ManyToOne()
   app!: IdentifiedReference<App>;
+
+  // @ManyToOne()
+  // appSeries!: IdentifiedReference<AppSeries>
 
   // pivot table key names are mismatched and this does not work :(
   // @ManyToMany({
@@ -85,4 +95,68 @@ export class Job extends BaseEntity {
       this.app = Reference.create(app)
     }
   }
+
+  isActive(): boolean {
+    return isStateActive(this.state)
+  }
+
+  isTerminal(): boolean {
+    return isStateTerminal(this.state)
+  }
+
+  // Calculated as the time during which the job stayed in running state
+  runTime(): number {
+    if (!this.startedRunning) {
+      return 0
+    }
+    if (!this.stoppedRunning) {
+      return new Date().getTime() - this.startedRunning
+    }
+    return this.stoppedRunning - this.startedRunning
+  }
+
+  runTimeString(): string {
+    return formatDuration(this.runTime())
+  }
+
+  elapsedTimeSinceCreation(): number {
+    return new Date().getTime() - this.createdAt.getTime()
+  }
+
+  elapsedTimeSinceCreationString(): string {
+    return formatDuration(this.elapsedTimeSinceCreation())
+  }
+
+  parseJobDescribe() {
+    if (!this.describe) {
+      return this.describe
+    }
+
+    try {
+      const parsedJSON = JSON.parse(this.describe)
+      this.startedRunning = parsedJSON.startedRunning
+      this.stoppedRunning = parsedJSON.stoppedRunning
+      this.failureReason = parsedJSON.failureReason
+      this.failureMessage = parsedJSON.failureMessage
+    }
+    catch {
+      console.log(`Error parsing job describe: ${this.describe}`)
+    }
+    // onCreate / onUpdate needs a return value
+    return this.describe
+  }
+
+  // Properties extracted from job describe
+  //
+  @Property({ persist: false })
+  startedRunning: number
+
+  @Property({ persist: false })
+  stoppedRunning: number
+
+  @Property({ persist: false, serializedName: 'failure_reason' })
+  failureReason: string
+
+  @Property({ persist: false, serializedName: 'failure_message' })
+  failureMessage: string
 }

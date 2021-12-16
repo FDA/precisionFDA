@@ -49,9 +49,9 @@ module Sortable
   # Prepare Order/OrderDirection pair from params (only allowed values).
   # @return { order => order_dir }, { :launched_on => 'DESC' }
   #   if no param values provided.
-  def order_from_params
+  def order_from_params(default_order = "launched_on")
     order_field_values = self.class::ORDER_FIELDS.values.flatten
-    order_query(self.class::ORDER_FIELDS[params[:order_by] || "launched_on"],
+    order_query(self.class::ORDER_FIELDS[params[:order_by] || default_order],
                 params[:order_dir], order_field_values)
   end
 

@@ -42,7 +42,7 @@ import {
 import { HOME_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
 import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
-import RenameObjectModal from '../../../Files/RenameObjectModal'
+import RenameObjectModal from '../../../RenameObjectModal'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeMoveModal from '../../../../../views/components/Home/HomeMoveModal'
 import AttachLicenseModal from '../../AttachLicenseModal'

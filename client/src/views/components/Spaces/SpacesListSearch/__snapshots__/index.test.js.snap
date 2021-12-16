@@ -8,6 +8,7 @@ exports[`<SpacesListSearch /> matches snapshot 1`] = `
     className="spaces-list-search__input"
   >
     <input
+      aria-label="Search box to filter Spaces by State, Name, Type or User..."
       autoComplete="off"
       className="form-control"
       name="spacesListSearch"

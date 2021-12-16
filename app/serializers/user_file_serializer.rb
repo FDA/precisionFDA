@@ -30,6 +30,18 @@ class UserFileSerializer < NodeSerializer
     end
   end
 
+  # license of the file with selected attributes
+  # when file does not have license - return {}
+  def file_license
+    object.license&.slice(:id, :uid, :title) || {}
+  end
+
+  # Check whether object could be licensed - means,
+  # current_user is the owner of the object, independently of object scope
+  def licenseable
+    object.user.id == current_user.id
+  end
+
   # Builds links to files.
   # @return [Hash] Links.
   # rubocop:disable Metrics/MethodLength
@@ -40,7 +52,7 @@ class UserFileSerializer < NodeSerializer
     super.tap do |links|
       links[:show] = file_path(object)
       links[:user] = user_path(object.user.dxuser)
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       links[:space] = space_path if object.in_space?
 
       # POST download_list files
