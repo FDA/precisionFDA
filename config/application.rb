@@ -32,15 +32,6 @@ module PrecisionFda
 
     config.sass.preferred_syntax = :sass
 
-    # Bower asset paths
-    root.join('vendor', 'assets', 'bower_components').to_s.tap do |bower_path|
-      config.sass.load_paths << bower_path
-      config.assets.paths << bower_path
-    end
-
-    # Precompile icon fonts
-    config.assets.precompile << %r(bootstrap-sass/assets/fonts/bootstrap/[\w-]+\.(?:eot|svg|ttf|woff2?)$)
-
     config.middleware.use Rack::PermanentRedirect
 
     config.middleware.insert 0,
