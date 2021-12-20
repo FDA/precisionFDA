@@ -51,7 +51,7 @@ class License < ApplicationRecord
   end
 
   def rename(new_name, context)
-    update_attributes(title: new_name)
+    update(title: new_name)
   end
 
   def describe_fields
