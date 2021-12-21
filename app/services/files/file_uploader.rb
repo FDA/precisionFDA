@@ -51,7 +51,6 @@ module Files
       end
 
       url_service = UploadUrlFetcher.new(context, uid)
-      url_service.instance_eval { file }
 
       Parallel.each_with_index(chunks, in_threads: THREADS_COUNT) do |(chunk, md5, size), index|
         idx = index + 1

@@ -3,7 +3,7 @@ class UploadUrlFetcher
 
   def initialize(context, uid)
     @context = context
-    @uid = uid
+    @file = UserFile.open.find_by!(uid: uid)
   end
 
   # Returns:
@@ -33,12 +33,6 @@ class UploadUrlFetcher
 
   private
 
-  def file
-    # Check that the file exists, is accessible by the user
-    #   and is in the open state. Throw 404 if otherwise.
-    @file ||= UserFile.open.find_by_uid!(uid)
-  end
-
   def token
     @token ||= begin
       if file.user_id != context.user_id
@@ -56,5 +50,5 @@ class UploadUrlFetcher
     api ||= DNAnexusAPI.new(token)
   end
 
-  attr_reader :context, :uid
+  attr_reader :context, :file
 end
