@@ -59,31 +59,17 @@ class HttpsAppsClient
     )
   end
 
-  def dbclusters_start(dxids)
+  def dbcluster_action(dxids, action)
+    raise Error, "Wrong action #{action}" unless %w(start stop terminate).include?(action)
+
     request(
-      "/dbclusters/start",
+      "/dbclusters/#{action}",
       { dxids: dxids },
       Net::HTTP::Post::METHOD,
     )
   end
 
-  def dbclusters_stop(dxids)
-    request(
-      "/dbclusters/stop",
-      { dxids: dxids },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def dbclusters_terminate(dxids)
-    request(
-      "/dbclusters/terminate",
-      { dxids: dxids },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def dbclusters_create(opts)
+  def dbcluster_create(opts)
     request(
       "/dbclusters/create",
       opts,
