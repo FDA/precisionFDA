@@ -1,5 +1,8 @@
 redis_options = { url: ENV["REDIS_WORKER_URL"], network_timeout: 5 }
-redis_options.merge!(password: ENV["REDIS_AUTH"]) if Utils.aws_env?
+
+Rails.application.config.to_prepare do
+  redis_options.merge!(password: ENV["REDIS_AUTH"]) if Utils.aws_env?
+end
 
 Sidekiq.configure_server do |config|
   config.redis = redis_options
