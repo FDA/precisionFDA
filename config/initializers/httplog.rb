@@ -1,4 +1,4 @@
-if Rails.env == 'development'
+if Rails.env.development?
   HttpLog.configure do |config|
     # Enable or disable all logging
     config.enabled = true
