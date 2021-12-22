@@ -19,6 +19,22 @@ import { formatDuration, isStateActive, isStateTerminal } from './job.helper'
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
+// Tried the following but didn't work
+// @Filter({ name: 'isActive', cond: { $or: [ ACTIVE_STATES.map(x => { return { 'state': x } }) ]}})
+// @Filter({ name: 'isTerminal', cond: { $or: [ TERMINAL_STATES.map(x => { return { 'state': x } }) ]}})
+@Filter({ name: 'isActive', cond: { $or: [
+  { 'state': JOB_STATE.IDLE },
+  { 'state': JOB_STATE.RUNNING },
+]}})
+@Filter({ name: 'isNonTerminal', cond: { $or: [
+  { 'state': JOB_STATE.IDLE },
+  { 'state': JOB_STATE.RUNNING },
+  { 'state': JOB_STATE.TERMINATING },
+]}})
+@Filter({ name: 'isTerminal', cond: { $or: [
+  { 'state': JOB_STATE.DONE },
+  { 'state': JOB_STATE.TERMINATED },
+]}})
 export class Job extends BaseEntity {
   @PrimaryKey()
   id: number

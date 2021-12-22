@@ -57,7 +57,7 @@ class EmailClient {
       {},
     )
     if (res.success !== 'true') {
-      log.error({ err: res.errors }, 'SendEmail failed')
+      log.error({ error: res.errors }, 'SendEmail failed')
       throw new errors.ServiceError('Salesforce request failed', {
         code: errors.ErrorCodes.SALESFORCE_SERVICE_ERROR,
         clientResponse: res.success,

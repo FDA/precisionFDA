@@ -49,6 +49,11 @@ type PageJobs = {
   }
 }
 
+type WorkstationSyncFilesInput = {
+  dxid: string
+  force: boolean
+}
+
 const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -100,4 +105,5 @@ export {
   DescribeJobInput,
   ListJobsInput,
   PageJobs,
+  WorkstationSyncFilesInput,
 }

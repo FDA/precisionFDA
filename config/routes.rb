@@ -286,6 +286,7 @@ Rails.application.routes.draw do
 
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
+        patch :sync_files, on: :member
 
         collection do
           get :featured

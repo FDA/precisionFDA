@@ -477,10 +477,22 @@ class PlatformClient {
         },
         'Error: Failed platform response',
       )
-      throw new errors.ClientRequestError('Error: DNAnexus client API call failed', {
-        clientResponse: err.response.data,
-        clientStatusCode: err.response.status,
-      })
+
+      // Error response from the platform has the following response data:
+      //   "error": {
+      //     "type": "PermissionDenied",
+      //     "message": "BillTo for this job's project must have the \"httpsApp\" feature enabled to run this executable"
+      //   }
+      const statusCode = err.response.status
+      const errorType = err.response.data.error.type
+      const errorMessage = err.response.data.error.message
+      throw new errors.ClientRequestError(
+        `${errorType} (${statusCode}): ${errorMessage}`,
+        {
+          clientResponse: err.response.data,
+          clientStatusCode: statusCode,
+        },
+      )
     } else if (err.request) {
       // the request was made but no response was received
       this.log.error({ err }, 'Error: Failed platform request - no response received')
@@ -488,7 +500,11 @@ class PlatformClient {
       this.log.error({ err }, 'Error: Failed platform request - different error')
     }
     // todo: handle this does not result in 500 API error
-    throw err
+    throw new errors.ClientRequestError(
+      `Error: (${err.response.status}) ${err.response.data}`, {
+        clientResponse: err.response.data,
+        clientStatusCode: err.response.status,
+      })
   }
 }
 
