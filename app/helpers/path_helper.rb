@@ -147,8 +147,7 @@ module PathHelper
       end
     when "workflow"
       return workflow_analyses_path(item) if request.referer =~ /analyses/
-
-      workflow_path(item)
+      concat_path(item)
     when "space"
       discuss_space_path(item)
     when "task"
