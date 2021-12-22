@@ -19,6 +19,8 @@ export enum ErrorCodes {
   WORKER = 'E_WORKER',
   VALIDATION = 'E_VALIDATION',
   NOT_FOUND = 'E_NOT_FOUND',
+  NOT_PERMITTED = 'E_NOT_PERMITTED',
+  INVALID_STATE = 'E_INVALID_STATE',
   // for specific situations
   USER_CONTEXT_QUERY_INVALID = 'E_USER_CONTEXT_QUERY_INVALID',
   JOB_NOT_FOUND = 'E_JOB_NOT_FOUND',
@@ -45,10 +47,7 @@ export class BaseError extends Error {
     super(message)
     Error.captureStackTrace(this, this.constructor)
     this.name = this.constructor.name
-    this.props = {
-      ...props,
-      name: this.name,
-    }
+    this.props = props
   }
 }
 
@@ -89,6 +88,26 @@ export class ValidationError extends BaseError {
     super(message, {
       code: ErrorCodes.VALIDATION,
       statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class InvalidStateError extends BaseError {
+  constructor(message = 'Error: Entity is in invalid state for the operation', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.INVALID_STATE,
+      statusCode: 422,
+      ...props,
+    })
+  }
+}
+
+export class PermissionError extends BaseError {
+  constructor(message = 'Error: You do have permissions to access this entity', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.NOT_PERMITTED,
+      statusCode: 403,
       ...props,
     })
   }
@@ -135,6 +154,15 @@ export class UserNotFoundError extends NotFoundError {
   constructor(message = 'Error: User entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.USER_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
+export class SpaceNotFoundError extends NotFoundError {
+  constructor(message = 'Error: Space not found', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.SPACE_NOT_FOUND,
       ...props,
     })
   }

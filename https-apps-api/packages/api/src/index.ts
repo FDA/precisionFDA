@@ -6,7 +6,7 @@ const handleFatalError = (err: Error): void => {
   process.removeAllListeners('uncaughtException')
   process.removeAllListeners('unhandledRejection')
 
-  log.fatal({ err }, 'Fatal error occured. Exiting the app')
+  log.fatal({ error: err }, 'Fatal error occured. Exiting the app')
 }
 
 const stopAll = async (): Promise<void> => {

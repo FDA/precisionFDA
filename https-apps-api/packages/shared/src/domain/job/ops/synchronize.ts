@@ -1,5 +1,4 @@
 import { wrap } from '@mikro-orm/core'
-import { isNil } from 'ramda'
 import { CheckStatusJob } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
@@ -10,18 +9,15 @@ import {
   shouldSyncStatus,
 } from '../job.helper'
 import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
-import { createSendEmailTask, removeRepeatable } from '../../../queue'
-import type { Maybe } from '../../../types'
-import { User, Tagging, UserFile, Tag, Folder } from '../..'
-import { errors } from '../../..'
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
-import { createJobClosed } from '../../event/event.helper'
 import {
-  SyncFilesInFolderOperation,
-  SyncFolderFilesOutput,
-  SyncFoldersOperation,
-  helper,
-} from '../../user-file'
+  createSendEmailTask,
+  createSyncWorkstationFilesTask,
+  removeRepeatable,
+  TASKS} from '../../../queue'
+import type { Maybe } from '../../../types'
+import { User } from '../..'
+import { errors } from '../../..'
+import { createJobClosed } from '../../event/event.helper'
 import { RequestTerminateJobOperation } from '..'
 import {
   JobStaleInputTemplate,
@@ -39,6 +35,10 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
   protected job: Job
   protected client: PlatformClient
 
+  static getBullJobId(jobDxid: string) {
+    return `${TASKS.SYNC_JOB_STATUS}.${jobDxid}`
+  }
+
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
@@ -47,12 +47,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
 
     // check input data
     if (!job) {
-      this.ctx.log.warn({ input }, 'Error: Job does not exist')
+      this.ctx.log.error({ input }, 'Error: Job does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
     if (!user) {
-      this.ctx.log.warn({ input }, 'Error: User does not exist')
+      this.ctx.log.error({ input }, 'Error: User does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
@@ -136,105 +136,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
         }, 'SyncJobOperation: Detected failed job')
       }
 
-      // FOLDERS AND FILES SYNC
-      const projectDesc = await this.client.foldersList({
-        projectId: job.project,
-        accessToken: this.ctx.user.accessToken,
-      })
-      const syncFoldersOp = new SyncFoldersOperation({
-        log: this.ctx.log,
-        em: this.ctx.em,
-        user: this.ctx.user,
-      })
-      const localFolders = await syncFoldersOp.execute({
-        remoteFolderPaths: projectDesc.folders,
-        scope: job.scope,
-        parentId: job.id,
-        parentType: PARENT_TYPE.JOB,
-        projectDxid: job.project,
-      })
+      // Use the following to invoke sync files within this operation to debug
+      // const syncJobFilesOp = new WorkstationSyncFilesOperation(this.ctx)
+      // await syncJobFilesOp.execute({ dxid: job.dxid })
 
-      // for each local folder query files and check for differences
-      // null is added -> root folder
-      const folderPathsToCheck: Array<Folder | null> = [null, ...localFolders]
-      this.ctx.log.info({
-        foldersToCheckCount: folderPathsToCheck.length,
-      }, 'SyncJobOperation: About to sync files in folders')
-
-      const fileDeletesSeq = async (): Promise<void> => {
-        for (const folder of folderPathsToCheck) {
-          // !!!
-          const syncFilesEm = this.ctx.em.fork(true)
-          const syncFilesInFolderOp = new SyncFilesInFolderOperation({
-            log: this.ctx.log,
-            // operations run in parallel, they should have their own DB context
-            em: syncFilesEm,
-            user: this.ctx.user,
-          })
-          // eslint-disable-next-line no-await-in-loop
-          await syncFilesInFolderOp.execute({
-            folderId: !isNil(folder) ? folder.id : null,
-            projectDxid: job.project,
-            scope: job.scope,
-            parentType: PARENT_TYPE.JOB,
-            parentId: job.id,
-            entityType: FILE_ORIGIN_TYPE.HTTPS,
-            runRemove: true,
-            runAdd: false,
-          })
-          // syncFilesResp.push(res)
-        }
-      }
-      const syncFilesResp: SyncFolderFilesOutput[] = []
-      await fileDeletesSeq()
-
-      const fileAddsSeq = async (): Promise<void> => {
-        for (const folder of folderPathsToCheck) {
-          // !!!
-          const syncFilesEm = this.ctx.em.fork(true)
-          const syncFilesInFolderOp = new SyncFilesInFolderOperation({
-            log: this.ctx.log,
-            // operations run in parallel, they should have their own DB context
-            em: syncFilesEm,
-            user: this.ctx.user,
-          })
-          // eslint-disable-next-line no-await-in-loop
-          const res = await syncFilesInFolderOp.execute({
-            folderId: !isNil(folder) ? folder.id : null,
-            projectDxid: job.project,
-            scope: job.scope,
-            parentType: PARENT_TYPE.JOB,
-            parentId: job.id,
-            entityType: FILE_ORIGIN_TYPE.HTTPS,
-            runRemove: false,
-            runAdd: true,
-          })
-          syncFilesResp.push(res)
-        }
-      }
-      await fileAddsSeq()
-
-      const httpsFilesTag = await em.getRepository(Tag).findOneOrCreate('HTTPS File')
-      const jupyterSnapshotTag = await em.getRepository(Tag).findOneOrCreate('Jupyter Snapshot')
-      const createdFolderTags = await this.assignTags(localFolders, httpsFilesTag)
-      httpsFilesTag.taggingCount += createdFolderTags
-      await Promise.all(
-        syncFilesResp.map(async ({ folderPath, files }) => {
-          // files were created in a different identity map
-          em.persist(files)
-          // extra action based on folderPath happens here
-          if (folderPath.includes('/.Notebook_snapshots')) {
-            const newSnapshotTagsCnt = await this.assignTags(files, jupyterSnapshotTag)
-            jupyterSnapshotTag.taggingCount += newSnapshotTagsCnt
-            // this.changeEntityType(files)
-          }
-          // all files get this for now
-          const newHttpsTagsCnt = await this.assignTags(files, httpsFilesTag)
-          httpsFilesTag.taggingCount += newHttpsTagsCnt
-        }),
-      )
-      await em.flush()
-      // FOLDERS AND FILES SYNC END
+      // Queue file sync task, so that the syncing is not blocked
+      createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
     }
 
     this.ctx.log.info({ 
@@ -265,34 +172,5 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       body,
     }
     await createSendEmailTask(email, this.ctx.user)
-  }
-
-  private async assignTags(nodes: Array<UserFile | Folder>, tag: Tag): Promise<number> {
-    const em = this.ctx.em.fork(true)
-    const taggingRepo = em.getRepository(Tagging)
-    const existingRefs = await taggingRepo.findForFiles({
-      fileIds: nodes.map(f => f.id),
-      tagId: tag.id,
-      userId: this.ctx.user.id,
-    })
-    let createdTags = 0
-    nodes.forEach(node => {
-      const existing = existingRefs.find(tagging => tagging.taggableId === node.id)
-      if (!isNil(existing)) {
-        return
-      }
-      const tagging = taggingRepo.upsertForFile({
-        tagId: tag.id,
-        fileId: node.id,
-        userId: this.ctx.user.id,
-        nodeType: helper.getStiEnumTypeFromInstance(node),
-      })
-      // tagging.tag.taggingCount++
-      node.taggings.add(tagging)
-      em.persist(tagging)
-      createdTags++
-    })
-    await em.flush()
-    return createdTags
   }
 }

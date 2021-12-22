@@ -248,8 +248,8 @@ describe('POST /apps/:id/run', () => {
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
       .expect(201)
-    expect(fakes.queue.createJobSyncTaskFake.calledOnce).to.be.true()
-    const fakeCallArgs = fakes.queue.createJobSyncTaskFake.getCall(0).args
+    expect(fakes.queue.createSyncJobStatusTaskFake.calledOnce).to.be.true()
+    const fakeCallArgs = fakes.queue.createSyncJobStatusTaskFake.getCall(0).args
     expect(fakeCallArgs[0]).to.deep.equal({
       dxid: body.dxid,
     })
@@ -272,7 +272,7 @@ describe('POST /apps/:id/run', () => {
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
     })
 
     it('throws 404 when user does not have the project set', async () => {
@@ -286,7 +286,7 @@ describe('POST /apps/:id/run', () => {
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
     })
 
     // deprecated, admin owns the apps
@@ -300,7 +300,7 @@ describe('POST /apps/:id/run', () => {
           ...getDefaultQueryData(user),
         })
         .send(generate.app.runAppInput())
-      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 if requested app does not follow the requirements', async () => {
@@ -313,7 +313,7 @@ describe('POST /apps/:id/run', () => {
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 when snapshot is provided but file does not exist', async () => {
@@ -324,7 +324,7 @@ describe('POST /apps/:id/run', () => {
         })
         .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
     })
   })
 })

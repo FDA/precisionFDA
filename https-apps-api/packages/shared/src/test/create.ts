@@ -1,4 +1,5 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
+import { config } from '../config'
 import { entities } from '../domain'
 import * as generate from './generate'
 
@@ -17,6 +18,13 @@ const userHelper = {
     const user = wrap(new entities.User(org)).assign(input, { em })
     em.persist(user)
     return user
+  },
+
+  createAdmin: (em: EntityManager) => {
+    return userHelper.create(em, {
+      dxuser: config.platform.adminUser,
+      email: `${config.platform.adminUser}@dnanexus.com`,
+    })
   },
 }
 

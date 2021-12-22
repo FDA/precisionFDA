@@ -17,6 +17,7 @@ export const config: ConfigOverride = {
     },
     queues: {
       default: { name: 'https-apps-worker-queue-stg' },
+      fileSync: { name: 'https-apps-worker-fileSync-queue-stg' },
       emails: { name: 'https-apps-worker-emails-queue-stg' },
     },
   },

@@ -20,6 +20,7 @@ export const config: ConfigOverride = {
     },
     queues: {
       default: { name: 'https-apps-worker-queue-prod' },
+      fileSync: { name: 'https-apps-worker-fileSync-queue-prod' },
       emails: { name: 'https-apps-worker-emails-queue-prod' },
     },
   },

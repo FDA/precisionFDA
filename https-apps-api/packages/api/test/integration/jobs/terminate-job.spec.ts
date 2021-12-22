@@ -73,7 +73,7 @@ describe('PATCH /jobs/:id/terminate', () => {
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .query({ ...getDefaultQueryData(user) })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
 
     it('throws 404 when the job type is NOT HTTPS', async () => {
@@ -83,7 +83,7 @@ describe('PATCH /jobs/:id/terminate', () => {
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .query({ ...getDefaultQueryData(user) })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
   })
 })
