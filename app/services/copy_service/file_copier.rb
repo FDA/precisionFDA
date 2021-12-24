@@ -21,6 +21,7 @@ class CopyService
         new_file.project = destination_project
         new_file.parent = file.asset? ? new_file : file
         new_file.parent_type = "Asset" if file.asset?
+        new_file.entity_type = UserFile::TYPE_REGULAR
         new_file.save!
         new_file
       end
