@@ -142,7 +142,7 @@ describe('POST /apps/:id/run', () => {
       })
   })
 
-  it('accepts all input params (uses all overrides and optionals)', async () => {
+  it('accepts params for jupyter app (uses all overrides and optionals)', async () => {
     const inputComplete = {
       ...generate.app.runAppInput(),
       instanceType: 'himem-2',
@@ -172,6 +172,35 @@ describe('POST /apps/:id/run', () => {
       .to.have.property('systemRequirements')
       .that.deep.equals({
         '*': { instanceType: allowedInstanceTypes[inputComplete.instanceType] },
+      })
+  })
+
+  it('accepts params for ttyd app', async () => {
+    const ttydApp = create.appHelper.create(em, { user }, { spec: generate.app.ttydAppSpecData() })
+    await em.flush()
+    const ttydAppInput = {
+      ...generate.app.runTtydAppInput(),
+      instanceType: 'himem-2',
+      name: 'my-ttyd',
+      input: {
+        port: 8081,
+      },
+    }
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${ttydApp.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(ttydAppInput)
+      .expect(201)
+
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('name', ttydAppInput.name)
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      port: ttydAppInput.input.port,
+    })
+    expect(platformCall)
+      .to.have.property('systemRequirements')
+      .that.deep.equals({
+        '*': { instanceType: allowedInstanceTypes[ttydAppInput.instanceType] },
       })
   })
 

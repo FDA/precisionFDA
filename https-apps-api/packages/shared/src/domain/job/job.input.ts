@@ -18,6 +18,7 @@ type RunAppInput = {
     duration?: number
     cmd?: string
     imagename?: string
+    port?: number // ttyd
   }
   appDxId: string
 }
@@ -67,7 +68,7 @@ const runAppSchema: JSONSchema7 = {
       additionalProperties: false,
       required: [],
       properties: {
-        // these inputs are for jupyter app only
+        // these inputs are for jupyter app only (except of a 'port' input, that is for ttyd)
         duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
         snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
         feature: {
@@ -79,6 +80,8 @@ const runAppSchema: JSONSchema7 = {
         cmd: { type: 'string', maxLength: config.validation.maxStrLen },
         // rshiny app
         app_gz: { type: 'string', maxLength: config.validation.maxStrLen },
+        // ttyd
+        port: { type: 'integer' },
       },
     },
   },
