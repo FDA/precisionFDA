@@ -68,6 +68,7 @@ class CopyService
 
       copied_folder = folder.dup.tap do |new_folder|
         new_folder.scope = scope
+        new_folder.entity_type = Folder::TYPE_REGULAR
         new_folder.user = user
         new_folder[@parent_folder_col] = parent_folder&.id
         new_folder.save!
