@@ -193,7 +193,7 @@ class FolderService
   # Removes https folder and all its childs via Https Apps service.
   # @param folder [Folder] A folder.
   def remove_https_folder(folder)
-    https_apps_client.folder_remove(folder.id)
+    nodejs_api_client.folder_remove(folder.id)
 
     Rats.success(folder)
   rescue HttpsAppsClient::Error => e
@@ -201,7 +201,7 @@ class FolderService
   end
 
   def rename_https_folder(folder, new_name)
-    https_apps_client.folder_rename(folder.id, new_name)
+    nodejs_api_client.folder_rename(folder.id, new_name)
 
     Rats.success(folder)
   rescue HttpsAppsClient::Error => e
@@ -237,13 +237,21 @@ class FolderService
 
     if file.scope =~ /^space-(\d+)$/
       event_type = file.klass == "asset" ? :asset_deleted : :file_deleted
-      SpaceEventService.call($1.to_i, context.user_id, nil, file, event_type)
+
+      SpaceEventService.call(
+        Regexp.last_match(1).to_i,
+        context.user_id,
+        nil,
+        file,
+        event_type,
+        nodejs_api_client,
+      )
     end
 
     Rats.success(file)
   end
 
-  def https_apps_client
-    @https_apps_client ||= DIContainer.resolve("https_apps_client")
+  def nodejs_api_client
+    @nodejs_api_client ||= HttpsAppsClient.new(context.token, context.user)
   end
 end

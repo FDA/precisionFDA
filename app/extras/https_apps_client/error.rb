@@ -6,10 +6,6 @@ class HttpsAppsClient
     SPACE_NOT_FOUND_ERROR_CODE = "E_SPACE_NOT_FOUND".freeze
     VALIDATION_ERROR_CODE = "E_VALIDATION".freeze
 
-    def self.space_not_found_error_code
-      SPACE_NOT_FOUND_ERROR_CODE
-    end
-
     def initialize(msg)
       @msg = msg
     end
