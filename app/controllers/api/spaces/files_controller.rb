@@ -56,15 +56,10 @@ module Api
           nodes.where(sti_type: "Folder").find_each do |folder|
             folder.all_children.each { |node| node.update!(state: UserFile::STATE_REMOVING) }
           end
-
-          Array(nodes.pluck(:id)).in_groups_of(1000, false) do |ids|
-            job_args = ids.map do |node_id|
-              [node_id, session_auth_params]
-            end
-
-            Sidekiq::Client.push_bulk("class" => RemoveNodeWorker, "args" => job_args)
-          end
         end
+
+        job_args = nodes.pluck(:id).in_groups_of(1, false).map { |id| id << session_auth_params }
+        RemoveNodeWorker.perform_bulk(job_args, batch_size: 100)
 
         head :ok
       end
