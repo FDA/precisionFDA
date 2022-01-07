@@ -97,8 +97,6 @@ class UserFile < Node
 
   scope :open, -> { where(state: STATE_OPEN) }
   scope :not_removing, -> { where.not(state: STATE_REMOVING) }
-  scope :not_copying, -> { where.not(state: STATE_COPYING) }
-  scope :not_blocked, -> { not_removing.not_copying }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
@@ -124,10 +122,6 @@ class UserFile < Node
 
     def real_files
       where(parent_type: ["User", "Job", "Node", "Comparison"])
-    end
-
-    def not_assets
-      where.not(parent_type: "Asset")
     end
 
     def independent

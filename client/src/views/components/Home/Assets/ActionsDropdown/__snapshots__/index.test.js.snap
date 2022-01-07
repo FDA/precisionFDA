@@ -24,12 +24,6 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "isDisabled": true,
-          "link": undefined,
-          "method": "post",
-          "text": "Authorize URL",
-        },
-        Object {
-          "isDisabled": true,
           "link": "undefined&scope=public",
           "method": "post",
           "text": "Make public",

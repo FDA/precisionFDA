@@ -67,7 +67,7 @@ const ActionsDropdown = (props) => {
   const actions = [
     {
       text: 'Rename',
-      isDisabled: assets.length !== 1 || !links.rename,
+      isDisabled: assets.length !== 1,
       onClick: () => props.showRenameModal(),
     },
     {
@@ -86,12 +86,6 @@ const ActionsDropdown = (props) => {
       onClick: () => props.makeFeatured(links.feature, assetsUids, false),
       isDisabled: assets.length === 0 || assets.some(e => !e.featured || !e.links.feature),
       hide: !isAdmin,
-    },
-    {
-      text: 'Authorize URL',
-      isDisabled: assets.length !== 1 || !links.link,
-      link: links.link,
-      method: 'post',
     },
     {
       text: 'Make public',
