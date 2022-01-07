@@ -8,6 +8,7 @@ import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
 import { dbClusterSyncHandler } from './db-cluster-sync.handler'
 import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
+import { userCheckupHandler } from '../users/user-checkup.handler'
 
 export const handler = async (job: Job<Task<any>>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -31,6 +32,9 @@ export const handler = async (job: Job<Task<any>>) => {
       return await Promise.resolve()
     case queue.TASKS.SYNC_DBCLUSTER_STATUS:
       await dbClusterSyncHandler(job)
+      return await Promise.resolve()
+    case queue.TASKS.USER_CHECKUP:
+      await userCheckupHandler(job)
       return await Promise.resolve()
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')

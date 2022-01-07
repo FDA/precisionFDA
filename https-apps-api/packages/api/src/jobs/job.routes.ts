@@ -3,7 +3,7 @@ import Router from 'koa-router'
 import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 import { makeValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils'
-import { jobSyncFilesQuerySchema } from './job.schemas'
+import { jobListQuerySchema, jobSyncFilesQuerySchema } from './job.schemas'
 
 
 // Routes with /jobs prefix
@@ -12,10 +12,12 @@ const router = new Router<DefaultState, Api.Ctx>()
 const jobDxIdInputSchema = utils.schemas.getDxidInputSchema('jobDxId')
 
 // not used at the moment
-router.get('/', makeValidationMdw({ query: utils.schemas.paginationSchema }), async ctx => {
+router.get('/', makeValidationMdw({ query: jobListQuerySchema }), async ctx => {
   const jobs = await new jobDomain.ListJobsOperation(pickOpsCtx(ctx)).execute({
     page: ctx.validatedQuery.page ?? 1,
     limit: ctx.validatedQuery.limit ?? 10,
+    scope: ctx.validatedQuery.scope ?? undefined,
+    spaceId: ctx.validatedQuery.spaceId ?? undefined,
   })
   ctx.body = jobs
 })

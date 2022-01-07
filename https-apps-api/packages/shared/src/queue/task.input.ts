@@ -12,7 +12,7 @@ type Task<T> = {
 type BasicUserJob = Task<null>
 type CheckStatusJob = Task<{ dxid: string }>
 type SendEmailJob = Task<EmailSendInput>
-type CheckStaleJobsJob = Omit<Task<null>, 'user'>
+type CheckStaleJobsJob = Task<null>
 type SyncDbClusterJob = Task<{ dxid: string }>
 
 export { Task, BasicUserJob, CheckStatusJob, SendEmailJob, CheckStaleJobsJob, SyncDbClusterJob }

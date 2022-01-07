@@ -9,7 +9,7 @@ import {
   reportStaleJobsTemplate,
   ReportStaleJobsTemplateInput,
 } from '../../email/templates/mjml/report-stale-jobs.template'
-import { EmailSendInput } from '../../email/email.config'
+import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { createSendEmailTask } from '../../../queue'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { PlatformClient } from '../../../platform-client'
@@ -79,6 +79,7 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
       },
     })
     const email: EmailSendInput = {
+      emailType: EMAIL_TYPES.staleJobsReport,
       to: adminUser.email,
       body,
       subject: 'Stale jobs report',

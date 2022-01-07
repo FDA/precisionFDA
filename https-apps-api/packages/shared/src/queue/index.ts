@@ -9,6 +9,7 @@ import { getJobStatusMessage } from './queue.utils'
 import { InvalidStateError } from '../errors'
 import { SyncJobOperation } from '../domain/job'
 import { formatDuration } from '../domain/job/job.helper'
+import { EmailSendOperation } from '../domain/email'
 
 let statusQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
@@ -120,6 +121,15 @@ const removeRepeatable = async (job: Job): Promise<void> => {
   await statusQueue.removeJobs(`${prefix}:${id}:*`)
 }
 
+const findRepeatable = async (bullJobId: string) => {
+  const repeatableJobs = await statusQueue.getRepeatableJobs()
+  const result = repeatableJobs.filter(j => j.id === bullJobId)
+  if (result.length > 0) {
+    return result[0]
+  }
+  return null
+}
+
 // TASK PRODUCERS
 
 const createSyncJobStatusTask = async (
@@ -188,8 +198,13 @@ const createSendEmailTask = async (
     payload: data,
     user,
   }
-  const options: JobOptions = {
-    jobId: nanoid(),
+  const options: JobOptions = taskId ? {
+    jobId: taskId,
+    // The following is important for emails that should not be repeated
+    removeOnComplete: false,
+    removeOnFail: true,
+  } : {
+    jobId: EmailSendOperation.getBullJobId(data.emailType),
   }
   const handlePayloadFn = (
     payload: types.SendEmailJob['payload'],
@@ -204,10 +219,12 @@ const removeFromEmailQueue = (jobId: string) => {
   emailsQueue.removeJobs(jobId)
 }
 
-const createCheckStaleJobsTask = async (data: types.CheckStaleJobsJob['payload']): Promise<Job> => {
+const createCheckStaleJobsTask = async (
+  user: UserCtx,
+): Promise<Job> => {
   const wrapped = {
     type: TASKS.CHECK_STALE_JOBS,
-    payload: data,
+    user,
   }
   const options: JobOptions = { jobId: `${TASKS.CHECK_STALE_JOBS}` }
   return await addToQueue(wrapped, maintenanceQueue, options)
@@ -231,6 +248,17 @@ const createDbClusterSyncTask = async (
   return await addToQueue(wrapped, statusQueue, options)
 }
 
+const createUserCheckupTask = async (data: types.BasicUserJob): Promise<Job> => {
+  const wrapped = {
+    type: TASKS.USER_CHECKUP,
+    payload: data,
+    user: data.user,
+  }
+  const options: JobOptions = { jobId: `${TASKS.USER_CHECKUP}.${data.user.dxuser}` }
+  return await addToQueue(wrapped, maintenanceQueue, options)
+}
+
+
 export * as debug from './queue.debug'
 
 export {
@@ -240,6 +268,7 @@ export {
   removeFromEmailQueue,
   createCheckStaleJobsTask,
   createDbClusterSyncTask,
+  createUserCheckupTask,
   TASKS,
   createQueues,
   getQueue,
@@ -247,4 +276,5 @@ export {
   disconnectQueues,
   types,
   removeRepeatable,
+  findRepeatable,
 }
