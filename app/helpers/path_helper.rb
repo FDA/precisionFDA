@@ -56,7 +56,7 @@ module PathHelper
   def pathify(item)
     case item.klass
     when "file"
-      file_path(item)
+      "/home/files/#{item.uid}"
     when "note"
       if item.note_type == "Answer"
         pathify(item.answer)
@@ -74,7 +74,7 @@ module PathHelper
     when "job"
       job_path(item)
     when "asset"
-      asset_path(item)
+      "/home/assets/#{item.uid}"
     when "comment"
       if item.commentable_type == 'Space'
         discuss_space_path(item.commentable)
@@ -119,12 +119,11 @@ module PathHelper
   # @return [String] Folder's URL.
   def pathify_folder(folder)
     if folder.private?
-      files_path(folder_id: folder.id)
+      "/home/files?folderId=#{folder.id}"
     elsif folder.public?
-      explore_files_path(folder_id: folder.id)
+      "/home/files/everybody?folderId=#{folder.id}"
     elsif folder.in_space?
-      space = folder.space
-      api_files_path(space_id: space.id, folder_id: folder.id)
+      "/home/files/spaces?folderId=#{folder.id}"
     else
       raise "Unable to build folder's path"
     end
@@ -154,7 +153,7 @@ module PathHelper
       space_task_path(item.space_id, item)
     when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"
       pathify(item)
-    when "file", "app", "job", "asset", "folder"
+    when "file", "folder", "app", "job", "asset"
       concat_path(item)
     else
       raise "Unknown class #{item.klass}"

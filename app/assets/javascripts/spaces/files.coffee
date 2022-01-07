@@ -11,12 +11,14 @@ class SpacesFilesView
     @downloadModal = $('#download-files-modal')
     @publishModal = $('#publish-files-modal')
 
+    # this model was removed
     @moveFilesModal = new Precision.models.MoveFilesModal({
       selectedItems: @selectedItems,
       rootName: @params.rootName,
       nodes: @params.topNodes
     })
 
+    # this model was removed
     @downloadFilesModal = new Precision.models.ActionsWithFilesModal({
       selectedItems: @selectedItems,
       selectedListURL: @params.selectedListURL,

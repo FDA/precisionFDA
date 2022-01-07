@@ -58,8 +58,6 @@
           <div class="spaces-files-table">
             <% if @counts[:files] + @counts[:folders] > 0 %>
               <% if @folder&.in_space? && @folder.scoped_parent_folder_id %>
-                <% breadcrumb :folder, @folder %>
-                  <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
               <% else %>
                 <ul class="breadcrumb no-border">
                   <li class="active">

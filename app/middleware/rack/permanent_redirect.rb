@@ -24,7 +24,7 @@ module Rack
       return unless path =~ /^\/files\/(file-.{24})$/
 
       file = UserFile.find_by_dxid($1)
-      Rails.application.routes.url_helpers.file_path(file) if file.present?
+      "/home/files/#{file.uid}" if file.present?
     end
 
     def match_app_path(path)
