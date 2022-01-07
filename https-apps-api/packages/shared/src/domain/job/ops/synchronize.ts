@@ -12,6 +12,7 @@ import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
 import {
   createSendEmailTask,
   createSyncWorkstationFilesTask,
+  removeFromEmailQueue,
   removeRepeatable,
   TASKS} from '../../../queue'
 import type { Maybe } from '../../../types'
@@ -24,8 +25,9 @@ import {
   jobStaleTemplate,
 } from '../../email/templates/mjml/job-stale.handler'
 import { buildEmailTemplate } from '../../email/email.helper'
-import { EmailSendInput } from '../../email/email.config'
+import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
+import { EmailSendOperation } from '../../email'
 
 // N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
 //      In the future we'd need to rename this to something more specific
@@ -65,6 +67,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     if (!shouldSyncStatus(job)) {
       this.ctx.log.info({ input, job }, 'SyncJobOperation: Job is already finished. Removing task')
       await removeRepeatable(this.ctx.job)
+      this.removeTerminationEmailJob()
       return
     }
     // we want to synchronize the job status if it is not yet terminated
@@ -167,10 +170,24 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       content: { job: { id: this.job.id, name: this.job.name, uid: this.job.uid } },
     })
     const email: EmailSendInput = {
+      emailType: EMAIL_TYPES.jobTerminationWarning,
       to: this.user.email,
       subject: `precisionFDA Workstation ${this.job.name} will terminate in 24 hours`,
       body,
     }
-    await createSendEmailTask(email, this.ctx.user)
+    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
+    this.ctx.log.info({
+      jobId: this.job.id,
+      jobDxid: this.job.dxid,
+      user: this.user.dxuser,
+      recipient: this.user.email,
+      bullJobId: jobId,
+    }, 'SyncJobOperation: Sending termination warning email to user')
+    await createSendEmailTask(email, this.ctx.user, jobId)
+  }
+
+  private removeTerminationEmailJob() {
+    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
+    removeFromEmailQueue(jobId)
   }
 }

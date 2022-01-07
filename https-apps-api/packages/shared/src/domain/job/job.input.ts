@@ -38,6 +38,8 @@ type DescribeJobInput = DxIdInput & {
 type ListJobsInput = {
   page: number
   limit: number
+  scope?: string
+  spaceId?: number
 }
 
 type PageJobs = {

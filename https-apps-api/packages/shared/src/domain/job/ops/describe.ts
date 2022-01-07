@@ -4,28 +4,23 @@ import * as errors from '../../../errors'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import type { DescribeJobInput } from '../job.input'
-import { TERMINAL_STATES } from '../job.enum'
-import { User } from '../../user'
+import { getJobAccessibleByContext } from '../job.permissions'
 
 export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
   async run(input: DescribeJobInput): Promise<Job> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)
 
-    const jobRepo = em.getRepository(Job)
-    const job = await jobRepo.findOne({
-      dxid: input.dxid,
-      // FIXME: JUPYTER APP JOBS DO NOT CURRENTLY HAVE THE APP ASSIGNED LOCALLY
-      // app: input.appId ? em.getReference(App, input.appId) : null,
-      user: em.getReference(User, this.ctx.user.id),
-    })
-
-    if (!job) {
-      throw new errors.JobNotFoundError()
-    }
+    const job = await getJobAccessibleByContext(input.dxid, this.ctx)
+    await em.populate(job, ['app', 'user'])
+    // TODO: only populate necessary fields:
+    // await em.populate(job, [
+    //   'app.id', 'app.dxid', 'app.uid', 'app.title',
+    //   'user.id', 'user.dxuser', 'user.fullName',
+    // ]);
 
     // if job is already finished (in our system), no need to synchronize
-    if (job.state && Object.values(TERMINAL_STATES).includes(job.state)) {
+    if (job.state && job.isTerminal()) {
       this.ctx.log.debug({ job }, 'job state is terminated')
       return job
     }

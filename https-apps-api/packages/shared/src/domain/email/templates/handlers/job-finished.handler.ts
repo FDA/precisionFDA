@@ -1,5 +1,5 @@
 import { pipe, uniqBy } from 'ramda'
-import { EmailSendInput, EmailTemplate, NOTIFICATION_TYPES_BASE } from '../../email.config'
+import { EmailSendInput, EmailTemplate, EMAIL_TYPES, NOTIFICATION_TYPES_BASE } from '../../email.config'
 import { Job, User } from '../../..'
 import { JobFinishedInputTemplate, jobFinishedTemplate } from '../mjml/job-finished.template'
 import { BaseTemplate } from '..'
@@ -59,6 +59,7 @@ export class JobFinishedEmailHandler
       content: { job: { id: this.job.id, uid: this.job.uid, name: this.job.name } },
     })
     return {
+      emailType: EMAIL_TYPES.jobFinished,
       to: receiver.email,
       body,
       subject: `Execution ${this.job.name} finished`,

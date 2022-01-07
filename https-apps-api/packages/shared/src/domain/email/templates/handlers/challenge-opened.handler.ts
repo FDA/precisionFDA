@@ -7,6 +7,7 @@ import {
   ChallengeOpened,
   NOTIFICATION_TYPES_BASE,
   EmailSendInput,
+  EMAIL_TYPES,
 } from '../../email.config'
 import {
   buildEmailTemplate,
@@ -77,6 +78,7 @@ export class ChallengeOpenedEmailHandler
       },
     })
     return {
+      emailType: EMAIL_TYPES.challengeOpened,
       to: receiver.email,
       body,
       subject: `New challenge ${this.challenge.name}`,
