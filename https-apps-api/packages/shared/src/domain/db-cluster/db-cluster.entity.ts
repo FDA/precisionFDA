@@ -36,14 +36,14 @@ export class DbCluster extends BaseEntity {
   @Property()
   engineVersion!: string
 
-  @Property()
-  host: string
+  @Property({ nullable: true })
+  host?: string
 
-  @Property()
-  port: string
+  @Property({ nullable: true })
+  port?: string
 
-  @Property()
-  description: string
+  @Property({ nullable: true })
+  description?: string
 
   @Property()
   statusAsOf: Date
