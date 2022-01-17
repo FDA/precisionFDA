@@ -565,7 +565,7 @@ Rails.application.routes.draw do
 
     resource :org, only: :update
 
-    resources :spaces, only: %i(index) do
+    resources :spaces, only: :index do
       resources :comments
 
       resources :tasks, only: %i(create destroy update show) do
@@ -584,13 +584,6 @@ Rails.application.routes.draw do
         collection do
           get "object_types"
           get "chart"
-        end
-      end
-
-      resources :space_reports, only: [:index] do
-        collection do
-          get "counters"
-          get "download_report"
         end
       end
     end
