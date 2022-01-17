@@ -106,7 +106,7 @@ class TasksController < ApplicationController
 
       SpaceEventService.call(space_id, @context.user_id, @membership, task, :task_deleted)
     end
-    render json: { status: 200, redirect_url: tasks_space_path(space_id) }
+    render json: { status: 200, redirect_url: root_path }
   end
 
   def accept
@@ -216,7 +216,7 @@ class TasksController < ApplicationController
   def find_task
     @task = Task.find(unsafe_params[:id])
   rescue
-    redirect_to tasks_space_path(unsafe_params[:space_id], filter: :my, status: :awaiting_response)
+    redirect_to root_path
   end
 
   def find_tasks

@@ -42,23 +42,6 @@ class SpaceReportsController < ApplicationController
     send_data report, type: 'text/html', filename: 'report.html', disposion: 'attachment'
   end
 
-  # def download_report
-  #   results = generate_objects_for_export
-  #   filters =
-  #     {
-  #       dates: {
-  #         start_date: start_date.strftime("%m/%d/%Y"),
-  #         end_date: end_date.strftime("%m/%d/%Y")
-  #       },
-  #       users: users
-  #     }
-  #   data = generate_report(@context.user, results, filters)
-  #   send_data data,
-  #             disposition: "attachment",
-  #             filename: "interaction_report.html",
-  #             type: "text/html"
-  # end
-
   private
 
   def start_date
@@ -190,8 +173,6 @@ class SpaceReportsController < ApplicationController
       else
         ""
       end
-    when "comments"
-      discuss_space_path(object.commentable)
     else
       if object.accessible_by?(@context)
         pathify(object)

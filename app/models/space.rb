@@ -497,11 +497,6 @@ class Space < ActiveRecord::Base
     [uid, shared_space.try(:uid)].compact
   end
 
-  # Scopes of content that can be moved to an space.
-  def accessible_scopes_for_move
-    [SCOPE_PRIVATE].freeze
-  end
-
   # Determine, whether a space is accessible by a user.
   # @param context [Context] A user context.
   # @return [Boolean] Returns true if user has access to a space, false otherwise.
@@ -522,39 +517,6 @@ class Space < ActiveRecord::Base
     user_membership = space_memberships.active.find_by(user: user)
 
     user_membership.present? && (unactivated? || active? || locked? && user_membership.host?)
-  end
-
-  # Used in discuss only
-  def search_content(content_type, query)
-    case content_type
-    when "Note"
-      notes.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |note| [note.id, note.title] }
-    when "File"
-      files.where("LOWER(name) LIKE LOWER(?)", "%#{query}%").where(parent_type: "User")
-        .map { |file| [file.id, file.name] }
-    when "Asset"
-      assets.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |asset| [asset.id, asset.name] }
-    when "Comparison"
-      comparisons.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |comparison| [comparison.id, comparison.name] }
-    when "App"
-      apps.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |app| [app.id, app.title] }
-    when "Workflow"
-      workflows.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |workflow| [workflow.id, workflow.title] }
-    when "Job"
-      jobs.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |job| [job.id, job.name] }
-    else
-      []
-    end.map { |i, j| { id: i, name: j } }
-  end
-
-  def can_verify_space(context)
-    (space_memberships.host.lead[0].user.dxuser == context.user.dxuser) && active?
   end
 
   def content_counters(user_id)

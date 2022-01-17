@@ -76,11 +76,7 @@ module PathHelper
     when "asset"
       "/home/assets/#{item.uid}"
     when "comment"
-      if item.commentable_type == 'Space'
-        discuss_space_path(item.commentable)
-      else
-        pathify_comments(item.commentable)
-      end
+      pathify_comments(item.commentable)
     when "comparison"
       comparison_path(item)
     when "discussion"
@@ -147,8 +143,6 @@ module PathHelper
     when "workflow"
       return workflow_analyses_path(item) if request.referer =~ /analyses/
       concat_path(item)
-    when "space"
-      discuss_space_path(item)
     when "task"
       space_task_path(item.space_id, item)
     when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"

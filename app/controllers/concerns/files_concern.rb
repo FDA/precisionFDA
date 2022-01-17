@@ -51,4 +51,36 @@ module FilesConcern
     end
     file.reload
   end
+
+  # Get a node, mapped to attributes, used in /client on Space Files page,
+  # links crated for every node: UserFile or Folder.
+  # @param node [Node] Node to get origin for.
+  # @param space [Space] A space.
+  # @param current_user [User] A current_user.
+  # @return [Hash] An object of mapped node, to be used in /client
+  def client_file(node, space, current_user)
+    rename_path = if node.is_a?(UserFile)
+      api_file_path(node)
+    else
+      rename_folder_api_space_file_path(space, node)
+    end
+
+    {
+      id: node.id,
+      name: ERB::Util.h(node.name),
+      type: node.is_a?(UserFile) ? "File" : node.sti_type,
+      org: node.user ? node.user.org.handle : "-",
+      added_by: node.user.dxuser,
+      size: node.is_a?(UserFile) ? number_to_human_size(node.file_size) : "",
+      created: node.created_at.strftime("%m/%d/%Y"),
+      state: node.state,
+      tags: node.all_tags_list,
+      links: {}.tap do |links|
+        links[:filePath] = node.is_a?(UserFile) ? "/files/#{node.uid}" : ""
+        links[:user] = user_path(node.user.dxuser)
+        links[:originPath] = node.is_a?(UserFile) ? node_origin(node, current_user) : ""
+        links[:renamePath] = rename_path if space.editable_by?(current_user)
+      end,
+    }
+  end
 end
