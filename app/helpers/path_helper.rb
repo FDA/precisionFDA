@@ -38,8 +38,6 @@ module PathHelper
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
     when "workflow"
       workflow_comments_path(item)
-    when "task"
-      space_task_comments_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_comments_path(item)
     when "appathon"
@@ -87,8 +85,6 @@ module PathHelper
       license_path(item)
     when "space"
       _space_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
@@ -141,8 +137,6 @@ module PathHelper
     when "workflow"
       return workflow_analyses_path(item) if request.referer =~ /analyses/
       concat_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
     when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"
       pathify(item)
     when "file", "folder", "app", "job", "asset"

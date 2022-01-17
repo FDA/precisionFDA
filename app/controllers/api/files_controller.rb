@@ -4,7 +4,6 @@ module Api
   class FilesController < ApiController
     include SpaceConcern
     include CommonConcern
-    include FilesConcern
     include Paginationable
     include Sortable
     include Scopes
@@ -65,7 +64,7 @@ module Api
           render plain: page_dict[:total_count]
         else
           render json: {
-            entries: nodes.map { |node| client_file(node, @space, current_user) },
+            entries: nodes.map { |node| helpers.client_file(node, @space, current_user) },
             meta: files_meta.merge(count(page_dict[:total_count])).
               merge({ pagination: page_dict }),
           }, root: "files"

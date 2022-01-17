@@ -564,21 +564,7 @@ Rails.application.routes.draw do
     end
 
     resource :org, only: :update
-
-    resources :spaces, only: :index do
-      resources :comments
-
-      resources :tasks, only: %i(create destroy update show) do
-        post "accept", on: :collection
-        post "complete", on: :collection
-        post "decline", on: :collection
-        post "make_active", on: :collection
-        post "reopen", on: :collection
-        post "reassign", on: :member
-        post "copy", on: :member
-        get "task", on: :member
-      end
-    end
+    resources :spaces, only: :index
 
     get "/spaces/*all", to: "spaces#index"
 
