@@ -185,9 +185,6 @@ class CommentsController < ApplicationController
       [Appathon.find(unsafe_params[:appathon_id])]
     elsif unsafe_params[:note_id].present?
       [Note.find(unsafe_params[:note_id])]
-    elsif unsafe_params[:task_id].present?
-      task = Task.find(unsafe_params[:task_id])
-      [task.space, task]
     elsif unsafe_params[:comparison_id].present?
       [Comparison.find(unsafe_params[:comparison_id])]
     elsif unsafe_params[:file_id].present?

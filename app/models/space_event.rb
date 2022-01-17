@@ -19,7 +19,6 @@ class SpaceEvent < ApplicationRecord
   OBJECT_TYPES = %i(
     space
     membership
-    task
     comment
     app
     job
@@ -34,11 +33,6 @@ class SpaceEvent < ApplicationRecord
     membership_added
     membership_disabled
     membership_changed
-    task_created
-    task_reassigned
-    task_completed
-    task_declined
-    task_deleted
     job_added
     job_completed
     file_added
@@ -55,8 +49,6 @@ class SpaceEvent < ApplicationRecord
     space_locked
     space_unlocked
     space_deleted
-    task_accepted
-    task_reopened
     membership_enabled
   ).freeze
 
@@ -72,7 +64,6 @@ class SpaceEvent < ApplicationRecord
     :app        => %i(title),
     :note       => %i(title),
     :space      => %i(name),
-    :task       => %i(name),
     :job        => %i(name),
     :file       => %i(name uid),
     :asset      => %i(name uid),

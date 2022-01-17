@@ -47,7 +47,6 @@ class Space < ActiveRecord::Base
 
   has_many :users, through: :space_memberships
   has_many :confidential_spaces, class_name: "Space"
-  has_many :tasks, dependent: :destroy
   has_many :space_events
   has_many :space_invitations
 
@@ -517,32 +516,5 @@ class Space < ActiveRecord::Base
     user_membership = space_memberships.active.find_by(user: user)
 
     user_membership.present? && (unactivated? || active? || locked? && user_membership.host?)
-  end
-
-  def content_counters(user_id)
-    tasks = self.tasks.where("user_id = :user_id or assignee_id = :user_id", user_id: user_id)
-    open_tasks = tasks.open.count
-    accepted_tasks = tasks.accepted_and_failed_deadline.count
-    declined_tasks = tasks.declined.count
-    completed_tasks = tasks.completed.count
-    tasks = open_tasks + accepted_tasks + declined_tasks + completed_tasks
-
-    feed = space_events.count
-
-    {
-      feed: feed,
-      tasks: tasks,
-      notes: notes.count,
-      files: files.count,
-      apps: apps.count,
-      jobs: jobs.count,
-      comparisons: comparisons.count,
-      assets: assets.count,
-      workflows: workflows.count,
-      open_tasks: open_tasks,
-      accepted_tasks: accepted_tasks,
-      declined_tasks: declined_tasks,
-      completed_tasks: completed_tasks,
-    }
   end
 end
