@@ -617,26 +617,22 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   # the old Spaces Controller. It copies an item from a current confidential space to cooperative.
   # Only needed for the old Comparisons and Notes pages.
   def copy_to_cooperative
-    space = Space.accessible_by(current_user).find(unsafe_params[:id])
+    space = Space.confidential.accessible_by(current_user).find(unsafe_params[:id])
     object = item_from_uid(unsafe_params[:object_id])
     copy_service = CopyService.new(api: @context.api, user: @context.user)
 
     if space.editable_by?(current_user) && space.member_in_cooperative?(@context.user_id)
-      if object && space.shared_space
-        ActiveRecord::Base.transaction do
-          copy_service.copy(object, space.shared_space.uid).each do |new_object|
-            SpaceEventService.call(
-              space.shared_space.id,
-              @context.user_id,
-              nil,
-              new_object,
-              "copy_to_cooperative",
-            )
-          end
-        end
-
-        flash[:success] = "#{object.class} successfully copied"
+      copy_service.copy(object, space.shared_space.uid).each do |new_object|
+        SpaceEventService.call(
+          space.shared_space.id,
+          @context.user_id,
+          nil,
+          new_object,
+          "copy_to_cooperative",
+        )
       end
+
+      flash[:success] = "#{object.class} successfully copied"
     else
       flash[:warning] = "You have no permission to copy object(s) to cooperative."
     end
