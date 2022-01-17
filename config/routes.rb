@@ -115,6 +115,9 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+    post "/spaces/:id/copy_to_cooperative",
+         to: "main#copy_to_cooperative",
+         as: :copy_to_cooperative_space
 
     resources :org_requests do
       collection do
@@ -347,7 +350,6 @@ Rails.application.routes.draw do
         post "change", on: :collection
       end
 
-      post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"
@@ -564,19 +566,6 @@ Rails.application.routes.draw do
     resource :org, only: :update
 
     resources :spaces, only: %i(index) do
-      member do
-        get "tasks"
-        get "feed"
-        get "reports"
-        get "notes"
-        get "comparisons"
-        get "assets"
-        get "discuss"
-        post "invite"
-        post "copy_to_cooperative" # copy a single item to cooperative, used everywhere
-        post "search_content" # used in discuss only
-      end
-
       resources :comments
 
       resources :tasks, only: %i(create destroy update show) do
