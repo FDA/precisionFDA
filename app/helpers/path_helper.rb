@@ -36,8 +36,6 @@ module PathHelper
       discussion_comments_path(item)
     when "answer"
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
-    when "space"
-      space_comments_path(item)
     when "workflow"
       workflow_comments_path(item)
     when "task"

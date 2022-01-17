@@ -577,7 +577,6 @@ Rails.application.routes.draw do
         post "reassign", on: :member
         post "copy", on: :member
         get "task", on: :member
-        resources :comments
       end
     end
 
