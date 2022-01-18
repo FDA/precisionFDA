@@ -1,6 +1,5 @@
 module ApplicationHelper
   include PathHelper
-  include VerifiedSpaceHelper
   include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
   # rubocop:disable Rails/HelperInstanceVariable
@@ -174,8 +173,7 @@ module ApplicationHelper
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def home_path_to_item(item, no_home = false)
-    if !no_home && (%w(file folder app app-series job
-                       asset workflow workflow-series).include? item.klass)
+    if !no_home && (%w(app app-series job workflow workflow-series).include? item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)

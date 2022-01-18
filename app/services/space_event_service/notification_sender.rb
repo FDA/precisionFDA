@@ -39,8 +39,8 @@ module SpaceEventService
     ).freeze
 
     class << self
-      def call(event)
-        notification_class(event).try(:send, event)
+      def call(event, nodejs_api_client)
+        notification_class(event).try(:send, event, nodejs_api_client)
       end
 
       private

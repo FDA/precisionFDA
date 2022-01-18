@@ -6,6 +6,7 @@ import {
   EmailTemplate,
   SpaceChanged,
   NOTIFICATION_TYPES_BASE,
+  EMAIL_TYPES,
 } from '../../email.config'
 import { BaseTemplate } from '../base-template'
 import { SpaceChangeTemplateInput, spaceChangedTemplate } from '../mjml/space-change.template'
@@ -132,6 +133,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
       content,
     })
     return {
+      emailType: EMAIL_TYPES.spaceChanged,
       to: receiver.email,
       body,
       subject: `${content.initiator.fullName} ${content.action} the space ${content.space.name}`,

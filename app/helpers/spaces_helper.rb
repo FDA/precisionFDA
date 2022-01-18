@@ -415,7 +415,7 @@ module SpacesHelper
       state: node.state,
       tags: node.all_tags_list,
       links: {}.tap do |links|
-        links[:filePath] = node.is_a?(UserFile) ? file_path(node) : ""
+        links[:filePath] = node.is_a?(UserFile) ? "/files/#{node.uid}" : ""
         links[:user] = user_path(node.user.dxuser)
         links[:originPath] = node.is_a?(UserFile) ? node_origin(node, current_user) : ""
         links[:renamePath] = rename_path if space.editable_by?(current_user)

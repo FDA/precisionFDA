@@ -9,9 +9,10 @@ type Task<T> = {
 }
 
 // will be used in the sub-handler
+type BasicUserJob = Task<null>
 type CheckStatusJob = Task<{ dxid: string }>
 type SendEmailJob = Task<EmailSendInput>
-type CheckStaleJobsJob = Omit<Task<null>, 'user'>
+type CheckStaleJobsJob = Task<null>
 type SyncDbClusterJob = Task<{ dxid: string }>
 
-export { Task, CheckStatusJob, SendEmailJob, CheckStaleJobsJob, SyncDbClusterJob }
+export { Task, BasicUserJob, CheckStatusJob, SendEmailJob, CheckStaleJobsJob, SyncDbClusterJob }

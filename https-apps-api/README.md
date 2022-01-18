@@ -68,6 +68,11 @@ $ mv localhost.pem cert.pem
 $ mv localhost-key.pem key.pem
 ```
 
+### Environments
+
+Running nodejs in different environments will result in different default configurations. These are
+defined in `packages/src/shared/config/envs`
+
 ### Endpoints
 
 - **Context**
@@ -84,10 +89,12 @@ $ mv localhost-key.pem key.pem
     3. `instanceType`: matches values from the platform (again, for jupyter apps). For example `baseline-2`.
   - it actually calls the Platform and creates jupyter lab instance (or it fails if user token is not valid etc)
   - it also creates a worker task that pings the Platform for updates (only status changes at the moment) so this value can change under the hood. Worker runs every 2 minutes until the execution is terminated.
-- LIST HTTPS app executions - `GET /jobs`
+- LIST HTTPS app executions - `GET /jobs` (currently WIP and unused)
   - input (request query):
     1. `limit` - for pagination (default value 10)
     2. `offset` - pagination (default value 1)
+    3. `spaceId` - list jobs in a space
+    4. `scope` - used for My Home, can be me, featured, . Ignored if spaceId is present
 
 
 ### Useful Commands for Debugging
@@ -99,21 +106,30 @@ The access token of a particular user is stored in the `sessions` table
 
 
 Start workstation
-`curl -k "https://localhost:3001/apps/$APP_ID/run?$USER_CONTEXT"`
+`curl -sk "https://localhost:3001/apps/$APP_ID/run?$USER_CONTEXT"`
 
 List all jobs for a user
-`curl -k "https://localhost:3001/jobs?$USER_CONTEXT" | python -m json.tool`
+`curl -sk "https://localhost:3001/jobs?$USER_CONTEXT" | python -m json.tool`
 
 Describe a job
-`curl -k "https://localhost:3001/jobs/$JOB_ID?$USER_CONTEXT" | python -m json.tool`
+`curl -sk "https://localhost:3001/jobs/$JOB_ID?$USER_CONTEXT" | python -m json.tool`
 
 Terminate job
-`curl -k --request PATCH "https://localhost:3001/jobs/$JOB_ID/terminate?$USER_CONTEXT"`
+`curl -sk --request PATCH "https://localhost:3001/jobs/$JOB_ID/terminate?$USER_CONTEXT"`
+
+Sync workstation files
+`curl -sk --request PATCH "https://localhost:3001/jobs/$JOB_ID/syncFiles?$USER_CONTEXT"`
+
+Send email
+`curl -sk --request PATCH "https://localhost:3001/email/$EMAIL_ID/?$USER_CONTEXT"`
+
+Start user checkup task
+`curl -sk "https://localhost:3001/users/checkup?$USER_CONTEXT" | python -m json.tool`
 
 Stale job report task (admin)
-`curl -k "https://localhost:3001/admin/checkStaleJobs?$USER_CONTEXT" | python -m json.tool`
+`curl -sk "https://localhost:3001/admin/checkStaleJobs?$USER_CONTEXT" | python -m json.tool`
 
 Debug jobs in bull queue
-`curl -k "https://localhost:3001/debug/queue?$USER_CONTEXT" | python -m json.tool`
+`curl -sk "https://localhost:3001/debug/queue?$USER_CONTEXT" | python -m json.tool`
 
-`curl -k "https://localhost:3001/debug/queue/job/$JOB_ID?$USER_CONTEXT" | python -m json.tool`
+`curl -sk "https://localhost:3001/debug/queue/job/$BULLJOB_ID?$USER_CONTEXT" | python -m json.tool`

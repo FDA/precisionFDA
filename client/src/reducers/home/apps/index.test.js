@@ -82,8 +82,8 @@ describe('reset filter value', () => {
     expect(reducer(initialState, action)).toEqual({
       [HOME_APP_TYPES.PRIVATE]: {
         filters: {
-          sortType: null,
-          sortDirection: null,
+          sortType: 'created_at',
+          sortDirection: 'DESC',
           currentPage: 1,
           nextPage: null,
           prevPage: null,

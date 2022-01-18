@@ -116,9 +116,7 @@ class AppSerializer < ApplicationSerializer
       if can_run? && !object.in_locked_space?
         unless member_viewer?
           # app single run
-          links[:run_job] = new_app_job_path(
-            object.app_series.latest_version_app || object.app_series.latest_revision_app,
-          )
+          links[:run_job] = new_app_job_path(object.uid)
           # GET app batch run
           links[:batch_run] = batch_app_app_path(object.uid)
         end

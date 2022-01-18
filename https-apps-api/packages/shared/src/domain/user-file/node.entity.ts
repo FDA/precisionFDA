@@ -14,7 +14,7 @@ export class Node extends BaseEntity {
   @Property()
   dxid?: string
 
-  @Property()
+  @Property({ unique: true })
   uid: string
 
   @Enum({ fieldName: 'sti_type' })

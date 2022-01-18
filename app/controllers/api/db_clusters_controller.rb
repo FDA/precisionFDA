@@ -54,7 +54,7 @@ module Api
       ).except(:ddl_file_uid)
       opts[:name]&.strip!
 
-      response = https_apps_client.dbclusters_create(opts)
+      response = https_apps_client.dbcluster_create(opts)
       dbcluster = DbCluster.find_by!(dxid: response[:dxid])
 
       render json: dbcluster, adapter: :json
@@ -69,7 +69,7 @@ module Api
 
     # Used for start, stop and terminate actions.
     def run
-      https_apps_client.send("dbclusters_#{params[:api_method]}", params[:dxids])
+      https_apps_client.dbcluster_action(params[:dxids], params[:api_method])
 
       render json: {}, status: :no_content
     end

@@ -4,7 +4,7 @@ module SpaceEventService
 
     class << self
 
-      def send(event)
+      def send(event, _)
         receivers(event).each do |receiver|
           NotificationsMailer.task_updated_email(event.entity, receiver, action(event)).deliver_now!
         end

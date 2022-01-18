@@ -5,6 +5,7 @@ import {
   CommentAdded,
   EmailSendInput,
   EmailTemplate,
+  EMAIL_TYPES,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
 import {
@@ -130,6 +131,7 @@ export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> impleme
       },
     })
     return {
+      emailType: EMAIL_TYPES.commentAdded,
       to: receiver.email,
       body,
       subject: `${this.comment.user.unwrap().fullName} added a comment`,

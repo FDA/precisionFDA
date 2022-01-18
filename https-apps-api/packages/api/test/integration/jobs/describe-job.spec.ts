@@ -125,7 +125,7 @@ describe.skip('GET /jobs/:id', () => {
   context('error states', () => {
     it('returns 400 when query data is not provided', async () => {
       const { body } = await supertest(api.getServer()).get(`/jobs/${job.dxid}`).expect(400)
-      expect(body).to.have.property('code', errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID)
       expect(body.props).to.have.property('validationErrors')
     })
 
@@ -137,7 +137,7 @@ describe.skip('GET /jobs/:id', () => {
           ...getDefaultQueryData(user),
         })
         .expect(400)
-      expect(body).to.have.property('code', errors.ErrorCodes.VALIDATION)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.VALIDATION)
       expect(body.props).to.have.property('validationErrors')
     })
 
@@ -149,7 +149,7 @@ describe.skip('GET /jobs/:id', () => {
           id: user.id + 1,
         })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
 
     it.skip('returns 404 when job does not belong to the given app', async () => {
@@ -159,7 +159,7 @@ describe.skip('GET /jobs/:id', () => {
           ...getDefaultQueryData(user),
         })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
   })
 })

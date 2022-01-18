@@ -35,7 +35,7 @@ export class UserFile extends Node {
   @Property()
   entityType: FILE_ORIGIN_TYPE
 
-  @Property()
+  @Property({ unique: true })
   uid: string
 
   @Property()

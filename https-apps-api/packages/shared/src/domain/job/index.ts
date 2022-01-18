@@ -14,4 +14,8 @@ export { ListJobsOperation } from './ops/list'
 
 export { RequestTerminateJobOperation } from './ops/terminate'
 
+export { RequestWorkstationSyncFilesOperation } from './ops/request-workstation-files-sync'
+
 export { CheckStaleJobsOperation } from './ops/check-stale'
+
+export { CheckUserJobsOperation } from './ops/check-user-jobs'

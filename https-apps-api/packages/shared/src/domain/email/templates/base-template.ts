@@ -13,7 +13,7 @@ export class BaseTemplate<T> {
   constructor(emailTypeId: number, input: unknown, ctx: OpsCtx) {
     this.ctx = ctx
     this.config = getEmailConfig(emailTypeId)
-    this.emailType = this.config.name
+    this.emailType = emailTypeId
     this.ctx.log.info({ emailType: this.emailType }, 'Email template build')
 
     this.validatedInput = this.validate(input)
@@ -29,7 +29,7 @@ export class BaseTemplate<T> {
     const validateFn = ajv.compile(schema)
     if (!validateFn(payload)) {
       const validationErrors = validateFn.errors
-      throw new errors.ValidationError(`Email payload for email type ${this.emailType} invalid`, {
+      throw new errors.ValidationError(`Email payload for email type ${this.config.name} invalid`, {
         code: errors.ErrorCodes.EMAIL_VALIDATION,
         validationErrors,
       })

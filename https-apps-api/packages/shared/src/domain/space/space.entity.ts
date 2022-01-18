@@ -1,6 +1,7 @@
 import { Collection, Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
+import { getScopeFromSpaceId } from './space.helper'
 
 @Entity({ tableName: 'spaces' })
 export class Space extends BaseEntity {
@@ -24,4 +25,9 @@ export class Space extends BaseEntity {
     owner: true,
   })
   spaceMemberships = new Collection<SpaceMembership>(this)
+
+  @Property({ persist: false })
+  get uid(): string {
+    return getScopeFromSpaceId(this.id)
+  }
 }

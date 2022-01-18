@@ -114,6 +114,23 @@ const app = {
         },
       ],
     }),
+  ttydAppSpecData: () =>
+    JSON.stringify({
+      internet_access: true,
+      instance_type: 'baseline-4',
+      output_spec: [],
+      input_spec: [
+        {
+          name: 'port',
+          class: 'int',
+          default: 443,
+          label: 'ttyd port',
+          help: "ttyd shell will appear on this port",
+          optional: true,
+          choices: [443, 8081, 8080],
+        },
+      ],
+  }),
   simple: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
@@ -146,7 +163,9 @@ const app = {
   }),
   runTtydAppInput: () => ({
     scope: 'private',
-    input: {},
+    input: {
+      port: 8080,
+    },
   }),
   runRshinyAppInput: () => ({
     scope: 'private',

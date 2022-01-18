@@ -1,5 +1,4 @@
 if defined?(Wice::Defaults)
-
   # Default number of rows to show per page.
   Wice::Defaults::PER_PAGE = 20
 
@@ -191,5 +190,4 @@ if defined?(Wice::Defaults)
   # By default ActiveRecord calls are always executed inside Model.unscoped{}.
   # Setting <tt>USE_DEFAULT_SCOPE</tt> to true will use the default scope for all queries.
   Wice::Defaults::USE_DEFAULT_SCOPE = false
-
 end

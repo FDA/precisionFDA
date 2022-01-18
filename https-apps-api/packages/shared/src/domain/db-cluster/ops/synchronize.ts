@@ -67,8 +67,8 @@ export class SyncDbClusterOperation extends WorkerBaseOperation<SyncDbClusterJob
     const currentStatus = STATUSES[invertObj(STATUS)[dbCluster.status]]
 
     if (currentStatus === describeDbClusterRes.status &&
-        dbCluster.host === describeDbClusterRes.endpoint &&
-        dbCluster.port === describeDbClusterRes.port.toString()) {
+        dbCluster.host == describeDbClusterRes.endpoint &&
+        dbCluster.port == describeDbClusterRes.port?.toString()) {
       this.ctx.log.info({ dxid: dbCluster.dxid },
         'SyncDbClusterOperation: Status, endpoint or port have not been changed, no updates')
       return
@@ -85,7 +85,7 @@ export class SyncDbClusterOperation extends WorkerBaseOperation<SyncDbClusterJob
         status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
         statusAsOf: new Date(describeDbClusterRes.statusAsOf),
         host: describeDbClusterRes.endpoint,
-        port: describeDbClusterRes.port.toString(),
+        port: describeDbClusterRes.port?.toString(),
       },
       { em },
     )
