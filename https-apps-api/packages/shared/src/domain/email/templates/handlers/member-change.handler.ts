@@ -5,6 +5,7 @@ import { Space, SpaceMembership, User } from '../../..'
 import {
   EmailSendInput,
   EmailTemplate,
+  EMAIL_TYPES,
   MemberChanged,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
@@ -199,6 +200,7 @@ export class MemberChangedEmailHandler
       content,
     })
     return {
+      emailType: EMAIL_TYPES.memberChangedAddedRemoved,
       to: receiver.email,
       body,
       subject: `${content.initiator.fullName} ${content.action}`,

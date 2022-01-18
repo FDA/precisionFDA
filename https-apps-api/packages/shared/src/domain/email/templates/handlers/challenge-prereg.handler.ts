@@ -7,6 +7,7 @@ import {
   ChallengeCreated,
   NOTIFICATION_TYPES_BASE,
   EmailSendInput,
+  EMAIL_TYPES,
 } from '../../email.config'
 import {
   buildEmailTemplate,
@@ -84,6 +85,7 @@ export class ChallengePreregEmailHandler
       },
     })
     return {
+      emailType: EMAIL_TYPES.challengePrereg,
       to: receiver.email,
       body,
       subject: `Challenge ${this.validatedInput.name} preregistration opened`,

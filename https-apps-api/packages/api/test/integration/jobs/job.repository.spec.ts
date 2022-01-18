@@ -158,5 +158,17 @@ describe('JobRepository and JobEntity', () => {
       await em.flush()
       expect(job.runTimeString()).to.equal('42d 2m 57s')
     })
+
+    it('filters isActive/isTerminal/isNonTerminal work', async () => {
+      const jobRepo = em.getRepository(Job)
+      let results = await jobRepo.find({}, { filters: ['isActive'] })
+      expect(results).to.have.length(2)
+
+      results = await jobRepo.find({}, { filters: ['isTerminal'] })
+      expect(results).to.have.length(1)
+
+      results = await jobRepo.find({}, { filters: ['isNonTerminal'] })
+      expect(results).to.have.length(2)
+    })
   })
 })

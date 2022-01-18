@@ -57,6 +57,16 @@ application app_dir do
     user node[:deploy_user]
   end
 
+  execute "Install Bundler from Gemfile.lock" do
+    cwd app_dir
+    command %{
+      version=`sed -n '/BUNDLED WITH/{n;p}' Gemfile.lock | xargs`
+      if [ ! -z "$version" ]; then
+        gem install --conservative bundler:${version}
+      fi
+    }
+  end
+
   execute "Bundle gems" do
     command %{
       bundle config set --local without 'development test' && \

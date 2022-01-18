@@ -16,7 +16,7 @@ import {
   HOME_DATABASE_PASSWORD,
 } from '../../../../../constants'
 import { ButtonSolidBlue, Button } from '../../../../../components/Button'
-import { DropdownMenu } from '../../../DropdownMenu'
+// import { DropdownMenu } from '../../../DropdownMenu'
 import { createDatabase } from '../../../../../actions/home'
 import { fetchAccessibleFiles } from '../../../../../actions/spaces/files'
 import { AccessibleFileShape } from '../../../../shapes/AccessibleObjectsShape'
@@ -44,28 +44,20 @@ const HomeNewDatabaseCreateForm = ({
     },
   )
 
-  // In progress
-  // eslint-disable-next-line no-unused-vars
-  // const [optionsVersions, setOptionsVersions] = useState([]) // for updated options for versions Select
   const [fileNameSelected, setFileNameSelected] = useState('Select')
-  // const [versionNameSelected, setVersionNameSelected] = useState('Select')
-
+  const [versionNameSelected, setVersionNameSelected] = useState('Select')
+  const [instanceNameSelected, setInstanceNameSelected] = useState('Select')
   const [retypedPassword, setRetypedPassword] = useState('')
+
   const refFilesSelection = useRef(null)
-  // const refInstancesSelection = useRef(null) // instance Select should be added
-  // const refVersionsSelection = useRef(null)
+  const refInstancesSelection = useRef(null)
+  const refVersionsSelection = useRef(null)
 
   const history = useHistory()
-  // in progress
-  // eslint-disable-next-line no-unused-vars
-  // let filteredOptions
 
-  useLayoutEffect(() => {
-    fetchAccessibleFiles()
-    // filterOptions() // for Select options updates (for hiding)
-  }, [])
+  useLayoutEffect(() => { fetchAccessibleFiles() }, [])
 
-  // for Select
+  // for files Select
   const filesOptions =  accessibleFiles.filter(file => file.scope !== 'public').map(file => ({
     value: file.name,
     label: file.name,
@@ -83,91 +75,89 @@ const HomeNewDatabaseCreateForm = ({
   }
 
   const allowedTypes = [HOME_DATABASE_LABELS[HOME_DATABASE_ENGINE_TYPES['MySQL']], HOME_DATABASE_LABELS[HOME_DATABASE_ENGINE_TYPES['PostgreSQL']]]
-  const setEngineVersion = (version) => {
-    setFormDataInput({ ...formDataInput, engineVersion: version }) // for Dropdown
+  const setInstanceSelect = (instance) => {
+    refVersionsSelection.current.select.clearValue() // clear version Select
+    setInstanceNameSelected(instance)
+    if (instance) {
+      setFormDataInput({ ...formDataInput, dxInstanceClass: instance.value, engineVersion: '' })
+      if (versionNameSelected) {
+        setVersionNameSelected('')
+      }
+    } else {
+      setFormDataInput({ ...formDataInput, dxInstanceClass: '', engineVersion: '' })
+      setInstanceNameSelected('')
+    }
   }
 
-  //  for Select
-  // const setEngineVersionSelect = (version) => {
-  //   setVersionNameSelected(version)
-  //   if (version) {
-  //     setFormDataInput({ ...formDataInput, engineVersion: version.value })
-  //   } else {
-  //     setFormDataInput({ ...formDataInput, engineVersion: '' })
-  //     setVersionNameSelected('')
-  //   }
-  // }
-
-  const checkDisabledInstances = () => { return !(formDataInput.engine) }
-  const hideForPG = () => {
-    return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL']
-  }
-  const hideForMysql = () => {
-    return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['MySQL']
+  const setVersionSelect = (version) => {
+    setVersionNameSelected(version)
+    if (version) {
+      setFormDataInput({ ...formDataInput, engineVersion: version.value })
+    } else {
+      setFormDataInput({ ...formDataInput, engineVersion: '' })
+      setVersionNameSelected('')
+    }
   }
 
-  const availableInstances = [
+  const checkDisabledInstances = () => { return !(formDataInput.engine ) }
+  const hideForPG = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
+  const hideForMysql = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['MySQL'] }
+
+  const instancesOptions = [
     {
-      text: HOME_DATABASE_LABELS['db_std1_x1'],
-      hide: hideForPG(),
-      isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_STD1_X1),
+      value: HOME_DATABASE_INSTANCES.DB_STD1_X1,
+      label: HOME_DATABASE_LABELS['db_std1_x1'],
+      isDisabled: checkDisabledInstances() || hideForPG(),
     },
     {
-      text: HOME_DATABASE_LABELS['db_std1_x2'],
+      value: HOME_DATABASE_INSTANCES.DB_STD1_X2,
+      label: HOME_DATABASE_LABELS['db_std1_x2'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_STD1_X2),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x2'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X2,
+      label: HOME_DATABASE_LABELS['db_mem1_x2'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X2),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x4'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X4,
+      label: HOME_DATABASE_LABELS['db_mem1_x4'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X4),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x8'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X8,
+      label: HOME_DATABASE_LABELS['db_mem1_x8'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X8),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x16'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X16,
+      label: HOME_DATABASE_LABELS['db_mem1_x16'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X16),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x32'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X32,
+      label: HOME_DATABASE_LABELS['db_mem1_x32'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X32),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x48'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X48,
+      label: HOME_DATABASE_LABELS['db_mem1_x48'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X48),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x64'],
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X64,
+      label: HOME_DATABASE_LABELS['db_mem1_x64'],
       isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X64),
     },
     {
-      text: HOME_DATABASE_LABELS['db_mem1_x96'],
-      hide: hideForMysql(),
-      isDisabled: checkDisabledInstances(),
-      onClick: () => setInstance(HOME_DATABASE_INSTANCES.DB_MEM1_X96),
+      value: HOME_DATABASE_INSTANCES.DB_MEM1_X96,
+      label: HOME_DATABASE_LABELS['db_mem1_x96'],
+      isDisabled: checkDisabledInstances() || hideForMysql(),
     },
   ]
 
-  const hideMysqlVersions = () => {
-    return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL']
-  }
-
-  const hidePgVersions = () => {
-    return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['MySQL']
-  }
+  const hideMysqlVersions = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
+  const hidePgVersions = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['MySQL'] }
 
   const restrictedPgInstances = [
     HOME_DATABASE_INSTANCES.DB_STD1_X2,
@@ -179,68 +169,55 @@ const HomeNewDatabaseCreateForm = ({
     HOME_DATABASE_INSTANCES.DB_MEM1_X96,
   ]
 
-  const hidePgVersionsForSomeInstances = () => {
-    return restrictedPgInstances.includes(formDataInput.dxInstanceClass)
-  }
+  const hidePgVersionsForSomeInstances = () => { return restrictedPgInstances.includes(formDataInput.dxInstanceClass) }
+  const checkDisabledVersions = () => { return !(formDataInput.dxInstanceClass && formDataInput.engine) }
 
-  const checkDisabledVersions = () => {
-    return !(formDataInput.dxInstanceClass && formDataInput.engine)
-  }
-
-  const availableVersions = [
+  const versionsOptions = [
     {
-      text: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
-      hide: hideMysqlVersions(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12),
+      value: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
+      label: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
+      isDisabled: checkDisabledVersions() || hideMysqlVersions(),
     },
     {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
+      isDisabled: checkDisabledVersions() || hidePgVersions() || hidePgVersionsForSomeInstances(),
+    },
+    {
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_17,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_17,
+      isDisabled: checkDisabledVersions() || hidePgVersions() || hidePgVersionsForSomeInstances(),
+    },
+    {
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_18,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_18,
       hide: hidePgVersions() || hidePgVersionsForSomeInstances(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16),
+      isDisabled: checkDisabledVersions() || hidePgVersions() || hidePgVersionsForSomeInstances(),
     },
     {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_17,
-      hide: hidePgVersions() || hidePgVersionsForSomeInstances(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_17),
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
+      isDisabled: checkDisabledVersions() || hidePgVersions() || hidePgVersionsForSomeInstances(),
     },
     {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_18,
-      hide: hidePgVersions() || hidePgVersionsForSomeInstances(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_18),
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
+      isDisabled: checkDisabledVersions() || hidePgVersions(),
     },
     {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
-      hide: hidePgVersions() || hidePgVersionsForSomeInstances(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19),
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_12,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_12,
+      isDisabled: checkDisabledVersions() || hidePgVersions(),
     },
     {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
-      hide: hidePgVersions(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11),
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_13,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_13,
+      isDisabled: checkDisabledVersions() || hidePgVersions(),
     },
     {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_12,
-      hide: hidePgVersions(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_12),
-    },
-    {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_13,
-      hide: hidePgVersions(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_13),
-    },
-    {
-      text: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14,
-      hide: hidePgVersions(),
-      isDisabled: checkDisabledVersions(),
-      onClick: () => setEngineVersion(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14),
+      value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14,
+      label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14,
+      isDisabled: checkDisabledVersions() || hidePgVersions(),
     },
   ]
 
@@ -276,71 +253,32 @@ const HomeNewDatabaseCreateForm = ({
     history.replace({ ...history.location, state })
   }
 
-  let titleInstance = 'Select...'
-  if (formDataInput.dxInstanceClass) { titleInstance = HOME_DATABASE_LABELS[formDataInput.dxInstanceClass] }
-
-  let titleVersion = 'Select...'
-  if (formDataInput.engineVersion) { titleVersion = formDataInput.engineVersion }
-
   const createClickHandler = () => {
     if (checkPasswords()) { onCreateClick(formDataInput) }
   }
 
   const setEngine = (e) => {
-    // refVersionsSelection.current.select.clearValue() setVersionNameSelected
-    // setVersionNameSelected('') // for Select
+    refVersionsSelection.current.select.clearValue()
+    setVersionNameSelected('') // for Select version
+    refInstancesSelection.current.select.clearValue()
+    setInstanceNameSelected('') // for Select instance
     const { currentTarget } = e
-    setFormDataInput({ ...formDataInput, [currentTarget.name]: currentTarget.value, dxInstanceClass: '', engineVersion: '' })
+    setFormDataInput({
+      ...formDataInput,
+      [currentTarget.name]: currentTarget.value,
+      dxInstanceClass: '',
+      engineVersion: '',
+    })
   }
-
-  const setInstance = (instance) => {
-    setFormDataInput({ ...formDataInput, dxInstanceClass: instance, engineVersion: '' })
-  }
-
-  // options for Selects
-  // const versionOptions = [
-  //   {
-  //     value: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
-  //     label: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
-  //     hide: hideMysqlVersions(),  // does not work
-  //     // isSelected: hideMysqlVersions(), // does not work
-  //     isDisabled: checkDisabledVersions(),
-  //     onClick: () => setEngineVersionSelect(HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12),
-  //   },
-  //   {
-  //     value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
-  //     label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
-  //     hide: hidePgVersions() || hidePgVersionsForSomeInstances(),  // does not work
-  //     // isSelected: hidePgVersions() || hidePgVersionsForSomeInstances(),
-  //     // isOptionDisabled: hidePgVersions() || hidePgVersionsForSomeInstances(),
-  //     isDisabled: checkDisabledVersions(),
-  //     onClick: () => setEngineVersionSelect(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16),
-  //   },
-  //   {
-  //     value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
-  //     label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
-  //     hide: hidePgVersions(), // does not work
-  //     isDisabled: checkDisabledVersions(),
-  //     onClick: () => setEngineVersionSelect(HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11),
-  //   },
-  // ]
-
-  // for Select options updates
-  // const filterOptions = () => {
-  //   filteredOptions = availableVersionsSelect.filter(option => option.hide === false)
-  //   // setOptionsVersions(availableVersionsSelect.filter(option => option.hide === false)) // filteredOptions)
-  // }
 
   const typePassword = (e) => {
     const { currentTarget } = e
     setFormDataInput({ ...formDataInput, [currentTarget.name]: currentTarget.value })
   }
-
   const retypePassword = (e) => {
     const { currentTarget } = e
     setRetypedPassword(currentTarget.value)
   }
-
   const checkPasswords = () => {
     if (retypedPassword !== formDataInput.adminPassword) {
       setRetypedPassword('')
@@ -352,10 +290,11 @@ const HomeNewDatabaseCreateForm = ({
     }
   }
 
+  // clear all Selects
   const clearSelectionsValues = () => {
-    refFilesSelection.current.select.clearValue()     // clear files Select
-    // refVersionsSelection.current.select.clearValue()  // clear versions Select
-    // instance Select should be added
+    refFilesSelection.current.select.clearValue()
+    refVersionsSelection.current.select.clearValue()
+    refInstancesSelection.current.select.clearValue()
   }
 
   return (
@@ -420,7 +359,6 @@ const HomeNewDatabaseCreateForm = ({
         <div className="form-group__instance-group">
           <label className="control-label">Database type (required):</label>
           <div className="database-type-and-version-container">
-
             <div className="database-type-container">
               <div className="database-type-container__switch_container">
                 {allowedTypes.map((type) => {
@@ -441,33 +379,33 @@ const HomeNewDatabaseCreateForm = ({
             <div className="form-group__inLine-group">
               <label className="control-label">Instance (required):</label>
               <div className="group_selection">
-                <DropdownMenu
-                  title={titleInstance}
-                  page='create'
-                  options={availableInstances}
+                <Select
+                  ref={refInstancesSelection}
+                  name={instanceNameSelected}
+                  isSearchable={true}
+                  options={instancesOptions}
+                  onChange={setInstanceSelect}
+                  defaultValue={{ label: 'Select...', value: 0 }}
+                  hideSelectedOptions={true}
+                  isClearable={true}
                 />
+
               </div>
             </div>
 
             <div className="form-group__inLine-group">
               <label className="control-label">Version (required):</label>
               <div className="group_selection">
-                <DropdownMenu
-                  page='create'
-                  title={titleVersion}
-                  options={availableVersions}
+                <Select
+                  ref={refVersionsSelection}
+                  name={versionNameSelected}
+                  isSearchable={true}
+                  options={versionsOptions}
+                  onChange={setVersionSelect}
+                  defaultValue={{ label: 'Select...', value: 0 }}
+                  hideSelectedOptions={true}
+                  isClearable={true}
                 />
-                {/*<Select*/}
-                {/*  ref={refVersionsSelection}*/}
-                {/*  name={versionNameSelected}*/}
-                {/*  isSearchable={false}*/}
-                {/*  options={versionOptions}*/}
-                {/*  onChange={setEngineVersionSelect}*/}
-                {/*  defaultValue={{ label: 'Select...', value: 0 }}*/}
-                {/*  hideSelectedOptions={true}*/}
-                {/*  // styles={colourStyles}*/}
-                {/*  // className="file-selection"*/}
-                {/*/>*/}
               </div>
             </div>
           </div>

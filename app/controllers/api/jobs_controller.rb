@@ -332,6 +332,14 @@ module Api
       redirect_to authorized_job_uri.to_s
     end
 
+    # Trigger files sync from a running workstation
+    def sync_files
+      service = Jobs::SyncFilesService.call(params[:id], @context)
+      raise ApiError, service.message unless service.success?
+
+      render json: { message: { type: service.status, text: service.message } }
+    end
+
     private
 
     def job_copier

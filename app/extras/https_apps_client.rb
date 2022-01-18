@@ -29,6 +29,17 @@ class HttpsAppsClient
     )
   end
 
+  # Sync files for a running HTTPS app job.
+  # @param job_dxid [String] Job dxid to terminate.
+  # @param opts [Hash] Request body options.
+  def job_sync_files(job_dxid)
+    request(
+      "/jobs/#{job_dxid}/syncFiles",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   # Rename a folder.
   # @param folder_id [Integer] Folder ID.
   # @param new_name [String] New folder name.
@@ -59,31 +70,17 @@ class HttpsAppsClient
     )
   end
 
-  def dbclusters_start(dxids)
+  def dbcluster_action(dxids, action)
+    raise Error, "Wrong action #{action}" unless %w(start stop terminate).include?(action)
+
     request(
-      "/dbclusters/start",
+      "/dbclusters/#{action}",
       { dxids: dxids },
       Net::HTTP::Post::METHOD,
     )
   end
 
-  def dbclusters_stop(dxids)
-    request(
-      "/dbclusters/stop",
-      { dxids: dxids },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def dbclusters_terminate(dxids)
-    request(
-      "/dbclusters/terminate",
-      { dxids: dxids },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def dbclusters_create(opts)
+  def dbcluster_create(opts)
     request(
       "/dbclusters/create",
       opts,
@@ -104,7 +101,7 @@ class HttpsAppsClient
       handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
     end
   rescue Errno::ECONNREFUSED
-    raise Error, "Can't connect to JupyterLab service"
+    raise Error, "Can't connect to nodejs-api service"
   end
 
   # Returns connection options.

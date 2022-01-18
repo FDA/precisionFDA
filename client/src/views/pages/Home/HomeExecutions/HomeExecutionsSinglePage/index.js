@@ -22,6 +22,7 @@ import {
   setCurrentTab,
   copyToSpaceExecutions,
   executionsAttachTo,
+  syncFiles,
   terminateExecutions,
   editExecutionTags,
 } from '../../../../../actions/home'
@@ -29,7 +30,7 @@ import { getSelectedTab } from '../../../../../helpers/home'
 
 
 const HomeExecutionsSinglePage = (props) => {
-  const { currentTab, uid, fetchExecutionDetails, executionDetails = {}, setCurrentTab, copyToSpace, attachTo, terminateExecutions, editTags } = props
+  const { currentTab, uid, fetchExecutionDetails, executionDetails = {}, setCurrentTab, copyToSpace, attachTo, syncFiles, terminateExecutions, editTags } = props
 
   useLayoutEffect(() => {
     if (uid) fetchExecutionDetails(uid).then(({ status, payload }) => {
@@ -127,7 +128,9 @@ const HomeExecutionsSinglePage = (props) => {
             <li>
               <div className='home-single-page__object-options_header'>URL</div>
               <Link to={execution.links.open_external} target='_blank' className='home-single-page__object-options_value'>
-                <span className="fa fa-external-link"></span> open
+                <Button type='primary'>
+                  <span className="fa fa-external-link"></span> Open Workstation
+                </Button>
               </Link>
             </li>
           }
@@ -150,6 +153,15 @@ const HomeExecutionsSinglePage = (props) => {
   ]
 
   const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
+
+  const onSyncFilesClick = () => {
+    if (execution.state === 'running') {
+      syncFiles(execution.links.sync_files)
+    }
+    else {
+      alert(`Cannot sync files as workstation is ${execution.state}`)
+    }
+  }
 
   return (
     <HomeLayout hideTabs>
@@ -180,18 +192,23 @@ const HomeExecutionsSinglePage = (props) => {
                 </div>
               </div>
               <div className='home-single-page__header-section_right-block'>
+                {execution.links.sync_files &&
+                  <Button type='primary' onClick={onSyncFilesClick} style={{ marginRight: '20px' }}>Sync Files</Button>
+                }
                 <a href={execution.links.run_job} className='pfda-mr-r20'>
                   <Button type='primary'>Re-Run Execution</Button>
                 </a>
-                <ActionsDropdown
-                  executions={[execution]}
-                  page='details'
-                  copyToSpace={copyToSpace}
-                  attachTo={attachTo}
-                  terminateExecutions={terminateExecutions}
-                  comments={meta.links.comments}
-                  editTags={meta.links.edit_tags && editTags}
-                />
+                <div style={{ display: 'inline-block', marginTop: '2px' }}>
+                  <ActionsDropdown
+                    executions={[execution]}
+                    page='details'
+                    copyToSpace={copyToSpace}
+                    attachTo={attachTo}
+                    terminateExecutions={terminateExecutions}
+                    comments={meta.links.comments}
+                    editTags={meta.links.edit_tags && editTags}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -222,6 +239,8 @@ HomeExecutionsSinglePage.propTypes = {
   attachTo: PropTypes.func,
   terminateExecutions: PropTypes.func,
   editTags: PropTypes.func,
+  syncFiles: PropTypes.func,
+  showSyncFilesModal: PropTypes.func,
 }
 
 HomeExecutionsSinglePage.defaultProps = {
@@ -238,6 +257,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   setCurrentTab: (tab) => dispatch(setCurrentTab(tab)),
   copyToSpace: (scope, ids) => dispatch(copyToSpaceExecutions(scope, ids)),
   attachTo: (items, noteUids) => dispatch(executionsAttachTo(items, noteUids)),
+  syncFiles: (link) => dispatch(syncFiles(link)),
   terminateExecutions: (link, ids) => dispatch(terminateExecutions(link, ids)).then(({ status }) => {
     if (status) dispatch(fetchExecutionDetails(ownProps.uid))
   }),

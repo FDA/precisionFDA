@@ -76,7 +76,7 @@ describe('POST /dbclusters/terminate', () => {
         .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
         .expect(404)
 
-      expect(body).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_NOT_FOUND)
     })
 
     it('throws error when the dbcluster status is not available', async () => {
@@ -89,7 +89,7 @@ describe('POST /dbclusters/terminate', () => {
         .send({ dxids: dxids })
         .expect(400)
 
-      expect(body).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_STATUS_MISMATCH)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_STATUS_MISMATCH)
     })
   })
 })

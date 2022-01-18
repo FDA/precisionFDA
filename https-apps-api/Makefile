@@ -45,6 +45,8 @@ watch-worker:
 
 # maps to npm script build commands in every package
 build:
+	# Build packages/shared first otherwise api will fail
+	yarn workspace @pfda/https-apps-shared build && \
 	yarn workspaces run build
 
 run-prettier:

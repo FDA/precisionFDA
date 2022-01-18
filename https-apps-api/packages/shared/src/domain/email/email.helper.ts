@@ -14,7 +14,10 @@ import {
   NOTIFICATION_ROLE_PREFIXES,
   NOTIFICATION_TYPES_BASE,
   NOTIFICATION_TYPES,
+  EMAIL_TYPES,
 } from './email.config'
+import { TASKS } from '../../queue'
+import { nanoid } from 'nanoid'
 
 type EmailHelperCtx = OpsCtx & {
   config: EmailConfigItem
@@ -157,6 +160,12 @@ const saveEmailToFile = async (email: EmailSendInput, customFilename?: string): 
   await new Promise(done => fs.writeFile(targetPath, html, done))
 }
 
+const getBullJobIdForEmailOperation = (emailType: EMAIL_TYPES, customSuffix?: string): string => {
+  const prefix = `${TASKS.SEND_EMAIL}.${EMAIL_TYPES[emailType]}`
+  const suffix = customSuffix ?? nanoid()
+  return `${prefix}.${suffix}`
+}
+
 export {
   saveEmailToFile,
   buildIsNotificationEnabled,
@@ -164,4 +173,5 @@ export {
   getKeyForUserSpaceRole,
   getKeyForPrivateEvent,
   buildEmailTemplate,
+  getBullJobIdForEmailOperation,
 }

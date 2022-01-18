@@ -44,7 +44,7 @@ will be installed.
 
 First, start the mysql and backend containers
 
-`$ docker-compose start db web`
+`$ docker-compose up db web`
 
 #### Quick setup
 
