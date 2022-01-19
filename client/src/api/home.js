@@ -4,6 +4,7 @@ import { backendCall } from '../utils/api'
 const postApiCall = (url, data) => backendCall(url, 'POST', data)
 const putApiCall = (url, data) => backendCall(url, 'PUT', data)
 const deleteApiCall = (url, data) => backendCall(url, 'DELETE', data)
+const patchApiCall = (url, data) => backendCall(url, 'PATCH', data)
 
 const getApps = (data) => backendCall('/api/apps', 'GET', data)
 const getAppsFeatured = (data) => backendCall('/api/apps/featured', 'GET', data)
@@ -53,6 +54,7 @@ export {
   getDatabases,
   getDatabaseDetails,
   postApiCall,
+  patchApiCall,
   putApiCall,
   deleteApiCall,
   getFiles,

@@ -92,7 +92,6 @@ class AssetService
     end
 
     url_service = UploadUrlFetcher.new(context, uid)
-    url_service.instance_eval { file }
 
     Parallel.each_with_index(
       chunks, in_threads: THREADS_COUNT

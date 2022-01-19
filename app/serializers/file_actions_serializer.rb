@@ -24,7 +24,7 @@ class FileActionsSerializer < ApplicationSerializer
   # Returns a view url to file or folder.
   # @return [String] A view URL.
   def view_url
-    object.is_a?(Folder) ? pathify_folder(object) : file_path(object)
+    pathify(object)
   end
 
   # Returns a download url to a file.

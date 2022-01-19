@@ -166,7 +166,7 @@ class Job < ApplicationRecord
   def https_job_external_url
     return unless https?
 
-    https_port = describe.dig(:httpsApp, :ports).first || DEFAULT_HTTPS_PORT
+    https_port = describe.dig(:runInput, :port) || DEFAULT_HTTPS_PORT
     describe.dig(:httpsApp, :dns, :url).chomp("/") + ":#{https_port}"
   end
 

@@ -1,0 +1,20 @@
+import { DefaultState } from 'koa'
+import Router from 'koa-router'
+import { queue } from '@pfda/https-apps-shared'
+
+
+// Routes with /users prefix
+const router = new Router<DefaultState, Api.Ctx>()
+
+router.get(
+  '/checkup',
+  async ctx => {
+    const res = await queue.createUserCheckupTask({
+      type: queue.TASKS.USER_CHECKUP,
+      payload: null,
+      user: ctx.user })
+    ctx.body = res
+  },
+)
+
+export { router }

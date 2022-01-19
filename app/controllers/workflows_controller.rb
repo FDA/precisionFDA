@@ -346,7 +346,7 @@ class WorkflowsController < ApplicationController
         scope = "public"
       else
         flash[:error] = "You are not allowed to create public folders"
-        redirect_to explore_files_path
+        redirect_to "/home/files/everybody"
         return
       end
     elsif workflow.in_space?

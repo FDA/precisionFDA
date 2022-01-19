@@ -918,7 +918,7 @@ class ApiController < ApplicationController
 
     url = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).generate_permanent_link(file)
 
-    resource.update_attributes(url: url)
+    resource.update(url: url)
 
     render json: { id: file.uid, url: url }
   end

@@ -12,4 +12,10 @@ enum STATIC_SCOPE {
 
 type Scope = STATIC_SCOPE & { [k: string]: string }
 
-export { ENVS, STATIC_SCOPE, Scope }
+enum HOME_SCOPE {
+  ME = 'me',
+  FEATURED = 'featured',
+  EVERYBODY = 'everybody',
+}
+
+export { ENVS, STATIC_SCOPE, Scope, HOME_SCOPE }

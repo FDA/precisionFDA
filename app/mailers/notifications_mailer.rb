@@ -1,5 +1,5 @@
 class NotificationsMailer < ApplicationMailer
-  add_template_helper(SpacesHelper)
+  helper SpacesHelper
   helper :application, :client_url
 
   if Rails.env.production?

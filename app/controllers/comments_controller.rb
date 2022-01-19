@@ -91,7 +91,7 @@ class CommentsController < ApplicationController
     item = items_from_params.last
     comment = Comment.find_by(id: unsafe_params[:id], user_id: @context.user_id)
     if !comment.nil?
-      if comment.update_attributes(comment_params)
+      if comment.update(comment_params)
         log_space_event(comment, item, "comment_edited") if comment_inside_space?(item)
         redirect_to pathify_comments_redirect(item)
         return

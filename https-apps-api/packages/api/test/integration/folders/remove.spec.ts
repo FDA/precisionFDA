@@ -203,7 +203,7 @@ describe('DELETE /folders/:id', () => {
         .delete(`/folders/${folder.id}`)
         .query({ ...getDefaultQueryData(user) })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.FOLDER_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.FOLDER_NOT_FOUND)
     })
   })
 })

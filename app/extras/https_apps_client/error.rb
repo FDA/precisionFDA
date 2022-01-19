@@ -1,14 +1,10 @@
 class HttpsAppsClient
   # Client's specific error.
   class Error < StandardError
-    DEFAULT_ERROR_MSG = "JupyterLab client error.".freeze
+    DEFAULT_ERROR_MSG = "nodejs-api client error.".freeze
     DEFAULT_ERROR_CODE = "E_UNKNOWN".freeze
     SPACE_NOT_FOUND_ERROR_CODE = "E_SPACE_NOT_FOUND".freeze
     VALIDATION_ERROR_CODE = "E_VALIDATION".freeze
-
-    def self.space_not_found_error_code
-      SPACE_NOT_FOUND_ERROR_CODE
-    end
 
     def initialize(msg)
       @msg = msg
@@ -17,12 +13,12 @@ class HttpsAppsClient
     def message
       @message ||= begin
         if @msg.is_a?(Net::HTTPResponse)
-          if parsed_body[:code] == VALIDATION_ERROR_CODE
-            props = parsed_body.dig(:props, :validationErrors, :body)[0]
-            "#{props[:instancePath][1..]} #{props[:message]}"
+          if code == VALIDATION_ERROR_CODE
+            error_body = parsed_body.dig(:error, :validationErrors, :body)[0]
+            "#{error_body[:instancePath][1..]} #{error_body[:message]}"
           else
-            parsed_body.dig(:props, :clientResponse, :error, :message) ||
-              parsed_body[:message].presence ||
+            parsed_body.dig(:error, :clientResponse, :error, :message) ||
+              parsed_body.dig(:error, :message).presence ||
               DEFAULT_ERROR_MSG
           end
         else
@@ -32,7 +28,10 @@ class HttpsAppsClient
     end
 
     def code
-      @code ||= @msg.is_a?(Net::HTTPResponse) && parsed_body[:code].presence || DEFAULT_ERROR_CODE
+      @code ||= (
+        @msg.is_a?(Net::HTTPResponse) &&
+        parsed_body.dig(:error, :code).presence
+      ) || DEFAULT_ERROR_CODE
     end
 
     alias_method :error_code, :code

@@ -303,8 +303,8 @@ export default createReducer(initialState, {
     [appsType]: {
       ...state[appsType],
       filters: {
-        sortType: null,
-        sortDirection: null,
+        sortType: 'created_at',
+        sortDirection: 'DESC',
         currentPage: 1,
         nextPage: null,
         prevPage: null,

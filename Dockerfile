@@ -1,6 +1,6 @@
 FROM ruby:2.7.2
 
-RUN apt-get update && apt-get install -y cmake libssl-dev && gem install bundler -v 2.2.10
+RUN apt-get update && apt-get install -y cmake libssl-dev && gem install bundler -v 2.2.33
 
 WORKDIR /precision-fda
 

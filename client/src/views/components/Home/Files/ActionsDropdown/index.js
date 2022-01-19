@@ -94,7 +94,7 @@ const ActionsDropdown = (props) => {
     },
     {
       text: isFolder ? 'Rename' : 'Edit File Info',
-      isDisabled: files.length !== 1 || (isFolder ? !links.rename_folder : !links.rename),
+      isDisabled: files.length !== 1 || isFolder && !links.rename_folder,
       onClick: () => props.showFilesRenameModal(),
     },
     {

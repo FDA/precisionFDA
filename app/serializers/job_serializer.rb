@@ -194,6 +194,8 @@ class JobSerializer < ApplicationSerializer
 
       # GET /api/jobs/:id/open_external
       links[:open_external] = open_external_api_job_path(object) if object.https? && object.running?
+      # GET /api/jobs/:id/sync_files
+      links[:sync_files] = sync_files_api_job_path(object.dxid) if object.https? && object.running?
 
       # this job's app single run
       if object.in_space?

@@ -2,6 +2,7 @@ import { filter, pipe, uniqBy, isNil } from 'ramda'
 import {
   EmailSendInput,
   EmailTemplate,
+  EMAIL_TYPES,
   NewContentAdded,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
@@ -112,6 +113,7 @@ export class ContentChangedEmailHandler
       content,
     })
     return {
+      emailType: EMAIL_TYPES.newContentAdded,
       to: receiver.email,
       body,
       subject: 'Content changed',

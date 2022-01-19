@@ -284,8 +284,7 @@ module Api
 
     # POST /api/files/download_list
     # Responds with the files list.
-    # TODO: the similar route exists in old Files Controller. Both should be merged into one.
-    #   This only works for Spaces now.
+    # This only works for Spaces now.
     def download_list
       task = params[:task]
       files = []
@@ -321,7 +320,6 @@ module Api
 
     # GET /api/files/download
     # Responds with a link to download a file.
-    # TODO: the similar route exists in old Files Controller. Both should be merged into one.
     def download
       file = UserFile.exist_refresh_state(@context, params[:uid])
 
@@ -540,7 +538,7 @@ module Api
     end
 
     def find_user_file
-      @file = UserFile.not_assets.accessible_by(@context).
+      @file = UserFile.where.not(parent_type: "Asset").accessible_by(@context).
         includes(:user).find_by!(uid: params[:uid])
     rescue ActiveRecord::RecordNotFound => e
       raise ApiError, Message.not_found(e.exception.model)

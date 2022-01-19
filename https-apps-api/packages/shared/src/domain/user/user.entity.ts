@@ -89,7 +89,24 @@ export class User extends BaseEntity {
     return `${this.firstName} ${this.lastName}`
   }
 
+  @Property({ persist: false })
+  get spaceUids(): string[] {
+    const spaceUids: string[] = []
+    Array.from(this.spaceMemberships).forEach(spaceMembership => {
+      Array.from(spaceMembership.spaces).forEach(space => spaceUids.push(`space-${space.id}`))
+    })
+    return spaceUids
+  }
+
+  isMemberOfSpace(spaceUid: string): boolean {
+    return Object.values(this.spaceUids).includes(spaceUid)
+  }
+
   isChallengeBot(): boolean {
     return this.dxuser === config.users.challengeBotDxUser
+  }
+
+  isGuest(): boolean {
+    return this.dxuser.startsWith('Guest-')
   }
 }

@@ -12,7 +12,7 @@ import {
   JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
 } from '../job.enum'
-import { createJobSyncTask } from '../../../queue'
+import { createSyncJobStatusTask } from '../../../queue'
 import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject } from '../../../types'
 import { UserFile } from '../..'
@@ -120,13 +120,13 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       await em.commit()
     } catch (err) {
       await em.rollback()
-      this.ctx.log.warn({
+      this.ctx.log.error({
         error: err,
       }, 'CreateJobOperation: Error creating job')
       throw err
     }
 
-    await createJobSyncTask({ dxid: job.dxid }, this.ctx.user)
+    await createSyncJobStatusTask({ dxid: job.dxid }, this.ctx.user)
     return job
   }
 

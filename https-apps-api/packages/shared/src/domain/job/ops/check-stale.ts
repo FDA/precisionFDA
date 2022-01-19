@@ -2,7 +2,6 @@ import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { CheckStaleJobsJob } from '../../../queue/task.input'
 import { Job } from '../job.entity'
 import { Maybe } from '../../../types'
-import { JOB_STATE } from '../job.enum'
 import { config } from '../../../config'
 import { User } from '../..'
 import { buildEmailTemplate } from '../../email/email.helper'
@@ -14,6 +13,7 @@ import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { createSendEmailTask } from '../../../queue'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { PlatformClient } from '../../../platform-client'
+import { difference } from 'ramda'
 
 
 // This operation is run by admin to alert her/him that there are stale jobs that need
@@ -28,33 +28,42 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
     // find running jobs that are close to "deadline" -> 30days in production
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
-    const runningJobs = await jobRepo.find({
-      $or: [
-        { state: JOB_STATE.IDLE },
-        { state: JOB_STATE.RUNNING },
-        { state: JOB_STATE.TERMINATING },
-      ]
-    },
-    {
-      populate: ['app', 'user']
+    const runningJobs = await jobRepo.find({}, {
+      filters: ['isNonTerminal'],
+      orderBy: { createdAt: 'DESC' },
+      populate: ['app', 'user'],
     })
 
-    const isOverMaxDuration = buildIsOverMaxDuration('terminate')
-    const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
-    if (staleJobs.length === 0) {
-      this.ctx.log.info({}, 'No stale jobs found')
+    runningJobs.forEach((job) => job.dxid)
+    if (runningJobs.length === 0) {
+      this.ctx.log.info({}, 'No running jobs found')
       return []
     }
 
-    const staleJobsInfos = staleJobs.map(job => ({
+    const isOverMaxDuration = buildIsOverMaxDuration('notify')
+    const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
+    if (staleJobs.length === 0) {
+      this.ctx.log.info({}, 'No stale jobs found')
+    }
+
+    const nonStaleJobs = difference(runningJobs, staleJobs)
+
+    const createJobInfo = (job: Job) => ({
       uid: job.uid,
       name: job.name,
+      state: job.state,
       dxuser: job.user.getEntity().dxuser,
       duration: job.elapsedTimeSinceCreationString(),
-    }))
+    })
+    const nonStaleJobsInfo = nonStaleJobs.map(createJobInfo)
+    const staleJobsInfo = staleJobs.map(createJobInfo)
 
     this.ctx.log.info(
-      { staleJobs: staleJobsInfos },
+      { nonStaleJobsInfo: nonStaleJobsInfo },
+      'CheckStaleJobsOperation: Non stale jobs - for admin to note the times',
+    )
+    this.ctx.log.info(
+      { staleJobs: staleJobsInfo },
       'CheckStaleJobsOperation: Stale jobs - should be terminated',
     )
 
@@ -64,11 +73,13 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
     const body = buildEmailTemplate<ReportStaleJobsTemplateInput>(emailTemplate, {
       receiver: adminUser,
       content: {
-        jobInfos: staleJobsInfos,
-        maxDuration: config.workerJobs.syncJob.staleJobsTerminateAfter.toString() ?? 'Undefined',
+        staleJobsInfo: staleJobsInfo,
+        nonStaleJobsInfo: nonStaleJobsInfo,
+        maxDuration: config.workerJobs.syncJob.staleJobsEmailAfter.toString() ?? '-1',
       },
     })
     const email: EmailSendInput = {
+      emailType: EMAIL_TYPES.staleJobsReport,
       to: adminUser.email,
       body,
       subject: 'Stale jobs report',

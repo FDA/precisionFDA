@@ -220,6 +220,7 @@ type EmailProcessInput = {
 }
 
 type EmailSendInput = {
+  emailType: EMAIL_TYPES,
   to: string
   subject: string
   body: string
@@ -250,17 +251,21 @@ interface EmailTemplate {
   setupContext(): Promise<void>
 }
 
-type EMAIL_TYPES =
-  | 'jobFinished'
-  | 'challengeOpened'
-  | 'challengePrereg'
-  | 'newContentAdded'
-  | 'memberChangedAddedRemoved'
-  | 'spaceChanged'
-  | 'commentAdded'
+enum EMAIL_TYPES {
+  jobFinished = 1,
+  newContentAdded = 2,
+  memberChangedAddedRemoved = 3,
+  spaceChanged = 4,
+  commentAdded = 5,
+  challengeOpened = 6,
+  challengePrereg = 7,
+  jobTerminationWarning = 8,
+  staleJobsReport = 9,
+}
+
 type EmailConfigItem = {
   // unique name
-  name: EMAIL_TYPES
+  name: string
   // API param value -> EMAIL_TYPE, must be also unique
   emailId: number
   // schema used from ajv validation
@@ -273,43 +278,43 @@ type EmailConfigItem = {
 const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
   jobFinished: {
     name: 'jobFinished',
-    emailId: 1,
+    emailId: EMAIL_TYPES.jobFinished,
     schema: emailInputSchemas.jobFinishedEmailSchema,
     handlerClass: handlers.JobFinishedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
-    emailId: 2,
+    emailId: EMAIL_TYPES.newContentAdded,
     schema: emailInputSchemas.spaceEventEmailSchema,
     handlerClass: handlers.ContentChangedEmailHandler,
   },
   memberChangedAddedRemoved: {
     name: 'memberChangedAddedRemoved',
-    emailId: 3,
+    emailId: EMAIL_TYPES.memberChangedAddedRemoved,
     schema: emailInputSchemas.membershipChangedEmailSchema,
     handlerClass: handlers.MemberChangedEmailHandler,
   },
   spaceChanged: {
     name: 'spaceChanged',
-    emailId: 4,
+    emailId: EMAIL_TYPES.spaceChanged,
     schema: emailInputSchemas.spaceChangedEmailSchema,
     handlerClass: handlers.SpaceChangedEmailHandler,
   },
   commentAdded: {
     name: 'commentAdded',
-    emailId: 5,
+    emailId: EMAIL_TYPES.commentAdded,
     schema: emailInputSchemas.spaceEventEmailSchema,
     handlerClass: handlers.CommentAddedEmailHandler,
   },
   challengeOpened: {
     name: 'challengeOpened',
-    emailId: 6,
+    emailId: EMAIL_TYPES.challengeOpened,
     schema: emailInputSchemas.challengeStartedEmailSchema,
     handlerClass: handlers.ChallengeOpenedEmailHandler,
   },
   challengePrereg: {
     name: 'challengePrereg',
-    emailId: 7,
+    emailId: EMAIL_TYPES.challengePrereg,
     schema: emailInputSchemas.challengeCreatedEmailSchema,
     handlerClass: handlers.ChallengePreregEmailHandler,
   },
