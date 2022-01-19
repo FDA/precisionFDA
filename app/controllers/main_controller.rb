@@ -79,7 +79,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           },
           {
             title: "Explore files",
-            path: Rails.application.routes.url_helpers.explore_files_path,
+            path: "/home/files/everybody",
             help_label: "Learn",
             help_path: Rails.application.routes.url_helpers.show_docs_path("files"),
             description: "Browse the datasets have been publicly shared with the precisionFDA community",
@@ -100,7 +100,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           },
           {
             title: "Browse Assets",
-            path: Rails.application.routes.url_helpers.explore_assets_path,
+            path: "/home/assets/everybody",
             help_label: "Learn",
             help_path: Rails.application.routes.url_helpers.show_docs_path("creating_apps") + "#dev-assets",
             description: "Browse the collection of software assets that are used as building blocks in apps.",
@@ -617,8 +617,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def concat_path(item)
-    if ["file", "folder", "app", "app-series", "job", "asset", "workflow", "workflow-series"].
-        include? item.klass
+    if ["app", "app-series", "job", "workflow", "workflow-series"].include?(item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)

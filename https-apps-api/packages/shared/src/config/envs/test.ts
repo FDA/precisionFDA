@@ -12,6 +12,11 @@ export const config: ConfigOverride = {
     // debug: true,
     debug: false,
   },
+  emails: {
+    salesforce: {
+      isEnabled: false,
+    }
+  },
   redis: {
     url: 'redis://localhost:6379',
   },

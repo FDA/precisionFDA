@@ -1,13 +1,28 @@
+import { Space } from '../../space/space.entity'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import type { ListJobsInput, PageJobs } from '../job.input'
+import { getSpaceIsAccessibleByContext } from '../../space/space.permissions'
 
 export class ListJobsOperation extends BaseOperation<ListJobsInput, PageJobs> {
   async run(input: ListJobsInput): Promise<PageJobs> {
     const em = this.ctx.em
-    const jobRepo = em.getRepository(Job)
+
+    if (input.spaceId) {
+      await getSpaceIsAccessibleByContext(input.spaceId, this.ctx)
+    }
+
+    // Build query taking into account scope and spaceId
+    const query = {
+      ...input,
+      userId: this.ctx.user.id,
+      scope: input.scope ?? undefined,
+      spaceId: input.spaceId ?? undefined,
+    }
+
     // appName, launched by?, location?, duration, energy, launched at, tags?
-    const [jobs, totalCount] = await jobRepo.findPaginated(input)
+    const jobRepo = em.getRepository(Job)
+    const [jobs, totalCount] = await jobRepo.findPaginated(query)
     // todo: sync jobs here?
     const results: PageJobs = {
       data: jobs,

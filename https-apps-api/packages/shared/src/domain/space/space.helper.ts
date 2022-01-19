@@ -13,6 +13,10 @@ const getIdFromScopeName = (name: string): number => {
   return idValue
 }
 
+const getScopeFromSpaceId = (spaceId: number): string => {
+  return `space-${spaceId}`
+}
+
 const isValidScopeName = (name: string): boolean => {
   try {
     getIdFromScopeName(name)
@@ -23,4 +27,4 @@ const isValidScopeName = (name: string): boolean => {
   }
 }
 
-export { isValidScopeName, getIdFromScopeName }
+export { isValidScopeName, getIdFromScopeName, getScopeFromSpaceId }

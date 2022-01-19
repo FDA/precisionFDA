@@ -30,9 +30,10 @@ const fakes = {
   },
   queue: {
     removeRepeatableFake: sinon.fake(),
-    createJobSyncTaskFake: sinon.fake(),
+    createSyncJobStatusTaskFake: sinon.fake(),
     createEmailSendTaskFake: sinon.fake(),
     createDbClusterSyncTaskFake: sinon.fake(),
+    createSyncWorkstationFilesTask: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
@@ -95,9 +96,10 @@ const mocksSetup = () => {
   sandbox.replace(Bull.prototype, 'isReady', fakes.bull.isReadyFake)
   // stub queue helpers
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
-  sandbox.replace(queue, 'createJobSyncTask', fakes.queue.createJobSyncTaskFake)
+  sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
   sandbox.replace(queue, 'createDbClusterSyncTask', fakes.queue.createDbClusterSyncTaskFake)
+  sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
 }
 
 const mocksReset = () => {
@@ -116,10 +118,11 @@ const mocksReset = () => {
   fakes.client.dbClusterDescribeFake.reset()
 
   fakes.queue.removeRepeatableFake.resetHistory()
-  fakes.queue.createJobSyncTaskFake.resetHistory()
+  fakes.queue.createSyncJobStatusTaskFake.resetHistory()
   fakes.queue.createEmailSendTaskFake.resetHistory()
   fakes.queue.createDbClusterSyncTaskFake.resetHistory()
 
+  fakes.queue.createSyncWorkstationFilesTask.resetHistory()
   fakes.bull.processFake.resetHistory()
   fakes.bull.isReadyFake.resetHistory()
 

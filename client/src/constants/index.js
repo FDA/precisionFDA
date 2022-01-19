@@ -279,6 +279,7 @@ export const HOME_EXECUTIONS_MODALS = {
   EDIT_TAGS: 'editTagsModal',
   ATTACH_TO: 'attachToModal',
   TERMINATE: 'terminateModal',
+  SYNC_FILES: 'syncFiles',
 }
 
 export const HOME_ASSETS_MODALS = {

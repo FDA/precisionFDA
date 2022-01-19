@@ -87,8 +87,11 @@ const defaultConfig = {
       emails: {
         name: 'https-apps-worker-emails-queue',
       },
-      staleJobs: {
-        name: 'https-apps-stale-jobs-queue',
+      fileSync: {
+        name: 'https-apps-worker-filesSync-queue'
+      },
+      maintenance: {
+        name: 'https-apps-worker-maintenance-queue',
       },
     },
     syncJob: {

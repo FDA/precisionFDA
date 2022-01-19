@@ -286,6 +286,7 @@ Rails.application.routes.draw do
 
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
+        patch :sync_files, on: :member
 
         collection do
           get :featured
@@ -391,6 +392,8 @@ Rails.application.routes.draw do
       post "assign_app"
       get "list_licenses"
     end
+    # end API
+
 
     # FHIR
     scope "/fhir" do
@@ -462,18 +465,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :files do
-      post "download", on: :member
-      post "link", on: :member
-      post "rename", on: :member
-      get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
-      post "move", on: :collection
-      post "create_folder", on: :collection
-      post "rename_folder", on: :member
-      post "download_list", on: :collection
-      post "remove", on: :collection
-      post "publish", on: :collection
+    resources :files, only: [] do
       resources :comments
     end
 
@@ -484,11 +476,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :assets, path: "/assets" do
-      # resources :assets, path: "/app_assets" do
-      post "rename", on: :member
-      get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
+    resources :assets, only: :new do
       resources :comments
     end
 
