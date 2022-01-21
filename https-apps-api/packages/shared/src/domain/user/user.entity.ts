@@ -17,6 +17,10 @@ import { EmailNotification } from '../email'
 import { Job } from '../job/job.entity'
 import { Organization } from '../org'
 import { UserRepository } from './user.repository'
+import { ExpertQuestion } from '../expert-question/expert-question.entity'
+import { Expert } from '../expert/expert.entity'
+import { AdminGroup } from '../admin-group/admin-group.entity'
+import { AdminMembership } from '../admin-membership/admin-membership.entity'
 
 // contains the bare minimum to work with the user instance
 // might need to add more fields in the time
@@ -64,7 +68,7 @@ export class User extends BaseEntity {
   @OneToMany({ entity: () => SpaceMembership, mappedBy: 'user' })
   spaceMemberships = new Collection<SpaceMembership>(this)
 
-  @ManyToOne({ fieldName: 'org_id' })
+  @ManyToOne({ fieldName: 'org_id', entity: () => Organization })
   organization!: IdentifiedReference<Organization>
 
   @OneToOne({
@@ -76,11 +80,35 @@ export class User extends BaseEntity {
 
   [EntityRepositoryType]?: UserRepository
 
-  constructor(org: Organization, emailNotificationSettings?: EmailNotification) {
+  @OneToOne({
+    entity: () => Expert,
+    inversedBy: 'user',
+    orphanRemoval: true
+  })
+  expert: IdentifiedReference<Expert>
+
+  @OneToMany({
+    entity: () => ExpertQuestion,
+    mappedBy: 'user'
+    // TODO should orphans be removed?
+  })
+  expertQuestions = new Collection<ExpertQuestion>(this)
+
+  @OneToMany({
+    entity: () => AdminMembership,
+    mappedBy: 'user'
+  })
+  adminMembership = new Collection<AdminMembership>(this);
+
+
+  constructor(org: Organization, emailNotificationSettings?: EmailNotification, expert?: Expert) {
     super()
     this.organization = Reference.create(org)
     if (emailNotificationSettings) {
       this.emailNotificationSettings = Reference.create(emailNotificationSettings)
+    }
+    if (expert) {
+      this.expert = Reference.create(expert)
     }
   }
 

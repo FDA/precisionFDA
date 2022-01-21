@@ -5,7 +5,7 @@ import { User } from '..'
 
 export class UserRepository extends EntityRepository<User> {
   async findWithEmailSettings(userIds: number[]): Promise<User[]> {
-    return await this.find(
+    return this.find(
       {
         id: { $in: userIds },
       },

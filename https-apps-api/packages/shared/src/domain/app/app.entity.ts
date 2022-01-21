@@ -62,7 +62,7 @@ export class App extends BaseEntity {
   appSeriesId: number
 
   // references
-  @ManyToOne({ serializedName: 'userId' })
+  @ManyToOne({ entity: () => User, serializedName: 'userId' })
   user!: IdentifiedReference<User>
 
   @OneToMany({ entity: () => Job, mappedBy: 'app' })
