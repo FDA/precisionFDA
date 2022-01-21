@@ -101,11 +101,10 @@ class HttpsAppsClient
     )
   end
 
-  # ! NYI on nodejs side
-  def experts_years(opts)
+  def experts_years
     request(
       "/experts/years",
-      opts,
+      {},
       Net::HTTP::Get::METHOD,
     )
   end
