@@ -88,10 +88,33 @@ class HttpsAppsClient
     )
   end
 
+  def experts_list(page, limit, year)
+    query_args = { page: page, limit: limit }
+    if not(year.nil?)
+      query_args.store("year", year)
+    end
+    request(
+      "/experts",
+      {},
+      Net::HTTP::Get::METHOD,
+      query_args
+    )
+  end
+
+  # ! NYI on nodejs side
+  def experts_years(opts)
+    request(
+      "/experts/years",
+      opts,
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   private
 
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
-    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{auth_querystring}")
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {})
+    query = auth_query.merge!(additional_query)
+    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{query.to_query}")
     use_ssl = uri.scheme == "https"
 
     conn_opts = connection_opts.merge(use_ssl: use_ssl)
@@ -110,12 +133,20 @@ class HttpsAppsClient
     @connection_opts ||= { read_timeout: 120 }
   end
 
-  def auth_querystring
-    {
-      id: @user.id,
-      accessToken: @token,
-      dxuser: @user.dxuser,
-    }.to_query
+  def auth_query
+    auth_query_hash = {}
+    if not(@user.nil?)
+      if not (@user.id.nil?)
+        auth_query_hash.store("id", @user.id)
+      end
+      if not (@user.dxuser.nil?)
+        auth_query_hash.store("dxuser", @user.dxuser)
+      end
+    end
+    if not(@token.nil?)
+      auth_query_hash.store("accessToken", @token)
+    end
+    auth_query_hash
   end
 
   # Returns HTTP headers to be sent during every request.

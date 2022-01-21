@@ -85,10 +85,10 @@ export class Job extends BaseEntity {
   // analysis!: IdentifiedReference<Analysis>
 
   // relations
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
-  @ManyToOne()
+  @ManyToOne(() => App)
   app!: IdentifiedReference<App>;
 
   // @ManyToOne()

@@ -12,13 +12,11 @@ module Api
 
     def index
       page = params[:page].presence || 1
+      limit = params[:limit].presence || 10
       year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
 
-      experts = Expert.viewable_by(@context).order(created_at: :desc).page(page)
-      experts = experts.where(Arel.sql("YEAR(created_at) = #{year}")) if year
-
+      experts = https_apps_client.experts_list(page, limit, year)
       render json: experts,
-             meta: pagination_dict(experts),
              adapter: :json
     end
 

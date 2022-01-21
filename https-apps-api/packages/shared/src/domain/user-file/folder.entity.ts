@@ -60,7 +60,7 @@ export class Folder extends Node {
   @OneToMany(() => Tagging, tagging => tagging.folder, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>;
 
   [EntityRepositoryType]?: FolderRepository
