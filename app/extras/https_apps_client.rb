@@ -95,7 +95,7 @@ class HttpsAppsClient
       "/experts",
       {},
       Net::HTTP::Get::METHOD,
-      query_args
+      query_args,
     )
   end
 
