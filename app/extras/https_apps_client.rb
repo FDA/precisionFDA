@@ -90,9 +90,7 @@ class HttpsAppsClient
 
   def experts_list(page, limit, year)
     query_args = { page: page, limit: limit }
-    if not(year.nil?)
-      query_args.store("year", year)
-    end
+    query_args.store("year", year) unless year.nil?
     request(
       "/experts",
       {},
@@ -134,17 +132,11 @@ class HttpsAppsClient
 
   def auth_query
     auth_query_hash = {}
-    if not(@user.nil?)
-      if not (@user.id.nil?)
-        auth_query_hash.store("id", @user.id)
-      end
-      if not (@user.dxuser.nil?)
-        auth_query_hash.store("dxuser", @user.dxuser)
-      end
+    unless @user.nil?
+      auth_query_hash.store("id", @user.id) unless @user.id.nil?
+      auth_query_hash.store("dxuser", @user.dxuser) unless @user.dxuser.nil?
     end
-    if not(@token.nil?)
-      auth_query_hash.store("accessToken", @token)
-    end
+    auth_query_hash.store("accessToken", @token) unless @token.nil?
     auth_query_hash
   end
 
