@@ -21,7 +21,7 @@ module Api
     end
 
     def years
-      all_years = https_apps_client.experts_years()
+      all_years = https_apps_client.experts_years
       render json: all_years
     end
 
