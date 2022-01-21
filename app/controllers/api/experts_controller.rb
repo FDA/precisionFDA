@@ -21,7 +21,7 @@ module Api
     end
 
     def years
-      all_years = Expert.order(created_at: :desc).pluck(:created_at).map(&:year).uniq
+      all_years = https_apps_client.experts_years()
       render json: all_years
     end
 

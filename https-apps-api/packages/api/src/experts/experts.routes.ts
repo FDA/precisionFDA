@@ -36,5 +36,14 @@ router.get(
   },
 )
 
+router.get(
+  '/years',
+  async ctx => {
+    const res = await ctx.em.getRepository(entities.Expert).findYears()
+    console.log(res)
+    ctx.body = res;
+  },
+)
+
 export { router }
 
