@@ -7,7 +7,7 @@ export const expertListQuerySchema: JSONSchema7 = {
     ...utils.schemas.paginationSchema.properties,
     year: {
       type: 'integer',
-      minimum: 2000
+      minimum: 2017
     }
   },
   required: [],
