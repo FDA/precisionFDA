@@ -8,7 +8,7 @@ cp config/database.yml.sample config/database.yml
 
 bundle check || bundle install
 
-if [ ! -d "/var/lib/mysql/precisionfda@002dui@002dtest" ]; then
+if [ ! -d "/var/lib/mysql/precision@002dfda" ]; then
   bundle exec rake db:setup
 else
   bundle exec rake db:migrate

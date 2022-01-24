@@ -209,7 +209,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     else
       user_return_to = params[:user_return_to].presence
 
-      uri_attrs = [OAUTH2_REDIRECT_URI]
+      uri_attrs = [oauth2_redirect_url]
       uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
 
       query_params = URI.encode_www_form(
@@ -234,7 +234,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     # Exchange the code for a token
     result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).
-      fetch_token(unsafe_params[:code])
+      fetch_token(unsafe_params[:code], oauth2_redirect_url)
 
     if result["access_token"].blank? ||
        result["token_type"] != "bearer"
@@ -641,6 +641,10 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   private
+
+  def oauth2_redirect_url
+    URI.join(request.base_url, "/return_from_login").to_s
+  end
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def concat_path(item)
