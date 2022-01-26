@@ -3,6 +3,9 @@ FROM ruby:2.7.2
 ENV DOCKERIZE_VERSION v0.6.0
 ENV APP_DIR /precision-fda
 
+ARG rails_env=development
+ENV RAILS_ENV=$rails_env
+
 WORKDIR $APP_DIR
 RUN mkdir -p $APP_DIR
 COPY . $APP_DIR

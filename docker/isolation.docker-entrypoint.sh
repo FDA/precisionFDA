@@ -8,11 +8,8 @@ cp config/database.yml.sample config/database.yml
 
 bundle check || bundle install
 
-if [ ! -d "/var/lib/mysql/precision@002dfda" ]; then
-  bundle exec rake db:setup
-else
-  bundle exec rake db:migrate
-fi
+# Runs setup if database does not exist, or runs migrations if it does
+bundle exec rake db:prepare
 
 bundle exec rake user:generate_test_users
 
