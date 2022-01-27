@@ -1,10 +1,12 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { email } from '@pfda/https-apps-shared'
-import { makeValidationMdw } from '../server/middleware'
+import { defaultMiddlewares, makeValidationMdw } from '../server/middleware'
 import { pickOpsCtx } from '../utils'
 
 const router = new Router<DefaultState, Api.Ctx>()
+
+router.use(defaultMiddlewares)
 
 router.post(
   '/:emailId/send',

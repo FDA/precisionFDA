@@ -89,8 +89,8 @@ export class User extends BaseEntity {
 
   @OneToMany({
     entity: () => ExpertQuestion,
-    mappedBy: 'user'
-    // TODO should orphans be removed?
+    mappedBy: 'user',
+    orphanRemoval: true
   })
   expertQuestions = new Collection<ExpertQuestion>(this)
 

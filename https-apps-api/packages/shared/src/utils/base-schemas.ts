@@ -49,6 +49,7 @@ const userContextSchema: JSONSchema7 = {
     accessToken: { type: 'string', minLength: 1, maxLength: config.validation.maxStrLen },
     dxuser: dxidProp,
   },
+  required: ['id', 'accessToken', 'dxuser'],
   additionalProperties: true,
 }
 

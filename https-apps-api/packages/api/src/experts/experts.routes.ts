@@ -19,7 +19,7 @@ router.get(
     const limit = ctx.validatedQuery.limit ?? DEFAULT_PAGE_SIZE;
     const year = ctx.validatedQuery.year ?? null;
 
-    const canUserAdministerSite = await ctx.em.findOne(entities.AdminGroup, {
+    const canUserAdministerSite = Boolean(ctx.user) && await ctx.em.findOne(entities.AdminGroup, {
       role: adminGroup.ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
       adminMemberships: {
         user: {

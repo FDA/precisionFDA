@@ -22,11 +22,11 @@ interface UserCtx {
 }
 
 export class ExpertRepository extends EntityRepository<Expert> {
-  private getQueryViewableBy(userCtx: UserCtx, canAdministerSite: boolean, year?: number) {
+  private getQueryViewableBy(userCtx: UserCtx | undefined, canAdministerSite: boolean, year?: number) {
     const qb = this.em.createQueryBuilder(Expert,'e');
     // NOTE have to use query builder, to preserve functionality, as YEAR sql function is user
     let query = qb.select('*');
-    if (userCtx.id && userCtx.dxuser && userCtx.accessToken) {
+    if (userCtx?.id && userCtx.dxuser && userCtx.accessToken) {
       if (!canAdministerSite) {
         query = query.where({
           user: {
@@ -47,7 +47,7 @@ export class ExpertRepository extends EntityRepository<Expert> {
     return query;
   }
 
-  findPaginated(input: ExpertFindPaginatedParams, userCtx: UserCtx, canAdministerSite: boolean) {
+  findPaginated(input: ExpertFindPaginatedParams, userCtx: UserCtx | undefined, canAdministerSite: boolean = false) {
     const { page, limit, year } = input
     const offset = (page - 1) * limit
     const selectQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
