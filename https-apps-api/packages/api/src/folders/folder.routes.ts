@@ -3,8 +3,11 @@ import Router from 'koa-router'
 import { userFile, utils } from '@pfda/https-apps-shared'
 import { makeValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils'
+import { defaultMiddlewares } from '../server/middleware'
 
 const router = new Router<DefaultState, Api.Ctx>()
+
+router.use(defaultMiddlewares)
 
 router.patch(
   '/:id/rename',
