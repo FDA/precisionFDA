@@ -149,7 +149,7 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     concurrent-ruby (1.1.8)
-    connection_pool (2.2.3)
+    connection_pool (2.2.5)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
@@ -381,7 +381,7 @@ GEM
     rdoc (6.2.1)
     recaptcha (5.5.0)
       json
-    redis (4.2.2)
+    redis (4.5.1)
     ref (2.0.0)
     rexml (3.2.4)
     rspec (3.9.0)
@@ -450,7 +450,7 @@ GEM
     shellany (0.0.1)
     shoulda-matchers (4.4.1)
       activesupport (>= 4.2.0)
-    sidekiq (6.1.2)
+    sidekiq (6.4.0)
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
