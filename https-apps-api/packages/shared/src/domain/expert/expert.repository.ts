@@ -47,7 +47,7 @@ export class ExpertRepository extends EntityRepository<Expert> {
     return query;
   }
 
-  findPaginated(input: ExpertFindPaginatedParams, userCtx: UserCtx | undefined, canAdministerSite: boolean = false) {
+  async findPaginated(input: ExpertFindPaginatedParams, userCtx: UserCtx | undefined, canAdministerSite: boolean = false) {
     const { page, limit, year } = input
     const offset = (page - 1) * limit
     const selectQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
@@ -55,7 +55,19 @@ export class ExpertRepository extends EntityRepository<Expert> {
       .offset(offset);
     const countQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
       .count('id');
-    return Promise.all([selectQuery.execute<Expert[]>(), countQuery.execute<number>()])
+    const [experts, countResult ] = await Promise.all([selectQuery.execute<Expert[]>(), countQuery.execute<[{count: number}]>()])
+    const { count } = countResult[0];
+    const totalPages = Math.ceil(count / limit)
+    return {
+      experts,
+      meta: {
+        current_page: page,
+        next_page: page < totalPages ? page + 1 : null,
+        prev_page: page > 1 ? page - 1 : null,
+        total_pages: totalPages,
+        total_count: count
+      }
+    }
   }
 
   findYears() {

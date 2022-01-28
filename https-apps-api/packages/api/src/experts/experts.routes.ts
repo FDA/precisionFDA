@@ -27,12 +27,13 @@ router.get(
         }
       }
     })
-    const res = await ctx.em.getRepository(entities.Expert).findPaginated({
+    
+    const experts = await ctx.em.getRepository(entities.Expert).findPaginated({
       page,
       limit,
       year
     }, ctx.user, !!canUserAdministerSite);
-    ctx.body = res;
+    ctx.body = experts;
   },
 )
 
@@ -40,7 +41,6 @@ router.get(
   '/years',
   async ctx => {
     const res = await ctx.em.getRepository(entities.Expert).findYears()
-    console.log(res)
     ctx.body = res;
   },
 )
