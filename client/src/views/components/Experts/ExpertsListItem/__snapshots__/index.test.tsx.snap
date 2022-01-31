@@ -55,16 +55,24 @@ exports[`ExpertsListItem test should render ExpertsListItemBlogEntry 1`] = `
       >
         Expert Q&A
       </Button>
-      <a
-        href="/experts/1"
+      <Link
+        to="/experts/1"
       >
-        About This Expert
-      </a>
-      <a
-        href="/experts/1/blog"
+        <Icon
+          fw={true}
+          icon="fa-star-o"
+        />
+        <span>
+          About This Expert
+        </span>
+      </Link>
+      <Link
+        to="/experts/1/blog"
       >
-        Read Expert Blog Post ↗
-      </a>
+        <span>
+          Read Expert Blog Post ↗
+        </span>
+      </Link>
     </div>
   </div>
 </div>
@@ -122,11 +130,13 @@ exports[`ExpertsListItem test should render ExpertsListItemQuestionsAndAnswers 1
     <div
       className="expert-name"
     >
-      <a
-        href="/experts/1"
+      <Link
+        to="/experts/1"
       >
-        Experts 1
-      </a>
+        <span>
+          Experts 1
+        </span>
+      </Link>
     </div>
     <div
       className="answers-comments-container"

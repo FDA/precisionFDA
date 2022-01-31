@@ -177,8 +177,10 @@ Rails.application.routes.draw do
         get :my_entries, on: :collection
       end
 
-      resources :experts, only: %i(index show) do
+      resources :experts, controller: :experts,
+                param: :id, only: %i(index show ask_question blog) do
         get :years, on: :collection
+        post :ask_question, on: :member
       end
 
       resources :participants, path: "participants" do
@@ -552,6 +554,7 @@ Rails.application.routes.draw do
       post "close", on: :member
       get "dashboard", on: :member
       get "blog", on: :member
+      get "qa", on: :member
       nested do
         scope "/dashboard" do
           resources :expert_questions, as: "edit_question"

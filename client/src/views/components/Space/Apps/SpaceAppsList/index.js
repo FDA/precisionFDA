@@ -140,7 +140,7 @@ const Row = ({ app, toggleCheckbox }) => {
         <RunLinkShow
           runByYou={app.runByYou}
           link={app.links.run_job}
-                  ariaLabel={app.name}
+          ariaLabel={app.name}
         />
       </td>
       <td><TagsList tags={app.tags} /></td>
@@ -179,6 +179,7 @@ Row.propTypes = {
 RunLinkShow.propTypes = {
   link: PropTypes.string,
   runByYou: PropTypes.string,
+  ariaLabel: PropTypes.string,
 }
 
 const mapStateToProps = state => ({

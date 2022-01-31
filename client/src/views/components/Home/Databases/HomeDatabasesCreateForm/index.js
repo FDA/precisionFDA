@@ -16,7 +16,6 @@ import {
   HOME_DATABASE_PASSWORD,
 } from '../../../../../constants'
 import { ButtonSolidBlue, Button } from '../../../../../components/Button'
-// import { DropdownMenu } from '../../../DropdownMenu'
 import { createDatabase } from '../../../../../actions/home'
 import { fetchAccessibleFiles } from '../../../../../actions/spaces/files'
 import { AccessibleFileShape } from '../../../../shapes/AccessibleObjectsShape'

@@ -7,6 +7,8 @@ import CollapsibleMenu from '../../CollapsibleMenu'
 
 
 const StyledUserContentOutline = styled.div`
+width: 100%;
+
 .outline-item-h1 {
   margin-top: 3px;
 

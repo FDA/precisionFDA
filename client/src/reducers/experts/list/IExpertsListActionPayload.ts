@@ -6,6 +6,4 @@ interface IExpertsListActionPayload {
   pagination: IPagination,
 }
 
-export type {
-  IExpertsListActionPayload
-}
+export type { IExpertsListActionPayload }
