@@ -309,6 +309,21 @@ export const CHALLENGE_TIME_STATUS = {
   ENDED: 'ended',
 }
 
+export const EXPERT_STATE = {
+  OPEN: 'open',
+  CLOSED: 'closed',
+}
+
+export const EXPERTS_MODALS = {
+  ASK_QUESTION: 'askQuestionModal',
+  EDIT: 'editExpertInfoModal',
+}
+
+export const RECAPTCHA_KEYS = {
+  SITE: '6LcmuCIeAAAAALaDEkC8N5RvdMPO8Wt2HjNqyhuU',
+  SECRET: '6LcmuCIeAAAAAOCDXx6YV359JqrehWKCwASdJ5Ar',
+}
+
 export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
 export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'
 export const MAILING_LIST = 'https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564'
