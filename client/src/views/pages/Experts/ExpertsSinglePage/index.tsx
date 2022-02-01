@@ -1,8 +1,8 @@
 import React, { useLayoutEffect, useState } from 'react'
 import { Remarkable } from 'remarkable'
 import { linkify } from 'remarkable/linkify'
-import { useSelector, useDispatch } from 'react-redux'
-import { useQuery, useQueryClient, useMutation } from 'react-query'
+import { useDispatch, useSelector } from 'react-redux'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 // @ts-ignore
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { Link, useParams } from 'react-router-dom'
@@ -10,7 +10,7 @@ import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import { fetchExpertDetails, askQuestion } from '../../../../api/experts'
+import { askQuestion, fetchExpertDetails } from '../../../../api/experts'
 import { ExpertDetails } from '../../../components/Experts/ExpertDetails'
 import { ExpertBlog } from '../../../components/Experts/ExpertBlog'
 import { IExpert } from '../../../../types/expert'
@@ -23,7 +23,7 @@ import styled from 'styled-components'
 import navBackground from '../../../../assets/NavbarBackground.png'
 import { contextSelector } from '../../../../reducers/context/selectors'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import { showExpertsAskQuestionModal, hideExpertsAskQuestionModal } from '../../../../actions/experts'
+import { hideExpertsAskQuestionModal, showExpertsAskQuestionModal } from '../../../../actions/experts'
 import { ExpertAskQuestionModal } from '../../../components/Experts/ExpertAskQuestionModal'
 import Button from '../../../components/Button'
 import { expertsSelector } from '../../../../reducers/experts/details/selectors'
@@ -55,13 +55,13 @@ const ExpertsSingleDetailsPage = () => {
   const { expertId, page } = useParams<{ expertId: string, page: string }>()
   const [expert, setExpert] = useState<IExpert>()
 
-  const {  isLoading, data, status, error } = useQuery<any>(
+  const { isLoading, data, status, error } = useQuery<any>(
     'queryExpertDetails',
     () => fetchExpertDetails(expertId),
   )
   useLayoutEffect(() => {
-    if (data?.expert) {
-      setExpert(data?.expert)
+    if (data) {
+      setExpert(data)
     }
   }, [data])
 
@@ -127,6 +127,7 @@ const ExpertsSingleDetailsPage = () => {
       title: 'About this expert',
       subroute: '',
       content: (<ExpertDetails expert={expert} />),
+      outline: '',
     },
     {
       title: 'Blog Post',
@@ -137,6 +138,8 @@ const ExpertsSingleDetailsPage = () => {
     {
       title: 'Q&A',
       subroute: '/qa',
+      content: '',
+      outline: '',
     },
   ]
 
