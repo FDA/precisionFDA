@@ -18,6 +18,12 @@ export enum ExpertScope {
 @Entity({ tableName: 'experts', customRepository: () => ExpertRepository})
 export class Expert extends BaseEntity {
 
+  @Property()
+  createdAt = new Date()
+
+  @Property({ onUpdate: () => new Date() })
+  updatedAt = new Date()
+
   @OneToOne({ entity: () => User, mappedBy: 'expert' })
   user: IdentifiedReference<User>
 
