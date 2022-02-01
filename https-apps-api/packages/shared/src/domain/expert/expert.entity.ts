@@ -1,7 +1,9 @@
 import { Collection, Entity, EntityRepositoryType, Enum, IdentifiedReference, OneToMany, OneToOne, Property, Reference } from "@mikro-orm/core";
 import { BaseEntity } from '../../database/base-entity'
 import { ExpertQuestion } from "../expert-question";
+import { ExpertQuestionState } from "../expert-question/expert-question.entity";
 import { User } from "../user";
+import { Meta } from "./expert.serializer";
 import { ExpertRepository } from "./expert.repository";
 
 export enum ExpertState {
@@ -20,7 +22,7 @@ export class Expert extends BaseEntity {
   user: IdentifiedReference<User>
 
   @OneToMany({ entity: () => ExpertQuestion, mappedBy: 'expert' })
-  question = new Collection<ExpertQuestion>(this);
+  questions = new Collection<ExpertQuestion>(this);
 
   @Enum({ nullable: true })
   scope?: ExpertScope
@@ -28,9 +30,12 @@ export class Expert extends BaseEntity {
   @Enum({ nullable: true })
   state?: ExpertState 
 
-  // TODO(samuel) Add JSON serializing and deserializing
-  @Property({ type: 'text'})
-  meta?: string
+  // TODO(samuel) refactor this type to string, and find proper solution to define 2 versions of the entity
+  // 1st that corresponds to db
+  // 2nd that is properly typed
+  // Or alternatively migrate mysql schema to json column and fix in ruby as well :D
+  @Property({ type: 'text' })
+  meta?: Meta 
 
   @Property({ type: 'varchar' })
   image?: string
@@ -41,4 +46,23 @@ export class Expert extends BaseEntity {
     super()
     this.user = Reference.create(user);
   }  
+
+  async getAnsweredQuestionsCount() {
+    return (await this.questions.matching({ where: {
+      state: ExpertQuestionState.ANSWERED
+    }})).length
+  }
+
+  async getIgnoredQuestionsCount() {
+    return (await this.questions.matching({ where: {
+      state: ExpertQuestionState.IGNORED
+    }})).length
+  }
+
+  async getOpenQuestionsCount() {
+    return (await this.questions.matching({ where: {
+      state: ExpertQuestionState.OPEN
+    }})).length
+  }
+
 }

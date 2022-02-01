@@ -17,24 +17,22 @@ interface IExpert extends IListItem {
   totalCommentCount: number,
 }
 
-const mapToExpert = (data: any) => {
-  return {
-    id: data.id,
-    user_id: data.user_id,
-    image: data.image,
-    state: data.state,
-    scope: data.scope,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
-    title: data.title,
-    about: data.about,
-    blog: data.blog,
-    blogTitle: data.blog_title,
-    blogPreview: data.blog_preview,
-    totalAnswerCount: data.total_answer_count,
-    totalCommentCount: data.total_comment_count,
-  }
-}
+const mapToExpert = (data: any) => ({
+  id: data.id,
+  user_id: data.user_id,
+  image: data.image,
+  state: data.state,
+  scope: data.scope,
+  createdAt: new Date(data.createdAt),
+  updatedAt: new Date(data.updatedAt),
+  title: data.title,
+  about: data.meta.about,
+  blog: data.meta.blog,
+  blogTitle: data.meta.blogTitle,
+  blogPreview: data.meta.blogPreview,
+  totalAnswerCount: data.meta.totalAnswerCount,
+  totalCommentCount: data.meta.totalCommentCount,
+});
 
 export type { IExpert }
 export { mapToExpert }
