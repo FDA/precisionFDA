@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { IExpert } from '../../../../types/expert'
+import { format } from 'date-fns'
 import './style.sass'
 
 
@@ -20,8 +21,6 @@ const ExpertBlogComponent = ({ expert, content }: { expert?: IExpert, content: J
       </div>
     )
   }
-  const date = new Date(expert.createdAt)
-  const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' }
 
   return (
     <div className='expert-details__blog-content'>
@@ -29,8 +28,8 @@ const ExpertBlogComponent = ({ expert, content }: { expert?: IExpert, content: J
         <h1>{expert.blogTitle}</h1>
       </div>
       <div className='expert-details__blog-content__prefname'>
-        <p className='title'>{expert.title}</p>
-        <p>{date.toLocaleDateString('default', dateOptions)}</p>
+        <span className="expert-name">{expert.title}</span>
+        <span className="expert-date">{format(expert.createdAt, 'MMM dd, yyyy')}</span>
       </div>
       <div className='expert-details-content'>
         {content}
