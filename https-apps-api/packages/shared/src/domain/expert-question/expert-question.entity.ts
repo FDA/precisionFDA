@@ -1,4 +1,5 @@
 import { Entity, Enum, IdentifiedReference, ManyToOne, OneToOne, Property, Reference } from "@mikro-orm/core";
+import { isThisTypeNode } from "typescript";
 import { BaseEntity } from '../../database/base-entity'
 import { ExpertAnswer } from "../expert-answer";
 import { Expert } from "../expert/expert.entity";
@@ -8,6 +9,12 @@ export enum ExpertQuestionState {
   OPEN = 'open',
   ANSWERED = 'answered',
   IGNORED = 'ignored',
+}
+
+interface QuestionMeta {
+  _original: string;
+  // TODO(samuel) add proper type
+  _edited: any;
 }
 
 @Entity({ tableName: 'expert_questions' })
@@ -25,9 +32,8 @@ export class ExpertQuestion extends BaseEntity {
   @Property({type: 'text'})
   body!: string
 
-  // TODO(samuel) Add JSON serializing and deserializing
   @Property({ type: 'text'})
-  meta?: string
+  meta?: QuestionMeta 
 
   @Enum()
   state!: ExpertQuestionState 

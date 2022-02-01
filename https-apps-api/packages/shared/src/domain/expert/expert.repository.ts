@@ -1,5 +1,7 @@
+import { wrap } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/mysql'
 import { Expert, ExpertScope } from './expert.entity'
+import { serializeExpert } from './expert.serializer';
 
 
 // todo(samuel): Extract PaginationParams to a common interface file
@@ -59,7 +61,14 @@ export class ExpertRepository extends EntityRepository<Expert> {
     const { count } = countResult[0];
     const totalPages = Math.ceil(count / limit)
     return {
-      experts,
+      experts: await Promise.all(experts.map(async (expert) => {
+        const mappedExpert = this.map(expert)
+        // NOTE(samuel) - mikro-orm doesn't parse serialized json as we don't use json sql columns in db
+        // At least not for dev environment
+        const serializedExpert = await serializeExpert(mappedExpert)
+        // Note(samuel) - this is to eliminate collections that aren't initialized
+        return wrap(serializedExpert).toObject()
+      })),
       meta: {
         current_page: page,
         next_page: page < totalPages ? page + 1 : null,
