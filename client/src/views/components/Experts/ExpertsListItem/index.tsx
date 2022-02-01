@@ -27,7 +27,7 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
     return (
       <div className={classes}>
         <div className="experts-list-item__left-column">
-          <img className="expert-image img-circle" src={expert.image} />
+          <img className="expert-image img-circle" src={expert.image} alt={`Profile icon for ${expert.title}'s blog`} />
         </div>
         <div className="experts-list-item__right-column experts-item-content">
           <h1>{expert.blogTitle}</h1>
@@ -48,8 +48,8 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
           </div>
           {userCanEdit && (
             <div className="btn-group pull-right" style={{ marginTop: '4px' }}>
-              <a className="btn btn-default" href={`/experts/${expert.id}/edit`}><span className="fa fa-pencil"></span> Edit Expert</a>
-              <a className="btn btn-default" href={`/experts/${expert.id}/dashboard`}><span className="fa fa-dashboard fa-fw"></span> Dashboard</a>
+              <a className="btn btn-default" href={`/experts/${expert.id}/edit`} aria-label={`Click here to Edit the Expert ${expert.id}`}><span className="fa fa-pencil"></span> Edit Expert</a>
+              <a className="btn btn-default" href={`/experts/${expert.id}/dashboard`} aria-label={`Click here to View ${expert.id}'s Dashboard`}><span className="fa fa-dashboard fa-fw"></span> Dashboard</a>
             </div>
           )}
         </div>
@@ -66,7 +66,7 @@ class ExpertsListItemBlogEntrySmall extends ExpertsListItem {
     return (
       <div className={classes}>
         <div className="experts-list-item-small__left-column">
-          <img className="expert-image img-circle" src={expert.image} />
+          <img className="expert-image img-circle" src={expert.image} alt={`Profile icon for ${expert.title}'s blog`} />
         </div>
         <div className="experts-list-item-small__right-column experts-item-content">
           <div className="expert-name">{expert.title}</div>
@@ -87,7 +87,7 @@ class ExpertsListItemQuestionsAndAnswers extends ExpertsListItem {
     return (
       <div className={classes}>
         <div className="experts-list-item-small__left-column">
-          <img className="expert-image img-circle" src={expert.image} />
+          <img className="expert-image img-circle" src={expert.image} alt={`Profile icon for ${expert.title}'s blog`} />
         </div>
         <div className="experts-list-item-small__right-column experts-item-content">
           <div className="expert-name">

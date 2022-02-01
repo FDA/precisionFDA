@@ -59,7 +59,7 @@ const PFDAFooter = () => {
               <li><ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin"> LinkedIn</ExternalLink></li>
             </ul>
             <ul className="list-inline">
-              <li><a href="http://www.fda.gov/" target="_blank" title="FDA Home Page">FDA</a></li>
+              <li><a href="http://www.fda.gov/" target="_blank" title="FDA Home Page" aria-label='Navigate to the FDA home page in another window'>FDA</a></li>
               <li className="text-muted" aria-hidden="true">|</li>
               <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm" target="_blank" title="Accessibility">Accessibility</a></li>
               <li><a href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm" target="_blank" title="FDA Basics">Basics</a></li>
