@@ -8,6 +8,7 @@ exports[`ExpertsListItem test should render ExpertsListItemBlogEntry 1`] = `
     className="experts-list-item__left-column"
   >
     <img
+      alt="Profile icon for Experts 1's blog"
       className="expert-image img-circle"
       src=""
     />
@@ -86,6 +87,7 @@ exports[`ExpertsListItem test should render ExpertsListItemBlogEntrySmall 1`] = 
     className="experts-list-item-small__left-column"
   >
     <img
+      alt="Profile icon for Experts 1's blog"
       className="expert-image img-circle"
       src=""
     />
@@ -120,6 +122,7 @@ exports[`ExpertsListItem test should render ExpertsListItemQuestionsAndAnswers 1
     className="experts-list-item-small__left-column"
   >
     <img
+      alt="Profile icon for Experts 1's blog"
       className="expert-image img-circle"
       src=""
     />

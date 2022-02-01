@@ -20,15 +20,17 @@ const AppListItem = (app: IApp) => {
   // Blue icon = regular app
   // Yellow icon = https app
   const iconImage = app.entityType == 'regular' ? 'AppIconBlue.png' : 'AppIconYellow.png'
+  const iconImageAlt = app.entityType == 'regular' ? 'Normal Application icon' : 'Interactive Workstation Application icon'
   const linkToApp = `/home${app.links.show}`
+  const ariaLabel = `Click this to navigate to the ${app.title} page`
 
   return (
     <div className="top-apps-list" key={app.id}>
       <div className="top-apps-list__icon">
-        <GuestRestrictedLink to={linkToApp}><img src={`/assets/apps/${iconImage}`} /></GuestRestrictedLink>
+        <GuestRestrictedLink to={linkToApp} ariaLabel={ariaLabel}><img src={`/assets/apps/${iconImage}`} alt={iconImageAlt} /></GuestRestrictedLink>
       </div>
       <div className="top-apps-list__contents">
-        <div className="top-apps-list__name"><GuestRestrictedLink to={linkToApp}>{app.title}</GuestRestrictedLink></div>
+        <div className="top-apps-list__name"><GuestRestrictedLink to={linkToApp} ariaLabel={ariaLabel}>{app.title}</GuestRestrictedLink></div>
         <div className="top-apps-list__user">{app.org}</div>
         <div className="top-apps-list__date">Updated {timeDistance} ago</div>
       </div>
