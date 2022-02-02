@@ -29,10 +29,10 @@ run-worker-dev-dist:
 
 # run app locally starting from worker API
 run-dev:
-	$(bin)ts-node -r tsconfig-paths/register --files ./packages/api/src/index.js
+	$(bin)ts-node -r tsconfig-paths/register --files ./packages/api/src/index.ts
 
 run-worker-dev:
-	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/index.js
+	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/index.ts
 
 test-worker-task:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
