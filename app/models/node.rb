@@ -75,6 +75,10 @@ class Node < ApplicationRecord
     Folder.find_by(id: self[self.class.scope_column_name(scope)])
   end
 
+  def folder_id
+    self[self.class.scope_column_name(scope)]
+  end
+
   # Check, whether node is publishable. A node should be 'private' or in space.
   # @param user [User] A user who is going to publish.
   # @return [Boolean] Returns true if a node can be published by a user, false otherwise.
@@ -89,6 +93,10 @@ class Node < ApplicationRecord
       else
         :scoped_parent_folder_id
       end
+    end
+
+    def opposite_scope_column_name(scope)
+      (%i(parent_folder_id scoped_parent_folder_id) - [scope_column_name(scope)]).first
     end
 
     def folder_content(files, folders)

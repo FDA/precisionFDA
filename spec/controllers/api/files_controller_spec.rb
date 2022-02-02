@@ -127,8 +127,7 @@ RSpec.describe Api::FilesController, type: :controller do
       end
 
       it "copies files and folders" do
-        node_copier = instance_double(CopyService::NodeCopier, copy: CopyService::Copies.new)
-        allow(CopyService::NodeCopier).to receive(:new).and_return(node_copier)
+        allow(NodeCopyWorker).to receive(:perform_async)
 
         node_ids = [file_one.id, folder_one.id, file_two.id, file_other.id]
 
@@ -137,12 +136,8 @@ RSpec.describe Api::FilesController, type: :controller do
           item_ids: node_ids,
         }, format: :json
 
-        expected_nodes = Node.where(id: node_ids[0..-2])
-
-        expect(node_copier).to have_received(:copy).with(
-          match_array(expected_nodes),
-          space.uid,
-        )
+        expect(NodeCopyWorker).to have_received(:perform_async).
+          with(space.scope, node_ids[0..-2], anything)
 
         expect(response).to be_successful
       end
