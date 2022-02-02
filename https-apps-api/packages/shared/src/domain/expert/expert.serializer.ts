@@ -18,8 +18,8 @@ export const serializeExpert = async (expert: Expert) => {
   // Query builder has to be btw used, as query contains YEAR() - native mysql function
   // 
   // Therefore needs to be manually parsed and transformed
-  const parsedMeta = JSON.parse(expert.meta as any as string);
-  let title = parsedMeta?.prefname;
+  const parsedMeta = JSON.parse(expert.meta as any as string) as Meta;
+  let title = parsedMeta?._prefname;
   if (!title) {
     title = (await expert.user.load()).fullName;
   }

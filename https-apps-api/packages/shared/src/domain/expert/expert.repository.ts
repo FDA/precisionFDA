@@ -53,6 +53,9 @@ export class ExpertRepository extends EntityRepository<Expert> {
     const { page, limit, year } = input
     const offset = (page - 1) * limit
     const selectQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
+      .orderBy({
+        createdAt: -1
+      })
       .limit(limit)
       .offset(offset);
     const countQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
