@@ -25,7 +25,7 @@ const mapToExpert = (data: any) => ({
   scope: data.scope,
   createdAt: new Date(data.createdAt),
   updatedAt: new Date(data.updatedAt),
-  title: data.title,
+  title: data.meta.title,
   about: data.meta.about,
   blog: data.meta.blog,
   blogTitle: data.meta.blogTitle,
