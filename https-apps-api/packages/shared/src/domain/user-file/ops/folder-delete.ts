@@ -9,6 +9,7 @@ export class FolderDeleteOperation extends BaseOperation<IdInput, number> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)
 
+    // Todo(samuel) - performance optimization - execute read operations before transaction start
     await em.begin()
     try {
       const repo = em.getRepository(Folder)

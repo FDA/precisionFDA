@@ -15,17 +15,22 @@ export const serializeExpert = async (expert: Expert) => {
   const ignoredQuestionCount = await expert.getIgnoredQuestionsCount();
   const openQuestionCount = await expert.getOpenQuestionsCount();
   // NOTE(samuel) workaround as we aren't using json columns, loaded fields from query builder remain string
+  // Query builder has to be btw used, as query contains YEAR() - native mysql function
+  // 
   // Therefore needs to be manually parsed and transformed
-  console.log('parsing metadata')
   const parsedMeta = JSON.parse(expert.meta as any as string);
+  let title = parsedMeta?.prefname;
+  if (!title) {
+    title = (await expert.user.load()).fullName;
+  }
   // Note(samuel) this is a workaround hack to serve metadata in correct format
-  console.log('metadata parsed')
   return wrap(expert).assign({
     meta:{
       about: parsedMeta?._about,
       blog: parsedMeta?._blog,
       blogTitle: parsedMeta?._blog_title,
       blogPreview: parsedMeta?._challenge,
+      title: title,
       totalQuestionCount: answeredQuestionCount + ignoredQuestionCount + openQuestionCount,
       totalAnswerCount: answeredQuestionCount
     }
