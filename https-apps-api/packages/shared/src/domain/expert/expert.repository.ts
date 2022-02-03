@@ -18,7 +18,7 @@ interface ExpertFindPaginatedParams extends PaginationParams {
 // todo(samuel) find a way to unify
 // Duplicate from API package
 interface UserCtx {
-  id: number
+  id: number 
   accessToken: string
   dxuser: string
 }
@@ -52,14 +52,15 @@ export class ExpertRepository extends EntityRepository<Expert> {
   async findPaginated(input: ExpertFindPaginatedParams, userCtx: UserCtx | undefined, canAdministerSite: boolean = false) {
     const { page, limit, year } = input
     const offset = (page - 1) * limit
-    const selectQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
+    const baseQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
+    const countQuery = baseQuery.clone()
+      .count('id');
+    const selectQuery = baseQuery
       .orderBy({
         createdAt: -1
       })
       .limit(limit)
       .offset(offset);
-    const countQuery = this.getQueryViewableBy(userCtx, canAdministerSite, year)
-      .count('id');
     const [experts, countResult ] = await Promise.all([selectQuery.execute<Expert[]>(), countQuery.execute<[{count: number}]>()])
     const { count } = countResult[0];
     const totalPages = Math.ceil(count / limit)

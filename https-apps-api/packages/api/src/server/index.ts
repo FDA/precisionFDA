@@ -14,6 +14,7 @@ koa.use(koaBody())
 koa.use(mdw.makeLogRequestMdw())
 koa.use(mdw.makeErrorHandlerMdw())
 koa.use(mdw.makeOrmContextMdw())
+koa.use(mdw.makeParseUserContextMdw())
 
 // routes
 koa.use(router.routes())
