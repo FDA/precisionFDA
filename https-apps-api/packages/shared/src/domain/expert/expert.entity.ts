@@ -24,7 +24,7 @@ export class Expert extends BaseEntity {
   @Property({ onUpdate: () => new Date() })
   updatedAt = new Date()
 
-  @OneToOne({ entity: () => User, mappedBy: 'expert' })
+  @OneToOne({ entity: () => User, inversedBy: 'expert' })
   user: IdentifiedReference<User>
 
   @OneToMany({ entity: () => ExpertQuestion, mappedBy: 'expert' })
