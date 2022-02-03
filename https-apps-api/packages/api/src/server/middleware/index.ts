@@ -1,4 +1,4 @@
-import { makeUserContextMdw } from './user-context'
+import { makeValidateUserContextMdw } from './user-context'
 
 export { makeLogRequestMdw } from './log-request'
 
@@ -8,5 +8,7 @@ export { makeOrmContextMdw } from './orm-context'
 
 export { makeValidationMdw } from './validation'
 
-// NOTE in case of further additions, use koa-context
-export const defaultMiddlewares = makeUserContextMdw();
+export { makeParseUserContextMdw } from './user-context';
+
+// NOTE in case of further additions, use koa-compose
+export const defaultMiddlewares = makeValidateUserContextMdw();
