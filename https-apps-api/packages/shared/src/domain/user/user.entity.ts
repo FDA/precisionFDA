@@ -82,7 +82,7 @@ export class User extends BaseEntity {
 
   @OneToOne({
     entity: () => Expert,
-    inversedBy: 'user',
+    mappedBy: 'user',
     orphanRemoval: true
   })
   expert: IdentifiedReference<Expert>
