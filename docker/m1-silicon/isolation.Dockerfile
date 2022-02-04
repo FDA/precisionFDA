@@ -1,4 +1,4 @@
-FROM amd64/ruby:2.7.2
+FROM amd64/ruby:2.7.5
 # This dockerfile is required for Apple Silicon M1, otherwise gem installation during build of "web" and "sidekiq" services fails
 
 ENV DOCKERIZE_VERSION v0.6.0
