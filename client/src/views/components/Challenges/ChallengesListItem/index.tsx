@@ -30,7 +30,7 @@ class ChallengesListItem extends Component<IChallengeListItemProps> {
       <Styled.ChallengeListItem timeStatus={challenge.timeStatus}>
         <Styled.ChallengeListItemThumbnail timeStatus={challenge.timeStatus}>
           {challenge.isFirstItemInSection ? <Styled.ChallengesListSectionHeader timeStatus={challenge.timeStatus}><hr /></Styled.ChallengesListSectionHeader> : ''}
-          <img src={challenge.cardImageUrl} onClick={() => handleItemDetails(challenge.id)} />
+          <img src={challenge.cardImageUrl} alt={`Image representing ${challenge.name}`} onClick={() => handleItemDetails(challenge.id)} />
         </Styled.ChallengeListItemThumbnail>
         <Styled.ChallengeListItemContent>
           {challenge.isFirstItemInSection ? (

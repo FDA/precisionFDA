@@ -9,9 +9,11 @@ import precisionFDADark from './precisionFDA.dark.png'
 const StyledImg = styled.img`
   height: 40px;
 `
-
+StyledImg.defaultProps = {
+  alt: 'PFDA Light logo to navigate to home page',
+}
 const PFDALogoLight = ({ className='' }) => {
-  return <StyledImg className={className} src={precisionFDALight} alt='PFDA Light logo to navigate to home page' />
+  return <StyledImg className={className} src={precisionFDALight} />
 }
 
 PFDALogoLight.propTypes = {

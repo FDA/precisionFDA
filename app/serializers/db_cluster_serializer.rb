@@ -14,7 +14,7 @@ class DbClusterSerializer < ApplicationSerializer
     :added_by_fullname,
     :created_at,
     :created_at_date_time,
-    :engine, # aurora, aurora-mysql, aurora-postgresql
+    :engine, # aurora-mysql, aurora-postgresql
     :engine_version, # see possible values in the documentation
     :dx_instance_class,
     :status_as_of,
