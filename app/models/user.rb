@@ -70,7 +70,6 @@ class User < ApplicationRecord
   has_many :challenge_resources
   has_many :analyses
   has_one :usage_metric
-  has_many :tasks
   has_many :workflows
   has_one :notification_preference
   has_one :profile, dependent: :destroy

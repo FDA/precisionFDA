@@ -6,6 +6,8 @@ const getSpacesIcon = (type) => {
       return 'fa-cube'
     case 'databases':
       return 'fa-database'
+    case 'experts':
+      return 'fa-star-o'
     case 'jobs':
       return 'fa-cogs'
     case 'workflows':
@@ -18,6 +20,8 @@ const getSpacesIcon = (type) => {
       return 'fa-minus-circle'
     case 'enable':
       return 'fa-plus-circle'
+    case 'external':
+      return 'fa-external-link'
     case 'lead':
     case 'admin':
     case 'contributor':

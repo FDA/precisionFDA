@@ -82,7 +82,7 @@ class SpaceSerializer < ApplicationSerializer
   end
 
   # Returns space counters for related objects.
-  # @return [Hash] Space counters for members, tasks, files and notes, apps, comments.
+  # @return [Hash] Space counters for members, files and notes, apps, comments.
   def counters
     {
       files: files_count,

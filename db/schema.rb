@@ -2,15 +2,15 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# This file is the source Rails uses to define your schema when running `rails
-# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
 # be faster and is potentially less error prone than running all of your
 # migrations from scratch. Old migrations may fail to apply correctly if those
 # migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_09_084058) do
+ActiveRecord::Schema.define(version: 2022_01_17_193348) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -705,23 +705,6 @@ ActiveRecord::Schema.define(version: 2021_11_09_084058) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
-  create_table "tasks", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "space_id"
-    t.integer "assignee_id", null: false
-    t.integer "status", default: 0, null: false
-    t.string "name"
-    t.text "description"
-    t.datetime "response_deadline"
-    t.datetime "completion_deadline"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "response_time"
-    t.datetime "complete_time"
-    t.index ["space_id"], name: "index_tasks_on_space_id"
-    t.index ["user_id"], name: "index_tasks_on_user_id"
-  end
-
   create_table "truth_challenge_results", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "answer_id"
     t.string "entry"
@@ -966,7 +949,5 @@ ActiveRecord::Schema.define(version: 2021_11_09_084058) do
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
-  add_foreign_key "tasks", "spaces"
-  add_foreign_key "tasks", "users"
   add_foreign_key "users", "orgs"
 end

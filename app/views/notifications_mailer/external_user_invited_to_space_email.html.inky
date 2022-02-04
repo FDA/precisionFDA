@@ -25,7 +25,7 @@
         </p>
 
         <p>Role: <strong><%= @role %></strong></p>
-        <p>Side: <strong><%= member_side(@space, @admin) %></strong></p>
+        <p>Side: <strong><%= @admin.side_alias %></strong></p>
 
         <p>
           Space's let you move data from your private area and share to the space members to access.
