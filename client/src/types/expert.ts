@@ -38,7 +38,7 @@ const mapToExpert = (data: any) => {
 
 const mapToExpertNodeApi = (data: any) => ({
   id: data.id,
-  user_id: data.user_id,
+  user_id: data.user,
   image: data.image,
   state: data.state,
   scope: data.scope,
