@@ -1,6 +1,9 @@
 import { App } from './app/app.entity'
 import { Comment } from './comment/comment.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
+import { Expert } from './expert/expert.entity'
+import { ExpertQuestion } from './expert-question/expert-question.entity'
+import { ExpertAnswer } from './expert-answer/expert-answer.entity'
 import { Job } from './job/job.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
@@ -16,27 +19,36 @@ import { Space } from './space/space.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
 import { Asset } from './user-file/asset.entity'
 import { Challenge } from './challenge/challenge.entity'
+import { AdminGroup } from './admin-group/admin-group.entity'
+import { AdminMembership } from './admin-membership/admin-membership.entity'
 
 const entities = {
+  AdminGroup,
+  AdminMembership,
   App,
+  Asset,
+  Challenge,
   Comment,
   DbCluster,
-  Job,
-  User,
-  Tag,
-  Tagging,
-  Node,
-  Folder,
-  Asset,
-  UserFile,
-  JobClosedEvent,
-  Organization,
   EmailNotification,
+  Expert,
+  ExpertAnswer,
+  ExpertQuestion,
+  Folder,
+  Job,
+  JobClosedEvent,
+  Node,
+  Organization,
+  Space,
   SpaceEvent,
   SpaceMembership,
-  Space,
-  Challenge,
+  Tag,
+  Tagging,
+  User,
+  UserFile,
 }
+
+export * as adminGroup from './admin-group'
 
 export * as app from './app'
 
@@ -62,20 +74,25 @@ export * as dbCluster from './db-cluster'
 
 export {
   entities,
-  Job,
+  AdminGroup,
+  AdminMembership,
   App,
+  Asset,
+  Challenge,
   Comment,
   DbCluster,
-  User,
-  UserFile,
+  Expert,
+  ExpertAnswer,
+  ExpertQuestion,
   Folder,
+  Job,
+  Node,
+  Organization,
+  Space,
+  SpaceEvent,
+  SpaceMembership,
   Tag,
   Tagging,
-  Organization,
-  Node,
-  Asset,
-  Space,
-  SpaceMembership,
-  SpaceEvent,
-  Challenge,
+  User,
+  UserFile,
 }

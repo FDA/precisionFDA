@@ -1,10 +1,25 @@
 import { errors, utils, ajv } from '@pfda/https-apps-shared'
 
+export const makeParseUserContextMdw = () => (ctx: Api.Ctx, next) => {
+  // TODO(samuel) proper sanitization in case array is passed into query-string
+  const id = ctx.request.query.id
+  ctx.user = {
+    id: id ? parseInt(id.toString(), 10) : null,
+    accessToken: ctx.request.query.accessToken?.toString(),
+    dxuser: ctx.request.query.dxuser?.toString(),
+  }
+  if (Number.isNaN(ctx.user.id)) {
+    throw new errors.ValidationError('User id was NaN');
+  }
+  ctx.log.debug({ userId: ctx.user.id }, 'User context retrieved')
+  return next()
+}
+
 /**
  * This middleware expects some user data in the query
  * of the request.
  */
-export const makeUserContextMdw = () => {
+export const makeValidateUserContextMdw = () => {
   // validate the schema from ctx.request.query
   // store to the ctx
   const validatorFn = ajv.compile(utils.schemas.userContextSchema)
@@ -27,12 +42,6 @@ export const makeUserContextMdw = () => {
         validationErrors: validatorFn.errors,
       })
     }
-    ctx.user = {
-      id: ctx.validatedQuery.id,
-      accessToken: ctx.validatedQuery.accessToken,
-      dxuser: ctx.validatedQuery.dxuser,
-    }
-    ctx.log.debug({ userId: ctx.user.id }, 'User context retrieved')
     return next()
   }
 }

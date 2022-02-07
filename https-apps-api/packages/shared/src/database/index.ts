@@ -46,6 +46,6 @@ const stop = async (): Promise<void> => {
 export const database = {
   start,
   stop,
-  orm: (): MikroORM => orm,
-  connection: (): Connection => orm.em.getConnection(),
+  orm: (): MikroORM => orm!,
+  connection: (): Connection => orm!.em.getConnection(),
 }
