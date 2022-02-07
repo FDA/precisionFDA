@@ -2,10 +2,11 @@ import { queue } from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema'
-import { makeValidationMdw } from '../server/middleware'
+import { defaultMiddlewares, makeValidationMdw } from '../server/middleware'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
+router.use(defaultMiddlewares)
 
 // Debugging bull queue
 router.get(

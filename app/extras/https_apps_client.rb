@@ -88,10 +88,30 @@ class HttpsAppsClient
     )
   end
 
+  def experts_list(page, limit, year)
+    query_args = { page: page, limit: limit }
+    query_args[:year] = year if year
+    request(
+      "/experts",
+      {},
+      Net::HTTP::Get::METHOD,
+      query_args,
+    )
+  end
+
+  def experts_years
+    request(
+      "/experts/years",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   private
 
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
-    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{auth_querystring}")
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {})
+    query = auth_query.merge(additional_query).to_query
+    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{query}")
     use_ssl = uri.scheme == "https"
 
     conn_opts = connection_opts.merge(use_ssl: use_ssl)
@@ -110,12 +130,12 @@ class HttpsAppsClient
     @connection_opts ||= { read_timeout: 120 }
   end
 
-  def auth_querystring
+  def auth_query
     {
-      id: @user.id,
+      id: @user&.id,
+      dxuser: @user&.dxuser,
       accessToken: @token,
-      dxuser: @user.dxuser,
-    }.to_query
+    }.compact_blank
   end
 
   # Returns HTTP headers to be sent during every request.

@@ -1,0 +1,127 @@
+version: '3.7'
+
+x-shared: &shared
+  build:
+    context: ../../
+    dockerfile: docker/m1-silicon/isolation.Dockerfile
+  environment:
+    - RAILS_LOG_TO_STDOUT=1
+    - RAILS_ENV=ui_test
+    - NO_FIPS=1
+    - REDIS_WORKER_URL=redis://redis:6379/0
+    - GSRS_URL=http://gsrs:9000
+    - GSRS_ENABLED=true
+
+services:
+  web:
+    <<: *shared
+    volumes:
+      - type: bind
+        source: ../../
+        target: /precision-fda
+      - type: volume
+        source: pfda-gems
+        target: /usr/local/bundle
+      - pfda-mysql-volume:/var/lib/mysql
+    working_dir: /precision-fda
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - redis
+      - sidekiq
+      - gsrs
+    entrypoint: ./docker/isolation.docker-entrypoint.sh
+
+  frontend:
+    image: node:12
+    volumes:
+      - type: bind
+        source: ../../
+        target: /precision-fda
+    working_dir: /precision-fda/client
+    command: bash -c "yarn && yarn watch"
+
+  gsrs:
+    build:
+      context: ../../
+      dockerfile: docker/gsrs.Dockerfile
+    environment:
+      - MYSQL_HOST=gsrsdb
+      - MYSQL_DATABASE=ixginas
+      - MYSQL_ROOT_PASSWORD=password
+      - GSRS_PORT=9000
+    ports:
+      - 9000:9000
+    depends_on:
+      - gsrsdb
+
+  gsrsdb:
+    image: mysql:5.6
+    volumes:
+      - gsrs-mysql-volume:/var/lib/mysql
+    tmpfs:
+      - /tmp
+      - /run/mysqld
+    environment:
+      - MYSQL_DATABASE=ixginas
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 32900:3306
+
+  nodejs-api:
+    build:
+      context: ../../
+      dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
+      args:
+        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
+    command: ['make', 'run-dist']
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+      - redis
+
+  nodejs-worker:
+    build:
+      context: ../../
+      dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
+      args:
+        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
+
+    command: ['make', 'run-worker-dist']
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:5.6
+    volumes:
+      - pfda-mysql-volume:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 32800:3306
+
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+
+  sidekiq:
+    <<: *shared
+    volumes:
+      - type: bind
+        source: ../../
+        target: /precision-fda
+      - type: volume
+        source: pfda-gems
+        target: /usr/local/bundle
+    entrypoint: docker/sidekiq.entrypoint.sh
+    depends_on:
+      - redis
+
+volumes:
+  pfda-mysql-volume:
+  gsrs-mysql-volume:
+  pfda-gems:

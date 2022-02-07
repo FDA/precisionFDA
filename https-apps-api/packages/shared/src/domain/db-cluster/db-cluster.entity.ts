@@ -54,7 +54,7 @@ export class DbCluster extends BaseEntity {
   @Enum()
   engine!: ENGINE
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
   constructor(user: User) {

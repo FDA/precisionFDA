@@ -27,7 +27,7 @@ export class SpaceMembership extends BaseEntity {
   @Property()
   role: SPACE_MEMBERSHIP_ROLE
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
   @ManyToMany(() => Space, space => space.spaceMemberships)
