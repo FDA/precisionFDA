@@ -3,6 +3,7 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Provider } from 'react-redux'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { ToastContainer } from 'react-toastify'
 
 import history from './utils/history'
 import SpacesListPage from './views/pages/Spaces/SpacesListPage'
@@ -15,6 +16,7 @@ import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
 import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
 import NewsListPage from './views/pages/News/NewsListPage'
 import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
+import { ExpertsSinglePage } from './views/pages/Experts/ExpertsSinglePage'
 import LandingPage from './views/pages/Landing/LandingPage'
 import AboutPage from './views/pages/Landing/AboutPage'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
@@ -76,6 +78,14 @@ const root = ({ store }: any) => {
             <Route exact path='/news'>
               <NewsListPage />
             </Route>
+            <Route
+              path='/experts/:expertId/:page'>
+              <ExpertsSinglePage />
+            </Route>
+            <Route
+              path='/experts/:expertId'>
+              <ExpertsSinglePage />
+            </Route>
             <Route exact path='/experts'>
               <ExpertsListPage />
             </Route>
@@ -85,6 +95,7 @@ const root = ({ store }: any) => {
           </Switch>
         </ErrorWrapper>
       </Router>
+      <ToastContainer position='top-right' />
     </QueryClientProvider>
   </Provider>
 )}

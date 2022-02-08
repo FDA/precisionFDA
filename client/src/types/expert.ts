@@ -18,7 +18,7 @@ interface IExpert extends IListItem {
 }
 
 const mapToExpert = (data: any) => {
-  const expert = {
+  return {
     id: data.id,
     user_id: data.user_id,
     image: data.image,
@@ -34,8 +34,24 @@ const mapToExpert = (data: any) => {
     totalAnswerCount: data.total_answer_count,
     totalCommentCount: data.total_comment_count,
   }
-  return expert
 }
 
+const mapToExpertNodeApi = (data: any) => ({
+  id: data.id,
+  user_id: data.user,
+  image: data.image,
+  state: data.state,
+  scope: data.scope,
+  createdAt: new Date(data.createdAt),
+  updatedAt: new Date(data.updatedAt),
+  title: data.meta.title,
+  about: data.meta.about,
+  blog: data.meta.blog,
+  blogTitle: data.meta.blogTitle,
+  blogPreview: data.meta.blogPreview,
+  totalAnswerCount: data.meta.totalAnswerCount,
+  totalCommentCount: data.meta.totalCommentCount,
+});
+
 export type { IExpert }
-export { mapToExpert }
+export { mapToExpertNodeApi, mapToExpert }

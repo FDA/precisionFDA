@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, unless: -> { Rails.env.development? || Rails.env.dev? }
 
   # if we have some invalid forms redirect to root page.
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
@@ -121,7 +121,7 @@ class ApplicationController < ActionController::Base
   # Renders Unauthorized if it was unable to authorize user.
   def require_api_login_or_guest
     if @context.logged_in_or_guest?
-      return if verified_request?
+      return if verified_request? || Rails.env.development? || Rails.env.dev?
     else
       process_authorization_header
       return if @context.logged_in?
@@ -134,7 +134,7 @@ class ApplicationController < ActionController::Base
   # Renders Unauthorized if it was unable to authorize user.
   def require_api_login
     if @context.logged_in?
-      return if verified_request?
+      return if verified_request? || Rails.env.development? || Rails.env.dev?
     else
       process_authorization_header
       return if @context.logged_in?

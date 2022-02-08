@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space activation request for <%= @space.title %> as <%= "#{member_side(@space, @membership)} #{@membership.role}" %>
+    Space activation request for <%= @space.title %> as <%= "#{@membership.side_alias} #{@membership.role}" %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was provisioned and listed you as <%= "#{member_side(@space, @membership)} #{@membership.role}" %>.
+          The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was provisioned and listed you as <%= "#{@membership.side_alias} #{@membership.role}" %>.
         </p>
 
         <p>

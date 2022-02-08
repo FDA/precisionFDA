@@ -36,12 +36,8 @@ module PathHelper
       discussion_comments_path(item)
     when "answer"
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
-    when "space"
-      space_comments_path(item)
     when "workflow"
       workflow_comments_path(item)
-    when "task"
-      space_task_comments_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_comments_path(item)
     when "appathon"
@@ -76,11 +72,7 @@ module PathHelper
     when "asset"
       "/home/assets/#{item.uid}"
     when "comment"
-      if item.commentable_type == 'Space'
-        discuss_space_path(item.commentable)
-      else
-        pathify_comments(item.commentable)
-      end
+      pathify_comments(item.commentable)
     when "comparison"
       comparison_path(item)
     when "discussion"
@@ -93,8 +85,6 @@ module PathHelper
       license_path(item)
     when "space"
       _space_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
@@ -147,10 +137,6 @@ module PathHelper
     when "workflow"
       return workflow_analyses_path(item) if request.referer =~ /analyses/
       concat_path(item)
-    when "space"
-      discuss_space_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
     when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"
       pathify(item)
     when "file", "folder", "app", "job", "asset"

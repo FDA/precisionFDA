@@ -29,7 +29,7 @@ export class Comment extends BaseEntity {
   @Property()
   contentObjectType: string
 
-  @ManyToOne({ fieldName: 'user_id' })
+  @ManyToOne({ entity: () => User, fieldName: 'user_id' })
   user!: IdentifiedReference<User>
 
   constructor(user: User) {

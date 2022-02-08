@@ -115,6 +115,9 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+    post "/spaces/:id/copy_to_cooperative",
+         to: "main#copy_to_cooperative",
+         as: :copy_to_cooperative_space
 
     resources :org_requests do
       collection do
@@ -174,8 +177,10 @@ Rails.application.routes.draw do
         get :my_entries, on: :collection
       end
 
-      resources :experts, only: %i(index show) do
+      resources :experts, controller: :experts,
+                param: :id, only: %i(index show ask_question blog) do
         get :years, on: :collection
+        post :ask_question, on: :member
       end
 
       resources :participants, path: "participants" do
@@ -347,7 +352,6 @@ Rails.application.routes.draw do
         post "change", on: :collection
       end
 
-      post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"
@@ -550,6 +554,7 @@ Rails.application.routes.draw do
       post "close", on: :member
       get "dashboard", on: :member
       get "blog", on: :member
+      get "qa", on: :member
       nested do
         scope "/dashboard" do
           resources :expert_questions, as: "edit_question"
@@ -562,49 +567,7 @@ Rails.application.routes.draw do
     end
 
     resource :org, only: :update
-
-    resources :spaces, only: %i(index) do
-      member do
-        get "tasks"
-        get "feed"
-        get "reports"
-        get "notes"
-        get "comparisons"
-        get "assets"
-        get "discuss"
-        post "invite"
-        post "copy_to_cooperative" # copy a single item to cooperative, used everywhere
-        post "search_content" # used in discuss only
-      end
-
-      resources :comments
-
-      resources :tasks, only: %i(create destroy update show) do
-        post "accept", on: :collection
-        post "complete", on: :collection
-        post "decline", on: :collection
-        post "make_active", on: :collection
-        post "reopen", on: :collection
-        post "reassign", on: :member
-        post "copy", on: :member
-        get "task", on: :member
-        resources :comments
-      end
-
-      resources :space_feed, only: [:index] do
-        collection do
-          get "object_types"
-          get "chart"
-        end
-      end
-
-      resources :space_reports, only: [:index] do
-        collection do
-          get "counters"
-          get "download_report"
-        end
-      end
-    end
+    resources :spaces, only: :index
 
     get "/spaces/*all", to: "spaces#index"
 

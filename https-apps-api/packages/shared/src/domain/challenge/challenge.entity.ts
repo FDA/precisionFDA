@@ -56,10 +56,10 @@ export class Challenge extends BaseEntity {
   @Property()
   appId: number
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   admin!: IdentifiedReference<User>
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   appOwner!: IdentifiedReference<User>
 
   constructor(admin: User, appOwner: User) {

@@ -143,7 +143,7 @@ export const Header: React.FC = () => {
                   <HeaderItemText>Challenges</HeaderItemText>
                 </MenuItem>
               </Link>
-              <Link to="/experts" title="Experts">
+              <Link to="/experts" title="Exoerts">
                 <MenuItem active={isActiveLink('/experts')}>
                   <IconWrap>
                     <StarIcon height={16} />

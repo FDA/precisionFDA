@@ -50,9 +50,9 @@ interface ISocialMediaButtonProps {
 export const SocialMediaButtons : React.FunctionComponent<ISocialMediaButtonProps> = ({ showText=false }) => {
   return (
     <StyledSocialMediaButtons showText={showText}>
-      <a href="mailto:precisionfda@fda.hhs.gov" className="fa fa-envelope">{showText ? (<SocialMediaButtonText>Email the team</SocialMediaButtonText>) : ''}</a>
-      <ExternalLink to="https://twitter.com/precisionfda" className="fa fa-twitter">{showText ? (<SocialMediaButtonText>Twitter</SocialMediaButtonText>) : ''}</ExternalLink>
-      <ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin">{showText ? (<SocialMediaButtonText>LinkedIn</SocialMediaButtonText>) : ''}</ExternalLink>
+      <a href='mailto:precisionfda@fda.hhs.gov' className="fa fa-envelope" aria-label='Click this icon to email the PrecisionFDA team'>{showText ? (<SocialMediaButtonText>Email the team</SocialMediaButtonText>) : ''}</a>
+      <ExternalLink to='https://twitter.com/precisionfda' className="fa fa-twitter" ariaLabel='Click this icon to view the PrecisionFDA Twitter page in a new Tab'>{showText ? (<SocialMediaButtonText>Twitter</SocialMediaButtonText>) : ''}</ExternalLink>
+      <ExternalLink to='https://www.linkedin.com/showcase/precisionfda' className="fa fa-linkedin" ariaLabel='Click this icon to view the PrecisionFDA LinkedIn page in a new tab'>{showText ? (<SocialMediaButtonText>LinkedIn</SocialMediaButtonText>) : ''}</ExternalLink>
     </StyledSocialMediaButtons>
   )
 }

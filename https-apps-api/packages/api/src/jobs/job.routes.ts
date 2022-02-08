@@ -4,10 +4,13 @@ import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 import { makeValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils'
 import { jobListQuerySchema, jobSyncFilesQuerySchema } from './job.schemas'
+import { defaultMiddlewares } from '../server/middleware'
 
 
 // Routes with /jobs prefix
 const router = new Router<DefaultState, Api.Ctx>()
+
+router.use(defaultMiddlewares);
 
 const jobDxIdInputSchema = utils.schemas.getDxidInputSchema('jobDxId')
 
