@@ -36,5 +36,22 @@ const mapToExpert = (data: any) => {
   }
 }
 
+const mapToExpertNodeApi = (data: any) => ({
+  id: data.id,
+  user_id: data.user,
+  image: data.image,
+  state: data.state,
+  scope: data.scope,
+  createdAt: new Date(data.createdAt),
+  updatedAt: new Date(data.updatedAt),
+  title: data.meta.title,
+  about: data.meta.about,
+  blog: data.meta.blog,
+  blogTitle: data.meta.blogTitle,
+  blogPreview: data.meta.blogPreview,
+  totalAnswerCount: data.meta.totalAnswerCount,
+  totalCommentCount: data.meta.totalCommentCount,
+});
+
 export type { IExpert }
-export { mapToExpert }
+export { mapToExpertNodeApi, mapToExpert }
