@@ -36,9 +36,7 @@
             <% end %>
             <div class="pfda-comment-body"><%= simple_format(comment.body) %></div>
             <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
-              <% unless !comment.editable_by?(@context) && comment.commentable_type == "Task" %>
-                <li><a href="#" class="nested-comment--show-new-comment" data-parent-id="<%= comment.id %>">Reply</a></li>
-              <% end %>
+              <li><a href="#" class="nested-comment--show-new-comment" data-parent-id="<%= comment.id %>">Reply</a></li>
               <% if comment.editable_by?(@context) %>
                 <li><%= link_to "Edit", edit_polymorphic_path(items_from_params + [comment]) %></li>
                 <li><%= link_to "Delete", polymorphic_path(items_from_params + [comment]), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } %></li>

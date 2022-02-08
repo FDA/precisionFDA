@@ -4,7 +4,6 @@ module Api
   class FilesController < ApiController
     include SpaceConcern
     include CommonConcern
-    include FilesConcern
     include Paginationable
     include Sortable
     include Scopes

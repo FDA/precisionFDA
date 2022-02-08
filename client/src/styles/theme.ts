@@ -17,6 +17,7 @@ export const colors = {
   primaryRed: '#eb776f',
   primaryYellow: '#f0ad4e',
   highlightBlue: '#3a80ba',
+  remediatedhighlightBlue: '#4a8abf',
   highlightYellow: '#edad58',
   highlightGreen: '#44b150',
   subtleBlue: '#f4f8fd',

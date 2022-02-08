@@ -28,7 +28,7 @@ export class EmailNotification {
   @PrimaryKey()
   id: number
 
-  @OneToOne({ fieldName: 'user_id' })
+  @OneToOne({ fieldName: 'user_id', entity: () => User })
   user!: IdentifiedReference<User>
 
   @Property({ type: NotificationType })

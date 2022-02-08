@@ -7,13 +7,11 @@ import {
   EXPERTS_LIST_FETCH_SUCCESS,
   EXPERTS_LIST_FETCH_FAILURE,
 } from '../types'
-import * as C from '../../../constants'
-import { mapToExpert } from '../../../types/expert'
+import { mapToExpertNodeApi } from '../../../types/expert'
 import { mapToPagination } from '../../../views/shapes/PaginationShape'
 import { showAlertAboveAll } from '../../alertNotifications'
 import { expertsListPaginationSelector, expertsListYearSelector } from '../../../reducers/experts/list/selectors'
 import { IExpertsListActionPayload } from '../../../reducers/experts/list/IExpertsListActionPayload'
-
 
 
 const fetchExpertsStart = () => createAction(EXPERTS_LIST_FETCH_START)
@@ -43,7 +41,7 @@ const fetchExperts = () => (
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
           const actionPayload = {
-            items: response.payload.experts.map(mapToExpert),
+            items: response.payload.experts.map(mapToExpertNodeApi),
             pagination: mapToPagination(response.payload.meta),
           }
           dispatch(fetchExpertsSuccess(actionPayload))

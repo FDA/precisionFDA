@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "2.7.2"
+ruby "2.7.5"
 
 gem "rails", "~> 6.1.4.4"
 # Use SCSS for stylesheets
@@ -104,7 +104,7 @@ gem "dry-container"
 
 gem "rubyzip", "=1.3.0"
 
-gem "sidekiq", "~> 6.3"
+gem "sidekiq", "~> 6.4"
 
 gem "whenever", require: false
 

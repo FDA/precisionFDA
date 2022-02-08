@@ -37,6 +37,12 @@ Rails.application.configure do
   config.assets.debug = false
   config.assets.digest = true
 
+  # Segmentation fault fix during bundle exec rake assets:precompile
+  # https://github.com/rails/sprockets/issues/633
+  config.assets.configure do |env|
+    env.export_concurrent = false
+  end
+
   # `config.assets.precompile` and `config.assets.version`
   # have moved to config/initializers/assets.rb
 

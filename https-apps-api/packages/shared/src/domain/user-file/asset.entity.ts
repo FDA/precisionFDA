@@ -54,7 +54,7 @@ export class Asset extends Node {
   @Property()
   scopedParentFolderId?: number
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
   @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })

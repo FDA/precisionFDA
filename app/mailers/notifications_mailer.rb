@@ -1,5 +1,4 @@
 class NotificationsMailer < ApplicationMailer
-  helper SpacesHelper
   helper :application, :client_url
 
   if Rails.env.production?
@@ -138,34 +137,6 @@ class NotificationsMailer < ApplicationMailer
     name = @question.user.nil? ? "Anonymous" : @question.user.full_name.titleize
     mail to: @expert.user.email,
          subject: "A new question was submitted by \"#{name}\""
-  end
-
-  def new_task_email(task)
-    @task = task
-    mail to: @task.assignee.email,
-         subject: "Task \"#{@task.name}\" was assigned to you"
-  end
-
-  def task_updated_email(task, receiver, action)
-    @task = task
-    @action = action
-    @receiver = receiver
-    @task_creator = @task.user.id == @receiver.id ? 'you' : @task.user.full_name
-    @task_assignee = @task.assignee.id == @receiver.id ? 'you' : @task.assignee.full_name
-    mail to: @receiver.email,
-         subject: "Task \"#{@task.name}\" was #{@action}"
-  end
-
-  def user_failed_to_acknowledge_task_email(task)
-    @task = task
-    mail to: @task.user.email,
-         subject: "User failed to ackowledge task \"#{@task.name}\""
-  end
-
-  def user_failed_to_complete_task_email(task)
-    @task = task
-    mail to: @task.user.email,
-         subject: "User failed to complete task \"#{@task.name}\" in time"
   end
 
   def challenge_results(file, user_id, test_email=nil)

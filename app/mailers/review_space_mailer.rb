@@ -1,5 +1,5 @@
 class ReviewSpaceMailer < ApplicationMailer
-  helper :application, :spaces, :path, :client_url
+  helper :application, :path, :client_url
   default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
            reply_to: "PrecisionFDA@fda.hhs.gov"
 
