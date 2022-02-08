@@ -18,7 +18,8 @@ import * as overrides from './envs'
 type Maybe<T> = T | null
 
 const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
-  const value = parseInt(envValue, 10)
+  // TODO(samuel) validate that this is not undefined
+  const value = parseInt(envValue!, 10)
   return isNaN(value) ? null : value
 }
 
