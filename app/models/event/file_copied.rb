@@ -11,22 +11,39 @@
 #  param3     :string(255)
 #  created_at :datetime         not null
 #  param4     :string(255)
+#  data       :text(65535)
 #
+
 class Event
   # Tracks file copy events.
   class FileCopied < Event
-    alias_attribute :source_id, :param1
-    alias_attribute :target_id, :param2
-    alias_attribute :source_folder_id, :param3
-    alias_attribute :target_folder_id, :param4
+    store :data,
+          accessors: %i(
+            source_uid
+            source_name
+            source_path
+            source_folder_id
+            source_scope
+            target_uid
+            target_name
+            target_path
+            target_folder_id
+            target_scope
+          ), coder: JSON
 
     class << self
       def create_for(source, target, user)
         create(
-          source_id: source.id,
-          target_id: target.id,
+          source_uid: source.uid,
+          source_name: source.name,
+          source_path: source.file_full_path,
           source_folder_id: source.folder_id,
+          source_scope: source.scope,
+          target_uid: target.uid,
+          target_name: target.name,
+          target_path: target.file_full_path,
           target_folder_id: target.folder_id,
+          target_scope: target.scope,
           dxuser: user.dxuser,
           org_handle: user.org.handle,
         )

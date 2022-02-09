@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_17_193348) do
+ActiveRecord::Schema.define(version: 2022_02_09_141728) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -282,6 +282,7 @@ ActiveRecord::Schema.define(version: 2022_01_17_193348) do
     t.string "param3"
     t.datetime "created_at", null: false
     t.string "param4"
+    t.text "data"
     t.index ["type", "created_at"], name: "index_events_on_type_and_created_at"
   end
 
