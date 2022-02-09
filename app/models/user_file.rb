@@ -308,29 +308,29 @@ class UserFile < Node
   end
 
   # Returns a parent folder name of UserFile
-  # @param [scope] a file scope
+  # @param [file_scope] a file scope
   # @return [String] folder name or "/" for root
-  def parent_folder_name(scope = SCOPE_PRIVATE)
-    folder = parent_folder(scope)
+  def parent_folder_name(file_scope = scope)
+    folder = parent_folder(file_scope)
     folder.blank? ? "/" : folder.name
   end
 
-  def parent_folder(scope = SCOPE_PRIVATE)
-    column_name = Node.scope_column_name(scope)
+  def parent_folder(file_scope = scope)
+    column_name = Node.scope_column_name(file_scope)
     Folder.find_by(id: self[column_name])
   end
 
   # Returns a full path to current file
-  # @param [scope] a file scope]
+  # @param [file_scope] a file scope
   # @return [String] file path or "/" for root
-  def file_full_path(scope = SCOPE_PRIVATE)
-    parent_folder = parent_folder(scope)
+  def file_full_path(file_scope = scope)
+    parent_folder = parent_folder(file_scope)
     folders = []
     if parent_folder.blank?
       "/"
     else
-      folders << parent_folder_name(scope)
-      folders << parent_folder.ancestors(scope).pluck(:name)
+      folders << parent_folder_name(file_scope)
+      folders << parent_folder.ancestors(file_scope).pluck(:name)
     end
 
     collect_path_string(folders.flatten.reverse)
