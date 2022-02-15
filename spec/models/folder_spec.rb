@@ -24,75 +24,59 @@
 require "rails_helper"
 
 RSpec.describe Folder, type: :model do
-  # rubocop:disable RSpec/AnyInstance
-  let(:user) { create(:user, dxuser: "user") }
-  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
+  let(:user) { create(:user) }
+  let!(:folders) { create_list(:folder, 3, :private, user: user) }
 
-  let(:folder_private_one) do
-    create(:folder, :private, parent_folder_id: nil, scoped_parent_folder_id: nil)
-  end
-  let(:folder_private_two) do
-    create(
-      :folder,
-      :private,
-      parent_folder_id: folder_private_one.id,
-      scoped_parent_folder_id: nil,
-    )
-  end
-  let(:folder_private_three) do
-    create(
-      :folder,
-      :private,
-      parent_folder_id: nil,
-      scoped_parent_folder_id: nil,
-    )
-  end
+  describe ".private_count" do
+    subject(:private_count) { described_class.private_count(user) }
 
-  describe "return private_count of user's files" do
-    subject(:private_folders_count) { described_class.private_count(user) }
+    let(:folder) { folders.first }
 
-    before do
-      folder_private_one.update(user_id: user.id)
-      folder_private_three.update(user_id: user.id)
-    end
-
-    let(:other_user_id) { FFaker::Random.rand(5) }
-
-    context "when all folders scopes are private" do
-      context "when one file is not in root" do
-        before { folder_private_two.update(user_id: user.id) }
-
+    context "when all folders are private" do
+      context "when one folder is not in root" do
         it "returns correct count" do
-          expect(private_folders_count).to eq(3)
+          folder.update(parent_folder_id: folders.last.id)
+          expect(private_count).to eq(3)
         end
       end
 
       context "when all folders are in root" do
-        before { folder_private_two.update(user_id: user.id, parent_folder_id: nil) }
-
         it "returns correct count" do
-          expect(private_folders_count).to eq(3)
+          expect(private_count).to eq(3)
         end
       end
 
       context "when one folder does not belong to user" do
-        before { folder_private_two.update(user_id: other_user_id) }
+        before { folder.update(user: create(:user)) }
 
         it "returns correct count" do
-          expect(private_folders_count).to eq(2)
+          expect(private_count).to eq(2)
         end
       end
     end
 
-    context "when not all folders scopes are private" do
-      before { folder_private_two.update(user_id: user.id, parent_folder_id: nil, scope: "public") }
+    context "when not all folders are private" do
+      before { folder.update(scope: Scopes::SCOPE_PUBLIC) }
 
-      context "when one public file is in root folder" do
-        it "returns correct count" do
-          expect(private_folders_count).to eq(2)
-        end
+      it "returns correct count" do
+        expect(private_count).to eq(2)
       end
     end
   end
-  # rubocop:enable RSpec/AnyInstance
+
+  describe "#children" do
+    let(:folder) { folders.first }
+
+    before do
+      (folders - [folder]).each { |f| f.update(parent_folder_id: folder.id) }
+
+      create(:folder, :in_space, parent_folder_id: folder.id, user: user)
+      create(:folder, :public, user: user)
+      create(:folder, :private, user: user, parent_folder_id: folder.id)
+    end
+
+    it "returns child nodes" do
+      expect(folder.children.count).to eq(3)
+    end
+  end
 end
