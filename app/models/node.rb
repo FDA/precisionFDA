@@ -71,12 +71,20 @@ class Node < ApplicationRecord
     build_ancestors_tree(self, scope)
   end
 
-  def parent_folder
-    Folder.find_by(id: self[self.class.scope_column_name(scope)])
+  def scope_column_name
+    self.class.scope_column_name(scope)
+  end
+
+  def opposite_scope_column_name
+    self.class.opposite_scope_column_name(scope)
   end
 
   def folder_id
-    self[self.class.scope_column_name(scope)]
+    self[scope_column_name]
+  end
+
+  def parent_folder
+    Folder.find_by(id: folder_id)
   end
 
   # Check, whether node is publishable. A node should be 'private' or in space.

@@ -38,5 +38,9 @@ FactoryBot.define do
     trait :public do
       scope { :public }
     end
+
+    trait :in_space do
+      scope { "space-#{rand(1..100)}" }
+    end
   end
 end
