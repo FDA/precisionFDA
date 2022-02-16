@@ -16,41 +16,43 @@
 #
 
 class SpaceEvent < ApplicationRecord
-  OBJECT_TYPES = %i(
-    space
-    membership
-    comment
-    app
-    job
-    file
-    asset
-    comparison
-    workflow
-    note
-  ).freeze
+  OBJECT_TYPES = {
+    space: 0,
+    membership: 1,
+    comment: 3,
+    app: 4,
+    job: 5,
+    file: 6,
+    asset: 7,
+    comparison: 8,
+    workflow: 9,
+    note: 10,
+  }.freeze
 
-  ACTIVITY_TYPES = %i(
-    membership_added
-    membership_disabled
-    membership_changed
-    job_added
-    job_completed
-    file_added
-    file_deleted
-    note_added
-    app_added
-    asset_added
-    asset_deleted
-    comparison_added
-    workflow_added
-    comment_added
-    comment_edited
-    comment_deleted
-    space_locked
-    space_unlocked
-    space_deleted
-    membership_enabled
-  ).freeze
+  ACTIVITY_TYPES = {
+    membership_added: 0,
+    membership_disabled: 1,
+    membership_changed: 2,
+    job_added: 8,
+    job_completed: 9,
+    file_added: 10,
+    file_deleted: 11,
+    note_added: 12,
+    app_added: 13,
+    asset_added: 14,
+    asset_deleted: 15,
+    comparison_added: 16,
+    workflow_added: 17,
+    comment_added: 18,
+    comment_edited: 19,
+    comment_deleted: 20,
+    space_locked: 21,
+    space_unlocked: 22,
+    space_deleted: 23,
+    task_accepted: 24,
+    task_reopened: 25,
+    membership_enabled: 26,
+  }.freeze
 
   ROLES = %i(
     admin
@@ -60,15 +62,15 @@ class SpaceEvent < ApplicationRecord
   ).freeze
 
   DATA_ATTRIBUTES = {
-    :comment    => %i(body),
-    :app        => %i(title),
-    :note       => %i(title),
-    :space      => %i(name),
-    :job        => %i(name),
-    :file       => %i(name uid),
-    :asset      => %i(name uid),
-    :comparison => %i(name),
-    :workflow   => %i(name),
+    comment: %i(body),
+    app: %i(title),
+    note: %i(title),
+    space: %i(name),
+    job: %i(name),
+    file: %i(name uid),
+    asset: %i(name uid),
+    comparison: %i(name),
+    workflow: %i(name),
   }.freeze
 
   belongs_to :user
