@@ -158,7 +158,8 @@ class NotificationsMailer < ApplicationMailer
 
     return if recipients.blank?
 
-    @subject = "New challenge proposal received from #{proposal[:name]} (#{proposal[:email]})"
+    @subject = "[#{Rails.env.titleize}] New challenge proposal received from " \
+               "#{proposal[:name]} (#{proposal[:email]})"
     @proposal = proposal
 
     mail to: recipients,
