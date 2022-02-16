@@ -104,4 +104,11 @@ BILLING_INFO = {
   phone: "(301) 706-1836",
 }.freeze
 
+PFDA_EMAIL = "precisionfda@fda.hhs.gov".freeze
 SUPPORT_EMAIL = "precisionfda-support@dnanexus.com".freeze
+
+CHALLENGE_PROPOSAL_RECIPIENTS = {
+  production: [PFDA_EMAIL, SUPPORT_EMAIL],
+  staging: ["swestreich+pfda@dnanexus.com", SUPPORT_EMAIL],
+  development: [SUPPORT_EMAIL],
+}.freeze
