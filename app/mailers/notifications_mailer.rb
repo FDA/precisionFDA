@@ -154,13 +154,15 @@ class NotificationsMailer < ApplicationMailer
   end
 
   def challenge_proposal_received(proposal)
-    recipients = [SUPPORT_EMAIL]
-    recipients << "precisionfda@fda.hhs.gov" if Rails.env.production?
+    recipients = CHALLENGE_PROPOSAL_RECIPIENTS.fetch(Rails.env.to_sym, [])
 
-    email_body = proposal.map { |e| e.join(" = ") }.join("\n")
+    return if recipients.blank?
+
+    @subject = "New challenge proposal received from #{proposal[:name]} (#{proposal[:email]})"
+    @proposal = proposal
+
     mail to: recipients,
          reply_to: SUPPORT_EMAIL,
-         subject: "New challenge proposal received from #{proposal.name} (#{proposal.email})",
-         body: email_body
+         subject: @subject
   end
 end
