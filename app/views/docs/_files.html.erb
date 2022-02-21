@@ -29,15 +29,16 @@
 
         <p>For large files that are accessible over the Internet, we suggest running the "Fetch file from URL" app, which has been provided by the precisionFDA team. The app allows you to fetch a file from a given URL.</p>
 
-        <p>For large files that are on your computer, we suggest using the <strong>precisionFDA uploader</strong>, a command-line tool capable of uploading with multiple threads and more resilient to transient errors.
-        The precisionFDA uploader can be used for both files and app assets, and it's available through the <a href="<%= new_asset_path %>">Create Assets</a> page.</p>
+        <p>For large files that are on your computer, we suggest using the <strong>precisionFDA CLI</strong>, a command-line tool capable of uploading with multiple threads and more resilient to transient errors.
+        The precisionFDA CLI can be used for both files and app assets, and it's available through the <a href="<%= new_asset_path %>">Create Assets</a> page.</p>
 
-        <p>Visit that page and download the precisionFDA uploader for your operating system and architecture by clicking the respective button under "Step 3".</p>
+        <p>Visit that page and download the precisionFDA CLI for your operating system and architecture by clicking the respective button under "Step 3".</p>
         <p>The tool requires an "authorization key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective button under "Step 4" in the "Add Assets" page. Copy the key from that page and paste it in the command below where it says <strong>KEY</strong>. For your security, the key is valid for 24h.</p>
-        <p>Run <code>./pfda --cmd upload-file --key KEY --file /path/to/file</code>. This command will upload the file to precisionFDA.</p>
+        <p>Run <code>./pfda upload-file --key KEY --file /path/to/file</code>. This command will upload the file to precisionFDA.</p>
         <div class="alert alert-info">
-          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The CLI saves your key in <code>$HOME/.pfda_config</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
         </div>
+        <p>The CLI can do a lot more than uploading assets, please see the <a href="/docs/cli">Command Line Interface documentation page</a></p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
         <%= video_iframe(videos[:files_upload][:url], videos[:files_upload][:title]) %>

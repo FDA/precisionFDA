@@ -326,7 +326,18 @@ module Api
 
       file_url = file.file_url(@context, params[:inline])
 
-      redirect_to URI.parse(file_url).to_s
+      respond_to do |format|
+        format.html do
+          redirect_to URI.parse(file_url).to_s
+        end
+
+        format.json do
+          render json: {
+            file_url: file_url,
+            file_size: file.file_size,
+          }, adapter: :json
+        end
+      end
     end
 
     # POST /api/files/create_folder - create_folder_api_files_path
