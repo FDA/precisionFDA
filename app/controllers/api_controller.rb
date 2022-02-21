@@ -726,6 +726,7 @@ class ApiController < ApplicationController
   #
   # name (string, required, nonempty)
   # description (string, optional)
+  # scope (string, optional) 'public' | 'private' | <SPACE_ID>
   #
   # Outputs:
   #
