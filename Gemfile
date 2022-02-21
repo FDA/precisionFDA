@@ -87,9 +87,6 @@ gem "gretel", "~> 4.4"
 
 gem "rack-utf8_sanitizer", "~> 1.7"
 
-# View outgoing HTTP requests
-gem "httplog"
-
 gem "simple_form", "~> 5.1"
 
 # PDF builder
@@ -119,6 +116,9 @@ group :development do
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
   gem "web-console"
+
+  # View outgoing HTTP requests
+  gem "httplog"
 
   gem "listen"
 
