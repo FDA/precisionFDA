@@ -18,6 +18,7 @@ en:
           publishing: Publishing
           licenses: Licenses
           spaces: Spaces
+          cli: Command Line Interface
       site_admin:
         title: Administrator Features
         sections:

@@ -17,10 +17,16 @@ class CopyService
       return copies if nodes.empty?
 
       @parent_folder_col = Node.scope_column_name(scope)
+      @opposite_parent_folder_col = Node.opposite_scope_column_name(scope)
 
       parent_folder = nil
 
-      nodes.each { |node| copies.concat(copy_node(node, scope, parent_folder)) }
+      Node.transaction do
+        nodes.each do |node|
+          copied_node = copy_node(node, scope, parent_folder)
+          copies.concat(copied_node)
+        end
+      end
 
       copies
     end
@@ -46,7 +52,7 @@ class CopyService
     # @param scope [String] A destination scope.
     # @param parent_folder [Folder, nil] A parent folder of a folder.
     # @return [CopyService::Copies] An object that contains copied files and folders.
-    # rubocop:disable Metrics/MethodLength
+    # rubocop:todo Metrics/MethodLength
     def copy_folder(folder, scope, parent_folder = nil)
       copies = Copies.new
 
@@ -71,6 +77,7 @@ class CopyService
         new_folder.entity_type = Folder::TYPE_REGULAR
         new_folder.user = user
         new_folder[@parent_folder_col] = parent_folder&.id
+        new_folder[@opposite_parent_folder_col] = nil
         new_folder.save!
       end
 
@@ -98,10 +105,7 @@ class CopyService
     # @param parent_folder [Folder, nil] A parent folder of a file.
     # @return [CopyService::Copies] An object that contains copied and source files.
     def copy_file(file, scope, parent_folder = nil)
-      copies = file_copier.copy(file, scope)
-      file_copy = copies[0]
-      file_copy.object.update!(@parent_folder_col => parent_folder&.id) if file_copy&.copied
-      copies
+      file_copier.copy(file, scope, parent_folder&.id)
     end
   end
 end

@@ -203,12 +203,12 @@ module Api
       load_licenses(@file)
 
       # TODO: move common data to common_concern.rb
-      comparison = if @file.parent_type != "Comparison"
+      comparison = if @file.parent_type == "Comparison"
+        @file.parent.slice(:id, :user_id, :scope, :state)
+      else
         synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
         synchronizer.sync_comparisons!(@context.user)
         @file.comparisons.accessible_by(@context).includes(:taggings)
-      else
-        @file.parent.slice(:id, :user_id, :scope, :state)
       end
 
       comments = if @file.in_space?
@@ -231,16 +231,16 @@ module Api
         discussions.order(id: :desc).page(params[:discussions_page])
 
       render json: @file, root: "files", adapter: :json,
-        meta: {
-          user_licenses: @licenses,
-          object_license: @license,
-          comments: comments,
-          discussions: discussions,
-          answers: answers,
-          notes: notes,
-          comparisons: comparison,
-          links: meta_links(@file),
-        }
+             meta: {
+               user_licenses: @licenses,
+               object_license: @license,
+               comments: comments,
+               discussions: discussions,
+               answers: answers,
+               notes: notes,
+               comparisons: comparison,
+               links: meta_links(@file),
+             }
     end
     # rubocop:enable Metrics/MethodLength
 
@@ -259,26 +259,19 @@ module Api
     def copy
       nodes = Node.accessible_by(@context).where(id: params[:item_ids])
 
-      copies = node_copier.copy(nodes, params[:scope])
+      NodeCopyWorker.perform_async(
+        params[:scope],
+        nodes.pluck(:id),
+        session_auth_params,
+      )
 
-      # TODO: change old UI to handle json-response!
-      respond_to do |format|
-        messages = build_copy_messages(copies)
-
-        format.html do
-          success_msg = messages.find { |msg| msg[:type] == "success" }&.fetch(:message, nil)
-          warn_msg = messages.find { |msg| msg[:type] == "warning" }&.fetch(:message, nil)
-
-          flash[:success] = success_msg if success_msg
-          flash[:alert] = warn_msg if warn_msg
-
-          redirect_to pathify(nodes.first)
-        end
-
-        format.json do
-          render json: copies.all, root: "nodes", adapter: :json, meta: { messages: messages }
-        end
-      end
+      render json: nodes, root: "nodes", adapter: :json,
+             meta: {
+               messages: [{
+                 type: "success",
+                 message: I18n.t("api.files.copy.files_are_copying"),
+               }],
+             }
     end
 
     # POST /api/files/download_list
@@ -312,9 +305,10 @@ module Api
         raise ApiError, "Parameter 'task' is not defined!"
       end
 
-      render json: files, each_serializer: FileActionsSerializer,
-        scope_name: params[:scope] || SCOPE_PRIVATE,
-        action_name: task
+      render json: files,
+             each_serializer: FileActionsSerializer,
+             scope_name: params[:scope] || SCOPE_PRIVATE,
+             action_name: task
     end
 
     # GET /api/files/download
@@ -332,7 +326,18 @@ module Api
 
       file_url = file.file_url(@context, params[:inline])
 
-      redirect_to URI.parse(file_url).to_s
+      respond_to do |format|
+        format.html do
+          redirect_to URI.parse(file_url).to_s
+        end
+
+        format.json do
+          render json: {
+            file_url: file_url,
+            file_size: file.file_size,
+          }, adapter: :json
+        end
+      end
     end
 
     # POST /api/files/create_folder - create_folder_api_files_path
@@ -564,53 +569,6 @@ module Api
 
       raise ApiError, "You have no permissions to copy files to the scope '#{scope}'"
     end
-
-    # TODO: move message building away from the controller?
-    # Builds response notifications for the copy action.
-    # @param copies [CopyService::Copies] Copies
-    # @return [Array<Hash>] Array of notifications.
-    # rubocop:disable Metrics/MethodLength
-    def build_copy_messages(copies)
-      copied_count = copies.select(&:copied).size
-      messages = []
-
-      if copied_count.positive?
-        messages << {
-          type: "success",
-          message: I18n.t("api.files.copy.success", count: copied_count),
-        }
-      end
-
-      not_copied_files =
-        copies.select { |copy| copy.object.is_a?(UserFile) && !copy.copied }.map(&:object)
-      not_copied_folders =
-        copies.select { |copy| copy.object.is_a?(Folder) && !copy.copied }.map(&:object)
-
-      if not_copied_files.present?
-        messages << {
-          type: "warning",
-          message: I18n.t(
-            "api.files.copy.files_not_copied",
-            count: not_copied_files.size,
-            files: not_copied_files.map(&:name).join(", "),
-          ),
-        }
-      end
-
-      if not_copied_folders.present?
-        messages << {
-          type: "warning",
-          message: I18n.t(
-            "api.files.copy.folders_not_copied",
-            count: not_copied_folders.size,
-            folders: not_copied_folders.map(&:name).join(", "),
-          ),
-        }
-      end
-
-      messages
-    end
-    # rubocop:enable Metrics/MethodLength
   end
   # rubocop:enable Metrics/ClassLength
 end

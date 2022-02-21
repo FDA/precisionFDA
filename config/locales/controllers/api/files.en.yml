@@ -2,13 +2,5 @@ en:
   api:
     files:
       copy:
-        success:
-          one: "%{count} item is copied successfully."
-          other: "%{count} items are copied successfully."
-        files_not_copied:
-          one: File %{files} isn't copied since it already exists in the destination scope.
-          other: Files %{files} aren't copied since they already exist in the destination
-                 scope.
-        folders_not_copied:
-          one: Folder %{folders} isn't copied since it already exists in the destination scope.
-          other: Folders %{folders} aren't copied since they already exist in the destination scope.
+        files_are_copying: Files are being copied, it may take several minutes.
+                           The files will appear when copying is complete.
