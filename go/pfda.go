@@ -1,35 +1,24 @@
-// PrecisionFDA Uploader
-// Version 2.0.1
+// PrecisionFDA CLI
+// Version 2.1
 //
-// Written in Go
 //
 package main
 
 import (
-  "bytes"
-  "crypto/md5"
-  "crypto/tls"
-  "encoding/hex"
-  "encoding/json"
-  "flag"
-  "fmt"
-  "github.com/gosuri/uilive"
-  "github.com/hashicorp/go-cleanhttp"     // required by go-retryablehttp
-  "github.com/hashicorp/go-retryablehttp" // use http libraries from hashicorp for implement retry logic
-  "io"
-  "io/ioutil"
-  "log"
-  "math"
-  "net/http"
-  "os"
-  "os/exec"
-  "path/filepath"
-  "runtime"
-  "strconv"
-  "strings"
-  "sync"
-  "sync/atomic"
-  "time"
+	"crypto/tls"
+	"dnanexus.com/precision-fda-cli/precisionfda"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"rsc.io/goversion/version"
+	"runtime"
+	"strconv"
+	"strings"
 )
 
 import _ "crypto/tls/fipsonly"
@@ -37,34 +26,33 @@ import _ "crypto/tls/fipsonly"
 //
 // CONSTANTS
 //
-const userAgent = "Asset and File Uploader/2.0.1 (precisionFDA) Go-http-client/1.1"
-const minRetryTime = 1          // seconds
-const maxRetryTime = 30         // seconds
-const maxRetryCount = 5
 const defaultNumRoutines = 10
-const defaultChunkSize = 1<<26  // default 67MB (min. 5MB)
-const maxRoutines = 100
-const minRoutines = 1
-const maxChunkSize = 1<<32      // max. 2GB
-const minChunkSize = 5*1<<11    // min. 5MB
-const maxFileSize = 5*1<<41     // max. 5TB
-const https = "https://"
+const defaultChunkSize = 1<<24  // default 16.8MB (min. 5MB)
 const defaultSkipVerify = "false"
 const usageString = `
+
 ***********************
-PFDA UPLOADER TOOL v2.0.1
+PFDA COMMAND LINE TOOL v2.1
 ***********************
 To upload a file:
 
-  pfda --cmd upload-file [--key <KEY>] --file </PATH/TO/FILE>
+  pfda upload-file [--key <KEY>] --file </PATH/TO/FILE> [--folder-id <FOLDER_ID>]
+
+To upload a file to a space:
+
+  pfda upload-file [--key <KEY>] --file </PATH/TO/FILE> [--folder-id <FOLDER_ID>] --space-id 123
 
 To upload an asset:
 
-  pfda --cmd upload-asset [--key <KEY>] --name <NAME{.tar,.tar.gz}> --root </PATH/TO/ROOT/FOLDER> --readme <README{.txt,.md}>
+  pfda upload-asset [--key <KEY>] --name <NAME{.tar,.tar.gz}> --root </PATH/TO/ROOT/FOLDER> --readme <README{.txt,.md}>
+
+To download a file from My Home or from a space you have access to:
+
+  pfda download [--key <KEY>] --file-id <FILE_ID> [--output </PATH/TO/OUTPUT/FILE>]
 
 To call a precisionFDA API route:
 
-  pfda --cmd api [--key <KEY>] --route <API_ROUTE> --json <JSON_PAYLOAD> [--output </PATH/TO/OUTPUT/FILE>]
+  pfda api [--key <KEY>] --route <API_ROUTE> --json <JSON_PAYLOAD> [--output </PATH/TO/OUTPUT/FILE>]
 
 To print version info and exit : 
 
@@ -74,529 +62,365 @@ To print version info and exit :
 then version info is printed before obtaining key and executing command)
 `
 //
+// N.B. the --cmd flag exists and is now deprecated, but the following should all work
+//
+// # Testing upload to localhost
+// $ ./pfda upload-file --server localhost:3000 --skipverify true --key $KEY --file fileYouWantToUpload.pdf
+// $ ./pfda --cmd upload-file --server localhost:3000 --skipverify true --key $KEY --file fileYouWantToUpload.pdf
+//
+// # Testing download from localhost
+// $ ./pfda download --server localhost:3000 --skipverify true --key $KEY --file file-yourfileuuid-1
+// $ ./pfda --cmd download --server localhost:3000 --skipverify true --key $KEY --file file-yourfileuuid-1
+//
+// # Testing the API for file download
+// $ ./pfda api --server localhost:3000 --skipverify true --key $KEY --route "files/file-G70fbKj0qp9YGkg24kGxQvF4-1/download" --json '{ "format": "json" }'
+// $ ./pfda --cmd api --server localhost:3000 --skipverify true --key $KEY --route "files/file-G70fbKj0qp9YGkg24kGxQvF4-1/download" --json '{ "format": "json" }'
+
+
+//
 // GLOBAL VARIABLES
 //
-var globalKey string
-var configPath = os.Getenv("HOME") + "/.pfda_config"
-var globalNumRoutines int
-var globalChunkSize int
+var configPath = filepath.Join(getUserHomeDir(), ".pfda_config")
 var defaultURL = "precision.fda.gov"
-var baseURL = https + defaultURL
-
-var client = &retryablehttp.Client{
-  HTTPClient:   cleanhttp.DefaultClient(),
-  RetryWaitMin: minRetryTime * time.Second,
-  RetryWaitMax: maxRetryTime * time.Second,
-  RetryMax:     maxRetryCount,
-  CheckRetry:   retryablehttp.DefaultRetryPolicy,
-  Backoff:      retryablehttp.DefaultBackoff,
-}
 
 // these varaibles are populated by -ldflags -X command line options
 var (
-  commitID string
-  Version string
-  BuildTime string
-  OsArch string
+	commitID string
+	Version string
+	BuildTime string
+	OsArch string
 )
 
-// Structs: Note that exported members (those visible to other packages) must be capitalized
-type jsonID struct {
-  ID string `json:"id"`
-}
-type jsonChunkInfo struct {
-  ID string `json:"id"`
-  Size int `json:"size"`
-  Index int `json:"index"`
-  Md5 string `json:"md5"`
-}
-type jsonFileInfo struct {
-  Name string `json:"name"`
-  Desc string `json:"description"`
-}
-type jsonAssetInfo struct {
-  Name string `json:"name"`
-  Desc string `json:"description"`
-  Paths []string `json:"paths"`
-}
 type jsonConfig struct {
-  Key string `json:key`
+	Key string `json:key`
 }
-type uploadChunk struct {
-  index int
-  data []byte // slice/ptr
+
+var pfdaclient *precisionfda.PFDAClient
+
+
+//
+//  ACTION FUNCTIONS
+//  Wrapping calls to pfdaclient allow us to replace these functions in pfda_test.go with mocks
+//
+var invokeUploadFile = func(client precisionfda.IPFDAClient, inputFilePath *string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
+	client.SetChunkSize(*inputChunkSize)
+	client.SetNumRoutines(*inputNumRoutines)
+	return client.UploadFile(*inputFilePath, *folderID, *spaceID)
 }
+
+var invokeUploadAsset = func(client precisionfda.IPFDAClient, assetFolderPath *string, assetName *string, readmeFilePath *string, inputChunkSize *int, inputNumRoutines *int) error {
+	client.SetChunkSize(*inputChunkSize)
+	client.SetNumRoutines(*inputNumRoutines)
+	return client.UploadAsset(*assetFolderPath, *assetName, *readmeFilePath)
+}
+
+var invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string) error {
+	return client.DownloadFile(*fileID, *outputFilePath)
+}
+
+
 
 func main() {
-  // Define command line arguments
-  command := flag.String("cmd", "", "Command to execute. Must be one of ['upload-file','upload-asset','api'].")
-  authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
-  apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
-  jsonInput := flag.String("json", "", "JSON payload for specified API call (if any).")
-  inputFilePath := flag.String("file", "", "Path to file for 'upload-file'")
-  assetFolderPath := flag.String("root", "", "Path to root folder for 'upload-asset'")
-  assetName := flag.String("name", "", "Name of uploaded asset file. Must end with '.tar' or '.tar.gz'.")
-  readmeFilePath := flag.String("readme", "", "Readme file for uploaded asset. Must end with '.txt' or '.md'.")
-  outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
-  inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
-  inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
-  server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
-  skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
-  pfda_version := flag.Bool("version",false , "[optional] Print version")
+	returnCode := mainInternal()
+	os.Exit(returnCode)
+}
 
+func mainInternal() int {
+	// This isn't necessary for the CLI to run correctly, but we define command line flags
+	// inside mainInternal so that they can be unit tested
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-  // Parse command line args
-  flag.Parse()
-  
-  // if --version flag was given, print pfda info
-  if *pfda_version {
-    printInfo()
-    // if only --version without any command , exit 
-    if *command == "" {
-       os.Exit(0)
-    }
-  }
+	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute. Must be one of ['upload-file','upload-asset','api'].")
+	authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
+	apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
+	jsonInput := flag.String("json", "", "JSON payload for specified API call (if any).")
+	inputFilePath := flag.String("file", "", "Path to file for 'upload-file'")
+	assetFolderPath := flag.String("root", "", "Path to root folder for 'upload-asset'")
+	assetName := flag.String("name", "", "Name of uploaded asset file. Must end with '.tar' or '.tar.gz'.")
+	readmeFilePath := flag.String("readme", "", "Readme file for uploaded asset. Must end with '.txt' or '.md'.")
+	fileID := flag.String("file-id", "", "File ID of the file to be downloaded")
+	folderID := flag.String("folder-id", "", "Folder ID of the target folder")
+	spaceID := flag.String("space-id", "", "Space ID of the target space")
+	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
+	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
+	inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
+	server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
+	skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
+	pfda_version := flag.Bool("version", false, "[optional] Print version")
 
-  if *authKey == "" {
-    // Check config if '-key' not provided
-    f, err := ioutil.ReadFile(configPath)
-    if err != nil {
-      // Internal error reading config
-      if !os.IsNotExist(err) {
-        panic(fmt.Errorf("Error reading existing config file from path %s: %s", configPath, err.Error()))
-      }
-      // No config exists at ~/.pfda_config
-      fmt.Println(usageString)
-      flag.Usage()
-      inputError(fmt.Sprintf("Authorization key not provided and configuration file '%s' not found. Please provide it as [--key <KEY>].", configPath))
-    }
-    var config jsonConfig
-    err = json.Unmarshal(f, &config)
-    check(err)
-    globalKey = config.Key
-  } else {
-    // '-key' provided, set globalKey
-    globalKey = *authKey
-  }
+	// Support for ./pfda upload-file option of specifying a command, making --cmd optional
+	var positionalCmd string
+	if len(os.Args) > 1 && !strings.HasPrefix(os.Args[1], "-") {
+		// Storing first positional arg after ./pfda
+		positionalCmd = os.Args[1]
+		flag.CommandLine.Parse(os.Args[2:])
+	} else {
+		flag.Parse()
+	}
 
-  if *server != "" && *server != defaultURL {
-    baseURL = https + *server
-  }
+	if positionalCmd != "" {
+		if *command == "" {
+			*command = positionalCmd
+		} else {
+			fmt.Println("Error: both positional command and --cmd option specified. Please remove one or the other")
+			return 1
+		}
+	}
 
-  b, err := strconv.ParseBool(*skipVerify)
-  check(err)
-  if b {
-    client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
-  }
+	if *server != "" && *server != defaultURL {
+		pfdaclient = precisionfda.NewPFDAClient(*server) 
+	} else {
+		pfdaclient = precisionfda.NewPFDAClient(defaultURL)
+	}
 
-  // Customized checks for each command
-  switch *command {
-  case "upload-asset":
-    if *assetFolderPath == "" {
-      inputError("Root directory for the asset is required. Provide it as [--root <ASSET_ROOT>].")
-    }
+	b, err := strconv.ParseBool(*skipVerify)
+	if err != nil {
+		printError(err)
+		return 1
+	}
 
-    f, err := os.Stat(*assetFolderPath)
-    if os.IsNotExist(err) || !f.IsDir() {
-      inputError(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory.", *assetFolderPath))
-    }
+	if b {
+		// Setting '--skipverify' true will allow devs to connect to local instances with self-signed certs
+		pfdaclient.Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+			ServerName: *server,
+		}
+	} else {
+		pfdaclient.Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+	}
 
-    if *assetName == "" {
-      inputError("Asset name (ending with .tar or .tar.gz) is required. Provide it as [--name <ASSET_NAME>].")
-    }
+	// if --version flag was given, print pfda info
+	if *pfda_version {
+		printInfo(pfdaclient)
+		// if only --version without any command , exit 
+		if *command == "" {
+			return 0
+		}
+	}
 
-    if !strings.HasSuffix(*assetName, ".tar") && !strings.HasSuffix(*assetName, ".tar.gz")  {
-      inputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *assetName))
-    }
+	if *authKey == "" {
+		// Check config if '-key' not provided
+		f, err := ioutil.ReadFile(configPath)
+		if err != nil {
+			// Internal error reading config
+			if !os.IsNotExist(err) {
+				fmt.Errorf("Error reading existing config file from path %s: %s\nIf this persists please delete ~/.pfda_config", configPath, err.Error())
+				return 1
+			}
+			// No config exists at ~/.pfda_config
+			fmt.Println(usageString)
+			flag.Usage()
+			return inputError(fmt.Sprintf("Authorization key not provided and configuration file '%s' not found. Please provide it as [--key <KEY>].", configPath))
+		}
+		var config jsonConfig
+		err = json.Unmarshal(f, &config)
+		if err != nil {
+			printError(err)
+			return 1
+		}
 
-    if *readmeFilePath == "" {
-      inputError("Readme file for the asset (ending with .txt or .md) is required. Provide it as [--readme <ASSET_README>].")
-    }
+		pfdaclient.AuthKey = config.Key
+	} else {
+		// '-key' provided, set AuthKey
+		pfdaclient.AuthKey = *authKey
+	}
 
-    f, err = os.Stat(*readmeFilePath)
-    if os.IsNotExist(err) || f.IsDir() {
-      inputError(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory.", *readmeFilePath))
-    }
+	switch *command {
+	case "upload-asset":
+		if *assetFolderPath == "" {
+			return inputError("Root directory for the asset is required. Provide it as [--root <ASSET_ROOT>].")
+		}
 
-    checkUploadArgs(*inputChunkSize, *inputNumRoutines)
-    uploadAsset(*assetFolderPath, *assetName, *readmeFilePath)
+		f, err := os.Stat(*assetFolderPath)
+		if os.IsNotExist(err) || !f.IsDir() {
+			return inputError(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory.", *assetFolderPath))
+		}
 
-  case "upload-file":
-    if *inputFilePath == "" {
-      inputError("Path to file for upload is required. Please provide it as [--file <FILE_PATH>].")
-    }
+		if *assetName == "" {
+			return inputError("Asset name (ending with .tar or .tar.gz) is required. Provide it as [--name <ASSET_NAME>].")
+		}
 
-    f, err := os.Stat(*inputFilePath)
-    if os.IsNotExist(err) || f.IsDir() {
-      inputError(fmt.Sprintf("Input file path '%s' does not exist or is a directory.", *inputFilePath))
-    }
+		if !strings.HasSuffix(*assetName, ".tar") && !strings.HasSuffix(*assetName, ".tar.gz")  {
+			return inputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *assetName))
+		}
 
-    checkUploadArgs(*inputChunkSize, *inputNumRoutines)
-    uploadFile(*inputFilePath)
+		if *readmeFilePath == "" {
+			return inputError("Readme file for the asset (ending with .txt or .md) is required. Provide it as [--readme <ASSET_README>].")
+		}
 
-  case "api":
-    if *apiRoute == "" {
-      inputError("API route is required. Please provide it as '--route <API_ROUTE_NAME>'.")
-    }
+		f, err = os.Stat(*readmeFilePath)
+		if os.IsNotExist(err) || f.IsDir() {
+			return inputError(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory.", *readmeFilePath))
+		}
 
-    if *jsonInput != "" && !isValidJSON(*jsonInput) {
-      inputError(fmt.Sprintf("Provided JSON '%s' is not valid. Please provide the input in valid JSON format.", *jsonInput))
-    }
+		err = invokeUploadAsset(pfdaclient, assetFolderPath, assetName, readmeFilePath, inputChunkSize, inputNumRoutines)
+		if err != nil {
+			printError(err)
+			return 1
+		}
 
-    callRoute(*apiRoute, *jsonInput, *outputFilePath)
+	case "upload-file":
+		if *inputFilePath == "" {
+			return inputError("Path to file for upload is required. Please provide it as [--file <FILE_PATH>].")
+		}
 
-  case "":
-    // Empty command
-    fmt.Println(usageString)
-    flag.Usage()
-    fmt.Println("Command to execute is required. Provide it as '--cmd {'upload-file','upload-asset','api'}'")
-    printInfo()
-    os.Exit(1)
+		f, err := os.Stat(*inputFilePath)
+		if os.IsNotExist(err) || f.IsDir() {
+			return inputError(fmt.Sprintf("Input file path '%s' does not exist or is a directory.", *inputFilePath))
+		}
 
-  default:
-    // Invalid, non-empty command
-    fmt.Printf("Command ' %s' not found. Must be one of ['upload-file','upload-asset','api'}].\n", *command)
-    os.Exit(1)
-  }
+		err = invokeUploadFile(pfdaclient, inputFilePath, folderID, spaceID, inputChunkSize, inputNumRoutines)
+		if err != nil {
+			printError(err)
+			return 1
+		}
 
-  // Write configuration and save key
-  if *authKey != "" {
-    // If key was given by --key option in the command line
-    // marshal it to json and write into .pfda__config
-    // if marshaling fails fails, issue warning and exit 
-    jsonData, err := json.Marshal(jsonConfig{
-      Key: *authKey,
-    })
-    if err != nil {
-       fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", configPath, err.Error())
-       fmt.Printf("You will need to submit authorization key in the command line in the next upload.\n")
-       // exit gracefully, without panic
-       os.Exit(0)
-    }
+	case "download":
+		if *fileID == "" {
+			return inputError("File ID of the file to be downloaded is required: [--file-id <FILE_ID>]")
+		}
 
-    // below is a more compact and cleaner implementation which is recommended when writing small files
-    // It doesn't use separate Create / Write from os package, as before but takes advantage of 
-    // ioutil.WriteFile which opens, writes and closes a file in one swoop
-    // denote, that it also works on Windows ( checked on AWS EC2 windows instance )
-    // despite Linux style file permissions are given
-    // if .pfda_config exists it is truncaters before writing
-    // denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it  
-    err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'  
-    if err != nil {
-       fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
-    } else { 
-       fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
-    }
-  }
+		err := invokeDownloadFile(pfdaclient, fileID, outputFilePath)
+		if err != nil {
+			printError(err)
+			return 1
+		}
+
+	case "api":
+		if *apiRoute == "" {
+			return inputError("API route is required. Please provide it as '--route <API_ROUTE_NAME>'.")
+		}
+
+		if *jsonInput != "" && !isValidJSON(*jsonInput) {
+			return inputError(fmt.Sprintf("Provided JSON '%s' is not valid. Please provide the input in valid JSON format.", *jsonInput))
+		}
+
+		err := pfdaclient.CallAPI(*apiRoute, *jsonInput, *outputFilePath)
+		if err != nil {
+			printError(err)
+			return 1
+		}
+
+	case "":
+		// Empty command
+		fmt.Println(usageString)
+		flag.Usage()
+		fmt.Println("Command to execute is required. Provide it as 'pfda {'upload-file','upload-asset','download','api'}'")
+		return 1
+
+	default:
+		// Invalid, non-empty command
+		fmt.Printf("Command ' %s' not found. Must be one of ['upload-file','upload-asset','download','api'}].\n", *command)
+		return 1
+	}
+
+	// Write configuration and save key
+	if *authKey != "" {
+		// If key was given by --key option in the command line
+		// marshal it to json and write into .pfda__config
+		// if marshaling fails fails, issue warning and exit 
+		jsonData, err := json.Marshal(jsonConfig{
+			Key: *authKey,
+		})
+		if err != nil {
+			fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", configPath, err.Error())
+			fmt.Printf("You will need to submit authorization key in the command line in the next upload.\n")
+			// exit gracefully, without panic
+			return 0
+		}
+
+		// below is a more compact and cleaner implementation which is recommended when writing small files
+		// It doesn't use separate Create / Write from os package, as before but takes advantage of 
+		// ioutil.WriteFile which opens, writes and closes a file in one swoop
+		// denote, that it also works on Windows ( checked on AWS EC2 windows instance )
+		// despite Linux style file permissions are given
+		// if .pfda_config exists it is truncaters before writing
+		// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it  
+		err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'  
+		if err != nil {
+			fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
+		} else { 
+			fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
+		}
+	}
+
+	return 0
 }
 
 //
-//  COMMAND FUNCTIONS
+//  PRINT FUNCTIONS
 //
-func callRoute(route string, data string, outputFile string) {
-  // sanitize input
-  route = strings.ToLower(route)
-  url := baseURL + "/api/" + route
-  _, body := makeRequestFail("POST", url, []byte(data))
+func printInfo(pfdaclient *precisionfda.PFDAClient) {
+	fmt.Printf("\npFDA CLI Info\n")
+	fmt.Printf("  Commit ID   :    %s\n", commitID)
+	fmt.Printf("  CLI Version :    %s\n", Version)
+	fmt.Printf("  Os/Arch     :    %s\n", OsArch)
+	fmt.Printf("  Build Time  :    %s\n", BuildTime)
+	fmt.Printf("  Go Version  :    %s\n", runtime.Version())
 
-  if (outputFile == "") {
-    fmt.Printf("Return response data for API call '%s:\n%s\n", route, string(body))
-  } else {
-    f, err := os.Create(outputFile)
-    check(err)
-    defer f.Close()
-    bytesWritten, err := f.Write(body)
-    check(err)
-    fmt.Printf("Downloaded response data for API call: %s (%d bytes) to file '%s'\n", route, bytesWritten, outputFile)
-  }
+	transport := pfdaclient.Client.HTTPClient.Transport.(*http.Transport)
+	fmt.Printf("  TLS Version :    %s\n", GetTLSVersion(transport))
+
+	printCryptoInfo()
 }
 
-func uploadAsset(rootFolderPath string, name string, readmeFilePath string) {
-  createURL := baseURL + "/api/create_asset"
-  closeURL := baseURL + "/api/close_asset"
+func printCryptoInfo() {
+	executable, err := os.Executable()
+	if err != nil {
+		fmt.Println("Unable to retrieve executable path")
+	}
 
-  // Get list of all asset files
-  fileList := []string{}
-  assetSize := int64(0)
-  err := filepath.Walk(rootFolderPath, func(path string, f os.FileInfo, err error) error {
-      if !f.IsDir() {
-        relPath, err := filepath.Rel(rootFolderPath, path)
-        check(err)
-        fileList = append(fileList, relPath)
-        assetSize += f.Size()
-      }
-      return nil
-  })
-  check(err)
+	v, err := version.ReadExe(executable)
+	if err != nil {
+		fmt.Println("Unable to retrieve goversion info")
+	}
 
-  if (assetSize > maxFileSize) {
-    inputError(fmt.Sprintf("Size of asset folder '%s' (%d) exceeds maximum allowed file size(%d).", rootFolderPath, assetSize, maxFileSize));
-  }
-
-  // Read in the readme all at once
-  readmeBuf, err := ioutil.ReadFile(readmeFilePath)
-  check(err)
-
-  jsonData, err := json.Marshal(jsonAssetInfo{
-    Name: name,
-    Desc: string(readmeBuf),
-    Paths: fileList[:],
-  })
-  check(err)
-
-  fileID := createFileID(createURL, jsonData)
-  chunkPool := make(chan uploadChunk, globalNumRoutines)
-  wg := initWaitGroup(fileID, chunkPool, assetSize)
-
-  fmt.Println(">> Archiving asset...")
-  cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
-  if strings.HasSuffix(name, ".tar.gz") {
-    cmd = exec.Command("tar", "-cz", "-C", rootFolderPath, ".")
-  }
-  stdout, err := cmd.StdoutPipe()
-  check(err)
-  err = cmd.Start()
-  check(err)
-
-  fmt.Print(">> Uploading asset |")
-  f, err := os.Open(rootFolderPath)
-  check(err)
-  defer f.Close()
-  readAndChunk(stdout, chunkPool, assetSize)
-  close(chunkPool)
-  wg.Wait()
-
-  fmt.Println(">| Uploaded 100%\n>> Finalizing asset...")
-  jsonData, err = json.Marshal(jsonID{
-    ID: fileID,
-  })
-  check(err)
-
-  makeRequestFail("POST", closeURL, jsonData)
-  fmt.Println(">> Done! Access your asset at " + baseURL + "/home/assets/" + fileID)
+	if v.FIPSOnly {
+		fmt.Println("  FIPS        :    +crypto/tls/fipsonly verified")
+	} else {
+		fmt.Println("  FIPS        :    warning FIPS mode not verified")
+	}
 }
 
-func uploadFile(path string) {
-  createURL := baseURL + "/api/create_file"
-  closeURL := baseURL + "/api/close_file"
+func GetTLSVersion(tr *http.Transport) string {
+	switch tr.TLSClientConfig.MinVersion {
+	case tls.VersionTLS10:
+		return "TLS 1.0"
+	case tls.VersionTLS11:
+		return "TLS 1.1"
+	case tls.VersionTLS12:
+		return "TLS 1.2"
+	case tls.VersionTLS13:
+		return "TLS 1.3"
+	}
 
-  jsonData, err := json.Marshal(jsonAssetInfo{
-    Name: filepath.Base(path),
-    Desc: "",
-  })
-  check(err)
-
-  fileID := createFileID(createURL, jsonData)
-  chunkPool := make(chan uploadChunk, globalNumRoutines)
-
-  fmt.Printf(">> Uploading file %s\n", path)
-  f, err := os.Open(path)
-  check(err)
-  defer f.Close()
-  info, err := f.Stat()
-  check(err)
-  if (info.Size() > maxFileSize) {
-    inputError(fmt.Sprintf("Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, info.Size(), maxFileSize));
-  }
-
-  wg := initWaitGroup(fileID, chunkPool, info.Size())
-  readAndChunk(f, chunkPool, info.Size())
-  close(chunkPool)
-  wg.Wait()
-
-  fmt.Println(">| Uploaded 100%\n>> Finalizing file...")
-  jsonData, err = json.Marshal(jsonID{
-    ID: fileID,
-  })
-  check(err)
-
-  makeRequestFail("POST", closeURL, jsonData)
-  fmt.Println(">> Done! Access your file at " + baseURL + "/home/files/" + fileID)
+	return "Unknown"
 }
 
 //
 //  HELPER FUNCTIONS
 //
-func check(e error) {
-  if e != nil {
-    panic(e)
-  }
+func printError(err error) {
+	fmt.Println()
+	fmt.Println(err)
 }
 
-func checkUploadArgs(chunkSize int, numRoutines int) {
-  if chunkSize > maxChunkSize || chunkSize < minChunkSize {
-    inputError("Chunk size must be between 5MB and 5GB.")
-  } else {
-    globalChunkSize = chunkSize
-  }
-
-  if numRoutines > maxRoutines || numRoutines < minRoutines {
-    inputError("Maximum number of threads must an integer within the range of [1-100].")
-  } else {
-    globalNumRoutines = numRoutines
-  }
-}
-
-func createFileID(url string, data []byte) (fileID string) {
-  _, body := makeRequestFail("POST", url, data)
-
-  var resultJSON map[string]interface{}
-  err := json.Unmarshal(body, &resultJSON)
-  check(err)
-  if (resultJSON["id"] == nil) {
-    panic("No id in response!")
-  }
-  fileID = resultJSON["id"].(string)
-  return
-}
-
-func initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size int64) (wg *sync.WaitGroup) {
-  numRoutines := min(globalNumRoutines, int(math.Ceil(float64(size)/float64(globalChunkSize))))
-
-  var totalSent uint64 = 0
-  writer := uilive.New()
-  writer.Start()
-  defer writer.Stop()
-  
-  var g sync.WaitGroup
-  for i := 0; i < numRoutines; i++ {
-    g.Add(1)
-    go func() {
-      for chunk := range chunkPool {
-        sendToStore(fileID, chunk)
-
-        atomic.AddUint64(&totalSent, uint64(len(chunk.data)))
-        currentSize := atomic.LoadUint64(&totalSent)
-        fmt.Fprintf(writer, "     %.1f%% (%d/%d)\n",
-                   100*float64(currentSize)/float64(size), currentSize, size)
-        writer.Flush()
-      }
-      g.Done()
-    }()
-  }
-  wg = &g
-  return
-}
-
-func inputError(msg string) {
-  fmt.Println(fmt.Errorf(msg))
-  os.Exit(1)
+func inputError(msg string) int {
+	printError(fmt.Errorf(msg))
+	return 1
 }
 
 func isValidJSON(s string) bool {
-  var js interface{}
-  return json.Unmarshal([]byte(s), &js) == nil
+	var js interface{}
+	return json.Unmarshal([]byte(s), &js) == nil
 }
 
-func makeRequestFail(requestType string, url string, data []byte) (status string, body []byte) {
-  req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-  check(err)
-  setPostHeaders(req)
-
-  resp, err := client.Do(req)
-  check(err)
-  defer resp.Body.Close()
-  status = resp.Status
-  body, _ = ioutil.ReadAll(resp.Body)
-
-  if (!strings.HasPrefix(status, "2")) {
-    urlFailure(requestType, url, status)
-  }
-  return
-}
-
-func makeRequestWithHeadersFail(requestType string, url string, headers map[string]interface{}, data []byte) (status string, body []byte) {
-  req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-  check(err)
-  for header, value := range headers {
-    req.Header.Set(header, value.(string))
-  }
-
-  resp, err := client.Do(req)
-  check(err)
-  defer resp.Body.Close()
-  status = resp.Status
-  body, _ = ioutil.ReadAll(resp.Body)
-
-  if (!strings.HasPrefix(status, "2")) {
-    urlFailure(requestType, url, status)
-  }
-  return
-}
-
-func min(a, b int) int {
-  if a < b {
-    return a
-  }
-  return b
-}
-
-func readAndChunk(f io.ReadCloser, c chan<- uploadChunk, size int64) {
-  // dynamically adjust chunkSize
-  chunkIndex := 1
-  for {
-    byteBuf := make([]byte, globalChunkSize)
-    i := 0
-    for i < globalChunkSize {
-      tempBuf := byteBuf[i:]
-      m, err := f.Read(tempBuf)
-      if err != nil && err != io.EOF {
-        panic(err)
-      }
-      i += m
-      if err == io.EOF {
-        break
-      }
-    }
-    // Only upload an empty chunk if empty file
-    if i == 0 && chunkIndex > 1 {
-      break
-    }
-    c <- uploadChunk{
-      index: chunkIndex,
-      data: byteBuf[:i], // use slice
-    }
-    chunkIndex++
-  }
-}
-
-func printInfo() {
-  fmt.Printf("Uploader Info\n")
-  fmt.Printf("  Commit ID :         %s\n",commitID)
-  fmt.Printf("  Uploader Version :  %s\n",Version)
-  fmt.Printf("  Os/Arch :           %s\n",OsArch)
-  fmt.Printf("  Build Time :        %s\n",BuildTime)
-  fmt.Printf("  Go Version :        %s\n",runtime.Version())
-}
-
-func sendToStore(id string, chunk uploadChunk) {
-  uploadURL := baseURL + "/api/get_upload_url"
-  md5Sum := md5.Sum(chunk.data)
-  jsonData, err := json.Marshal(jsonChunkInfo{
-    ID: id,
-    Size: len(chunk.data),
-    Index: chunk.index,
-    Md5: hex.EncodeToString(md5Sum[:]),
-  })
-
-  _, body := makeRequestFail("POST", uploadURL, jsonData)
-
-  var resultJSON map[string]interface{}
-  err = json.Unmarshal(body, &resultJSON)
-  check(err)
-  if (resultJSON["url"] == "") {
-    panic("No url in response!")
-  }
-  makeRequestWithHeadersFail("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
-}
-
-
-func setPostHeaders(req *retryablehttp.Request) {
-  req.Header.Set("User-Agent", userAgent)
-  req.Header.Set("Authorization", "Key " + globalKey)
-  req.Header.Set("Content-Type", "application/json")
-}
-
-func urlFailure(requestType string, url string, status string) {
-  log.Fatalln(fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided app-id and auth-key are still valid", requestType, url, status))
+func getUserHomeDir() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return homeDir
 }
