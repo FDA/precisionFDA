@@ -65,7 +65,7 @@ module Api
       proposal = unsafe_params.slice(:name, :email, :organisation,
                                      :specific_question, :specific_question_text,
                                      :data_details, :data_details_text)
-      NotificationsMailer.challenge_proposal_received(proposal)
+      NotificationsMailer.challenge_proposal_received(proposal).deliver_now
       render json: {}
     end
 

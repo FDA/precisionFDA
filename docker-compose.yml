@@ -3,6 +3,7 @@ version: '3.7'
 x-shared: &shared
   build:
     context: .
+    dockerfile: docker/isolation.Dockerfile
   volumes:
     - type: bind
       source: .

@@ -149,6 +149,7 @@ describe('TASK: sync_job_status', () => {
       param2: app.dxid,
       param3: null,
       param4: null,
+      data: null,
     })
 
     // Check workstation sync job is queued

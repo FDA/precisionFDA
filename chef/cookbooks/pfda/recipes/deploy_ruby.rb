@@ -145,4 +145,8 @@ application app_dir do
     user node[:deploy_user]
     environment lazy { ENV.to_hash }
   end
+
+  poise_service_options "sidekiq" do
+    template "sidekiq.service.erb"
+  end
 end
