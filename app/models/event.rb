@@ -11,12 +11,15 @@
 #  param3     :string(255)
 #  created_at :datetime         not null
 #  param4     :string(255)
+#  data       :text(65535)
 #
 
 class Event < ApplicationRecord
   include Auditor
 
   scope :date_range, ->(begin_at, end_at) { where(created_at: begin_at..end_at) }
+
+  store :data, coder: JSON
 
   class << self
     def select_sum(attribute)

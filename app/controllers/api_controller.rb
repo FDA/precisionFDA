@@ -1,3 +1,4 @@
+# rubocop:todo Style/SignalException
 class ApiController < ApplicationController
   include ErrorProcessable
   include WorkflowConcern
@@ -7,7 +8,7 @@ class ApiController < ApplicationController
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
-  # rubocop:disable Rails/LexicallyScopedActionFilter
+  # rubocop:todo Rails/LexicallyScopedActionFilter
   before_action :require_api_login,
                 except: %i(
                   destroy
@@ -43,8 +44,6 @@ class ApiController < ApplicationController
 
   attr_accessor :show_count
   attr_writer :context
-
-  # rubocop:disable Style/SignalException
 
   # A common method to add Objects count into api response
   # @param count [Integer] Object's count
@@ -253,7 +252,6 @@ class ApiController < ApplicationController
   #     Files inside folders are also sorted.
   #  uids: array of all found file's uid values
   #
-  # rubocop:disable Style/SignalException
   def files_regex_search
     page = params[:page].to_i.positive? ? params[:page] : 1
     files = user_real_files(params, @context).files_conditions
@@ -280,7 +278,6 @@ class ApiController < ApplicationController
     rescue RegexpError => e
       fail "RegEx Invalid: #{e}"
     end
-    # rubocop:enable Style/SignalException
   end
 
   # Inputs:
@@ -322,9 +319,7 @@ class ApiController < ApplicationController
     result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
       describe_for_api(file, unsafe_params[:describe])
     end
-    # rubocop:disable Style/NumericPredicate
-    render json: unsafe_params[:offset] == 0 ? { objects: result, count: count } : result
-    # rubocop:enable Style/NumericPredicate
+    render json: unsafe_params[:offset]&.zero? ? { objects: result, count: count } : result
   end
 
   # Inputs
@@ -731,6 +726,7 @@ class ApiController < ApplicationController
   #
   # name (string, required, nonempty)
   # description (string, optional)
+  # scope (string, optional) 'public' | 'private' | <SPACE_ID>
   #
   # Outputs:
   #
@@ -760,7 +756,6 @@ class ApiController < ApplicationController
   # Creates a challenge logo - to be visible as a challenge card image
   # @return [Hash] - a uid of a file uploaded as a card image
   #
-  # rubocop:disable Style/SignalException
   def create_challenge_card_image
     return unless current_user.site_or_challenge_admin?
 
@@ -787,7 +782,6 @@ class ApiController < ApplicationController
       scope: "public",
     )
 
-    # rubocop:enable Style/SignalException
     render json: { id: file.uid }
   end
 
@@ -1201,7 +1195,6 @@ class ApiController < ApplicationController
   # Outputs:
   # id: the submission id
   #
-  # rubocop:disable Style/SignalException
   def update_submission
     id = unsafe_params[:id].to_i
     fail "id needs to be an Integer" unless id.is_a?(Integer)
@@ -1224,7 +1217,6 @@ class ApiController < ApplicationController
       id: submission.id,
     }
   end
-  # rubocop:enable Style/SignalException
 
   # Inputs
   #
@@ -1444,7 +1436,7 @@ class ApiController < ApplicationController
   # @return items [Array] list of items with inverted 'feature' flag
   def update_feature_flag
     featured = !params[:featured].nil?
-    pick_values(params[:item_ids]).map do |uid|
+    Array(params[:item_ids]).map do |uid|
       item = item_from_uid(uid)
       next unless item.scope == Scopes::SCOPE_PUBLIC && item.featured ^ featured
 
@@ -1458,7 +1450,7 @@ class ApiController < ApplicationController
   # @param item_ids [Array] array of [String] uid-s.
   # @return items [Array] list of deleted items (active: false)
   def soft_delete
-    items = pick_values(params[:item_ids]).map do |uid|
+    items = Array(params[:item_ids]).map do |uid|
       item = item_from_uid(uid)
       if item.editable_by?(@context)
         item.update(deleted: true)
@@ -1534,10 +1526,9 @@ class ApiController < ApplicationController
       fail "Asset path should be a non-empty String of size less than 4096"
     end
   end
-  # rubocop:enable Style/SignalException
 
   # Validates and initializes parameters for a file creation.
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:todo Metrics/MethodLength
   def validate_create_file
     folder_id = params[:folder_id].presence
     @folder =
@@ -1582,22 +1573,10 @@ class ApiController < ApplicationController
 
     raise_api_error "The folder doesn't belong to a scope #{@scope}."
   end
+  # rubocop:enable Metrics/MethodLength
 
   def https_apps_client
     DIContainer.resolve("https_apps_client")
   end
-
-  private
-
-  # Convert input value to array.
-  # @param order
-  # @return [Array] with order inside.
-  def pick_values(order)
-    case order
-    when Array then order
-    when String then [order]
-    else []
-    end
-  end
-  # rubocop:enable all
+  # rubocop:enable Style/SignalException
 end

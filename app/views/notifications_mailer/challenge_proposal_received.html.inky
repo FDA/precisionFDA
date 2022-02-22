@@ -1,0 +1,37 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    <%= @subject %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">New challenge proposal</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p><%= @subject %></p>
+        <p><em>Name:</em> <%= @proposal[:name] %>
+        <p><em>Contact Email:</em> <%= @proposal[:email] %></p>
+        <p><em>Organisation/Institute:</em> <%= @proposal[:organisation] %></p>
+        <p><em>Do you have specific scientific question driving the challenge?</em> <%= @proposal[:specific_question] %></p>
+        <% if @proposal[:specific_question] == "Yes" %>
+          <p><em>Please provide details:</em> <%= @proposal[:specific_question_text] %></p>
+        <% end %>
+        <p><em>Do you have access to data for the challenge?</em> <%= @proposal[:data_details] %></p>
+        <% if @proposal[:data_details] == "Yes" %>
+          <p><em>Please provide details about the data (e.g. data type, sample number, etc):</em> <%= @proposal[:data_details_text] %></p>
+        <% end %>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

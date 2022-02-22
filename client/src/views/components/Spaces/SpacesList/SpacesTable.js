@@ -54,10 +54,10 @@ const SharedCells = ({ space, hasPrivate }) => {
           <span>Shared</span>
         }
       </td>
-      <td aria-label={`Click this link to navigate to the ${space.hostLead.name} profile page`} className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
+      <td aria-label={`Click this link to navigate to the ${space.hostLead?.name} profile page`} className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
         {(space.hostLead) && <UserLink user={space.hostLead} />}
       </td>
-      <td aria-label={`Click this link to navigate to the ${space.guestLead.name} profile page`} className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
+      <td aria-label={`Click this link to navigate to the ${space.guestLead?.name} profile page`} className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
         {(space.guestLead) && <UserLink user={space.guestLead} />}
       </td>
     </>
