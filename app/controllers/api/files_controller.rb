@@ -15,6 +15,7 @@ module Api
     before_action :sync_files, only: %i(index)
 
     DOWNLOAD_ACTION = "download".freeze
+    OPEN_ACTION = "open".freeze
     PUBLISH_ACTION = "publish".freeze
     DELETE_ACTION = "delete".freeze
     COPY_ACTION = "copy".freeze
@@ -282,7 +283,7 @@ module Api
       files = []
 
       case task
-      when DOWNLOAD_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
+      when DOWNLOAD_ACTION, OPEN_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
         nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when PUBLISH_ACTION
