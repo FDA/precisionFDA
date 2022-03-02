@@ -55,8 +55,10 @@ class App
             source venv/bin/activate
 
             # Upgrade Pip to the latest and install CWLtool
-            pip install -U pip
-            pip install cwltool
+            apt-get update
+            apt-get install python3-pip
+            python3 -m pip install pip==20.0.2
+            pip3 install cwltool
           CODE
         end
 
