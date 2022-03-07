@@ -55,6 +55,7 @@ const HomeAttachToModal = (props) => {
 
   const onClickAttachAction = () => {
     const types = {
+      [OBJECT_TYPES.ASSET]: 'Asset',
       [OBJECT_TYPES.FILE]: 'UserFile',
       [OBJECT_TYPES.APP]: 'App',
       [OBJECT_TYPES.JOB]: 'Job',

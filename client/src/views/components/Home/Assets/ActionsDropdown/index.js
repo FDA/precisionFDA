@@ -54,8 +54,8 @@ const ACTIONS_TO_REMOVE = {
 
 const ActionsDropdown = (props) => {
   const { assets, page = 'private' } = props
-  const assetsIds = assets.map(app => app.id)
-  const assetsUids = assets.map(app => app.uid)
+  const assetsIds = assets.map(asset => asset.id)
+  const assetsUids = assets.map(asset => asset.uid)
 
   const links = {}
   if (assets[0] && assets[0].links) {
@@ -151,7 +151,7 @@ const ActionsDropdown = (props) => {
         hideAction={() => props.hideAttachToModal()}
         ids={assetsIds}
         attachAction={(items, noteUids) => props.attachTo(items, noteUids)}
-        itemsType={OBJECT_TYPES.APP}
+        itemsType={OBJECT_TYPES.ASSET}
       />
       <HomeEditTagsModal
         isOpen={props.editTagsModal.isOpen}
