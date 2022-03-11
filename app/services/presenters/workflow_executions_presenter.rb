@@ -25,6 +25,7 @@ module Presenters
       username: :launched_by,
       apptitle: :app_title,
       created_at: :created_at_date_time,
+      launched_on: :created_at_date_time,
     }.freeze
 
     # Instance of WorkflowExecutionsPresenter initializes with filter params from controller

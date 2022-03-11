@@ -39,7 +39,7 @@ services:
         source: ../
         target: /precision-fda
     working_dir: /precision-fda/client
-    command: bash -c "yarn && yarn watch"
+    command: bash -c "yarn && yarn build"
 
   gsrs:
     build:

@@ -2,6 +2,7 @@
 
 const path = require('path')
 
+const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 
@@ -15,10 +16,14 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'bundle.css',
     }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
   ],
   module: {
     rules: [
       {
+        enforce: 'pre',
         test: /\.(ts|js)x?$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
@@ -41,13 +46,13 @@ module.exports = {
         loader: 'url-loader',
         options: {
           limit: 2000,
-          outputPath: './', 
+          outputPath: '', 
           publicPath: '/assets/',
         },
       },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', 'jsx', '.json'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
 }
