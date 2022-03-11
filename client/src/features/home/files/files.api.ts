@@ -1,0 +1,176 @@
+import { checkStatus, requestOpts } from "../../../utils/api";
+import { BaseError, DownloadListResponse, IFilter, IMeta, ResourceScope } from "../types";
+import { cleanObject, Params, prepareListFetch } from "../utils";
+import { IFile } from "./files.types";
+
+export interface FetchFilesQuery {
+  files: IFile[]
+  meta: IMeta
+}
+
+export async function fetchFiles(
+  filters: IFilter[],
+  scope: ResourceScope,
+  params: Params,
+  spaceId?: string,
+): Promise<FetchFilesQuery> {
+  const query = prepareListFetch(filters, params, spaceId)
+  const folderQ = '?' + new URLSearchParams(query as {}).toString()
+  let scopeQ = ''
+  if(scope) {
+    scopeQ = scope === 'me' ? '' : scope
+    scopeQ = '/' + scopeQ
+  }
+
+  const res = await fetch(`/api/files${scopeQ}${folderQ}`).then(checkStatus)
+  return res.json()
+}
+
+export async function fetchFile(uid: string): Promise<{ files: IFile, meta: any}> {
+  const res = await fetch(`/api/files/${uid}`).then(checkStatus)
+  return res.json()
+}
+
+export async function fetchTrack(fileId: number) {
+  const res = await fetch(`/api/files/${fileId}`).then(checkStatus)
+  return res.json()
+}
+
+export async function fetchFilesDownloadList(ids: string[], scope: ResourceScope = 'me'): Promise<DownloadListResponse[]> {
+  const res = await fetch(`/api/files/download_list`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({
+      task: "delete", ids: ids, scope: scope === 'me' ? 'private' : scope
+    })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function deleteFilesRequest(ids: string[]): Promise<any> {
+  const res = await fetch(`/api/files/remove`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ ids })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function addFolderRequest({name}:{name: string}, parentFolderId?: string, scope?: ResourceScope): Promise<BaseError> {
+  const res = await fetch(`/api/files/create_folder`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ name, parent_folder_id: parentFolderId ?? null, public: scope === 'everybody' ? 'true' : null })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function featureFileRequest({ids, uids, featured}:{ids: string[], uids: string[], featured: boolean}) {
+  const res = await fetch(`/api/files/feature`, {
+    method: 'PUT',
+    ...requestOpts,
+    body: JSON.stringify({item_ids: [...ids, ...uids], featured })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function copyFilesRequest(scope: string, ids: string[]) {
+  const item_ids = ids.map(id => parseInt(id, 10))
+  const res = await fetch(`/api/files/copy`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ item_ids, scope })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function editFileRequest({name, description, fileId}:{name: string, description: string, fileId: string}) {
+  const res = await fetch(`/api/files/${fileId}`, {
+    method: 'PUT',
+    ...requestOpts,
+    body: JSON.stringify({file: { name, description }})
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function editFolderRequest({ name, folderId }:{ name: string, folderId?: string }) {
+  const res = await (await fetch(`/api/folders/rename_folder`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ name, folder_id: folderId ?? null })
+  })).json()
+  return res
+}
+
+export async function uploadFilesRequest(blobs: any[]) {
+  const res = await fetch(`/api/folders/`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ name })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export const fetchFolderChildren = async (scope: 'private' | 'public', folderId?: string) => {
+  const queryParams = cleanObject({
+    folder_id: folderId === 'ROOT' ? undefined : folderId,
+    scope
+  })
+  
+  const query = '?' + new URLSearchParams(queryParams as {}).toString()
+  const res = await fetch(`/api/folders/children${query}`, {
+    method: 'GET',
+  }).then(checkStatus)
+  return res.json()
+}
+
+export const moveFilesRequest = async (nodeIds: string[], targetId: string, scope?: ResourceScope) => {
+  const body = cleanObject({
+    node_ids: nodeIds,
+    target_id: parseInt(targetId) || null,
+  })
+  
+  const res = await fetch(`/api/files/move`, {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify(body)
+  }).then(checkStatus)
+  return res.json()
+}
+
+export async function createFile(name: string, scope: string, folder_id: string | null) {
+  const res = await fetch('/api/create_file', {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ name, scope: scope === 'everybody' ? 'public' : null, folder_id })
+  }).then(checkStatus)
+
+  return res.json()
+}
+
+export async function getUploadURL(id: string, index: number, size: number, md5: string) {
+  const res = await fetch('/api/get_upload_url', {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ id, index, size, md5 })
+  }).then(checkStatus)
+
+  return res.json()
+}
+
+export async function uploadChunk(url: string, chunk: ArrayBuffer, headers: any) {
+  return fetch(url, {
+    method: 'PUT',
+    body: chunk,
+    headers,
+  })
+}
+
+export async function closeFile(id: string) {
+  const res = await fetch('/api/close_file', {
+    method: 'POST',
+    ...requestOpts,
+    body: JSON.stringify({ id })
+  }).then(checkStatus)
+  return res.json()
+}

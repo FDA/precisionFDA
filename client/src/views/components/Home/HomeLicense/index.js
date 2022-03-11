@@ -2,9 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
-import Markdown from '../../Markdown'
 import LinkTargetBlank from '../../LinkTargetBlank'
 import './style.sass'
+import { Markdown } from '../../../../components/Markdown'
 
 
 const HomeLicense = ({ license = {}, className, link }) => {

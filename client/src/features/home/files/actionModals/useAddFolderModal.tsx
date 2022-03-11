@@ -1,0 +1,84 @@
+import { ErrorMessage } from '@hookform/error-message'
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { useMutation, useQueryClient } from 'react-query'
+import { toast } from 'react-toastify'
+import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import { FieldGroup, InputError } from '../../../../components/form/styles'
+import { InputText } from '../../../../components/InputText'
+import { Modal } from '../../../modal'
+import { ButtonRow, StyledForm } from '../../../modal/styles'
+import { useModal } from '../../../modal/useModal'
+import { ResourceScope } from '../../types'
+import { addFolderRequest } from '../files.api'
+
+
+export const useAddFolderModal = ({ folderId, scope }: { folderId?: string, scope?: ResourceScope }) => {
+  const queryClient = useQueryClient()
+  const { isShown, setShowModal } = useModal()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    reset,
+    setError
+  } = useForm({ defaultValues: { name: ''}})
+  const mutation = useMutation({
+    mutationFn: (payload: { name: string }) =>
+      addFolderRequest(payload, folderId, scope),
+    onSuccess: (res) => {
+      if(res?.message?.type === 'error') {
+        setError('name', {message: res.message.text[0], type: 'validate'})
+        toast.error(`Error: ${res.message.text[0]}}`);
+        return
+      }
+      reset()
+      queryClient.invalidateQueries('files')
+      setShowModal(false)
+      toast.success('Success: Adding folder.');
+    },
+    onError: () => {
+      toast.error('Error: Adding folder.');
+    },
+  })
+
+  const onSubmit = (vals: any) => {
+    mutation.mutateAsync({ name: vals.name })
+  }
+
+  const modalComp = (
+    <Modal
+      data-testid="modal-files-add-folder"
+      headerText="Create new folder"
+      isShown={isShown}
+      hide={() => setShowModal(false)}
+    >
+      <StyledForm onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          <label>Folder Name</label>
+          <InputText
+            label="Folder Name"
+            {...register('name')}
+            placeholder="Enter Name..."
+            autoFocus
+            disabled={mutation.isLoading}
+          />
+          <ErrorMessage
+            errors={errors}
+            name="name"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
+        </FieldGroup>
+        <ButtonRow>
+          <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
+          <ButtonSolidBlue type="submit" disabled={mutation.isLoading}>Add</ButtonSolidBlue>
+        </ButtonRow>
+      </StyledForm>
+    </Modal>
+  )
+  return {
+    modalComp,
+    setShowModal,
+  }
+}

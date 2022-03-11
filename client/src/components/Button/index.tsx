@@ -35,7 +35,7 @@ export const Button = styled.button<IButton>`
     outline: 0;
   }
 
-  ${({ role, disabled }) => { 
+  ${({ role, disabled, active }) => { 
     let textColor = theme.colors.primaryBlue;
     let borderColor = 'rgb(218, 239, 251);'
     let borderColorHover = theme.colors.lightBlue;
@@ -79,6 +79,12 @@ export const Button = styled.button<IButton>`
         border-color: ${textColor};
         box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
       }
+
+      ${!!active && css`
+        color: ${textColor};
+        border-color: ${textColor};
+        box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
+      `}
     `
   }}
 

@@ -16,7 +16,7 @@ const contextFetchSuccess = ({ user, meta }) => createAction(CONTEXT_FETCH_SUCCE
 
 const contextFetchFailure = () => createAction(CONTEXT_FETCH_FAILURE)
 
-export default () => (
+export const context = () => (
   (dispatch) => {
     dispatch(contextFetchStart())
 
@@ -34,3 +34,4 @@ export default () => (
       .catch(e => console.error(e))
   }
 )
+export default context

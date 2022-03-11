@@ -1,11 +1,13 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const PlusIcon = ({ width = 11 }: { width?: number }) => (
+export const PlusIcon = ({ width, height, style }: { height?: number, width?: number, style?: any }) => (
   <Svg
     aria-hidden="true"
     width={width}
+    height={height}
     viewBox="0 0 448 512"
+    style={style}
   >
     <path
       fill="currentColor"
@@ -13,3 +15,5 @@ export const PlusIcon = ({ width = 11 }: { width?: number }) => (
     />
   </Svg>
 )
+
+export const CrossIcon = (props: any) => <PlusIcon style={{ transform: 'rotate(45deg)'}} {...props} />

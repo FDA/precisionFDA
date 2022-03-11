@@ -3,9 +3,9 @@ import { Svg } from './Svg'
 
 export const InfoCircleIcon = ({ width, height }: { width?: number; height?: number }) => (
   <Svg
-    aria-hidden="true"
     height={height}
     width={width}
+    viewBox="0 0 512 512"
   >
     <path
       fill="currentColor"

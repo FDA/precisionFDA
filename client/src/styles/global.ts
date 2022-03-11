@@ -1,4 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components';
+import { colors } from './theme';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -7,6 +8,20 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   #app-root {
+  }
+  html, body, main, #app-root, .pfda-loader-wrapper {
+    height: 100%;
+  }
+  a {
+    color: ${colors.primaryBlue};
+    text-decoration: none;
+    &:hover {
+      color: #4297df;
+    }
+  }
+  .pfda-loader-wrapper {
+    display: flex;
+    flex-direction: column;
   }
 `;
 
