@@ -171,7 +171,8 @@ export const NotificationsPage = () => {
 
   const siteNotificationsRole = StaticRoles.private
   const enableJobNotificationSettings: any = localPrefSelection[siteNotificationsRole]?.private_job_finished //true
-  const enableChallengeNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_opened //true
+  const enableChallengeOpenNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_opened //true
+  const enableChallengePreregNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_preregister //true
 
   if(user.is_guest) {
     return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
@@ -195,13 +196,27 @@ export const NotificationsPage = () => {
                 id="newChallenge"
                 name="newChallenge"
                 type="checkbox"
-                checked={enableChallengeNotificationSettins}
+                checked={enableChallengeOpenNotificationSettins}
                 onChange={() =>
                   handleSelection(siteNotificationsRole, 'private_challenge_opened')
                 }
               />
               <label htmlFor="newChallenge">
                 Notify me when a new precisionFDA challenge is created.
+              </label>
+            </FieldGroup>
+            <FieldGroup>
+              <Checkbox
+                id="preregChallenge"
+                name="preregChallenge"
+                type="checkbox"
+                checked={enableChallengePreregNotificationSettins}
+                onChange={() =>
+                  handleSelection(siteNotificationsRole, 'private_challenge_preregister')
+                }
+              />
+              <label htmlFor="preregChallenge">
+                Notify me when a new precisionFDA challenge is open for pre-registration.
               </label>
             </FieldGroup>
             <FieldGroup>
