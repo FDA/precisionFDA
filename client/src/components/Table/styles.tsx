@@ -135,6 +135,9 @@ export const ReactTableStyles = styled.div`
       &.collapse {
         width: 0.0000000001%;
       }
+      :first-child {
+        padding-left: 12px;
+      }
       :last-child {
         border-right: 0;
       }

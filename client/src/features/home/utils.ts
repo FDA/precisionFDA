@@ -90,3 +90,6 @@ export const toObjectFromArray = (ar: any[]) => {
   return ob
 }
 
+export const toTitleCase = (str: string) => {
+  return str[0].toUpperCase() + str.slice(1)
+}
