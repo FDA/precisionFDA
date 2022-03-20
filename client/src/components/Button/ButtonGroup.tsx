@@ -1,19 +1,23 @@
 import styled from 'styled-components'
-import { Button } from '.'
+import { ToggleButton } from '.'
+
+// Use ToggleButton to implement a multi-selection button group
 
 export const ButtonGroup = styled.div`
   display: flex;
 
-  ${Button}{
+  ${ToggleButton}{
     border-radius: 0;
+    border-right: 0px;
   }
 
-  ${Button}:first-child {
+  ${ToggleButton}:first-child {
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
   }
-  ${Button}:last-child {
+  ${ToggleButton}:last-child {
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
+    border-right: 1px;
   }
 `

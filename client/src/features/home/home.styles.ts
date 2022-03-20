@@ -3,15 +3,13 @@ import styled, { css } from "styled-components"
 import { Button } from "../../components/Button"
 import { Svg } from "../../components/icons/Svg"
 import { BackLink } from "../../components/Page/PageBackLink"
-import { colors } from "../../styles/theme"
+import { MainBanner } from "../../components/Banner"
+import { commonStyles } from "../../styles/commonStyles"
+import { colors, padding, sizing, fontSize, fontWeight } from "../../styles/theme"
 
 
 export const StyledBackLink = styled(BackLink)`
   margin: 16px 16px;
-`
-
-export const ScopePicker = styled.div`
-  margin: 20px;
 `
 
 export const LoadingList = styled.span`
@@ -20,24 +18,102 @@ export const LoadingList = styled.span`
 
 export const MenuText = styled.span`
   flex: 1 0 auto;
-
+  font-size: 16px;
+  font-weight: ${fontWeight.bold};
 `
-export const StyledMenuCounter = styled.span<{isLong?: boolean}>`
+
+export const HomeBanner = styled(MainBanner)`
+  display: flex;
+  flex-flow: row nowrap;
+  padding: 18px ${padding.mainContentHorizontal};
+  margin: 0 auto;
+
+  @media (max-width: 640px) {
+    flex-flow: column wrap;
+  }
+`
+
+export const HomeTitle = styled.h1`
+  ${commonStyles.bannerTitle}
+  color: ${colors.textWhite};
+  margin: auto 0;
+  width: 228px;
+`
+
+export const ScopeDetails = styled.div`
+  display: flex:
+  flex-direction: column;
+  align-items: center;
+`
+
+export const ScopePicker = styled.div`
+  display: flex;
+  gap: 48px;
+  padding: 0 0 6px 0;
+  margin: 0;
+`
+
+export const ScopePickerItem = styled(Button)<{ active?: boolean }>`
+  display: inline-block;
+  font-weight: ${fontWeight.medium};
+  font-size: ${fontSize.h2};
+  line-height: 20px;
+  color: ${colors.textWhite};
+  background: transparent;
+  letter-spacing: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  border-bottom: ${sizing.highlightBarWidth} solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: transparent;
+    border-bottom: ${sizing.highlightBarWidth} solid ${colors.remediatedhighlightBlue};
+    color: ${colors.textWhite};
+  }
+
+  ${({ active }) => (
+    active && css`
+      color: ${colors.remediatedhighlightBlue};
+      border-bottom: ${sizing.highlightBarWidth} solid ${colors.remediatedhighlightBlue};
+
+      &:hover {
+        color: ${colors.remediatedhighlightBlue};
+      }
+    `
+  )}
+`
+
+export const ScopeDescription = styled.span`
+  color: ${colors.textWhite};
+  font-size: 13px;
+`
+
+export const StyledMenuCounter = styled.span<{isLong?: boolean, active?: boolean}>`
   height: 20px;
   min-width: 20px;
   line-height: 0;
-  background-color: ${colors.inactiveBlue};
-  border-radius: 10px;
   ${({ isLong }) => isLong && `padding: 0 2px;`}
   display: flex;
   justify-content: center;
   align-items: center;
 
   justify-self: flex-end;
-  margin-right: 1rem;
-  color: ${colors.white110};
+  margin-right: 24px;
+  color: ${colors.textDarkGrey};
   font-size: 12px;
+
+  ${({ active }) => {
+    if (active) {
+      return css`
+        color: ${colors.textWhite};
+      `
+    }
+  }}
 `
+
 export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
@@ -45,17 +121,22 @@ export const MenuItem = styled(NavLink)`
   height: 50px;
   padding-left: 20px;
   color: ${colors.textDarkGrey};
+  font-weight: 400;
   &.active {
-    background-color: #dfe9f8;
+    color: ${colors.textWhite};
+    background-color: ${colors.primaryBlue};
     &:hover {
-      background-color: #dfe9f8;
+      color: ${colors.textWhite};
+      background-color: ${colors.primaryBlue};
     }
   }
   &:hover {
-    background-color: #f1f6fd;
+    color: ${colors.textDarkGrey};
+    background-color: ${colors.subtleBlue};
   }
   ${Svg} {
-    margin-right: 10px;
+    margin: auto 0px;
+    width: 32px;
   }
 `
 
@@ -65,7 +146,6 @@ export const Row = styled.div`
   align-items: stretch;
   flex: 1 1 auto;
   flex-direction: row;
-  border-top: solid 1px #d5d5d5;
 `
 export const StyledMenu = styled.div<{ expanded: boolean }>`
   display: flex;
@@ -73,9 +153,9 @@ export const StyledMenu = styled.div<{ expanded: boolean }>`
 
   ${({ expanded }) => expanded
     ? css`
-      min-width: 270px;
-      max-width: 270px;
-      width: 270px;
+      min-width: 228px;
+      max-width: 228px;
+      width: 228px;
     `
     : css`
       width: 70px;

@@ -1,36 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
-import { StringParam, useQueryParam } from 'use-query-params';
-import { Button } from '../../components/Button';
-import { ButtonGroup } from '../../components/Button/ButtonGroup';
-import { GuestNotAllowed } from '../../components/GuestNotAllowed';
-import { BoltIcon } from '../../components/icons/BoltIcon';
-import { CogsIcon } from '../../components/icons/Cogs';
-import { CubeIcon } from '../../components/icons/CubeIcon';
-import { DatabaseIcon } from '../../components/icons/DatabaseIcon';
-import { FileIcon } from '../../components/icons/FileIcon';
-import { FileZipIcon } from '../../components/icons/FileZipIcon';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { RootState } from '../../store';
-import { checkStatus } from '../../utils/api';
-import DefaultLayout from '../../views/layouts/DefaultLayout';
-import { AppList } from './apps/AppList';
-import { AppsShow } from './apps/AppsShow';
-import { AssetList } from "./assets/AssetList";
-import { AssetShow } from './assets/AssetShow';
-import { CreateDatabase } from './databases/create/CreateDatabase';
-import { DatabaseList } from './databases/DatabaseList';
-import { DatabaseShow } from './databases/DatabaseShow';
-import { ExecutionList } from './executions/ExecutionList';
-import { JobShow } from './executions/JobShow';
-import { FileList } from "./files/FileList";
-import { FileShow } from "./files/show/FileShow";
-import { Expand, Fill, Main, MenuItem, MenuText, Row, ScopePicker, StyledMenu } from './home.styles';
-import { ResourceScope } from './types';
-import { WorkflowList } from './workflows/WorflowList';
-import { WorkflowShow } from './workflows/WorkflowShow';
+import React, { useEffect, useState } from 'react'
+import { useQuery } from 'react-query'
+import { useSelector } from 'react-redux'
+import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
+import { StringParam, useQueryParam } from 'use-query-params'
+import { GuestNotAllowed } from '../../components/GuestNotAllowed'
+import { BoltIcon } from '../../components/icons/BoltIcon'
+import { CogsIcon } from '../../components/icons/Cogs'
+import { CubeIcon } from '../../components/icons/CubeIcon'
+import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
+import { FileIcon } from '../../components/icons/FileIcon'
+import { FileZipIcon } from '../../components/icons/FileZipIcon'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { RootState } from '../../store'
+import { checkStatus } from '../../utils/api'
+import DefaultLayout from '../../views/layouts/DefaultLayout'
+import { AppList } from './apps/AppList'
+import { AppsShow } from './apps/AppsShow'
+import { AssetList } from "./assets/AssetList"
+import { AssetShow } from './assets/AssetShow'
+import { CreateDatabase } from './databases/create/CreateDatabase'
+import { DatabaseList } from './databases/DatabaseList'
+import { DatabaseShow } from './databases/DatabaseShow'
+import { ExecutionList } from './executions/ExecutionList'
+import { JobShow } from './executions/JobShow'
+import { FileList } from "./files/FileList"
+import { FileShow } from "./files/show/FileShow"
+import { Expand, Fill, HomeBanner, HomeTitle, Main, MenuItem, MenuText, Row,
+  ScopeDescription, ScopeDetails, ScopePicker, ScopePickerItem, StyledMenu, StyledMenuCounter } from './home.styles'
+import { ResourceScope } from './types'
+import { toTitleCase } from './utils'
+import { WorkflowList } from './workflows/WorflowList'
+import { WorkflowShow } from './workflows/WorkflowShow'
 
 interface CounterRequest {
   apps: string,
@@ -41,28 +41,31 @@ interface CounterRequest {
   workflows: string,
 }
 
-export async function counterRequest(): Promise<CounterRequest> {
-  const req = await fetch('/api/counters').then(checkStatus);
+export async function counterRequest(scope: string): Promise<CounterRequest> {
+  let apiRoute = '/api/counters'
+  // TODO: Consider making scope an enum
+  if (scope !== 'me') {
+    apiRoute = `${apiRoute}/${scope}`
+  }
+  const req = await fetch(apiRoute).then(checkStatus);
   let json = await req.json();
-  // TODO: remove this when the API is fixed and returns only string or number
-  if(typeof json.jobs === 'number') json.jobs = json.jobs.toString() + 499;
   return json
 }
 
-const MenuCounter = ({count}:{count?: string}) => {
-  return null
-  // if(!count) return null
-  // return (<StyledMenuCounter isLong={count.length > 2}>{count}</StyledMenuCounter>)
+const MenuCounter = ({count, active}:{count?: string, active?: boolean}) => {
+  // return null
+  if(!count) return null
+  return (<StyledMenuCounter isLong={count.length > 2} active={active}>{count}</StyledMenuCounter>)
 }
 
 export const Home2 = () => {
-  const user = useSelector((state: RootState) => state.context.user);
-  const [expandedSidebar, setExpandedSidebar] = useLocalStorage<any>('expandedMyHomeSidebar', true);
-  const { path, isExact, url, params } = useRouteMatch();
-  const history = useHistory();
-  const [scopeQuery, setScopeQuery] = useQueryParam('scope', StringParam);
+  const user = useSelector((state: RootState) => state.context.user)
+  const [expandedSidebar, setExpandedSidebar] = useLocalStorage<any>('expandedMyHomeSidebar', true)
+  const { path, isExact, url, params } = useRouteMatch()
+  const history = useHistory()
+  const [scopeQuery, setScopeQuery] = useQueryParam('scope', StringParam)
   const [scope, setScope] = useState<string>(scopeQuery as ResourceScope || 'me' as ResourceScope)
-  const {data} = useQuery(['counter', scope], counterRequest)
+  const {data} = useQuery(['counter', scope], () => counterRequest(scope))
   const [activeResource, setActiveResource] = useState<string>()
 
   const handleScopeClick = async (newScope: ResourceScope) => {
@@ -98,95 +101,129 @@ export const Home2 = () => {
     )
   }
 
+  // TODO: If scopeDescriptions is reused in another component, extract this to a utility function
+  const capitalizedResource = (activeResource ? toTitleCase(activeResource) : 'Undefined')
+  const scopeDescriptions: { [key: string]: string; } = {
+    me: `Your private ${activeResource}, visible to you only`,
+    featured: `Featured ${activeResource}. This list is curated by the site admin`,
+    everybody: `${capitalizedResource} that are shared publicly, by you or anyone on precisionFDA`,
+    spaces: `${capitalizedResource} in Spaces that you have access to`,
+  }
+  const scopeDescription = scopeDescriptions[scope]
+
   return (
     <DefaultLayout>
-      <ScopePicker>
-        <ButtonGroup>
-          <Button
-            data-testid="me-button"
-            onClick={() => handleScopeClick('me')}
-            active={scope === 'me'}
-          >
-            Me
-          </Button>
-          <Button
-            data-testid="featured-button"
-            onClick={() => handleScopeClick('featured')}
-            active={scope === 'featured'}
-          >
-            Featured
-          </Button>
-          <Button
-            data-testid="everyone-button"
-            onClick={() => handleScopeClick('everybody')}
-            active={scope === 'everybody'}
-          >
-            Everyone
-          </Button>
-          <Button
-            data-testid="spaces-button"
-            onClick={() => handleScopeClick('spaces')}
-            active={scope === 'spaces'}
-          >
-            Spaces
-          </Button>
-        </ButtonGroup>
-      </ScopePicker>
+      <HomeBanner>
+        <HomeTitle>My Home</HomeTitle>
+        <ScopeDetails>
+          <ScopePicker>
+            <ScopePickerItem
+              data-testid="me-button"
+              onClick={() => handleScopeClick('me')}
+              active={scope === 'me'}
+            >
+              Me
+            </ScopePickerItem>
+            <ScopePickerItem
+              data-testid="featured-button"
+              onClick={() => handleScopeClick('featured')}
+              active={scope === 'featured'}
+            >
+              Featured
+            </ScopePickerItem>
+            <ScopePickerItem
+              data-testid="everyone-button"
+              onClick={() => handleScopeClick('everybody')}
+              active={scope === 'everybody'}
+            >
+              Everyone
+            </ScopePickerItem>
+            <ScopePickerItem
+              data-testid="spaces-button"
+              onClick={() => handleScopeClick('spaces')}
+              active={scope === 'spaces'}
+            >
+              Spaces
+            </ScopePickerItem>
+          </ScopePicker>
+          <ScopeDescription>
+            {scopeDescription}
+          </ScopeDescription>
+        </ScopeDetails>
+      </HomeBanner>
       <Row>
         <StyledMenu expanded={expandedSidebar}>
           <MenuItem
             data-testid="home-files-link"
             to={`/home/files${routeScopeParam}`}
             activeClassName="active"
+            title="Files"
           >
             <FileIcon height={14} />
             <MenuText>Files</MenuText>
-            <MenuCounter count={data?.files} />
+            {expandedSidebar && (
+              <MenuCounter count={data?.files} active={activeResource === 'files'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="home-apps-link"
             to={`/home/apps${routeScopeParam}`}
             activeClassName="active"
+            title="Apps"
           >
             <CubeIcon height={14} />
             <MenuText>Apps</MenuText>
-            <MenuCounter count={data?.apps} />
+            {expandedSidebar && (
+              <MenuCounter count={data?.apps} active={activeResource === 'apps'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="home-databases-link"
             to={`/home/databases${routeScopeParam}`}
             activeClassName="active"
+            title="Databases"
           >
             <DatabaseIcon height={14} />
             <MenuText>Databases</MenuText>
-            <MenuCounter count={data?.dbclusters} />
+            {expandedSidebar && (
+              <MenuCounter count={data?.dbclusters} active={activeResource === 'databases'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="home-assets-link"
             to={`/home/assets${routeScopeParam}`}
             activeClassName="active"
+            title="Assets"
           >
             <FileZipIcon height={14} />
             <MenuText>Assets</MenuText>
-            <MenuCounter count={data?.assets} />
+            {expandedSidebar && (
+              <MenuCounter count={data?.assets} active={activeResource === 'assets'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="home-workflows-link"
             to={`/home/workflows${routeScopeParam}`}
             activeClassName="active"
+            title="Workflows"
           >
             <BoltIcon height={14} />
             <MenuText>Workflows</MenuText>
-            <MenuCounter count={data?.workflows} />
+            {expandedSidebar && (
+              <MenuCounter count={data?.workflows} active={activeResource === 'workflows'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="home-executions-link"
             to={`/home/executions${routeScopeParam}`}
             activeClassName="active"
+            title="Executions"
           >
             <CogsIcon height={14} />
             <MenuText>Executions</MenuText>
-            <MenuCounter count={data?.jobs} />
+            {expandedSidebar && (
+              <MenuCounter count={data?.jobs} active={activeResource === 'executions'} />
+            )}
           </MenuItem>
           <Fill />
           <Expand

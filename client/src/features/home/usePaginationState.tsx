@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { NumberParam, UrlUpdateType, useQueryParam, withDefault } from 'use-query-params'
 
+const defaultPage = 1
+const defaultPerPageCount = 20
+
 export interface PaginationState {
   page: number
   setPage: any
@@ -26,11 +29,11 @@ export interface PaginationParams {
 export function usePaginationParams(): PaginationParams {
   const [pageParam, setPageParam] = useQueryParam(
     'page',
-    withDefault(NumberParam, 1),
+    withDefault(NumberParam, defaultPage),
   )
   const [perPageParam, setPerPageParam] = useQueryParam(
     'per_page',
-    withDefault(NumberParam, 10),
+    withDefault(NumberParam, defaultPerPageCount),
   )
 
   const handleSetPageParam = (v: number, updateType: UrlUpdateType) => {
