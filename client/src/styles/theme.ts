@@ -98,6 +98,7 @@ export const sizing = {
   thumbnailHeightSmall: '90px',
   iconSmall: '56px',
   highlightBarWidth: '4px',
+  modalBorderRadius: '8px',
 }
 
 export const theme = {

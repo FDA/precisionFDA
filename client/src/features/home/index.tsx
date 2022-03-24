@@ -53,9 +53,8 @@ export async function counterRequest(scope: string): Promise<CounterRequest> {
 }
 
 const MenuCounter = ({count, active}:{count?: string, active?: boolean}) => {
-  // return null
-  if(!count) return null
-  return (<StyledMenuCounter isLong={count.length > 2} active={active}>{count}</StyledMenuCounter>)
+  const displayedCount = count ?? "0"
+  return (<StyledMenuCounter isLong={displayedCount.length > 2} active={active}>{displayedCount}</StyledMenuCounter>)
 }
 
 export const Home2 = () => {
@@ -65,7 +64,7 @@ export const Home2 = () => {
   const history = useHistory()
   const [scopeQuery, setScopeQuery] = useQueryParam('scope', StringParam)
   const [scope, setScope] = useState<string>(scopeQuery as ResourceScope || 'me' as ResourceScope)
-  const {data} = useQuery(['counter', scope], () => counterRequest(scope))
+  const {data} = useQuery(['counters', scope], () => counterRequest(scope))
   const [activeResource, setActiveResource] = useState<string>()
 
   const handleScopeClick = async (newScope: ResourceScope) => {

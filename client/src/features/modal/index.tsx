@@ -13,26 +13,31 @@ import {
   Footer,
 } from './styles';
 export interface ModalProps {
-  isShown: boolean;
-  hide: () => void;
-  headerText: string;
-  footer?: React.ReactNode;
-  blur?: boolean;
+  isShown: boolean
+  hide: () => void
+  headerText: string
+  footer?: React.ReactNode
+  blur?: boolean
+  disableClose?: boolean
 }
-const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, footer, blur = false, ...rest }) => {
+const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, footer, blur = false, disableClose = false, ...rest }) => {
   useKeyPress('Escape', () => hide())
   return (
     <React.Fragment>
-      <Backdrop onClick={hide} blur={blur} />
+      <Backdrop onClick={disableClose ? undefined : hide} blur={blur} />
       <Wrapper aria-modal aria-labelledby={headerText} tabIndex={-1} role="dialog" {...rest}>
         <StyledModal>
           <Header>
             <HeaderText>{headerText}</HeaderText>
-            <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
-              <PlusIcon height={16} />
-            </CloseButton>
+            {!disableClose &&
+              <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
+                <PlusIcon height={16} />
+              </CloseButton>
+            }
           </Header>
-          {children}
+          <Content>
+            {children}
+          </Content>
           {footer && <Footer>{footer}</Footer>}
         </StyledModal>
       </Wrapper>

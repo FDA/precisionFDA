@@ -13,6 +13,7 @@ import { Modal } from '../../../../modal'
 import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
 import { useModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
+import { itemsCountString } from '../../../utils'
 import { uploadFilesRequest } from '../../files.api'
 import {
   FilesMeta,
@@ -106,11 +107,12 @@ export const useFileUploadModal = ({
         scope: scope === 'me' ? 'private' : scope === 'everybody' ? 'public' : scope,
         folderId,
       })
-      toast.success('Success: uploading files')
+      toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
     } catch (error) {
       toast.error('Error: uploading files')
     }
     await queryCache.invalidateQueries('files')
+    await queryCache.invalidateQueries('counters')
   }
   
   const modalComp = (

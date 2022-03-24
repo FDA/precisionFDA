@@ -10,6 +10,7 @@ import {
 } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
+import { itemsCountString } from '../../utils'
 import { IAsset } from '../assets.types'
 
 export function useDownloadAssetsModal(selectedFiles: IAsset[]){
@@ -26,7 +27,7 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]){
   const modalComp = (
     <Modal
       data-testid="modal-assets-download"
-      headerText={`Download ${momoSelected.length} items(s)`}
+      headerText={`Download ${itemsCountString('asset', momoSelected.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}

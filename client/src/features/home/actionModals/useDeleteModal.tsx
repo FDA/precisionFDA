@@ -9,6 +9,7 @@ import { Modal } from '../../modal'
 import { ButtonRow, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { APIResource, ResourceScope } from '../types'
+import { itemsCountString } from '../utils'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
@@ -42,7 +43,7 @@ export function useDeleteModal<T extends { id: string; name: string }>({
       } else {
         onSuccess && onSuccess(res)
         setShowModal(false)
-        toast.success(`Success: Deleting ${resource}`)
+        toast.success(`Success: Deleted ${itemsCountString(resource, momoSelected.length)}`)
       }
     },
   })
@@ -54,7 +55,7 @@ export function useDeleteModal<T extends { id: string; name: string }>({
   const modalComp = (
     <Modal
       data-testid={`modal-${resource}-delete`}
-      headerText={`Delete ${momoSelected.length} items(s)`}
+      headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={

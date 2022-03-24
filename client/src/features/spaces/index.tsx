@@ -86,7 +86,7 @@ export const Spaces2 = ({ space }: { space: ISpace }) => {
     true,
   )
   let { path } = useRouteMatch()
-  const { data } = useQuery(['counter'], counterRequest)
+  const { data } = useQuery(['counters'], counterRequest)
 
   if (user.is_guest) {
     return (

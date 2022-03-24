@@ -10,6 +10,7 @@ import {
 } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
+import { itemsCountString } from '../../utils'
 import { IFile } from '../files.types'
 
 export const useDownloadFileModal = (selectedFiles: IFile[]) => {
@@ -26,7 +27,7 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
   const modalComp = (
     <Modal
       data-testid="modal-files-download"
-      headerText={`Download ${momoSelected.length} items(s)`}
+      headerText={`Download ${itemsCountString('file', momoSelected.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}
