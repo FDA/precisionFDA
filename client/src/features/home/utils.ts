@@ -93,3 +93,11 @@ export const toObjectFromArray = (ar: any[]) => {
 export const toTitleCase = (str: string) => {
   return str[0].toUpperCase() + str.slice(1)
 }
+
+export const pluralize = (noun: string, count: number) => {
+  return (count > 1) ? noun + 's' : noun
+}
+
+export const itemsCountString = (noun: string, count: number) => {
+  return `${count} ${pluralize(noun, count)}`
+}

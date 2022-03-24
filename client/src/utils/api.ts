@@ -1,4 +1,5 @@
 import queryString from 'query-string'
+import { toast } from 'react-toastify';
 
 export const requestOpts: RequestInit = {
   mode: 'cors',
@@ -12,9 +13,18 @@ export const requestOpts: RequestInit = {
 
 export function checkStatus(res: Response) {
   if (!res.ok) {
+    if (res.status === 401) {
+      toast.error(`Session expired. Please log in again`, {
+        toastId: '401 toast',
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: false,
+        closeOnClick: false,
+        onClick: () => window.location.assign('/login'),
+      })
+    }
     throw new Error(res.statusText);
   }
-  return res;
+  return res
 }
 
 export const getAuthenticityToken = () => {

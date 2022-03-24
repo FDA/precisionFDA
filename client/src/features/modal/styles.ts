@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { Svg } from '../../components/icons/Svg';
+import { breakPoints, colors, fontSize, fontWeight, sizing } from '../../styles/theme';
 export const Wrapper = styled.div`
   position: fixed;
   top: 50%;
@@ -24,8 +25,10 @@ export const StyledModal = styled.div`
   z-index: 100;
   background: white;
   position: relative;
-  margin: auto;
-  border-radius: 8px;
+  margin: 24px auto;
+  border-radius: ${sizing.modalBorderRadius};
+  display: flex;
+  flex-direction: column;
 
   table {
     display: table;
@@ -35,15 +38,24 @@ export const StyledModal = styled.div`
     border-spacing: 2px;
     border-color: grey;
   }
+
+  max-height: calc(100vh - 120px);
+  width: auto;
+  @media(min-width: ${breakPoints.medium}px) {
+    width: 640px;
+  }
 `;
 export const Header = styled.div`
-  border-radius: 8px 8px 0 0;
+  border-radius: ${sizing.modalBorderRadius} ${sizing.modalBorderRadius} 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.3rem; 
   border-bottom: 1px solid #e5e5e5;
-  padding: 1rem;
+  padding: 12px 24px;
+  font-size: ${fontSize.h2};
+  font-weight: ${fontWeight.bold};
+  color: ${colors.textBlack};
 `;
 export const Footer = styled.div`
   /* border-radius: 8px 8px 0 0; */
@@ -52,7 +64,7 @@ export const Footer = styled.div`
   align-items: center;
   gap: 8px;
   border-top: 1px solid #e5e5e5;
-  padding: 1rem;
+  padding: 12px;
 `;
 export const HeaderText = styled.div`
   align-self: center;
@@ -79,9 +91,12 @@ export const ButtonRow = styled.div`
   gap: 8px;
   justify-content: flex-end;
   align-items: center;
+  margin-top: 24px;
 `
 export const Content = styled.div`
-`;
+  overflow-y: scroll;
+  padding: 12px;
+`
 
 export const StyledForm = styled.form`
   display: flex;

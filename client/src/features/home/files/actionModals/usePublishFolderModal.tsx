@@ -7,7 +7,6 @@ import { Loader } from '../../../../components/Loader'
 import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
-import { ButtonRow } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { ResourceScope } from '../../types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
@@ -85,13 +84,13 @@ export const usePublishFolderModal = (
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={
-        <ButtonRow>
+        <>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
           <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
             Publish
           </ButtonSolidBlue>
-        </ButtonRow>
+        </>
       }
     >
       <PublishFolder selectedFiles={momoSelected} scope={scope} />

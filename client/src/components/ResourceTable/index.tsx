@@ -6,9 +6,11 @@ import { Svg } from "../icons/Svg"
 
 export const StyledTable = styled.table`
   border-spacing: 0;
+  width: 100%;
 `
 
 export const StyledAction = styled(Button)`
+  align-self: flex-end;
   ${Svg} {
     padding-right: 0.4rem;
   }
@@ -25,7 +27,7 @@ export const StyledName = styled.a<{ isCurrent?: boolean }>`
 
 export const StyledTD = styled.td`
   padding: 8px;
-  vertical-align: top;
+  vertical-align: middle;
 `
 type Row = {
   [key: string]: React.ReactNode;

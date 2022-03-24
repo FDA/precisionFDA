@@ -3,7 +3,7 @@ import React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Provider } from 'react-redux'
 import { Redirect, Route, Router, Switch } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
+import { Slide, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { PushReplaceHistory, QueryParamProvider } from 'use-query-params'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
@@ -12,6 +12,7 @@ import { Home2 } from './features/home'
 import { FileShow } from './features/home/files/show/FileShow'
 import { useModal } from './features/modal/useModal'
 import GlobalStyle from './styles/global'
+import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
@@ -50,6 +51,7 @@ const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
 
 const root = ({ store }: any) => {
   const authModal = useModal()
+  toast.configure()
 
   return (
     <Provider store={store}>
@@ -147,7 +149,7 @@ const root = ({ store }: any) => {
           </QueryParamProvider>
         </Router>
         <AuthModal {...authModal} />
-        <ToastContainer position="top-right" />
+        <StyledToastContainer position="top-right" transition={Slide} hideProgressBar pauseOnHover />
         {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
     </Provider>

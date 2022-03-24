@@ -23,7 +23,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
   const handleOpenClick = (item: IFile) => {
     if (item.links.download) {
-      const win = window.open(item.links.download, '_blank')
+      const win = window.open(`${item.links.download}?inline=true`, '_blank')
       win?.focus()
     }
   }
