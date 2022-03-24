@@ -1,4 +1,4 @@
-import { checkStatus, requestOpts } from "../../../utils/api";
+import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
 import { IExecution } from "../executions/executions.types";
 import { IFilter, IMeta, ResourceScope } from "../types";
 import { Params, prepareListFetch } from "../utils";
@@ -45,8 +45,7 @@ export async function createWorkflowRequest(name: string) {
 
 export async function copyWorkflowsRequest(scope: string, ids: string[]) {
   const res = await fetch(`/api/workflows/copy`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids, scope })
   }).then(checkStatus)
   return res.json()
@@ -54,8 +53,7 @@ export async function copyWorkflowsRequest(scope: string, ids: string[]) {
 
 export async function deleteWorkflowRequest(ids: string[]) {
   const res = await fetch(`/api/workflows/delete`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids })
   }).then(checkStatus)
   return res.json()

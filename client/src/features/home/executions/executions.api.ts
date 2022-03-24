@@ -1,4 +1,4 @@
-import { checkStatus, requestOpts } from "../../../utils/api";
+import { checkStatus, getApiRequestOpts } from "../../../utils/api";
 import { IFilter, IMeta, ResourceScope } from "../types";
 import { Params, prepareListFetch } from "../utils";
 import { IExecution } from "./executions.types";
@@ -24,26 +24,23 @@ export async function fetchExecution(uid: string): Promise<{ job: IExecution, me
 
 export async function copyJobsRequest(scope: string, ids: string[]) {
   const res = await fetch(`/api/jobs/copy`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids, scope })
   }).then(checkStatus)
   return res.json()
 }
 
-export async function terminateJobsRequest(id: string) {
+export async function terminateJobsRequest(ids: string[]) {
   const res = await fetch(`/api/jobs/terminate`, {
-    ...requestOpts,
-    method: 'POST',
-    body: JSON.stringify({ id })
+    ...getApiRequestOpts('POST'),
+    body: JSON.stringify({ id: ids })
   }).then(checkStatus)
   return res.json()
 }
 
 export async function syncFilesRequest(link: string) {
   const res = await fetch(link, {
-    ...requestOpts,
-    method: 'PATCH',
+    ...getApiRequestOpts('PATCH'),
   }).then(checkStatus)
   return res.json()
 }

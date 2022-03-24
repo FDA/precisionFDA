@@ -18,7 +18,7 @@ const StyledResourceTable = styled(ResourceTable)`
   min-width: 300px;
 `
 
-export function useTerminateModal<T extends { id: string; name: string }>({
+export function useTerminateModal<T extends { ids: string[]; name: string }>({
   selected,
 }: {
   selected: IExecution[]
@@ -39,18 +39,18 @@ export function useTerminateModal<T extends { id: string; name: string }>({
       queryClient.invalidateQueries('jobs')
       queryClient.invalidateQueries(['execution', selected[0].uid])
       setShowModal(false)
-      toast.success(`Success: terminating execution`)
+      toast.success(`Success: ${res?.message?.text}`)
     },
   })
 
   const handleSubmit = () => {
-    mutation.mutateAsync(memoSelected[0].uid)
+    mutation.mutateAsync(memoSelected.map(x => x.uid))
   }
 
   const modalComp = (
     <Modal
       data-testid={`modal-execution-terminate`}
-      headerText={`Terminate selected execution`}
+      headerText={`Terminate selected execution?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={

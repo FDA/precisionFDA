@@ -32,16 +32,25 @@ export const getAuthenticityToken = () => {
   return CSRFHolder ? CSRFHolder.content : null
 }
 
-const backendCall = (route: string, method = 'POST', data = {}, token = getAuthenticityToken()) => {
+export const getApiRequestOpts = (method: string, token: string = getAuthenticityToken()) => {
   const opts: RequestInit = {
     method,
     ...requestOpts
   }
 
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    opts['body'] = JSON.stringify(data)
+    // The CSRF-Token only affects staging and production, checked by 'protect_from_forgery' in Rails
     // @ts-ignore
     opts['headers']['X-CSRF-Token'] = token
+  }
+  return opts
+}
+
+const backendCall = (route: string, method = 'POST', data = {}, token = getAuthenticityToken()) => {
+  const opts: RequestInit = getApiRequestOpts(method, token)
+
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    opts['body'] = JSON.stringify(data)
   } else if (['GET', 'HEAD'].includes(method)) {
     route = queryString.stringifyUrl({ url: route, query: data })
   }

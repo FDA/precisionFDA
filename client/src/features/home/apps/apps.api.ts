@@ -1,4 +1,4 @@
-import { checkStatus, requestOpts } from "../../../utils/api";
+import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
 import { IExecution } from "../executions/executions.types";
 import { IFilter, IMeta, ResourceScope } from "../types";
 import { Params, prepareListFetch } from "../utils";
@@ -34,19 +34,20 @@ export async function fetchAppExecutions(filters: IFilter[], appUid: string, par
   return res.json()
 }
 
+// TODO: unused / unfinished
+/*
 export async function createAppRequest(name: string) {
   const res = await (await fetch(`/api/folders/`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ name })
   })).json()
   return res
 }
+*/
 
 export async function copyAppsRequest(scope: string, ids: string[]) {
   const res = await fetch(`/api/apps/copy`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids, scope })
   }).then(checkStatus)
   return res.json()
@@ -54,8 +55,7 @@ export async function copyAppsRequest(scope: string, ids: string[]) {
 
 export async function deleteAppsRequest(ids: string[]): Promise<any> {
   const res = await fetch(`/api/apps/delete`, {
-    method: 'PUT',
-    ...requestOpts,
+    ...getApiRequestOpts('PUT'),
     body: JSON.stringify({ item_ids: ids })
   }).then(checkStatus)
   return res.json()

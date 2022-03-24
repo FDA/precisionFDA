@@ -1,6 +1,6 @@
 import { useMutation } from 'react-query'
 import { toast } from 'react-toastify'
-import { checkStatus, requestOpts } from '../../../utils/api'
+import { checkStatus, getApiRequestOpts } from '../../../utils/api'
 import { APIResource } from '../types'
 export interface Meta {
   type: 'success' | 'error';
@@ -14,8 +14,7 @@ export interface RequestResponse {
 
 async function featureRequest(resource: APIResource, { uids, featured }: { uids: string[], featured: boolean }): Promise<RequestResponse> {
   const res = await fetch(`/api/${resource}/feature`, {
-    method: 'PUT',
-    ...requestOpts,
+    ...getApiRequestOpts('PUT'),
     body: JSON.stringify({ item_ids: uids, featured: featured || undefined })
   }).then(checkStatus)
   return res.json()
