@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
-import { checkStatus, requestOpts } from '../../../utils/api'
+import { checkStatus, getApiRequestOpts } from '../../../utils/api'
 import { Modal } from '../../modal'
 import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -34,8 +34,7 @@ async function editTagsRequest({
   tags: string
 }): Promise<RequestResponse> {
   const res = await fetch(`/api/set_tags`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ taggable_uid: uid, tags }),
   }).then(checkStatus)
   return res.json()

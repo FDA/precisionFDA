@@ -7,7 +7,7 @@ import { CircleCheckIcon } from '../../../components/icons/CircleCheckIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { Loader } from '../../../components/Loader'
 import { breakPoints } from '../../../styles/theme'
-import { checkStatus, requestOpts } from '../../../utils/api'
+import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
 import { Modal } from '../../modal'
 import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../../modal/ModalCheckList'
 import { ButtonRow, ModalScroll } from '../../modal/styles'
@@ -90,8 +90,7 @@ export const assignToChallengeRequest = ({link, appUid, challengeId}: {link: str
     challenge_id: challengeId,
   }
   const res:any = fetch(link, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify(body),
   }).then(checkStatus).then(res => res.json())
   if (res.message) {

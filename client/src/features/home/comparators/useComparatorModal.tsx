@@ -2,7 +2,7 @@ import React from 'react'
 import { useMutation } from 'react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue, ButtonSolidRed } from '../../../components/Button'
-import { checkStatus, requestOpts } from '../../../utils/api'
+import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
 import { Modal } from '../../modal'
 import { StyledModalContent } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -30,24 +30,21 @@ export type ComparatorActionRequest = { actionType: ComparatorActionTypes, dxid:
 
 export async function addToComparatorsRequest(payload: any) {
   return fetch('/admin/apps/add_to_comparators', {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify(payload),
   }).then(checkStatus)
 }
 
 export async function removeFromComparatorsRequest(payload: any) {
   return fetch('/admin/apps/remove_from_comparators', {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify(payload),
   }).then(checkStatus)
 }
 
 export async function setAppDefaultComparatorsRequest(payload: any) {
   return fetch('/admin/apps/set_comparison_app', {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify(payload),
   }).then(checkStatus)
 }

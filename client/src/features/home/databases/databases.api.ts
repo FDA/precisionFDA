@@ -1,4 +1,4 @@
-import { checkStatus, requestOpts } from "../../../utils/api";
+import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
 import { IFile } from "../files/files.types";
 import { IFilter, IMeta, ResourceScope } from "../types";
 import { Params, prepareListFetch } from "../utils";
@@ -40,8 +40,7 @@ interface IAccessibleFiles extends IFile {
 
 export async function fetchAccessibleFiles(): Promise<IAccessibleFiles[]> {
   const res = await (await fetch('/api/list_files', {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ scopes: []})
   })).json()
   if(res.failure) throw new Error(res.failure)
@@ -73,8 +72,7 @@ export interface CreateDatabaseResponse {
 
 export async function createDatabaseRequest(payload: CreateDatabasePayload): Promise<CreateDatabaseResponse> {
   const res = await fetch(`/api/dbclusters/`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ db_cluster: payload })
   })
   return res.json()
@@ -87,8 +85,7 @@ export interface EditDatabasePayload {
 
 export async function editDatabaseRequest(payload: EditDatabasePayload, dxid: string) {
   const res = await (await fetch(`/api/dbclusters/${dxid}`, {
-    ...requestOpts,
-    method: 'PUT',
+    ...getApiRequestOpts('PUT'),
     body: JSON.stringify({ ...payload })
   })).json()
   return res
@@ -96,8 +93,7 @@ export async function editDatabaseRequest(payload: EditDatabasePayload, dxid: st
 
 export async function copyDatabasesRequest(scope: string, ids: string[]) {
   const res = await fetch(`/api/dbclusters/copy`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids, scope })
   }).then(checkStatus)
   return res.json()
@@ -105,8 +101,7 @@ export async function copyDatabasesRequest(scope: string, ids: string[]) {
 
 export async function databaseMethodRequest(method: MethodType, dxids: string[]) {
   const res = await fetch(`/api/dbclusters/${method}`, {
-    ...requestOpts,
-    method: 'POST',
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ api_method: method, dxids })
   }).then(checkStatus)
   return res

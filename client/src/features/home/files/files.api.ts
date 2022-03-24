@@ -1,4 +1,4 @@
-import { checkStatus, requestOpts } from "../../../utils/api";
+import { checkStatus, getApiRequestOpts } from "../../../utils/api";
 import { BaseError, DownloadListResponse, IFilter, IMeta, ResourceScope } from "../types";
 import { cleanObject, Params, prepareListFetch } from "../utils";
 import { IFile } from "./files.types";
@@ -38,8 +38,7 @@ export async function fetchTrack(fileId: number) {
 
 export async function fetchFilesDownloadList(ids: string[], scope: ResourceScope = 'me'): Promise<DownloadListResponse[]> {
   const res = await fetch(`/api/files/download_list`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({
       task: "delete", ids: ids, scope: scope === 'me' ? 'private' : scope
     })
@@ -49,8 +48,7 @@ export async function fetchFilesDownloadList(ids: string[], scope: ResourceScope
 
 export async function deleteFilesRequest(ids: string[]): Promise<any> {
   const res = await fetch(`/api/files/remove`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ ids })
   }).then(checkStatus)
   return res.json()
@@ -58,8 +56,7 @@ export async function deleteFilesRequest(ids: string[]): Promise<any> {
 
 export async function addFolderRequest({name}:{name: string}, parentFolderId?: string, scope?: ResourceScope): Promise<BaseError> {
   const res = await fetch(`/api/files/create_folder`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ name, parent_folder_id: parentFolderId ?? null, public: scope === 'everybody' ? 'true' : null })
   }).then(checkStatus)
   return res.json()
@@ -67,8 +64,7 @@ export async function addFolderRequest({name}:{name: string}, parentFolderId?: s
 
 export async function featureFileRequest({ids, uids, featured}:{ids: string[], uids: string[], featured: boolean}) {
   const res = await fetch(`/api/files/feature`, {
-    method: 'PUT',
-    ...requestOpts,
+    ...getApiRequestOpts('PUT'),
     body: JSON.stringify({item_ids: [...ids, ...uids], featured })
   }).then(checkStatus)
   return res.json()
@@ -77,8 +73,7 @@ export async function featureFileRequest({ids, uids, featured}:{ids: string[], u
 export async function copyFilesRequest(scope: string, ids: string[]) {
   const item_ids = ids.map(id => parseInt(id, 10))
   const res = await fetch(`/api/files/copy`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids, scope })
   }).then(checkStatus)
   return res.json()
@@ -86,8 +81,7 @@ export async function copyFilesRequest(scope: string, ids: string[]) {
 
 export async function editFileRequest({name, description, fileId}:{name: string, description: string, fileId: string}) {
   const res = await fetch(`/api/files/${fileId}`, {
-    method: 'PUT',
-    ...requestOpts,
+    ...getApiRequestOpts('PUT'),
     body: JSON.stringify({file: { name, description }})
   }).then(checkStatus)
   return res.json()
@@ -95,8 +89,7 @@ export async function editFileRequest({name, description, fileId}:{name: string,
 
 export async function editFolderRequest({ name, folderId }:{ name: string, folderId?: string }) {
   const res = await (await fetch(`/api/folders/rename_folder`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ name, folder_id: folderId ?? null })
   })).json()
   return res
@@ -104,8 +97,7 @@ export async function editFolderRequest({ name, folderId }:{ name: string, folde
 
 export async function uploadFilesRequest(blobs: any[]) {
   const res = await fetch(`/api/folders/`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ name })
   }).then(checkStatus)
   return res.json()
@@ -131,8 +123,7 @@ export const moveFilesRequest = async (nodeIds: string[], targetId: string, scop
   })
   
   const res = await fetch(`/api/files/move`, {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify(body)
   }).then(checkStatus)
   return res.json()
@@ -140,8 +131,7 @@ export const moveFilesRequest = async (nodeIds: string[], targetId: string, scop
 
 export async function createFile(name: string, scope: string, folder_id: string | null) {
   const res = await fetch('/api/create_file', {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ name, scope: scope === 'everybody' ? 'public' : null, folder_id })
   }).then(checkStatus)
 
@@ -150,8 +140,7 @@ export async function createFile(name: string, scope: string, folder_id: string 
 
 export async function getUploadURL(id: string, index: number, size: number, md5: string) {
   const res = await fetch('/api/get_upload_url', {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ id, index, size, md5 })
   }).then(checkStatus)
 
@@ -168,8 +157,7 @@ export async function uploadChunk(url: string, chunk: ArrayBuffer, headers: any)
 
 export async function closeFile(id: string) {
   const res = await fetch('/api/close_file', {
-    method: 'POST',
-    ...requestOpts,
+    ...getApiRequestOpts('POST'),
     body: JSON.stringify({ id })
   }).then(checkStatus)
   return res.json()
