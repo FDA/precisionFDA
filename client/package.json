@@ -7,6 +7,7 @@
     "build:production": "webpack --config webpack.production.config.js",
     "build": "webpack --progress --config webpack.development.config.js",
     "watch": "webpack --config webpack.development.config.js",
+    "watch:docker": "webpack --config webpack.docker.development.config.js",
     "server": "webpack-dev-server --mode development --config webpack.devserver.config.js --live-reload",
     "start:dev": "yarn server",
     "lint": "eslint",
