@@ -133,6 +133,10 @@ export interface IExecution {
   workflow_title?: string;
 }
 
+// IExeuction's uid attribute can have the following prefixes
+export const jobExecutionPrefix = 'job-'
+export const workflowExecutionPrefix = 'workflow-'
+
 export interface Pagination {
   current_page: number;
   next_page?: any;

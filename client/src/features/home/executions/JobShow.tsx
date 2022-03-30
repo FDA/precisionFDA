@@ -32,6 +32,7 @@ import { useSyncFilesMutation } from './useSyncFilesMutation'
 import { InputsAndOutputs } from './InputsAndOutputs'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { HomeLabel } from '../../../components/HomeLabel'
+import { colors } from '../../../styles/theme'
 
 const ExecutionActions = ({
   scope,
@@ -71,41 +72,41 @@ const StyledExecutionState = styled.span<{ state: JobState }>`
   ${({ state }) =>
     state === 'running' &&
     css`
-      color: #2071b5;
-      background-color: #f0f9fd;
+      color: ${colors.stateRunningColor};
+      background-color: ${colors.stateRunningBackground};
     `}
   ${({ state }) =>
     state === 'idle' &&
     css`
-      color: #2071b5;
-      background-color: #f0f9fd;
+      color: ${colors.stateRunningColor};
+      background-color: ${colors.stateRunningBackground};
     `}
 
   ${({ state }) =>
     state === 'done' &&
     css`
       color: #336534;
-      background-color: #dff0d8;
+      background-color: ${colors.stateDoneBackground};
     `}
 
   ${({ state }) =>
     state === 'terminated' &&
     css`
-      color: #821a1d;
-      background-color: #ffeeed;
+      color: ${colors.stateFailedColor};
+      background-color: ${colors.stateFailedBackground};
     `}
 
   ${({ state }) =>
     state === 'failed' &&
     css`
-      color: #821a1d;
-      background-color: #ffeeed;
+      color: ${colors.stateFailedColor};
+      background-color: ${colors.stateFailedBackground};
     `}
 `
 
 const FailureMessage = styled.div`
-  color: #821a1d;
-  background-color: #ffeeed;
+  color: ${colors.stateFailedColor};
+  background-color: ${colors.stateFailedBackground};
   padding: 3px 5px;
   border-radius: 3px;
   /* font-size: 13px; */

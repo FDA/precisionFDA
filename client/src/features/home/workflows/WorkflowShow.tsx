@@ -209,7 +209,7 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
           Spec
         </StyledTab>
         <StyledTab activeClassName="active" to={`${match.url}/jobs`}>
-          Executions ()
+          Executions ({Object.keys(meta.executions).length})
         </StyledTab>
         <StyledTab activeClassName="active" to={`${match.url}/diagram`}>
           Diagram

@@ -10,6 +10,7 @@ import { ActionFunctionsType, ResourceScope } from "../types";
 import { copyJobsRequest } from "./executions.api";
 import { IExecution } from "./executions.types";
 import { pick } from "ramda";
+import { getExecutionJobsList } from "./executions.util";
 
 export enum ExecutionAction {
   "View Logs" = "View Logs",
@@ -34,13 +35,16 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     queryClient.invalidateQueries(resourceKeys)
   }})
 
+  // An IExecution can be either a job (app) or workflow, in the case of the workflow
+  const selectedJobs = getExecutionJobsList(selected)
+
   const {
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal({
     resource: 'jobs',
-    selected: selected.map(s => ({ id: s.uid })),
+    selected: selectedJobs.map(jobUid => ({ id: jobUid })),
     updateFunction: copyJobsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)

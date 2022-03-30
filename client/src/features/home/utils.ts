@@ -28,13 +28,14 @@ export function mapSizeFilter(filters: IFilter[]): IFilter[] {
   }
 }
 
+// Some of the list API's filter keys do not match their keys in JSON responses
+// so we need a custom mapping
 export function renameFilterKeys(filters: IFilter[]): IFilter[] {
   return filters.map((filter: IFilter) => {
     let key = { ...filter }
     if (key.id === 'added_by') key.id = 'username'
     if (key.id === 'engine') key.id = 'type'
     if (key.id === 'dx_instance_class') key.id = 'instance'
-    if (key.id === 'app_title') key.id = 'apptitle'
     if (key.id === 'launched_by') key.id = 'username'
 
     return key
@@ -45,11 +46,13 @@ export function cleanObject(obj: {}) {
   return pickBy(obj, v => v !== undefined)
 }
 
+// Some of the list API's order_by values do not match their keys in JSON responses
+// so we need a custom mapping
 function renameOrderByKeys(key?: string): string | undefined {
   if (key === 'file_size') return 'size'
   if (key === 'created_at_date_time') return 'created_at'
   if (key === 'launched_by') return 'username'
-  if (key === 'app_title') return 'apptitle'
+  if (key === 'launched_on') return 'created_at'
   if (key === 'dx_instance_class') return 'instance'
   return key
 }

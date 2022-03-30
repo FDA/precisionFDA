@@ -18,7 +18,7 @@ module Api
     ORDER_FIELDS = { # we use this order-fields Hash for simple filtering (JobService::JobFilter)
       "created_at" => %w(created_at),
       "name" => %w(name),
-      "apptitle" => %w(apps.title),
+      "app_title" => %w(apps.title),
       "username" => %w(users.first_name users.last_name),
     }.freeze
 
@@ -26,7 +26,7 @@ module Api
       "created_at" => ->(left, right) { left.created_at_date_time <=> right.created_at_date_time },
       "launched_on" => ->(left, right) { left.launched_on <=> right.launched_on },
       "name" => ->(left, right) { left.name <=> right.name },
-      "apptitle" => ->(left, right) { left.app_title <=> right.app_title },
+      "app_title" => ->(left, right) { left.app_title <=> right.app_title },
       "username" => ->(left, right) { left.launched_by <=> right.launched_by },
       "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
     }.freeze
