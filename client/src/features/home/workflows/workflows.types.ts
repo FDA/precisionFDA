@@ -1,3 +1,4 @@
+import { IExecution } from "../executions/executions.types";
 import { ResourceScope } from "../types";
 
 export enum WorkflowActions {
@@ -69,7 +70,6 @@ export interface Revision {
 
 export interface Batches {}
 
-export interface Executions {}
 export interface Links2 {
   comments: string;
   edit_tags: string;
@@ -101,7 +101,7 @@ export interface WorkflowMeta {
   spec: Spec;
   apps: App[];
   revisions: Revision[];
-  executions: Executions;
+  executions: Map<number, IExecution>;
   batches: Batches;
   challenges?: any;
   comments: any[];

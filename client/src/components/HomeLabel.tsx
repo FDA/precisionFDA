@@ -1,6 +1,7 @@
 import classnames from 'classnames'
 import React from 'react'
 import styled from 'styled-components'
+import { colors } from '../styles/theme'
 import Icon from '../views/components/Icon'
 
 const StyledHomeLabel = styled.span`
@@ -23,18 +24,18 @@ const StyledHomeLabel = styled.span`
 
   &__state-running, &__state-idle {
 
-    color: #f0f9fd;
-    background-color: #2071b5;
+    color: ${colors.stateRunningBackground};
+    background-color: ${colors.stateRunningColor};
   }
 
   &__state-done {
-    color: #3c763d;
-    background-color: #dff0d8;
+    color: ${colors.stateDoneColor};
+    background-color: ${colors.stateDoneBackground};
   }
 
   &__state-failed, &__state-terminated {
-    color: #821a1d;
-    background-color: #ffeeed;
+    color: ${colors.stateFailedColor};
+    background-color: ${colors.stateFailedBackground};
   }
 
   i {

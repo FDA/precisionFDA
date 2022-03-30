@@ -39,6 +39,7 @@ export const colors = {
   white110: '#f5f5f5',
   backgroundLightGray: 'rgb(242, 242, 242)',
   borderDefault: '#ddd',
+  // Used for jobs or executions
   stateRunningBackground: '#f0f9fd',
   stateRunningColor: '#2071b5',
   stateFailedBackground: '#ffeeed',

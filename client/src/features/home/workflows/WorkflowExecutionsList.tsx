@@ -150,12 +150,12 @@ export const ExecutionsListTable = ({
           return (
             <>
               {row.original.jobs &&
-                row.original.jobs.map(job => {
+                row.original.jobs.map((job, index) => {
                   return (
                     <div
                       className="tr sub"
                       {...row.getRowProps()}
-                      key={`${row.getRowProps().key}-sub`}
+                      key={`${row.getRowProps().key}-sub-${index}`}
                       style={{
                         ...row.getRowProps().style,
                         backgroundColor: colors.backgroundLightGray,
