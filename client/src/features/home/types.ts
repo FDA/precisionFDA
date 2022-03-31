@@ -1,4 +1,5 @@
 import { ReactNode } from "react-router/node_modules/@types/react"
+import { IChallenge } from "../../types/challenge"
 
 export interface TableSelected<T> {
   selectedItems: T[]
@@ -71,6 +72,7 @@ export interface IMeta {
   },
   "path": MetaPath[],
   "count": number,
+  "challenges": IChallenge[],
   "pagination": {
     "current_page": number,
     "next_page": null | number,

@@ -29,9 +29,4 @@ export const StyledToastContainer = styled(ToastContainer)`
     border: 2px solid ${colors.primaryYellow}  !important;
     border-radius: ${sizing.modalBorderRadius} !important;
   }
-
-  --toastify-color-info: ${colors.primaryBlue};
-  --toastify-color-success: ${colors.highlightGreen};
-  --toastify-color-warning: ${colors.primaryYellow};
-  --toastify-color-error: ${colors.primaryRed};
 `

@@ -15,6 +15,7 @@ import { IApp } from "./apps.types";
 import { useExportToModal } from "./useExportToModal";
 import { useComparatorModal } from "../comparators/useComparatorModal";
 import { pick } from "ramda";
+import { IChallenge } from "../../../types/challenge";
 
 export enum AppActions {
   "Run" = "Run",
@@ -37,7 +38,7 @@ export enum AppActions {
   'Remove from Comparators' = 'Remove from Comparators',
 }
 
-export const useAppSelectionActions = ({ scope, selectedItems, resourceKeys, resetSelected, comparatorLinks }: { scope?: ResourceScope, selectedItems: IApp[], resourceKeys: string[], resetSelected?: () => void, comparatorLinks: {[key: string]: string} }) => {
+export const useAppSelectionActions = ({ scope, selectedItems, resourceKeys, resetSelected, comparatorLinks, challenges }: { scope?: ResourceScope, selectedItems: IApp[], resourceKeys: string[], resetSelected?: () => void, comparatorLinks: {[key: string]: string}, challenges: IChallenge[] | undefined } ) => {
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -212,7 +213,7 @@ export const useAppSelectionActions = ({ scope, selectedItems, resourceKeys, res
       isDisabled: selected.length !== 1,
       modal: attachToChallengeModal,
       showModal: isShownAttachToChallengeModal,
-      hide: !selected[0]?.links?.assign_app,
+      hide: !challenges || challenges.length === 0 || !selected[0]?.links?.assign_app,
     },
     'Edit tags': {
       func: () => setTagsModal(true),

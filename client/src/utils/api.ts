@@ -1,3 +1,4 @@
+import httpStatusCodes from 'http-status-codes'
 import queryString from 'query-string'
 import { toast } from 'react-toastify';
 
@@ -11,9 +12,9 @@ export const requestOpts: RequestInit = {
   },
 }
 
-export function checkStatus(res: Response) {
+export const checkStatus = async (res: Response) => {
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === httpStatusCodes.UNAUTHORIZED) {
       toast.error(`Session expired. Please log in again`, {
         toastId: '401 toast',
         position: toast.POSITION.TOP_CENTER,
@@ -22,9 +23,63 @@ export function checkStatus(res: Response) {
         onClick: () => window.location.assign('/login'),
       })
     }
-    throw new Error(res.statusText);
+    const fallbackMessage = `${res.status}: ${res.statusText}`
+    try {
+      const payload = await res.json()
+      const message = payload.error?.message ?? payload.message?.text ?? fallbackMessage
+      throw new Error(message)
+    }
+    catch {
+      // This code path is for certain API routes/errors where the Ruby backend returns a page and not a json
+      throw new Error(fallbackMessage)
+    }
   }
   return res
+}
+
+export enum MESSAGE_TYPE {
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error',
+}
+
+export const displayResponseMessage = async (res: Response) => {
+  const payload = await res.json()
+  displayResponseMessage(payload)
+}
+
+export const displayPayloadMessage = (payload: any) => {
+  // The response messaging from the API is a bit eclectic, as seen with the following scenarios that
+  // we've seen (so far). Thus this function needs to be able to handle the delivery of messages to
+  // the user under all scenarios.
+  //
+  // In general:                         { message: { type: "success", text: "hello" }}
+  // /api/files/copy:                    { message: { type: "success", text: ["hello1", ... ]}}
+  // /api/spaces/{id}/files/move_nodes:  { meta: { messages: [ { type: "success", message: "hello" }, ... ]}}
+
+  // TODO: consolidate backend message format, perhaps making messages a string[] for all responses
+
+  const message = Array.isArray(payload.meta?.messages) ? payload.meta.messages[0] : payload.message
+  if (message) {
+    const errorMessage = Array.isArray(message.text) ? message.text[0] : (message.text ?? message.message)
+    console.log(errorMessage)
+    switch (message.type) {
+      case MESSAGE_TYPE.SUCCESS:
+        toast.success(errorMessage)
+        break
+      case MESSAGE_TYPE.WARNING:
+        toast.warning(errorMessage)
+        break
+      case MESSAGE_TYPE.ERROR:
+        toast.error(errorMessage)
+        break
+      default:
+        break
+    }
+  }
+  else if (payload.error) {
+    toast.error(payload.error.message)
+  }
 }
 
 export const getAuthenticityToken = () => {

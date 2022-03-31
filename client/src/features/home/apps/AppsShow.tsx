@@ -39,6 +39,7 @@ import { fetchApp } from './apps.api'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { SpecTab } from './SpecTab'
+import { IChallenge } from '../../../types/challenge'
 
 const renderOptions = (app: IApp, scopeParamLink: string) => {
   const columns = [
@@ -95,24 +96,27 @@ const renderOptions = (app: IApp, scopeParamLink: string) => {
   return <MetadataSection><MetadataRow>{list}</MetadataRow></MetadataSection>
 }
 
-const DetailActionsDropdown = ({ app, comparatorLinks }: { app: IApp, comparatorLinks: {[key: string]: string} }) => {
+const DetailActionsDropdown = (
+  { app, comparatorLinks, challenges }:
+  { app: IApp, comparatorLinks: {[key: string]: string}, challenges?: IChallenge[] }) => {
   const actions = useAppSelectionActions({
     scope: app.location === 'Private' ? 'me' : app.location,
     selectedItems: [app],
     resetSelected: () => {},
     resourceKeys: ['app', app.uid],
     comparatorLinks,
+    challenges: challenges,
   })
 
   return (
     <>
-      <HeaderButton as="a" href={`/apps/${app.uid}/jobs/new`} type="primary">
+      <HeaderButton as="a" href={`/apps/${app.uid}/jobs/new`} type="primary" disabled={!app.links.run_job}>
         <>
           {'Run App'}&nbsp;
           <Pill>rev{app.revision}</Pill>
         </>
       </HeaderButton>
-      <HeaderButton as="a" href={`/apps/${app.uid}/batch_app`} type="primary">
+      <HeaderButton as="a" href={`/apps/${app.uid}/batch_app`} type="primary" disabled={!app.links.batch_run}>
         <>
           {'Run Batch'}&nbsp;
           <Pill>rev{app.revision}</Pill>
@@ -206,7 +210,11 @@ export const AppsShow = ({ scope }: { scope: ResourceScope }) => {
           </HeaderLeft>
           <HeaderRight>
             <StyledRight>
-              {app && <DetailActionsDropdown app={app} comparatorLinks={meta.links.comparators} />}
+              {app &&
+                <DetailActionsDropdown app={app}
+                                       comparatorLinks={meta.links?.comparators ?? []}
+                                       challenges={meta.challenges} />
+              }
             </StyledRight>
           </HeaderRight>
         </Header>

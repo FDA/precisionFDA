@@ -23,6 +23,15 @@ const GlobalStyle = createGlobalStyle`
     display: flex;
     flex-direction: column;
   }
+
+  :root {
+    --toastify-color-info: ${colors.primaryBlue};
+    --toastify-color-success: ${colors.highlightGreen};
+    --toastify-color-warning: ${colors.primaryYellow};
+    --toastify-color-error: ${colors.primaryRed};
+    --toastify-toast-width: inherit;
+  }
+
 `;
 
 export const LayoutBody = styled.div`

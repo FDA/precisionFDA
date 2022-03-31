@@ -13,9 +13,10 @@ const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
     }
   })
 
-const throwIfError = (status: number) => {
+const throwIfError = (status: number, payload?: any) => {
   if (status !== httpStatusCodes.OK) {
-    throw new Error('Upload failure')
+    const errorMessage = payload?.error?.message ?? 'Unknown upload failure'
+    throw new Error(errorMessage)
   }
 }
 
@@ -54,7 +55,7 @@ export const multiFileUpload = async ({
       .then(response => {
         console.log(file.name);
 
-        throwIfError(response.status)
+        throwIfError(response.status, response.payload)
 
         const numChunks = Math.ceil(file.size / CHUNK_SIZE)
         const reader = new FileReader()
@@ -79,7 +80,7 @@ export const multiFileUpload = async ({
                   const { status, payload } = response
                   const { url, headers } = payload
 
-                  throwIfError(status)
+                  throwIfError(status, payload)
 
                   return uploadChunk(url, buffer, headers)
                 })
@@ -116,9 +117,11 @@ export const multiFileUpload = async ({
 
         reader.readAsArrayBuffer(file as any)
       })
-      .catch(() => {
+      .catch((error) => {
         uploadInfo.status = FILE_STATUS['failure']
         // dispatch(updateFile(uploadInfo))
+        // Rethrow error for consumers of this API to catch
+        throw error
       })
   }
 }

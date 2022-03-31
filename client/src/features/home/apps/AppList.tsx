@@ -59,7 +59,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
     selectedItems: selectedFileObjects,
     resourceKeys: ['apps'],
     resetSelected,
-    comparatorLinks: {}
+    comparatorLinks: {},
+    challenges: data?.meta?.challenges,
   })
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
