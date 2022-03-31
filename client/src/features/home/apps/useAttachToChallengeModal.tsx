@@ -7,7 +7,7 @@ import { CircleCheckIcon } from '../../../components/icons/CircleCheckIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { Loader } from '../../../components/Loader'
 import { breakPoints } from '../../../styles/theme'
-import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
+import { checkStatus, displayPayloadMessage, getApiRequestOpts } from '../../../utils/api'
 import { Modal } from '../../modal'
 import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../../modal/ModalCheckList'
 import { ButtonRow, ModalScroll } from '../../modal/styles'
@@ -43,10 +43,10 @@ const ChallengesList = ({
   return (
     <ModalScroll>
       <Table>
-        <HeaderRow>
-          <CheckCol></CheckCol>
-        </HeaderRow>
         <tbody>
+          <HeaderRow>
+            <CheckCol></CheckCol>
+          </HeaderRow>
           {meta!.challenges.map((s: any, i: number) => (
             <TableRow
               isSelected={selected === s.id}
@@ -84,25 +84,15 @@ const StyledForm = styled.form`
   }
 `
 
-export const assignToChallengeRequest = ({link, appUid, challengeId}: {link: string, appUid: string, challengeId: string}) => {
+export const assignToChallengeRequest = ({link, appId, challengeId}: {link: string, appId: string, challengeId: string}) => {
   const body = {
-    app_uid: appUid,
-    challenge_id: challengeId,
+    app_id: appId,
+    id: challengeId,
   }
-  const res:any = fetch(link, {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(body),
-  }).then(checkStatus).then(res => res.json())
-  if (res.message) {
-    if (res.message.type === 'success')
-      toast.success(res.message.text)
-    else if (res.message.type === 'warning')
-      toast.error(res.message.text)
-    else if (res.message.type === 'error')
-      toast.error(res.message.text)
-  } else {
-    toast.success('Objects are successfully copied.')
-  }
+  let res: any = fetch(link, {
+      ...getApiRequestOpts('POST'),
+      body: JSON.stringify(body),
+    }).then(checkStatus).then(res => res.json())
   return res
 }
 
@@ -124,6 +114,10 @@ const ChallengeAppForm = ({
     onSuccess: (res: any) => {
       onSuccess && onSuccess(res)
       setShowModal(false)
+      displayPayloadMessage(res)
+    },
+    onError: (error: any) => {
+      toast.error(error.message)
     },
   })
 
@@ -138,7 +132,7 @@ const ChallengeAppForm = ({
   const handleSubmit = (e: any) => {
     e.preventDefault()
     if (selectedId) {
-      mutation.mutateAsync({link: app.links.assign_app, appUid: app.uid, challengeId: selectedId})
+      mutation.mutateAsync({link: app.links.assign_app, appId: app.id, challengeId: selectedId})
     }
   }
   return (

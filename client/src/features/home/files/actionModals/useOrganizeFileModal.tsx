@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { useImmer } from 'use-immer'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import { displayPayloadMessage } from '../../../../utils/api'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
 import { ResourceScope } from '../../types'
@@ -81,11 +82,11 @@ export const useOrganizeFileModal = ({
   const mutation = useMutation({
     mutationFn: (target: string) =>
       moveFilesRequest(selectedIds, target, scope),
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries('files')
       setShowModal(false)
       resetSelected && resetSelected()
-      toast.success('Success: Moving files')
+      displayPayloadMessage(res)
     },
     onError: () => {
       toast.error('Error: Moving files')

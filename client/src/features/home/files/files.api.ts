@@ -54,7 +54,7 @@ export async function deleteFilesRequest(ids: string[]): Promise<any> {
   return res.json()
 }
 
-export async function addFolderRequest({name}:{name: string}, parentFolderId?: string, scope?: ResourceScope): Promise<BaseError> {
+export async function addFolderRequest({name}:{name: string}, parentFolderId?: string, scope?: ResourceScope) {
   const res = await fetch(`/api/files/create_folder`, {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify({ name, parent_folder_id: parentFolderId ?? null, public: scope === 'everybody' ? 'true' : null })

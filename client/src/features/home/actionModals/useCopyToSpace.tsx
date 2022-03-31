@@ -7,6 +7,7 @@ import { CircleCheckIcon } from '../../../components/icons/CircleCheckIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { Loader } from '../../../components/Loader'
 import { breakPoints } from '../../../styles/theme'
+import { displayPayloadMessage } from '../../../utils/api'
 import { Modal } from '../../modal'
 import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../../modal/ModalCheckList'
 import { ButtonRow, ModalScroll } from '../../modal/styles'
@@ -37,12 +38,12 @@ const SpacesList = ({
   return (
     <ModalScroll>
       <Table>
-        <HeaderRow>
-          <TitleCol>Title</TitleCol>
-          <Col>Scope</Col>
-          <CheckCol></CheckCol>
-        </HeaderRow>
         <tbody>
+          <HeaderRow>
+            <TitleCol>Title</TitleCol>
+            <Col>Scope</Col>
+            <CheckCol></CheckCol>
+          </HeaderRow>
           {data!.map((s, i) => (
             <TableRow
               isSelected={selected === s.scope}
@@ -103,7 +104,7 @@ const CopyToSpaceForm = ({
     onSuccess: (res: any) => {
       onSuccess && onSuccess(res)
       setShowModal(false)
-      toast.success(`Success: ${resource} copied to space.`)
+      displayPayloadMessage(res)
     },
     onError: () => {
       toast.error(`Error: Copying ${resource} to space.`)

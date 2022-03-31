@@ -29,8 +29,9 @@ export const useAddFolderModal = ({ folderId, scope }: { folderId?: string, scop
       addFolderRequest(payload, folderId, scope),
     onSuccess: (res) => {
       if(res?.message?.type === 'error') {
-        setError('name', {message: res.message.text[0], type: 'validate'})
-        toast.error(`Error: ${res.message.text[0]}}`);
+        const errorMessage = res.message?.text ?? 'Unknown error adding folder'
+        setError('name', {message: errorMessage, type: 'validate'})
+        toast.error(errorMessage);
         return
       }
       reset()

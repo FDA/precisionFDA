@@ -109,7 +109,7 @@ export const useFileUploadModal = ({
       })
       toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
     } catch (error) {
-      toast.error('Error: uploading files')
+      toast.error(error.message)
     }
     await queryCache.invalidateQueries('files')
     await queryCache.invalidateQueries('counters')
