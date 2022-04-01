@@ -37,7 +37,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
           },
         },
         {
-          Header: 'Name',
+          Header: 'Execution Name',
           accessor: 'name',
           Filter: DefaultColumnFilter,
           width: colWidths?.name || 300,
