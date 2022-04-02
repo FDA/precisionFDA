@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import precisionFDALight from './precisionFDA.white.png'
-import precisionFDADark from './precisionFDA.dark.png'
+import precisionFDALight from '../../../../assets/precisionFDA.white.png'
+import precisionFDADark from '../../../../assets/precisionFDA.dark.png'
 
 
 const StyledImg = styled.img`

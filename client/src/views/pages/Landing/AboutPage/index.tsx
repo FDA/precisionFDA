@@ -1,4 +1,7 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
+import { contextUserSelector } from '../../../../reducers/context/selectors'
+import { RootState } from '../../../../store'
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs'
 
 import PublicLayout from '../../../layouts/PublicLayout'
@@ -6,11 +9,12 @@ import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 
 
 const AboutPage = () => {
-  const isLoggedIn = false
+  const user = useSelector((state: RootState) => state.context.user)
+  const isLoggedIn = (user !== null)
   const title = 'About precisionFDA'
   return (
     <PublicLayout>
-      <NavigationBar title={title} />
+      <NavigationBar title={title} user={user} />
 
         <Tabs>
         <div className="container-fluid">

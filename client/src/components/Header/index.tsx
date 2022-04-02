@@ -1,43 +1,34 @@
 import React from 'react'
-import {
-  HeaderItemText,
-  HeaderLeft,
-  MenuItem,
-  HeaderRight,
-  HeaderSpacer,
-  Nav,
-  StyledHeader,
-  StyledHeaderLogo,
-  StyledLinkReactRoute,
-  StyledDropMenuLinks,
-  StyledLink,
-  StyledDivider,
-  AvatarMenuItem,
-  IconWrap,
-  LogoWrap,
-} from './styles'
-import Dropdown from '../Dropdown'
-import { HomeIcon } from '../icons/HomeIcon'
-import { ProfileIcon } from '../icons/ProfileIcon'
-import { CommentIcon } from '../icons/CommentIcon'
-import { TrophyIcon } from '../icons/TrophyIcon'
-import { StarIcon } from '../icons/StarIcon'
-import { StickyNoteIcon } from '../icons/StickyNote'
-import { BullsEyeIcon } from '../icons/BullsEyeIcon'
-import { FortIcon } from '../icons/FortIcon'
-import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
-import { CommentingIcon } from '../icons/CommentingIcon'
-import { GSRSIcon } from '../icons/GSRSIcon'
-import { CaretIcon } from '../icons/CaretIcon'
-import { Link, matchPath, useLocation } from 'react-router-dom'
-import { SUPPORT_EMAIL } from '../../constants'
-import { QuestionIcon } from '../icons/QuestionIcon'
 import { useSelector } from 'react-redux'
+import { Link, useLocation } from 'react-router-dom'
+
+import { SUPPORT_EMAIL } from '../../constants'
+import { logout } from '../../features/auth/api'
 import {
   contextUserSelector,
   isInitializedSelector,
 } from '../../reducers/context/selectors'
-import { logout } from '../../features/auth/api'
+import Dropdown from '../Dropdown'
+import { BullsEyeIcon } from '../icons/BullsEyeIcon'
+import { CaretIcon } from '../icons/CaretIcon'
+import { CommentIcon } from '../icons/CommentIcon'
+import { CommentingIcon } from '../icons/CommentingIcon'
+import { FortIcon } from '../icons/FortIcon'
+import { GSRSIcon } from '../icons/GSRSIcon'
+import { HomeIcon } from '../icons/HomeIcon'
+import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
+import { ProfileIcon } from '../icons/ProfileIcon'
+import { QuestionIcon } from '../icons/QuestionIcon'
+import { StarIcon } from '../icons/StarIcon'
+import { StickyNoteIcon } from '../icons/StickyNote'
+import { TrophyIcon } from '../icons/TrophyIcon'
+import {
+  AvatarMenuItem, HeaderItemText,
+  HeaderLeft, HeaderRight,
+  HeaderSpacer, IconWrap,
+  LogoWrap, MenuItem, Nav, StyledDivider, StyledDropMenuLinks, StyledHeader,
+  StyledHeaderLogo, StyledLink, StyledLinkReactRoute,
+} from './styles'
 
 
 const getUsername = (user: any) => {
@@ -71,7 +62,7 @@ export const Header: React.FC = () => {
     <StyledDropMenuLinks>
       <StyledLink href="/profile">Profile</StyledLink>
       {user && !userIsGuest && (
-        <StyledLink href={`/users/${user!.dxuser}`}>Public Profile</StyledLink>
+        <StyledLink href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
       )}
       <StyledLink href="/licenses">Manage Licenses</StyledLink>
       {!userIsGuest && (
@@ -202,7 +193,7 @@ export const Header: React.FC = () => {
           )}
         </HeaderLeft>
         <HeaderRight>
-          <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support">
+          <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support" rel="noreferrer">
             <MenuItem>
               <IconWrap>
                 <CommentingIcon height={16} />

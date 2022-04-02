@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components'
 import { commonStyles } from '../../styles/commonStyles'
-import { colors, breakPoints, sizing, padding } from '../../styles/theme'
+import { colors, breakPoints, padding } from '../../styles/theme'
+import { Svg } from '../icons/Svg'
 
 export const pagePadding = css`
   padding: 8px;
@@ -28,6 +29,7 @@ export const PageRightColumn = styled.div`
 `
 
 export const PageContainer = styled.div`
+  flex: 1 0 auto;
   max-width: 1330px;
   margin-left: auto;
   margin-right: auto;
@@ -49,4 +51,35 @@ export const PageHeader = styled.div`
 export const PageActions = styled.div`
   display: flex;
   gap: 10px;
+`
+
+export const VerticalCenter = styled.span`
+  display: flex;
+  align-items: center;
+`
+
+export const Refresh = styled.span<{spin?: boolean}>`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: ${colors.textDarkGrey};
+
+  ${Svg}{
+    animation-name: ${({ spin }) => spin ? 'spin' : 'none'};
+    animation-duration: 2000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`
+export const Row = styled.div`
+  display: flex;
 `

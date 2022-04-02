@@ -13,9 +13,9 @@ module.exports = {
   ],
   plugins: [
     "babel-plugin-styled-components",
-    "@babel/plugin-proposal-class-properties",
     ["@babel/plugin-transform-runtime", { "regenerator": true }]
   ],
+  sourceMaps: true,
   env: {
     production: {
       plugins: [
