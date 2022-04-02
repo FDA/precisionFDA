@@ -6,6 +6,7 @@ export const BookIcon = ({ width, height }: { width?: number; height?: number })
     aria-hidden="true"
     height={height}
     width={width}
+    viewBox="0 0 512 512"
   >
     <path
       fill="currentColor"

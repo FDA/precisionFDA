@@ -33,13 +33,17 @@ services:
     entrypoint: ./docker/isolation.docker-entrypoint.sh
 
   frontend:
-    image: node:12
+    build:
+      context: ../client
+      dockerfile: ./docker/isolation.Dockerfile
     volumes:
       - type: bind
-        source: ../
-        target: /precision-fda
-    working_dir: /precision-fda/client
-    command: bash -c "yarn && yarn watch"
+        source: ../client/src
+        target: /precision-fda/src
+      - type: bind
+        source: ../app/assets/packs/bundle.js
+        target: /precision-fda/dist/bundle.js
+    command: yarn watch:docker
 
   gsrs:
     build:

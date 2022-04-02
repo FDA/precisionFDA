@@ -35,11 +35,11 @@ export const Button = styled.button<IButton>`
     outline: 0;
   }
 
-  ${({ role, disabled }) => { 
-    let textColor = theme.colors.primaryBlue;
+  ${({ role, disabled, active }) => { 
+    let textColor = theme.colors.primaryBlue
     let borderColor = 'rgb(218, 239, 251);'
-    let borderColorHover = theme.colors.lightBlue;
-    let backgroundColorHover = theme.colors.subtleBlue;
+    let borderColorHover = theme.colors.lightBlue
+    let backgroundColorHover = theme.colors.subtleBlue
 
     if (role === "warning") {
       // TODO: the colours are not based on mockups and are not final
@@ -79,6 +79,12 @@ export const Button = styled.button<IButton>`
         border-color: ${textColor};
         box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
       }
+
+      ${!!active && css`
+        color: ${textColor};
+        border-color: ${textColor};
+        box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
+      `}
     `
   }}
 
@@ -155,4 +161,29 @@ export const ButtonSolidRed = styled(Button)`
     background-color: ${theme.colors.darkRed};
     box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
   }
+`
+
+export const ToggleButton = styled(Button)<IButton>`
+  background-color: ${theme.colors.textWhite};
+  border-color: #1b639f;
+  color: ${theme.colors.textBlack};
+
+  &:hover {
+    ${({ disabled }) => !disabled && css`
+      color: ${theme.colors.primaryBlue};
+    `}
+    ${({ disabled }) => disabled && css`
+      color: ${theme.colors.textMediumGrey};
+      cursor: not-allowed;
+    `}
+    ${({ active }) => active && css`
+      color: ${theme.colors.textWhite};
+      background-color: ${theme.colors.primaryBlue};
+    `}
+  }
+
+  ${({ active }) => active && css`
+    color: ${theme.colors.textWhite};
+    background-color: ${theme.colors.primaryBlue};
+  `}
 `

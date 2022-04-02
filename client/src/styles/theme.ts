@@ -27,7 +27,7 @@ export const colors = {
   inactiveBlue: '#8c9ba8',
   lightYellow: '#efe5d7',
   mediumDarkBlue: '#2f5373',
-  darkRed: '#c41331',
+  darkRed: '#CA2323',
   darkBlue: '#343E4D',
   darkGreen: '#1d764c',
   darkYellow: '#ec971f',
@@ -36,8 +36,10 @@ export const colors = {
   textMediumGrey: '#646464',
   textLightGrey: '#ddd',
   textWhite: '#fff',
+  white110: '#f5f5f5',
   backgroundLightGray: 'rgb(242, 242, 242)',
   borderDefault: '#ddd',
+  // Used for jobs or executions
   stateRunningBackground: '#f0f9fd',
   stateRunningColor: '#2071b5',
   stateFailedBackground: '#ffeeed',
@@ -97,6 +99,7 @@ export const sizing = {
   thumbnailHeightSmall: '90px',
   iconSmall: '56px',
   highlightBarWidth: '4px',
+  modalBorderRadius: '8px',
 }
 
 export const theme = {

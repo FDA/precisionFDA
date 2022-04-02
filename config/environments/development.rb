@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -95,5 +94,12 @@ Rails.application.configure do
     logger.formatter = config.log_formatter
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
+
+  config.after_initialize do
+    # @see https://github.com/trusche/httplog#configuration
+    HttpLog.configure do |httplog_config|
+      httplog_config.logger = Rails.logger
+      httplog_config.log_headers = true
+    end
+  end
 end
-# rubocop:enable Metrics/BlockLength

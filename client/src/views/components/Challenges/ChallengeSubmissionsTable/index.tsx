@@ -1,6 +1,5 @@
 import React, { Component, FunctionComponent } from 'react'
 import { connect } from 'react-redux'
-
 import Loader from '../../Loader'
 import Modal from '../../Modal'
 import Button from '../../Button'
@@ -14,11 +13,11 @@ import {
 import { Table, Thead, Tbody, Th } from '../../TableComponents'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 import './style.sass'
-import Markdown from '../../Markdown'
 import { getOrder } from '../../../../helpers'
 import * as C from '../../../../constants'
 import { JobState } from '../../../../types/job'
 import { ISubmission } from '../../../../types/submission'
+import { Markdown } from '../../../../components/Markdown'
 
 
 interface IChallengeSubmissionsTableProps {

@@ -33,7 +33,7 @@
           <div>
             <span class="btn btn-primary btn-sm btn-browse-files">
               <span class="fa fa-files-o"></span>&nbsp;Select Docker Image
-              <input id="docker_image_file_input" type="file" accept=".tar.gz" data-bind="event: {change: dockerFileOnChangeHandler}">
+              <input id="docker_image_file_input" type="file" accept=".gz" data-bind="event: {change: dockerFileOnChangeHandler}">
             </span>
           </div>
           <!-- ko if: dockerImage() -->

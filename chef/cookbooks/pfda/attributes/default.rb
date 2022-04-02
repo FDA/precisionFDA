@@ -24,16 +24,16 @@ default[:nginx][:log_dir] = "/var/log/nginx"
 default[:logrotate][:rotate] = 30
 default[:logrotate][:dateformat] = false # set to '-%Y%m%d' to have date formatted logs
 
-nodejs_version = "12.16.1"
+nodejs_version = "12.22.10"
 default["nodejs"]["install_method"] = "binary"
 default["nodejs"]["version"] = nodejs_version
 
 # The location to install global items.
 default["nodejs"]["prefix"] = "/usr/local/nodejs-binary-#{nodejs_version}"
 
-# https://nodejs.org/dist/v12.16.1/SHASUMS256.txt
+# https://nodejs.org/dist/v12.22.10/SHASUMS256.txt
 default["nodejs"]["binary"]["checksum"] =
-  "b2d9787da97d6c0d5cbf24c69fdbbf376b19089f921432c5a61aa323bc070bea"
+  "deda5ce0560db916291cbfd1975869f756a47adcedad841887c116c37b6b1ff4"
 
 default["nodejs"]["bin_path"] = "/usr/local/nodejs-binary/bin/"
 default["nodejs"]["worker"]["instances"] = 2

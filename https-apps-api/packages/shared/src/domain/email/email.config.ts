@@ -275,6 +275,7 @@ type EmailConfigItem = {
   handlerClass: EmailTemplateContructor
 }
 
+// TODO(samuel) fix proper use of as const
 const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
   jobFinished: {
     name: 'jobFinished',
