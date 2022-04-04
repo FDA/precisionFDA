@@ -44,14 +44,14 @@ const Item = ({ file, action }) => (
       <td style={{ textAlign: 'center' }}>
         <a href={file.downloadURL} target="_blank" rel="noopener noreferrer">
           <Icon icon="fa-download" fw />&nbsp;
-          open
+          download
         </a>
       </td>
     )}
     {(action === HOME_FILES_ACTIONS.OPEN) && (
       <td style={{ textAlign: 'center' }}>
         <a href={`${file.downloadURL}?inline=true`} target="_blank" rel="noopener noreferrer">
-          <Icon icon="fa-download" fw />&nbsp;
+          <Icon icon="fa-file-o" fw />&nbsp;
           open
         </a>
       </td>

@@ -8,15 +8,12 @@ module Api
       before_action :can_edit?, except: %i(subfolders)
 
       # POST /api/spaces/:space_id/files/publish_files
-      # Makes selected files/folders public.
+      # Makes selected files public.
       def publish_files
         files = @space.files.where(id: params[:ids])
-        folders = @space.folders.where(id: params[:ids])
-        head(:unprocessable_entity) && return unless files.exists? && folders.exists?
-        folder_children = folders.flat_map(&:all_children)
+        head(:unprocessable_entity) && return unless files.exists?
 
-        count = UserFile.publish(files + folders + folder_children,
-                                 @context, UserFile::SCOPE_PUBLIC)
+        count = UserFile.publish(files, @context, UserFile::SCOPE_PUBLIC)
 
         render json: { count: count }
       end

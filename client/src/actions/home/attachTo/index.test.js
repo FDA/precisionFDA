@@ -15,7 +15,7 @@ import { ALERT_SHOW_ABOVE_ALL } from '../../alertNotifications/types'
 import { ALERT_ABOVE_ALL, OBJECT_TYPES } from '../../../constants'
 
 
-describe('attachTo()', () => {
+xdescribe('attachTo()', () => {
   afterEach(() => {
     fetchMock.reset()
   })
@@ -84,7 +84,7 @@ describe('attachTo()', () => {
 })
 
 
-describe('attachTo()', () => {
+xdescribe('attachTo()', () => {
   afterEach(() => {
     fetchMock.reset()
   })

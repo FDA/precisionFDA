@@ -87,6 +87,7 @@ const buildIsNotificationEnabled = (
     // notification TYPE does not even exist, we cannot send the email
     return false
   }
+  // TODO(samuel) remove fallback option when all users have notifications settings created - Create migration
   // for now, we know all default values are set to true
   const defaultValue = true
   if (isNil(userConfig) || isNil(userConfig.data)) {
@@ -171,7 +172,6 @@ export {
   buildIsNotificationEnabled,
   buildFilterByUserSettings,
   getKeyForUserSpaceRole,
-  getKeyForPrivateEvent,
   buildEmailTemplate,
   getBullJobIdForEmailOperation,
 }

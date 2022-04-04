@@ -53,6 +53,7 @@ class NotificationPreference < ApplicationRecord
   ).freeze
 
   # email types currently handled by nodejs app
+  # File - /https-apps-api/packages/shared/src/domain/email/email.config.ts
   EMAIL_TYPES = {
     notification_job: 1,
     notification_content: 2,
@@ -82,6 +83,45 @@ class NotificationPreference < ApplicationRecord
 
   validates(*ALL_KEYS, inclusion: { in: [true, false] })
   store :data, accessors: ALL_KEYS, coder: JSON
+
+  class << self
+    def default_preferences
+      {
+        # flags - enabled only for comment_activity
+        # https://jira.internal.dnanexus.com/browse/PFDA-3094
+        reviewer_membership_changed: 0,
+        reviewer_comment_activity: 1,
+        reviewer_content_added_or_deleted: 0,
+        sponsor_membership_changed: 0,
+        sponsor_comment_activity: 1,
+        sponsor_content_added_or_deleted: 0,
+        reviewer_lead_membership_changed: 1,
+        reviewer_lead_comment_activity: 1,
+        reviewer_lead_content_added_or_deleted: 1,
+        reviewer_lead_member_added_to_space: 1,
+        reviewer_lead_space_locked_unlocked_deleted: 1,
+        sponsor_lead_membership_changed: 1,
+        sponsor_lead_comment_activity: 1,
+        sponsor_lead_content_added_or_deleted: 1,
+        sponsor_lead_member_added_to_space: 1,
+        sponsor_lead_space_locked_unlocked_deleted: 1,
+        admin_membership_changed: 1,
+        admin_comment_activity: 1,
+        admin_content_added_or_deleted: 1,
+        admin_member_added_to_space: 1,
+        admin_space_locked_unlocked_deleted: 1,
+        private_job_finished: 0,
+        private_challenge_opened: 1,
+        private_challenge_preregister: 1,
+      }
+    end
+
+    def create_for_user!(user)
+      np = default_preferences
+      np[:user_id] = user.id
+      create!(np)
+    end
+  end
 
   def self.find_by_user(user)
     find_or_initialize_by(user_id: user.id)

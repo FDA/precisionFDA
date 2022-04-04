@@ -8,18 +8,8 @@ import { theme } from '../../../../styles/theme'
 import { PublicNavbar } from '../PublicNavbar'
 import { commonStyles } from '../../../../styles/commonStyles'
 import { Header } from '../../../../components/Header'
-import navBackground from '../../../../assets/NavbarBackground.png'
+import { MainBanner } from '../../../../components/Banner'
 
-
-const StyledNavigationBar = styled.div`
-  width: 100%;
-  background-color: rgb(22,19,14);
-  background-image: url(${navBackground});
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  color: white;
-`
 
 const NavigationBarBanner = styled.div`
   display: flex;
@@ -46,7 +36,7 @@ const NavigationBarLogoAndTitle = styled.div`
   }
 
   h1 {
-    ${commonStyles.pageTitle}
+    ${commonStyles.bannerTitle}
     color: #fff;
     margin: 0;
   }
@@ -139,7 +129,7 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
   const showLoggedInNavBar = isLoggedIn && false
 
   return (
-    <StyledNavigationBar id="navigation-bar">
+    <MainBanner id="navigation-bar">
       {showLoggedInNavBar && (
         <Header />
       )}
@@ -150,7 +140,7 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
       )}
       {renderTitleIfDefined()}
       {children}
-    </StyledNavigationBar>
+    </MainBanner>
   )
 }
 

@@ -10,6 +10,7 @@ const bpLarge = `@media(min-width: 1200px)`
 const bpSuper = `@media(min-width: 1340px)`
 
 export const StyledHeaderLogo = styled(PFDALogoLight)`
+  box-sizing: border-box;
   padding: 4px 0;
 `
 
@@ -39,6 +40,7 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
   align-items: center;
   cursor: pointer;
   color: ${theme.colors.textWhite};
+  box-sizing: border-box;
 
   ${({ active = false }) => {
     if (active) {

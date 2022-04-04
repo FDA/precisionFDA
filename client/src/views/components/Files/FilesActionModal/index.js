@@ -54,6 +54,7 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
       )
   }
 }
+
 // This component logic - is for Everybody, Featured page
 const FilesActionModal = ({ modalAction, hideAction, action, files, isOpen, isLoading }) => {
   const title = switchTitle(action)

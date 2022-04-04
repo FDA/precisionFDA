@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   include UidFindable
 
   # Prevent CSRF attacks by raising an exception.
+  # N.B.: GET and HEAD requests are not checked
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception, unless: -> { Rails.env.development? || Rails.env.dev? }
 

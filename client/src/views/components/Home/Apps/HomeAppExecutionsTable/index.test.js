@@ -4,7 +4,7 @@ import { shallow } from 'enzyme'
 import { HomeAppsExecutionsTable } from '.'
 
 
-describe('HomeAppsExecutionsTable test', () => {
+xdescribe('HomeAppsExecutionsTable test', () => {
   it('should render', () => {
     const component = shallow(<HomeAppsExecutionsTable />)
 
