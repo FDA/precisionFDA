@@ -1098,7 +1098,7 @@ class ApiController < ApplicationController
   #
   # note_uids (Array[String], required): array of note, discussion, answer uids
   # item (Array[Object], required): array of items with id, type
-  #     item.type (String): type of string from App, Comparison, Job, or UserFile
+  #     item.type (String): type of string from App, Comparison, Job, UserFile or Asset
   #
   # Outputs:
   #
@@ -1106,14 +1106,23 @@ class ApiController < ApplicationController
   # items_added (Array[Integer])
   #
   def attach_to_notes
+    items = unsafe_params[:items]
     note_uids = unsafe_params[:note_uids]
-    unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
+
+    unless note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
       fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids"
     end
 
-    items = unsafe_params[:items]
-    unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
-      fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
+    valid_items =
+      items.all? do |item|
+        item[:id].is_a?(Numeric) &&
+          item[:type].is_a?(String) &&
+          %w(App Asset Comparison Job UserFile).include?(item[:type])
+      end
+
+    unless valid_items
+      fail "Items need to be an array of objects with id and type " \
+           "(one of App, Comparison, Job, UserFile or Asset)"
     end
 
     notes_added = {}
@@ -1123,7 +1132,7 @@ class ApiController < ApplicationController
       note_uids.each do |note_uid|
         note_item = item_from_uid(note_uid)
 
-        next unless !note_item.nil? && note_item.editable_by?(@context)
+        next unless note_item&.editable_by?(@context)
 
         items.each do |item|
           item[:type] = if item[:type].blank?

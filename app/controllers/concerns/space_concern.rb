@@ -16,7 +16,7 @@ module SpaceConcern
     @space = Space.undeleted.find(params[:space_id])
     raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 
-    return nil unless @space.accessible_by_user?(current_user)
+    return unless @space.accessible_by_user?(current_user)
 
     @space
   end

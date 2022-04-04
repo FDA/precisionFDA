@@ -98,7 +98,7 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
             icon="fa-download" text="Download" handler={showDownloadModal} />
           <Divider />
           <Item isDisabled={!isAnyFileChecked}
-            icon="fa-download" text="Download" handler={showOpenModal} />
+            icon="fa-file-o" text="Open" handler={showOpenModal} />
         </ul>
       </div>
       <ActionModal files={checkedFiles} loadFilesHandler={loadFilesHandler} />

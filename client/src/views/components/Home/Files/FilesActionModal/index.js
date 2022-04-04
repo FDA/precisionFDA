@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import HomeFileShape from '../../../../shapes/HomeFileShape'
 import Modal from '../../../Modal'
 import Button from '../../../Button'
-import { HOME_FILES_ACTIONS } from '../../../../../constants'
+import { HOME_FILES_ACTIONS, SPACE_FILES_ACTIONS } from '../../../../../constants'
 import FilesList from './FilesList'
 
 
@@ -18,6 +18,10 @@ const switchTitle = (action) => {
       return 'Open'
     case HOME_FILES_ACTIONS.DOWNLOAD:
       return 'Download'
+    case SPACE_FILES_ACTIONS.PUBLISH:
+      return 'Publish'
+    case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+      return 'Copy To Private'
     default:
       return 'Some Action'
   }
@@ -37,6 +41,20 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
         <>
           <Button onClick={hideAction}>Cancel</Button>
           <Button type="danger" onClick={modalAction}>Delete</Button>
+        </>
+      )
+    case SPACE_FILES_ACTIONS.PUBLISH:
+      return (
+        <>
+          <Button onClick={hideAction}>Cancel</Button>
+          <Button type="success" onClick={modalAction}>Publish</Button>
+        </>
+      )
+    case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+      return (
+        <>
+          <Button onClick={hideAction}>Cancel</Button>
+          <Button type="success" onClick={modalAction}>Copy</Button>
         </>
       )
     default:

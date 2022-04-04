@@ -15,6 +15,7 @@ module Api
     before_action :sync_files, only: %i(index)
 
     DOWNLOAD_ACTION = "download".freeze
+    OPEN_ACTION = "open".freeze
     PUBLISH_ACTION = "publish".freeze
     DELETE_ACTION = "delete".freeze
     COPY_ACTION = "copy".freeze
@@ -42,67 +43,40 @@ module Api
     #   all files, editable by current user.
     # @param order_by, order_dir [String] Params for ordering.
     # @return files [UserFile] Array of UserFile objects if they exist OR files: [].
-    # rubocop:disable Metrics/MethodLength
     def index
       # Fetches space files.
-      if params[:space_id]
-        nodes = []
-        if find_user_space
-          folder_id = params[:folder_id]
-          nodes = @space.nodes.files_and_folders.
-            where(scoped_parent_folder_id: folder_id).
-            includes(:taggings).eager_load(user: :org).
-            search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).
-            page(page_from_params).per(PAGE_SIZE)
-          nodes = FileService::FilesFilter.call(nodes, params[:filters])
-        end
+      respond_with_space_files && return if params[:space_id]
 
-        page_dict = pagination_dict(nodes)
+      # Fetches all user 'private' files.
+      filter_tags = params.dig(:filters, :tags)
 
-        if show_count
-          render plain: page_dict[:total_count]
-        else
-          render json: {
-            entries: nodes.map { |node| helpers.client_file(node, @space, current_user) },
-            meta: files_meta.merge(count(page_dict[:total_count])).
-              merge({ pagination: page_dict }),
-          }, root: "files"
-        end
-      else
-        # Fetches all user 'private' files.
-        filter_tags = params.dig(:filters, :tags)
+      files = UserFile.
+        real_files.
+        editable_by(@context).
+        accessible_by_private.
+        where.not(parent_type: ["Comparison", nil]).
+        includes(:taggings).
+        eager_load(user: :org).
+        search_by_tags(filter_tags)
 
-        files = UserFile.
-          real_files.
-          editable_by(@context).
-          accessible_by_private.
-          where.not(parent_type: ["Comparison", nil]).
-          includes(:taggings).eager_load(user: :org).
-          search_by_tags(filter_tags)
+      return render(plain: files.size) if show_count
 
-        if show_count
-          render plain: files.size
-        else
-          files = files.where(parent_folder_id: @parent_folder_id)
-          files = FileService::FilesFilter.call(files, params[:filters])
+      files = files.where(parent_folder_id: @parent_folder_id)
+      files = FileService::FilesFilter.call(files, params[:filters])
 
-          folders = private_folders(@parent_folder_id).includes(:taggings).
-            eager_load(user: :org).search_by_tags(filter_tags)
-          folders = FileService::FilesFilter.call(folders, params[:filters])
+      folders = private_folders(@parent_folder_id).includes(:taggings).
+        eager_load(user: :org).search_by_tags(filter_tags)
+      folders = FileService::FilesFilter.call(folders, params[:filters])
 
-          user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-            order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-          page_dict = pagination_dict(user_files)
+      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
+        order(order_from_params).page(page_from_params).per(page_size)
+      page_dict = pagination_dict(user_files)
 
-          render json: user_files, root: "files", adapter: :json,
-                 meta: files_meta.
-                   merge(count(UserFile.private_count(@context.user))).
-                   merge({ pagination: page_dict })
-        end
-      end
+      render json: user_files, root: "files", adapter: :json,
+             meta: files_meta.
+               merge(count(UserFile.private_count(@context.user))).
+               merge({ pagination: page_dict })
     end
-    # rubocop:enable Metrics/MethodLength
 
     # GET /api/files/featured
     # A fetch method for files, accessible by public and with user taggings.
@@ -119,9 +93,10 @@ module Api
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = Folder.
-        featured.accessible_by(@context).
+        featured.
+        accessible_by(@context).
         where(parent_folder_id: @parent_folder_id).
-        includes(:taggings).eager_load(user: :org).
+        includes(:taggings).
         eager_load(user: :org).
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
@@ -282,7 +257,7 @@ module Api
       files = []
 
       case task
-      when DOWNLOAD_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
+      when DOWNLOAD_ACTION, OPEN_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
         nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when PUBLISH_ACTION
@@ -457,23 +432,46 @@ module Api
 
     private
 
+    def respond_with_space_files
+      nodes = []
+
+      if find_user_space
+        folder_id = params[:folder_id]
+        nodes = @space.nodes.files_and_folders.
+          where(scoped_parent_folder_id: folder_id).
+          includes(:taggings).eager_load(user: :org).
+          search_by_tags(params.dig(:filters, :tags)).
+          order(order_from_params).
+          page(page_from_params).per(page_size)
+        nodes = FileService::FilesFilter.call(nodes, params[:filters])
+      end
+
+      page_dict = pagination_dict(nodes)
+
+      return render(plain: page_dict[:total_count]) if show_count
+
+      render json: {
+        entries: nodes.map { |node| helpers.client_file(node, @space, current_user) },
+        meta: files_meta.merge(count(page_dict[:total_count])).
+          merge({ pagination: page_dict }),
+      }, root: "files"
+    end
+
     def render_files_list(files:, folders:)
       files_size = files.size
 
-      if show_count
-        render plain: files_size
-      else
-        user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+      return render(plain: files_size) if show_count
 
-        page_dict = pagination_dict(user_files)
-        page_dict[:total_count] = files_size
+      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
+        order(order_from_params).page(page_from_params).per(page_size)
 
-        render json: user_files, root: "files", adapter: :json,
-               meta: files_meta.
-                 merge(count(page_dict[:total_count])).
-                 merge({ pagination: page_dict })
-      end
+      page_dict = pagination_dict(user_files)
+      page_dict[:total_count] = files_size
+
+      render json: user_files, root: "files", adapter: :json,
+             meta: files_meta.
+               merge(count(page_dict[:total_count])).
+               merge({ pagination: page_dict })
     end
 
     # Get a FolderService new instance for a current context

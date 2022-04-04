@@ -6,6 +6,7 @@
       "dom.iterable",
       "es2020"
     ],
+    "sourceMap": true,
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

@@ -9,7 +9,7 @@ import { HomeDatabasesSinglePage }  from './index'
 const mockStore = configureMockStore()
 const store = mockStore({})
 
-describe('HomeDatabasesSinglePage test', () => {
+xdescribe('HomeDatabasesSinglePage test', () => {
   it('should render', () => {
     const component = shallow(
       <Provider store={store}>

@@ -123,3 +123,13 @@ In order to run app in QA environment, use this command (from the project root):
   in docker-compose.yml file)
 
 For the rest of the useful commands see [here](USEFUL_COMMANDS.md).
+
+
+## Troubleshootng
+
+- If at some point the previously working docker setup fails, with Ruby complaining about its dependencies, try deleting the gems volume then rebuild the images
+  ```docker-compose down
+  docker volume rm precision-fda_gems
+  docker-compose build
+  docker-compose up
+  ```
