@@ -10,6 +10,9 @@ x-shared: &shared
     - REDIS_WORKER_URL=redis://redis:6379/0
     - GSRS_URL=http://gsrs:9000
     - GSRS_ENABLED=true
+    # ! Never push these flags enable - set to value "1", or any other non-empty string
+    - SKIP_DEPS_SETUP=0
+    - SKIP_DB_SETUP=0
 
 services:
   web:
