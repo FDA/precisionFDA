@@ -6,12 +6,16 @@ dockerize -wait tcp://db:3306
 
 cp config/database.yml.sample config/database.yml
 
-bundle check || bundle install
+if [[ ! $SKIP_DEPS_SETUP || $SKIP_DEPS_SETUP = 0 ]]; then
+  bundle check || bundle install
+fi
 
-# Runs setup if database does not exist, or runs migrations if it does
-bundle exec rake db:prepare
+if [[ ! $SKIP_DB_SETUP || $SKIP_DB_SETUP = 0 ]]; then
+  # Runs setup if database does not exist, or runs migrations if it does
+  bundle exec rake db:prepare
 
-bundle exec rake user:generate_test_users
+  bundle exec rake user:generate_test_users
+fi
 
 if [[ -f ./key.pem && -f ./cert.pem ]]; then
   bundle exec thin --debug start --ssl --ssl-key-file ./key.pem --ssl-cert-file ./cert.pem
