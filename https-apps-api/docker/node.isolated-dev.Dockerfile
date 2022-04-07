@@ -10,8 +10,6 @@ COPY https-apps-api/packages/worker/package.json ./packages/worker/package.json
 RUN yarn install --frozen-lockfile
 
 # copy root-level shared stuff
-COPY .env key.pem cert.pem ./
-# copy the code (leveraging .dockerignore)
-COPY https-apps-api/ ./
-# build /dist
-RUN make build
+COPY key.pem cert.pem /keys/
+# Note(samuel) - /src folder is expected to be mounted as volume for watch mode
+CMD ["make", "watch"]
