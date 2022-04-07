@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
@@ -20,7 +20,7 @@ import {
   ActionsRow,
   LoadingList,
   QuickActions,
-  StyledHomeTable,
+  StyledHomeTable
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
@@ -78,7 +78,13 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
     setPageParam(1, 'replaceIn')
   }
 
+  // If the component is rendering for the first time, skip setting folderIdParam
+  const first = useRef(true);
   useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
     setFolderIdParam(undefined, 'pushIn')
   }, [scope])
 
