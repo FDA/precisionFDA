@@ -47,6 +47,9 @@ services:
       - type: bind
         source: ../../app/assets/packs/bundle.js
         target: /precision-fda/dist/bundle.js
+      - type: volume 
+        source: pfda-webpack-cache
+        target: /precision-fda/.build_cache/
     working_dir: /precision-fda
     command: yarn watch:docker
 
@@ -133,3 +136,4 @@ volumes:
   pfda-mysql-volume:
   gsrs-mysql-volume:
   pfda-gems:
+  pfda-webpack-cache:
