@@ -84,8 +84,6 @@ services:
     build:
       context: ../../
       dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
-      args:
-        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
     command: ['make', 'run-dist']
     ports:
       - 3001:3001
@@ -97,9 +95,6 @@ services:
     build:
       context: ../../
       dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
-      args:
-        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
-
     command: ['make', 'run-worker-dist']
     depends_on:
       - db
