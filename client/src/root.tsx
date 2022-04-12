@@ -1,104 +1,160 @@
-import React from 'react'
-import { Router, Switch, Route, Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { Provider } from 'react-redux'
+import React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { ToastContainer } from 'react-toastify'
-
-import history from './utils/history'
-import SpacesListPage from './views/pages/Spaces/SpacesListPage'
-import SpacePage from './views/pages/Spaces/SpacePage'
-import NoFoundPage from './views/pages/NoFoundPage'
-import NewSpacePage from './views/pages/Spaces/NewSpacePage'
-import HomePage from './views/pages/Home'
-import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
-import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
-import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
-import NewsListPage from './views/pages/News/NewsListPage'
-import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
-import { ExpertsSinglePage } from './views/pages/Experts/ExpertsSinglePage'
-import LandingPage from './views/pages/Landing/LandingPage'
-import AboutPage from './views/pages/Landing/AboutPage'
+import { Provider } from 'react-redux'
+import { Redirect, Route, Router, Switch } from 'react-router-dom'
+import { Slide, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { PushReplaceHistory, QueryParamProvider } from 'use-query-params'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
+import { AuthModal } from './features/auth/AuthModal'
+import { Home2 } from './features/home'
+import { FileShow } from './features/home/files/show/FileShow'
+import { useModal } from './features/modal/useModal'
+import GlobalStyle from './styles/global'
+import { StyledToastContainer } from './styles/toast.styles'
+import history from './utils/history'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
-import GlobalStyle from './styles/global'
+import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
+import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
+import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
+import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
+import { ExpertsSinglePage } from './views/pages/Experts/ExpertsSinglePage'
+import HomePage from './views/pages/Home'
+import AboutPage from './views/pages/Landing/AboutPage'
+import LandingPage from './views/pages/Landing/LandingPage'
+import NewsListPage from './views/pages/News/NewsListPage'
+import NoFoundPage from './views/pages/NoFoundPage'
+import NewSpacePage from './views/pages/Spaces/NewSpacePage'
+import SpacePage from './views/pages/Spaces/SpacePage'
+import SpacesListPage from './views/pages/Spaces/SpacesListPage'
 
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // We disable refetching on focus as it can extend the session without user input
-      refetchOnWindowFocus: false,
+const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        // We disable refetching on focus as it can extend the session without user input
+        refetchOnWindowFocus: false,
+        onSuccess: (res: any) => {
+          // Catch if cookie expired
+          // if(process.env.NODE_ENV !== 'development') {
+          if (res?.failure === 'Authentication failure') {
+            onAuthFailure()
+          }
+          // }
+        },
+      },
     },
-  },
-})
+  })
 
 const root = ({ store }: any) => {
+  const authModal = useModal()
+  toast.configure()
+
   return (
-  <Provider store={store}>
-    <GlobalStyle />
-    <QueryClientProvider client={queryClient}>
-      <Router history={history}>
-        <ErrorWrapper>
-          <Switch>
-            <Route exact path='/'>
-              <LandingPage />
-            </Route>
-            <Route exact path='/about'>
-              <AboutPage />
-            </Route>
-            <Redirect exact from='/home' to='/home/files' />
-            <Route path='/home/:page/:tab?' render={(props: any) => <HomePage {...props} />} />
-            <Route path='/account/notifications'>
-              <NotificationsPage />
-            </Route>
-            <Route exact path='/spaces'>
-              <SpacesListPage />
-            </Route>
-            <Route exact path='/spaces/new'>
-              <NewSpacePage />
-            </Route>
-            <Route exact path='/spaces/duplicate/:spaceId'>
-              <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.DUPLICATE} />
-            </Route>
-            <Route exact path='/spaces/edit/:spaceId'>
-              <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.EDIT} />
-            </Route>
-            <Redirect exact from='/spaces/:spaceId' to='/spaces/:spaceId/files' />
-            <Route path='/spaces/:spaceId/:page' render={(props) => <SpacePage {...props} />} />
-            <Route exact path='/challenges'>
-              <ChallengesListPage />
-            </Route>
-            <Route exact path='/challenges/propose'>
-              <ChallengeProposePage />
-            </Route>
-            <Route path='/challenges/:challengeId/:page' render={(props) => <ChallengeDetailsPage {...props} />} />
-            <Route path='/challenges/:challengeId' render={(props) => <ChallengeDetailsPage {...props} />} />
-            <Route exact path='/news'>
-              <NewsListPage />
-            </Route>
-            <Route
-              path='/experts/:expertId/:page'>
-              <ExpertsSinglePage />
-            </Route>
-            <Route
-              path='/experts/:expertId'>
-              <ExpertsSinglePage />
-            </Route>
-            <Route exact path='/experts'>
-              <ExpertsListPage />
-            </Route>
-            <Route path="*">
-              <NoFoundPage />
-            </Route>
-          </Switch>
-        </ErrorWrapper>
-      </Router>
-      <ToastContainer position='top-right' />
-    </QueryClientProvider>
-  </Provider>
-)}
+    <Provider store={store}>
+      <GlobalStyle />
+      <QueryClientProvider
+        client={queryClient({
+          onAuthFailure: () => authModal.setShowModal(true),
+        })}
+      >
+        <Router history={history}>
+          <QueryParamProvider
+            ReactRouterRoute={Route}
+            history={history as unknown as PushReplaceHistory}
+            location={history.location as unknown as Location}
+          >
+            {/* <SessionExpiration authModal={authModal} /> */}
+            <ErrorWrapper>
+              <Switch>
+                <Route exact path="/">
+                  <LandingPage />
+                </Route>
+                <Route exact path="/about">
+                  <AboutPage />
+                </Route>
+                <Route exact path="/files/:fileId">
+                  <FileShow />
+                </Route>
+                <Route path="/home">
+                  <Home2 />
+                </Route>
+                <Redirect exact from="/home-old" to="/home-old/files" />
+                <Route
+                  path="/home-old/:page/:tab?"
+                  render={(props: any) => <HomePage {...props} />}
+                />
+                <Route path="/account/notifications">
+                  <NotificationsPage />
+                </Route>
+                {/* <Route exact path="/spaces">
+                  <Spaces2List />
+                </Route> */}
+                <Route exact path="/spaces">
+                  {/* <Space /> */}
+                  <SpacesListPage />
+                </Route>
+                <Route exact path="/spaces/new">
+                  <NewSpacePage />
+                </Route>
+                <Route exact path="/spaces/duplicate/:spaceId">
+                  <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.DUPLICATE} />
+                </Route>
+                <Route exact path="/spaces/edit/:spaceId">
+                  <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.EDIT} />
+                </Route>
+                <Redirect
+                  exact
+                  from="/spaces/:spaceId"
+                  to="/spaces/:spaceId/files"
+                />
+                <Route
+                  path="/spaces/:spaceId/:page"
+                  render={props => <SpacePage {...props} />}
+                />
+                <Route exact path="/challenges">
+                  <ChallengesListPage />
+                </Route>
+                <Route exact path="/challenges/propose">
+                  <ChallengeProposePage />
+                </Route>
+                <Route
+                  path="/challenges/:challengeId/:page"
+                  render={props => <ChallengeDetailsPage {...props} />}
+                />
+                <Route
+                  path="/challenges/:challengeId"
+                  render={props => <ChallengeDetailsPage {...props} />}
+                />
+                <Route exact path="/news">
+                  <NewsListPage />
+                </Route>
+                <Route path="/experts/:expertId/:page">
+                  <ExpertsSinglePage />
+                </Route>
+                <Route path="/experts/:expertId">
+                  <ExpertsSinglePage />
+                </Route>
+                <Route exact path="/experts">
+                  <ExpertsListPage />
+                </Route>
+                <Route path="*">
+                  <NoFoundPage />
+                </Route>
+              </Switch>
+            </ErrorWrapper>
+          </QueryParamProvider>
+        </Router>
+        <AuthModal {...authModal} />
+        <StyledToastContainer position="top-right" transition={Slide} hideProgressBar pauseOnHover />
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      </QueryClientProvider>
+    </Provider>
+  )
+}
 
 root.displayName = 'Root'
 

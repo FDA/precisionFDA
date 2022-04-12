@@ -129,7 +129,16 @@ Rails.application.routes.draw do
 
     # My Home (Site-Wide UI & API Redesign)
     get "home" => "home#index"
+    get "home" => "home#index"
     get "/home/*all", to: "home#index"
+
+    # Old My Home
+    # TODO: remove old code once new My Home is stable for release or two,
+    #       but for now it still has utility for devs
+    # get "home-old" => "home#index"
+    # get "home-old" => "home#index"
+    # get "/home-old/*all", to: "home#index"
+
     get "/account/*all", to: "home#index"
     get "/challenges/propose", to: "challenges#index"
 

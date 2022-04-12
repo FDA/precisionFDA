@@ -101,7 +101,7 @@ describe('backendCall()', () => {
 
     return backendCall(BACKEND_URL, 'GET', {}, token)
       .then(() => {
-        expect(fetchMock.lastOptions().headers['X-CSRF-Token']).toEqual(undefined)
+        expect(fetchMock.lastOptions().headers['X-CSRF-Token']).toEqual(null)
       })
   })
 

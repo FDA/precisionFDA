@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby "2.7.5"
 
-gem "rails", "= 6.1.4.6"
+gem "rails", "= 6.1.4.7"
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0"
 # Use Uglifier as compressor for JavaScript assets
@@ -160,5 +160,5 @@ end
 
 group :production, :staging, :dev do
   gem "exception_notification", "~> 4.4"
-  gem "puma", "~> 5.6", ">= 5.6.2"
+  gem "puma", "~> 5.6", ">= 5.6.4"
 end

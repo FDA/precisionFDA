@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  nodejs-api:
+    build:
+      dockerfile: ./https-apps-api/docker/node.isolated-dev.Dockerfile
+    command: ['make', 'watch']
+    volumes:
+      - type: bind
+        source: ../../https-apps-api
+        target: /app
+
+  nodejs-worker:
+    build:
+      dockerfile: ./https-apps-api/docker/node.isolated-dev.Dockerfile
+    command: ['make', 'watch-worker']
+    volumes:
+      - type: bind
+        source: ../../https-apps-api
+        target: /app
