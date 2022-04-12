@@ -9,7 +9,7 @@ export PATH := $(bin):$(PATH)
 # 	npm install && touch node_modules
 
 install:
-	yarn
+	yarn --frozen-lockfile
 
 install-test-prod:
 	yarn install --production --frozen-lockfile
