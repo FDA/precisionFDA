@@ -53,7 +53,7 @@ export interface RunDataUpdates {
 export interface Links2 {
   show: string;
   user: string;
-  app: string;
+  app?: string;
   workflow: string;
   publish: string;
   log: string;
