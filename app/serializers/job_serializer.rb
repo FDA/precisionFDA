@@ -76,22 +76,25 @@ class JobSerializer < ApplicationSerializer
     object.run_data
   end
 
+  # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
   # Returns a title of an app.
   # @return [String] app title.
   def app_title
-    object.app.title
+    object.app&.title
   end
 
+  # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
   # Returns a revision of an app.
   # @return [Numeric] app revision.
   def app_revision
-    object.app.revision
+    object.app&.revision
   end
 
+  # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
   # Returns if app is active (not-deleted).
   # @return [Boolean] app active flag.
   def app_active
-    object.app.not_deleted?
+    object.app&.not_deleted?
   end
 
   # Returns a user who has created this Job.
@@ -172,8 +175,9 @@ class JobSerializer < ApplicationSerializer
       links[:show] = job_path(object)
       # link to user who run a job - api_job_path
       links[:user] = user_path(object.user.dxuser)
+      # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
       # show job's app details page - api_app_path
-      links[:app] = app_path(object.app)
+      links[:app] = app_path(object.app) if object.app
       # show job's workflow details page
       links[:workflow] =
         object.try(:analysis).try(:workflow) ? workflow_path(object.analysis.workflow) : "N/A"
@@ -201,13 +205,15 @@ class JobSerializer < ApplicationSerializer
       if object.in_space?
         unless member_viewer?
           links[:run_job] = new_app_job_path(
-            object.app.app_series.latest_version_app || object.app.app_series.latest_revision_app,
+            # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
+            object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
           )
           links[:space] = space_path
         end
       else
         links[:run_job] = new_app_job_path(
-          object.app.app_series.latest_version_app || object.app.app_series.latest_revision_app,
+          # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
+          object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
         )
       end
 
