@@ -67,8 +67,7 @@
           an asterisk to indicate multiple files.</p>
         <p><code>dx upload <$filename></code> will upload a file from the local worker to your precisionFDA private
           area. You may upload multiple files using an asterisk.</p>
-        <p><i>NOTE: your files will not appear on precisionFDA until file synching occurs, which happens only upon
-          termination of the Workstation execution.</i></p>
+        <p><i>NOTE: your files will not appear on precisionFDA until file syncing occurs, which happens either by clicking the "Sync Now" button on the Execution detail page, or automatically upon termination of the Workstation execution.</i></p>
       </div>
       <div id="workstation-snapshots" class="h2">Creating snapshots on Workstations</div>
       <div class="bs-docs-section">
@@ -101,7 +100,7 @@
         <p>You can terminate a Workstation at any time by selecting "Terminate" from the Execution detail page.</p>
 
         <p>Any uploaded files on a Workstation, pushed to the cloud using `dx upload`, will <strong>not</strong> appear
-          on precisionFDA in your private area until the Workstation Execution is terminated.</p>
+          on precisionFDA in your private area until the execution is synced, or until it is terminated.  This syncing will happen automatically upon execution termination, but can be triggered to happen earlier by clicking on "Sync now" on the Execution detail page.</p>
         <p>Note that after a Workstation is terminated, any files on the worker are no longer accessible! Make sure to
           upload your work, or take a snapshot of the worker, before terminating.</p>
       </div>
