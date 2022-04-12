@@ -62,6 +62,7 @@ module OrgService
         org = create_org
         user = create_user(org)
         create_profile(user)
+        create_notification_preferences(user)
         @invitation.update!(user_id: user.id)
         add_user_to_spaces(user)
       end
@@ -97,6 +98,10 @@ module OrgService
       )
       org.update!(admin_id: user.id)
       user
+    end
+
+    def create_notification_preferences(user)
+      NotificationPreference.create_for_user!(user)
     end
 
     # add user to spaces if there is any invitation

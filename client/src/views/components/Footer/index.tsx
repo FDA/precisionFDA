@@ -22,6 +22,23 @@ const StyledFooter = styled.footer`
   display: grid;
   grid-template-columns: ${theme.sizing.largeColumnWidth} 1fr;
   padding: ${theme.padding.mainContentVertical} ${theme.padding.mainContentHorizontal};
+  font-size: 14px;
+  line-height: 1.428571429;
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: -5px;
+    margin-top: 0;
+  }
+  li {
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  p {
+    margin: 0 0 10px;
+    color: #555555;
+  }
 `
 
 const StyledFooterAddress = styled.div`

@@ -160,7 +160,7 @@ module ApplicationHelper
     else
       local_opts[:icon_class] = "fa-fw"
     end
-
+    local_opts.merge!(data: { turbolinks: false })
     local_opts.merge!(current_user: current_user)
 
     unilink(item, local_opts, current_user)

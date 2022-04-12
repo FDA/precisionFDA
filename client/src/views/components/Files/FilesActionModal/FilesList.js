@@ -29,7 +29,7 @@ const Item = ({ file, action }) => (
     {(action === SPACE_FILES_ACTIONS.OPEN) && (
       <td>
         <a href={`${file.downloadURL}?inline=true`} target="_blank" rel="noopener noreferrer">
-          <Icon icon="fa-download" fw />&nbsp;
+          <Icon icon="fa-file-o" fw />&nbsp;
           open
         </a>
       </td>

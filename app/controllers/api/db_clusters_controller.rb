@@ -15,7 +15,7 @@ module Api
       "status" => "status",
       "engine" => "engine",
       "instance" => "dx_instance_class",
-      "created" => "created_at",
+      "created_at" => "created_at",
     }.freeze
 
     def index
