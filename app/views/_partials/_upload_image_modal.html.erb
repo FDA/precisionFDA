@@ -14,7 +14,7 @@
                   <span class="fa fa-file-image-o"></span> Browse image to upload... <input class="event-browse-files" type='file' accept="image/*" required />
                 </span>
 
-                <button class="btn btn-success btn-lg event-upload-image" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
+                <button class="btn btn-success btn-lg event-upload-image remediated-uploadbutton-color" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
                   <span class="fa fa-cloud-upload fa-fw"></span> Upload
                 </button>
                 <button class="btn btn-link btn-lg event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">
@@ -28,7 +28,7 @@
         <div class="container-fluid">
           <div class="section-files panel panel-info">
             <div class="panel-heading">
-              <span class="upload-state panel-title" data-bind="text: uploadStateDisplay"></span>
+              <span class="upload-state panel-title upload-modal-remediated-color" data-bind="text: uploadStateDisplay"></span>
             </div>
             <ul class="list-group list-files" data-bind="foreach: files">
               <li class='list-group-item' data-bind="css: classes">

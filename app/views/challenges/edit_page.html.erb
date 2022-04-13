@@ -7,10 +7,10 @@
         <div class="btn-group pull-right">
           <a class="btn btn-default btn-md" href="<%= show_challenge_path(@challenge, params[:tab]) %>"><span class="fa fa-reply fa-fw"></span> Return to Challenge Page</a>
         </div>
-        <li role="presentation" class="<%= !["challenge_results", "resources", "pre_registration"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge) %>" data-no-turbolink="true" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
-        <li role="presentation" class="<%= params[:tab] == "challenge_results" ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'challenge_results') %>" data-no-turbolink="true" class="tab-label" aria-controls="challenge_results" role="tab">Challenge Results</a></li>
-        <li role="presentation" class="<%= params[:tab] == "resources" ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'resources') %>" class="tab-label" aria-controls="challenge_results" role="tab">Resources</a></li>
-        <li role="presentation" class="<%= params[:tab] == "pre_registration" ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'pre_registration') %>" class="tab-label" aria-controls="challenge_results" role="tab">Pre-Registration</a></li>
+        <li role="presentation" class="<%= !["challenge_results", "resources", "pre_registration"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge) %>" data-no-turbolink="true" class="tab-label navigation-header-grey" aria-controls="info" role="tab">Challenge Info</a></li>
+        <li role="presentation" class="<%= params[:tab] == "challenge_results" ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'challenge_results') %>" data-no-turbolink="true" class="tab-label navigation-header-grey" aria-controls="challenge_results" role="tab">Challenge Results</a></li>
+        <li role="presentation" class="<%= params[:tab] == "resources" ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'resources') %>" class="tab-label navigation-header-grey" aria-controls="challenge_results" role="tab">Resources</a></li>
+        <li role="presentation" class="<%= params[:tab] == "pre_registration" ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'pre_registration') %>" class="tab-label navigation-header-grey" aria-controls="challenge_results" role="tab">Pre-Registration</a></li>
       </ul>
     </div>
     <% if params[:tab] == "challenge_results" %>
