@@ -21,7 +21,7 @@ export const config: ConfigOverride = {
     },
   },
   redis: {
-    isSecure: true,
+    isSecure: false,
   },
   emails: {
     salesforce: {
