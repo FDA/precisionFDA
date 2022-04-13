@@ -107,13 +107,13 @@ const PublicNavbarCenterButtons = styled.div<IPublicNavbarSticky>`
 
   a.current {
     
-    color: ${theme.colors.remediatedhighlightBlue};
-    border-bottom: 2px solid ${theme.colors.remediatedhighlightBlue};
+    color: ${theme.colors.blueOnWhite};
+    border-bottom: 2px solid ${theme.colors.blueOnWhite};
 
     ${props => props.sticky ? `
     &:hover {
-      border-bottom: 2px solid ${theme.colors.remediatedhighlightBlue};
-      color: ${theme.colors.remediatedhighlightBlue};
+      border-bottom: 2px solid ${theme.colors.blueOnWhite};
+      color: ${theme.colors.blueOnWhite};
     }
     ` : `
     &:hover {

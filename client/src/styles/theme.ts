@@ -17,7 +17,7 @@ export const colors = {
   primaryRed: '#eb776f',
   primaryYellow: '#f0ad4e',
   highlightBlue: '#3a80ba',
-  remediatedhighlightBlue: '#4a8abf',
+  blueOnWhite: '#3776a9',
   highlightYellow: '#edad58',
   highlightGreen: '#44b150',
   subtleBlue: '#f4f8fd',
@@ -34,6 +34,8 @@ export const colors = {
   textBlack: '#000',
   textDarkGrey: '#272727',
   textMediumGrey: '#646464',
+  colorDateGrey: '#919191',
+  stateLabelGrey: '#919191',
   textLightGrey: '#ddd',
   textWhite: '#fff',
   white110: '#f5f5f5',
@@ -46,6 +48,18 @@ export const colors = {
   stateFailedColor: '#821a1d',
   stateDoneBackground: '#dff0d8',
   stateDoneColor: 'darken(#3c763d, 5%)',
+  blacktextOnWhite: '#333333', 
+  darkblueOnLightBlue: '#1f5cb7',
+  brownOnWhite: '#aa6708',
+  borderBrownOnWhite: '#af6a08',
+  disabledBlackTextOnGrey: '#130101', 
+  darkGreyOnGrey: '#7891b7',
+  buttonGreenOnWhite: '#30825b',
+  greyTextonBlack: '#919191',
+  brownOnGrey: '#b3453d', 
+  blueOnBlack: '#368ad3',
+  greyOnLightBlue: '#6d6d6d',
+  
 }
 
 export const fontSize = {

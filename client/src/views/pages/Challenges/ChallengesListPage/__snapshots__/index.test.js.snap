@@ -24,14 +24,17 @@ exports[`ChallengesListPage test should render 1`] = `
         options={
           Array [
             Object {
+              "entityType": "Challenges",
               "onClick": [Function],
               "text": "Currently Open",
             },
             Object {
+              "entityType": "Challenges",
               "onClick": [Function],
               "text": "Upcoming",
             },
             Object {
+              "entityType": "Challenges",
               "onClick": [Function],
               "text": "Ended",
             },
