@@ -77,9 +77,14 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
+  # NOTE - ARM64V8 ENV variable
+  # As ruby images have to be emulated on arm64v8 architectures, due to mysql2 not working properly
+  # native packages, such as `inotify` won't compile. Ruby uses "ActiveSupport::FileUpdateChecker" by default
+  # https://guides.rubyonrails.org/configuring.html#config-file-watcher
+
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
-  config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  config.file_watcher = ActiveSupport::EventedFileUpdateChecker unless ENV["ARM64V8_DEVELOPMENT_PATCH"]
 
   # SSL
   config.force_ssl = true
