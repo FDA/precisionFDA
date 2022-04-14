@@ -9,6 +9,7 @@ import { checkStaleJobsHandler } from './check-stale-jobs.handler'
 import { dbClusterSyncHandler } from './db-cluster-sync.handler'
 import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
 import { userCheckupHandler } from '../users/user-checkup.handler'
+import { testHeapMemoryAllocationError } from 'shared/src/debug'
 
 export const handler = async (job: Job<Task<any>>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -38,6 +39,9 @@ export const handler = async (job: Job<Task<any>>) => {
       return await Promise.resolve()
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')
+      return await Promise.resolve()
+    case queue.TASKS.DEBUG_TEST_MAX_MEMORY:
+      await testHeapMemoryAllocationError()
       return await Promise.resolve()
     default:
       log.warn({ jobData: job.data }, 'Trying to handle unsupported task')
