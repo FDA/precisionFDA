@@ -61,6 +61,11 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}-worker-4"
                      },
                      {
+                         "file_path": "/home/deploy/.pm2/pm2.log",
+                         "log_group_name": "dev/node/https-workers",
+                         "log_stream_name": "{instance_id}-pm2"
+                     },
+                     {
                          "file_path": "/home/deploy/.pm2/logs/https-apps-api-error-0.log",
                          "log_group_name": "dev/node/https-apps-api-error-0.log",
                          "log_stream_name": "{instance_id}"
