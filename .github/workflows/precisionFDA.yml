@@ -223,6 +223,9 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+      - name: Test production build
+        run: yarn workspaces run build
+
   test-react-app:
     name: Test React app
     runs-on: ubuntu-latest
