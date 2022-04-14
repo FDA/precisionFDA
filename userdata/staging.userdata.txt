@@ -61,6 +61,31 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}-worker-4"
                      },
                      {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-api-error-0.log",
+                         "log_group_name": "staging/node/https-apps-api-error-0.log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-1.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-1"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-2.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-2"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-3.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-3"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-4.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-4"
+                     },
+                     {
                          "file_path": "/srv/www/precision_fda/current/log/cron.log",
                          "log_group_name": "staging/backend/cron.log",
                          "log_stream_name": "{instance_id}"
