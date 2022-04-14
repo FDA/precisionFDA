@@ -3,7 +3,6 @@ import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema'
 import { defaultMiddlewares, makeValidationMdw } from '../server/middleware'
-import { createTestMaxMemoryTask } from 'shared/src/queue'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
@@ -78,7 +77,7 @@ if (config.api.allowErrorTestingRoutes) {
   router.get(
     '/errors/testWorkerMemoryAllocationError',
     async ctx => {
-      createTestMaxMemoryTask()
+      queue.createTestMaxMemoryTask()
       ctx.body = { result: 'Test worker heap memory allocation test queued' }
       ctx.status = 200
     }
