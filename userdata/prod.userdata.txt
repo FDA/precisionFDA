@@ -63,7 +63,7 @@ cat <<EOF > /tmp/config.json
                      },
                      {
                          "file_path": "/home/deploy/.pm2/pm2.log",
-                         "log_group_name": "production/node/https-workers",
+                         "log_group_name": "production/node/pm2",
                          "log_stream_name": "{instance_id}-pm2"
                      },
                      {
