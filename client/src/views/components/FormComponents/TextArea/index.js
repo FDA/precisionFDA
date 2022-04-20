@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
 
-const TextArea = ({ children, name, id, styleClasses, ...rest }) => {
+const TextArea = ({ children, name, id, styleClasses, aria_label, ...rest }) => {
+  const arialabel = aria_label ? aria_label : ''
   const classes = classNames({
     'form-control': true,
   }, styleClasses)
@@ -12,6 +13,7 @@ const TextArea = ({ children, name, id, styleClasses, ...rest }) => {
       id={id || name}
       name={name}
       className={classes}
+      aria-label={arialabel}
       {...rest}
     >
       {children}
@@ -24,6 +26,7 @@ TextArea.propTypes = {
   id: PropTypes.string,
   styleClasses: PropTypes.string,
   children: PropTypes.string,
+  aria_label: PropTypes.string,
 }
 
 export default TextArea

@@ -21,14 +21,17 @@ const ChallengeProposePage = () => {
   const sideMenuOptions = [
     {
       text: 'Currently Open',
+      entityType: 'Challenges',
       onClick: () => history.push('/challenges'),
     },
     {
       text: 'Upcoming',
+      entityType: 'Challenges',
       onClick: () => history.push('/challenges'),
     },
     {
       text: 'Propose a Challenge',
+      entityType: '',
       onClick: () => console.log('Propose a Challenge clicked'),
     },
   ]

@@ -6,6 +6,7 @@ import { FILE_STI_TYPE } from './user-file.enum'
   abstract: true,
   discriminatorColumn: 'stiType',
   discriminatorMap: { UserFile: 'UserFile', Folder: 'Folder', Asset: 'Asset' },
+  tableName: 'nodes',
 })
 export class Node extends BaseEntity {
   @PrimaryKey()
