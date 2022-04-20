@@ -4,6 +4,7 @@ export const config: ConfigOverride = {
   appName: 'https-apps-worker-prod',
   api: {
     railsHost: process.env.HOST,
+    allowErrorTestingRoutes: false,
   },
   logs: {
     pretty: false,

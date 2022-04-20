@@ -259,6 +259,20 @@ const createUserCheckupTask = async (data: types.BasicUserJob): Promise<Job> => 
 }
 
 
+const createTestMaxMemoryTask = async(): Promise<any> => {
+  maintenanceQueue.removeJobs(TASKS.DEBUG_TEST_MAX_MEMORY)
+
+  const data = {
+    type: TASKS.DEBUG_TEST_MAX_MEMORY,
+  }
+
+  const options: JobOptions = {
+    jobId: TASKS.DEBUG_TEST_MAX_MEMORY,
+  }
+  return await addToQueue(data, maintenanceQueue, options)
+}
+
+
 export * as debug from './queue.debug'
 
 export {
@@ -269,6 +283,7 @@ export {
   createCheckStaleJobsTask,
   createDbClusterSyncTask,
   createUserCheckupTask,
+  createTestMaxMemoryTask,
   TASKS,
   createQueues,
   getQueue,
