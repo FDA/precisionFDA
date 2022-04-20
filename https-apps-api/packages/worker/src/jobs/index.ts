@@ -1,5 +1,5 @@
 import { path } from 'ramda'
-import { queue, errors } from '@pfda/https-apps-shared'
+import { queue, errors, debug } from '@pfda/https-apps-shared'
 import type { Task } from '@pfda/https-apps-shared/src/queue/task.input'
 import { Job } from 'bull'
 import { log } from '../utils'
@@ -38,6 +38,9 @@ export const handler = async (job: Job<Task<any>>) => {
       return await Promise.resolve()
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')
+      return await Promise.resolve()
+    case queue.TASKS.DEBUG_TEST_MAX_MEMORY:
+      await debug.testHeapMemoryAllocationError()
       return await Promise.resolve()
     default:
       log.warn({ jobData: job.data }, 'Trying to handle unsupported task')
