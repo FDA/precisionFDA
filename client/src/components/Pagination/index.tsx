@@ -115,7 +115,7 @@ export const Pagination = ({
           <StyledPerPageSelect
             value={perPage}
             name="perPage"
-            onChange={e => onPerPageSelect(parseInt(e.target.value))}
+            onChange={e => onPerPageSelect(parseInt(e.target.value, 10))}
             data-testid="pagination-perpage-select"
           >
             <option value="10">10</option>

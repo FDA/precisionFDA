@@ -1,10 +1,10 @@
 <% content_for :title do %>Edit Challenge<% end %>
 
 <div class="page-header">
-  <div class="page-title">
+  <h1 class="page-title remediation-page-header">
     <span class="fa fa-trophy"></span>
     Edit Challenge
-  </div>
+  </h1>
 </div>
 
 <div class="container-fluid container-padded">
@@ -16,7 +16,7 @@
       <div class="col-sm-offset-3">
         <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Updating..."} %>
         <%- if @challenge.can_announce_result? %>
-          <%= link_to "Announce result", announce_result_challenge_path(@challenge), method: :post, class: "btn btn-warning" %>
+          <%= link_to "Announce result", announce_result_challenge_path(@challenge), method: :post, class: "btn btn-warning challenges-announce-result" %>
         <%- end %>
       </div>
     </div>

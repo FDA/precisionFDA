@@ -9,7 +9,7 @@ export PATH := $(bin):$(PATH)
 # 	npm install && touch node_modules
 
 install:
-	yarn
+	yarn --frozen-lockfile
 
 install-test-prod:
 	yarn install --production --frozen-lockfile
@@ -38,10 +38,10 @@ test-worker-task:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
 
 watch:
-	$(bin)nodemon --watch ./packages/api/src --watch ./packages/shared/src --ext ts --exec make run-dev
+	$(bin)ts-node-dev -r tsconfig-paths/register --files ./packages/api/src/index.ts
 
 watch-worker:
-	$(bin)nodemon --watch ./packages/worker/src --ext ts --exec make run-worker-dev
+	$(bin)ts-node-dev -r tsconfig-paths/register --files ./packages/worker/src/index.ts
 
 # maps to npm script build commands in every package
 build:

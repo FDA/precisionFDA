@@ -18,7 +18,7 @@ router.post(
     const res = await new email.EmailProcessOperation(pickOpsCtx(ctx)).execute({
       input: ctx.request.body.input,
       receiverUserIds: ctx.request.body.receiverUserIds,
-      emailTypeId: ctx.params.emailId,
+      emailTypeId: ctx.params.emailId as any,
     })
     ctx.body = res
   },
