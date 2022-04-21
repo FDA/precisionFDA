@@ -4,10 +4,11 @@ const path = require('path')
 
 const { merge } = require('webpack-merge')
 
-const common = require('./webpack.common.config')
+const base = require('./webpack.fragment.base')
+const swc = require('./webpack.fragment.swc')
 
 
-module.exports = merge(common, {
+module.exports = merge(base, swc, {
   mode: 'development',
   output: {
     path: path.resolve(__dirname, 'dist'),
