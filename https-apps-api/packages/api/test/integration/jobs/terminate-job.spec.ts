@@ -44,6 +44,7 @@ describe('PATCH /jobs/:id/terminate', () => {
       entityType: ENTITY_TYPE.HTTPS,
       user: user.id,
       app: app.id,
+      terminationEmailSent: false
     })
   })
 

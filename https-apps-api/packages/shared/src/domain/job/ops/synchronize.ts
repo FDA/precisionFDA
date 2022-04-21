@@ -1,5 +1,5 @@
 import { wrap } from '@mikro-orm/core'
-import { CheckStatusJob } from '../../../queue/task.input'
+import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
 import {
@@ -13,9 +13,9 @@ import {
   createSendEmailTask,
   createSyncWorkstationFilesTask,
   removeFromEmailQueue,
-  removeRepeatable,
-  TASKS} from '../../../queue'
-import type { Maybe } from '../../../types'
+  removeRepeatable
+} from '../../../queue'
+import type { Maybe, UserOpsCtx } from '../../../types'
 import { User } from '../..'
 import { errors } from '../../..'
 import { createJobClosed } from '../../event/event.helper'
@@ -32,13 +32,17 @@ import { EmailSendOperation } from '../../email'
 // N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
 //      In the future we'd need to rename this to something more specific
 //      when normal job syncing is also a part of the nodejs-worker
-export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
+export class SyncJobOperation extends WorkerBaseOperation<
+  UserOpsCtx,
+  CheckStatusJob['payload'],
+  Maybe<Job>
+> {
   protected user: User
   protected job: Job
   protected client: PlatformClient
 
   static getBullJobId(jobDxid: string) {
-    return `${TASKS.SYNC_JOB_STATUS}.${jobDxid}`
+    return `${TASK_TYPE.SYNC_JOB_STATUS}.${jobDxid}`
   }
 
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
@@ -96,6 +100,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       return
     }
 
+    // TODO(samuel) this shoudl be part of platform client
     delete platformJobData["sshHostKey"]
     this.ctx.log.info({ platformJobData: platformJobData }, 'SyncJobOperation: Received job/describe from platform')
 
@@ -104,9 +109,12 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     if (
       isStateActive(job.state) &&
       isOverNotifyMaxDuration(job) &&
-      !isOverTerminateMaxDuration(job)
+      !isOverTerminateMaxDuration(job) &&
+      !job.terminationEmailSent
     ) {
       await this.sendTerminationEmail()
+      job.terminationEmailSent = true
+      em.persist(job)
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
       this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Job marked as stale, trying to terminate')

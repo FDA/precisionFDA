@@ -1,9 +1,9 @@
-import { OpsCtx } from "../../types"
+import { UserOpsCtx } from "../../types"
 import { PermissionError, SpaceNotFoundError } from "../../errors"
 import { Space } from "./space.entity"
 
 
-export const getSpaceIsAccessibleByContext = async (spaceId: number, ctx: OpsCtx): Promise<Space> => {
+export const getSpaceIsAccessibleByContext = async (spaceId: number, ctx: UserOpsCtx): Promise<Space> => {
   const spaceRepo = ctx.em.getRepository(Space)
   const space = await spaceRepo.findOne({ id: spaceId })
   if (!space) {

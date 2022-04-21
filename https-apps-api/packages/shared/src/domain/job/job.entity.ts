@@ -12,7 +12,6 @@ import {
 import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
-import { Space } from '../space'
 import { JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
@@ -57,6 +56,9 @@ export class Job extends BaseEntity {
 
   @Property()
   entityType: number
+
+  @Property()
+  terminationEmailSent: boolean
 
   @Property({ hidden: true })
   runData: string
