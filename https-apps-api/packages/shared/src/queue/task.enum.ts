@@ -6,6 +6,7 @@ enum TASKS {
   SYNC_DBCLUSTER_STATUS = 'sync_dbcluster_status',
   USER_CHECKUP = 'user_checkup',
   OTHER_TASK = 'other',
+  DEBUG_TEST_MAX_MEMORY = 'debug_test_max_memory',
 }
 
 export { TASKS }
