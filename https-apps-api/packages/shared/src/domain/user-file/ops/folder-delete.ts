@@ -2,9 +2,13 @@ import { Folder, UserFile } from '../..'
 import { BaseOperation } from '../../../utils/base-operation'
 import { client, errors } from '../../..'
 import { childrenTraverse, getFolderPath } from '../user-file.helper'
-import { IdInput } from '../../../types'
+import { IdInput, UserOpsCtx } from '../../../types'
 
-export class FolderDeleteOperation extends BaseOperation<IdInput, number> {
+export class FolderDeleteOperation extends BaseOperation<
+  UserOpsCtx,
+  IdInput,
+  number
+> {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)

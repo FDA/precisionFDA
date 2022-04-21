@@ -105,7 +105,18 @@ const defaultConfig = {
       // staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*29, // 29 days
       staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? 60*60*24*30, // 30 days
     },
+    nonTerminatedDbClusters: {
+      repeatPattern: '0 6 * * *'
+    }
   },
+  flags: {
+    dev: {
+      skipUserMiddlewareForDebugRoutes: false
+    }
+  },
+  // TODO(samuel) - replace this flag with array of initial tasks
+  // TODO(samuel) - ideally replace ramda with better package that can deep-merge arrays in typescript
+  shouldAddCheckNonterminatedClustersOnInit: false 
 }
 
 // plug-in the overrides that are based on the NODE_ENV

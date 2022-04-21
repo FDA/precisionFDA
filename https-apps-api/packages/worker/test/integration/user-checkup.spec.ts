@@ -9,11 +9,11 @@ import { JobOptions } from 'bull'
 import type { BasicUserJob } from '@pfda/https-apps-shared/src/queue/task.input'
 
 const createUserCheckupTask = async (user: BasicUserJob['user']) => {
-  const options: JobOptions = { jobId: `${queue.TASKS.USER_CHECKUP}` }
-  const defaultTestQueue = queue.getQueue()
+  const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.USER_CHECKUP}` }
+  const defaultTestQueue = queue.getStatusQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
-    type: queue.TASKS.USER_CHECKUP,
+    type: queue.types.TASK_TYPE.USER_CHECKUP,
     user,
   }, options)
 }

@@ -1,6 +1,5 @@
 import { database } from '@pfda/https-apps-shared'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
-import { WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { getChildLogger } from '../utils'
@@ -11,7 +10,7 @@ export const workstationSyncFilesHandler = async (bullJob: Job) => {
   const requestId = nanoid()
   const log = getChildLogger(requestId)
   // Do we need to validate in the worker when this should be checked by RequestWorkstationFilesSync?
-  const ctx: WorkerOpsCtx = {
+  const ctx = {
     em: database.orm().em.fork(),
     log,
     user: data.user,

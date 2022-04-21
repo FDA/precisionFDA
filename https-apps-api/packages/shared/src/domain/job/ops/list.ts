@@ -1,10 +1,10 @@
-import { Space } from '../../space/space.entity'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import type { ListJobsInput, PageJobs } from '../job.input'
 import { getSpaceIsAccessibleByContext } from '../../space/space.permissions'
+import { UserOpsCtx } from '../../../types'
 
-export class ListJobsOperation extends BaseOperation<ListJobsInput, PageJobs> {
+export class ListJobsOperation extends BaseOperation<UserOpsCtx, ListJobsInput, PageJobs> {
   async run(input: ListJobsInput): Promise<PageJobs> {
     const em = this.ctx.em
 

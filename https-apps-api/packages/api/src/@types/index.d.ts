@@ -15,6 +15,7 @@ declare global {
 
   namespace Ops {
     export interface OpsCtx extends types.OpsCtx {}
+    export interface UserOpsCtx extends types.UserOpsCtx {}
   }
 
   // interface Foo extends types.OpsCtx {}
@@ -24,7 +25,7 @@ declare global {
       // added to Koa context in log-request middleware
       log: Logger
       em: EntityManager
-      user: UserCtx
+      user?: UserCtx
       validatedQuery: AnyObject
     }
 

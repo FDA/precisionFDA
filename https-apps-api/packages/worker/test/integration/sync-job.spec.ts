@@ -18,15 +18,16 @@ import {
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 
 const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getQueue()
+  const defaultTestQueue = queue.getStatusQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
-    type: queue.TASKS.SYNC_JOB_STATUS,
+    type: queue.types.TASK_TYPE.SYNC_JOB_STATUS,
     payload,
     user,
   })
@@ -138,7 +139,8 @@ describe('TASK: sync_job_status', () => {
     expect(updatedJob).to.have.property('state', JOB_STATE.TERMINATED)
     expect(updatedJob).to.have.property('updatedAt').that.is.not.equal(job.updatedAt)
     // fetch created event
-    const events = await afterEm.createQueryBuilder('events').select('*').execute()
+    // TODO(samuel) fix entity manager type
+    const events = await (afterEm as any as SqlEntityManager).createQueryBuilder('events').select('*').execute()
     expect(events).to.be.an('array').with.lengthOf(1)
     expect(stripEntityDates(events[0])).to.be.deep.equal({
       id: 1,
@@ -261,8 +263,10 @@ describe('TASK: sync_job_status', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // return only first entry so it is easier to test
+      // @ts-expect-error Fix - ts says that array has smaller length
       const firstFileDxid = FILES_LIST_RES_ROOT.results[5].id
       fakes.client.filesListFake.returns({
+      // @ts-expect-error Fix - ts says that array has smaller length
         results: [FILES_LIST_RES_ROOT.results[5]],
         next: null,
       })
@@ -293,7 +297,9 @@ describe('TASK: sync_job_status', () => {
         name: FILES_DESC_RES.results[0].describe.name,
         state: 'closed',
         scope: 'private',
-        entityType: FILE_TYPE.SNAPSHOT,
+        // TODO(samuel) refactor this into FILE_ORIGIN_TYPE as defined in user-file.entity
+        // @ts-expect-error FILE_TYPE enum does not exist
+        entityType: FILE_TYPE?.SNAPSHOT,
         stiType: FILE_STI_TYPE.USERFILE,
       })
     })
@@ -308,11 +314,13 @@ describe('TASK: sync_job_status', () => {
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // all the files
       fakes.client.filesListFake.onCall(0).returns({
+        // @ts-expect-error FILE_TYPE enum does not exist
         results: [FILES_LIST_RES_ROOT.results[0], FILES_LIST_RES_ROOT.results[5]],
         next: null,
       })
       // snapshot files
       fakes.client.filesListFake.onCall(1).returns({
+        // @ts-expect-error FILE_TYPE enum does not exist
         results: [FILES_LIST_RES_ROOT.results[5]],
         next: null,
       })
@@ -330,7 +338,9 @@ describe('TASK: sync_job_status', () => {
         { populate: ['taggings.tag'], filters: ['userfile'] },
       )
       expect(filesInDb).to.be.an('array').with.lengthOf(2)
+      // @ts-expect-error FILE_TYPE enum does not exist
       const regularFile = filesInDb.find(file => file.entityType === FILE_TYPE.REGULAR)
+      // @ts-expect-error FILE_TYPE enum does not exist
       const snapshotFile = filesInDb.find(file => file.entityType === FILE_TYPE.SNAPSHOT)
       expect(regularFile).to.not.be.undefined()
       expect(regularFile.taggings.count()).to.equal(1)
