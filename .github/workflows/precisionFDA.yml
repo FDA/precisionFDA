@@ -218,6 +218,10 @@ jobs:
           make test-api
         working-directory: ./https-apps-api
 
+      - name: Test production build
+        run: yarn workspaces run build
+        working-directory: ./https-apps-api
+
       - name: Snyk test
         run: cd https-apps-api && node_modules/.bin/snyk test
         env:

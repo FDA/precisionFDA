@@ -37,6 +37,7 @@ const defaultConfig = {
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
     railsHost: process.env.HOST ?? 'https://localhost:3000',
+    allowErrorTestingRoutes: process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
   },
   logs: {
     pretty: true,
