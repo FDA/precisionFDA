@@ -88,9 +88,9 @@ module FilesSyncing
 
         return if remote_state == file.state
 
-        logger.debug("update file #{file.uid} by user #{user.dxuser} 
-          from state #{file.state} to #{remote_state}")
-          
+        logger.debug("update file #{file.uid} by user #{user.dxuser} " \
+                     "from state #{file.state} to #{remote_state}")
+
         if remote_state == UserFile::STATE_CLOSED
           file.update!(state: remote_state, file_size: result[:describe][:size])
           Event::FileCreated.create_for(file, user)
