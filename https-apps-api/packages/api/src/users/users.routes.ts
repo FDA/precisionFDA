@@ -13,8 +13,7 @@ router.get(
   '/checkup',
   async ctx => {
     const res = await queue.createUserCheckupTask({
-      type: queue.TASKS.USER_CHECKUP,
-      payload: null,
+      type: queue.types.TASK_TYPE.USER_CHECKUP,
       user: ctx.user })
     ctx.body = res
   },

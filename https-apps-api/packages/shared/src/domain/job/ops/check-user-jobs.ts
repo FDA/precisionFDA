@@ -1,18 +1,17 @@
 import { WorkerBaseOperation } from '../../../utils/base-operation'
-import { BasicUserJob } from '../../../queue/task.input'
 import { Job } from '../job.entity'
-import { Maybe } from '../../../types'
+import { Maybe, UserOpsCtx } from '../../../types'
 import { JOB_DB_ENTITY_TYPE } from '../job.enum'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { JobDescribeResponse, PlatformClient } from '../../../platform-client'
-import { wrap } from '@mikro-orm/core'
 import { SyncJobOperation } from './synchronize'
 import { findRepeatable, createSyncJobStatusTask } from '../../../queue'
 
 // Check jobs for a given user, to be run when user logs in to clean up
 // old states that are stuck because sync jobs are missing.
 export class CheckUserJobsOperation extends WorkerBaseOperation<
-  BasicUserJob['payload'],
+  UserOpsCtx,
+  never,
   Maybe<Job[]>
 > {
   protected client: PlatformClient
@@ -60,7 +59,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
           }, 'CheckUserJobsOperation: Local job state not the same as platform state')
   
           if (job.entityType = JOB_DB_ENTITY_TYPE.HTTPS) {
-            this.ctx.log.info({}, 'CheckStaleJobsOperation: This is an HTTPS app')
+            this.ctx.log.info({}, 'CheckUserJobsOperation: This is an HTTPS app')
           }
 
           const bullJobId = SyncJobOperation.getBullJobId(job.dxid)

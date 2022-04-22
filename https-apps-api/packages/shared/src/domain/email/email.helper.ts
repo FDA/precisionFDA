@@ -16,7 +16,7 @@ import {
   NOTIFICATION_TYPES,
   EMAIL_TYPES,
 } from './email.config'
-import { TASKS } from '../../queue'
+import { types } from '../../queue'
 import { nanoid } from 'nanoid'
 
 type EmailHelperCtx = OpsCtx & {
@@ -162,7 +162,7 @@ const saveEmailToFile = async (email: EmailSendInput, customFilename?: string): 
 }
 
 const getBullJobIdForEmailOperation = (emailType: EMAIL_TYPES, customSuffix?: string): string => {
-  const prefix = `${TASKS.SEND_EMAIL}.${EMAIL_TYPES[emailType]}`
+  const prefix = `${types.TASK_TYPE.SEND_EMAIL}.${EMAIL_TYPES[emailType]}`
   const suffix = customSuffix ?? nanoid()
   return `${prefix}.${suffix}`
 }

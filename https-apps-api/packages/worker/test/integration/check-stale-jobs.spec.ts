@@ -12,11 +12,11 @@ import { JOB_STATE } from 'shared/src/domain/job/job.enum'
 const createCheckStaleJobsTask = async (
   user: CheckStaleJobsJob['user'],
 ) => {
-  const options: JobOptions = { jobId: `${queue.TASKS.CHECK_STALE_JOBS}` }
-  const defaultTestQueue = queue.getQueue()
+  const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.CHECK_STALE_JOBS}` }
+  const defaultTestQueue = queue.getStatusQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
-    type: queue.TASKS.CHECK_STALE_JOBS,
+    type: queue.types.TASK_TYPE.CHECK_STALE_JOBS,
     user,
   }, options)
 }

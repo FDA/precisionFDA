@@ -1,16 +1,16 @@
-import { isNil } from "ramda";
-import { PlatformClient } from "../../../platform-client";
-import { CheckStatusJob } from "../../../queue/task.input";
-import { Maybe } from "../../../types";
-import { WorkerBaseOperation } from "../../../utils/base-operation";
+import { isNil } from "ramda"
+import { PlatformClient } from "../../../platform-client"
+import { CheckStatusJob } from "../../../queue/task.input"
+import { Maybe, UserOpsCtx } from "../../../types"
+import { WorkerBaseOperation } from "../../../utils/base-operation"
 import { removeRepeatable } from '../../../queue'
-import { Job } from "../../job";
-import { Tag } from "../../tag/tag.entity";
-import { Folder } from "../folder.entity";
-import { assignTags } from "../user-file-tags";
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from "../user-file.enum";
-import { SyncFilesInFolderOperation, SyncFolderFilesOutput } from "./sync-folder-files";
-import { SyncFoldersOperation } from "./sync-folders";
+import { Job } from "../../job"
+import { Tag } from "../../tag/tag.entity"
+import { Folder } from "../folder.entity"
+import { assignTags } from "../user-file-tags"
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from "../user-file.enum"
+import { SyncFilesInFolderOperation, SyncFolderFilesOutput } from "./sync-folder-files"
+import { SyncFoldersOperation } from "./sync-folders"
 
 
 /*
@@ -19,7 +19,11 @@ import { SyncFoldersOperation } from "./sync-folders";
  *   normal jobs, whose output files are well defined and are only synchronised when
  *   the app finishes successfully.
  */
-export class WorkstationSyncFilesOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Maybe<Job>> {
+export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
+  UserOpsCtx,
+  CheckStatusJob['payload'],
+  Maybe<Job>
+> {
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)

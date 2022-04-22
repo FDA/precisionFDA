@@ -1,22 +1,25 @@
-import { nanoid } from 'nanoid'
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable require-await */
+/* eslint-disable multiline-ternary */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import Bull, { Job, JobOptions, QueueOptions } from 'bull'
 import { AnyObject, UserCtx } from '../types'
 import { defaultLogger as log } from '../logger'
 import { config } from '../config'
-import { TASKS } from './task.enum'
-import * as types from './task.input'
-import { getJobStatusMessage } from './queue.utils'
 import { InvalidStateError } from '../errors'
 import { SyncJobOperation } from '../domain/job'
 import { formatDuration } from '../domain/job/job.helper'
 import { EmailSendOperation } from '../domain/email'
+import { SyncDbClusterOperation } from '../domain/db-cluster'
+import { getJobStatusMessage } from './queue.utils'
+import * as types from './task.input'
 
 let statusQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
 let emailsQueue: Bull.Queue
 let maintenanceQueue: Bull.Queue
 
-const getQueue = (): Bull.Queue => statusQueue
+const getStatusQueue = (): Bull.Queue => statusQueue
 
 const getQueues = (): Bull.Queue[] => [statusQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
 
@@ -72,6 +75,24 @@ const createQueues = async (): Promise<void> => {
   await fileSyncQueue.isReady()
   await emailsQueue.isReady()
   await maintenanceQueue.isReady()
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  await initMaintenanceQueue()
+}
+
+const initMaintenanceQueue = async () => {
+  log.info({}, 'Initializing maintenance queue')
+  if (config.shouldAddCheckNonterminatedClustersOnInit) {
+    const checkNonTerminatedDbclustersTask = {
+      type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
+    }
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    await addToQueue(checkNonTerminatedDbclustersTask, maintenanceQueue, {
+      repeat: {
+        cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
+      },
+      jobId: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
+    })
+  }
 }
 
 const disconnectQueues = async (): Promise<void> => {
@@ -83,35 +104,37 @@ const disconnectQueues = async (): Promise<void> => {
   log.info('Queues disconnected')
 }
 
-const addToQueue = async (
-  task: AnyObject,
+const addToQueue = async <T extends types.Task>(
+  task: T,
   queue: Bull.Queue,
   options?: JobOptions,
   payloadFn?: (payload: AnyObject) => AnyObject,
-): Promise<Job> => {
+) => {
   if (typeof queue === 'undefined') {
     throw new Error('The queue was not started')
   }
   // default noop function
-  const whitelistPayloadFn = payloadFn ? payloadFn : payload => payload
+  const whitelistPayloadFn = payloadFn || (payload => payload)
   log.info(
     {
       task: {
         type: task.type,
-        payload: whitelistPayloadFn(task.payload),
-        userId: task.user?.id,
+        // TODO(samuel) fix
+        payload: whitelistPayloadFn((task as any).payload),
+        userId: (task as any)?.user?.id,
       },
       job: {
-        id: options?.jobId,
+        id: options.jobId,
       },
     },
     'adding a task to queue',
   )
-  const job = await queue.add(task, options)
+  // TODO(samuel) fix - idk why type resolution doesn't work
+  const job = await queue.add(task, options) as Bull.Job<T>
   return job
 }
 
-const removeRepeatable = async (job: Job): Promise<void> => {
+const removeRepeatable = async (job: Job) => {
   if (typeof statusQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
@@ -135,9 +158,9 @@ const findRepeatable = async (bullJobId: string) => {
 const createSyncJobStatusTask = async (
   data: types.CheckStatusJob['payload'],
   user: UserCtx,
-): Promise<Job> => {
+) => {
   const wrapped = {
-    type: TASKS.SYNC_JOB_STATUS,
+    type: types.TASK_TYPE.SYNC_JOB_STATUS as const,
     payload: data,
     user,
   }
@@ -160,8 +183,8 @@ const createSyncJobStatusTask = async (
 const createSyncWorkstationFilesTask = async (
   data: types.CheckStatusJob['payload'],
   user: UserCtx,
-): Promise<Job> => {
-  const jobType = TASKS.SYNC_WORKSTATION_FILES
+) => {
+  const jobType = types.TASK_TYPE.SYNC_WORKSTATION_FILES as const
   const wrapped = {
     type: jobType,
     payload: data,
@@ -181,7 +204,7 @@ const createSyncWorkstationFilesTask = async (
 
   // This is a user triggered task, and should not be repeated
   const options: JobOptions = {
-    jobId: jobId,
+    jobId,
   }
   return await addToQueue(wrapped, fileSyncQueue, options)
 }
@@ -190,11 +213,11 @@ const createSyncWorkstationFilesTask = async (
 // type and id to be sent
 const createSendEmailTask = async (
   data: types.SendEmailJob['payload'],
-  user: UserCtx,
+  user: UserCtx | undefined,
   taskId?: string,
-): Promise<Job> => {
+) => {
   const wrapped = {
-    type: TASKS.SEND_EMAIL,
+    type: types.TASK_TYPE.SEND_EMAIL as const,
     payload: data,
     user,
   }
@@ -206,13 +229,11 @@ const createSendEmailTask = async (
   } : {
     jobId: EmailSendOperation.getBullJobId(data.emailType),
   }
-  const handlePayloadFn = (
-    payload: types.SendEmailJob['payload'],
-  ): types.SendEmailJob['payload'] => ({
+  const handlePayloadFn = (payload: types.SendEmailJob['payload']): types.SendEmailJob['payload'] => ({
     ...payload,
     body: '[too-long]',
   })
-  return await addToQueue(wrapped, emailsQueue, options, handlePayloadFn)
+  return addToQueue(wrapped, emailsQueue, options, handlePayloadFn)
 }
 
 const removeFromEmailQueue = (jobId: string) => {
@@ -221,53 +242,53 @@ const removeFromEmailQueue = (jobId: string) => {
 
 const createCheckStaleJobsTask = async (
   user: UserCtx,
-): Promise<Job> => {
+) => {
   const wrapped = {
-    type: TASKS.CHECK_STALE_JOBS,
+    type: types.TASK_TYPE.CHECK_STALE_JOBS as const,
+    payload: undefined,
     user,
   }
-  const options: JobOptions = { jobId: `${TASKS.CHECK_STALE_JOBS}` }
+  const options: JobOptions = { jobId: types.TASK_TYPE.CHECK_STALE_JOBS }
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
 const createDbClusterSyncTask = async (
   data: types.SyncDbClusterJob['payload'],
   user: UserCtx,
-): Promise<Job> => {
+) => {
   const wrapped = {
-    type: TASKS.SYNC_DBCLUSTER_STATUS,
+    type: types.TASK_TYPE.SYNC_DBCLUSTER_STATUS as const,
     payload: data,
     user,
   }
 
   const options: JobOptions = {
-    jobId: nanoid(),
+    jobId: SyncDbClusterOperation.getBullJobId(data.dxid),
     repeat: { cron: config.workerJobs.syncJob.repeatPattern },
   }
 
   return await addToQueue(wrapped, statusQueue, options)
 }
 
-const createUserCheckupTask = async (data: types.BasicUserJob): Promise<Job> => {
+const createUserCheckupTask = async (data: types.BasicUserJob) => {
   const wrapped = {
-    type: TASKS.USER_CHECKUP,
-    payload: data,
+    type: types.TASK_TYPE.USER_CHECKUP as const,
     user: data.user,
   }
-  const options: JobOptions = { jobId: `${TASKS.USER_CHECKUP}.${data.user.dxuser}` }
+  const options: JobOptions = { jobId: `${wrapped.type}.${data.user.dxuser}` }
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
 
-const createTestMaxMemoryTask = async(): Promise<any> => {
-  maintenanceQueue.removeJobs(TASKS.DEBUG_TEST_MAX_MEMORY)
+const createTestMaxMemoryTask = async (): Promise<any> => {
+  maintenanceQueue.removeJobs(types.TASK_TYPE.DEBUG_MAX_MEMORY)
 
   const data = {
-    type: TASKS.DEBUG_TEST_MAX_MEMORY,
+    type: types.TASK_TYPE.DEBUG_MAX_MEMORY as const,
   }
 
   const options: JobOptions = {
-    jobId: TASKS.DEBUG_TEST_MAX_MEMORY,
+    jobId: types.TASK_TYPE.DEBUG_MAX_MEMORY,
   }
   return await addToQueue(data, maintenanceQueue, options)
 }
@@ -284,9 +305,8 @@ export {
   createDbClusterSyncTask,
   createUserCheckupTask,
   createTestMaxMemoryTask,
-  TASKS,
   createQueues,
-  getQueue,
+  getStatusQueue,
   getQueues,
   disconnectQueues,
   types,
