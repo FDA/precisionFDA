@@ -88,6 +88,7 @@ module FilesSyncing
 
         return if remote_state == file.state
 
+        logger.debug("update file #{file.uid} by user #{user.dxuser} to state #{remote_state}")
         if remote_state == UserFile::STATE_CLOSED
           file.update!(state: remote_state, file_size: result[:describe][:size])
           Event::FileCreated.create_for(file, user)
@@ -120,6 +121,7 @@ module FilesSyncing
 
     # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
     def remove_local_file(file, user)
+      logger.debug("removing local file #{file.uid} by user #{user.dxuser}")
       UserFile.transaction do
         # Use find_by(file.id) since file.reload may raise ActiveRecord::RecordNotFound
         file = UserFile.find_by(id: file.id)
