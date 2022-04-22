@@ -97,7 +97,7 @@ export const ExecutionsListTable = ({
     columnResizing: UseResizeColumnsState<any>['columnResizing']
   ) => void
 }) => {
-  const col = useExecutionColumns({ colWidths })
+  const col = useExecutionColumns({ colWidths, filterDataTestIdPrefix: 'workflow-executions-list' })
   const [hiddenColumns, sethiddenColumns] = useState<string[]>(['workflow', 'featured', 'location', 'tags'])
   const columns = useMemo(() => col, [col])
 

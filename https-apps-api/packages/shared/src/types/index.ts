@@ -29,14 +29,16 @@ interface UserCtx {
   dxuser: string
 }
 
+// TODO(samuel) typescript refactor
+// * these types are defined at 2 places
+// * UserCtx shouldn't be part of context by default
 interface OpsCtx {
   log: Logger
   em: EntityManager
-  user: UserCtx
 }
 
-interface WorkerOpsCtx extends OpsCtx {
-  job: Job
+interface UserOpsCtx extends OpsCtx {
+  user: UserCtx
 }
 
 type DxIdInput = {
@@ -47,4 +49,6 @@ type IdInput = {
   id: number
 }
 
-export type { DeepPartial, AnyObject, UserCtx, OpsCtx, WorkerOpsCtx, Maybe, DxIdInput, IdInput }
+type WorkerOpsCtx<Ctx extends OpsCtx> = Ctx & { job: Job}
+
+export type { DeepPartial, AnyObject, UserCtx, OpsCtx, UserOpsCtx, Maybe, DxIdInput, IdInput, WorkerOpsCtx }

@@ -44,6 +44,7 @@ interface IColumn {
   header: string
   value: keyof IWorkflow
   link?: string
+  dataTestId: string
 }
 
 const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
@@ -52,23 +53,28 @@ const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
       header: 'location',
       value: 'location',
       link: workflow.links.space && `${workflow.links.space}/workflows`,
+      dataTestId: 'workflow-show-meta-location',
     },
     {
       header: 'name',
       value: 'name',
+      dataTestId: 'workflow-show-meta-name',
     },
     {
       header: 'id',
       value: 'uid',
+      dataTestId: 'workflow-show-meta-id',
     },
     {
       header: 'added by',
       value: 'added_by',
       link: workflow.links.user,
+      dataTestId: 'workflow-show-meta-added-by',
     },
     {
       header: 'created on',
       value: 'created_at_date_time',
+      dataTestId: 'workflow-show-meta-created-on',
     },
   ]
 
@@ -77,18 +83,18 @@ const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
       <MetadataKey>{e.header}</MetadataKey>
       {e.header === 'location' && !e.link ? (
         <MetadataVal>
-          <Link to={`/home/workflows${scopeParamLink}`}>
+          <Link to={`/home/workflows${scopeParamLink}`} data-testid={e.dataTestId}>
             {workflow[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
         <MetadataVal>
-          <Link to={e.link} target="_blank">
+          <Link to={e.link} target="_blank" data-testid={e.dataTestId}>
             {workflow[e.value]}
           </Link>
         </MetadataVal>
       ) : (
-        <MetadataVal>{workflow[e.value]}</MetadataVal>
+        <MetadataVal data-testid={e.dataTestId}>{workflow[e.value]}</MetadataVal>
       )}
     </MetadataItem>
   ))
@@ -109,6 +115,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         as="a"
         href={`${workflow.links.show}/analyses/new`}
         type="primary"
+        data-testid='workflow-show-actions-run'
       >
         <>
           {'Run Workflow'}&nbsp;
@@ -119,6 +126,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         as="a"
         href={workflow.links.batch_run_workflow}
         type="primary"
+        data-testid='workflow-show-actions-run-batch'
       >
         <>
           {'Run Batch Workflow'}&nbsp;
@@ -171,13 +179,13 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/workflows${scopeParamLink}`}>
+      <StyledBackLink linkTo={`/home/workflows${scopeParamLink}`} data-testid={'workflow-show-back-link'}>
         Back to Workflows
       </StyledBackLink>
       <Topbox>
         <Header>
           <HeaderLeft>
-            <Title>
+            <Title data-testid="workflow-show-title">
               <BoltIcon height={20} />
               &nbsp;{workflowTitle}
             </Title>
@@ -197,6 +205,7 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
         {renderOptions(workflow, scopeParamLink)}
         {workflow.tags.length > 0 && (
           <StyledTags>
+            {/* TODO(samuel) validate that tag is non-null string*/}
             {workflow.tags.map(tag => (
               <StyledTagItem key={tag}>{tag}</StyledTagItem>
             ))}
@@ -205,16 +214,16 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" to={`${match.url}`}>
+        <StyledTab activeClassName="active" to={`${match.url}`} data-testid={'workflow-show-tab-spec'}>
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/jobs`}>
+        <StyledTab activeClassName="active" to={`${match.url}/jobs`} data-testid={'workflow-show-tab-executions'}>
           Executions ({Object.keys(meta.executions).length})
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/diagram`}>
+        <StyledTab activeClassName="active" to={`${match.url}/diagram`} data-testid={'workflow-show-tab-diagram'}>
           Diagram
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/readme`}>
+        <StyledTab activeClassName="active" to={`${match.url}/readme`} data-testid={'workflow-show-tab-readme'}>
           Readme
         </StyledTab>
       </StyledTabList>

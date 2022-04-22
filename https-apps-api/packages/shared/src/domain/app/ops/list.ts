@@ -1,8 +1,9 @@
 import { App } from '../app.entity'
 import { User } from '../../user'
 import { BaseOperation, DefaultInput } from '../../../utils'
+import { UserOpsCtx } from '../../../types'
 
-export class ListAppsOperation extends BaseOperation<DefaultInput, App[]> {
+export class ListAppsOperation extends BaseOperation<UserOpsCtx, DefaultInput, App[]> {
   async run() {
     // all the https-type apps that somehow belong to given user
     const em = this.ctx.em

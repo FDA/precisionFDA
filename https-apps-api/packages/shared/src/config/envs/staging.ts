@@ -24,4 +24,5 @@ export const config: ConfigOverride = {
   redis: {
     isSecure: true,
   },
+  shouldAddCheckNonterminatedClustersOnInit: true
 }

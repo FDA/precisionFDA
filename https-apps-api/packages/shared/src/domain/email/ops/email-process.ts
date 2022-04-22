@@ -1,8 +1,9 @@
 import { BaseOperation } from '../../../utils'
 import { EmailProcessInput, getEmailConfig, EmailTemplate } from '../email.config'
 import { createSendEmailTask } from '../../../queue'
+import { UserOpsCtx } from '../../../types'
 
-export class EmailProcessOperation extends BaseOperation<EmailProcessInput, boolean> {
+export class EmailProcessOperation extends BaseOperation<UserOpsCtx, EmailProcessInput, boolean> {
   input: EmailProcessInput
 
   async run(input: EmailProcessInput): Promise<boolean> {
@@ -22,7 +23,7 @@ export class EmailProcessOperation extends BaseOperation<EmailProcessInput, bool
   }
 
   /**
-   * @returns class that implements EmailTemplate
+   * @returns instance of class that implements EmailTemplate
    */
   private async getEmailTemplate(): Promise<EmailTemplate> {
     const emailTypeId = this.input.emailTypeId
