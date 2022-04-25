@@ -51,6 +51,7 @@ class ChallengesListPage extends Component {
           setTimeStatusHandler(CHALLENGE_TIME_STATUS.CURRENT)
           loadChallenges()
         },
+        entityType: 'Challenges',
       },
       {
         text: 'Upcoming',
@@ -59,6 +60,7 @@ class ChallengesListPage extends Component {
           setTimeStatusHandler(CHALLENGE_TIME_STATUS.UPCOMING)
           loadChallenges()
         },
+        entityType: 'Challenges',
       },
       {
         text: 'Ended',
@@ -67,6 +69,7 @@ class ChallengesListPage extends Component {
           setTimeStatusHandler(CHALLENGE_TIME_STATUS.ENDED)
           loadChallenges()
         },
+        entityType: 'Challenges',
       },
     ]
 

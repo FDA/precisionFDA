@@ -45,12 +45,8 @@ export function usePaginationParams(): PaginationParams {
   }
 
   const handleSetPerPageParam = (v: number, updateType: UrlUpdateType) => {
-    if(v === 10) {
-      setPerPageParam(undefined)
-    } else {
-      setPageParam(undefined)
-      setPerPageParam(v, 'pushIn')
-    }
+    setPageParam(undefined)
+    setPerPageParam(v, 'pushIn')
   }
 
   return { pageParam, perPageParam, setPerPageParam: handleSetPerPageParam, setPageParam: handleSetPageParam }

@@ -4,7 +4,7 @@ import { Challenge, Space, User } from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { ChallengePreregEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
-import { OpsCtx } from '@pfda/https-apps-shared/src/types'
+import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { database } from '@pfda/https-apps-shared'
 import { CHALLENGE_STATUS } from '@pfda/https-apps-shared/src/domain/challenge/challenge.enum'
@@ -16,7 +16,7 @@ describe('challenge-prereg.handler', () => {
   let anotherUser: User
   let challenge: Challenge
   let space: Space
-  let ctx: OpsCtx
+  let ctx: UserOpsCtx
   const config = EMAIL_CONFIG.challengePrereg
 
   beforeEach(async () => {

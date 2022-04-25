@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { format } from 'date-fns-tz'
 import enUS from 'date-fns/locale/en-US'
+import './style.sass'
 
 import ChallengeTimeRemaining from '../../../../components/Challenges/ChallengeTimeRemaining'
 import { CHALLENGE_TIME_STATUS } from '../../../../../constants'
@@ -89,8 +90,8 @@ const ChallengeStateLabel = styled.span<IChallengeTimeStatusControl>`
     }
     else if (timeStatus === CHALLENGE_TIME_STATUS.ENDED) {
       return css`
-        color: ${theme.colors.textMediumGrey};
-        border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.textMediumGrey};
+        color: ${theme.colors.stateLabelGrey};
+        border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.stateLabelGrey};
       `
     }
   }}
@@ -129,7 +130,7 @@ const ChallengeDate = styled.div<IChallengeTimeStatusControl>`
     }
     else if (timeStatus === CHALLENGE_TIME_STATUS.ENDED) {
       return css`
-        color: ${theme.colors.textMediumGrey};
+        color: ${theme.colors.colorDateGrey};
       `
     }
   }}
@@ -197,7 +198,7 @@ export const ChallengeDetailsBanner: React.FunctionComponent<IChallengeDetailsBa
     <StyledChallengeDetailsBanner>
       <LeftColumn>
         <div>
-          <Link to={{ pathname: '/challenges' }}>
+          <Link to={{ pathname: '/challenges' }} className="backToChallenges">
             &larr; Back to All Challenges
           </Link>
           <div style={{ 'marginTop': '20px' }}><ChallengeStateLabel timeStatus={challenge.timeStatus}>{stateLabel}</ChallengeStateLabel></div>
@@ -217,7 +218,7 @@ export const ChallengeDetailsBanner: React.FunctionComponent<IChallengeDetailsBa
         </ChallengeDateArea>
       </LeftColumn>
       <RightColumn>
-        <ChallengeThumbnail src={challenge.cardImageUrl} />
+        <ChallengeThumbnail src={challenge.cardImageUrl} alt={`${challenge.name} thumbnail`} />
       </RightColumn>
     </StyledChallengeDetailsBanner>
   )

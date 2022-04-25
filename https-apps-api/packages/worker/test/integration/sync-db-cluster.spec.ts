@@ -13,9 +13,9 @@ const createSyncDbClusterTestTask = async (
   payload: SyncDbClusterJob['payload'],
   user: SyncDbClusterJob['user'],
 ) => {
-  const defaultTestQueue = queue.getQueue()
+  const defaultTestQueue = queue.getStatusQueue()
   await defaultTestQueue.add({
-    type: queue.TASKS.SYNC_DBCLUSTER_STATUS,
+    type: queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS,
     payload,
     user,
   })

@@ -1,6 +1,5 @@
 import { database, email } from '@pfda/https-apps-shared'
 import type { SendEmailJob } from '@pfda/https-apps-shared/src/queue/task.input'
-import { WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { getChildLogger } from '../utils'
@@ -12,7 +11,7 @@ export const sendEmailHandler = async (bullJob: Job) => {
   // this is like a router endpoint
   // validation ??
   // build context
-  const ctx: WorkerOpsCtx = {
+  const ctx = {
     em: database.orm().em.fork(),
     log,
     user: data.user,

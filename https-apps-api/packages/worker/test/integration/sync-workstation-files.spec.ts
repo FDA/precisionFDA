@@ -1,6 +1,6 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
-import { App, User, UserFile, Tag, Tagging, Folder } from '@pfda/https-apps-shared/src/domain'
+import { App, User, UserFile, Tag, Tagging, Folder, Job } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
@@ -39,10 +39,10 @@ const createSyncWorkstationFilesTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getQueue()
+  const defaultTestQueue = queue.getStatusQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
-    type: queue.TASKS.SYNC_WORKSTATION_FILES,
+    type: queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES,
     payload,
     user,
   })

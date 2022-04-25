@@ -84,6 +84,8 @@ const runAppSchema: JSONSchema7 = {
         app_gz: { type: 'string', maxLength: config.validation.maxStrLen },
         // ttyd
         port: { type: 'integer' },
+        // Apache Guacamole
+        max_session_length: { type: 'string', maxLength: config.validation.maxStrLen },
       },
     },
   },
