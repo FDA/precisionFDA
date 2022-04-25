@@ -7,8 +7,9 @@ import { DbCluster } from '../db-cluster.entity'
 import { User } from '../../user'
 import { STATUS, ENGINE, STATUSES, ENGINES } from '../db-cluster.enum'
 import { createDbClusterSyncTask } from '../../../queue'
+import { UserOpsCtx } from '../../../types'
 
-export class CreateDbClusterOperation extends BaseOperation<CreateDbClusterInput, DbCluster> {
+export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDbClusterInput, DbCluster> {
   private input: CreateDbClusterInput
   private em: EntityManager
 

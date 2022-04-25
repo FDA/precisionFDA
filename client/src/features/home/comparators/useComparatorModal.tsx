@@ -2,7 +2,7 @@ import React from 'react'
 import { useMutation } from 'react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue, ButtonSolidRed } from '../../../components/Button'
-import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
+import { checkStatus, getApiRequestOpts } from '../../../utils/api'
 import { Modal } from '../../modal'
 import { StyledModalContent } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -96,7 +96,9 @@ export function useComparatorModal<
     },
     onSuccess: (res: any) => {
       if (res.error) {
-        toast.error(res.error)
+        toast.error('Error: ' + res.error)
+        setShowModal(false)
+        return
       }
       const messages = res?.meta?.messages
       if (messages) {

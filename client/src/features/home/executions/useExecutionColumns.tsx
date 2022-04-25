@@ -15,7 +15,17 @@ import { StyledLinkCell } from '../home.styles'
 import { KeyVal } from '../types'
 import { IExecution } from './executions.types'
 
-export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?: KeyVal, isAdmin?: boolean }) => {
+export const useExecutionColumns = ({
+  colWidths,
+  isAdmin = false,
+  filterDataTestIdPrefix
+}: {
+  colWidths?: KeyVal,
+  isAdmin?: boolean,
+  // TODO(samuel) add this into .d.ts to properly solve declaration merging
+  filterDataTestIdPrefix?: string | undefined
+
+}) => {
   const queryClient = useQueryClient()
   return useMemo<Column<IExecution>[]>(
     () =>
@@ -35,6 +45,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
               return <div>{props.row.original.state}</div>
             }
           },
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {},
         },
         {
           Header: 'Execution Name',
@@ -53,6 +64,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
                 {props.value}
               </StyledLinkCell>
             ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {},
         },
         {
           Header: 'Workflow',
@@ -65,7 +77,8 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
                 <BoltIcon height={14} />
                 {props.value}
               </StyledLinkCell>
-            )
+            ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-workflow-title` } : {},
         },
         {
           Header: 'Featured',
@@ -81,6 +94,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
               <FeaturedToggle disabled={!isAdmin} resource="jobs" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['jobs'])} />
             </div>
           ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-featured` } : {},
         },
         {
           Header: 'App Title',
@@ -96,6 +110,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
                 {props.value}
               </StyledLinkCell>
             ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-app-title` } : {},
         },
         {
           Header: 'Launched By',
@@ -105,6 +120,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
           Cell: props => (
             <a href={props.row.original.links.user ?? '#'}>{props.value}</a>
           ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {},
         },
         {
           Header: 'Location',
@@ -117,6 +133,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
               {props.value}
             </StyledLinkCell>
           ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-location` } : {},
         },
         {
           Header: 'Instance Type',
@@ -131,6 +148,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
             ) : (
               <>{props.row.original.instance_type}</>
             ),
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {},
         },
         {
           Header: 'Duration',
@@ -147,6 +165,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
               return <>{props.row.original.duration}</>
             }
           },
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {},
         },
         {
           Header: 'Energy',
@@ -164,13 +183,15 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
               return <>{props.row.original.energy_consumption}</>
             }
           },
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {},
         },
         {
           Header: 'Launched On',
           accessor: 'launched_on',
           disableFilters: true,
           width: colWidths?.launched_on || 198,
-          Cell: props => props.row.original.launched_on === null ? props.row.original.created_at_date_time : props.row.original.launched_on
+          Cell: props => props.row.original.launched_on === null ? props.row.original.created_at_date_time : props.row.original.launched_on,
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {},
         },
         {
           Header: 'Tags',
@@ -187,6 +208,7 @@ export const useExecutionColumns = ({ colWidths, isAdmin = false }: { colWidths?
               </StyledTags>
             )
           },
+          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {},
         },
       ] as Column<IExecution>[],
     [],

@@ -36,4 +36,6 @@ you can run the following, but will need AWS credentials that has access to prod
 
 ## Running specific recipes
 
+Run a specific recipe to test it directly, but be sure to invoke `pfda::get_ssm_parameters` first before the other steps:
+
   chef-client --chef-license accept-silent --no-fips -z -E dev -r "recipe[pfda::get_ssm_parameters],recipe[pfda::deploy_ruby]"

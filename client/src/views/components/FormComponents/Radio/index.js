@@ -13,8 +13,8 @@ const Radio = ({ name, label, options, initialValue, status, inline, ...rest }) 
       <div className={classNames(rowClasses)}>
         {options.map(option => (
           <div className={classNames('form-check', { 'form-check-inline': inline })} key={option.value}>
-            <input className="form-check-input" type="radio" name={name} id={name} value={option.value} defaultChecked={initialValue==option.value} {...rest} />
-            <label className="form-check-label" htmlFor={name}>{option.label}</label>
+            <input className="form-check-input" htmlFor={option.htmlFor ? option.htmlFor : option.value} aria-label={`for Input ${option.ariaLabel}`} type="radio" name={name} id={`${name}-${option.value}`} value={option.value} defaultChecked={initialValue==option.value} {...rest} />
+            <label className="form-check-label" htmlFor={option.htmlFor ? option.htmlFor : option.value} aria-label={option.ariaLabel} >{option.label}</label>
           </div>
         ))}
       </div>

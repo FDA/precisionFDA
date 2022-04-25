@@ -5,8 +5,13 @@ import { config } from '../../../config'
 import { emailClient } from '../../../services/salesforce.service'
 import { getBullJobIdForEmailOperation } from '../email.helper'
 import { EMAIL_TYPES } from '../email.config'
+import { OpsCtx } from '../../../types'
 
-export class EmailSendOperation extends WorkerBaseOperation<SendEmailJob['payload'], boolean> {
+export class EmailSendOperation extends WorkerBaseOperation<
+  OpsCtx,
+  SendEmailJob['payload'],
+  boolean
+> {
 
   static getBullJobId = (emailType: EMAIL_TYPES, customSuffix?: string): string => {
     return getBullJobIdForEmailOperation(emailType, customSuffix)

@@ -22,7 +22,7 @@ export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
       </StyledNameCell>
     )
   }
-  if (cell.column.id === 'app_title') {
+  if (cell.column.id === 'app_title' && job.links.app) {
     val = (
       <StyledNameCell as={Link} to={`/home${job.links.app}`}>
         <CubeIcon height={14} /> {job.app_title}

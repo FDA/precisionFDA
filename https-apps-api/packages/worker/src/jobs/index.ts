@@ -1,6 +1,5 @@
 import { path } from 'ramda'
-import { queue, errors } from '@pfda/https-apps-shared'
-import type { Task } from '@pfda/https-apps-shared/src/queue/task.input'
+import { queue, errors, debug } from '@pfda/https-apps-shared'
 import { Job } from 'bull'
 import { log } from '../utils'
 import { jobStatusHandler } from './job-status.handler'
@@ -9,36 +8,44 @@ import { checkStaleJobsHandler } from './check-stale-jobs.handler'
 import { dbClusterSyncHandler } from './db-cluster-sync.handler'
 import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
 import { userCheckupHandler } from '../users/user-checkup.handler'
+import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclusters.handler'
 
-export const handler = async (job: Job<Task<any>>) => {
+export const handler = async (job: Job<queue.types.Task>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
     log.warn({ jobData: job.data }, 'Invalid job.data format')
     throw new errors.WorkerError('Job data does not specify task type', { jobData: job.data })
   }
 
   switch (job.data.type) {
-    case queue.TASKS.SYNC_JOB_STATUS:
+    case queue.types.TASK_TYPE.SYNC_JOB_STATUS:
       await jobStatusHandler(job)
-      return await Promise.resolve()
-    case queue.TASKS.SYNC_WORKSTATION_FILES:
+      return
+    case queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES:
       await workstationSyncFilesHandler(job)
-      return await Promise.resolve()
-    case queue.TASKS.SEND_EMAIL:
+      return
+    case queue.types.TASK_TYPE.SEND_EMAIL:
       await sendEmailHandler(job)
-      return await Promise.resolve()
-    case queue.TASKS.CHECK_STALE_JOBS:
+      return
+    case queue.types.TASK_TYPE.CHECK_STALE_JOBS:
       // not used at the moment -> the job is never put to queue
-      await checkStaleJobsHandler(job)
-      return await Promise.resolve()
-    case queue.TASKS.SYNC_DBCLUSTER_STATUS:
+      // TODO(samuel) - typescript fix discriminated union type resolution, to avoid "as any"
+      await checkStaleJobsHandler(job as any)
+      return
+    case queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS:
+      await checkNonTerminatedDbClustersHandler(job as any)
+      return
+    case queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS:
       await dbClusterSyncHandler(job)
-      return await Promise.resolve()
-    case queue.TASKS.USER_CHECKUP:
+      return
+    case queue.types.TASK_TYPE.USER_CHECKUP:
       await userCheckupHandler(job)
-      return await Promise.resolve()
-    case queue.TASKS.OTHER_TASK:
+      return
+    case queue.types.TASK_TYPE.OTHER_TASK:
       console.log('gonna do the other task')
-      return await Promise.resolve()
+      return
+    case queue.types.TASK_TYPE.DEBUG_MAX_MEMORY:
+      await debug.testHeapMemoryAllocationError()
+      return
     default:
       log.warn({ jobData: job.data }, 'Trying to handle unsupported task')
       throw new errors.WorkerError('Unsupported task', { jobData: job.data })

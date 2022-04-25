@@ -10,12 +10,12 @@ import {
   createFoldersTraverse,
   detectIntersectedTraverse,
   getPathsToKeep,
-  filterDuplicities,
-  findFolderForPath,
+  filterDuplicities
 } from '../user-file.helper'
 import { User, UserFile } from '../..'
 import { errors } from '../../..'
 import { FILE_ORIGIN_TYPE } from '../user-file.enum'
+import { UserOpsCtx } from '../../../types'
 
 // todo: maybe another operation type for "can be called from another operation"
 
@@ -23,7 +23,11 @@ import { FILE_ORIGIN_TYPE } from '../user-file.enum'
 // Comparison of equivalent folders is done by comparing their full paths
 // Contents of newly created folders (those that exist on dx platform but not pfda) are not synchronized
 // by this operation, but it would remove files contained within deleted folders on the pfda side
-export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder[]> {
+export class SyncFoldersOperation extends BaseOperation<
+  UserOpsCtx,
+  SyncFoldersInput,
+  Folder[]
+> {
   async run(input: SyncFoldersInput): Promise<Folder[]> {
     const em = this.ctx.em
     const user = await em.findOne(User, { id: this.ctx.user.id })

@@ -6,6 +6,7 @@ import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { errors, client } from '../../..'
 import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
+import { UserOpsCtx } from '../../../types'
 
 export type SyncFolderFilesOutput = {
   folderPath: string
@@ -14,6 +15,7 @@ export type SyncFolderFilesOutput = {
 }
 
 export class SyncFilesInFolderOperation extends BaseOperation<
+  UserOpsCtx,
   SyncFilesInFolderInput,
   SyncFolderFilesOutput
 > {

@@ -11,6 +11,9 @@ x-shared: &shared
     - REDIS_WORKER_URL=redis://redis:6379/0
     - GSRS_URL=http://gsrs:9000
     - GSRS_ENABLED=true
+    # ! Never push these flags enable - set to value "1", or any other non-empty string
+    - SKIP_DEPS_SETUP=0
+    - SKIP_DB_SETUP=0
 
 services:
   web:
@@ -44,6 +47,9 @@ services:
       - type: bind
         source: ../../app/assets/packs/bundle.js
         target: /precision-fda/dist/bundle.js
+      - type: volume 
+        source: pfda-webpack-cache
+        target: /precision-fda/.build_cache/
     working_dir: /precision-fda
     command: yarn watch:docker
 
@@ -62,7 +68,7 @@ services:
       - gsrsdb
 
   gsrsdb:
-    image: mysql:5.6
+    image: amd64/mysql:5.6
     volumes:
       - gsrs-mysql-volume:/var/lib/mysql
     tmpfs:
@@ -78,8 +84,6 @@ services:
     build:
       context: ../../
       dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
-      args:
-        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
     command: ['make', 'run-dist']
     ports:
       - 3001:3001
@@ -91,16 +95,13 @@ services:
     build:
       context: ../../
       dockerfile: ./https-apps-api/docker/node.isolated-qa.Dockerfile
-      args:
-        - database_url_build=mysql://root:password@db:3306/precisionfda-ui-test
-
     command: ['make', 'run-worker-dist']
     depends_on:
       - db
       - redis
 
   db:
-    image: mysql:5.6
+    image: amd64/mysql:5.6
     volumes:
       - pfda-mysql-volume:/var/lib/mysql
     environment:
@@ -130,3 +131,4 @@ volumes:
   pfda-mysql-volume:
   gsrs-mysql-volume:
   pfda-gems:
+  pfda-webpack-cache:

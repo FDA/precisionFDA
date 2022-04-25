@@ -5,7 +5,7 @@ import { Job, SpaceMembership, User, Space, Comment } from '@pfda/https-apps-sha
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { CommentAddedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
-import { OpsCtx } from '@pfda/https-apps-shared/src/types'
+import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
@@ -17,7 +17,7 @@ describe('member-change.handler', () => {
   let space: Space
   let comment: Comment
   let job: Job
-  let ctx: OpsCtx
+  let ctx: UserOpsCtx
   let anotherUserMembership: SpaceMembership
   const emailConfig = EMAIL_CONFIG.newContentAdded
 
