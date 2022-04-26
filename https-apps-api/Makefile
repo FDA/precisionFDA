@@ -38,7 +38,7 @@ test-worker-task:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
 
 watch:
-	$(bin)ts-node-dev -r tsconfig-paths/register --files ./packages/api/src/index.ts
+	$(bin)ts-node -r tsconfig-paths/register --files ./packages/api/src/index-dev.ts
 
 watch-worker:
 	$(bin)ts-node-dev -r tsconfig-paths/register --files ./packages/worker/src/index.ts
