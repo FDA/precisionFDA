@@ -71,7 +71,7 @@ export const Header: React.FC = () => {
         </StyledLinkReactRoute>
       )}
       <StyledDivider />
-      <StyledLink href="/about">About</StyledLink>
+      <StyledLinkReactRoute to="/about">About</StyledLinkReactRoute>
       <StyledLink href="/guidelines">Guidelines</StyledLink>
       <StyledLink href="/docs">Docs</StyledLink>
       <StyledDivider />
