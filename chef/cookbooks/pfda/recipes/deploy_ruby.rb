@@ -94,6 +94,10 @@ application app_dir do
     cwd  app_dir
     user node[:deploy_user]
     environment lazy { ENV.to_hash }
+    # To recover from ActiveRecord::ConcurrentMigrationError when
+    # deploying onto multiple instances in CodeBuild
+    retries 2
+    retry_delay 20
   end
 
   execute "Bundle frontend" do
