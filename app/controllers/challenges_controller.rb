@@ -13,6 +13,8 @@ class ChallengesController < ApplicationController
 
   def new
     @challenge = Challenge.new
+    time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
+    js time_zone: time_zone
   end
 
   def create
