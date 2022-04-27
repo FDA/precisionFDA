@@ -128,25 +128,26 @@ init_file_form_view = (data) ->
     .on("click.files.new", ".event-upload-image", (e) -> viewModel.handleUpload(e))
     .on("click.files.new", ".event-clear-files", (e) -> viewModel.handleClear(e))
 
-init_datetimepickers = () ->
+init_datetimepickers = (data) ->
   inputs = $('.add-datetimepicker')
+  timeZone =  data.time_zone.replace(' - ', '/')
   for input in inputs
     new Precision.Datepicker(input, {
       noDefaultValue: true,
-      icon: true
-    })
-
+      icon: true,
+    }, {timeZone: timeZone})
+ 
 MainController = Paloma.controller('Challenges', {
   create: ->
-    init_datetimepickers()
+    init_datetimepickers(@params)
     init_file_form_view(@params)
   update: ->
-    init_datetimepickers()
+    init_datetimepickers(@params)
     init_file_form_view(@params)
   new: ->
-    init_datetimepickers()
+    init_datetimepickers(@params)
     init_file_form_view(@params)
   edit: ->
-    init_datetimepickers()
+    init_datetimepickers(@params)
     init_file_form_view(@params)
 })
