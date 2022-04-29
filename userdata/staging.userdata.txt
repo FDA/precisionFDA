@@ -40,7 +40,8 @@ cat <<EOF > /tmp/config.json
                          "file_path": "/srv/www/precision_fda/current/log/https-api-0.log",
                          "log_group_name": "staging/node/https-api-0.log",
                          "log_stream_name": "{instance_id}"
-                     },{
+                     },
+                     {
                          "file_path": "/srv/www/precision_fda/current/log/https-worker-1.log",
                          "log_group_name": "staging/node/https-workers",
                          "log_stream_name": "{instance_id}-worker-1"
@@ -67,7 +68,7 @@ cat <<EOF > /tmp/config.json
                      },
                      {
                          "file_path": "/home/deploy/.pm2/logs/https-apps-api-error-0.log",
-                         "log_group_name": "staging/node/https-apps-api-error-0.log",
+                         "log_group_name": "staging/node/https-apps-api-errors",
                          "log_stream_name": "{instance_id}"
                      },
                      {
