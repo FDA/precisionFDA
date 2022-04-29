@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby "2.7.5"
 
-gem "rails", "= 6.1.4.7"
+gem "rails", "= 6.1.5.1"
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0"
 # Use Uglifier as compressor for JavaScript assets
@@ -117,9 +117,6 @@ group :development do
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
   gem "web-console"
 
-  # View outgoing HTTP requests
-  gem "httplog"
-
   gem "listen"
 
   # Automatic Ruby code checking tool.
@@ -145,6 +142,11 @@ end
 
 group :development, :test, :ui_test do
   gem "thin", "~> 1.8"
+end
+
+group :development, :test, :ui_test, :staging do
+  # View outgoing HTTP requests in logs
+  gem "httplog"
 end
 
 group :test do
