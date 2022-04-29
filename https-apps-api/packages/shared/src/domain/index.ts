@@ -11,7 +11,7 @@ import { Tagging } from './tagging/tagging.entity'
 import { Node } from './user-file/node.entity'
 import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
-import { JobClosedEvent } from './event/job-closed.entity'
+import { Event } from './event/event.entity'
 import { Organization } from './org/org.entity'
 import { EmailNotification } from './email/email-notification.entity'
 import { SpaceEvent } from './space-event/space-event.entity'
@@ -36,7 +36,7 @@ const entities = {
   ExpertQuestion,
   Folder,
   Job,
-  JobClosedEvent,
+  Event,
   Node,
   Organization,
   Space,
