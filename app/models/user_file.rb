@@ -307,44 +307,6 @@ class UserFile < Node
     uid
   end
 
-  # Returns a parent folder name of UserFile
-  # @param [file_scope] a file scope
-  # @return [String] folder name or "/" for root
-  def parent_folder_name(file_scope = scope)
-    folder = parent_folder(file_scope)
-    folder.blank? ? "/" : folder.name
-  end
-
-  def parent_folder(file_scope = scope)
-    column_name = Node.scope_column_name(file_scope)
-    Folder.find_by(id: self[column_name])
-  end
-
-  # Returns a full path to current file
-  # @param [file_scope] a file scope
-  # @return [String] file path or "/" for root
-  def file_full_path(file_scope = scope)
-    parent_folder = parent_folder(file_scope)
-    folders = []
-    if parent_folder.blank?
-      "/"
-    else
-      folders << parent_folder_name(file_scope)
-      folders << parent_folder.ancestors(file_scope).pluck(:name)
-    end
-
-    collect_path_string(folders.flatten.reverse)
-  end
-
-  # Collects a string of file's path.
-  # @param [dir_set] Array of strings: ["second_level_folder", "third_level_folder"]
-  # @return [String] file path or "/" for root. Ex. "/second_level_folder/third_level_folder/"
-  def collect_path_string(dir_set)
-    path = "/"
-    dir_set.each { |dir| path = path + dir + "/" }
-    path
-  end
-
   def not_asset?
     parent_type != "Asset"
   end

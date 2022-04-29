@@ -15,21 +15,17 @@
 #
 
 class Event
-  # Tracks file delete events.
-  class FileDeleted < Event
-    alias_attribute :file_size, :param1
-
-    store :data, accessors: %i(uid name path folder_id scope), coder: JSON
+  # Tracks folder creation events.
+  class FolderCreated < Event
+    store :data, accessors: %i(id scope name path), coder: JSON
 
     class << self
-      def create_for(file, user)
+      def create_for(folder, user)
         create(
-          uid: file.uid,
-          name: file.name,
-          path: file.full_path,
-          folder_id: file.folder_id,
-          scope: file.scope,
-          file_size: file.file_size,
+          id: folder.id,
+          scope: folder.scope,
+          name: folder.name,
+          path: folder.full_path,
           dxuser: user.dxuser,
           org_handle: user.org.handle,
         )
