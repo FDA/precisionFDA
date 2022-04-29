@@ -54,7 +54,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       folderId: input.folderId,
     })
     // just all REGULAR files in the project
-    // there will be conflicts with synced status and locallCreatedFiles
+    // there will be conflicts with synced status and localCreatedFiles
     // point is not to try to recreate them
     const locallyCreatedFiles = await fileRepo.findLocalFilesInProject({
       project: input.projectDxid,

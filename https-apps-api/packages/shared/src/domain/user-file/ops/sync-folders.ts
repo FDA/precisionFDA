@@ -16,6 +16,8 @@ import { User, UserFile } from '../..'
 import { errors } from '../../..'
 import { FILE_ORIGIN_TYPE } from '../user-file.enum'
 import { UserOpsCtx } from '../../../types'
+import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
+import { getFolderPath, getParentFolders } from '../user-file.helper'
 
 // todo: maybe another operation type for "can be called from another operation"
 
@@ -78,7 +80,15 @@ export class SyncFoldersOperation extends BaseOperation<
       // do not have how to detect which one is their parent
       // (using just a reference without identifier)
       // eslint-disable-next-line no-await-in-loop
-      await em.persistAndFlush(res)
+      await em.persist(res)
+      await em.flush()
+      const createdFolder = res[0];
+      const parentFolders = await getParentFolders(createdFolder, repo)
+      const folderPath = getFolderPath(parentFolders, createdFolder)
+      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_CREATED, createdFolder, folderPath, user);
+      await em.persist(folderEvent);
+      await em.flush()
+
       this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'SyncFoldersOperation: Created new folders with names')
     }
 
@@ -155,9 +165,13 @@ export class SyncFoldersOperation extends BaseOperation<
     em.getRepository(UserFile).removeFilesWithTags(filesToDelete)
 
     // Then delete the folders themselves
-    foldersToDelete.map(folder => {
-      repo.removeWithTags(folder)
-    })
+    for (const folderToDelete of foldersToDelete) {
+      repo.removeWithTags(folderToDelete)
+      const parentFolders = await getParentFolders(folderToDelete, repo)
+      const folderPath = getFolderPath(parentFolders, folderToDelete)
+      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folderToDelete, folderPath, user);
+      await em.persist(folderEvent);
+    }
     await em.flush()
 
     return await repo.findForSynchronization({

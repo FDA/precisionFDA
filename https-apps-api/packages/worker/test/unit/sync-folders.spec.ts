@@ -1,6 +1,6 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { Tagging, User } from '@pfda/https-apps-shared/src/domain'
+import { Folder, Tagging, User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import type { SyncFoldersInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
@@ -20,6 +20,7 @@ describe('syncFolders operation', () => {
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
+    await em.clear()
     userCtx = { ...user, accessToken: 'foo' }
     defaultInput = {
       scope: 'private',
@@ -38,6 +39,7 @@ describe('syncFolders operation', () => {
       log,
       user: userCtx,
     })
+
     const input = { ...defaultInput, remoteFolderPaths: ['/foo'] }
     const res = await op.execute(input)
     // todo: complete test of DB entry shape
@@ -45,6 +47,11 @@ describe('syncFolders operation', () => {
     expect(res[0]).to.have.property('name', 'foo')
     expect(res[0]).to.have.property('parentFolderId', undefined)
     expect(res[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
+
+    const loaded_from_db = await em.findOneOrFail(Folder, res[0].id)
+    expect(loaded_from_db).to.have.property('name', 'foo')
+    expect(loaded_from_db).to.have.property('parentFolderId', null)
+    expect(loaded_from_db).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
   })
 
   it('creates two subfolders with the same name', async () => {

@@ -3,6 +3,8 @@ import { BaseOperation } from '../../../utils/base-operation'
 import { client, errors } from '../../..'
 import { childrenTraverse, getFolderPath } from '../user-file.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
+import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
+import { User } from '../../user/user.entity'
 
 export class FolderDeleteOperation extends BaseOperation<
   UserOpsCtx,
@@ -18,6 +20,7 @@ export class FolderDeleteOperation extends BaseOperation<
     try {
       const repo = em.getRepository(Folder)
       const userFileRepo = em.getRepository(UserFile)
+      const userRepo = em.getRepository(User)
       const existingFolder = await repo.findOneWithProject(input.id)
       if (!existingFolder) {
         throw new errors.FolderNotFoundError()
@@ -46,9 +49,14 @@ export class FolderDeleteOperation extends BaseOperation<
         accessToken: this.ctx.user.accessToken,
       })
       userFileRepo.removeFilesWithTags(filesToRemove)
-      folderSubtree.forEach(folder => {
+      
+      const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
+      for (const folder of folderSubtree) {
+        const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folder, folderPath, currentUser)
+        em.persist(folderEvent)
         em.remove(folder)
-      })
+      }
+
       await em.commit()
       this.ctx.log.info(
         { foldersCnt: folderSubtree.length, filesCnt: filesToRemove.length },

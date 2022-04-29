@@ -1,7 +1,7 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
 
 @Entity({ tableName: 'events' })
-export class JobClosedEvent {
+export class Event {
   @PrimaryKey()
   id: number
 
@@ -27,6 +27,9 @@ export class JobClosedEvent {
 
   @Property()
   param4: string
+
+  @Property()
+  data: string
 
   @Property()
   createdAt = new Date()
