@@ -272,6 +272,15 @@ class User < ApplicationRecord
     challenge_eval? || can_administer_site?
   end
 
+  # Government user: check if user have fda.hhs.gov email
+  def self.government_email?(email)
+    email =~ URI::MailTo::EMAIL_REGEXP && email.split("@").last == "fda.hhs.gov"
+  end
+
+  def government_user?
+    User.government_email?(email)
+  end
+
   def challenge_eval?
     admin_groups.any?(&:challenge_eval?)
   end

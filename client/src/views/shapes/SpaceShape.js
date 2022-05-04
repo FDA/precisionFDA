@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types'
 
-import { UserShape, mapToUser } from './UserShape'
+import { mapToUser, UserShape } from './UserShape'
+// eslint-disable-next-line
 import { SPACE_STATUS_LOCKED, SPACE_STATUS_UNACTIVATED } from '../../constants'
-
 
 const CountersShape = {
   members: PropTypes.number,
@@ -22,6 +22,7 @@ const SpaceShape = {
   canDuplicate: PropTypes.bool,
   updatable: PropTypes.bool,
   cts: PropTypes.string,
+  isExclusive: PropTypes.bool,
   isPrivate: PropTypes.bool,
   isLocked: PropTypes.bool,
   isActive: PropTypes.bool,
@@ -38,7 +39,7 @@ const SpaceShape = {
   updatedAt: PropTypes.string,
 }
 
-const mapToSpace = (data) => ({
+const mapToSpace = data => ({
   id: data.id,
   scope: `space-${data.id}`,
   name: data.name,
@@ -49,7 +50,8 @@ const mapToSpace = (data) => ({
   contextMembership: data.current_user_membership,
   updatable: data.updatable,
   cts: data.cts,
-  isPrivate: !!(data.shared_space_id),
+  isExclusive: data.private_exclusive,
+  isPrivate: !!data.shared_space_id,
   isLocked: data.state === SPACE_STATUS_LOCKED,
   isActive: data.state !== SPACE_STATUS_UNACTIVATED,
   sharedSpaceId: data.shared_space_id,
@@ -72,7 +74,4 @@ const mapToSpace = (data) => ({
 
 export default SpaceShape
 
-export {
-  SpaceShape,
-  mapToSpace,
-}
+export { SpaceShape, mapToSpace }

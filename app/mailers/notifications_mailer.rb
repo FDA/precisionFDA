@@ -55,7 +55,13 @@ class NotificationsMailer < ApplicationMailer
 
   def space_activation_email(space, membership)
     @space = space
-    @membership = membership
+    @activation_request_lead =
+      if space.administrator?
+        membership.side_alias == "host" ? "creator" : "approver"
+      else
+        "#{membership.side_alias} #{membership.role}"
+      end
+    @leads_names = space.administrator? ? "creator and approver" : "host and guest"
     @user = membership.user
     mail to: @user.email,
          subject: "Action required to activate new space \"#{@space.title}\""
@@ -63,7 +69,6 @@ class NotificationsMailer < ApplicationMailer
 
   def space_activated_email(space, membership)
     @space = space
-    @membership = membership
     @user = membership.user
     mail to: @user.email,
          subject: "Your space was activated: \"#{@space.title}\""
@@ -147,7 +152,11 @@ class NotificationsMailer < ApplicationMailer
     }
 
     if test_email.present?
-      mail(to: test_email, from: 'notification@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
+      mail(
+        to: test_email,
+        from: "notification@dnanexus.com",
+        subject: "Results of NCI-CPTAC challenge",
+      )
     else
       mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
     end

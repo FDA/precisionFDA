@@ -3,10 +3,10 @@ import { withRouter } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 import DefaultLayout from '../../../layouts/DefaultLayout'
-import NewSpaceForm from '../../../components/Spaces/NewSpaceForm'
+import { NewSpaceForm } from '../../../components/Spaces/NewSpaceForm'
 import Button from '../../../components/Button'
+// eslint-disable-next-line
 import { NEW_SPACE_PAGE_ACTIONS } from '../../../../constants'
-
 
 class NewSpacePage extends React.Component {
   redirectToSpaces = () => {
@@ -15,7 +15,10 @@ class NewSpacePage extends React.Component {
 
   render() {
     const { action, history } = this.props
-    const title = (action === NEW_SPACE_PAGE_ACTIONS.EDIT) ? 'Edit space' : 'Create a new space'
+    const title =
+      action === NEW_SPACE_PAGE_ACTIONS.EDIT
+        ? 'Edit space'
+        : 'Create a new space'
     return (
       <DefaultLayout>
         <div className="container">
@@ -24,7 +27,9 @@ class NewSpacePage extends React.Component {
               <h1>{title}</h1>
             </div>
             <div className="pull-right pfda-mr-t20">
-              <Button onClick={history.goBack} size="lg" type="primary">Back</Button>
+              <Button onClick={history.goBack} size="lg" type="primary">
+                Back
+              </Button>
             </div>
           </div>
           <NewSpaceForm action={action} onCancelClick={this.redirectToSpaces} />

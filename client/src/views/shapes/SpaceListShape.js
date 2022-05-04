@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
+// eslint-disable-next-line
 import { mapToSpace, SpaceShape } from './SpaceShape'
-
 
 const SpaceListShape = {
   id: PropTypes.number,
@@ -10,16 +10,22 @@ const SpaceListShape = {
   shared: PropTypes.exact(SpaceShape),
 }
 
-const  mapToSpaceList = (data) => {
+const mapToSpaceList = data => {
   let hasPrivate = false
   let privateArea = {}
 
   if (data.confidential_space) {
     hasPrivate = true
     privateArea = mapToSpace(data.confidential_space)
+  } else if (data.private_exclusive) {
+    hasPrivate = true
+    privateArea = mapToSpace(data)
   }
 
-  const sharedArea = mapToSpace(data)
+  let sharedArea
+  if (!data.private_exclusive) {
+    sharedArea = mapToSpace(data)
+  }
 
   return {
     id: data.id,
@@ -31,7 +37,4 @@ const  mapToSpaceList = (data) => {
 
 export default SpaceListShape
 
-export {
-  SpaceListShape,
-  mapToSpaceList,
-}
+export { SpaceListShape, mapToSpaceList }
