@@ -135,9 +135,10 @@ class UserFile < Node
     # This is a class method for independent files.
     # For comparison files, use Comparison.publication_project!
     def publication_project!(user, scope)
-      if scope == SCOPE_PUBLIC
+      case scope
+      when SCOPE_PUBLIC
         user.public_files_project
-      elsif scope == SCOPE_PRIVATE
+      when SCOPE_PRIVATE
         user.private_files_project
       else
         Space.from_scope(scope).project_for_user(user)

@@ -48,7 +48,6 @@ export const Header: React.FC = () => {
   const user = useSelector(contextUserSelector)
 
   const userCanAdministerSite = user?.can_administer_site
-  const userCanSeeSpaces = user?.can_see_spaces
   const userIsGuest = user?.is_guest
   const isSpacesPath = pathname.startsWith('/spaces')
 
@@ -171,16 +170,14 @@ export const Header: React.FC = () => {
             </>
           )}
           <HeaderSpacer />
-          {userCanSeeSpaces && (
-            <Link to="/spaces" title="Spaces">
-              <MenuItem active={isActiveLink('/spaces')}>
-                <IconWrap>
-                  <ObjectGroupIcon height={16} />
-                </IconWrap>
-                <HeaderItemText>Spaces</HeaderItemText>
-              </MenuItem>
-            </Link>
-          )}
+          <Link to="/spaces" title="Spaces">
+            <MenuItem active={isActiveLink('/spaces')}>
+              <IconWrap>
+                <ObjectGroupIcon height={16} />
+              </IconWrap>
+              <HeaderItemText>Spaces</HeaderItemText>
+            </MenuItem>
+          </Link>
           {showGSRSLink && (
             <a href="/ginas/app/beta" target="_blank" title="GSRS">
               <MenuItem>
