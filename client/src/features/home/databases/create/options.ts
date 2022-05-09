@@ -19,7 +19,6 @@ export const HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS = {
 }
 
 export const HOME_DATABASE_INSTANCE_CLASSES = [
-  'db_std1_x1',
   'db_std1_x2',
   'db_mem1_x2',
   'db_mem1_x4',
@@ -28,11 +27,9 @@ export const HOME_DATABASE_INSTANCE_CLASSES = [
   'db_mem1_x32',
   'db_mem1_x48',
   'db_mem1_x64',
-  'db_mem1_x96',
 ]
 
 export const HOME_DATABASE_INSTANCES = {
-  DB_STD1_X1: 'db_std1_x1',
   DB_STD1_X2: 'db_std1_x2',
   DB_MEM1_X2: 'db_mem1_x2',
   DB_MEM1_X4: 'db_mem1_x4',
@@ -41,11 +38,9 @@ export const HOME_DATABASE_INSTANCES = {
   DB_MEM1_X32: 'db_mem1_x32',
   DB_MEM1_X48: 'db_mem1_x48',
   DB_MEM1_X64: 'db_mem1_x64',
-  DB_MEM1_X96: 'db_mem1_x96',
 }
 
 export const HOME_DATABASE_LABELS = {
-  'db_std1_x1': 'DB Baseline 1 x 1',
   'db_std1_x2': 'DB Baseline 1 x 2',
   'db_mem1_x2': 'DB Mem 1 x 2',
   'db_mem1_x4': 'DB Mem 1 x 4',
@@ -54,7 +49,6 @@ export const HOME_DATABASE_LABELS = {
   'db_mem1_x32': 'DB Mem 1 x 32',
   'db_mem1_x48': 'DB Mem 1 x 48',
   'db_mem1_x64': 'DB Mem 1 x 64',
-  'db_mem1_x96': 'DB Mem 1 x 96',
   'aurora-mysql': 'MySQL',
   'aurora-postgresql': 'PostgreSQL',
   'available': 'Available',
@@ -67,15 +61,8 @@ export const HOME_DATABASE_LABELS = {
 }
 
 const checkDisabledInstances = (engine: string) => { return !engine }
-const hideForPG = (engine: string) => { return engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
-const hideForMysql = (engine: string) => { return engine === HOME_DATABASE_ENGINE_TYPES['MySQL'] }
 
 export const instancesOptions = (engine?: string) => engine ? [
-  {
-    value: HOME_DATABASE_INSTANCES.DB_STD1_X1,
-    label: HOME_DATABASE_LABELS['db_std1_x1'],
-    isDisabled: checkDisabledInstances(engine) || hideForPG(engine),
-  },
   {
     value: HOME_DATABASE_INSTANCES.DB_STD1_X2,
     label: HOME_DATABASE_LABELS['db_std1_x2'],
@@ -116,11 +103,6 @@ export const instancesOptions = (engine?: string) => engine ? [
     label: HOME_DATABASE_LABELS['db_mem1_x64'],
     isDisabled: checkDisabledInstances(engine),
   },
-  {
-    value: HOME_DATABASE_INSTANCES.DB_MEM1_X96,
-    label: HOME_DATABASE_LABELS['db_mem1_x96'],
-    isDisabled: checkDisabledInstances(engine) || hideForMysql(engine),
-  },
 ] : []
 
 const hideMysqlVersions = (engine: string) => { return engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
@@ -133,7 +115,6 @@ const restrictedPgInstances = [
   HOME_DATABASE_INSTANCES.DB_MEM1_X8,
   HOME_DATABASE_INSTANCES.DB_MEM1_X16,
   HOME_DATABASE_INSTANCES.DB_MEM1_X48,
-  HOME_DATABASE_INSTANCES.DB_MEM1_X96,
 ]
 
 const hidePgVersionsForSomeInstances = (dxInstanceClass: string) => { return restrictedPgInstances.includes(dxInstanceClass) }
