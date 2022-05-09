@@ -13,7 +13,7 @@ const DBCLUSTER_DESC_RES = {
   created: 1638474425000,
   modified: 1638474425919,
   createdBy: { user: 'user-pfda_autotest1' },
-  dxInstanceClass: 'db_std1_x1',
+  dxInstanceClass: 'db_std1_x2',
   engine: 'aurora-mysql',
   engineVersion: '5.7.12',
   endpoint: 'dbcluster-g6zx5k800f2gj3zyfkbqgq63.cluster-cfzitlm9q1kq.us-east-1.rds.amazonaws.com',

@@ -61,7 +61,6 @@ class DbCluster < ApplicationRecord
   ).freeze
 
   DX_INSTANCE_CLASSES = {
-    "db_std1_x1" => "DB Baseline 1 x 1",
     "db_std1_x2" => "DB Baseline 1 x 2",
     "db_mem1_x2" => "DB Mem 1 x 2",
     "db_mem1_x4" => "DB Mem 1 x 4",
@@ -70,7 +69,6 @@ class DbCluster < ApplicationRecord
     "db_mem1_x32" => "DB Mem 1 x 32",
     "db_mem1_x48" => "DB Mem 1 x 48",
     "db_mem1_x64" => "DB Mem 1 x 64",
-    "db_mem1_x96" => "DB Mem 1 x 96",
   }.freeze
 
   ENGINE_MYSQL = "aurora-mysql".freeze
