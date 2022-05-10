@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cp config/database.yml.sample config/database.yml
+cp config/database.sample.yml config/database.yml
 
 service mysql start
 

@@ -1,4 +1,6 @@
-FROM ruby:2.7.5
+ARG RUBY_IMAGE_TAG
+
+FROM ruby:${RUBY_IMAGE_TAG}
 
 ENV DOCKERIZE_VERSION v0.6.0
 ENV APP_DIR /precision-fda
@@ -14,6 +16,6 @@ RUN apt-get update && \
     tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
     rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
     gem install bundler -v ${BUNDLER_VERSION}
-COPY ./docker/isolation.docker-entrypoint.sh $APP_DIR/docker/isolation.docker-entrypoint.sh
+COPY ./docker/entrypoint/isolation.docker-entrypoint.sh $APP_DIR/docker/entrypoint/isolation.docker-entrypoint.sh
 
-CMD $APP_DIR/docker/isolation.docker-entrypoint.sh
+CMD $APP_DIR/docker/entrypoint/isolation.docker-entrypoint.sh

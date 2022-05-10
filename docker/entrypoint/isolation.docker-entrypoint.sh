@@ -4,9 +4,9 @@ sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVE
 
 dockerize -wait tcp://db:3306
 
-cp config/database.yml.sample config/database.yml
+cp config/database.sample.yml config/database.yml
 
-if [[ ! $SKIP_DEPS_SETUP || $SKIP_DEPS_SETUP = 0 ]]; then
+if [[ ! $SKIP_RUBY_DEPS_SETUP || $SKIP_RUBY_DEPS_SETUP = 0 ]]; then
   bundle check || bundle install
 fi
 

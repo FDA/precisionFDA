@@ -2,7 +2,7 @@
 
 sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVEL=2/g' /etc/ssl/openssl.cnf
 
-cp config/database.yml.sample config/database.yml
+cp config/database.sample.yml config/database.yml
 
 service mysql start
 

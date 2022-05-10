@@ -81,3 +81,5 @@ lerna-debug.log
 
 cert.pem
 key.pem
+
+vendor/cache

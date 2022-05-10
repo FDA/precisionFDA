@@ -53,7 +53,7 @@ You can skip any section if you have already installed the dependencies.
     * `git clone git@github.com:dnanexus/precision-fda.git`
 
 * Create database config file
-    * `cp config/database.yml.sample config/database.yml`
+    * `cp config/database.sample.yml config/database.yml`
 
 * Create environment config file
     * `cp .env.sample .env`
