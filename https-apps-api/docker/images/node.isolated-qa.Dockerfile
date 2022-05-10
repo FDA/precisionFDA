@@ -1,4 +1,6 @@
-FROM node:12.22.10
+ARG NODEJS_IMAGE_TAG
+
+FROM node:${NODEJS_IMAGE_TAG}
 
 WORKDIR /app
 COPY https-apps-api/package.json https-apps-api/yarn.lock ./
@@ -10,8 +12,10 @@ COPY https-apps-api/packages/worker/package.json ./packages/worker/package.json
 RUN yarn install --frozen-lockfile
 
 # copy root-level shared stuff
-COPY .env key.pem cert.pem ./
+COPY key.pem cert.pem ./
 # copy the code (leveraging .dockerignore)
 COPY https-apps-api/ ./
 # build /dist
 RUN make build
+
+

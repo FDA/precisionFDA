@@ -20,8 +20,8 @@ RUN cd /srv && \
 
 WORKDIR /srv/gsrs-play-dist
 
-COPY docker/ginas-dev.conf /srv/gsrs-play-dist/conf/ginas-dev.conf
-COPY docker/gsrs.entrypoint.sh /tmp/entrypoint.sh
+COPY gsrs/ginas-dev.conf /srv/gsrs-play-dist/conf/ginas-dev.conf
+COPY gsrs/docker/entrypoint/gsrs.entrypoint.sh /tmp/entrypoint.sh
 
 # prepare a config file
 RUN sed -i "s/<db_host>/${MYSQL_HOST}/g" $GSRS_CONFIG && \

@@ -2,11 +2,11 @@ version: '3.7'
 
 x-shared: &shared
   build:
-    context: .
-    dockerfile: docker/isolation.Dockerfile
+    context: ../
+    dockerfile: docker/images/isolation.Dockerfile
   volumes:
     - type: bind
-      source: .
+      source: ../
       target: /precision-fda
     - type: volume
       source: gems
@@ -15,7 +15,7 @@ x-shared: &shared
 services:
   web:
     <<: *shared
-    entrypoint: ./docker/web.entrypoint.sh
+    entrypoint: ./docker/entrypoint/web.entrypoint.sh
     ports:
       - 3000:3000
     depends_on:
@@ -29,15 +29,15 @@ services:
     image: node:12
     volumes:
       - type: bind
-        source: .
+        source: ../
         target: /precision-fda
     working_dir: /precision-fda/client
     command: bash -c "yarn && yarn watch"
 
   nodejs-api:
     build:
-      context: .
-      dockerfile: ./https-apps-api/docker/node.isolated.Dockerfile
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/Dockerfile
     command: ['make', 'run-dist']
     ports:
       - 3001:3001
@@ -47,8 +47,8 @@ services:
 
   nodejs-worker:
     build:
-      context: .
-      dockerfile: ./https-apps-api/docker/node.isolated.Dockerfile
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/Dockerfile
     command: ['make', 'run-worker-dist']
     depends_on:
       - db
@@ -72,7 +72,7 @@ services:
     <<: *shared
     depends_on:
       - redis
-    entrypoint: ./docker/sidekiq.entrypoint.sh
+    entrypoint: ./docker/entrypoint/sidekiq.entrypoint.sh
 
 volumes:
   pfda-mysql-volume:
