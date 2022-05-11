@@ -12,7 +12,7 @@ install:
 	yarn --frozen-lockfile
 
 install-test-prod:
-	yarn install --production --frozen-lockfile
+	yarn install --production=false --frozen-lockfile
 
 # a demonstration on how to run built API
 run-dist:
