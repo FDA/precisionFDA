@@ -21,11 +21,13 @@ class Event
 
     class << self
       def create_for(folder, user)
+        path_with_folder = folder.full_path == "/" ? "/#{folder.name}" : folder.full_path + folder.name
         create(
           id: folder.id,
           scope: folder.scope,
           name: folder.name,
-          path: folder.full_path,
+          path: path_with_folder,
+          param1: path_with_folder,
           dxuser: user.dxuser,
           org_handle: user.org.handle,
         )
