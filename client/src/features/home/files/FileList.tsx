@@ -99,8 +99,8 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
     resetSelected,
     resourceKeys: ['files'],
   })
-  delete(actions['Comments'])
-  delete(actions['Request license approval'])
+  delete actions['Comments'];
+  delete actions['Request license approval'];
 
   const listActions = useFolderActions(scope, folderIdParam!)
 

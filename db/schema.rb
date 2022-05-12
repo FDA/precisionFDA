@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_09_141728) do
+ActiveRecord::Schema.define(version: 2022_02_21_165243) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -406,6 +406,7 @@ ActiveRecord::Schema.define(version: 2022_02_09_141728) do
     t.integer "local_folder_id"
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
+    t.boolean "termination_email_sent", default: false
     t.index ["analysis_id"], name: "fk_rails_0a95efec7a"
     t.index ["app_id"], name: "index_jobs_on_app_id"
     t.index ["app_series_id"], name: "index_jobs_on_app_series_id"

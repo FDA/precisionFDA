@@ -9,11 +9,12 @@ import {
   buildIsNotificationEnabled,
 } from '../../email.helper'
 import { isJobInSpace, isJobPublic } from '../../../job/job.helper'
+import { UserOpsCtx } from '../../../../types'
 
 type JobFinishedInputType = { jobId: number }
 
 export class JobFinishedEmailHandler
-  extends BaseTemplate<JobFinishedInputType>
+  extends BaseTemplate<JobFinishedInputType, UserOpsCtx>
   implements EmailTemplate {
   templateFile = jobFinishedTemplate
   job: Job

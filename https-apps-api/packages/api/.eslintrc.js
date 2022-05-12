@@ -23,5 +23,7 @@ module.exports = {
     // we want to use both types and interfaces
     '@typescript-eslint/consistent-type-definitions': 0,
     '@typescript-eslint/restrict-template-expressions': 0,
+    'import/group-exports': 0,
+    '@typescript-eslint/no-floating-promises': 0,
   },
 }

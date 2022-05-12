@@ -1,6 +1,5 @@
 import { database, job } from '@pfda/https-apps-shared'
 import type { BasicUserJob } from '@pfda/https-apps-shared/src/queue/task.input'
-import type { WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { getChildLogger } from '../utils'
@@ -14,13 +13,13 @@ export const userCheckupHandler = async (bullJob: Job) => {
   const requestId = nanoid()
   const log = getChildLogger(requestId)
   const em = database.orm().em.fork()
-  const ctx: WorkerOpsCtx = {
+  const ctx = {
     em,
     log,
     user: data.user,
     job: bullJob,
   }
 
-  await new job.CheckUserJobsOperation(ctx).execute(data.payload)
+  await new job.CheckUserJobsOperation(ctx).execute()
   // Add more operations when necessary
 }

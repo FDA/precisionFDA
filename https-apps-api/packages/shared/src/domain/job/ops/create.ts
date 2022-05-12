@@ -14,10 +14,10 @@ import {
 } from '../job.enum'
 import { createSyncJobStatusTask } from '../../../queue'
 import { AppInputSpecItem } from '../../app/app.enum'
-import { AnyObject } from '../../../types'
+import { AnyObject, UserOpsCtx } from '../../../types'
 import { UserFile } from '../..'
 
-export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
+export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
   private jobInput: AnyObject
   private projectId: string

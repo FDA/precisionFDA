@@ -18,29 +18,67 @@ module SpaceService
     # @param space_form [SpaceForm] Space form object.
     # @return [Space] Created space.
     def call(space_form)
+      space = nil
+
       Space.transaction do
         space = build_space(space_form)
         dxorgs = [space.host_dxorg, space.guest_dxorg].uniq.compact
+
         create_orgs(dxorgs)
         space.save!
         add_leads(space, space_form)
         invite_challenge_bot(space) if @for_challenge
 
+        create_shared_or_private_project(space)
+
         if space.review?
-          create_reviewer_cooperative_project(space)
           create_reviewer_confidential_space(space, space_form)
-        else
+        elsif space.groups? || space.government? || space.administrator?
           remove_pfda_admin_user(space, space_form)
+        elsif space.private_type?
+          # Private Spaces have space_id set to it's own id
+          space.update(space_id: space.id)
         end
 
-        send_emails(space)
-        space
+        # For private, government and administrator spaces we accept the space automatically
+        accept_space(space) if space.private_type? || space.government? || space.administrator?
+
+        invite_site_admins_to_space(space) if space.administrator?
       end
+
+      send_emails(space) unless space.private_type?
+
+      space
     end
 
     private
 
     attr_reader :user, :api, :notification_mailer, :admin_api
+
+    # Invites all site administrators to the space
+    def invite_site_admins_to_space(space)
+      host_lead = space.host_lead # the admin who's created the current administrator space
+      site_admins = User.site_admins - [host_lead]
+
+      return if site_admins.empty?
+
+      admin_membership = space.space_memberships.find_by(user: host_lead)
+
+      site_admins.each do |site_admin|
+        # rubocop:disable Layout/LineLength
+        Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
+                          " with admin membership #{admin_membership.id}")
+        SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership)
+        NotificationsMailer.space_activated_email(space, admin_membership).deliver_now!
+        # rubocop:enable Layout/LineLength
+      end
+    end
+
+    # Accept space without user action
+    def accept_space(space)
+      space.active! if space.accepted? # always true for private_type spaces
+      space.save!
+    end
 
     def invite_challenge_bot(space)
       membership = space.space_memberships.find_by(user_id: space.host_lead.id)
@@ -54,6 +92,16 @@ module SpaceService
       )
     end
 
+    # Construct guest dxorg upon its existance - used for Non review and Non groups
+    #   and Non gov., admin groups types,
+    #   which have space_form.guest_lead_dxuser == '' and space_form.sponsor_lead_dxuser == ''
+    #   - for Private type spaces we do not create dxorg here
+    def construct_guest_dxorg(guest_lead_dxuser, sponsor_lead_dxuser, uuid)
+      return if guest_lead_dxuser.empty? && sponsor_lead_dxuser.empty?
+
+      Org.construct_dxorg("space_guest_#{uuid}")
+    end
+
     def build_space(space_form)
       uuid = SecureRandom.hex[0..9]
 
@@ -61,7 +109,9 @@ module SpaceService
         name: space_form.name,
         description: space_form.description,
         host_dxorg: Org.construct_dxorg("space_host_#{uuid}"),
-        guest_dxorg: Org.construct_dxorg("space_guest_#{uuid}"),
+        guest_dxorg: construct_guest_dxorg(
+          space_form.guest_lead_dxuser, space_form.sponsor_lead_dxuser, uuid
+        ),
         sponsor_org_id: space_form.space_sponsor&.org_id,
         space_type: space_form.space_type,
         cts: space_form.cts,
@@ -83,6 +133,9 @@ module SpaceService
         space_form.host_admin,
         SpaceMembership::SIDE_HOST,
       )
+
+      # do not add guest/sponsor side admin for private_type, gov and admin spaces
+      return if space.private_type? || space.government? || space.administrator?
 
       add_lead(
         space,
@@ -112,7 +165,7 @@ module SpaceService
         admin_api.org_remove_member(space.host_dxorg, ADMIN_USER)
       end
 
-      return if space_form.guest_admin.dxid == ADMIN_USER
+      return if space_form.guest_admin.nil? || space_form.guest_admin&.dxid == ADMIN_USER
 
       admin_api.org_remove_member(space.guest_dxorg, ADMIN_USER)
     end
@@ -125,9 +178,10 @@ module SpaceService
       end
     end
 
-    # Create a project of a cooperative review space.
+    # Create a project of a cooperative (shared) review or private_type space.
     # @param [Space]
-    def create_reviewer_cooperative_project(space)
+    #  rubocop:disable Metrics/MethodLength
+    def create_shared_or_private_project(space)
       if ADMIN_USER != user.dxid
         admin_api.org_invite(
           space.host_dxorg,
@@ -145,18 +199,20 @@ module SpaceService
       api.project_invite(
         project_dxid,
         space.host_dxorg,
-        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+        DNAnexusAPI::PROJECT_ACCESS_ADMINISTER,
         suppressEmailNotification: true,
         suppressAllNotifications: true,
       )
 
-      api.project_invite(
-        project_dxid,
-        space.guest_dxorg,
-        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
-        suppressEmailNotification: true,
-        suppressAllNotifications: true,
-      )
+      if space.shared?
+        api.project_invite(
+          project_dxid,
+          space.guest_dxorg,
+          DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+          suppressEmailNotification: true,
+          suppressAllNotifications: true,
+        )
+      end
 
       api.project_invite(
         project_dxid,
@@ -169,6 +225,7 @@ module SpaceService
       space.host_project = project_dxid
       space.save!
     end
+    #  rubocop:enable Metrics/MethodLength
 
     # Create a project of a confidential review space.
     # @param [Space]

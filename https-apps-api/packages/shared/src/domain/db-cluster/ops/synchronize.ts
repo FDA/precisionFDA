@@ -1,15 +1,22 @@
 import { wrap } from '@mikro-orm/core'
 import { invertObj } from 'ramda'
-import { SyncDbClusterJob } from '../../../queue/task.input'
+import { SyncDbClusterJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { PlatformClient, DbClusterDescribeResponse } from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
-import type { Maybe } from '../../../types'
+import type { Maybe, UserOpsCtx } from '../../../types'
 import { DbCluster, User } from '../..'
 import { errors } from '../../..'
 import { STATUS, STATUSES } from '../db-cluster.enum'
 
-export class SyncDbClusterOperation extends WorkerBaseOperation<SyncDbClusterJob['payload'], Maybe<DbCluster>> {
+export class SyncDbClusterOperation extends WorkerBaseOperation<
+  UserOpsCtx,
+  SyncDbClusterJob['payload'],
+  Maybe<DbCluster>
+> {
+  static getBullJobId(dbClusterDxId: string) {
+    return `${TASK_TYPE.SYNC_DBCLUSTER_STATUS}.${dbClusterDxId}`
+  }
   async run(input: SyncDbClusterJob['payload']): Promise<Maybe<DbCluster>> {
     const em = this.ctx.em
     const dbCluster = await em.findOne(DbCluster, { dxid: input.dxid })

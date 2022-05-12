@@ -38,8 +38,7 @@ RSpec.describe Api::UsersController, type: :controller do
         expect(parsed_response).not_to include(
           "meta" => hash_including(
             "links" => hash_including(
-              "space_info" => anything,
-              "space_create" => anything,
+              "challenge_new" => anything,
             ),
           ),
         )

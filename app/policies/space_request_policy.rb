@@ -18,5 +18,13 @@ module SpaceRequestPolicy
     user.review_space_admin? && space.shared? && space.locked?
   end
 
-  alias_method :can_delete?, :can_unlock?
+  # Determines if space can be deleted by user.
+  # @param user [User] User that tries to delete space.
+  # @param space [Space] Space that is to be deleted.
+  # @return [true, false] Returns true if space can be unlocked by user, false otherwise.
+  def can_delete?(user, space)
+    return true if user.site_admin?
+
+    user.review_space_admin? && space.shared?
+  end
 end

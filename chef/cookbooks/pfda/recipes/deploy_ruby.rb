@@ -94,6 +94,10 @@ application app_dir do
     cwd  app_dir
     user node[:deploy_user]
     environment lazy { ENV.to_hash }
+    # To recover from ActiveRecord::ConcurrentMigrationError when
+    # deploying onto multiple instances in CodeBuild
+    retries 3
+    retry_delay 60
   end
 
   execute "Bundle frontend" do
@@ -102,7 +106,7 @@ application app_dir do
     # See pull request #1556 for explanation on the need to rebuild node-sass
     command %{
       export PATH=#{node[:nodejs][:prefix]}/bin:$PATH && \
-      yarn --frozen-lockfile && \
+      yarn --frozen-lockfile --production=false && \
       npm rebuild node-sass && \
       yarn run build:production
     }

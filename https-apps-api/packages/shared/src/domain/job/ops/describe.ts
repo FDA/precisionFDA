@@ -5,8 +5,9 @@ import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import type { DescribeJobInput } from '../job.input'
 import { getJobAccessibleByContext } from '../job.permissions'
+import { UserOpsCtx } from '../../../types'
 
-export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
+export class DescribeJobOperation extends BaseOperation<UserOpsCtx, DescribeJobInput, Job> {
   async run(input: DescribeJobInput): Promise<Job> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)

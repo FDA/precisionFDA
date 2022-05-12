@@ -36,4 +36,5 @@ export const config: ConfigOverride = {
       },
     },
   },
+  shouldAddCheckNonterminatedClustersOnInit: false
 }
