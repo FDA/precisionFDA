@@ -4,10 +4,15 @@ import { BaseOperation } from '../../../utils'
 import { filterLeafPaths, getFolderPath, getPathsToBuild } from '../user-file.helper'
 import { FILE_STI_TYPE } from '../user-file.enum'
 import { errors } from '../../..'
+import { UserOpsCtx } from '../../../types'
 
 type RecreateFolderInput = {}
 
-export class FolderRecreateOperation extends BaseOperation<RecreateFolderInput, void> {
+export class FolderRecreateOperation extends BaseOperation<
+  UserOpsCtx,
+  RecreateFolderInput,
+  void
+> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async run(input: RecreateFolderInput): Promise<void> {
     const em = this.ctx.em

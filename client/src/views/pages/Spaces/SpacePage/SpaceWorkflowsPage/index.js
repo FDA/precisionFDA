@@ -41,7 +41,7 @@ class SpaceWorkflowsPage extends Component {
   render() {
     const { spaceId, space, workflows, showAddWorkflowsModal, showCopyModal } = this.props
     const checkedWorkflows = workflows.filter(((workflow) => workflow.isChecked))
-    const title = getSpacePageTitle('Workflows', space.isPrivate)
+    const title = getSpacePageTitle('Workflows', space.isPrivate, space.isExclusive)
 
     return (
       <SpaceLayout spaceId={spaceId} space={space}>

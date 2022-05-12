@@ -206,7 +206,7 @@ class ApplicationController < ActionController::Base
       owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
-      file_path: object.is_a?(UserFile) ? object.file_full_path(scope) : nil,
+      file_path: object.is_a?(UserFile) ? object.full_path(scope) : nil,
       parent_folder_name: object.is_a?(UserFile) ? object.parent_folder_name(scope) : nil,
       public: object.public?,
       private: object.private?,

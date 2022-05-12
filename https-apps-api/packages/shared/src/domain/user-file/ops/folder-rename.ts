@@ -3,8 +3,9 @@ import { BaseOperation } from '../../../utils/base-operation'
 import { RenameFolderInput } from '../user-file.input'
 import { client, errors } from '../../..'
 import { getFolderPath } from '../user-file.helper'
+import { UserOpsCtx } from '../../../types'
 
-export class FolderRenameOperation extends BaseOperation<RenameFolderInput, Folder> {
+export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolderInput, Folder> {
   async run(input: RenameFolderInput): Promise<Folder> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)

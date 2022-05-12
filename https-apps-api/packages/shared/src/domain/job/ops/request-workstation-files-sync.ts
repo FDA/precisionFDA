@@ -7,9 +7,10 @@ import { JOB_STATE } from '../job.enum'
 import { ENTITY_TYPE } from '../../app/app.enum'
 import { createSyncWorkstationFilesTask } from '../../../queue'
 import { getJobAccessibleByContext } from '../job.permissions'
+import { UserOpsCtx } from '../../../types'
 
 
-export class RequestWorkstationSyncFilesOperation extends BaseOperation<WorkstationSyncFilesInput, Job> {
+export class RequestWorkstationSyncFilesOperation extends BaseOperation<UserOpsCtx, WorkstationSyncFilesInput, Job> {
   async run(input: WorkstationSyncFilesInput): Promise<Job> {
     const job = await getJobAccessibleByContext(input.dxid, this.ctx)
 

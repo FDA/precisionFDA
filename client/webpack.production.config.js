@@ -2,10 +2,11 @@
 
 const { merge } = require('webpack-merge')
 
-const common = require('./webpack.common.config')
+const base = require('./webpack.fragment.base')
+const babel = require('./webpack.fragment.babel')
 
 
-module.exports = merge(common, {
+module.exports = merge(base, babel, {
   mode: 'production',
   devtool: 'eval',
 })

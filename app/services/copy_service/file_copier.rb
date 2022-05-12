@@ -15,12 +15,18 @@ class CopyService
 
         return existed_file if existed_file
 
+        # we need to skip generation of UID, because it would trigger default_scope on Asset
+        max_id_number = UserFile.where(dxid: file.dxid).pluck(:uid).
+          map { |uid| uid[/(?<=-)\d+$/].to_i }.max.to_i
+        new_uid = "#{file.dxid}-#{max_id_number + 1}"
+
         file.dup.tap do |new_file|
           new_file.assign_attributes(attrs)
           new_file.scope = scope
           new_file.project = destination_project
           new_file.parent = file
           new_file.entity_type = UserFile::TYPE_REGULAR
+          new_file.uid = new_uid
           new_file.save!
         end
       end

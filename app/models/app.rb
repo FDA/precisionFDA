@@ -98,7 +98,7 @@ class App < ApplicationRecord
   # Check whether app is not in space of any type
   # @return [true, false]
   def not_in_spaces
-    !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
+    !in_space? || Space::TYPES.exclude?(space_object.space_type)
   end
 
   # Scopes that can be used to run an app.

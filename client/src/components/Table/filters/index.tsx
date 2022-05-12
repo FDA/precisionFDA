@@ -4,7 +4,7 @@ import { StyledInput } from '../../InputText'
 export * from './numericFilter'
 
 export function NumberRangeColumnFilter({
-  column: { filterValue = [null,null], preFilteredRows, setFilter, id },
+  column: { filterValue = [null,null], preFilteredRows, setFilter, id, filterDataTestId },
 }: any) {
   if(filterValue[0] === undefined) filterValue[0] = null
   return (
@@ -13,6 +13,7 @@ export function NumberRangeColumnFilter({
         display: 'flex',
         gap: 4,
       }}
+      data-testid={filterDataTestId}
     >
       <StyledInput
         value={filterValue[0] || ''}
@@ -51,7 +52,7 @@ export function NumberRangeColumnFilter({
 }
 
 export function SelectColumnFilter({
-  column: { filterValue, setFilter, preFilteredRows, id, options },
+  column: { filterValue, setFilter, preFilteredRows, id, options, filterDataTestId },
 }: any) {
   return (
     <InputSelect
@@ -60,6 +61,7 @@ export function SelectColumnFilter({
         console.log(e.target.value)
         setFilter(e.target.value || undefined)
       }}
+      data-testid={filterDataTestId}
     >
       <option value="">All</option>
       {options.map((option: any, i: number) => (
@@ -72,11 +74,12 @@ export function SelectColumnFilter({
 }
 
 export function DefaultColumnFilter({
-  column: { filterValue, preFilteredRows, accessor, onFilterChange, setFilter },
+  column: { filterValue, preFilteredRows, accessor, onFilterChange, setFilter, filterDataTestId },
   filterKey,
 }: {
   column: any
   filterKey: string
+  dataTestId?: string
 }) {
   return (
     <StyledInput
@@ -84,6 +87,7 @@ export function DefaultColumnFilter({
       onChange={e => setFilter(e.target.value)}
       placeholder={`--`}
       style={{lineHeight: '1.1rem'}}
+      data-testid={filterDataTestId}
     />
   )
 }

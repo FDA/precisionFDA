@@ -70,17 +70,17 @@ export const ScopePickerItem = styled(Button)<{ active?: boolean }>`
 
   &:hover {
     background: transparent;
-    border-bottom: ${sizing.highlightBarWidth} solid ${colors.remediatedhighlightBlue};
+    border-bottom: ${sizing.highlightBarWidth} solid ${colors.blueOnBlack};
     color: ${colors.textWhite};
   }
 
   ${({ active }) => (
     active && css`
-      color: ${colors.remediatedhighlightBlue};
-      border-bottom: ${sizing.highlightBarWidth} solid ${colors.remediatedhighlightBlue};
+      color: ${colors.blueOnBlack};
+      border-bottom: ${sizing.highlightBarWidth} solid ${colors.blueOnBlack};
 
       &:hover {
-        color: ${colors.remediatedhighlightBlue};
+        color: ${colors.blueOnBlack};
       }
     `
   )}

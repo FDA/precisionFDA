@@ -8,7 +8,7 @@ import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@pfda/https-apps-shared/src/domai
 import supertest from 'supertest'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /jobs/:id', () => {
@@ -31,7 +31,7 @@ describe.skip('GET /jobs/:id', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .get(`/jobs/${job.dxid}`)
       .query({
         ...getDefaultQueryData(user),
@@ -69,7 +69,7 @@ describe.skip('GET /jobs/:id', () => {
 
   it('will not call the platform client if the job is in terminated state', async () => {
     const jobDescribeFake = fakes.client.jobDescribeFake
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .get(`/jobs/${job.dxid}`)
       .query({
         ...getDefaultQueryData(user),
@@ -84,7 +84,7 @@ describe.skip('GET /jobs/:id', () => {
     const activeJob = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.IDLE })
     await em.flush()
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .get(`/jobs/${activeJob.dxid}`)
       .query({
         ...getDefaultQueryData(user),
@@ -105,7 +105,7 @@ describe.skip('GET /jobs/:id', () => {
     }
     jobDescribeFake.returns(platformResponse)
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .get(`/jobs/${anotherJob.dxid}`)
       .query({
         ...getDefaultQueryData(user),
@@ -124,14 +124,14 @@ describe.skip('GET /jobs/:id', () => {
 
   context('error states', () => {
     it('returns 400 when query data is not provided', async () => {
-      const { body } = await supertest(api.getServer()).get(`/jobs/${job.dxid}`).expect(400)
+      const { body } = await supertest(getServer()).get(`/jobs/${job.dxid}`).expect(400)
       expect(body.error).to.have.property('code', errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID)
       expect(body.props).to.have.property('validationErrors')
     })
 
     it('returns 400 when jobId is invalid', async () => {
       const longString = repeat('a', 65).join('')
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .get(`/jobs/${longString}`)
         .query({
           ...getDefaultQueryData(user),
@@ -142,7 +142,7 @@ describe.skip('GET /jobs/:id', () => {
     })
 
     it('returns 404 when job does not belong to the given user', async () => {
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .get(`/jobs/${job.dxid}`)
         .query({
           ...getDefaultQueryData(user),
@@ -153,7 +153,7 @@ describe.skip('GET /jobs/:id', () => {
     })
 
     it.skip('returns 404 when job does not belong to the given app', async () => {
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .get(`/apps/${(app.id + 1).toString()}/jobs/${job.dxid}`)
         .query({
           ...getDefaultQueryData(user),

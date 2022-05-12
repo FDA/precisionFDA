@@ -1,12 +1,14 @@
-import { queue } from '@pfda/https-apps-shared'
+import { config, debug, queue } from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import type { JSONSchema7, JSONSchema7Definition } from 'json-schema'
+import type { JSONSchema7 } from 'json-schema'
 import { defaultMiddlewares, makeValidationMdw } from '../server/middleware'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
-router.use(defaultMiddlewares)
+if (!config.flags.dev.skipUserMiddlewareForDebugRoutes) {
+  router.use(defaultMiddlewares)
+}
 
 // Debugging bull queue
 router.get(
@@ -54,5 +56,34 @@ router.get(
     ctx.status = 200
   }
 )
+
+// Debugging exception capturing and memory
+if (config.api.allowErrorTestingRoutes) {
+  router.get(
+    '/errors/throwApiException',
+    async ctx => {
+      const err = new Error('This is a test error')
+      throw err
+    }
+  )
+
+  router.get(
+    '/errors/testApiMemoryAllocationError',
+    async ctx => {
+      debug.testHeapMemoryAllocationError()
+      ctx.body = { result: 'Test api heap memory allocation test finished - did not crash?' }
+      ctx.status = 200
+    }
+  )
+
+  router.get(
+    '/errors/testWorkerMemoryAllocationError',
+    async ctx => {
+      queue.createTestMaxMemoryTask()
+      ctx.body = { result: 'Test worker heap memory allocation test queued' }
+      ctx.status = 200
+    }
+  )
+}
 
 export { router }
