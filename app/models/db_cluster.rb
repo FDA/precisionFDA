@@ -54,9 +54,6 @@ class DbCluster < ApplicationRecord
     9.6.17
     9.6.18
     9.6.19
-    10.11
-    10.12
-    10.13
     10.14
   ).freeze
 

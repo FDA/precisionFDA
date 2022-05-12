@@ -12,9 +12,6 @@ export const HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS = {
   V_9_6_17: '9.6.17',
   V_9_6_18: '9.6.18',
   V_9_6_19: '9.6.19',
-  V_10_11: '10.11',
-  V_10_12: '10.12',
-  V_10_13: '10.13',
   V_10_14: '10.14',
 }
 
@@ -146,21 +143,6 @@ export const versionsOptions = (engine?: string, dxInstanceClass?: string) => en
     value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
     label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
     isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine) || hidePgVersionsForSomeInstances(dxInstanceClass),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_11,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_12,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_12,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_13,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_13,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine),
   },
   {
     value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14,
