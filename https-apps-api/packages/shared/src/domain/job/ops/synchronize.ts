@@ -45,6 +45,10 @@ export class SyncJobOperation extends WorkerBaseOperation<
     return `${TASK_TYPE.SYNC_JOB_STATUS}.${jobDxid}`
   }
 
+  static getJobDxidFromBullJobId(bullJobId: string) {
+    return bullJobId.replace('sync_job_status.', '')
+  }
+
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)

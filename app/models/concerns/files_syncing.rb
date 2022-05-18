@@ -88,18 +88,20 @@ module FilesSyncing
 
         return if remote_state == file.state
 
-        logger.debug("update file #{file.uid} by user #{user.dxuser} " \
+        logger.debug("SyncFilesState: update file #{file.uid} by user #{user.dxuser} " \
                      "from state #{file.state} to #{remote_state}")
 
         if remote_state == UserFile::STATE_CLOSED
           file.update!(state: remote_state, file_size: result[:describe][:size])
           Event::FileCreated.create_for(file, user)
+          logger.debug("SyncFilesState: created new file #{file.uid}")
         elsif (remote_state == UserFile::STATE_CLOSING && file.state == UserFile::STATE_OPEN) ||
               remote_state == UserFile::STATE_ABANDONED
           file.update!(state: remote_state)
+          logger.debug("SyncFilesState: updated file state to #{file.state} from #{remote_state}")
         else
           # NOTE we should never be here
-          raise "File #{file.uid} had local state #{file.state} " \
+          raise "SyncFilesState: File #{file.uid} had local state #{file.state} " \
                 "(previously #{old_file_state}) and remote state #{remote_state}"
         end
       end
