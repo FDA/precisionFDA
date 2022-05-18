@@ -85,6 +85,15 @@ The source of truth for `precision-fda` portal is `mysql` db, which is initializ
   * > This part is work in progress
   * [`.env.example` file](../.env.example) is a reference file, however, there are a handful of secrets, ask a colleague to provide them
 
+#### Minor configuration differences
+
+If you're running stack with `make run-arm64v8-dev` configuration, it uses different key paths. Edit `https-apps-api/.env` accordingly, docker setup won't work
+
+```
+NODE_PATH_CERT=/keys/cert.pem
+NODE_PATH_KEY_CERT=/keys/key.pem
+```
+
 ### 2. Prepare the database
 
 The command might vary, depending on your role (dev, qa), or on CPU architecture of the workstation (`x86_64`, `arm64`). You can find more details on the topic [here](./MACOS_ARCHITECTURE_DIFFERENCES.md)
