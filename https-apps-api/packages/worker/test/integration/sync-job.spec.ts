@@ -19,6 +19,21 @@ import {
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { SyncJobOperation } from '@pfda/https-apps-shared/src/domain/job'
+
+describe('SyncJobOperation BullJobId', () => {
+  it('creates correct bullJob ids', async () => {
+    const jobDxid = 'job-1234567'
+    const bullJobId = SyncJobOperation.getBullJobId(jobDxid)
+    expect(bullJobId).to.equal('sync_job_status.job-1234567')
+  })
+
+  it('parses bullJob ids correctly', async () => {
+    const bullJobId = 'sync_job_status.job-G9jb79Q0qp9yX9G51fykB5VP'
+    const jobDxid = SyncJobOperation.getJobDxidFromBullJobId(bullJobId)
+    expect(jobDxid).to.equal('job-G9jb79Q0qp9yX9G51fykB5VP')
+  })
+})
 
 const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],

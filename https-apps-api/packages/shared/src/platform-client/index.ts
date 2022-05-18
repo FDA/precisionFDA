@@ -7,6 +7,7 @@ import { config } from '../config'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
+import { FILE_STATE_DX } from '../domain/user-file/user-file.enum'
 
 type BaseParams = {
   accessToken: string
@@ -77,6 +78,7 @@ type ListFilesResponse = {
       id: string
       name: string
       size: number
+      state: FILE_STATE_DX
     }
   }>
   // if set up, we might want to paginate
@@ -429,9 +431,12 @@ class PlatformClient {
         fields: {
           name: true,
           size: true,
+          state: true,
         },
       }
     }
+    // Documentation for platform API /system/findDataObjects
+    // https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
     const url = `${config.platform.apiUrl}/system/findDataObjects`
     const options: AxiosRequestConfig = {
       method: 'POST',

@@ -20,6 +20,9 @@ let emailsQueue: Bull.Queue
 let maintenanceQueue: Bull.Queue
 
 const getStatusQueue = (): Bull.Queue => statusQueue
+const getFileSyncQueue = (): Bull.Queue => fileSyncQueue
+const getEmailsQueue = (): Bull.Queue => emailsQueue
+const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
 const getQueues = (): Bull.Queue[] => [statusQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
 
@@ -296,6 +299,8 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
 
 export * as debug from './queue.debug'
 
+export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
+
 export {
   createSyncJobStatusTask,
   createSyncWorkstationFilesTask,
@@ -307,6 +312,9 @@ export {
   createTestMaxMemoryTask,
   createQueues,
   getStatusQueue,
+  getFileSyncQueue,
+  getEmailsQueue,
+  getMaintenanceQueue,
   getQueues,
   disconnectQueues,
   types,

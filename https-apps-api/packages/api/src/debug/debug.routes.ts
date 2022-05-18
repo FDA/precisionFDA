@@ -21,6 +21,15 @@ router.get(
 )
 
 router.get(
+  '/queue/cleanup',
+  async ctx => {
+    const res = await new queue.CleanupWorkerQueueOperation(ctx).execute()
+    ctx.body = res
+    ctx.status = 200
+  }
+)
+
+router.get(
   '/queue/job/:bullJobId',
   async ctx => {
     const res = await queue.debug.debugQueueJob(ctx.params.bullJobId)
