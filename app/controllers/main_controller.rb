@@ -318,6 +318,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           user.last_login = Time.zone.now
           user.save(validate: false)
         end
+
+        post_login_checks user, token
       end
 
       Session.delete_expired
@@ -338,6 +340,15 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       distribute_results user, token
       redirect_to redirect_url
     end
+  end
+
+  def post_login_checks(user, token)
+    # User logged in successfully, a good time to run user checkup with the new token
+    https_apps_client = HttpsAppsClient.new(token, user)
+    https_apps_client.user_checkup
+  rescue StandardError => e
+    # Error in requesting a user checkup shouldn't interrupt the login process
+    Rails.logger.error("Error requesting user checkup: #{e.message}")
   end
 
   def check_webapp

@@ -1,6 +1,6 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
 import { DateTime } from 'luxon'
-import { database, queue } from '@pfda/https-apps-shared'
+import { database, queue, errors } from '@pfda/https-apps-shared'
 import { App, User, Job, UserFile, Tag, Tagging, Folder } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
@@ -441,7 +441,25 @@ describe('TASK: sync_job_status', () => {
       expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
     })
 
-    it('removes task from queue when client API call errors', async () => {
+    it('it handles ClientRequestError gracefully', async() => {
+      const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
+      await em.flush()
+      fakes.client.jobDescribeFake.rejects(new errors.ClientRequestError(
+        'ServiceUnavailable', {
+          clientResponse: 'Some resource was temporarily unavailable; please try again later',
+          clientStatusCode: 503,
+        }      
+      ))
+  
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.client.jobDescribeFake.calledOnce).to.be.true()
+      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
+    })
+
+    it('it handles other error gracefully', async() => {
       const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
       fakes.client.jobDescribeFake.rejects(new Error('boom'))
       await em.flush()
@@ -449,7 +467,7 @@ describe('TASK: sync_job_status', () => {
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
       )
-      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
+      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
     })
   })
 })

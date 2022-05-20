@@ -7,6 +7,17 @@ class HttpsAppsClient
     @user = user
   end
 
+  # User checkup
+  # To be run whenever user logs in to make sure sync tasks are
+  # healthy and to check the general health of the user account
+  def user_checkup
+    request(
+      "/users/checkup",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # Run an app.
   # @param app_dxid [String] App dxid.
   # @param opts [Hash] Request body options.
