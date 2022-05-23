@@ -64,5 +64,5 @@ export const removeRepeatable = async (key: string): Promise<any> => {
     q.removeRepeatableByKey(key)
     jobsCountAfter += (await q.getRepeatableJobs()).length
   }))
-  return `${jobsCountAfter-jobsCountBefore} jobs removed`
+  return `${jobsCountBefore-jobsCountAfter} jobs removed`
 }

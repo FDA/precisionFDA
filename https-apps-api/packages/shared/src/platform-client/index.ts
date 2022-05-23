@@ -166,6 +166,12 @@ type DbClusterDescribeResponse = {
   failureReason?: string
 } & AnyObject
 
+export enum PlatformErrors {
+  ResourceNotFound = 'ResourceNotFound',
+  PermissionDenied = 'PermissionDenied',
+  InvalidInput = 'InvalidInput',
+}
+
 const defaultLog = getLogger('platform-client-logger')
 
 class PlatformClient {
@@ -471,7 +477,7 @@ class PlatformClient {
     return { authorization: `Bearer ${params.accessToken}` }
   }
 
-  private handleFailed(err: any): any {
+  handleFailed(err: any): any {
     // response status code is NOT 2xx
     if (err.response) {
       this.log.error(
@@ -488,9 +494,13 @@ class PlatformClient {
       //     "type": "PermissionDenied",
       //     "message": "BillTo for this job's project must have the \"httpsApp\" feature enabled to run this executable"
       //   }
+      //
+      // Howvever, there's also a class of error response where the response payload is HTML
+      // See platform-client.mock.ts for more examples
+      //
       const statusCode = err.response.status
-      const errorType = err.response.data.error.type
-      const errorMessage = err.response.data.error.message
+      const errorType = err.response.data?.error?.type || 'Server Error'
+      const errorMessage = err.response.data?.error?.message || err.response.data
       throw new errors.ClientRequestError(
         `${errorType} (${statusCode}): ${errorMessage}`,
         {
@@ -505,11 +515,16 @@ class PlatformClient {
       this.log.error({ err }, 'Error: Failed platform request - different error')
     }
     // todo: handle this does not result in 500 API error
+    // TODO(2): Need to consider other error types and handle them with a descriptive message
+    // e.g. See ETIMEOUT error in platform-client.mock.ts
+    const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
     throw new errors.ClientRequestError(
-      `Error: (${err.response.status}) ${err.response.data}`, {
-        clientResponse: err.response.data,
-        clientStatusCode: err.response.status,
-      })
+      errorMessage,
+      {
+        clientResponse: err.response?.data || 'No platform response',
+        clientStatusCode: err.response?.status || 408,
+      },
+    )
   }
 }
 

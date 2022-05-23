@@ -37,7 +37,8 @@ class ChallengesController < ApplicationController
   end
 
   def edit
-    js card_image_url: @challenge.card_image_url, card_image_id: @challenge.card_image_id
+    time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
+    js card_image_url: @challenge.card_image_url, card_image_id: @challenge.card_image_id, time_zone: time_zone
   end
 
   def update
@@ -57,7 +58,8 @@ class ChallengesController < ApplicationController
         flash[:success] = "The challenge was updated successfully."
         redirect_to challenge_path(@challenge)
       else
-        js update_challenge_params.to_h
+        time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
+        js update_challenge_params.to_h, time_zone: time_zone
         render action: :edit
       end
     end

@@ -175,13 +175,27 @@ describe('TASK: sync db cluster', () => {
       expect(fakes.client.dbClusterDescribeFake.notCalled).to.be.true()
     })
 
-    it('removes task from queue when client API call returns errors', async () => {
+    it('it handles ClientRequestError gracefully', async() => {
+      fakes.client.dbClusterDescribeFake.rejects(new errors.ClientRequestError(
+        'ServiceUnavailable', {
+          clientResponse: 'Some resource was temporarily unavailable; please try again later',
+          clientStatusCode: 503,
+        }
+      ))
+      await createSyncDbClusterTestTask(
+        { dxid: dbCluster.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
+      )
+      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
+    })
+  
+    it('it handles other error gracefully', async () => {
       fakes.client.dbClusterDescribeFake.rejects(new Error('quack'))
       await createSyncDbClusterTestTask(
         { dxid: dbCluster.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
       )
-      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
+      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
     })
 
     it('does not remove task from queue when client API call returns 5xx error', async () => {
