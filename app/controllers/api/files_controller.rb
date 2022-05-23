@@ -69,7 +69,7 @@ module Api
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
       user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-        order(order_from_params).page(page_from_params).per(page_size)
+        order(order_params).page(page_from_params).per(page_size)
       page_dict = pagination_dict(user_files)
 
       render json: user_files, root: "files", adapter: :json,
@@ -441,7 +441,7 @@ module Api
           where(scoped_parent_folder_id: folder_id).
           includes(:taggings).eager_load(user: :org).
           search_by_tags(params.dig(:filters, :tags)).
-          order(order_from_params).
+          order(order_params).
           page(page_from_params).per(page_size)
         nodes = FileService::FilesFilter.call(nodes, params[:filters])
       end
@@ -463,7 +463,7 @@ module Api
       return render(plain: files_size) if show_count
 
       user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_from_params).page(page_from_params).per(page_size)
+        order(order_params).page(page_from_params).per(page_size)
 
       page_dict = pagination_dict(user_files)
       page_dict[:total_count] = files_size
@@ -472,6 +472,15 @@ module Api
              meta: files_meta.
                merge(count(page_dict[:total_count])).
                merge({ pagination: page_dict })
+    end
+
+    # Default to reverse chronological order unless overriden by params
+    def order_params
+      if params[:order_by]
+        order_from_params
+      else
+        { created_at: Sortable::DIRECTION_DESC }
+      end
     end
 
     # Get a FolderService new instance for a current context

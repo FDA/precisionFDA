@@ -20,6 +20,11 @@
 #  restrict_to_template :boolean          default(FALSE)
 #  inactivity_notified  :boolean          default(FALSE)
 #
+#
+#  Notes:
+#  space_id is used primarily for Review Spaces where private areas of the Sponsor and
+#           Reviewer sides refer to the host space
+#           It is also used for Private Spaces which points back to itself
 
 class Space < ActiveRecord::Base
   paginates_per 25
@@ -34,8 +39,10 @@ class Space < ActiveRecord::Base
   STATE_LOCKED = "locked".freeze
   STATE_DELETED = "deleted".freeze
 
-  TYPES = %i(groups review verification).freeze
   STATES = [STATE_UNACTIVATED, STATE_ACTIVE, STATE_LOCKED, STATE_DELETED].freeze
+
+  TYPES = %w(groups review verification private_type government administrator).freeze
+  EXCLUSIVE_TYPES = %w(private_type government administrator).freeze
 
   SCOPE_PATTERN = /^space-(\d+)$/.freeze
 
@@ -79,6 +86,7 @@ class Space < ActiveRecord::Base
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
   scope :non_groups, -> { where.not(space_type: :groups) }
+  scope :admin_spaces, -> { where(space_type: :administrator) }
   scope :undeleted, -> { where.not(state: :deleted) }
   scope :restricted, -> { confidential.where(restrict_to_template: true) }
   scope :editable_by, lambda { |context|
@@ -222,6 +230,11 @@ class Space < ActiveRecord::Base
     review? && !confidential?
   end
 
+  # To distinct all Private spaces of private_type
+  def exclusive?
+    (space_id.present? && space_id == id) || EXCLUSIVE_TYPES.include?(space_type)
+  end
+
   # Find a space, oposite to a given area of a current review space:
   #   if a current space is confidential and reviewer,
   #   then opposite space will be a sponsor one. And vice versa.
@@ -241,7 +254,10 @@ class Space < ActiveRecord::Base
   end
 
   # this is always false for confidential review spaces
+  # this is always true for exclusive private spaces
   def accepted?
+    return true if exclusive?
+
     accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
   end
 
@@ -251,7 +267,7 @@ class Space < ActiveRecord::Base
     return false unless member
     return true if review? && confidential?
 
-    if groups?
+    if groups? || government? || administrator?
       return member.host? && host_project.present? ||
              member.guest? && guest_project.present?
     end
@@ -341,13 +357,20 @@ class Space < ActiveRecord::Base
 
   alias_method :scope, :uid
 
+  # Space title for spaces list in actions modals
   def title
     if review?
-      confidential? ? "#{name}(Private)" : "#{name}(Shared)"
+      confidential? ? "#{name} (Private Review)" : "#{name} (Shared Review)"
     elsif verification?
-      "#{name}(Verification)"
+      "#{name} (Verification)"
+    elsif groups?
+      "#{name} (Group)"
+    elsif private_type?
+      "#{name} (Private)"
+    elsif government?
+      "#{name} (Government)"
     else
-      "#{name}(Group)"
+      "#{name} (Administrator)"
     end
   end
 
@@ -379,7 +402,6 @@ class Space < ActiveRecord::Base
 
   def project_for_user(user)
     member = space_memberships.find_by(user_id: user.id)
-
     member ||= SpaceMembership.new_by_admin(user) if user.review_space_admin? || user.challenge_bot?
 
     project_dxid(member)

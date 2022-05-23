@@ -7,6 +7,7 @@ module SpaceService
 
       def create(space, admin)
         return if space.project_dxid(admin).present?
+
         contribute_org = space.org_dxid(admin)
         opposite_org = space.opposite_org_dxid(admin)
         project_dxid = create_project(admin, space)

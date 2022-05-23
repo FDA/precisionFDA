@@ -1,0 +1,60 @@
+version: '3.7'
+
+services:
+  web:
+    environment:
+      - ARM64V8_DEVELOPMENT_PATCH=${ARM64V8_DEVELOPMENT_PATCH}
+      - RAILS_ENV=development
+  frontend:
+    build:
+      context: ../client
+      dockerfile: ./docker/images/isolation.arm64v8.dev.Dockerfile
+    environment:
+      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
+    volumes:
+      - type: bind
+        source: ../client/src
+        target: /precision-fda/src
+      - yarn-network-cache-client:${YARNV1_CACHE_DIR}
+      - yarn-deps-cache-client:/precision-fda/node_modules
+  nodejs-api:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/node.isolated-dev.Dockerfile
+    command: ['make', 'watch']
+    environment:
+      - NODE_ENV=development
+      - NODE_DATABASE_NAME=precision-fda
+      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+    volumes:
+      - type: bind
+        source: ../https-apps-api/packages
+        target: /app/packages
+      - yarn-network-cache-nodejs-api:${YARNV1_CACHE_DIR}
+      - yarn-deps-cache-nodejs-api:/app/node_modules
+
+  nodejs-worker:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/node.isolated-dev.Dockerfile
+    command: ['make', 'watch-worker']
+    environment:
+      - NODE_ENV=development
+      - NODE_DATABASE_NAME=precision-fda
+      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+    volumes:
+      - type: bind
+        source: ../https-apps-api/packages
+        target: /app/packages
+      - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
+      - yarn-deps-cache-nodejs-worker:/app/node_modules
+
+volumes:
+  yarn-network-cache-client:
+  yarn-network-cache-nodejs-api:
+  yarn-network-cache-nodejs-worker:
+  yarn-deps-cache-client:
+  yarn-deps-cache-nodejs-api:
+  yarn-deps-cache-nodejs-worker:

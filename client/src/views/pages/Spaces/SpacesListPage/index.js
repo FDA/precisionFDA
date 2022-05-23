@@ -1,30 +1,38 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Link } from 'react-router-dom'
 
 import DefaultLayout from '../../../layouts/DefaultLayout'
 import SpacesList from '../../../components/Spaces/SpacesList'
 import SpacesListSwitcher from '../../../components/Spaces/SpacesListSwitcher'
 import SpacesListSearch from '../../../components/Spaces/SpacesListSearch'
-import { contextUserSelector, createSpaceLinkSelector } from '../../../../reducers/context/selectors'
 import {
-  resetSpacesListFilters,
+  contextUserSelector,
+  createSpaceLinkSelector,
+} from '../../../../reducers/context/selectors'
+import {
   fetchSpaces,
+  resetSpacesListFilters,
   searchSpacesList,
+  showLayoutCreateSpaceModal,
 } from '../../../../actions/spaces'
 import './style.sass'
 import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
-
+import Button from '../../../components/Button'
+import { NEW_SPACE_PAGE_ACTIONS } from '../../../../constants'
+// eslint-disable-next-line
+import { CreateSpaceModal } from '../../../components/Space/LayoutModals/CreateSpaceModal'
 
 class SpacesListPage extends Component {
   constructor(props) {
     super(props)
-    this.filterSpacesHandler = (searchString) => {
-      const { filterSpaces, loadSpaces } = this.props
+    const { filterSpaces, loadSpaces, showCreateSpaceModal } = this.props
+
+    this.filterSpacesHandler = searchString => {
       filterSpaces(searchString)
       loadSpaces()
     }
+    this.createSpaceModal = action => showCreateSpaceModal(action)
   }
 
   componentDidMount() {
@@ -36,8 +44,12 @@ class SpacesListPage extends Component {
   render() {
     const { createSpaceLink, user } = this.props
 
-    if(user?.is_guest) {
-      return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
+    if (user?.is_guest) {
+      return (
+        <DefaultLayout>
+          <GuestNotAllowed />
+        </DefaultLayout>
+      )
     }
 
     return (
@@ -48,13 +60,21 @@ class SpacesListPage extends Component {
               <SpacesListSwitcher />
             </div>
             <div className="pull-left">
-              <SpacesListSearch filterSpacesHandler={this.filterSpacesHandler} />
+              <SpacesListSearch
+                filterSpacesHandler={this.filterSpacesHandler}
+              />
             </div>
             <div className="pull-right">
               {createSpaceLink && (
-                <Link to='/spaces/new' className="btn btn-primary btn-lg">
+                <Button
+                  type="primary"
+                  size="lg"
+                  onClick={() =>
+                    this.createSpaceModal(NEW_SPACE_PAGE_ACTIONS.CREATE)
+                  }
+                >
                   Create new space
-                </Link>
+                </Button>
               )}
             </div>
           </div>
@@ -62,6 +82,9 @@ class SpacesListPage extends Component {
             <SpacesList />
           </div>
         </div>
+        {createSpaceLink && (
+          <CreateSpaceModal action={NEW_SPACE_PAGE_ACTIONS.CREATE} />
+        )}
       </DefaultLayout>
     )
   }
@@ -72,6 +95,7 @@ SpacesListPage.propTypes = {
   loadSpaces: PropTypes.func,
   resetFilters: PropTypes.func,
   filterSpaces: PropTypes.func,
+  showCreateSpaceModal: PropTypes.func,
   user: PropTypes.any,
 }
 
@@ -80,6 +104,7 @@ SpacesListPage.defaultProps = {
   loadSpaces: () => {},
   resetFilters: () => {},
   filterSpaces: () => {},
+  showCreateSpaceModal: () => {},
 }
 
 const mapStateToProps = state => ({
@@ -90,11 +115,10 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   loadSpaces: () => dispatch(fetchSpaces()),
   resetFilters: () => dispatch(resetSpacesListFilters()),
-  filterSpaces: (searchString) => dispatch(searchSpacesList(searchString)),
+  filterSpaces: searchString => dispatch(searchSpacesList(searchString)),
+  showCreateSpaceModal: () => dispatch(showLayoutCreateSpaceModal()),
 })
 
-export {
-  SpacesListPage,
-}
+export { SpacesListPage }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SpacesListPage)

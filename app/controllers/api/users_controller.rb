@@ -16,7 +16,7 @@ module Api
       return links if @context.guest?
 
       links.tap do |meta|
-        meta[:links][:space_create] = api_spaces_path if current_user.can_create_spaces?
+        meta[:links][:space_create] = api_spaces_path
         meta[:links][:space_info] = info_api_spaces_path
         meta[:links][:accessible_spaces] = editable_spaces_api_spaces_path
         meta[:links][:accessible_apps] = api_list_apps_path

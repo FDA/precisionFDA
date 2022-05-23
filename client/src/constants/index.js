@@ -1,9 +1,6 @@
 export const SPACE_TYPE_CARD = 'card'
 export const SPACE_TYPE_TABLE = 'table'
-export const SPACE_VIEW_TYPES = [
-  SPACE_TYPE_CARD,
-  SPACE_TYPE_TABLE,
-]
+export const SPACE_VIEW_TYPES = [SPACE_TYPE_CARD, SPACE_TYPE_TABLE]
 
 export const SORT_ASC = 'ASC'
 export const SORT_DESC = 'DESC'
@@ -18,6 +15,16 @@ export const FILES_TYPE_FILE = 'UserFile'
 export const SPACE_REVIEW = 'review'
 export const SPACE_GROUPS = 'groups'
 export const SPACE_VERIFICATION = 'verification'
+export const SPACE_PRIVATE = 'private'
+export const SPACE_PRIVATE_TYPE = 'private_type'
+export const SPACE_GOVERNMENT = 'government'
+export const SPACE_ADMINISTRATOR = 'administrator'
+
+export const SPACE_TYPES = {
+  PRIVATE_TYPE: 'private_type',
+  GOVERNMENT_GROUP: 'government',
+  ADMIN_GROUP: 'administrator',
+}
 
 export const SPACE_STATUS_UNACTIVATED = 'unactivated'
 export const SPACE_STATUS_ACTIVE = 'active'
@@ -56,6 +63,7 @@ export const SPACE_MEMBERS_ROLES = [
 ]
 
 export const NEW_SPACE_PAGE_ACTIONS = {
+  CREATE: 'CREATE',
   DUPLICATE: 'DUPLICATE',
   EDIT: 'EDIT',
 }
@@ -95,8 +103,8 @@ export const HOME_DATABASE_PASSWORD = {
 }
 
 export const HOME_DATABASE_ENGINE_TYPES = {
-  'MySQL': 'aurora-mysql',
-  'PostgreSQL': 'aurora-postgresql',
+  MySQL: 'aurora-mysql',
+  PostgreSQL: 'aurora-postgresql',
 }
 
 export const HOME_DATABASE_MYSQL_INSTANCE_VERSIONS = {
@@ -108,14 +116,10 @@ export const HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS = {
   V_9_6_17: '9.6.17',
   V_9_6_18: '9.6.18',
   V_9_6_19: '9.6.19',
-  V_10_11: '10.11',
-  V_10_12: '10.12',
-  V_10_13: '10.13',
   V_10_14: '10.14',
 }
 
 export const HOME_DATABASE_INSTANCE_CLASSES = [
-  'db_std1_x1',
   'db_std1_x2',
   'db_mem1_x2',
   'db_mem1_x4',
@@ -124,11 +128,9 @@ export const HOME_DATABASE_INSTANCE_CLASSES = [
   'db_mem1_x32',
   'db_mem1_x48',
   'db_mem1_x64',
-  'db_mem1_x96',
 ]
 
 export const HOME_DATABASE_INSTANCES = {
-  DB_STD1_X1: 'db_std1_x1',
   DB_STD1_X2: 'db_std1_x2',
   DB_MEM1_X2: 'db_mem1_x2',
   DB_MEM1_X4: 'db_mem1_x4',
@@ -137,29 +139,26 @@ export const HOME_DATABASE_INSTANCES = {
   DB_MEM1_X32: 'db_mem1_x32',
   DB_MEM1_X48: 'db_mem1_x48',
   DB_MEM1_X64: 'db_mem1_x64',
-  DB_MEM1_X96: 'db_mem1_x96',
 }
 
 export const HOME_DATABASE_LABELS = {
-  'db_std1_x1': 'DB Baseline 1 x 1',
-  'db_std1_x2': 'DB Baseline 1 x 2',
-  'db_mem1_x2': 'DB Mem 1 x 2',
-  'db_mem1_x4': 'DB Mem 1 x 4',
-  'db_mem1_x8': 'DB Mem 1 x 8',
-  'db_mem1_x16': 'DB Mem 1 x 16',
-  'db_mem1_x32': 'DB Mem 1 x 32',
-  'db_mem1_x48': 'DB Mem 1 x 48',
-  'db_mem1_x64': 'DB Mem 1 x 64',
-  'db_mem1_x96': 'DB Mem 1 x 96',
+  db_std1_x2: 'DB Baseline 1 x 2',
+  db_mem1_x2: 'DB Mem 1 x 2',
+  db_mem1_x4: 'DB Mem 1 x 4',
+  db_mem1_x8: 'DB Mem 1 x 8',
+  db_mem1_x16: 'DB Mem 1 x 16',
+  db_mem1_x32: 'DB Mem 1 x 32',
+  db_mem1_x48: 'DB Mem 1 x 48',
+  db_mem1_x64: 'DB Mem 1 x 64',
   'aurora-mysql': 'MySQL',
   'aurora-postgresql': 'PostgreSQL',
-  'available': 'Available',
-  'creating': 'Creating',
-  'starting': 'Starting',
-  'stopped': 'Stopped',
-  'stopping': 'Stopping',
-  'terminated': 'Terminated',
-  'terminating': 'Terminating',
+  available: 'Available',
+  creating: 'Creating',
+  starting: 'Starting',
+  stopped: 'Stopped',
+  stopping: 'Stopping',
+  terminated: 'Terminated',
+  terminating: 'Terminating',
 }
 
 export const HOME_DATABASES_MODALS = {
@@ -326,4 +325,5 @@ export const RECAPTCHA_KEYS = {
 
 export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
 export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'
-export const MAILING_LIST = 'https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564'
+export const MAILING_LIST =
+  'https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564'

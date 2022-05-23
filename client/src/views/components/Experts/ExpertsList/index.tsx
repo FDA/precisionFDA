@@ -13,7 +13,7 @@ import {
 import {
   expertsListItemsSelector,
   expertsListIsFetchingSelector,
-  expertsListPaginationSelector
+  expertsListPaginationSelector,
 } from '../../../../reducers/experts/list/selectors'
 import { StyledExpertsListContainer } from './styles'
 import { contextUserSelector } from '../../../../reducers/context/selectors'

@@ -28,7 +28,7 @@ import { PageRightColumn, PageLeftColumn } from '../../../../components/Page/sty
 
 
 const extractChallengeContent = (challenge, regionName) => {
-  if (!challenge || !challenge.meta || !challenge.meta.regions) {
+  if (!challenge?.meta?.regions?.[regionName]) {
     return ''
   }
   return challenge.meta.regions[regionName]

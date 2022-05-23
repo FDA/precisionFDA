@@ -45,6 +45,10 @@ export class SyncJobOperation extends WorkerBaseOperation<
     return `${TASK_TYPE.SYNC_JOB_STATUS}.${jobDxid}`
   }
 
+  static getJobDxidFromBullJobId(bullJobId: string) {
+    return bullJobId.replace('sync_job_status.', '')
+  }
+
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
@@ -92,11 +96,11 @@ export class SyncJobOperation extends WorkerBaseOperation<
         }
       }
 
-      this.ctx.log.info({ error: err.props },
-        'SyncJobOperation: Error on job/describe Removing sync job task')
-      // handle WORKER dirty state here
-      // we could do more efficient error handling and also calls repetition here
-      await removeRepeatable(this.ctx.job)
+      this.ctx.log.info({ error: err },
+        'SyncJobOperation: Unhandled error from job/describe')
+      // We should not be blanket removing the sync task on error, causing sync to be removed
+      // and the status becomes stuck
+      // await removeRepeatable(this.ctx.job)
       return
     }
 
@@ -127,6 +131,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       return
     }
     // fixme: the mapping is not perfect for the https apps
+    // TODO(Zai): Figure out in what way this is not perfect and document it
     const remoteState = platformJobData.state
     if (remoteState === job.state) {
       this.ctx.log.info({ remoteState }, 'SyncJobOperation: State has not changed, no updates')

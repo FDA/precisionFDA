@@ -62,9 +62,11 @@ export class SyncDbClusterOperation extends WorkerBaseOperation<
         }
       }
 
-      this.ctx.log.info({ error: err.props },
-        'SyncDbClusterOperation: Error on dbcluster/describe Removing sync job task')
-      await removeRepeatable(this.ctx.job)
+      this.ctx.log.info({ error: err },
+        'SyncDbClusterOperation: Unhandled error from dbcluster/describe')
+      // We should not be blanket removing the sync task on error, causing sync to be removed
+      // and the status becomes stuck
+      // await removeRepeatable(this.ctx.job)
       return
     }
 

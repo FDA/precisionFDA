@@ -230,7 +230,7 @@ export const AppsShow = ({ scope }: { scope: ResourceScope }) => {
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" to={`${match.url}`}>
+        <StyledTab activeClassName="active" exact to={`${match.url}`}>
           Spec
         </StyledTab>
         <StyledTab activeClassName="active" to={`${match.url}/jobs`}>

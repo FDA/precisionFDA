@@ -41,17 +41,18 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
       const runningJob = await queue.getStatusQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
       if (!runningJob) {
         await queue.createSyncJobStatusTask(job, this.ctx.user)
+        this.ctx.log.info({}, `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`)
       }
     })
     if (runningJobs.length === 0) {
-      this.ctx.log.info({}, 'No running jobs found')
+      this.ctx.log.info({}, 'CheckStaleJobsOperation: No running jobs found')
       return []
     }
 
     const isOverMaxDuration = buildIsOverMaxDuration('notify')
     const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
     if (staleJobs.length === 0) {
-      this.ctx.log.info({}, 'No stale jobs found')
+      this.ctx.log.info({}, 'CheckStaleJobsOperation: No stale jobs found')
     }
 
     // TODO(samuel) use Set instead - reduce bundle size

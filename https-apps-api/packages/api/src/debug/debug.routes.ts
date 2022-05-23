@@ -21,6 +21,15 @@ router.get(
 )
 
 router.get(
+  '/queue/cleanup',
+  async ctx => {
+    const res = await new queue.CleanupWorkerQueueOperation(ctx).execute()
+    ctx.body = res
+    ctx.status = 200
+  }
+)
+
+router.get(
   '/queue/job/:bullJobId',
   async ctx => {
     const res = await queue.debug.debugQueueJob(ctx.params.bullJobId)
@@ -29,7 +38,7 @@ router.get(
   },
 )
 
-router.get(
+router.delete (
   '/queue/removeJobs/:pattern',
   async ctx => {
     const res = await queue.debug.removeJobs(ctx.params.pattern)
@@ -43,15 +52,15 @@ const removeRepeatableSchema: JSONSchema7 = {
   properties: {
     key: { type: 'string', minLength: 1 },
   },
-  required: ['id'],
-  additionalProperties: true,
 }
 
-router.get(
+router.delete(
   '/queue/removeRepeatable',
-  makeValidationMdw({ query: removeRepeatableSchema }),
+  makeValidationMdw({
+    body: removeRepeatableSchema,
+  }),
   async ctx => {
-    const res = await queue.debug.removeRepeatable(ctx.validatedQuery.key)
+    const res = await queue.debug.removeRepeatable(ctx.request.body.key)
     ctx.body = res
     ctx.status = 200
   }

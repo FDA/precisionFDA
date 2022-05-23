@@ -81,7 +81,7 @@ class ChallengesListPage extends Component {
     }
 
     const getEmptyListMessage = (timeStatus) => {
-      switch(timeStatus) {
+      switch (timeStatus) {
         case CHALLENGE_TIME_STATUS.CURRENT:
         case CHALLENGE_TIME_STATUS.UPCOMING:
           return `There are no ${timeStatus} challenges on precisionFDA at the moment.  Check back regularly or subscribe to the mailing list to be informed of new community challenges.`
@@ -99,7 +99,7 @@ class ChallengesListPage extends Component {
         <div className="challenges-page-layout">
           <div className="left-column">
             {filterActive &&
-            <a onClick={handleResetClicked}>&larr; Back to All Challenges</a>
+              <a onClick={handleResetClicked}>&larr; Back to All Challenges</a>
             }
             <ChallengesList emptyListMessage={getEmptyListMessage(timeStatus)} setPageHandler={setPageHandler} />
           </div>
@@ -111,6 +111,9 @@ class ChallengesListPage extends Component {
             <hr />
             <div className="pfda-subsection-heading">PREVIOUS CHALLENGES</div>
             <ChallengesYearList setYearHandler={setYearHandler} />
+            <hr />
+            <div className="pfda-subsection-heading">OTHER CHALLENGES</div>
+            <a href='/challenges/app-a-thon-in-a-box' onClick={() => window.location.assign('/challenges/app-a-thon-in-a-box')}>App-a-thon in a Box &rarr;</a>
             <hr />
             <div className="pfda-subsection-heading">PROPOSE A CHALLENGE</div>
             <p>If you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.</p>
@@ -136,11 +139,11 @@ ChallengesListPage.propTypes = {
 }
 
 ChallengesListPage.defaultProps = {
-  loadChallenges: () => {},
-  setPageHandler: () => {},
-  setYearHandler: () => {},
-  setTimeStatusHandler: () => {},
-  resetFilters: () => {},
+  loadChallenges: () => { },
+  setPageHandler: () => { },
+  setYearHandler: () => { },
+  setTimeStatusHandler: () => { },
+  resetFilters: () => { },
 }
 
 const mapStateToProps = state => ({

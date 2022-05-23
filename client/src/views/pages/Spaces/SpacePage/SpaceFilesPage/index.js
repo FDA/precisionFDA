@@ -61,7 +61,7 @@ class SpaceFilesPage extends Component {
     const folderId = this.getFolderId()
     const sortHandler = (type) => sortFiles(spaceId, folderId, type)
     const pageHandler = (value) => setPageFiles(spaceId, folderId, value)
-    const title = getSpacePageTitle('Files', space.isPrivate)
+    const title = getSpacePageTitle('Files', space.isPrivate, space.isExclusive)
 
     return (
       <SpaceLayout spaceId={spaceId} space={space}>

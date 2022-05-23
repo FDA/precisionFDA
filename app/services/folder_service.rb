@@ -37,7 +37,10 @@ class FolderService
       scope_column_name => parent_folder&.id,
     )
 
-    folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
+    return Rats.failure(folder.errors.messages) unless folder.save
+
+    Event::FolderCreated.create_for(folder, context.user)
+    Rats.success(folder)
   end
 
   def rename(folder, new_name)
@@ -184,6 +187,7 @@ class FolderService
     folder.destroy
 
     if folder.destroyed?
+      Event::FolderDeleted.create_for(folder, context.user)
       Rats.success(folder)
     else
       Rats.failure(message: "#{folder.name}: folder removal error.")

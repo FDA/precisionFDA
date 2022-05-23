@@ -5,7 +5,7 @@ import { BaseOperation } from '../../../utils'
 import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { errors, client } from '../../..'
-import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
 import { UserOpsCtx } from '../../../types'
 
 export type SyncFolderFilesOutput = {
@@ -54,7 +54,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       folderId: input.folderId,
     })
     // just all REGULAR files in the project
-    // there will be conflicts with synced status and locallCreatedFiles
+    // there will be conflicts with synced status and locallyCreatedFiles
     // point is not to try to recreate them
     const locallyCreatedFiles = await fileRepo.findLocalFilesInProject({
       project: input.projectDxid,
@@ -100,6 +100,11 @@ export class SyncFilesInFolderOperation extends BaseOperation<
           details: { fileId: userfile.id },
         })
       }
+      this.ctx.log.info(
+        { localFile: userfile, remoteFile: remoteState.describe },
+        'SyncFilesInFolderOperation: Updating file metadata',
+      )
+
       // we test name and size fields
       if (userfile.name !== remoteState.describe!.name) {
         // console.log('updating file name')
@@ -107,6 +112,9 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       }
       if (userfile.fileSize !== remoteState.describe!.size) {
         userfile.fileSize = remoteState.describe!.size
+      }
+      if (userfile.state !== remoteState.describe!.state) {
+        userfile.state = remoteState.describe!.state
       }
     })
 
@@ -149,7 +157,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
             parentType: PARENT_TYPE.JOB,
             parentId: input.parentId,
             parentFolderId: current?.id,
-            state: FILE_STATE.CLOSED,
+            state: remoteDetails?.describe?.state ?? FILE_STATE_DX.CLOSED,
             stiType: FILE_STI_TYPE.USERFILE,
             entityType: FILE_ORIGIN_TYPE.HTTPS,
           },

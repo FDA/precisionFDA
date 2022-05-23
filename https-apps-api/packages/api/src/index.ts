@@ -1,49 +1,5 @@
-import { database, queue } from '@pfda/https-apps-shared'
-import { api } from './server'
-import { log } from './logger'
+import { createApp } from './server/app'
+import { createEntrypoint } from './entrypoint'
 
-const handleFatalError = (err: Error): void => {
-  process.removeAllListeners('uncaughtException')
-  process.removeAllListeners('unhandledRejection')
-
-  log.fatal({ error: err }, 'Fatal error occured. Exiting the app')
-}
-
-const stopAll = async (): Promise<void> => {
-  log.info('App closing')
-
-  process.removeAllListeners('SIGINT')
-  process.removeAllListeners('SIGTERM')
-
-  // close the services
-  await api.stopServer()
-  await database.stop()
-  await queue.disconnectQueues()
-}
-
-const startAll = async (): Promise<void> => {
-  process.once('uncaughtException', err => {
-    log.error('App crash: Uncaught exception')
-    handleFatalError(err)
-  })
-
-  process.once('unhandledRejection', err => {
-    log.error('App crash: Unhandled rejection')
-    handleFatalError(err as Error)
-  })
-
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.once('SIGINT', () => stopAll())
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.once('SIGTERM', () => stopAll())
-
-  // start the services in correct order
-  await database.start()
-  await queue.createQueues()
-  await api.startHttpsServer()
-}
-
-// run it
-Promise.resolve()
-  .then(() => startAll())
-  .catch(err => handleFatalError(err))
+const app = createApp()
+createEntrypoint(() => app.callback())()

@@ -50,6 +50,7 @@ enum SPACE_EVENT_ACTIVITY_TYPE {
   task_accepted = 24,
   task_reopened = 25,
   membership_enabled = 26,
+  membership_deleted = 27,
 }
 
 export { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }
