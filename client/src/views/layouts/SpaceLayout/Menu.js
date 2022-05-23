@@ -2,14 +2,15 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import classNames from 'classnames/bind'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import SpaceShape from '../../shapes/SpaceShape'
 import { getSpacesIcon } from '../../../helpers/spaces'
 import Icon from '../../components/Icon'
 import { isSideMenuHiddenSelector } from '../../../reducers/spaces/space/selectors'
 import { spaceSideMenuToggle } from '../../../actions/spaces'
-
+// eslint-disable-next-line
+import { SPACE_GROUPS, SPACE_PRIVATE_TYPE, SPACE_REVIEW, SPACE_GOVERNMENT } from '../../../constants'
 
 const MenuLink = ({ url, icon, text, counter }) => (
   <NavLink
@@ -20,7 +21,7 @@ const MenuLink = ({ url, icon, text, counter }) => (
     <Icon icon={icon} />
     <span className="space-page-layout__menu-item-text">
       <span>{text}</span>
-      {(!isNaN(counter)) && <span>({counter})</span>}
+      {!isNaN(counter) && <span>({counter})</span>}
     </span>
   </NavLink>
 )
@@ -33,7 +34,9 @@ const Menu = ({ space }) => {
 
   const classes = classNames({
     'space-page-layout__menu': true,
-    'space-page-layout__menu--shared': !space.isPrivate,
+    'space-page-layout__menu--shared':
+      !space.isPrivate & (space.type !== SPACE_PRIVATE_TYPE),
+    'space-page-layout__menu--exclusive': space.type === SPACE_PRIVATE_TYPE,
     'space-page-layout__menu--hidden': isHidden,
   })
 
@@ -69,16 +72,18 @@ const Menu = ({ space }) => {
           text="Jobs"
           counter={space.counters.jobs}
         />
-        <MenuLink
-          url={`/spaces/${space.id}/members`}
-          icon={getSpacesIcon('members')}
-          text="Members"
-          counter={space.counters.members}
-        />
+        {[SPACE_GROUPS, SPACE_REVIEW, SPACE_GOVERNMENT].includes(space.type) && (
+          <MenuLink
+            url={`/spaces/${space.id}/members`}
+            icon={getSpacesIcon('members')}
+            text="Members"
+            counter={space.counters.members}
+          />
+        )}
       </div>
       <div className={switcherClasses} onClick={toggleMenu}>
-        {(!isHidden) && <Icon icon='fa-chevron-left' />}
-        {(isHidden) && <Icon icon='fa-chevron-right' />}
+        {!isHidden && <Icon icon="fa-chevron-left" />}
+        {isHidden && <Icon icon="fa-chevron-right" />}
       </div>
     </div>
   )

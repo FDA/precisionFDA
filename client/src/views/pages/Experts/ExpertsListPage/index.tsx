@@ -9,10 +9,9 @@ import ExpertsYearList from '../../../components/Experts/ExpertsYearList'
 import {
   fetchExperts,
   expertsListSetYear,
-  expertsListResetFilters
+  expertsListResetFilters,
 } from '../../../../actions/experts'
 import './style.sass'
-
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { SectionHeading } from '../../../components/Controls/SectionHeading'
 import { expertsListYearSelector } from '../../../../reducers/experts/list/selectors'

@@ -26,7 +26,7 @@ class Event
         create(
           uid: file.uid,
           name: file.name,
-          path: file.file_full_path,
+          path: file.full_path,
           folder_id: file.folder_id,
           scope: file.scope,
           file_size: file.file_size,

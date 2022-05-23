@@ -29,7 +29,6 @@ const ENGINES = {
 } as const
 
 const allowedInstanceTypes = [
-  'db_std1_x1',
   'db_std1_x2',
   'db_mem1_x2',
   'db_mem1_x4',
@@ -38,7 +37,6 @@ const allowedInstanceTypes = [
   'db_mem1_x32',
   'db_mem1_x48',
   'db_mem1_x64',
-  'db_mem1_x96',
 ]
 
 const allowedEngineVersions = [
@@ -47,9 +45,6 @@ const allowedEngineVersions = [
   '9.6.17',
   '9.6.18',
   '9.6.19',
-  '10.11',
-  '10.12',
-  '10.13',
   '10.14',
 ]
 

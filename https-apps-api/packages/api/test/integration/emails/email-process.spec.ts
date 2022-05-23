@@ -7,7 +7,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database } from '@pfda/https-apps-shared'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('POST /emails/:id/send', () => {
@@ -42,7 +42,7 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('response shape & mocks call shape (JOB_FINISHED email) - is now deprecated', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/emails/${EMAIL_ID_JOB}/send`)
       .query({ ...getDefaultQueryData(user) })
       .send({ input: { jobId: job.id } })
@@ -56,7 +56,7 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/emails/${EMAIL_ID_SPACE_CONTENT}/send`)
       .query({ ...getDefaultQueryData(user) })
       .send({ input: { spaceEventId: spaceEventJobAdded.id } })
@@ -72,7 +72,7 @@ describe('POST /emails/:id/send', () => {
 
   context('errors', () => {
     it('requires default input field', async () => {
-      await supertest(api.getServer())
+      await supertest(getServer())
         .post(`/emails/${EMAIL_ID_JOB}/send`)
         .query({ ...getDefaultQueryData(user) })
         .send({ payload: { jobId: job.id } })
@@ -80,7 +80,7 @@ describe('POST /emails/:id/send', () => {
     })
 
     it('requires input content based on email type (JOB_FINISHED)', async () => {
-      await supertest(api.getServer())
+      await supertest(getServer())
         .post(`/emails/${EMAIL_ID_JOB}/send`)
         .query({ ...getDefaultQueryData(user) })
         .send({ input: { jobIdFoo: job.id } })
@@ -88,7 +88,7 @@ describe('POST /emails/:id/send', () => {
     })
 
     it('requires input content based on email type (SPACE_CONTENT_CHANGE)', async () => {
-      await supertest(api.getServer())
+      await supertest(getServer())
         .post(`/emails/${EMAIL_ID_SPACE_CONTENT}/send`)
         .query({ ...getDefaultQueryData(user) })
         .send({ input: { spaceEventIdFoo: job.id } })

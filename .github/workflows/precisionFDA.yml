@@ -266,7 +266,7 @@ jobs:
           cache-dependency-path: ./client/yarn.lock
 
       - name: Install
-        run: yarn --frozen-lockfile
+        run: yarn --frozen-lockfile --production=false
         working-directory: ./client
 
       - name: Build production

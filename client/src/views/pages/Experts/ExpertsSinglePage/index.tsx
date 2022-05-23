@@ -8,6 +8,8 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import styled from 'styled-components'
+import httpStatusCodes from 'http-status-codes'
 
 import PublicLayout from '../../../layouts/PublicLayout'
 import { askQuestion, fetchExpertDetails } from '../../../../api/experts'
@@ -19,7 +21,6 @@ import { StyledPageContainer, StyledPageLeftColumn, StyledPageRightColumn, Style
 import { EXPERT_STATE } from '../../../../constants'
 import './style.sass'
 import { SocialMediaButtons } from '../../../components/NavigationBar/SocialMediaButtons'
-import styled from 'styled-components'
 import navBackground from '../../../../assets/NavbarBackground.png'
 import { contextSelector } from '../../../../reducers/context/selectors'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
@@ -28,13 +29,11 @@ import { ExpertAskQuestionModal } from '../../../components/Experts/ExpertAskQue
 import Button from '../../../components/Button'
 import { expertsSelector } from '../../../../reducers/experts/details/selectors'
 import history from '../../../../utils/history'
-import httpStatusCodes from 'http-status-codes'
 import UserContent from '../../../components/UserContent'
-
 
 const StyledNavigationBar = styled.div`
   width: 100%;
-  background-color: rgb(22,19,14);
+  background-color: rgb(22, 19, 14);
   background-image: url(${navBackground});
   background-repeat: no-repeat;
   background-size: cover;
@@ -50,14 +49,11 @@ const StyledSocialMediaButtons = styled.div`
   margin-right: 2%;
 `
 
-
 const ExpertsSingleDetailsPage = () => {
-  const { expertId, page } = useParams<{ expertId: string, page: string }>()
+  const { expertId, page } = useParams<{ expertId: string; page: string }>()
   const [expert, setExpert] = useState<IExpert>()
-
-  const { isLoading, data, status, error } = useQuery<any>(
-    'queryExpertDetails',
-    () => fetchExpertDetails(expertId),
+  const { isLoading, data } = useQuery<any>('queryExpertDetails', () =>
+    fetchExpertDetails(expertId),
   )
   useLayoutEffect(() => {
     if (data) {
@@ -70,13 +66,16 @@ const ExpertsSingleDetailsPage = () => {
   const showModalAction = () => dispatch(showExpertsAskQuestionModal())
 
   const user = useSelector(state => contextSelector(state).user)
-  const askQuestionModal = useSelector(state => expertsSelector(state).details.askQuestionModal)
+  const askQuestionModal = useSelector(
+    state => expertsSelector(state).details.askQuestionModal,
+  )
   const [tabIndex, setTabIndex] = useState(-1)
   const queryClient = useQueryClient()
 
   const askExpert = (userName: string, question: string) => {
-    createQuestionMutation.mutateAsync({ userName, question }).then(
-      response => {
+    createQuestionMutation
+      .mutateAsync({ userName, question })
+      .then(response => {
         if (response.status === httpStatusCodes.OK) {
           queryClient.invalidateQueries('queryExpertDetails')
           toast.success('Your question was submitted successfully')
@@ -85,15 +84,16 @@ const ExpertsSingleDetailsPage = () => {
         }
         hideModalAction()
         history.push(`/experts/${expertId}`)
-      }
-    )
+      })
   }
-  const createQuestionMutation = useMutation(({ userName, question }: { userName: string, question: string }) =>
-    askQuestion({ userName, question },expertId))
+  const createQuestionMutation = useMutation(
+    ({ userName, question }: { userName: string; question: string }) =>
+      askQuestion({ userName, question }, expertId),
+  )
 
   if (isLoading) {
     return (
-      <div className='text-center'>
+      <div className="text-center">
         <Loader />
       </div>
     )
@@ -126,13 +126,13 @@ const ExpertsSingleDetailsPage = () => {
     {
       title: 'About this expert',
       subroute: '',
-      content: (<ExpertDetails expert={expert} />),
+      content: <ExpertDetails expert={expert} />,
       outline: '',
     },
     {
       title: 'Blog Post',
       subroute: '/blog',
-      content: (<ExpertBlog expert={expert} content={content}/>),
+      content: <ExpertBlog expert={expert} content={content} />,
       outline: outlineContent(),
     },
     {
@@ -147,7 +147,9 @@ const ExpertsSingleDetailsPage = () => {
 
   if (tabIndex < 0) {
     const pageRoute = `/${page}`
-    setTabIndex(tabSubroutes.includes(pageRoute) ? tabSubroutes.indexOf(pageRoute) : 0)
+    setTabIndex(
+      tabSubroutes.includes(pageRoute) ? tabSubroutes.indexOf(pageRoute) : 0,
+    )
   }
 
   const onSelectTab = (index: any) => {
@@ -166,77 +168,96 @@ const ExpertsSingleDetailsPage = () => {
   const showSocialMediaButtonText = false
   const showLogoOnNavbar = true
   const expertFaceData = (
-      <StyledNavigationBar>
-        <div className="experts-details__left-column__logo-bar">
-          <img
-              className="experts-details__expert-image"
-              src={expert?.image}
-              alt="Expert's Logo"
-          />
-          <div className="experts-details__logo-data">
-            <Link to={{ pathname: '/experts' }}>
-              &larr; Back to All Experts
-            </Link>
-            <h1>{expert?.title}</h1>
-          </div>
+    <StyledNavigationBar>
+      <div className="experts-details__left-column__logo-bar">
+        <img
+          className="experts-details__expert-image"
+          src={expert?.image}
+          alt="Expert's Logo"
+        />
+        <div className="experts-details__logo-data">
+          <Link to={{ pathname: '/experts' }}>&larr; Back to All Experts</Link>
+          <h1>{expert?.title}</h1>
         </div>
-        <StyledSocialMediaButtons>
-          <SocialMediaButtons showText={showSocialMediaButtonText} />
-        </StyledSocialMediaButtons>
-      </StyledNavigationBar>
+      </div>
+      <StyledSocialMediaButtons>
+        <SocialMediaButtons showText={showSocialMediaButtonText} />
+      </StyledSocialMediaButtons>
+    </StyledNavigationBar>
   )
 
   return (
     <PublicLayout>
       <NavigationBar
-        children={expertFaceData}
         title={title}
         subtitle={subtitle}
         showLogoOnNavbar={showLogoOnNavbar}
         user={user}
-      />
+      >
+        {expertFaceData}
+      </NavigationBar>
       <StyledPageContainer>
         <StyledPageLeftColumn>
           <StyledTabsExpertPage>
             <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
               <TabList className="expert-details-tabs__tab-list">
                 {tabs.map((tab, index) => (
-                  <Tab key={index} className="expert-details-tabs__tab" selectedClassName="expert-details-tabs__tab--selected">{tab.title}</Tab>
+                  <Tab
+                    key={index}
+                    className="expert-details-tabs__tab"
+                    selectedClassName="expert-details-tabs__tab--selected"
+                  >
+                    {tab.title}
+                  </Tab>
                 ))}
               </TabList>
 
               {tabs.map((tab, index) => (
-                <TabPanel key={index}>
-                  {tab.content}
-                </TabPanel>
+                <TabPanel key={index}>{tab.content}</TabPanel>
               ))}
             </Tabs>
           </StyledTabsExpertPage>
         </StyledPageLeftColumn>
-        {tabSubroutes[tabIndex] === '' &&
+        {tabSubroutes[tabIndex] === '' && (
           <StyledPageRightColumn>
             <div className="experts-page-layout right-column">
               {expertIsOpened && (
-                  <div className="btn-group" style={{marginTop: '24px', width: '100%'}}>
-                    <Button size='md' className="btn btn-default btn-block" onClick={showModalAction}>Ask
-                      this expert</Button>
-                  </div>
+                <div
+                  className="btn-group"
+                  style={{ marginTop: '24px', width: '100%' }}
+                >
+                  <Button
+                    size="md"
+                    className="btn btn-default btn-block"
+                    onClick={showModalAction}
+                  >
+                    Ask this expert
+                  </Button>
+                </div>
               )}
               {editPermitted && (
-                  <div className="btn-group" style={{marginTop: '24px', width: '100%'}}>
-                    <a className="btn btn-default btn-block" href={`/experts/${expert?.id}/edit`}>Edit Expert Info</a>
-                  </div>
+                <div
+                  className="btn-group"
+                  style={{ marginTop: '24px', width: '100%' }}
+                >
+                  <a
+                    className="btn btn-default btn-block"
+                    href={`/experts/${expert?.id}/edit`}
+                  >
+                    Edit Expert Info
+                  </a>
+                </div>
               )}
             </div>
           </StyledPageRightColumn>
-        }
-        {tabSubroutes[tabIndex] === '/blog' &&
+        )}
+        {tabSubroutes[tabIndex] === '/blog' && (
           <StyledPageRightColumn>
             <div className="experts-page-layout right-column">
               {tabs[tabIndex].outline}
             </div>
           </StyledPageRightColumn>
-        }
+        )}
       </StyledPageContainer>
       <ExpertAskQuestionModal
         isOpen={askQuestionModal.isOpen}

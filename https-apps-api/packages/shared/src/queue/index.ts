@@ -20,6 +20,9 @@ let emailsQueue: Bull.Queue
 let maintenanceQueue: Bull.Queue
 
 const getStatusQueue = (): Bull.Queue => statusQueue
+const getFileSyncQueue = (): Bull.Queue => fileSyncQueue
+const getEmailsQueue = (): Bull.Queue => emailsQueue
+const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
 const getQueues = (): Bull.Queue[] => [statusQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
 
@@ -146,11 +149,8 @@ const removeRepeatable = async (job: Job) => {
 
 const findRepeatable = async (bullJobId: string) => {
   const repeatableJobs = await statusQueue.getRepeatableJobs()
-  const result = repeatableJobs.filter(j => j.id === bullJobId)
-  if (result.length > 0) {
-    return result[0]
-  }
-  return null
+  const result = repeatableJobs.find(j => j.id === bullJobId)
+  return result
 }
 
 // TASK PRODUCERS
@@ -296,6 +296,8 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
 
 export * as debug from './queue.debug'
 
+export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
+
 export {
   createSyncJobStatusTask,
   createSyncWorkstationFilesTask,
@@ -307,6 +309,9 @@ export {
   createTestMaxMemoryTask,
   createQueues,
   getStatusQueue,
+  getFileSyncQueue,
+  getEmailsQueue,
+  getMaintenanceQueue,
   getQueues,
   disconnectQueues,
   types,
