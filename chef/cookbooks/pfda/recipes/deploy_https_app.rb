@@ -50,7 +50,7 @@ application app_dir do
 
   execute "make install" do
     cwd https_apps_dir
-    command "yarn"
+    command "yarn --frozen-lockfile --production=false"
     user node[:deploy_user]
     environment lazy { ENV.to_hash }
   end

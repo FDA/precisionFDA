@@ -15,6 +15,10 @@ export default {
     isOpen: false,
     isLoading: false,
   },
+  createSpaceModal: {
+    isOpen: false,
+    isLoading: false,
+  },
   spaceAddDataModal: {
     isOpen: false,
     isLoading: false,

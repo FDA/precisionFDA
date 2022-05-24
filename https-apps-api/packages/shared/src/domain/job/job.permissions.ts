@@ -1,11 +1,11 @@
 import { JobNotFoundError, PermissionError } from '../../errors'
-import { OpsCtx } from '../../types'
+import { UserOpsCtx } from '../../types'
 import { Job } from "./job.entity"
 import { App } from '../app/app.entity'
 
 
 // Check if job exists and is accessible by the user
-export const getJobAccessibleByContext = async (jobDxid: string, ctx: OpsCtx): Promise<Job> => {
+export const getJobAccessibleByContext = async (jobDxid: string, ctx: UserOpsCtx): Promise<Job> => {
   const jobRepo = ctx.em.getRepository(Job)
   const job = await jobRepo.findOne({ dxid: jobDxid }, {
     populate: ['user'],
@@ -20,7 +20,7 @@ export const getJobAccessibleByContext = async (jobDxid: string, ctx: OpsCtx): P
   return job
 }
 
-export const getJobForApp = async (jobDxid: string, appId: number, ctx: OpsCtx): Promise<Job> => {
+export const getJobForApp = async (jobDxid: string, appId: number, ctx: UserOpsCtx): Promise<Job> => {
   const jobRepo = ctx.em.getRepository(Job)
   const job = await jobRepo.findOne(
     {

@@ -52,6 +52,7 @@ class SpaceEvent < ApplicationRecord
     task_accepted: 24,
     task_reopened: 25,
     membership_enabled: 26,
+    membership_deleted: 27,
   }.freeze
 
   ROLES = %i(

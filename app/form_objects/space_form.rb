@@ -17,6 +17,7 @@ class SpaceForm
 
   TYPE_GROUPS = "groups".freeze
   TYPE_REVIEW = "review".freeze
+  TYPE_PRIVATE = "private_type".freeze
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser

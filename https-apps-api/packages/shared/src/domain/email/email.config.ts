@@ -261,6 +261,7 @@ enum EMAIL_TYPES {
   challengePrereg = 7,
   jobTerminationWarning = 8,
   staleJobsReport = 9,
+  nonTerminatedDbClusters = 10,
 }
 
 type EmailConfigItem = {

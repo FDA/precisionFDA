@@ -99,15 +99,8 @@ const HomeNewDatabaseCreateForm = ({
   }
 
   const checkDisabledInstances = () => { return !(formDataInput.engine ) }
-  const hideForPG = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
-  const hideForMysql = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['MySQL'] }
 
   const instancesOptions = [
-    {
-      value: HOME_DATABASE_INSTANCES.DB_STD1_X1,
-      label: HOME_DATABASE_LABELS['db_std1_x1'],
-      isDisabled: checkDisabledInstances() || hideForPG(),
-    },
     {
       value: HOME_DATABASE_INSTANCES.DB_STD1_X2,
       label: HOME_DATABASE_LABELS['db_std1_x2'],
@@ -148,11 +141,6 @@ const HomeNewDatabaseCreateForm = ({
       label: HOME_DATABASE_LABELS['db_mem1_x64'],
       isDisabled: checkDisabledInstances(),
     },
-    {
-      value: HOME_DATABASE_INSTANCES.DB_MEM1_X96,
-      label: HOME_DATABASE_LABELS['db_mem1_x96'],
-      isDisabled: checkDisabledInstances() || hideForMysql(),
-    },
   ]
 
   const hideMysqlVersions = () => { return formDataInput.engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
@@ -165,7 +153,6 @@ const HomeNewDatabaseCreateForm = ({
     HOME_DATABASE_INSTANCES.DB_MEM1_X8,
     HOME_DATABASE_INSTANCES.DB_MEM1_X16,
     HOME_DATABASE_INSTANCES.DB_MEM1_X48,
-    HOME_DATABASE_INSTANCES.DB_MEM1_X96,
   ]
 
   const hidePgVersionsForSomeInstances = () => { return restrictedPgInstances.includes(formDataInput.dxInstanceClass) }

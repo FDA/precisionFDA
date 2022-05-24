@@ -1,4 +1,6 @@
-require 'spec_helper'
+require "spec_helper"
+require "factory_bot_rails"
+require "shoulda/matchers"
 
 ENV['RAILS_ENV'] ||= 'test'
 ENV['ADMIN_TOKEN'] ||= 'admin_token'

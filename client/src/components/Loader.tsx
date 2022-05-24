@@ -1,7 +1,12 @@
 import React from 'react'
+import styled from 'styled-components'
 import { Svg } from './icons/Svg'
 
+const LoaderWrapper = styled.div`
+  margin: 5% 0 0 45%;
+`
 export const Loader = ({ height = 16 } : { height?: number }) => (
+  <LoaderWrapper>
   <Svg
     height={height}
     width={60}
@@ -31,4 +36,5 @@ export const Loader = ({ height = 16 } : { height?: number }) => (
       begin="0.3"/>     
   </circle>
   </Svg>
+  </LoaderWrapper>
 )
