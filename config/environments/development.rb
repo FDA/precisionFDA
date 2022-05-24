@@ -94,17 +94,20 @@ Rails.application.configure do
 
   # STDOUT logging
   if ENV["RAILS_LOG_TO_STDOUT"]
-    STDOUT.sync = true
-    logger = ActiveSupport::Logger.new(STDOUT)
+    $stdout.sync = true
+    logger = ActiveSupport::Logger.new($stdout)
     logger.formatter = config.log_formatter
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
 
-  config.after_initialize do
-    # @see https://github.com/trusche/httplog#configuration
-    HttpLog.configure do |httplog_config|
-      httplog_config.logger = Rails.logger
-      httplog_config.log_headers = true
+  # http request/response logging
+  if ENV["LOG_REQUESTS"]
+    config.after_initialize do
+      # @see https://github.com/trusche/httplog#configuration
+      HttpLog.configure do |httplog_config|
+        httplog_config.logger = Rails.logger
+        httplog_config.log_headers = true
+      end
     end
   end
 end

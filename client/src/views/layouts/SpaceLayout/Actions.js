@@ -7,13 +7,16 @@ import Button from '../../components/Button'
 import LockSpaceModal from '../../components/Space/LayoutModals/LockSpaceModal'
 import UnlockSpaceModal from '../../components/Space/LayoutModals/UnlockSpaceModal'
 import DeleteSpaceModal from '../../components/Space/LayoutModals/DeleteSpaceModal'
+import { CreateSpaceModal } from '../../components/Space/LayoutModals/CreateSpaceModal'
 import {
   showLayoutLockModal,
   showLayoutUnlockModal,
   showLayoutDeleteModal,
+  showLayoutCreateSpaceModal,
 } from '../../../actions/spaces'
 import { createSpaceLinkSelector } from '../../../reducers/context/selectors'
 import { spaceCanDuplicateSelector } from '../../../reducers/spaces/space/selectors'
+import { NEW_SPACE_PAGE_ACTIONS } from '../../../constants'
 
 
 const Actions = ({ links = {}}) => {
@@ -25,6 +28,7 @@ const Actions = ({ links = {}}) => {
   const showLockModal = () => dispatch(showLayoutLockModal())
   const showUnlockModal = () => dispatch(showLayoutUnlockModal())
   const showDeleteModal = () => dispatch(showLayoutDeleteModal())
+  const showCreateSpaceModal = () => dispatch(showLayoutCreateSpaceModal())
 
   return (
     <div className="space-page-layout__actions">
@@ -32,10 +36,7 @@ const Actions = ({ links = {}}) => {
         Back
       </Link>
       {(links.update) &&
-        <Link to={`/spaces/edit/${spaceId}`} className="btn btn-default btn-spaces-margin">
-          Edit Space
-        </Link>
-      }
+        <Button onClick={() => showCreateSpaceModal(NEW_SPACE_PAGE_ACTIONS.EDIT)}>Edit Space</Button>}
       { createSpaceLink && isDuplicable &&
         <Link to={`/spaces/duplicate/${spaceId}`} className="btn btn-default btn-spaces-margin">
           Duplicate Space
@@ -48,6 +49,11 @@ const Actions = ({ links = {}}) => {
       {(links.lock) && <LockSpaceModal lockLink={links.lock} />}
       {(links.unlock) && <UnlockSpaceModal unlockLink={links.unlock} />}
       {(links.delete) && <DeleteSpaceModal deleteLink={links.delete} />}
+      {(links.update) &&
+        <CreateSpaceModal
+          action={NEW_SPACE_PAGE_ACTIONS.EDIT}
+        />
+      }
     </div>
   )
 }

@@ -90,6 +90,10 @@ class Context
     user&.is_challenge_evaluator?
   end
 
+  def gov_user?
+    user&.government_user?
+  end
+
   def api
     @api ||= DNAnexusAPI.new(token)
   end

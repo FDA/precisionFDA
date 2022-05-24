@@ -12,7 +12,7 @@ import {
   ENGINES,
 } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('POST /dbclusters/create', () => {
@@ -41,7 +41,7 @@ describe('POST /dbclusters/create', () => {
     fakes.client.dbClusterCreateFake.onCall(0).returns({ id: dxid })
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/dbclusters/create`)
       .query({ ...getDefaultQueryData(user) })
       .send(createInput)
@@ -70,7 +70,7 @@ describe('POST /dbclusters/create', () => {
     fakes.client.dbClusterCreateFake.onCall(0).returns({ id: dxid })
     const userQueryData = getDefaultQueryData(user)
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/dbclusters/create`)
       .query({ ...userQueryData })
       .send(createInput)
@@ -105,7 +105,7 @@ describe('POST /dbclusters/create', () => {
     const describeCallRes = { ...mockResponses.DBCLUSTER_DESC_RES, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/dbclusters/create`)
       .query({ ...userQueryData })
       .send(generate.dbCluster.createInput())

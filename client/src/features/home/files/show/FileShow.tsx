@@ -76,9 +76,8 @@ export const FileShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   // const { files, meta: ma } = data!
   const file = data?.files
   const meta = data?.meta
-
   if (status === 'loading') {
-    return <HomeLoader />
+    return  <HomeLoader />
   }
 
   if (!file || !file.id)

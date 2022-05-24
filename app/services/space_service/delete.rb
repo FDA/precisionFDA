@@ -6,6 +6,7 @@ module SpaceService
       space.confidential_spaces.each(&:deleted!)
 
       delete_files(space)
+      # delete_memberships(space)
 
       SpaceEventService.call(space.id, admin_member.user_id, admin_member, space, :space_deleted)
     end
@@ -17,6 +18,10 @@ module SpaceService
       files = UserFile.where(scope: scopes)
       remove_objects_from_platform(files)
       files.destroy_all
+    end
+
+    def self.delete_memberships(space)
+      # TODO: fill in stub
     end
 
     def self.remove_objects_from_platform(files)

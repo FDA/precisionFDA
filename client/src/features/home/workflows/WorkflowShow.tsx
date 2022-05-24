@@ -214,7 +214,7 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" to={`${match.url}`} data-testid={'workflow-show-tab-spec'}>
+        <StyledTab activeClassName="active" exact to={`${match.url}`} data-testid={'workflow-show-tab-spec'}>
           Spec
         </StyledTab>
         <StyledTab activeClassName="active" to={`${match.url}/jobs`} data-testid={'workflow-show-tab-executions'}>

@@ -40,6 +40,13 @@ module DXClient
         call(project_dxid, "invite", opts.merge(invitee: invitee, level: level))
       end
 
+      # Remove user from project. Call using user_api as the user leaving is implied by the token
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-leave
+      # @return [Hash]
+      def project_leave(project_dxid, opts = {})
+        call(project_dxid, "leave", opts)
+      end
+
       # Decreases user permissions from provided project.
       # @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-decreasepermissions
       # @param project_dxid [String] Projects's dxid.

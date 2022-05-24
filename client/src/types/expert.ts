@@ -1,4 +1,4 @@
-import { IListItem } from "./listItem"
+import { IListItem } from './listItem'
 
 interface IExpert extends IListItem {
   id: number,
@@ -51,7 +51,7 @@ const mapToExpertNodeApi = (data: any) => ({
   blogPreview: data.meta.blogPreview,
   totalAnswerCount: data.meta.totalAnswerCount,
   totalCommentCount: data.meta.totalCommentCount,
-});
+})
 
 export type { IExpert }
 export { mapToExpertNodeApi, mapToExpert }

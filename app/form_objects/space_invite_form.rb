@@ -80,6 +80,28 @@ class SpaceInviteForm
 
   def validate_invitees
     errors.add(:invitees, "List of invitees is empty!") if invitees.values.flatten.blank?
+
+    return unless space.government?
+
+    # Check invitees for valid government emails
+    # N.B. the invite form allows both email and dxuser entries
+    invitees[:email].each do |email|
+      next if User.government_email?(email)
+
+      errors.add(
+        :base,
+        "Invitee #{email} is not a Government user",
+      )
+    end
+    invitees[:dxuser].each do |dxuser|
+      user = User.find_by(dxuser: dxuser)
+      next if User.government_email?(user.email)
+
+      errors.add(
+        :base,
+        "Invitee #{dxuser} is not a Government user",
+      )
+    end
   end
 
   # Validates a case to prevent a user from being added to both private and

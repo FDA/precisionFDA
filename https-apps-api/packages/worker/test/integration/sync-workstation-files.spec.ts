@@ -16,7 +16,7 @@ import {
   FOLDERS_LIST_RES_LARGE,
 } from '@pfda/https-apps-shared/src/test/mock-responses'
 import {
-  FILE_STATE,
+  FILE_STATE_DX,
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
@@ -115,7 +115,7 @@ describe('TASK: sync_workstation_files', () => {
         { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
-          state: FILE_STATE.CLOSED,
+          state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
           parentFolderId: null,
           // weird error with update
@@ -313,7 +313,7 @@ describe('TASK: sync_workstation_files', () => {
         { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
-          state: FILE_STATE.CLOSED,
+          state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
           parentFolderId: null,
           parentId: job.id,
@@ -380,7 +380,7 @@ describe('TASK: sync_workstation_files', () => {
         { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
-          state: FILE_STATE.CLOSED,
+          state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
           parentFolderId: null,
           // weird error with update
@@ -445,7 +445,7 @@ describe('TASK: sync_workstation_files', () => {
         { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
-          state: FILE_STATE.CLOSED,
+          state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
           parentFolderId: null,
           parentId: job.id,
