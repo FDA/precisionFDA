@@ -32,7 +32,7 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/puma.log",
+                         "file_path": "/srv/www/precision_fda/current/log/production.log",
                          "log_group_name": "production/backend/production.log",
                          "log_stream_name": "{instance_id}"
                      },
