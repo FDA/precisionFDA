@@ -30,7 +30,8 @@
     "nanoid": "^3.1.31",
     "pino": "^6.7.0",
     "pino-pretty": "^4.3.0",
-    "ramda": "^0.27.1"
+    "ramda": "^0.27.1",
+    "@types/pino": "^6.3.2"
   },
   "devDependencies": {
     "@strv/eslint-config-node": "^2.2.2",
@@ -45,7 +46,6 @@
     "@types/koa-router": "^7.4.1",
     "@types/luxon": "^1.25.0",
     "@types/mocha": "^8.0.3",
-    "@types/pino": "^6.3.2",
     "@types/pino-http": "^5.0.5",
     "@types/ramda": "^0.27.28",
     "@types/sinon": "^9.0.8",

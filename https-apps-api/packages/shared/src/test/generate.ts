@@ -12,7 +12,7 @@ import {
 import { STATIC_SCOPE } from '../enums'
 import type { AnyObject } from '../types'
 import {
-  FILE_STATE,
+  FILE_STATE_DX,
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
@@ -203,7 +203,7 @@ const userFile = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.HTTPS,
-      state: FILE_STATE.CLOSED,
+      state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
     }
@@ -217,7 +217,7 @@ const userFile = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.REGULAR,
-      state: FILE_STATE.CLOSED,
+      state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
     }
@@ -234,7 +234,7 @@ const asset = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.REGULAR,
-      state: FILE_STATE.CLOSED,
+      state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.ASSET,
     }

@@ -63,7 +63,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
           }
 
           const bullJobId = SyncJobOperation.getBullJobId(job.dxid)
-          const bullJob = findRepeatable(bullJobId)
+          const bullJob = await findRepeatable(bullJobId)
           if (!bullJob) {
             await createSyncJobStatusTask({ dxid: job.dxid }, this.ctx.user)
             this.ctx.log.warn({ 
@@ -74,7 +74,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
           else {
             this.ctx.log.info({ 
               jobDxid: job.dxid,
-              bullJobId: bullJobId,
+              bullJob,
             }, 'CheckUserJobsOperation: Status sync task found, everything is fine')
 
             // Todo: there is still the possible case that a sync task exist but it failed to
