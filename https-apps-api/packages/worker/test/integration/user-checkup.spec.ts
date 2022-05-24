@@ -21,16 +21,12 @@ const createUserCheckupTask = async (user: BasicUserJob['user']) => {
 describe('TASK: user-checkup', () => {
   let em: EntityManager
   let user: User
-  let app: App
 
   beforeEach(async () => {
-    // probably not needed
-    // await emptyDefaultQueue()
     await db.dropData(database.connection())
     em = database.orm().em
     em.clear()
     user = create.userHelper.createAdmin(em)
-    app = create.appHelper.create(em, { user })
     await em.flush()
     // reset fakes
     mocksReset()
@@ -38,9 +34,6 @@ describe('TASK: user-checkup', () => {
   })
 
   it('processes a queue task - calls the queue handlers', async () => {
-    const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
-    await em.flush()
-
     await createUserCheckupTask({ id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' })
     expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
   })
