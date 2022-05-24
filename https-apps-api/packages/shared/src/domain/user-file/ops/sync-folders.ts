@@ -10,12 +10,14 @@ import {
   createFoldersTraverse,
   detectIntersectedTraverse,
   getPathsToKeep,
-  filterDuplicities,
-  findFolderForPath,
+  filterDuplicities
 } from '../user-file.helper'
 import { User, UserFile } from '../..'
 import { errors } from '../../..'
 import { FILE_ORIGIN_TYPE } from '../user-file.enum'
+import { UserOpsCtx } from '../../../types'
+import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
+import { getFolderPath, getParentFolders } from '../user-file.helper'
 
 // todo: maybe another operation type for "can be called from another operation"
 
@@ -23,7 +25,11 @@ import { FILE_ORIGIN_TYPE } from '../user-file.enum'
 // Comparison of equivalent folders is done by comparing their full paths
 // Contents of newly created folders (those that exist on dx platform but not pfda) are not synchronized
 // by this operation, but it would remove files contained within deleted folders on the pfda side
-export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder[]> {
+export class SyncFoldersOperation extends BaseOperation<
+  UserOpsCtx,
+  SyncFoldersInput,
+  Folder[]
+> {
   async run(input: SyncFoldersInput): Promise<Folder[]> {
     const em = this.ctx.em
     const user = await em.findOne(User, { id: this.ctx.user.id })
@@ -74,7 +80,15 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
       // do not have how to detect which one is their parent
       // (using just a reference without identifier)
       // eslint-disable-next-line no-await-in-loop
-      await em.persistAndFlush(res)
+      await em.persist(res)
+      await em.flush()
+      const createdFolder = res[0];
+      const parentFolders = await getParentFolders(createdFolder, repo)
+      const folderPath = getFolderPath(parentFolders, createdFolder)
+      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_CREATED, createdFolder, folderPath, user);
+      await em.persist(folderEvent);
+      await em.flush()
+
       this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'SyncFoldersOperation: Created new folders with names')
     }
 
@@ -151,9 +165,13 @@ export class SyncFoldersOperation extends BaseOperation<SyncFoldersInput, Folder
     em.getRepository(UserFile).removeFilesWithTags(filesToDelete)
 
     // Then delete the folders themselves
-    foldersToDelete.map(folder => {
-      repo.removeWithTags(folder)
-    })
+    for (const folderToDelete of foldersToDelete) {
+      repo.removeWithTags(folderToDelete)
+      const parentFolders = await getParentFolders(folderToDelete, repo)
+      const folderPath = getFolderPath(parentFolders, folderToDelete)
+      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folderToDelete, folderPath, user);
+      await em.persist(folderEvent);
+    }
     await em.flush()
 
     return await repo.findForSynchronization({

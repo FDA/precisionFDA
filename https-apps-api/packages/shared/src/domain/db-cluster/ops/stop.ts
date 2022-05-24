@@ -4,9 +4,9 @@ import { BaseOperation } from '../../../utils'
 import * as client from '../../../platform-client'
 import { DbCluster } from '../db-cluster.entity'
 import { STATUS, STATUSES } from '../db-cluster.enum'
-import { DxIdInput } from '@pfda/https-apps-shared/src/types'
+import { DxIdInput, UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 
-export class StopDbClusterOperation extends BaseOperation<DxIdInput, DbCluster> {
+export class StopDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput, DbCluster> {
   async run(input: DxIdInput): Promise<DbCluster> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)

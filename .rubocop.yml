@@ -131,7 +131,7 @@ Layout/LineEndStringConcatenationIndentation:
   Enabled: true
 
 Layout/LineLength:
-  Max: 100
+  Max: 120
   AllowHeredoc: true
   AllowURI: true
   URISchemes:

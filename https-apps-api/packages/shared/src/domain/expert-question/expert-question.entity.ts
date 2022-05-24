@@ -1,5 +1,4 @@
 import { Entity, Enum, IdentifiedReference, ManyToOne, OneToOne, Property, Reference } from "@mikro-orm/core";
-import { isThisTypeNode } from "typescript";
 import { BaseEntity } from '../../database/base-entity'
 import { ExpertAnswer } from "../expert-answer";
 import { Expert } from "../expert/expert.entity";

@@ -1,8 +1,9 @@
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { CheckStaleJobsJob } from '../../../queue/task.input'
 import { Job } from '../job.entity'
-import { Maybe } from '../../../types'
+import { Maybe, UserOpsCtx } from '../../../types'
 import { config } from '../../../config'
+import { queue } from '../../..'
 import { User } from '../..'
 import { buildEmailTemplate } from '../../email/email.helper'
 import {
@@ -14,11 +15,13 @@ import { createSendEmailTask } from '../../../queue'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { PlatformClient } from '../../../platform-client'
 import { difference } from 'ramda'
+import { SyncJobOperation } from '../'
 
 
 // This operation is run by admin to alert her/him that there are stale jobs that need
 // to be looked into
 export class CheckStaleJobsOperation extends WorkerBaseOperation<
+  UserOpsCtx,
   CheckStaleJobsJob['payload'],
   Maybe<Job[]>
 > {
@@ -34,18 +37,26 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
       populate: ['app', 'user'],
     })
 
-    runningJobs.forEach((job) => job.dxid)
+    runningJobs.map(async (job) => {
+      const runningJob = await queue.getStatusQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
+      if (!runningJob) {
+        await queue.createSyncJobStatusTask(job, this.ctx.user)
+        this.ctx.log.info({}, `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`)
+      }
+    })
     if (runningJobs.length === 0) {
-      this.ctx.log.info({}, 'No running jobs found')
+      this.ctx.log.info({}, 'CheckStaleJobsOperation: No running jobs found')
       return []
     }
 
     const isOverMaxDuration = buildIsOverMaxDuration('notify')
     const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
     if (staleJobs.length === 0) {
-      this.ctx.log.info({}, 'No stale jobs found')
+      this.ctx.log.info({}, 'CheckStaleJobsOperation: No stale jobs found')
     }
 
+    // TODO(samuel) use Set instead - reduce bundle size
+    // TODO(samuel) refactor into repository method instead
     const nonStaleJobs = difference(runningJobs, staleJobs)
 
     const createJobInfo = (job: Job) => ({

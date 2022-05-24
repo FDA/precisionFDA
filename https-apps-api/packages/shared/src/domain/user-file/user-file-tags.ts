@@ -6,11 +6,11 @@ import {
   UserFile,
 } from '.'
 import { Tag } from "../tag/tag.entity"
-import { WorkerOpsCtx } from "../../types"
+import { UserOpsCtx } from "../../types"
 
 
 export const assignTags = async (
-  ctx: WorkerOpsCtx,
+  ctx: UserOpsCtx,
   nodes: Array<UserFile | Folder>,
   tag: Tag
 ): Promise<number> => {

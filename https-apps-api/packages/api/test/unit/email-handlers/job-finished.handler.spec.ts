@@ -5,7 +5,7 @@ import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { JobFinishedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
-import { OpsCtx } from '@pfda/https-apps-shared/src/types'
+import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { database } from '@pfda/https-apps-shared'
 import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
@@ -16,7 +16,7 @@ describe('job-finished.handler', () => {
   let anotherUser: User
   let app: App
   let job: Job
-  let ctx: OpsCtx
+  let ctx: UserOpsCtx
   const config = EMAIL_CONFIG.jobFinished
 
   beforeEach(async () => {

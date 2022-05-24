@@ -57,6 +57,18 @@ exports[`ChallengesListPage test should render 1`] = `
       <div
         className="pfda-subsection-heading"
       >
+        OTHER CHALLENGES
+      </div>
+      <a
+        href="/challenges/app-a-thon-in-a-box"
+        onClick={[Function]}
+      >
+        App-a-thon in a Box →
+      </a>
+      <hr />
+      <div
+        className="pfda-subsection-heading"
+      >
         PROPOSE A CHALLENGE
       </div>
       <p>

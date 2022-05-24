@@ -6,7 +6,7 @@ import { PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-f
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('POST /folders/recreate', () => {
@@ -35,7 +35,7 @@ describe('POST /folders/recreate', () => {
   })
 
   it('response shape & mocks default call', async () => {
-    await supertest(api.getServer())
+    await supertest(getServer())
       .post('/folders/recreate')
       .query({ ...getDefaultQueryData(user) })
       .expect(204)
@@ -51,7 +51,7 @@ describe('POST /folders/recreate', () => {
       { parentId: user.id },
     )
     await em.flush()
-    await supertest(api.getServer())
+    await supertest(getServer())
       .post('/folders/recreate')
       .query({ ...getDefaultQueryData(user) })
       .expect(204)
@@ -82,7 +82,7 @@ describe('POST /folders/recreate', () => {
       },
     )
     await em.flush()
-    await supertest(api.getServer())
+    await supertest(getServer())
       .post('/folders/recreate')
       .query({ ...getDefaultQueryData(user) })
       .expect(204)

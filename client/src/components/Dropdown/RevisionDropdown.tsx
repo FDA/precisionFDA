@@ -111,6 +111,7 @@ export const RevisionDropdown = ({
           <StyledRevisionDropdownButton
             {...dropdownProps}
             active={dropdownProps.isActive}
+            data-testid="workflow-show-dropdown-revision-button"
           >
             <DropdownIcon>
               <HistoryIcon height={13} />

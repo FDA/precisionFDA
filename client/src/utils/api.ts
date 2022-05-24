@@ -12,6 +12,9 @@ export const requestOpts: RequestInit = {
   },
 }
 
+// TODO: separate app errors from network errors. 
+// Application errors, like validations, should not throw Error.
+// They should return error in the api response as an object of errors.
 export const checkStatus = async (res: Response) => {
   if (!res.ok) {
     if (res.status === httpStatusCodes.UNAUTHORIZED) {
@@ -22,16 +25,17 @@ export const checkStatus = async (res: Response) => {
         closeOnClick: false,
         onClick: () => window.location.assign('/login'),
       })
-    }
-    const fallbackMessage = `${res.status}: ${res.statusText}`
-    try {
-      const payload = await res.json()
-      const message = payload.error?.message ?? payload.message?.text ?? fallbackMessage
-      throw new Error(message)
-    }
-    catch {
-      // This code path is for certain API routes/errors where the Ruby backend returns a page and not a json
-      throw new Error(fallbackMessage)
+    } else {
+      let message = `${res.status}: ${res.statusText}`
+      try {
+        const payload = await res.json()
+        message = payload.error?.message ?? payload.message?.text ?? payload.error
+      }
+      catch {
+        // This code path is for certain API routes/errors where the Ruby backend returns a page and not a json
+        throw new Error(message)
+      }
+      return { error: message }
     }
   }
   return res

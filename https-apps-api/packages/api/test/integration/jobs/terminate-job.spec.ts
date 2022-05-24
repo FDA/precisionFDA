@@ -7,7 +7,7 @@ import { ENTITY_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('PATCH /jobs/:id/terminate', () => {
@@ -29,7 +29,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .query({ ...getDefaultQueryData(user) })
       .send({})
@@ -44,11 +44,12 @@ describe('PATCH /jobs/:id/terminate', () => {
       entityType: ENTITY_TYPE.HTTPS,
       user: user.id,
       app: app.id,
+      terminationEmailSent: false
     })
   })
 
   it('calls the platform API', async () => {
-    await supertest(api.getServer())
+    await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -58,7 +59,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   it('does not call platform API if the job is already finished', async () => {
     job.state = JOB_STATE.TERMINATED
     await em.flush()
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -69,7 +70,7 @@ describe('PATCH /jobs/:id/terminate', () => {
 
   context('error states', () => {
     it('throws 404 when the job does not exist', async () => {
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .query({ ...getDefaultQueryData(user) })
         .expect(404)
@@ -79,7 +80,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     it('throws 404 when the job type is NOT HTTPS', async () => {
       job.entityType = ENTITY_TYPE.NORMAL
       await em.flush()
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .query({ ...getDefaultQueryData(user) })
         .expect(404)

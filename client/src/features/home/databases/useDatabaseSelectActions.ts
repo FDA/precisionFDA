@@ -107,7 +107,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
         actionsDisabled = { start: true, stop: false, terminate: false }
         break
       case 'stopped':
-        actionsDisabled = { start: false, stop: true, terminate: false }
+        actionsDisabled = { start: false, stop: true, terminate: true }
         break
       case 'stopping' || 'starting' || 'terminating' || 'terminated':
         actionsDisabled = { start: true, stop: true, terminate: true }
