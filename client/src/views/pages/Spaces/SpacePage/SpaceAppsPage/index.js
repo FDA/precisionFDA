@@ -54,7 +54,7 @@ class SpaceAppsPage extends Component {
     } = this.props
 
     const checkedApps = apps.filter(((app) => app.isChecked))
-    const title = getSpacePageTitle('Apps', space.isPrivate)
+    const title = getSpacePageTitle('Apps', space.isPrivate, space.isExclusive)
 
     const copyToPrivateHandler = () => {
       return copyToPrivate(appsLinks?.copy_private, checkedApps.map((app) => app.id))

@@ -53,6 +53,32 @@ const childrenTraverse = async (
 }
 
 /**
+ * Traverses up in the hierarchy and returns all folders up to the root.
+ * 
+ * @param folder Folder whose parents we need
+ * @param repo 
+ * @returns all folders above given folder
+ */
+const getParentFolders = async(
+  folder: Folder,
+  repo: FolderRepository,): Promise<Folder[]> => {
+    const folderTree: Folder[] = new Array
+    if (folder.parentFolderId) {
+      let currentFolder: Folder | null = folder
+      while (currentFolder != null && currentFolder.parentFolderId) {
+        currentFolder = await repo.findOne(currentFolder.parentFolderId)
+        if (currentFolder != null) {
+          folderTree.push(currentFolder)
+        }
+      }
+      return folderTree
+    } else {
+      return folderTree
+    }
+  }
+
+
+/**
  * Construct a folder's absolute paths (relative to Files root folder) from local database rows.
  * This is done recursively starting from the end node and stepping up the tree reaching the root
  * folder
@@ -266,6 +292,7 @@ export {
   filterDuplicities,
   getFolderPath,
   childrenTraverse,
+  getParentFolders,
   getStiEnumTypeFromInstance,
   filterLeafPaths,
   findFolderForPath,

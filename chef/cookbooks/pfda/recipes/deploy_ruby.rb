@@ -106,7 +106,7 @@ application app_dir do
     # See pull request #1556 for explanation on the need to rebuild node-sass
     command %{
       export PATH=#{node[:nodejs][:prefix]}/bin:$PATH && \
-      yarn --frozen-lockfile && \
+      yarn --frozen-lockfile --production=false && \
       npm rebuild node-sass && \
       yarn run build:production
     }

@@ -89,7 +89,7 @@ class Challenge < ApplicationRecord
             if: :status_pre_registration?
   validate :validate_end_at
   validate :validate_start_at
-  validate :can_open?
+  validate :can_open?, if: :status_open?
   validate :scope_should_be_valid
 
   attr_accessor :host_lead_dxuser, :guest_lead_dxuser

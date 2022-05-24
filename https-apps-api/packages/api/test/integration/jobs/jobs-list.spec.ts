@@ -11,7 +11,7 @@ import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@pfda/https-apps-shared/src/domai
 import supertest from 'supertest'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 import { HOME_SCOPE } from '@pfda/https-apps-shared/src/enums'
 import { getScopeFromSpaceId } from '@pfda/https-apps-shared/src/domain/space/space.helper'
@@ -88,7 +88,7 @@ describe.skip('GET /jobs', () => {
   })
 
   it('returns jobs list', async () => {
-    const { body } = await supertest(api.getServer()).get('/jobs').query({
+    const { body } = await supertest(getServer()).get('/jobs').query({
       ...getDefaultQueryData(user1),
     }).expect(200)
     
@@ -104,7 +104,7 @@ describe.skip('GET /jobs', () => {
   })
 
   it('returns second page of jobs list', async () => {
-    const { body } = await supertest(api.getServer()).get('/jobs').query({
+    const { body } = await supertest(getServer()).get('/jobs').query({
       ...getDefaultQueryData(user1),
       page: 2,
     }).expect(200)
@@ -121,7 +121,7 @@ describe.skip('GET /jobs', () => {
   })
 
   it('returns jobs list for user2', async () => {
-    const { body } = await supertest(api.getServer()).get('/jobs').query({
+    const { body } = await supertest(getServer()).get('/jobs').query({
       ...getDefaultQueryData(user2),
       page: 2,
     }).expect(200)
@@ -137,7 +137,7 @@ describe.skip('GET /jobs', () => {
 
   // TODO
   it.skip('returns jobs list for different scopes', async () => {
-    const { body } = await supertest(api.getServer()).get('/jobs').query({
+    const { body } = await supertest(getServer()).get('/jobs').query({
       ...getDefaultQueryData(user1),
       scope: HOME_SCOPE.EVERYBODY,
     }).expect(200)
@@ -147,7 +147,7 @@ describe.skip('GET /jobs', () => {
 
   // TODO
   it.skip('returns jobs list for a space', async () => {
-    const { body } = await supertest(api.getServer()).get('/jobs').query({
+    const { body } = await supertest(getServer()).get('/jobs').query({
       ...getDefaultQueryData(user1),
       scope: getScopeFromSpaceId(space.id),
     }).expect(200)
@@ -158,7 +158,7 @@ describe.skip('GET /jobs', () => {
   context('error states', () => {
     it('returns 400 when scope is invalid', async () => {
       const badScope = 'foobar'
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .get('/jobs')
         .query({
           ...getDefaultQueryData(user1),
@@ -170,7 +170,7 @@ describe.skip('GET /jobs', () => {
 
     it('returns 400 when spaceId is invalid', async () => {
       const badSpaceId = 'notASpaceId'
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .get('/jobs')
         .query({
           ...getDefaultQueryData(user1),

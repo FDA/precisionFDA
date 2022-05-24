@@ -26,7 +26,6 @@ module Api
     # Activates a space.
     def accept
       membership = @space.space_memberships.find_by(user: current_user)
-
       if SpaceMembershipPolicy.can_accept?(@space, membership)
         SpaceService::Accept.call(api, @space, membership)
 
@@ -100,12 +99,15 @@ module Api
       space = Space.undeleted.find(params[:id])
 
       head(:forbidden) && return unless space.updatable_by?(current_user)
-      space_update_form = SpaceEditForm.new(update_space_params.merge(
+
+      space_edit_params = update_space_params.merge(
         current_user: current_user,
         space_host_lead: space.host_lead_dxuser,
-        space_guest_lead: space.guest_lead_dxuser,
         source_space_id: space.id,
-      ))
+      )
+
+      space_edit_params = space_edit_params.merge(space_guest_lead: space.guest_lead_dxuser) unless space.exclusive?
+      space_update_form = SpaceEditForm.new(space_edit_params)
 
       if space_update_form.valid?
         space.update!(update_space_naming_params)
@@ -235,8 +237,11 @@ module Api
 
     def space_types
       [].tap do |types|
+        types << :private_type
         types << :groups if @context.can_administer_site?
+        types << :government if @context.gov_user?
         types << :review if @context.review_space_admin?
+        types << :administrator if @context.can_administer_site?
       end
     end
 
@@ -245,7 +250,8 @@ module Api
     def find_space
       @space = Space.undeleted.find(params[:id])
 
-      return if @space.accessible_by_user?(current_user) || current_user.review_space_admin?
+      return if @space.accessible_by_user?(current_user) ||
+                (current_user.review_space_admin? && @space.review?)
 
       raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 

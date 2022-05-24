@@ -10,7 +10,7 @@ import {
   STATUSES,
 } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('POST /dbclusters/start', () => {
@@ -34,7 +34,7 @@ describe('POST /dbclusters/start', () => {
   })
 
   it('responds with success', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/dbclusters/start`)
       .query({ ...getDefaultQueryData(user) })
       .send({ dxids: dxids })
@@ -54,7 +54,7 @@ describe('POST /dbclusters/start', () => {
     const describeCallRes = { status: STATUSES.STARTING, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/dbclusters/start`)
       .query({ ...getDefaultQueryData(user) })
       .send({ dxids: [dxid] })
@@ -70,7 +70,7 @@ describe('POST /dbclusters/start', () => {
 
   context('error states', () => {
     it('throws error when the dbcluster does not exist', async () => {
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/dbclusters/start`)
         .query({ ...getDefaultQueryData(user) })
         .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
@@ -83,7 +83,7 @@ describe('POST /dbclusters/start', () => {
       dbClusters[0].status = DB_CLUSTER_STATUS.AVAILABLE
       await em.flush()
 
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/dbclusters/start`)
         .query({ ...getDefaultQueryData(user) })
         .send({ dxids: dxids })
