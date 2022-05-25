@@ -4,6 +4,9 @@ import { schemas } from '../../utils'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 
+
+const MAX_JOB_DURATION_MINUTES = 60 * 60 * 24 * 30  // 30 days
+
 type DxIdInput = {
   dxid: string
 }
@@ -71,7 +74,7 @@ const runAppSchema: JSONSchema7 = {
       required: [],
       properties: {
         // these inputs are for jupyter app only (except of a 'port' input, that is for ttyd)
-        duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
+        duration: { type: 'integer', minimum: 30, maximum: MAX_JOB_DURATION_MINUTES },
         snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
         feature: {
           type: 'string',
