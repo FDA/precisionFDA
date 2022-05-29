@@ -47,7 +47,7 @@ class EmailClient {
           {
             '@xsi:type': 'SingleEmailMessage',
             orgWideEmailAddressId: config.emails.salesforce.fromAddress,
-            ccAddresses: ['kbehalova-cf@dnanexus.com'],
+            ccAddresses: ['precisionfda-no-reply@dnanexus.com'],
             toAddresses: input.to,
             subject: input.subject,
             htmlBody: input.body,
