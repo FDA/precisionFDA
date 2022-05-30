@@ -50,7 +50,7 @@ describe('JobRepository and JobEntity', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     terminatedJob = create.jobHelper.create(em, { user, app }, {
       project: user.privateFilesProject,
       createdAt: jobCreatedAt,

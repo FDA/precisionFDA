@@ -21,7 +21,7 @@ describe.skip('GET /apps', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user })
+    app = create.appHelper.createHTTPS(em, { user })
     await em.flush()
     // handle the stubs
     mocksReset()
@@ -55,7 +55,7 @@ describe.skip('GET /apps', () => {
 
   it('returns only apps of given user', async () => {
     const anotherUser = create.userHelper.create(em)
-    const anotherApp = create.appHelper.create(em, { user: anotherUser })
+    const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
     await em.flush()
 
     const { body } = await supertest(getServer())

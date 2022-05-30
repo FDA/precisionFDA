@@ -26,7 +26,7 @@ describe('POST /apps/:id/run', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     await em.flush()
     // handle the stubs
     mocksReset()
@@ -176,7 +176,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('accepts params for ttyd app', async () => {
-    const ttydApp = create.appHelper.create(em, { user }, { spec: generate.app.ttydAppSpecData() })
+    const ttydApp = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.ttydAppSpecData() })
     await em.flush()
     const ttydAppInput = {
       ...generate.app.runTtydAppInput(),
@@ -205,7 +205,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('accepts params for rshiny app', async () => {
-    const rshinyApp = create.appHelper.create(em, { user }, { ...generate.app.rshiny() })
+    const rshinyApp = create.appHelper.createHTTPS(em, { user }, { ...generate.app.rshiny() })
     const gzipFile = create.filesHelper.create(em, { user })
     await em.flush()
     const input = {
@@ -321,7 +321,7 @@ describe('POST /apps/:id/run', () => {
     // deprecated, admin owns the apps
     it.skip('throws 401 when user does not own the app', async () => {
       const anotherUser = create.userHelper.create(em)
-      const anotherApp = create.appHelper.create(em, { user: anotherUser })
+      const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
       await em.flush()
       const { body } = await supertest(getServer())
         .post(`/apps/${anotherApp.dxid}/run`)
@@ -333,7 +333,7 @@ describe('POST /apps/:id/run', () => {
     })
 
     it('throws 404 if requested app does not follow the requirements', async () => {
-      const anotherApp = create.appHelper.create(em, { user }, { scope: 'private' })
+      const anotherApp = create.appHelper.createHTTPS(em, { user }, { scope: 'private' })
       await em.flush()
       const { body } = await supertest(getServer())
         .post(`/apps/${anotherApp.dxid}/run`)

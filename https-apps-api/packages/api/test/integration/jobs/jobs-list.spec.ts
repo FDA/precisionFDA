@@ -34,7 +34,7 @@ describe.skip('GET /jobs', () => {
     em.clear()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user: user1 })
+    app = create.appHelper.createHTTPS(em, { user: user1 })
     space = create.spacesHelper.create(em)
 
     // Create a bunch of jobs for the user
