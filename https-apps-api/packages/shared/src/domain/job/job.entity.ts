@@ -12,7 +12,7 @@ import {
 import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
-import { JOB_STATE } from './job.enum'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
 import { formatDuration, isStateActive, isStateTerminal } from './job.helper'
@@ -84,14 +84,16 @@ export class Job extends BaseEntity {
   localFolderId: number
 
   // @ManyToOne()
-  // analysis!: IdentifiedReference<Analysis>
+  // analysis?: IdentifiedReference<Analysis>
 
   // relations
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
-  @ManyToOne(() => App)
-  app!: IdentifiedReference<App>;
+  // App could be null if this job is associated with an analysis (workflow) instead
+  // or if the app was deleted from the database
+  @ManyToOne({ entity: () => App, nullable: true })
+  app?: IdentifiedReference<App>
 
   // @ManyToOne()
   // appSeries!: IdentifiedReference<AppSeries>
@@ -113,6 +115,14 @@ export class Job extends BaseEntity {
     if (app) {
       this.app = Reference.create(app)
     }
+  }
+
+  isRegular(): boolean {
+    return this.entityType === JOB_DB_ENTITY_TYPE.REGULAR
+  }
+
+  isHTTPS(): boolean {
+    return this.entityType === JOB_DB_ENTITY_TYPE.HTTPS
   }
 
   isActive(): boolean {
