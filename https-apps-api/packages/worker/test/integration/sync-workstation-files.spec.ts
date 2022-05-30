@@ -58,7 +58,7 @@ describe('TASK: sync_workstation_files', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
-    app = create.appHelper.create(em, { user })
+    app = create.appHelper.createHTTPS(em, { user })
     await em.flush()
     // reset fakes
     mocksReset()

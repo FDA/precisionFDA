@@ -15,20 +15,20 @@ export class Event {
   dxuser: string
 
   // dxid
-  @Property()
+  @Property({ nullable: true })
   param1: string
 
   // app_dxid
-  @Property()
+  @Property({ nullable: true })
   param2: string
 
-  @Property()
+  @Property({ nullable: true })
   param3: string
 
-  @Property()
+  @Property({ nullable: true })
   param4: string
 
-  @Property()
+  @Property({ nullable: true })
   data: string
 
   @Property()
