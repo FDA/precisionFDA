@@ -247,10 +247,6 @@ jobs:
         run: yarn test
         working-directory: ./client
 
-      - name: Lint
-        run: yarn lint .
-        working-directory: ./client
-
   test-react-app-production:
     name: Test React app production build
     runs-on: ubuntu-latest
