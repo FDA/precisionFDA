@@ -1,7 +1,12 @@
 # Docker-based setup
 
+
 This guide covers all the steps required to get docker based
 development environment.
+
+## Prerequisites
+
+Make sure that you understand this [Makefile](../Makefile)
 
 ## Installing docker and docker-compose
 
@@ -60,6 +65,31 @@ test "$(uname -m)" = arm64 && sed -i '' 's/ARM64V8_DEVELOPMENT_PATCH=0/ARM64V8_D
 # In case linux version of command is required
 # http://stackoverflow.com/questions/12696125/ddg#12696224
 test "$(uname -m)" = arm64 && sed -i 's/ARM64V8_DEVELOPMENT_PATCH=0/ARM64V8_DEVELOPMENT_PATCH=1/g' docker/.env
+```
+
+### RAILS_ENV issues on intel CPUs
+
+> This section is temporary workaround. Problem hasn't been fully investigated, due to lack of time
+
+* There have been instances of CSRF token failures in local development. 
+  * This requires `RAILS_ENV=development`, which cannot be defined in [this docker compose](../docker/isolation.docker-compose.yml)
+* There are also problems for QAs that result in faulty DB creation, where QA setup doesn't work
+  * contrary to previous point, this **requires** `RAILS_ENV=ui_test` to be defined in [the same docker compose](../docker/isolation.docker-compose.yml)
+  * Tested with configuring in `.env` didn't help
+
+As QAs and Devs use same [docker compose](../docker/isolation.docker-compose.yml), unless you want to go with QA setup, make sure you've got [docker .env](../docker/.env) configured accordingly
+
+```bash
+INTEL_RAILS_ENV=development
+```
+Alternatively run following
+
+```bash
+# Works only on mac os
+test "$(uname -m)" != arm64 && sed -i '' 's/# INTEL_RAILS_ENV=development/INTEL_RAILS_ENV=development/g' docker/.env
+# In case linux version of command is required
+# http://stackoverflow.com/questions/12696125/ddg#12696224
+test "$(uname -m)" != arm64 && sed -i 's/# INTEL_RAILS_ENV=development/INTEL_RAILS_ENV=development/g' docker/.env
 ```
 
 ## Database setup
