@@ -36,7 +36,7 @@ describe('space-change.handler', () => {
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
     anotherUserLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
     spaceMembership = create.spacesHelper.addMember(em, { user, space })

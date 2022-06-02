@@ -6,7 +6,9 @@ import { Event } from './event.entity'
 
 const createJobClosed = async (user: User, job: Job): Promise<Event> => {
   const event = new Event()
-  const app = job.app.isInitialized() ? job.app.getEntity() : await job.app.load()
+  const app = job.app
+    ? job.app.isInitialized() ? job.app.getEntity() : await job.app.load()
+    : undefined
   const organization = user.organization.isInitialized()
     ? user.organization.getEntity()
     : await user.organization.load()
@@ -15,7 +17,7 @@ const createJobClosed = async (user: User, job: Job): Promise<Event> => {
     orgHandle: organization.handle,
     dxuser: user.dxuser,
     param1: job.dxid,
-    param2: app.dxid,
+    param2: app?.dxid,
   })
   return event
 }
