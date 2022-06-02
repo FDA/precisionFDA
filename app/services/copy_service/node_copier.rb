@@ -74,7 +74,8 @@ class CopyService
       end
 
       if existing_folder
-        Rails.logger.info("NodeCopier::copy_folder found existing folder id #{existing_folder.id} name #{existing_folder.name}")
+        Rails.logger.info("NodeCopier::copy_folder found existing folder id #{existing_folder.id} " + 
+                          "name #{existing_folder.name}")
 
         copies.push(
           object: existing_folder,
