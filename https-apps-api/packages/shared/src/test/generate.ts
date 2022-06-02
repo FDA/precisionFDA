@@ -131,11 +131,23 @@ const app = {
         },
       ],
   }),
-  simple: (): Partial<InstanceType<typeof entities.App>> => {
+  regular: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
       title: 'app-title',
+      scope: 'public',
+      spec:
+        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+      release: 'default-release-value',
+      entityType: ENTITY_TYPE.NORMAL,
+    }
+  },
+  https: (): Partial<InstanceType<typeof entities.App>> => {
+    const dxid = `app-${random.dxstr()}`
+    return {
+      dxid,
+      title: 'https-app-title',
       scope: 'public',
       spec:
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
@@ -188,6 +200,20 @@ const job = {
       scope: 'private',
       uid: `${dxid}-1`,
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+    }
+  },
+  regular: (): Partial<InstanceType<typeof entities.Job>> => {
+    const dxid = `job-${random.dxstr()}`
+    return {
+      dxid,
+      project: `project-${random.dxstr()}`,
+      runData: JSON.stringify({ run_instance_type: 'baseline-8', run_inputs: {}, run_outputs: {} }),
+      describe: JSON.stringify({ id: dxid }),
+      state: JOB_STATE.IDLE,
+      name: chance.name(),
+      scope: 'private',
+      uid: `${dxid}-1`,
+      entityType: JOB_DB_ENTITY_TYPE.REGULAR,
     }
   },
   jobId: () => 'job-FyZg2z000B72xG6b3yVY5BBK',
@@ -374,6 +400,18 @@ const dbCluster = {
   }),
 }
 
+const bullQueue = {
+  syncJobStatus: (jobDxid, userContext) => ({
+    data: {
+      payload: {
+          dxid: jobDxid
+      },
+      type: 'sync_job_status',
+      user: userContext,
+    },
+  }),
+}
+
 export {
   random,
   user,
@@ -390,4 +428,5 @@ export {
   comment,
   challenge,
   dbCluster,
+  bullQueue,
 }

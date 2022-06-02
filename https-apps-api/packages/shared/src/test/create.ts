@@ -54,7 +54,7 @@ const jobHelper = {
     },
     data?: Partial<InstanceType<typeof entities.Job>>,
   ) => {
-    const defaults = generate.job.simple()
+    const defaults = references.app?.isHTTPS() ? generate.job.simple() : generate.job.regular()
     const input = {
       ...defaults,
       ...data,
@@ -66,12 +66,26 @@ const jobHelper = {
 }
 
 const appHelper = {
-  create: (
+  createRegular: (
     em: EntityManager,
     references: { user: InstanceType<typeof entities.User> },
     data?: Partial<InstanceType<typeof entities.App>>,
   ) => {
-    const defaults = generate.app.simple()
+    const defaults = generate.app.regular()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const app = wrap(new entities.App(references.user)).assign(input, { em })
+    em.persist(app)
+    return app
+  },
+  createHTTPS: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.App>>,
+  ) => {
+    const defaults = generate.app.https()
     const input = {
       ...defaults,
       ...data,
