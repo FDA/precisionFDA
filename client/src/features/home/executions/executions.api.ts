@@ -38,6 +38,8 @@ export async function terminateJobsRequest(ids: string[]) {
   return res.json()
 }
 
+
+
 export async function syncFilesRequest(link: string) {
   const res = await fetch(link, {
     ...getApiRequestOpts('PATCH'),

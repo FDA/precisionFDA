@@ -12,7 +12,7 @@ module Jobs
 
     def message
       service_message = SUCCESS_MESSAGE
-      service_message = response[:errors].inspect if response[:errors].present?
+      service_message = response[:errors].inspect.delete('[""]') if response[:errors].present?
 
       service_message
     end
