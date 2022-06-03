@@ -2,6 +2,7 @@ import { wrap } from '@mikro-orm/core'
 import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
+import { JOB_DB_ENTITY_TYPE } from '../job.enum'
 import {
   buildIsOverMaxDuration,
   isStateActive,
@@ -57,15 +58,26 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
     // check input data
     if (!job) {
-      this.ctx.log.error({ input }, 'Error: Job does not exist')
+      this.ctx.log.error({ input }, 'SyncJobOperation: Error: Job does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
+
+    // This operation currently only handles HTTPS apps correctly, but when we migrate
+    // job syncing to nodejs we'll relax this condition
+    //
+    if (!job.isHTTPS()) {
+      this.ctx.log.error({ input }, 'SyncJobOperation: Error: Job is not HTTPS app')
+      await removeRepeatable(this.ctx.job)
+      return
+    }
+
     if (!user) {
-      this.ctx.log.error({ input }, 'Error: User does not exist')
+      this.ctx.log.error({ input }, 'SyncJobOperation: Error: User does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
+
     // todo: check users ownership -> we should have a helper for it
     this.job = job
     this.user = user

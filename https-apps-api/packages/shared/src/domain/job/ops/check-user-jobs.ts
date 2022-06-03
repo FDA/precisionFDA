@@ -34,6 +34,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
       this.ctx.log.info(
         { staleJobs: staleJobs.map(job => ({
             jobId: job.id,
+            jobDxid: job.dxid,
             jobState: job.state,
           }))
         },
@@ -45,7 +46,18 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
     // There are cases where job's status sync is outdated (e.g. token issues) and we need to
     // have a failsafe where we recreate the job sync task
     this.client = new PlatformClient(this.ctx.log)
-    await Promise.all(runningJobs.map(async (job) => {
+
+    // It is better to loop sychronously so that logs are colocated correctly and can be read logically
+    // and that we space out platform calls a little (lest we run into any rate limiter)
+    for (let job of runningJobs) {
+      if (!job.isHTTPS()) {
+        // We can support resolving stale syncing of jobs of normal (non HTTPS) apps once
+        // the job_syncing.rb business logic is reimplemented as nodejs operations
+        // but for now we must skip these jobs
+        this.ctx.log.info({}, 'CheckUserJobsOperation: This is not an HTTPS app, and currently unsupported by this opeartion')
+        continue
+      }
+
       try {
         let platformJobData: JobDescribeResponse = await this.client.jobDescribe({
           jobId: job.dxid,
@@ -57,10 +69,6 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
             jobState: job.state,
             platformJobState: platformJobData.state,
           }, 'CheckUserJobsOperation: Local job state not the same as platform state')
-  
-          if (job.entityType = JOB_DB_ENTITY_TYPE.HTTPS) {
-            this.ctx.log.info({}, 'CheckUserJobsOperation: This is an HTTPS app')
-          }
 
           const bullJobId = SyncJobOperation.getBullJobId(job.dxid)
           const bullJob = await findRepeatable(bullJobId)
@@ -91,8 +99,9 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
         this.ctx.log.info({ error: err },
           'CheckUserJobsOperation: Encountered error describing job on platform')
       }
-    }))
+    }
 
     return staleJobs
   }
 }
+

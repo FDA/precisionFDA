@@ -1,0 +1,56 @@
+<% content_for :title do %><%= @challenge.name %><% end %>
+
+<div class="container container-padded">
+  <div class="row">
+    <div class="col-md-16">
+      <!-- Nav tabs -->
+      <ul class="nav nav-pills nav-pills-lg nav-tabs-contained" role="tablist">
+        <li role="presentation" class="<%= !["submissions", "my_entries", "results"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge) %>" class="tab-label" aria-controls="info" role="tab" data-turbolinks="false">Introduction</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'submissions' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'submissions') %>" class="tab-label" aria-controls="submissions" role="tab">Submissions</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'my_entries' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'my_entries') %>" class="tab-label" aria-controls="my_entries" role="tab">My Entries</a></li>
+        <% if @challenge.can_show_results?(@context) %>
+          <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, "results")  %>" class="tab-label" aria-controls="results" role="tab">Results</a></li>
+        <% end %>
+      </ul>
+    </div>
+    <div class="col-md-8">
+      <% if @challenge.active? %>
+        <% unless @context.guest? %>
+          <% if !@context.logged_in? || !@challenge.followed_by?(@context.user) %>
+            <a class="btn btn-success btn-block btn-lg text-uppercase" href="<%= join_challenge_path(@challenge) %>" role="button">
+              <span class="fa fa-lg fa-user-plus" aria-hidden="true"></span>
+              &nbsp;Join Challenge
+            </a>
+          <% elsif @challenge.accepting_submissions? %>
+            <a class="btn btn-primary btn-block btn-lg text-uppercase" href="<%= new_challenge_submission_path(challenge_id: @challenge.id, app_dxid: @challenge.app) %>" role="button">
+              <span class="fa fa-lg fa-inbox" aria-hidden="true"></span>
+              &nbsp;Submit Challenge Entry
+            </a>
+          <% end %>
+        <% end %>
+      <% else %>
+        <% if @challenge.over? %>
+          <button type="button" class="btn btn-danger btn-block btn-lg text-uppercase" disabled>
+            <span class="fa fa-lg fa-trophy" aria-hidden="true"></span>
+            &nbsp;Challenge Closed
+          </button>
+        <% elsif @challenge.coming_soon? %>
+          <button type="button" class="btn btn-primary btn-block btn-lg text-uppercase" disabled>
+            <span class="fa fa-lg fa-trophy" aria-hidden="true"></span>
+            &nbsp;Challenge Launching Soon
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  <br/>
+
+  <div class="row">
+    <% if ['results'].include?(params[:tab]) %>
+        <%= render "challenges/results", challenge: @challenge, submissions: @submissions, vaf_results: @vaf_results, vaf_spotter_ids: @vaf_spotter_ids, csv_names: @csv_names, csv_ids: @csv_ids, csv: @csv, headers: @headers, keys: @keys %>
+    <% else %>
+        <%= render 'challenges/treasure' %>
+
+    <% end %>
+  </div>
+</div>

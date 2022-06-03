@@ -13,25 +13,8 @@ class ProfileContactsModel
   setDefaults: (continueEditing) =>
     vals = @contactsDefaults()
 
-    @country(getCountryId(vals))
-    @countryName(getCountryName(vals))
-    $(COUNTRY_SELECT).trigger('change')
-
     @email(vals.email || '')
     @emailConfirmed(vals.email_confirmed || '')
-    @address1(vals.address1 || '')
-    @address2(vals.address2 || '')
-    @city(vals.city || '')
-    @postalCode(vals.postal_code || '')
-    @phoneCountryCodeValue(getCountryCode(vals))
-    @phoneInput.setValue(vals.phone || '')
-    @phoneInputValue(vals.phone || '')
-    @isPhoneInputValid(@phoneInput.validate(@phoneCountryCodeValue()))
-
-    @state(vals.us_state || '')
-    @phoneCountryCode(getCountryCodeId(vals))
-    # @phoneConfirmed(vals.phone_confirmed)
-    @phoneConfirmed(true)
 
     @isLoading(false)
     if !continueEditing
@@ -126,64 +109,16 @@ class ProfileContactsModel
             @authCredentialsModal.isLoading(false)
       })
 
-  phoneInputOnChange: (value = '') =>
-    @phoneInputValue(value)
-    @isPhoneInputValid(@phoneInput.validate(@phoneCountryCodeValue()))
-    # @phoneConfirmed(false)
-
-  saveMobilePhone: (phoneModal) =>
-    if @phoneConfirmed()
-      @isLoading(true)
-      $.ajax({
-        method: 'PUT',
-        url: '',
-        contentType: 'multipart/form-data',
-        data: {
-          profile: {
-            phone: @phoneInputValue(),
-            phone_country_id: @phoneCountryCode()
-            phone_confirmed: true
-          }
-        },
-        success: (data) =>
-          Precision.alert.showAboveAll('Phone successfully verified and saved!', 'alert-success')
-          phoneModal.modal.modal('hide')
-          @contactsDefaults(data)
-          @setDefaults(true)
-        error: (data) =>
-          try
-            errors = JSON.parse(data.responseText)
-            errorText = ''
-            for field, error of errors
-              errorText += "<b>Error: </b>#{field} #{error}<br>"
-            Precision.alert.showAboveAll(errorText)
-          catch
-            Precision.alert.showAboveAll('Something went wrong.')
-          finally
-            phoneModal.modal.modal('hide')
-            phoneModal.isLoading(false)
-            @isLoading(false)
-      })
-
   showCredentialsModal: (root, e) ->
     e.preventDefault()
     @authCredentialsModal.showModal()
 
   constructor: (params, contactsDefaults = {}) ->
     @contactsForm = $('#profile_form')
-    @phoneForm = $('#profile_phone_form')
     @isEditing = ko.observable(false)
     @isLoading = ko.observable(false)
     @pristin = ko.observable(true)
     @contactsDefaults = ko.observable(contactsDefaults)
-
-    @address1 = ko.observable('')
-    @address2 = ko.observable('')
-    @city = ko.observable('')
-    @country = ko.observable('')
-    @countryName = ko.observable('')
-    @state = ko.observable('')
-    @postalCode = ko.observable('')
 
     ### Email Edit ###
     @authCredentialsModal = new Precision.AuthCredentialsModal(@sendRequest)
@@ -191,75 +126,15 @@ class ProfileContactsModel
     @emailConfirmed = ko.observable(false)
     ### Email Edit ###
 
-    ### Phone ###
-    @phoneInputValue = ko.observable('')
-    @phoneConfirmed = ko.observable(true)
-    @phoneCountryCode = ko.observable('')
-    @phoneCountryCodeValue = ko.observable('')
-    @isPhoneInputValid = ko.observable(false)
-    @phoneFullValue = ko.computed( =>
-      # @phoneConfirmed(false)
-      return "#{@phoneCountryCodeValue().replace(/\s/g, '')}#{@phoneInputValue()}"
-    )
-
-    @phoneInput = new Precision.PhoneInput($(PHONE_INPUT)[0], {
-      onChange: @phoneInputOnChange
-    })
-
-    @disableConfirmPhoneButton = ko.computed(() =>
-      return !@isPhoneInputValid() or !@phoneCountryCodeValue().length
-    )
-    @showConfirmPhoneButton = ko.computed( => @phoneInputValue().length and !@phoneConfirmed())
-    ### Phone ###
 
     @contactsForm.on 'input', (e) =>
       $(e.target).parent().parent().removeClass('has-error')
       @pristin(false)
 
     @emailLabel = ko.computed(=> @email())
-    @address1Label = ko.computed(=> @address1())
-    @address2Label = ko.computed(=> @address2())
-    @cityLabel = ko.computed(=>
-      country = if @country() then "#{@countryName()}, " else ''
-      state = if @state() then "#{@state()}, " else ''
-      city = if @city() then "#{@city()}, " else ''
-      postalCode = if @postalCode() then "#{@postalCode()}" else ''
-      return "#{country}#{state}#{city}#{postalCode}"
-    )
-    @phoneLabel = ko.computed(=> "#{@phoneCountryCodeValue()} #{@phoneInputValue()}")
-
-    $(COUNTRY_SELECT).on 'change', (e) ->
-      e.preventDefault()
-      value = e.target.value
-      $state = $(US_STATE)
-      $code = $(PHONE_COUNTRY_CODE)
-
-      code = Precision.utils.findCountryCode(params.country_codes, value)
-      $code.find('option').each (i, option) ->
-        if option.label == code
-          $code.val(option.value)
-          $code.trigger('change')
-
-      if value == params.usa_id.toString()
-        $state.attr('required', 'required')
-        $state.removeAttr('disabled')
-      else
-        $state.removeAttr('required')
-        $state.attr('disabled', 'disabled')
-        $state.val('')
-
-    $(PHONE_COUNTRY_CODE).on 'change', (e) =>
-      option = $(e.target).find("[value=\"#{e.target.value}\"]")
-      @phoneCountryCodeValue(option[0].label) if option and option[0]
-      @isPhoneInputValid(@phoneInput.validate(@phoneCountryCodeValue()))
-
     @setDefaults()
 
 class ProfilePageView
-  showConfirmPhoneModal: (root, e) ->
-    e.preventDefault()
-    @phoneConfirm.requestCode(root, e)
-
   showEditOrgNameModal: (root, e) ->
     e.preventDefault()
     @editOrgNameModalValue(@orgNameValue.text())
@@ -369,14 +244,6 @@ class ProfilePageView
     @orgId = params.org_id
     @contacts = new ProfileContactsModel(params, contactsDefaults)
     @authCredentialsModal = @contacts.authCredentialsModal
-    @phoneConfirm = new Precision.ConfirmPhoneModal(
-      @contacts.phoneInputValue,
-      @contacts.phoneCountryCodeValue,
-      @contacts.phoneConfirmed,
-      {
-        onSuccessVerify: @contacts.saveMobilePhone
-      }
-    )
 
     ### Deactivate user###
     @deactivateUserModal = new Precision.DeactivateUserModal()
