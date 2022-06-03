@@ -4,7 +4,10 @@ import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router'
 import { RootState } from '../../../store'
 import { IUser } from '../../../types/user'
-import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import {
+  OBJECT_TYPES,
+  useAttachToModal,
+} from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -20,7 +23,6 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest } from './files.api'
 import { IFile } from './files.types'
-
 
 export enum FileActions {
   'Track' = 'Track',
@@ -62,14 +64,14 @@ export const useFilesSelectActions = ({
   const selected = selectedItems.filter(x => x !== undefined)
   const user: IUser = useSelector((state: RootState) => state.context.user)
   const isAdmin: boolean = user?.admin
-  
+
   const featureMutation = useFeatureMutation({
     resource: 'files',
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
-  
+
   const {
     modalComp: openFileModal,
     setShowModal: setOpenFileModal,
@@ -151,13 +153,16 @@ export const useFilesSelectActions = ({
     updateFunction: copyFilesRequest,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
   const {
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), OBJECT_TYPES.FILE)
+  } = useAttachToModal(
+    selected.map(s => s.id),
+    OBJECT_TYPES.FILE,
+  )
   const {
     modalComp: tagsModal,
     setShowModal: setTagsModal,
@@ -185,7 +190,9 @@ export const useFilesSelectActions = ({
         selected.length === 0 ||
         selected.some(
           e =>
-            e.type === 'Folder' || (e.type === 'UserFile' && !e.links.download),
+            e.type === 'Folder' ||
+            (e.type === 'UserFile' && !e.links.download) ||
+            e.show_license_pending,
         ),
       modal: openFileModal,
       showModal: isShownOpenFileModal,
@@ -196,7 +203,9 @@ export const useFilesSelectActions = ({
         selected.length === 0 ||
         selected.some(
           e =>
-            e.type === 'Folder' || (e.type === 'UserFile' && !e.links.download),
+            e.type === 'Folder' ||
+            (e.type === 'UserFile' && !e.links.download) ||
+            e.show_license_pending,
         ),
       modal: downloadModal,
       showModal: isShownDownloadModal,
@@ -276,7 +285,7 @@ export const useFilesSelectActions = ({
         selected.length === 0 || selected.some(e => !e.links.organize),
       modal: organizeFileModal,
       showModal: isShownOrganizeFileModal,
-      hide: !isAdmin && scope !== 'me'
+      hide: !isAdmin && scope !== 'me',
     },
     'Copy to space': {
       func: () => setCopyToSpaceModal(true),
@@ -300,7 +309,10 @@ export const useFilesSelectActions = ({
         !availableLicenses,
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
-      hide: selected.length !== 1 || !selected[0]?.links?.license || !availableLicenses,
+      hide:
+        selected.length !== 1 ||
+        !selected[0]?.links?.license ||
+        !availableLicenses,
     },
     'Detach License': {
       func: () => setDetachLicenseModal(true),
@@ -340,7 +352,7 @@ export const useFilesSelectActions = ({
     },
   }
 
-  if(scope === 'spaces') {
+  if (scope === 'spaces') {
     actions = pick(['Open', 'Download', 'Rename', 'Copy to space'], actions)
   }
 

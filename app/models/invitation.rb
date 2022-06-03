@@ -41,12 +41,6 @@ class Invitation < ApplicationRecord
   validates :first_name,
             :last_name,
             :email,
-            :address1,
-            :country,
-            :city,
-            :postal_code,
-            :phone_country,
-            :phone,
             :req_reason,
             presence: true
 
@@ -57,9 +51,6 @@ class Invitation < ApplicationRecord
             inclusion: [true, false]
 
   validate :validate_email,
-           :validate_phone,
-           # :validate_state,
-           :validate_phone_country_code,
            on: :create
 
   store :extras,
@@ -105,18 +96,6 @@ class Invitation < ApplicationRecord
     phone_country.try(:dial_code)
   end
 
-  def validate_phone_country_code
-    if usa? && !usa_phone_code?
-      errors.add(:phone_country_id, "doesn't match USA phone code")
-    end
-  end
-
-  def validate_phone
-    if full_phone.gsub(/[^0-9]/, '').length < 9
-      errors.add(:phone, "wrong format")
-    end
-  end
-
   def usa_phone_code?
     phone_country_code == Country::UNITED_STATES_AREA_CODE
   end
@@ -135,11 +114,6 @@ class Invitation < ApplicationRecord
     errors.add(:email, I18n.t(:email_taken, side: "DNAnexus")) if DNAnexusAPI.email_exists?(email)
   end
 
-  def validate_state
-    if usa? && !User.validate_state(us_state, postal_code)
-      errors.add(:state, "doesn't match postal code")
-    end
-  end
 
   delegate :usa?, to: :country, allow_nil: true
 end

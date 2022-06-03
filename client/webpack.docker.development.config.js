@@ -8,7 +8,7 @@ const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
 
 
-module.exports = merge(base, swc, {
+module.exports = merge(base, swc({ enableSourceMaps: false }), {
   mode: 'development',
   output: {
     path: path.resolve(__dirname, 'dist'),

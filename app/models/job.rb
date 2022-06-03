@@ -95,7 +95,7 @@ class Job < ApplicationRecord
     TYPE_HTTPS => 1,
   }
 
-  delegate :input_spec, :output_spec, to: :app
+  delegate :input_spec, :output_spec, to: :app, allow_nil: true
 
   attr_accessor :current_user
 

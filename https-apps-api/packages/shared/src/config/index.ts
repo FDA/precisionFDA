@@ -12,6 +12,7 @@ import { mergeDeepRight } from 'ramda'
 import { ENVS } from '../enums'
 // eslint-disable-next-line import/first
 import { DeepPartial } from '../types'
+import { MAX_JOB_DURATION_MINUTES } from './constants'
 // eslint-disable-next-line import/first
 import * as overrides from './envs'
 
@@ -54,6 +55,7 @@ const defaultConfig = {
   validation: {
     maxStrLen: 255,
     maxIdStrLen: 64,
+    maxJobDurationMinutes: MAX_JOB_DURATION_MINUTES,
   },
   platform: {
     apiUrl: 'https://stagingapi.dnanexus.com',
@@ -103,7 +105,7 @@ const defaultConfig = {
       // Until PFDA-2431 is fixed, we prevent job termination warnings email from being sent out
       staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*30, // 30 days
       // staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*29, // 29 days
-      staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? 60*60*24*30, // 30 days
+      staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *'
