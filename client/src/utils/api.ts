@@ -1,5 +1,6 @@
 import httpStatusCodes from 'http-status-codes'
 import queryString from 'query-string'
+import { useHistory } from 'react-router';
 import { toast } from 'react-toastify';
 
 export const requestOpts: RequestInit = {
@@ -12,24 +13,35 @@ export const requestOpts: RequestInit = {
   },
 }
 
+export const unauthorizedHandler = () => {
+const history = useHistory();
+toast.error(`Session expired. Please log in again`, {
+  toastId: '401 toast',
+  position: toast.POSITION.TOP_CENTER,
+  autoClose: false,
+  closeOnClick: false,
+  onClick: () => history.push('/login')
+})
+}
 // TODO: separate app errors from network errors. 
 // Application errors, like validations, should not throw Error.
 // They should return error in the api response as an object of errors.
 export const checkStatus = async (res: Response) => {
   if (!res.ok) {
     if (res.status === httpStatusCodes.UNAUTHORIZED) {
-      toast.error(`Session expired. Please log in again`, {
-        toastId: '401 toast',
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: false,
-        closeOnClick: false,
-        onClick: () => window.location.assign('/login'),
-      })
+      unauthorizedHandler()
     } else {
       let message = `${res.status}: ${res.statusText}`
       try {
         const payload = await res.json()
         message = payload.error?.message ?? payload.message?.text ?? payload.error
+        if (res.status === httpStatusCodes.UNPROCESSABLE_ENTITY) {
+          toast.error(message, {
+            toastId: '422 toast',
+            position: toast.POSITION.TOP_RIGHT,
+            closeOnClick: true,
+          })
+        }
       }
       catch {
         // This code path is for certain API routes/errors where the Ruby backend returns a page and not a json
@@ -122,6 +134,4 @@ const backendCall = (route: string, method = 'POST', data = {}, token = getAuthe
     })
 }
 
-export {
-  backendCall,
-}
+export { backendCall, }
