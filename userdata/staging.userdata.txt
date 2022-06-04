@@ -1,0 +1,165 @@
+#cloud-boothook
+#!/bin/bash
+rm -rf /etc/rc.local
+
+cat <<EOF > /tmp/config.json
+{
+     "agent": {
+         "run_as_user": "root"
+     },
+     "logs": {
+         "logs_collected": {
+             "files": {
+                 "collect_list": [
+                     {
+                         "file_path": "/var/log/install.log",
+                         "log_group_name": "staging-chef-install-log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/var/log/install.err",
+                         "log_group_name": "staging-chef-install-err",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/root/.chef/local-mode-cache/cache/chef-stacktrace.out",
+                         "log_group_name": "staging-chef-stacktrace.out",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/audit.log",
+                         "log_group_name": "staging/backend/audit.log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/puma.log",
+                         "log_group_name": "staging/backend/production.log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/https-api-0.log",
+                         "log_group_name": "staging/node/https-api-0.log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/https-worker-1.log",
+                         "log_group_name": "staging/node/https-workers",
+                         "log_stream_name": "{instance_id}-worker-1"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/https-worker-2.log",
+                         "log_group_name": "staging/node/https-workers",
+                         "log_stream_name": "{instance_id}-worker-2"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/https-worker-3.log",
+                         "log_group_name": "staging/node/https-workers",
+                         "log_stream_name": "{instance_id}-worker-3"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/https-worker-4.log",
+                         "log_group_name": "staging/node/https-workers",
+                         "log_stream_name": "{instance_id}-worker-4"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/pm2.log",
+                         "log_group_name": "staging/node/pm2",
+                         "log_stream_name": "{instance_id}-pm2"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-api-error-0.log",
+                         "log_group_name": "staging/node/https-apps-api-errors",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-1.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-1"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-2.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-2"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-3.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-3"
+                     },
+                     {
+                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-4.log",
+                         "log_group_name": "staging/node/https-worker-errors",
+                         "log_stream_name": "{instance_id}-https-worker-error-4"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/cron.log",
+                         "log_group_name": "staging/backend/cron.log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/gsrs/logs/application.log",
+                         "log_group_name": "staging/gsrs/logs",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/gsrs/logs/access.log",
+                         "log_group_name": "staging/gsrs/access",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/gsrs/logs/fail-persist.log",
+                         "log_group_name": "staging/gsrs/fail-persist",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/gsrs/logs/reindex.log",
+                         "log_group_name": "staging/gsrs/reindex",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/gsrs/logs/fail-transform",
+                         "log_group_name": "staging/gsrs/fail-transform",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/home/deploy/gsrs/logs/fail-extract.log",
+                         "log_group_name": "staging/gsrs/fail-extract",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/sidekiq.log",
+                         "log_group_name": "staging/backend/sidekiq.log",
+                         "log_stream_name": "{instance_id}"
+                     }
+
+                 ]
+             }
+         }
+     }
+ }
+EOF
+
+cat <<EOF > /etc/rc.local
+#!/bin/bash
+cp /tmp/config.json /opt/aws/amazon-cloudwatch-agent/bin/config.json
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s
+sudo -i . /root/install_app.sh
+EOF
+
+cat <<EOF > /root/install_app.sh
+#!/bin/bash -e
+REGION=\$(curl http://169.254.169.254/latest/meta-data/placement/region)
+curl -L https://omnitruck.chef.io/install.sh | sudo bash -s -- -v 16.12.3-1 &> /var/log/install.log 2> /var/log/install.err
+aws ssm get-parameter --name /pfda/staging/app/app_source/ssh_key --with-decryption --output text --query Parameter.Value --region \$REGION  > /root/.ssh/id_rsa 2>> /var/log/install.err
+chmod 400 /root/.ssh/id_rsa &>> /var/log/install.log 2>> /var/log/install.err
+cd /
+COOKBOOKS_BRANCH=\$(aws ssm get-parameter --name /pfda/staging/chef/source_branch --query Parameter.Value --region \$REGION | tr -d '\"')  &>> /var/log/install.log 2>> /var/log/install.err
+GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:dnanexus/precision-fda.git &>>  /var/log/install.log 2>> /var/log/install.err
+cd /precision-fda/; git checkout \$COOKBOOKS_BRANCH &>>  /var/log/install.log 2>> /var/log/install.err
+gem install berkshelf -N &>>  /var/log/install.log 2>> /var/log/install.err
+cd /precision-fda/chef/cookbooks/pfda; berks vendor ../ &>>  /var/log/install.log; cd /precision-fda/chef;chef-client --chef-license accept-silent --no-fips -z -E staging -r "role[pfda_server]" &>>  /var/log/install.log 2>> /var/log/install.err
+
+EOF
+
+
+chmod +x /etc/rc.local
