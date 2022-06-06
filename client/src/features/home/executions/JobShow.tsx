@@ -28,7 +28,9 @@ import { ResourceScope } from '../types'
 import { fetchExecution } from './executions.api'
 import { IExecution, JobState } from './executions.types'
 import { useExecutionActions } from './useExecutionSelectActions'
-import { useSyncFilesMutation } from './useSyncFilesMutation'
+import { useMutation } from 'react-query';
+import { toast } from 'react-toastify';
+import { syncFilesRequest } from './executions.api';
 import { InputsAndOutputs } from './InputsAndOutputs'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { HomeLabel } from '../../../components/HomeLabel'
@@ -121,7 +123,18 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const history = useHistory()
   const { executionUid } = useParams<{ executionUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
-  const syncFiles = useSyncFilesMutation()
+  const syncFiles = useMutation({
+    mutationFn: syncFilesRequest,
+    onSuccess: ({ message }) => {
+      if (message) {
+        if (message.type === 'success') {
+          toast.success(message.text)
+        } else if (message.type === 'warning') {
+          toast.warning(message.text)
+        }
+      }
+    },
+  })
 
   const { data, status } = useQuery(['execution', executionUid], () =>
     fetchExecution(executionUid),
