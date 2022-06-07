@@ -1,4 +1,6 @@
 /* globals module __dirname */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
 
@@ -8,7 +10,7 @@ const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
 
 
-module.exports = merge(base, swc({ enableSourceMaps: false }), {
+module.exports = merge(base({}), swc({}), {
   mode: 'development',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -21,7 +23,6 @@ module.exports = merge(base, swc({ enableSourceMaps: false }), {
     name: 'PfdaBuildCache',
     cacheDirectory: path.resolve(__dirname, '.build_cache'),
     buildDependencies: {
-      // eslint-disable-next-line no-undef
       config: [__filename],
     },
     version: 'docker',
