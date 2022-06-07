@@ -1,4 +1,6 @@
 /* globals module __dirname */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
 const fs = require('fs')
@@ -14,15 +16,22 @@ const swc = require('./webpack.fragment.swc')
 // const TARGET = 'https://precisionfda-dev.dnanexus.com'
 const TARGET = 'https://localhost:3000'
 
-module.exports = merge(base, swc({ enableSourceMaps: true }), {
+const urlLoaderOptions = {
+  limit: 2000,
+}
+const swcLoaderOptions = {
+  parseMap: true,
+}
+
+module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
   mode: 'development',
   entry: './src/index.tsx',
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    new ReactRefreshWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, './src/index.html'),
     }),
-    new ReactRefreshWebpackPlugin(),
   ],
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -32,16 +41,14 @@ module.exports = merge(base, swc({ enableSourceMaps: true }), {
     rules: [
       {
         test: /\.(ts|js)x?$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: require.resolve('babel-loader'),
-            options: {
-              sourceMap: true,
-              plugins: [require.resolve('react-refresh/babel')].filter(Boolean),
-            },
-          },
-        ],
+        exclude: [/node_modules/, /dist/, /.build_cache/],
+        loader: 'babel-loader',
+        options: {
+          plugins: ['babel-plugin-styled-components'],
+          presets: [],
+          cacheDirectory: true,
+          cacheCompression: false,
+        },
       },
     ],
   },
@@ -55,6 +62,9 @@ module.exports = merge(base, swc({ enableSourceMaps: true }), {
   devServer: {
     devMiddleware: {
       index: 'index.html',
+    },
+    client: {
+      overlay: false,
     },
     static: './dist',
     historyApiFallback: true, // See https://stackoverflow.com/questions/56573363/react-router-v4-nested-routes-not-work-with-webpack-dev-server
