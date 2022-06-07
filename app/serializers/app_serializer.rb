@@ -83,7 +83,7 @@ class AppSerializer < ApplicationSerializer
       links[:space] = space_path if object.in_space?
       links[:jobs] = jobs_api_app_path(object)
       # GET track single app
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       # GET /apps/:id/fork - fork a single app
       links[:fork] = fork_app_path(object)
       # POST export a single app to a docker container
@@ -116,9 +116,7 @@ class AppSerializer < ApplicationSerializer
       if can_run? && !object.in_locked_space?
         unless member_viewer?
           # app single run
-          links[:run_job] = new_app_job_path(
-            object.app_series.latest_version_app || object.app_series.latest_revision_app,
-          )
+          links[:run_job] = new_app_job_path(object.uid)
           # GET app batch run
           links[:batch_run] = batch_app_app_path(object.uid)
         end

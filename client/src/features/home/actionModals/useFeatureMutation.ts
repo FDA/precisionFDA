@@ -1,0 +1,40 @@
+import { useMutation } from 'react-query'
+import { toast } from 'react-toastify'
+import { checkStatus, getApiRequestOpts } from '../../../utils/api'
+import { APIResource } from '../types'
+export interface Meta {
+  type: 'success' | 'error';
+  message: string;
+}
+
+export interface RequestResponse {
+  items: any[];
+  meta: Meta[];
+}
+
+async function featureRequest(resource: APIResource, { uids, featured }: { uids: string[], featured: boolean }): Promise<RequestResponse> {
+  const res = await fetch(`/api/${resource}/feature`, {
+    ...getApiRequestOpts('PUT'),
+    body: JSON.stringify({ item_ids: uids, featured: featured || undefined })
+  }).then(checkStatus)
+  return res.json()
+}
+
+export const useFeatureMutation = ({ resource, onSuccess }: { resource: APIResource, onSuccess?: (res: any) => void }) => {
+  const featureMutation = useMutation({
+    mutationFn: (payload: { featured: boolean, uids: string[] }) => featureRequest(resource, payload),
+    onSuccess: async (res) => {
+      if (res.meta[0].type === 'success') {
+        toast.success(`Success: ${res.meta[0].message}`)
+        onSuccess && onSuccess(res)
+      } else {
+        toast.error(`Error: ${res.meta[0].message}`)
+      }
+    },
+    onError: (res) => {
+      toast.error(`Error: featuring`)
+    }
+  })
+
+  return featureMutation
+}

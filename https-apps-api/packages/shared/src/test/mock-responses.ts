@@ -1,3 +1,27 @@
+const DBCLUSTER_DESC_RES = {
+  id: 'dbcluster-G6ZX5K800f2gj9zYFkBQgq63',
+  project: 'project-Fyg9JX800f2qJz513yP3716y',
+  class: 'dbcluster',
+  sponsored: false,
+  name: 'Test Db Cluster',
+  types: [],
+  state: 'open',
+  hidden: false,
+  links: [],
+  folder: '/',
+  tags: [],
+  created: 1638474425000,
+  modified: 1638474425919,
+  createdBy: { user: 'user-pfda_autotest1' },
+  dxInstanceClass: 'db_std1_x2',
+  engine: 'aurora-mysql',
+  engineVersion: '5.7.12',
+  endpoint: 'dbcluster-g6zx5k800f2gj3zyfkbqgq63.cluster-cfzitlm9q1kq.us-east-1.rds.amazonaws.com',
+  port: 3306,
+  status: 'available',
+  statusAsOf: 1638475661489,
+} as const
+
 const FILES_LIST_RES_ROOT = {
   results: [
     {
@@ -73,6 +97,16 @@ const FILES_LIST_RES_TEST_FOLDER = {
 const FOLDERS_LIST_RES = {
   id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
   folders: ['/', '/.Notebook_snapshots', '/test-folder'],
+}
+
+const FOLDERS_LIST_RES_MEDIUM = {
+  id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  folders: ['/', '/.Notebook_snapshots', '/test-folder', '/foo', '/foo/bar', '/foo/bar/stu'],
+}
+
+const FOLDERS_LIST_RES_LARGE = {
+  id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  folders: ['/'].concat(Array.from(Array(33).keys()).map(i => `/folder-${i}`)),
 }
 
 const FILES_DESC_RES = {
@@ -195,9 +229,13 @@ const FILES_DESC_RES = {
 } as const
 
 export {
+  DBCLUSTER_DESC_RES,
   FILES_LIST_RES_ROOT,
   FILES_LIST_RES_SNAPSHOT,
   FILES_DESC_RES,
   FOLDERS_LIST_RES,
+  FOLDERS_LIST_RES_MEDIUM,
+  FOLDERS_LIST_RES_LARGE,
   FILES_LIST_RES_TEST_FOLDER,
 }
+

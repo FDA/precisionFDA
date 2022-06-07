@@ -10,7 +10,7 @@ import {
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('PATCH /folders/:id/rename', () => {
@@ -26,7 +26,7 @@ describe('PATCH /folders/:id/rename', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     await em.flush()
     folder = create.filesHelper.createFolder(
@@ -39,7 +39,7 @@ describe('PATCH /folders/:id/rename', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .patch(`/folders/${folder.id}/rename`)
       .query({ ...getDefaultQueryData(user) })
       .send({
@@ -73,7 +73,7 @@ describe('PATCH /folders/:id/rename', () => {
       { project: folder.project, name: 'c', parentFolderId: folder.id },
     )
     await em.flush()
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .patch(`/folders/${subfolder.id}/rename`)
       .query({ ...getDefaultQueryData(user) })
       .send({
@@ -88,7 +88,7 @@ describe('PATCH /folders/:id/rename', () => {
   context('error states', () => {
     it('if API call fails, name is not updated', async () => {
       fakes.client.folderRenameFake.throws()
-      await supertest(api.getServer())
+      await supertest(getServer())
         .patch(`/folders/${folder.id}/rename`)
         .query({ ...getDefaultQueryData(user) })
         .send({

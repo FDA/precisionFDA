@@ -100,7 +100,7 @@ export const commonStyles = {
       border: none;
 
       &--active {
-        color: ${theme.colors.highlightBlue};
+        color: ${theme.colors.blueOnWhite};
       }
 
       &--prev, &--next {

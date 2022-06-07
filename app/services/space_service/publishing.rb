@@ -21,8 +21,7 @@ module SpaceService
       elsif scope.is_a?(String)
         if scope != "public"
           raise "Publish route called with invalid scope #{scope}" unless Space.valid_scope?(scope)
-
-          space = Space.find_by(id: Regexp.last_match(1))
+          space = Space.find_by(id: Space.scope_id(scope))
           useful_space = space.present? && space.active? && space.accessible_by?(context)
           raise "Publish route called with invalid space #{scope}" unless useful_space
 

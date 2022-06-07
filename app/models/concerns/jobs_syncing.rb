@@ -51,6 +51,7 @@ module JobsSyncing
     def sync_jobs!(context, jobs = Job.includes(:analysis), project = nil)
       return if context.guest?
 
+      logger.debug("syncing jobs with context #{context.inspect}")
       user = context.user
       api = DIContainer.resolve("api.user")
 
@@ -105,6 +106,7 @@ module JobsSyncing
 
     # rubocop:todo Metrics/MethodLength
     def sync_job_state(result, job, user, api)
+      logger.debug("syncing state #{result.inspect} for job id #{job.uid} by user #{user.dxuser}")
       state = result["describe"]["state"]
       # Only do anything if local job state is stale
       return if state == job.state
@@ -169,6 +171,13 @@ module JobsSyncing
 
         send_job_done_email(job.id)
       else
+        if state == Job::STATE_FAILED
+          # Job failed, so we need to log this
+          logger.info "Job #{job.id} failed: " \
+                      "failureReason: #{result['describe']['failureReason']}, " \
+                      "failureMessage: #{result['describe']['failureMessage']}"
+        end
+
         # Job state changed but not done (no outputs)
         Job.transaction do
           job.reload

@@ -1,17 +1,17 @@
 ### Show error for ContentTools dialog ###
-#= require ./content_tools/dialog_errors.coffee
+#= require ./content_tools/dialog_errors
 
 ### ContentTools VideoDialog Monkeypatch ###
 ### Aim - add url validation ###
-#= require ./content_tools/video_dialog.coffee
+#= require ./content_tools/video_dialog
 
 ### ContentTools ImageDialog Monkeypatch ###
 ### Aim - change upload image dialog ###
-#= require ./content_tools/image_dialog.coffee
+#= require ./content_tools/image_dialog
 
 ### ContentTools PropertiesDialog Monkeypatch ###
 ### Aim - prohibit to insert DOM nodes ###
-#= require ./content_tools/properties_dialog.coffee
+#= require ./content_tools/properties_dialog
 
 class EditorModel
 

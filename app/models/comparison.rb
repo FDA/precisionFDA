@@ -102,7 +102,7 @@ class Comparison < ApplicationRecord
   end
 
   def rename(new_name, description, context)
-    update_attributes(name: new_name, description: description)
+    update(name: new_name, description: description)
   end
 
   def self.publication_project!(context, scope)

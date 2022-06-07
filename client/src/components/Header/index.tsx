@@ -1,43 +1,34 @@
 import React from 'react'
-import {
-  HeaderItemText,
-  HeaderLeft,
-  MenuItem,
-  HeaderRight,
-  HeaderSpacer,
-  Nav,
-  StyledHeader,
-  StyledHeaderLogo,
-  StyledLinkReactRoute,
-  StyledDropMenuLinks,
-  StyledLink,
-  StyledDivider,
-  AvatarMenuItem,
-  IconWrap,
-  LogoWrap,
-} from './styles'
-import Dropdown from '../Dropdown'
-import { HomeIcon } from '../icons/HomeIcon'
-import { ProfileIcon } from '../icons/ProfileIcon'
-import { CommentIcon } from '../icons/CommentIcon'
-import { TrophyIcon } from '../icons/TrophyIcon'
-import { StarIcon } from '../icons/StarIcon'
-import { StickyNoteIcon } from '../icons/StickyNote'
-import { BullsEyeIcon } from '../icons/BullsEyeIcon'
-import { FortIcon } from '../icons/FortIcon'
-import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
-import { CommentingIcon } from '../icons/CommentingIcon'
-import { GSRSIcon } from '../icons/GSRSIcon'
-import { CaretIcon } from '../icons/CaretIcon'
-import { Link, matchPath, useLocation } from 'react-router-dom'
-import { SUPPORT_EMAIL } from '../../constants'
-import { QuestionIcon } from '../icons/QuestionIcon'
 import { useSelector } from 'react-redux'
+import { Link, useLocation } from 'react-router-dom'
+
+import { SUPPORT_EMAIL } from '../../constants'
+import { logout } from '../../features/auth/api'
 import {
   contextUserSelector,
   isInitializedSelector,
 } from '../../reducers/context/selectors'
-import { logout } from '../../features/auth/api'
+import Dropdown from '../Dropdown'
+import { BullsEyeIcon } from '../icons/BullsEyeIcon'
+import { CaretIcon } from '../icons/CaretIcon'
+import { CommentIcon } from '../icons/CommentIcon'
+import { CommentingIcon } from '../icons/CommentingIcon'
+import { FortIcon } from '../icons/FortIcon'
+import { GSRSIcon } from '../icons/GSRSIcon'
+import { HomeIcon } from '../icons/HomeIcon'
+import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
+import { ProfileIcon } from '../icons/ProfileIcon'
+import { QuestionIcon } from '../icons/QuestionIcon'
+import { StarIcon } from '../icons/StarIcon'
+import { StickyNoteIcon } from '../icons/StickyNote'
+import { TrophyIcon } from '../icons/TrophyIcon'
+import {
+  AvatarMenuItem, HeaderItemText,
+  HeaderLeft, HeaderRight,
+  HeaderSpacer, IconWrap,
+  LogoWrap, MenuItem, Nav, StyledDivider, StyledDropMenuLinks, StyledHeader,
+  StyledHeaderLogo, StyledLink, StyledLinkReactRoute,
+} from './styles'
 
 
 const getUsername = (user: any) => {
@@ -57,7 +48,6 @@ export const Header: React.FC = () => {
   const user = useSelector(contextUserSelector)
 
   const userCanAdministerSite = user?.can_administer_site
-  const userCanSeeSpaces = user?.can_see_spaces
   const userIsGuest = user?.is_guest
   const isSpacesPath = pathname.startsWith('/spaces')
 
@@ -71,7 +61,7 @@ export const Header: React.FC = () => {
     <StyledDropMenuLinks>
       <StyledLink href="/profile">Profile</StyledLink>
       {user && !userIsGuest && (
-        <StyledLink href={`/users/${user!.dxuser}`}>Public Profile</StyledLink>
+        <StyledLink href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
       )}
       <StyledLink href="/licenses">Manage Licenses</StyledLink>
       {!userIsGuest && (
@@ -80,7 +70,7 @@ export const Header: React.FC = () => {
         </StyledLinkReactRoute>
       )}
       <StyledDivider />
-      <StyledLink href="/about">About</StyledLink>
+      <StyledLinkReactRoute to="/about">About</StyledLinkReactRoute>
       <StyledLink href="/guidelines">Guidelines</StyledLink>
       <StyledLink href="/docs">Docs</StyledLink>
       <StyledDivider />
@@ -106,8 +96,7 @@ export const Header: React.FC = () => {
 
   if (!init) return null
 
-  // Remove the false condition once we're ready to deploy GSRS to the public
-  const showGSRSLink = false && !isSpacesPath
+  const showGSRSLink = !isSpacesPath && !userIsGuest
 
   return (
     <StyledHeader>
@@ -181,18 +170,16 @@ export const Header: React.FC = () => {
             </>
           )}
           <HeaderSpacer />
-          {userCanSeeSpaces && (
-            <Link to="/spaces" title="Spaces">
-              <MenuItem active={isActiveLink('/spaces')}>
-                <IconWrap>
-                  <ObjectGroupIcon height={16} />
-                </IconWrap>
-                <HeaderItemText>Spaces</HeaderItemText>
-              </MenuItem>
-            </Link>
-          )}
+          <Link to="/spaces" title="Spaces">
+            <MenuItem active={isActiveLink('/spaces')}>
+              <IconWrap>
+                <ObjectGroupIcon height={16} />
+              </IconWrap>
+              <HeaderItemText>Spaces</HeaderItemText>
+            </MenuItem>
+          </Link>
           {showGSRSLink && (
-            <a href="/ginas/app/beta" title="GSRS">
+            <a href="/ginas/app/beta" target="_blank" title="GSRS">
               <MenuItem>
                 <IconWrap>
                   <GSRSIcon height={16} />
@@ -203,7 +190,7 @@ export const Header: React.FC = () => {
           )}
         </HeaderLeft>
         <HeaderRight>
-          <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support">
+          <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support" rel="noreferrer">
             <MenuItem>
               <IconWrap>
                 <CommentingIcon height={16} />

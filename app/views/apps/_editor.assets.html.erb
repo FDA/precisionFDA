@@ -6,7 +6,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">
           Selected Assets for your VM Environment
-          <small><a href="<%= assets_path %>" target="_blank">Manage your assets <span class="fa fa-external-link"></span></a></small>
+          <small><a href="/home/assets" target="_blank">Manage your assets <span class="fa fa-external-link"></span></a></small>
         </h4>
       </div>
       <div class="modal-body modal-body-search-selector modal-body-padless">
@@ -48,7 +48,7 @@
           <div role="tabpanel" class="tab-pane tab-pane-preview active">
             <!-- ko if: previewedAsset() -->
               <div class="h2">
-                <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/app_assets/' + previewedAsset().uid}" target="_blank"></a>
+                <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/home/assets/' + previewedAsset().uid}" target="_blank"></a>
               </div>
               <hr>
               <!-- ko if: previewedAsset().descriptionDisplay() -->

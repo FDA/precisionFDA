@@ -8,8 +8,11 @@ export const fetchNotificationsPreferences = async () => {
 export const saveNotificationsPreferences = async (preference: any) => {
   const input = {
     ...preference.reviewer,
-    ...preference.lead_reviewer,
-    ...preference.review_space_admin,
+    ...preference.sponsor,
+    ...preference.reviewer_lead,
+    ...preference.sponsor_lead,
+    ...preference.admin,
+    ...preference.private,
   }
   Object.entries(input).forEach(([key, value]) => {
     const newValue = value === true ? 1 : 0

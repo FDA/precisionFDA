@@ -1,0 +1,100 @@
+.new-database-form
+  margin-top: 50px
+
+  &__container
+    display: flex
+
+    &__fields
+      display: flex
+
+  .form-group
+    margin-right: 25px
+    margin-bottom: 20px
+    width: 100%
+    display: flow-root
+    //.form-group:not(.required)
+    //  label
+    //    color: #333333
+    //    font-size: 16px
+    //    font-weight: bold
+    &__password
+      margin-bottom: 2px
+
+
+    &__inLine-group
+      display: flex
+      margin-right: 2px
+      width: 95% //500px
+      align-items: flex-start
+      margin-top: 40px
+      margin-bottom: 20px
+      border-color: rgb(218,239,251)
+
+      .file-selection
+        width: 95% //500px
+        border-color: rgb(218,239,251) !important
+        //border: 1px solid transparent
+        user-select: none
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015)
+        //border-color: rgb(218, 239, 251)
+        color: #1F70B5
+        font-size: 14px
+        border-radius: 3px
+
+        &:focus
+          outline: 0
+
+      .field
+        margin-left: 20px
+        width: 200px
+
+    &__instance-group
+        margin-right: 0
+        display: inline-block
+        width: 30%
+    //.form-group:not(.required)
+    //  width: 688px
+
+    label
+      color: #333333
+      font-size: 16px
+      font-weight: bold
+
+  .checkbox
+    label
+      font-weight: normal !important
+      font-size: 14px !important
+
+  .btn + .btn
+    margin-left: 10px
+
+.database-type-container
+  display: flex
+  justify-content: space-between
+
+  &__switch_container
+    display: flex
+
+.database-type-and-version-container
+  display: flex
+  flex-flow: column wrap
+
+.database-type-switch + .database-type-switch
+  margin-left: 20px
+
+.group_selection
+  margin-right: 20px
+  margin-left: 25px
+  width: 52%
+
+  &__password-submit
+    margin-left: 0
+
+.control-label
+  font-size: 16px
+  margin-bottom: 15px
+
+.control-input-container
+  .password-input
+    margin-top: 25px
+    width: 51%

@@ -8,6 +8,9 @@ import HomeAppsFeaturedPage from './HomeApps/HomeAppsFeaturedPage'
 import HomeAppsEverybodyPage from './HomeApps/HomeAppsEverybodyPage'
 import HomeAppsSpacesPage from './HomeApps/HomeAppsSpacesPage'
 import HomeAppsSinglePage from './HomeApps/HomeAppsSinglePage'
+import { HomeDatabasesPage } from './HomeDatabases/HomeDatabasesPage'
+import { HomeDatabasesSinglePage } from './HomeDatabases/HomeDatabasesSinglePage'
+import { HomeDatabasesCreatePage } from './HomeDatabases/HomeDatabasesCreatePage'
 import HomeFilesSinglePage from './HomeFiles/HomeFilesSinglePage'
 import HomeLayout from '../../layouts/HomeLayout'
 import HomeFilesPage from './HomeFiles/HomeFilesPage'
@@ -32,6 +35,7 @@ import HomeAssetSinglePage from './HomeAssets/HomeAssetSinglePage'
 import { contextUserSelector } from '../../../reducers/context/selectors'
 import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
 import DefaultLayout from '../../layouts/DefaultLayout'
+import { HOME_DATABASES_ACTIONS } from '../../../constants'
 
 
 const HomePage = ({ match }) => {
@@ -45,10 +49,14 @@ const HomePage = ({ match }) => {
 
   let uid
   let tab = match.params.tab ? `/${match.params.tab}` : ''
+
   if (match.params.tab && match.params.tab.split('-')[0]) {
     switch (match.params.tab.split('-')[0]) {
       case 'app':
         tab = '/app-page'
+        break
+      case 'dbcluster':
+        tab = '/database-page'
         break
       case 'file':
         tab = '/file-page'
@@ -76,6 +84,15 @@ const HomePage = ({ match }) => {
       return <HomeAppsSpacesPage />
     case 'apps/app-page':
       return <HomeAppsSinglePage uid={uid} />
+    case 'databases':
+      return <HomeDatabasesPage />
+    case 'databases/database-page':
+      return <HomeDatabasesSinglePage dxid={uid} />
+    case 'databases/new':
+      return <HomeDatabasesCreatePage
+        currentTab={'Private'}
+        action={HOME_DATABASES_ACTIONS.CREATE}
+      />
     case 'files':
       return <HomeFilesPage />
     case 'files/featured':

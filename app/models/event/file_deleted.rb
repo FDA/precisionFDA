@@ -11,20 +11,29 @@
 #  param3     :string(255)
 #  created_at :datetime         not null
 #  param4     :string(255)
+#  data       :text(65535)
 #
 
-class Event::FileDeleted < Event
-  alias_attribute :file_size, :param1
-  alias_attribute :dxid, :param2
-  alias_attribute :scope, :param3
+class Event
+  # Tracks file delete events.
+  class FileDeleted < Event
+    alias_attribute :file_size, :param1
 
-  def self.create_for(file, user)
-    create(
-      dxid: file.dxid,
-      file_size: file.file_size,
-      scope: file.scope,
-      dxuser: user.dxuser,
-      org_handle: user.org.handle
-    )
+    store :data, accessors: %i(uid name path folder_id scope), coder: JSON
+
+    class << self
+      def create_for(file, user)
+        create(
+          uid: file.uid,
+          name: file.name,
+          path: file.full_path,
+          folder_id: file.folder_id,
+          scope: file.scope,
+          file_size: file.file_size,
+          dxuser: user.dxuser,
+          org_handle: user.org.handle,
+        )
+      end
+    end
   end
 end

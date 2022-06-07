@@ -18,9 +18,7 @@ class ExpertSerializer < ApplicationSerializer
     :total_comment_count,
   )
 
-  delegate :title, to: :object
-  delegate :total_comment_count, to: :object
-
+  delegate :scope, :title, :total_comment_count, to: :object
   def about
     object._about
   end

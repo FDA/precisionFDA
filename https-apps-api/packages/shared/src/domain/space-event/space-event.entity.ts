@@ -43,10 +43,10 @@ export class SpaceEvent {
   @Property()
   data: JsonType
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   user: IdentifiedReference<User>
 
-  @ManyToOne()
+  @ManyToOne(() => Space)
   space: IdentifiedReference<Space>
 
   constructor(user: User, space: Space) {

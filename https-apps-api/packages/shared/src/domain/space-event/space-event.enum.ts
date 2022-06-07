@@ -9,7 +9,7 @@ enum PARENT_TYPE {
 enum SPACE_EVENT_OBJECT_TYPE {
   SPACE = 0,
   MEMBERSHIP = 1,
-  // deprecated?
+  // task deprecated?
   TASK = 2,
   COMMENT = 3,
   APP = 4,
@@ -25,6 +25,7 @@ enum SPACE_EVENT_ACTIVITY_TYPE {
   membership_added = 0,
   membership_disabled = 1,
   membership_changed = 2,
+  // task deprecated?
   task_created = 3,
   task_reassigned = 4,
   task_completed = 5,
@@ -49,6 +50,7 @@ enum SPACE_EVENT_ACTIVITY_TYPE {
   task_accepted = 24,
   task_reopened = 25,
   membership_enabled = 26,
+  membership_deleted = 27,
 }
 
 export { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }

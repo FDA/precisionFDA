@@ -14,6 +14,8 @@ import {
   SPACE_LAYOUT_SHOW_UNLOCK_MODAL,
   SPACE_LAYOUT_HIDE_DELETE_MODAL,
   SPACE_LAYOUT_SHOW_DELETE_MODAL,
+  SPACE_LAYOUT_HIDE_CREATE_SPACE_MODAL,
+  SPACE_LAYOUT_SHOW_CREATE_SPACE_MODAL,
   LOCK_SPACE_START,
   LOCK_SPACE_SUCCESS,
   LOCK_SPACE_FAILURE,
@@ -191,6 +193,22 @@ export default createReducer(initialState, {
     ...state,
     deleteSpaceModal: {
       ...state.deleteSpaceModal,
+      isOpen: true,
+    },
+  }),
+
+  [SPACE_LAYOUT_HIDE_CREATE_SPACE_MODAL]: state => ({
+    ...state,
+    createSpaceModal: {
+      ...state.createSpaceModal,
+      isOpen: false,
+    },
+  }),
+
+  [SPACE_LAYOUT_SHOW_CREATE_SPACE_MODAL]: state => ({
+    ...state,
+    createSpaceModal: {
+      ...state.createSpaceModal,
       isOpen: true,
     },
   }),

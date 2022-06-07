@@ -112,16 +112,19 @@ class ProfileController < ApplicationController
           user[:last_name] = @last
           user[:email] = @email
           user[:normalized_email] = @normalized_email
-          u = User.create!(user)
-
-          auditor_data = {
-            action: "create",
-            record_type: "Provision User",
-            record: {
-              message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{u.as_json} by '#{@user.dxuser}'",
-            },
-          }
-          Auditor.perform_audit(auditor_data)
+          u = nil
+          ActiveRecord::Base.transaction do
+            u = User.create!(user)
+            NotificationPreference.create_for_user!(u)
+            auditor_data = {
+              action: "create",
+              record_type: "Provision User",
+              record: {
+                message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{u.as_json} by '#{@user.dxuser}'",
+              },
+            }
+            Auditor.perform_audit(auditor_data)
+          end
           @state = "step3"
         end
       end

@@ -6,10 +6,10 @@ import {
   PageTitle,
   PageActions,
 } from '../../../../components/Page/styles'
-import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
 import { ButtonSolidBlue } from '../../../../components/Button'
 import Select from 'react-select'
 import { Checkbox } from '../../../../components/Checkbox'
+import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 import DefaultLayout from '../../../layouts/DefaultLayout'
 import { useSelector } from 'react-redux'
@@ -17,54 +17,89 @@ import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
 
 enum Roles {
-  'review_space_admin' = 'review_space_admin',
-  'lead_reviewer' = 'lead_reviewer',
   'reviewer' = 'reviewer',
+  'sponsor' = 'sponsor',
+  'reviewer_lead' = 'reviewer_lead',
+  'sponsor_lead' = 'sponsor_lead',
+  'admin' = 'admin',
+}
+
+enum StaticRoles {
+  'private' = 'private',
 }
 
 const RoleLabel = {
-  [Roles['review_space_admin']]: 'Review Space Admin',
-  [Roles['lead_reviewer']]: 'Lead Reviewer',
   [Roles['reviewer']]: 'Reviewer',
+  [Roles['sponsor']]: 'Sponsor',
+  [Roles['reviewer_lead']]: 'Reviewer Lead',
+  [Roles['sponsor_lead']]: 'Sponsor Lead',
+  [Roles['admin']]: 'Review Space Admin',
 }
 
 const NotificationLabel: any = {
   admin_membership_changed: 'Membership Changed',
   admin_comment_activity: 'Comment Activity',
   admin_content_added_or_deleted: 'Content Added Or Deleted',
-  admin_member_added_or_removed_from_space: 'Member Added Or Removed From Space',
+  admin_member_added_to_space: 'Member Added to Space',
   admin_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
-  admin_space_lock_unlock_delete_requests: 'Space Locked, Unlocked, or Deleted Request',
-  lead_membership_changed: 'Membership Changed',
-  lead_comment_activity: 'Comment Activity',
-  lead_content_added_or_deleted: 'Content Added Or Deleted',
-  lead_member_added_or_removed_from_space: 'Member Added Or Removed From Space',
-  lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
-  all_membership_changed: 'Membership Changed',
-  all_comment_activity: 'Comment Activity',
-  all_content_added_or_deleted: 'Content Added or Deleted',
+
+  reviewer_lead_membership_changed: 'Membership Changed',
+  reviewer_lead_comment_activity: 'Comment Activity',
+  reviewer_lead_content_added_or_deleted: 'Content Added Or Deleted',
+  reviewer_lead_member_added_to_space: 'Member Added to Space',
+  reviewer_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+
+  sponsor_lead_membership_changed: 'Membership Changed',
+  sponsor_lead_comment_activity: 'Comment Activity',
+  sponsor_lead_content_added_or_deleted: 'Content Added Or Deleted',
+  sponsor_lead_member_added_to_space: 'Member Added to Space',
+  sponsor_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+
+  sponsor_membership_changed: 'Membership Changed',
+  sponsor_comment_activity: 'Comment Activity',
+  sponsor_content_added_or_deleted: 'Content Added or Deleted',
+
+  reviewer_membership_changed: 'Membership Changed',
+  reviewer_comment_activity: 'Comment Activity',
+  reviewer_content_added_or_deleted: 'Content Added or Deleted',
 }
 
 const preference = {
-  review_space_admin: {
+  reviewer: {
+    reviewer_membership_changed: false,
+    reviewer_comment_activity: false,
+    reviewer_content_added_or_deleted: false,
+  },
+  sponsor: {
+    sponsor_membership_changed: false,
+    sponsor_comment_activity: false,
+    sponsor_content_added_or_deleted: false,
+  },
+  reviewer_lead: {
+    reviewer_lead_membership_changed: false,
+    reviewer_lead_comment_activity: false,
+    reviewer_lead_content_added_or_deleted: false,
+    reviewer_lead_member_added_to_space: false,
+    reviewer_lead_space_locked_unlocked_deleted: false,
+  },
+  sponsor_lead: {
+    sponsor_lead_membership_changed: false,
+    sponsor_lead_comment_activity: false,
+    sponsor_lead_content_added_or_deleted: false,
+    sponsor_lead_member_added_to_space: false,
+    sponsor_lead_space_locked_unlocked_deleted: false,
+  },
+  admin: {
     admin_membership_changed: false,
     admin_comment_activity: false,
     admin_content_added_or_deleted: false,
-    admin_member_added_or_removed_from_space: false,
+    admin_member_added_to_space: false,
     admin_space_locked_unlocked_deleted: false,
-    admin_space_lock_unlock_delete_requests: false,
   },
-  lead_reviewer: {
-    lead_membership_changed: false,
-    lead_comment_activity: false,
-    lead_content_added_or_deleted: false,
-    lead_member_added_or_removed_from_space: false,
-    lead_space_locked_unlocked_deleted: false,
-  },
-  reviewer: {
-    all_membership_changed: false,
-    all_comment_activity: false,
-    all_content_added_or_deleted: false,
+  private: {
+    private_job_finished: false,
+    private_challenge_opened: false,
+    private_challenge_preregister: false,
   },
 }
 
@@ -75,10 +110,13 @@ export const NotificationsPage = () => {
   const options = roles.map(value => ({ value, label: RoleLabel[value] }))
   const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
 
-  const { data, status, error } = useQuery<any>('notifications', fetchNotificationsPreferences)
+  const { data, status, error } = useQuery<any>(
+    'notifications',
+    fetchNotificationsPreferences,
+  )
 
   const queryCache = useQueryClient()
-  const {mutateAsync: notificationsMutation } = useMutation(
+  const { mutateAsync: notificationsMutation } = useMutation(
     saveNotificationsPreferences,
     {
       onSuccess: () => {
@@ -87,38 +125,43 @@ export const NotificationsPage = () => {
       },
       onError: () => {
         // showErrorAlert('Error saving')
-      }
-    }
+      },
+    },
   )
 
   useEffect(() => {
-    if(data?.preference) {
+    if (data?.preference) {
       setLocalPrefSelection(data?.preference)
     }
   }, [data])
 
-  const isAllChecked = (keys: {[key: string]: boolean}) => {
-    const includesFalse = Object.keys(keys).map(k => keys[k]).includes(false)
+  const isAllChecked = (keys: { [key: string]: boolean }) => {
+    const includesFalse = Object.keys(keys)
+      .map(k => keys[k])
+      .includes(false)
     return !includesFalse
   }
 
-  const handleSelection = (role: Roles, notification: string) => {
+  const handleSelection = (role: Roles | StaticRoles, notification: string) => {
     setLocalPrefSelection({
       ...localPrefSelection,
       [role]: {
         ...localPrefSelection[role],
-        [notification]: !localPrefSelection[role][notification]
-      }
+        [notification]: !localPrefSelection[role][notification],
+      },
     })
   }
 
   const handleCheckAll = (role: Roles) => {
-    const newVals = mapValues(localPrefSelection[role], () => !isAllChecked(localPrefSelection[role]));
+    const newVals = mapValues(
+      localPrefSelection[role],
+      () => !isAllChecked(localPrefSelection[role]),
+    )
     setLocalPrefSelection({
       ...localPrefSelection,
       [role]: {
-        ...newVals
-      }
+        ...newVals,
+      },
     })
   }
 
@@ -126,8 +169,10 @@ export const NotificationsPage = () => {
     notificationsMutation(localPrefSelection)
   }
 
-  const enableJobNotificationSettings = false
-  const enableChallengeNotificationSettins = false
+  const siteNotificationsRole = StaticRoles.private
+  const enableJobNotificationSettings: any = localPrefSelection[siteNotificationsRole]?.private_job_finished //true
+  const enableChallengeOpenNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_opened //true
+  const enableChallengePreregNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_preregister //true
 
   if(user.is_guest) {
     return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
@@ -145,32 +190,49 @@ export const NotificationsPage = () => {
           </PageHeader>
 
           <StyledNotifications>
-            {enableJobNotificationSettings || enableChallengeNotificationSettins &&
             <SectionTitle>Site Notifications</SectionTitle>
-            }
-
-            {enableChallengeNotificationSettins &&
             <FieldGroup>
-              <Checkbox id="newChallenge" name="newChallenge" type="checkbox" />
+              <Checkbox
+                id="newChallenge"
+                name="newChallenge"
+                type="checkbox"
+                checked={enableChallengeOpenNotificationSettins}
+                onChange={() =>
+                  handleSelection(siteNotificationsRole, 'private_challenge_opened')
+                }
+              />
               <label htmlFor="newChallenge">
                 Notify me when a new precisionFDA challenge is created.
               </label>
             </FieldGroup>
-            }
-
-            {enableJobNotificationSettings &&
+            <FieldGroup>
+              <Checkbox
+                id="preregChallenge"
+                name="preregChallenge"
+                type="checkbox"
+                checked={enableChallengePreregNotificationSettins}
+                onChange={() =>
+                  handleSelection(siteNotificationsRole, 'private_challenge_preregister')
+                }
+              />
+              <label htmlFor="preregChallenge">
+                Notify me when a new precisionFDA challenge is open for pre-registration.
+              </label>
+            </FieldGroup>
             <FieldGroup>
               <Checkbox
                 id="finishedExecution"
                 name="finishedExecution"
                 type="checkbox"
+                checked={enableJobNotificationSettings}
+                onChange={() =>
+                  handleSelection(siteNotificationsRole, 'private_job_finished')
+                }
               />
               <label htmlFor="finishedExecution">
                 Notify me when an execution has finished.
               </label>
             </FieldGroup>
-            }
-
             <SectionTitle>Space Notifications</SectionTitle>
 
             <StyledSelectWrap>

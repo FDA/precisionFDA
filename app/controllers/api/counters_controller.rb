@@ -4,6 +4,7 @@ module Api
     CONTROLLERS = {
       "apps" => AppsController,
       "assets" => AssetsController,
+      "dbclusters" => DbClustersController,
       "jobs" => JobsController,
       "files" => FilesController,
       "workflows" => WorkflowsController,

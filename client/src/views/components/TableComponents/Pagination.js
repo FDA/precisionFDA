@@ -63,7 +63,7 @@ const Page = ({ page, setPageHandler }) => {
   }
 
   return (
-    <a onClick={onClick} className={classes}>{page.label}</a>
+    <a onClick={onClick} className={classes} aria-label={`Click this link to navigate to page number ${page.value}`}>{page.label}</a>
   )
 }
 

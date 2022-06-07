@@ -5,7 +5,7 @@ import { shallowEqual, useSelector, useDispatch } from 'react-redux'
 import FileShape from '../../../../shapes/FileShape'
 import { spaceFilesRenameModalSelector } from '../../../../../reducers/spaces/files/selectors'
 import { hideFilesRenameModal, renameFile } from '../../../../../actions/spaces'
-import RenameObjectModal from '../../../Files/RenameObjectModal'
+import RenameObjectModal from '../../../RenameObjectModal'
 
 
 const RenameModal = ({ file, loadFilesHandler }) => {

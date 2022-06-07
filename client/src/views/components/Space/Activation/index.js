@@ -5,24 +5,23 @@ import { connect } from 'react-redux'
 import DefaultLayout from '../../../layouts/DefaultLayout'
 import Button from '../../Button'
 import Icon from '../../Icon'
-import { SPACE_REVIEW } from '../../../../constants'
-import {
-  spaceDataSelector,
-  spaceIsAcceptingSelector,
-} from '../../../../reducers/spaces/space/selectors'
+import { SPACE_ADMINISTRATOR, SPACE_GOVERNMENT, SPACE_GROUPS, SPACE_REVIEW, SPACE_VERIFICATION } from '../../../../constants'
+import { spaceDataSelector, spaceIsAcceptingSelector } from '../../../../reducers/spaces/space/selectors'
 import { contextSelector } from '../../../../reducers/context/selectors'
 import acceptSpace from '../../../../actions/spaces/acceptSpace'
 import SpaceShape from '../../../shapes/SpaceShape'
+import { getGuestLeadLabel, getHostLeadLabel } from '../../../../helpers/spaces'
 import './style.sass'
-
 
 const AcceptButton = ({ isAccepted, isAccepting, onClick, ...rest }) => {
   const buttonLabel = isAccepting ? 'Accepting space...' : 'Accept Space'
 
-  return (
-    isAccepted ?
-      <div className="activation__accepted">{"You've already accepted this space"}</div> :
-      <Button type="success" size="lg" onClick={onClick} {...rest}>{buttonLabel}</Button>
+  return isAccepted ? (
+    <div className="activation__accepted">{"You've already accepted this space"}</div>
+  ) : (
+    <Button type="success" size="lg" onClick={onClick} {...rest}>
+      {buttonLabel}
+    </Button>
   )
 }
 
@@ -32,13 +31,26 @@ AcceptButton.propTypes = {
   onClick: PropTypes.func.isRequired,
 }
 
+const acceptedLabel = isAccepted => (isAccepted ? 'Accepted' : 'Pending')
 
-const acceptedLabel = isAccepted => isAccepted ? 'Accepted' : 'Pending'
+const hostLeadLabel = spaceType =>
+  `${
+    spaceType === SPACE_REVIEW
+      ? 'Reviewer Lead'
+      : getHostLeadLabel(spaceType, [SPACE_VERIFICATION, SPACE_GROUPS, SPACE_GOVERNMENT], [SPACE_ADMINISTRATOR])
+  }`
 
-const hostLeadLabel = spaceType => `${spaceType === SPACE_REVIEW ? 'Reviewer' : 'Host'} Lead`
-
-const guestLeadLabel = spaceType => `${spaceType === SPACE_REVIEW ? 'Sponsor' : 'Space'} Lead`
-
+const guestLeadLabel = spaceType => {
+  if ([SPACE_REVIEW, SPACE_GROUPS, SPACE_GOVERNMENT, SPACE_ADMINISTRATOR].includes(spaceType)) {
+    return `${
+      spaceType === SPACE_REVIEW
+        ? 'Sponsor Lead'
+        : getGuestLeadLabel(spaceType, [SPACE_VERIFICATION, SPACE_GROUPS, SPACE_GOVERNMENT], [SPACE_ADMINISTRATOR])
+    }`
+  } else {
+    return ''
+  }
+}
 
 class Activation extends React.Component {
   acceptClickHandler = () => {
@@ -55,6 +67,10 @@ class Activation extends React.Component {
     const hostLabel = hostLeadLabel(type)
     const guestLabel = guestLeadLabel(type)
 
+    const activationMessage = guestLead
+      ? `Both ${hostLabel} and ${guestLabel} must "Accept Space" to activate it.`
+      : `${hostLabel} must "Accept Space" to activate it.`
+
     return (
       <DefaultLayout>
         <div className="container-fluid pfda-padded-30 space-activation">
@@ -64,24 +80,22 @@ class Activation extends React.Component {
           <div className="space-members row">
             <div className="col-xs-6">
               <div className="space-members_role">{hostLabel}</div>
-              {
-                hostLead &&
+              {hostLead && (
                 <>
                   <div className="space-members_name">{hostLead.name}</div>
                   <div className="space-members_status">{acceptedLabel(hostLead.isAccepted)}</div>
                 </>
-              }
+              )}
             </div>
 
             <div className="col-xs-6">
               <div className="space-members_role">{guestLabel}</div>
-              {
-                guestLead &&
+              {guestLead && (
                 <>
                   <div className="space-members_name">{guestLead.name}</div>
                   <div className="space-members_status">{acceptedLabel(guestLead.isAccepted)}</div>
                 </>
-              }
+              )}
             </div>
 
             <div className="col-xs-6">
@@ -95,27 +109,22 @@ class Activation extends React.Component {
             </div>
           </div>
 
-          <div className="activation">
+          <div className="activation accept_space">
             <div className="activation__info">
               <Icon cssClasses="activation__icon" icon="fa-warning" />
               <div className="activation__label">
-                <div className="activation__big">
-                  This space has not yet been activated.
-                </div>
-                <div className="activation__small">
-                  Both {hostLabel} and {guestLabel} must {'"Accept Space"'} to activate it.
-                </div>
+                <div className="activation__big">This space has not yet been activated.</div>
+                <div className="activation__small">{activationMessage}</div>
               </div>
             </div>
-            {
-              !!currentUser &&
+            {!!currentUser && (
               <AcceptButton
                 disabled={isAccepting}
                 isAccepted={isAcceptedByUser}
                 isAccepting={isAccepting}
                 onClick={this.acceptClickHandler}
               />
-            }
+            )}
           </div>
         </div>
       </DefaultLayout>

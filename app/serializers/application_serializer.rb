@@ -18,6 +18,16 @@ class ApplicationSerializer < ActiveModel::Serializer
     object.license&.slice(:id, :uid, :title) || {}
   end
 
+  # Returns license pending status for the object
+  # @return [show_license_pending] true or false
+  def show_license_pending
+    if object.license&.approval_required
+      object.license_status?(current_user, "pending")
+    else
+      false
+    end
+  end
+
   # Check whether object could be licensed - means,
   # current_user is the owner of the object, independently of object scope
   def licenseable
@@ -54,29 +64,12 @@ class ApplicationSerializer < ActiveModel::Serializer
     current_membership&.role == "lead"
   end
 
-  # GET
-  # Returns url for object tracking.
-  # @param object.uid [String]
-  # @return [String] url.
-  def track_object
-    "/track?id=#{object.uid}"
-  end
-
   # POST
   # Returns url for object tracking.
   # @param object.uid [String]
   # @return [String] url.
   def publish_object
     "/publish?id=#{object.uid}"
-  end
-
-  # POST
-  # Returns url for object associating to the license.
-  # @param license_id [Integer]
-  # @param [object.uid] [Array of object uids]
-  # @return [String] url.
-  def licensed_object
-    "/licenses/:id/license_item?items_to_license=#{[object.uid]}"
   end
 
   # Returns a user who has created this app.

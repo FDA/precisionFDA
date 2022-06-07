@@ -5,7 +5,8 @@ import { BaseOperation } from '../../../utils'
 import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { errors, client } from '../../..'
-import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
+import { UserOpsCtx } from '../../../types'
 
 export type SyncFolderFilesOutput = {
   folderPath: string
@@ -14,11 +15,12 @@ export type SyncFolderFilesOutput = {
 }
 
 export class SyncFilesInFolderOperation extends BaseOperation<
+  UserOpsCtx,
   SyncFilesInFolderInput,
   SyncFolderFilesOutput
 > {
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
-    this.ctx.log.debug({ input }, 'input params')
+    this.ctx.log.debug({ input }, 'SyncFilesInFolderOperation input params')
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)
 
@@ -52,7 +54,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       folderId: input.folderId,
     })
     // just all REGULAR files in the project
-    // there will be conflicts with synced status and locallCreatedFiles
+    // there will be conflicts with synced status and locallyCreatedFiles
     // point is not to try to recreate them
     const locallyCreatedFiles = await fileRepo.findLocalFilesInProject({
       project: input.projectDxid,
@@ -72,15 +74,19 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     const toAdd = difference(remoteFileDxids, localFileDxids)
     const toRemove = difference(localFileDxids, remoteFileDxids)
 
-    this.ctx.log.debug({ localFileDxids, folderPath }, 'local files detected in given subfolder')
-    this.ctx.log.debug({ remoteFileDxids, folderPath }, 'remote files detected in given subfolder')
+    if (localFileDxids.length > 0) {
+      this.ctx.log.debug({ localFileDxids, folderPath }, 'SyncFilesInFolderOperation: Local files detected in given subfolder')
+    }
+    if (remoteFileDxids.length > 0) {
+      this.ctx.log.debug({ remoteFileDxids, folderPath }, 'SyncFilesInFolderOperation: Remote files detected in given subfolder')
+    }
     this.ctx.log.info(
       { folderPath, toAdd, toRemove },
-      'files detected to add/remove under given subfolder path',
+      'SyncFilesInFolderOperation: Files detected to add/remove under given subfolder path',
     )
     this.ctx.log.info(
       { locallyCreatedFileDxids, folderPath },
-      'Local NORMAL type files to consider',
+      'SyncFilesInFolderOperation: Local NORMAL type files to consider',
     )
 
     // update existing files
@@ -94,6 +100,11 @@ export class SyncFilesInFolderOperation extends BaseOperation<
           details: { fileId: userfile.id },
         })
       }
+      this.ctx.log.info(
+        { localFile: userfile, remoteFile: remoteState.describe },
+        'SyncFilesInFolderOperation: Updating file metadata',
+      )
+
       // we test name and size fields
       if (userfile.name !== remoteState.describe!.name) {
         // console.log('updating file name')
@@ -101,6 +112,9 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       }
       if (userfile.fileSize !== remoteState.describe!.size) {
         userfile.fileSize = remoteState.describe!.size
+      }
+      if (userfile.state !== remoteState.describe!.state) {
+        userfile.state = remoteState.describe!.state
       }
     })
 
@@ -117,7 +131,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
         if (locallyCreatedFileDxids.includes(dxid)) {
           this.ctx.log.warn(
             { dxid },
-            'File already exists in local database, but it is not HTTPS file. Recreating would crash the op.',
+            'SyncFilesInFolderOperation: File already exists in local database, but it is not HTTPS file. Recreating would crash the op.',
           )
           return
         }
@@ -128,7 +142,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
         if (remoteDetails.describe && !remoteDetails.describe.size) {
           this.ctx.log.warn(
             { file: remoteDetails },
-            'File may be in a wrong state, size property is missing',
+            'SyncFilesInFolderOperation: File may be in a wrong state, size property is missing',
           )
         }
         const newFile = wrap(new UserFile(em.getReference(User, this.ctx.user.id))).assign(
@@ -143,7 +157,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
             parentType: PARENT_TYPE.JOB,
             parentId: input.parentId,
             parentFolderId: current?.id,
-            state: FILE_STATE.CLOSED,
+            state: remoteDetails?.describe?.state ?? FILE_STATE_DX.CLOSED,
             stiType: FILE_STI_TYPE.USERFILE,
             entityType: FILE_ORIGIN_TYPE.HTTPS,
           },

@@ -6,7 +6,7 @@ import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { MemberChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
-import { OpsCtx } from '@pfda/https-apps-shared/src/types'
+import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
@@ -19,7 +19,7 @@ describe('member-change.handler', () => {
   let app: App
   let job: Job
   let space: Space
-  let ctx: OpsCtx
+  let ctx: UserOpsCtx
   let anotherUserMembership: SpaceMembership
   const emailConfig = EMAIL_CONFIG.memberChangedAddedRemoved
 
@@ -31,7 +31,7 @@ describe('member-change.handler', () => {
     user = create.userHelper.create(em, { email: generate.random.email() })
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
 
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
     create.spacesHelper.addMember(em, { user, space })
@@ -245,7 +245,7 @@ describe('member-change.handler', () => {
       }
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       const key = handler.getNotificationKey()
-      expect(key).to.equal('member_added_or_removed_from_space')
+      expect(key).to.equal('member_added_to_space')
     })
 
     it('based on space event type (member changed)', async () => {

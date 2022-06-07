@@ -7,6 +7,9 @@ const getLogger = (name = 'pino-logger-name'): pino.Logger =>
     prettyPrint: config.logs.pretty ? { translateTime: true } : false,
     level: config.logs.level,
     // todo: serializers
+    serializers: {
+      error: pino.stdSerializers.err
+    },
   })
 
 const defaultLogger = getLogger()

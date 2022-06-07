@@ -79,6 +79,7 @@ Footer.propTypes = {
   setBlobs: PropTypes.func.isRequired,
   spaceId: PropTypes.number,
   uploadInProgress: PropTypes.bool,
+  uploadDisabled: PropTypes.bool,
   scope: PropTypes.string,
   onClose: PropTypes.func,
 }

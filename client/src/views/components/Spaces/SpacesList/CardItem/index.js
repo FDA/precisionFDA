@@ -6,49 +6,66 @@ import SpaceListShape from '../../../../shapes/SpaceListShape'
 import TagsList from '../../../TagsList'
 import Switcher from './Switcher'
 import DataContainer from './DataContainer'
+// eslint-disable-next-line
 import './style.sass'
 
+const CardItem = ({ space, lockToggleHandler }) => {
+  const chackExclusiveSpace = space.hasPrivate && space.private.isExclusive
+  const spaceArea = chackExclusiveSpace ? space.private : space.shared
 
-const CardItem = ({ space, lockToggleHandler }) => (
-  <div className="spaces-list-card">
-    <div className="spaces-list-card__header">
-      <div className="spaces-list-card__title">
-        { space.shared.links.show ?
-          <Link to={`/spaces/${space.shared.id}`}>{space.shared.name}</Link> :
-          <span>{space.shared.name}</span>
-        }
-      </div>
-      <div>
-        <Switcher space={space.shared} lockToggleHandler={lockToggleHandler} />
-      </div>
-    </div>
-
-    <div className="spaces-list-card__desc">
-      <div className="spaces-list-card__desc-text">{space.shared.desc}</div>
-      <div>
-        <TagsList tags={space.shared.tags} />
-      </div>
-    </div>
-
-    <div className="row pfda-mr-t10">
-      <div className="pull-right">
-        <div className="spaces-list-card__date">
-          <div className="spaces-list-card__date-label">Created on:</div>
-          <div className="spaces-list-card__date-value">{space.shared.createdAt}</div>
+  return (
+    <div className="spaces-list-card">
+      <div className="spaces-list-card__header">
+        <div className="spaces-list-card__title">
+          {spaceArea.links.show ? (
+            <Link
+              to={`/spaces/${spaceArea.id}`}
+              aria-label={`This link will navigate to ${spaceArea.name} Space`}
+            >
+              {spaceArea.name}
+            </Link>
+          ) : (
+            <span>{spaceArea.name}</span>
+          )}
         </div>
-        <div className="spaces-list-card__date">
-          <div className="spaces-list-card__date-label">Modified on:</div>
-          <div className="spaces-list-card__date-value">{space.shared.updatedAt}</div>
+        <div>
+          <Switcher space={spaceArea} lockToggleHandler={lockToggleHandler} />
         </div>
       </div>
-    </div>
 
-    <div className="spaces-list-card__body">
-      {(space.hasPrivate) && <DataContainer space={space.private} />}
-      <DataContainer space={space.shared} />
+      <div className="spaces-list-card__desc">
+        <div className="spaces-list-card__desc-text">{spaceArea.desc}</div>
+        <div>
+          <TagsList tags={spaceArea.tags} />
+        </div>
+      </div>
+
+      <div className="row pfda-mr-t10">
+        <div className="pull-right">
+          <div className="spaces-list-card__date">
+            <div className="spaces-list-card__date-label">Created on:</div>
+            <div className="spaces-list-card__date-value">
+              {spaceArea.createdAt}
+            </div>
+          </div>
+          <div className="spaces-list-card__date">
+            <div className="spaces-list-card__date-label">Modified on:</div>
+            <div className="spaces-list-card__date-value">
+              {spaceArea.updatedAt}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="spaces-list-card__body">
+        {(space.hasPrivate || space.isExclusive) && (
+          <DataContainer space={space.private} />
+        )}
+        {!spaceArea.isExclusive && <DataContainer space={space.shared} />}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default CardItem
 

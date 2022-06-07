@@ -44,7 +44,7 @@ class ChallengeResource < ApplicationRecord
   def rename(new_name, context)
     if editable_by?(context)
       DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(dxid, "rename", {project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT, name: new_name})
-      user_file.update_attributes(name: new_name)
+      user_file.update(name: new_name)
     else
       false
     end

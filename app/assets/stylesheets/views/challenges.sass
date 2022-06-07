@@ -1,4 +1,6 @@
 @import "_common"
+@import "../../../client/src/styles/variables.sass"
+@import "../variables/_brand_variables.scss"
 
 .pfda-controller-challenges.pfda-action-edit_page
   [data-editable].container
@@ -298,3 +300,32 @@ th.ce-element--type-table-cell
 
   .challenge-description
     font-weight: 300
+  
+select[disabled].disabledTextColor, input[disabled].disabledTextColor
+  color: $color-disabledBlackTextOnGrey
+
+.challenges-description
+  color: $color-blacktextOnWhite !important
+
+.challenge-upload-image-text
+  color: $color-blacktextOnWhite !important
+
+.challenges-announce-result
+  background-color: $color-brownOnWhite !important
+  border-color: $color-borderBrownOnWhite !important
+
+.remediation-page-header
+  font-weight: 500
+  color: $color-darkGreyOnGrey !important
+
+.upload-modal-remediated-color
+  color: $color-darkblueOnLightBlue !important
+
+.remediated-uploadbutton-color
+  background-color: $color-buttonGreenOnWhite !important
+
+.tab-label.navigation-header-grey
+  color: $color-greyOnLightBlue !important
+
+.active a.tab-label.navigation-header-grey
+  color: $brand-blue-primary !important

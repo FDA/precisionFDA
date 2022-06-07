@@ -1,0 +1,59 @@
+import { Maybe } from "../../../types"
+import { WorkerBaseOperation } from "../../../utils/base-operation"
+import { DbCluster, SyncDbClusterOperation } from ".."
+import { queue } from "../../../"
+import { User } from "../../user/user.entity"
+import { reportNonTerminatedDbClustersTemplate, ReportNonTerminatedDbClustersTemplateInput } from "../../email/templates/mjml/report-non-terminated-dbclusters.template"
+import { EmailSendInput, EMAIL_TYPES } from "../../email/email.config"
+import { buildEmailTemplate } from "../../email/email.helper"
+import { invertObj } from "ramda"
+import { STATUS, STATUSES } from "../../db-cluster/db-cluster.enum"
+import { OpsCtx } from "../../../types"
+
+export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
+  OpsCtx,
+  undefined,
+  Maybe<DbCluster[]>
+> {
+  
+  async run() {
+    const em = this.ctx.em
+    const dbClusterRepo = em.getRepository(DbCluster)
+    const nonTerminatedDbClusters = await dbClusterRepo.find({}, {
+      filters: ['isNonTerminal'],
+      orderBy: { createdAt: 'DESC' },
+      populate: ['user'],
+    })
+    nonTerminatedDbClusters.forEach(async (nonTerminatedDbCluster) => {
+      const dbSyncOperation = await queue.getStatusQueue().getJob(SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid))
+      if (!dbSyncOperation) {
+        // TODO how to treat this scenario - don't have user ctx
+        // TODO(samuel) - possibly solve this later
+        console.log('Missing sync operation for unterminated database')
+      }
+    })
+    const adminUser = await em.getRepository(User).findAdminUser()
+    const emailTemplate = reportNonTerminatedDbClustersTemplate
+    const body = buildEmailTemplate<ReportNonTerminatedDbClustersTemplateInput>(emailTemplate, {
+      receiver: adminUser,
+      content: {
+        nonTerminatedDbClusters: nonTerminatedDbClusters.map((dbcluster) => ({
+          uid: dbcluster.uid,
+          name: dbcluster.name,
+          dxuser: dbcluster.user.getEntity().dxuser,
+          status: STATUSES[invertObj(STATUS)[dbcluster.status]],
+          dxInstanceClass: dbcluster.dxInstanceClass,
+          duration: dbcluster.elapsedTimeSinceCreationString()
+        }))
+      },
+    })
+    const email: EmailSendInput = {
+      emailType: EMAIL_TYPES.nonTerminatedDbClusters,
+      to: adminUser.email,
+      body,
+      subject: 'Non-terminated dbclusters',
+    }
+    await queue.createSendEmailTask(email, undefined)
+    return nonTerminatedDbClusters
+  }
+}

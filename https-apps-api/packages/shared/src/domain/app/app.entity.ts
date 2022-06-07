@@ -62,7 +62,7 @@ export class App extends BaseEntity {
   appSeriesId: number
 
   // references
-  @ManyToOne({ serializedName: 'userId' })
+  @ManyToOne({ entity: () => User, serializedName: 'userId' })
   user!: IdentifiedReference<User>
 
   @OneToMany({ entity: () => Job, mappedBy: 'app' })
@@ -70,6 +70,14 @@ export class App extends BaseEntity {
 
   @Enum()
   entityType: ENTITY_TYPE;
+
+  isRegular() {
+    return this.entityType === ENTITY_TYPE.NORMAL
+  }
+
+  isHTTPS() {
+    return this.entityType === ENTITY_TYPE.HTTPS
+  }
 
   [EntityRepositoryType]?: AppRepository
 

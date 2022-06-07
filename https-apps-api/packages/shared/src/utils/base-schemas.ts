@@ -19,6 +19,20 @@ const idInputSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
+const getDxidsInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'ids') => ({
+  type: 'object',
+  properties: {
+    [paramName]: {
+      type: 'array',
+      uniqueItems: true,
+      items: dxidProp,
+      minItems: 1,
+    }
+  },
+  required: [paramName],
+  additionalProperties: false,
+})
+
 const getDxidInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'id') => ({
   type: 'object',
   properties: {
@@ -52,6 +66,7 @@ const paginationSchema: JSONSchema7 = {
 const schemas = {
   userContextSchema,
   getDxidInputSchema,
+  getDxidsInputSchema,
   idInputSchema,
   idProp,
   dxidProp,

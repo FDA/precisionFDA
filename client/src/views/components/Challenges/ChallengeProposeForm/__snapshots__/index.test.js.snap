@@ -47,10 +47,14 @@ exports[`ChallengeProposeForm matches snapshot 1`] = `
       options={
         Array [
           Object {
+            "ariaLabel": "Select Yes to specific scientific question driving the challenge",
+            "htmlFor": "Opt Yes to specific scientific question driving the challenge",
             "label": "Yes",
             "value": "Yes",
           },
           Object {
+            "ariaLabel": "Select No to specific scientific question driving the challenge",
+            "htmlFor": "Opt No to specific scientific question driving the challenge",
             "label": "No",
             "value": "No",
           },
@@ -58,6 +62,7 @@ exports[`ChallengeProposeForm matches snapshot 1`] = `
       }
     />
     <TextareaField
+      aria_label="Please provide details for any scientific questions"
       disabled={false}
       label="Please provide details"
       name="specific_question_text"
@@ -73,10 +78,14 @@ exports[`ChallengeProposeForm matches snapshot 1`] = `
       options={
         Array [
           Object {
+            "ariaLabel": "Select Yes for access to data for the challenge",
+            "htmlFor": "Opt Yes to access to data for the challenge",
             "label": "Yes",
             "value": "Yes",
           },
           Object {
+            "ariaLabel": "Select No for access to data for the challenge",
+            "htmlFor": "Opt No to access to data for the challenge",
             "label": "No",
             "value": "No",
           },
@@ -84,6 +93,7 @@ exports[`ChallengeProposeForm matches snapshot 1`] = `
       }
     />
     <TextareaField
+      aria_label="Please provide details about data for the challenge"
       disabled={false}
       label="Please provide details about the data (e.g. data type, sample number, etc)"
       name="data_details_text"

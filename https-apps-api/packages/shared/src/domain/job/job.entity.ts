@@ -1,6 +1,7 @@
 import {
   Entity,
   EntityRepositoryType,
+  Filter,
   IdentifiedReference,
   JsonType,
   ManyToOne,
@@ -11,11 +12,29 @@ import {
 import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
-import { JOB_STATE } from './job.enum'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
+import { formatDuration, isStateActive, isStateTerminal } from './job.helper'
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
+@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
+// Tried the following but didn't work
+// @Filter({ name: 'isActive', cond: { $or: [ ACTIVE_STATES.map(x => { return { 'state': x } }) ]}})
+// @Filter({ name: 'isTerminal', cond: { $or: [ TERMINAL_STATES.map(x => { return { 'state': x } }) ]}})
+@Filter({ name: 'isActive', cond: { $or: [
+  { 'state': JOB_STATE.IDLE },
+  { 'state': JOB_STATE.RUNNING },
+]}})
+@Filter({ name: 'isNonTerminal', cond: { $or: [
+  { 'state': JOB_STATE.IDLE },
+  { 'state': JOB_STATE.RUNNING },
+  { 'state': JOB_STATE.TERMINATING },
+]}})
+@Filter({ name: 'isTerminal', cond: { $or: [
+  { 'state': JOB_STATE.DONE },
+  { 'state': JOB_STATE.TERMINATED },
+]}})
 export class Job extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -38,10 +57,17 @@ export class Job extends BaseEntity {
   @Property()
   entityType: number
 
+  @Property()
+  terminationEmailSent: boolean
+
   @Property({ hidden: true })
   runData: string
 
-  @Property({ hidden: true })
+  @Property({
+    hidden: true,
+    onCreate: (entity: Job) => entity.parseJobDescribe(),
+    onUpdate: (entity: Job) => entity.parseJobDescribe(),
+  })
   describe: string
 
   @Property({ type: JsonType, hidden: true })
@@ -57,15 +83,20 @@ export class Job extends BaseEntity {
   @Property({ hidden: true })
   localFolderId: number
 
-  // @Property()
-  // analysisId: number
+  // @ManyToOne()
+  // analysis?: IdentifiedReference<Analysis>
 
   // relations
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
-  @ManyToOne()
-  app!: IdentifiedReference<App>;
+  // App could be null if this job is associated with an analysis (workflow) instead
+  // or if the app was deleted from the database
+  @ManyToOne({ entity: () => App, nullable: true })
+  app?: IdentifiedReference<App>
+
+  // @ManyToOne()
+  // appSeries!: IdentifiedReference<AppSeries>
 
   // pivot table key names are mismatched and this does not work :(
   // @ManyToMany({
@@ -85,4 +116,76 @@ export class Job extends BaseEntity {
       this.app = Reference.create(app)
     }
   }
+
+  isRegular(): boolean {
+    return this.entityType === JOB_DB_ENTITY_TYPE.REGULAR
+  }
+
+  isHTTPS(): boolean {
+    return this.entityType === JOB_DB_ENTITY_TYPE.HTTPS
+  }
+
+  isActive(): boolean {
+    return isStateActive(this.state)
+  }
+
+  isTerminal(): boolean {
+    return isStateTerminal(this.state)
+  }
+
+  // Calculated as the time during which the job stayed in running state
+  runTime(): number {
+    if (!this.startedRunning) {
+      return 0
+    }
+    if (!this.stoppedRunning) {
+      return new Date().getTime() - this.startedRunning
+    }
+    return this.stoppedRunning - this.startedRunning
+  }
+
+  runTimeString(): string {
+    return formatDuration(this.runTime())
+  }
+
+  elapsedTimeSinceCreation(): number {
+    return new Date().getTime() - this.createdAt.getTime()
+  }
+
+  elapsedTimeSinceCreationString(): string {
+    return formatDuration(this.elapsedTimeSinceCreation())
+  }
+
+  parseJobDescribe() {
+    if (!this.describe) {
+      return this.describe
+    }
+
+    try {
+      const parsedJSON = JSON.parse(this.describe)
+      this.startedRunning = parsedJSON.startedRunning
+      this.stoppedRunning = parsedJSON.stoppedRunning
+      this.failureReason = parsedJSON.failureReason
+      this.failureMessage = parsedJSON.failureMessage
+    }
+    catch {
+      console.log(`Error parsing job describe: ${this.describe}`)
+    }
+    // onCreate / onUpdate needs a return value
+    return this.describe
+  }
+
+  // Properties extracted from job describe
+  //
+  @Property({ persist: false })
+  startedRunning: number
+
+  @Property({ persist: false })
+  stoppedRunning: number
+
+  @Property({ persist: false, serializedName: 'failure_reason' })
+  failureReason: string
+
+  @Property({ persist: false, serializedName: 'failure_message' })
+  failureMessage: string
 }

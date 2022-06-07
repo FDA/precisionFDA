@@ -1,68 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ChallengeProposePage test should render 1`] = `
-<PublicLayout>
-  <NavigationBar
-    subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."
-    title="Challenges"
-  />
-  <div
-    className="challenge-propose-main-container"
-  >
-    <div
-      className="left-column"
-    >
-      <h1
-        className="pfda-section-heading"
-      >
-        Propose a Challenge
-      </h1>
-      <p>
-        Do you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to put in front of the precisionFDA expert community.
-      </p>
-      <p>
-        Feel free to let us know! We would love to discuss this with you.
-      </p>
-    </div>
-    <div
-      className="middle-column"
-    >
-      <Connect(ChallengeProposeForm) />
-    </div>
-    <div
-      className="right-column"
-    >
-      <CollapsibleMenu
-        options={
-          Array [
-            Object {
-              "onClick": [Function],
-              "text": "Currently Open",
-            },
-            Object {
-              "onClick": [Function],
-              "text": "Upcoming",
-            },
-            Object {
-              "onClick": [Function],
-              "text": "Propose a Challenge",
-            },
-          ]
-        }
-        title="Challenges"
-      />
-      <hr />
-      <div
-        className="pfda-subsection-heading"
-      >
-        PREVIOUS CHALLENGES
-      </div>
-      <ChallengesYearList
-        elementName="challenges"
-        query={[Function]}
-        setYearHandler={[Function]}
-      />
-    </div>
-  </div>
-</PublicLayout>
+<ContextProvider
+  value={
+    Object {
+      "store": Object {
+        "clearActions": [Function],
+        "dispatch": [Function],
+        "getActions": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+      },
+      "subscription": Object {
+        "addNestedSub": [Function],
+        "getListeners": [Function],
+        "handleChangeWrapper": [Function],
+        "isSubscribed": [Function],
+        "notifyNestedSubs": [Function],
+        "onStateChange": [Function],
+        "trySubscribe": [Function],
+        "tryUnsubscribe": [Function],
+      },
+    }
+  }
+>
+  <ChallengeProposePage />
+</ContextProvider>
 `;

@@ -24,12 +24,6 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "isDisabled": true,
-          "link": undefined,
-          "method": "post",
-          "text": "Authorize URL",
-        },
-        Object {
-          "isDisabled": true,
           "link": "undefined&scope=public",
           "method": "post",
           "text": "Make public",
@@ -83,7 +77,7 @@ exports[`ActionsDropdown test should render 1`] = `
     attachAction={[Function]}
     hideAction={[Function]}
     ids={Array []}
-    itemsType="APP"
+    itemsType="ASSET"
   />
   <HomeEditTagsModal
     name=""

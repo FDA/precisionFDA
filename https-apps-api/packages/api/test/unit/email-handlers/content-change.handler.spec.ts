@@ -12,7 +12,7 @@ import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { ContentChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
-import { OpsCtx } from '@pfda/https-apps-shared/src/types'
+import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
@@ -25,7 +25,7 @@ describe('content-change.handler', () => {
   let anotherUser: User
   let app: App
   let job: Job
-  let ctx: OpsCtx
+  let ctx: UserOpsCtx
   let space: Space
   let spaceEventJobAdded: SpaceEvent
   let anotherUserMembership: SpaceMembership
@@ -39,7 +39,7 @@ describe('content-change.handler', () => {
     user = create.userHelper.create(em, { email: generate.random.email() })
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
 
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
     create.spacesHelper.addMember(em, { user, space })
@@ -80,7 +80,7 @@ describe('content-change.handler', () => {
 
     it('based on user settings', async () => {
       // the key prefix has to match anotherUsers role in the space
-      const settings = { all_content_added_or_deleted: false } as const
+      const settings = { reviewer_comment_activity: true } as const
       const settingsEntity = new EmailNotification({ user: anotherUser })
       settingsEntity.data = settings
       anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
@@ -89,7 +89,7 @@ describe('content-change.handler', () => {
       const input = { spaceEventId: spaceEventJobAdded.id }
       const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
       const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(0)
+      expect(receivers).to.have.lengthOf(1)
     })
 
     it('notifications default value = true', async () => {

@@ -1,4 +1,6 @@
-require 'spec_helper'
+require "spec_helper"
+require "factory_bot_rails"
+require "shoulda/matchers"
 
 ENV['RAILS_ENV'] ||= 'test'
 ENV['ADMIN_TOKEN'] ||= 'admin_token'
@@ -6,7 +8,7 @@ ENV['CHALLENGE_BOT_TOKEN'] ||= 'challenge_bot_token'
 
 require_relative '../config/environment'
 
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+abort("The Rails environment is running in production mode!") if Utils.aws_env?
 
 require 'rspec/rails'
 

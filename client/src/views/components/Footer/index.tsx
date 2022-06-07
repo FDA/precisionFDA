@@ -22,6 +22,23 @@ const StyledFooter = styled.footer`
   display: grid;
   grid-template-columns: ${theme.sizing.largeColumnWidth} 1fr;
   padding: ${theme.padding.mainContentVertical} ${theme.padding.mainContentHorizontal};
+  font-size: 14px;
+  line-height: 1.428571429;
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: -5px;
+    margin-top: 0;
+  }
+  li {
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  p {
+    margin: 0 0 10px;
+    color: #555555;
+  }
 `
 
 const StyledFooterAddress = styled.div`
@@ -59,7 +76,7 @@ const PFDAFooter = () => {
               <li><ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin"> LinkedIn</ExternalLink></li>
             </ul>
             <ul className="list-inline">
-              <li><a href="http://www.fda.gov/" target="_blank" title="FDA Home Page">FDA</a></li>
+              <li><a href="http://www.fda.gov/" target="_blank" title="FDA Home Page" aria-label='Navigate to the FDA home page in another window'>FDA</a></li>
               <li className="text-muted" aria-hidden="true">|</li>
               <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm" target="_blank" title="Accessibility">Accessibility</a></li>
               <li><a href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm" target="_blank" title="FDA Basics">Basics</a></li>

@@ -7,7 +7,7 @@ import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { APP_HTTPS_SUBTYPE, APP_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /apps', () => {
@@ -21,14 +21,14 @@ describe.skip('GET /apps', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user })
+    app = create.appHelper.createHTTPS(em, { user })
     await em.flush()
     // handle the stubs
     mocksReset()
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .get('/apps')
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -55,10 +55,10 @@ describe.skip('GET /apps', () => {
 
   it('returns only apps of given user', async () => {
     const anotherUser = create.userHelper.create(em)
-    const anotherApp = create.appHelper.create(em, { user: anotherUser })
+    const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
     await em.flush()
 
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .get('/apps')
       .query({ ...getDefaultQueryData(anotherUser) })
       .expect(200)

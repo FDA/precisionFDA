@@ -3,8 +3,20 @@ import type { SendEmailJob } from '../../../queue/task.input'
 import * as helper from '../email.helper'
 import { config } from '../../../config'
 import { emailClient } from '../../../services/salesforce.service'
+import { getBullJobIdForEmailOperation } from '../email.helper'
+import { EMAIL_TYPES } from '../email.config'
+import { OpsCtx } from '../../../types'
 
-export class EmailSendOperation extends WorkerBaseOperation<SendEmailJob['payload'], boolean> {
+export class EmailSendOperation extends WorkerBaseOperation<
+  OpsCtx,
+  SendEmailJob['payload'],
+  boolean
+> {
+
+  static getBullJobId = (emailType: EMAIL_TYPES, customSuffix?: string): string => {
+    return getBullJobIdForEmailOperation(emailType, customSuffix)
+  }
+
   async run(input: SendEmailJob['payload']): Promise<boolean> {
     if (config.emails.salesforce.isEnabled) {
       try {

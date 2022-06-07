@@ -12,7 +12,7 @@ import {
 } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe('POST /apps/:id/run', () => {
@@ -26,14 +26,14 @@ describe('POST /apps/:id/run', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     await em.flush()
     // handle the stubs
     mocksReset()
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
@@ -54,7 +54,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('builds json fields in the db', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
@@ -85,7 +85,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('response shape - ttyd app (still user.private project)', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runTtydAppInput())
@@ -113,7 +113,7 @@ describe('POST /apps/:id/run', () => {
         snapshot: snapshotFile.uid,
       },
     }
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(input)
@@ -142,7 +142,7 @@ describe('POST /apps/:id/run', () => {
       })
   })
 
-  it('accepts all input params (uses all overrides and optionals)', async () => {
+  it('accepts params for jupyter app (uses all overrides and optionals)', async () => {
     const inputComplete = {
       ...generate.app.runAppInput(),
       instanceType: 'himem-2',
@@ -154,7 +154,7 @@ describe('POST /apps/:id/run', () => {
         cmd: 'my-command-override',
       },
     }
-    await supertest(api.getServer())
+    await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(inputComplete)
@@ -175,8 +175,37 @@ describe('POST /apps/:id/run', () => {
       })
   })
 
+  it('accepts params for ttyd app', async () => {
+    const ttydApp = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.ttydAppSpecData() })
+    await em.flush()
+    const ttydAppInput = {
+      ...generate.app.runTtydAppInput(),
+      instanceType: 'himem-2',
+      name: 'my-ttyd',
+      input: {
+        port: 8081,
+      },
+    }
+    const { body } = await supertest(getServer())
+      .post(`/apps/${ttydApp.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(ttydAppInput)
+      .expect(201)
+
+    const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(platformCall).to.have.property('name', ttydAppInput.name)
+    expect(platformCall).to.have.property('input').that.deep.equals({
+      port: ttydAppInput.input.port,
+    })
+    expect(platformCall)
+      .to.have.property('systemRequirements')
+      .that.deep.equals({
+        '*': { instanceType: allowedInstanceTypes[ttydAppInput.instanceType] },
+      })
+  })
+
   it('accepts params for rshiny app', async () => {
-    const rshinyApp = create.appHelper.create(em, { user }, { ...generate.app.rshiny() })
+    const rshinyApp = create.appHelper.createHTTPS(em, { user }, { ...generate.app.rshiny() })
     const gzipFile = create.filesHelper.create(em, { user })
     await em.flush()
     const input = {
@@ -185,7 +214,7 @@ describe('POST /apps/:id/run', () => {
         app_gz: gzipFile.uid,
       },
     }
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/apps/${rshinyApp.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(input)
@@ -217,7 +246,7 @@ describe('POST /apps/:id/run', () => {
       scope: 'private',
       input: {},
     }
-    await supertest(api.getServer())
+    await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(inputComplete)
@@ -234,7 +263,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('calls the platform API', async () => {
-    await supertest(api.getServer())
+    await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
@@ -243,13 +272,13 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('calls queue helper', async () => {
-    const { body } = await supertest(api.getServer())
+    const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
       .expect(201)
-    expect(fakes.queue.createJobSyncTaskFake.calledOnce).to.be.true()
-    const fakeCallArgs = fakes.queue.createJobSyncTaskFake.getCall(0).args
+    expect(fakes.queue.createSyncJobStatusTaskFake.calledOnce).to.be.true()
+    const fakeCallArgs = fakes.queue.createSyncJobStatusTaskFake.getCall(0).args
     expect(fakeCallArgs[0]).to.deep.equal({
       dxid: body.dxid,
     })
@@ -264,7 +293,7 @@ describe('POST /apps/:id/run', () => {
 
   context('error states', () => {
     it('throws 404 when user does not exist', async () => {
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/apps/${app.dxid}/run`)
         .query({
           ...getDefaultQueryData(user),
@@ -272,13 +301,13 @@ describe('POST /apps/:id/run', () => {
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
     })
 
     it('throws 404 when user does not have the project set', async () => {
       user.privateFilesProject = null
       await em.flush()
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/apps/${app.dxid}/run`)
         .query({
           ...getDefaultQueryData(user),
@@ -286,45 +315,45 @@ describe('POST /apps/:id/run', () => {
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
     })
 
     // deprecated, admin owns the apps
     it.skip('throws 401 when user does not own the app', async () => {
       const anotherUser = create.userHelper.create(em)
-      const anotherApp = create.appHelper.create(em, { user: anotherUser })
+      const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
       await em.flush()
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/apps/${anotherApp.dxid}/run`)
         .query({
           ...getDefaultQueryData(user),
         })
         .send(generate.app.runAppInput())
-      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 if requested app does not follow the requirements', async () => {
-      const anotherApp = create.appHelper.create(em, { user }, { scope: 'private' })
+      const anotherApp = create.appHelper.createHTTPS(em, { user }, { scope: 'private' })
       await em.flush()
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/apps/${anotherApp.dxid}/run`)
         .query({
           ...getDefaultQueryData(user),
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 when snapshot is provided but file does not exist', async () => {
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .post(`/apps/${app.dxid}/run`)
         .query({
           ...getDefaultQueryData(user),
         })
         .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
     })
   })
 })

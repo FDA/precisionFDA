@@ -13,23 +13,29 @@
 
 class AcceptedLicense < ApplicationRecord
   include Auditor
+
+  STATUS_ACTIVE = "active".freeze
+  STATUS_PENDING = "pending".freeze
+
   belongs_to :license
   belongs_to :user
   has_many :licensed_items, through: :license
 
   def pending?
-    state == 'pending'
+    state == STATUS_PENDING
   end
 
   def active?
-    state.nil? || state == 'active'
+    state.nil? || state == STATUS_ACTIVE
   end
 
-  def self.pending
-    where(state: 'pending')
-  end
+  class << self
+    def pending
+      where(state: STATUS_PENDING)
+    end
 
-  def self.active
-    where(state: [nil, 'active'])
+    def active
+      where(state: [nil, STATUS_ACTIVE])
+    end
   end
 end

@@ -6,46 +6,75 @@ import classNames from 'classnames/bind'
 import Counter from './Counter'
 import UserShape from '../../../../shapes/UserShape'
 import SpaceShape from '../../../../shapes/SpaceShape'
-import { SPACE_REVIEW } from '../../../../../constants'
-
+import { getGuestLeadLabel, getHostLeadLabel } from '../../../../../helpers/spaces'
+import {
+  SPACE_ADMINISTRATOR,
+  SPACE_GOVERNMENT,
+  SPACE_GROUPS,
+  SPACE_PRIVATE_TYPE,
+  SPACE_REVIEW,
+  SPACE_VERIFICATION,
+} from '../../../../../constants'
 
 const UserLink = ({ user, helperText }) => (
   <div className="spaces-list-card-data__lead">
-    <a href={user.url}>
-      {`${user.name} ${helperText}`}
-    </a>
+    <a href={user.url}>{`${user.name} ${helperText}`}</a>
   </div>
 )
 
 const DataContainer = ({ space }) => {
-  const typeTitle = (space.isPrivate) ? 'Private Area' : 'Shared Area'
+  const typeTitle = space?.isPrivate || space.isExclusive ? 'Private Area' : 'Shared Area'
   const classes = classNames({
     'spaces-list-card-data': true,
-    'spaces-list-card-data--private': space.isPrivate,
-    'spaces-list-card-data--shared': !space.isPrivate,
+    'spaces-list-card-data--private': space?.isPrivate || space.isExclusive,
+    'spaces-list-card-data--shared': !space?.isPrivate && !space.isExclusive,
+    'spaces-list-card-data-margin': space?.type === SPACE_REVIEW,
   })
 
   return (
     <div className={classes}>
       <div className="pfda-padded-b10">
         <div className="spaces-list-card-data__title">
-          { space.links.show ?
-            <Link to={`/spaces/${space.id}`}>{typeTitle}</Link> :
+          {space.links.show ? (
+            <Link to={`/spaces/${space.id}`} aria-label={`Click this link to navigate to Space ID ${space.id} `}>
+              {typeTitle}
+            </Link>
+          ) : (
             <span>{typeTitle}</span>
-          }
+          )}
         </div>
       </div>
 
       <div className="spaces-list-card-data__leaders">
-        { (space.isPrivate && space.hostLead) &&
-          <UserLink user={space.hostLead} helperText="(Lead)" />
-        }
-        { (!space.isPrivate && space.hostLead) &&
-          <UserLink user={space.hostLead} helperText={`(${space.type === SPACE_REVIEW ? 'Reviewer' : 'Host'} Lead)`} />
-        }
-        { (!space.isPrivate && space.guestLead) &&
-          <UserLink user={space.guestLead} helperText={`(${space.type === SPACE_REVIEW ? 'Sponsor' : 'Space'} Lead)`} />
-        }
+        {space?.isPrivate && space.hostLead && <UserLink user={space.hostLead} helperText="(Lead)" />}
+        {!space?.isPrivate && space.hostLead && (
+          <UserLink
+            user={space.hostLead}
+            helperText={`(${
+              space.type === SPACE_REVIEW
+                ? 'Reviewer Lead'
+                : `${getHostLeadLabel(
+                    space.type,
+                    [SPACE_VERIFICATION, SPACE_GROUPS, SPACE_PRIVATE_TYPE, SPACE_GOVERNMENT],
+                    [SPACE_ADMINISTRATOR],
+                  )}`
+            })`}
+          />
+        )}
+        {!space?.isPrivate && space.guestLead && (
+          <UserLink
+            user={space.guestLead}
+            helperText={`(${
+              space.type === SPACE_REVIEW
+                ? 'Sponsor Lead'
+                : `${getGuestLeadLabel(
+                    space.type,
+                    [SPACE_VERIFICATION, SPACE_GROUPS, SPACE_PRIVATE_TYPE, SPACE_GOVERNMENT],
+                    [SPACE_ADMINISTRATOR],
+                  )}`
+            })`}
+          />
+        )}
       </div>
 
       <div className="spaces-list-card-data__counters">
@@ -55,13 +84,11 @@ const DataContainer = ({ space }) => {
         <Counter type="jobs" counter={space.counters.jobs} />
         <Counter type="members" counter={space.counters.members} />
       </div>
-
     </div>
   )
 }
 
 export default DataContainer
-
 
 DataContainer.propTypes = {
   space: PropTypes.exact(SpaceShape),

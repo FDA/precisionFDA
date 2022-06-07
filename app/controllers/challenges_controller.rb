@@ -2,7 +2,7 @@
 # rubocop:todo Metrics/ClassLength
 class ChallengesController < ApplicationController
   skip_before_action :require_login,
-                     only: %i(index consistency truth appathons join show)
+                     only: %i(index consistency truth appathons join show treasure_old)
   before_action :require_login_or_guest, only: []
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
@@ -13,6 +13,8 @@ class ChallengesController < ApplicationController
 
   def new
     @challenge = Challenge.new
+    time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
+    js time_zone: time_zone
   end
 
   def create
@@ -35,7 +37,8 @@ class ChallengesController < ApplicationController
   end
 
   def edit
-    js card_image_url: @challenge.card_image_url, card_image_id: @challenge.card_image_id
+    time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
+    js card_image_url: @challenge.card_image_url, card_image_id: @challenge.card_image_id, time_zone: time_zone
   end
 
   def update
@@ -55,7 +58,8 @@ class ChallengesController < ApplicationController
         flash[:success] = "The challenge was updated successfully."
         redirect_to challenge_path(@challenge)
       else
-        js update_challenge_params.to_h
+        time_zone = ActiveSupport::TimeZone.find_tzinfo(@context.user.time_zone).to_s
+        js update_challenge_params.to_h, time_zone: time_zone
         render action: :edit
       end
     end
@@ -133,7 +137,83 @@ class ChallengesController < ApplicationController
 
     js submissions: @submissions.map { |s| s.slice(:id, :name, :desc) }
   end
-  # rubocop:enable Metrics/MethodLength
+
+  # rubocop:todo Metrics/MethodLength
+  def treasure_old
+    @challenge = Challenge.find_by(name: "Hidden Treasures - Warm Up")
+
+    if @challenge.nil?
+      redirect_to challenges_path, alert: "Challenge was not found"
+      return
+    end
+
+    unless @challenge.accessible_by?(@context)
+      redirect_to challenges_path, alert: "You don't have permissions to view this challenge"
+      return
+    end
+
+    Job.sync_challenge_jobs!
+    @tab = unsafe_params[:tab]
+    @submissions = Submission.none
+    @my_entries = false
+    @csv = nil
+    @csv_names = nil
+    @csv_ids = nil
+    @headers = nil
+    @keys = nil
+
+    case @tab
+    when "submissions"
+      @submissions = @challenge.submissions.accessible_by_public
+    when "results"
+      unless @challenge.can_show_results?(@context)
+        redirect_to challenges_path
+        return
+      end
+
+      @submissions = @challenge.submissions.accessible_by_public
+      if @challenge.automated?
+        @results = @challenge.completed_submissions
+        @result_columns = @challenge.output_names
+      else
+        @csv = CSV.open(
+          Rails.root.join("app/assets/csvs/treasure_hunt_warm_up_results.csv"),
+          encoding: "bom|utf-8",
+        ).read
+
+        @vaf_spotter_ids = [8, 9, 12, 20, 21, 22, 23, 25, 32, 34, 35, 36, 37, 38, 41,
+                            49, 51, 79, 81, 89, 90, 96, 97, 98, 104, 110, 116, 120,
+                            122, 124, 143, 147, 149, 150, 155, 156, 157]
+        @headers = @csv.shift(7)
+        @keys = @headers.map(&:first)
+        @csv_ids, @csv_names = @csv.map { |row| row.shift.split(" ", 2) }.
+          map { |id, name| [id.to_i, name.to_s] }.transpose
+        # @vaf_submissions is no longer an ActiveRecord relation,
+        #   careful if you want to use wice_grid.
+        @vaf_results = @submissions.select { |s| @csv_ids.include?(s.id) }.
+          sort_by { |s| @csv_ids.index s.id }
+      end
+    when "my_entries"
+      @submissions = @challenge.submissions.editable_by(@context)
+      @my_entries = true
+    else
+      return
+    end
+
+    @submissions_grid = initialize_grid(@submissions,
+                                        name: "submissions",
+                                        order: "submissions.id",
+                                        order_direction: "desc",
+                                        per_page: 100)
+
+    @resources_grid = initialize_grid(@challenge.challenge_resources,
+                                      name: "resources",
+                                      order: "challenge_resources.updated_at",
+                                      order_direction: "desc",
+                                      per_page: 100)
+
+    js submissions: @submissions.map { |s| s.slice(:id, :name, :desc) }
+  end
 
   def announce_result
     @challenge.jobs.find_each do |job|

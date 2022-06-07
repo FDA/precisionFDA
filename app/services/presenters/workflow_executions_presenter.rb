@@ -23,8 +23,9 @@ module Presenters
     ORDER_PARAMS_MAP = {
       name: :name,
       username: :launched_by,
-      apptitle: :app_title,
+      app_title: :app_title,
       created_at: :created_at_date_time,
+      launched_on: :created_at_date_time,
     }.freeze
 
     # Instance of WorkflowExecutionsPresenter initializes with filter params from controller
@@ -121,7 +122,10 @@ module Presenters
 
     # filter all response records with +#matcher+ lambda selection within +@params+
     def filter_records
-      filters.key?(:workflow_title) && patch_keys
+      # For filtering by workflow_title
+      filters[:name] = filters.delete :workflow_title if filters.key?(:workflow_title)
+      # For filtering launched_by via 'username' to normalize execution filter keys with JobsFilter
+      filters[:launched_by] = filters.delete :username if filters.key?(:username)
       @response = response.each do |record|
         record[:jobs] = record.fetch(:jobs, []).select(&matcher)
       end
@@ -148,12 +152,6 @@ module Presenters
       to = from + (response.size % Paginationable::PAGE_SIZE) if to > response.size
 
       @response = @response[from..to]
-    end
-
-    # To be able to search by workflow_title.
-    #   It uses same table row for apps and workflows at client
-    def patch_keys # :nodoc:
-      filters[:name] = filters.delete :workflow_title
     end
   end
 end

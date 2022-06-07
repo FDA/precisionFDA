@@ -70,7 +70,6 @@ class User < ApplicationRecord
   has_many :challenge_resources
   has_many :analyses
   has_one :usage_metric
-  has_many :tasks
   has_many :workflows
   has_one :notification_preference
   has_one :profile, dependent: :destroy
@@ -271,6 +270,15 @@ class User < ApplicationRecord
 
   def is_challenge_evaluator?
     challenge_eval? || can_administer_site?
+  end
+
+  # Government user: check if user have fda.hhs.gov email
+  def self.government_email?(email)
+    email =~ URI::MailTo::EMAIL_REGEXP && email.split("@").last == "fda.hhs.gov"
+  end
+
+  def government_user?
+    User.government_email?(email)
   end
 
   def challenge_eval?

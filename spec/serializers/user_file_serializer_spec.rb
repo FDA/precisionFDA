@@ -29,7 +29,7 @@ describe UserFileSerializer do
 
     context "when user is not authenticated" do
       it "links[show, user, track] exist" do
-        expect(user_file_serialized["links"]["show"]).to eq(file_path(user_file))
+        expect(user_file_serialized["links"]["show"]).to eq("/files/#{user_file.uid}")
         expect(user_file_serialized["links"]["user"]).to eq(user_path(user.dxuser))
         expect(user_file_serialized["links"]["track"]).to eq("/track?id=#{user_file.uid}")
       end
@@ -45,9 +45,8 @@ describe UserFileSerializer do
         expect(user_file_serialized["links"]["update"]).to eq(api_files_path)
       end
 
-      it "links[download, link, publish] are nil" do
+      it "links[download, publish] are nil" do
         expect(user_file_serialized["links"]["download"]).to eq(download_api_file_path(user_file))
-        expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
         expect(user_file_serialized["links"]["publish"]).to be_nil
       end
 
@@ -101,10 +100,9 @@ describe UserFileSerializer do
             )
           end
 
-          it "links[download, link, copy] exist" do
+          it "links[download, copy] exist" do
             expect(user_file_serialized["links"]["download"]).
               to eq(download_api_file_path(user_file))
-            expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
             expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
           end
 
@@ -134,11 +132,9 @@ describe UserFileSerializer do
               expect(user_file).to be_owned_by_user(user)
             end
 
-            it "links[publish, rename] exist" do
+            it "links[publish] exist" do
               expect(user_file_serialized["links"]["publish"]).
                 to eq("/publish?id=#{user_file.uid}")
-              expect(user_file_serialized["links"]["rename"]).
-                to eq(rename_file_path(user_file))
             end
 
             it "links[remove, organize] exist" do
@@ -206,10 +202,9 @@ describe UserFileSerializer do
           context "when license does not owned by user" do
             before { user_file.license.update(user_id: nil) }
 
-            it "links[download, link, copy] exist" do
+            it "links[download, copy] exist" do
               expect(user_file_serialized["links"]["download"]).
                 to eq(download_api_file_path(user_file))
-              expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
               expect(user_file_serialized["links"]["copy"]).to eq(copy_api_files_path)
             end
           end
@@ -280,10 +275,9 @@ describe UserFileSerializer do
         allow(user).to receive(:logged_in?).and_return(true)
       end
 
-      it "links[download, link, publish] exist" do
+      it "links[download, publish] exist" do
         expect(user_file_serialized["links"]["download"]).
           to eq(download_api_file_path(user_file))
-        expect(user_file_serialized["links"]["link"]).to eq(link_file_path(user_file))
         expect(user_file_serialized["links"]["publish"]).to eq("/publish?id=#{user_file.uid}")
       end
 
@@ -303,8 +297,7 @@ describe UserFileSerializer do
         end
       end
 
-      it "links[rename, remove] exist" do
-        expect(user_file_serialized["links"]["rename"]).to eq(rename_file_path(user_file))
+      it "links[remove] exist" do
         expect(user_file_serialized["links"]["remove"]).to eq(remove_api_files_path)
       end
 

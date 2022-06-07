@@ -10,7 +10,7 @@ interface IExternalLinkProps {
   children?: React.ReactNode,
 }
 
-const ExternalLink : FunctionComponent<IExternalLinkProps> = ({ to, className, children }) => {
+const ExternalLink : FunctionComponent<IExternalLinkProps> = ({ to, className, children, ariaLabel }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const openModal = () => {
@@ -28,7 +28,7 @@ const ExternalLink : FunctionComponent<IExternalLinkProps> = ({ to, className, c
 
   return (
     <>
-      <a onClick={() => openModal()} className={className}>{children}</a>
+      <a onClick={() => openModal()} className={className} aria-label={ariaLabel}>{children}</a>
       <Modal
         isOpen={isOpen}
         isLoading={false}

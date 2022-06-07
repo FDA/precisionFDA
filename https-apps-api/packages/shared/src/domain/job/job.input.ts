@@ -4,6 +4,7 @@ import { schemas } from '../../utils'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 
+
 type DxIdInput = {
   dxid: string
 }
@@ -18,6 +19,7 @@ type RunAppInput = {
     duration?: number
     cmd?: string
     imagename?: string
+    port?: number // ttyd
   }
   appDxId: string
 }
@@ -37,6 +39,8 @@ type DescribeJobInput = DxIdInput & {
 type ListJobsInput = {
   page: number
   limit: number
+  scope?: string
+  spaceId?: number
 }
 
 type PageJobs = {
@@ -47,6 +51,11 @@ type PageJobs = {
     totalCount: number
     limit: number
   }
+}
+
+type WorkstationSyncFilesInput = {
+  dxid: string
+  force: boolean
 }
 
 const runAppSchema: JSONSchema7 = {
@@ -62,8 +71,8 @@ const runAppSchema: JSONSchema7 = {
       additionalProperties: false,
       required: [],
       properties: {
-        // these inputs are for jupyter app only
-        duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
+        // these inputs are for jupyter app only (except of a 'port' input, that is for ttyd)
+        duration: { type: 'integer', minimum: 30, maximum: config.validation.maxJobDurationMinutes },
         snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
         feature: {
           type: 'string',
@@ -74,6 +83,10 @@ const runAppSchema: JSONSchema7 = {
         cmd: { type: 'string', maxLength: config.validation.maxStrLen },
         // rshiny app
         app_gz: { type: 'string', maxLength: config.validation.maxStrLen },
+        // ttyd
+        port: { type: 'integer' },
+        // Apache Guacamole
+        max_session_length: { type: 'string', maxLength: config.validation.maxStrLen },
       },
     },
   },
@@ -100,4 +113,5 @@ export {
   DescribeJobInput,
   ListJobsInput,
   PageJobs,
+  WorkstationSyncFilesInput,
 }
