@@ -26,6 +26,7 @@ module.exports = {
   rules: {
     'comma-dangle': ['error', 'always-multiline'],
     'import/extensions': 'off',
+    'no-redeclare': 'off',
     'react/function-component-definition': 'off',
     'no-prototype-builtins': 'off',
     'import/prefer-default-export': 'off',

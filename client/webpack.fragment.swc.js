@@ -1,4 +1,6 @@
 /* globals module __dirname */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
 
@@ -7,7 +9,7 @@ const path = require('path')
 // also when options.parseMap is enabled "yarn docker:build" fails
 // Therefore we need to consider two versions of swc config for webpack
 
-module.exports = ({ enableSourceMaps } = { enableSourceMaps: false }) => ({
+module.exports = ({ swcLoaderOptions }) => ({
   entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, '../app/assets/packs/'),
@@ -20,15 +22,10 @@ module.exports = ({ enableSourceMaps } = { enableSourceMaps: false }) => ({
         test: /\.(ts|js)x?$/,
         exclude: /node_modules/,
         loader: 'swc-loader',
-        ...(enableSourceMaps ? {
-          options: {
-            parseMap: true,
-          },
-        } : {}),
+        options: swcLoaderOptions || {
+          parseMap: false,
+        },
       },
     ],
-  },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
 })
