@@ -242,7 +242,7 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
             <WorkflowExecutionsList uid={workflowUid} />
           </Route>
           <Route path={`${match.path}`}>
-            <HomeWorkflowsSpec spec={meta.spec} />,
+            <HomeWorkflowsSpec spec={meta.spec} />
           </Route>
         </Switch>
       </StyledTabPanel>

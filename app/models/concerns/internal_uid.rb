@@ -10,7 +10,7 @@ module InternalUid
     private
 
     def generate_uid
-      return if persisted? || uid?
+      return if persisted?
 
       self.uid = "#{dxid}-#{max_uid_number + 1}"
     end
