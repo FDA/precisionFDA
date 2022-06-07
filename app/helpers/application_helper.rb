@@ -1,6 +1,5 @@
 module ApplicationHelper
   include PathHelper
-  include VerifiedSpaceHelper
   include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
   # rubocop:disable Rails/HelperInstanceVariable
@@ -67,6 +66,8 @@ module ApplicationHelper
     case item.klass
     when "file"
       "fa-file-o"
+    when "db-cluster"
+      "fa-database"
     when "note"
       "fa-sticky-note"
     when "answer"
@@ -94,37 +95,6 @@ module ApplicationHelper
     else
       raise "Unknown class #{item.klass}"
     end
-  end
-
-  # Provide a node origin links to use on Home (Space) Files page
-  # @param node [Node] Node to get origin for.
-  # @return [String] - file link object node of type "UserFile"
-  def node_origin(node, current_user)
-    if node.klass == "folder" && !node.https?
-      nil
-    elsif node.parent_type == "Node" && node.parent.blank?
-      "Copied"
-    elsif node.parent_type != "User"
-
-      node_origin_link(
-        unilinkfw(node.parent, { no_home: true, current_user: current_user }),
-      )
-    else
-      "Uploaded"
-    end
-  end
-
-  def node_origin_link(html_link)
-    parsed_html_link = Nokogiri::HTML(html_link)
-    parsed_a_element = parsed_html_link.at("a")
-    parsed_span_element = parsed_html_link.at("span")
-
-    origin_link = {}
-    origin_link[:href] = parsed_a_element["href"] if parsed_a_element
-    origin_link[:fa] = parsed_span_element.to_h["class"] if parsed_span_element
-    origin_link[:text] = parsed_html_link.text
-
-    origin_link
   end
 
   # Valid options
@@ -172,8 +142,7 @@ module ApplicationHelper
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def home_path_to_item(item, no_home = false)
-    if !no_home && (%w(file folder app app-series job
-                       asset workflow workflow-series).include? item.klass)
+    if !no_home && (%w(app app-series job workflow workflow-series).include? item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)
@@ -191,7 +160,7 @@ module ApplicationHelper
     else
       local_opts[:icon_class] = "fa-fw"
     end
-
+    local_opts.merge!(data: { turbolinks: false })
     local_opts.merge!(current_user: current_user)
 
     unilink(item, local_opts, current_user)

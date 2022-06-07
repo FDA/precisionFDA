@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { withRouter } from 'react-router'
+import { withRouter } from 'react-router-dom'
 
 import HomeLayout from '../../../../layouts/HomeLayout'
 import Icon from '../../../../components/Icon'
@@ -198,7 +198,7 @@ const HomeFilesSinglePage = (props) => {
       <HomeEditTagsModal
         isOpen={editTagsModal.isOpen}
         isLoading={editTagsModal.isLoading}
-        name={file.title}
+        name={file.name}
         tags={file.tags}
         showSuggestedTags
         hideAction={hideFileEditTagsModal}

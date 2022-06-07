@@ -1,12 +1,10 @@
 module SpaceEventService
   class MembershipNotifications
-
     class << self
-
-      def send(event)
+      def send(event, nodejs_api_client)
         email_type_id = NotificationPreference.email_types[:notification_space_membership]
-        api = DIContainer.resolve("https_apps_client")
-        api.email_send(email_type_id, {
+
+        nodejs_api_client.email_send(email_type_id, {
           initUserId: event.user_id,
           spaceId: event.space_id,
           updatedMembershipId: event.entity_id,
@@ -14,12 +12,10 @@ module SpaceEventService
           newMembershipRole: event.entity.role,
         })
       rescue HttpsAppsClient::Error => e
-        raise e unless e.code == HttpsAppsClient::Error.space_not_found_error_code
+        raise e unless e.code == HttpsAppsClient::Error::SPACE_NOT_FOUND_ERROR_CODE
 
         {}
       end
-
     end
-
   end
 end

@@ -65,6 +65,8 @@ class Job < ApplicationRecord
   TYPE_REGULAR = "regular".freeze
   TYPE_HTTPS = "https".freeze
 
+  DEFAULT_HTTPS_PORT = 443
+
   belongs_to :app
   belongs_to :user
   belongs_to :app_series
@@ -93,7 +95,7 @@ class Job < ApplicationRecord
     TYPE_HTTPS => 1,
   }
 
-  delegate :input_spec, :output_spec, to: :app
+  delegate :input_spec, :output_spec, to: :app, allow_nil: true
 
   attr_accessor :current_user
 
@@ -133,6 +135,12 @@ class Job < ApplicationRecord
     state == STATE_FAILED
   end
 
+  def failure_reason
+    return "" if !failed? || !describe.key?("failureReason")
+
+    describe["failureReason"]
+  end
+
   def failure_message
     return "" if !failed? || !describe.key?("failureMessage")
 
@@ -158,7 +166,8 @@ class Job < ApplicationRecord
   def https_job_external_url
     return unless https?
 
-    describe.dig(:httpsApp, :dns, :url)
+    https_port = describe.dig(:runInput, :port) || DEFAULT_HTTPS_PORT
+    describe.dig(:httpsApp, :dns, :url).chomp("/") + ":#{https_port}"
   end
 
   def update_provenance!

@@ -63,16 +63,18 @@ $bigger-text-fs: 18px
 
   &-data
     width: 100%
-    margin-right: 20px
     color: #fff
     background-color: #333
     padding: 15px
+
+    &-margin
+      margin-right: 20px
 
     a
       color: #fff
 
     &--shared
-      margin-right: 0px
+      margin-right: 0
       background-color: $color-public
       color: #333
       a
@@ -132,3 +134,13 @@ $bigger-text-fs: 18px
 
   &__toggle
     margin: 0px 10px
+
+.remediation-card-switcher
+  &-unactivated
+    color: #686664
+  &-active
+    color: #0f854c
+  &-deleted
+    color: #9c5e07
+  &-locked
+    color: #c7463d

@@ -17,13 +17,16 @@ class SpaceSerializer < ApplicationSerializer
 
   attribute :space_type, key: :type
 
-  attribute :space_id, key: :shared_space_id, if: -> { object.confidential? }
+  attribute :space_id, key: :shared_space_id, if: lambda {
+    object.confidential? && !object.private_type?
+  }
   attribute :private_space_id, if: -> { object.shared? && confidential_space }
 
   attribute :tag_list, key: :tags
 
   attribute :can_duplicate, if: -> { object.review? }
   attribute :current_user_membership, key: :current_user_membership
+  attribute :exclusive?, key: :private_exclusive, if: -> { object.private_type? }
 
   has_one :host_lead_member,
           key: :host_lead,
@@ -36,7 +39,7 @@ class SpaceSerializer < ApplicationSerializer
           if: -> { object.guest_lead_member }
 
   has_one :confidential_space, serializer: self,
-                               if: -> { current_user && space_membership && object.shared? }
+          if: -> { current_user && space_membership && (object.shared? || object.exclusive?) }
 
   # Builds links according to user permissions.
   # @return [Hash] Links.
@@ -82,7 +85,7 @@ class SpaceSerializer < ApplicationSerializer
   end
 
   # Returns space counters for related objects.
-  # @return [Hash] Space counters for members, tasks, files and notes, apps, comments.
+  # @return [Hash] Space counters for members, files and notes, apps, comments.
   def counters
     {
       files: files_count,

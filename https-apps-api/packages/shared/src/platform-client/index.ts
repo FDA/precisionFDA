@@ -7,6 +7,7 @@ import { config } from '../config'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
+import { FILE_STATE_DX } from '../domain/user-file/user-file.enum'
 
 type BaseParams = {
   accessToken: string
@@ -77,6 +78,7 @@ type ListFilesResponse = {
       id: string
       name: string
       size: number
+      state: FILE_STATE_DX
     }
   }>
   // if set up, we might want to paginate
@@ -125,7 +127,50 @@ type JobDescribeResponse = {
       url?: string
     }
   }
+  failureCount?: any
+  failureReason?: string
+  failureMessage?: string
 } & AnyObject
+
+type DbClusterActionParams = BaseParams & { dxid: string }
+type DbClusterAction = 'start' | 'stop' | 'terminate'
+
+type DbClusterCreateParams = BaseParams & {
+  name: string
+  project: string
+  engine: string
+  engineVersion: string
+  dxInstanceClass: string
+  adminPassword: string
+}
+
+type DbClusterDescribeParams = BaseParams & {
+  dxid: string
+  project?: string
+}
+
+type DbClusterDescribeResponse = {
+  id: string
+  project: string
+  name: string
+  created: number
+  modified: number
+  createdBy: { user: string }
+  dxInstanceClass: string
+  engine: string
+  engineVersion: string
+  status: string
+  endpoint?: string
+  port?: number
+  statusAsOf?: number
+  failureReason?: string
+} & AnyObject
+
+export enum PlatformErrors {
+  ResourceNotFound = 'ResourceNotFound',
+  PermissionDenied = 'PermissionDenied',
+  InvalidInput = 'InvalidInput',
+}
 
 const defaultLog = getLogger('platform-client-logger')
 
@@ -317,6 +362,64 @@ class PlatformClient {
     }
   }
 
+  async dbClusterAction(params: DbClusterActionParams,
+                        action: DbClusterAction): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/${action}`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  async dbClusterCreate(params: DbClusterCreateParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/dbcluster/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken'], params) },
+      url,
+      headers: this.setupHeaders(params),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  async dbClusterDescribe(params: DbClusterDescribeParams): Promise<DbClusterDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken', 'dxid'], params) },
+      url,
+      headers: this.setupHeaders(params),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
   private async filesList(params: ListFilesParams): Promise<ListFilesResponse> {
     const data: AnyObject = {
       class: 'file',
@@ -334,9 +437,12 @@ class PlatformClient {
         fields: {
           name: true,
           size: true,
+          state: true,
         },
       }
     }
+    // Documentation for platform API /system/findDataObjects
+    // https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
     const url = `${config.platform.apiUrl}/system/findDataObjects`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -364,14 +470,14 @@ class PlatformClient {
 
   private logClientFailed(options: AxiosRequestConfig): void {
     const sanitized = {}
-    this.log.warn({ requestOptions: { ...options, headers: sanitized } }, 'Failed request options')
+    this.log.warn({ requestOptions: { ...options, headers: sanitized } }, 'Error: Failed request options')
   }
 
   private setupHeaders(params: BaseParams): AnyObject {
     return { authorization: `Bearer ${params.accessToken}` }
   }
 
-  private handleFailed(err: any): any {
+  handleFailed(err: any): any {
     // response status code is NOT 2xx
     if (err.response) {
       this.log.error(
@@ -380,20 +486,45 @@ class PlatformClient {
           statusCode: err.response.status,
           resHeaders: err.response.headers,
         },
-        'Failed platform response',
+        'Error: Failed platform response',
       )
-      throw new errors.ClientRequestError('DNANexus client API call failed', {
-        clientResponse: err.response.data,
-        clientStatusCode: err.response.status,
-      })
+
+      // Error response from the platform has the following response data:
+      //   "error": {
+      //     "type": "PermissionDenied",
+      //     "message": "BillTo for this job's project must have the \"httpsApp\" feature enabled to run this executable"
+      //   }
+      //
+      // Howvever, there's also a class of error response where the response payload is HTML
+      // See platform-client.mock.ts for more examples
+      //
+      const statusCode = err.response.status
+      const errorType = err.response.data?.error?.type || 'Server Error'
+      const errorMessage = err.response.data?.error?.message || err.response.data
+      throw new errors.ClientRequestError(
+        `${errorType} (${statusCode}): ${errorMessage}`,
+        {
+          clientResponse: err.response.data,
+          clientStatusCode: statusCode,
+        },
+      )
     } else if (err.request) {
       // the request was made but no response was received
-      this.log.error({ err }, 'Failed platform request - no response received')
+      this.log.error({ err }, 'Error: Failed platform request - no response received')
     } else {
-      this.log.error({ err }, 'Failed platform request - different error')
+      this.log.error({ err }, 'Error: Failed platform request - different error')
     }
     // todo: handle this does not result in 500 API error
-    throw err
+    // TODO(2): Need to consider other error types and handle them with a descriptive message
+    // e.g. See ETIMEOUT error in platform-client.mock.ts
+    const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
+    throw new errors.ClientRequestError(
+      errorMessage,
+      {
+        clientResponse: err.response?.data || 'No platform response',
+        clientStatusCode: err.response?.status || 408,
+      },
+    )
   }
 }
 
@@ -406,4 +537,6 @@ export {
   DescribeFilesResponse,
   JobCreateParams,
   DescribeFoldersResponse,
+  DbClusterCreateParams,
+  DbClusterDescribeResponse,
 }

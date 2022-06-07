@@ -2,7 +2,6 @@ set :bundle_command, "/usr/local/bin/bundle exec"
 set :output, "log/cron.log"
 
 %w(
-  DNANEXUS_BACKEND
   SALESFORCE_USERNAME
   SALESFORCE_PASSWORD
   SALESFORCE_SECRET_TOKEN
@@ -12,11 +11,6 @@ set :output, "log/cron.log"
   SECRET_KEY_BASE
 ).each do |name|
   env name, ENV[name]
-end
-
-every 1.hour do
-  runner "TasksChecker.check_tasks_for_failed_response_deadline"
-  runner "TasksChecker.check_tasks_for_failed_completion_deadline"
 end
 
 every 1.day do

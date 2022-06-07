@@ -97,8 +97,6 @@ class UserFile < Node
 
   scope :open, -> { where(state: STATE_OPEN) }
   scope :not_removing, -> { where.not(state: STATE_REMOVING) }
-  scope :not_copying, -> { where.not(state: STATE_COPYING) }
-  scope :not_blocked, -> { not_removing.not_copying }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
@@ -126,10 +124,6 @@ class UserFile < Node
       where(parent_type: ["User", "Job", "Node", "Comparison"])
     end
 
-    def not_assets
-      where.not(parent_type: "Asset")
-    end
-
     def independent
       where.not(parent_type: PARENT_TYPE_COMPARISON)
     end
@@ -141,9 +135,10 @@ class UserFile < Node
     # This is a class method for independent files.
     # For comparison files, use Comparison.publication_project!
     def publication_project!(user, scope)
-      if scope == SCOPE_PUBLIC
+      case scope
+      when SCOPE_PUBLIC
         user.public_files_project
-      elsif scope == SCOPE_PRIVATE
+      when SCOPE_PRIVATE
         user.private_files_project
       else
         Space.from_scope(scope).project_for_user(user)
@@ -311,44 +306,6 @@ class UserFile < Node
 
   def to_param
     uid
-  end
-
-  # Returns a parent folder name of UserFile
-  # @param [scope] a file scope
-  # @return [String] folder name or "/" for root
-  def parent_folder_name(scope = SCOPE_PRIVATE)
-    folder = parent_folder(scope)
-    folder.blank? ? "/" : folder.name
-  end
-
-  def parent_folder(scope = SCOPE_PRIVATE)
-    column_name = Node.scope_column_name(scope)
-    Folder.find_by(id: self[column_name])
-  end
-
-  # Returns a full path to current file
-  # @param [scope] a file scope]
-  # @return [String] file path or "/" for root
-  def file_full_path(scope = SCOPE_PRIVATE)
-    parent_folder = parent_folder(scope)
-    folders = []
-    if parent_folder.blank?
-      "/"
-    else
-      folders << parent_folder_name(scope)
-      folders << parent_folder.ancestors(scope).pluck(:name)
-    end
-
-    collect_path_string(folders.flatten.reverse)
-  end
-
-  # Collects a string of file's path.
-  # @param [dir_set] Array of strings: ["second_level_folder", "third_level_folder"]
-  # @return [String] file path or "/" for root. Ex. "/second_level_folder/third_level_folder/"
-  def collect_path_string(dir_set)
-    path = "/"
-    dir_set.each { |dir| path = path + dir + "/" }
-    path
   end
 
   def not_asset?

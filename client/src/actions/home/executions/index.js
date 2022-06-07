@@ -15,6 +15,7 @@ import fetchExecutionsSpaces from './fetchExecutionsSpaces'
 import fetchExecutionDetails from './fetchExecutionDetails'
 import fetchExecutionsEverybody from './fetchExecutionsEverybody'
 import fetchExecutionsFeatured from './fetchExecutionsFeatured'
+import syncFiles from './syncFiles'
 import terminateExecutions from './terminateExecutions'
 
 
@@ -61,6 +62,7 @@ export {
   fetchExecutionDetails,
   fetchExecutionsEverybody,
   fetchExecutionsFeatured,
+  syncFiles,
   terminateExecutions,
   expandExecution,
   expandAllExecutions,

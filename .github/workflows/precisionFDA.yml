@@ -8,13 +8,32 @@ on:
       - '*'
 
 jobs:
+  # Prepopulates ruby cache
+  # This is because of behaviour of github actions
+  # When two parallel jobs attempt to write same set of deps into cache
+  # It causes following error
+  # Unable to reserve cache with key setup-ruby-bundler-cache-v3-ubuntu-20.04-ruby-2.7.5-Gemfile.lock-e82dcaca5ba83e867a2506d159bec55cc14ba20a0d7df00850b22a1f25d364ba, another job may be creating this cache.
+  # Example run: https://github.com/dnanexus/precision-fda/runs/5841042836?check_suite_focus=true
+  # Every job that uses ruby dependencies should wait for this job first
+  # needs: [ruby-setup]
+  ruby-setup:
+    name: Setup Ruby
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          cache-version: 1
+
   static-analysis-master:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     name: Static Analysis for Master
     runs-on: ubuntu-latest
     env:
-      BUNDLE_WITHOUT: "default test production"
       MAKE: "make --jobs 4"
+    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@v2
 
@@ -22,6 +41,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          cache-version: 1
 
       # # Enable this after a global rubocop fix.
       # - name: Rubocop
@@ -35,12 +55,12 @@ jobs:
     name: Static Analysis for PR
     runs-on: ubuntu-latest
     env:
-      BUNDLE_WITHOUT: "default test production"
       MAKE: "make --jobs 4"
     permissions:
       contents: read
       pull-requests: write
       statuses: write
+    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@v2
 
@@ -51,6 +71,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          cache-version: 1
 
       - name: Rubocop
         run: bundle exec pronto run -f github_status github_pr -c origin/${{ github.base_ref }}
@@ -79,14 +100,14 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: password
-
+    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          cache-version: 1
 
       - name: Install & Build
         env:
@@ -127,9 +148,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: "12.16.1"
+          node-version: "12.22.10"
+          cache: 'yarn'
+          cache-dependency-path: ./client/yarn.lock
 
       - name: Install
         run: yarn
@@ -153,20 +176,32 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: password
-
+    needs: [ruby-setup]
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          cache-version: 1
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12.16.1'
+          node-version: '12.22.10'
+      # TODO(samuel) - yarn cache from setup-node@3 github actions still is quite slow and results in install time of 1 minute
+      # My guess: issue might be related to the use of workspaces
+      # Workaround: node_modules directly stored in the package
+      # Removal requires more investingation
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./https-apps-api/node_modules
+            ./https-apps-api/packages/api/node_modules
+            ./https-apps-api/packages/worker/node_modules
+            ./https-apps-api/packages/shared/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('./https-apps-api/yarn.lock') }}
 
-      - name: Install & Build
+      - name: Prepare env & db
         env:
           NO_FIPS: 1
         run: |
@@ -174,13 +209,17 @@ jobs:
           sudo apt-get install -y cmake libssl-dev
           cp config/database.yml.ci config/database.yml
           bundle exec rake db:setup
-          npm install -g yarn
-
+      - name: Install Deps
+        run: make install
+        working-directory: ./https-apps-api
       - name: Test
         run: |
-          make install
           make test-worker
           make test-api
+        working-directory: ./https-apps-api
+
+      - name: Test production build
+        run: yarn workspaces run build
         working-directory: ./https-apps-api
 
       - name: Snyk test
@@ -194,9 +233,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12.16.1'
+          node-version: '12.22.10'
+          cache: 'yarn'
+          cache-dependency-path: ./client/yarn.lock
 
       - name: Install
         run: yarn --frozen-lockfile
@@ -206,6 +247,24 @@ jobs:
         run: yarn test
         working-directory: ./client
 
-      - name: Lint
-        run: yarn lint .
+  test-react-app-production:
+    name: Test React app production build
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '12.22.10'
+          cache: 'yarn'
+          cache-dependency-path: ./client/yarn.lock
+
+      - name: Install
+        run: yarn --frozen-lockfile --production=false
+        working-directory: ./client
+
+      - name: Build production
+        run: npm rebuild node-sass && yarn run build:production
         working-directory: ./client

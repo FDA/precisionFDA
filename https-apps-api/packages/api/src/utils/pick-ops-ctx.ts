@@ -6,9 +6,9 @@ const hasLog = has('log')
 const hasUserData = has('user')
 const hasAll = allPass([hasEm, hasLog, hasUserData])
 
-export const pickOpsCtx = (koaCtx: Api.Ctx): Ops.OpsCtx => {
+export const pickOpsCtx = (koaCtx: Api.Ctx): Ops.UserOpsCtx => {
   if (hasAll(koaCtx)) {
-    const ctx = pick(['em', 'log', 'user'])(koaCtx) as Ops.OpsCtx
+    const ctx = pick(['em', 'log', 'user'])(koaCtx) as Ops.UserOpsCtx
     return ctx
   }
   throw new errors.InternalError('Cannot build operation context, wrong input')

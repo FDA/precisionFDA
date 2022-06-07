@@ -41,7 +41,7 @@ const exampleOptions = [
   },
 ]
 
-const Item = ({ text, isDisabled, target, onClick }) => {
+const Item = ({ text, isDisabled, target, onClick, entityType }) => {
   const classes = classNames({
     'collapsible-menu__item--disabled': isDisabled,
   }, 'collapsible-menu__item')
@@ -52,7 +52,7 @@ const Item = ({ text, isDisabled, target, onClick }) => {
 
   return (
     <div className={classes} onClick={handler}>
-      { target ? <Link to={target}>{text}</Link> : <a>{text}</a> }
+      { target ? <Link to={target} aria-label={`Click to view ${text} ${entityType}`}>{text}</Link> : <a aria-label={`Click to view ${text} ${entityType}`}>{text}</a> }
     </div>
   )
 }
@@ -62,12 +62,12 @@ const CollapsibleMenu = ({ title, titleAnchor, children, options }) => {
   const menuOptions = options ? options : exampleOptions
 
   const generateList = () => { return menuOptions.map((e) => {
-    return <Item {...e} key={e.text} onClick={e.onClick} />
+    return <Item {...e} key={e.text} onClick={e.onClick} entityType={e.entityType}/>
   })}
 
   const menuId = uuidv4()
-  const collapseMenuId = 'collapseMenu'+menuId
-  const collapseBodyId = 'collapseBody'+menuId
+  const collapseMenuId = 'collapseMenu'+menuId+title
+  const collapseBodyId = 'collapseBody'+menuId+title
 
   return (
     <div className="accordion collapsible-menu" id={collapseMenuId}>
@@ -75,20 +75,20 @@ const CollapsibleMenu = ({ title, titleAnchor, children, options }) => {
       <div className="accordion-header collapsible-header">
         <div style={{ display: 'flex' }}>
           <div style={{ flex: '0 0 16px', marginTop: '12px' }}>
-            <Icon id='toggle-icon' icon='fa-angle-down' data-toggle="collapse" data-target={'#'+collapseBodyId} aria-expanded="true" aria-controls={collapseBodyId} />
+            <Icon id='toggle-icon' icon='fa-angle-down' data-toggle="collapse" data-target={'#'+collapseBodyId} aria-controls={collapseBodyId} />
           </div>
           <div className='title'>
-            <HashLink smooth to={titleAnchor}>{title}</HashLink>
+            <HashLink smooth to={titleAnchor} aria-label={`Navigates to ${title} component`}>{title}</HashLink>
           </div>
         </div>
       </div>
       ) : (
-      <div className="accordion-header collapsible-header" data-toggle="collapse" data-target={'#'+collapseBodyId} aria-expanded="true" aria-controls={collapseBodyId}>
+      <div className="accordion-header collapsible-header" data-toggle="collapse" data-target={'#'+collapseBodyId} aria-controls={collapseBodyId}>
         <Icon id='toggle-icon' icon='fa-angle-down' />
-        <div className='title'>{title}</div>
+        <div className='title' aria-label={`Navigate to ${title} section`} >{title}</div>
       </div>
       )}
-      <div id={collapseBodyId} className="accordion-collapse collapse in" aria-labelledby="collapsibleMenuHeading" data-parent={'#'+collapseMenuId}>
+      <div id={collapseBodyId} className="accordion-collapse collapse in" aria-label="Collapsible menu heading" data-parent={'#'+collapseMenuId}>
         {children ? children : generateList()}
       </div>
     </div>
@@ -101,6 +101,7 @@ Item.propTypes = {
   target: PropTypes.string,
   isDisabled: PropTypes.bool,
   onClick: PropTypes.func,
+  entityType: PropTypes.string,
 }
 
 CollapsibleMenu.propTypes = {

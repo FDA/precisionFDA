@@ -1,10 +1,11 @@
-import { pipe, filter, uniqBy } from 'ramda'
+import { filter, pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
 import { errors } from '../../../..'
-import { User, SpaceMembership, Space } from '../../..'
+import { Space, SpaceMembership, User } from '../../..'
 import {
   EmailSendInput,
   EmailTemplate,
+  EMAIL_TYPES,
   MemberChanged,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
@@ -99,14 +100,13 @@ export class MemberChangedEmailHandler
       SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
       SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
     ]
-    const membershipAddedRemovedKeys = [SPACE_EVENT_ACTIVITY_TYPE.membership_added]
+    const membershipAddingKey = [SPACE_EVENT_ACTIVITY_TYPE.membership_added]
     const currentKey = SPACE_EVENT_ACTIVITY_TYPE[this.validatedInput.activityType]
-    // todo: member removed space event key ???
     if (membershipChangeKeys.includes(currentKey)) {
       return 'membership_changed'
     }
-    if (membershipAddedRemovedKeys.includes(currentKey)) {
-      return 'member_added_or_removed_from_space'
+    if (membershipAddingKey.includes(currentKey)) {
+      return 'member_added_to_space'
     }
     throw new Error(`Unknown activityType value ${this.validatedInput.activityType}`)
   }
@@ -119,8 +119,32 @@ export class MemberChangedEmailHandler
     )
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
-
     const spaceEventUserId = this.user.id
+    const userMembership: any = memberships.filter(memberShip => {
+      if (memberShip.user.id === spaceEventUserId) {
+        return memberShip
+      }
+    })
+
+    const receiverMembershipForAdding: any = memberships.filter(memberShip => {
+      if (userMembership &&
+          memberShip.side === userMembership[0].side &&
+          memberShip.user.id !== spaceEventUserId &&
+          [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(memberShip.role)
+      ) {
+        return memberShip
+      }
+    })
+
+    const receiverMembershipForChanging: any = memberships.filter(memberShip => {
+      if (userMembership &&
+        memberShip.side === userMembership[0].side &&
+        memberShip.user.id !== spaceEventUserId
+      ) {
+        return memberShip
+      }
+    })
+
     // this has to be bound to local
     const filterUsers = pipe(
       // SpaceMembership[] -> User[]
@@ -130,10 +154,19 @@ export class MemberChangedEmailHandler
       filter((u: User) => !u.isChallengeBot()),
       uniqBy((user: User) => user.id),
     )
-    const result = filterUsers(memberships)
-    // based on email type, find who will be the receiver
-    // users who are in the space + active ?
-    return result
+    let receivers
+    // membership_added
+    if(this.validatedInput.activityType === 'membership_added') {
+      receivers = filterUsers(receiverMembershipForAdding)
+    } else { // other actions for membership: enable/disable/role change
+      receivers = filterUsers(receiverMembershipForChanging)
+      if(this.validatedInput.activityType === 'membership_enabled' &&
+        !this.updatedMembership.active) {
+        const enabledUser = await this.ctx.em.findOneOrFail(User, { id: this.updatedMembership.user.id })
+        receivers.push(enabledUser)
+      }
+    }
+    return receivers
   }
 
   async getTemplateContent(): Promise<MemberChangeTemplateInput['content']> {
@@ -167,6 +200,7 @@ export class MemberChangedEmailHandler
       content,
     })
     return {
+      emailType: EMAIL_TYPES.memberChangedAddedRemoved,
       to: receiver.email,
       body,
       subject: `${content.initiator.fullName} ${content.action}`,

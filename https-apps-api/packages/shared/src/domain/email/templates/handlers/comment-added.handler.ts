@@ -1,10 +1,11 @@
 import { LoadedReference } from '@mikro-orm/core'
 import { pipe, filter, uniqBy } from 'ramda'
-import { Comment, SpaceEvent, Space, User, SpaceMembership } from '../../..'
+import { Comment, UserFile, App, Job, SpaceEvent, Space, User, SpaceMembership } from '../../..'
 import {
   CommentAdded,
   EmailSendInput,
   EmailTemplate,
+  EMAIL_TYPES,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
 import {
@@ -14,11 +15,18 @@ import {
 } from '../../email.helper'
 import { BaseTemplate } from '../base-template'
 import { commentAddedTemplate, CommentAddedTemplateInput } from '../mjml/comment-added.template'
+import { generateObjectCommentsLink } from '../mjml/common'
 
 export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> implements EmailTemplate {
   templateFile = commentAddedTemplate
   comment: Comment & { user: LoadedReference<User, User> }
   spaceEvent: SpaceEvent & { space: LoadedReference<Space, Space> }
+  userFile: UserFile & { user: LoadedReference<User, User> }
+  app: App & { user: LoadedReference<User, User> }
+  job: Job & { user: LoadedReference<User, User> }
+  // to add workflow commenting in Home refactoring, on Rails side
+  // workflow: Workflow
+  objectCommentsLink: any
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'comment_activity'
@@ -36,6 +44,56 @@ export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> impleme
       { id: this.spaceEvent.entityId },
       { populate: ['user'] },
     )
+
+    switch (this.comment.contentObjectType) {
+      case 'Node':
+        this.userFile = await this.ctx.em.findOneOrFail(
+          UserFile,
+          { id: this.comment.contentObjectId },
+          { populate: ['user'] },
+        );
+        this.objectCommentsLink = generateObjectCommentsLink(
+          'files',
+          this.userFile.uid,
+        )
+        return this.objectCommentsLink
+      case 'App':
+        this.app = await this.ctx.em.findOneOrFail(
+          App,
+          { id: this.comment.contentObjectId },
+          { populate: ['user'] },
+        )
+        this.objectCommentsLink = generateObjectCommentsLink(
+          'apps',
+          this.app.uid,
+        )
+        return this.objectCommentsLink
+      case 'Job':
+        this.job = await this.ctx.em.findOneOrFail(
+          Job,
+          { id: this.comment.contentObjectId },
+          { populate: ['user'] },
+        );
+        this.objectCommentsLink = generateObjectCommentsLink(
+          'jobs',
+          this.job.uid,
+        )
+        return this.objectCommentsLink
+      // to do before: Workflow commenting fix on Rails side in Home refactoring,
+      // case 'Workflow':
+      //   this.workflow = await this.ctx.em.findOneOrFail(
+      //     Workflow,
+      //     { id: this.comment.contentObjectId },
+      //     { populate: ['user'] },
+      //   );
+      //   this.objectCommentsLink = generateObjectCommentsLink(
+      //     'workflows',
+      //     this.workflow.uid,
+      //   )
+      //   console.log("In CommentAddedEmailHandler: Workflow this.objectCommentsLink = ",this.objectCommentsLink)
+      //   return this.objectCommentsLink
+      // default: return;
+    }
   }
 
   async determineReceivers(): Promise<User[]> {
@@ -62,11 +120,18 @@ export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> impleme
       receiver,
       content: {
         initiator: { fullName: this.comment.user.unwrap().fullName },
-        comment: { body: this.comment.body, id: this.comment.id },
+        comment: {
+          body: this.comment.body,
+          id: this.comment.id,
+          contentObjectId: this.comment.contentObjectId,
+          contentObjectType: this.comment.contentObjectType,
+        },
         space: { id: this.spaceEvent.space.id },
+        objectCommentsLink: this.objectCommentsLink,
       },
     })
     return {
+      emailType: EMAIL_TYPES.commentAdded,
       to: receiver.email,
       body,
       subject: `${this.comment.user.unwrap().fullName} added a comment`,

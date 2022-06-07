@@ -1,49 +1,21 @@
-# The client for communicating with JupiterLab service.
+# The client for communicating with nodejs-api service.
 class HttpsAppsClient
-  # Client's specific error.
-  class Error < StandardError
-    DEFAULT_ERROR_MSG = "JupyterLab client error.".freeze
-    DEFAULT_ERROR_CODE = "E_UNKNOWN".freeze
-    SPACE_NOT_FOUND_ERROR_CODE = "E_SPACE_NOT_FOUND".freeze
-
-    def self.space_not_found_error_code
-      SPACE_NOT_FOUND_ERROR_CODE
-    end
-
-    def initialize(msg)
-      @msg = msg
-    end
-
-    def message
-      if @msg.is_a?(Net::HTTPResponse)
-        return parsed_body(@msg.body)["message"].presence || DEFAULT_ERROR_MSG
-      end
-
-      @msg
-    end
-
-    def code
-      if @msg.is_a?(Net::HTTPResponse)
-        return parsed_body(@msg.body)["code"].presence || DEFAULT_ERROR_CODE
-      end
-
-      @msg
-    end
-
-    private
-
-    def parsed_body(response_body)
-      JSON.parse(response_body)
-    rescue JSON::ParserError
-      {}
-    end
-  end
-
   # @param token [String] User access token.
   # @param user [User] A user.
   def initialize(token, user)
     @token = token
     @user = user
+  end
+
+  # User checkup
+  # To be run whenever user logs in to make sure sync tasks are
+  # healthy and to check the general health of the user account
+  def user_checkup
+    request(
+      "/users/checkup",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
   end
 
   # Run an app.
@@ -63,6 +35,17 @@ class HttpsAppsClient
   def job_terminate(job_dxid)
     request(
       "/jobs/#{job_dxid}/terminate",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  # Sync files for a running HTTPS app job.
+  # @param job_dxid [String] Job dxid to terminate.
+  # @param opts [Hash] Request body options.
+  def job_sync_files(job_dxid)
+    request(
+      "/jobs/#{job_dxid}/syncFiles",
       {},
       Net::HTTP::Patch::METHOD,
     )
@@ -98,10 +81,48 @@ class HttpsAppsClient
     )
   end
 
+  def dbcluster_action(dxids, action)
+    raise Error, "Wrong action #{action}" unless %w(start stop terminate).include?(action)
+
+    request(
+      "/dbclusters/#{action}",
+      { dxids: dxids },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def dbcluster_create(opts)
+    request(
+      "/dbclusters/create",
+      opts,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def experts_list(page, limit, year)
+    query_args = { page: page, limit: limit }
+    query_args[:year] = year if year
+    request(
+      "/experts",
+      {},
+      Net::HTTP::Get::METHOD,
+      query_args,
+    )
+  end
+
+  def experts_years
+    request(
+      "/experts/years",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   private
 
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD)
-    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{auth_querystring}")
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {})
+    query = auth_query.merge(additional_query).to_query
+    uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{query}")
     use_ssl = uri.scheme == "https"
 
     conn_opts = connection_opts.merge(use_ssl: use_ssl)
@@ -111,7 +132,7 @@ class HttpsAppsClient
       handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
     end
   rescue Errno::ECONNREFUSED
-    raise Error, "Can't connect to JupyterLab service"
+    raise Error, "Can't connect to nodejs-api service"
   end
 
   # Returns connection options.
@@ -120,12 +141,12 @@ class HttpsAppsClient
     @connection_opts ||= { read_timeout: 120 }
   end
 
-  def auth_querystring
+  def auth_query
     {
-      id: @user.id,
+      id: @user&.id,
+      dxuser: @user&.dxuser,
       accessToken: @token,
-      dxuser: @user.dxuser,
-    }.to_query
+    }.compact_blank
   end
 
   # Returns HTTP headers to be sent during every request.
@@ -139,7 +160,10 @@ class HttpsAppsClient
   # @return [Hash] Response from server converted to hash.
   def handle_response(response)
     response.value
-    JSON.parse(response.body)
+    parsed = JSON.parse(response.body || "")
+    parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+  rescue JSON::ParserError
+    response.body
   rescue Net::HTTPClientException
     raise Error, response
   rescue StandardError

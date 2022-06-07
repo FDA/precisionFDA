@@ -86,6 +86,7 @@ class AppService
 
       app_series.update!(latest_revision_app: app)
       app_series.update!(latest_version_app: app) if Space.valid_scope?(scope)
+      app_series.update!(deleted: false) if app_series.deleted?
 
       Event::AppCreated.create_for(app, user)
     end

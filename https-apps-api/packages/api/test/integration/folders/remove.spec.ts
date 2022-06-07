@@ -6,7 +6,7 @@ import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
-import { api } from '../../../src/server'
+import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
 describe('DELETE /folders/:id', () => {
@@ -22,7 +22,7 @@ describe('DELETE /folders/:id', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     await em.flush()
     folder = create.filesHelper.createFolder(
@@ -35,7 +35,7 @@ describe('DELETE /folders/:id', () => {
   })
 
   it('response shape & mocks call', async () => {
-    await supertest(api.getServer())
+    await supertest(getServer())
       .delete(`/folders/${folder.id}`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -46,7 +46,7 @@ describe('DELETE /folders/:id', () => {
   })
 
   it('removes the folder from database', async () => {
-    await supertest(api.getServer())
+    await supertest(getServer())
       .delete(`/folders/${folder.id}`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -62,7 +62,7 @@ describe('DELETE /folders/:id', () => {
       { project: folder.project, name: 'b', parentFolderId: folder.id },
     )
     await em.flush()
-    await supertest(api.getServer())
+    await supertest(getServer())
       .delete(`/folders/${subfolder.id}`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -117,7 +117,7 @@ describe('DELETE /folders/:id', () => {
       },
     )
     await em.flush()
-    await supertest(api.getServer())
+    await supertest(getServer())
       .delete(`/folders/${subfolder.id}`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -178,7 +178,7 @@ describe('DELETE /folders/:id', () => {
       },
     )
     await em.flush()
-    await supertest(api.getServer())
+    await supertest(getServer())
       .delete(`/folders/${folder.id}`)
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
@@ -199,11 +199,11 @@ describe('DELETE /folders/:id', () => {
     it('returns 404 when folder does not exist or does not have projectId assigned', async () => {
       folder.project = null
       await em.flush()
-      const { body } = await supertest(api.getServer())
+      const { body } = await supertest(getServer())
         .delete(`/folders/${folder.id}`)
         .query({ ...getDefaultQueryData(user) })
         .expect(404)
-      expect(body).to.have.property('code', errors.ErrorCodes.FOLDER_NOT_FOUND)
+      expect(body.error).to.have.property('code', errors.ErrorCodes.FOLDER_NOT_FOUND)
     })
   })
 })

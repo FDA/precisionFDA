@@ -27,7 +27,6 @@ import { Table, Thead, Tbody, Th } from '../../../TableComponents'
 import './style.sass'
 import Icon from '../../../Icon'
 import LinkTargetBlank from '../../../LinkTargetBlank'
-import Button from '../../../Button'
 import { getSpacesIcon } from '../../../../../helpers/spaces'
 import Counters from '../../../TableComponents/Counters'
 import Pagination from '../../../TableComponents/Pagination'
@@ -61,15 +60,15 @@ const SpaceAppsList = ({ spaceId, apps, isFetching, sortType, sortDir, sortHandl
               <th className="pfda-padded-l10">
                 <Icon onClick={toggleAllCheckboxes} icon={checkboxClasses} />
               </th>
-              <Th sortType={sortType} sortDir={sortDir} type='name' sortHandler={sortAppsHandler}>name</Th>
-              <Th sortType={sortType} sortDir={sortDir} type='title' sortHandler={sortAppsHandler}>title</Th>
-              <Th sortType={sortType} sortDir={sortDir} type='revision' sortHandler={sortAppsHandler}>revision</Th>
-              <Th>explorers</Th>
-              <Th sortType={sortType} sortDir={sortDir} type='org' sortHandler={sortAppsHandler}>org</Th>
-              <Th sortType={sortType} sortDir={sortDir} type='added_by' sortHandler={sortAppsHandler}>added by</Th>
-              <Th sortType={sortType} sortDir={sortDir} type='created_at' sortHandler={sortAppsHandler}>created</Th>
-              <Th>run by you?</Th>
-              <Th sortType={sortType} sortDir={sortDir} type='tags' sortHandler={sortAppsHandler}>tags</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='name' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">name</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='title' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">title</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='revision' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">revision</Th>
+              <Th class_name="spaces-list-headers-grey">explorers</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='org' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">org</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='added_by' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">added by</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='created_at' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">created</Th>
+              <Th class_name="spaces-list-headers-grey">run by you?</Th>
+              <Th sortType={sortType} sortDir={sortDir} type='tags' sortHandler={sortAppsHandler} class_name="spaces-list-headers-blue">tags</Th>
             </Thead>
             <Tbody>
               {apps.map((app) => <Row app={app} key={app.id} toggleCheckbox={toggleCheckbox} />)}
@@ -93,11 +92,11 @@ const SpaceAppsList = ({ spaceId, apps, isFetching, sortType, sortDir, sortHandl
   return <div className='text-center'>No apps found.</div>
 }
 
-const RunLinkShow = ({ runByYou, link }) => {
+const RunLinkShow = ({ runByYou, link, ariaLabel }) => {
   if (typeof runByYou === 'string' && runByYou === 'Try' && link) {
     return (
-      <Link to={link} target='_blank' rel='noopener noreferrer'>
-        <Button type="primary" size="xs">{runByYou}</Button>
+      <Link to={link} target='_blank' rel='noopener noreferrer' className='btn btn-primary btn-xs' aria-label={`View ${ariaLabel} app configure and run settings in new window`}>
+        {runByYou}
       </Link>
     )
   } else {
@@ -123,10 +122,10 @@ const Row = ({ app, toggleCheckbox }) => {
       </td>
       <td>{app.name}</td>
       <td>
-        <LinkTargetBlank url={linkShow}>
+        <a href={linkShow} target='_blank' rel='noreferrer' aria-label={`Navigate to ${app.name} App details page`}>
           <Icon icon={getSpacesIcon('apps')} fw />
           <span>{app.title}</span>
-        </LinkTargetBlank>
+        </a>
       </td>
       <td>{app.revision}</td>
       <td>{app.explorers}</td>
@@ -141,6 +140,7 @@ const Row = ({ app, toggleCheckbox }) => {
         <RunLinkShow
           runByYou={app.runByYou}
           link={app.links.run_job}
+          ariaLabel={app.name}
         />
       </td>
       <td><TagsList tags={app.tags} /></td>
@@ -179,6 +179,7 @@ Row.propTypes = {
 RunLinkShow.propTypes = {
   link: PropTypes.string,
   runByYou: PropTypes.string,
+  ariaLabel: PropTypes.string,
 }
 
 const mapStateToProps = state => ({

@@ -1,0 +1,79 @@
+version: '3.7'
+
+x-shared: &shared
+  build:
+    context: ../
+    dockerfile: docker/images/isolation.Dockerfile
+  volumes:
+    - type: bind
+      source: ../
+      target: /precision-fda
+    - type: volume
+      source: gems
+      target: /usr/local/bundle
+
+services:
+  web:
+    <<: *shared
+    entrypoint: ./docker/entrypoint/web.entrypoint.sh
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - redis
+      - sidekiq
+    stdin_open: true
+    tty: true
+
+  frontend:
+    image: node:12
+    volumes:
+      - type: bind
+        source: ../
+        target: /precision-fda
+    working_dir: /precision-fda/client
+    command: bash -c "yarn && yarn watch"
+
+  nodejs-api:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/Dockerfile
+    command: ['make', 'run-dist']
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+      - redis
+
+  nodejs-worker:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/Dockerfile
+    command: ['make', 'run-worker-dist']
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:5.6
+    volumes:
+      - pfda-mysql-volume:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 3306:3306
+
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+
+  sidekiq:
+    <<: *shared
+    depends_on:
+      - redis
+    entrypoint: ./docker/entrypoint/sidekiq.entrypoint.sh
+
+volumes:
+  pfda-mysql-volume:
+  gems:

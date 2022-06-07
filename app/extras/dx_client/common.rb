@@ -23,7 +23,7 @@ module DXClient
 
             api.org_remove_member(ORG_DUMMY, user_dxid)
           end
-        rescue Net::HTTPClientException => e
+        rescue DXClient::Errors::DXClientError => e
           Rails.logger.error([e.message, e.backtrace.join("\n")].join("\n"))
         end
 
@@ -46,7 +46,7 @@ module DXClient
         scope: { full: true },
         label: "httpsapp",
         client_id: "httpsapp",
-        redirect_uri: "#{job.https_job_external_url.downcase}:443/oauth2/access",
+        redirect_uri: "#{job.https_job_external_url.downcase}/oauth2/access",
       }
 
       call("system", "newAuthToken", params)["authorization_code"]

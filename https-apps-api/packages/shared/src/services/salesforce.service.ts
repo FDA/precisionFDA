@@ -47,7 +47,7 @@ class EmailClient {
           {
             '@xsi:type': 'SingleEmailMessage',
             orgWideEmailAddressId: config.emails.salesforce.fromAddress,
-            ccAddresses: ['kbehalova-cf@dnanexus.com'],
+            ccAddresses: ['precisionfda-no-reply@dnanexus.com'],
             toAddresses: input.to,
             subject: input.subject,
             htmlBody: input.body,
@@ -57,7 +57,7 @@ class EmailClient {
       {},
     )
     if (res.success !== 'true') {
-      log.error({ err: res.errors }, 'SendEmail failed')
+      log.error({ error: res.errors }, 'SendEmail failed')
       throw new errors.ServiceError('Salesforce request failed', {
         code: errors.ErrorCodes.SALESFORCE_SERVICE_ERROR,
         clientResponse: res.success,

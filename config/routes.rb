@@ -115,6 +115,9 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+    post "/spaces/:id/copy_to_cooperative",
+         to: "main#copy_to_cooperative",
+         as: :copy_to_cooperative_space
 
     resources :org_requests do
       collection do
@@ -126,8 +129,18 @@ Rails.application.routes.draw do
 
     # My Home (Site-Wide UI & API Redesign)
     get "home" => "home#index"
+    get "home" => "home#index"
     get "/home/*all", to: "home#index"
+
+    # Old My Home
+    # TODO: remove old code once new My Home is stable for release or two,
+    #       but for now it still has utility for devs
+    # get "home-old" => "home#index"
+    # get "home-old" => "home#index"
+    # get "/home-old/*all", to: "home#index"
+
     get "/account/*all", to: "home#index"
+    get "/challenges/propose", to: "challenges#index"
 
     if ENV["GSRS_ENABLED"]
       match "/ginas/app/logout", to: "main#destroy", via: :all
@@ -174,8 +187,10 @@ Rails.application.routes.draw do
         get :my_entries, on: :collection
       end
 
-      resources :experts, only: %i(index show) do
+      resources :experts, controller: :experts,
+                param: :id, only: %i(index show ask_question blog) do
         get :years, on: :collection
+        post :ask_question, on: :member
       end
 
       resources :participants, path: "participants" do
@@ -286,6 +301,7 @@ Rails.application.routes.draw do
 
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
+        patch :sync_files, on: :member
 
         collection do
           get :featured
@@ -325,6 +341,15 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :dbclusters, controller: :db_clusters,
+                             param: :dxid, only: %i(index show create update) do
+        post ":api_method", on: :collection,
+                            to: "db_clusters#run",
+                            as: :run,
+                            api_method: /(start|stop|terminate)/
+        resources :comments
+      end
+
       resource :counters do
         get :index
         get :featured
@@ -337,7 +362,6 @@ Rails.application.routes.draw do
         post "change", on: :collection
       end
 
-      post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"
@@ -382,6 +406,8 @@ Rails.application.routes.draw do
       post "assign_app"
       get "list_licenses"
     end
+    # end API
+
 
     # FHIR
     scope "/fhir" do
@@ -453,18 +479,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :files do
-      post "download", on: :member
-      post "link", on: :member
-      post "rename", on: :member
-      get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
-      post "move", on: :collection
-      post "create_folder", on: :collection
-      post "rename_folder", on: :member
-      post "download_list", on: :collection
-      post "remove", on: :collection
-      post "publish", on: :collection
+    resources :files, only: [] do
       resources :comments
     end
 
@@ -475,11 +490,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :assets, path: "/assets" do
-      # resources :assets, path: "/app_assets" do
-      post "rename", on: :member
-      get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
+    resources :assets, only: :new do
       resources :comments
     end
 
@@ -487,6 +498,9 @@ Rails.application.routes.draw do
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: "active_meta_appathon"
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: "appathon_in_a_box"
     get "challenges", to: "challenges#index"
+    get "old_challenges/treasure", to: "challenges#treasure_old"
+    get "old_challenges/treasure(/:tab)", to: "challenges#treasure_old"
+
     resources :challenges do
       get "consistency(/:tab)", on: :collection, action: :consistency, as: "consistency"
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
@@ -553,6 +567,7 @@ Rails.application.routes.draw do
       post "close", on: :member
       get "dashboard", on: :member
       get "blog", on: :member
+      get "qa", on: :member
       nested do
         scope "/dashboard" do
           resources :expert_questions, as: "edit_question"
@@ -565,49 +580,7 @@ Rails.application.routes.draw do
     end
 
     resource :org, only: :update
-
-    resources :spaces, only: %i(index) do
-      member do
-        get "tasks"
-        get "feed"
-        get "reports"
-        get "notes"
-        get "comparisons"
-        get "assets"
-        get "discuss"
-        post "invite"
-        post "copy_to_cooperative" # copy a single item to cooperative, used everywhere
-        post "search_content" # used in discuss only
-      end
-
-      resources :comments
-
-      resources :tasks, only: %i(create destroy update show) do
-        post "accept", on: :collection
-        post "complete", on: :collection
-        post "decline", on: :collection
-        post "make_active", on: :collection
-        post "reopen", on: :collection
-        post "reassign", on: :member
-        post "copy", on: :member
-        get "task", on: :member
-        resources :comments
-      end
-
-      resources :space_feed, only: [:index] do
-        collection do
-          get "object_types"
-          get "chart"
-        end
-      end
-
-      resources :space_reports, only: [:index] do
-        collection do
-          get "counters"
-          get "download_report"
-        end
-      end
-    end
+    resources :spaces, only: :index
 
     get "/spaces/*all", to: "spaces#index"
 

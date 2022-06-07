@@ -57,7 +57,7 @@
     elsif app_ids.present?
       "Not this revision"
     else
-      link_to "Try", new_app_job_path(series.latest_version_app), class: 'btn btn-primary btn-xs'
+      link_to "Try", new_app_job_path(series.latest_version_app)
     end
   end
 

@@ -127,8 +127,7 @@ RSpec.describe Api::FilesController, type: :controller do
       end
 
       it "copies files and folders" do
-        node_copier = instance_double(CopyService::NodeCopier, copy: CopyService::Copies.new)
-        allow(CopyService::NodeCopier).to receive(:new).and_return(node_copier)
+        allow(NodeCopyWorker).to receive(:perform_async)
 
         node_ids = [file_one.id, folder_one.id, file_two.id, file_other.id]
 
@@ -137,19 +136,15 @@ RSpec.describe Api::FilesController, type: :controller do
           item_ids: node_ids,
         }, format: :json
 
-        expected_nodes = Node.where(id: node_ids[0..-2])
-
-        expect(node_copier).to have_received(:copy).with(
-          match_array(expected_nodes),
-          space.uid,
-        )
+        expect(NodeCopyWorker).to have_received(:perform_async).
+          with(space.scope, node_ids[0..-2], anything)
 
         expect(response).to be_successful
       end
 
       context "when user doesn't have contributor access to a scope" do
-        let(:another_user) { create(:user) }
         let(:space) do
+          another_user = create(:user)
           create(
             :space,
             :review,
@@ -181,11 +176,12 @@ RSpec.describe Api::FilesController, type: :controller do
   describe "PUT feature files and folders" do
     context "when user is authenticated" do
       let(:folder_one) { create(:folder, :public, user: admin) }
-      let(:file_one) { create(:user_file, :private, user: user, parent_folder_id: folder_one.id) }
-      let(:file_two) { create(:user_file, :public, user: admin, parent_folder_id: folder_one.id) }
       let(:file_other) { create(:user_file, :public, user: admin) }
 
       before do
+        create(:user_file, :private, user: user, parent_folder_id: folder_one.id)
+        create(:user_file, :public, user: admin, parent_folder_id: folder_one.id)
+
         authenticate!(admin)
       end
 
@@ -197,23 +193,12 @@ RSpec.describe Api::FilesController, type: :controller do
       end
 
       it "feature file and folder in one response" do
-        [file_one, file_two].each(&:reload)
         put :invert_feature, params: { item_ids: [file_other.uid, folder_one.id],
                                        featured: true }, format: :json
 
         expect(response).to be_successful
         expect { folder_one.reload }.to change(folder_one, :featured).from(false).to(true)
         expect { file_other.reload }.to change(file_other, :featured).from(false).to(true)
-      end
-
-      it "folder contains files with diff scopes" do
-        [file_one, file_two].each(&:reload)
-        put :invert_feature, params: { item_ids: [file_other.uid, folder_one.id],
-                                       featured: true }, format: :json
-
-        expect(response).to be_successful
-        expect { file_two.reload }.to change(file_two, :featured).from(false).to(true)
-        expect(file_one.reload.featured).to be true
       end
     end
 

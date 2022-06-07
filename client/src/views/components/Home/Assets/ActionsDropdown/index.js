@@ -38,7 +38,7 @@ import { OBJECT_TYPES, HOME_FILES_ACTIONS } from '../../../../../constants'
 import { DropdownMenu } from '../../../DropdownMenu'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeEditTagsModal from '../../HomeEditTagsModal'
-import RenameObjectModal from '../../../Files/RenameObjectModal'
+import RenameObjectModal from '../../../RenameObjectModal'
 import AssetsActionModal from '../AssetsActionModal'
 import AttachLicenseModal from '../../AttachLicenseModal'
 import HomeLicenseModal from '../../HomeLicenseModal'
@@ -54,8 +54,8 @@ const ACTIONS_TO_REMOVE = {
 
 const ActionsDropdown = (props) => {
   const { assets, page = 'private' } = props
-  const assetsIds = assets.map(app => app.id)
-  const assetsUids = assets.map(app => app.uid)
+  const assetsIds = assets.map(asset => asset.id)
+  const assetsUids = assets.map(asset => asset.uid)
 
   const links = {}
   if (assets[0] && assets[0].links) {
@@ -67,7 +67,7 @@ const ActionsDropdown = (props) => {
   const actions = [
     {
       text: 'Rename',
-      isDisabled: assets.length !== 1 || !links.rename,
+      isDisabled: assets.length !== 1,
       onClick: () => props.showRenameModal(),
     },
     {
@@ -86,12 +86,6 @@ const ActionsDropdown = (props) => {
       onClick: () => props.makeFeatured(links.feature, assetsUids, false),
       isDisabled: assets.length === 0 || assets.some(e => !e.featured || !e.links.feature),
       hide: !isAdmin,
-    },
-    {
-      text: 'Authorize URL',
-      isDisabled: assets.length !== 1 || !links.link,
-      link: links.link,
-      method: 'post',
     },
     {
       text: 'Make public',
@@ -157,7 +151,7 @@ const ActionsDropdown = (props) => {
         hideAction={() => props.hideAttachToModal()}
         ids={assetsIds}
         attachAction={(items, noteUids) => props.attachTo(items, noteUids)}
-        itemsType={OBJECT_TYPES.APP}
+        itemsType={OBJECT_TYPES.ASSET}
       />
       <HomeEditTagsModal
         isOpen={props.editTagsModal.isOpen}

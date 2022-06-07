@@ -17,6 +17,7 @@ export const colors = {
   primaryRed: '#eb776f',
   primaryYellow: '#f0ad4e',
   highlightBlue: '#3a80ba',
+  blueOnWhite: '#3776a9',
   highlightYellow: '#edad58',
   highlightGreen: '#44b150',
   subtleBlue: '#f4f8fd',
@@ -26,23 +27,39 @@ export const colors = {
   inactiveBlue: '#8c9ba8',
   lightYellow: '#efe5d7',
   mediumDarkBlue: '#2f5373',
-  darkRed: '#c41331',
+  darkRed: '#CA2323',
   darkBlue: '#343E4D',
   darkGreen: '#1d764c',
   darkYellow: '#ec971f',
   textBlack: '#000',
   textDarkGrey: '#272727',
   textMediumGrey: '#646464',
+  colorDateGrey: '#919191',
+  stateLabelGrey: '#919191',
   textLightGrey: '#ddd',
   textWhite: '#fff',
+  white110: '#f5f5f5',
   backgroundLightGray: 'rgb(242, 242, 242)',
   borderDefault: '#ddd',
+  // Used for jobs or executions
   stateRunningBackground: '#f0f9fd',
   stateRunningColor: '#2071b5',
   stateFailedBackground: '#ffeeed',
   stateFailedColor: '#821a1d',
   stateDoneBackground: '#dff0d8',
   stateDoneColor: 'darken(#3c763d, 5%)',
+  blacktextOnWhite: '#333333', 
+  darkblueOnLightBlue: '#1f5cb7',
+  brownOnWhite: '#aa6708',
+  borderBrownOnWhite: '#af6a08',
+  disabledBlackTextOnGrey: '#130101', 
+  darkGreyOnGrey: '#7891b7',
+  buttonGreenOnWhite: '#30825b',
+  greyTextonBlack: '#919191',
+  brownOnGrey: '#b3453d', 
+  blueOnBlack: '#368ad3',
+  greyOnLightBlue: '#6d6d6d',
+  
 }
 
 export const fontSize = {
@@ -96,6 +113,7 @@ export const sizing = {
   thumbnailHeightSmall: '90px',
   iconSmall: '56px',
   highlightBarWidth: '4px',
+  modalBorderRadius: '8px',
 }
 
 export const theme = {

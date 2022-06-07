@@ -2,16 +2,19 @@ import React, { useState, useRef, FC } from 'react'
 import { usePopper } from 'react-popper'
 import { PopperContainer, DropdownMenu } from './styles'
 import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
+import { Placement } from '@popperjs/core'
+import { useKeyPress } from '../../hooks/useKeyPress'
 
 export const Dropdown: FC<{
   content: React.ReactNode
+  placement? : Placement
   forceShowPopper?: boolean
   trigger?: 'click' | 'hover'
   children: ({}: any) => React.ReactNode
-}> = ({ forceShowPopper, trigger = 'hover', content, children }) => {
+}> = ({ forceShowPopper, trigger = 'hover', content, children, placement = 'bottom-end' }) => {
   const [showPopper, setShowPopper] = useState(false)
-
   const [delayHandler, setDelayHandler] = useState<any>(null)
+  useKeyPress('Escape', () => setShowPopper(false))
 
   const handleMouseEnter = (event: any) => {
     setDelayHandler(
@@ -35,7 +38,7 @@ export const Dropdown: FC<{
     buttonRef.current,
     popperRef.current,
     {
-      placement: 'bottom-end',
+      placement,
       modifiers: [
         {
           name: 'arrow',
@@ -54,11 +57,11 @@ export const Dropdown: FC<{
   )
 
   return (
-    <div ref={clickRef}>
+    <div ref={clickRef} style={{display: 'contents'}}>
       {children({
         style: { cursor: 'pointer' },
         ref: buttonRef,
-        onClick: () => trigger === 'click' && setShowPopper(!showPopper),
+        onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
         onMouseEnter: () => trigger === 'hover' && setShowPopper(true),
         onMouseLeave: () => trigger === 'hover' && setShowPopper(false),
         isActive: showPopper,

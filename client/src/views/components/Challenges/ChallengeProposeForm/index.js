@@ -129,10 +129,15 @@ class ChallengeProposeForm extends React.Component {
 
     const formIsValid = this.validateForm()
     const formDisabled = isSubmitting || !formIsValid
+    
+    const scientificQuestionRadioOptions = [
+      { 'label': 'Yes', 'value': 'Yes' , 'ariaLabel': 'Select Yes to specific scientific question driving the challenge', 'htmlFor': 'Opt Yes to specific scientific question driving the challenge' },
+      { 'label': 'No', 'value': 'No', 'ariaLabel': 'Select No to specific scientific question driving the challenge', 'htmlFor': 'Opt No to specific scientific question driving the challenge' }, 
+    ]
 
-    const radioOptions = [
-      { 'label': 'Yes', 'value': 'Yes' },
-      { 'label': 'No', 'value': 'No' },
+    const accessToDataRadioOptions = [
+      { 'label': 'Yes', 'value': 'Yes' , 'ariaLabel': 'Select Yes for access to data for the challenge', 'htmlFor': 'Opt Yes to access to data for the challenge' },
+      { 'label': 'No', 'value': 'No', 'ariaLabel': 'Select No for access to data for the challenge', 'htmlFor': 'Opt No to access to data for the challenge' },
     ]
 
     const showErrorString = !formIsValid
@@ -155,17 +160,19 @@ class ChallengeProposeForm extends React.Component {
           <TextField type="text" name="organisation" label="Organisation/Institute" row={true} placeholder="Enter your organization/institute"
             onChange={this.onChangeHandler}
             />
-          <Radio name="specific_question" label="Do you have specific scientific question driving the challenge?" options={radioOptions} initialValue={'Yes'}
+          <Radio name="specific_question" label="Do you have specific scientific question driving the challenge?" options={scientificQuestionRadioOptions} initialValue={'Yes'}
             onChange={this.onChangeHandler} />
           <TextareaField name="specific_question_text" label="Please provide details"
             placeholder="Enter question details"
+            aria_label="Please provide details for any scientific questions" 
             onChange={this.onChangeHandler}
             disabled={this.state.formData.specific_question==='No'}
           />
-          <Radio name="data_details" label="Do you have access to data for the challenge?" options={radioOptions} inline={true} initialValue={'Yes'}
+          <Radio name="data_details" label="Do you have access to data for the challenge?" options={accessToDataRadioOptions} inline={true} initialValue={'Yes'}
             onChange={this.onChangeHandler} />
           <TextareaField name="data_details_text" label="Please provide details about the data (e.g. data type, sample number, etc)"
             placeholder="Enter data details"
+            aria_label="Please provide details about data for the challenge"
             onChange={this.onChangeHandler}
             disabled={this.state.formData.data_details==='No'}
           />

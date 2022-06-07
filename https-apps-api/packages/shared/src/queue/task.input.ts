@@ -1,16 +1,69 @@
 import { EmailSendInput } from '../domain/email/email.config'
 import { UserCtx } from '../types'
-import { TASKS } from './task.enum'
 
-type Task<T> = {
-  type: TASKS
-  payload: T
+type TaskWithAuth = {
   user: UserCtx
 }
 
-// will be used in the sub-handler
-type CheckStatusJob = Task<{ dxid: string }>
-type SendEmailJob = Task<EmailSendInput>
-type CheckStaleJobsJob = Omit<Task<null>, 'user'>
+type TaskWithMaybeAuth = {
+  user: UserCtx | undefined
+}
 
-export { Task, CheckStatusJob, SendEmailJob, CheckStaleJobsJob }
+export enum TASK_TYPE {
+  SYNC_JOB_STATUS = 'sync_job_status',
+  SYNC_WORKSTATION_FILES = 'sync_workstation_files',
+  SEND_EMAIL = 'send_email',
+  CHECK_STALE_JOBS = 'check_stale_jobs',
+  CHECK_NON_TERMINATED_DBCLUSTERS = 'check_non_terminated_dbclusters',
+  SYNC_DBCLUSTER_STATUS = 'sync_dbcluster_status',
+  USER_CHECKUP = 'user_checkup',
+  DEBUG_MAX_MEMORY = 'debug_test_max_memory',
+  OTHER_TASK = 'other',
+}
+
+// will be used in the sub-handler
+export type BasicUserJob = TaskWithAuth & {
+  type: TASK_TYPE.USER_CHECKUP
+}
+export type CheckStatusJob = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_JOB_STATUS
+  payload: { dxid: string }
+}
+
+export type SendEmailJob = TaskWithMaybeAuth & {
+  type: TASK_TYPE.SEND_EMAIL
+  payload: EmailSendInput
+}
+export type CheckStaleJobsJob = TaskWithAuth & {
+  payload: undefined
+  type: TASK_TYPE.CHECK_STALE_JOBS
+}
+export type SyncDbClusterJob = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_DBCLUSTER_STATUS
+  payload: { dxid: string }
+}
+export type SyncWorkstationFiles = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_WORKSTATION_FILES
+}
+export type OtherTask = TaskWithAuth & {
+  type: TASK_TYPE.OTHER_TASK
+}
+// NOTE(samuel) - task running without user context
+export type CheckNonTerminatedDbClustersJob = {
+  type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS
+}
+
+export type DebugMaxMemory = {
+  type: TASK_TYPE.DEBUG_MAX_MEMORY
+};
+
+export type Task =
+  | BasicUserJob
+  | CheckStatusJob
+  | SendEmailJob
+  | CheckStaleJobsJob
+  | CheckNonTerminatedDbClustersJob
+  | SyncDbClusterJob
+  | SyncWorkstationFiles
+  | DebugMaxMemory
+  | OtherTask

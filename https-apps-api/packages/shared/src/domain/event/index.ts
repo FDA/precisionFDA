@@ -1,1 +1,1 @@
-export { JobClosedEvent } from './job-closed.entity'
+export { Event } from './event.entity'

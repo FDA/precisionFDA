@@ -50,7 +50,6 @@ describe AssetSerializer do
 
       it "links[download, link, publish] are nil" do
         expect(asset_serialized["links"]["download"]).to eq(download_api_file_path(asset))
-        expect(asset_serialized["links"]["link"]).to eq(link_file_path(asset))
         expect(asset_serialized["links"]["publish"]).to be_nil
       end
 
@@ -103,10 +102,9 @@ describe AssetSerializer do
             )
           end
 
-          it "links[download, link, copy] exist" do
+          it "links[download, copy] exist" do
             expect(asset_serialized["links"]["download"]).
               to eq(download_api_file_path(asset))
-            expect(asset_serialized["links"]["link"]).to eq(link_file_path(asset))
             expect(asset_serialized["links"]["copy"]).to eq(copy_api_files_path)
           end
 
@@ -208,10 +206,9 @@ describe AssetSerializer do
           context "when license does not owned by user" do
             before { asset.license.update(user_id: nil) }
 
-            it "links[download, link, copy] exist" do
+            it "links[download, copy] exist" do
               expect(asset_serialized["links"]["download"]).
                 to eq(download_api_file_path(asset))
-              expect(asset_serialized["links"]["link"]).to eq(link_file_path(asset))
               expect(asset_serialized["links"]["copy"]).to eq(copy_api_files_path)
             end
           end
@@ -284,9 +281,8 @@ describe AssetSerializer do
         allow(user).to receive(:logged_in?).and_return(true)
       end
 
-      it "links[download, link, publish] exist" do
+      it "links[download, publish] exist" do
         expect(asset_serialized["links"]["download"]).to eq(download_api_file_path(asset))
-        expect(asset_serialized["links"]["link"]).to eq(link_file_path(asset))
         expect(asset_serialized["links"]["publish"]).to eq("/publish?id=#{asset.uid}")
       end
 

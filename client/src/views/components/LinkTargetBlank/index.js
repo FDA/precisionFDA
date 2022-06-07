@@ -2,9 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 
-const LinkTargetBlank = ({ url, children }) => {
+const LinkTargetBlank = ({ url, children, ariaLabel }) => {
   return (
-    <a href={url} target='_blank' rel='noopener noreferrer'>
+    <a href={url} target='_blank' rel='noopener noreferrer' aria-label={ariaLabel}>
       {children}
     </a>
   )
@@ -20,4 +20,5 @@ LinkTargetBlank.propTypes = {
     PropTypes.element,
     PropTypes.string,
   ]),
+  ariaLabel: PropTypes.string,
 }

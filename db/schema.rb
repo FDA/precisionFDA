@@ -2,15 +2,15 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# This file is the source Rails uses to define your schema when running `rails
-# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
 # be faster and is potentially less error prone than running all of your
 # migrations from scratch. Old migrations may fail to apply correctly if those
 # migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_22_144105) do
+ActiveRecord::Schema.define(version: 2022_02_21_165243) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -242,6 +242,28 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
     t.index ["name"], name: "index_countries_on_name", unique: true
   end
 
+  create_table "dbclusters", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.string "dxid", null: false
+    t.string "name", null: false
+    t.integer "status", null: false
+    t.string "scope", null: false
+    t.integer "user_id", null: false
+    t.string "project", null: false
+    t.string "dx_instance_class", null: false
+    t.integer "engine", null: false
+    t.string "engine_version", null: false
+    t.string "host"
+    t.string "port"
+    t.string "description"
+    t.datetime "status_as_of"
+    t.string "uid", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
+    t.index ["uid"], name: "index_dbclusters_on_uid", unique: true
+    t.index ["user_id"], name: "index_dbclusters_on_user_id"
+  end
+
   create_table "discussions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -260,6 +282,7 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
     t.string "param3"
     t.datetime "created_at", null: false
     t.string "param4"
+    t.text "data"
     t.index ["type", "created_at"], name: "index_events_on_type_and_created_at"
   end
 
@@ -383,6 +406,7 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
     t.integer "local_folder_id"
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
+    t.boolean "termination_email_sent", default: false
     t.index ["analysis_id"], name: "fk_rails_0a95efec7a"
     t.index ["app_id"], name: "index_jobs_on_app_id"
     t.index ["app_series_id"], name: "index_jobs_on_app_series_id"
@@ -683,23 +707,6 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
-  create_table "tasks", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "space_id"
-    t.integer "assignee_id", null: false
-    t.integer "status", default: 0, null: false
-    t.string "name"
-    t.text "description"
-    t.datetime "response_deadline"
-    t.datetime "completion_deadline"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "response_time"
-    t.datetime "complete_time"
-    t.index ["space_id"], name: "index_tasks_on_space_id"
-    t.index ["user_id"], name: "index_tasks_on_user_id"
-  end
-
   create_table "truth_challenge_results", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "answer_id"
     t.string "entry"
@@ -906,6 +913,7 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
   add_foreign_key "comparisons", "users"
+  add_foreign_key "dbclusters", "users"
   add_foreign_key "discussions", "notes"
   add_foreign_key "discussions", "users"
   add_foreign_key "expert_answers", "expert_questions"
@@ -943,7 +951,5 @@ ActiveRecord::Schema.define(version: 2021_05_22_144105) do
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
-  add_foreign_key "tasks", "spaces"
-  add_foreign_key "tasks", "users"
   add_foreign_key "users", "orgs"
 end

@@ -35,7 +35,7 @@ export class UserFile extends Node {
   @Property()
   entityType: FILE_ORIGIN_TYPE
 
-  @Property()
+  @Property({ unique: true })
   uid: string
 
   @Property()
@@ -60,7 +60,7 @@ export class UserFile extends Node {
 
   // todo: micro-orm can do single table inheritance
 
-  @ManyToOne()
+  @ManyToOne(() => User)
   user!: IdentifiedReference<User>
 
   @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })

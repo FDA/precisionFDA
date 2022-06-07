@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -38,6 +37,12 @@ Rails.application.configure do
   config.assets.debug = false
   config.assets.digest = true
 
+  # Segmentation fault fix during bundle exec rake assets:precompile
+  # https://github.com/rails/sprockets/issues/633
+  config.assets.configure do |env|
+    env.export_concurrent = false
+  end
+
   # `config.assets.precompile` and `config.assets.version`
   # have moved to config/initializers/assets.rb
 
@@ -74,11 +79,7 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  config.action_mailer.default_url_options = if ENV["DNANEXUS_BACKEND"] == "production"
-    { host: "precision.fda.gov", protocol: "https" }
-  else
-    { host: "precisionfda-staging.dnanexus.com", protocol: "https" }
-  end
+  config.action_mailer.default_url_options = { host: "precision.fda.gov", protocol: "https" }
 
   config.action_mailer.delivery_method = :salesforce
   config.action_mailer.perform_deliveries = true
@@ -113,13 +114,10 @@ Rails.application.configure do
       end
     end,
     email: {
-      email_prefix: (
-        ENV["DNANEXUS_BACKEND"] == "production" ? "[PrecisionFDA]" : "[PrecisionFDA-Stage]"
-      ),
+      email_prefix: "[PrecisionFDA]",
       sender_address: "\"notifier\" <notification@dnanexus.com>",
       exception_recipients: %w(precisionfda-dev@dnanexus.com),
       email_format: :html,
     },
   )
 end
-# rubocop:enable Metrics/BlockLength

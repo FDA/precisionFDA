@@ -9,56 +9,76 @@ import SpaceShape from '../../../shapes/SpaceShape'
 import UserShape from '../../../shapes/UserShape'
 import TagsList from '../../TagsList'
 import ToggleSwitch from './ToggleSwitch'
-import { Table, Thead, Tbody, Th } from '../../TableComponents'
+import { Table, Tbody, Th, Thead } from '../../TableComponents'
 import Pagination from '../../TableComponents/Pagination'
+// eslint-disable-next-line
+import { SPACE_PRIVATE_TYPE } from '../../../../constants'
 
-
-const UserLink = ({ user }) => (
-  <a href={user.url}>{user.name}</a>
-)
+const UserLink = ({ user }) => <a href={user.url}>{user.name}</a>
 
 const PrivateCells = ({ space }) => {
   const isAccessible = !!space.links.show
   const tdClasses = {
-    'spaces-list-table__private-row': true,
+    'spaces-list-table__private-row': space?.isPrivate || space.isExclusive,
     'td-underline': isAccessible,
   }
   return (
     <>
       <td className={classNames(tdClasses)}>
-        { isAccessible ?
-          <Link to={`/spaces/${space.id}`}>Private</Link> :
+        {isAccessible ? (
+          <Link
+            to={`/spaces/${space.id}`}
+            aria-label={`Click this link to navigate to Private Space ID ${space.id}`}
+          >
+            Private
+          </Link>
+        ) : (
           <span>Private</span>
-        }
+        )}
       </td>
       <td className="spaces-list-table__private-row">
-        {(space.hostLead) && <UserLink user={space.hostLead} />}
+        {space.hostLead && <UserLink user={space.hostLead} />}
       </td>
-      <td className="spaces-list-table__private-row"></td>
+      <td className="spaces-list-table__private-row" />
     </>
   )
 }
 
 const SharedCells = ({ space, hasPrivate }) => {
-  const sharedRowspan = (hasPrivate) ? 1 : 2
+  const sharedRowspan = hasPrivate ? 1 : 2
   const isAccessible = !!space.links.show
   const tdClasses = {
-    'spaces-list-table__shared-row': true,
+    'spaces-list-table__shared-row': !space.isPrivate && !space.isExclusive,
     'td-underline': isAccessible,
   }
+
   return (
     <>
       <td className={classNames(tdClasses)} rowSpan={sharedRowspan}>
-        { isAccessible ?
-          <Link to={`/spaces/${space.id}`}>Shared</Link> :
+        {isAccessible ? (
+          <Link
+            to={`/spaces/${space.id}`}
+            aria-label={`Click this link to navigate to Space ID ${space.id}`}
+          >
+            Shared
+          </Link>
+        ) : (
           <span>Shared</span>
-        }
+        )}
       </td>
-      <td className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
-        {(space.hostLead) && <UserLink user={space.hostLead} />}
+      <td
+        aria-label={`Click this link to navigate to the ${space.hostLead?.name} profile page`}
+        className="spaces-list-table__shared-row"
+        rowSpan={sharedRowspan}
+      >
+        {space.hostLead && <UserLink user={space.hostLead} />}
       </td>
-      <td className="spaces-list-table__shared-row" rowSpan={sharedRowspan}>
-        {(space.guestLead) && <UserLink user={space.guestLead} />}
+      <td
+        aria-label={`Click this link to navigate to the ${space.guestLead?.name} profile page`}
+        className="spaces-list-table__shared-row"
+        rowSpan={sharedRowspan}
+      >
+        {space.guestLead && <UserLink user={space.guestLead} />}
       </td>
     </>
   )
@@ -68,13 +88,18 @@ const ToggleCell = ({ space, lockToggleHandler }) => {
   const classes = classNames(
     'spaces-list-table__switcher',
     `spaces-list-table__switcher--${space.status}`,
+    `remediation-table-switcher-${space.status}`,
   )
   return (
     <td rowSpan="2" className="spaces-list-table__switcher-td">
       <div className={classes}>
-        {(space.hasLockLink) && (
+        {space.hasLockLink && (
           <div>
-            <ToggleSwitch space={space} vertical toggleHandler={lockToggleHandler} />
+            <ToggleSwitch
+              space={space}
+              vertical
+              toggleHandler={lockToggleHandler}
+            />
           </div>
         )}
         <div className="spaces-list-table__switcher-label">{space.status}</div>
@@ -84,40 +109,75 @@ const ToggleCell = ({ space, lockToggleHandler }) => {
 }
 
 const Row = ({ space, lockToggleHandler }) => {
-  const paddTrClasses = classNames('spaces-list-table__tr', 'spaces-list-table__tr--padding')
-  const topTrClasses = classNames('spaces-list-table__tr', 'spaces-list-table__tr--top')
-  const bottomTrClasses = classNames('spaces-list-table__tr', 'spaces-list-table__tr--bottom')
+  const paddTrClasses = classNames(
+    'spaces-list-table__tr',
+    'spaces-list-table__tr--padding',
+  )
+  const topTrClasses = classNames(
+    'spaces-list-table__tr',
+    'spaces-list-table__tr--top',
+  )
+  const bottomTrClasses = classNames(
+    'spaces-list-table__tr',
+    'spaces-list-table__tr--bottom',
+  )
+
+  const chackExclusiveSpace =
+    space.hasPrivate &&
+    space.private.isExclusive &&
+    space.private.type === SPACE_PRIVATE_TYPE
+  const spaceArea = chackExclusiveSpace ? space.private : space.shared
+  const spaceAreaType =
+    spaceArea.type === SPACE_PRIVATE_TYPE ? 'private' : spaceArea.type
+
   return (
     <>
       <tr className={paddTrClasses}>
         <td colSpan="9" />
       </tr>
       <tr className={topTrClasses}>
-        <ToggleCell space={space.shared} lockToggleHandler={lockToggleHandler} />
+        <ToggleCell space={spaceArea} lockToggleHandler={lockToggleHandler} />
         <td className="spaces-list-table__title">
-          { space.shared.links.show ?
-            <Link to={`/spaces/${space.shared.id}`}>{space.shared.name}</Link> :
-            <span>{space.shared.name}</span>
-          }
+          {spaceArea.links?.show ? (
+            <Link
+              aria-label={`This link will navigate to ${spaceArea.name} Space`}
+              to={`/spaces/${spaceArea.id}`}
+            >
+              {spaceArea.name}
+            </Link>
+          ) : (
+            <span>{spaceArea.name}</span>
+          )}
         </td>
-        <td>{space.shared.type}</td>
+        <td>{spaceAreaType}</td>
         <td rowSpan="2" className="spaces-list-table__tags">
-          <TagsList tags={space.shared.tags} />
+          <TagsList tags={spaceArea.tags} />
         </td>
-        <td>{space.shared.createdAt}</td>
-        <td>{space.shared.updatedAt}</td>
-        {(space.hasPrivate) ? <PrivateCells space={space.private} /> : <SharedCells space={space.shared} />}
+        <td>{spaceArea.createdAt}</td>
+        <td>{spaceArea.updatedAt}</td>
+        {space.hasPrivate || spaceArea.isExclusive ? (
+          <PrivateCells space={space.private} />
+        ) : (
+          <SharedCells space={space.shared} />
+        )}
       </tr>
+
       <tr className={bottomTrClasses}>
-        <td colSpan="2">{space.shared.desc}</td>
-        <td colSpan="2"></td>
-        {(space.hasPrivate) && <SharedCells space={space.shared} hasPrivate />}
+        {space.hasPrivate && !spaceArea.isExclusive && (
+          <>
+            <td colSpan="2">{spaceArea.desc}</td>
+            <td colSpan="2" />
+            {space.hasPrivate && !spaceArea.isExclusive && (
+              <SharedCells space={space.shared} hasPrivate />
+            )}
+          </>
+        )}
       </tr>
     </>
   )
 }
 
-const SpacesTable = (props) => {
+const SpacesTable = props => {
   const { spaces, sortType, sortDir, pagintion } = props
   const { sortHandler, lockToggleHandler, setPageHandler } = props
 
@@ -125,18 +185,56 @@ const SpacesTable = (props) => {
     <div className="spaces-list-table">
       <Table>
         <Thead>
-          <Th>space state</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="name" sortHandler={sortHandler}>name</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="type" sortHandler={sortHandler}>type</Th>
-          <Th>tags</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="created_at" sortHandler={sortHandler}>created on</Th>
-          <Th sortType={sortType} sortDir={sortDir} type="updated_at" sortHandler={sortHandler}>modified on</Th>
-          <Th>area type</Th>
-          <Th>reviewer/host lead</Th>
-          <Th>sponsor/guest lead</Th>
+          <Th class_name="spaces-list-headers-grey">space state</Th>
+          <Th
+            sortType={sortType}
+            sortDir={sortDir}
+            type="name"
+            sortHandler={sortHandler}
+            class_name="spaces-list-headers-blue"
+          >
+            name
+          </Th>
+          <Th
+            sortType={sortType}
+            sortDir={sortDir}
+            type="type"
+            sortHandler={sortHandler}
+            class_name="spaces-list-headers-blue"
+          >
+            type
+          </Th>
+          <Th class_name="spaces-list-headers-grey">tags</Th>
+          <Th
+            sortType={sortType}
+            sortDir={sortDir}
+            type="created_at"
+            sortHandler={sortHandler}
+            class_name="spaces-list-headers-blue"
+          >
+            created on
+          </Th>
+          <Th
+            sortType={sortType}
+            sortDir={sortDir}
+            type="updated_at"
+            sortHandler={sortHandler}
+            class_name="spaces-list-headers-blue"
+          >
+            modified on
+          </Th>
+          <Th class_name="spaces-list-headers-grey">area type</Th>
+          <Th class_name="spaces-list-headers-grey">reviewer/host lead</Th>
+          <Th class_name="spaces-list-headers-grey">sponsor/guest lead</Th>
         </Thead>
         <Tbody>
-          {spaces.map((space) => <Row space={space} key={space.id} lockToggleHandler={lockToggleHandler} />)}
+          {spaces.map(space => (
+            <Row
+              space={space}
+              key={space.id}
+              lockToggleHandler={lockToggleHandler}
+            />
+          ))}
         </Tbody>
       </Table>
       <Pagination data={pagintion} setPageHandler={setPageHandler} />

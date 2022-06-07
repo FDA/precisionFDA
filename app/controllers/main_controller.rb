@@ -79,7 +79,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           },
           {
             title: "Explore files",
-            path: Rails.application.routes.url_helpers.explore_files_path,
+            path: "/home/files/everybody",
             help_label: "Learn",
             help_path: Rails.application.routes.url_helpers.show_docs_path("files"),
             description: "Browse the datasets have been publicly shared with the precisionFDA community",
@@ -100,7 +100,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           },
           {
             title: "Browse Assets",
-            path: Rails.application.routes.url_helpers.explore_assets_path,
+            path: "/home/assets/everybody",
             help_label: "Learn",
             help_path: Rails.application.routes.url_helpers.show_docs_path("creating_apps") + "#dev-assets",
             description: "Browse the collection of software assets that are used as building blocks in apps.",
@@ -209,7 +209,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     else
       user_return_to = params[:user_return_to].presence
 
-      uri_attrs = [OAUTH2_REDIRECT_URI]
+      uri_attrs = [oauth2_redirect_url]
       uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
 
       query_params = URI.encode_www_form(
@@ -234,7 +234,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     # Exchange the code for a token
     result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).
-      fetch_token(unsafe_params[:code])
+      fetch_token(unsafe_params[:code], oauth2_redirect_url)
 
     if result["access_token"].blank? ||
        result["token_type"] != "bearer"
@@ -318,6 +318,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           user.last_login = Time.zone.now
           user.save(validate: false)
         end
+
+        post_login_checks user, token
       end
 
       Session.delete_expired
@@ -338,6 +340,15 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       distribute_results user, token
       redirect_to redirect_url
     end
+  end
+
+  def post_login_checks(user, token)
+    # User logged in successfully, a good time to run user checkup with the new token
+    https_apps_client = HttpsAppsClient.new(token, user)
+    https_apps_client.user_checkup
+  rescue StandardError => e
+    # Error in requesting a user checkup shouldn't interrupt the login process
+    Rails.logger.error("Error requesting user checkup: #{e.message}")
   end
 
   def check_webapp
@@ -613,12 +624,42 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     end
   end
 
+  # This action is only for backward compatibility with the old pages and was moved here from
+  # the old Spaces Controller. It copies an item from a current confidential space to cooperative.
+  # Only needed for the old Comparisons and Notes pages.
+  def copy_to_cooperative
+    space = Space.confidential.accessible_by(current_user).find(unsafe_params[:id])
+    object = item_from_uid(unsafe_params[:object_id])
+    copy_service = CopyService.new(api: @context.api, user: @context.user)
+
+    if space.editable_by?(current_user) && space.member_in_cooperative?(@context.user_id)
+      copy_service.copy(object, space.shared_space.uid).each do |new_object|
+        SpaceEventService.call(
+          space.shared_space.id,
+          @context.user_id,
+          nil,
+          new_object,
+          "copy_to_cooperative",
+        )
+      end
+
+      flash[:success] = "#{object.class} successfully copied"
+    else
+      flash[:warning] = "You have no permission to copy object(s) to cooperative."
+    end
+
+    redirect_back(fallback_location: _space_path(space))
+  end
+
   private
+
+  def oauth2_redirect_url
+    URI.join(request.base_url, "/return_from_login").to_s
+  end
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def concat_path(item)
-    if ["file", "folder", "app", "app-series", "job", "asset", "workflow", "workflow-series"].
-        include? item.klass
+    if ["app", "app-series", "job", "workflow", "workflow-series"].include?(item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)

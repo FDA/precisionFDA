@@ -1,4 +1,5 @@
 import { EntityManager, wrap } from '@mikro-orm/core'
+import { config } from '../config'
 import { entities } from '../domain'
 import * as generate from './generate'
 
@@ -18,6 +19,30 @@ const userHelper = {
     em.persist(user)
     return user
   },
+
+  createAdmin: (em: EntityManager) => {
+    return userHelper.create(em, {
+      dxuser: config.platform.adminUser,
+      email: `${config.platform.adminUser}@dnanexus.com`,
+    })
+  },
+}
+
+const dbClusterHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.DbCluster>>,
+  ) => {
+    const defaults = generate.dbCluster.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const dbCluster = wrap(new entities.DbCluster(references.user)).assign(input, { em })
+    em.persist(dbCluster)
+    return dbCluster
+  },
 }
 
 const jobHelper = {
@@ -29,7 +54,7 @@ const jobHelper = {
     },
     data?: Partial<InstanceType<typeof entities.Job>>,
   ) => {
-    const defaults = generate.job.simple()
+    const defaults = references.app?.isHTTPS() ? generate.job.simple() : generate.job.regular()
     const input = {
       ...defaults,
       ...data,
@@ -41,12 +66,26 @@ const jobHelper = {
 }
 
 const appHelper = {
-  create: (
+  createRegular: (
     em: EntityManager,
     references: { user: InstanceType<typeof entities.User> },
     data?: Partial<InstanceType<typeof entities.App>>,
   ) => {
-    const defaults = generate.app.simple()
+    const defaults = generate.app.regular()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const app = wrap(new entities.App(references.user)).assign(input, { em })
+    em.persist(app)
+    return app
+  },
+  createHTTPS: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.App>>,
+  ) => {
+    const defaults = generate.app.https()
     const input = {
       ...defaults,
       ...data,
@@ -225,6 +264,25 @@ const spacesHelper = {
   },
 }
 
+const challengeHelper = {
+  create: (
+    em: EntityManager,
+    references: { userAndAdmin: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Challenge>>,
+  ) => {
+    const defaults = generate.challenge.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const challenge = wrap(
+      new entities.Challenge(references.userAndAdmin, references.userAndAdmin),
+    ).assign(input)
+    em.persist(challenge)
+    return challenge
+  },
+}
+
 const commentHelper = {
   create: (
     em: EntityManager,
@@ -242,4 +300,14 @@ const commentHelper = {
   },
 }
 
-export { userHelper, jobHelper, appHelper, filesHelper, tagsHelper, spacesHelper, commentHelper }
+export {
+  userHelper,
+  jobHelper,
+  appHelper,
+  filesHelper,
+  tagsHelper,
+  spacesHelper,
+  commentHelper,
+  challengeHelper,
+  dbClusterHelper,
+}

@@ -14,6 +14,12 @@ const shouldSyncStatus = (job: Job): boolean => {
   return true
 }
 
+const isJobPrivate = (job: Job): boolean => job.scope.toLowerCase() === 'private'
+
+const isJobPublic = (job: Job): boolean => job.scope.toLowerCase() === 'public'
+
+const isJobInSpace = (job: Job): boolean => job.scope.toLowerCase().startsWith('space')
+
 const isStateActive = (state: string): boolean =>
   Object.values(ACTIVE_STATES).includes(state as JOB_STATE)
 
@@ -39,4 +45,32 @@ const buildIsOverMaxDuration = (
   }
 }
 
-export { shouldSyncStatus, isStateTerminal, buildIsOverMaxDuration, isStateActive }
+const formatDuration = (duration: number): string => {
+  const elaspsedSeconds = Math.floor(duration / 1000)
+  const days = Math.floor(elaspsedSeconds / 86400)
+  const hours = (elaspsedSeconds % 86400) / 3600
+  const minutes = (hours % 1) * 60
+  const seconds = (minutes % 1) * 60
+
+  let result = Math.floor(minutes) + 'm ' + Math.round(seconds) + 's'
+  const hoursInt = Math.floor(hours)
+  const daysInt = Math.floor(days)
+  if (hoursInt) {
+    result = `${hoursInt}h ${result}`
+  }
+  if (daysInt) {
+    return `${daysInt}d ${result}`
+  }
+  return result
+}
+
+export {
+  shouldSyncStatus,
+  isStateTerminal,
+  buildIsOverMaxDuration,
+  isStateActive,
+  isJobPrivate,
+  isJobPublic,
+  isJobInSpace,
+  formatDuration,
+}

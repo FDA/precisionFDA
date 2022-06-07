@@ -2,6 +2,7 @@ import { filter, pipe, uniqBy, isNil } from 'ramda'
 import {
   EmailSendInput,
   EmailTemplate,
+  EMAIL_TYPES,
   NewContentAdded,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
@@ -59,9 +60,7 @@ export class ContentChangedEmailHandler
       filter((u: User) => u.id !== spaceEvent.user.id),
       uniqBy((user: User) => user.id),
     )
-    const result = filterUsers(memberships)
-
-    return result
+    return filterUsers(memberships)
   }
 
   async getTemplateContent(): Promise<NewContentTemplateInput['content']> {
@@ -114,6 +113,7 @@ export class ContentChangedEmailHandler
       content,
     })
     return {
+      emailType: EMAIL_TYPES.newContentAdded,
       to: receiver.email,
       body,
       subject: 'Content changed',

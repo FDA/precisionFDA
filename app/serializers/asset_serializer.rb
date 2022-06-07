@@ -35,16 +35,12 @@ class AssetSerializer < UserFileSerializer
         unless object.license.owned_by_user?(current_user)
           # GET download single asset
           links[:download] = download_api_file_path(object)
-          # POST Authorize URL - to move to api
-          links[:link] = link_file_path(object)
         end
       end
 
       if object.license.blank? && object.owned_by_user?(current_user)
         # GET download single asset
         links[:download] = download_api_file_path(object)
-        # POST Authorize URL - to move to api
-        links[:link] = link_file_path(object)
       end
 
       if object.license.present? && !object.license_status?(current_user, "active")

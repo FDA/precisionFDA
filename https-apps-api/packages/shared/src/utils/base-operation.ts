@@ -1,27 +1,26 @@
 /* eslint-disable import/group-exports */
 /* eslint-disable max-classes-per-file */
+import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { path } from 'ramda'
-import type { AnyObject, OpsCtx, WorkerOpsCtx } from '../types'
+import { OpsCtx, WorkerOpsCtx } from '../types'
+import type { AnyObject } from '../types'
+import { maskAccessTokenUserCtx } from './logging'
 
 export type DefaultInput = AnyObject
 
-export abstract class BaseOperation<IN, OUT> {
-  protected ctx: OpsCtx
+export abstract class BaseOperation<CtxT extends OpsCtx, In, Out> {
+  protected ctx: CtxT 
   protected id: string
 
   // input context has to be provided by the server or the worker setup
-  constructor(inputCtx: OpsCtx) {
+  constructor(inputCtx: CtxT) {
     this.id = nanoid()
     // build context
-    this.ctx = {
-      log: inputCtx.log,
-      em: inputCtx.em,
-      user: inputCtx.user,
-    }
+    this.ctx = inputCtx
   }
 
-  async execute(props?: IN): Promise<OUT> {
+  async execute(props?: In): Promise<Out> {
     const startTime = Date.now()
     this.ctx.log.info(
       {
@@ -35,51 +34,69 @@ export abstract class BaseOperation<IN, OUT> {
       // run the operation with context
       const res = await this.run(props)
       return res
-    } catch (err) {
-      this.ctx.log.warn(
-        { executionTime: Date.now() - startTime, err, id: this.id },
+    } catch (error) {
+      this.ctx.log.error(
+        {
+          executionTime: Date.now() - startTime,
+          error,
+          id: this.id,
+        },
         'Operation failed',
       )
-      throw err
+      throw error
     }
   }
 
-  public abstract run(props?: IN): Promise<OUT>
+  public abstract run(props?: In): Promise<Out>
 }
 
-export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT> {
-  protected ctx: WorkerOpsCtx
+export abstract class WorkerBaseOperation<Ctx extends OpsCtx, In, Out> extends BaseOperation<Ctx, In, Out> {
+  protected ctx: WorkerOpsCtx<Ctx>
 
-  constructor(inputCtx: WorkerOpsCtx) {
+  constructor(inputCtx: WorkerOpsCtx<Ctx>) {
     super(inputCtx)
     // adding one extra field
     this.ctx.job = inputCtx.job
   }
 
-  async execute(props?: IN): Promise<OUT> {
+  async execute(props?: In): Promise<Out> {
     const startTime = Date.now()
-    this.ctx.log.info(
-      {
-        name: this.constructor.name,
-        startTime,
-        id: this.id,
-        jobType: this.ctx.job.data?.type,
-        bullJobId: this.ctx.job.id,
-        bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
+    const operationInfo = {
+      name: this.constructor.name,
+      startTime,
+      id: this.id,
+      jobData: {
+        type: this.ctx.job.data?.type,
+        payload: this.ctx.job.data?.payload,
+        user: maskAccessTokenUserCtx(this.ctx.job.data?.user),
       },
+      bullJobId: this.ctx.job.id,
+      bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
+    }
+    this.ctx.log.info({...operationInfo},
       'Worker operation started',
     )
+
     try {
       // run the operation with context
       const res = await this.run(props)
-      this.ctx.log.info({ id: this.id }, 'Worker operation finished')
+      this.ctx.log.info(
+        {
+          ...operationInfo,
+          executionTime: Date.now() - startTime,
+        },
+        'Worker operation finished')
       return res
-    } catch (err) {
-      this.ctx.log.warn(
-        { executionTime: Date.now() - startTime, err, id: this.id },
-        'Operation failed',
+    } catch (error) {
+      this.ctx.log.error(
+        {
+          ...operationInfo,
+          executionTime: Date.now() - startTime,
+          error,
+        },
+        'Worker operation failed',
       )
-      throw err
+      throw error
     }
   }
 }

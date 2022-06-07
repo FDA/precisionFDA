@@ -30,6 +30,18 @@ class UserFileSerializer < NodeSerializer
     end
   end
 
+  # license of the file with selected attributes
+  # when file does not have license - return {}
+  def file_license
+    object.license&.slice(:id, :uid, :title) || {}
+  end
+
+  # Check whether object could be licensed - means,
+  # current_user is the owner of the object, independently of object scope
+  def licenseable
+    object.user.id == current_user.id
+  end
+
   # Builds links to files.
   # @return [Hash] Links.
   # rubocop:disable Metrics/MethodLength
@@ -38,9 +50,9 @@ class UserFileSerializer < NodeSerializer
 
     # rubocop:disable Metrics/BlockLength
     super.tap do |links|
-      links[:show] = file_path(object)
+      links[:show] = "/files/#{object.uid}"
       links[:user] = user_path(object.user.dxuser)
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       links[:space] = space_path if object.in_space?
 
       # POST download_list files
@@ -59,8 +71,6 @@ class UserFileSerializer < NodeSerializer
       if object.license.present? && object.license_status?(current_user, "active")
         unless object.license.owned_by_user?(current_user)
           links[:download] = download_api_file_path(object)
-          # POST Authorize URL - to move to api
-          links[:link] = link_file_path(object)
           # POST /api/files/copy  copy_api_files
           links[:copy] = copy_api_files_path
         end
@@ -91,8 +101,6 @@ class UserFileSerializer < NodeSerializer
       if object.license.blank?
         # GET download single file
         links[:download] = download_api_file_path(object)
-        # POST Authorize URL - to move to api
-        links[:link] = link_file_path(object)
         # POST /api/files/copy  copy_api_files
         links[:copy] = copy_api_files_path
       end
@@ -101,7 +109,6 @@ class UserFileSerializer < NodeSerializer
         unless object.in_space? && member_viewer?
           # publish single file if it is not public already and in a root folder
           links[:publish] = publish_object unless object.public? || object.parent_folder_id
-          links[:rename] = rename_file_path(object)
           # POST: /api/files/remove - Delete file(s) & folder(s), being selected
           links[:remove] = remove_api_files_path
           # POST associate item to a license

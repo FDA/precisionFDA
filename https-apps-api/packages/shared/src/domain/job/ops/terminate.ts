@@ -6,8 +6,9 @@ import * as client from '../../../platform-client'
 import { JOB_STATE } from '../job.enum'
 import { isStateTerminal } from '../job.helper'
 import { ENTITY_TYPE } from '../../app/app.enum'
+import { UserOpsCtx } from '../../../types'
 
-export class RequestTerminateJobOperation extends BaseOperation<DxIdInput, Job> {
+export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxIdInput, Job> {
   async run(input: DxIdInput): Promise<Job> {
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.log)

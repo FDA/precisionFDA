@@ -37,7 +37,7 @@ class SpaceJobsPage extends Component {
 
   render() {
     const { spaceId, space, showAddAppsModal } = this.props
-    const title = getSpacePageTitle('Jobs', space.isPrivate)
+    const title = getSpacePageTitle('Jobs', space.isPrivate, space.isExclusive)
 
     return (
       <SpaceLayout spaceId={spaceId} space={space}>

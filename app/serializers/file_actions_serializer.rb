@@ -11,7 +11,8 @@ class FileActionsSerializer < ApplicationSerializer
   attribute :klass, key: :type
   attribute :fs_path, key: :fsPath
   attribute :view_url, key: :viewURL
-  attribute :download_url, key: :downloadURL, if: -> { object.is_a?(UserFile) && download_action? }
+  attribute :download_url, key: :downloadURL,
+                           if: -> { object.is_a?(UserFile) && download_or_open_action? }
 
   # Returns a path to a file starting from root folder.
   # @return [String] A path to a file.
@@ -24,7 +25,7 @@ class FileActionsSerializer < ApplicationSerializer
   # Returns a view url to file or folder.
   # @return [String] A view URL.
   def view_url
-    object.is_a?(Folder) ? pathify_folder(object) : file_path(object)
+    pathify(object)
   end
 
   # Returns a download url to a file.
@@ -35,10 +36,13 @@ class FileActionsSerializer < ApplicationSerializer
 
   private
 
-  # Checks if action is download.
+  # Checks if action is download or open.
   # @return [Boolean] Returns true if action is download, false otherwise.
-  def download_action?
-    @instance_options[:action_name] == Api::FilesController::DOWNLOAD_ACTION
+  def download_or_open_action?
+    [
+      Api::FilesController::DOWNLOAD_ACTION,
+      Api::FilesController::OPEN_ACTION,
+    ].include?(@instance_options[:action_name])
   end
 
   # Returns files scope label.

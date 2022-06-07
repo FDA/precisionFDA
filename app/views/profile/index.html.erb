@@ -52,10 +52,9 @@
   </div>
 </div>
 
-<div class="infoframe-outer contact-information">
+<div class="infoframe-outer contact-information" data-bind="css: {hidden: !contacts.isEditing(), loading: contacts.isLoading()}">
   <div class="infoframe-inner">
     <h4 class="infoframe-title">Contact Information</h4>
-      <%= render 'profile/profile_contacts_view' %>
       <%= render 'profile/profile_contacts_form' %>
       <%#= render '_partials/phone_confirmation_modal' %>
       <%= render '_partials/auth_credentials_modal' %>

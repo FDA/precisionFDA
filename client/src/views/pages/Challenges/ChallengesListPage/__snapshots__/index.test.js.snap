@@ -24,14 +24,17 @@ exports[`ChallengesListPage test should render 1`] = `
         options={
           Array [
             Object {
+              "entityType": "Challenges",
               "onClick": [Function],
               "text": "Currently Open",
             },
             Object {
+              "entityType": "Challenges",
               "onClick": [Function],
               "text": "Upcoming",
             },
             Object {
+              "entityType": "Challenges",
               "onClick": [Function],
               "text": "Ended",
             },
@@ -50,6 +53,18 @@ exports[`ChallengesListPage test should render 1`] = `
         query={[Function]}
         setYearHandler={[Function]}
       />
+      <hr />
+      <div
+        className="pfda-subsection-heading"
+      >
+        OTHER CHALLENGES
+      </div>
+      <a
+        href="/challenges/app-a-thon-in-a-box"
+        onClick={[Function]}
+      >
+        App-a-thon in a Box →
+      </a>
       <hr />
       <div
         className="pfda-subsection-heading"

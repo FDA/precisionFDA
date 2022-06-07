@@ -1,11 +1,18 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
+import { DateTime } from 'luxon'
 import { entities } from '../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
+import {
+  STATUS as DB_CLUSTER_STATUS,
+  ENGINE as DB_CLUSTER_ENGINE,
+  ENGINES,
+} from '../domain/db-cluster/db-cluster.enum'
+import { STATIC_SCOPE } from '../enums'
 import type { AnyObject } from '../types'
 import {
-  FILE_STATE,
+  FILE_STATE_DX,
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
@@ -19,6 +26,7 @@ import {
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
+import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
 
 const chance = new Chance()
 
@@ -29,6 +37,7 @@ const random = {
   password: () => chance.string({ length: 20 }),
   dxstr: (): string => nanoid(),
   word: () => chance.word(),
+  description: () => chance.sentence({ words: 2 }),
   chance,
 }
 
@@ -40,6 +49,9 @@ const user = {
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
     privateFilesProject: `project-${random.dxstr()}`,
+    publicFilesProject: `project-${random.dxstr()}`,
+    // privateComparisonsProject: `project-${random.dxstr()}`,
+    // publicComparisonsProject: `project-${random.dxstr()}`,
   }),
 }
 
@@ -102,11 +114,40 @@ const app = {
         },
       ],
     }),
-  simple: (): Partial<InstanceType<typeof entities.App>> => {
+  ttydAppSpecData: () =>
+    JSON.stringify({
+      internet_access: true,
+      instance_type: 'baseline-4',
+      output_spec: [],
+      input_spec: [
+        {
+          name: 'port',
+          class: 'int',
+          default: 443,
+          label: 'ttyd port',
+          help: "ttyd shell will appear on this port",
+          optional: true,
+          choices: [443, 8081, 8080],
+        },
+      ],
+  }),
+  regular: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
       title: 'app-title',
+      scope: 'public',
+      spec:
+        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+      release: 'default-release-value',
+      entityType: ENTITY_TYPE.NORMAL,
+    }
+  },
+  https: (): Partial<InstanceType<typeof entities.App>> => {
+    const dxid = `app-${random.dxstr()}`
+    return {
+      dxid,
+      title: 'https-app-title',
       scope: 'public',
       spec:
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
@@ -134,7 +175,9 @@ const app = {
   }),
   runTtydAppInput: () => ({
     scope: 'private',
-    input: {},
+    input: {
+      port: 8080,
+    },
   }),
   runRshinyAppInput: () => ({
     scope: 'private',
@@ -159,6 +202,20 @@ const job = {
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
     }
   },
+  regular: (): Partial<InstanceType<typeof entities.Job>> => {
+    const dxid = `job-${random.dxstr()}`
+    return {
+      dxid,
+      project: `project-${random.dxstr()}`,
+      runData: JSON.stringify({ run_instance_type: 'baseline-8', run_inputs: {}, run_outputs: {} }),
+      describe: JSON.stringify({ id: dxid }),
+      state: JOB_STATE.IDLE,
+      name: chance.name(),
+      scope: 'private',
+      uid: `${dxid}-1`,
+      entityType: JOB_DB_ENTITY_TYPE.REGULAR,
+    }
+  },
   jobId: () => 'job-FyZg2z000B72xG6b3yVY5BBK',
 }
 
@@ -172,7 +229,7 @@ const userFile = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.HTTPS,
-      state: FILE_STATE.CLOSED,
+      state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
     }
@@ -186,7 +243,7 @@ const userFile = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.REGULAR,
-      state: FILE_STATE.CLOSED,
+      state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.USERFILE,
     }
@@ -203,7 +260,7 @@ const asset = {
       name: chance.name(),
       scope: 'private',
       entityType: FILE_ORIGIN_TYPE.REGULAR,
-      state: FILE_STATE.CLOSED,
+      state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.ASSET,
     }
@@ -260,6 +317,11 @@ const space = {
     state: 1, // ACTIVE,
     type: 1, // review type
   }),
+  group: (): Partial<InstanceType<typeof entities.Space>> => ({
+    name: chance.word(),
+    state: 1,
+    type: 0, // GROUP type
+  }),
 }
 
 const spaceMembership = {
@@ -289,6 +351,14 @@ const spaceEvent = {
   }),
 }
 
+const challenge = {
+  simple: (): Partial<InstanceType<typeof entities.Challenge>> => ({
+    name: 'test-challenge',
+    scope: 'public',
+    status: CHALLENGE_STATUS.SETUP,
+  }),
+}
+
 const comment = {
   simple: (): Partial<InstanceType<typeof entities.Comment>> => ({
     body: chance.sentence(),
@@ -296,6 +366,49 @@ const comment = {
     contentObjectType: 'Job',
     commentableId: 1,
     contentObjectId: 1,
+  }),
+}
+
+const dbCluster = {
+  simple: (): Partial<InstanceType<typeof entities.DbCluster>> => {
+    const dxid = `dbcluster-${random.dxstr()}`
+    return {
+      dxid: dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      description: random.description(),
+      scope: STATIC_SCOPE.PRIVATE,
+      dxInstanceClass: 'db_std1_x2',
+      engineVersion: '5.7.12',
+      host: `dbcluster.${chance.word()}.com`,
+      port: chance.pickone(['3306', '3307', '3308']),
+      statusAsOf: DateTime.now().minus({ minutes: chance.natural({ min: 1, max: 30 }) }).toJSDate(),
+      status: DB_CLUSTER_STATUS.AVAILABLE,
+      engine: DB_CLUSTER_ENGINE.MYSQL,
+    }
+  },
+  createInput: (): AnyObject => ({
+    project: `project-${random.dxstr()}`,
+    name: chance.name(),
+    description: random.description(),
+    scope: STATIC_SCOPE.PRIVATE,
+    dxInstanceClass: 'db_std1_x2',
+    engine: ENGINES.MYSQL,
+    engineVersion: '5.7.12',
+    adminPassword: random.password(),
+  }),
+}
+
+const bullQueue = {
+  syncJobStatus: (jobDxid, userContext) => ({
+    data: {
+      payload: {
+          dxid: jobDxid
+      },
+      type: 'sync_job_status',
+      user: userContext,
+    },
   }),
 }
 
@@ -313,4 +426,7 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
+  challenge,
+  dbCluster,
+  bullQueue,
 }

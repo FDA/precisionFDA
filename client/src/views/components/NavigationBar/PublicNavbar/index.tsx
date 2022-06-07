@@ -106,14 +106,20 @@ const PublicNavbarCenterButtons = styled.div<IPublicNavbarSticky>`
   }
 
   a.current {
-    color: ${theme.colors.highlightBlue};
-    border-bottom: 2px solid ${theme.colors.highlightBlue};
+    
+    color: ${theme.colors.blueOnWhite};
+    border-bottom: 2px solid ${theme.colors.blueOnWhite};
 
     ${props => props.sticky ? `
     &:hover {
-      border-bottom: 2px solid ${theme.colors.highlightBlue};
+      border-bottom: 2px solid ${theme.colors.blueOnWhite};
+      color: ${theme.colors.blueOnWhite};
     }
-    ` : ''}
+    ` : `
+    &:hover {
+      color: #336e9e;
+    }
+    `}
   }
 `
 
@@ -198,6 +204,7 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
         <Link to={'/news'} className={getLinkClassName('/news')}>News</Link>
         <Link to={'/experts'} className={getLinkClassName('/experts')}>Experts</Link>
         <Link to={'/about'} className={getLinkClassName('/about')}>About</Link>
+        <a href="/uniisearch" target="_blank">UNII Search</a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons>
         <Button onClick={onRequestAccess}>Request Access</Button>

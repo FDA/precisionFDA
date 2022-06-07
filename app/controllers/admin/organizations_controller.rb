@@ -25,7 +25,7 @@ module Admin
         else
           @can_change_admin = false
         end
-      rescue Net::HTTPClientException
+      rescue DXClient::Errors::DXClientError
         @can_change_admin = false # likely no access to that group
       end
 

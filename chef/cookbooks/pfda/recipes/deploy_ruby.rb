@@ -1,14 +1,5 @@
 include_recipe('::configure_ssh')
 
-aws_ssm_parameter_store "get app params" do
-  path "#{node[:ssm_base_path]}/app/"
-  recursive true
-  with_decryption true
-  return_key "app"
-  action :get_parameters_by_path
-  region node[:aws_region]
-end
-
 app_dir = node[:rails_app_dir]
 frontend_dir = File.join(app_dir, "client")
 env_file = File.join(app_dir, ".env")
@@ -20,7 +11,7 @@ application app_dir do
   ruby_block "create .env file and set env vars" do
     block do
       File.open(env_file, "w+") do |f|
-        node.run_state["app"]["environment"].each do |name, val|
+        node.run_state["ssm_params"]["app"]["environment"].each do |name, val|
           ENV[name] = val
           f << "#{name}=#{val}\n"
         end
@@ -33,7 +24,7 @@ application app_dir do
         uri.query = "sslca=#{node['mysql_rds_sslca_path']}"
         ENV["DATABASE_URL"] = uri.to_s
 
-        node.run_state["app"]["database_config"] = DatabaseUrlParser.call(ENV["DATABASE_URL"])
+        node.run_state["ssm_params"]["app"]["database_config"] = DatabaseUrlParser.call(ENV["DATABASE_URL"])
       end
 
       ENV["HOME"] = "/home/#{node[:deploy_user]}"
@@ -41,15 +32,11 @@ application app_dir do
     end
   end
 
-  execute "Add DEV_HOST env var" do
-    only_if {
-      File.exists?(env_file) &&
-        File.foreach(env_file).grep(/DEV_HOST=/).none? &&
-        !%w(production staging).include?(node.environment)
-    }
+  execute "Add HOST env var" do
+    only_if { File.exists?(env_file) && File.foreach(env_file).grep(/HOST=/).none? }
 
     command %{
-      echo "DEV_HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)" >> #{env_file}
+      echo "HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)" >> #{env_file}
     }
   end
 
@@ -63,11 +50,21 @@ application app_dir do
   end
 
   git app_dir do
-    repository lazy { node.run_state["app"]["app_source"]["url"] }
-    revision lazy { node.run_state["app"]["app_source"]["revision"] }
+    repository lazy { node.run_state["ssm_params"]["app"]["app_source"]["url"] }
+    revision lazy { node.run_state["ssm_params"]["app"]["app_source"]["revision"] }
     ssh_wrapper node[:ssh_wrapper_path]
     depth 1
     user node[:deploy_user]
+  end
+
+  execute "Install Bundler from Gemfile.lock" do
+    cwd app_dir
+    command %{
+      version=`sed -n '/BUNDLED WITH/{n;p}' Gemfile.lock | xargs`
+      if [ ! -z "$version" ]; then
+        gem install --conservative bundler:${version}
+      fi
+    }
   end
 
   execute "Bundle gems" do
@@ -86,7 +83,7 @@ application app_dir do
     source "database.erb"
     variables lazy {{
       rails_env: ENV.fetch("RAILS_ENV", "development"),
-      config: node.run_state["app"]["database_config"] || {},
+      config: node.run_state["ssm_params"]["app"]["database_config"] || {},
       sslca: node[:mysql_rds_sslca_path],
     }}
     user node[:deploy_user]
@@ -97,6 +94,10 @@ application app_dir do
     cwd  app_dir
     user node[:deploy_user]
     environment lazy { ENV.to_hash }
+    # To recover from ActiveRecord::ConcurrentMigrationError when
+    # deploying onto multiple instances in CodeBuild
+    retries 3
+    retry_delay 60
   end
 
   execute "Bundle frontend" do
@@ -105,7 +106,7 @@ application app_dir do
     # See pull request #1556 for explanation on the need to rebuild node-sass
     command %{
       export PATH=#{node[:nodejs][:prefix]}/bin:$PATH && \
-      yarn --frozen-lockfile && \
+      yarn --frozen-lockfile --production=false && \
       npm rebuild node-sass && \
       yarn run build:production
     }
@@ -147,5 +148,9 @@ application app_dir do
     provider :systemd
     user node[:deploy_user]
     environment lazy { ENV.to_hash }
+  end
+
+  poise_service_options "sidekiq" do
+    template "sidekiq.service.erb"
   end
 end

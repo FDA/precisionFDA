@@ -15,7 +15,7 @@ interface IGuestRestrictedLinkProps {
 }
 
 
-const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to, children, className }) => {
+const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to, children, className, ariaLabel }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const openModal = () => {
@@ -33,9 +33,9 @@ const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to
   return (
     <>
       {userHasAccess ? 
-      <Link to={to} className={className}>{children}</Link>
+      <Link to={to} className={className} aria-label={ariaLabel}>{children}</Link>
       : 
-      <a className={className} onClick={() => openModal()}>{children}</a>
+      <a className={className} onClick={() => openModal()} aria-label={ariaLabel}>{children}</a>
       }
       <Modal
         isOpen={isOpen}
