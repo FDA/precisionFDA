@@ -91,23 +91,4 @@ Rails.application.configure do
 
   # Allow access from any ip
   config.web_console.whiny_requests = false
-
-  # STDOUT logging
-  if ENV["RAILS_LOG_TO_STDOUT"]
-    $stdout.sync = true
-    logger = ActiveSupport::Logger.new($stdout)
-    logger.formatter = config.log_formatter
-    config.logger = ActiveSupport::TaggedLogging.new(logger)
-  end
-
-  # http request/response logging
-  if ENV["LOG_REQUESTS"]
-    config.after_initialize do
-      # @see https://github.com/trusche/httplog#configuration
-      HttpLog.configure do |httplog_config|
-        httplog_config.logger = Rails.logger
-        httplog_config.log_headers = true
-      end
-    end
-  end
 end
