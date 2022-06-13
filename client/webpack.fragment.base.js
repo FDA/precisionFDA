@@ -1,4 +1,6 @@
 /* globals module __dirname */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
 
@@ -6,7 +8,7 @@ const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 
-module.exports = {
+module.exports = ({ urlLoaderOptions }) => ({
   entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, '../app/assets/packs/'),
@@ -24,6 +26,7 @@ module.exports = {
     rules: [
       {
         test: /\.s(a|c)ss$/,
+        exclude: [/dist/, /.build_cache/],
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
@@ -38,7 +41,7 @@ module.exports = {
         test: /\.(png|jpg)$/,
         exclude: /node_modules/,
         loader: 'url-loader',
-        options: {
+        options: urlLoaderOptions || {
           limit: 2000,
           outputPath: '', 
           publicPath: '/assets/',
@@ -46,4 +49,7 @@ module.exports = {
       },
     ],
   },
-}
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+  },
+})

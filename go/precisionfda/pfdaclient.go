@@ -19,6 +19,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -332,7 +333,12 @@ func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string) error {
 		return fmt.Errorf("No file_url in response!\n\nResponse: %s", string(body))
 	}
 	fileURL := resultJSON["file_url"].(string)
-	fileName := path.Base(fileURL)
+	originalName := path.Base(fileURL)
+	fileName, err := url.PathUnescape(originalName)
+	if err != nil {
+		fmt.Printf("Error while unescaping file name, using the original name.")
+		fileName = originalName
+	}
 	fmt.Printf("   Downloading :  %s\n", fileName)
 
 	fileSize := resultJSON["file_size"].(float64)

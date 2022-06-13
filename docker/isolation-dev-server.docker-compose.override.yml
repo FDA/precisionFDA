@@ -50,6 +50,10 @@ services:
         target: /app/packages
       - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-worker:/app/node_modules
+  sidekiq:
+    environment:
+      - ARM64V8_DEVELOPMENT_PATCH=${ARM64V8_DEVELOPMENT_PATCH}
+      - RAILS_ENV=development
 
 volumes:
   yarn-network-cache-client:

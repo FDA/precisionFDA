@@ -2,6 +2,7 @@ import { pick } from "ramda";
 import { useQueryClient } from "react-query";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
+import { toast } from "react-toastify";
 import { RootState } from "../../../store";
 import { useCopyToSpaceModal } from "../actionModals/useCopyToSpace";
 import { useDeleteModal } from "../actionModals/useDeleteModal";
@@ -27,8 +28,15 @@ export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, r
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
-  } = useCopyToSpaceModal<IWorkflow>({ resource: 'workflows', selected, updateFunction: copyWorkflowsRequest, onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+  } = useCopyToSpaceModal<IWorkflow>({ resource: 'workflows', selected, updateFunction: copyWorkflowsRequest, 
+  onSuccess: (res: any) => {
+    toast.success("The workflow has been published successfully!")
+    queryClient.invalidateQueries(resourceKeys).then(() => {
+      if (Array.isArray(res.workflows)) {
+        history.push(`/home/workflows/${res.workflows[0].uid}`)
+      }
+    }
+    )
   }})
 
   const {

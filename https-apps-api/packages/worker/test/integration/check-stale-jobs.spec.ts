@@ -33,7 +33,7 @@ describe('TASK: check-stale-jobs', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.createAdmin(em)
-    app = create.appHelper.create(em, { user })
+    app = create.appHelper.createHTTPS(em, { user })
     await em.flush()
     // reset fakes
     mocksReset()

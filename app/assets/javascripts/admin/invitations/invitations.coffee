@@ -6,13 +6,6 @@ class InvitationModel
     @firstName = ko.observable(@original.first_name)
     @lastName = ko.observable(@original.last_name)
     @email = ko.observable(@original.email)
-    @address1 = ko.observable(@original.address1)
-    @address2 = ko.observable(@original.address2)
-    @countryId = ko.observable(@original.country_id)
-    @city = ko.observable(@original.city)
-    @usState = ko.observable(@original.us_state)
-    @postalCode = ko.observable(@original.postal_code)
-    @phone = ko.observable(@original.phone)
     @duns = ko.observable(@original.duns)
     @errors = ko.observableArray([])
     @success = ko.observable(false)
@@ -53,13 +46,6 @@ class PageInvitationsView
         first_name: invitation.firstName(),
         last_name: invitation.lastName(),
         email: invitation.email(),
-        address1: invitation.address1(),
-        address2: invitation.address2(),
-        country_id: invitation.countryId(),
-        city: invitation.city(),
-        us_state: invitation.usState(),
-        postal_code: invitation.postalCode(),
-        phone: invitation.phone(),
         duns: invitation.duns(),
       }
     )
@@ -127,13 +113,6 @@ class PageInvitationsView
         { data: 'first_name' },
         { data: 'last_name' },
         { data: 'email' },
-        { data: 'address1' },
-        { data: 'address2' },
-        { data: 'country_name' },
-        { data: 'city' },
-        { data: 'us_state' },
-        { data: 'postal_code' },
-        { data: 'phone' },
         { data: 'duns' },
         { data: 'created_at' },
       ],
@@ -146,7 +125,7 @@ class PageInvitationsView
             "<input value=\"#{data}\" type=\"checkbox\" class=\"select-user\" />"
         }
       ],
-      order: [[ 12, "desc" ]]
+      order: [[ 5, "desc" ]]
     })
     @searchDataGridContainer = $('#invitations_data_grid_filter input', @gridModal)
     @searchValue = document.getElementById('search_input')

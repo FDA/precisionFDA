@@ -23,7 +23,7 @@ describe.skip('GET /jobs/:id', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user })
+    app = create.appHelper.createHTTPS(em, { user })
     job = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.DONE })
     await em.flush()
 
