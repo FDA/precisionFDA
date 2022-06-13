@@ -71,6 +71,14 @@ export class App extends BaseEntity {
   @Enum()
   entityType: ENTITY_TYPE;
 
+  isRegular() {
+    return this.entityType === ENTITY_TYPE.NORMAL
+  }
+
+  isHTTPS() {
+    return this.entityType === ENTITY_TYPE.HTTPS
+  }
+
   [EntityRepositoryType]?: AppRepository
 
   constructor(user: User) {

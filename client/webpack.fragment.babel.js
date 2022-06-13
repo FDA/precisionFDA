@@ -1,4 +1,6 @@
 /* globals module __dirname */
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
 
@@ -18,9 +20,6 @@ module.exports = {
         loader: 'babel-loader',
       },
     ],
-  },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
 }
 

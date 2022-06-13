@@ -144,7 +144,7 @@ group :development, :test, :ui_test do
   gem "thin", "~> 1.8"
 end
 
-group :development, :test, :ui_test, :staging do
+group :development, :test, :ui_test, :staging, :dev do
   # View outgoing HTTP requests in logs
   gem "httplog"
 end
