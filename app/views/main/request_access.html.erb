@@ -50,13 +50,13 @@
         <div class="form-group form-group-lg">
           <%= f.label :first_name, "First name", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required' %>
+            <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required', minlength: 2 %>
           </div>
         </div>
         <div class="form-group form-group-lg">
           <%= f.label :last_name, "Last name", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required' %>
+            <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required', minlength: 2 %>
           </div>
         </div>
         <div class="form-group form-group-lg">
