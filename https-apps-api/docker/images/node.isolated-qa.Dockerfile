@@ -17,5 +17,3 @@ COPY key.pem cert.pem ./
 COPY https-apps-api/ ./
 # build /dist
 RUN make build
-
-
