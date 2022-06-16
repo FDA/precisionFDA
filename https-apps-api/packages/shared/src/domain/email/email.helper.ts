@@ -23,6 +23,14 @@ type EmailHelperCtx = OpsCtx & {
   config: EmailConfigItem
 }
 
+// is not a regular user but we still want to send some notifications to it
+// all templates uses only firstName
+const pfdaNoReplyUser = {
+  firstName: 'precisionfda-no-reply',
+  email: 'precisionfda-no-reply@dnanexus.com'
+} as User
+
+
 // use this for spaceEvent type of emails
 const getKeyForUserSpaceRole = (
   membership: SpaceMembership,
@@ -168,6 +176,7 @@ const getBullJobIdForEmailOperation = (emailType: EMAIL_TYPES, customSuffix?: st
 }
 
 export {
+  pfdaNoReplyUser,
   saveEmailToFile,
   buildIsNotificationEnabled,
   buildFilterByUserSettings,

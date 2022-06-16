@@ -68,7 +68,7 @@ describe('challenge-prereg.handler', () => {
       const handler = new ChallengePreregEmailHandler(config.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(2)
+      expect(receivers).to.have.lengthOf(3)
     })
 
     it('return users in given space (private challenge)', async () => {
@@ -89,7 +89,7 @@ describe('challenge-prereg.handler', () => {
       const handler = new ChallengePreregEmailHandler(config.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
+      expect(receivers).to.have.lengthOf(2)
       expect(receivers[0]).to.have.property('id', anotherUser.id)
     })
   })
