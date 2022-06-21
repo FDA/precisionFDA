@@ -6,6 +6,7 @@ import { useFilterParams } from './useFilterState'
 import { useListQuery } from './useListQuery'
 import { useOrderByParams } from './useOrderByState'
 import { usePaginationParams } from './usePaginationState'
+import { usePrevious } from '../../hooks/usePrevious';
 
 
 type ListType = { [key: string]: {}, meta: IMeta }
@@ -21,19 +22,41 @@ interface IUseList<T> {
   queryOptions?: UseQueryOptions<T>
 }
 
+const filters = {
+  name: 'string',
+  title: 'string',
+  state: 'string',
+  engine: 'string',
+  dx_instance_class: 'string',
+  tags: 'string',
+  status: 'string',
+  featured: 'string',
+  location: 'string',
+  added_by: 'string',
+  app_title: 'string',
+  launched_by: 'string',
+  file_size: 'range',
+}
+
+const filterReset: Record<string, undefined> = {}
+Object.keys(filters).forEach(v => {
+  filterReset[v] = undefined
+})
+
 
 export function useList<T extends ListType>({ spaceId, scope, fetchList, resource, params = {}, queryOptions }: IUseList<T>) {
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
+  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
   const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: (cols) => setSelectedIndexes({}) })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
-  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
   const resetSelected = () => setSelectedIndexes(undefined)
 
   const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
+    filters,
     onSetFilter: () => {
       setSelectedIndexes({})
       setPageParam(1, 'replaceIn')
-    }
+    },
   })
 
   useEffect(() => {
@@ -41,9 +64,13 @@ export function useList<T extends ListType>({ spaceId, scope, fetchList, resourc
     resetSelected()
   }, [pageParam, perPageParam, sort, filterQuery, scope, spaceId])
 
+  const prevScope = usePrevious(scope)
   useEffect(() => {
-    setPageParam(undefined, 'replaceIn')
-    setFilterParam({}, 'replaceIn')
+    // skip first render
+    if(prevScope) {
+      setPageParam(undefined, 'replaceIn')
+      setFilterParam(filterReset, 'replaceIn')
+    }
   }, [scope])
 
   const query = useListQuery<T>({
@@ -56,8 +83,6 @@ export function useList<T extends ListType>({ spaceId, scope, fetchList, resourc
     filter: filterQuery,
     params,
   })
-
-
 
   return {
     setPerPageParam,

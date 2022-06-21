@@ -184,7 +184,6 @@ export const AssetsListTable = ({
   }, [scope])
 
   const columns = useMemo(() => col, [col])
-
   const data = useMemo(() => apps || [], [apps])
 
   return (
@@ -204,6 +203,7 @@ export const AssetsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
+        shouldResetFilters={scope as any}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no assets here.</EmptyTable>}
