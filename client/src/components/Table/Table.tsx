@@ -1,32 +1,53 @@
+/* eslint-disable react/require-default-props */
 import 'core-js'
 import { range } from 'ramda'
 import React, {
-  MouseEventHandler, PropsWithChildren, ReactElement, ReactNode
+  MouseEventHandler,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+  useMemo,
 } from 'react'
 import {
-  Cell, CellProps, Filters, IdType, Row, SortingRule, TableInstance, TableOptions, useColumnOrder, useExpanded, useFilters, useFlexLayout, useGlobalFilter, useGroupBy, useMountedLayoutEffect, usePagination, useResizeColumns, UseResizeColumnsState, useRowSelect, useRowState, useSortBy, useTable
+  Cell,
+  CellProps,
+  Filters,
+  IdType,
+  Row,
+  SortingRule,
+  TableInstance,
+  TableOptions,
+  useColumnOrder,
+  useExpanded,
+  useFilters,
+  useFlexLayout,
+  useGlobalFilter,
+  useGroupBy,
+  useMountedLayoutEffect,
+  usePagination,
+  useResizeColumns,
+  UseResizeColumnsState,
+  useRowSelect, useSortBy,
+  useTable,
 } from 'react-table'
 import 'regenerator-runtime'
 import { DefaultColumnFilter } from './helpers'
 import { LoadingRows } from './LoadingRows'
 import { ReactTableStyles, StyledTable } from './styles'
-import {
-  expandHook,
-  rowActionColHook, selectionHook
-} from './tableHooks'
-
+import { expandHook, rowActionColHook, selectionHook } from './tableHooks'
 
 export interface IRowActionProps<T extends object = {}> extends CellProps<T> {
   context: any
 }
 
 export interface ITable<T extends object = {}> extends TableOptions<T> {
-  name: string;
-  hiddenColumns?: string[];
-  loading?: boolean;
+  name: string
+  hiddenColumns?: string[]
+  loading?: boolean
   loadingComponent?: any
+  shouldResetFilters?: boolean
   emptyComponent?: React.ReactNode
-  context?: object;
+  context?: object
   showTableTools?: boolean
   showPagination?: boolean
   isColsResizable?: boolean
@@ -42,20 +63,20 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   onAdd?: (instance: TableInstance<T>) => MouseEventHandler
   onDelete?: (instance: TableInstance<T>) => MouseEventHandler
   onEdit?: (instance: TableInstance<T>) => MouseEventHandler
-  onClick?: (row: Row<T>) => void,
-  isFilterable?: boolean,
-  filters?: Filters<T>,
-  setFilters?: (filters: any[]) => void,
+  onClick?: (row: Row<T>) => void
+  isFilterable?: boolean
+  filters?: Filters<T>
+  setFilters?: (filters: any[]) => void
   cellProps?: (cell: Cell<T>) => any
   rowProps?: (row: Row<T>) => any
   updateRowState?: (row: Row<T>) => any
   saveColumnResizeWidth?: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing']
+    columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
 }
 
 export default function Table<T extends object>(
-  props: PropsWithChildren<ITable<T>>
+  props: PropsWithChildren<ITable<T>>,
 ): ReactElement {
   const {
     loading = true,
@@ -70,6 +91,7 @@ export default function Table<T extends object>(
     isSortable = false,
     sortByPreference,
     isExpandable = false,
+    shouldResetFilters,
     isColsResizable = false,
     emptyComponent,
     context = {},
@@ -103,7 +125,7 @@ export default function Table<T extends object>(
       initialState: {
         filters: filters || [],
         hiddenColumns: hiddenColumns || [],
-        selectedRowIds: selectedRows || {} as any,
+        selectedRowIds: selectedRows || ({} as any),
         sortBy: sortByPreference || [],
       },
       manualFilters: true,
@@ -121,7 +143,7 @@ export default function Table<T extends object>(
     useFlexLayout,
     isExpandable ? expandHook : () => {},
     rowActionColHook<T>(context, rowActionsComponent),
-    isSelectable ? useRowSelect: () => {},
+    isSelectable ? useRowSelect : () => {},
     isSelectable ? selectionHook : () => {},
     isColsResizable ? useResizeColumns : () => {},
   )
@@ -136,29 +158,36 @@ export default function Table<T extends object>(
     state: { selectedRowIds, sortBy, columnResizing },
     setHiddenColumns,
     toggleAllRowsSelected,
+    setAllFilters,
   } = instance
 
   useMountedLayoutEffect(() => {
-    setSelectedRows && setSelectedRows(selectedRowIds)
+    if(setSelectedRows) setSelectedRows(selectedRowIds)
   }, [selectedRowIds, setSelectedRows])
-  
+
   useMountedLayoutEffect(() => {
-    setSortByPreference && setSortByPreference(sortBy)
+    if(setSortByPreference) setSortByPreference(sortBy)
   }, [sortBy])
 
+  // TODO: find a better way to reset filters when scope changes
+  const reset = useMemo(() => shouldResetFilters, [shouldResetFilters])
   useMountedLayoutEffect(() => {
-    typeof setFilters === 'function' && setFilters(state.filters);
-  }, [state.filters, setFilters]);
+    if(reset) setAllFilters([])
+  }, [reset])
 
   useMountedLayoutEffect(() => {
-    hiddenColumns && setHiddenColumns(hiddenColumns)
+    if(typeof setFilters === 'function') setFilters(state.filters)
+  }, [state.filters, setFilters])
+
+  useMountedLayoutEffect(() => {
+    if(hiddenColumns) setHiddenColumns(hiddenColumns)
   }, [hiddenColumns])
-  
+
   useMountedLayoutEffect(() => {
     // Kinda hacky, but it works. Resets the selected rows in react-table
     // from the parent by setting selectredRows to undefined. This is because there
     // is no way to use useRowSelect in a conrolled way.
-    if(selectedRows === undefined) {
+    if (selectedRows === undefined) {
       toggleAllRowsSelected(false)
     }
   }, [selectedRows])
@@ -177,6 +206,7 @@ export default function Table<T extends object>(
           <div {...getTableProps()} className="table sticky">
             <div className="thead">
               {visibleColumns.map((column, i) => (
+                // eslint-disable-next-line react/jsx-key
                 <div {...column.getHeaderProps()} className="th">
                   {isColsResizable && column.getResizerProps && (
                     <div
@@ -190,6 +220,7 @@ export default function Table<T extends object>(
                     <div {...column.getSortByToggleProps()} className="sort">
                       {column.render('Header')}
                       <span>
+                        {/* eslint-disable-next-line no-nested-ternary */}
                         {column.isSorted
                           ? column.isSortedDesc
                             ? ' ↓'
@@ -198,42 +229,56 @@ export default function Table<T extends object>(
                       </span>
                     </div>
                   ) : (
-                    <>
-                      {column.render('Header')}
-                    </>
+                    <>{column.render('Header')}</>
                   )}
                 </div>
               ))}
             </div>
-            
-            {isFilterable &&
+
+            {isFilterable && (
               <div className="thead">
                 {visibleColumns.map((column, i) => (
+                  // eslint-disable-next-line react/jsx-key
                   <div {...column.getHeaderProps()} className="th">
                     {column.canFilter ? column.render('Filter') : null}
                   </div>
                 ))}
               </div>
-            }
+            )}
 
             <div {...getTableBodyProps()} className="tbody">
-              {range(0, 10).map((i) => <LoadingRows<T> loading={loading} visibleColumns={visibleColumns} delay={i} key={i} />)}
+              {range(0, 10).map(i => (
+                <LoadingRows<T>
+                  loading={loading}
+                  visibleColumns={visibleColumns}
+                  delay={i}
+                  key={i}
+                />
+              ))}
               {!loading && page.length === 0 && emptyComponent}
               {page.map((row, index) => {
-                const r: Row<T> = updateRowState && updateRowState(row) || row
+                const r: Row<T> = (updateRowState && updateRowState(row)) || row
                 prepareRow(r)
                 return (
                   <React.Fragment key={r.id}>
-                    <div {...r.getRowProps(rowProps && rowProps(r))} className="tr">
-                      {r.cells.map(cell => {
-                        return (
-                          <div {...cell.getCellProps(cellProps && cellProps(cell))} className="td" data-testid={`table-col-${cell.column.id}`}>
+                    <div
+                      {...r.getRowProps(rowProps && rowProps(r))}
+                      className="tr"
+                    >
+                      {r.cells.map(cell => (
+                          // eslint-disable-next-line react/jsx-key
+                          <div
+                            {...cell.getCellProps(cellProps && cellProps(cell))}
+                            className="td"
+                            data-testid={`table-col-${cell.column.id}`}
+                          >
                             {cell.render('Cell')}
                           </div>
-                        )
-                      })}
+                        ))}
                     </div>
-                    {isExpandable && r.isExpanded ? (subcomponent && subcomponent(r)) : null}
+                    {isExpandable && r.isExpanded
+                      ? subcomponent && subcomponent(r)
+                      : null}
                   </React.Fragment>
                 )
               })}
