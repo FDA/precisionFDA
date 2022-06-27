@@ -206,7 +206,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	}
 
 	chunkPool := make(chan uploadChunk, c.NumRoutines)
-	wg := c.initWaitGroup(fileID, chunkPool, assetSize)
+	wg := c.initWaitGroup(fileID, chunkPool, &assetSize)
 
 	fmt.Println(">> Archiving asset...")
 	cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
@@ -223,13 +223,13 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	}
 
 	fmt.Print(">> Uploading asset |")
-	f, err := os.Open(rootFolderPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	c.readAndChunk(stdout, chunkPool, assetSize)
+	// no need to open the rootFolderPath, asset is read from stdout
+	// f, err := os.Open(rootFolderPath)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer f.Close()
+	c.readAndChunk(stdout, chunkPool, &assetSize)
 	close(chunkPool)
 	wg.Wait()
 
@@ -292,8 +292,10 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) er
 		inputError(fmt.Sprintf("Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, info.Size(), maxFileSize));
 	}
 
-	wg := c.initWaitGroup(fileID, chunkPool, info.Size())
-	c.readAndChunk(f, chunkPool, info.Size())
+	size := info.Size()
+
+	wg := c.initWaitGroup(fileID, chunkPool, &size)
+	c.readAndChunk(f, chunkPool, &size)
 	close(chunkPool)
 	wg.Wait()
 
@@ -428,8 +430,8 @@ func (c *PFDAClient) createFileID(url string, data []byte) (string, error) {
 	return fileID, nil
 }
 
-func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size int64) (wg *sync.WaitGroup) {
-	numRoutines := min(c.NumRoutines, int(math.Ceil(float64(size)/float64(c.ChunkSize))))
+func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size *int64) (wg *sync.WaitGroup) {
+	numRoutines := min(c.NumRoutines, int(math.Ceil(float64(*size)/float64(c.ChunkSize))))
 
 	var totalSent uint64 = 0
 	writer := uilive.New()
@@ -445,8 +447,9 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 
 				atomic.AddUint64(&totalSent, uint64(len(chunk.data)))
 				currentSize := atomic.LoadUint64(&totalSent)
+				totalSize := atomic.LoadInt64(size)
 				fmt.Fprintf(writer, "     %.1f%% (%s / %s)\n",
-							100*float64(currentSize)/float64(size), units.HumanSize(float64(currentSize)), units.HumanSize(float64(size)))
+							100*float64(currentSize)/float64(totalSize), units.HumanSize(float64(currentSize)), units.HumanSize(float64(totalSize)))
 				writer.Flush()
 			}
 			g.Done()
@@ -500,9 +503,10 @@ func min(a, b int) int {
 	return b
 }
 
-func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size int64) {
+func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size *int64) {
 	// dynamically adjust chunkSize
 	chunkIndex := 1
+	var totalDataLength = 0
 	for {
 		byteBuf := make([]byte, c.ChunkSize)
 		i := 0
@@ -517,6 +521,7 @@ func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size i
 				break
 			}
 		}
+		totalDataLength += i;
 		// Only upload an empty chunk if empty file
 		if i == 0 && chunkIndex > 1 {
 			break
@@ -527,6 +532,7 @@ func (c *PFDAClient) readAndChunk(f io.ReadCloser, ch chan<- uploadChunk, size i
 		}
 		chunkIndex++
 	}
+	atomic.StoreInt64(size, int64(totalDataLength))
 }
 
 func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
