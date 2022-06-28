@@ -185,6 +185,10 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 		inputError(fmt.Sprintf("Size of asset folder '%s' (%d) exceeds maximum allowed file size(%d).", rootFolderPath, assetSize, maxFileSize));
 	}
 
+	if (assetSize == 0) {
+		inputError(fmt.Sprintf("Size of asset folder '%s' is 0. Uploading an empty asset is not allowed.", rootFolderPath));
+	}
+
 	// Read in the readme all at once
 	readmeBuf, err := ioutil.ReadFile(readmeFilePath)
 	if err != nil {
@@ -270,14 +274,6 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) er
 		return err
 	}
 
-	fileID, err := c.createFileID(createURL, jsonData)
-	if err != nil {
-		return err
-	}
-
-	chunkPool := make(chan uploadChunk, c.NumRoutines)
-
-	fmt.Printf(">> Uploading file %s\n", path)
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -288,14 +284,28 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) er
 		return err
 	}
 
-	if (info.Size() > maxFileSize) {
-		inputError(fmt.Sprintf("Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, info.Size(), maxFileSize));
-	}
-
 	size := info.Size()
 
-	wg := c.initWaitGroup(fileID, chunkPool, &size)
-	c.readAndChunk(f, chunkPool, &size)
+	if (size > maxFileSize) {
+		inputError(fmt.Sprintf("Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, size, maxFileSize));
+	}
+
+	if (size == 0) {
+		inputError(fmt.Sprintf("Size of file '%s' is 0. Uploading an empty file is not allowed.", path));
+	}
+
+	fileID, err := c.createFileID(createURL, jsonData)
+	if err != nil {
+		return err
+	}
+
+	chunkPool := make(chan uploadChunk, c.NumRoutines)
+
+	fmt.Printf(">> Uploading file %s\n", path)
+
+	wg := c.initWaitGroup(fileID, chunkPool, size)
+	c.readAndChunk(f, chunkPool, size)
+
 	close(chunkPool)
 	wg.Wait()
 
