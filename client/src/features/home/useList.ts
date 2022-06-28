@@ -22,7 +22,7 @@ interface IUseList<T> {
   queryOptions?: UseQueryOptions<T>
 }
 
-const filters = {
+export const filters = {
   name: 'string',
   title: 'string',
   state: 'string',
