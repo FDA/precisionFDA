@@ -1,0 +1,21 @@
+volumes:
+  db-gsrs-mysql-volume:
+
+services:
+  web:
+    depends_on:
+      - gsrs
+    environment:
+      - GSRS_URL=http://gsrs:9000
+      - GSRS_ENABLED=true
+  gsrs:
+    extends:
+      file: ./external.services.yml
+      service: gsrs
+  gsrsdb:
+    extends:
+      file: ./external.services.yml
+      service: gsrsdb
+    volumes:
+      - db-gsrs-mysql-volume:/var/lib/mysql
+

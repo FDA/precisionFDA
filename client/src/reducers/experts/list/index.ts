@@ -42,7 +42,8 @@ export default createReducer(initialState, {
 
   [EXPERTS_LIST_SET_YEAR]: (state: any, year: number) => ({
     ...state,
-    year: year
+    year: year,
+    pagination: null,
   }),
 
   [EXPERTS_LIST_RESET_FILTERS]: (state: any) => ({

@@ -184,6 +184,7 @@ export const ExecutionsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
+        shouldResetFilters={scope as any}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no executions here.</EmptyTable>}
@@ -191,7 +192,7 @@ export const ExecutionsListTable = ({
         isSortable
         isFilterable
         saveColumnResizeWidth={saveColumnResizeWidth}
-        isExpandable={true}
+        isExpandable
         cellProps={cell => 
           cell.column.id === 'state'
             ? {

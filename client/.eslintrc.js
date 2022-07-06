@@ -27,6 +27,8 @@ module.exports = {
     'comma-dangle': ['error', 'always-multiline'],
     'import/extensions': 'off',
     'no-redeclare': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    'react/jsx-props-no-spreading': 'off',
     'react/function-component-definition': 'off',
     'no-prototype-builtins': 'off',
     'import/prefer-default-export': 'off',

@@ -69,9 +69,12 @@ describe('TASK: check-stale-jobs', () => {
     expect(firstCall.args[0].type).to.equal('check_stale_jobs')
     expect(firstCall.args[1].jobId).to.equal('check_stale_jobs')
 
-    expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
+    expect(fakes.queue.createEmailSendTaskFake.calledTwice).to.be.true()
     const [email, userCtx] = fakes.queue.createEmailSendTaskFake.getCall(0).args
     expect(email).to.have.property('to', user.email)
     expect(email).to.have.property('subject', 'Stale jobs report')
+
+    const [secondEmail] = fakes.queue.createEmailSendTaskFake.getCall(1).args
+    expect(secondEmail).to.have.property('to', 'precisionfda-no-reply@dnanexus.com')
   })
 })

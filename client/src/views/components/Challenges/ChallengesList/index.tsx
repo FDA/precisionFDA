@@ -23,11 +23,30 @@ interface IChallengesListProps {
   emptyListMessage?: string,
 }
 
-const reorderChallengesListWithCurrentChallengesOnTop = (challenges: IChallengeListItem[]) => {
-  const currentChallenges = challenges.filter((challenge) => {
-    return challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT
+/**
+ * Reorders the response to put all current challenges in front, then upcoming sorted by nearest first, then previous
+ * @param challenges
+ * @returns reordered challenges list by custom rules
+ */
+const reoderChallenges = (challenges: IChallengeListItem[]): IChallengeListItem[] => {
+
+  const currentChallenges: IChallengeListItem[] = []
+  const upcomingChallenges: IChallengeListItem[] = []
+  const rest: IChallengeListItem[] = []
+
+  challenges.forEach((challenge) => {
+    switch (challenge.timeStatus) {
+    case CHALLENGE_TIME_STATUS.CURRENT:
+      currentChallenges.push(challenge); break
+    case CHALLENGE_TIME_STATUS.UPCOMING:
+      upcomingChallenges.push(challenge); break
+    default:
+      rest.push(challenge); break
+    }
   })
-  return [...currentChallenges, ...challenges.filter(x => !currentChallenges.includes(x))]
+  upcomingChallenges.sort((a, b ) => a.startAt.getTime() - b.startAt.getTime());
+
+  return [...currentChallenges, ...upcomingChallenges, ...rest]
 }
 
 
@@ -62,6 +81,9 @@ const ChallengesList: FunctionComponent<IChallengesListProps> = ({ listItemCompo
   let foundFirstUpcomingChallenge = false
   let foundFirstCurrentChallenge = false
   let foundFirstClosedChallenge = false
+
+  challengesToShow = reoderChallenges(challengesToShow)
+
   challengesToShow.map((challenge) => {
     if (!foundFirstUpcomingChallenge && challenge.timeStatus == CHALLENGE_TIME_STATUS.UPCOMING) {
       challenge.isFirstItemInSection = true
@@ -82,11 +104,6 @@ const ChallengesList: FunctionComponent<IChallengesListProps> = ({ listItemCompo
       challenge.isFirstItemInSection = false
     }
   })
-
-  // The following reorders the response to put all current challenges in front
-  // as specified by the mock ups
-  //
-  challengesToShow = reorderChallengesListWithCurrentChallengesOnTop(challengesToShow)
 
   const handleItemDetails = (id: number) => {
     history.push(`/challenges/${id}`)
