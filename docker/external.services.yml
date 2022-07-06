@@ -1,0 +1,29 @@
+services:
+  gsrs:
+    build:
+      context: ../
+      dockerfile: ./gsrs/docker/images/gsrs.Dockerfile
+    environment:
+      - MYSQL_HOST=gsrsdb
+      - MYSQL_DATABASE=ixginas
+      - MYSQL_ROOT_PASSWORD=password
+      - GSRS_PORT=9000
+    ports:
+      - 9000:9000
+    depends_on:
+      - gsrsdb
+
+  gsrsdb:
+    image: mysql:${MYSQL_IMAGE_TAG:-5.6}
+    tmpfs:
+      - /tmp
+      - /run/mysqld
+    environment:
+      - MYSQL_DATABASE=ixginas
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 32900:3306
+  gsrsdb_emulated:
+    extends:
+      service: gsrsdb
+    image: amd64/mysql:${MYSQL_IMAGE_TAG:-5.6}

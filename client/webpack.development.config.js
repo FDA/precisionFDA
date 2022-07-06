@@ -99,6 +99,38 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      '/discussions': {
+        target: TARGET,
+        secure: false,
+      },
+      '/notes': {
+        target: TARGET,
+        secure: false,
+      },
+      '/comparisons': {
+        target: TARGET,
+        secure: false,
+      },
+      '/licenses': {
+        target: TARGET,
+        secure: false,
+      },
+      '/users': {
+        target: TARGET,
+        secure: false,
+      },
+      '/profile': {
+        target: TARGET,
+        secure: false,
+      },
+      '/guidelines': {
+        target: TARGET,
+        secure: false,
+      },
+      '/docs': {
+        target: TARGET,
+        secure: false,
+      },
     },
   },
 })

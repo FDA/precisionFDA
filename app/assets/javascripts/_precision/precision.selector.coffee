@@ -158,6 +158,7 @@ class ObjectListModel
     @apiParams = config.apiParams ? {}
     @selectable = config.selectable ? false
     @totalCount = 0
+    @lastQuery = undefined
 
     @busy = ko.observable(false)
 
@@ -180,12 +181,18 @@ class ObjectListModel
       if @className != "selected"
         objects = @filterByProperty(objects, 'owned') if @selectorModel.filterByOwned()
 
-      if @className == 'file' && @totalCount != @objects().length && !_.isEmpty(@filterQuery())
+      if @className == 'file' && @totalCount != @objects().length && !_.isEmpty(@filterQuery()) && @lastQuery == undefined
         @objects.removeAll()
         @getObjects(0, @totalCount)
 
-      objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
-      objects = @filterSetOfObjects(objects, @filterQuery())
+      if @lastQuery != @filterQuery() && @name == 'Files'
+        @objects.removeAll()
+        @lastQuery = @filterQuery()
+        @getObjects(0, 100, @lastQuery)
+      else
+        objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
+        objects = @filterSetOfObjects(objects, @filterQuery())
+        
       objects = _.sortBy(objects, 'name')
       return objects
     )
@@ -201,13 +208,16 @@ class ObjectListModel
   clearActiveRelated: () ->
     @activeRelatedObjects([])
 
-  getObjects: (offset = 0, limit = 100) ->
+  getObjects: (offset = 0, limit = 100, query = '') ->
     return $.Deferred().resolve() if !@apiEndpoint?
+    @busy(true)
     accessibleScope = @selectorModel.listRelatedParams.scopes
+
     if @className == 'file'
       @apiParams['offset'] = offset
       @apiParams['limit'] = limit
       @apiParams['scopes'] = accessibleScope
+      @apiParams['search_string'] = query
 
     params = _.defaults(@apiParams, {
       describe: {
@@ -220,7 +230,6 @@ class ObjectListModel
     })
 
     @objects.removeAll() unless @className == 'file'
-    @busy(true)
     Precision.api("/api/#{@apiEndpoint}", params, (result) =>
       @totalCount = result['count'] if result['count']
       objects = if result['objects'] then result['objects'] else result
@@ -229,7 +238,7 @@ class ObjectListModel
         @selectorModel.objectsHash[objectModel.uid] = objectModel
         objectModel
       )
-      @objects(@objects().concat(objectModels))
+      @objects(objectModels)
     ).always(=>
       @busy(false)
     )

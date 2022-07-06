@@ -74,8 +74,11 @@ class CopyService
 
             raise WorkflowCopyError, "Can't remap workflow stage inputs" unless app_input
 
-            input["default_workflow_value"] = app_input["default"]
-            input["defaultValues"] = app_input["default"]
+            file_to_copy = UserFile.find_by!(uid: input["default_workflow_value"])
+            copied_file = copy_service.copy(file_to_copy, scope).first
+
+            input["default_workflow_value"] = copied_file.uid
+            input["defaultValues"] = app_input["defaultValues"]
           end
 
           input

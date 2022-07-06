@@ -1,7 +1,9 @@
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable dot-notation */
 import { all, any } from 'ramda'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Dropzone from 'react-dropzone'
-import { useMutation, useQueryClient } from 'react-query'
+import { useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
 import { Button, ButtonSolidBlue } from '../../../../../components/Button'
@@ -14,7 +16,6 @@ import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
 import { useModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
 import { itemsCountString } from '../../../utils'
-import { uploadFilesRequest } from '../../files.api'
 import {
   FilesMeta,
   FILE_STATUS,
@@ -30,6 +31,7 @@ import {
   SubTitle,
   UploadFilesTable,
 } from './styles'
+
 const idGenerator = createSequenceGenerator()
 
 const isUniqFile = (blobs: any, file: any) =>
@@ -68,6 +70,12 @@ export const useFileUploadModal = ({
   const exceedsMax = filesMeta.length > MAX_UPLOADABLE_FILES
   const noneSelected = filesMeta.length === 0
 
+  useEffect(() => {
+    if (uploadFinished) {
+      toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
+    }
+  }, [uploadFinished])
+
   const handleRemoveAll = () => {
     setFilesMeta(() => [])
     setBlobs([])
@@ -85,8 +93,6 @@ export const useFileUploadModal = ({
     setBlobs(newBlobs)
   }
 
-  const handleRetryFile = (id: string) => {}
-
   const updateFilesStatus = (info: IUploadInfo) => {
     setFilesMeta((draft: any) => {
       const f = draft.find((file: any) => file.id === info.id)
@@ -101,14 +107,13 @@ export const useFileUploadModal = ({
     try {
       await multiFileUpload({
         filesBlob: blobs,
-        filesMeta: filesMeta,
+        filesMeta,
         updateFileStatus: updateFilesStatus,
         spaceId: 1,
         scope: scope === 'me' ? 'private' : scope === 'everybody' ? 'public' : scope,
         folderId,
       })
-      toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message)
     }
     await queryCache.invalidateQueries('files')
@@ -125,7 +130,7 @@ export const useFileUploadModal = ({
       <StyledDropSection>
         <ButtonSolidBlue disabled={uploadInProgress}>
           <Dropzone
-            noDrag={true}
+            noDrag
             disabled={uploadInProgress}
             maxSize={MAX_UPLOADABLE_FILE_SIZE}
             onDropAccepted={accepted => {
@@ -169,8 +174,8 @@ export const useFileUploadModal = ({
               </tr>
             </thead>
             <tbody>
-              {filesMeta.map((f, i) => (
-                <tr key={i}>
+              {filesMeta.map(f => (
+                <tr key={f.id}>
                   <td>{f.name}</td>
                   <Status>{f.status}</Status>
                   <Remove>

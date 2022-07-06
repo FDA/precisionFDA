@@ -10,7 +10,7 @@ module SpaceMembershipService
       return if membership.lead?
 
       if membership.new_record?
-        membership = SpaceMembershipService::Create.call(api, space, membership)
+        membership = SpaceMembershipService::Create.call(api, space, membership, admin_member.user)
         create_event(space, membership, admin_member)
         membership
       else
