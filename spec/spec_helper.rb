@@ -18,6 +18,10 @@ end
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
+  # we always want to run tests in test configuration
+  # if developer does set env tests delete whole dev database
+  ENV["RAILS_ENV"] = "test"
+
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
   config.include JsonResponse, type: :controller

@@ -2,8 +2,10 @@ require "rails_helper"
 
 RSpec.describe WDLObject, type: :model do
   subject(:wdl_object) { described_class.new(raw) }
+  subject(:wdl_object2) { described_class.new(raw2) }
 
-  let(:raw) { IO.read(Rails.root.join("spec/support/files/workflow_import/wdl/wdl_sample_1.wdl")) }
+  let(:raw) { File.read(Rails.root.join("spec/support/files/workflow_import/wdl/wdl_sample_1.wdl")) }
+  let(:raw2) { File.read(Rails.root.join("spec/support/files/workflow_import/wdl/wdl_sample_2.wdl")) }
 
   describe "#valid?" do
     context "when WDL is correct" do
@@ -221,6 +223,21 @@ RSpec.describe WDLObject, type: :model do
           "call snpEff",
         )
       end
+    end
+  end
+
+  describe "parsing of inputs for sample 2 (inputs wrapped in input)" do
+    subject(:tasks) { wdl_object2.tasks }
+
+    it "test inputs' values" do
+      inputs = tasks[0].inputs.to_s
+
+      expect(inputs).to include(
+        "File reads1",
+        "File? reads2",
+        "File index_tar_gz",
+        "String? output_prefix",
+      )
     end
   end
 end

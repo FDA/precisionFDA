@@ -49,19 +49,4 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
-
-  # STDOUT logging
-  $stdout.sync = true
-  logger = ActiveSupport::Logger.new($stdout)
-  logger.formatter = config.log_formatter
-  config.logger = ActiveSupport::TaggedLogging.new(logger)
-
-  # http request/response logging
-  config.after_initialize do
-    # @see https://github.com/trusche/httplog#configuration
-    HttpLog.configure do |httplog_config|
-      httplog_config.logger = Rails.logger
-      httplog_config.log_headers = true
-    end
-  end
 end

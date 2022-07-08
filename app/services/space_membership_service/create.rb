@@ -4,8 +4,10 @@ module SpaceMembershipService
       # @param api [DNAnexusAPI]
       # @param space [Space]
       # @param membership [SpaceMembership]
-      def call(api, space, membership)
-        invitee = membership.user.dxid
+      # @param admin_member [User] - current user
+      def call(api, space, membership, admin_member)
+        new_user = membership.user
+        invitee = new_user.dxid
         org_dxid = space.org_dxid(membership)
 
         if ADMIN_USER != invitee || !admin_user_member?(api, org_dxid)
@@ -24,8 +26,8 @@ module SpaceMembershipService
           end
 
           # To avoid invite yourself to an organization when user is RSA and
-          #   space is created and active already
-          unless membership.user.review_space_admin? && space.state == Space::STATE_ACTIVE
+          # space is created and active already
+          unless new_user.review_space_admin? && new_user.id == admin_member.id && space.state == Space::STATE_ACTIVE
             api.org_invite(org_dxid, invitee, attrs)
           end
         end

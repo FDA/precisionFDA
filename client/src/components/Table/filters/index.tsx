@@ -83,7 +83,7 @@ export function DefaultColumnFilter({
 }) {
   return (
     <StyledInput
-      defaultValue={filterValue}
+      value={filterValue || ''}
       onChange={e => setFilter(e.target.value)}
       placeholder={`--`}
       style={{lineHeight: '1.1rem'}}

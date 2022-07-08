@@ -150,6 +150,7 @@ module SpaceService
         space,
         lead,
         side,
+        user,
       )
     end
 

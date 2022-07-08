@@ -197,7 +197,6 @@ export const AppsListTable = ({
   }, [scope])
 
   const columns = useMemo(() => col, [col])
-
   const data = useMemo(() => apps || [], [apps])
 
   return (
@@ -217,6 +216,7 @@ export const AppsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
+        shouldResetFilters={scope as any}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no apps here.</EmptyTable>}
