@@ -103,21 +103,6 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 
-  # STDOUT logging
-  $stdout.sync = true
-  logger = ActiveSupport::Logger.new($stdout)
-  logger.formatter = config.log_formatter
-  config.logger = ActiveSupport::TaggedLogging.new(logger)
-
-  # http request/response logging
-  config.after_initialize do
-    # @see https://github.com/trusche/httplog#configuration
-    HttpLog.configure do |httplog_config|
-      httplog_config.logger = Rails.logger
-      httplog_config.log_headers = true
-    end
-  end
-
   # Email us when an exception occurs
   Rails.application.config.middleware.use(
     ExceptionNotification::Rack,

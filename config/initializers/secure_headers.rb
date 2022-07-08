@@ -15,7 +15,9 @@ SecureHeaders::Configuration.default do |config|
     connect_src: %w(
       'self'
       https://dnanexus-platform-upload-prod.s3.amazonaws.com
+      https://dnanexus-platform-upload-prod.s3-fips.us-east-1.amazonaws.com
       https://dnanexus-platform-upload-stg.s3.amazonaws.com
+      https://dnanexus-platform-upload-stg.s3-fips.us-east-1.amazonaws.com
       https://s3.amazonaws.com
       https://stagingdl.dnanex.us
       https://dl.dnanex.us

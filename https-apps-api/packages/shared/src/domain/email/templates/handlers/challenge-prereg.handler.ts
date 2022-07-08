@@ -13,6 +13,7 @@ import {
   buildEmailTemplate,
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
+  pfdaNoReplyUser,
 } from '../../email.helper'
 import { BaseTemplate } from '../base-template'
 import {
@@ -73,7 +74,7 @@ export class ChallengePreregEmailHandler
       filterFn,
       uniqBy((u: User) => u.id),
     )
-    const interestedUsers = filterPipe(users)
+    const interestedUsers = filterPipe(users).concat(pfdaNoReplyUser)
     return interestedUsers
   }
 

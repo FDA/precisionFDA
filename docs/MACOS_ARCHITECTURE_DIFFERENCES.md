@@ -1,6 +1,6 @@
-# MacOS architecture differences
+# Summary of Platform Differences
 
-_Last updated 3.5.2022_
+_Last updated 14.6.2022_
 
 ## Docker issues
 
@@ -21,6 +21,8 @@ image: amd64/mysql
 
 ## Ruby watch mode
 
-As stated also in [this article](https://docs.docker.com/desktop/mac/apple-silicon/), `inotify` file system notification API doesn't work on emulated images. This API is used internally by `listen` package and `EventedFileSystemWatcher`. Rails (according to [Rails config](https://guides.rubyonrails.org/configuring.html#config-file-watcher)) ships by default with `FileSystemWatcher`, therefore configuration option for `EventedFileSystemWatcher` is disabled for `arm64v8` with `ARM64V8_DEVELOPMENT_PATCH` env variable
+As stated also in [this article](https://docs.docker.com/desktop/mac/apple-silicon/), `inotify` file system notification API doesn't work on emulated images. This API is used internally by `listen` package and `EventedFileSystemWatcher`. Rails (according to [Rails config](https://guides.rubyonrails.org/configuring.html#config-file-watcher)) ships by default with `FileSystemWatcher`, therefore configuration option for `EventedFileSystemWatcher` is disabled for `arm64v8` with `ARM64V8_DEVELOPMENT_PATCH` env variable.
 
 [See here](../config/environments/development.rb)
+
+The env variable `ARM64V8_DEVELOPMENT_PATCH` is defined in arm64v8 docker compose files, such as [this one for arm64v8 dev](../docker/arm64v8.dev.docker-compose.yml).

@@ -1,6 +1,6 @@
 import { debounce } from 'lodash'
 import { useCallback, useState } from 'react'
-import { DelimitedNumericArrayParam, StringParam, useQueryParams, withDefault } from 'use-query-params'
+import { DelimitedNumericArrayParam, QueryParamConfig, StringParam, useQueryParams, withDefault } from 'use-query-params'
 import { IFilter } from './types'
 import { toObjectFromArray } from './utils'
 
@@ -18,16 +18,16 @@ function fileSizeParamMap(fileSize?: [number | null, number | null]) {
       fileSize = undefined
     }
     return fileSize
-  } else {
+  } 
     return fileSize
-  }
+  
 }
 
 export const defaultFilterValues = (arr: string[]) => arr.reduce((acc: any, curr: any) => (acc[curr] = undefined, acc), {})
 
 const KEYS = ['name', 'tags', 'featured', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by']
 function getObjectKeys<T>(a: string[]) {
-  let o = {} as any
+  const o = {} as any
   a.forEach(k => o[k] = undefined)
   return o
 }
@@ -49,30 +49,25 @@ export function useFilterState({ onSetFilter }: { onSetFilter?: (values: any) =>
   }
 }
 
+type FilterArgs =  Record<string, string>
+type ParamsType = {[key: string]: QueryParamConfig<any, any>}
 
-export function useFilterParams({ onSetFilter }: { onSetFilter?: (values: any) => void }) {
-  // TODO: Extract column names out of useList
-  const [filterQuery, setFilterParam] = useQueryParams({
-    name: withDefault(StringParam, undefined),
-    title: withDefault(StringParam, undefined),
-    state: withDefault(StringParam, undefined),
-    engine: withDefault(StringParam, undefined),
-    dx_instance_class: withDefault(StringParam, undefined),
-    tags: withDefault(StringParam, undefined),
-    status: withDefault(StringParam, undefined),
-    featured: withDefault(StringParam, undefined),
-    location: withDefault(StringParam, undefined),
-    added_by: withDefault(StringParam, undefined),
-    app_title: withDefault(StringParam, undefined),
-    launched_by: withDefault(StringParam, undefined),
-    file_size: withDefault(DelimitedNumericArrayParam, undefined),
+export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs, onSetFilter?: (values: any) => void }) {
+  const params: ParamsType = {}
+  Object.keys(filters).forEach(v => {
+    if(filters[v] === 'string') {
+      params[v] = withDefault(StringParam, undefined)
+    }
+    if(filters[v] === 'range') {
+      params[v] = withDefault(DelimitedNumericArrayParam, undefined)
+    }
   })
+  const [filterQuery, setFilterParam] = useQueryParams(params)
 
   const debouncedSetFilterQuery = debounce(v => {
     v.file_size = fileSizeParamMap(v.file_size)
-
     setFilterParam(v)
-    onSetFilter && onSetFilter(v)
+    if(onSetFilter) onSetFilter(v)
   }, 500)
 
   const setSearchFilter = useCallback((val: IFilter[]) => {

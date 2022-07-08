@@ -560,6 +560,9 @@ Rails/WhereNot:
 RSpec/ExampleLength:
   Max: 20
 
+RSpec/MultipleMemoizedHelpers:
+  Max: 20
+
 RSpec/ExcessiveDocstringSpacing:
   Enabled: true
 

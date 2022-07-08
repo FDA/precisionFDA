@@ -286,9 +286,8 @@ export const FilesListTable = ({
   useEffect(() => {
     sethiddenColumns(hidden)
   }, [scope])
-
+  
   const columns = useMemo(() => col, [col])
-
   const data = useMemo(() => files || [], [files])
 
   return (
@@ -309,6 +308,7 @@ export const FilesListTable = ({
         sortByPreference={sortBy}
         manualFilters
         filters={filters}
+        shouldResetFilters={scope as any}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no files here.</EmptyTable>}
         isColsResizable
