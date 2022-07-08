@@ -19,7 +19,6 @@ class SelectorModel
       if element && isFile && scrolledDown && notAllLoaded && notBusy
         context.$data.getObjects(currentNumberOfObjects)
 
-
   constructor: (@opts) ->
     @id = _.uniqueId('object-selector-modal-')
     @modal = null
@@ -34,11 +33,21 @@ class SelectorModel
     @busy = ko.observable(false)
     @saving = ko.observable(false)
     @error = ko.observable()
+    @numAllObjects = ko.observable(0)
 
     @filterByOwned = ko.observable(false)
 
     @calls = []
     @callsDeferred = $.Deferred()
+    
+    @tabSelected = ko.observable('')
+    @filesTabSelected = ko.computed( =>
+      if (@tabSelected == 'file')
+        return true
+      else
+        return false
+    )
+    @filteredObjects = ko.observableArray()
 
     @selectedList = new ObjectListModel(this, {
       className: "selected"
@@ -64,6 +73,10 @@ class SelectorModel
 
     @canSave = ko.computed(=>
       !@busy() && !@saving() && !_.isEmpty(@selected())
+    )
+
+    @canSaveAll = ko.computed(=>
+      !@busy() && !@saving() && !_.isEmpty(@filteredObjects())
     )
 
     @hasError = ko.computed(=>
@@ -136,6 +149,21 @@ class SelectorModel
         @saving(false)
       )
 
+  saveAll: () =>
+    @saving(true)
+    @error(null)
+    @opts.onSave(@filteredObjects())
+      .done((data, hideModal = true) =>
+        if hideModal
+          @modal.modal('hide')
+          @saving(false)
+        @opts.onAfterSave?()
+      )
+      .fail(() =>
+        @onError()
+        @saving(false)
+      )    
+
   onError: (e) =>
     console.error(e.status, e.statusText, e.responseText)
     if e.responseText? && _.isObject(e.responseText)
@@ -188,7 +216,7 @@ class ObjectListModel
       if @lastQuery != @filterQuery() && @name == 'Files'
         @objects.removeAll()
         @lastQuery = @filterQuery()
-        @getObjects(0, 100, @lastQuery)
+        @getObjects(0, 1000, @lastQuery)
       else
         objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
         objects = @filterSetOfObjects(objects, @filterQuery())
@@ -205,11 +233,15 @@ class ObjectListModel
       _.size(@activeRelatedObjects()) > 0
     )
 
+  clickTab: () ->
+    @selectorModel.tabSelected($(this)[0].className)
+
   clearActiveRelated: () ->
     @activeRelatedObjects([])
 
   getObjects: (offset = 0, limit = 100, query = '') ->
     return $.Deferred().resolve() if !@apiEndpoint?
+    @selectorModel.busy(true)
     @busy(true)
     accessibleScope = @selectorModel.listRelatedParams.scopes
 
@@ -238,9 +270,13 @@ class ObjectListModel
         @selectorModel.objectsHash[objectModel.uid] = objectModel
         objectModel
       )
+      if (@className == 'file')
+        @selectorModel.numAllObjects(objectModels.length)
+        @selectorModel.filteredObjects(objectModels)
       @objects(objectModels)
     ).always(=>
       @busy(false)
+      @selectorModel.busy(false)
     )
 
   filterByProperty: (objects, property) ->
