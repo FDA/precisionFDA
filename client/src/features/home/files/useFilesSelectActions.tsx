@@ -232,7 +232,7 @@ export const useFilesSelectActions = ({
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
       isDisabled: selected.length !== 1 || selected[0].location === 'Public',
-      hide: isFolder || selected.length !== 1 || scope !== 'me',
+      hide: isFolder || selected.length !== 1 || scope !== 'me' || selected[0].links?.publish === undefined,
     },
     // 'Make folder public': {
     //   func: () => {},
