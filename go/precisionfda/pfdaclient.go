@@ -303,8 +303,8 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) er
 
 	fmt.Printf(">> Uploading file %s\n", path)
 
-	wg := c.initWaitGroup(fileID, chunkPool, size)
-	c.readAndChunk(f, chunkPool, size)
+	wg := c.initWaitGroup(fileID, chunkPool, &size)
+	c.readAndChunk(f, chunkPool, &size)
 
 	close(chunkPool)
 	wg.Wait()
