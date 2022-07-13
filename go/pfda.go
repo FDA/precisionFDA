@@ -32,7 +32,7 @@ const defaultSkipVerify = "false"
 const usageString = `
 
 ***********************
-PFDA COMMAND LINE TOOL v2.1
+PFDA COMMAND LINE TOOL v2.1.1
 ***********************
 To upload a file:
 
