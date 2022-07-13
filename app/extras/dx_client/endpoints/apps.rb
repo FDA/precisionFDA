@@ -28,7 +28,7 @@ module DXClient
           previous_bill_to = parsed[1].to_s
 
           Rails.logger.info("Attempt to create app with billTo #{current_bill_to} failed, " \
-                      "because previous version was created with billTo #{previous_bill_to}")
+                            "because previous version was created with billTo #{previous_bill_to}")
           Rails.logger.info("Creating new version with #{previous_bill_to} and updating billTo to #{current_bill_to}")
 
           opts[:billTo] = previous_bill_to
