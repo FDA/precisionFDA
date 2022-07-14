@@ -8,6 +8,7 @@ import { create, generate, db, mockResponses } from '@pfda/https-apps-shared/src
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { STATUS, STATUSES } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
+import { errorsFactory } from '../utils/errors-factory'
 
 const createSyncDbClusterTestTask = async (
   payload: SyncDbClusterJob['payload'],
@@ -31,7 +32,7 @@ describe('TASK: sync db cluster', () => {
     em = database.orm().em
     em.clear()
     user = create.userHelper.create(em)
-    dbCluster = create.dbClusterHelper.create(em, { user }),
+    dbCluster = create.dbClusterHelper.create(em, { user })
     await em.flush()
     mocksReset()
     queueMocksReset()
@@ -175,21 +176,27 @@ describe('TASK: sync db cluster', () => {
       expect(fakes.client.dbClusterDescribeFake.notCalled).to.be.true()
     })
 
-    it('it handles ClientRequestError gracefully', async() => {
-      fakes.client.dbClusterDescribeFake.rejects(new errors.ClientRequestError(
-        'ServiceUnavailable', {
-          clientResponse: 'Some resource was temporarily unavailable; please try again later',
-          clientStatusCode: 503,
-        }
-      ))
+    it('it handles InvalidAuthentication - ExpiredToken gracefully', async () => {
+      fakes.client.dbClusterDescribeFake.rejects(errorsFactory.createClientTokenExpiredError())
       await createSyncDbClusterTestTask(
         { dxid: dbCluster.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
       )
+      expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
+      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
+    })
+
+    it('it handles ClientRequestError gracefully', async () => {
+      fakes.client.dbClusterDescribeFake.rejects(errorsFactory.createServiceUnavailableError())
+      await createSyncDbClusterTestTask(
+        { dxid: dbCluster.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
+      )
+      expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
       expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
     })
-  
-    it('it handles other error gracefully', async () => {
+
+    it('it handles other errors gracefully', async () => {
       fakes.client.dbClusterDescribeFake.rejects(new Error('quack'))
       await createSyncDbClusterTestTask(
         { dxid: dbCluster.dxid },
@@ -200,10 +207,10 @@ describe('TASK: sync db cluster', () => {
 
     it('does not remove task from queue when client API call returns 5xx error', async () => {
       fakes.client.dbClusterDescribeFake.rejects(
-        new errors.ClientRequestError("client error", {
+        new errors.ClientRequestError('client error', {
           clientResponse: {},
           clientStatusCode: 500,
-      }))
+        }))
       await createSyncDbClusterTestTask(
         { dxid: dbCluster.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },

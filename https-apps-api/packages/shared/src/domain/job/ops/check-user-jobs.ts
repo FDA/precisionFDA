@@ -27,7 +27,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
     // Find running jobs that are over the max duration
     const isOverMaxDuration = buildIsOverMaxDuration('terminate')
     const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
-    if (staleJobs.length == 0) {
+    if (staleJobs.length === 0) {
       this.ctx.log.info({}, 'CheckUserJobsOperation: No stale jobs found')
     }
     else {
@@ -49,7 +49,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
 
     // It is better to loop sychronously so that logs are colocated correctly and can be read logically
     // and that we space out platform calls a little (lest we run into any rate limiter)
-    for (let job of runningJobs) {
+    for (const job of runningJobs) {
       if (!job.isHTTPS()) {
         // We can support resolving stale syncing of jobs of normal (non HTTPS) apps once
         // the job_syncing.rb business logic is reimplemented as nodejs operations
@@ -59,7 +59,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
       }
 
       try {
-        let platformJobData: JobDescribeResponse = await this.client.jobDescribe({
+        const platformJobData: JobDescribeResponse = await this.client.jobDescribe({
           jobId: job.dxid,
           accessToken: this.ctx.user.accessToken,
         })
@@ -80,7 +80,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
             }, 'CheckUserJobsOperation: Status sync task for job missing, recreating it')
           }
           else {
-            this.ctx.log.info({ 
+            this.ctx.log.info({
               jobDxid: job.dxid,
               bullJob,
             }, 'CheckUserJobsOperation: Status sync task found, everything is fine')

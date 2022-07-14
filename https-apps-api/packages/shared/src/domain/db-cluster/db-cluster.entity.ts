@@ -14,6 +14,7 @@ import { User } from '../user/user.entity'
 import { STATUS, ENGINE } from './db-cluster.enum'
 
 @Entity({ tableName: 'dbclusters' })
+@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
 @Filter({ name: 'isNonTerminal', cond: {
     status: {
       $ne: STATUS.TERMINATED
