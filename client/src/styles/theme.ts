@@ -56,6 +56,7 @@ export const colors = {
   darkGreyOnGrey: '#7891b7',
   buttonGreenOnWhite: '#30825b',
   greyTextonBlack: '#919191',
+  greyTextOnWhite: '#707070',
   brownOnGrey: '#b3453d', 
   blueOnBlack: '#368ad3',
   greyOnLightBlue: '#6d6d6d',
