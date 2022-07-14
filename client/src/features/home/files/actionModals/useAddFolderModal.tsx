@@ -54,6 +54,7 @@ export const useAddFolderModal = ({ folderId, scope }: { folderId?: string, scop
       headerText="Create new folder"
       isShown={isShown}
       hide={() => setShowModal(false)}
+      title="Modal window to create a new folder"
     >
       <StyledForm onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
@@ -73,7 +74,7 @@ export const useAddFolderModal = ({ folderId, scope }: { folderId?: string, scop
         </FieldGroup>
         <ButtonRow>
           <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
-          <ButtonSolidBlue type="submit" disabled={mutation.isLoading}>Add</ButtonSolidBlue>
+          <ButtonSolidBlue type="submit" disabled={mutation.isLoading} alt="Button with 'Add' text to create a folder">Add</ButtonSolidBlue>
         </ButtonRow>
       </StyledForm>
     </Modal>

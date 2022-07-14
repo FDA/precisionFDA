@@ -93,6 +93,7 @@ export const useDeleteFileModal = ({ selected, onSuccess, scope } : {
       headerText={`Delete ${itemsCountString('item', itemsCount)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
+      title="Modal window to select files for deletion"
       footer={
         <>
           {mutation.isLoading && <Loader />}

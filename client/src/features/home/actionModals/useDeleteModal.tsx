@@ -58,6 +58,7 @@ export function useDeleteModal<T extends { id: string; name: string }>({
       headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
+      title={`Modal window to select ${resource}s for deletion`}
       footer={
         <ButtonRow>
           {mutation.isLoading && <Loader />}
