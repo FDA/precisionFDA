@@ -126,6 +126,7 @@ export const useFileUploadModal = ({
       headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}
       isShown={isShown}
       hide={() => handleClose()}
+      title="Modal dialog to upload files"
     >
       <StyledDropSection>
         <ButtonSolidBlue disabled={uploadInProgress}>
@@ -168,7 +169,7 @@ export const useFileUploadModal = ({
           <UploadFilesTable>
             <thead>
               <tr>
-                <td>Name</td>
+                <th>Name</th>
                 <Status>Status</Status>
                 <Remove>Remove</Remove>
               </tr>
