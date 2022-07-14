@@ -1,3 +1,4 @@
+/* eslint-disable no-undefined */
 import { wrap, EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
