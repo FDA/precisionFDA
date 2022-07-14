@@ -63,14 +63,18 @@ exports[`ExpertsListItem test should render ExpertsListItemBlogEntry 1`] = `
           fw={true}
           icon="fa-star-o"
         />
-        <span>
+        <span
+          aria-label="Click to view more information about Experts 1"
+        >
           About This Expert
         </span>
       </Link>
       <Link
         to="/experts/1/blog"
       >
-        <span>
+        <span
+          aria-label="Click to read Experts 1's blog post"
+        >
           Read Expert Blog Post ↗
         </span>
       </Link>
