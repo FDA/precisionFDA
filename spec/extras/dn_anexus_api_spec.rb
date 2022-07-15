@@ -87,7 +87,7 @@ describe DNAnexusAPI do
     #   it "raises ChargesMismatchError exception" do
     #     expect { client.app_new(payload) }.to raise_error(DXClient::Errors::ChargesMismatchError)
     #   end
-    end
+    # end
 
     context "when another kind of error was returned" do
       before do
