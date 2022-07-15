@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react'
+import { useQueryClient } from 'react-query'
+import { Column } from 'react-table'
 import {
   DefaultColumnFilter,
   NumberRangeColumnFilter,
   SelectColumnFilter,
 } from '../../../components/Table/filters'
-import { Column } from 'react-table'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { IFile } from './files.types'
@@ -15,7 +16,7 @@ import { TaskIcon } from '../../../components/icons/TaskIcon'
 import { AreaChartIcon } from '../../../components/icons/AreaChartIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { KeyVal } from '../types'
-import { useQueryClient } from 'react-query'
+import { colors } from '../../../styles/theme'
 
 export const useFilesColumns = ({
   isAdmin = false,
@@ -40,7 +41,7 @@ export const useFilesColumns = ({
           Cell: props => (
             <>
               {props.cell.row.original.type === 'UserFile' ? (
-                <StyledNameCell
+                <StyledNameCell color={(props.cell.row.original.state == 'open') ? colors.stateLabelGrey : colors.primaryBlue}
                   onClick={() => onFileClick(props.cell.row.original.uid)}
                 >
                   <FileIcon height={14} />
