@@ -31,78 +31,71 @@ import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 
-const renderOptions = (db: IDatabase) => {
-  return (
-    <>
-      <MetadataSection>
-      <MetadataRow>
-        <MetadataItem>
-          <MetadataKey>Location</MetadataKey>
-          <MetadataVal>
-            {db.location && (
-              <Link target="_blank" to={`/home/databases`}>
-                {db.location}
-              </Link>
-            )}
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>ID</MetadataKey>
-          <MetadataVal>{db.dxid}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Added By</MetadataKey>
-          <MetadataVal>
-            {' '}
-            <Link target="_blank" to={db.links.user!}>
-              {db.added_by_fullname}
+const renderOptions = (db: IDatabase) => (
+  <MetadataSection>
+    <MetadataRow>
+      <MetadataItem>
+        <MetadataKey>Location</MetadataKey>
+        <MetadataVal>
+          {db.location && (
+            <Link target="_blank" to="/home/databases">
+              {db.location}
             </Link>
-          </MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Created On</MetadataKey>
-          <MetadataVal>{db.created_at_date_time}</MetadataVal>
-        </MetadataItem>
-      </MetadataRow>
-      <MetadataRow>
-
-
-        <MetadataItem>
-          <MetadataKey>DB Status</MetadataKey>
-          <MetadataVal>{db.status}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>DB Port</MetadataKey>
-          <MetadataVal>{db.port}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Engine</MetadataKey>
-          <MetadataVal>{db.engine}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Version</MetadataKey>
-          <MetadataVal>{db.engine_version}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Instance</MetadataKey>
-          <MetadataVal>{db.dx_instance_class}</MetadataVal>
-        </MetadataItem>
-      </MetadataRow>
-      <MetadataRow>
-
-        <MetadataItem>
-          <MetadataKey>Status Updated</MetadataKey>
-          <MetadataVal>{db.status_updated_date_time}</MetadataVal>
-        </MetadataItem>
-        <MetadataItem>
-          <MetadataKey>Host Endpoint</MetadataKey>
-          <MetadataVal>{db.host}</MetadataVal>
-        </MetadataItem>
-</MetadataRow>
-      </MetadataSection>
-    </>
-  )
-}
+          )}
+        </MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>ID</MetadataKey>
+        <MetadataVal>{db.dxid}</MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Added By</MetadataKey>
+        <MetadataVal>
+          {' '}
+          <Link target="_blank" to={db.links.user!}>
+            {db.added_by_fullname}
+          </Link>
+        </MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Created On</MetadataKey>
+        <MetadataVal>{db.created_at_date_time}</MetadataVal>
+      </MetadataItem>
+    </MetadataRow>
+    <MetadataRow>
+      <MetadataItem>
+        <MetadataKey>DB Status</MetadataKey>
+        <MetadataVal>{db.status}</MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>DB Port</MetadataKey>
+        <MetadataVal>{db.port}</MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Engine</MetadataKey>
+        <MetadataVal>{db.engine}</MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Version</MetadataKey>
+        <MetadataVal>{db.engine_version}</MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Instance</MetadataKey>
+        <MetadataVal>{db.dx_instance_class}</MetadataVal>
+      </MetadataItem>
+    </MetadataRow>
+    <MetadataRow>
+      <MetadataItem>
+        <MetadataKey>Status Updated</MetadataKey>
+        <MetadataVal>{db.status_updated_date_time}</MetadataVal>
+      </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>Host Endpoint</MetadataKey>
+        <MetadataVal>{db.host}</MetadataVal>
+      </MetadataItem>
+    </MetadataRow>
+  </MetadataSection>
+)
 
 const DetailActionsDropdown = ({
   db,
@@ -159,7 +152,7 @@ export const DatabaseShow = ({ scope }: { scope: ResourceScope }) => {
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/databases`}>
+      <StyledBackLink linkTo="/home/databases">
         Back to Databases
       </StyledBackLink>
       <Topbox>
@@ -168,9 +161,9 @@ export const DatabaseShow = ({ scope }: { scope: ResourceScope }) => {
             <Title>
               <DatabaseIcon height={20} />
               &nbsp;{db?.name}
-              {(db.status === 'starting' || db.status === 'stopping' || db.status === 'terminating') && (
-                <Loader />
-              )}
+              {(db.status === 'starting' ||
+                db.status === 'stopping' ||
+                db.status === 'terminating') && <Loader />}
             </Title>
             <Description>{db.description}</Description>
           </HeaderLeft>

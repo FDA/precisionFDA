@@ -143,6 +143,12 @@ $GOPATH/bin/goversion -crypto go/dist/pfda*
 
 # Version History
 
+### 2.1.1 (2022-07-18)
+
+- Improvements to asset upload
+- Fixed downloading file with spaces in filename
+
+
 ### 2.1 (2022-02-22)
 
 - The CLI can now download files from private home or a space

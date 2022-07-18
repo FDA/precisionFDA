@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react'
+import { useQueryClient } from 'react-query'
+import ReactTooltip from 'react-tooltip'
+import { Column } from 'react-table'
 import {
   DefaultColumnFilter,
   NumberRangeColumnFilter,
   SelectColumnFilter,
 } from '../../../components/Table/filters'
-import { Column } from 'react-table'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { IFile } from './files.types'
@@ -15,7 +17,9 @@ import { TaskIcon } from '../../../components/icons/TaskIcon'
 import { AreaChartIcon } from '../../../components/icons/AreaChartIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { KeyVal } from '../types'
-import { useQueryClient } from 'react-query'
+import { colors } from '../../../styles/theme'
+
+const markIncompleteFile = (file: any) => (file.state === 'open') || (file.state === 'closing')
 
 export const useFilesColumns = ({
   isAdmin = false,
@@ -40,12 +44,19 @@ export const useFilesColumns = ({
           Cell: props => (
             <>
               {props.cell.row.original.type === 'UserFile' ? (
-                <StyledNameCell
-                  onClick={() => onFileClick(props.cell.row.original.uid)}
-                >
-                  <FileIcon height={14} />
-                  {props.value}
-                </StyledNameCell>
+                <>
+                  <StyledNameCell data-tip data-for={`fileNameTooltip${props.cell.row.original.uid}`}
+                  color={(markIncompleteFile(props.cell.row.original)) ? colors.stateLabelGrey : colors.primaryBlue}
+                    onClick={() => onFileClick(props.cell.row.original.uid)} >
+                    <FileIcon height={14} />
+                      {props.value}
+                  </StyledNameCell>
+                  {markIncompleteFile(props.cell.row.original) && 
+                  <ReactTooltip id={`fileNameTooltip${props.cell.row.original.uid}`} place="top" effect="solid">
+                    File is in {props.cell.row.original.state} state.
+                  </ReactTooltip>
+                  }
+                </>
               ) : (
                 <StyledNameCell
                   onClick={() =>

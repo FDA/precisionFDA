@@ -15,7 +15,7 @@
           Open Questions (<%= @open_questions.count %>)
         </div>
         <% @open_questions.each do |q|%>
-          <%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %>
+          <%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "remediated-question-blue list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %>
         <% end %>
       <% end %>
 
@@ -24,7 +24,7 @@
           Answered Questions (<%= @answered_questions.count %>)
         </div>
         <% @answered_questions.each do |q|%>
-          <%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %>
+          <%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "remediated-question-blue list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %>
         <% end %>
       <% end %>
 
@@ -33,7 +33,7 @@
           Ignored Questions (<%= @ignored_questions.count %>)
         </div>
         <% @ignored_questions.each do |q|%>
-          <s><%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %></s>
+          <s><%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "remediated-question-blue list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %></s>
         <% end %>
       <% end %>
 

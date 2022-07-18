@@ -25,7 +25,7 @@ const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, f
   return (
     <React.Fragment>
       <Backdrop onClick={disableClose ? undefined : hide} blur={blur} />
-      <Wrapper aria-modal aria-labelledby={headerText} tabIndex={-1} role="dialog" {...rest}>
+      <Wrapper aria-modal aria-label={headerText} tabIndex={-1} role="dialog" {...rest}>
         <StyledModal>
           <Header>
             <HeaderText>{headerText}</HeaderText>
