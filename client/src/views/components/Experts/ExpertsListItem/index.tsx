@@ -54,10 +54,10 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
             </Button>
             <Link to={`/experts/${expert.id}`}>
               <Icon icon={getSpacesIcon('experts')} fw />
-              <span>About This Expert</span>
+              <span aria-label={`Click to view more information about ${expert.title}`}>About This Expert</span>
             </Link>
             <Link to={`/experts/${expert.id}/blog`}>
-              <span>Read Expert Blog Post &#x2197;</span>
+              <span aria-label={`Click to read ${expert.title}'s blog post`}>Read Expert Blog Post &#x2197;</span>
             </Link>
           </div>
           {userCanEdit && (

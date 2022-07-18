@@ -17,7 +17,7 @@
                   <span class="fa fa-file-image-o"></span> Browse image to upload... <input class="event-browse-files" type='file' accept="image/*" required />
                 </span>
 
-                <button class="btn btn-success btn-lg event-upload-image" style="display:none;" data-bind="visible: modalUploader.isUploadVisible, disable: modalUploader.disableActions">
+                <button class="btn btn-success btn-lg event-upload-image remediated-uploadbutton-color" style="display:none;" data-bind="visible: modalUploader.isUploadVisible, disable: modalUploader.disableActions">
                   <span class="fa fa-cloud-upload fa-fw"></span> Upload
                 </button>
 
@@ -32,7 +32,7 @@
         <div class="container-fluid">
           <div class="section-files panel panel-info">
             <div class="panel-heading">
-              <span class="upload-state panel-title" data-bind="text: modalUploader.uploadStateDisplay"></span>
+              <span class="upload-state panel-title upload-modal-remediated-color" data-bind="text: modalUploader.uploadStateDisplay"></span>
             </div>
 
             <ul class="list-group list-files" data-bind="foreach: modalUploader.files">

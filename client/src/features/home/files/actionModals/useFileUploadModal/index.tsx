@@ -73,6 +73,8 @@ export const useFileUploadModal = ({
   useEffect(() => {
     if (uploadFinished) {
       toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
+      queryCache.invalidateQueries('files')
+      queryCache.invalidateQueries('counters')
     }
   }, [uploadFinished])
 
@@ -116,8 +118,6 @@ export const useFileUploadModal = ({
     } catch (error: any) {
       toast.error(error.message)
     }
-    await queryCache.invalidateQueries('files')
-    await queryCache.invalidateQueries('counters')
   }
   
   const modalComp = (
@@ -126,6 +126,7 @@ export const useFileUploadModal = ({
       headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}
       isShown={isShown}
       hide={() => handleClose()}
+      title="Modal dialog to upload files"
     >
       <StyledDropSection>
         <ButtonSolidBlue disabled={uploadInProgress}>
@@ -168,7 +169,7 @@ export const useFileUploadModal = ({
           <UploadFilesTable>
             <thead>
               <tr>
-                <td>Name</td>
+                <th>Name</th>
                 <Status>Status</Status>
                 <Remove>Remove</Remove>
               </tr>

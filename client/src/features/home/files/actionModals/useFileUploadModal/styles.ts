@@ -13,7 +13,7 @@ export const SubTitle = styled.div`
   font-size: 16px;
   color: ${colors.textDarkGrey};
 `
-export const Remove = styled.td`
+export const Remove = styled.th`
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -21,7 +21,7 @@ export const Remove = styled.td`
     cursor: pointer;
   }
 `
-export const Status = styled.td`
+export const Status = styled.th`
   padding-right: 12px;
   padding-left: 12px;
   width: 80px;
