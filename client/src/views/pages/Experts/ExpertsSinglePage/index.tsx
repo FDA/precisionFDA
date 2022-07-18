@@ -30,6 +30,8 @@ import Button from '../../../components/Button'
 import { expertsSelector } from '../../../../reducers/experts/details/selectors'
 import history from '../../../../utils/history'
 import UserContent from '../../../components/UserContent'
+import { colors } from '../../../../styles/theme'
+
 
 const StyledNavigationBar = styled.div`
   width: 100%;
@@ -46,7 +48,11 @@ const StyledNavigationBar = styled.div`
 `
 const StyledSocialMediaButtons = styled.div`
   margin-top: 100px;
-  margin-right: 2%;
+  margin-right: 2%
+`
+
+const BackToModulePage = styled(Link)`
+  color: ${colors.blueOnBlack} !important
 `
 
 const ExpertsSingleDetailsPage = () => {
@@ -171,12 +177,15 @@ const ExpertsSingleDetailsPage = () => {
     <StyledNavigationBar>
       <div className="experts-details__left-column__logo-bar">
         <img
-          className="experts-details__expert-image"
-          src={expert?.image}
-          alt="Expert's Logo"
+            className="experts-details__expert-image"
+            src={expert?.image}
+            alt="Expert's Logo"
         />
         <div className="experts-details__logo-data">
-          <Link to={{ pathname: '/experts' }}>&larr; Back to All Experts</Link>
+          <BackToModulePage to={{ pathname: '/experts' }}>
+            &larr; Back to All Experts
+          </BackToModulePage>
+
           <h1>{expert?.title}</h1>
         </div>
       </div>

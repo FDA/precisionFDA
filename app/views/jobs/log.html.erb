@@ -13,7 +13,7 @@
     <% else %>
       <span class="label label-warning"> <%= @job.state.upcase %></span>
     <% end %>
-    <span class="name"><%= link_to @job.name, home_path_to_item(@job) %></span>
+    <span class="name"><%= link_to(@job.name, home_path_to_item(@job), data: { turbolinks: "false" }) %></span>
   </div>
 </div>
 

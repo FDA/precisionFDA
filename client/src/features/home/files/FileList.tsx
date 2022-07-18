@@ -20,7 +20,7 @@ import {
   ActionsRow,
   LoadingList,
   QuickActions,
-  StyledHomeTable
+  StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
@@ -79,11 +79,11 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
   }
 
   // If the component is rendering for the first time, skip setting folderIdParam
-  const first = useRef(true);
+  const first = useRef(true)
   useEffect(() => {
     if (first.current) {
-      first.current = false;
-      return;
+      first.current = false
+      return
     }
     setFolderIdParam(undefined, 'pushIn')
   }, [scope])
@@ -92,15 +92,15 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
     selectedIndexes,
     data?.files,
   )
-  let actions = useFilesSelectActions({
+  const actions = useFilesSelectActions({
     scope,
     fileId: folderIdParam!,
     selectedItems: selectedObjects,
     resetSelected,
     resourceKeys: ['files'],
   })
-  delete actions['Comments'];
-  delete actions['Request license approval'];
+  delete actions['Comments']
+  delete actions['Request license approval']
 
   const listActions = useFolderActions(scope, folderIdParam!)
 
@@ -286,9 +286,8 @@ export const FilesListTable = ({
   useEffect(() => {
     sethiddenColumns(hidden)
   }, [scope])
-
+  
   const columns = useMemo(() => col, [col])
-
   const data = useMemo(() => files || [], [files])
 
   return (
@@ -309,6 +308,7 @@ export const FilesListTable = ({
         sortByPreference={sortBy}
         manualFilters
         filters={filters}
+        shouldResetFilters={scope as any}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no files here.</EmptyTable>}
         isColsResizable

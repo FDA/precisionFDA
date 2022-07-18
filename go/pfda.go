@@ -32,7 +32,7 @@ const defaultSkipVerify = "false"
 const usageString = `
 
 ***********************
-PFDA COMMAND LINE TOOL v2.1
+PFDA COMMAND LINE TOOL v2.1.1
 ***********************
 To upload a file:
 
@@ -54,7 +54,7 @@ To call a precisionFDA API route:
 
   pfda api [--key <KEY>] --route <API_ROUTE> --json <JSON_PAYLOAD> [--output </PATH/TO/OUTPUT/FILE>]
 
-To print version info and exit : 
+To print version info and exit :
 
   pfda --version
 
@@ -168,7 +168,7 @@ func mainInternal() int {
 	}
 
 	if *server != "" && *server != defaultURL {
-		pfdaclient = precisionfda.NewPFDAClient(*server) 
+		pfdaclient = precisionfda.NewPFDAClient(*server)
 	} else {
 		pfdaclient = precisionfda.NewPFDAClient(defaultURL)
 	}
@@ -194,7 +194,7 @@ func mainInternal() int {
 	// if --version flag was given, print pfda info
 	if *pfda_version {
 		printInfo(pfdaclient)
-		// if only --version without any command , exit 
+		// if only --version without any command , exit
 		if *command == "" {
 			return 0
 		}
@@ -320,7 +320,7 @@ func mainInternal() int {
 	if *authKey != "" {
 		// If key was given by --key option in the command line
 		// marshal it to json and write into .pfda__config
-		// if marshaling fails fails, issue warning and exit 
+		// if marshaling fails, issue warning and exit
 		jsonData, err := json.Marshal(jsonConfig{
 			Key: *authKey,
 		})
@@ -332,16 +332,16 @@ func mainInternal() int {
 		}
 
 		// below is a more compact and cleaner implementation which is recommended when writing small files
-		// It doesn't use separate Create / Write from os package, as before but takes advantage of 
+		// It doesn't use separate Create / Write from os package, as before but takes advantage of
 		// ioutil.WriteFile which opens, writes and closes a file in one swoop
 		// denote, that it also works on Windows ( checked on AWS EC2 windows instance )
 		// despite Linux style file permissions are given
 		// if .pfda_config exists it is truncaters before writing
-		// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it  
-		err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'  
+		// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it
+		err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'
 		if err != nil {
 			fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
-		} else { 
+		} else {
 			fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
 		}
 	}

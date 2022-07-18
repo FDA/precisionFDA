@@ -1,16 +1,20 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
+import 'regenerator-runtime/runtime'
 import httpStatusCodes from 'http-status-codes'
 import sparkMD5 from 'spark-md5'
 import { closeFile, createFile, getUploadURL, uploadChunk } from '../../../../../api/files'
 // import { closeFile, createFile, getUploadURL, uploadChunk } from "../../files.api"
-import { CHUNK_SIZE, FilesMeta, FILE_STATUS, IUploadFile, IUploadInfo } from "./constants"
+import { CHUNK_SIZE, FilesMeta, FILE_STATUS, IUploadFile, IUploadInfo } from './constants'
 
 const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
   filesBlob.filter(b => {
     const fileMeta = filesMeta.find(f => f.id === b.generatedId)
 
-    if (fileMeta?.status === FILE_STATUS['added']) {
+    if (fileMeta?.status === FILE_STATUS.added) {
       return true
     }
+    return false
   })
 
 const throwIfError = (status: number, payload?: any) => {
@@ -41,9 +45,9 @@ export const multiFileUpload = async ({
   const filteredFiles: IUploadFile[] = filterFiles(filesBlob, filesMeta)
 
   for (const file of filteredFiles) {
-    let uploadInfo: IUploadInfo = {
+    const uploadInfo: IUploadInfo = {
       id: file.generatedId,
-      status: FILE_STATUS['preparing'],
+      status: FILE_STATUS.preparing,
       uploadedSize: 0,
     }
 
@@ -53,7 +57,7 @@ export const multiFileUpload = async ({
 
     await createFile(file.name, scopeToUpload, folderId ?? null)
       .then(response => {
-        console.log(file.name);
+        console.log(file.name)
 
         throwIfError(response.status, response.payload)
 
@@ -63,51 +67,51 @@ export const multiFileUpload = async ({
         const fileUid = response.payload.id
 
         reader.onload = () => {
-          uploadInfo.status = FILE_STATUS['uploading']
+          uploadInfo.status = FILE_STATUS.uploading
           uploadInfo.uploadedSize = 0
           updateFileStatus(uploadInfo)
 
           for (let i = 0; i < numChunks; i++) {
-            let firstByte = i * CHUNK_SIZE
-            let lastByte = (i + 1) * CHUNK_SIZE
+            const firstByte = i * CHUNK_SIZE
+            const lastByte = (i + 1) * CHUNK_SIZE
             if (reader.result) {
-              let buffer = reader.result.slice(firstByte, lastByte) as ArrayBuffer
+              const buffer = reader.result.slice(firstByte, lastByte) as ArrayBuffer
               spark.append(buffer)
-              let hash = spark.end()
+              const hash = spark.end()
 
               getUploadURL(response.payload.id, i + 1, buffer.byteLength, hash)
-                .then(response => {
-                  const { status, payload } = response
+                .then(res => {
+                  const { status, payload } = res
                   const { url, headers } = payload
 
                   throwIfError(status, payload)
 
                   return uploadChunk(url, buffer, headers)
                 })
-                .then(response => {
-                  throwIfError(response.status)
+                .then(res => {
+                  throwIfError(res.status)
 
-                  uploadInfo.status = FILE_STATUS['uploading']
+                  uploadInfo.status = FILE_STATUS.uploading
                   uploadInfo.uploadedSize += buffer.byteLength
                   updateFileStatus(uploadInfo)
 
                   if (uploadInfo.uploadedSize === file.size) {
-                    uploadInfo.status = FILE_STATUS['finalizing']
+                    uploadInfo.status = FILE_STATUS.finalizing
                     updateFileStatus(uploadInfo)
 
                     return closeFile(fileUid)
                   }
                 })
-                .then(response => {
-                  throwIfError(response!.status)
+                .then(res => {
+                  throwIfError(res!.status)
 
                   if (uploadInfo.uploadedSize !== file.size) return
 
-                  uploadInfo.status = FILE_STATUS['uploaded']
+                  uploadInfo.status = FILE_STATUS.uploaded
                   updateFileStatus(uploadInfo)
                 })
                 .catch(() => {
-                  uploadInfo.status = FILE_STATUS['failure']
+                  uploadInfo.status = FILE_STATUS.failure
                   updateFileStatus(uploadInfo)
                 })
             }
@@ -118,7 +122,7 @@ export const multiFileUpload = async ({
         reader.readAsArrayBuffer(file as any)
       })
       .catch((error) => {
-        uploadInfo.status = FILE_STATUS['failure']
+        uploadInfo.status = FILE_STATUS.failure
         // dispatch(updateFile(uploadInfo))
         // Rethrow error for consumers of this API to catch
         throw error

@@ -202,7 +202,6 @@ export const DatabaseListTable = ({
   }, [scope])
 
   const columns = useMemo(() => col, [col])
-
   const memoData = useMemo(() => data || [], [data])
 
   return (
@@ -222,6 +221,7 @@ export const DatabaseListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
+        shouldResetFilters={scope as any}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no databases here.</EmptyTable>}

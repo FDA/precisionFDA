@@ -38,7 +38,7 @@
           <!-- Nav tabs -->
           <ul class="nav nav-pills nav-tabs-padded" role="tablist">
             <!-- ko foreach: objectLists -->
-            <li role="presentation" data-bind="attr: {'data-classname': className}">
+            <li role="presentation" data-bind="attr: {'data-classname': className}, click: clickTab">
               <a role="tab" data-toggle="tab" data-bind="attr: {href: '#tab-' + $parent.id + '-' + className}">
                 <span data-bind="text: name"></span>
                 <span class="badge" data-bind="visible: numFilteredObjects, text: numFilteredObjects"></span>
@@ -105,6 +105,11 @@
           <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">
             <span data-bind="text: saving() ? 'Selecting...':'Select'"></span>
             <span class="badge" data-bind="visible: numSelected, text: numSelected"></span>
+          </button>
+          <button type="button" class="btn btn-primary" 
+            data-bind="visible: (tabSelected() == 'file' && selectionType == 'checkbox') && numAllObjects, click: saveAll, css: {disabled: !canSaveAll()}, disable: !canSaveAll()">
+            <span data-bind="text: saving() ? 'Selecting...':'Select all'"></span>
+            <span class="badge" data-bind="visible: numAllObjects && !busy(), text: numAllObjects"></span>
           </button>
         </div>
       </div><!-- /.modal-content -->
