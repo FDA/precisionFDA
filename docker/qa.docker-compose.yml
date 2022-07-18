@@ -1,0 +1,56 @@
+version: '3.7'
+
+volumes:
+  bundler-deps-cache-ruby:
+  db-pfda-mysql-volume:
+  webpack-cache-client:
+
+services:
+  web:
+    extends:
+      file: ./base.services.yml
+      service: web
+    environment:
+      - RAILS_ENV=ui_test
+    volumes:
+      - type: volume
+        source: bundler-deps-cache-ruby
+        target: /usr/local/bundle
+      - db-pfda-mysql-volume:/var/lib/mysql
+  frontend:
+    extends:
+      file: ./base.services.yml
+      service: frontend
+    volumes:
+      - type: volume
+        source: webpack-cache-client
+        target: /precision-fda/.build_cache/
+  nodejs-api:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-api
+  nodejs-worker:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-worker
+  db:
+    extends:
+      file: ./base.services.yml
+      service: db
+    volumes:
+      - db-pfda-mysql-volume:/var/lib/mysql
+  redis:
+    extends:
+      file: ./base.services.yml
+      service: redis
+  sidekiq:
+    extends:
+      file: ./base.services.yml
+      service: sidekiq
+    environment:
+      - RAILS_ENV=ui_test
+    volumes:
+      - type: volume
+        source: bundler-deps-cache-ruby
+        target: /usr/local/bundle
+

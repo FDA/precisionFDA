@@ -71,8 +71,10 @@ class JobSerializer < ApplicationSerializer
   # Returns a run_data output file uid, updated if output is of type 'file'
   # @return run_data [Hash] Contains:
   #   { ... "run_outputs" => { "qf1 " => "file-Fz1qBXQ06fZ9PGyy3yKxqb0j-1" } }
+  # Be careful that not all run_outputs values are strings, e.g.
+  #   { ... "run_outputs" => { "float_output" => 0.997611725020877 } }
   def run_data_updates
-    object.run_data["run_outputs"]&.each { |_k, v| v&.concat("-1") if v[0..3] == "file" }
+    object.run_data["run_outputs"]&.each { |_k, v| v&.concat("-1") if v.is_a?(String) && v[0..3] == "file" }
     object.run_data
   end
 

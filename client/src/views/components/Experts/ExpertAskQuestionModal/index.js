@@ -83,6 +83,7 @@ const ExpertAskQuestionModalComponent = ({
             <TextareaField
               label={''}
               placeholder='Submit a question..'
+              aria_label='Ask a question to submit to Expert'
               style={{ height: '100px' }}
               value={askedQuestion}
               name='asking'

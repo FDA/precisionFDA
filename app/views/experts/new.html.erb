@@ -1,9 +1,11 @@
 <% content_for :title do %>Create a new Expert of the Month<% end %>
 
 <div class="page-header">
-  <div class="page-title">
-    <span class="fa fa-groups"></span>
-    Create a new <strong>Expert of the Month</strong>
+  <div class="page-title expert-header-remediation">
+    <h1>
+      <span class="fa fa-groups"></span>
+      Create a new <strong>Expert of the Month</strong>
+    </h1>
   </div>
 </div>
 
@@ -15,7 +17,7 @@
     <div class="form-group">
       <div class="col-sm-offset-3">
         <%= f.submit "Create Expert", class: 'btn btn-primary', data: { disable_with: "Creating...", bind: "enable: modalUploader.imageUrl" } %>
-        <div class="text-muted" data-bind="visible: !modalUploader.imageUrl()"><br/>Please upload an image for the expert.</div>
+        <div class="text-muted expert-upload-image-text" data-bind="visible: !modalUploader.imageUrl()"><br/>Please upload an image for the expert.</div>
       </div>
     </div>
   <% end %>
