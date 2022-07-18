@@ -73,6 +73,8 @@ export const useFileUploadModal = ({
   useEffect(() => {
     if (uploadFinished) {
       toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
+      queryCache.invalidateQueries('files')
+      queryCache.invalidateQueries('counters')
     }
   }, [uploadFinished])
 
@@ -116,8 +118,6 @@ export const useFileUploadModal = ({
     } catch (error: any) {
       toast.error(error.message)
     }
-    await queryCache.invalidateQueries('files')
-    await queryCache.invalidateQueries('counters')
   }
   
   const modalComp = (
