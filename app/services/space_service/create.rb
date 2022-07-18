@@ -19,6 +19,7 @@ module SpaceService
     # @return [Space] Created space.
     def call(space_form)
       space = nil
+      site_admins = nil
 
       Space.transaction do
         space = build_space(space_form)
@@ -43,9 +44,11 @@ module SpaceService
         # For private, government and administrator spaces we accept the space automatically
         accept_space(space) if space.private_type? || space.government? || space.administrator?
 
-        invite_site_admins_to_space(space) if space.administrator?
+        site_admins = User.site_admins - [space.host_lead]
+        create_site_admin_invitations_to_space(space, site_admins) if space.administrator?
       end
 
+      send_invitation_emails_to_site_admins(space, site_admins) if space.administrator?
       send_emails(space) unless space.private_type?
 
       space
@@ -56,9 +59,8 @@ module SpaceService
     attr_reader :user, :api, :notification_mailer, :admin_api
 
     # Invites all site administrators to the space
-    def invite_site_admins_to_space(space)
+    def create_site_admin_invitations_to_space(space, site_admins)
       host_lead = space.host_lead # the admin who's created the current administrator space
-      site_admins = User.site_admins - [host_lead]
 
       return if site_admins.empty?
 
@@ -68,9 +70,26 @@ module SpaceService
         # rubocop:disable Layout/LineLength
         Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
                           " with admin membership #{admin_membership.id}")
-        SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership)
+        SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
         NotificationsMailer.space_activated_email(space, admin_membership).deliver_now!
         # rubocop:enable Layout/LineLength
+      end
+    end
+
+    # Sends invitation emails to administrator space
+    # Logic inspired from SpaceMembershipService::CreateOrUpdate
+    # Known Bug: could probably send an email if space_membership record was already existing
+    # However this should be unexpected edge case AFAIK (samuel)
+    def send_invitation_emails_to_site_admins(space, site_admins)
+      host_lead = space.host_lead # the admin who's created the current administrator space
+
+      return if site_admins.empty?
+
+      admin_membership = space.space_memberships.find_by(user: host_lead)
+
+      site_admins.each do |site_admin|
+        membership = space.space_memberships.active.where(user_id: site_admin.id).first
+        SpaceEventService.call(space.id, admin_membership.user_id, admin_membership, membership, :membership_added)
       end
     end
 
