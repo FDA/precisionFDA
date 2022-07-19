@@ -178,12 +178,16 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
   const onLogIn = () => {
     window.location.assign('/login')
   }
+  const onLogInWithSSO = () => {
+    window.location.assign('https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D')
+  }
+  const isStaging = window.location.host === 'precisionfda-staging.dnanexus.com'
 
-  const pathname = useLocation().pathname
+  const { pathname } = useLocation()
   const getLinkClassName = (linkPath: string) => {
-    if (linkPath == '/') { // Special case
+    if (linkPath === '/') { // Special case
       return classNames({
-        'current': pathname == linkPath,
+        'current': pathname === linkPath,
       })
     }
     return classNames({
@@ -209,6 +213,7 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
       <PublicNavbarRightButtons>
         <Button onClick={onRequestAccess}>Request Access</Button>
         <Button type="primary" onClick={onLogIn}>Log In</Button>
+        {isStaging && <Button type="primary" onClick={onLogInWithSSO}>Log In With SSO</Button>}
       </PublicNavbarRightButtons>
     </StyledPublicNavbar>
   )

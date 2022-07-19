@@ -10,11 +10,12 @@ import { getStateBgColorFromState } from '../executions/executions.util'
 import { getSubComponentValue } from '../executions/getSubComponentValue'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import {
-  StyledHomeTable
+  StyledHomeTable,
 } from '../home.styles'
 import { IFilter, IMeta, KeyVal } from '../types'
 import { useColumnWidthLocalStorage } from '../useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
+import { filters } from '../useList'
 import { useListQuery } from '../useListQuery'
 import { useOrderByState } from '../useOrderByState'
 import { usePaginationParams } from '../usePaginationState'
@@ -26,10 +27,10 @@ type ListType = { jobs: IExecution[]; meta: IMeta }
 export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
   const resource = 'app-executions'
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sortBy, sort, setSortBy } = useOrderByState({defaultOrder: {order_by: 'created_at_date_time', order_dir: 'DESC'}})
+  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
 
-  const { filterQuery, setSearchFilter } = useFilterParams({})
+  const { filterQuery, setSearchFilter } = useFilterParams({ filters })
 
   const query = useListQuery<ListType>({
     fetchList: fetchWorkflowExecutions,
@@ -37,7 +38,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
     scope: uid as any,
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort?.order_by, order_dir: sort?.order_dir },
-    filter: filterQuery
+    filter: filterQuery,
   })
 
   const setPerPage = (perPage: number) => {
@@ -84,7 +85,7 @@ export const ExecutionsListTable = ({
   setSortBy,
   sortBy,
   saveColumnResizeWidth,
-  colWidths
+  colWidths,
 }: {
   filters: IFilter[]
   jobs?: IExecution[]
@@ -122,7 +123,7 @@ export const ExecutionsListTable = ({
         isSortable
         isFilterable
         saveColumnResizeWidth={saveColumnResizeWidth}
-        isExpandable={true}
+        isExpandable
         cellProps={cell => 
           cell.column.id === 'state'
             ? {
@@ -140,18 +141,16 @@ export const ExecutionsListTable = ({
             : {}
         }
         rowProps={row => ({
-          className: 'hideExpand'
+          className: 'hideExpand',
         })}
         updateRowState={row => ({
           ...row,
-          hideExpand: !row.original.jobs
+          hideExpand: !row.original.jobs,
         })}
-        subcomponent={row => {
-          return (
+        subcomponent={row => (
             <>
               {row.original.jobs &&
-                row.original.jobs.map((job, index) => {
-                  return (
+                row.original.jobs.map((job, index) => (
                     <div
                       className="tr sub"
                       {...row.getRowProps()}
@@ -163,11 +162,9 @@ export const ExecutionsListTable = ({
                     >
                       {row.cells.map(cell => getSubComponentValue(job, cell))}
                     </div>
-                  )
-                })}
+                  ))}
             </>
-          )
-        }}
+          )}
       />
     </StyledHomeTable>
   )

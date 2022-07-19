@@ -27,6 +27,7 @@ exports[`ExpertAskQuestionModal test should render 1`] = `
         className="modal-body"
       >
         <TextareaField
+          aria_label="Ask a question to submit to Expert"
           label=""
           name="asking"
           onChange={[Function]}

@@ -1,13 +1,19 @@
 import React, { useState } from 'react'
-import { useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useParams } from 'react-router'
-import { Link, useHistory } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import styled, { css } from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HomeLabel } from '../../../components/HomeLabel'
 import { CogsIcon } from '../../../components/icons/Cogs'
+import { SyncIcon } from '../../../components/icons/SyncIcon'
+import { Refresh } from '../../../components/Page/styles'
+import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { HOME_TABS } from '../../../constants'
+import { colors } from '../../../styles/theme'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsRow, StyledBackLink } from '../home.styles'
 import {
@@ -25,16 +31,10 @@ import {
   Topbox,
 } from '../show.styles'
 import { ResourceScope } from '../types'
-import { fetchExecution } from './executions.api'
+import { fetchExecution, syncFilesRequest } from './executions.api'
 import { IExecution, JobState } from './executions.types'
-import { useExecutionActions } from './useExecutionSelectActions'
-import { useMutation } from 'react-query';
-import { toast } from 'react-toastify';
-import { syncFilesRequest } from './executions.api';
 import { InputsAndOutputs } from './InputsAndOutputs'
-import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
-import { HomeLabel } from '../../../components/HomeLabel'
-import { colors } from '../../../styles/theme'
+import { useExecutionActions } from './useExecutionSelectActions'
 
 const ExecutionActions = ({
   scope,
@@ -61,10 +61,14 @@ const ExecutionActions = ({
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Attach to...']?.modal}
-      {actions['Terminate']?.modal}
+      {actions.Terminate?.modal}
     </>
   )
 }
+
+const StyledRefresh = styled(Refresh)`
+  margin-right: 16px;
+`
 
 const StyledExecutionState = styled.span<{ state: JobState }>`
   padding: 3px 5px;
@@ -114,13 +118,12 @@ const FailureMessage = styled.div`
   /* font-size: 13px; */
 `
 
-const ExecutionState = ({ state }: { state: JobState }) => {
-  return <StyledExecutionState state={state}>{state}</StyledExecutionState>
-}
+const ExecutionState = ({ state }: { state: JobState }) => (
+  <StyledExecutionState state={state}>{state}</StyledExecutionState>
+)
 
 export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const queryCache = useQueryClient()
-  const history = useHistory()
   const { executionUid } = useParams<{ executionUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
   const syncFiles = useMutation({
@@ -136,8 +139,9 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
     },
   })
 
-  const { data, status } = useQuery(['execution', executionUid], () =>
-    fetchExecution(executionUid),
+  const { data, status, refetch, isFetching } = useQuery(
+    ['execution', executionUid],
+    () => fetchExecution(executionUid),
   )
   // const { files, meta: ma } = data!
   const execution = data?.job
@@ -177,6 +181,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
 
   const onSyncFilesClick = () => {
     if (execution.state === 'running') {
+      // eslint-disable-next-line no-unused-expressions
       execution.links.sync_files &&
         syncFiles
           .mutateAsync(execution.links.sync_files)
@@ -217,8 +222,18 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
           </HeaderLeft>
           <div>
             <ActionsRow>
+              {execution.state === 'terminated' ||
+              execution.state === 'done' ? null : (
+                <StyledRefresh spin={isFetching} onClick={() => refetch()}>
+                  <SyncIcon />
+                </StyledRefresh>
+              )}
               {execution.links.open_external && (
-                <ButtonSolidBlue as="a" target="_blank" href={execution.links.open_external}>
+                <ButtonSolidBlue
+                  as="a"
+                  target="_blank"
+                  href={execution.links.open_external}
+                >
                   Open Workstation
                 </ButtonSolidBlue>
               )}
@@ -228,7 +243,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
                 </ButtonSolidBlue>
               )}
               <ButtonSolidBlue
-                as={'a'}
+                as="a"
                 href={`/apps/${execution.links.app?.replace(
                   '/apps/',
                   '',
@@ -253,6 +268,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
                       'space-',
                       '',
                     )}/jobs`}
+                    rel="noreferrer"
                   >
                     {execution.location}
                   </a>

@@ -109,7 +109,7 @@ class CopyService
     def copy_assets(app, scope)
       return [] unless app.assets.exists?
 
-      file_copier.copy(app.assets, scope).all
+      file_copier.copy(app.assets, scope, nil, true).all
     end
 
     # Copies default input files from a source app.

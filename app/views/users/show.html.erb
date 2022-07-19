@@ -108,14 +108,14 @@
   <% end %>
   <% if @counts[:comparisons] > 0 %>
   <li role="presentation" class="<%= params[:tab] == 'comparisons' ? 'active' : '' %>">
-    <a href="<%= user_path(@user.dxuser, 'comparisons') %>" aria-controls="tab-comparisons"><span class="fa fa-fw fa-area-chart"></span>
+    <a href="<%= user_path(@user.dxuser, 'comparisons') %>" aria-label="CLick to view Comparisons"><span class="fa fa-fw fa-area-chart"></span>
       <span class="tab-label">Comparisons <span class="badge"><%= @counts[:comparisons] %></span></span>
     </a>
   </li>
   <% end %>
   <% if @counts[:apps] > 0 %>
   <li role="presentation" class="<%= params[:tab] == 'apps' ? 'active' : '' %>">
-    <a href="<%= user_path(@user.dxuser, 'apps') %>" aria-controls="tab-apps"><span class="fa fa-fw fa-cube"></span>
+    <a href="<%= user_path(@user.dxuser, 'apps') %>" aria-label="Click to view Apps"><span class="fa fa-fw fa-cube"></span>
       <span class="tab-label">Apps <span class="badge"><%= @counts[:apps] %></span></span>
     </a>
   </li>

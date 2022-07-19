@@ -9,8 +9,11 @@ class CopyService
       # @param scope [String] A destination scope.
       # @param destination_project [String] A destination project.
       # @param attrs [Hash] Extra attributes for a new file.
+      # @param skip_parent Attribute introduced because of PFDA-3325.
+      #  Set to true if you want to skip setting file as a parent of the new record.
       # @return [UserFile] A new file record.
-      def copy_record(file, scope, destination_project, attrs = {})
+      # rubocop:disable Style/OptionalBooleanParameter
+      def copy_record(file, scope, destination_project, attrs = {}, skip_parent = false)
         existed_file = UserFile.find_by(dxid: file.dxid, project: destination_project)
 
         return existed_file if existed_file
@@ -19,8 +22,9 @@ class CopyService
           new_file.assign_attributes(attrs)
           new_file.scope = scope
           new_file.project = destination_project
-          new_file.parent = file
+          new_file.parent = file unless skip_parent
           new_file.entity_type = UserFile::TYPE_REGULAR
+          new_file.archive_entries = file.archive_entries.map(&:dup) if defined? file.archive_entries
           new_file.save!
         end
       end
@@ -31,7 +35,7 @@ class CopyService
       @user = user
     end
 
-    def copy(files, scope, folder_id = nil)
+    def copy(files, scope, folder_id = nil, skip_parent = false)
       attrs = check_and_assign_folder(scope, folder_id)
       attrs[:user] = user
 
@@ -44,7 +48,7 @@ class CopyService
         api.project_clone(project, destination_project, objects: project_files.map(&:dxid))
 
         project_files.each do |file|
-          copied_file = self.class.copy_record(file, scope, destination_project, attrs)
+          copied_file = self.class.copy_record(file, scope, destination_project, attrs, skip_parent)
           @copies.push(object: copied_file, source: file)
           Event::FileCopied.create_for(file, copied_file, user)
         end
@@ -52,6 +56,7 @@ class CopyService
 
       @copies
     end
+    # rubocop:enable Style/OptionalBooleanParameter
 
     private
 
@@ -66,9 +71,7 @@ class CopyService
 
       folder = Folder.find(folder_id)
 
-      if folder.scope != scope
-        raise FileCopyError, "Folder '#{folder.name}' doesn't belong to a scope '#{scope}'"
-      end
+      raise FileCopyError, "Folder '#{folder.name}' doesn't belong to a scope '#{scope}'" if folder.scope != scope
 
       folder_column = Folder.scope_column_name(scope)
       opposite_folder_column = Folder.opposite_scope_column_name(scope)

@@ -2,7 +2,10 @@ source "https://rubygems.org"
 
 ruby "2.7.5"
 
-gem "rails", "= 6.1.5.1"
+gem "rails", "= 6.1.6.1"
+
+gem "rails-html-sanitizer", "~> 1.4.3"
+
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0"
 # Use Uglifier as compressor for JavaScript assets

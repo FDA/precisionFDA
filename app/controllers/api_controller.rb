@@ -288,6 +288,8 @@ class ApiController < ApplicationController
   #   leave blank for all
   # editable (Boolean, optional): if filtering for only editable_by the context user,
   #   otherwise accessible_by
+  # search_string (string, optional): if specified, file names are matched to this string
+  #   (wildcard on both ends)
   # describe (object, optional)
   #     fields (array, optional):
   #         Array containing field name [field_1, field_2, ...]
@@ -310,16 +312,19 @@ class ApiController < ApplicationController
     User.sync_files!(@context)
     files = user_real_files(params, @context)
 
-    count = files.count if unsafe_params[:offset] == 0
-
     if unsafe_params[:limit] && unsafe_params[:offset]
       files = files.limit(unsafe_params[:limit]).offset(unsafe_params[:offset])
     end
 
-    result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
+    search_string = params[:search_string].presence || ""
+
+    result = files.eager_load(:license, user: :org).
+      where("nodes.name LIKE ?", "%#{search_string}%").
+      order(id: :desc).map do |file|
       describe_for_api(file, unsafe_params[:describe])
-    end
-    render json: unsafe_params[:offset]&.zero? ? { objects: result, count: count } : result
+    end.compact
+
+    render json: unsafe_params[:offset]&.zero? ? { objects: result, count: result.length } : result
   end
 
   # Inputs
