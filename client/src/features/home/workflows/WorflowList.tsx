@@ -209,6 +209,7 @@ export const WorkflowListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
+        shouldResetFilters={scope as any}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no workflows here.</EmptyTable>}

@@ -2,7 +2,17 @@
 
 
 This guide covers all the steps required to get docker based
-development environment.
+development environment. There are also a few _optional_ sections, that are strongly recommended to use for full-stack developer roles
+
+## Prerequisites
+
+Make sure that you understand this [Makefile](../Makefile)
+
+Make sure you know, which configuration to use. Your configuration depends on following
+
+* role (qa | dev)
+* architecture of your workstation
+  * unless its windows, you can find it using command - `uname -m`
 
 ## Prerequisites
 
@@ -29,73 +39,32 @@ I can restart it with following command
 
 ```bash
 # Edited from "make run-arm64v8-dev"
-docker compose -f docker/isolation.arm64v8.docker-compose.yml -f docker/isolation-dev-server.docker-compose.override.yml restart nodejs-api
+docker compose -f docker/arm64v8.dev.docker-compose.yml restart nodejs-api
 ```
-## General Setup
+## Minor fixes that it's better to setup in advance
 
-> This section is work in progress
+Majority of the UI is developed as React app - see [client/package.json](../client/package.json).
+Compiled react app is served from asset pipeline. For now it requires sharing files between two running containers, which is accomplished with bind mounts (feel free to read through `docker-compose.yml` files for better understanding of topic)
 
-There are a few [docker-related](../docker/isolation.docker-compose.yml) [env variables](../docker/.env.example), that are used in `docker-compose.yml` files
-
-```bash
-# Run in 'precision-fda' root directory
-cp docker/.env.example docker/.env
-```
-
-Also please execute this temporary step to avoid non-existing bind mounts
+To keep number of side effects minimal, single file `bundle.js` is mounted instead of whole directory. Although it's cleaner solution, this results in possible issue during initial setup, where source bind mount is missing. Fix it by running following commands
 
 ```bash
 mkdir -p app/assets/packs
 touch app/assets/packs/bundle.js
 ```
 
-### Platform differences
+### Minor configuration differences for nodejs-api
 
-In order to make ruby watch mode working in `docker`, configure following in `docker/.env`
+If you're running stack with `make run-arm64v8-dev` configuration, it uses different key paths for `nodejs-api`. Edit `https-apps-api/.env` with following values
 
-```bash
-ARM64V8_DEVELOPMENT_PATCH=0
 ```
-
-Alternatively run following
-
-```bash
-# Works only on mac os
-test "$(uname -m)" = arm64 && sed -i '' 's/ARM64V8_DEVELOPMENT_PATCH=0/ARM64V8_DEVELOPMENT_PATCH=1/g' docker/.env
-# In case linux version of command is required
-# http://stackoverflow.com/questions/12696125/ddg#12696224
-test "$(uname -m)" = arm64 && sed -i 's/ARM64V8_DEVELOPMENT_PATCH=0/ARM64V8_DEVELOPMENT_PATCH=1/g' docker/.env
+NODE_PATH_CERT=/keys/cert.pem
+NODE_PATH_KEY_CERT=/keys/key.pem
 ```
-
-### RAILS_ENV issues on intel CPUs
-
-> This section is temporary workaround. Problem hasn't been fully investigated, due to lack of time
-
-* There have been instances of CSRF token failures in local development. 
-  * This requires `RAILS_ENV=development`, which cannot be defined in [this docker compose](../docker/isolation.docker-compose.yml)
-* There are also problems for QAs that result in faulty DB creation, where QA setup doesn't work
-  * contrary to previous point, this **requires** `RAILS_ENV=ui_test` to be defined in [the same docker compose](../docker/isolation.docker-compose.yml)
-  * Tested with configuring in `.env` didn't help
-
-As QAs and Devs use same [docker compose](../docker/isolation.docker-compose.yml), unless you want to go with QA setup, make sure you've got [docker .env](../docker/.env) configured accordingly
-
-```bash
-INTEL_RAILS_ENV=development
-```
-Alternatively run following
-
-```bash
-# Works only on mac os
-test "$(uname -m)" != arm64 && sed -i '' 's/# INTEL_RAILS_ENV=development/INTEL_RAILS_ENV=development/g' docker/.env
-# In case linux version of command is required
-# http://stackoverflow.com/questions/12696125/ddg#12696224
-test "$(uname -m)" != arm64 && sed -i 's/# INTEL_RAILS_ENV=development/INTEL_RAILS_ENV=development/g' docker/.env
-```
-
 ## Database setup
 
 The source of truth for `precision-fda` portal is `mysql` db, which is initialized with
-* db migrations, that result in following [schema](../db/schema.rb)
+* db migrations, that results in following [schema](../db/schema.rb)
   * See `db/migrate` directory, for instance [this file](../db/migrate/20150904202622_create_users.rb)
 * `rake ` tasks that prepopulate the database, such as [this one](../lib/tasks/user.rake), that generates dummy users
 
@@ -115,14 +84,6 @@ The source of truth for `precision-fda` portal is `mysql` db, which is initializ
   * > This part is work in progress
   * [`.env.example` file](../.env.example) is a reference file, however, there are a handful of secrets, ask a colleague to provide them
 
-#### Minor configuration differences
-
-If you're running stack with `make run-arm64v8-dev` configuration, it uses different key paths. Edit `https-apps-api/.env` accordingly, docker setup won't work
-
-```
-NODE_PATH_CERT=/keys/cert.pem
-NODE_PATH_KEY_CERT=/keys/key.pem
-```
 
 ### 2. Prepare the database
 
@@ -139,11 +100,6 @@ make prepare-db-arm64v8-dev
 # arm64v8 (Apple M1 Silicon) qa
 make prepare-db-arm64v8-qa
 ```
-
-* **IMPORTANT**
-  * If by any chance you're reinitializing db with these steps, make sure that `SKIP_DP_SETUP` in `.env` is set to `0` (or left out)
-  * Otherwise db setup will not work
-
 
 ## Nodejs API setup
 
@@ -171,8 +127,7 @@ docker compose exec \
 # ! Don't forget to add respective flags before running this command
 # For instance, dev with "arm64v8"
 # docker compose 
-#     -f docker/isolation.arm64v8.docker-compose.yml \
-#     -f docker/isolation-dev-server.docker-compose.override.yml \
+#     -f docker/arm64v8.dev.docker-compose.yml \
 #     exec \
 #     -e PFDA_USER_FIRST_NAME=Florante \
 #     -e PFDA_USER_LAST_NAME=DelaCruz \
@@ -200,22 +155,66 @@ make run-arm64v8-qa
 Once the application is correctly installed & configured, you should be able to access the portal at `https://localhost:3000/`.
 In order to log in to the system, ask for shared DEV credentials (ask some1 from the team)
 
-## Running application with GSRS (deprecated section)
+## Running application with external services
 
-GSRS runs as a process on the same instance as pFDA but is completely separate codebase
-To run everything locally via docker, you'd need to use a different docker-compose file.
-
-First build and do the database setup as described above using the full docker-compose:
-
-```docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml build
-docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml start db web
-docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml exec web bundle exec rake {db:setup,db:migrate,user:generate_test_users}
+```bash
+# intel dev
+make run-all
+# intel qa
+make run-all-qa
+# arm64v8 (Apple M1 Silicon) dev
+make run-all-arm64v8-dev
+# arm64v8 (Apple M1 Silicon) qa
+make run-all-arm64v8-qa
 ```
 
-Then run the whole application
+### GSRS
 
-`docker-compose -p precision-fda-full -f docker/isolation.docker-compose.yml up`
+GSRS runs as a process on the same instance as pFDA but is completely separate codebase
 
-### TODO(samuel)
+_Last updated 14.6.2022_
 
-discuss if it's worth documenting a build without GSRS
+> Atm GSRS local setup is not fully functional, needs various fixes. Contact colleagues to get more information on this topic
+
+## (Optional) Setup for impatient personalities
+
+There are a few [docker-related](../docker/arm64v8.dev..docker-compose.yml) [env variables](../docker/.env.example), that are used in `docker-compose.yml` files, such as `SKIP_RUBY_SETUP`
+After you run your docker setup successfully, and want to save some time by skipping dependency checks and reinstallations (assuming you've got them correct), feel free to setup
+
+```bash
+# Run in 'precision-fda' root directory
+cp docker/.env.example docker/.env
+```
+
+For obvious reasons these settings aren't versioned, and therefore are kept in separate [docker/.env](../docker/.env.example) file
+
+
+## (Optional) Symlink docker-compose.yml for less typing
+
+If copy-pasting too many CLI options (such as `-f docker/dev.docker-compose.yml`) is getting frustrating, feel free to symlink your favourite configuration into `docker-compose.yml`
+
+For instance
+
+```bash
+# Run in 'precision-fda' root directory
+# intel dev
+ln -s docker/dev.docker-compose.yml docker/docker-compose.yml
+# intel qa
+ln -s docker/qa.docker-compose.yml docker/docker-compose.yml
+# arm64v8 (Apple M1 Silicon) dev
+ln -s docker/arm64v8.dev.docker-compose.yml docker/docker-compose.yml
+# arm64v8 (Apple M1 Silicon) qa
+ln -s docker/arm64v8.qa.docker-compose.yml docker/docker-compose.yml
+```
+
+This makes use of docker compose more trivial, you can start the stack with simply
+
+```bash
+docker compose up --build
+```
+
+Note that this part of setup is experimental, potential side effects are suspected with this approach
+
+## Updating docker-compose files
+
+Before updating anything related to docker setup, please take a look at [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md), to update according to repo best practices

@@ -1,11 +1,11 @@
-import { Link, NavLink } from "react-router-dom"
-import styled, { css } from "styled-components"
-import { Button } from "../../components/Button"
-import { Svg } from "../../components/icons/Svg"
-import { BackLink } from "../../components/Page/PageBackLink"
-import { MainBanner } from "../../components/Banner"
-import { commonStyles } from "../../styles/commonStyles"
-import { colors, padding, sizing, fontSize, fontWeight } from "../../styles/theme"
+import { Link, NavLink } from 'react-router-dom'
+import styled, { css } from 'styled-components'
+import { Button } from '../../components/Button'
+import { Svg } from '../../components/icons/Svg'
+import { BackLink } from '../../components/Page/PageBackLink'
+import { MainBanner } from '../../components/Banner'
+import { commonStyles } from '../../styles/commonStyles'
+import { colors, padding, sizing, fontSize, fontWeight } from '../../styles/theme'
 
 
 export const StyledBackLink = styled(BackLink)`
@@ -41,7 +41,7 @@ export const HomeTitle = styled.h1`
 `
 
 export const ScopeDetails = styled.div`
-  display: flex:
+  display: flex;
   flex-direction: column;
   align-items: center;
 `
@@ -95,7 +95,7 @@ export const StyledMenuCounter = styled.span<{isLong?: boolean, active?: boolean
   height: 20px;
   min-width: 20px;
   line-height: 0;
-  ${({ isLong }) => isLong && `padding: 0 2px;`}
+  ${({ isLong }) => isLong && 'padding: 0 2px;'}
   display: flex;
   justify-content: center;
   align-items: center;
@@ -214,11 +214,17 @@ export const StyledRight = styled.div`
   gap: 8px;
 `
 
-export const StyledNameCell = styled.div`
+export const StyledNameCell = styled.div<{ color?: string }>`
   display: flex;
   align-items: center;
   cursor: pointer;
   color: ${colors.primaryBlue};
+  
+  ${({ color }) =>
+    color && css`
+      color: ${color};  
+    `
+  }
 
   ${Svg} {
     margin-right: 7px;

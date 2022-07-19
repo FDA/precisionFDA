@@ -8,11 +8,12 @@ import { IExecution } from '../executions/executions.types'
 import { getStateBgColorFromState } from '../executions/executions.util'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import {
-  StyledHomeTable
+  StyledHomeTable,
 } from '../home.styles'
 import { IFilter, IMeta, KeyVal } from '../types'
 import { useColumnWidthLocalStorage } from '../useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
+import { filters } from '../useList'
 import { useListQuery } from '../useListQuery'
 import { useOrderByState } from '../useOrderByState'
 import { usePaginationParams } from '../usePaginationState'
@@ -24,14 +25,14 @@ type ListType = { jobs: IExecution[]; meta: IMeta }
 export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
   const resource = 'app-executions'
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({defaultOrder: {order_by: 'created_at_date_time', order_dir: 'DESC'}})
+  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
 
   // useEffect(() => {
   //   setSortByParam({orderBy: 'created_at_date_time', order: 'desc'})
   // }, [])
 
-  const { filterQuery, setSearchFilter } = useFilterParams({})
+  const { filterQuery, setSearchFilter } = useFilterParams({ filters })
 
   const query = useListQuery<ListType>({
     fetchList: fetchAppExecutions,
@@ -39,7 +40,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
     scope: appUid as any,
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort.order_by, order_dir: sort.order_dir },
-    filter: filterQuery
+    filter: filterQuery,
   })
 
   const setPerPage = (perPage: number) => {
@@ -85,7 +86,7 @@ export const ExecutionsListTable = ({
   setSortBy,
   sortBy,
   saveColumnResizeWidth,
-  colWidths
+  colWidths,
 }: {
   filters: IFilter[]
   jobs?: IExecution[]
@@ -141,11 +142,11 @@ export const ExecutionsListTable = ({
             : {}
         }
         rowProps={row => ({
-          className: 'hideExpand'
+          className: 'hideExpand',
         })}
         updateRowState={row => ({
           ...row,
-          hideExpand: !row.original.jobs
+          hideExpand: !row.original.jobs,
         })}
       />
     </StyledHomeTable>

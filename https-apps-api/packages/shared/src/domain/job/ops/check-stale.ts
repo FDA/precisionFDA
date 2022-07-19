@@ -95,7 +95,16 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
       body,
       subject: 'Stale jobs report',
     }
+    const emailToPfda: EmailSendInput = {
+      emailType: EMAIL_TYPES.staleJobsReport,
+      to: 'precisionfda-no-reply@dnanexus.com',
+      body,
+      subject: 'Stale jobs report',
+    }
+
     await createSendEmailTask(email, this.ctx.user)
+    await createSendEmailTask(emailToPfda, this.ctx.user)
+
     return staleJobs
   }
 }

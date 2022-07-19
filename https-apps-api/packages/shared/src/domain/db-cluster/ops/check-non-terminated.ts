@@ -15,7 +15,7 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
   undefined,
   Maybe<DbCluster[]>
 > {
-  
+
   async run() {
     const em = this.ctx.em
     const dbClusterRepo = em.getRepository(DbCluster)
@@ -53,7 +53,16 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
       body,
       subject: 'Non-terminated dbclusters',
     }
+    const emailToPfda: EmailSendInput = {
+      emailType: EMAIL_TYPES.nonTerminatedDbClusters,
+      to: 'precisionfda-no-reply@dnanexus.com',
+      body,
+      subject: 'Non-terminated dbclusters',
+    }
+
     await queue.createSendEmailTask(email, undefined)
+    await queue.createSendEmailTask(emailToPfda, undefined)
+
     return nonTerminatedDbClusters
   }
 }

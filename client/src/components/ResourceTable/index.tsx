@@ -36,6 +36,12 @@ type Row = {
 export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => {
   return (
     <StyledTable {...rest}>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Location</th>
+        </tr>
+      </thead>
       <tbody>
         {rows.map((row, i) => (
           <tr key={i}>

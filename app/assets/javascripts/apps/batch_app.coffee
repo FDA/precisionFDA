@@ -122,9 +122,7 @@ class BatchAppNewView
     @inputModels(newInputModels)
 
   removeItem: (item) =>
-    if @batchInputSpec()[0].defaultValue
-      selectedFiles = []
-    else if @batchInputSpec()[0].value().length > 0
+    if @batchInputSpec()[0].value().length > 0
       selectedFiles = @batchInputSpec()[0].value().filter (el) -> el.uid != item.uid
     @batchInputSpec()[0].value(selectedFiles)
 
