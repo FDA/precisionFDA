@@ -4,8 +4,8 @@ import { Link, useLocation } from 'react-router-dom'
 
 import { SUPPORT_EMAIL } from '../../constants'
 import { logout } from '../../features/auth/api'
+import { useAuthUser } from '../../features/auth/useAuthUser'
 import {
-  contextUserSelector,
   isInitializedSelector,
 } from '../../reducers/context/selectors'
 import Dropdown from '../Dropdown'
@@ -45,7 +45,7 @@ const getUsername = (user: any) => {
 export const Header: React.FC = () => {
   const pathname = useLocation().pathname
   const init = useSelector(isInitializedSelector)
-  const user = useSelector(contextUserSelector)
+  const user = useAuthUser()
 
   const userCanAdministerSite = user?.can_administer_site
   const userIsGuest = user?.is_guest

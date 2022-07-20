@@ -1,19 +1,20 @@
-import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
-import { IExecution } from "../executions/executions.types";
-import { IFilter, IMeta, ResourceScope } from "../types";
-import { Params, prepareListFetch } from "../utils";
-import { IApp } from "./apps.types";
+import { checkStatus, getApiRequestOpts } from '../../../utils/api'
+import { IExecution } from '../executions/executions.types'
+import { IFilter, IMeta } from '../types'
+import { formatScopeQ, Params, prepareListFetch } from '../utils'
+import { IApp } from './apps.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
   meta: IMeta
 }
 
-export async function fetchApps(filters: IFilter[], scope: ResourceScope, params: Params): Promise<FetchAppsQuery> {
+export async function fetchApps(filters: IFilter[], params: Params): Promise<FetchAppsQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const scopeQ = scope === 'me' ? '' : scope
-  const res = await fetch(`/api/apps/${scopeQ}${paramQ}`)
+  const scopeQ = formatScopeQ(params.scope)
+
+  const res = await fetch(`/api/apps${scopeQ}${paramQ}`).then(checkStatus)
   return res.json()
 }
 
@@ -46,17 +47,26 @@ export async function createAppRequest(name: string) {
 */
 
 export async function copyAppsRequest(scope: string, ids: string[]) {
-  const res = await fetch(`/api/apps/copy`, {
+  const res = await fetch('/api/apps/copy', {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope })
+    body: JSON.stringify({ item_ids: ids, scope }),
   }).then(checkStatus)
   return res.json()
 }
 
 export async function deleteAppsRequest(ids: string[]): Promise<any> {
-  const res = await fetch(`/api/apps/delete`, {
+  const res = await fetch('/api/apps/delete', {
     ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ item_ids: ids })
+    body: JSON.stringify({ item_ids: ids }),
   }).then(checkStatus)
+  return res.json()
+}
+
+export async function copyAppsToPrivate(ids: string[]) {
+  const res = await fetch('/api/apps/copy', {
+    ...getApiRequestOpts('POST'),
+    body: JSON.stringify({ item_ids: ids, scope: 'private' }),
+  }).then(checkStatus)
+
   return res.json()
 }

@@ -1,7 +1,7 @@
 import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
 import { IExecution } from "../executions/executions.types";
 import { IFilter, IMeta, ResourceScope } from "../types";
-import { Params, prepareListFetch } from "../utils";
+import { formatScopeQ, Params, prepareListFetch } from "../utils";
 import { FetchWorkflowRequest, IWorkflow } from "./workflows.types";
 
 export interface FetchWorkflowListQuery {
@@ -9,11 +9,11 @@ export interface FetchWorkflowListQuery {
   meta: IMeta
 }
 
-export async function fetchWorkflowList(filters: IFilter[], scope: ResourceScope, params: Params): Promise<FetchWorkflowListQuery> {
+export async function fetchWorkflowList(filters: IFilter[], params: Params): Promise<FetchWorkflowListQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const scopeQ = scope === 'me' ? '' : scope
-  const res = await fetch(`/api/workflows/${scopeQ}${paramQ}`)
+  const scopeQ = formatScopeQ(params.scope)
+  const res = await fetch(`/api/workflows${scopeQ}${paramQ}`)
   return res.json()
 }
 

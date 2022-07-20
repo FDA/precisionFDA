@@ -1,7 +1,7 @@
 import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from 'react-query'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
@@ -13,6 +13,8 @@ import {
   StyledTabPanel,
 } from '../../../components/Tabs'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { Location } from '../../../types/utils'
+import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home.styles'
 import {
@@ -153,8 +155,9 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
+export const WorkflowShow = ({ scope }: { scope?: ResourceScope }) => {
   const match = useRouteMatch()
+  const location: Location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data, status, isLoading } = useQuery(['workflow', workflowUid], () =>
     fetchWorkflow(workflowUid),
@@ -174,12 +177,12 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
       </NotFound>
     )
 
-  const scopeParamLink = `?scope=${scope.toLowerCase()}`
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
   const workflowTitle = workflow.title ? workflow.title : workflow.name
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/workflows${scopeParamLink}`} data-testid={'workflow-show-back-link'}>
+      <StyledBackLink linkTo={getBackPath(location, 'workflows')} data-testid={'workflow-show-back-link'}>
         Back to Workflows
       </StyledBackLink>
       <Topbox>
@@ -203,14 +206,16 @@ export const WorkflowShow = ({ scope }: { scope: ResourceScope }) => {
         </Header>
 
         {renderOptions(workflow, scopeParamLink)}
-        {workflow.tags.length > 0 && (
-          <StyledTags>
-            {/* TODO(samuel) validate that tag is non-null string*/}
-            {workflow.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        <MetadataSection>
+          {workflow.tags.length > 0 && (
+            <StyledTags>
+              {/* TODO(samuel) validate that tag is non-null string*/}
+              {workflow.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
 
       <StyledTabList>

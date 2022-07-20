@@ -14,6 +14,7 @@ class AppSerializer < ApplicationSerializer
     :updated_at,
     :location,
     :readme,
+    :scope,
     :revision,
     :app_series_id,
     :run_by_you,
@@ -25,8 +26,12 @@ class AppSerializer < ApplicationSerializer
   )
 
   attribute :all_tags_list, key: :tags
-
+  attribute :scope_id, key: :scope
   delegate :updated_at, to: :object
+
+  def scope_id
+    object.scope
+  end
 
   # Returns a tags list for an App
   def all_tags_list

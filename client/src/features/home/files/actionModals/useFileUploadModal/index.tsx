@@ -47,9 +47,11 @@ const isUniqFile = (blobs: any, file: any) =>
 export const useFileUploadModal = ({
   scope,
   folderId,
+  spaceId,
 }: {
   scope?: ResourceScope
   folderId?: string
+  spaceId?: string
 }) => {
   const queryCache = useQueryClient()
   const { isShown, setShowModal } = useModal()
@@ -111,8 +113,8 @@ export const useFileUploadModal = ({
         filesBlob: blobs,
         filesMeta,
         updateFileStatus: updateFilesStatus,
-        spaceId: 1,
         scope: scope === 'me' ? 'private' : scope === 'everybody' ? 'public' : scope,
+        spaceId,
         folderId,
       })
     } catch (error: any) {
@@ -138,13 +140,14 @@ export const useFileUploadModal = ({
               const uniqBlob: any[] = []
               const fil: any[] = []
               accepted.forEach((file: any) => {
-                if (isUniqFile(blobs, file)) {
-                  file.generatedId = idGenerator.next().value
-                  uniqBlob.push(file)
+                const f = file
+                if (isUniqFile(blobs, f)) {
+                  f.generatedId = idGenerator.next().value
+                  uniqBlob.push(f)
                   fil.push({
-                    id: file.generatedId,
-                    name: file.name,
-                    size: file.size,
+                    id: f.generatedId,
+                    name: f.name,
+                    size: f.size,
                     status: FILE_STATUS['added'],
                     uploadedSize: 0,
                   })
@@ -221,6 +224,7 @@ export const useFileUploadModal = ({
       </Footer>
     </Modal>
   )
+
   return {
     modalComp,
     setShowModal,

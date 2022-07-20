@@ -1,7 +1,7 @@
 import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
 import { IFile } from "../files/files.types";
 import { IFilter, IMeta, ResourceScope } from "../types";
-import { Params, prepareListFetch } from "../utils";
+import { formatScopeQ, Params, prepareListFetch } from "../utils";
 import { IDatabase, MethodType } from "./databases.types";
 
 export interface FetchDatabaseListQuery {
@@ -11,12 +11,11 @@ export interface FetchDatabaseListQuery {
 
 export async function fetchDatabaseList(
   filters: IFilter[],
-  scope: ResourceScope,
   params: Params,
 ): Promise<FetchDatabaseListQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const scopeQ = scope === 'me' ? '' : scope
+  const scopeQ = formatScopeQ(params.scope)
 
   const res = await fetch(`/api/dbclusters/${scopeQ}${paramQ}`)
   return res.json()

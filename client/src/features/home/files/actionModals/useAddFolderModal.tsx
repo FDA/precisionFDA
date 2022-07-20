@@ -13,7 +13,7 @@ import { ResourceScope } from '../../types'
 import { addFolderRequest } from '../files.api'
 
 
-export const useAddFolderModal = ({ folderId, scope }: { folderId?: string, scope?: ResourceScope }) => {
+export const useAddFolderModal = ({ folderId, spaceId, scope }: { folderId?: string, spaceId?: string, scope?: ResourceScope }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const {
@@ -22,25 +22,25 @@ export const useAddFolderModal = ({ folderId, scope }: { folderId?: string, scop
     watch,
     formState: { errors },
     reset,
-    setError
-  } = useForm({ defaultValues: { name: ''}})
+    setError,
+  } = useForm({ defaultValues: { name: '' }})
   const mutation = useMutation({
     mutationFn: (payload: { name: string }) =>
-      addFolderRequest(payload, folderId, scope),
+      addFolderRequest(payload, folderId, spaceId, scope),
     onSuccess: (res) => {
       if(res?.message?.type === 'error') {
         const errorMessage = res.message?.text ?? 'Unknown error adding folder'
-        setError('name', {message: errorMessage, type: 'validate'})
-        toast.error(errorMessage);
+        setError('name', { message: errorMessage, type: 'validate' })
+        toast.error(errorMessage)
         return
       }
       reset()
       queryClient.invalidateQueries('files')
       setShowModal(false)
-      toast.success('Success: Adding folder.');
+      toast.success('Success: Adding folder.')
     },
     onError: () => {
-      toast.error('Error: Adding folder.');
+      toast.error('Error: Adding folder.')
     },
   })
 

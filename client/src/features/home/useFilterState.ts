@@ -25,7 +25,7 @@ function fileSizeParamMap(fileSize?: [number | null, number | null]) {
 
 export const defaultFilterValues = (arr: string[]) => arr.reduce((acc: any, curr: any) => (acc[curr] = undefined, acc), {})
 
-const KEYS = ['name', 'tags', 'featured', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by']
+const KEYS = ['name', 'tags', 'featured', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by', 'type']
 function getObjectKeys<T>(a: string[]) {
   const o = {} as any
   a.forEach(k => o[k] = undefined)

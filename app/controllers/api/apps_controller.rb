@@ -29,23 +29,19 @@ module Api
     # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def index
       apps = []
+      filters = params[:filters]
 
       if params[:space_id]
         if find_user_space
-          apps = @space.latest_revision_apps.unremoved.
-            eager_load(:app_series, :user).includes(:taggings).
-            search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-          apps = AppSeriesService::AppSeriesFilter.call(apps, params[:filters])
+          apps = @space.latest_revision_apps.unremoved.eager_load(:app_series, :user).includes(:taggings)
+          apps = filter_apps(apps, filters)
         end
-        page_meta = { pagination: pagination_dict(apps) }
       else
         apps_series = AppSeries.
           accessible_by(@context).
           unremoved.
           eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
-        filters = params[:filters]
         apps = apps_series.map do |series|
           latest = series.latest_accessible(@context)
           if (latest&.scope == "private") && AppSeriesService::AppSeriesFilter.
@@ -53,11 +49,11 @@ module Api
             latest
           end
         end.compact
-
-        apps = sort_array_by_fields(apps)
-        page_meta = pagination_meta(apps.count)
-        apps = paginate_array(apps)
       end
+
+      apps = sort_array_by_fields(apps)
+      page_meta = pagination_meta(apps.count)
+      apps = paginate_array(apps)
 
       render_apps_list(apps, page_meta)
     end
@@ -316,6 +312,15 @@ module Api
     end
 
     private
+
+    def filter_apps(apps, filters)
+      apps.map do |app|
+        if AppSeriesService::AppSeriesFilter.
+            match(app, filters)
+          app
+        end
+      end.compact
+    end
 
     # Add Rdoc
     def apps_meta(apps)

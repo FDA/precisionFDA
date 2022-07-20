@@ -68,8 +68,8 @@ const FileLink = ({ file, spaceId, isDisabled, ariaLabel }) => {
 }
 
 const OriginalLink = ({ file }) => {
-  const { originPath } = file.links
-  const url = originPath.href ? `/home${originPath.href}` : null
+  const originPath = file.origin
+  const url = originPath?.href ? `/home${originPath.href}` : null
 
   switch (typeof originPath) {
     case 'object':

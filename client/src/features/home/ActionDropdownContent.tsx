@@ -52,7 +52,7 @@ const LinkAction: React.FC<{ link: Link, disabled?: boolean }> = ({ children, li
 }
 
 export function ActionsDropdownContent({ actions, message }: { actions: ActionFunctionsType<any>, message?: React.ReactNode }) {
-    const visibleActions = Object.keys(actions).filter(a => !actions[a].hide ?? true).map(v => ({ key: v, ...actions[v] }))
+    const visibleActions = Object.keys(actions).filter(a => !actions[a]?.hide ?? true).map(v => ({ key: v, ...actions[v] }))
     return (
       <ActionMenu>
         {message &&

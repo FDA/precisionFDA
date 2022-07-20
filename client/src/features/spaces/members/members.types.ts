@@ -1,0 +1,26 @@
+
+export interface Links {
+  gravatar: string;
+  user: string;
+}
+
+export type MemberRole = 'lead' | 'contributor'
+export type MemberSide = 'host' | 'guest'
+
+export interface SpaceMembership {
+  id: number;
+  user_name: string;
+  title: string;
+  active: boolean;
+  role: MemberRole;
+  side: MemberSide;
+  org: string;
+  created_at: string;
+  links: Links;
+  to_roles: any[];
+}
+
+export interface ListMembersResponse {
+  space_memberships: SpaceMembership[];
+}
+

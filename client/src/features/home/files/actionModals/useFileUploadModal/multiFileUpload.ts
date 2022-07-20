@@ -28,7 +28,7 @@ interface IMultiFileUpload {
   filesBlob: any[],
   filesMeta: FilesMeta[],
   updateFileStatus: (info: IUploadInfo) => void,
-  spaceId?: number,
+  spaceId?: string,
   scope?: string,
   folderId?: string
 }

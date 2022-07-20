@@ -10,13 +10,14 @@ import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchApps } from './apps.api'
 import { IApp } from './apps.types'
+import { useAppListActions } from './useAppListActions'
 import { useAppsColumns } from './useAppsColumns'
 import { useAppSelectionActions } from './useAppSelectionActions'
 
@@ -44,8 +45,10 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
     fetchList: fetchApps,
     onRowClick,
     resource: 'apps',
-    scope,
-    spaceId,
+    params: {
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
+    },
   })
 
   const { status, data, error } = query
@@ -56,12 +59,27 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
   )
   const actions = useAppSelectionActions({
     scope,
+    spaceId,
     selectedItems: selectedFileObjects,
     resourceKeys: ['apps'],
     resetSelected,
     comparatorLinks: {},
     challenges: data?.meta?.challenges,
   })
+
+  const listActions = useAppListActions({
+    scope,
+    spaceId,
+    resourceKeys: ['apps'],
+  })
+
+  if(scope) {
+    delete actions['Copy to private']
+  } else {
+    // Disable actions in spaces
+    delete actions['Make public']
+    delete actions['Copy to private']
+  }
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -71,15 +89,23 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         <ActionsRow>
           <QuickActions>
             {scope === 'me' && (
-              <>
-                <ButtonSolidBlue
-                  as="a"
-                  href="/apps/new"
-                  data-testid="home-apps-create-button"
-                >
-                  <PlusIcon height={12} /> Create App
-                </ButtonSolidBlue>
-              </>
+              <ButtonSolidBlue
+                as="a"
+                href="/apps/new"
+                data-testid="home-apps-create-button"
+              >
+                <PlusIcon height={12} /> Create App
+              </ButtonSolidBlue>
+            )}
+            {spaceId && (
+              <ButtonSolidBlue
+                data-testid="spaces-apps-add-app-button"
+                onClick={() =>
+                  listActions['Add App']?.func({ showModal: true })
+                }
+              >
+                <PlusIcon height={12} /> Add App
+              </ButtonSolidBlue>
             )}
           </QuickActions>
           <Dropdown
@@ -120,29 +146,33 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.apps?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          hide={hidePagination(
+            query.isFetched,
+            data?.apps?.length,
+            data?.meta?.pagination?.total_pages,
+            )}
+            isPreviousData={data?.meta?.pagination?.prev_page !== null}
+            isNextData={data?.meta?.pagination?.next_page !== null}
+            setPage={setPageParam}
+            onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
+      {actions['Copy to private']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
+      
+      {listActions['Add App']?.modal}
     </>
   )
 }
@@ -182,11 +212,17 @@ export const AppsListTable = ({
   const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
   const locationColumnHide = scope !== 'spaces' ? 'location' : null
   const addedByColumnHide = scope === 'me' ? 'added_by' : null
+  const explorersColumnHide = scope !== undefined ? 'explorers' : null
+  const orgColumnHide = scope !== undefined ? 'org' : null
+  const runByYouColumnHide = scope !== undefined ? 'run_by_you' : null
 
   const hidden = [
     featuredColumnHide,
     locationColumnHide,
     addedByColumnHide,
+    explorersColumnHide,
+    orgColumnHide,
+    runByYouColumnHide,
   ].filter(Boolean) as string[]
 
   const col = useAppsColumns({ colWidths, isAdmin })

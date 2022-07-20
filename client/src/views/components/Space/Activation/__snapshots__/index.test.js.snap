@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Activation /> renders 1`] = `
-<DefaultLayout>
+<Fragment>
   <div
     className="container-fluid pfda-padded-30 space-activation"
   >
@@ -78,5 +78,5 @@ exports[`<Activation /> renders 1`] = `
       </div>
     </div>
   </div>
-</DefaultLayout>
+</Fragment>
 `;

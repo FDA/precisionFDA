@@ -4,10 +4,13 @@ export interface IUser {
   org: string,
   url: string,
   isAccepted: boolean,
+  isGovUser?: boolean,
+  isAdmin?: boolean,
   dxuser: string,
   admin: boolean
   can_access_notification_preference: boolean
   can_administer_site: boolean
+  review_space_admin: boolean
   can_create_challenges: boolean
   can_see_spaces: boolean
   counters: {

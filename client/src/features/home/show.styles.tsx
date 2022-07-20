@@ -63,7 +63,6 @@ export const Header = styled.div`
 `
 
 export const Topbox = styled.div`
-  background: ${colors.subtleBlue};
   margin-bottom: 40px;
 `
 

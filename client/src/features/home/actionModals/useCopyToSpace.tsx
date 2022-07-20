@@ -12,7 +12,7 @@ import { Modal } from '../../modal'
 import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../../modal/ModalCheckList'
 import { ButtonRow, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { fetchEditableSpacesList } from '../../space/api'
+import { fetchEditableSpacesList } from '../../spaces/spaces.api'
 import { APIResource } from '../types'
 
 
@@ -29,7 +29,7 @@ const SpacesList = ({
     refetch,
   } = useQuery(['editable_spaces_list'], () => fetchEditableSpacesList(), {
     onError: () => {
-      toast.error('Error: Fetching editable sapces.')
+      toast.error('Error: Fetching editable spaces.')
     },
   })
   if (status === 'loading') return <div>Loading...</div>
@@ -77,9 +77,7 @@ const StyledForm = styled.form`
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  width: 90vw;
   @media(min-width: ${breakPoints.small}px) {
-    min-width: 40vw;
     width: auto;
   }
 `

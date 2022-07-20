@@ -198,6 +198,14 @@ class Space < ActiveRecord::Base
     Comparison.accessible_by_space(self)
   end
 
+  def workflow_series
+    WorkflowSeries.accessible_by_space(self)
+  end
+
+  def latest_revision_workflows
+    Workflow.where(id: workflow_series.pluck(:latest_revision_workflow_id))
+  end
+
   def workflows
     Workflow.accessible_by_space(self)
   end

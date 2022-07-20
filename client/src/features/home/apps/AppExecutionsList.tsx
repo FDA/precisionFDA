@@ -4,6 +4,7 @@ import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { columnFilters } from '../columnFilters'
 import { IExecution } from '../executions/executions.types'
 import { getStateBgColorFromState } from '../executions/executions.util'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
@@ -13,7 +14,6 @@ import {
 import { IFilter, IMeta, KeyVal } from '../types'
 import { useColumnWidthLocalStorage } from '../useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
-import { filters } from '../useList'
 import { useListQuery } from '../useListQuery'
 import { useOrderByState } from '../useOrderByState'
 import { usePaginationParams } from '../usePaginationState'
@@ -32,7 +32,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
   //   setSortByParam({orderBy: 'created_at_date_time', order: 'desc'})
   // }, [])
 
-  const { filterQuery, setSearchFilter } = useFilterParams({ filters })
+  const { filterQuery, setSearchFilter } = useFilterParams({ filters: columnFilters })
 
   const query = useListQuery<ListType>({
     fetchList: fetchAppExecutions,

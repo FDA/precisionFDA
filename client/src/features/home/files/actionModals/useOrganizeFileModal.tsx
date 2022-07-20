@@ -14,11 +14,11 @@ import { IFile } from '../files.types'
 import { FileTree } from '../FileTree'
 
 function findById(tree: any[], nodeId: string): any {
-  for (let node of tree) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const node of tree) {
     if (node.key === nodeId) return node
-
     if (node.children) {
-      let desiredNode = findById(node.children, nodeId)
+      const desiredNode = findById(node.children, nodeId)
       if (desiredNode) return desiredNode
     }
   }
@@ -27,20 +27,22 @@ function findById(tree: any[], nodeId: string): any {
 
 const OrganizeFiles = ({
   scope,
+  spaceId,
   onSelect,
 }: {
   scope?: ResourceScope
+  spaceId?: string,
   onSelect: (folerId: Key[]) => void
 }) => {
   const [treeData, setTreeData] = useImmer<any>([
-    { key: 'ROOT', title: '/', children: [] },
+    { key: 'ROOT', title: '/', children: []},
   ])
 
   return (
     <FileTree
       onExpand={d => {}}
       loadData={async node => {
-        const { nodes } = await fetchFolderChildren(scope === 'me' ? 'private' : 'public', node.key.toString())
+        const { nodes } = await fetchFolderChildren(scope === 'me' ? 'private' : 'public', spaceId, node.key.toString())
         const children = nodes
           .filter((e: any) => e.type === 'Folder')
           .map((d: any) => ({
@@ -63,29 +65,30 @@ const OrganizeFiles = ({
 }
 
 const StyledForm = styled.form`
-  min-width: 300px;
   padding: 1rem;
 `
 
 export const useOrganizeFileModal = ({
   selected,
   scope,
-  resetSelected,
+  spaceId,
+  onSuccess,
 }: {
   selected: IFile[]
   scope?: ResourceScope
-  resetSelected?: () => void
+  spaceId?: string
+  onSuccess?: () => void
 }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const selectedIds = selected.map(f => f.id)
   const mutation = useMutation({
     mutationFn: (target: string) =>
-      moveFilesRequest(selectedIds, target, scope),
+      moveFilesRequest(selectedIds, target, scope, spaceId),
     onSuccess: (res) => {
       queryClient.invalidateQueries('files')
       setShowModal(false)
-      resetSelected && resetSelected()
+      if(onSuccess) onSuccess()
       displayPayloadMessage(res)
     },
     onError: () => {
@@ -116,7 +119,7 @@ export const useOrganizeFileModal = ({
           <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
             Cancel
           </Button>
-          <ButtonSolidBlue type="submit" onClick={handleSubmit} disabled={mutation.isLoading}>
+          <ButtonSolidBlue type="submit" onClick={handleSubmit} disabled={mutation.isLoading || !selectedTarget}>
             Move
           </ButtonSolidBlue>
         </>
@@ -124,8 +127,11 @@ export const useOrganizeFileModal = ({
     >
       <StyledForm as="div">
         <OrganizeFiles
+          spaceId={spaceId}
           scope={scope}
-          onSelect={s => handleSelect(s[0].toString())}
+          onSelect={s => {
+            handleSelect(s[0]?.toString())
+          }}
         />
       </StyledForm>
     </Modal>

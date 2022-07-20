@@ -1,6 +1,7 @@
-import styled, { css } from 'styled-components';
-import { Svg } from '../../components/icons/Svg';
-import { breakPoints, colors, fontSize, fontWeight, sizing } from '../../styles/theme';
+import styled, { css } from 'styled-components'
+import { Svg } from '../../components/icons/Svg'
+import { breakPoints, colors, fontSize, fontWeight, sizing } from '../../styles/theme'
+
 export const Wrapper = styled.div`
   position: fixed;
   top: 50%;
@@ -8,10 +9,11 @@ export const Wrapper = styled.div`
   transform: translate(-50%, -50%);
   z-index: 700;
   outline: 0;
-`;
+  width: 80%;
+`
 export const Backdrop = styled.div<{ blur: boolean }>`
   ${({ blur }) => blur && css`
-    backdrop-filter: blur(8px);  
+    backdrop-filter: blur(8px);
   `}
   position: fixed;
   width: 100%;
@@ -20,7 +22,7 @@ export const Backdrop = styled.div<{ blur: boolean }>`
   left: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 500;
-`;
+`
 export const StyledModal = styled.div`
   z-index: 100;
   background: white;
@@ -44,7 +46,7 @@ export const StyledModal = styled.div`
   @media(min-width: ${breakPoints.medium}px) {
     width: 640px;
   }
-`;
+`
 export const Header = styled.div`
   border-radius: ${sizing.modalBorderRadius} ${sizing.modalBorderRadius} 0 0;
   display: flex;
@@ -56,20 +58,19 @@ export const Header = styled.div`
   font-size: ${fontSize.h2};
   font-weight: ${fontWeight.bold};
   color: ${colors.textBlack};
-`;
+`
 export const Footer = styled.div`
-  /* border-radius: 8px 8px 0 0; */
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
   border-top: 1px solid #e5e5e5;
   padding: 12px;
-`;
+`
 export const HeaderText = styled.div`
   align-self: center;
   color: #333333;
-`;
+`
 export const CloseButton = styled.button`
   font-size: 0.8rem;
   border: none;
@@ -85,7 +86,7 @@ export const CloseButton = styled.button`
   ${Svg} {
     transform: rotate(45deg);
   }
-`;
+`
 export const ButtonRow = styled.div`
   display: flex;
   gap: 8px;
@@ -103,7 +104,6 @@ export const StyledForm = styled.form`
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  min-width: 370px;
 `
 export const ModalScroll = styled.div`
   max-height: 50vh;
