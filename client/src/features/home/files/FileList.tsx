@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, useRouteMatch } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { StringParam, useQueryParam } from 'use-query-params'
 import {
@@ -21,11 +21,12 @@ import {
   LoadingList,
   QuickActions,
   StyledHomeTable,
+  StyledPaginationSection,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
+import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
@@ -34,16 +35,17 @@ import { useFolderActions } from './useFolderActions'
 
 type ListType = { files: IFile[]; meta: IMeta }
 
-export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?: ResourceScope, spaceId?: string, showFolderActions?: boolean }) => {
+  const { path } = useRouteMatch()
+  
   const [folderIdParam, setFolderIdParam] = useQueryParam(
     'folder_id',
     StringParam,
   )
   const isAdmin = useSelector((state: any) => state.context.user.admin)
-  const showFolderActions = (scope === 'everybody' && isAdmin) || scope === 'me'
 
   const history = useHistory()
-  const onRowClick = (id: string) => history.push(`/home/files/${id}`)
+  const onRowClick = (id: string) => history.push(`${path}/${id}`)
 
   const {
     setPerPageParam,
@@ -63,10 +65,10 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
     fetchList: fetchFiles,
     onRowClick,
     resource: 'files',
-    scope,
-    spaceId,
     params: {
       folderId: folderIdParam || undefined,
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
     },
   })
 
@@ -88,12 +90,15 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
     setFolderIdParam(undefined, 'pushIn')
   }, [scope])
 
+  const files = data?.files || data?.entries
+
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
-    data?.files,
+    files,
   )
   const actions = useFilesSelectActions({
     scope,
+    spaceId,
     fileId: folderIdParam!,
     selectedItems: selectedObjects,
     resetSelected,
@@ -101,8 +106,13 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
   })
   delete actions['Comments']
   delete actions['Request license approval']
+  if(scope) {
+    delete actions['Copy to private']
+  } else {
+    delete actions['Copy to space']
+  }
 
-  const listActions = useFolderActions(scope, folderIdParam!)
+  const listActions = useFolderActions(scope, folderIdParam!, spaceId)
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -124,7 +134,7 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
                 <ButtonSolidBlue
                   data-testid="home-files-add-files-button"
                   onClick={() =>
-                    listActions['Add Files']?.func({ showModal: true })
+                    listActions[spaceId ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })
                   }
                 >
                   <PlusIcon height={12} /> Add Files
@@ -154,7 +164,7 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
           </Dropdown>
         </ActionsRow>
         <ActionsRow>
-          {breadcrumbs(data?.meta?.path, scope)}
+          {breadcrumbs(path, data?.meta?.path, scope)}
           {status === 'loading' && <LoadingList>Loading...</LoadingList>}
         </ActionsRow>
       </div>
@@ -165,7 +175,7 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
         isLoading={status === 'loading'}
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
-        files={data?.files}
+        files={files}
         onFolderClick={onFolderClick}
         onFileClick={onRowClick}
         selectedRows={selectedIndexes}
@@ -175,25 +185,29 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.files?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
+      
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          hide={hidePagination(
+            query.isFetched,
+            data?.files?.length,
+            data?.meta?.pagination?.total_pages,
+            )}
+            isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+            isNextData={data?.meta?.pagination?.next_page! !== null}
+            setPage={setPageParam}
+            onPerPageSelect={setPerPageParam}
+          />
+      </StyledPaginationSection>
 
       {listActions['Add Folder']?.modal}
       {listActions['Add Files']?.modal}
+      {listActions['Copy Files']?.modal}
+      {listActions['Choose Add Option']?.modal}
       {actions['Open']?.modal}
       {actions['Download']?.modal}
       {actions['Edit file info']?.modal}
@@ -201,6 +215,7 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
       {actions['Delete']?.modal}
       {actions['Organize']?.modal}
       {actions['Copy to space']?.modal}
+      {actions['Copy to private']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
@@ -210,15 +225,21 @@ export const FileList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
   )
 }
 
-const breadcrumbs = (path: MetaPath[] = [], scope?: ResourceScope) => (
+const createSearchParam = (params: Record<string, any>) => {
+  const query = cleanObject(params)
+  const paramQ = `?${  new URLSearchParams(query as any).toString()}`
+  return paramQ
+}
+
+const breadcrumbs = (basePath: string, metaPath: MetaPath[] = [], scope?: ResourceScope) => (
   <StyledBreadcrumbs>
     <BreadcrumbLabel>You are here:</BreadcrumbLabel>
-    {[{ id: 0, name: 'Files', href: `/home/files?scope=${scope}` }]
+    {[{ id: 0, name: 'Files', href: `${basePath}${createSearchParam({ scope })}` }]
       .concat(
-        path.map(folder => ({
+        metaPath.map(folder => ({
           id: folder.id,
           name: folder.name,
-          href: `files?scope=${scope}&folder_id=${folder.id}`,
+          href: `files${createSearchParam({ scope, folder_id: folder.id })}`,
         })),
       )
       .map(folder => (
@@ -226,8 +247,8 @@ const breadcrumbs = (path: MetaPath[] = [], scope?: ResourceScope) => (
           {folder.name}
         </Link>
       ))
-      //@ts-ignore
-      .reduce((prev, curr) => [prev,<BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>,curr,])}
+      // @ts-ignore
+      .reduce((prev, curr) => [prev,<BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>,curr])}
   </StyledBreadcrumbs>
 )
 
@@ -269,11 +290,13 @@ export const FilesListTable = ({
   const locationColumnHide = scope !== 'spaces' ? 'location' : null
   const addedByColumnHide = scope === 'me' ? 'added_by' : null
   const meFeaturedColumnHide = scope === 'me' ? 'featured' : null
+  const stateColumnHide = scope !== undefined ? 'state' : null
   const hidden = [
     meFeaturedColumnHide,
     featuredColumnHide,
     locationColumnHide,
     addedByColumnHide,
+    stateColumnHide,
   ].filter(Boolean) as string[]
   const col = useFilesColumns({
     onFolderClick,

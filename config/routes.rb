@@ -583,6 +583,7 @@ Rails.application.routes.draw do
     resources :spaces, only: :index
 
     get "/spaces/*all", to: "spaces#index"
+    get "/spaces-old/*all", to: "spaces#index"
 
     # to debug
     # resources :notification_preferences, only: [:index] do

@@ -9,6 +9,7 @@ import {
   useAttachToModal,
 } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
+import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
@@ -21,7 +22,7 @@ import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useEditFolderModal } from './actionModals/useEditFolderModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
-import { copyFilesRequest } from './files.api'
+import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
 
 export enum FileActions {
@@ -37,6 +38,7 @@ export enum FileActions {
   'Delete' = 'Delete',
   'Organize' = 'Organize',
   'Copy to space' = 'Copy to space',
+  'Copy to private' = 'Copy to private',
   'Attach to...' = 'Attach to...',
   'Attach License' = 'Attach License',
   'Detach License' = 'Detach License',
@@ -49,11 +51,13 @@ export enum FileActions {
 export const useFilesSelectActions = ({
   scope,
   fileId,
+  spaceId,
   selectedItems,
   resourceKeys,
   resetSelected,
 }: {
   scope?: ResourceScope
+  spaceId?: string
   fileId: string
   selectedItems: IFile[]
   resourceKeys: string[]
@@ -132,18 +136,26 @@ export const useFilesSelectActions = ({
     isShown: isShownDeleteFileModal,
   } = useDeleteFileModal({
     selected,
-    scope,
+    // eslint-disable-next-line no-nested-ternary
+    scope: scope ? (scope === 'me' ? 'private' : scope) : `space-${spaceId}`,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-      history.push(`/home/files`)
-      resetSelected && resetSelected()
+      if(spaceId) {
+        history.push(`/spaces/${spaceId}/files`)
+      } else {
+        history.push('/home/files')
+      }
+      if(resetSelected) resetSelected()
     },
   })
   const {
     modalComp: organizeFileModal,
     setShowModal: setOrganizeFileModal,
     isShown: isShownOrganizeFileModal,
-  } = useOrganizeFileModal({ selected, scope, resetSelected })
+  } = useOrganizeFileModal({ selected, scope, spaceId, onSuccess: () => {
+      if(resetSelected) resetSelected()
+    }, 
+  })
   const {
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
@@ -152,6 +164,18 @@ export const useFilesSelectActions = ({
     resource: 'files',
     selected,
     updateFunction: copyFilesRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+  const {
+    modalComp: copyToPrivateModal,
+    setShowModal: setCopyToPrivateModal,
+    isShown: isShownCopyToPrivateModal,
+  } = useCopyToPrivateModal({
+    resource: 'files',
+    selected,
+    request: copyFilesToPrivate,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
     },
@@ -303,6 +327,12 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
+    },
+    'Copy to private': {
+      func: () => setCopyToPrivateModal(true),
+      isDisabled: selected.length === 0,
+      modal: copyToPrivateModal,
+      showModal: isShownCopyToPrivateModal,
     },
     'Attach to...': {
       func: () => setAttachToModal(true),

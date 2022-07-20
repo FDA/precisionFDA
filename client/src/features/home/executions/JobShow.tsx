@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled, { css } from 'styled-components'
@@ -14,6 +14,7 @@ import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { HOME_TABS } from '../../../constants'
 import { colors } from '../../../styles/theme'
+import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsRow, StyledBackLink } from '../home.styles'
 import {
@@ -124,6 +125,7 @@ const ExecutionState = ({ state }: { state: JobState }) => (
 
 export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const queryCache = useQueryClient()
+  const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
   const syncFiles = useMutation({
@@ -193,7 +195,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/executions${scopeParamLink}`}>
+      <StyledBackLink linkTo={getBackPath(location, 'executions')}>
         Back to Executions
       </StyledBackLink>
       <Topbox>
@@ -332,13 +334,15 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-        {execution.tags.length > 0 && (
-          <StyledTags>
-            {execution.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        <MetadataSection>
+          {execution.tags.length > 0 && (
+            <StyledTags>
+              {execution.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
 
       <div className="pfda-padded-t40" />

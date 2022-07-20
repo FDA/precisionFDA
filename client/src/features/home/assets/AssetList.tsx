@@ -10,7 +10,7 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { RootState } from '../../../store'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
@@ -44,8 +44,10 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
     fetchList: fetchAssets,
     onRowClick,
     resource: 'assets',
-    scope,
-    spaceId
+    params: {
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
+    },
   })
   const { status, data, error, isFetching } = query
 
@@ -108,22 +110,23 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.assets?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          hide={hidePagination(
+            query.isFetched,
+            data?.assets?.length,
+            data?.meta?.pagination?.total_pages,
+          )}
+          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+          isNextData={data?.meta?.pagination?.next_page! !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {actions['Delete']?.modal}
       {actions['Download']?.modal}
       {actions['Attach to...']?.modal}

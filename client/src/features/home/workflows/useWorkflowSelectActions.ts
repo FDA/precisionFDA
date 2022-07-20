@@ -1,28 +1,28 @@
-import { pick } from "ramda";
-import { useQueryClient } from "react-query";
-import { useSelector } from "react-redux";
-import { useHistory } from "react-router";
-import { toast } from "react-toastify";
-import { RootState } from "../../../store";
-import { useCopyToSpaceModal } from "../actionModals/useCopyToSpace";
-import { useDeleteModal } from "../actionModals/useDeleteModal";
-import { useEditTagsModal } from "../actionModals/useEditTagsModal";
-import { useFeatureMutation } from "../actionModals/useFeatureMutation";
-import { useExportToModal } from "../apps/useExportToModal";
-import { ActionFunctionsType, ResourceScope } from "../types";
-import { copyWorkflowsRequest, deleteWorkflowRequest } from "./workflows.api";
-import { IWorkflow, WorkflowActions } from "./workflows.types";
+import { pick } from 'ramda'
+import { useQueryClient } from 'react-query'
+import { useSelector } from 'react-redux'
+import { useHistory } from 'react-router'
+import { toast } from 'react-toastify'
+import { RootState } from '../../../store'
+import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
+import { useDeleteModal } from '../actionModals/useDeleteModal'
+import { useEditTagsModal } from '../actionModals/useEditTagsModal'
+import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useExportToModal } from '../apps/useExportToModal'
+import { ActionFunctionsType, ResourceScope } from '../types'
+import { copyWorkflowsRequest, deleteWorkflowRequest } from './workflows.api'
+import { IWorkflow, WorkflowActions } from './workflows.types'
 
-export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, resetSelected }: { scope?: ResourceScope, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
+export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resourceKeys, resetSelected }: { scope?: ResourceScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useSelector((state: RootState) => state.context.user)
   const isAdmin = user ? user.admin : false
 
-  const featureMutation = useFeatureMutation({resource: 'workflows', onSuccess: () => {
+  const featureMutation = useFeatureMutation({ resource: 'workflows', onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
-  }})
+  } })
 
   const {
     modalComp: copyToSpaceModal,
@@ -30,14 +30,14 @@ export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, r
     isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal<IWorkflow>({ resource: 'workflows', selected, updateFunction: copyWorkflowsRequest, 
   onSuccess: (res: any) => {
-    toast.success("The workflow has been published successfully!")
+    toast.success('The workflow has been published successfully!')
     queryClient.invalidateQueries(resourceKeys).then(() => {
       if (Array.isArray(res.workflows)) {
         history.push(`/home/workflows/${res.workflows[0].uid}`)
       }
-    }
+    },
     )
-  }})
+  } })
 
   const {
     modalComp: tagsModal,
@@ -48,7 +48,7 @@ export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, r
     selected: { uid: `workflow-series-${selected[0]?.workflow_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 
   const {
@@ -62,9 +62,13 @@ export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, r
     request: deleteWorkflowRequest,
     onSuccess: () => {
       queryClient.invalidateQueries('workflows')
-      history.push(`/home/workflows`)
-      resetSelected && resetSelected()
-    }
+      if(spaceId) {
+        history.push(`/spaces/${spaceId}/workflows`)
+      } else {
+        history.push('/home/workflows')
+      }
+      if(resetSelected) resetSelected()
+    },
   })
 
   const {
@@ -128,7 +132,7 @@ export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, r
       hide: scope === 'spaces',
       isDisabled: selected.some((e) => !e.links?.delete) || selected.length === 0,
     },
-    "Copy to space": {
+    'Copy to space': {
       func: () => setCopyToSpaceModal(true),
       isDisabled:
         selected.length === 0 || selected.some(e => !e.links?.copy),
@@ -139,14 +143,14 @@ export const useWorkflowSelectActions = ({ scope, selectedItems, resourceKeys, r
       func: () => { },
       link: `/workflows/${selected[0]?.uid}/comments`,
       isDisabled: false,
-      hide: selected.length !== 1
+      hide: selected.length !== 1,
     },
     'Edit tags': {
       func: () => setTagsModal(true),
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      hide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1)
+      hide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
     },
   }
 

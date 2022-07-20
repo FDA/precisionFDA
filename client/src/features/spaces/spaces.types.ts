@@ -8,14 +8,19 @@ export interface Counters {
 }
 
 export interface Links {
-  show: string;
-  update: string;
-  update_tags: string;
-  apps: string;
-  files: string;
-  workflows: string;
-  jobs: string;
-  members: string;
+  add_data?: string;
+  show?: string;
+  lock?: string;
+  unlock?: string;
+  update?: string;
+  delete?: string;
+  update_tags?: string;
+  apps?: string;
+  files?: string;
+  workflows?: string;
+  jobs?: string;
+  members?: string;
+  show_private?: string;
 }
 
 export interface HostLead {
@@ -36,15 +41,36 @@ export interface GuestLead {
   is_accepted: boolean;
 }
 
-export interface ISpace {
-  id: string;
+export interface ConfidentialSpace {
+  id: number;
   description: string;
   state: string;
   name: string;
   type: string;
+  cts: string;
+  created_at: string;
+  updated_at: string;
+  counters: Counters;
+  links: Links;
+  updatable: boolean;
+  shared_space_id: number;
+  tags: any[];
+  current_user_membership: boolean;
+  host_lead: HostLead;
+}
+
+export type SideRole = 'reviewer' | 'sponsor'
+
+export interface ISpace {
+  id: string;
+  description: string;
+  state: 'active' | 'unactivated';
+  name: string;
+  type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator'
   cts?: any;
   created_at: string;
   updated_at: string;
+  space_create: string;
   counters: Counters;
   links: Links;
   updatable: boolean;
@@ -52,6 +78,22 @@ export interface ISpace {
   current_user_membership: boolean;
   host_lead: HostLead;
   guest_lead: GuestLead;
-  private_space_id?: string
-  shared_space_id?: string
+  private_space_id?: string;
+  shared_space_id?: string;
+  can_duplicate: boolean;
+  confidential_space: ConfidentialSpace;
+}
+
+export const columnFilters = {
+  name: 'string',
+  description: 'string',
+  state: 'string',
+  tags: 'string',
+  status: 'string',
+  featured: 'string',
+  created_at: 'string',
+  updated_at: 'string',
+  host_lead: 'string',
+  guest_lead: 'string',
+  type: 'string',
 }

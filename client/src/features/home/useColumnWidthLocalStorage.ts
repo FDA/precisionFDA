@@ -1,9 +1,12 @@
 import { UseResizeColumnsState } from 'react-table';
-import { StringParam, useQueryParams } from 'use-query-params'
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
+export interface IColumnWidthLocalStorage {
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
+  colWidths: any
+}
 
-export function useColumnWidthLocalStorage(resource: string) {
+export function useColumnWidthLocalStorage(resource: string): IColumnWidthLocalStorage {
   const [colWidths, setColWidths] = useLocalStorage<any>(`home-colWidths-${resource}`, {});
   const saveColumnResizeWidth = (columnResizing: UseResizeColumnsState<any>['columnResizing']) => {
     setColWidths({ ...colWidths, ...columnResizing.columnWidths })

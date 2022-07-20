@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
 import { Provider } from 'react-redux'
 import { Redirect, Route, Router, Switch } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
@@ -11,6 +12,9 @@ import { AuthModal } from './features/auth/AuthModal'
 import { Home2 } from './features/home'
 import { FileShow } from './features/home/files/show/FileShow'
 import { useModal } from './features/modal/useModal'
+import { Spaces } from './features/spaces'
+import { SpaceShow } from './features/spaces/show/SpaceShow'
+import { Spaces2List } from './features/spaces/SpacesList'
 import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
@@ -90,31 +94,29 @@ const root = ({ store }: any) => {
                 <Route path="/account/notifications">
                   <NotificationsPage />
                 </Route>
-                {/* <Route exact path="/spaces">
-                  <Spaces2List />
-                </Route> */}
-                <Route exact path="/spaces">
-                  {/* <Space /> */}
-                  <SpacesListPage />
+                <Route path="/spaces">
+                  <Spaces />
                 </Route>
-                <Route exact path="/spaces/new">
+
+                <Route exact path="/spaces-old/new">
                   <NewSpacePage />
                 </Route>
-                <Route exact path="/spaces/duplicate/:spaceId">
+                <Route exact path="/spaces-old/duplicate/:spaceId">
                   <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.DUPLICATE} />
                 </Route>
-                <Route exact path="/spaces/edit/:spaceId">
+                <Route exact path="/spaces-old/edit/:spaceId">
                   <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.EDIT} />
                 </Route>
                 <Redirect
                   exact
-                  from="/spaces/:spaceId"
-                  to="/spaces/:spaceId/files"
+                  from="/spaces-old/:spaceId"
+                  to="/spaces-old/:spaceId/files"
                 />
                 <Route
-                  path="/spaces/:spaceId/:page"
+                  path="/spaces-old/:spaceId/:page"
                   render={props => <SpacePage {...props} />}
                 />
+
                 <Route exact path="/challenges">
                   <ChallengesListPage />
                 </Route>

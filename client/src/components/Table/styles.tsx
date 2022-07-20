@@ -33,7 +33,7 @@ export const StyledRowActionComponent = styled.div`
   box-shadow: -17px 0px 11px -7px #ffffff;
 `
 
-export const ReactTableStyles = styled.div`
+export const ReactTableStyles = styled.div<{fillWidth: boolean}>`
   .sort {
     display: flex;
     justify-content: space-between;
@@ -84,7 +84,6 @@ export const ReactTableStyles = styled.div`
   .table {
     .thead {
       display: flex;
-      height: 40px;
       border-top: 1px solid #d5d5d5;
       border-bottom: 2px solid #d5d5d5;
       /* box-shadow: 0rem 0.2rem 1.2rem 0 rgba(0, 0, 0, 0.05); */
@@ -106,7 +105,7 @@ export const ReactTableStyles = styled.div`
     }
 
     .tr {
-      width: fit-content;
+      ${({ fillWidth }) => !fillWidth && 'width: fit-content;'} 
       border-bottom: 1px solid #d5d5d5;
       :last-child {
         .td {
@@ -154,7 +153,7 @@ export const ReactTableStyles = styled.div`
 
     &.sticky {
       .thead{
-        width: fit-content;
+        ${({ fillWidth }) => !fillWidth && 'width: fit-content;'} 
       }
 
       .tbody {

@@ -19,16 +19,16 @@ module Api
     def index
       if params[:space_id]
         workflows = []
+        filters = params[:filters]
 
         if find_user_space
-          workflows = @space.workflows.unremoved.
-            eager_load(:workflow_series, :user).includes(:taggings).
-            search_by_tags(params.dig(:filters, :tags))
-          workflows = Workflows::WorkflowFilter.call(workflows, params[:filters]).
-            order(order_from_params).
-            page(page_from_params).
-            per(page_size)
+          workflows = @space.latest_revision_workflows.unremoved.
+            eager_load(:workflow_series, :user).includes(:taggings)
+          workflows = filter_workflows(workflows, filters)
           workflows.each { |workflow| workflow.current_user = @context.user }
+          workflows = sort_array_by_fields(workflows)
+          page_meta = pagination_meta(workflows.count)
+          workflows = paginate_array(workflows)
         end
 
         page_dict = pagination_dict(workflows)
@@ -38,7 +38,7 @@ module Api
         else
           render json: workflows,
                  root: Workflow.model_name.plural,
-                 meta: workflows_meta.merge(pagination: page_dict),
+                 meta: workflows_meta.merge(page_meta),
                  adapter: :json
         end
 
@@ -53,7 +53,7 @@ module Api
         order(order_from_params).
         map do |series|
           latest = series.latest_accessible(@context)
-          latest if Workflows::WorkflowFilter.match(latest, params[:filters])
+          latest if Workflows::WorkflowFilter.match(latest, filters)
         end.compact
 
       render_workflows_list workflows
@@ -218,6 +218,15 @@ module Api
     end
 
     private
+
+    def filter_workflows(workflows, filters)
+      workflows.map do |workflow|
+        if Workflows::WorkflowFilter.
+            match(workflow, filters)
+          workflow
+        end
+      end.compact
+    end
 
     def render_workflows_list(workflows)
       if show_count

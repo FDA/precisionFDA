@@ -26,16 +26,36 @@ export const Loading1 = styled.div<{delay?: number}>`
   }
 `
 
+const sty = css`
+  /* background-color: green; */
+  height: 80px !important;
+  border-top: none !important;
+  border-bottom: none !important;
+`
+
+const Row = styled.div`
+  display: flex;
+  width: fit-content;
+  border-bottom: 1px solid #d5d5d5;
+
+  .tr {
+    padding: 0;
+    border-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+`
+
 export function LoadingRows<T extends {}>({ visibleColumns, loading, delay }: { visibleColumns: ColumnInstance<T>[], loading: boolean, delay: number }) {
   return (
     <>
-      {loading && <div className="thead" style={{ borderBottom: 'none' }}>
+      {loading && <Row>
         {visibleColumns.map((column, i) => (
-            <div {...column.getHeaderProps()} className="tr" key={i}>
-              <div className="td" style={{ padding: 'none', opacity: 0.5 }}><Loading1 delay={delay}><span></span></Loading1></div>
+            <div style={{...column.getHeaderProps().style, borderBottom: 0 }} className="tr" key={i}>
+              <div className="td" style={{ opacity: 0.5 }}><Loading1 delay={delay}><span></span></Loading1></div>
             </div>
         ))}
-      </div>}
+      </Row>}
     </>
   )
 };

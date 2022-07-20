@@ -64,7 +64,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     })
 
     this.spaceMembership = spaceMembership[0] // future need
-    this.spaceMembershipSide = SPACE_MEMBERSHIP_SIDE[spaceMembership[0].side] // no need
+    this.spaceMembershipSide = spaceMembership[0] ? SPACE_MEMBERSHIP_SIDE[spaceMembership[0].side] : undefined // no need
     this.receiverMembershipSide = {} // future need
     this.receiversSides = {}
   }
@@ -99,9 +99,9 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     )
     // @ts-ignore
     this.receiversSides = Object.fromEntries(receiversSidesArr)
-    const receiverMembership: any = memberships.filter(memberShip => {
-      if (receivers && memberShip.user.id === receivers[0].id) {
-        return memberShip
+    const receiverMembership: any = memberships.filter(membership => {
+      if (receivers && membership.user.id === receivers[0].id) {
+        return membership
       }
     })
     this.receiverMembershipSide = SPACE_MEMBERSHIP_SIDE[receiverMembership[0].side]
@@ -119,7 +119,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
       space: { name: this.space.name, id: this.space.id },
       action,
       initiator: { fullName: this.user.fullName },
-      spaceMembership: { side: this.spaceMembership.side },
+      spaceMembership: { side: this.spaceMembership ? this.spaceMembership.side : undefined },
       spaceMembershipSide: this.spaceMembershipSide,
       receiverMembershipSide: this.receiverMembershipSide,
       receiversSides: this.receiversSides,

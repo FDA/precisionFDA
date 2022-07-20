@@ -1,6 +1,8 @@
 # Space serializer.
 # rubocop:disable Metrics/ClassLength
 class SpaceSerializer < ApplicationSerializer
+  delegate :all_tags_list, to: :object
+
   attributes(
     :id,
     :description,
@@ -21,8 +23,7 @@ class SpaceSerializer < ApplicationSerializer
     object.confidential? && !object.private_type?
   }
   attribute :private_space_id, if: -> { object.shared? && confidential_space }
-
-  attribute :tag_list, key: :tags
+  attribute :all_tags_list, key: :tags
 
   attribute :can_duplicate, if: -> { object.review? }
   attribute :current_user_membership, key: :current_user_membership

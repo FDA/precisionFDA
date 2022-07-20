@@ -16,7 +16,7 @@ export interface BaseError {
   }
 }
 
-export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions'
+export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions' | 'spaces'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 
 export interface DownloadListResponse {

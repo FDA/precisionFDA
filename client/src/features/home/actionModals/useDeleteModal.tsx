@@ -40,11 +40,10 @@ export function useDeleteModal<T extends { id: string; name: string }>({
       if (res?.meta?.messages[0].type === 'error') {
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
         return
-      } else {
-        onSuccess && onSuccess(res)
-        setShowModal(false)
-        toast.success(`Success: Deleted ${itemsCountString(resource, momoSelected.length)}`)
       }
+      if(onSuccess) onSuccess(res)
+      setShowModal(false)
+      toast.success(`Success: Deleted ${itemsCountString(resource, momoSelected.length)}`)
     },
   })
 
@@ -71,11 +70,9 @@ export function useDeleteModal<T extends { id: string; name: string }>({
     >
       <ModalScroll>
         <StyledResourceTable
-          rows={selected.map(s => {
-            return {
+          rows={selected.map(s => ({
               name: <div>{s.name}</div>,
-            }
-          })}
+            }))}
         />
       </ModalScroll>
     </Modal>

@@ -16,6 +16,7 @@ import {
   ActionsRow,
   QuickActions,
   StyledHomeTable,
+  StyledPaginationSection,
   StyledRight,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
@@ -69,7 +70,9 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
     fetchList: fetchDatabaseList,
     onRowClick,
     resource: 'dbclusters',
-    scope,
+    params: {
+      scope: scope || undefined,
+    },
   })
   const { status, data } = query
 
@@ -133,23 +136,23 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.dbclusters?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          hide={hidePagination(
+            query.isFetched,
+            data?.dbclusters?.length,
+            data?.meta?.pagination?.total_pages,
+          )}
+          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+          isNextData={data?.meta?.pagination?.next_page! !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit Database Info']?.modal}

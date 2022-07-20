@@ -1,49 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Hooks, HeaderProps, CellProps, useResizeColumns } from 'react-table'
 import { initial } from 'lodash'
 import { IndeterminateCheckbox } from './IndeterminateCheckbox'
 import { ExpandArrowIcon } from './styles'
-import { Pagination } from './Pagination'
 import { TransparentButton } from '../Dropdown/styles'
 
-export function rowActionColHook<T extends object>(
-  context: object,
-  rowActionsComponent?: (props: any) => React.ReactNode,
-): any {
-  return (hooks: Hooks<any>) => {
-    if (!rowActionsComponent) return
-    hooks.visibleColumns.push(columns => [
-      ...columns,
-      {
-        id: '_rowAction',
-        disableResizing: true,
-        disableGroupBy: true,
-        minWidth: 180,
-        sticky: 'right',
-        Cell: (cellProps: CellProps<T>) =>
-          rowActionsComponent({ ...cellProps, context }),
-        Header: instance => (
-          <Pagination
-            canNextPage={instance.canNextPage}
-            canPreviousPage={instance.canPreviousPage}
-            gotoPage={instance.gotoPage}
-            nextPage={instance.nextPage}
-            pageCount={instance.pageCount}
-            pageIndex={instance.state.pageIndex}
-            pageOptions={instance.pageOptions}
-            pageSize={instance.state.pageSize}
-            previousPage={instance.previousPage}
-            setPageSize={instance.setPageSize}
-          />
-        ),
-      },
-    ])
-    hooks.useInstanceBeforeDimensions.push(({ headers }) => {
-      const selectedHeader = headers[0]
-      selectedHeader.canResize = false
-    })
-  }
-}
 
 export const selectionHook = (hooks: Hooks<any>) => {
   hooks.visibleColumns.push(columns => [
@@ -93,9 +54,7 @@ export const useEmptyCol = (width: number) => (hooks: Hooks<any>) => {
         // minWidth: 500,
         flexGrow: 1,
         flexShrink: 0,
-        Header: ({ getToggleAllRowsSelectedProps }: HeaderProps<any>) => (
-          <div></div>
-        ),
+        Header: ({ getToggleAllRowsSelectedProps }: HeaderProps<any>) => (<div/>),
         Cell: ({ row }: CellProps<any>) => <div {...row.getRowProps()}></div>,
       },
       ...stickyCol,

@@ -5,6 +5,7 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { columnFilters } from '../columnFilters'
 import { IExecution } from '../executions/executions.types'
 import { getStateBgColorFromState } from '../executions/executions.util'
 import { getSubComponentValue } from '../executions/getSubComponentValue'
@@ -15,7 +16,6 @@ import {
 import { IFilter, IMeta, KeyVal } from '../types'
 import { useColumnWidthLocalStorage } from '../useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
-import { filters } from '../useList'
 import { useListQuery } from '../useListQuery'
 import { useOrderByState } from '../useOrderByState'
 import { usePaginationParams } from '../usePaginationState'
@@ -30,7 +30,9 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
   const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
 
-  const { filterQuery, setSearchFilter } = useFilterParams({ filters })
+  const { filterQuery, setSearchFilter } = useFilterParams({
+    filters: columnFilters,
+  })
 
   const query = useListQuery<ListType>({
     fetchList: fetchWorkflowExecutions,

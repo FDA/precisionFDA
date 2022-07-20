@@ -2,6 +2,18 @@ import { useState } from 'react'
 import { SortingRule } from 'react-table'
 import { StringParam, useQueryParams, withDefault } from 'use-query-params'
 
+type Cols = SortingRule<string>[]
+export type SortyByParamType = {
+  order_by?: string | null,
+  order_dir?: string | null,
+}
+
+export interface ISortByParams {
+  sortBy: SortingRule<string>[],
+  sort: SortyByParamType,
+  setSortBy: (cols: Cols) => void
+}
+
 export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): {sortBy: SortingRule<string>[], sort: SortyByParamType, setSortBy: (cols: Cols) => void} {
   const [sort, setSort] = useState({
     order_by: defaultOrder?.order_by,
@@ -25,13 +37,7 @@ export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: S
   }
 }
 
-type Cols = SortingRule<string>[]
-export type SortyByParamType = {
-  order_by?: string | null,
-  order_dir?: string | null,
-}
-
-export function useOrderByParams({ defaultOrder, onSetSortBy }: {defaultOrder?: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): {sortBy: SortingRule<string>[], sort: SortyByParamType, setSortBy: (cols: Cols) => void} {
+export function useOrderByParams({ defaultOrder, onSetSortBy }: {defaultOrder?: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): ISortByParams {
   const [sortByParam, setSortByParam] = useQueryParams({
     order_by: withDefault(StringParam, defaultOrder?.order_by),
     order_dir: withDefault(StringParam,  defaultOrder?.order_dir),

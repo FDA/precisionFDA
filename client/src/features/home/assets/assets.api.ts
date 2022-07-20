@@ -1,6 +1,6 @@
 import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
 import { BaseAPIResponse, BaseError, IFilter, IMeta, ResourceScope } from "../types";
-import { Params, prepareListFetch } from "../utils";
+import { formatScopeQ, Params, prepareListFetch } from "../utils";
 import { IAsset } from "./assets.types";
 
 export interface FetchAssetsQuery extends BaseAPIResponse {
@@ -8,11 +8,11 @@ export interface FetchAssetsQuery extends BaseAPIResponse {
   meta: IMeta
 }
 
-export async function fetchAssets(filters: IFilter[], scope: ResourceScope, params: Params): Promise<FetchAssetsQuery> {
+export async function fetchAssets(filters: IFilter[], params: Params): Promise<FetchAssetsQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const scopeQ = scope === 'me' ? '' : scope
-  const res = await fetch(`/api/assets/${scopeQ}${paramQ}`)
+  const scopeQ = formatScopeQ(params.scope)
+  const res = await fetch(`/api/assets${scopeQ}${paramQ}`)
   return res.json()
 }
 

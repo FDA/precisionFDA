@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { useQueryClient } from 'react-query'
+import { useLocation, useRouteMatch } from 'react-router'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
@@ -27,6 +28,8 @@ export const useExecutionColumns = ({
 
 }) => {
   const queryClient = useQueryClient()
+  const location = useLocation()
+  const { path } = useRouteMatch()
   return useMemo<Column<IExecution>[]>(
     () =>
       [
@@ -52,20 +55,23 @@ export const useExecutionColumns = ({
           accessor: 'name',
           Filter: DefaultColumnFilter,
           width: colWidths?.name || 300,
-          Cell: props =>
-            props.row.original.jobs ? (
-              <StyledLinkCell to={`/home/workflows/${props.row.original.uid}`}>
-                <BoltIcon height={14} />
-                {props.value}
-              </StyledLinkCell>
-            ) : (
-              <StyledLinkCell to={`/home/executions/${props.row.original.uid}`}>
-                <CogsIcon height={14} />
-                {props.value}
-              </StyledLinkCell>
-            ),
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {},
-        },
+          Cell: props => {
+            const to = {pathname: `${path}/${props.cell.row.original.uid}`, state: {from: location.pathname, fromSearch: location.search }}
+
+            return props.row.original.jobs ? (
+                <StyledLinkCell to={to}>
+                  <BoltIcon height={14} />
+                  {props.value}
+                </StyledLinkCell>
+              ) : (
+                <StyledLinkCell to={to}>
+                  <CogsIcon height={14} />
+                  {props.value}
+                </StyledLinkCell>
+              )
+            },
+            ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {},
+          },
         {
           Header: 'Workflow',
           id: 'workflow',
@@ -211,6 +217,6 @@ export const useExecutionColumns = ({
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {},
         },
       ] as Column<IExecution>[],
-    [],
+    [location.search],
   )
 }

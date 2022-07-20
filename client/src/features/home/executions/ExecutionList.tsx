@@ -11,7 +11,7 @@ import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
-  ActionsRow, StyledHomeTable
+  ActionsRow, StyledHomeTable, StyledPaginationSection
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
@@ -47,8 +47,10 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     fetchList: fetchExecutions,
     onRowClick,
     resource: 'jobs',
-    scope,
-    spaceId,
+    params: {
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
+    },
   })
   const { status, data, error } = query
 
@@ -102,18 +104,19 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
+          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+          isNextData={data?.meta?.pagination?.next_page! !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Attach to...']?.modal}

@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query'
+import { useQuery, UseQueryOptions } from 'react-query'
 import { APIResource, IMeta, ResourceScope } from './types'
 import { toArrayFromObject } from './utils'
 
@@ -25,10 +25,10 @@ interface IUseListQuery<T> {
 }
 
 
-export function useListQuery<T>({ fetchList, scope, spaceId, resource, params = {}, queryOptions, pagination = {}, order = {}, filter = {} }: IUseListQuery<T>) {
+export function useListQuery<T>({ fetchList, resource, params = {}, queryOptions, pagination = {}, order = {}, filter = {} }: IUseListQuery<T>) {
   return useQuery<T>(
-    [resource, scope, spaceId, toArrayFromObject(filter), pagination?.page, pagination?.perPage, order?.order_by, order?.order_dir, Object.keys(params).map(k => params[k])],
-    () => fetchList(toArrayFromObject(filter), scope as ResourceScope, { page: pagination?.page, perPage: pagination?.perPage, sortBy: order, ...params }, spaceId),
+    [resource, toArrayFromObject(filter), pagination?.page, pagination?.perPage, order?.order_by, order?.order_dir, ...Object.keys(params).map(k => `${k}=${params[k]}`)],
+    () => fetchList(toArrayFromObject(filter), { page: pagination?.page, perPage: pagination?.perPage, sortBy: order, ...params }),
     {
       refetchOnWindowFocus: false,
       ...queryOptions

@@ -163,6 +163,26 @@ export const ButtonSolidRed = styled(Button)`
   }
 `
 
+export const ButtonOutlineGrey = styled(Button)`
+  border-color: ${theme.colors.borderDefault};
+  color: ${theme.colors.textDarkGrey};
+
+  &:hover {
+    ${({ disabled }) => !disabled && css`
+      background-color: ${theme.colors.backgroundLightGray};
+      color: ${theme.colors.textDarkGrey};
+      border-color: ${theme.colors.borderDefault};
+    `}
+    ${({ disabled }) => disabled && css`
+      cursor: not-allowed;
+    `}
+  }
+
+  &:active {
+    box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
+  }
+`
+
 export const ToggleButton = styled(Button)<IButton>`
   background-color: ${theme.colors.textWhite};
   border-color: #1b639f;

@@ -10,7 +10,6 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { DownloadListResponse, ResourceScope } from '../../types'
 import { itemsCountString } from '../../utils'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
@@ -20,35 +19,54 @@ const StyledPath = styled.div`
 `
 
 const DeleteFiles = ({
-  data,
+  selected,
   scope,
 }: {
-  data: DownloadListResponse[]
-  scope?: ResourceScope
+  selected: IFile[]
+  scope: string
 }) => {
+  const {
+    data = [],
+    status,
+    refetch,
+  } = useQuery(
+    ['download_list', selected],
+    () =>
+      fetchFilesDownloadList(
+        selected.map(s => s.id),
+        scope,
+      ),
+    {
+      onError: () => {
+        toast.error('Error: Fetching download list.')
+      },
+    },
+  )
   return (
     <ResourceTable
-      rows={data.map(s => {
-        return {
+      rows={data.map(s => ({
           name: (
             <StyledName href={s.viewURL} target="_blank">
               <VerticalCenter>
-                {s.type === 'file' ? <FileIcon /> : <FolderIcon /> }
+                {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
               </VerticalCenter>
               {s.name}
             </StyledName>
           ),
           path: <StyledPath>{s.fsPath}</StyledPath>,
-        }
-      })}
+        }))}
     />
   )
 }
 
-export const useDeleteFileModal = ({ selected, onSuccess, scope } : {
-  selected: IFile[],
-  onSuccess: () => void,
-  scope?: ResourceScope,
+export const useDeleteFileModal = ({
+  selected,
+  onSuccess,
+  scope,
+}: {
+  selected: IFile[]
+  onSuccess: () => void
+  scope: string
 }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
@@ -65,49 +83,39 @@ export const useDeleteFileModal = ({ selected, onSuccess, scope } : {
       setShowModal(false)
       toast.success(`Success: Deleted ${selected.length} files or folders.`)
     },
-  })
+  })  
 
   const handleSubmit = () => {
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const { data = [], status, refetch } = useQuery(
-    ['download_list', selected],
-    () =>
-      fetchFilesDownloadList(
-        selected.map(s => s.id),
-        scope,
-      ),
-    {
-      onError: () => {
-        toast.error('Error: Fetching download list.')
-      },
-    },
-  )
-
-  const itemsCount = (status === 'loading') ? momoSelected.length : data.length
-
   const modalComp = (
     <Modal
       data-testid="modal-files-delete"
-      headerText={`Delete ${itemsCountString('item', itemsCount)}?`}
+      headerText={`Delete ${itemsCountString('item', momoSelected.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       title="Modal window to select files for deletion"
       footer={
         <>
           {mutation.isLoading && <Loader />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
+          <Button
+            onClick={() => setShowModal(false)}
+            disabled={mutation.isLoading}
+          >
+            Cancel
+          </Button>
           <ButtonSolidRed onClick={handleSubmit} disabled={mutation.isLoading}>
             Delete
           </ButtonSolidRed>
         </>
       }
     >
-      {status === 'loading'
-        ? <div>Loading...</div>
-        : <DeleteFiles data={data} scope={scope} />
-      }
+      {status === 'loading' ? (
+        <div>Loading...</div>
+      ) : (
+        <DeleteFiles selected={momoSelected} scope={scope} />
+      )}
     </Modal>
   )
   return {
