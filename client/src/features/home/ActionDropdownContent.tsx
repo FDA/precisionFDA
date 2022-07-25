@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 import { colors } from '../../styles/theme'
 import { ActionFunctionsType, Link } from './types'
 
+//Updated disbaled text color for remediation using textMediumGrey
 export const ActionItem = styled.li<{disabled?: boolean}>`
   padding: 0 20px;
   margin: 0;
@@ -12,7 +13,7 @@ export const ActionItem = styled.li<{disabled?: boolean}>`
   font-size: 14px;
   cursor: pointer;
   ${({disabled}) => disabled && css`
-    color: #777777;
+    color: ${colors.textMediumGrey};
     cursor: not-allowed;
   `}
   &:hover {

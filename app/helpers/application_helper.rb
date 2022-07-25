@@ -38,10 +38,10 @@ module ApplicationHelper
   end
 
   def alert_help(text, path, prompt = "Need help?")
-    prompt = "<span class='pfda-help-prompt'>#{h(prompt)}</span>" if !prompt.blank?
+    prompt = "<span class='pfda-help-prompt alert-help-remediated'>#{h(prompt)}</span>" if !prompt.blank?
     raw """
     <div class='pfda-help-block'>
-      <span class='fa fa-question-circle' aria-hidden='true'></span>#{prompt}<a href='#{path}' target='_blank'>#{h(text)} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
+      <span class='fa fa-question-circle' aria-hidden='true'></span>#{prompt}<a href='#{path}' class='review-doc-text' target='_blank'>#{h(text)} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
     </div>
     """
   end
