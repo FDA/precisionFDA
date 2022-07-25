@@ -157,11 +157,20 @@ export class SyncJobOperation extends WorkerBaseOperation<
       em.persist(eventEntity)
 
       if (remoteState == JOB_STATE.FAILED) {
-        this.ctx.log.info({
-          failureCounts: platformJobData.failureCounts,
-          failureReason: platformJobData.failureReason,
-          failureMessage: platformJobData.failureMessage,
-        }, 'SyncJobOperation: Detected failed job')
+        if (job.state == JOB_STATE.RUNNING) {
+        // if latest known state was 'running' then platform terminated the job
+          this.ctx.log.info({
+            jobId: input.dxid,
+            failureReason: platformJobData.failureReason,
+            failureMessage: platformJobData.failureMessage,
+          }, 'SyncJobOperation: Detected job termination by platform')
+        } else {
+          this.ctx.log.info({
+            failureCounts: platformJobData.failureCounts,
+            failureReason: platformJobData.failureReason,
+            failureMessage: platformJobData.failureMessage,
+          }, 'SyncJobOperation: Detected failed job')
+        }
       }
 
       // Use the following to invoke sync files within this operation to debug
@@ -172,7 +181,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
     }
 
-    this.ctx.log.info({ 
+    this.ctx.log.info({
       jobId: input.dxid,
       fromState: job.state,
       toState: remoteState,

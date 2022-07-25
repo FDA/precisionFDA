@@ -21,6 +21,7 @@ type JobCreateParams = BaseParams & {
   name?: string
   input: AnyObject
   systemRequirements: AnyObject
+  timeoutPolicyByExecutable: AnyObject
   snapshot?: {
     $dnanexus_link: {
       project?: string
