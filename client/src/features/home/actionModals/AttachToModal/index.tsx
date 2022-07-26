@@ -136,8 +136,8 @@ const HomeAttachToModal = (props: any) => {
               {itemsList}
               {!itemsList.length &&
                 <div className='__menu-item'>
-                  <span className='text-muted'>No results found</span>
-                  <span className='__menu-item_clear' onClick={() => setSearch('')} >Clear query</span>
+                  <span className='text-muted noResultContent'>No results found</span>
+                  <span className='__menu-item_clear removeQuery' onClick={() => setSearch('')} >Clear query</span>
                 </div>
               }
             </ul>
@@ -148,7 +148,7 @@ const HomeAttachToModal = (props: any) => {
             <a href={selectedItem.path} >{selectedItem.title}</a>
           </div>
           <Markdown data={selectedItem.content} />
-          <div className='__note-container_no-content'>
+          <div className='__note-container_no-content noResultContent'>
             {!selectedItem.content && 'No content written for this item'}
           </div>
         </div>
