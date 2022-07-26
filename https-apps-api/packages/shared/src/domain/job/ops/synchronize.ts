@@ -156,8 +156,8 @@ export class SyncJobOperation extends WorkerBaseOperation<
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
 
-      if (remoteState == JOB_STATE.FAILED) {
-        if (job.state == JOB_STATE.RUNNING) {
+      if (remoteState === JOB_STATE.FAILED) {
+        if (job.state === JOB_STATE.RUNNING) {
         // if latest known state was 'running' then platform terminated the job
           this.ctx.log.info({
             jobId: input.dxid,
