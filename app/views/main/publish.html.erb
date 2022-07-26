@@ -5,13 +5,20 @@
   <div class="container container-padded-v">
     <!-- ko if: !isScopeASpace() -->
     <div class='pfda-help-block'>
-      <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank') %>
+      <span class='fa fa-exclamation-triangle' aria-hidden='true'></span>
+      <div class='alert-help-remediated'>
+        Publishing items makes them publicly visible.
+      </div>
+      <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank', class: 'review-doc-text') %>
     </div>
     <!-- /ko -->
     <!-- ko if: isScopeASpace() -->
     <div class='pfda-help-block'>
       <span class='fa fa-exclamation-triangle' aria-hidden='true'></span>
-      Sharing items makes them visible to the members of the selected Space. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank') %>
+      <div class='alert-help-remediated'>
+        Sharing items makes them visible to the members of the selected Space.
+      </div>
+      <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank', class: 'review-doc-text' ) %>
     </div>
     <!-- /ko -->
     <div class="list-group">

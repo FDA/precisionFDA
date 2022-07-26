@@ -98,21 +98,20 @@ export class SyncJobOperation extends WorkerBaseOperation<
         accessToken: this.ctx.user.accessToken,
       })
     } catch (err) {
-      if (err instanceof errors.ClientRequestError) {
-        // we retrieved response status code
-        if (err.props?.clientStatusCode && err.props?.clientStatusCode >= 500) {
-          // there was an error on platform side, we will retry later
+      if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {
+        if (err.props.clientStatusCode === 401) {
+          // Unauthorized. Expected scenario is that the user token has expired
+          // Removing the sync task will allow a new sync task to be recreated
+          // when user next logs in via UserCheckupTask
           this.ctx.log.info({ error: err.props },
-            'SyncJobOperation: Will not remove this job - 5xx error code detected')
-          return
+            'SyncJobOperation: Received 401 from platform, removing sync task')
+          await removeRepeatable(this.ctx.job)
         }
       }
-
-      this.ctx.log.info({ error: err },
-        'SyncJobOperation: Unhandled error from job/describe')
-      // We should not be blanket removing the sync task on error, causing sync to be removed
-      // and the status becomes stuck
-      // await removeRepeatable(this.ctx.job)
+      else {
+        this.ctx.log.info({ error: err },
+          'SyncJobOperation: Unhandled error from job/describe, will retry later')
+      }
       return
     }
 
