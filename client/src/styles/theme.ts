@@ -28,6 +28,7 @@ export const colors = {
   lightYellow: '#efe5d7',
   mediumDarkBlue: '#2f5373',
   darkRed: '#CA2323',
+  hoverDarkRed: '#8c0808',
   darkBlue: '#343E4D',
   darkGreen: '#1d764c',
   darkYellow: '#ec971f',
