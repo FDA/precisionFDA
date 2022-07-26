@@ -10,6 +10,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/prefer-readonly-parameter-types': 0,
     '@typescript-eslint/consistent-type-definitions': 0,
+    '@typescript-eslint/no-warning-comments': 0,
     // does not work for decorators
     'new-cap': 0,
     'id-length': 0,

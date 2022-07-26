@@ -24,7 +24,7 @@ export const MetadataRow = styled.div`
 export const MetadataItem = styled.div``
 
 export const MetadataKey = styled.div`
-  color: #8198BC;
+  color: ${colors.greyOnLightBlue};
   font-weight: 300;
   text-transform: uppercase;
   white-space: nowrap;
