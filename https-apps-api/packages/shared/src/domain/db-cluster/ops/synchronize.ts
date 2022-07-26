@@ -65,7 +65,7 @@ export class SyncDbClusterOperation extends WorkerBaseOperation<
       }
       else {
         this.ctx.log.info({ error: err },
-          'SyncDbClusterOperation: Unhandled error from job/describe, will retry later')
+          'SyncDbClusterOperation: Unhandled error from dbcluster/describe, will retry later')
       }
       return
     }
