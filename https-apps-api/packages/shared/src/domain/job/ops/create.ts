@@ -16,6 +16,7 @@ import { createSyncJobStatusTask } from '../../../queue'
 import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject, UserOpsCtx } from '../../../types'
 import { UserFile } from '../..'
+import { config } from '../../../config'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -213,6 +214,12 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     return initValue
   }
 
+  // Let the worker terminate the job first, then platform if still running - to avoid race conditions
+  private computeTimeoutPolicyForPlatformInMinutes(): number {
+    // value in config is usually in seconds, platform needs days|hours|minutes
+    return Math.ceil(Number(config.workerJobs.syncJob.staleJobsTerminateAfter) / 60) + 5;
+  }
+
   private buildClientApiCall(app: App): client.JobCreateParams {
     // shared payload here
     const payload: client.JobCreateParams = {
@@ -222,6 +229,13 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       systemRequirements: {
         '*': {
           instanceType: this.instance,
+        },
+      },
+      timeoutPolicyByExecutable: {
+        [app.dxid]: {
+          '*': {
+            minutes: this.computeTimeoutPolicyForPlatformInMinutes()
+          }
         },
       },
       name: this.input.name,
