@@ -2,7 +2,7 @@ import { IUser } from './user'
 import { ICounters } from './counters'
 
 interface ISpace {
-  id: number,
+  id: string,
   scope: string,
   name: string,
   desc: string,
@@ -18,8 +18,8 @@ interface ISpace {
   sharedSpaceId: number,
   privateSpaceId: number,
   hasLockLink: boolean,
-  hostLead: IUser, //UserShape,
-  guestLead: IUser, //UserShape,
+  hostLead: IUser,
+  guestLead: IUser,
   status: string,
   links: any, // object
   counters: ICounters,

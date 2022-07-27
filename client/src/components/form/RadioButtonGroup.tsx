@@ -1,4 +1,4 @@
-import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { colors } from '../../styles/theme'
 
@@ -61,19 +61,21 @@ const Group = styled.div<{ disabled: boolean }>`
   `}
 `
 
-export const RadioButtonGroup = ({
+export function RadioButtonGroup<T extends string | undefined>({
   value,
   options,
   onChange,
   onBlur,
-  disabled,
+  disabled = false,
+  ariaLabel,
 }: {
-  value: string
+  ariaLabel?: string
+  value?: T
   disabled?: boolean
-  options: { value: string; label: string }[]
-  onChange: (value: string) => void
+  options: { value?: T; label: string }[]
+  onChange: (value?: T) => void
   onBlur?: () => void
-}) => {
+}) {
   const [selected, setSelected] = useState(value || options[0].value)
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export const RadioButtonGroup = ({
   }, [selected])
 
   return (
-    <Group role="group" aria-label="Space type select" onBlur={onBlur} disabled={disabled}>
+    <Group role="radiogroup" aria-label={ariaLabel} onBlur={onBlur} disabled={disabled}>
       {options.map(({ value, label }, index) => (
         <Fragment key={index}>
           <input
@@ -95,7 +97,8 @@ export const RadioButtonGroup = ({
             onChange={() => setSelected(value)}
             disabled={disabled}
           />
-          <label htmlFor={`button${index}`}>{label}</label>
+
+          <label aria-checked="false" htmlFor={`button${index}`}>{label}</label>
         </Fragment>
       ))}
     </Group>

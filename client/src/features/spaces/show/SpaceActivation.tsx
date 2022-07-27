@@ -158,7 +158,7 @@ export function Activation({ space }: { space: ISpace }) {
           </div>
           {!!currentUser && (
             <ButtonSolidGreen
-              disabled={isAcceptedByUser}
+              disabled={isAcceptedByUser || acceptSpaceMutation.isLoading}
               onClick={() => acceptClickHandler()}
             >
               {isAcceptedByUser ? 'Already accepted' : 'Accept Space'}
