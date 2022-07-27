@@ -41,7 +41,6 @@ export const StyledModal = styled.div`
     border-color: grey;
   }
 
-  max-height: calc(100vh - 120px);
   width: auto;
   @media(min-width: ${breakPoints.medium}px) {
     width: 640px;
@@ -94,8 +93,8 @@ export const ButtonRow = styled.div`
   align-items: center;
   margin-top: 24px;
 `
-export const Content = styled.div`
-  overflow-y: scroll;
+export const Content = styled.div<{ overflowContent: boolean }>`
+  ${({ overflowContent }) => overflowContent && 'overflow-y: scroll;'}
   padding: 12px;
 `
 

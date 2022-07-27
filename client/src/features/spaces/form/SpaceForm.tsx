@@ -164,6 +164,7 @@ export const SpaceForm = ({
               value={value}
               onBlur={onBlur}
               options={options}
+              ariaLabel="Spaces option select"
             />
           )}
         />

@@ -4,11 +4,11 @@ export interface Links {
   user: string;
 }
 
-export type MemberRole = 'lead' | 'contributor'
+export type MemberRole = 'lead' | 'contributor' | 'viewer' | 'admin' | 'disable' | 'enable'
 export type MemberSide = 'host' | 'guest'
 
 export interface SpaceMembership {
-  id: number;
+  id: string;
   user_name: string;
   title: string;
   active: boolean;

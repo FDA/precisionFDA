@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { colors } from '../../../styles/theme'
 import { SpaceMembership } from './members.types'
+import { Button } from '../../../components/Button/index'
+import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 
-export const StyledMemberCard = styled.div`
+export const StyledMemberCard = styled.div<{isDeactivated: boolean}>`
   min-width: 300px;
   border: 2px solid ${colors.primaryBlue};
-  margin-top: 16px;
+  ${({ isDeactivated }) => isDeactivated && `border: 2px solid ${colors.borderDefault};;`}
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 `
 export const StyledCardHeader = styled.div`
   background-color: ${colors.subtleBlue};
@@ -36,7 +38,8 @@ export const Gravatar = styled.img`
   height: 30px;
   margin-right: 5px;
 `
-export const StyledDetails = styled.div`
+export const StyledDetails = styled.div<{isDeactivated: boolean}>`
+  ${({ isDeactivated }) => isDeactivated && `color: ${colors.textDarkGreyInactive};`}
   font-size: 14px;
   line-height: 22px;
   ul {
@@ -50,9 +53,14 @@ export const StyledDetails = styled.div`
   }
 `
 
-export function MemberCard({ member }: { member: SpaceMembership }) {
+const RoleButton = styled(Button)`
+  margin: 4px;
+`
+
+export function MemberCard({ member, spaceId }: { member: SpaceMembership, spaceId: string }) {
+  const { modalComp, setShowModal } = useChangeMemberRoleModal({ spaceId, member })
   return (
-    <StyledMemberCard>
+    <StyledMemberCard isDeactivated={!member.active}>
       <StyledCardHeader>
         <Link
           to={`/users/${member.user_name}`}
@@ -63,7 +71,7 @@ export function MemberCard({ member }: { member: SpaceMembership }) {
           {member.title}
         </Link>
       </StyledCardHeader>
-      <StyledDetails>
+      <StyledDetails isDeactivated={!member.active}>
         <ul>
           <li>
             <Key>Username:</Key>
@@ -79,7 +87,7 @@ export function MemberCard({ member }: { member: SpaceMembership }) {
           </li>
           <li>
             <Key>Role:</Key>
-            <Value>{member.role}</Value>
+            <Value>{member.active ? member.role : `${member.role} (disabled)`}</Value>
           </li>
           <li>
             <Key>Organization:</Key>
@@ -90,6 +98,7 @@ export function MemberCard({ member }: { member: SpaceMembership }) {
             <Value>{member.created_at}</Value>
           </li>
         </ul>
+        {member.to_roles.length > 0 && <><RoleButton onClick={() => setShowModal(true)}>Change Role</RoleButton>{modalComp}</>}
       </StyledDetails>
     </StyledMemberCard>
   )
