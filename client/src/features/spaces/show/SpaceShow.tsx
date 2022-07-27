@@ -214,7 +214,7 @@ export const Spaces2 = ({
                 <JobShow />
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
-                <MembersList spaceId={space.id} />
+                <MembersList space={space} />
               </Route>
               <Route
                 exact
