@@ -24,11 +24,13 @@ export async function spaceRequest({ id }: { id: string }): Promise<{meta: unkno
 
 export async function unlockSpaceRequest({ link = '' }: { id: string, op: 'lock' | 'unlock', link?: string }): Promise<unknown> {
   // const res = await fetch(`/api/spaces/${id}/${op}`, { method: 'POST'})
-  const res = await fetch(link, { method: 'POST' })
+  const res = await fetch(link, {
+    ...getApiRequestOpts('POST'),
+  })
   return res.json()
 }
 
-export async function addData({ spaceId, uids }: { spaceId: string, uids: string[] }): Promise<unknown> {  
+export async function addData({ spaceId, uids }: { spaceId: string, uids: string[] }): Promise<unknown> {
   const res = await fetch(`/api/spaces/${spaceId}/add_data/`, {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify({ uids }),
@@ -36,8 +38,10 @@ export async function addData({ spaceId, uids }: { spaceId: string, uids: string
   return res
 }
 
-export async function acceptSpaceRequest({ id, name }: { id: string, name: string }): Promise<unknown> {
-  const res = await fetch(`/api/spaces/${id}-${name}/accept`, { method: 'POST' })
+export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknown> {
+  const res = await fetch(`/api/spaces/${id}/accept`, {
+    ...getApiRequestOpts('POST'),
+   })
   return res.json()
 }
 

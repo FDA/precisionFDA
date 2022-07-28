@@ -79,7 +79,7 @@ const guestLeadLabel = (spaceType: ISpace['type']) => {
     return `${
       spaceType === SPACE_REVIEW ? 'Sponsor Lead' : getGuestLeadLabel(spaceType)
     }`
-  } 
+  }
     return ''
 }
 
@@ -95,7 +95,7 @@ export function Activation({ space }: { space: ISpace }) {
     },
   })
   const acceptClickHandler = () => {
-    acceptSpaceMutation.mutateAsync({ id: space.id, name: space.name })
+    acceptSpaceMutation.mutateAsync({ id: space.id })
   }
 
   const { name, description, created_at, id, type, host_lead, guest_lead } =
