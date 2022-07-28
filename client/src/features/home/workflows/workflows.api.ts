@@ -27,10 +27,14 @@ export interface FetchWorkflowExecutionsQuery {
   meta: IMeta
 }
 
-export async function fetchWorkflowExecutions(filters: IFilter[], uid: string, params: Params): Promise<FetchWorkflowExecutionsQuery> {
+interface WorkflowExecutionParams extends Params {
+  uid: string
+}
+
+export async function fetchWorkflowExecutions(filters: IFilter[], params: WorkflowExecutionParams): Promise<FetchWorkflowExecutionsQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const res = await fetch(`/api/workflows/${uid}/jobs${paramQ}`)
+  const paramQ = `?${new URLSearchParams(query as any).toString()}`
+  const res = await fetch(`/api/workflows/${params.uid}/jobs${paramQ}`)
   return res.json()
 }
 
