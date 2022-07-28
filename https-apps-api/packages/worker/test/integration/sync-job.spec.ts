@@ -20,6 +20,7 @@ import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/moc
 import { stripEntityDates } from '../utils/expect-helper'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { SyncJobOperation } from '@pfda/https-apps-shared/src/domain/job'
+import { errorsFactory } from '../utils/errors-factory'
 
 describe('SyncJobOperation BullJobId', () => {
   it('creates correct bullJob ids', async () => {
@@ -441,16 +442,24 @@ describe('TASK: sync_job_status', () => {
       expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
     })
 
-    it('it handles ClientRequestError gracefully', async() => {
+    it('it handles InvalidAuthentication - ExpiredToken gracefully', async () => {
       const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
       await em.flush()
-      fakes.client.jobDescribeFake.rejects(new errors.ClientRequestError(
-        'ServiceUnavailable', {
-          clientResponse: 'Some resource was temporarily unavailable; please try again later',
-          clientStatusCode: 503,
-        }      
-      ))
-  
+      fakes.client.jobDescribeFake.rejects(errorsFactory.createClientTokenExpiredError())
+
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.client.jobDescribeFake.calledOnce).to.be.true()
+      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
+    })
+
+    it('it handles ClientRequestError gracefully', async () => {
+      const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
+      await em.flush()
+      fakes.client.jobDescribeFake.rejects(errorsFactory.createServiceUnavailableError())
+
       await createSyncJobTask(
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
@@ -459,7 +468,7 @@ describe('TASK: sync_job_status', () => {
       expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
     })
 
-    it('it handles other error gracefully', async() => {
+    it('it handles other error gracefully', async () => {
       const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })
       fakes.client.jobDescribeFake.rejects(new Error('boom'))
       await em.flush()
