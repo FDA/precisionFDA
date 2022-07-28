@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
+import styled from 'styled-components'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
@@ -22,6 +23,10 @@ import { usePaginationParams } from '../usePaginationState'
 import { toArrayFromObject } from '../utils'
 import { fetchWorkflowExecutions } from './workflows.api'
 
+const ExecutionsPagination = styled.div`
+  padding-left: 12px;
+`
+
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
 export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
@@ -41,6 +46,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort?.order_by, order_dir: sort?.order_dir },
     filter: filterQuery,
+    params: { uid },
   })
 
   const setPerPage = (perPage: number) => {
@@ -62,17 +68,19 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPage}
-      />
+      <ExecutionsPagination>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPage}
+        />
+      </ExecutionsPagination>
     </ErrorBoundary>
   )
 }

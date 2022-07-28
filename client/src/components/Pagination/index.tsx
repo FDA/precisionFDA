@@ -53,7 +53,7 @@ export function hidePagination(
 export const Pagination = ({
   page,
   setPage,
-  totalCount,
+  totalCount = 0,
   perPage,
   totalPages = Math.ceil(totalCount / perPage),
   isPreviousData,
@@ -64,7 +64,7 @@ export const Pagination = ({
   page?: number
   setPage: (n: number) => void
   onPerPageSelect: (n: number) => void
-  totalCount: number
+  totalCount?: number
   totalPages?: number
   perPage: number
   isPreviousData: boolean
@@ -89,7 +89,7 @@ export const Pagination = ({
 
   const handleJumpToSubmit = (e: any) => {
     e.preventDefault()
-    const value = parseInt(e.target[0].value)
+    const value = parseInt(e.target[0].value, 10)
     if (value > localTotal || value <= 0) {
       setPage(1)
     } else {

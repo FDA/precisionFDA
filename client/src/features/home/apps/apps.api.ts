@@ -28,10 +28,14 @@ export interface FetchAppsExecutionsQuery {
   meta: IMeta
 }
 
-export async function fetchAppExecutions(filters: IFilter[], appUid: string, params: Params): Promise<FetchAppsExecutionsQuery> {
+interface FetchAppExecutionsParams extends Params {
+  appUid: string
+}
+
+export async function fetchAppExecutions(filters: IFilter[], params: FetchAppExecutionsParams): Promise<FetchAppsExecutionsQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const res = await fetch(`/api/apps/${appUid}/jobs${paramQ}`)
+  const paramQ = `?${new URLSearchParams(query as any).toString()}`
+  const res = await fetch(`/api/apps/${params.appUid}/jobs${paramQ}`)
   return res.json()
 }
 
