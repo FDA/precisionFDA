@@ -27,9 +27,14 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
     nonTerminatedDbClusters.forEach(async (nonTerminatedDbCluster) => {
       const dbSyncOperation = await queue.getStatusQueue().getJob(SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid))
       if (!dbSyncOperation) {
-        // TODO how to treat this scenario - don't have user ctx
-        // TODO(samuel) - possibly solve this later
-        console.log('Missing sync operation for unterminated database')
+        this.ctx.log.warn(
+          { 
+            user: nonTerminatedDbCluster.user.getEntity().dxuser,
+            dbCluster: nonTerminatedDbCluster,
+          },
+          'CheckNonTerminatedDbClustersOperation: Missing sync operation for unterminated database, ' +
+          'it will be recreated the next time the user logs in.',
+        )
       }
     })
     const adminUser = await em.getRepository(User).findAdminUser()

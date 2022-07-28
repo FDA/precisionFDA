@@ -98,21 +98,20 @@ export class SyncJobOperation extends WorkerBaseOperation<
         accessToken: this.ctx.user.accessToken,
       })
     } catch (err) {
-      if (err instanceof errors.ClientRequestError) {
-        // we retrieved response status code
-        if (err.props?.clientStatusCode && err.props?.clientStatusCode >= 500) {
-          // there was an error on platform side, we will retry later
+      if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {
+        if (err.props.clientStatusCode === 401) {
+          // Unauthorized. Expected scenario is that the user token has expired
+          // Removing the sync task will allow a new sync task to be recreated
+          // when user next logs in via UserCheckupTask
           this.ctx.log.info({ error: err.props },
-            'SyncJobOperation: Will not remove this job - 5xx error code detected')
-          return
+            'SyncJobOperation: Received 401 from platform, removing sync task')
+          await removeRepeatable(this.ctx.job)
         }
       }
-
-      this.ctx.log.info({ error: err },
-        'SyncJobOperation: Unhandled error from job/describe')
-      // We should not be blanket removing the sync task on error, causing sync to be removed
-      // and the status becomes stuck
-      // await removeRepeatable(this.ctx.job)
+      else {
+        this.ctx.log.info({ error: err },
+          'SyncJobOperation: Unhandled error from job/describe, will retry later')
+      }
       return
     }
 
@@ -156,12 +155,21 @@ export class SyncJobOperation extends WorkerBaseOperation<
       const eventEntity = await createJobClosed(user, job)
       em.persist(eventEntity)
 
-      if (remoteState == JOB_STATE.FAILED) {
-        this.ctx.log.info({
-          failureCounts: platformJobData.failureCounts,
-          failureReason: platformJobData.failureReason,
-          failureMessage: platformJobData.failureMessage,
-        }, 'SyncJobOperation: Detected failed job')
+      if (remoteState === JOB_STATE.FAILED) {
+        if (job.state === JOB_STATE.RUNNING) {
+        // if latest known state was 'running' then platform terminated the job
+          this.ctx.log.info({
+            jobId: input.dxid,
+            failureReason: platformJobData.failureReason,
+            failureMessage: platformJobData.failureMessage,
+          }, 'SyncJobOperation: Detected job termination by platform')
+        } else {
+          this.ctx.log.info({
+            failureCounts: platformJobData.failureCounts,
+            failureReason: platformJobData.failureReason,
+            failureMessage: platformJobData.failureMessage,
+          }, 'SyncJobOperation: Detected failed job')
+        }
       }
 
       // Use the following to invoke sync files within this operation to debug
@@ -172,7 +180,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
     }
 
-    this.ctx.log.info({ 
+    this.ctx.log.info({
       jobId: input.dxid,
       fromState: job.state,
       toState: remoteState,

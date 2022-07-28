@@ -25,5 +25,6 @@ module.exports = {
     '@typescript-eslint/restrict-template-expressions': 0,
     'import/group-exports': 0,
     '@typescript-eslint/no-floating-promises': 0,
+    '@typescript-eslint/no-warning-comments': 0,
   },
 }

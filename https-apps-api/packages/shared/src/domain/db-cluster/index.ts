@@ -13,3 +13,5 @@ export { TerminateDbClusterOperation } from './ops/terminate'
 export { SyncDbClusterOperation } from './ops/synchronize'
 
 export { CheckNonTerminatedDbClustersOperation } from './ops/check-non-terminated'
+
+export { CheckUserDbClustersOperation } from './ops/check-user-dbs'

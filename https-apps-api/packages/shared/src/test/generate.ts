@@ -27,6 +27,8 @@ import {
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
 import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
+import { TASK_TYPE } from '../queue/task.input'
+import { SyncDbClusterOperation } from '../domain/db-cluster'
 
 const chance = new Chance()
 
@@ -404,11 +406,31 @@ const bullQueue = {
   syncJobStatus: (jobDxid, userContext) => ({
     data: {
       payload: {
-          dxid: jobDxid
+        dxid: jobDxid,
       },
-      type: 'sync_job_status',
+      type: TASK_TYPE.SYNC_JOB_STATUS,
       user: userContext,
     },
+  }),
+  syncDbClusterStatus: (dbClusterDxid, userContext) => ({
+    data: {
+      payload: {
+        dxid: dbClusterDxid,
+      },
+      type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+      user: userContext,
+    },
+  }),
+}
+
+const bullQueueRepeatable = {
+  syncDbClusterStatus: (dbClusterDxid) => ({
+    id: SyncDbClusterOperation.getBullJobId(dbClusterDxid),
+    endDate: null,
+    tz: null,
+    cron: '*/2 * * * *',
+    every: null,
+    next: Date.now() + (60 * 1000),
   }),
 }
 
@@ -429,4 +451,5 @@ export {
   challenge,
   dbCluster,
   bullQueue,
+  bullQueueRepeatable,
 }
