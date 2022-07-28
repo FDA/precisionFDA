@@ -62,10 +62,9 @@ describe('PATCH /jobs/:id/terminate', () => {
     const { body } = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .query({ ...getDefaultQueryData(user) })
-      .expect(200)
+      .expect(422)
     expect(fakes.client.jobTerminateFake.notCalled).to.be.true()
-    // job state was not changed
-    expect(body).to.have.property('state', JOB_STATE.TERMINATED)
+    expect(body.error.message).to.equal('Job is already terminating or terminated')
   })
 
   context('error states', () => {
