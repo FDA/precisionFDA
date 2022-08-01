@@ -109,7 +109,7 @@ Rails.application.routes.draw do
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"
     get "about/:section" => "main#about"
-    get "terms" => "main#terms"
+    get "terms" => "home#index"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
@@ -131,7 +131,7 @@ Rails.application.routes.draw do
     get "home" => "home#index"
     get "home" => "home#index"
     get "/home/*all", to: "home#index"
-
+    
     # Old My Home
     # TODO: remove old code once new My Home is stable for release or two,
     #       but for now it still has utility for devs

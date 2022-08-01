@@ -33,6 +33,7 @@ import NoFoundPage from './views/pages/NoFoundPage'
 import NewSpacePage from './views/pages/Spaces/NewSpacePage'
 import SpacePage from './views/pages/Spaces/SpacePage'
 import SpacesListPage from './views/pages/Spaces/SpacesListPage'
+import { ToS } from './views/pages/ToS'
 
 
 const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
@@ -142,6 +143,9 @@ const root = ({ store }: any) => {
                 </Route>
                 <Route exact path="/experts">
                   <ExpertsListPage />
+                </Route>
+                <Route exact path="/terms">
+                  <ToS />
                 </Route>
                 <Route path="*">
                   <NoFoundPage />
