@@ -70,6 +70,9 @@ export interface EditSpacePayload {
 export interface CreateSpaceResponse {
   space: ISpace
   error?: Error;
+  errors?: {
+    messages: string[]
+  };
 }
 
 export interface EditableSpace {

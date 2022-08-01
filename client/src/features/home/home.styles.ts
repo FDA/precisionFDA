@@ -91,29 +91,6 @@ export const ScopeDescription = styled.span`
   font-size: 13px;
 `
 
-export const StyledMenuCounter = styled.span<{isLong?: boolean, active?: boolean}>`
-  height: 20px;
-  min-width: 20px;
-  line-height: 0;
-  ${({ isLong }) => isLong && 'padding: 0 2px;'}
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  justify-self: flex-end;
-  margin-right: 24px;
-  color: ${colors.textDarkGrey};
-  font-size: 12px;
-
-  ${({ active }) => {
-    if (active) {
-      return css`
-        color: ${colors.textWhite};
-      `
-    }
-  }}
-`
-
 export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
@@ -258,5 +235,7 @@ export const StyledRunByYouLink = styled.a`
 `
 
 export const StyledPaginationSection = styled.div`
-  margin: 32px 20px;
+  padding-left: 12px;
+  padding-top: 32px;
+  padding-bottom: 16px;
 `

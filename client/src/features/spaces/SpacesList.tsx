@@ -28,8 +28,6 @@ const SpacesHeader = styled.div`
 
 type ListType = { spaces: ISpace[]; meta: IMeta }
 
-const mainColumnWidth = 250
-
 function getWindowHWidth() {
   const { innerWidth: width } = window
   return {
@@ -114,6 +112,7 @@ export const Spaces2List = () => {
 
 const StyledTable = styled.div`
   ${ReactTableStyles} {
+    font-size: 14px;
     .table {
       .tr {
         height: 56px;

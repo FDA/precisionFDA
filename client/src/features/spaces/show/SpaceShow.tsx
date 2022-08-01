@@ -16,9 +16,9 @@ import { FileIcon } from '../../../components/icons/FileIcon'
 import { FlapIcon } from '../../../components/icons/FlapIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { Loader } from '../../../components/Loader'
+import { MenuCounter } from '../../../components/MenuCounter'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
 import { usePrevious } from '../../../hooks/usePrevious'
-import { checkStatus } from '../../../utils/api'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { AppList } from '../../home/apps/AppList'
 import { AppsShow } from '../../home/apps/AppsShow'
@@ -35,6 +35,7 @@ import {
   Row,
   StyledMenu,
 } from '../../home/home.styles'
+import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { WorkflowList } from '../../home/workflows/WorflowList'
 import { WorkflowShow } from '../../home/workflows/WorkflowShow'
 import { MembersList } from '../members/MembersList'
@@ -52,22 +53,6 @@ import {
   SpaceTypeHeader, TopSpaceHeader,
 } from './styles'
 
-interface CounterRequest {
-  apps: string
-  assets: string
-  dbclusters: string
-  jobs: string
-  files: string
-  workflows: string
-}
-
-export async function counterRequest(): Promise<CounterRequest> {
-  const req = await fetch('/api/counters').then(checkStatus)
-  const json = await req.json()
-  // TODO: remove this when the API is fixed and returns only string or number
-  if (typeof json.jobs === 'number') json.jobs = json.jobs.toString() + 499
-  return json
-}
 
 export const Spaces2 = ({
   space,
@@ -84,6 +69,7 @@ export const Spaces2 = ({
   )
   const { path } = useRouteMatch()
   const spaceActions = useSpaceActions({ space })
+  const [activeResource] = useActiveResourceFromUrl('spaces')
 
   if (user.is_guest) {
     return <GuestNotAllowed />
@@ -137,6 +123,9 @@ export const Spaces2 = ({
           >
             <FileIcon height={14} />
             <MenuText>Files</MenuText>
+            {expandedSidebar && (
+              <MenuCounter count={space.counters.files.toString()} active={activeResource === 'files'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="apps-link"
@@ -145,6 +134,9 @@ export const Spaces2 = ({
           >
             <CubeIcon height={14} />
             <MenuText>Apps</MenuText>
+            {expandedSidebar && (
+              <MenuCounter count={space.counters.apps.toString()} active={activeResource === 'apps'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="workflows-link"
@@ -153,6 +145,9 @@ export const Spaces2 = ({
           >
             <BoltIcon height={14} />
             <MenuText>Workflows</MenuText>
+            {expandedSidebar && (
+              <MenuCounter count={space.counters.workflows.toString()} active={activeResource === 'workflows'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="executions-link"
@@ -161,6 +156,9 @@ export const Spaces2 = ({
           >
             <CogsIcon height={14} />
             <MenuText>Executions</MenuText>
+            {expandedSidebar && (
+              <MenuCounter count={space.counters.jobs.toString()} active={activeResource === 'executions'} />
+            )}
           </MenuItem>
           <MenuItem
             data-testid="members-link"
@@ -169,6 +167,9 @@ export const Spaces2 = ({
           >
             <UsersIcon height={14} />
             <MenuText>Members</MenuText>
+            {expandedSidebar && (
+              <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />
+            )}
           </MenuItem>
           <Fill />
           <Expand
@@ -195,13 +196,13 @@ export const Spaces2 = ({
               <Route exact path={`/spaces/${space.id}/apps`}>
                 <AppList spaceId={space.id} />
               </Route>
-              <Route exact path={`/spaces/${space.id}/apps/:appUid`}>
+              <Route path={`/spaces/${space.id}/apps/:appUid`}>
                 <AppsShow />
               </Route>
               <Route exact path={`/spaces/${space.id}/workflows`}>
                 <WorkflowList spaceId={space.id} />
               </Route>
-              <Route exact path={`/spaces/${space.id}/workflows/:workflowUid`}>
+              <Route path={`/spaces/${space.id}/workflows/:workflowUid`}>
                 <WorkflowShow />
               </Route>
               <Route exact path={`/spaces/${space.id}/executions`}>

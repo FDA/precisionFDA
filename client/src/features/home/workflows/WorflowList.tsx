@@ -34,7 +34,7 @@ export const WorkflowList = ({
   spaceId,
 }: {
   scope?: ResourceScope
-  spaceId: string
+  spaceId?: string
 }) => {
   const history = useHistory()
   const isAdmin = useSelector((state: RootState) => state.context.user.admin)
@@ -143,7 +143,7 @@ export const WorkflowList = ({
       <StyledPaginationSection>
         <Pagination
           page={data?.meta?.pagination?.current_page}
-          totalCount={data?.meta?.pagination?.total_count!}
+          totalCount={data?.meta?.pagination?.total_count}
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           hide={hidePagination(

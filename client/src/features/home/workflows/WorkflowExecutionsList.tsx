@@ -25,6 +25,8 @@ import { fetchWorkflowExecutions } from './workflows.api'
 
 const ExecutionsPagination = styled.div`
   padding-left: 12px;
+  padding-top: 32px;
+  padding-bottom: 16px;
 `
 
 type ListType = { jobs: IExecution[]; meta: IMeta }

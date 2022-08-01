@@ -3,7 +3,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { UseMutationResult } from 'react-query'
-import * as Yup from 'yup'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { Divider, InputError } from '../../../components/form/styles'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -14,7 +13,7 @@ import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
 import { HintText, Row, StyledForm } from './styles'
-import { getSpaceTypeOptions } from './helpers'
+import { getSpaceTypeOptions, SPACE_TYPE_HINT, validationSchema } from './helpers'
 
 interface SpaceCreateForm {
   space_type: ISpace['type']
@@ -28,53 +27,6 @@ interface SpaceCreateForm {
   cts: string | null
 }
 
-const SPACE_TYPE_HINT: Record<ISpace['type'], string> = {
-  private_type: 'Available to all users, and only consists of a private area.',
-  groups:
-    'Site admins can create a space in which any users can be invited.\nFor challenges, a group space is automatically created to house all user submissions.\nGroup spaces has two sides (Host and Lead), ',
-  review:
-    'Each Review Space has 2 areas: private and cooperative ones.\nEach review Space has 2 sides: reviewers and sponsors.',
-  government:
-    'Only a government user may create or join a Government-Restriced Space.\nValidation and error message should appear in the "Create Space" and "Add Members" forms to check that an entered username belongs to a government user.\nGovernment spaces only has one side, which is the Shared area.',
-  administrator:
-    'Only site admins can be members of an Administrator Space. Membership is implicit, i.e. all site admins can access and use any Administrator Space\nAdministrator space has only one side, which is the Shared area',
-}
-
-const validationSchema = Yup.object().shape({
-  space_type: Yup.string().required('Engine required'),
-  name: Yup.string().required('Name required'),
-  description: Yup.string().required('Description required'),
-  guest_lead_dxuser: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'groups',
-      then: Yup.string().required('Guest lead required'),
-    }),
-  review_lead_dxuser: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().required('Review lead required'),
-    }),
-  host_lead_dxuser: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'groups',
-      then: Yup.string().required('Host lead required'),
-    }),
-  sponsor_lead_dxuser: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().required('Sponsor lead required'),
-    }),
-  cts: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().nullable(),
-    }),
-})
 
 export interface ISpaceForm {
   mutation: UseMutationResult<CreateSpaceResponse, unknown, CreateSpacePayload, unknown>

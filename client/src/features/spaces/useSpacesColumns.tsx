@@ -43,15 +43,27 @@ export const Dot = styled.div`
   height: 8px;
   border-radius: 5px;
 `
+export const StyledName = styled.span`
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: not-allowed;
+  color: ${colors.textDarkGreyInactive};
+`
+export const StyledNameLink = styled(Link)`
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 16px;
+`
 
-export const StatusCell = styled.div<{isActive: boolean}>`
+export const StatusCell = styled.div<{ isActive: boolean }>`
   display: flex;
   align-items: center;
-  color: ${({ isActive }) => isActive ? 'green' : 'red'};
+  color: ${({ isActive }) => (isActive ? 'green' : 'red')};
   text-transform: capitalize;
 
   ${Dot} {
-    color: ${({ isActive }) => isActive ? 'green' : 'red'};
+    color: ${({ isActive }) => (isActive ? 'green' : 'red')};
     margin-right: 8px;
   }
 `
@@ -104,8 +116,8 @@ export const useSpacesColumns = ({
   colWidths,
   isAdmin = false,
 }: {
-  colWidths?: any;
-  isAdmin?: boolean;
+  colWidths?: any
+  isAdmin?: boolean
 }) =>
   useMemo<Column<ISpace>[]>(
     () =>
@@ -136,9 +148,13 @@ export const useSpacesColumns = ({
           Filter: DefaultColumnFilter,
           Cell: ({ row }) => (
             <SpaceTableNameCell>
-              <Link to={{ pathname: `/spaces/${row.original.id}` }}>
-                {row.original.name}
-              </Link>
+              {row.original.current_user_membership ? (
+                <StyledNameLink to={{ pathname: `/spaces/${row.original.id}` }}>
+                  {row.original.name}
+                </StyledNameLink>
+              ) : (
+                <StyledName>{row.original.name}</StyledName>
+              )}
               <p>{row.original.description}</p>
             </SpaceTableNameCell>
           ),
@@ -163,7 +179,7 @@ export const useSpacesColumns = ({
           width: colWidths?.tags || 200,
           Cell: ({ value }) => (
             <StyledTags>
-              {value.map((tag) => (
+              {value.map(tag => (
                 <StyledTagItem key={tag}>{tag}</StyledTagItem>
               ))}
             </StyledTags>
