@@ -3,12 +3,14 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
+import { useHistory } from 'react-router'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { Modal } from '../../modal'
 import { ButtonRow, StyledForm } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -37,7 +39,9 @@ const validationSchema = Yup.object().shape({
 })
 
 export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string, member: SpaceMembership }) => {
+  const authUser = useAuthUser()
   const queryClient = useQueryClient()
+  const history = useHistory()
   const { isShown, setShowModal } = useModal()
   const {
     handleSubmit,
@@ -45,18 +49,21 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
     formState: { errors },
     reset,
   } = useForm<FormValues>({
-    mode: 'onBlur',
-    defaultValues: { role: { label: LABEL[member.role], value: member.role }},
     resolver: yupResolver(validationSchema),
   })
   const mutation = useMutation({
     mutationFn: ({ role }: FormValues) =>
       changeMembershipRoleRequest({ spaceId, memberId: member.id, role: role.value }),
     onSuccess: res => {
-      reset()
-      queryClient.invalidateQueries('space-members')
-      setShowModal(false)
-      toast.success('Success: Change member role.')
+      if(authUser.dxuser === res.member) {
+        history.push('/spaces')
+        toast.success('Success: Disabled yourself from the space.')
+      } else {
+        reset()
+        queryClient.invalidateQueries('space-members')
+        setShowModal(false)
+        toast.success('Success: Change member role.')
+      }
     },
     onError: (e) => {
       toast.error(`Error: Change member role. ${e.response.data.errors}`)
@@ -117,6 +124,7 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
                 onBlur={onBlur}
                 value={value}
                 isDisabled={mutation.isLoading}
+                defaultInputValue={undefined}
               />
             )}
           />

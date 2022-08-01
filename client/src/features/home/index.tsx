@@ -12,6 +12,7 @@ import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { FlapIcon } from '../../components/icons/FlapIcon'
+import { MenuCounter } from '../../components/MenuCounter'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { RootState } from '../../store'
 import { checkStatus } from '../../utils/api'
@@ -27,11 +28,13 @@ import { ExecutionList } from './executions/ExecutionList'
 import { JobShow } from './executions/JobShow'
 import { FileList } from './files/FileList'
 import { FileShow } from './files/show/FileShow'
-import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu, StyledMenuCounter } from './home.styles'
+import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.styles'
 import { ResourceScope } from './types'
+import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
 import { WorkflowList } from './workflows/WorflowList'
 import { WorkflowShow } from './workflows/WorkflowShow'
+
 
 interface CounterRequest {
   apps: string,
@@ -52,11 +55,6 @@ export async function counterRequest(scope: ResourceScope): Promise<CounterReque
   return json
 }
 
-const MenuCounter = ({ count, active }:{count?: string, active?: boolean}) => {
-  const displayedCount = count ?? '0'
-  return (<StyledMenuCounter isLong={displayedCount.length > 2} active={active}>{displayedCount}</StyledMenuCounter>)
-}
-
 export const Home2 = () => {
   const user = useSelector((state: RootState) => state.context.user)
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
@@ -64,8 +62,8 @@ export const Home2 = () => {
   const history = useHistory()
   const [scopeQuery, setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
   const [scope, setScope] = useState<ResourceScope>(scopeQuery || 'me')
-  const { data } = useQuery(['counters', scope], () => counterRequest(scope))
-  const [activeResource, setActiveResource] = useState<string>()
+  const { data: counterData } = useQuery(['counters', scope], () => counterRequest(scope))
+  const [activeResource] = useActiveResourceFromUrl('myhome')
 
   const handleScopeClick = async (newScope: ResourceScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
@@ -75,11 +73,6 @@ export const Home2 = () => {
       history.push(`/home/${activeResource}?scope=${newScope}`)
     }
   }
-
-  useEffect(() => {
-    const [,,resource] = history.location.pathname.split('/')
-    setActiveResource(resource)
-  }, [history.location])
 
   useEffect(() => {
     if(scopeQuery) {
@@ -161,7 +154,7 @@ export const Home2 = () => {
             <FileIcon height={14} />
             <MenuText>Files</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.files} active={activeResource === 'files'} />
+              <MenuCounter count={counterData?.files} active={activeResource === 'files'} />
             )}
           </MenuItem>
           <MenuItem
@@ -173,7 +166,7 @@ export const Home2 = () => {
             <CubeIcon height={14} />
             <MenuText>Apps</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.apps} active={activeResource === 'apps'} />
+              <MenuCounter count={counterData?.apps} active={activeResource === 'apps'} />
             )}
           </MenuItem>
           <MenuItem
@@ -185,7 +178,7 @@ export const Home2 = () => {
             <DatabaseIcon height={14} />
             <MenuText>Databases</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.dbclusters} active={activeResource === 'databases'} />
+              <MenuCounter count={counterData?.dbclusters} active={activeResource === 'databases'} />
             )}
           </MenuItem>
           <MenuItem
@@ -197,7 +190,7 @@ export const Home2 = () => {
             <FileZipIcon height={14} />
             <MenuText>Assets</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.assets} active={activeResource === 'assets'} />
+              <MenuCounter count={counterData?.assets} active={activeResource === 'assets'} />
             )}
           </MenuItem>
           <MenuItem
@@ -209,7 +202,7 @@ export const Home2 = () => {
             <BoltIcon height={14} />
             <MenuText>Workflows</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.workflows} active={activeResource === 'workflows'} />
+              <MenuCounter count={counterData?.workflows} active={activeResource === 'workflows'} />
             )}
           </MenuItem>
           <MenuItem
@@ -221,7 +214,7 @@ export const Home2 = () => {
             <CogsIcon height={14} />
             <MenuText>Executions</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.jobs} active={activeResource === 'executions'} />
+              <MenuCounter count={counterData?.jobs} active={activeResource === 'executions'} />
             )}
           </MenuItem>
           <Fill />

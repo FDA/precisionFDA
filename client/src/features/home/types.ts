@@ -1,5 +1,5 @@
-import { ReactNode } from "react-router/node_modules/@types/react"
-import { IChallenge } from "../../types/challenge"
+import { ReactNode } from 'react'
+import { IChallenge } from '../../types/challenge'
 
 export interface TableSelected<T> {
   selectedItems: T[]
@@ -15,7 +15,7 @@ export interface BaseError {
     type: 'error'
   }
 }
-
+export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions'
 export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions' | 'spaces'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 
@@ -62,23 +62,23 @@ export type ActionFunctionsTypeRev<T extends string> = {
 export type ResourcePage = 'details' | 'list'
 
 export interface MetaPath {
-  "id": number
-  "name": string
+  'id': number
+  'name': string
 }
 export interface IMeta {
-  "links": {
-    "copy_private": string
-    "comments": string
+  'links': {
+    'copy_private': string
+    'comments': string
   },
-  "path": MetaPath[],
-  "count": number,
-  "challenges": IChallenge[],
-  "pagination": {
-    "current_page": number,
-    "next_page": null | number,
-    "prev_page": null | number,
-    "total_pages": number,
-    "total_count": number
+  'path': MetaPath[],
+  'count': number,
+  'challenges': IChallenge[],
+  'pagination': {
+    'current_page': number,
+    'next_page': null | number,
+    'prev_page': null | number,
+    'total_pages': number,
+    'total_count': number
   }
 }
 

@@ -77,6 +77,7 @@ export const useFileUploadModal = ({
       toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
       queryCache.invalidateQueries('files')
       queryCache.invalidateQueries('counters')
+      if(spaceId) queryCache.invalidateQueries(['space', spaceId.toString()])
     }
   }, [uploadFinished])
 

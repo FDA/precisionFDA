@@ -1,11 +1,10 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
-import * as Yup from 'yup'
 import { ButtonOutlineGrey, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Divider, InputError } from '../../../components/form/styles'
@@ -20,10 +19,11 @@ import { SpaceTypeName } from '../common'
 import {
   CreateSpacePayload,
   editSpaceRequest,
-  spaceRequest,
+  spaceRequest
 } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
+import { validationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm } from './styles'
 
 
@@ -53,21 +53,6 @@ const EditTags = ({ spaceId, tags = []}: { spaceId: string, tags?: string[]}) =>
   )
 }
 
-const validationSchema = Yup.object().shape({
-  space_type: Yup.string().required('Engine required'),
-  name: Yup.string().required('Name required'),
-  description: Yup.string().required('Description required'),
-  guest_lead_dxuser: Yup.string().optional(),
-  review_lead_dxuser: Yup.string().optional(),
-  host_lead_dxuser: Yup.string().optional(),
-  sponsor_lead_dxuser: Yup.string().optional(),
-  cts: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string(),
-    }),
-})
 
 interface SpaceSettingsVals {
   space_type: ISpace['type']
@@ -92,6 +77,29 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   const history = useHistory()
   const queryClient = useQueryClient()
   const spaceActions = useSpaceActions({ space })
+  const[formError, setFormError] = useState<string | undefined>()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    getValues,
+    setError,
+  } = useForm<SpaceSettingsVals>({
+    mode: 'onBlur',
+    resolver: yupResolver(validationSchema),
+    defaultValues: {
+      space_type: space.type,
+      name: space.name,
+      description: space.description,
+      host_lead_dxuser: space.host_lead?.dxuser,
+      guest_lead_dxuser: space.guest_lead?.dxuser,
+      review_lead_dxuser: space.host_lead?.dxuser,
+      sponsor_lead_dxuser: space.guest_lead?.dxuser,
+      cts: space.cts,
+    },
+  })
 
   const mutation = useMutation({
     mutationFn: (payload: CreateSpacePayload) =>
@@ -101,8 +109,9 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         history.push(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries('spaces')
         toast.success('Success: editing space settings.')
-      } else if (res?.error) {
-          toast.error(`${res.error.type}: ${res.error.message}`)
+      } else if (res?.errors) {
+          toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
+          setFormError(`Error: ${res.errors.messages.join('\r\n')}`)
         } else {
           toast.error('Something went wrong!')
         }
@@ -112,27 +121,8 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     },
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    getValues,
-  } = useForm<SpaceSettingsVals>({
-    mode: 'onBlur',
-    resolver: yupResolver(validationSchema),
-    defaultValues: {
-      space_type: space.type,
-      name: space.name,
-      description: space.description,
-      host_lead_dxuser: space.host_lead?.dxuser,
-      review_lead_dxuser: space.host_lead?.dxuser,
-      sponsor_lead_dxuser: space.guest_lead?.dxuser,
-      cts: space.cts,
-    },
-  })
-
   const onSubmit = () => {
+    setFormError(undefined)
     const vals = getValues()
     if (vals.space_type === 'private_type') {
       vals.host_lead_dxuser = user.dxuser
@@ -206,8 +196,8 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Host Lead">
             <InputText
               label="Host Lead"
-              {...register('host_lead_dxuser')}
               disabled
+              {...register('host_lead_dxuser')}
             />
             <ErrorMessage
               errors={errors}
@@ -218,8 +208,8 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Guest Lead">
             <InputText
               label="Guest Lead"
-              {...register('guest_lead_dxuser')}
               disabled
+              {...register('guest_lead_dxuser')}
             />
             <ErrorMessage
               errors={errors}
@@ -235,6 +225,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Reviewer Lead">
             <InputText
               label="Reviewer Lead"
+              disabled={isSubmitting}
               {...register('review_lead_dxuser')}
             />
             <ErrorMessage
@@ -247,6 +238,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Sponsor Lead">
             <InputText
               label="Sponsor Lead"
+              disabled={isSubmitting}
               {...register('sponsor_lead_dxuser')}
             />
             <ErrorMessage
@@ -288,6 +280,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           Save
         </ButtonSolidBlue>
         {isSubmitting && <Loader />}
+       {formError && <InputError>{formError}</InputError>}
       </Row>
     </StyledForm>
   )

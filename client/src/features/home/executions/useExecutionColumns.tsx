@@ -19,7 +19,7 @@ import { IExecution } from './executions.types'
 export const useExecutionColumns = ({
   colWidths,
   isAdmin = false,
-  filterDataTestIdPrefix
+  filterDataTestIdPrefix,
 }: {
   colWidths?: KeyVal,
   isAdmin?: boolean,
@@ -41,12 +41,12 @@ export const useExecutionColumns = ({
           Filter: DefaultColumnFilter,
           disableSortBy: true,
           Cell: (props: any) => {
-            const jobs = props.row.original.jobs
+            const { jobs } = props.row.original
             if (jobs) {
               return <div>{jobs[jobs.length - 1].state}</div>
-            } else {
+            } 
               return <div>{props.row.original.state}</div>
-            }
+            
           },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {},
         },
@@ -55,18 +55,26 @@ export const useExecutionColumns = ({
           accessor: 'name',
           Filter: DefaultColumnFilter,
           width: colWidths?.name || 300,
-          Cell: props => {
-            const to = {pathname: `${path}/${props.cell.row.original.uid}`, state: {from: location.pathname, fromSearch: location.search }}
+          Cell: ({ cell, row, value }) => {
+            const rowType = row.original.workflow_series_id ? 'workflows' : 'executions'
+            let pathname
+            if(path.startsWith('/home')){
+              pathname = `/home/${rowType}/${cell.row.original.uid}`
+            }
+            if(path.startsWith('/spaces')){
+              pathname = `/spaces/${rowType}/${cell.row.original.uid}`
+            }
+            const to = { pathname, state: { from: location.pathname, fromSearch: location.search }}
 
-            return props.row.original.jobs ? (
+            return row.original.jobs ? (
                 <StyledLinkCell to={to}>
                   <BoltIcon height={14} />
-                  {props.value}
+                  {value}
                 </StyledLinkCell>
               ) : (
                 <StyledLinkCell to={to}>
                   <CogsIcon height={14} />
-                  {props.value}
+                  {value}
                 </StyledLinkCell>
               )
             },
@@ -164,12 +172,12 @@ export const useExecutionColumns = ({
           disableSortBy: true,
           width: colWidths?.duration || 198,
           Cell: (props: any) => {
-            const jobs = props.row.original.jobs
+            const { jobs } = props.row.original
             if (jobs) {
               return <>{jobs[jobs.length - 1].duration}</>
-            } else {
+            } 
               return <>{props.row.original.duration}</>
-            }
+            
           },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {},
         },
@@ -182,12 +190,12 @@ export const useExecutionColumns = ({
           width: colWidths?.energy || 50,
           // Cell: (props) => <>{props.value[props.value.length-1].energy_consumption}</>
           Cell: (props: any) => {
-            const jobs = props.row.original.jobs
+            const { jobs } = props.row.original
             if (jobs) {
               return <>{jobs[jobs.length - 1].energy_consumption}</>
-            } else {
+            } 
               return <>{props.row.original.energy_consumption}</>
-            }
+            
           },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {},
         },
@@ -205,15 +213,13 @@ export const useExecutionColumns = ({
           Filter: DefaultColumnFilter,
           disableSortBy: true,
           width: colWidths?.tags || 500,
-          Cell: props => {
-            return (
+          Cell: props => (
               <StyledTags>
                 {props.value?.map(tag => (
                   <StyledTagItem key={tag}>{tag}</StyledTagItem>
                 ))}
               </StyledTags>
-            )
-          },
+            ),
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {},
         },
       ] as Column<IExecution>[],

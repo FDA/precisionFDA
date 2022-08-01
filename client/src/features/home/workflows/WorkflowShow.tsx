@@ -83,6 +83,7 @@ const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
   const list = columns.map(e => (
     <MetadataItem key={e.header}>
       <MetadataKey>{e.header}</MetadataKey>
+      {/* eslint-disable-next-line no-nested-ternary */}
       {e.header === 'location' && !e.link ? (
         <MetadataVal>
           <Link to={`/home/workflows${scopeParamLink}`} data-testid={e.dataTestId}>
@@ -120,7 +121,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         data-testid='workflow-show-actions-run'
       >
         <>
-          {'Run Workflow'}&nbsp;
+          Run Workflow&nbsp;
           <Pill>rev{workflow.revision}</Pill>
         </>
       </HeaderButton>
@@ -131,7 +132,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         data-testid='workflow-show-actions-run-batch'
       >
         <>
-          {'Run Batch Workflow'}&nbsp;
+          Run Batch Workflow&nbsp;
           <Pill>rev{workflow.revision}</Pill>
         </>
       </HeaderButton>
@@ -182,7 +183,7 @@ export const WorkflowShow = ({ scope }: { scope?: ResourceScope }) => {
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'workflows')} data-testid={'workflow-show-back-link'}>
+      <StyledBackLink linkTo={getBackPath(location, 'workflows')} data-testid="workflow-show-back-link">
         Back to Workflows
       </StyledBackLink>
       <Topbox>
@@ -209,7 +210,7 @@ export const WorkflowShow = ({ scope }: { scope?: ResourceScope }) => {
         <MetadataSection>
           {workflow.tags.length > 0 && (
             <StyledTags>
-              {/* TODO(samuel) validate that tag is non-null string*/}
+              {/* TODO(samuel) validate that tag is non-null string */}
               {workflow.tags.map(tag => (
                 <StyledTagItem key={tag}>{tag}</StyledTagItem>
                 ))}
@@ -219,16 +220,16 @@ export const WorkflowShow = ({ scope }: { scope?: ResourceScope }) => {
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" exact to={`${match.url}`} data-testid={'workflow-show-tab-spec'}>
+        <StyledTab activeClassName="active" exact to={{ pathname: `${match.url}`, state: location.state }} data-testid="workflow-show-tab-spec">
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/jobs`} data-testid={'workflow-show-tab-executions'}>
-          Executions ({Object.keys(meta.executions).length})
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/jobs`, state: location.state }} data-testid="workflow-show-tab-executions">
+          Executions ({workflow.job_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/diagram`} data-testid={'workflow-show-tab-diagram'}>
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/diagram`, state: location.state }} data-testid="workflow-show-tab-diagram">
           Diagram
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/readme`} data-testid={'workflow-show-tab-readme'}>
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/readme`, state: location.state }} data-testid="workflow-show-tab-readme">
           Readme
         </StyledTab>
       </StyledTabList>

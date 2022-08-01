@@ -23,6 +23,8 @@ import { fetchAppExecutions } from './apps.api'
 
 const ExecutionsPagination = styled.div`
   padding-left: 12px;
+  padding-top: 32px;
+  padding-bottom: 16px;
 `
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
@@ -124,7 +126,7 @@ export const ExecutionsListTable = ({
         loading={isLoading}
         loadingComponent={<div>Loading...</div>}
         sortByPreference={sortBy}
-        setSortByPreference={(a) => {console.log(a);setSortBy(a)}}
+        setSortByPreference={a => setSortBy(a)}
         manualFilters
         filters={filters}
         setFilters={setFilters}

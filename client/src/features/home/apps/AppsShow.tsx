@@ -235,13 +235,13 @@ export const AppsShow = ({ scope }: { scope?: ResourceScope }) => {
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" exact to={`${match.url}`}>
+        <StyledTab activeClassName="active" exact to={{ pathname: `${match.url}`, state: location.state }}>
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/jobs`}>
-          Executions ({meta.jobs.length})
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/jobs`, state: location.state }}>
+          Executions ({app.job_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/readme`}>
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/readme`, state: location.state }}>
           Readme
         </StyledTab>
       </StyledTabList>
