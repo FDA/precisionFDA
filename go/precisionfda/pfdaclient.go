@@ -15,11 +15,12 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"net/url"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -213,17 +214,39 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	wg := c.initWaitGroup(fileID, chunkPool, &assetSize)
 
 	fmt.Println(">> Archiving asset...")
-	cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
-	if strings.HasSuffix(name, ".tar.gz") {
-		cmd = exec.Command("tar", "-cz", "-C", rootFolderPath, ".")
-	}
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	err = cmd.Start()
-	if err != nil {
-		return err
+
+	// different approarch for WinOS tar command
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("tar", "-cf", name, "-C", rootFolderPath, ".")
+		if strings.HasSuffix(name, ".tar.gz") {
+		cmd = exec.Command("tar", "-czf", name, "-C", rootFolderPath, ".")
+		}
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+		err = cmd.Wait()
+		if err != nil {
+			return err
+		}
+		tarArchive, err := os.Open(name)
+		if err != nil {
+			return err
+		}
+		defer os.Remove(name)
+		defer tarArchive.Close()
+		c.readAndChunk(tarArchive, chunkPool, &assetSize)
+	} else {
+		cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
+		if strings.HasSuffix(name, ".tar.gz") {
+			cmd = exec.Command("tar", "-cz", "-C", rootFolderPath, ".")
+		}
+		stdout, err := cmd.StdoutPipe()
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+		c.readAndChunk(stdout, chunkPool, &assetSize)
 	}
 
 	fmt.Print(">> Uploading asset |")
@@ -233,7 +256,6 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	// 	return err
 	// }
 	// defer f.Close()
-	c.readAndChunk(stdout, chunkPool, &assetSize)
 	close(chunkPool)
 	wg.Wait()
 
