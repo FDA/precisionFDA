@@ -354,7 +354,7 @@ func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string) error {
 	fmt.Printf("   Downloading :  %s\n", fileName)
 
 	fileSize := resultJSON["file_size"].(float64)
-	fmt.Printf("     File Size :  %s\n", units.HumanSize(fileSize))
+	fmt.Printf("     File Size :  %s\n", units.BytesSize(fileSize))
 
 	if outputFilePath == "" {
 		// If output is not specified, use the original filename and current working directory
@@ -459,7 +459,7 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 				currentSize := atomic.LoadUint64(&totalSent)
 				totalSize := atomic.LoadInt64(size)
 				fmt.Fprintf(writer, "     %.1f%% (%s / %s)\n",
-							100*float64(currentSize)/float64(totalSize), units.HumanSize(float64(currentSize)), units.HumanSize(float64(totalSize)))
+							100*float64(currentSize)/float64(totalSize), units.BytesSize(float64(currentSize)), units.BytesSize(float64(totalSize)))
 				writer.Flush()
 			}
 			g.Done()
