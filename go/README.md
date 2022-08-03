@@ -143,7 +143,7 @@ $GOPATH/bin/goversion -crypto go/dist/pfda*
 
 # Version History
 
-### 2.1.2 (2022-07-20)
+### 2.1.2 (2022-08-03)
 
 - Fixed windows asset upload
 
