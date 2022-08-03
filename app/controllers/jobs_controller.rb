@@ -37,7 +37,6 @@ class JobsController < ApplicationController
 
     if @job.nil? || @job.log_unaccessible?(@context)
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
-      redirect_to apps_path
       return
     end
 
