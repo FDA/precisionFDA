@@ -1,28 +1,47 @@
-import { Job } from "bull";
+import { Job, JobInformation, Queue } from 'bull'
 
 
-export const getJobStatusMessage = (job: Job, jobLabel?: string) => {
+const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string> => {
   const prefix = jobLabel ?? 'Job'
-  if (job.isActive()) {
+  if (await job.isActive()) {
     return `${prefix} is currently running`
   }
-  if (job.isCompleted()) {
+  if (await job.isCompleted()) {
     return `${prefix} has completed`
   }
-  if (job.isDelayed()) {
+  if (await job.isDelayed()) {
     return `${prefix} is delayed`
   }
-  if (job.isFailed()) {
+  if (await job.isFailed()) {
     return `${prefix} had failed`
   }
-  if (job.isPaused()) {
+  if (await job.isPaused()) {
     return `${prefix} is paused`
   }
-  if (job.isStuck()) {
+  if (await job.isStuck()) {
     return `${prefix} is stuck`
   }
-  if (job.isWaiting()) {
+  if (await job.isWaiting()) {
     return `${prefix} is currently waiting`
   }
   return `${prefix} is in an unknown state`
+}
+
+// Orphaned repeatable jobs are ones where the 'next' property is in the past relative to
+// the current date.
+const isJobOrphaned = (jobInfo: JobInformation): boolean => {
+  return jobInfo.next < Date.now()
+}
+
+const clearOrphanedRepeatableJobs = async (queue: Queue): Promise<JobInformation[]> => {
+  const repeatableJobs = await queue.getRepeatableJobs()
+  const jobsToRemove = repeatableJobs.filter(job => isJobOrphaned(job))
+  await Promise.all(jobsToRemove.map(async job => await queue.removeRepeatable(job)))
+  return jobsToRemove
+}
+
+export {
+  getJobStatusMessage,
+  isJobOrphaned,
+  clearOrphanedRepeatableJobs,
 }
