@@ -76,7 +76,7 @@ class ChallengeMyEntriesTable extends Component<IChallengeSubmissionsTableProps>
 
   render() {
     const { submissions, isFetching, user } = this.props
-    return renderChallengeSubmissionsTable(submissions, isFetching, user, this.renderEmptyView, this.renderTable)
+    return renderChallengeSubmissionsTable(submissions, isFetching, user, false, this.renderEmptyView, this.renderTable)
   }
 }
 
