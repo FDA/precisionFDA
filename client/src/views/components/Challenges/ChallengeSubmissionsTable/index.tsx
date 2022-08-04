@@ -23,6 +23,7 @@ import { Markdown } from '../../../../components/Markdown'
 interface IChallengeSubmissionsTableProps {
   challengeId: number,
   submissions: ISubmission[],
+  isSpaceMember: boolean,
   isFetching: boolean,
   user: any,
   fetchData: (challengeId: number) => void,
@@ -30,15 +31,17 @@ interface IChallengeSubmissionsTableProps {
 
 interface ISubmissionElementProps {
   submission: ISubmission,
+  isSpaceMember?: boolean
   user?: any,
 }
 
 
 const renderChallengeSubmissionsTable = (submissions: ISubmission[],
-                                         isFetching: boolean,
-                                         user: any,
-                                         renderEmptyView: () => JSX.Element,
-                                         renderTable: (submissions: ISubmission[], user: any) => JSX.Element) => {
+  isFetching: boolean,
+  user: any,
+  isSpaceMember: boolean,
+  renderEmptyView: () => JSX.Element,
+  renderTable: (submissions: ISubmission[], user: any, isSpaceMember: boolean) => JSX.Element) => {
 
   const isLoggedIn = (user && Object.keys(user).length > 0)
   if (!isLoggedIn) {
@@ -62,11 +65,11 @@ const renderChallengeSubmissionsTable = (submissions: ISubmission[],
     return renderEmptyView()
   }
 
-  return renderTable(submissions, user)
+  return renderTable(submissions, user, isSpaceMember)
 }
 
 
-const SubmissionStateCell : FunctionComponent<ISubmissionElementProps> = ({ submission }: ISubmissionElementProps) => {
+const SubmissionStateCell: FunctionComponent<ISubmissionElementProps> = ({ submission }: ISubmissionElementProps) => {
   let state = '', style = ''
   switch (submission.jobState) {
     case JobState.Done:
@@ -85,7 +88,7 @@ const SubmissionStateCell : FunctionComponent<ISubmissionElementProps> = ({ subm
   return <td className={`col-state state-${style}`}>{state}</td>
 }
 
-const SubmissionNameCell : FunctionComponent<ISubmissionElementProps> = ({ submission }: ISubmissionElementProps) => {
+const SubmissionNameCell: FunctionComponent<ISubmissionElementProps> = ({ submission }: ISubmissionElementProps) => {
   const [state, setState] = React.useState({
     isOpen: false,
   })
@@ -107,19 +110,31 @@ const SubmissionNameCell : FunctionComponent<ISubmissionElementProps> = ({ submi
   </td>)
 }
 
-const SubmissionInputFilesCell : FunctionComponent<ISubmissionElementProps> = ({ submission, user }: ISubmissionElementProps) => {
+const SubmissionInputFilesCell: FunctionComponent<ISubmissionElementProps> = ({ submission, user, isSpaceMember }: ISubmissionElementProps) => {
+
   const userCanAccessFile = (file: any) => {
     const fileIsPublic = (file.scope === 'public')
     const userIsOwnerOfFile = (file.user_id == user.id)
-    return !user.is_guest && (fileIsPublic || userIsOwnerOfFile)
+    return !user.is_guest && (fileIsPublic || userIsOwnerOfFile || isSpaceMember)
   }
+
+  const generateAppropriateLink = (file: any) => {
+    if (isSpaceMember) {
+      const space_file: any = submission.runInputData.filter((v: any) => v.file_name === file.name)?.[0]
+      return space_file ? `/home/files/${space_file?.file_uid}` : `/home/files/${file.uid}`
+    }
+    else {
+      return `/home/files/${file.uid}`
+    } 
+  }
+
 
   return (
     <td>
       <ul className="submission-ul">
         {submission.jobInputFiles.map((file: any, index: number) => {
           if (userCanAccessFile(file)) {
-            return <li key={file.id}><a href={`/home/files/${file.uid}`} target="_blank">{file.name}</a></li>
+            return <li key={file.id}><a href={generateAppropriateLink(file)} target="_blank">{file.name}</a></li>
           }
           return <li key={file.id}>{file.name}</li>
         })}
@@ -128,18 +143,18 @@ const SubmissionInputFilesCell : FunctionComponent<ISubmissionElementProps> = ({
   )
 }
 
-const SubmissionCreatedAtCell : FunctionComponent<ISubmissionElementProps> = ({ submission }: ISubmissionElementProps) => {
+const SubmissionCreatedAtCell: FunctionComponent<ISubmissionElementProps> = ({ submission }: ISubmissionElementProps) => {
   return <td>{submission.createdAt}</td>
 }
 
 class SubmissionRow extends Component<ISubmissionElementProps> {
   render() {
-    const { submission, user } = this.props
+    const { submission, user, isSpaceMember } = this.props
     return (
       <tr>
         <SubmissionNameCell submission={submission} />
         <td><a href={`/users/${submission.user.dxuser}`}>{submission.user.name}</a></td>
-        <SubmissionInputFilesCell submission={submission} user={user} />
+        <SubmissionInputFilesCell submission={submission} user={user} isSpaceMember={isSpaceMember} />
         <SubmissionCreatedAtCell submission={submission} />
       </tr>
     )
@@ -168,12 +183,12 @@ class ChallengeSubmissionsTable extends Component<IChallengeSubmissionsTableProp
   renderEmptyView() {
     return (
       <div className="text-center">
-         No entries have been successfully submitted for this challenge.
+        No entries have been successfully submitted for this challenge.
       </div>
     )
   }
 
-  renderTable(submissions: ISubmission[], user: any) {
+  renderTable(submissions: ISubmission[], user: any, isSpaceMember: boolean) {
     const { sortType, sortDirection } = this.state
 
     const sortTableHandler = (newType: string) => {
@@ -204,7 +219,7 @@ class ChallengeSubmissionsTable extends Component<IChallengeSubmissionsTableProp
             </Thead>
             <Tbody>
               {sortedSubmissions.map((submission) => (
-                <SubmissionRow key={submission.id} submission={submission} user={user} />
+                <SubmissionRow key={submission.id} submission={submission} user={user} isSpaceMember={isSpaceMember} />
               ))}
             </Tbody>
           </Table>
@@ -214,8 +229,8 @@ class ChallengeSubmissionsTable extends Component<IChallengeSubmissionsTableProp
   }
 
   render() {
-    const { submissions, isFetching, user } = this.props
-    return renderChallengeSubmissionsTable(submissions, isFetching, user, this.renderEmptyView.bind(this), this.renderTable.bind(this))
+    const { submissions, isFetching, user, isSpaceMember } = this.props
+    return renderChallengeSubmissionsTable(submissions, isFetching, user, isSpaceMember, this.renderEmptyView.bind(this), this.renderTable.bind(this))
   }
 }
 

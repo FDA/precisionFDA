@@ -297,9 +297,12 @@ class SubmissionsController < ApplicationController
 
     @app = App.find(@challenge.app_id)
 
-    clone_inputs_to_space
+    cloned_inputs = clone_inputs_to_space
+    job_run_inputs = cloned_inputs.copies.to_h { |copy| [copy.source.uid, copy.object.uid] } unless cloned_inputs.nil?
 
     input_info ||= input_spec_preparer.run(@app, @inputs)
+
+    input_info.run_inputs.each { |k, v| input_info.run_inputs[k] = job_run_inputs[v] } unless cloned_inputs.nil?
 
     job = job_creator.create(
       app: @app,
@@ -343,7 +346,7 @@ class SubmissionsController < ApplicationController
     )
 
     begin
-      challenge_bot_copy_service.copy(files, @challenge.space.scope)
+      copied_files = challenge_bot_copy_service.copy(files, @challenge.space.scope)
     ensure
       api.project_decrease_permissions(
         @context.user.private_files_project,
@@ -351,6 +354,7 @@ class SubmissionsController < ApplicationController
         "user-#{CHALLENGE_BOT_DX_USER}",
       )
     end
+    copied_files
   end
 
   def challenge_bot_copy_service
