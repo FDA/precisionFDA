@@ -41,34 +41,28 @@ describe('TASK: user-checkup', () => {
 
   it('adds job sync tasks for HTTPS apps but not regular apps to the queue', async () => {
     const job1 = create.jobHelper.create(em, { user, app: regularApp }, {
-        state: JOB_STATE.IDLE,
-      },
-    )
+      state: JOB_STATE.IDLE,
+    })
     const job2 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.IDLE,
-      },
-    )
+      state: JOB_STATE.IDLE,
+    })
     const job3 = create.jobHelper.create(em, { user, app: regularApp }, {
-        state: JOB_STATE.TERMINATING
-      },
-    )
+      state: JOB_STATE.TERMINATING,
+    })
     const job4 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job5 = create.jobHelper.create(em, { user, app: regularApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job6 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.TERMINATED,
-      },
-    )
+      state: JOB_STATE.TERMINATED,
+    })
     await em.flush()
 
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
 
-    await queue.createUserCheckupTask({ 
+    await queue.createUserCheckupTask({
       type: queue.types.TASK_TYPE.USER_CHECKUP,
       user: userContext,
     })
@@ -87,21 +81,17 @@ describe('TASK: user-checkup', () => {
 
   it('ignores jobs that have sync tasks already there', async () => {
     const job1 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job2 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job3 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.TERMINATING
-      },
-    )
+      state: JOB_STATE.TERMINATING,
+    })
     const job4 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.TERMINATING,
-      },
-    )
+      state: JOB_STATE.TERMINATING,
+    })
     await em.flush()
 
     fakes.queue.findRepeatableFake.onCall(0).returns(undefined)

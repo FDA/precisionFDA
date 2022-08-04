@@ -1,8 +1,9 @@
+/* eslint-disable no-warning-comments */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable require-await */
 /* eslint-disable multiline-ternary */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import Bull, { Job, JobOptions, QueueOptions } from 'bull'
+import Bull, { Job, JobInformation, JobOptions, QueueOptions } from 'bull'
 import { AnyObject, UserCtx } from '../types'
 import { defaultLogger as log } from '../logger'
 import { config } from '../config'
@@ -11,7 +12,7 @@ import { SyncJobOperation } from '../domain/job'
 import { formatDuration } from '../domain/job/job.helper'
 import { EmailSendOperation } from '../domain/email'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
-import { getJobStatusMessage } from './queue.utils'
+import { clearOrphanedRepeatableJobs, getJobStatusMessage } from './queue.utils'
 import * as types from './task.input'
 
 let statusQueue: Bull.Queue
@@ -80,6 +81,11 @@ const createQueues = async (): Promise<void> => {
   await maintenanceQueue.isReady()
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
+
+  clearOrphanedRepeatableJobs(statusQueue)
+  clearOrphanedRepeatableJobs(fileSyncQueue)
+  clearOrphanedRepeatableJobs(emailsQueue)
+  clearOrphanedRepeatableJobs(maintenanceQueue)
 }
 
 const initMaintenanceQueue = async () => {
@@ -137,6 +143,13 @@ const addToQueue = async <T extends types.Task>(
   return job
 }
 
+// removeRepeatable and removeRepeatableJob explanation:
+//     removeRepeatable calls calls queue.removeJobs, removing the job task
+//     removeRepeatableJob calls queue.removeRepeatable, removing the entity with 'cron'
+// Hypothesis: if we remove the repetableJob (the entity with 'cron') alongside the job as is currently done
+//             when a sync task such as SyncJobOperation finishes, it may be the most correct way of cleaning
+//             up repeatable jobs
+// TODO: dig deeper into bull queue's implementation to verify the above
 const removeRepeatable = async (job: Job) => {
   if (typeof statusQueue === 'undefined') {
     throw new Error('The queue was not started')
@@ -145,6 +158,17 @@ const removeRepeatable = async (job: Job) => {
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
   await statusQueue.removeJobs(`${prefix}:${id}:*`)
+}
+
+const removeRepeatableJob = async (job: JobInformation) => {
+  if (typeof statusQueue === 'undefined') {
+    throw new Error('removeRepeatableJob: The queue was not started')
+  }
+  log.info({ jobId: job.id, cron: job.cron },
+    'removeRepeatableJob: trying to remove repeatable job',
+  )
+  // await statusQueue.removeRepeatableByKey(job.key)
+  await statusQueue.removeRepeatable({ jobId: job.id, cron: job.cron })
 }
 
 const findRepeatable = async (bullJobId: string) => {
@@ -193,9 +217,9 @@ const createSyncWorkstationFilesTask = async (
 
   const jobId = `${jobType}.${data.dxid}`
   const existingJob = await fileSyncQueue.getJob(jobId)
-  if (existingJob) {
+  if (existingJob !== null) {
     // Do not allow a second file sync job to be added to the queue
-    let errorMessage = getJobStatusMessage(existingJob, 'File sync')
+    let errorMessage = await getJobStatusMessage(existingJob, 'File sync')
     const elapsedTime = Date.now() - existingJob.timestamp
     errorMessage += `. Current state is ${await existingJob.getState()}`
     errorMessage += `. Elapsed time ${formatDuration(elapsedTime)}`
@@ -279,6 +303,14 @@ const createUserCheckupTask = async (data: types.BasicUserJob) => {
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
+const createCheckUserJobsTask = async (data: types.BasicUserJob) => {
+  const wrapped = {
+    type: types.TASK_TYPE.CHECK_USER_JOBS as const,
+    user: data.user,
+  }
+  const options: JobOptions = { jobId: `${wrapped.type}.${data.user.dxuser}` }
+  return await addToQueue(wrapped, maintenanceQueue, options)
+}
 
 const createTestMaxMemoryTask = async (): Promise<any> => {
   maintenanceQueue.removeJobs(types.TASK_TYPE.DEBUG_MAX_MEMORY)
@@ -306,6 +338,7 @@ export {
   createCheckStaleJobsTask,
   createDbClusterSyncTask,
   createUserCheckupTask,
+  createCheckUserJobsTask,
   createTestMaxMemoryTask,
   createQueues,
   getStatusQueue,
@@ -316,5 +349,6 @@ export {
   disconnectQueues,
   types,
   removeRepeatable,
+  removeRepeatableJob,
   findRepeatable,
 }

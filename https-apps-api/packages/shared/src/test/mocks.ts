@@ -31,6 +31,7 @@ const fakes = {
   queue: {
     findRepeatableFake: sinon.stub(),
     removeRepeatableFake: sinon.fake(),
+    removeRepeatableJobsFake: sinon.fake(),
     createSyncJobStatusTaskFake: sinon.fake(),
     createEmailSendTaskFake: sinon.fake(),
     createDbClusterSyncTaskFake: sinon.fake(),
@@ -98,6 +99,7 @@ const mocksSetup = () => {
   // stub queue helpers
   sandbox.replace(queue, 'findRepeatable', fakes.queue.findRepeatableFake)
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
+  sandbox.replace(queue, 'removeRepeatableJob', fakes.queue.removeRepeatableJobsFake)
   sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
   sandbox.replace(queue, 'createDbClusterSyncTask', fakes.queue.createDbClusterSyncTaskFake)
