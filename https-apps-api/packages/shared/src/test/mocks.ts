@@ -121,7 +121,8 @@ const mocksReset = () => {
   fakes.client.dbClusterCreateFake.reset()
   fakes.client.dbClusterDescribeFake.reset()
 
-  fakes.queue.findRepeatableFake.resetHistory()
+  fakes.queue.findRepeatableFake.reset()
+
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.removeRepeatableJobsFake.resetHistory()
   fakes.queue.createSyncJobStatusTaskFake.resetHistory()
