@@ -3,7 +3,7 @@
 /* eslint-disable require-await */
 /* eslint-disable multiline-ternary */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import Bull, { Job, JobInformation, JobOptions, QueueOptions } from 'bull'
+import Bull, { Job, JobInformation, JobOptions, Queue, QueueOptions } from 'bull'
 import { AnyObject, UserCtx } from '../types'
 import { defaultLogger as log } from '../logger'
 import { config } from '../config'
@@ -82,10 +82,8 @@ const createQueues = async (): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
-  clearOrphanedRepeatableJobs(statusQueue)
-  clearOrphanedRepeatableJobs(fileSyncQueue)
-  clearOrphanedRepeatableJobs(emailsQueue)
-  clearOrphanedRepeatableJobs(maintenanceQueue)
+  const removedJobs = await clearOrphanedRepeatableJobs(statusQueue)
+  log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
 const initMaintenanceQueue = async () => {
@@ -160,15 +158,12 @@ const removeRepeatable = async (job: Job) => {
   await statusQueue.removeJobs(`${prefix}:${id}:*`)
 }
 
-const removeRepeatableJob = async (job: JobInformation) => {
-  if (typeof statusQueue === 'undefined') {
-    throw new Error('removeRepeatableJob: The queue was not started')
-  }
+const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
   log.info({ jobId: job.id, cron: job.cron },
     'removeRepeatableJob: trying to remove repeatable job',
   )
   // await statusQueue.removeRepeatableByKey(job.key)
-  await statusQueue.removeRepeatable({ jobId: job.id, cron: job.cron })
+  await queue.removeRepeatable({ jobId: job.id, cron: job.cron })
 }
 
 const findRepeatable = async (bullJobId: string) => {

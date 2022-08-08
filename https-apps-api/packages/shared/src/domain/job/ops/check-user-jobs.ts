@@ -24,15 +24,15 @@ const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log): Pro
       jobDxid: job.dxid,
       bullJobId,
     }, 'CheckUserJobsOperation: Status sync task for job missing, recreating it')
-    queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
+    await queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else if (isJobOrphaned(bullJob)) {
     log.info({
       jobDxid: job.dxid,
       bullJob,
     }, 'CheckUserJobsOperation: Status sync task found, but it is orphaned. '
        + 'Removing and recreating it')
-    await queue.removeRepeatableJob(bullJob)
-    queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
+    await queue.removeRepeatableJob(bullJob, queue.getStatusQueue())
+    await queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else {
     log.info({
       jobDxid: job.dxid,
