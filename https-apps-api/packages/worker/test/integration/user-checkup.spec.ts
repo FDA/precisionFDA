@@ -25,8 +25,9 @@ describe('TASK: user-checkup', () => {
     regularApp = create.appHelper.createRegular(em, { user })
     httpsApp = create.appHelper.createHTTPS(em, { user })
     await em.flush()
-    // reset fakes
     userContext = { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' }
+
+    // reset fakes
     mocksReset()
     queueMocksReset()
   })

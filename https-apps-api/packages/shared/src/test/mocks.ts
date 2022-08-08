@@ -123,6 +123,7 @@ const mocksReset = () => {
 
   fakes.queue.findRepeatableFake.resetHistory()
   fakes.queue.removeRepeatableFake.resetHistory()
+  fakes.queue.removeRepeatableJobsFake.resetHistory()
   fakes.queue.createSyncJobStatusTaskFake.resetHistory()
   fakes.queue.createEmailSendTaskFake.resetHistory()
   fakes.queue.createDbClusterSyncTaskFake.resetHistory()
