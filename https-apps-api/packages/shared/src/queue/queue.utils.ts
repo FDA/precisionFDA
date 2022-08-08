@@ -1,4 +1,5 @@
 import { Job, JobInformation, Queue } from 'bull'
+import { removeRepeatableJob } from '.'
 
 
 const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string> => {
@@ -36,7 +37,7 @@ const isJobOrphaned = (jobInfo: JobInformation): boolean => {
 const clearOrphanedRepeatableJobs = async (queue: Queue): Promise<JobInformation[]> => {
   const repeatableJobs = await queue.getRepeatableJobs()
   const jobsToRemove = repeatableJobs.filter(job => isJobOrphaned(job))
-  await Promise.all(jobsToRemove.map(async job => await queue.removeRepeatable(job)))
+  await Promise.all(jobsToRemove.map(async job => await removeRepeatableJob(job, queue)))
   return jobsToRemove
 }
 
