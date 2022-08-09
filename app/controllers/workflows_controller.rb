@@ -165,15 +165,11 @@ class WorkflowsController < ApplicationController
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
       redirect_to workflows_path
       return
-    elsif !@workflow.allow_batch_run?
-      flash[:error] = "Sorry, this workflow cannot be run in a batch"
-      redirect_to workflows_path
-      return
     else
       @revisions = @workflow.workflow_series.accessible_revisions(@context)
     end
 
-    inputs = @workflow.batch_input_spec.select { |input| input[:values][:id].nil? }
+    inputs = @workflow.all_input_spec.select { |input| input[:values][:id].nil? }
     outputs = @workflow.all_output_spec
 
     inputs.map { |v| v["uniq_input_name"] = v["parent_slot"] + "." + v["name"] }
