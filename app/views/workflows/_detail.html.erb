@@ -104,10 +104,8 @@
       <%= link_to new_workflow_analysis_path(@workflow), class: "btn btn-primary" do %>
         Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
       <% end %>
-      <% if @workflow.allow_batch_run? %>
-        <%= link_to batch_workflow_workflow_path(@workflow), class: "btn btn-primary" do %>
-          Run Batch Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
-        <% end %>
+      <%= link_to batch_workflow_workflow_path(@workflow), class: "btn btn-primary" do %>
+        Run Batch Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
       <% end %>
     <% end %>
     <%= render "_partials/btn_copy", item: @workflow %>
