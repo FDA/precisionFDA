@@ -7,6 +7,12 @@ import { mocksRestore, mocksSetup } from '@pfda/https-apps-shared/src/test/mocks
 import { setupHandlers } from '../src/queues'
 import { mocksSetup as localMocksSetup, mocksRestore as localMocksRestore } from './utils/mocks'
 
+// Handle exception being thrown inside an async test
+// See https://github.com/mochajs/mocha/issues/1128#issuecomment-975324465
+process.on('unhandledRejection', err => {
+  throw err
+})
+
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
