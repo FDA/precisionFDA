@@ -49,7 +49,7 @@ const createSyncJobTask = async (
   })
 }
 
-describe('TASK: sync_job_status', () => {
+describe.skip('TASK: sync_job_status', () => {
   let em: EntityManager
   let user: User
   let app: App
