@@ -10,7 +10,7 @@ import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 
 
-describe.skip('TASK: user-checkup', () => {
+describe('TASK: user-checkup', () => {
   let em: EntityManager
   let user: User
   let userContext: UserCtx

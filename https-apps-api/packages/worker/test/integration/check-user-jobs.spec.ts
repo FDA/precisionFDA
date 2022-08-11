@@ -14,7 +14,7 @@ import { UserCtx } from 'shared/src/types'
 import { range } from 'ramda'
 
 
-describe.skip('TASK: check-user-jobs', () => {
+describe('TASK: check-user-jobs', () => {
   let em: EntityManager
   let user: User
   let userContext: UserCtx
