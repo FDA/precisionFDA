@@ -82,8 +82,8 @@ const createQueues = async (): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
-  // const removedJobs = await clearOrphanedRepeatableJobs(statusQueue)
-  // log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
+  const removedJobs = await clearOrphanedRepeatableJobs(statusQueue)
+  log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
 const initMaintenanceQueue = async () => {
