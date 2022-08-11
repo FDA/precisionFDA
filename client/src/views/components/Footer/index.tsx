@@ -84,6 +84,7 @@ const PFDAFooter = () => {
               <li><a href="http://www.fda.gov/AboutFDA/WorkingatFDA/NoFearAct/default.htm" target="_blank" title="No Fear Act">No Fear Act</a></li>
               <li><a href="http://www.fda.gov/AboutFDA/Transparency/default.htm" target="_blank" title="Transparency">Transparency</a></li>
               <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/WebsitePolicies/default.htm" target="_blank" title="Website Policies">Website Policies</a></li>
+              <li><a href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html" target="_blank" title="Vulnerability Disclosure Policy">Vulnerability Disclosure Policy</a></li>
             </ul>
           </div>
           <StyledFooterAddress>
