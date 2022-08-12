@@ -29,6 +29,8 @@ const getQueues = (): Bull.Queue[] => [statusQueue, fileSyncQueue, emailsQueue, 
 
 // set up the queues
 const createQueues = async (): Promise<void> => {
+  log.info({}, 'Initializing queues')
+
   // other config passed into IORedis constructor
   const redisOptions: QueueOptions['redis'] = {
     tls: config.redis.isSecure as any,
