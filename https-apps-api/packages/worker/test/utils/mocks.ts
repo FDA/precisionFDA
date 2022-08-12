@@ -10,14 +10,23 @@ const fakes = {
   addToQueueStub: sinon.stub().callsFake(async input => {
     await handler({ data: input } as Job)
   }),
+  removeJobsStub: sinon.stub(),
+  // Stubbing getRepeatableJobs to avoid jobs clearing code crashing during tests
+  getRepeatableJobsStub: sinon.stub().callsFake(async () => {
+    return []
+  }),
 }
 
 const mocksSetup = () => {
   sandbox.replace(Bull.prototype, 'add', fakes.addToQueueStub)
+  sandbox.replace(Bull.prototype, 'removeJobs', fakes.removeJobsStub)
+  sandbox.replace(Bull.prototype, 'getRepeatableJobs', fakes.getRepeatableJobsStub)
 }
 
 const mocksReset = () => {
   fakes.addToQueueStub.resetHistory()
+  fakes.removeJobsStub.resetHistory()
+  fakes.getRepeatableJobsStub.resetHistory()
 }
 
 const mocksRestore = () => {

@@ -8,6 +8,17 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
+import { BasicUserJob } from 'shared/src/queue/task.input'
+
+
+const createUserCheckupTask = async (user: UserCtx) => {
+  const defaultTestQueue = queue.getStatusQueue()
+  await defaultTestQueue.add({
+    type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
+    payload: undefined,
+    user,
+  })
+}
 
 
 describe('TASK: user-checkup', () => {
@@ -33,10 +44,11 @@ describe('TASK: user-checkup', () => {
   })
 
   it('processes a queue task - calls the queue handlers', async () => {
-    await queue.createUserCheckupTask({ 
-      type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: userContext,
-    })
+    // await queue.createUserCheckupTask({
+    //   type: queue.types.TASK_TYPE.USER_CHECKUP,
+    //   user: userContext,
+    // })
+    await createUserCheckupTask(userContext)
     expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
   })
 
@@ -63,10 +75,7 @@ describe('TASK: user-checkup', () => {
 
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
 
-    await queue.createUserCheckupTask({
-      type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: userContext,
-    })
+    await createUserCheckupTask(userContext)
 
     // Only non-terminated HTTPS jobs should result in task creation
     // In this case only job2 and job4
@@ -100,10 +109,7 @@ describe('TASK: user-checkup', () => {
     fakes.queue.findRepeatableFake.onCall(2).returns(undefined)
     fakes.queue.findRepeatableFake.onCall(3).returns(generate.bullQueue.syncJobStatus(job4.dxid, userContext))
 
-    await queue.createUserCheckupTask({
-      type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: userContext,
-    })
+    await createUserCheckupTask(userContext)
 
     expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(2)
 
