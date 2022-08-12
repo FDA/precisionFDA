@@ -9,7 +9,7 @@ import {
   createSpaceRequest,
   spaceRequest,
 } from '../spaces.api'
-import { SpaceForm } from './SpaceForm'
+import { SpaceForm } from './CreateSpaceForm'
 
 export const DuplicateSpace = () => {
   const history = useHistory()

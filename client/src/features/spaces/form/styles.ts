@@ -29,3 +29,15 @@ export const StyledButton = styled(Button)`
   border: none;
   background: none;
 `
+
+export const StyledPageCenter = styled.div`
+  display: flex;
+  justify-content: center;
+`
+export const StyledPageContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 500px;
+  flex: 1 0 auto;
+`
