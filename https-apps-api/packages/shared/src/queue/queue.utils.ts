@@ -35,11 +35,9 @@ const isJobOrphaned = (jobInfo: JobInformation): boolean => {
 }
 
 const clearOrphanedRepeatableJobs = async (queue: Queue): Promise<JobInformation[]> => {
-  console.log(`clearOrphanedRepeatableJobs start`)
   const repeatableJobs = await queue.getRepeatableJobs()
   const jobsToRemove = repeatableJobs.filter(job => isJobOrphaned(job))
   await Promise.all(jobsToRemove.map(async job => await removeRepeatableJob(job, queue)))
-  console.log(`clearOrphanedRepeatableJobs jobsToRemove: ${jobsToRemove}`)
   return jobsToRemove
 }
 

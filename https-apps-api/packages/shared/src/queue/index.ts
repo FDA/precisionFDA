@@ -29,7 +29,7 @@ const getQueues = (): Bull.Queue[] => [statusQueue, fileSyncQueue, emailsQueue, 
 
 // set up the queues
 const createQueues = async (): Promise<void> => {
-  console.log({}, 'Initializing queues')
+  log.info({}, 'Initializing queues')
 
   // other config passed into IORedis constructor
   const redisOptions: QueueOptions['redis'] = {
@@ -84,9 +84,7 @@ const createQueues = async (): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
-  console.log({}, 'clearOrphanedRepeatableJobs start')
   const removedJobs = await clearOrphanedRepeatableJobs(statusQueue)
-  console.log({}, 'clearOrphanedRepeatableJobs end')
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
