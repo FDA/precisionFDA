@@ -87,9 +87,6 @@ describe('TASK: check-user-jobs', () => {
       }
 
       const stateAndJob = platformStatesAndBullJob[i]
-      // console.log(`i = ${i}`)
-      // console.log(`apiCounter = ${apiCallCounter}`)
-      // console.log(stateAndJob)
       fakes.client.jobDescribeFake.onCall(apiCallCounter).returns({
         id: job.dxid,
         state: stateAndJob[0],
