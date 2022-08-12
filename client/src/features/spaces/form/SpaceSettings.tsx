@@ -19,12 +19,12 @@ import { SpaceTypeName } from '../common'
 import {
   CreateSpacePayload,
   editSpaceRequest,
-  spaceRequest
+  spaceRequest,
 } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { validationSchema } from './helpers'
-import { HintText, Row, StyledButton, StyledForm } from './styles'
+import { HintText, Row, StyledButton, StyledForm, StyledPageContent, StyledPageCenter } from './styles'
 
 
 const EditTags = ({ spaceId, tags = []}: { spaceId: string, tags?: string[]}) => {
@@ -196,7 +196,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Host Lead">
             <InputText
               label="Host Lead"
-              disabled
+              disabled={isSubmitting}
               {...register('host_lead_dxuser')}
             />
             <ErrorMessage
@@ -208,7 +208,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Guest Lead">
             <InputText
               label="Guest Lead"
-              disabled
+              disabled={isSubmitting}
               {...register('guest_lead_dxuser')}
             />
             <ErrorMessage
@@ -238,7 +238,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Sponsor Lead">
             <InputText
               label="Sponsor Lead"
-              disabled={isSubmitting}
+              disabled
               {...register('sponsor_lead_dxuser')}
             />
             <ErrorMessage
@@ -299,9 +299,12 @@ export const SpaceSettings = () => {
   return (
     <PageContentItems>
       <BackLink linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLink>
-      <PageTitle>Space Settings</PageTitle>
-
-      <SpaceSettingsForm space={data.space} />
+      <StyledPageCenter>
+        <StyledPageContent>
+          <PageTitle>Space Settings</PageTitle>
+          <SpaceSettingsForm space={data.space} />
+        </StyledPageContent>
+      </StyledPageCenter>
     </PageContentItems>
   )
 }

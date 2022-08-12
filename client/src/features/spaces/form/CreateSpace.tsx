@@ -5,7 +5,8 @@ import { toast } from 'react-toastify'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { PageContentItems, PageTitle } from '../../../components/Page/styles'
 import { createSpaceRequest } from '../spaces.api'
-import { SpaceForm } from './SpaceForm'
+import { SpaceForm } from './CreateSpaceForm'
+import { StyledPageCenter, StyledPageContent } from './styles'
 
 export const CreateSpace = () => {
   const history = useHistory()
@@ -32,8 +33,12 @@ export const CreateSpace = () => {
   return (
     <PageContentItems>
       <BackLink linkTo="/spaces">Back to Spaces</BackLink>
-      <PageTitle>Create Space</PageTitle>
-      <SpaceForm mutation={mutation} />
+      <StyledPageCenter>
+        <StyledPageContent>
+          <PageTitle>Create Space</PageTitle>
+          <SpaceForm mutation={mutation} />
+        </StyledPageContent>
+      </StyledPageCenter>
     </PageContentItems>
   )
 }
