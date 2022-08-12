@@ -32,10 +32,12 @@ const fakes = {
     findRepeatableFake: sinon.stub(),
     removeRepeatableFake: sinon.fake(),
     removeRepeatableJobsFake: sinon.fake(),
-    createSyncJobStatusTaskFake: sinon.fake(),
-    createEmailSendTaskFake: sinon.fake(),
+    createCheckUserJobsTask: sinon.fake(),
     createDbClusterSyncTaskFake: sinon.fake(),
+    createEmailSendTaskFake: sinon.fake(),
+    createSyncJobStatusTaskFake: sinon.fake(),
     createSyncWorkstationFilesTask: sinon.fake(),
+    createUserCheckupTask: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
@@ -100,10 +102,12 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'findRepeatable', fakes.queue.findRepeatableFake)
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
   sandbox.replace(queue, 'removeRepeatableJob', fakes.queue.removeRepeatableJobsFake)
-  sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
-  sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
+  sandbox.replace(queue, 'createCheckUserJobsTask', fakes.queue.createCheckUserJobsTask)
   sandbox.replace(queue, 'createDbClusterSyncTask', fakes.queue.createDbClusterSyncTaskFake)
+  sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
+  sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
   sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
+  sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
 }
 
 const mocksReset = () => {
@@ -125,10 +129,12 @@ const mocksReset = () => {
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.removeRepeatableJobsFake.resetHistory()
-  fakes.queue.createSyncJobStatusTaskFake.resetHistory()
-  fakes.queue.createEmailSendTaskFake.resetHistory()
+  fakes.queue.createCheckUserJobsTask.resetHistory()
   fakes.queue.createDbClusterSyncTaskFake.resetHistory()
+  fakes.queue.createEmailSendTaskFake.resetHistory()
+  fakes.queue.createSyncJobStatusTaskFake.resetHistory()
   fakes.queue.createSyncWorkstationFilesTask.resetHistory()
+  fakes.queue.createUserCheckupTask.resetHistory()
 
   fakes.bull.processFake.resetHistory()
   fakes.bull.isReadyFake.resetHistory()

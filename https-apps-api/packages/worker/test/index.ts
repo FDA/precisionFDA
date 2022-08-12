@@ -10,6 +10,8 @@ import { mocksSetup as localMocksSetup, mocksRestore as localMocksRestore } from
 // Handle exception being thrown inside an async test
 // This seems to be a flaw in mocha since 8.2.1
 // See https://github.com/mochajs/mocha/issues/1128#issuecomment-975324465
+//     https://github.com/modernweb-dev/web/issues/1730
+//     https://github.com/mochajs/mocha/issues/2640
 process.on('uncaughtException', err => {
   console.log({ err }, 'nodejs worker test: uncaughtException')
   throw err

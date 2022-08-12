@@ -25,6 +25,7 @@ export enum TASK_TYPE {
 // will be used in the sub-handler
 export type BasicUserJob = TaskWithAuth & {
   type: (TASK_TYPE.USER_CHECKUP | TASK_TYPE.CHECK_USER_JOBS)
+  payload: undefined
 }
 export type CheckStatusJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_JOB_STATUS

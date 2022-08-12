@@ -7,11 +7,21 @@ import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import type { BasicUserJob } from '@pfda/https-apps-shared/src/queue/task.input'
+import type { BasicUserJob, TASK_TYPE } from '@pfda/https-apps-shared/src/queue/task.input'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JOB_STATE } from 'shared/src/domain/job/job.enum'
 import { UserCtx } from 'shared/src/types'
 import { range } from 'ramda'
+
+
+const createCheckUserJobsTask = async (user: UserCtx) => {
+  const defaultTestQueue = queue.getStatusQueue()
+  await defaultTestQueue.add({
+    type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
+    payload: undefined,
+    user,
+  })
+}
 
 
 describe('TASK: check-user-jobs', () => {
@@ -89,10 +99,7 @@ describe('TASK: check-user-jobs', () => {
       apiCallCounter += 1
     }
 
-    await queue.createCheckUserJobsTask({
-      type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
-      user: userContext,
-    })
+    await createCheckUserJobsTask(userContext)
 
     // Expect job sync calls to be made on missing or orphaned jobs
     expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(5)
