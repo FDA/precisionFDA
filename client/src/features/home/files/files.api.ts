@@ -1,6 +1,7 @@
 import { checkStatus, getApiRequestOpts } from '../../../utils/api'
+import { cleanObject } from '../../../utils/object'
 import { BaseError, DownloadListResponse, IFilter, IMeta, ResourceScope } from '../types'
-import { cleanObject, formatScopeQ, Params, prepareListFetch } from '../utils'
+import { formatScopeQ, Params, prepareListFetch } from '../utils'
 import { IFile } from './files.types'
 
 export interface FetchFilesQuery {

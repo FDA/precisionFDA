@@ -47,7 +47,7 @@
       <p class="list-group-item-text"><%= humanize_seconds(@job.runtime) %></p>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Energy Consumed</h5>
+      <h5 class="list-group-item-heading">Cost In Dollars</h5>
       <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.energy_string %></p>
     </li>
     <% if @job.https? && @job.running? %>

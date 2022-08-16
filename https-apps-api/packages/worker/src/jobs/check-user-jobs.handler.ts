@@ -16,5 +16,5 @@ export const checkUserJobsHandler = async (bullJob: Job) => {
     job: bullJob,
   }
 
-  await new job.CheckUserJobsOperation(ctx).execute()
+  await new job.CheckUserJobsOperation(ctx as any).execute()
 }

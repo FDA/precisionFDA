@@ -23,8 +23,12 @@ module.exports = {
     // we want to use both types and interfaces
     '@typescript-eslint/consistent-type-definitions': 0,
     '@typescript-eslint/restrict-template-expressions': 0,
+
+    // TODO(samuel) - added by me - go through this at some point
     'import/group-exports': 0,
+    'no-warning-comments': 0,
     '@typescript-eslint/no-floating-promises': 0,
     '@typescript-eslint/no-warning-comments': 0,
+    '@typescript-eslint/array-type': 0,
   },
 }

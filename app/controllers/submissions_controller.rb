@@ -1,5 +1,7 @@
 # Submissions controller
 class SubmissionsController < ApplicationController
+  include CloudResourcesConcern
+
   skip_before_action :require_login, only: []
   before_action :require_login_or_guest, only: []
   before_action :check_challenge_access
@@ -24,6 +26,12 @@ class SubmissionsController < ApplicationController
     unless @challenge.accepting_submissions?
       flash[:error] = "Sorry, this challenge is currently not accepting submissions."
       redirect_to challenge_path(@challenge)
+      return
+    end
+
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
       return
     end
 
@@ -56,7 +64,8 @@ class SubmissionsController < ApplicationController
        app: @app.slice(:dxid, :spec, :title),
        scopes_permitted: %w(public private),
        licenses_to_accept: licenses_to_accept.uniq(&:id),
-       licenses_accepted: licenses_accepted
+       licenses_accepted: licenses_accepted,
+       instance_types: user_compute_resource_labels
   end
 
   def edit

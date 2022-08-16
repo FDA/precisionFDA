@@ -15,6 +15,7 @@ import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
@@ -26,7 +27,6 @@ import {
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
@@ -63,7 +63,6 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
     colWidths,
   } = useList<ListType>({
     fetchList: fetchFiles,
-    onRowClick,
     resource: 'files',
     params: {
       folderId: folderIdParam || undefined,
@@ -192,7 +191,7 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
           totalCount={data?.meta?.pagination?.total_count!}
           totalPages={data?.meta?.pagination?.total_pages!}
           perPage={perPageParam}
-          hide={hidePagination(
+          isHidden={hidePagination(
             query.isFetched,
             data?.files?.length,
             data?.meta?.pagination?.total_pages,

@@ -27,7 +27,7 @@ const formatUnknownError = (err: Error) => {
   return payload
 }
 
-export const makeErrorHandlerMdw: Api.Mdw = () => async (ctx, next) => {
+export const errorHandlerMdw = async (ctx: Api.Ctx, next) => {
   try {
     // eslint-disable-next-line @typescript-eslint/return-await
     return await next()

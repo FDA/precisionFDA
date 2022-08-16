@@ -150,7 +150,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
       showModal: isShownCopyToSpaceModal,
     },
     'Move to Archive': {
-      hide: true,
+      shouldHide: true,
       isDisabled: true, // databases.length !== 1,
       func: () => { },
     },
@@ -162,7 +162,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     },
     'Detach License': {
       isDisabled: selected.length !== 1,
-      hide: selected.length !== 1 || !selected[0]?.links.detach_license,
+      shouldHide: selected.length !== 1 || !selected[0]?.links.detach_license,
       func: () => setDetachLicenseModal(true),
       modal: detachLicenseModal,
       showModal: isShownDetachLicenseModal,

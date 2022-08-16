@@ -10,7 +10,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../utils'
+import { itemsCountString } from '../../../../utils/formatting'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 

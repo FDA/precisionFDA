@@ -9,7 +9,7 @@ import { Modal } from '../../modal'
 import { ButtonRow, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { APIResource, ResourceScope } from '../types'
-import { itemsCountString } from '../utils'
+import { itemsCountString } from '../../../utils/formatting'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;

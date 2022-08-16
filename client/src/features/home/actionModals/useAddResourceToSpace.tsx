@@ -9,11 +9,11 @@ import { Loader } from '../../../components/Loader'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { breakPoints } from '../../../styles/theme'
+import { getSelectedObjectsFromIndexes } from '../../../utils/object'
 import { Modal } from '../../modal'
 import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { IApp } from '../apps/apps.types'
-import { getSelectedObjectsFromIndexes } from '../utils'
 
 const StyledName = styled.div`
   white-space: nowrap;

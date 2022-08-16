@@ -182,12 +182,12 @@ export const useExecutionColumns = ({
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {},
         },
         {
-          Header: 'Energy',
+          Header: 'Cost In Dollars',
           accessor: 'jobs',
           id: 'energy',
           disableFilters: true,
           disableSortBy: true,
-          width: colWidths?.energy || 50,
+          width: colWidths?.energy || 106,
           // Cell: (props) => <>{props.value[props.value.length-1].energy_consumption}</>
           Cell: (props: any) => {
             const { jobs } = props.row.original

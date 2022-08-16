@@ -29,6 +29,7 @@ export const config: ConfigOverride = {
   platform: {
     apiUrl: 'https://api.dnanexus.com',
     authApiUrl: 'https://auth.dnanexus.com',
+    orgEveryoneHandle: 'precisionfda',
   },
   redis: {
     isSecure: true,

@@ -13,9 +13,9 @@ import { TrashIcon } from '../../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../../utils'
 import { Modal } from '../../../../modal'
 import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
-import { useModal } from '../../../../modal/useModal'
+import { useConditionalModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
-import { itemsCountString } from '../../../utils'
+import { itemsCountString } from '../../../../../utils/formatting'
 import {
   FilesMeta,
   FILE_STATUS,
@@ -44,17 +44,23 @@ const isUniqFile = (blobs: any, file: any) =>
       blob.path === file.path,
   )
 
+type UploadModalArgs = {
+  scope?: ResourceScope
+  folderId?: string
+  spaceId?: string
+  isAllowed: boolean
+  onViolation: () => void
+}
+  
 export const useFileUploadModal = ({
   scope,
   folderId,
   spaceId,
-}: {
-  scope?: ResourceScope
-  folderId?: string
-  spaceId?: string
-}) => {
+  isAllowed,
+  onViolation,
+}: UploadModalArgs) => {
   const queryCache = useQueryClient()
-  const { isShown, setShowModal } = useModal()
+  const { isShown, setShowModal } = useConditionalModal(isAllowed, onViolation)
   const [filesMeta, setFilesMeta] = useImmer<FilesMeta[]>([])
   const [blobs, setBlobs] = useState<any[]>([])
 
@@ -209,7 +215,7 @@ export const useFileUploadModal = ({
             Remove all
           </Button>
           {uploadFinished ? (
-            <ButtonSolidBlue onClick={() => handleClose()}>
+            <ButtonSolidBlue onClick={handleClose}>
               Close
             </ButtonSolidBlue>
           ) : (

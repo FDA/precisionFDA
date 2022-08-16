@@ -68,7 +68,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         end
 
         login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
-        login_tasks_processor.call(@context.user)
+        login_tasks_processor.call(@context.user, @context.api)
       else
         @tutorials = [
           {

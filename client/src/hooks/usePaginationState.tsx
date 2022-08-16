@@ -4,36 +4,21 @@ import { NumberParam, UrlUpdateType, useQueryParam, withDefault } from 'use-quer
 const defaultPage = 1
 const defaultPerPageCount = 20
 
-export interface PaginationState {
-  page: number
-  setPage: any
-  perPage: number
-  setPerPage: any
-}
-
-export function usePaginationState(): PaginationState {
+export function usePaginationState() {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(10)
 
   return { page, perPage, setPerPage, setPage }
 }
 
-
-export interface PaginationParams {
-  pageParam: number,
-  setPageParam: any,
-  perPageParam: number,
-  setPerPageParam: any,
-}
-
-export function usePaginationParams(): PaginationParams {
+export function usePaginationParams(initialPerPageCount?: number) {
   const [pageParam, setPageParam] = useQueryParam(
     'page',
     withDefault(NumberParam, defaultPage),
   )
   const [perPageParam, setPerPageParam] = useQueryParam(
     'per_page',
-    withDefault(NumberParam, defaultPerPageCount),
+    withDefault(NumberParam, initialPerPageCount ?? defaultPerPageCount),
   )
 
   const handleSetPageParam = (v: number, updateType: UrlUpdateType) => {

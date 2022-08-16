@@ -14,6 +14,7 @@ const getAppDetails = (uid, data) => backendCall(`/api/apps/${uid}`, 'GET', data
 const getAppExecutions = (uid, data) => backendCall(`/api/apps/${uid}/jobs`, 'GET', data)
 
 const getDatabases = (data) => backendCall('/api/dbclusters', 'GET', data)
+const getDatabaseAllowedInstances = (data) => backendCall('/api/dbclusters/allowed_instances', 'GET', data)
 const getDatabaseDetails = (dxid, data) => backendCall(`/api/dbclusters/${dxid}`, 'GET', data)
 // const getDatabasesSpaces = (data) => backendCall('/api/databases/spaces', 'GET', data)
 
@@ -52,6 +53,7 @@ export {
   getAppsSpaces,
   getAppDetails,
   getDatabases,
+  getDatabaseAllowedInstances,
   getDatabaseDetails,
   postApiCall,
   patchApiCall,

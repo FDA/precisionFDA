@@ -11,6 +11,7 @@ import { Refresh } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
@@ -22,7 +23,6 @@ import {
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
@@ -68,7 +68,6 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
     colWidths,
   } = useList<ListType>({
     fetchList: fetchDatabaseList,
-    onRowClick,
     resource: 'dbclusters',
     params: {
       scope: scope || undefined,
@@ -125,7 +124,8 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
       <DatabaseListTable
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         data={data?.dbclusters}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
@@ -142,7 +142,7 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
           totalCount={data?.meta?.pagination?.total_count!}
           totalPages={data?.meta?.pagination?.total_pages!}
           perPage={perPageParam}
-          hide={hidePagination(
+          isHidden={hidePagination(
             query.isFetched,
             data?.dbclusters?.length,
             data?.meta?.pagination?.total_pages,

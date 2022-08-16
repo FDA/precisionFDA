@@ -21,6 +21,9 @@ export const config: ConfigOverride = {
       emails: { name: 'https-apps-worker-emails-queue-stg' },
     },
   },
+  platform: {
+    orgEveryoneHandle: 'precisionfda',
+  },
   redis: {
     isSecure: true,
   },

@@ -1,4 +1,5 @@
-import React from 'react'
+/* eslint-disable react/jsx-props-no-spreading */
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -8,6 +9,8 @@ import { useAuthUser } from '../../features/auth/useAuthUser'
 import {
   isInitializedSelector,
 } from '../../reducers/context/selectors'
+import { IUser } from '../../types/user'
+import { CloudResourceModal } from '../CloudResourcesModal'
 import Dropdown from '../Dropdown'
 import { BullsEyeIcon } from '../icons/BullsEyeIcon'
 import { CaretIcon } from '../icons/CaretIcon'
@@ -27,41 +30,26 @@ import {
   HeaderLeft, HeaderRight,
   HeaderSpacer, IconWrap,
   LogoWrap, MenuItem, Nav, StyledDivider, StyledDropMenuLinks, StyledHeader,
-  StyledHeaderLogo, StyledLink, StyledLinkReactRoute,
+  StyledHeaderLogo, StyledLink, StyledLinkReactRoute, StyledOnClickModalDiv,
 } from './styles'
 
 
-const getUsername = (user: any) => {
-  if (user) {
-    if (user.full_name === ' ') {
-      return user.dxuser
-    } else {
-      return user.full_name
-    }
-  }
-  return '...'
+type UserMenuProps = {
+  user: IUser | null | undefined
+  userIsGuest: boolean
+  userCanAdministerSite: boolean
+  handleLogout: () => void
+  showCloudResourcesModal: () => void
 }
 
-export const Header: React.FC = () => {
-  const pathname = useLocation().pathname
-  const init = useSelector(isInitializedSelector)
-  const user = useAuthUser()
-
-  const userCanAdministerSite = user?.can_administer_site
-  const userIsGuest = user?.is_guest
-  const isSpacesPath = pathname.startsWith('/spaces')
-
-  const handleLogout = async () => {
-    await logout().then(() => {
-      window.location.replace('/')
-    })
-  }
-
-  const renderUserMenu = () => (
-    <StyledDropMenuLinks>
+export const UserMenu = ({ user, userIsGuest, userCanAdministerSite, handleLogout, showCloudResourcesModal }: UserMenuProps) => (
+  <StyledDropMenuLinks>
       <StyledLink href="/profile">Profile</StyledLink>
       {user && !userIsGuest && (
-        <StyledLink href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
+        <>
+          <StyledLink href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
+          <StyledOnClickModalDiv onClick={showCloudResourcesModal}>Cloud Resources</StyledOnClickModalDiv>
+        </>
       )}
       <StyledLink href="/licenses">Manage Licenses</StyledLink>
       {!userIsGuest && (
@@ -80,16 +68,43 @@ export const Header: React.FC = () => {
           <StyledDivider />
         </>
       )}
-      <StyledLink as="div" onClick={() => handleLogout()}>
+      <StyledLink as="div" onClick={handleLogout}>
         Log Out
       </StyledLink>
     </StyledDropMenuLinks>
   )
 
+const getUsername = (user: any) => {
+  if (user) {
+    if (user.full_name === ' ') {
+      return user.dxuser
+    } 
+      return user.full_name
+    
+  }
+  return '...'
+}
+
+export const Header: React.FC = () => {
+  const { pathname } = useLocation()
+  const init = useSelector(isInitializedSelector)
+  const user = useAuthUser()
+  const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
+
+  const userCanAdministerSite = user?.can_administer_site
+  const userIsGuest = user?.is_guest
+  const isSpacesPath = pathname.startsWith('/spaces')
+
+  const handleLogout = async () => {
+    await logout().then(() => {
+      window.location.replace('/')
+    })
+  }
+
   const isActiveLink = (linkPath: string) => {
-    if (linkPath == '/') {
+    if (linkPath === '/') {
       // Special case
-      return pathname == linkPath
+      return pathname === linkPath
     }
     return pathname.startsWith(linkPath)
   }
@@ -99,131 +114,145 @@ export const Header: React.FC = () => {
   const showGSRSLink = !isSpacesPath && !userIsGuest
 
   return (
-    <StyledHeader>
-      <Nav>
-        <LogoWrap as={Link} to="/">
-          <StyledHeaderLogo />
-        </LogoWrap>
-        <HeaderLeft>
-          <Link to={isSpacesPath ? '/home' : '/'} title={isSpacesPath ? 'Back Home' : 'Overview'}>
-            <MenuItem active={isActiveLink('/')}>
-              <IconWrap>
-                <HomeIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>
-                {isSpacesPath ? 'Back Home' : 'Overview'}
-              </HeaderItemText>
-            </MenuItem>
-          </Link>
-          {!isSpacesPath && (
-            <>
-              <a href="/discussions" title="Discussions">
-                <MenuItem active={isActiveLink('/discussions')}>
-                  <IconWrap>
-                    <CommentIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Discussions</HeaderItemText>
-                </MenuItem>
-              </a>
-              <Link to="/challenges" title="Challenges">
-                <MenuItem active={isActiveLink('/challenges')}>
-                  <IconWrap>
-                    <TrophyIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Challenges</HeaderItemText>
-                </MenuItem>
-              </Link>
-              <Link to="/experts" title="Exoerts">
-                <MenuItem active={isActiveLink('/experts')}>
-                  <IconWrap>
-                    <StarIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Experts</HeaderItemText>
-                </MenuItem>
-              </Link>
-              <HeaderSpacer />
-              <Link to="/home" title="My Home">
-                <MenuItem active={isActiveLink('/home')}>
-                  <IconWrap>
-                    <FortIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>My Home</HeaderItemText>
-                </MenuItem>
-              </Link>
-              <HeaderSpacer />
-              <a href="/notes" title="Notes">
-                <MenuItem active={isActiveLink('/notes')}>
-                  <IconWrap>
-                    <StickyNoteIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Notes</HeaderItemText>
-                </MenuItem>
-              </a>
-              <a href="/comparisons" title="Comparisons">
-                <MenuItem active={isActiveLink('/comparisons')}>
-                  <IconWrap>
-                    <BullsEyeIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Comparisons</HeaderItemText>
-                </MenuItem>
-              </a>
-            </>
-          )}
-          <HeaderSpacer />
-          <Link to="/spaces" title="Spaces">
-            <MenuItem active={isActiveLink('/spaces')}>
-              <IconWrap>
-                <ObjectGroupIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Spaces</HeaderItemText>
-            </MenuItem>
-          </Link>
-          {showGSRSLink && (
-            <a href="/ginas/app/beta" target="_blank" title="GSRS">
-              <MenuItem>
+    <>
+      <StyledHeader>
+        <Nav>
+          <LogoWrap as={Link} to="/">
+            <StyledHeaderLogo />
+          </LogoWrap>
+          <HeaderLeft>
+            <Link to={isSpacesPath ? '/home' : '/'} title={isSpacesPath ? 'Back Home' : 'Overview'}>
+              <MenuItem active={isActiveLink('/')}>
                 <IconWrap>
-                  <GSRSIcon height={16} />
-                </IconWrap>
-                <HeaderItemText>GSRS</HeaderItemText>
-              </MenuItem>
-            </a>
-          )}
-        </HeaderLeft>
-        <HeaderRight>
-          <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support" rel="noreferrer">
-            <MenuItem>
-              <IconWrap>
-                <CommentingIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Support</HeaderItemText>
-            </MenuItem>
-          </a>
-          <a href="/docs" title="Get Started">
-            <MenuItem active={isActiveLink('/docs')}>
-              <IconWrap>
-                <QuestionIcon height={16} />
-              </IconWrap>
-              <HeaderItemText>Get Started</HeaderItemText>
-            </MenuItem>
-          </a>
-          <Dropdown trigger="click" content={renderUserMenu()}>
-            {dropdownProps => (
-              <AvatarMenuItem
-                {...dropdownProps}
-                active={dropdownProps.isActive}
-              >
-                <IconWrap>
-                  <ProfileIcon height={16} />
+                  <HomeIcon height={16} />
                 </IconWrap>
                 <HeaderItemText>
-                  {getUsername(user)}
-                  <CaretIcon height={6} />
+                  {isSpacesPath ? 'Back Home' : 'Overview'}
                 </HeaderItemText>
-              </AvatarMenuItem>
+              </MenuItem>
+            </Link>
+            {!isSpacesPath && (
+              <>
+                <a href="/discussions" title="Discussions">
+                  <MenuItem active={isActiveLink('/discussions')}>
+                    <IconWrap>
+                      <CommentIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>Discussions</HeaderItemText>
+                  </MenuItem>
+                </a>
+                <Link to="/challenges" title="Challenges">
+                  <MenuItem active={isActiveLink('/challenges')}>
+                    <IconWrap>
+                      <TrophyIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>Challenges</HeaderItemText>
+                  </MenuItem>
+                </Link>
+                <Link to="/experts" title="Exoerts">
+                  <MenuItem active={isActiveLink('/experts')}>
+                    <IconWrap>
+                      <StarIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>Experts</HeaderItemText>
+                  </MenuItem>
+                </Link>
+                <HeaderSpacer />
+                <Link to="/home" title="My Home">
+                  <MenuItem active={isActiveLink('/home')}>
+                    <IconWrap>
+                      <FortIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>My Home</HeaderItemText>
+                  </MenuItem>
+                </Link>
+                <HeaderSpacer />
+                <a href="/notes" title="Notes">
+                  <MenuItem active={isActiveLink('/notes')}>
+                    <IconWrap>
+                      <StickyNoteIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>Notes</HeaderItemText>
+                  </MenuItem>
+                </a>
+                <a href="/comparisons" title="Comparisons">
+                  <MenuItem active={isActiveLink('/comparisons')}>
+                    <IconWrap>
+                      <BullsEyeIcon height={16} />
+                    </IconWrap>
+                    <HeaderItemText>Comparisons</HeaderItemText>
+                  </MenuItem>
+                </a>
+              </>
             )}
-          </Dropdown>
-        </HeaderRight>
-      </Nav>
-    </StyledHeader>
+            <HeaderSpacer />
+            <Link to="/spaces" title="Spaces">
+              <MenuItem active={isActiveLink('/spaces')}>
+                <IconWrap>
+                  <ObjectGroupIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>Spaces</HeaderItemText>
+              </MenuItem>
+            </Link>
+            {showGSRSLink && (
+              <a href="/ginas/app/beta" target="_blank" title="GSRS">
+                <MenuItem>
+                  <IconWrap>
+                    <GSRSIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>GSRS</HeaderItemText>
+                </MenuItem>
+              </a>
+            )}
+          </HeaderLeft>
+          <HeaderRight>
+            <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support" rel="noreferrer">
+              <MenuItem>
+                <IconWrap>
+                  <CommentingIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>Support</HeaderItemText>
+              </MenuItem>
+            </a>
+            <a href="/docs" title="Get Started">
+              <MenuItem active={isActiveLink('/docs')}>
+                <IconWrap>
+                  <QuestionIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>Get Started</HeaderItemText>
+              </MenuItem>
+            </a>
+            <Dropdown trigger="click" content={<UserMenu
+              user={user}
+              userCanAdministerSite={userCanAdministerSite}
+              userIsGuest={userIsGuest}
+              handleLogout={handleLogout}
+              showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
+            />}>
+              {dropdownProps => (
+                <AvatarMenuItem
+                  {...dropdownProps}
+                  active={dropdownProps.isActive}
+                >
+                  <IconWrap>
+                    <ProfileIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>
+                    {getUsername(user)}
+                    <CaretIcon height={6} />
+                  </HeaderItemText>
+                </AvatarMenuItem>
+              )}
+            </Dropdown>
+          </HeaderRight>
+        </Nav>
+      </StyledHeader>
+      <CloudResourceModal
+        isShown={isCloudResourcesModalShown}
+        hide={() => {
+          setCloudResourcesModalShown(false)
+        }}
+      />
+    </>
   )
 }

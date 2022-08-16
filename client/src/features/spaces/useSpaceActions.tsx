@@ -22,27 +22,31 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
 
   const actions: ActionFunctionsType<SpaceActions> = {
     'Lock/Unlock': {
+      type: 'modal',
       func: () => {
         modal.setShowModal(true)
       },
-      hide: !(space.links.lock || space.links.unlock),
+      shouldHide: !(space.links.lock || space.links.unlock),
       modal: modal.modalComp,
       showModal: modal.isShown,
     },
     'Edit Space': {
+      type: 'modal',
       func: () => {},
       isDisabled: false,
-      hide: !space.links.update,
+      shouldHide: !space.links.update,
     },
     'Duplicate Space': {
+      type: 'modal',
       func: () => {},
       isDisabled: false,
-      hide: !space.can_duplicate,
+      shouldHide: !space.can_duplicate,
     },
     Delete: {
+      type: 'modal',
       func: () => {},
       isDisabled: false,
-      hide: !!space.links.delete,
+      shouldHide: !!space.links.delete,
     },
   }
 

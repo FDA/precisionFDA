@@ -1,6 +1,7 @@
 import { database, job } from '@pfda/https-apps-shared'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { Job } from 'bull'
+import { UserOpsCtx, WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { getChildLogger } from '../utils'
 
 export const jobStatusHandler = async (bullJob: Job) => {
@@ -12,8 +13,9 @@ export const jobStatusHandler = async (bullJob: Job) => {
   // this is like a router endpoint
   // validation ??
   // build context
-  const ctx = {
-    em: database.orm().em.fork(),
+  const ctx: WorkerOpsCtx<UserOpsCtx> = {
+    // TODO(samuel) fix by declaration merging
+    em: database.orm().em.fork() as any,
     log,
     user: data.user,
     job: bullJob,

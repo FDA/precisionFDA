@@ -156,11 +156,11 @@ class Job < ApplicationRecord
   def energy
     return nil unless describe.key?("totalPrice")
 
-    ((describe["totalPrice"] * 400 + 5).to_i / 5.0).to_i * 5
+    (describe["totalPrice"] * 100).to_i / 100.0
   end
 
   def energy_string
-    (energy || "TBD").to_s
+    ("#{energy}$" || "TBD").to_s
   end
 
   def https_job_external_url

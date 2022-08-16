@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from 'react-query'
@@ -19,7 +20,6 @@ import { HomeLabel } from '../../../components/HomeLabel'
 import {
   ActionsButton,
   Header,
-  HeaderButton,
   HeaderLeft,
   HeaderRight,
   HomeLoader,
@@ -42,6 +42,7 @@ import { SpecTab } from './SpecTab'
 import { IChallenge } from '../../../types/challenge'
 import { getBackPath } from '../../../utils/getBackPath'
 import { Location } from '../../../types/utils'
+import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 
 const renderOptions = (app: IApp, scopeParamLink: string) => {
   const columns = [
@@ -112,18 +113,26 @@ const DetailActionsDropdown = (
 
   return (
     <>
-      <HeaderButton as="a" href={`/apps/${app.uid}/jobs/new`} type="primary" disabled={!app.links.run_job}>
+      <CloudResourcesHeaderButton
+        href={`/apps/${app.uid}/jobs/new`}
+        isLinkDisabled={!app.links.run_job}
+        conditionType='all'
+      >
         <>
           Run App&nbsp;
           <Pill>rev{app.revision}</Pill>
         </>
-      </HeaderButton>
-      <HeaderButton as="a" href={`/apps/${app.uid}/batch_app`} type="primary" disabled={!app.links.batch_run}>
+      </CloudResourcesHeaderButton>
+      <CloudResourcesHeaderButton
+        href={`/apps/${app.uid}/batch_app`}
+        isLinkDisabled={!app.links.batch_run}
+        conditionType='all'
+      >
         <>
           Run Batch&nbsp;
           <Pill>rev{app.revision}</Pill>
         </>
-      </HeaderButton>
+      </CloudResourcesHeaderButton>
       <Dropdown
         trigger="click"
         content={

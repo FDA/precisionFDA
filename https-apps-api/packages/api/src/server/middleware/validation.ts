@@ -1,6 +1,7 @@
+/* eslint-disable import/exports-last */
 import type { JSONSchema7 } from 'json-schema'
 import { isEmpty } from 'ramda'
-import { errors, ajv } from '@pfda/https-apps-shared'
+import { errors, ajv, utils } from '@pfda/https-apps-shared'
 
 type SanitizeInputFn = (props: any) => typeof props
 type SchemaWithSource = {
@@ -9,7 +10,7 @@ type SchemaWithSource = {
   params?: JSONSchema7
 }
 
-export const makeValidationMdw = (schema: SchemaWithSource, sanitizeInput?: SanitizeInputFn) => {
+export const makeSchemaValidationMdw = (schema: SchemaWithSource, sanitizeInput?: SanitizeInputFn) => {
   if (isEmpty(schema)) {
     throw new errors.InternalError('Empty schema spec passed to validation mdw.')
   }
@@ -51,7 +52,7 @@ export const makeValidationMdw = (schema: SchemaWithSource, sanitizeInput?: Sani
           input: sanitizeInputFn(ctx.request.body),
           errors: validationErrors,
         },
-        'Validation failed',
+        'Validation by schema failed',
       )
       throw new errors.ValidationError('Request body invalid', {
         code: errors.ErrorCodes.VALIDATION,
@@ -64,8 +65,51 @@ export const makeValidationMdw = (schema: SchemaWithSource, sanitizeInput?: Sani
         url: ctx.request.url,
         input: sanitizeInputFn(ctx.request.body),
       },
-      'Validation passed',
+      'Validation by schema passed',
     )
     return next()
   }
+}
+
+// TODO(samuel) This function is not 100% accurate in TS
+// The return type of this fn is the same schema type
+// This shouldn't affect resolved types, as utils.aggregateError.aggregateSchemaErrors depends
+// Purely on function return types
+// If 100% accuracy is wanted you can create similar generic to
+// ResolveSchemaReturnTypes and apply it to this function
+function bindCtxArgument<SchemaT>(schema: SchemaT, ctx: Api.Ctx): SchemaT {
+  if (typeof schema === 'function') {
+    // @ts-expect-error
+    return () => schema(ctx)
+  }
+  if (Array.isArray(schema)) {
+    return schema.map((entry) => bindCtxArgument(entry, ctx)) as any
+  }
+  if (typeof schema === 'object') {
+    return Object.fromEntries(Object.entries(schema as any).map(([key, value]) => [
+      key,
+      bindCtxArgument(value, ctx)
+    ])) as any
+  }
+  // Otherwise atomic value expected - string | number | boolean
+  return schema
+}
+
+// TODO(samuel) investigate how applying middleware can deep-merge ctx type definitions
+export const makeValidationMiddleware = <SchemaT extends any>(
+  schema: SchemaT
+) => (ctx: Api.Ctx, next) => {
+  const { errors: caughtErrors } = utils.aggregateError.aggregateSchemaErrors(bindCtxArgument(schema, ctx))
+  if (caughtErrors.length > 0) {
+    throw utils.aggregateError.formatAggregatedError(
+      'Ctx validation failed',
+      caughtErrors,
+      {
+        clientResponse: 'Validation Error',
+        clientStatusCode: 400,
+        code: errors.ErrorCodes.VALIDATION,
+      },
+    )
+  }
+  return next()
 }

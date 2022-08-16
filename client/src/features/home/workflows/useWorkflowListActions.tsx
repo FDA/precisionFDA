@@ -31,11 +31,13 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
 
   const actionsFunctions: ActionFunctionsType<any> = {
     'Create Workflow': {
+      type: 'modal',
       func: ({ showModal = false } = {}) => setShowCreateAppModal(showModal),
       isDisabled: false,
       modal: CreateAppModal,
     },
     'Add Workflow': {
+      type: 'modal',
       func: ({ showModal = false } = {}) => setShowAddWorkflowModal(showModal),
       isDisabled: false,
       modal: AddWorkflowModal,

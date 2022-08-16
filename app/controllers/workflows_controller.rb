@@ -2,10 +2,17 @@ class WorkflowsController < ApplicationController
   include CommonConcern
   include WorkflowConcern
   include ErrorProcessable
+  include CloudResourcesConcern
 
   before_action :validate_workflow_before_export, only: %i(cwl_export wdl_export)
+  before_action :check_total_and_job_charges_limit, only: %i(batch_workflow run_batch)
 
   def new
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to workflows_path
+      return
+    end
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
@@ -13,13 +20,14 @@ class WorkflowsController < ApplicationController
       apps: { private_apps: private_app_series.map { |a_s| a_s.slice(:id, :name) },
               public_apps: public_app_series.map { |a_s| a_s.slice(:id, :name) } },
       scope: %w(private),
+      instance_types: user_compute_resource_labels,
     )
   end
 
   def show
     @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
     if @workflow.nil?
-      flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
+      flash[:error] = I18n.t("workflow_not_accessible")
       redirect_to workflows_path
       return
     end
@@ -46,6 +54,11 @@ class WorkflowsController < ApplicationController
   end
 
   def edit
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to workflows_path
+      return
+    end
     @workflow = Workflow.editable_by(@context).find_by(uid: unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, you do not have permissions to edit this workflow"
@@ -59,6 +72,7 @@ class WorkflowsController < ApplicationController
       apps: { private_apps: private_app_series.map { |a_s| a_s.slice(:id, :name) },
               public_apps: public_app_series.map { |a_s| a_s.slice(:id, :name) } },
       scope: @workflow.accessible_scopes,
+      instance_types: user_compute_resource_labels,
       workflow: @workflow,
     )
   end
@@ -70,7 +84,7 @@ class WorkflowsController < ApplicationController
     if unsafe_params[:id].present?
       @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
       if @workflow.nil?
-        flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
+        flash[:error] = I18n.t("workflow_not_accessible")
         redirect_to workflows_path
         return
       else
@@ -131,6 +145,11 @@ class WorkflowsController < ApplicationController
   end
 
   def fork
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to workflows_path
+      return
+    end
     @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, you do not have permissions to fork this workflow"
@@ -146,6 +165,7 @@ class WorkflowsController < ApplicationController
         public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) },
       },
       scope: @workflow.accessible_scopes,
+      instance_types: user_compute_resource_labels,
       workflow: @workflow,
     )
   end
@@ -162,7 +182,7 @@ class WorkflowsController < ApplicationController
     @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
     if @workflow.nil?
-      flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
+      flash[:error] = I18n.t("workflow_not_accessible")
       redirect_to workflows_path
       return
     else

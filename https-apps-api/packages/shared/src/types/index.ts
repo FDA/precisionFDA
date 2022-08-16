@@ -4,7 +4,7 @@
  * thus this workaround is in place.
  */
 
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { Job } from 'bull'
 import { Logger } from 'pino'
 

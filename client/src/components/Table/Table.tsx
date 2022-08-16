@@ -73,6 +73,8 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   saveColumnResizeWidth?: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  getRowId?: Parameters<typeof useTable>[0]['getRowId']
+  shouldAllowScrollbar?: boolean
 }
 
 export default function Table<T extends object>(
@@ -104,6 +106,7 @@ export default function Table<T extends object>(
     updateRowState,
     saveColumnResizeWidth,
     manualFilters,
+    shouldAllowScrollbar,
   } = props
 
   const defaultColumn = {
@@ -201,7 +204,7 @@ export default function Table<T extends object>(
 
   return (
     <StyledTable>
-      <ReactTableStyles fillWidth={fillWidth}>
+      <ReactTableStyles shouldFillWidth={fillWidth} shouldAllowScrollbar={shouldAllowScrollbar}>
         <div className="tableWrap">
           <div {...getTableProps()} className="table sticky">
             <div className="thead">

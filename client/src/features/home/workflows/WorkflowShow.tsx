@@ -1,8 +1,10 @@
+/* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from 'react-query'
 import { useLocation, useParams } from 'react-router'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
+import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
@@ -20,7 +22,6 @@ import { StyledBackLink, StyledRight } from '../home.styles'
 import {
   ActionsButton,
   Header,
-  HeaderButton,
   HeaderLeft,
   HeaderRight,
   HomeLoader,
@@ -114,28 +115,26 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
 
   return (
     <>
-      <HeaderButton
-        as="a"
+      <CloudResourcesHeaderButton
         href={`${workflow.links.show}/analyses/new`}
-        type="primary"
         data-testid='workflow-show-actions-run'
+        conditionType='all'
       >
         <>
           Run Workflow&nbsp;
           <Pill>rev{workflow.revision}</Pill>
         </>
-      </HeaderButton>
-      <HeaderButton
-        as="a"
+      </CloudResourcesHeaderButton>
+      <CloudResourcesHeaderButton
         href={workflow.links.batch_run_workflow}
-        type="primary"
         data-testid='workflow-show-actions-run-batch'
+        conditionType='all'
       >
         <>
           Run Batch Workflow&nbsp;
           <Pill>rev{workflow.revision}</Pill>
         </>
-      </HeaderButton>
+      </CloudResourcesHeaderButton>
       <Dropdown
         trigger="click"
         content={

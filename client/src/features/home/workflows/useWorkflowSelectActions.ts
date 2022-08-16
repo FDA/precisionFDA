@@ -81,58 +81,65 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
 
   let actions: ActionFunctionsType<WorkflowActions> = {
     'Run': {
-      func: () => { },
+      type: 'link',
       link: `${links?.show}/analyses/new`,
       isDisabled: selected.length !== 1 || !links?.run_workflow,
+      cloudResourcesConditionType: 'all',
     },
     'Run Batch': {
-      func: () => { },
+      type: 'link',
       link: links?.batch_run_workflow,
       isDisabled: selected.length !== 1 || !links?.batch_run_workflow,
+      cloudResourcesConditionType: 'all',
     },
     'Diagram': {
-      func: () => { },
+      type: 'link',
       link: links?.diagram,
       isDisabled: selected.length !== 1 || !links?.diagram,
     },
     'Edit': {
-      func: () => { },
+      type: 'link',
       link: links?.edit,
       isDisabled: selected.length !== 1 || !links?.edit,
     },
     'Fork': {
-      func: () => { },
+      type: 'link',
       link: links?.fork,
       isDisabled: selected.length !== 1 || !links?.fork,
     },
     'Export to': {
+      type: 'modal',
       func: () => setExportToModal(true),
       modal: exportToModal,
       showModal: isShownExportToModal,
       isDisabled: selected.length !== 1,
     },
     'Feature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || scope !== 'everybody',
     },
     'Unfeature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
+      shouldHide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
     },
     'Delete': {
+      type: 'modal',
       func: () => setDeleteModal(true),
       modal: deleteModal,
       showModal: isShownDeleteModal,
-      hide: scope === 'spaces',
+      shouldHide: scope === 'spaces',
       isDisabled: selected.some((e) => !e.links?.delete) || selected.length === 0,
     },
     'Copy to space': {
+      type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled:
         selected.length === 0 || selected.some(e => !e.links?.copy),
@@ -140,17 +147,18 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
       showModal: isShownCopyToSpaceModal,
     },
     'Comments': {
-      func: () => { },
+      type: 'link',
       link: `/workflows/${selected[0]?.uid}/comments`,
       isDisabled: false,
-      hide: selected.length !== 1,
+      shouldHide: selected.length !== 1,
     },
     'Edit tags': {
+      type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      hide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
     },
   }
 

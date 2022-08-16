@@ -172,18 +172,21 @@ const app = {
   },
   runAppInput: (): AnyObject => ({
     scope: 'private',
+    jobLimit: 32.67,
     input: {
       duration: 30,
     },
   }),
   runTtydAppInput: () => ({
     scope: 'private',
+    jobLimit: 50,
     input: {
       port: 8080,
     },
   }),
   runRshinyAppInput: () => ({
     scope: 'private',
+    jobLimit: 50,
     input: {
       app_gz: 'app-gzipped-file',
     },

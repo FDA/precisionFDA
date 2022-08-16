@@ -27,13 +27,21 @@ const SpacesList = ({
     data = [],
     status,
     refetch,
-  } = useQuery(['editable_spaces_list'], () => fetchEditableSpacesList(), {
+  } = useQuery(['editable_spaces_list'], fetchEditableSpacesList, {
     onError: () => {
       toast.error('Error: Fetching editable spaces.')
     },
   })
-  if (status === 'loading') return <div>Loading...</div>
-  if (data.length === 0) return <div>You have no spaces.</div>
+  if (status === 'loading') {
+    return (
+      <div>Loading...</div>
+    )
+  }
+  if (data.length === 0) {
+    return (
+      <div>You have no spaces.</div>
+    )
+  }
 
   return (
     <ModalScroll>

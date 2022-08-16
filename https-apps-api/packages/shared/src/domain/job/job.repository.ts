@@ -1,4 +1,4 @@
-import { EntityRepository, FindOneOptions } from '@mikro-orm/core'
+import { EntityRepository } from '@mikro-orm/mysql'
 import { buildEntityQueryAndFilter } from '../permissions/permissions.filters'
 import { Job } from './job.entity'
 import { JOB_STATE } from './job.enum'

@@ -1,15 +1,24 @@
+/* eslint-disable react/require-default-props */
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { colors } from '../styles/theme'
 import { Svg } from './icons/Svg'
 
-const LoaderWrapper = styled.div`
+const LoaderWrapper = styled.div<{shouldDisplayInline?: boolean}>`
   display: flex;
   justify-content: center;
   margin-top: 16px;
+  ${({ shouldDisplayInline }) => shouldDisplayInline && css`
+    display: inline;
+  `}
 `
-export const Loader = ({ height = 16 }: { height?: number }) => (
-  <LoaderWrapper>
+type Props = {
+  height: number
+  shouldDisplayInline?: boolean
+}
+
+export const Loader = ({ height = 16, shouldDisplayInline }: Props) => (
+  <LoaderWrapper shouldDisplayInline={shouldDisplayInline}>
     <Svg height={height} width={60}>
       <circle fill={colors.darkBlue} stroke="none" cx="6" cy={height / 2} r="6">
         <animate

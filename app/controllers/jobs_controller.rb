@@ -1,7 +1,12 @@
 # Jobs controller
+
 class JobsController < ApplicationController
+  include ErrorProcessable
+  include CloudResourcesConcern
+
   skip_before_action :require_login,     only: [:show]
   before_action :require_login_or_guest, only: [:show]
+  before_action :check_total_and_job_charges_limit, only: :new
 
   def show
     @job = Job.accessible_by(@context).includes(:user).find_by(uid: params[:id])
@@ -100,6 +105,13 @@ class JobsController < ApplicationController
         flash: { error: I18n.t("app_not_accessible_or_runnable") },
       ) && return
     end
+    if user_has_no_compute_resources_allowed
+      redirect_back(
+        fallback_location: apps_path,
+        flash: { error: I18n.t("api.errors.no_allowed_instance_types") },
+      ) && return
+    end
+
 
     licenses_to_accept = []
     @app.assets.each do |asset|
@@ -134,7 +146,9 @@ class JobsController < ApplicationController
        licenses_to_accept: licenses_to_accept.uniq(&:id),
        licenses_accepted: licenses_accepted,
        selectable_spaces: selectable_spaces,
-       content_scopes: content_scopes
+       content_scopes: content_scopes,
+       instance_types: user_compute_resource_labels,
+       job_limit: current_user.job_limit
   end
 
   def destroy

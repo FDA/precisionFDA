@@ -1,7 +1,7 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { job as jobDomain, utils } from '@pfda/https-apps-shared'
-import { makeValidationMdw } from '../server/middleware/validation'
+import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
 
@@ -11,7 +11,7 @@ router.use(defaultMiddlewares)
 
 router.post(
   '/:appDxId/run',
-  makeValidationMdw({
+  makeSchemaValidationMdw({
     body: jobDomain.inputs.runAppSchema,
     params: utils.schemas.getDxidInputSchema('appDxId'),
   }),
