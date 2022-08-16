@@ -383,7 +383,7 @@ export const useFilesSelectActions = ({
     },
     'Edit tags': {
       func: () => setTagsModal(true),
-      isDisabled: openSelected,
+      isDisabled: openSelected || isFolder,
       modal: tagsModal,
       showModal: isShownTagsModal,
       hide:
