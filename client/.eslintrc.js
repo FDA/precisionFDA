@@ -10,9 +10,11 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'prettier',
   ],
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "PROD_OR_STAGE": "readonly",
+    "RECAPTCHA_SITE_KEY": "readonly",
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
