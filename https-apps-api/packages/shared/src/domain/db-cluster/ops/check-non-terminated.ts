@@ -48,8 +48,8 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
           dxuser: dbcluster.user.getEntity().dxuser,
           status: STATUSES[invertObj(STATUS)[dbcluster.status]],
           dxInstanceClass: dbcluster.dxInstanceClass,
-          duration: dbcluster.elapsedTimeSinceCreationString()
-        }))
+          duration: dbcluster.elapsedTimeSinceCreationString(),
+        })),
       },
     })
     const email: EmailSendInput = {
