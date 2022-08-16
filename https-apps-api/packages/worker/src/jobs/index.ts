@@ -2,13 +2,14 @@ import { path } from 'ramda'
 import { queue, errors, debug } from '@pfda/https-apps-shared'
 import { Job } from 'bull'
 import { log } from '../utils'
+import { userCheckupHandler } from '../users/user-checkup.handler'
 import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
 import { dbClusterSyncHandler } from './db-cluster-sync.handler'
 import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
-import { userCheckupHandler } from '../users/user-checkup.handler'
 import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclusters.handler'
+import { checkUserJobsHandler } from './check-user-jobs.handler'
 
 export const handler = async (job: Job<queue.types.Task>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -40,8 +41,8 @@ export const handler = async (job: Job<queue.types.Task>) => {
     case queue.types.TASK_TYPE.USER_CHECKUP:
       await userCheckupHandler(job)
       return
-    case queue.types.TASK_TYPE.OTHER_TASK:
-      console.log('gonna do the other task')
+    case queue.types.TASK_TYPE.CHECK_USER_JOBS:
+      await checkUserJobsHandler(job)
       return
     case queue.types.TASK_TYPE.DEBUG_MAX_MEMORY:
       await debug.testHeapMemoryAllocationError()
