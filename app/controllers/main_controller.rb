@@ -1,6 +1,7 @@
 # rubocop:todo Style/Documentation
 class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   include Recaptcha::Adapters::ControllerMethods
+  include RecaptchaHelper
 
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
@@ -414,7 +415,9 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def create_request_access
     @invitation = Invitation.new
 
-    if verify_recaptcha(model: @invitation)
+    token = unsafe_params.dig("g-recaptcha-response-data", :registration)
+
+    if verify_captcha_assessment(token, "registration")
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
     end
 
