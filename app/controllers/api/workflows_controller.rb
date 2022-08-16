@@ -194,7 +194,8 @@ module Api
           workflow = Workflows::Builder.call(presenter)
           render json: { id: workflow.uid, asset_uids: presenter.assets.map(&:uid) }
         else
-          render json: { errors: presenter.errors.full_messages }, status: :unprocessable_entity
+          render json: { error: { message: presenter.errors.full_messages.first } },
+                 status: :unprocessable_entity
         end
       end
     rescue StandardError => e
@@ -206,7 +207,7 @@ module Api
         e.message
       end
 
-      render json: { errors: [message] }, status: :unprocessable_entity
+      render json: { error: { message: message } }, status: :unprocessable_entity
     end
 
     def diagram

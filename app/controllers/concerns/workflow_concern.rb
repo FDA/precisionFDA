@@ -63,6 +63,10 @@ module WorkflowConcern
     inputs = workflow_params["inputs"] || []
     fail "If provided, the workflow 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |s| s.is_a?(Hash) }
 
+    unless workflow.stages.all? { |stage| @context.user.resources.include?(stage[:instanceType]) }
+      raise_api_error I18n.t("workflows.errors.unsupported_instance_types", name: workflow.name)
+    end
+
     workflow_input_spec = workflow.input_spec_hash
     unseen_workflow_inputs = workflow.unused_input_spec_hash
 

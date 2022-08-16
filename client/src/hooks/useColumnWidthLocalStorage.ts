@@ -1,5 +1,5 @@
 import { UseResizeColumnsState } from 'react-table';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useLocalStorage } from './useLocalStorage';
 
 export interface IColumnWidthLocalStorage {
   saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void

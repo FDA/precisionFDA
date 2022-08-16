@@ -144,7 +144,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
   return (
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      {!spaceActions['Lock/Unlock']?.hide && (
+      {!spaceActions['Lock/Unlock']?.shouldHide && (
         <div>
           <ButtonOutlineGrey
             type="button"

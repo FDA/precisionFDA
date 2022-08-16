@@ -1,7 +1,7 @@
 shared_examples 'workflow_presenter' do
   subject { presenter }
 
-  let(:user) { create(:user) }
+  let(:user) { create(:user, resources: CloudResourceDefaults::RESOURCES) }
   let(:locale_scope) { "activemodel.errors.models.workflow/presenter.attributes" }
   let(:presenter) { described_class.new(raw, context) }
   let(:subject_response) { presenter.build }

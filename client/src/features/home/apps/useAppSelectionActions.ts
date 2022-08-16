@@ -164,66 +164,73 @@ export const useAppSelectionActions = ({
 
   let actions: ActionFunctionsType<AppActions> = {
     'Run': {
-      func: () => { },
+      type: 'link',
       link: `/apps/${selected[0]?.uid}/jobs/new`,
       isDisabled: selected.length !== 1 || !selected[0].links.run_job,
+      cloudResourcesConditionType: 'all',
     },
     'Run batch': {
-      func: () => { },
+      type: 'link',
       link: `/apps/${selected[0]?.uid}/batch_app`,
       isDisabled: selected.length !== 1 || !selected[0].links.batch_run,
+      cloudResourcesConditionType: 'all',
     },
     'Track': {
-      func: () => { },
+      type: 'link',
       link: selected[0]?.links?.track,
       isDisabled: selected.length !== 1 || !selected[0].links.track,
     },
     'Edit': {
-      func: () => { },
+      type: 'link',
       link: selected[0]?.links?.edit,
       isDisabled: selected.length !== 1 || !selected[0].links.edit,
     },
     'Fork': {
-      func: () => { },
+      type: 'link',
       link: selected[0]?.links?.fork,
       isDisabled: selected.length !== 1 || !selected[0].links.fork,
     },
     'Export to': {
+      type: 'modal',
       func: () => setExportToModal(true),
       modal: exportToModal,
       showModal: isShownExportToModal,
       isDisabled: selected.length !== 1,
     },
     'Make public': {
-      func: () => { },
+      type: 'link',
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
       isDisabled: selected.length !== 1 || !selected[0].links.publish,
-      hide: selected[0]?.location !== 'Private',
+      shouldHide: selected[0]?.location !== 'Private',
     },
     'Feature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || scope !== 'everybody',
     },
     'Unfeature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
+      shouldHide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
     },
     'Delete': {
+      type: 'modal',
       func: () => setDeleteModal(true),
       isDisabled: selected.some((e) => !e.links.delete) || selected.length === 0,
       modal: deleteModal,
       showModal: isShownDeleteModal,
     },
     'Copy to space': {
+      type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled:
         selected.length === 0 || selected.some(e => !e.links.copy),
@@ -231,12 +238,14 @@ export const useAppSelectionActions = ({
       showModal: isShownCopyToSpaceModal,
     },
     'Copy to private': {
+      type: 'modal',
       func: () => setCopyToPrivateModal(true),
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
     },
     'Attach to...': {
+      type: 'modal',
       func: () => setAttachToModal(true),
       isDisabled:
         selected.length === 0 ||
@@ -245,42 +254,47 @@ export const useAppSelectionActions = ({
       showModal: isShownAttachToModal,
     },
     'Comments': {
-      func: () => { },
+      type: 'link',
       link: `/apps/${selected[0]?.uid}/comments`,
       isDisabled: selected.length !== 1,
     },
     'Set as Challenge App': {
+      type: 'modal',
       func: () => setAttachToChallengeModal(true),
       isDisabled: selected.length !== 1,
       modal: attachToChallengeModal,
       showModal: isShownAttachToChallengeModal,
-      hide: !challenges || challenges.length === 0 || !selected[0]?.links?.assign_app,
+      shouldHide: !challenges || challenges.length === 0 || !selected[0]?.links?.assign_app,
     },
     'Edit tags': {
+      type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      hide: (!isAdmin && selected[0]?.added_by !== user.dxuser) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user.dxuser) || (selected.length !== 1),
     },
     'Add to Comparators': {
+      type: 'modal',
       func: () => setShowComparatorAddModal(true, 'add_to_comparators'),
       isDisabled: false,
-      hide: !comparatorLinks?.add_to_comparators,
+      shouldHide: !comparatorLinks?.add_to_comparators,
       showModal: isShownComparatorAddModal,
       modal: comparatorAddModal,
     },
     'Set this app as comparison default': {
+      type: 'modal',
       func: () => setShowComparatorSetModal(true, 'set_app'),
       isDisabled: false,
-      hide: !comparatorLinks?.set_app,
+      shouldHide: !comparatorLinks?.set_app,
       showModal: isShownComparatorSetModal,
       modal: comparatorSetModal,
     },
     'Remove from Comparators': {
+      type: 'modal',
       func: () => setShowComparatorRemoveModal(true, 'remove_from_comparators'),
       isDisabled: false,
-      hide: !comparatorLinks?.remove_from_comparators,
+      shouldHide: !comparatorLinks?.remove_from_comparators,
       showModal: isShownComparatorRemoveModal,
       modal: comparatorRemoveModal,
     },

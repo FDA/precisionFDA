@@ -1,5 +1,5 @@
 /* eslint-disable no-undefined */
-import { wrap, EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
@@ -8,8 +8,6 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
-import { BasicUserJob } from 'shared/src/queue/task.input'
-
 
 const createUserCheckupTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getStatusQueue()
@@ -19,7 +17,6 @@ const createUserCheckupTask = async (user: UserCtx) => {
     user,
   })
 }
-
 
 describe('TASK: user-checkup', () => {
   let em: EntityManager

@@ -10,6 +10,7 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { RootState } from '../../../store'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
@@ -20,7 +21,6 @@ import {
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { useWorkflowColumns } from './useWorkflowColumns'
 import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
@@ -55,7 +55,6 @@ export const WorkflowList = ({
     resetSelected,
   } = useList<ListType>({
     fetchList: fetchWorkflowList,
-    onRowClick,
     resource: 'workflows',
     params: {
       spaceId: spaceId || undefined,
@@ -129,7 +128,8 @@ export const WorkflowList = ({
         isAdmin={isAdmin}
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         workflows={data?.workflows}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
@@ -146,7 +146,7 @@ export const WorkflowList = ({
           totalCount={data?.meta?.pagination?.total_count}
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          hide={hidePagination(
+          isHidden={hidePagination(
             query.isFetched,
             data?.workflows?.length,
             data?.meta?.pagination?.total_pages,

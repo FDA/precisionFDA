@@ -1,6 +1,6 @@
 import React from 'react'
 import { Hooks, HeaderProps, CellProps, useResizeColumns } from 'react-table'
-import { initial } from 'lodash'
+import initial from 'lodash/initial'
 import { IndeterminateCheckbox } from './IndeterminateCheckbox'
 import { ExpandArrowIcon } from './styles'
 import { TransparentButton } from '../Dropdown/styles'

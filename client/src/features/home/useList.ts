@@ -3,14 +3,14 @@ import { UseQueryOptions } from 'react-query'
 import { usePrevious } from '../../hooks/usePrevious'
 import { columnFilters } from './columnFilters'
 import { APIResource, IMeta, ResourceScope } from './types'
-import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from './useColumnWidthLocalStorage'
+import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from './useFilterState'
 import { useListQuery } from './useListQuery'
-import { ISortByParams, useOrderByParams } from './useOrderByState'
-import { PaginationParams, usePaginationParams } from './usePaginationState'
+import { ISortByParams, useOrderByParams } from '../../hooks/useOrderByState'
+import { usePaginationParams } from '../../hooks/usePaginationState'
 
 export interface IListProps {
-  pagination: PaginationParams
+  pagination: ReturnType<typeof usePaginationParams>
   sort: ISortByParams
   filter: Record<string, string>
   colWidth: IColumnWidthLocalStorage
@@ -22,7 +22,6 @@ interface IUseList<T> {
   scope?: ResourceScope,
   fetchList: any,
   resource: APIResource,
-  onRowClick: any,
   params?: {
     [key: string]: string | undefined
   }
@@ -51,7 +50,7 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}, 
   })
 
   useEffect(() => {
-    // Reset selected rows if pageParam, perPageParam, sort, filterQuery, scope change 
+    // Reset selected rows if pageParam, perPageParam, sort, filterQuery, scope, spaceId change 
     resetSelected()
   }, [pageParam, perPageParam, sort, filterQuery, params.scope, params.spaceId])
 

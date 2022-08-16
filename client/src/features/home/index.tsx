@@ -32,7 +32,7 @@ import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.
 import { ResourceScope } from './types'
 import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
-import { WorkflowList } from './workflows/WorflowList'
+import { WorkflowList } from './workflows/WorkflowList'
 import { WorkflowShow } from './workflows/WorkflowShow'
 
 

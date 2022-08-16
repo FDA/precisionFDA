@@ -36,7 +36,7 @@ import {
   StyledMenu,
 } from '../../home/home.styles'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
-import { WorkflowList } from '../../home/workflows/WorflowList'
+import { WorkflowList } from '../../home/workflows/WorkflowList'
 import { WorkflowShow } from '../../home/workflows/WorkflowShow'
 import { MembersList } from '../members/MembersList'
 import { spaceRequest } from '../spaces.api'
@@ -90,7 +90,7 @@ export const Spaces2 = ({
 
           <ButtonRow>
             <Row>
-              {!spaceActions['Edit Space']?.hide && (
+              {!spaceActions['Edit Space']?.shouldHide && (
                 <ActionButton
                   data-testid="edit-space-button"
                   onClick={() => history.push(`/spaces/${space.id}/edit`)}
@@ -98,7 +98,7 @@ export const Spaces2 = ({
                   Space Settings
                 </ActionButton>
               )}
-              {!spaceActions['Duplicate Space']?.hide && (
+              {!spaceActions['Duplicate Space']?.shouldHide && (
                 <ActionButton
                   data-testid="duplicate-space-button"
                   onClick={() => history.push(`/spaces/${space.id}/duplicate`)}

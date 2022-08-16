@@ -1,6 +1,6 @@
-import { useSelector } from "react-redux"
-import { contextUserSelector } from "../../reducers/context/selectors"
-import { IUser } from "../../types/user"
+import { useSelector } from 'react-redux'
+import { contextUserSelector } from '../../reducers/context/selectors'
+import { IUser } from '../../types/user'
 
 export const useAuthUser = () => {
   let user: IUser = useSelector(contextUserSelector)

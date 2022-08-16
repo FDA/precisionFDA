@@ -8,17 +8,20 @@ import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.enum'
+import { OrgMembershipError } from '../errors'
 
+// TODO(samuel) refactor this so that headers aren't mixed with URL params
 type BaseParams = {
   accessToken: string
 }
 type JobDescribeParams = BaseParams & { jobId: string }
 type JobTerminateParams = BaseParams & { jobId: string }
-// todo: ..
+
 type JobCreateParams = BaseParams & {
   appId: string
   project: string
   name?: string
+  costLimit: number
   input: AnyObject
   systemRequirements: AnyObject
   timeoutPolicyByExecutable: AnyObject
@@ -69,6 +72,24 @@ type MoveFilesParams = BaseParams & {
   destinationFolderPath: string
   fileIds: string[]
   projectId: string
+}
+
+type UserResetMfaParams = {
+  headers: BaseParams
+  dxid: string
+  data: {
+    user_id: string
+    org_id: string
+  }
+}
+
+type UserUnlockParams = {
+  headers: BaseParams
+  dxid: string
+  data: {
+    user_id: string
+    org_id: string
+  }
 }
 
 type ListFilesResponse = {
@@ -363,8 +384,10 @@ class PlatformClient {
     }
   }
 
-  async dbClusterAction(params: DbClusterActionParams,
-                        action: DbClusterAction): Promise<ClassIdResponse> {
+  async dbClusterAction(
+    params: DbClusterActionParams,
+    action: DbClusterAction,
+  ): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/${action}`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -418,6 +441,52 @@ class PlatformClient {
     } catch (err) {
       this.logClientFailed(options)
       return this.handleFailed(err)
+    }
+  }
+
+  async userResetMfa(params: UserResetMfaParams) {
+    const url = `${config.platform.authApiUrl}/${params.dxid}/resetUserMFA`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+      headers: this.setupHeaders(params.headers),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err, (_, __, message) => {
+        if (message.includes('MFA is already reset')) {
+          throw new errors.MfaAlreadyResetError()
+        }
+      })
+    }
+  }
+
+  async userUnlock(params: UserUnlockParams) {
+    const url = `${config.platform.apiUrl}/${params.dxid}/unlockUserAccount`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+      headers: this.setupHeaders(params.headers),
+    }
+
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err, (_, __, message) => {
+        if (message.includes('must be an admin')) {
+          throw new OrgMembershipError()
+        }
+      })
     }
   }
 
@@ -478,7 +547,10 @@ class PlatformClient {
     return { authorization: `Bearer ${params.accessToken}` }
   }
 
-  handleFailed(err: any): any {
+  private handleFailed(
+    err: any,
+    customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
+  ): any {
     // response status code is NOT 2xx
     if (err.response) {
       this.log.error(
@@ -502,6 +574,9 @@ class PlatformClient {
       const statusCode = err.response.status
       const errorType = err.response.data?.error?.type || 'Server Error'
       const errorMessage = err.response.data?.error?.message || err.response.data
+      if (customErrorThrower) {
+        customErrorThrower(statusCode, errorType, errorMessage)
+      }
       throw new errors.ClientRequestError(
         `${errorType} (${statusCode}): ${errorMessage}`,
         {

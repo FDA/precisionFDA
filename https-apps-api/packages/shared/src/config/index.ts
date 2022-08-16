@@ -63,6 +63,7 @@ const defaultConfig = {
     adminUser: 'precisionfda.admin_dev',
     adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
     findDataObjectsQueryLimit: 100,
+    orgEveryoneHandle: 'precisionfda_dev',
   },
   emails: {
     salesforce: {
@@ -108,7 +109,7 @@ const defaultConfig = {
       staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
     },
     nonTerminatedDbClusters: {
-      repeatPattern: '0 6 * * *'
+      repeatPattern: '0 6 * * *',
     }
   },
   flags: {

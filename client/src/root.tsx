@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { Provider } from 'react-redux'
@@ -20,6 +20,7 @@ import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
+import { UsersList } from './features/admin/users'
 import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
 import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
 import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
@@ -54,6 +55,12 @@ const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
     },
   })
 
+// NOTE(samuel) this happens when window.location.pathname and 
+const possiblyMismatchedRoutes = [
+  '/admin/users'
+]
+
+  
 const root = ({ store }: any) => {
   const authModal = useModal()
   toast.configure()
@@ -75,6 +82,16 @@ const root = ({ store }: any) => {
             {/* <SessionExpiration authModal={authModal} /> */}
             <ErrorWrapper>
               <Switch>
+                { // TODO(samuel) temporary hotfix for incorrect routing, remove when admin dashboard gets implemented in react
+                  (function () {
+                    const isRouteMismatched = possiblyMismatchedRoutes.includes(window.location.pathname)
+                    // TODO(samuel) for some reason history.location is not overwritten sometimes
+                    if (isRouteMismatched) {
+                      return <Redirect exact from='/' to={window.location.pathname} />
+                    }
+
+                  })()
+                }
                 <Route exact path="/">
                   <LandingPage />
                 </Route>
@@ -146,6 +163,9 @@ const root = ({ store }: any) => {
                 </Route>
                 <Route exact path="/terms">
                   <ToS />
+                </Route>
+                <Route exact path="/admin/users">
+                  <UsersList />
                 </Route>
                 <Route path="*">
                   <NoFoundPage />

@@ -1,7 +1,7 @@
+import { omit, invertObj } from 'ramda'
+import { EntityManager } from '@mikro-orm/mysql'
 import { BaseOperation } from '../../../utils'
 import * as client from '../../../platform-client'
-import { omit, invertObj } from 'ramda'
-import { EntityManager } from '@mikro-orm/core'
 import type { CreateDbClusterInput } from '../db-cluster.input'
 import { DbCluster } from '../db-cluster.entity'
 import { User } from '../../user'
@@ -21,11 +21,11 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
 
     const user = await this.em.findOne(User, { id: this.ctx.user.id })
 
-    const newDbClusterRes: client.ClassIdResponse =
-      await platformClient.dbClusterCreate(this.buildCreateApiCall())
+    const newDbClusterRes: client.ClassIdResponse
+      = await platformClient.dbClusterCreate(this.buildCreateApiCall())
 
-    const describeDbClusterRes: client.DbClusterDescribeResponse =
-      await platformClient.dbClusterDescribe({
+    const describeDbClusterRes: client.DbClusterDescribeResponse
+      = await platformClient.dbClusterDescribe({
         dxid: newDbClusterRes.id,
         project: input.project,
         accessToken: this.ctx.user.accessToken,
@@ -46,9 +46,7 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
     return payload
   }
 
-  private async persistDbCluster(
-    describeDbClusterRes: client.DbClusterDescribeResponse
-  ): Promise<DbCluster> {
+  private async persistDbCluster(describeDbClusterRes: client.DbClusterDescribeResponse): Promise<DbCluster> {
     const dbCluster = this.em.create(DbCluster, {
       user: this.em.getReference(User, this.ctx.user.id),
       dxid: describeDbClusterRes.id,

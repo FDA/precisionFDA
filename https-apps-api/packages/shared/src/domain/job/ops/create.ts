@@ -235,9 +235,10 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         [app.dxid]: {
           '*': {
             minutes: this.computeTimeoutPolicyForPlatformInMinutes()
-          }
+          },
         },
       },
+      costLimit: this.input.jobLimit,
       name: this.input.name,
       input: {},
     }

@@ -161,8 +161,8 @@ class NewAppViewModel extends Precision.models.AppEditorModel
   wdlTextValueOnInput: (root, e) =>
     @wdlTextValue(e.target.value)
 
-  constructor: (data, ubuntuReleases) ->
-    super(data, ubuntuReleases, 'new')
+  constructor: (data, ubuntuReleases, instanceTypes) ->
+    super(data, ubuntuReleases, instanceTypes, 'new')
     @importModal = $('#import_cwl_wdl_modal')
     @importSuccessModal = $('#import_cwl_wdl_success_modal')
     @wdlFileInput = $('#wdl_file_input')
@@ -208,6 +208,10 @@ class NewAppViewModel extends Precision.models.AppEditorModel
 AppsController = Paloma.controller('Apps', {
   new: ->
     $container = $("body main")
-    viewModel = new NewAppViewModel(@params.app, @params.ubuntu_releases)
+    viewModel = new NewAppViewModel(
+      @params.app,
+      @params.ubuntu_releases,
+      @params.instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type),
+    )
     ko.applyBindings(viewModel, $container[0])
 })

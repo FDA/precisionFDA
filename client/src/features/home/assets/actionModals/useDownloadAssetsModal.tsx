@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useMemo } from 'react'
 import { Button } from '../../../../components/Button'
 import { DownloadIcon } from '../../../../components/icons/DownloadIcon'
@@ -10,7 +11,7 @@ import {
 } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../utils'
+import { itemsCountString } from '../../../../utils/formatting'
 import { IAsset } from '../assets.types'
 
 export function useDownloadAssetsModal(selectedFiles: IAsset[]){
@@ -22,19 +23,18 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]){
     }
   }
 
-  const momoSelected = useMemo(() => selectedFiles, [isShown])
+  const memoSelected = useMemo(() => selectedFiles, [isShown])
 
   const modalComp = (
     <Modal
       data-testid="modal-assets-download"
-      headerText={`Download ${itemsCountString('asset', momoSelected.length)}?`}
-      isShown={isShown}
+      headerText={`Download ${itemsCountString('asset', memoSelected.length)}?`}
+      isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
       footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}
     >
       <ResourceTable
-        rows={momoSelected.map((s, i) => {
-          return {
+        rows={memoSelected.map((s, i) => ({
             name: (
               <StyledName key={`${i}-name`} href={s.links.show} target="_blank">
                 <VerticalCenter>
@@ -52,8 +52,7 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]){
                 Download
               </StyledAction>
             ),
-          }
-        })}
+          }))}
       />
     </Modal>
   )

@@ -325,7 +325,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
               <MetadataVal>{execution.duration}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
-              <MetadataKey>Energy Consumed</MetadataKey>
+              <MetadataKey>Cost In Dollars</MetadataKey>
               <MetadataVal>{execution.energy_consumption}</MetadataVal>
             </MetadataItem>
             <MetadataItem>

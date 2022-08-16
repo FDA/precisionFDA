@@ -1,7 +1,7 @@
 import { wrap } from "@mikro-orm/core";
 import { Expert } from "..";
 
-export interface Meta {
+export interface ExpertMeta {
   _prefname: string;
   _about: string;
   _blog: string;
@@ -18,7 +18,7 @@ export const serializeExpert = async (expert: Expert) => {
   // Query builder has to be btw used, as query contains YEAR() - native mysql function
   // 
   // Therefore needs to be manually parsed and transformed
-  const parsedMeta = JSON.parse(expert.meta as any as string) as Meta;
+  const parsedMeta = JSON.parse(expert.meta as any as string) as ExpertMeta;
   let title = parsedMeta?._prefname;
   if (!title) {
     title = (await expert.user.load()).fullName;

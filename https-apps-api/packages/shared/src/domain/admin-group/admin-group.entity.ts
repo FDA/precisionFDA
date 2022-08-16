@@ -1,6 +1,6 @@
-import { Entity, Collection, OneToMany, Enum } from "@mikro-orm/core"
+import { Entity, Collection, OneToMany, Enum } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { AdminMembership } from "../admin-membership/admin-membership.entity";
+import { AdminMembership } from '../admin-membership/admin-membership.entity'
 
 export enum ADMIN_GROUP_ROLES {
   ROLE_SITE_ADMIN = 0,
@@ -11,10 +11,9 @@ export enum ADMIN_GROUP_ROLES {
 
 @Entity({ tableName: 'admin_groups' })
 export class AdminGroup extends BaseEntity {
-
   @Enum()
-  role: ADMIN_GROUP_ROLES;
+  role: ADMIN_GROUP_ROLES
 
   @OneToMany(() => AdminMembership, 'adminGroup', { orphanRemoval: true })
-  adminMemberships = new Collection<AdminMembership>(this);
+  adminMemberships = new Collection<AdminMembership>(this)
 }

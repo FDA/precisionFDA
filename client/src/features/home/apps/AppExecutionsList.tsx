@@ -13,13 +13,13 @@ import {
   StyledHomeTable,
 } from '../home.styles'
 import { IFilter, IMeta, KeyVal } from '../types'
-import { useColumnWidthLocalStorage } from '../useColumnWidthLocalStorage'
+import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
 import { useListQuery } from '../useListQuery'
-import { useOrderByState } from '../useOrderByState'
-import { usePaginationParams } from '../usePaginationState'
-import { toArrayFromObject } from '../utils'
+import { useOrderByState } from '../../../hooks/useOrderByState'
 import { fetchAppExecutions } from './apps.api'
+import { usePaginationParams } from '../../../hooks/usePaginationState'
+import { toArrayFromObject } from '../../../utils/object'
 
 const ExecutionsPagination = styled.div`
   padding-left: 12px;
@@ -62,7 +62,8 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
     <ErrorBoundary>
       <ExecutionsListTable
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) fix possibly undefined values from querystring
+        filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         isLoading={status === 'loading'}
         setSortBy={setSortBy}
@@ -76,7 +77,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
           totalCount={data?.meta?.pagination?.total_count}
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
+          isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
           isPreviousData={data?.meta?.pagination?.prev_page !== null}
           isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={setPageParam}
@@ -126,7 +127,7 @@ export const ExecutionsListTable = ({
         loading={isLoading}
         loadingComponent={<div>Loading...</div>}
         sortByPreference={sortBy}
-        setSortByPreference={a => setSortBy(a)}
+        setSortByPreference={setSortBy}
         manualFilters
         filters={filters}
         setFilters={setFilters}

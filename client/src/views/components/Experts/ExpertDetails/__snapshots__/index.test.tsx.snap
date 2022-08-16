@@ -18,7 +18,6 @@ exports[`ExpertDetails test should render ExpertDetails 1`] = `
         "handleChangeWrapper": [Function],
         "isSubscribed": [Function],
         "notifyNestedSubs": [Function],
-        "onStateChange": [Function],
         "trySubscribe": [Function],
         "tryUnsubscribe": [Function],
       },

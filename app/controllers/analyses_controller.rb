@@ -1,8 +1,13 @@
 class AnalysesController < ApplicationController
+  include CloudResourcesConcern
+
+  before_action :check_total_charges_limit, only: :new
+
   def new
-    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:workflow_id])
-    if @workflow.nil?
-      flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
+    @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:workflow_id])
+
+    unless @workflow
+      flash[:error] = I18n.t("workflow_not_accessible")
       redirect_to workflows_path
       return
     end

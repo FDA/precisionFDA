@@ -9,6 +9,7 @@ import Table from '../../../components/Table/Table'
 import { RootState } from '../../../store'
 import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow, StyledHomeTable, StyledPaginationSection
@@ -16,7 +17,6 @@ import {
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { getStateBgColorFromState } from './executions.util'
@@ -45,7 +45,6 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     colWidths,
   } = useList<ListType>({
     fetchList: fetchExecutions,
-    onRowClick,
     resource: 'jobs',
     params: {
       spaceId: spaceId || undefined,
@@ -94,7 +93,8 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         isAdmin={isAdmin}
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         isLoading={status === 'loading'}
         selectedRows={selectedIndexes}
@@ -110,7 +110,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
           totalCount={data?.meta?.pagination?.total_count!}
           totalPages={data?.meta?.pagination?.total_pages!}
           perPage={perPageParam}
-          hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
+          isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
           isPreviousData={data?.meta?.pagination?.prev_page! !== null}
           isNextData={data?.meta?.pagination?.next_page! !== null}
           setPage={setPageParam}

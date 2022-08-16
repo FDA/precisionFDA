@@ -31,6 +31,11 @@ export const StyledPagination = styled.div`
   gap: 5px;
 `
 
+export const ItemsOf = styled.div`
+  margin-right: 5px;
+  white-space: pre;
+`
+
 export const PerPage = styled.div`
   display: flex;
   align-items: center;
@@ -58,7 +63,7 @@ export const Pagination = ({
   totalPages = Math.ceil(totalCount / perPage),
   isPreviousData,
   isNextData,
-  hide,
+  isHidden,
   onPerPageSelect,
 }: {
   page?: number
@@ -69,11 +74,15 @@ export const Pagination = ({
   perPage: number
   isPreviousData: boolean
   isNextData: boolean
-  hide: boolean
+  isHidden: boolean
 }) => {
-  if (hide) return null
+  if (isHidden) {
+    return null
+  }
   const [localTotal, setLocalTotal] = useState<number>(totalPages || 0)
   const [localPage, setLocalPage] = useState<number>(page || 0)
+  const pageLowerBound = (page - 1) * perPage + 1
+  const pageUpperBound = page * perPage
 
   useEffect(() => {
     if (totalPages) {
@@ -104,6 +113,7 @@ export const Pagination = ({
 
   return (
     <StyledPagination>
+      <ItemsOf>{`${pageLowerBound}-${Math.min(totalCount, pageUpperBound)} of ${totalCount}`}</ItemsOf>
       <PerPage>
         <StyledPerPageSelect
           value={perPage}

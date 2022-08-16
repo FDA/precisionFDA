@@ -9,12 +9,12 @@ import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchApps } from './apps.api'
 import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
@@ -43,7 +43,6 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
     resetSelected,
   } = useList<ListType>({
     fetchList: fetchApps,
-    onRowClick,
     resource: 'apps',
     params: {
       spaceId: spaceId || undefined,
@@ -135,7 +134,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         isAdmin={isAdmin}
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         apps={data?.apps}
         isLoading={status === 'loading'}
         sortBy={sortBy}
@@ -152,7 +152,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
           totalCount={data?.meta?.pagination?.total_count}
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          hide={hidePagination(
+          isHidden={hidePagination(
             query.isFetched,
             data?.apps?.length,
             data?.meta?.pagination?.total_pages,

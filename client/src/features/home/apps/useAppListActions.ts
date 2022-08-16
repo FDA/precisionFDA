@@ -40,6 +40,7 @@ export const useAppListActions = ({
 
   const actions: ActionFunctionsType<AppListActions> = {
     'Add App': {
+      type: 'modal',
       func: ({ showModal = false } = {}) => setShowAddAppModal(showModal),
       isDisabled: false,
       modal: AddAppModal,

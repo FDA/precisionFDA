@@ -8,14 +8,22 @@ import { FieldGroup, InputError } from '../../../../components/form/styles'
 import { InputText } from '../../../../components/InputText'
 import { Modal } from '../../../modal'
 import { ButtonRow, StyledForm } from '../../../modal/styles'
-import { useModal } from '../../../modal/useModal'
+import { useConditionalModal } from '../../../modal/useModal'
 import { ResourceScope } from '../../types'
 import { addFolderRequest } from '../files.api'
 
 
-export const useAddFolderModal = ({ folderId, spaceId, scope }: { folderId?: string, spaceId?: string, scope?: ResourceScope }) => {
+type FolderModalArgs = {
+  folderId?: string,
+  spaceId?: string,
+  scope?: ResourceScope,
+  isAllowed: boolean
+  onViolation: () => void
+}
+
+export const useAddFolderModal = ({ folderId, spaceId, scope, isAllowed, onViolation }: FolderModalArgs) => {
   const queryClient = useQueryClient()
-  const { isShown, setShowModal } = useModal()
+  const { isShown, setShowModal } = useConditionalModal(isAllowed, onViolation)
   const {
     register,
     handleSubmit,
@@ -52,7 +60,7 @@ export const useAddFolderModal = ({ folderId, spaceId, scope }: { folderId?: str
     <Modal
       data-testid="modal-files-add-folder"
       headerText="Create new folder"
-      isShown={isShown}
+      isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
       title="Modal window to create a new folder"
     >

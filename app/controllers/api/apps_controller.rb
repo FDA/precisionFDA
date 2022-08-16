@@ -12,6 +12,7 @@ module Api
     include Sortable
     include ErrorProcessable
     include Scopes
+    include CloudResourcesConcern
 
     skip_before_action :require_api_login, only: %i(everybody featured)
     before_action :require_api_login_or_guest, only: %i(everybody featured)
@@ -309,6 +310,10 @@ module Api
       end
 
       render json: apps
+    end
+
+    def user_compute_resources
+      render json: user_compute_resource_labels
     end
 
     private

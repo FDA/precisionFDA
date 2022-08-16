@@ -1,25 +1,24 @@
 import { useQuery, UseQueryOptions } from 'react-query'
+import { toArrayFromObject } from '../../utils/object'
 import { APIResource, IMeta, ResourceScope } from './types'
-import { toArrayFromObject } from './utils'
 
-
-type ListType = { [key: string]: {}, meta: IMeta }
+type ListType = { [key: string]: {}; meta: IMeta }
 interface IUseListQuery<T> {
-  spaceId?: string,
-  scope?: ResourceScope,
-  fetchList: any,
-  resource: APIResource,
+  spaceId?: string
+  scope?: ResourceScope
+  fetchList: any
+  resource: APIResource
   params?: {
     [key: string]: string | undefined
   }
   order?: {
     order_by?: string | null
     order_dir?: string | null
-  },
+  }
   pagination?: {
     perPage?: number
     page?: number
-  },
+  }
   queryOptions?: UseQueryOptions<T>
   filter?: any
 }
@@ -31,6 +30,7 @@ export function useListQuery<T>({ fetchList, resource, params = {}, queryOptions
     () => fetchList(toArrayFromObject(filter), { page: pagination?.page, perPage: pagination?.perPage, sortBy: order, ...params }),
     {
       refetchOnWindowFocus: false,
-      ...queryOptions
-    })
+      ...queryOptions,
+    },
+  )
 }

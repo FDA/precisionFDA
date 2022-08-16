@@ -1,5 +1,7 @@
 export { JobFinishedEmailHandler } from './job-finished.handler'
 
+export { JobFailedEmailHandler } from './job-failed.handler'
+
 export { ContentChangedEmailHandler } from './content-change.handler'
 
 export { MemberChangedEmailHandler } from './member-change.handler'
