@@ -1,5 +1,5 @@
 /* eslint-disable no-undefined */
-import { wrap, EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
@@ -9,6 +9,14 @@ import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/moc
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 
+const createUserCheckupTask = async (user: UserCtx) => {
+  const defaultTestQueue = queue.getStatusQueue()
+  await defaultTestQueue.add({
+    type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
+    payload: undefined,
+    user,
+  })
+}
 
 describe('TASK: user-checkup', () => {
   let em: EntityManager
@@ -25,53 +33,46 @@ describe('TASK: user-checkup', () => {
     regularApp = create.appHelper.createRegular(em, { user })
     httpsApp = create.appHelper.createHTTPS(em, { user })
     await em.flush()
-    // reset fakes
     userContext = { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' }
+
+    // reset fakes
     mocksReset()
     queueMocksReset()
   })
 
   it('processes a queue task - calls the queue handlers', async () => {
-    await queue.createUserCheckupTask({ 
-      type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: userContext,
-    })
+    // await queue.createUserCheckupTask({
+    //   type: queue.types.TASK_TYPE.USER_CHECKUP,
+    //   user: userContext,
+    // })
+    await createUserCheckupTask(userContext)
     expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
   })
 
   it('adds job sync tasks for HTTPS apps but not regular apps to the queue', async () => {
     const job1 = create.jobHelper.create(em, { user, app: regularApp }, {
-        state: JOB_STATE.IDLE,
-      },
-    )
+      state: JOB_STATE.IDLE,
+    })
     const job2 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.IDLE,
-      },
-    )
+      state: JOB_STATE.IDLE,
+    })
     const job3 = create.jobHelper.create(em, { user, app: regularApp }, {
-        state: JOB_STATE.TERMINATING
-      },
-    )
+      state: JOB_STATE.TERMINATING,
+    })
     const job4 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job5 = create.jobHelper.create(em, { user, app: regularApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job6 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.TERMINATED,
-      },
-    )
+      state: JOB_STATE.TERMINATED,
+    })
     await em.flush()
 
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
 
-    await queue.createUserCheckupTask({ 
-      type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: userContext,
-    })
+    await createUserCheckupTask(userContext)
 
     // Only non-terminated HTTPS jobs should result in task creation
     // In this case only job2 and job4
@@ -87,21 +88,17 @@ describe('TASK: user-checkup', () => {
 
   it('ignores jobs that have sync tasks already there', async () => {
     const job1 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job2 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.RUNNING,
-      },
-    )
+      state: JOB_STATE.RUNNING,
+    })
     const job3 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.TERMINATING
-      },
-    )
+      state: JOB_STATE.TERMINATING,
+    })
     const job4 = create.jobHelper.create(em, { user, app: httpsApp }, {
-        state: JOB_STATE.TERMINATING,
-      },
-    )
+      state: JOB_STATE.TERMINATING,
+    })
     await em.flush()
 
     fakes.queue.findRepeatableFake.onCall(0).returns(undefined)
@@ -109,10 +106,7 @@ describe('TASK: user-checkup', () => {
     fakes.queue.findRepeatableFake.onCall(2).returns(undefined)
     fakes.queue.findRepeatableFake.onCall(3).returns(generate.bullQueue.syncJobStatus(job4.dxid, userContext))
 
-    await queue.createUserCheckupTask({
-      type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: userContext,
-    })
+    await createUserCheckupTask(userContext)
 
     expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(2)
 

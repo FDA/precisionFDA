@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useMemo } from 'react'
 import { Button } from '../../../../components/Button'
 import { DownloadIcon } from '../../../../components/icons/DownloadIcon'
@@ -10,7 +11,7 @@ import {
 } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../utils'
+import { itemsCountString } from '../../../../utils/formatting'
 import { IFile } from '../files.types'
 
 export const useDownloadFileModal = (selectedFiles: IFile[]) => {
@@ -28,13 +29,12 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
     <Modal
       data-testid="modal-files-download"
       headerText={`Download ${itemsCountString('file', momoSelected.length)}?`}
-      isShown={isShown}
+      isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
       footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}
     >
       <ResourceTable
-        rows={momoSelected.map((s, i) => {
-          return {
+        rows={momoSelected.map((s, i) => ({
             name: (
               <StyledName key={`${i}-name`} href={s.links.show} target="_blank">
                 <VerticalCenter>
@@ -52,8 +52,7 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
                 Download
               </StyledAction>
             ),
-          }
-        })}
+          }))}
       />
     </Modal>
   )

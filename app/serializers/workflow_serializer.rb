@@ -25,6 +25,7 @@ class WorkflowSerializer < ApplicationSerializer
   )
 
   attribute :all_tags_list, key: :tags
+  attribute :job_count, key: :job_count
 
   # Returns manually assigned jobs - do not confuse with object.jobs.
   attr_accessor :jobs
@@ -35,6 +36,10 @@ class WorkflowSerializer < ApplicationSerializer
 
   def title
     @title || object.title
+  end
+
+  def job_count
+    object.analyses.distinct.count
   end
 
   # Returns a tags list for a Workflow

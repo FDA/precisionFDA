@@ -1,11 +1,11 @@
-import styled from "styled-components"
+import styled from 'styled-components'
 
 export const StyledTags = styled.div`
   display: flex;
   align-items: center;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 16px 8px;
+  gap: 10px;
 
   &:hover {
   /* width */
@@ -36,9 +36,9 @@ export const StyledTagItem = styled.div`
   background-color: #f6dab2;
   padding: 5px;
   position: relative;
-  margin-left: 20px;
   line-height: 12px;
   font-size: 12px;
+  margin-left: 10px;
 
   &:before {
     content: "";

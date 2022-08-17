@@ -41,8 +41,16 @@
       color: #fff
 
   .dropdown-menu
-    li > a
+    li > a, p 
       color: $gray-dark
+    // li > p is a workaround
+    li > p
+      margin: 0
+      padding: 3px 20px
+      &:hover
+        cursor: pointer
+        background-color: #f5f5f5
+      
   .dropdown-toggle
     li > a
       background-color: none !important

@@ -1,7 +1,7 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { dbCluster as dbClusterDomain, utils } from '@pfda/https-apps-shared'
-import { makeValidationMdw } from '../server/middleware/validation'
+import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
 
@@ -11,7 +11,7 @@ router.use(defaultMiddlewares)
 
 router.post(
   '/start',
-  makeValidationMdw({ body: utils.schemas.getDxidsInputSchema('dxids') }),
+  makeSchemaValidationMdw({ body: utils.schemas.getDxidsInputSchema('dxids') }),
   async ctx => {
     const dxIds = ctx.request.body.dxids
 
@@ -28,7 +28,7 @@ router.post(
 
 router.post(
   '/stop',
-  makeValidationMdw({ body: utils.schemas.getDxidsInputSchema('dxids') }),
+  makeSchemaValidationMdw({ body: utils.schemas.getDxidsInputSchema('dxids') }),
   async ctx => {
     const dxIds = ctx.request.body.dxids
 
@@ -45,7 +45,7 @@ router.post(
 
 router.post(
   '/terminate',
-  makeValidationMdw({ body: utils.schemas.getDxidsInputSchema('dxids') }),
+  makeSchemaValidationMdw({ body: utils.schemas.getDxidsInputSchema('dxids') }),
   async ctx => {
     const dxIds = ctx.request.body.dxids
 
@@ -62,7 +62,7 @@ router.post(
 
 router.post(
   '/create',
-  makeValidationMdw({ body: dbClusterDomain.inputs.createDbClusterSchema }),
+  makeSchemaValidationMdw({ body: dbClusterDomain.inputs.createDbClusterSchema }),
   async ctx => {
     const res = await new dbClusterDomain.CreateDbClusterOperation(pickOpsCtx(ctx)).execute({
       ...ctx.request.body

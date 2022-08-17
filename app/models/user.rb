@@ -80,6 +80,9 @@ class User < ApplicationRecord
            dependent: :destroy
 
   store :extras, accessors: [:has_seen_guidelines], coder: JSON
+  store :cloud_resource_settings,
+        accessors: %i(charges_baseline pricing_map job_limit total_limit resources),
+        coder: JSON
 
   include Gravtastic
   gravtastic secure: true, default: "retro"
@@ -146,6 +149,14 @@ class User < ApplicationRecord
         belongs_to_org(org_id).
         pending.
         limit(ORG_MEMBERS_SEARCH_LIMIT)
+    end
+
+    def set_legacy_org_baseline_charges!(org_id, charges)
+      belongs_to_org(org_id).
+        # Note(samuel) this part is potentially slow
+        # Tried .update_all(charges_baseline: charges)
+        # Didn't work, most likely ActiveRecord bulk updating doesn't work that well with JSON types
+        each { |u| u.update(charges_baseline: charges) }
     end
 
     def validate_email(email)
@@ -316,6 +327,10 @@ class User < ApplicationRecord
   # @param time_zone [String] new time zone
   def update_time_zone(time_zone)
     update(time_zone: time_zone) if Time.find_zone(time_zone)
+  end
+
+  def can_run_jobs?
+    job_limit.positive?
   end
 
   alias_method :site_admin?, :can_administer_site?

@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react'
 import { useQueryClient } from 'react-query'
+import { useLocation, useRouteMatch } from 'react-router'
+import { Link } from 'react-router-dom'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
@@ -22,6 +24,8 @@ export const useWorkflowColumns = ({
   colWidths?: KeyVal
 }) => {
   const queryClient = useQueryClient()
+  const location = useLocation()
+  const { path } = useRouteMatch()
   return useMemo<Column<IWorkflow>[]>(
     () =>
       [
@@ -32,7 +36,8 @@ export const useWorkflowColumns = ({
           width: colWidths?.name || 198,
           Cell: props => (  
             <StyledNameCell
-              onClick={() => handleRowClick(props.cell.row.original.uid)}
+              as={Link}
+              to={{pathname: `${path}/${props.cell.row.original.uid}`, state: {from: location.pathname, fromSearch: location.search }}}
             >
               <BoltIcon height={14} />
               {props.value}
@@ -98,6 +103,6 @@ export const useWorkflowColumns = ({
           )}
         },
       ] as Column<IWorkflow>[],
-    [],
+    [location.search],
   )
 }

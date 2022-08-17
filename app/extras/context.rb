@@ -28,12 +28,14 @@ class Context
     end
   end
 
-  def initialize(user_id, username, token, expiration, org_id)
+  def initialize(user_id, username, token, expiration, org_id, cli_client = false)
     @user_id = user_id
     @username = username
     @token = token
     @expiration = expiration
     @org_id = org_id
+
+    @cli_client = cli_client
 
     # Cache user, if logged in
     if logged_in?
@@ -48,6 +50,10 @@ class Context
     @user ||= begin
       User.new(dxuser: @username, expiration: @expiration) if guest?
     end
+  end
+
+  def cli_client?
+    @client_cli
   end
 
   def gravatar_url

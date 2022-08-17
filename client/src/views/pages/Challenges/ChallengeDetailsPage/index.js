@@ -76,7 +76,7 @@ class ChallengeDetailsPage extends React.Component {
           <NavigationBar showLogoOnNavbar={true} />
           <div className="error-container">
             <Link to={{ pathname: '/challenges' }}>
-                &larr; Back to All Challenges
+              &larr; Back to All Challenges
             </Link>
             <div className="text-center">
               {error}
@@ -92,7 +92,7 @@ class ChallengeDetailsPage extends React.Component {
     const challengeSetupOrPreRegistration = (challenge.status == CHALLENGE_STATUS.SETUP) || challengePreRegistration
 
     const userCanJoin = isLoggedIn && !challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
-    const userCanSubmitEntry =  isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
+    const userCanSubmitEntry = isLoggedIn && challenge.isFollowed && challenge.timeStatus == CHALLENGE_TIME_STATUS.CURRENT && challenge.status == CHALLENGE_STATUS.OPEN
     const userIsChallengeAdmin = (isLoggedIn && user.can_create_challenges)
 
     const userCanSeePreRegistration = challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration)
@@ -142,7 +142,7 @@ class ChallengeDetailsPage extends React.Component {
       tabs.push({
         title: 'SUBMISSIONS',
         subroute: '/submissions',
-        content: (<ChallengeSubmissionsTable challengeId={challenge.id} />),
+        content: (<ChallengeSubmissionsTable challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />),
       })
       tabs.push({
         title: 'MY ENTRIES',
@@ -224,9 +224,9 @@ class ChallengeDetailsPage extends React.Component {
               <CallToActionButton onClick={onClickPreRegistrationButton}>Sign Up for Pre-Registration</CallToActionButton>
               :
               user.is_guest ?
-                <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className={joinChallengeButtonClasses}>Join Challenge</GuestRestrictedLink> 
+                <GuestRestrictedLink to={`/challenges/${challenge.id}/join`} className={joinChallengeButtonClasses}>Join Challenge</GuestRestrictedLink>
                 :
-                <button className={joinChallengeButtonClasses} onClick={() => {if (userCanJoin) { this.handleJoinChallenge()}}}>{joinChallengeButtonTitle}</button>
+                <button className={joinChallengeButtonClasses} onClick={() => { if (userCanJoin) { this.handleJoinChallenge() } }}>{joinChallengeButtonTitle}</button>
             }
             {userCanSubmitEntry && (
               <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} href={challenge.links.new_submission}>Submit Challenge Entry</a>
@@ -268,7 +268,7 @@ ChallengeDetailsPage.propTypes = {
 ChallengeDetailsPage.defaultProps = {
   challenge: {},
   isFetching: true,
-  loadChallenge: () => {},
+  loadChallenge: () => { },
 }
 
 const mapStateToProps = (state) => ({

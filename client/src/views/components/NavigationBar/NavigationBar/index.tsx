@@ -24,6 +24,32 @@ const NavigationBarBanner = styled.div`
   }
 `
 
+export const NavigationBarPublicLandingTitle = styled.div`
+  flex-shrink: 1;
+  flex-grow: 1;
+  margin-bottom: ${theme.padding.mainContentVertical};
+
+  h1 {
+    color: #fff;
+    font-size: 32px;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 133%;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+  }
+
+  .pfda-navbar-logo {
+    width: 180px;
+    height: 40px;
+  }
+`
+
 const NavigationBarLogoAndTitle = styled.div`
   order: 1;
   text-align: left;

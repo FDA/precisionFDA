@@ -9,14 +9,14 @@ import Table from '../../../components/Table/Table'
 import { RootState } from '../../../store'
 import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
-  ActionsRow, StyledHomeTable
+  ActionsRow, StyledHomeTable, StyledPaginationSection
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { getStateBgColorFromState } from './executions.util'
@@ -45,10 +45,11 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     colWidths,
   } = useList<ListType>({
     fetchList: fetchExecutions,
-    onRowClick,
     resource: 'jobs',
-    scope,
-    spaceId,
+    params: {
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
+    },
   })
   const { status, data, error } = query
 
@@ -92,7 +93,8 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         isAdmin={isAdmin}
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         isLoading={status === 'loading'}
         selectedRows={selectedIndexes}
@@ -102,18 +104,19 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
+          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+          isNextData={data?.meta?.pagination?.next_page! !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Attach to...']?.modal}

@@ -1,7 +1,8 @@
+/* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from 'react-query'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
@@ -19,7 +20,6 @@ import { HomeLabel } from '../../../components/HomeLabel'
 import {
   ActionsButton,
   Header,
-  HeaderButton,
   HeaderLeft,
   HeaderRight,
   HomeLoader,
@@ -40,6 +40,9 @@ import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { SpecTab } from './SpecTab'
 import { IChallenge } from '../../../types/challenge'
+import { getBackPath } from '../../../utils/getBackPath'
+import { Location } from '../../../types/utils'
+import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 
 const renderOptions = (app: IApp, scopeParamLink: string) => {
   const columns = [
@@ -87,7 +90,7 @@ const renderOptions = (app: IApp, scopeParamLink: string) => {
           </Link>
         </MetadataVal>
       ) : (
-        //@ts-ignore
+        // @ts-ignore
         <MetadataVal>{app[e.value]}</MetadataVal>
       )}
     </MetadataItem>
@@ -105,23 +108,31 @@ const DetailActionsDropdown = (
     resetSelected: () => {},
     resourceKeys: ['app', app.uid],
     comparatorLinks,
-    challenges: challenges,
+    challenges,
   })
 
   return (
     <>
-      <HeaderButton as="a" href={`/apps/${app.uid}/jobs/new`} type="primary" disabled={!app.links.run_job}>
+      <CloudResourcesHeaderButton
+        href={`/apps/${app.uid}/jobs/new`}
+        isLinkDisabled={!app.links.run_job}
+        conditionType='all'
+      >
         <>
-          {'Run App'}&nbsp;
+          Run App&nbsp;
           <Pill>rev{app.revision}</Pill>
         </>
-      </HeaderButton>
-      <HeaderButton as="a" href={`/apps/${app.uid}/batch_app`} type="primary" disabled={!app.links.batch_run}>
+      </CloudResourcesHeaderButton>
+      <CloudResourcesHeaderButton
+        href={`/apps/${app.uid}/batch_app`}
+        isLinkDisabled={!app.links.batch_run}
+        conditionType='all'
+      >
         <>
-          {'Run Batch'}&nbsp;
+          Run Batch&nbsp;
           <Pill>rev{app.revision}</Pill>
         </>
-      </HeaderButton>
+      </CloudResourcesHeaderButton>
       <Dropdown
         trigger="click"
         content={
@@ -147,7 +158,8 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ scope }: { scope: ResourceScope }) => {
+export const AppsShow = ({ scope }: { scope?: ResourceScope }) => {
+  const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
   const { data, status, isLoading } = useQuery(['app', appUid], () =>
@@ -166,12 +178,12 @@ export const AppsShow = ({ scope }: { scope: ResourceScope }) => {
         <div>Sorry, this app does not exist or is not accessible by you.</div>
       </NotFound>
     )
-  const scopeParamLink = `?scope=${scope.toLowerCase()}`
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
   const appTitle = app.title ? app.title : app.name
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/apps${scopeParamLink}`}>
+      <StyledBackLink linkTo={getBackPath(location, 'apps')}>
         Back to Apps
       </StyledBackLink>
       <Topbox>
@@ -218,25 +230,27 @@ export const AppsShow = ({ scope }: { scope: ResourceScope }) => {
             </StyledRight>
           </HeaderRight>
         </Header>
-
+        
         {renderOptions(app, scopeParamLink)}
-        {app.tags.length > 0 && (
-          <StyledTags>
-            {app.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        <MetadataSection>
+          {app.tags.length > 0 && (
+            <StyledTags>
+              {app.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+              ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" exact to={`${match.url}`}>
+        <StyledTab activeClassName="active" exact to={{ pathname: `${match.url}`, state: location.state }}>
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/jobs`}>
-          Executions ({meta.jobs.length})
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/jobs`, state: location.state }}>
+          Executions ({app.job_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={`${match.url}/readme`}>
+        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/readme`, state: location.state }}>
           Readme
         </StyledTab>
       </StyledTabList>

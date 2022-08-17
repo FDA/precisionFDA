@@ -24,7 +24,7 @@ export const MetadataRow = styled.div`
 export const MetadataItem = styled.div``
 
 export const MetadataKey = styled.div`
-  color: #8198BC;
+  color: ${colors.greyOnLightBlue};
   font-weight: 300;
   text-transform: uppercase;
   white-space: nowrap;
@@ -63,7 +63,6 @@ export const Header = styled.div`
 `
 
 export const Topbox = styled.div`
-  background: ${colors.subtleBlue};
   margin-bottom: 40px;
 `
 
@@ -102,9 +101,8 @@ export const HomeLoader = styled(Loader)`
 export const StyledActionsButton = styled(ButtonSolidBlue)`
   gap: 6px;
 `
-  export const ActionsButton = React.forwardRef((props: any, ref) => (
-    <StyledActionsButton ref={ref} {...props}>
-      Actions <ArrowIcon />
-    </StyledActionsButton>
-  ))
-  
+export const ActionsButton = React.forwardRef((props: any, ref) => (
+  <StyledActionsButton ref={ref} {...props}>
+    Actions <ArrowIcon />
+  </StyledActionsButton>
+))

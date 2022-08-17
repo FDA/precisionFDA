@@ -13,6 +13,7 @@ type RunAppInput = {
   scope: string
   name?: string
   instanceType?: string
+  jobLimit: number
   input?: {
     snapshot: string
     feature?: string
@@ -62,6 +63,7 @@ const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     instanceType: { type: 'string', enum: Object.keys(allowedInstanceTypes) },
+    jobLimit: { type: 'number', minimum: 0 },
     scope: { type: 'string', maxLength: config.validation.maxStrLen },
     name: { type: 'string', maxLength: config.validation.maxStrLen },
     // keeping this for now, since we do not have any other apps
@@ -90,7 +92,7 @@ const runAppSchema: JSONSchema7 = {
       },
     },
   },
-  required: ['scope'],
+  required: ['scope', 'jobLimit'],
   additionalProperties: false,
 }
 

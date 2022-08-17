@@ -142,13 +142,13 @@ export const ButtonSolidGreen = styled(Button)`
 `
 
 export const ButtonSolidRed = styled(Button)`
-  background-color: ${theme.colors.primaryRed};
-  border-color: ${theme.colors.darkRed};
+  background-color: ${theme.colors.darkRed};
+  border-color: ${theme.colors.hoverDarkRed};
   color: ${theme.colors.textWhite};
 
   &:hover {
     ${({ disabled }) => !disabled && css`
-      background-color: ${theme.colors.darkRed};
+      background-color: ${theme.colors.hoverDarkRed};
       color: ${theme.colors.textWhite};
     `}
     ${({ disabled }) => disabled && css`
@@ -158,7 +158,27 @@ export const ButtonSolidRed = styled(Button)`
 
   &:active {
     color: ${theme.colors.textWhite};
-    background-color: ${theme.colors.darkRed};
+    background-color: ${theme.colors.hoverDarkRed};
+    box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
+  }
+`
+
+export const ButtonOutlineGrey = styled(Button)`
+  border-color: ${theme.colors.borderDefault};
+  color: ${theme.colors.textDarkGrey};
+
+  &:hover {
+    ${({ disabled }) => !disabled && css`
+      background-color: ${theme.colors.backgroundLightGray};
+      color: ${theme.colors.textDarkGrey};
+      border-color: ${theme.colors.borderDefault};
+    `}
+    ${({ disabled }) => disabled && css`
+      cursor: not-allowed;
+    `}
+  }
+
+  &:active {
     box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
   }
 `

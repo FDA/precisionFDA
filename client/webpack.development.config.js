@@ -103,6 +103,14 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      '/apps': {
+        target: TARGET,
+        secure: false,
+      },
+      '/workflows': {
+        target: TARGET,
+        secure: false,
+      },
       '/notes': {
         target: TARGET,
         secure: false,

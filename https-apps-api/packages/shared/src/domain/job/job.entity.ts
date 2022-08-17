@@ -4,6 +4,7 @@ import {
   Filter,
   IdentifiedReference,
   JsonType,
+  OnInit,
   ManyToOne,
   PrimaryKey,
   Property,
@@ -160,7 +161,6 @@ export class Job extends BaseEntity {
     if (!this.describe) {
       return this.describe
     }
-
     try {
       const parsedJSON = JSON.parse(this.describe)
       this.startedRunning = parsedJSON.startedRunning
@@ -174,6 +174,11 @@ export class Job extends BaseEntity {
     // onCreate / onUpdate needs a return value
     return this.describe
   }
+
+  // TODO(samuel) standardize or refactor this
+  // TODO(samuel) investigate mikro-orm docs if this is the optimal way to load entities
+  @OnInit()
+  initDescribeFields() { this.parseJobDescribe() }
 
   // Properties extracted from job describe
   //

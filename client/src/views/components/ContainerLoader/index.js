@@ -1,7 +1,7 @@
-import React from 'react'
 import PropTypes from 'prop-types'
+import React from 'react'
+import { Loader } from '../../../components/Loader'
 
-import Loader from '../Loader'
 import './style.sass'
 
 

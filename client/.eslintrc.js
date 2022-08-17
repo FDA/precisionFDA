@@ -10,9 +10,11 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'prettier',
   ],
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "PROD_OR_STAGE": "readonly",
+    "RECAPTCHA_SITE_KEY": "readonly",
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -24,6 +26,14 @@ module.exports = {
   },
   plugins: ['react', 'react-hooks', '@typescript-eslint', 'prettier'],
   rules: {
+    'no-shadow': 'off',
+    'dot-notation': 'off',
+    '@typescript-eslint/no-shadow': ['error'],
+    '@typescript-eslint/no-empty-function': 'off',
+    'camelcase': 'off',
+    'react/prop-types': 'off',
+    'react/require-default-props': 'off',
+    'react/jsx-props-no-spreading': 'off',
     'comma-dangle': ['error', 'always-multiline'],
     'import/extensions': 'off',
     'no-redeclare': 'off',

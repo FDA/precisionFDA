@@ -33,7 +33,7 @@
     "@types/chance": "^1.1.0",
     "@types/dirty-chai": "^2.0.2",
     "@types/luxon": "^1.26.5",
-    "@types/mocha": "^8.0.4",
+    "@types/mocha": "^8.2.3",
     "@types/ramda": "^0.27.32",
     "@types/sinon": "^9.0.8",
     "bull-repl": "^0.26.3",
@@ -42,7 +42,7 @@
     "chance": "^1.1.7",
     "dirty-chai": "^2.0.1",
     "luxon": "^1.27.0",
-    "mocha": "^8.2.1",
+    "mocha": "^8.4.0",
     "sinon": "^9.2.1"
   }
 }

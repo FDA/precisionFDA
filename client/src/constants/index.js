@@ -318,10 +318,6 @@ export const EXPERTS_MODALS = {
   EDIT: 'editExpertInfoModal',
 }
 
-export const RECAPTCHA_KEYS = {
-  SITE: '6LcmuCIeAAAAALaDEkC8N5RvdMPO8Wt2HjNqyhuU',
-  SECRET: '6LcmuCIeAAAAAOCDXx6YV359JqrehWKCwASdJ5Ar',
-}
 
 export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
 export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'

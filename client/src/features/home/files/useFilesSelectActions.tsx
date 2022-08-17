@@ -9,6 +9,7 @@ import {
   useAttachToModal,
 } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
+import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
@@ -21,7 +22,7 @@ import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useEditFolderModal } from './actionModals/useEditFolderModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
-import { copyFilesRequest } from './files.api'
+import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
 
 export enum FileActions {
@@ -37,6 +38,7 @@ export enum FileActions {
   'Delete' = 'Delete',
   'Organize' = 'Organize',
   'Copy to space' = 'Copy to space',
+  'Copy to private' = 'Copy to private',
   'Attach to...' = 'Attach to...',
   'Attach License' = 'Attach License',
   'Detach License' = 'Detach License',
@@ -49,11 +51,13 @@ export enum FileActions {
 export const useFilesSelectActions = ({
   scope,
   fileId,
+  spaceId,
   selectedItems,
   resourceKeys,
   resetSelected,
 }: {
   scope?: ResourceScope
+  spaceId?: string
   fileId: string
   selectedItems: IFile[]
   resourceKeys: string[]
@@ -132,18 +136,26 @@ export const useFilesSelectActions = ({
     isShown: isShownDeleteFileModal,
   } = useDeleteFileModal({
     selected,
-    scope,
+    // eslint-disable-next-line no-nested-ternary
+    scope: scope ? (scope === 'me' ? 'private' : scope) : `space-${spaceId}`,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-      history.push(`/home/files`)
-      resetSelected && resetSelected()
+      if(spaceId) {
+        history.push(`/spaces/${spaceId}/files`)
+      } else {
+        history.push('/home/files')
+      }
+      if(resetSelected) resetSelected()
     },
   })
   const {
     modalComp: organizeFileModal,
     setShowModal: setOrganizeFileModal,
     isShown: isShownOrganizeFileModal,
-  } = useOrganizeFileModal({ selected, scope, resetSelected })
+  } = useOrganizeFileModal({ selected, scope, spaceId, onSuccess: () => {
+      if(resetSelected) resetSelected()
+    }, 
+  })
   const {
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
@@ -152,6 +164,18 @@ export const useFilesSelectActions = ({
     resource: 'files',
     selected,
     updateFunction: copyFilesRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+  const {
+    modalComp: copyToPrivateModal,
+    setShowModal: setCopyToPrivateModal,
+    isShown: isShownCopyToPrivateModal,
+  } = useCopyToPrivateModal({
+    resource: 'files',
+    selected,
+    request: copyFilesToPrivate,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
     },
@@ -181,11 +205,12 @@ export const useFilesSelectActions = ({
 
   let actions: ActionFunctionsType<FileActions> = {
     'Track': {
-      func: () => {},
+      type: 'link',
       link: selected[0]?.links?.track,
       isDisabled: selected.length !== 1 || !selected[0].links.track || openSelected,
     },
     'Open': {
+      type: 'modal',
       func: () => setOpenFileModal(true),
       isDisabled:
         selected.length === 0 ||
@@ -200,6 +225,7 @@ export const useFilesSelectActions = ({
       showModal: isShownOpenFileModal,
     },
     'Download': {
+      type: 'modal',
       func: () => setDownloadModal(true),
       isDisabled:
         selected.length === 0 ||
@@ -214,28 +240,30 @@ export const useFilesSelectActions = ({
       showModal: isShownDownloadModal,
     },
     'Edit file info': {
+      type: 'modal',
       func: () => setEditFileModal(true),
       modal: editFileModal,
       isDisabled:
         selected.length !== 1 || user.full_name !== selected[0].added_by,
       showModal: isShownEditFileModal,
-      hide: isFolder || selected.length !== 1 || scope === 'spaces' || openSelected,
+      shouldHide: isFolder || selected.length !== 1 || scope === 'spaces' || openSelected,
     },
     'Edit folder info': {
+      type: 'modal',
       func: () => setEditFolderModal(true),
       isDisabled: selected.length !== 1,
       modal: editFolderModal,
       showModal: isShownEditFolderModal,
-      hide: !isFolder || selected.length !== 1 || scope === 'spaces',
+      shouldHide: !isFolder || selected.length !== 1 || scope === 'spaces',
     },
     'Make file public': {
-      func: () => {},
+      type: 'link',
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
       isDisabled: selected.length !== 1 || selected[0].location === 'Public',
-      hide: isFolder || selected.length !== 1 || scope !== 'me' 
+      shouldHide: isFolder || selected.length !== 1 || scope !== 'me' 
         || selected[0].links?.publish === undefined || openSelected,
     },
     // 'Make folder public': {
@@ -248,6 +276,7 @@ export const useFilesSelectActions = ({
     //   hide: !isFolder || selected.length !== 1
     // },
     'Feature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({
           featured: true,
@@ -258,12 +287,13 @@ export const useFilesSelectActions = ({
         selected.length === 0 ||
         !selected.every(e => !e.featured || !e.links.feature) ||
         openSelected,
-      hide:
+      shouldHide:
         scope !== 'everybody' ||
         selected.some(e => e.featured !== false) ||
         !isAdmin,
     },
     'Unfeature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({
           featured: false,
@@ -274,12 +304,13 @@ export const useFilesSelectActions = ({
         selected.length === 0 ||
         !selected.every(e => e.featured || !e.links.feature) ||
         openSelected,
-      hide:
+      shouldHide:
         selected.some(e => e.featured !== true) ||
         (scope !== 'everybody' && scope !== 'featured') ||
         !isAdmin,
     },
     'Delete': {
+      type: 'modal',
       func: () => setDeleteFileModal(true),
       isDisabled: selected.length === 0 ||
         selected.some(e => !e.links.remove),
@@ -287,6 +318,7 @@ export const useFilesSelectActions = ({
       showModal: isShownDeleteFileModal,
     },
     'Organize': {
+      type: 'modal',
       func: () => setOrganizeFileModal(true),
       isDisabled:
         selected.length === 0 ||
@@ -294,9 +326,10 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: organizeFileModal,
       showModal: isShownOrganizeFileModal,
-      hide: !isAdmin && scope !== 'me',
+      shouldHide: !isAdmin && scope !== 'me',
     },
     'Copy to space': {
+      type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled: selected.length === 0 ||
         selected.some(e => !e.links.copy) ||
@@ -304,7 +337,15 @@ export const useFilesSelectActions = ({
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
+    'Copy to private': {
+      type: 'modal',
+      func: () => setCopyToPrivateModal(true),
+      isDisabled: selected.length === 0,
+      modal: copyToPrivateModal,
+      showModal: isShownCopyToPrivateModal,
+    },
     'Attach to...': {
+      type: 'modal',
       func: () => setAttachToModal(true),
       // TODO: filesAttachTo is missing
       isDisabled:
@@ -315,6 +356,7 @@ export const useFilesSelectActions = ({
       showModal: isShownAttachToModal,
     },
     'Attach License': {
+      type: 'modal',
       func: () => setAttachLicensesModal(true),
       isDisabled:
         selected.length !== 1 ||
@@ -323,12 +365,13 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
-      hide:
+      shouldHide:
         selected.length !== 1 ||
         !selected[0]?.links?.license ||
         !availableLicenses,
     },
     'Detach License': {
+      type: 'modal',
       func: () => setDetachLicenseModal(true),
       isDisabled:
         selected.length !== 1 ||
@@ -337,32 +380,34 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: detachLicenseModal,
       showModal: isShownDetachLicenseModal,
-      hide: selected.length !== 1 || !selected[0]?.links?.detach_license,
+      shouldHide: selected.length !== 1 || !selected[0]?.links?.detach_license,
     },
     'Request license approval': {
-      func: () => {},
+      type: 'link',
       link: `/licenses/${selected[0]?.file_license?.id}/request_approval`,
-      hide: !selected[0]?.links?.request_approval_license,
+      shouldHide: !selected[0]?.links?.request_approval_license,
     },
     'Accept License': {
+      type: 'modal',
       func: () => setAcceptLicensesModal(true),
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
       isDisabled: openSelected,
-      hide: selected.length !== 1 || !selected[0]?.links?.accept_license_action,
+      shouldHide: selected.length !== 1 || !selected[0]?.links?.accept_license_action,
     },
     'Edit tags': {
+      type: 'modal',
       func: () => setTagsModal(true),
-      isDisabled: openSelected,
+      isDisabled: openSelected || isFolder,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      hide:
+      shouldHide:
         (!isAdmin && selected[0]?.added_by !== user.full_name) ||
         selected.length !== 1 ||
         scope === 'spaces',
     },
     'Comments': {
-      func: () => {},
+      type: 'link',
       link: `/files/${selected[0]?.uid}/comments`,
     },
   }

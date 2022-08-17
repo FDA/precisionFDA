@@ -24,6 +24,13 @@
       <% if @context.logged_in? %>
         <li><%= link_to "Public Profile", user_path(@context.username) %></li>
       <% end %>
+      <% if @context.logged_in? %>
+        <li>
+          <p data-bind="click: showCloudResourcesModal">
+            Cloud Resources
+          </p>
+        </li>
+      <% end %>
       <li><%= link_to "Manage Licenses", licenses_path %></li>
       <% if @context.logged_in? %>
         <li><%= link_to "Notification Settings", '/account/notifications', data: { turbolinks: false } %></li>

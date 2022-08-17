@@ -28,6 +28,10 @@ namespace :user do
         u.private_comparisons_project = args.private_comparisons_project
         u.public_comparisons_project = args.public_comparisons_project
         u.has_seen_guidelines = true
+        u.pricing_map = CloudResourceDefaults::PRICING_MAP
+        u.job_limit = CloudResourceDefaults::JOB_LIMIT
+        u.total_limit = CloudResourceDefaults::TOTAL_LIMIT
+        u.resources = CloudResourceDefaults::RESOURCES
       end
 
       user.admin_groups = AdminGroup.where(role: args.admin_roles) if args.admin_roles.present?

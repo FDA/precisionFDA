@@ -1,5 +1,5 @@
 class AppEditorModel
-  constructor: (app, ubuntuReleases, @mode = 'edit') ->
+  constructor: (app, ubuntuReleases, @availableInstances, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
     @loadingAssets = ko.observable(false)
@@ -68,7 +68,6 @@ class AppEditorModel
 
     @internetAccess = ko.observable(app?.spec?.internet_access ? false)
 
-    @availableInstances = Precision.INSTANCES
     @defaultInstanceType = app?.spec?.instance_type ? "baseline-8"
     @instanceType = ko.observable(@defaultInstanceType)
 

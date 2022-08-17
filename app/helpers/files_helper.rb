@@ -18,18 +18,20 @@ module FilesHelper
 
     {
       id: node.id,
+      uid: node.uid,
       name: ERB::Util.h(node.name),
       type: node.is_a?(UserFile) ? "File" : node.sti_type,
       org: node.user ? node.user.org.handle : "-",
       added_by: node.user.dxuser,
-      size: node.is_a?(UserFile) ? number_to_human_size(node.file_size) : "",
-      created: node.created_at.strftime("%m/%d/%Y"),
+      file_size: node.is_a?(UserFile) ? number_to_human_size(node.file_size) : "",
+      created_at: node.created_at.strftime("%m/%d/%Y"),
+      created_at_date_time: node.created_at.strftime("%Y-%m-%d %H:%M:%S %Z"),
       state: node.state,
       tags: node.all_tags_list,
+      origin: node.is_a?(UserFile) ? node_origin(node, current_user) : "",
       links: {}.tap do |links|
         links[:filePath] = node.is_a?(UserFile) ? "/files/#{node.uid}" : ""
         links[:user] = user_path(node.user.dxuser)
-        links[:originPath] = node.is_a?(UserFile) ? node_origin(node, current_user) : ""
         links[:renamePath] = rename_path if space.editable_by?(current_user)
       end,
     }
