@@ -18,7 +18,7 @@ describe('POST /emails/:id/send', () => {
   let job: Job
   let spaceEventJobAdded: SpaceEvent
 
-  const EMAIL_ID_JOB = EMAIL_CONFIG.jobFinished.emailId
+  const EMAIL_ID_JOB_FINISHED = EMAIL_CONFIG.jobFinished.emailId
   const EMAIL_ID_SPACE_CONTENT = EMAIL_CONFIG.newContentAdded.emailId
 
   beforeEach(async () => {
@@ -43,7 +43,7 @@ describe('POST /emails/:id/send', () => {
 
   it('response shape & mocks call shape (JOB_FINISHED email) - is now deprecated', async () => {
     const { body } = await supertest(getServer())
-      .post(`/emails/${EMAIL_ID_JOB}/send`)
+      .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
       .query({ ...getDefaultQueryData(user) })
       .send({ input: { jobId: job.id } })
       .expect(200)
@@ -53,6 +53,32 @@ describe('POST /emails/:id/send', () => {
     expect(taskInput).to.have.property('to', user.email)
     expect(taskInput).to.have.property('subject', `Execution ${job.name} finished`)
     expect(taskInput).to.have.property('body').that.is.a('string')
+  })
+
+  it('response shape & mocks call shape (JOB_FAILED email)', async () => {
+    const emailId = EMAIL_CONFIG.jobFailed.emailId
+    const failureReason = 'FailureReason'
+    const failureMessage = 'failure message'
+
+    job.state = JOB_STATE.FAILED
+    job.describe = JSON.stringify({
+      failureReason: failureReason,
+      failureMessage: failureMessage,
+    })
+    await em.flush()
+
+    const { body } = await supertest(getServer())
+      .post(`/emails/${emailId}/send`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({ input: { jobId: job.id } })
+      .expect(200)
+
+    expect(body).to.be.true()
+    const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
+
+    expect(taskInput).to.have.property('to', user.email)
+    expect(taskInput).to.have.property('subject', `Execution "${job.name}" failed`)
+    expect(taskInput.body).to.include(`${failureReason}: ${failureMessage}`)
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {
@@ -73,7 +99,7 @@ describe('POST /emails/:id/send', () => {
   context('errors', () => {
     it('requires default input field', async () => {
       await supertest(getServer())
-        .post(`/emails/${EMAIL_ID_JOB}/send`)
+        .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
         .query({ ...getDefaultQueryData(user) })
         .send({ payload: { jobId: job.id } })
         .expect(400)
@@ -81,7 +107,7 @@ describe('POST /emails/:id/send', () => {
 
     it('requires input content based on email type (JOB_FINISHED)', async () => {
       await supertest(getServer())
-        .post(`/emails/${EMAIL_ID_JOB}/send`)
+        .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
         .query({ ...getDefaultQueryData(user) })
         .send({ input: { jobIdFoo: job.id } })
         .expect(400)

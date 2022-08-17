@@ -1,5 +1,7 @@
 module Imports
+  # Workflow specification constants for CWL presenter specs.
   module WorkflowSpecificationHelper
+    # rubocop:disable Metrics/MethodLength
     def specification
       { input_spec:
         { stages:
@@ -47,7 +49,7 @@ module Imports
                   "optional" => false,
                   "label" => "" },
               ],
-              instanceType: "baseline-8",
+              instanceType: "baseline-4",
               stageIndex: 0,
             },
             {
@@ -93,11 +95,12 @@ module Imports
                   "optional" => false,
                   "label" => "" },
               ],
-              instanceType: "baseline-8",
+              instanceType: "baseline-4",
               stageIndex: 1,
             },
           ] },
         output_spec: { stages: [] } }
     end
+    # rubocop:enable Metrics/MethodLength
   end
 end

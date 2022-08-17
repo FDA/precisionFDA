@@ -1,5 +1,6 @@
-import { ReactNode } from "react-router/node_modules/@types/react"
-import { IChallenge } from "../../types/challenge"
+import { ReactNode } from 'react'
+import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
+import { IChallenge } from '../../types/challenge'
 
 export interface TableSelected<T> {
   selectedItems: T[]
@@ -15,8 +16,8 @@ export interface BaseError {
     type: 'error'
   }
 }
-
-export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions'
+export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions'
+export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions' | 'spaces'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 
 export interface DownloadListResponse {
@@ -39,46 +40,45 @@ export type Link = string | {
   method: 'GET' | 'POST'
 }
 
-export type ActionFunctionsType<T extends string> = {
-  [key in T]?: {
-    func: (arg?: IModal) => void,
-    isDisabled?: boolean
-    key?: string
-    modal?: ReactNode | null
-    showModal?: boolean
-    hide?: boolean
-    link?: Link
-  }
-}
-export type ActionFunctionsTypeRev<T extends string> = {
-  [key in T]: {
-    func: (arg?: IModal) => void,
-    isEnabled?: (arg?: any) => boolean
-    modal?: ReactNode | null
-    showModal?: boolean
-  }
+export type ActionType = {
+  isDisabled?: boolean
+  key?: string
+  shouldHide?: boolean
+} & ({
+  type: 'link'
+  link: Link
+  cloudResourcesConditionType?: CloudResourcesConditionType
+} | ({
+  type: 'modal'
+  func: (arg?: IModal) => void,
+  modal?: ReactNode | null
+  showModal?: boolean
+}))
+
+export type ActionFunctionsType<KeyT extends string> = {
+  [key in KeyT]?: ActionType
 }
 
 export type ResourcePage = 'details' | 'list'
 
 export interface MetaPath {
-  "id": number
-  "name": string
+  'id': number
+  'name': string
 }
 export interface IMeta {
-  "links": {
-    "copy_private": string
-    "comments": string
+  'links': {
+    'copy_private': string
+    'comments': string
   },
-  "path": MetaPath[],
-  "count": number,
-  "challenges": IChallenge[],
-  "pagination": {
-    "current_page": number,
-    "next_page": null | number,
-    "prev_page": null | number,
-    "total_pages": number,
-    "total_count": number
+  'path': MetaPath[],
+  'count': number,
+  'challenges': IChallenge[],
+  'pagination': {
+    'current_page': number,
+    'next_page': null | number,
+    'prev_page': null | number,
+    'total_pages': number,
+    'total_count': number
   }
 }
 

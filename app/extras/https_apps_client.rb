@@ -118,6 +118,125 @@ class HttpsAppsClient
     )
   end
 
+  def users_list(page, per_page, order_by, order_dir, filters)
+    pagination_args = {}
+    pagination_args[:page] = page if page
+    pagination_args[:per_page] = per_page if per_page
+    pagination_args[:order_by] = order_by if order_by
+    pagination_args[:order_dir] = order_dir if order_dir
+    pagination_args[:filters] = filters if filters
+    request(
+      "/admin/users",
+      {},
+      Net::HTTP::Get::METHOD,
+      pagination_args,
+    )
+  end
+
+  def users_set_total_limit(ids, total_limit)
+    request(
+      "/admin/users/setTotalLimit",
+      {
+        ids: ids,
+        totalLimit: total_limit,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_set_job_limit(ids, job_limit)
+    request(
+      "/admin/users/setJobLimit",
+      {
+        ids: ids,
+        jobLimit: job_limit,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_reset_2fa(ids)
+    request(
+      "/admin/users/reset2fa",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def users_unlock(ids)
+    request(
+      "/admin/users/unlock",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def users_activate(ids)
+    request(
+      "/admin/users/activate",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_deactivate(ids)
+    request(
+      "/admin/users/deactivate",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_enable_resource(ids, resource)
+    request(
+      "/admin/users/enableResourceType",
+      {
+        ids: ids,
+        resource: resource,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_enable_all_resources(ids)
+    request(
+      "/admin/users/enableAllResourceTypes",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_disable_resource(ids, resource)
+    request(
+      "/admin/users/disableResourceType",
+      {
+        ids: ids,
+        resource: resource,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def users_disable_all_resources(ids)
+    request(
+      "/admin/users/disableAllResourceTypes",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
   private
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {})

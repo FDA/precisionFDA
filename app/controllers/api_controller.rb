@@ -5,6 +5,7 @@ class ApiController < ApplicationController
   include FilesConcern
   include UidFindable
   include ApiExceptionHandler
+  include CloudResourcesConcern
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
@@ -37,6 +38,8 @@ class ApiController < ApplicationController
                   search_assets
                 )
   before_action :validate_create_asset, only: :create_asset
+  before_action :check_total_and_job_charges_limit, only: %i(run_workflow)
+  before_action :check_total_charges_limit, only: %i(create_file create_asset)
   before_action :validate_create_file, only: :create_file
   before_action :validate_get_upload_url, only: :get_upload_url
 

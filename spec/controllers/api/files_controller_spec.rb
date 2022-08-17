@@ -13,7 +13,12 @@ RSpec.shared_examples "not_editable" do
 end
 
 RSpec.describe Api::FilesController, type: :controller do
-  let(:user) { create(:user) }
+  let(:user) { create(
+    :user,
+    total_limit: CloudResourceDefaults::TOTAL_LIMIT,
+    job_limit: CloudResourceDefaults::JOB_LIMIT,
+    resources: CloudResourceDefaults::RESOURCES,
+    ) }
   let(:admin) { create(:user, :admin) }
   let(:file) { create(:user_file, :private, user: user) }
 
@@ -68,6 +73,8 @@ RSpec.describe Api::FilesController, type: :controller do
 
         allow(UserFile).to receive(:exist_refresh_state).and_return(file)
         allow(file).to receive(:file_url).and_return(redirect_url)
+
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
       end
 
       it "redirects to a file download url" do

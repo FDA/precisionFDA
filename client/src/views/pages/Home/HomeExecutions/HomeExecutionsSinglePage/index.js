@@ -92,7 +92,7 @@ const HomeExecutionsSinglePage = (props) => {
         value: 'duration',
       },
       {
-        header: 'energy consumed',
+        header: 'Cost In Dollars',
         value: 'energyConsumption',
       },
       {

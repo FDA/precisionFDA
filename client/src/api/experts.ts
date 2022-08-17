@@ -8,7 +8,7 @@ const fetchExpertDetails = async (expertId: string): Promise<IExpert> => {
   return mapToExpert(res?.payload.expert)
 }
 const askQuestion = (
-  data: { userName: string; question: string },
+  data: { userName: string; question: string, captchaValue: string },
   expertId: string,
 ) => backendCall(`/api/experts/${expertId}/ask_question`, 'POST', data)
 

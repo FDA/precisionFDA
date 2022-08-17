@@ -1,5 +1,5 @@
 class SubmissionsView
-  constructor: (app, scopes_permitted, @asset_licenses_to_accept) ->
+  constructor: (app, scopes_permitted, instance_types, @asset_licenses_to_accept) ->
     @contentScopes = ko.observable(scopes_permitted)
     @dxid = app.dxid
     @inputSpec = app.spec.input_spec
@@ -26,7 +26,7 @@ class SubmissionsView
       return !@busy() && areInputsReady && !_.isEmpty(@name()) && !_.isEmpty(@desc())
     )
 
-    @availableInstances = Precision.INSTANCES
+    @availableInstances = instance_types
     @defaultInstanceType = app.spec.instance_type
     @instanceType = ko.observable(app.spec.instance_type)
 
@@ -68,7 +68,13 @@ class SubmissionsView
 ChallengeSubmissionsController = Paloma.controller('Submissions',
   new: ->
     $container = $("body main")
-    viewModel = new SubmissionsView(@params.app, @params.scopes_permitted, @params.licenses_to_accept)
+    viewModel = new SubmissionsView(
+      @params.app,
+      @params.scopes_permitted,
+      @params.instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type),
+      @params.licenses_to_accept,
+    )
+    #
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")

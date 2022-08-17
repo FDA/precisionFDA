@@ -192,14 +192,16 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-
-        {asset.tags.length > 0 && (
-          <StyledTags>
-            {asset.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        
+        <MetadataSection>
+          {asset.tags.length > 0 && (
+            <StyledTags>
+              {asset.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
 
       <div className="pfda-padded-t40" />

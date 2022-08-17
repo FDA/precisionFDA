@@ -18,6 +18,7 @@ class ChallengeSerializer < ApplicationSerializer
 
   attribute :followed?, key: :is_followed
   attribute :can_edit?, key: :can_edit
+  attribute :space_member?, key: :is_space_member
 
   def can_edit?
     current_user && object.editable_by?(current_user)
@@ -25,6 +26,10 @@ class ChallengeSerializer < ApplicationSerializer
 
   def followed?
     current_user && object.followed_by?(current_user)
+  end
+
+  def space_member?
+    current_user && object.space_member?(current_user)
   end
 
   def links

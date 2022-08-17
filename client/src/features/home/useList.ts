@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react'
 import { UseQueryOptions } from 'react-query'
+import { usePrevious } from '../../hooks/usePrevious'
+import { columnFilters } from './columnFilters'
 import { APIResource, IMeta, ResourceScope } from './types'
-import { useColumnWidthLocalStorage } from './useColumnWidthLocalStorage'
+import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from './useFilterState'
 import { useListQuery } from './useListQuery'
-import { useOrderByParams } from './useOrderByState'
-import { usePaginationParams } from './usePaginationState'
-import { usePrevious } from '../../hooks/usePrevious';
+import { ISortByParams, useOrderByParams } from '../../hooks/useOrderByState'
+import { usePaginationParams } from '../../hooks/usePaginationState'
 
+export interface IListProps {
+  pagination: ReturnType<typeof usePaginationParams>
+  sort: ISortByParams
+  filter: Record<string, string>
+  colWidth: IColumnWidthLocalStorage
+}
 
 type ListType = { [key: string]: {}, meta: IMeta }
 interface IUseList<T> {
@@ -15,36 +22,19 @@ interface IUseList<T> {
   scope?: ResourceScope,
   fetchList: any,
   resource: APIResource,
-  onRowClick: any,
   params?: {
     [key: string]: string | undefined
   }
   queryOptions?: UseQueryOptions<T>
 }
 
-export const filters = {
-  name: 'string',
-  title: 'string',
-  state: 'string',
-  engine: 'string',
-  dx_instance_class: 'string',
-  tags: 'string',
-  status: 'string',
-  featured: 'string',
-  location: 'string',
-  added_by: 'string',
-  app_title: 'string',
-  launched_by: 'string',
-  file_size: 'range',
-}
-
 const filterReset: Record<string, undefined> = {}
-Object.keys(filters).forEach(v => {
+Object.keys(columnFilters).forEach(v => {
   filterReset[v] = undefined
 })
 
 
-export function useList<T extends ListType>({ spaceId, scope, fetchList, resource, params = {}, queryOptions }: IUseList<T>) {
+export function useList<T extends ListType>({ fetchList, resource, params = {}, queryOptions }: IUseList<T>) {
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
   const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
   const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: (cols) => setSelectedIndexes({}) })
@@ -52,7 +42,7 @@ export function useList<T extends ListType>({ spaceId, scope, fetchList, resourc
   const resetSelected = () => setSelectedIndexes(undefined)
 
   const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
-    filters,
+    filters: columnFilters,
     onSetFilter: () => {
       setSelectedIndexes({})
       setPageParam(1, 'replaceIn')
@@ -60,23 +50,21 @@ export function useList<T extends ListType>({ spaceId, scope, fetchList, resourc
   })
 
   useEffect(() => {
-    // Reset selected rows if pageParam, perPageParam, sort, filterQuery, scope change 
+    // Reset selected rows if pageParam, perPageParam, sort, filterQuery, scope, spaceId change 
     resetSelected()
-  }, [pageParam, perPageParam, sort, filterQuery, scope, spaceId])
+  }, [pageParam, perPageParam, sort, filterQuery, params.scope, params.spaceId])
 
-  const prevScope = usePrevious(scope)
+  const prevScope = usePrevious(params.scope)
   useEffect(() => {
     // skip first render
     if(prevScope) {
       setPageParam(undefined, 'replaceIn')
       setFilterParam(filterReset, 'replaceIn')
     }
-  }, [scope])
+  }, [params.scope])
 
   const query = useListQuery<T>({
     fetchList,
-    scope,
-    spaceId,
     resource,
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort.order_by, order_dir: sort.order_dir },

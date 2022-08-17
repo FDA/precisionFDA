@@ -16,7 +16,6 @@ import { RequestResponse } from './useFeatureMutation'
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
-  min-width: 300px;
   padding: 1rem;
   gap: 1rem;
 `
@@ -33,7 +32,7 @@ async function editTagsRequest({
   uid: string
   tags: string
 }): Promise<RequestResponse> {
-  const res = await fetch(`/api/set_tags`, {
+  const res = await fetch('/api/set_tags', {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify({ taggable_uid: uid, tags }),
   }).then(checkStatus)
@@ -49,7 +48,7 @@ const EditTagsForm = ({
   onSuccess,
   uid,
   setShowModal,
-  tags
+  tags,
 }: {
   resource: APIResource
   uid: string
@@ -57,7 +56,6 @@ const EditTagsForm = ({
   onSuccess?: (res:any) =>void
   setShowModal?: (show: boolean) => void
 }) => {
-  const queryClient = useQueryClient()
   const { register, handleSubmit } = useForm<FormInputs>({
     defaultValues: {
       tags: tags.join(', '),
@@ -67,8 +65,8 @@ const EditTagsForm = ({
   const mutation = useMutation({
     mutationFn: (tags: string) => editTagsRequest({ uid, tags }),
     onSuccess: (res) => {
-      onSuccess && onSuccess(res)
-      setShowModal && setShowModal(false)
+      if(onSuccess) onSuccess(res)
+      if(setShowModal) setShowModal(false)
       toast.success(`Success: ${resource} editing tags`)
     },
     onError: () => {
@@ -81,7 +79,10 @@ const EditTagsForm = ({
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
+    <StyledForm onSubmit={(e) => {
+        e.stopPropagation()
+        handleSubmit(onSubmit)(e)
+      }}>
       <StyledSubtext>Tags are public to the community</StyledSubtext>
       <FieldGroup>
         <label>Tags (comma-separated)</label>

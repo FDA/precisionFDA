@@ -1,13 +1,12 @@
 import { expect } from 'chai'
-import { repeat } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
-import { errors, database } from '@pfda/https-apps-shared'
+import { database } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { APP_HTTPS_SUBTYPE, APP_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
+import { mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /apps', () => {

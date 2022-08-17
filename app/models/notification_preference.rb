@@ -55,13 +55,17 @@ class NotificationPreference < ApplicationRecord
   # email types currently handled by nodejs app
   # File - /https-apps-api/packages/shared/src/domain/email/email.config.ts
   EMAIL_TYPES = {
-    notification_job: 1,
+    notification_job_done: 1,
     notification_content: 2,
     notification_space_membership: 3,
     notification_space_action: 4,
     notification_comment: 5,
     notification_challenge_opened: 6,
     notification_challenge_preregister: 7,
+    # nodejs app only types
+    # jobTerminationWarning = 8,
+    # staleJobsReport = 9,
+    notification_job_failed: 11,
   }.freeze
 
   ALL_KEYS = REVIEWER_KEYS + SPONSOR_KEYS + REVIEWER_LEAD_KEYS + SPONSOR_LEAD_KEYS +

@@ -12,7 +12,7 @@ export const checkNonTerminatedDbClustersHandler = async (bullJob: Job<CheckNonT
     log,
     job: bullJob
   }
-  await new dbCluster.CheckNonTerminatedDbClustersOperation(ctx).execute()
+  await new dbCluster.CheckNonTerminatedDbClustersOperation(ctx as any).execute()
 
 }
 

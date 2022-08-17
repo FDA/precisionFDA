@@ -160,6 +160,8 @@ class ApplicationController < ActionController::Base
         decrypted = JSON.parse(rails_encryptor.decrypt_and_verify(key))
         if decrypted.is_a?(Hash) && decrypted["context"].is_a?(Hash)
           fields = %w(user_id username token expiration org_id).map { |f| decrypted["context"][f] }
+          # Flag indicating, that user is calling from CLI
+          fields.push(true)
           init_context(*fields)
         end
       rescue
@@ -173,8 +175,8 @@ class ApplicationController < ActionController::Base
   # @param token [String] User's token.
   # @param expiration [Integer] Token's expiration.
   # @param org_id [Integer] User org's ID.
-  def init_context(user_id, username, token, expiration, org_id)
-    @context = Context.new(user_id, username, token, expiration, org_id)
+  def init_context(user_id, username, token, expiration, org_id, cli_client = false)
+    @context = Context.new(user_id, username, token, expiration, org_id, cli_client)
     DIContainer.configure(@context.user, token) unless @context.guest?
   end
 

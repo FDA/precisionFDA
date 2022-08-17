@@ -1,14 +1,21 @@
 import styled, { css } from "styled-components";
-import { theme } from "../../styles/theme";
+import { colors } from "../../styles/theme";
 
 export const FieldGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  label {
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0;
+    color: ${colors.textDarkGrey};
+  }
 `
 
 export const Hint = styled.div`
-  color: ${theme.colors.textMediumGrey};
+  color: ${colors.textMediumGrey};
   font-size: 14px;
 `
 
@@ -29,10 +36,17 @@ export const InputSelect = styled.select`
 `
 
 export const InputError = styled.div`
-  color: ${theme.colors.stateFailedColor};
+  font-size: 14px;
+  color: ${colors.stateFailedColor};
   
   &::before {
     display: inline;
     content: "⚠ ";
   }
+`
+
+export const Divider = styled.div`
+  box-sizing: border-box;
+  width: 100%;
+  border-bottom: 1.5px solid #d9d9d9;
 `

@@ -2,14 +2,26 @@ module Admin
   # Responsible for users related actions.
   class UsersController < BaseController
     skip_before_action  :check_admin, only: :toggle_activate_user
+    layout "react", only: %i(index)
 
     # GET
     # Renders users.
     def index
-      @users = User.all
-      @users_grid = initialize_grid(@users)
+      response = https_apps_client.users_list(
+        unsafe_params[:page],
+        unsafe_params[:per_page],
+        unsafe_params[:order_by],
+        unsafe_params[:order_dir],
+        unsafe_params[:filters],
+      )
+      # render json: response, adapter: :json
+      respond_to do |format|
+        format.html { render "admin/users/index" }
+        format.json { render json: response }
+      end
     end
 
+    # TODO(samuel) unify this method
     # POST
     # Toggles user's active status.
     def toggle_activate_user
@@ -62,6 +74,108 @@ module Admin
         )
       end
     end
+
+    # ┌───────────────────────────────────────────────────────────┐
+    # │                                                           │
+    # │   Bulk methods implemented in https-apps-api begin here   │
+    # │                                                           │
+    # └───────────────────────────────────────────────────────────┘
+
+    def set_total_limit
+      response = https_apps_client.users_set_total_limit(
+        unsafe_params[:ids],
+        unsafe_params[:totalLimit],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def set_job_limit
+      response = https_apps_client.users_set_job_limit(
+        unsafe_params[:ids],
+        unsafe_params[:jobLimit],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_reset_2fa
+      response = https_apps_client.users_reset_2fa(
+        unsafe_params[:ids],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_unlock
+      response = https_apps_client.users_unlock(
+        unsafe_params[:ids],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_activate
+      response = https_apps_client.users_activate(
+        unsafe_params[:ids],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_deactivate
+      response = https_apps_client.users_deactivate(
+        unsafe_params[:ids],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_enable_resource
+      response = https_apps_client.users_enable_resource(
+        unsafe_params[:ids],
+        unsafe_params[:resource],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_enable_all_resources
+      response = https_apps_client.users_enable_all_resources(unsafe_params[:ids])
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_disable_resource
+      response = https_apps_client.users_disable_resource(
+        unsafe_params[:ids],
+        unsafe_params[:resource],
+      )
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    def bulk_disable_all_resources
+      response = https_apps_client.users_disable_all_resources(unsafe_params[:ids])
+      respond_to do |format|
+        format.json { render json: response }
+      end
+    end
+
+    # ┌───────────────────────────────────────────────────────┐
+    # │                                                       │
+    # │  Bulk methods implemented in https-apps-api end here  │
+    # │                                                       │
+    # └───────────────────────────────────────────────────────┘
 
     # GET
     # Renders deactivated users.
@@ -173,6 +287,11 @@ module Admin
     # @return [Boolean] Returns true if current user is organization admin, false otherwise.
     def user_org_admin?(user)
       current_user.id == user.org.admin_id
+    end
+
+    # TODO(samuel) ask about better way to implement this
+    def https_apps_client
+      DIContainer.resolve("https_apps_client")
     end
   end
 end

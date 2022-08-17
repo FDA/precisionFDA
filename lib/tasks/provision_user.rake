@@ -90,12 +90,18 @@ namespace :provision do
     perms[old_admin_dxuserid] = {level: "MEMBER", allowBillableActivities: true, appAccess: true, projectAccess: 'VIEW'}
     api.call(dxorg, "setMemberAccess", perms)
 
-    u = nil
+    new_user = User.new do |u|
+      u.org_id = o.id
+      u.schema_version = User::CURRENT_SCHEMA
+      u.charges_baseline = o.admin.charges_baseline
+      u.pricing_map = CloudResourceDefaults::PRICING_MAP
+      u.job_limit = CloudResourceDefaults::JOB_LIMIT
+      u.total_limit = CloudResourceDefaults::TOTAL_LIMIT
+      u.resources = CloudResourceDefaults::RESOURCES
+    end
     User.transaction do
-      user[:org_id] = o.id
-      user[:schema_version] = User::CURRENT_SCHEMA
-      u = User.create!(user)
-      o.admin_id = u.id
+      new_user.save
+      o.admin_id = new_user.id
       o.save!
     end
 

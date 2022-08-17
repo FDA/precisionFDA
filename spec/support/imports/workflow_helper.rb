@@ -1,10 +1,12 @@
 module Imports
+  # Workflow slots constants for CWL presenter specs.
   module WorkflowHelper
+    # rubocop:disable Metrics/MethodLength
     def params
       { "slots" => [
         { "uid" => "app-FXKBg3803PFFYJjz11BgJ4b4-1",
           "name" => "app-776-first-step-1",
-          "instanceType" => "baseline-8",
+          "instanceType" => "baseline-4",
           "inputs" => [
             { "name" => "input_file_param_1",
               "class" => "file",
@@ -42,7 +44,7 @@ module Imports
           "stageIndex" => 0 },
         { "uid" => "app-FXKBjg807jkfZKYq126yx61f-1",
           "name" => "app-776-second-step-1",
-          "instanceType" => "baseline-8",
+          "instanceType" => "baseline-4",
           "inputs" => [
             { "name" => "input_file_param_1",
               "class" => "file",
@@ -88,5 +90,6 @@ module Imports
         "workflow_title" => "workflow-776-4",
         "is_new" => true }
     end
+    # rubocop:enable Metrics/MethodLength
   end
 end

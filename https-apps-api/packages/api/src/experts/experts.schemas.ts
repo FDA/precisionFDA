@@ -1,4 +1,4 @@
-import { JSONSchema7 } from "json-schema";
+import { JSONSchema7 } from 'json-schema'
 import { utils } from '@pfda/https-apps-shared'
 
 export const expertListQuerySchema: JSONSchema7 = {
@@ -7,10 +7,10 @@ export const expertListQuerySchema: JSONSchema7 = {
     ...utils.schemas.paginationSchema.properties,
     year: {
       type: 'integer',
-      minimum: 2017
-    }
+      minimum: 2017,
+    },
   },
   required: [],
   // Note: has to be enabled because of auth part of query string
-  additionalProperties: true
+  additionalProperties: true,
 }

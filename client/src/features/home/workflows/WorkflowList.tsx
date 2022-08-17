@@ -10,12 +10,17 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { RootState } from '../../../store'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
+import {
+  ActionsRow,
+  QuickActions,
+  StyledHomeTable,
+  StyledPaginationSection,
+} from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { useWorkflowColumns } from './useWorkflowColumns'
 import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
@@ -24,7 +29,13 @@ import { IWorkflow } from './workflows.types'
 
 type ListType = { workflows: IWorkflow[]; meta: IMeta }
 
-export const WorkflowList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const WorkflowList = ({
+  scope,
+  spaceId,
+}: {
+  scope?: ResourceScope
+  spaceId?: string
+}) => {
   const history = useHistory()
   const isAdmin = useSelector((state: RootState) => state.context.user.admin)
   const onRowClick = (id: string) => history.push(`/home/workflows/${id}`)
@@ -44,10 +55,11 @@ export const WorkflowList = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
     resetSelected,
   } = useList<ListType>({
     fetchList: fetchWorkflowList,
-    onRowClick,
     resource: 'workflows',
-    scope,
-    spaceId,
+    params: {
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
+    },
   })
   const { status, data, error } = query
 
@@ -57,11 +69,12 @@ export const WorkflowList = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
   )
   const actions = useWorkflowSelectActions({
     scope,
+    spaceId,
     selectedItems: selectedObjects,
     resourceKeys: ['workflows'],
     resetSelected,
   })
-  const listActions = useWorkflowListActions()
+  const listActions = useWorkflowListActions({ spaceId })
   const message =
     scope === 'spaces' &&
     'To perform other actions on this workflow, access it from the Space'
@@ -73,21 +86,31 @@ export const WorkflowList = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
       <div>
         <ActionsRow>
           <QuickActions>
-            <ButtonSolidBlue
-              data-testid="home-workflows-create-link"
-              as="a"
-              href="/workflows/new"
-            >
-              <PlusIcon height={12} /> Create Workflow
-            </ButtonSolidBlue>
+            {scope === 'me' && (
+              <ButtonSolidBlue
+                data-testid="home-workflows-create-link"
+                as="a"
+                href="/workflows/new"
+              >
+                <PlusIcon height={12} /> Create Workflow
+              </ButtonSolidBlue>
+            )}
+
+            {spaceId && (
+              <ButtonSolidBlue
+                data-testid="spaces-workflows-add-button"
+                onClick={() =>
+                  listActions['Add Workflow']?.func({ showModal: true })
+                }
+              >
+                <PlusIcon height={12} /> Add Workflow
+              </ButtonSolidBlue>
+            )}
           </QuickActions>
           <Dropdown
             trigger="click"
             content={
-              <ActionsDropdownContent
-                actions={actions}
-                message={message}
-              />
+              <ActionsDropdownContent actions={actions} message={message} />
             }
           >
             {dropdownProps => (
@@ -105,7 +128,8 @@ export const WorkflowList = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
         isAdmin={isAdmin}
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         workflows={data?.workflows}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
@@ -116,23 +140,25 @@ export const WorkflowList = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.workflows?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          isHidden={hidePagination(
+            query.isFetched,
+            data?.workflows?.length,
+            data?.meta?.pagination?.total_pages,
+          )}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {listActions['Create Workflow']?.modal}
+      {listActions['Add Workflow']?.modal}
       {actions['Copy to space']?.modal}
       {actions['Delete']?.modal}
       {actions['Export to']?.modal}

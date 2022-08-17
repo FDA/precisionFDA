@@ -1,28 +1,28 @@
-import { useMutation, useQueryClient } from "react-query";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store";
-import { OBJECT_TYPES, useAttachToModal } from "../actionModals/useAttachToModal";
-import { useCopyToSpaceModal } from "../actionModals/useCopyToSpace";
-import { useEditTagsModal } from "../actionModals/useEditTagsModal";
-import { useFeatureMutation } from "../actionModals/useFeatureMutation";
-import { useTerminateModal } from "./useTerminateModal";
-import { ActionFunctionsType, ResourceScope } from "../types";
-import { copyJobsRequest } from "./executions.api";
-import { IExecution } from "./executions.types";
-import { pick } from "ramda";
-import { getExecutionJobsList } from "./executions.util";
+import { useMutation, useQueryClient } from 'react-query'
+import { useSelector } from 'react-redux'
+import { pick } from 'ramda'
+import { RootState } from '../../../store'
+import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
+import { useEditTagsModal } from '../actionModals/useEditTagsModal'
+import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useTerminateModal } from './useTerminateModal'
+import { ActionFunctionsType, ResourceScope } from '../types'
+import { copyJobsRequest } from './executions.api'
+import { IExecution } from './executions.types'
+import { getExecutionJobsList } from './executions.util'
 
 export enum ExecutionAction {
-  "View Logs" = "View Logs",
-  "Terminate" = "Terminate",
-  "Track" = "Track",
-  "Copy to space" = "Copy to space",
-  "Feature" = "Feature",
-  "Unfeature" = "Unfeature",
-  "Make Public" = "Make Public",
-  "Attach to..." = "Attach to...",
-  "Comments" = "Comments",
-  "Edit tags" = "Edit tags",
+  'View Logs' = 'View Logs',
+  'Terminate' = 'Terminate',
+  'Track' = 'Track',
+  'Copy to space' = 'Copy to space',
+  'Feature' = 'Feature',
+  'Unfeature' = 'Unfeature',
+  'Make Public' = 'Make Public',
+  'Attach to...' = 'Attach to...',
+  'Comments' = 'Comments',
+  'Edit tags' = 'Edit tags',
 }
 
 export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { scope?: ResourceScope, selectedItems: IExecution[], resourceKeys: string[]}) => {
@@ -31,9 +31,9 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
   const user = useSelector((state: RootState) => state.context.user)
   const isAdmin = user ? user.admin : false
 
-  const featureMutation = useFeatureMutation({resource: 'jobs', onSuccess: () => {
+  const featureMutation = useFeatureMutation({ resource: 'jobs', onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
-  }})
+  } })
 
   // An IExecution can be either a job (app) or workflow, in the case of the workflow
   const selectedJobs = getExecutionJobsList(selected)
@@ -48,7 +48,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     updateFunction: copyJobsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 
   const {
@@ -58,7 +58,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
   } = useEditTagsModal<IExecution>({
     resource: 'jobs', selected: selected[0], onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 // "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
   const {
@@ -79,64 +79,70 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
   const links = selected[0]?.links
 
   let actions: ActionFunctionsType<ExecutionAction> = {
-    "View Logs": {
-      func: () => { },
+    'View Logs': {
+      type: 'link',
       link: links?.log,
       isDisabled: selected.length !== 1 || !links.log,
     },
-    "Terminate": {
+    'Terminate': {
+      type: 'modal',
       func: () => setTerminateModal(true),
       isDisabled: selected.length !== 1,
       modal: terminateoModal,
       showModal: isShownTerminateModal,
     },
-    "Track": {
-      func: () => { },
+    'Track': {
+      type: 'link',
       link: links?.track,
       isDisabled: selected.length !== 1 || !links.track,
     },
-    "Copy to space": {
+    'Copy to space': {
+      type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled:
         selected.length === 0 || selected.some(e => !e.links?.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
-    "Feature": {
+    'Feature': {
+      type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || scope !== 'everybody',
     },
-    "Unfeature": {
+    'Unfeature': {
+      type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
+      shouldHide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
     },
-    "Make Public": {
-      func: () => { },
+    'Make Public': {
+      type: 'link',
       isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || (selected[0].jobs && selected[0].scope === 'private'),
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
-      }
+      },
     },
-    "Attach to...": {
+    'Attach to...': {
+      type: 'modal',
       func: () => setAttachToModal(true),
       isDisabled: selected.length === 0 || selected.some(e => !e.links?.attach_to),
       modal: attachToModal,
       showModal: isShownAttachToModal,
     },
-    "Comments": {
-      func: () => { },
+    'Comments': {
+      type: 'link',
       isDisabled: selected.length !== 1,
-      link: `/jobs/${selected[0]?.uid}/comments`
+      link: `/jobs/${selected[0]?.uid}/comments`,
     },
-    "Edit tags": {
+    'Edit tags': {
+      type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      hide: (!isAdmin && selected[0]?.launched_by !== user.full_name) || (selected.length !== 1)
+      shouldHide: (!isAdmin && selected[0]?.launched_by !== user.full_name) || (selected.length !== 1),
     },
   }
 

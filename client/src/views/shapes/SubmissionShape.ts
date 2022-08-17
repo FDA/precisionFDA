@@ -15,6 +15,7 @@ const SubmissionShape = {
   jobState: PropTypes.string,
   jobName: PropTypes.string,
   jobInputFiles: PropTypes.arrayOf(PropTypes.object),
+  runInputData: PropTypes.arrayOf(PropTypes.object),
   userCanAccessSpace: PropTypes.bool,
 }
 
@@ -33,6 +34,7 @@ const mapToSubmission = (data: any) => {
     jobState: data.job_state,
     jobName: data.job_name,
     jobInputFiles: data.job_input_files,
+    runInputData: data.run_input_data,
     userCanAccessSpace: data.user_can_access_space,
   }
 }

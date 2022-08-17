@@ -178,13 +178,15 @@ export const DatabaseShow = ({ scope }: { scope: ResourceScope }) => {
         </Header>
 
         {renderOptions(db)}
-        {db.tags.length > 0 && (
-          <StyledTags>
-            {db.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        <MetadataSection>
+          {db.tags.length > 0 && (
+            <StyledTags>
+              {db.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
     </>
   )

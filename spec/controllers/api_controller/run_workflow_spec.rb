@@ -1,7 +1,8 @@
 require "rails_helper"
 
+# rubocop:todo RSpec/MultipleMemoizedHelpers
 RSpec.describe ApiController, type: :controller do
-  let(:user) { create(:user, dxuser: "user") }
+  let(:user) { create(:user, dxuser: "user", job_limit: 100, resources: CloudResourceDefaults::RESOURCES) }
 
   let(:app_input) do
     [
@@ -31,7 +32,7 @@ RSpec.describe ApiController, type: :controller do
            input_spec: app_input,
            output_spec: app_output,
            internet_access: false,
-           instance_type: "baseline-8",
+           instance_type: "baseline-4",
            packages: nil,
            code: "emit os1 'Test App Outpit:-->'$s1' and '$s2\nemit oi1 $i2",)
   end
@@ -81,7 +82,7 @@ RSpec.describe ApiController, type: :controller do
                 app_uid: app.uid,
                 inputs: workflow_inputs,
                 outputs: workflow_outputs,
-                instanceType: "baseline-8",
+                instanceType: "baseline-4",
                 stageIndex: 0,
               },
             ],
@@ -182,7 +183,10 @@ RSpec.describe ApiController, type: :controller do
   end
 
   describe "POST run_workflow" do
-    before { authenticate!(user) }
+    before do
+      authenticate!(user)
+      allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
+    end
 
     it "runs a workflow" do
       list_projects_response = { "#{workflow.project}": "ADMINISTER" }
@@ -218,5 +222,34 @@ RSpec.describe ApiController, type: :controller do
       expect(parsed_response["error"]["message"])
         .to eq("#{run_inputs_failed_int.keys[0]}: value is not an integer")
     end
+
+    context "when user exceeded charges limit" do
+      before do
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
+      end
+
+      it "responds with an error" do
+        post "run_workflow", params: params, format: :json
+
+        expect(response.status).to eq(422)
+        expect(parsed_response["error"]["message"]).to \
+          include(I18n.t("api.errors.exceeded_charges_limit"))
+      end
+    end
+
+    context "when user runs a workflow on forbidden instance types" do
+      before do
+        user.update(resources: user.resources - %w(baseline-4))
+      end
+
+      it "responds with an error" do
+        post "run_workflow", params: params, format: :json
+
+        expect(response.status).to eq(422)
+        expect(parsed_response["error"]["message"]).to \
+          include(I18n.t("workflows.errors.unsupported_instance_types", name: workflow.name))
+      end
+    end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers

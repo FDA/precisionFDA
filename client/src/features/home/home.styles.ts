@@ -91,29 +91,6 @@ export const ScopeDescription = styled.span`
   font-size: 13px;
 `
 
-export const StyledMenuCounter = styled.span<{isLong?: boolean, active?: boolean}>`
-  height: 20px;
-  min-width: 20px;
-  line-height: 0;
-  ${({ isLong }) => isLong && 'padding: 0 2px;'}
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  justify-self: flex-end;
-  margin-right: 24px;
-  color: ${colors.textDarkGrey};
-  font-size: 12px;
-
-  ${({ active }) => {
-    if (active) {
-      return css`
-        color: ${colors.textWhite};
-      `
-    }
-  }}
-`
-
 export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
@@ -170,6 +147,10 @@ export const StyledMenu = styled.div<{ expanded: boolean }>`
         padding: 0;
         justify-content: center;
       }
+      ${Expand} {
+        justify-content: center;
+        padding: 18px 0;
+      }
     `
   }
   border-right: solid 1px #d5d5d5;
@@ -182,13 +163,17 @@ export const Main = styled.div`
   overflow: auto;
 `
 export const Expand = styled.div`
+  position: relative;
+  padding-right: 24px;
+  padding-bottom: 16px;
   display: flex;
   cursor: pointer;
-
-  justify-content: center;
+  justify-content: flex-end;
   justify-self: flex-end;
-  background: #dfe9f8;
   color: ${colors.textDarkGrey};
+  svg:hover {
+    color: ${colors.textMediumGrey};
+  }
 `
 export const Fill = styled.div`
   flex: 1 0 auto;
@@ -197,7 +182,6 @@ export const Fill = styled.div`
 export const StyledHomeTable = styled.div`
   font-size: 14px;
 `
-
 
 export const QuickActions = styled.div`
   display: flex;
@@ -246,4 +230,12 @@ export const ActionsRow = styled.div`
   margin: 20px;
   gap: 8px;
 `
+export const StyledRunByYouLink = styled.a`
+  font-size: 12px;
+`
 
+export const StyledPaginationSection = styled.div`
+  padding-left: 12px;
+  padding-top: 32px;
+  padding-bottom: 16px;
+`

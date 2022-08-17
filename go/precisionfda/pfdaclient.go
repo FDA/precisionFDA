@@ -15,11 +15,12 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"net/url"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -213,17 +214,39 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	wg := c.initWaitGroup(fileID, chunkPool, &assetSize)
 
 	fmt.Println(">> Archiving asset...")
-	cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
-	if strings.HasSuffix(name, ".tar.gz") {
-		cmd = exec.Command("tar", "-cz", "-C", rootFolderPath, ".")
-	}
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	err = cmd.Start()
-	if err != nil {
-		return err
+
+	// different approarch for WinOS tar command
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("tar", "-cf", name, "-C", rootFolderPath, ".")
+		if strings.HasSuffix(name, ".tar.gz") {
+		cmd = exec.Command("tar", "-czf", name, "-C", rootFolderPath, ".")
+		}
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+		err = cmd.Wait()
+		if err != nil {
+			return err
+		}
+		tarArchive, err := os.Open(name)
+		if err != nil {
+			return err
+		}
+		defer os.Remove(name)
+		defer tarArchive.Close()
+		c.readAndChunk(tarArchive, chunkPool, &assetSize)
+	} else {
+		cmd := exec.Command("tar", "-c", "-C", rootFolderPath, ".")
+		if strings.HasSuffix(name, ".tar.gz") {
+			cmd = exec.Command("tar", "-cz", "-C", rootFolderPath, ".")
+		}
+		stdout, err := cmd.StdoutPipe()
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+		c.readAndChunk(stdout, chunkPool, &assetSize)
 	}
 
 	fmt.Print(">> Uploading asset |")
@@ -233,7 +256,6 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	// 	return err
 	// }
 	// defer f.Close()
-	c.readAndChunk(stdout, chunkPool, &assetSize)
 	close(chunkPool)
 	wg.Wait()
 
@@ -354,7 +376,7 @@ func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string) error {
 	fmt.Printf("   Downloading :  %s\n", fileName)
 
 	fileSize := resultJSON["file_size"].(float64)
-	fmt.Printf("     File Size :  %s\n", units.HumanSize(fileSize))
+	fmt.Printf("     File Size :  %s\n", units.BytesSize(fileSize))
 
 	if outputFilePath == "" {
 		// If output is not specified, use the original filename and current working directory
@@ -459,7 +481,7 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 				currentSize := atomic.LoadUint64(&totalSent)
 				totalSize := atomic.LoadInt64(size)
 				fmt.Fprintf(writer, "     %.1f%% (%s / %s)\n",
-							100*float64(currentSize)/float64(totalSize), units.HumanSize(float64(currentSize)), units.HumanSize(float64(totalSize)))
+							100*float64(currentSize)/float64(totalSize), units.BytesSize(float64(currentSize)), units.BytesSize(float64(totalSize)))
 				writer.Flush()
 			}
 			g.Done()

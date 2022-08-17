@@ -172,6 +172,10 @@ class Challenge < ApplicationRecord
     user.site_or_challenge_admin?
   end
 
+  def space_member?(user)
+    space&.space_memberships&.map(&:user_id)&.include?(user.id)
+  end
+
   def status_setup?
     status == STATUS_SETUP
   end

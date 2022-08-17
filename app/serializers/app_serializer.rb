@@ -14,6 +14,7 @@ class AppSerializer < ApplicationSerializer
     :updated_at,
     :location,
     :readme,
+    :scope,
     :revision,
     :app_series_id,
     :run_by_you,
@@ -25,8 +26,17 @@ class AppSerializer < ApplicationSerializer
   )
 
   attribute :all_tags_list, key: :tags
-
+  attribute :job_count, key: :job_count
+  attribute :scope_id, key: :scope
   delegate :updated_at, to: :object
+
+  def scope_id
+    object.scope
+  end
+
+  def job_count
+    object.app_series.jobs.distinct.count
+  end
 
   # Returns a tags list for an App
   def all_tags_list
