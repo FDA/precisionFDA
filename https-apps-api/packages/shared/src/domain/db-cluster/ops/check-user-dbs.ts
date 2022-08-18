@@ -8,10 +8,9 @@ import { SyncDbClusterOperation } from './synchronize'
 
 
 const recreateDbSyncOperationIfMissing = async (dbCluster: DbCluster, log: P.Logger, userCtx: UserCtx): Promise<void> => {
-  console.log(`Checking dbcluster ${dbCluster.dxid}, userId ${userCtx.id}, state ${dbCluster.status}`)
+  log.info(`Checking dbcluster ${dbCluster.dxid}, userId ${userCtx.id}, status ${dbCluster.status}`)
   const dbSyncOperation = await queue.findRepeatable(SyncDbClusterOperation.getBullJobId(dbCluster.dxid))
   if (!dbSyncOperation) {
-    console.log(`missing DB Cluster sync operation for uid ${dbCluster.dxid}`)
     log.info(
       { dbCluster, userId: userCtx.id },
       'CheckUserDbClustersOperation: Recreating missing DB Cluster sync operation',
@@ -42,7 +41,7 @@ export class CheckUserDbClustersOperation extends WorkerBaseOperation<UserOpsCtx
 
     this.ctx.log.info(
       { nonTerminatedDbClusters, userId },
-      'CheckUserDbClustersOperation: Found DB Cluster for userId'
+      'CheckUserDbClustersOperation: Found DB Clusters for userId'
     )
 
     const operations: Array<Promise<void>> = []

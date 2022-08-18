@@ -2,6 +2,7 @@ module Api
   # Experts API controller.
   class ExpertsController < ApiController
     include Paginationable
+    include RecaptchaHelper
 
     skip_before_action :require_api_login
     before_action :find_expert, only: %i(show update ask_question blog)
@@ -46,7 +47,7 @@ module Api
     def ask_question
       if @context.logged_in?
         exp_question = ExpertQuestion.provision(@expert, @context, params[:question])
-      else
+      elsif verify_captcha_assessment(params[:captchaValue], "question")
         exp_question = ExpertQuestion.new(
           user_id: nil,
           expert_id: @expert.id,
@@ -56,6 +57,9 @@ module Api
           _edited: false.to_s,
         )
         exp_question.save!
+      else
+        raise ApiError,
+              "Your question was not submitted because of ReCaptcha validation failed, Please try again."
       end
 
       unless exp_question

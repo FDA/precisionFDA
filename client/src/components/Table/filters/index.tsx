@@ -1,12 +1,24 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { InputSelect } from '../../form/styles'
 import { StyledInput } from '../../InputText'
 export * from './numericFilter'
 
+const sanitizeRangeFilterValue = (rawValue: string | [number | null | undefined, number | null | undefined]) => {
+  if (typeof rawValue === 'string') {
+    return rawValue.split(',')
+  }
+  // No idea what's the reason behind this, just want to avoid breaking change
+  let v = rawValue
+  if(v[0] === undefined) {
+    v[0] = null
+  }
+  return v
+}
+
 export function NumberRangeColumnFilter({
-  column: { filterValue = [null,null], preFilteredRows, setFilter, id, filterDataTestId },
+  column: { filterValue = [null,null], preFilteredRows, setFilter, id, filterDataTestId, filterPlaceholderFrom, filterPlaceholderTo },
 }: any) {
-  if(filterValue[0] === undefined) filterValue[0] = null
+  const parsedFilterValue = sanitizeRangeFilterValue(filterValue)
   return (
     <div
       style={{
@@ -16,14 +28,14 @@ export function NumberRangeColumnFilter({
       data-testid={filterDataTestId}
     >
       <StyledInput
-        value={filterValue[0] || ''}
+        value={parsedFilterValue[0] || ''}
         type="number"
         onChange={e => {
           const val = e.target.value
           setFilter((old = []) => [val ? parseInt(val, 10) : null, old[1]])
         }}
         min={0}
-        placeholder={`Min(Kb)`}
+        placeholder={filterPlaceholderFrom}
         style={{
           width: '72px',
           fontSize: 11,
@@ -32,14 +44,14 @@ export function NumberRangeColumnFilter({
         }}
       />
       <StyledInput
-        value={filterValue[1] || ''}
+        value={parsedFilterValue[1] || ''}
         type="number"
         onChange={e => {
           const val = e.target.value
           setFilter((old = []) => [old[0], val ? parseInt(val, 10) : null])
         }}
         min={0}
-        placeholder={`Max(Kb)`}
+        placeholder={filterPlaceholderTo}
         style={{
           width: '72px',
           fontSize: 11,

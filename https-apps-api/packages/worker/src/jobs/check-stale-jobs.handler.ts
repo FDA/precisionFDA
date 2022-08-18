@@ -9,7 +9,8 @@ export const checkStaleJobsHandler = async (bullJob: Job<CheckStaleJobsJob>) => 
   const requestId = nanoid()
   const log = getChildLogger(requestId)
   // this way we can set up worker operation that needs to run under admin account
-  const em = database.orm().em.fork()
+  // TODO(samuel) fix by declaration merging
+  const em = database.orm().em.fork() as any
   const adminUser = await em.getRepository(entities.User).findAdminUser()
   const adminUserCtx = {
     id: adminUser.id,

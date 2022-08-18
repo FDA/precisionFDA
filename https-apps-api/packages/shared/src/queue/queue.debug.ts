@@ -1,5 +1,6 @@
+/* eslint-disable import/group-exports */
 import Bull from 'bull'
-import { getQueues } from "."
+import { getQueues } from '.'
 
 
 // Queue debugging functions
@@ -24,15 +25,15 @@ export const debugQueueJob = async (jobId: string): Promise<any> => {
     if (job) {
       results.push({
         queue: q.name,
-        job: job,
+        job,
       })
     }
 
-    const repeatableJobs = (await q.getRepeatableJobs()).filter(job => job.id === jobId)
-    for (const job of repeatableJobs) {
+    const repeatableJobs = (await q.getRepeatableJobs()).filter(j => j.id === jobId)
+    for (const repeatableJob of repeatableJobs) {
       results.push({
         queue: q.name,
-        job: job,
+        job: repeatableJob,
       })
     }
   }
@@ -48,11 +49,13 @@ export const removeJobs = async (pattern: string): Promise<any> => {
            jobCounts.failed + jobCounts.waiting
   }
   await Promise.all(queues.map(async (q) => {
-    jobsCountBefore += aggregateCounts(await q.getJobCounts())
-    q.removeJobs(pattern)
-    jobsCountAfter += aggregateCounts(await q.getJobCounts())
+    const beforeCount = aggregateCounts(await q.getJobCounts())
+    jobsCountBefore += beforeCount
+    await q.removeJobs(pattern)
+    const afterCount = aggregateCounts(await q.getJobCounts())
+    jobsCountAfter += afterCount
   }))
-  return `${jobsCountBefore-jobsCountAfter} jobs removed`
+  return `${jobsCountBefore - jobsCountAfter} jobs removed`
 }
 
 export const removeRepeatable = async (key: string): Promise<any> => {
@@ -60,9 +63,12 @@ export const removeRepeatable = async (key: string): Promise<any> => {
   let jobsCountBefore = 0
   let jobsCountAfter = 0
   await Promise.all(queues.map(async (q) => {
-    jobsCountBefore += (await q.getRepeatableJobs()).length
-    q.removeRepeatableByKey(key)
-    jobsCountAfter += (await q.getRepeatableJobs()).length
+    const beforeCount = (await q.getRepeatableJobs()).length
+    jobsCountBefore += beforeCount
+    await q.removeRepeatableByKey(key)
+    const afterCount = (await q.getRepeatableJobs()).length
+    jobsCountAfter += afterCount
   }))
-  return `${jobsCountBefore-jobsCountAfter} jobs removed`
+  return `${jobsCountBefore - jobsCountAfter} jobs removed`
 }
+

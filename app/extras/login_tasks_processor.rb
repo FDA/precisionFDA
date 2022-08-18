@@ -2,6 +2,7 @@
 class LoginTasksProcessor
   include OrgService::Errors
   include OrgService::RequestFilter
+  include OrgService::BaselineCharges
 
   # Constructor.
   # @param leave_org_processor [OrgService::LeaveOrgProcess] Processor of leaving organization
@@ -12,8 +13,10 @@ class LoginTasksProcessor
 
   # Invokes tasks for provided user.
   # @param user [User] User to process tasks for.
-  def call(user)
+  # @param api [DNAnexusAPI] User API object.
+  def call(user, api)
     process_org_leave_and_dissolve!(user)
+    set_user_baseline_charges!(user, api)
   end
 
   private

@@ -1,17 +1,29 @@
 import React, { useMemo } from 'react'
 import { useQueryClient } from 'react-query'
+import { Link, useRouteMatch, useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
+import styled from 'styled-components'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import {
   DefaultColumnFilter,
-  SelectColumnFilter
+  SelectColumnFilter,
 } from '../../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
-import { StyledLinkCell } from '../home.styles'
+import { colors } from '../../../styles/theme'
+import { StyledLinkCell, StyledRunByYouLink } from '../home.styles'
 import { KeyVal } from '../types'
 import { IApp } from './apps.types'
+
+export const Pill = styled.div`
+  border-radius: 7px;
+  background-color: ${colors.primaryBlue};
+  color: ${colors.white110};
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+`
 
 export const useAppsColumns = ({
   colWidths,
@@ -20,6 +32,8 @@ export const useAppsColumns = ({
   colWidths: KeyVal
   isAdmin?: boolean
 }) => {
+  const location = useLocation()
+  const { path } = useRouteMatch()
   const queryClient = useQueryClient()
   return  useMemo<Column<IApp>[]>(
     () =>
@@ -36,7 +50,7 @@ export const useAppsColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.title || 300,
           Cell: props => (
-            <StyledLinkCell to={`/home/apps/${props.row.original.uid}`}>
+            <StyledLinkCell to={{ pathname: `${path}/${props.cell.row.original.uid}`, state: { from: location.pathname, fromSearch: location.search } }}>
               <CubeIcon height={14} />
               {props.value}
             </StyledLinkCell>
@@ -65,6 +79,18 @@ export const useAppsColumns = ({
           width: colWidths?.revision || 198,
         },
         {
+          Header: 'Explorers',
+          accessor: 'explorers',
+          Filter: DefaultColumnFilter,
+          width: colWidths?.explorers || 100,
+        },
+        {
+          Header: 'Org',
+          accessor: 'org',
+          Filter: DefaultColumnFilter,
+          width: colWidths?.org || 180,
+        },
+        {
           Header: 'Added By',
           accessor: 'added_by',
           Filter: DefaultColumnFilter,
@@ -89,6 +115,15 @@ export const useAppsColumns = ({
           width: colWidths?.created_at_date_time || 198,
         },
         {
+          Header: 'Run By You',
+          accessor: 'run_by_you',
+          disableFilters: true,
+          width: colWidths?.run_by_you || 100,
+          Cell: props => (
+            <StyledRunByYouLink href={`/apps/${props.row.original.uid}/jobs/new`}><Pill>{props.value}</Pill></StyledRunByYouLink>
+          ),
+        },
+        {
           Header: 'Tags',
           accessor: 'tags',
           Filter: DefaultColumnFilter,
@@ -105,7 +140,7 @@ export const useAppsColumns = ({
           },
         },
       ] as Column<IApp>[],
-    [],
+    [location.search],
   )
 }
 

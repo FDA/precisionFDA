@@ -6,7 +6,7 @@ import { log } from '../utils'
 const setupHandlers = async (): Promise<void> => {
   await queue.createQueues()
 
-  queue.getQueues().forEach(async q => {
+  await Promise.all(queue.getQueues().map(async q => {
     log.info(
       {
         queueStatus: q.client.status,
@@ -15,7 +15,7 @@ const setupHandlers = async (): Promise<void> => {
       },
       `${q.name} status on startup`,
     )
-  });
+  }))
 
   // TODO(samuel) - refactor all queues should have their own specific handlers
   // TODO(samuel) - no need for single switch case for all

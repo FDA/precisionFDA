@@ -93,3 +93,13 @@ window.Precision.utils =
         _getData()
       scrollPos = $parentNodeDIV.scrollTop()
     $parentNodeDIV.on 'scroll', onScrollHandler
+
+  replaceSpaceSubstringWithNbsps: (string, substringLength) -> 
+    spaceFill = Array(substringLength).fill(' ').join('')
+    nbspFill = Array(substringLength).fill('\xa0').join('')
+    string.replace(spaceFill, nbspFill)
+
+  sanitizeInstanceTypeNbsp: (instanceType) -> {
+    label: @replaceSpaceSubstringWithNbsps(instanceType.label, 4)
+    value: instanceType.value
+  }

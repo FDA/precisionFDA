@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { EntityRepository } from '@mikro-orm/core'
+import { EntityRepository } from '@mikro-orm/mysql'
 import { App } from './app.entity'
 import { ENTITY_TYPE } from './app.enum'
 

@@ -1,8 +1,11 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
+import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
+import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { colors } from '../../styles/theme'
 import { ActionFunctionsType, Link } from './types'
 
+// Updated disbaled text color for remediation using textMediumGrey
 export const ActionItem = styled.li<{disabled?: boolean}>`
   padding: 0 20px;
   margin: 0;
@@ -12,7 +15,7 @@ export const ActionItem = styled.li<{disabled?: boolean}>`
   font-size: 14px;
   cursor: pointer;
   ${({disabled}) => disabled && css`
-    color: #777777;
+    color: ${colors.textMediumGrey};
     cursor: not-allowed;
   `}
   &:hover {
@@ -42,17 +45,60 @@ export const StyledActionsMessage = styled.div`
   color: ${colors.textDarkGrey};
 `
 
-const LinkAction: React.FC<{ link: Link, disabled?: boolean }> = ({ children, link, disabled = false }) => {
-  if(disabled) return <>{children}</>
+const LinkAction: React.FC<{
+  link: Link,
+  disabled?: boolean 
+  cloudResourcesConditionType?: CloudResourcesConditionType
+}> = ({ children, link, disabled = false, cloudResourcesConditionType }) => {
+  if(disabled) {
+    return children
+  }
   const url = typeof link === 'string' ? link : link.url
   const method = typeof link === 'string' ? 'GET' : link.method
   return (
-    <a href={url} data-method={method}>{children}</a>
+    cloudResourcesConditionType 
+      ? (
+        <CloudResourcesConditionalAnchor
+          href={url}
+          dataMethod={method}
+          conditionType={cloudResourcesConditionType}
+        >
+          {children}
+        </CloudResourcesConditionalAnchor>
+      ) : <a href={url} data-method={method}>{children}</a>
   )
 }
 
+const renderActionItem = (action: ActionFunctionsType<any>[number]) => {
+  switch (action?.type) {
+    case 'link':
+      return (
+        <ActionItem key={action.key} disabled={action?.isDisabled ?? true}>
+          <LinkAction
+            disabled={action?.isDisabled}
+            link={action?.link}
+            cloudResourcesConditionType={action?.cloudResourcesConditionType}
+          >
+            {action.key}
+          </LinkAction>
+        </ActionItem>
+      )
+    case 'modal':
+    default:
+      return (
+        <ActionItem
+          key={action?.key}
+          onClick={() => !action?.isDisabled && action?.func()}
+          disabled={action?.isDisabled ?? true}
+        >
+          {action?.key}
+        </ActionItem>
+      )
+  }
+}
+
 export function ActionsDropdownContent({ actions, message }: { actions: ActionFunctionsType<any>, message?: React.ReactNode }) {
-    const visibleActions = Object.keys(actions).filter(a => !actions[a].hide ?? true).map(v => ({ key: v, ...actions[v] }))
+    const visibleActions = Object.keys(actions).filter(a => !actions[a]?.shouldHide ?? true).map(v => ({ key: v, ...actions[v] }))
     return (
       <ActionMenu>
         {message &&
@@ -60,12 +106,8 @@ export function ActionsDropdownContent({ actions, message }: { actions: ActionFu
             {message}
           </StyledActionsMessage>
         }
-        {visibleActions.map(a => {
-          return a?.link
-          ? <ActionItem key={a.key} disabled={a?.isDisabled ?? true}><LinkAction disabled={a?.isDisabled} link={a.link}>{a.key}</LinkAction></ActionItem>
-          :// @ts-ignore
-          <ActionItem key={a.key} onClick={() => !a?.isDisabled && a?.func()} disabled={a?.isDisabled ?? true}>{a.key}</ActionItem>
-        })}
+        {/* TODO - fix "any" cast */}
+        {visibleActions.map(a => renderActionItem(a as any))}
       </ActionMenu>
     )
 }

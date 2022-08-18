@@ -20,6 +20,7 @@ module Api
       "name" => %w(name),
       "app_title" => %w(apps.title),
       "username" => %w(users.first_name users.last_name),
+      "workflow" => %w(workflows.title),
     }.freeze
 
     SORT_FIELDS = { # additional sorting for grouped and serialized values (see render_jobs_list)

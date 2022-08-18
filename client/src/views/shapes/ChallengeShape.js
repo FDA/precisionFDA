@@ -23,6 +23,7 @@ const ChallengeShape = {
   spaceId: PropTypes.number,
   preRegistrationUrl: PropTypes.string,
   isFollowed: PropTypes.bool, // True if user has joined the challenge
+  isSpaceMember: PropTypes.bool, // True is user is member of challenge's space
   canEdit: PropTypes.bool,
   links: PropTypes.object,
 }
@@ -57,6 +58,7 @@ const mapToChallenge = (data) => {
     cardImageId: data.card_image_id,
     preRegistrationUrl: data.pre_registration_url,
     isFollowed: data.is_followed,
+    isSpaceMember: data.is_space_member,
     canEdit: data.can_edit,
     links: data.links,
   }

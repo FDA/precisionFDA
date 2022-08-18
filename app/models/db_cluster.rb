@@ -57,6 +57,7 @@ class DbCluster < ApplicationRecord
     10.14
   ).freeze
 
+  # TODO(samuel) validate that I'm not starting db_std1_x1, db_mem1_x96 instance
   DX_INSTANCE_CLASSES = {
     "db_std1_x2" => "DB Baseline 1 x 2",
     "db_mem1_x2" => "DB Mem 1 x 2",

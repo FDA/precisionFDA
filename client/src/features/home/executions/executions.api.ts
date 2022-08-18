@@ -1,6 +1,6 @@
 import { checkStatus, getApiRequestOpts } from "../../../utils/api";
 import { IFilter, IMeta, ResourceScope } from "../types";
-import { Params, prepareListFetch } from "../utils";
+import { formatScopeQ, Params, prepareListFetch } from "../utils";
 import { IExecution } from "./executions.types";
 
 
@@ -9,11 +9,11 @@ export interface FetchExecutionsQuery {
   meta: IMeta
 }
 
-export async function fetchExecutions(filters: IFilter[], scope: ResourceScope, params: Params): Promise<FetchExecutionsQuery> {
+export async function fetchExecutions(filters: IFilter[], params: Params): Promise<FetchExecutionsQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const scopeQ = scope === 'me' ? '' : scope
-  const res = await fetch(`/api/jobs/${scopeQ}${paramQ}`)
+  const scopeQ = formatScopeQ(params.scope)
+  const res = await fetch(`/api/jobs${scopeQ}${paramQ}`)
   return res.json()
 }
 

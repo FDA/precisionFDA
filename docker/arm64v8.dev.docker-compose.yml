@@ -91,7 +91,6 @@ services:
     extends:
       file: ./base.services.yml
       service: db_emulated
-    image: amd64/mysql:${MYSQL_IMAGE_TAG:-5.6}
     volumes:
       - db-pfda-mysql-volume:/var/lib/mysql
   redis:

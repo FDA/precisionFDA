@@ -9,11 +9,14 @@ type BaseErrorProps = AnyObject & {
   details?: AnyObject
 }
 type MaybeBaseErrorProps = Partial<BaseErrorProps>
-type ClientErrorProps = MaybeBaseErrorProps & {
+
+// TODO(samuel) check if 'code' property can be omitted instead
+export type ClientErrorProps = MaybeBaseErrorProps & {
   clientResponse: any
   clientStatusCode: number
 }
 
+// TODO(samuel) refactor into discriminated union type
 export enum ErrorCodes {
   GENERIC = 'E_INTERNAL',
   WORKER = 'E_WORKER',
@@ -28,6 +31,7 @@ export enum ErrorCodes {
   PROJECT_NOT_FOUND = 'E_PROJECT_NOT_FOUND',
   FOLDER_NOT_FOUND = 'E_FOLDER_NOT_FOUND',
   USER_NOT_FOUND = 'E_USER_NOT_FOUND',
+  USER_INVALID_PERMISSIONS = 'E_USER_INVALID_PERMISSIONS',
   USER_FILE_NOT_FOUND = 'E_USER_FILE_NOT_FOUND',
   SPACE_NOT_FOUND = 'E_SPACE_NOT_FOUND',
   NEXUS_REQUEST_FAILED = 'E_DNANEXUS_PLATFORM_REQUEST_FAILED',
@@ -37,6 +41,9 @@ export enum ErrorCodes {
   SALESFORCE_SERVICE_ERROR = 'E_SALESFORCE_SERVICE_FAILED',
   DB_CLUSTER_NOT_FOUND = 'E_DB_CLUSTER_NOT_FOUND',
   DB_CLUSTER_STATUS_MISMATCH = 'E_DB_CLUSTER_STATUS_MISMATCH',
+  AGGREGATE_ERROR = 'E_AGGREGATE_ERROR',
+  MFA_ALREADY_RESET = 'E_MFA_ALREADY_RESET',
+  ORG_MEMBERSHIP_ERROR = 'E_ORG_MEMBERSHIP_ERROR',
 }
 
 export class BaseError extends Error {
@@ -159,6 +166,16 @@ export class UserNotFoundError extends NotFoundError {
   }
 }
 
+export class UserInvalidPermissionsError extends NotFoundError {
+  constructor(message = 'Error: User invalid permissions', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.USER_NOT_FOUND,
+      statusCode: 403,
+      ...props,
+    })
+  }
+}
+
 export class SpaceNotFoundError extends NotFoundError {
   constructor(message = 'Error: Space not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
@@ -182,6 +199,32 @@ export class ServiceError extends BaseError {
   constructor(message: string, props: ClientErrorProps) {
     super(message, {
       code: ErrorCodes.EXTERNAL_SERVICE_ERROR,
+      statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class MfaAlreadyResetError extends BaseError {
+  constructor(
+    message = 'MFA is already reset or not yet configured for the user',
+    props: MaybeBaseErrorProps = {}
+  ) {
+    super(message, {
+      code: ErrorCodes.MFA_ALREADY_RESET,
+      statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class OrgMembershipError extends BaseError {
+  constructor(
+    message = 'Permission denied, must be a user of the org.',
+    props: MaybeBaseErrorProps = {}
+  ) {
+    super(message, {
+      code: ErrorCodes.ORG_MEMBERSHIP_ERROR,
       statusCode: 400,
       ...props,
     })

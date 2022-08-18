@@ -4,7 +4,7 @@ import { BaseOperation } from '../../../utils'
 import * as client from '../../../platform-client'
 import { DbCluster } from '../db-cluster.entity'
 import { STATUS, STATUSES } from '../db-cluster.enum'
-import { DxIdInput, UserOpsCtx } from '@pfda/https-apps-shared/src/types'
+import { DxIdInput, UserOpsCtx } from '../../../types'
 
 export class StartDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput, DbCluster> {
   async run(input: DxIdInput): Promise<DbCluster> {

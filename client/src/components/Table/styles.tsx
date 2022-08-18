@@ -3,10 +3,10 @@ import { theme } from '../../styles/theme'
 import { ArrowIcon } from '../icons/ArrowIcon'
 
 export const ExpandArrowIcon = styled(ArrowIcon)<{expanded?: boolean, hide?: boolean}>`
-  ${({hide}) => hide && css`
+  ${({ hide }) => hide && css`
     display: none;
   `}
-  ${({expanded}) => !expanded && css`
+  ${({ expanded }) => !expanded && css`
     transform: rotate(-90deg);
   `}
 `
@@ -33,7 +33,12 @@ export const StyledRowActionComponent = styled.div`
   box-shadow: -17px 0px 11px -7px #ffffff;
 `
 
-export const ReactTableStyles = styled.div`
+
+type ReactTableStylesProps = {
+  shouldFillWidth?: boolean
+  shouldAllowScrollbar?: boolean
+}
+export const ReactTableStyles = styled.div<ReactTableStylesProps>`
   .sort {
     display: flex;
     justify-content: space-between;
@@ -84,7 +89,6 @@ export const ReactTableStyles = styled.div`
   .table {
     .thead {
       display: flex;
-      height: 40px;
       border-top: 1px solid #d5d5d5;
       border-bottom: 2px solid #d5d5d5;
       /* box-shadow: 0rem 0.2rem 1.2rem 0 rgba(0, 0, 0, 0.05); */
@@ -103,10 +107,14 @@ export const ReactTableStyles = styled.div`
       width: 100%;
       flex-direction: column;
       background-color: white;
+      ${({ shouldAllowScrollbar }) => shouldAllowScrollbar && css`
+        max-height: 50vh;
+        overflow-y: scroll;
+      `}
     }
 
     .tr {
-      width: fit-content;
+      ${({ shouldFillWidth }) => !shouldFillWidth && 'width: fit-content;'} 
       border-bottom: 1px solid #d5d5d5;
       :last-child {
         .td {
@@ -154,7 +162,7 @@ export const ReactTableStyles = styled.div`
 
     &.sticky {
       .thead{
-        width: fit-content;
+        ${({ shouldFillWidth }) => !shouldFillWidth && 'width: fit-content;'} 
       }
 
       .tbody {

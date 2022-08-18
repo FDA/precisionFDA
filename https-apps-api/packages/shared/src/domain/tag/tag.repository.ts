@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/core'
+import { EntityRepository } from '@mikro-orm/mysql'
 import { Tag } from '..'
 
 export class TagRepository extends EntityRepository<Tag> {

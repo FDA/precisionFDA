@@ -50,6 +50,16 @@ Rails.application.routes.draw do
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
+      post "set_total_limit", to: "users#set_total_limit"
+      post "set_job_limit", to: "users#set_job_limit"
+      post "bulk_reset_2fa", to: "users#bulk_reset_2fa"
+      post "bulk_unlock", to: "users#bulk_unlock"
+      post "bulk_activate", to: "users#bulk_activate"
+      post "bulk_deactivate", to: "users#bulk_deactivate"
+      post "bulk_enable_resource", to: "users#bulk_enable_resource"
+      post "bulk_enable_all_resources", to: "users#bulk_enable_all_resources"
+      post "bulk_disable_resource", to: "users#bulk_disable_resource"
+      post "bulk_disable_all_resources", to: "users#bulk_disable_all_resources"
 
       resources :apps, only: [], param: :uid do
         collection do
@@ -109,7 +119,7 @@ Rails.application.routes.draw do
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"
     get "about/:section" => "main#about"
-    get "terms" => "main#terms"
+    get "terms" => "home#index"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
@@ -141,6 +151,7 @@ Rails.application.routes.draw do
 
     get "/account/*all", to: "home#index"
     get "/challenges/propose", to: "challenges#index"
+    get "/challenges/create", to: "challenges#index"
 
     if ENV["GSRS_ENABLED"]
       match "/ginas/app/logout", to: "main#destroy", via: :all
@@ -154,7 +165,11 @@ Rails.application.routes.draw do
     namespace "api" do
       get "update_active", to: "base#update_active"
 
-      get :user, to: "users#show"
+      resource :user, only: %i(show) do
+        get :cloud_resources
+      end
+
+      resources :users, only: %i(update)
 
       namespace "activity_reports" do
         get "total"
@@ -177,8 +192,14 @@ Rails.application.routes.draw do
         get :years, on: :collection
       end
 
-      resources :challenges, only: %i(index show) do
+      resources :challenges, only: %i(index show create update) do
         get :years, on: :collection
+        get :scoring_app_users, on: :collection
+        get :host_lead_users, on: :collection
+        get :guest_lead_users, on: :collection
+        get :challenges_for_select, on: :collection
+        get :scopes_for_select, on: :collection
+
         post :save_editor_page, on: :member
         post :propose, on: :collection
       end
@@ -208,6 +229,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :user_compute_resources
 
           put :feature, to: "apps#invert_feature"
           put :delete, to: "apps#soft_delete"
@@ -347,6 +369,7 @@ Rails.application.routes.draw do
                             to: "db_clusters#run",
                             as: :run,
                             api_method: /(start|stop|terminate)/
+        get :allowed_instances, on: :collection, to: "db_clusters#allowed_db_instances_by_user"
         resources :comments
       end
 
@@ -506,7 +529,6 @@ Rails.application.routes.draw do
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
       get "new", on: :collection, as: "new"
       get "join", on: :member
-      get "edit", on: :member
       get "editor(/:tab)", on: :member, action: :edit_page, as: "edit_page"
       post "editor/save_page", on: :member, action: :save_page, as: "save_page"
       get "(/:tab)", on: :member, action: :show, as: "show"
@@ -583,6 +605,7 @@ Rails.application.routes.draw do
     resources :spaces, only: :index
 
     get "/spaces/*all", to: "spaces#index"
+    get "/spaces-old/*all", to: "spaces#index"
 
     # to debug
     # resources :notification_preferences, only: [:index] do

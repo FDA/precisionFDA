@@ -1,19 +1,9 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import fetchContext from '../../../actions/context'
-import { RootState } from '../../../store'
+import React from 'react'
+import { Loader } from '../../../components/Loader'
+import { useAuthUserQuery } from '../../../features/auth/useAuthUser'
 
 export const LoaderWrapper: React.FC = ({ children }) => {
-  const dispatch = useDispatch()
-  const context = useSelector((state: RootState) => state.context)
-  useEffect(() => {
-    if (!context.isInitialized) {
-      dispatch(fetchContext())
-    }
-  }, [])
-
-  if (!context.isFetching) {
-    return <>{children}</>
-  }
-  return <div>Loading...</div>
+  const { isLoading } = useAuthUserQuery()
+  if (isLoading) return <Loader />
+  return children
 }

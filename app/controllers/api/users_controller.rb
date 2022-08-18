@@ -1,11 +1,32 @@
 module Api
   # Responsible for user-related information.
   class UsersController < BaseController
-    skip_before_action :require_api_login
+    skip_before_action :require_api_login, only: :show
     before_action :require_api_login_or_guest, only: :show
+
+    before_action :check_admin, only: %i(update)
 
     def show
       render json: current_user, meta: meta, adapter: :json
+    end
+
+    def update
+      user = User.find(params[:id])
+      user.update(update_user_params)
+
+      render json: user, adapter: :json
+    end
+
+    def cloud_resources
+      api = DIContainer.resolve("api.user")
+
+      resources = Users::ChargesFetcher.fetch(api, current_user)
+
+      resources[:usageLimit] = current_user.total_limit
+      resources[:jobLimit] = current_user.job_limit
+      resources[:usageAvailable] = [resources[:usageLimit] - resources[:totalCharges], 0].max
+
+      render json: resources
     end
 
     private
@@ -24,6 +45,10 @@ module Api
         meta[:links][:accessible_files] = api_list_files_path
         meta[:links][:challenge_new] = new_challenge_path if current_user.can_create_challenges?
       end
+    end
+
+    def update_user_params
+      params.require(:user).permit(:job_limit, :resources, :total_limit)
     end
   end
 end

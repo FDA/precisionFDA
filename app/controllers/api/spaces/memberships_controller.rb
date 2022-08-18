@@ -56,7 +56,7 @@ module Api
           end
         end
 
-        render json: { member: member.user.full_name, role: role }, adapter: :json
+        render json: { member: member.user.dxuser, role: role }, adapter: :json
       end
 
       private

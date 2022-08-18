@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { mapValues } from 'lodash'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useSelector } from 'react-redux'
+import Select from 'react-select'
 import {
   PageHeader,
   PageTitle,
   PageActions,
 } from '../../../../components/Page/styles'
 import { ButtonSolidBlue } from '../../../../components/Button'
-import Select from 'react-select'
 import { Checkbox } from '../../../../components/Checkbox'
 import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 import DefaultLayout from '../../../layouts/DefaultLayout'
-import { useSelector } from 'react-redux'
 import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
+import { mapValues } from '../../../../utils/object'
 
 enum Roles {
   'reviewer' = 'reviewer',

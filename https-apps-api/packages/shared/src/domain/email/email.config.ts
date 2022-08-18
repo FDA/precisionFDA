@@ -22,6 +22,7 @@ const NOTIFICATION_TYPES_BASE = {
   space_locked_unlocked_deleted: true,
   // jobs
   job_finished: true,
+  job_failed: true,
   // challenges
   challenge_opened: true,
   challenge_preregister: true,
@@ -93,6 +94,7 @@ const NOTIFICATION_TYPES_ADMIN = {
 
 const NOTIFICATION_PRIVATE = {
   private_job_finished: true,
+  private_job_failed: true,
   private_challenge_opened: true,
   private_challenge_preregister: true,
 }
@@ -115,6 +117,15 @@ const NOTIFICATION_TYPES:   Partial<typeof NOTIFICATION_TYPES_ADMIN> &
 // EMAIL VALIDATION SCHEMAS
 
 const jobFinishedEmailSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    jobId: schemas.idProp,
+  },
+  required: ['jobId'],
+  additionalProperties: false,
+}
+
+const jobFailedEmailSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     jobId: schemas.idProp,
@@ -181,6 +192,7 @@ const membershipChangedEmailSchema: JSONSchema7 = {
 
 const emailInputSchemas = {
   jobFinishedEmailSchema,
+  jobFailedEmailSchema,
   challengeStartedEmailSchema,
   spaceEventEmailSchema,
   spaceChangedEmailSchema,
@@ -262,6 +274,7 @@ enum EMAIL_TYPES {
   jobTerminationWarning = 8,
   staleJobsReport = 9,
   nonTerminatedDbClusters = 10,
+  jobFailed = 11,
 }
 
 type EmailConfigItem = {
@@ -276,13 +289,18 @@ type EmailConfigItem = {
   handlerClass: EmailTemplateContructor
 }
 
-// TODO(samuel) fix proper use of as const
-const EMAIL_CONFIG: { [k: string]: EmailConfigItem } = {
+const EMAIL_CONFIG = {
   jobFinished: {
     name: 'jobFinished',
     emailId: EMAIL_TYPES.jobFinished,
     schema: emailInputSchemas.jobFinishedEmailSchema,
     handlerClass: handlers.JobFinishedEmailHandler,
+  },
+  jobFailed: {
+    name: 'jobFailed',
+    emailId: EMAIL_TYPES.jobFailed,
+    schema: emailInputSchemas.jobFailedEmailSchema,
+    handlerClass: handlers.JobFailedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
