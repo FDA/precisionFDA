@@ -39,10 +39,10 @@ export type CloudResourcesConditionType =
 export const useCloudResourcesCondition = (condition: CloudResourcesConditionType) => {
   const query = useCloudResourcesQuery()
 
-  const isUsageAvailable = query.isFetched ? query.data!.usageAvailable > 0 : true
-  const isJobLimitPositive = query.isFetched ? query.data!.jobLimit > 0 : true
+  const isUsageAvailable = query.isSuccess ? query.data!.usageAvailable > 0 : true
+  const isJobLimitPositive = query.isSuccess ? query.data!.jobLimit > 0 : true
   const user = useSelector(contextUserSelector)
-  const hasUserSomeResourcesAllowed = query.isFetched ? user.resources.length > 0 : true
+  const hasUserSomeResourcesAllowed = query.isSuccess ? user.resources.length > 0 : true
   switch (condition) {
     case  'all': {
       const state = [

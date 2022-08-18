@@ -65,6 +65,7 @@ export const Pagination = ({
   isNextData,
   isHidden,
   onPerPageSelect,
+  showListCount = true,
 }: {
   page?: number
   setPage: (n: number) => void
@@ -75,6 +76,7 @@ export const Pagination = ({
   isPreviousData: boolean
   isNextData: boolean
   isHidden: boolean
+  showListCount?: boolean
 }) => {
   if (isHidden) {
     return null
@@ -113,7 +115,7 @@ export const Pagination = ({
 
   return (
     <StyledPagination>
-      <ItemsOf>{`${pageLowerBound}-${Math.min(totalCount, pageUpperBound)} of ${totalCount}`}</ItemsOf>
+      {showListCount && <ItemsOf>{`${pageLowerBound}-${Math.min(totalCount, pageUpperBound)} of ${totalCount}`}</ItemsOf>}
       <PerPage>
         <StyledPerPageSelect
           value={perPage}

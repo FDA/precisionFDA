@@ -60,5 +60,12 @@ export const SpaceTypeTabs = ({ space }: { space: ISpace }) => (
           Private Area
         </Tab>
       )}
+      {space.type === 'groups' && (
+        <Tab
+          isactive="true"
+        >
+          Shared Area
+        </Tab>
+      )}
     </Tabs>
   )

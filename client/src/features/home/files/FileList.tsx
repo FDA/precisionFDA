@@ -16,6 +16,7 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { ISpace } from '../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
@@ -35,7 +36,7 @@ import { useFolderActions } from './useFolderActions'
 
 type ListType = { files: IFile[]; meta: IMeta }
 
-export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?: ResourceScope, spaceId?: string, showFolderActions?: boolean }) => {
+export const FileList = ({ scope, space, showFolderActions = false }: { scope?: ResourceScope, space?: ISpace, showFolderActions?: boolean }) => {
   const { path } = useRouteMatch()
   
   const [folderIdParam, setFolderIdParam] = useQueryParam(
@@ -66,7 +67,7 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
     resource: 'files',
     params: {
       folderId: folderIdParam || undefined,
-      spaceId: spaceId || undefined,
+      spaceId: space?.id || undefined,
       scope: scope || undefined,
     },
   })
@@ -97,7 +98,7 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
   )
   const actions = useFilesSelectActions({
     scope,
-    spaceId,
+    space,
     fileId: folderIdParam!,
     selectedItems: selectedObjects,
     resetSelected,
@@ -106,12 +107,10 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
   delete actions['Comments']
   delete actions['Request license approval']
   if(scope) {
-    delete actions['Copy to private']
-  } else {
-    delete actions['Copy to space']
+    delete actions['Copy to My Home (private)']
   }
 
-  const listActions = useFolderActions(scope, folderIdParam!, spaceId)
+  const listActions = useFolderActions(scope, folderIdParam!, space?.id)
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -133,7 +132,7 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
                 <ButtonSolidBlue
                   data-testid="home-files-add-files-button"
                   onClick={() =>
-                    listActions[spaceId ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })
+                    listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })
                   }
                 >
                   <PlusIcon height={12} /> Add Files
@@ -214,7 +213,7 @@ export const FileList = ({ scope, spaceId, showFolderActions = false }: { scope?
       {actions['Delete']?.modal}
       {actions['Organize']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Copy to private']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
