@@ -2,7 +2,6 @@ import React from 'react'
 import { withRouter } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-import DefaultLayout from '../../../layouts/DefaultLayout'
 import { NewSpaceForm } from '../../../components/Spaces/NewSpaceForm'
 import Button from '../../../components/Button'
 // eslint-disable-next-line
@@ -20,7 +19,7 @@ class NewSpacePage extends React.Component {
         ? 'Edit space'
         : 'Create a new space'
     return (
-      <DefaultLayout>
+      <>
         <div className="container">
           <div className="row">
             <div className="pull-left">
@@ -34,7 +33,7 @@ class NewSpacePage extends React.Component {
           </div>
           <NewSpaceForm action={action} onCancelClick={this.redirectToSpaces} />
         </div>
-      </DefaultLayout>
+      </>
     )
   }
 }

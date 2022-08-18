@@ -1,5 +1,15 @@
 import { IListItem } from "./listItem";
 
+
+interface Regions {
+  intro: string
+  results: string
+  'results-details': string
+}
+interface ChallengeMeta {
+  regions: Regions
+}
+
 interface IChallenge extends IListItem {
   id: number,
   name: string,
@@ -16,7 +26,7 @@ interface IChallenge extends IListItem {
   //     'pre-registration': "Pre-Registration text",
   // }}
   //
-  meta: object,
+  meta: ChallengeMeta,
   startAt: Date,
   endAt: Date,
   createdAt: Date,

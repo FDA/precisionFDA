@@ -87,7 +87,7 @@ Build products will be available in `./dist`
 
 
 ### Cross Compilation:
-Compiling for non-native target platforms is made easy with go. Regardless of what OS/architecture you are running locally. 
+Compiling for non-native target platforms is made easy with go. Regardless of what OS/architecture you are running locally.
 
 The supported options for `$GOOS` and `$GOARCH` are listed below:
 ```bash
@@ -142,6 +142,10 @@ $GOPATH/bin/goversion -crypto go/dist/pfda*
 
 
 # Version History
+
+### 2.1.2 (2022-08-03)
+
+- Fixed windows asset upload
 
 ### 2.1.1 (2022-07-18)
 

@@ -1,4 +1,6 @@
 class ExpertsController < ApplicationController
+  include RecaptchaHelper
+
   skip_before_action :require_login,     only: %i(index show qa ask_question blog)
   before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
 
@@ -121,7 +123,10 @@ class ExpertsController < ApplicationController
           :_original => unsafe_params[:expert][:question],
           :_edited => false.to_s
       )
-      if verify_recaptcha(model: @exp_question) && @exp_question.save!
+      token = unsafe_params.dig("g-recaptcha-response-data", :question)
+      result = verify_captcha_assessment(token, "question")
+
+      if result && @exp_question.save!
         NotificationsMailer.new_expert_question_email(expert, @exp_question).deliver_now!
         flash[:success] = "Your question was submitted successfully."
       else

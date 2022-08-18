@@ -14,12 +14,18 @@ class NodeSerializer < ApplicationSerializer
     :added_by,
     :created_at,
     :featured,
+    :scope,
     :space_id,
   )
 
   attribute :sti_type, key: :type
   attribute :origin, if: -> { object.is_a?(UserFile) || object.is_a?(Folder) && object.https? }
   attribute :all_tags_list, key: :tags
+  attribute :scope_id, key: :scope
+
+  def scope_id
+    object.scope
+  end
 
   # Builds links to files.
   # @return [Hash] Links.

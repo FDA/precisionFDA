@@ -169,13 +169,15 @@ module JobsSyncing
           SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, job, :job_completed)
         end
 
-        send_job_done_email(job.id)
+        send_job_email(job.id, NotificationPreference.email_types[:notification_job_done])
       else
         if state == Job::STATE_FAILED
           # Job failed, so we need to log this
           logger.info "Job #{job.id} failed: " \
                       "failureReason: #{result['describe']['failureReason']}, " \
                       "failureMessage: #{result['describe']['failureMessage']}"
+
+          send_job_email(job.id, NotificationPreference.email_types[:notification_job_failed])
         end
 
         # Job state changed but not done (no outputs)
@@ -192,8 +194,7 @@ module JobsSyncing
     end
     # rubocop:enable Metrics/MethodLength
 
-    def send_job_done_email(job_id)
-      email_type_id = NotificationPreference.email_types[:notification_job]
+    def send_job_email(job_id, email_type_id)
       client = DIContainer.resolve("https_apps_client")
       client.email_send(email_type_id, { jobId: job_id })
     end
@@ -201,7 +202,7 @@ module JobsSyncing
 
   included do
     private_class_method :sync_job_state
-    private_class_method :send_job_done_email
+    private_class_method :send_job_email
   end
 end
 # rubocop:enable Metrics/ModuleLength

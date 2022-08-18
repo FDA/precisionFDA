@@ -95,6 +95,10 @@ module OrgService
         first_name: @params[:first_name],
         last_name: @params[:last_name],
         normalized_email: @params[:email].downcase,
+        pricing_map: CloudResourceDefaults::PRICING_MAP,
+        job_limit: CloudResourceDefaults::JOB_LIMIT,
+        total_limit: CloudResourceDefaults::TOTAL_LIMIT,
+        resources: CloudResourceDefaults::RESOURCES,
       )
       org.update!(admin_id: user.id)
       user

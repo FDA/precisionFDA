@@ -37,7 +37,7 @@ describe('fetchFiles()', () => {
     })
 
     it('dispatches correct actions on success response', () => {
-      fetchMock.get(url, { entries: files, meta: { links, pagination }})
+      fetchMock.get(url, { files: files, meta: { links, pagination }})
 
       return store.dispatch(fetchFiles(spaceId, folderId)).then(() => {
         const actions = store.getActions()

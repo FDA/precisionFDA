@@ -1,4 +1,4 @@
-import { css } from 'styled-components'
+import styled, { css } from 'styled-components'
 import { theme } from './theme'
 
 
@@ -136,3 +136,12 @@ export const commonStyles = {
     }
   `,
 }
+
+
+export const FlexRow = styled.div`
+  display: flex;
+`
+export const FlexCol = styled.div`
+  display: flex;
+  flex-direction: column;
+`

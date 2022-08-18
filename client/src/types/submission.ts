@@ -15,6 +15,7 @@ interface ISubmission {
   jobState: JobState,
   jobName: string,
   jobInputFiles: object[],
+  runInputData: object[],
   userCanAccessSpace: boolean,
 }
 

@@ -2,7 +2,8 @@ import { config, debug, queue } from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import type { JSONSchema7 } from 'json-schema'
-import { defaultMiddlewares, makeValidationMdw } from '../server/middleware'
+import { defaultMiddlewares } from '../server/middleware'
+import { makeSchemaValidationMdw } from '../server/middleware/validation'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
@@ -56,9 +57,7 @@ const removeRepeatableSchema: JSONSchema7 = {
 
 router.delete(
   '/queue/removeRepeatable',
-  makeValidationMdw({
-    body: removeRepeatableSchema,
-  }),
+  makeSchemaValidationMdw({ body: removeRepeatableSchema }),
   async ctx => {
     const res = await queue.debug.removeRepeatable(ctx.request.body.key)
     ctx.body = res

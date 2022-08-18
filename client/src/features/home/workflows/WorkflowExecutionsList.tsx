@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
+import styled from 'styled-components'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { columnFilters } from '../columnFilters'
 import { IExecution } from '../executions/executions.types'
 import { getStateBgColorFromState } from '../executions/executions.util'
 import { getSubComponentValue } from '../executions/getSubComponentValue'
@@ -13,14 +15,19 @@ import {
   StyledHomeTable,
 } from '../home.styles'
 import { IFilter, IMeta, KeyVal } from '../types'
-import { useColumnWidthLocalStorage } from '../useColumnWidthLocalStorage'
+import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
-import { filters } from '../useList'
 import { useListQuery } from '../useListQuery'
-import { useOrderByState } from '../useOrderByState'
-import { usePaginationParams } from '../usePaginationState'
-import { toArrayFromObject } from '../utils'
+import { useOrderByState } from '../../../hooks/useOrderByState'
 import { fetchWorkflowExecutions } from './workflows.api'
+import { usePaginationParams } from '../../../hooks/usePaginationState'
+import { toArrayFromObject } from '../../../utils/object'
+
+const ExecutionsPagination = styled.div`
+  padding-left: 12px;
+  padding-top: 32px;
+  padding-bottom: 16px;
+`
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -30,7 +37,9 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
   const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
 
-  const { filterQuery, setSearchFilter } = useFilterParams({ filters })
+  const { filterQuery, setSearchFilter } = useFilterParams({
+    filters: columnFilters,
+  })
 
   const query = useListQuery<ListType>({
     fetchList: fetchWorkflowExecutions,
@@ -39,6 +48,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort?.order_by, order_dir: sort?.order_dir },
     filter: filterQuery,
+    params: { uid },
   })
 
   const setPerPage = (perPage: number) => {
@@ -52,7 +62,8 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
     <ErrorBoundary>
       <ExecutionsListTable
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) fix by validating url query
+        filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         isLoading={status === 'loading'}
         setSortBy={setSortBy}
@@ -60,17 +71,19 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPage}
-      />
+      <ExecutionsPagination>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPage}
+        />
+      </ExecutionsPagination>
     </ErrorBoundary>
   )
 }

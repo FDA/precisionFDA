@@ -3,6 +3,14 @@ en:
     errors:
       invalid_permission: You have read-only access to the %{title} within the space
       invalid_scope: Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id.
+      exceeded_charges_limit: This precisionFDA account has reached its cloud platform resource
+                              limit - uploads and executions are not available.
+                              Please email precisionFDA@fda.hhs.gov to request additional cloud
+                              platform resources.
+      no_allowed_instance_types: This precisionFDA account does not have any instance type authorized to run execution.
+                                 Pleae email precisionFDA@fda.hhs.gov to request authorization to one or more instance types.
+      job_limit_zero: This precisionFDA user is not authorized to run executions at this time.
+                      Please email precisionFDA@fda.hhs.gov to request authorization to run executions.
     feature:
       messages:
         featured: "The item(s) has been featured successfully."

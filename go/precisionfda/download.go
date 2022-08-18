@@ -25,7 +25,7 @@ func (wc *ProgressWriter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Downloaded += int64(n)
 	percent := 100*float64(wc.Downloaded)/float64(wc.Total)
-	fmt.Fprintf(wc.Writer, "                  %.1f%% (%s of %s)\n", percent,  units.HumanSize(float64(wc.Downloaded)), units.HumanSize(float64(wc.Total)))
+	fmt.Fprintf(wc.Writer, "                  %.1f%% (%s of %s)\n", percent,  units.BytesSize(float64(wc.Downloaded)), units.BytesSize(float64(wc.Total)))
 	wc.Writer.Flush()
 	return n, nil
 }

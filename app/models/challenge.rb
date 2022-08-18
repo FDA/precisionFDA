@@ -82,7 +82,7 @@ class Challenge < ApplicationRecord
   validates :status, inclusion: { in: ->(challenge) { challenge.available_statuses } }
   validates :meta, meta: true
   validates :app_id,
-            presence: true,
+            presence: { message: "The scoring app user must select an app for the challenge first" },
             unless: :status_setup_or_pre_registration?
   validates :pre_registration_url,
             presence: true,
@@ -170,6 +170,10 @@ class Challenge < ApplicationRecord
     user = context_or_user.is_a?(User) ? context_or_user : context_or_user.user
 
     user.site_or_challenge_admin?
+  end
+
+  def space_member?(user)
+    space&.space_memberships&.map(&:user_id)&.include?(user.id)
   end
 
   def status_setup?

@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   EntityRepositoryType,
+  Enum,
   IdentifiedReference,
   ManyToOne,
   OneToMany,
@@ -16,11 +17,55 @@ import { BaseEntity } from '../../database/base-entity'
 import { EmailNotification } from '../email'
 import { Job } from '../job/job.entity'
 import { Organization } from '../org'
-import { UserRepository } from './user.repository'
 import { ExpertQuestion } from '../expert-question/expert-question.entity'
 import { Expert } from '../expert/expert.entity'
-import { AdminGroup } from '../admin-group/admin-group.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
+import { ADMIN_GROUP_ROLES } from '../admin-group'
+import { WorkaroundJsonType } from '../../database/custom-json-type'
+import { UserRepository } from './user.repository'
+
+
+export enum USER_STATE {
+  ENABLED = 0,
+  LOCKED = 1,
+  DEACTIVATED = 2
+}
+
+export const RESOURCE_TYPES = [
+  // Compute instancess
+  'baseline-2',
+  'baseline-4',
+  'baseline-8',
+  'baseline-16',
+  'baseline-36',
+  'hidisk-2',
+  'hidisk-4',
+  'hidisk-8',
+  'hidisk-16',
+  'hidisk-36',
+  'himem-2',
+  'himem-4',
+  'himem-8',
+  'himem-16',
+  'himem-32',
+  'gpu-8',
+  // Db instances
+  'db_std1_x2',
+  'db_mem1_x2',
+  'db_mem1_x4',
+  'db_mem1_x8',
+  'db_mem1_x16',
+  'db_mem1_x32',
+  'db_mem1_x48',
+  'db_mem1_x64',
+] as const
+
+type CloudResourceSettings = {
+  job_limit: number
+  total_limit: number
+  resources: Array<(typeof RESOURCE_TYPES)[number]>
+}
+
 
 // contains the bare minimum to work with the user instance
 // might need to add more fields in the time
@@ -38,11 +83,12 @@ export class User extends BaseEntity {
   @Property()
   publicFilesProject: string
 
-  @Property()
-  schemaVersion: string
+  @Property({ nullable: true })
+  schemaVersion?: number
 
+  // TODO(samuel) refactor this into foreign key
   @Property()
-  orgId: string
+  orgId: number
 
   @Property()
   firstName: string
@@ -56,11 +102,33 @@ export class User extends BaseEntity {
   @Property()
   normalizedEmail: string
 
+  // TODO(samuel) Ruby has a custom validation message on this constraint
+  @Property({ length: 250, nullable: true })
+  disableMessage?: string | null
+
   @Property({ nullable: true })
   lastLogin?: Date
 
-  @Property({ hidden: true })
-  userState: number
+  @Enum({ type: () => USER_STATE,
+    serializer: (value: USER_STATE) => {
+      switch (value) {
+        case USER_STATE.ENABLED:
+          return 'active'
+        case USER_STATE.DEACTIVATED:
+          return 'deactivated'
+        case USER_STATE.LOCKED:
+          return 'locked'
+        default:
+          return 'n/a'
+      }
+    } })
+  userState: USER_STATE
+
+  @Property({
+    type: WorkaroundJsonType,
+    columnType: 'text',
+  })
+  cloudResourceSettings?: CloudResourceSettings
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
   jobs = new Collection<Job>(this)
@@ -83,22 +151,22 @@ export class User extends BaseEntity {
   @OneToOne({
     entity: () => Expert,
     mappedBy: 'user',
-    orphanRemoval: true
+    orphanRemoval: true,
   })
   expert: IdentifiedReference<Expert>
 
   @OneToMany({
     entity: () => ExpertQuestion,
     mappedBy: 'user',
-    orphanRemoval: true
+    orphanRemoval: true,
   })
   expertQuestions = new Collection<ExpertQuestion>(this)
 
   @OneToMany({
     entity: () => AdminMembership,
-    mappedBy: 'user'
+    mappedBy: 'user',
   })
-  adminMembership = new Collection<AdminMembership>(this);
+  adminMembership = new Collection<AdminMembership>(this)
 
 
   constructor(org: Organization, emailNotificationSettings?: EmailNotification, expert?: Expert) {
@@ -126,15 +194,30 @@ export class User extends BaseEntity {
     return spaceUids
   }
 
-  isMemberOfSpace(spaceUid: string): boolean {
+  isMemberOfSpace(spaceUid: string) {
     return Object.values(this.spaceUids).includes(spaceUid)
   }
 
-  isChallengeBot(): boolean {
+  isChallengeBot() {
     return this.dxuser === config.users.challengeBotDxUser
   }
 
-  isGuest(): boolean {
+  isGuest() {
     return this.dxuser.startsWith('Guest-')
+  }
+
+  async isSiteAdmin() {
+    const siteAdminGroupMemberships = await this.adminMembership.matching({
+      where: {
+        adminGroup: {
+          role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
+        },
+      },
+      populate: {
+        adminGroup: true,
+      },
+    })
+
+    return siteAdminGroupMemberships.length > 0
   }
 }

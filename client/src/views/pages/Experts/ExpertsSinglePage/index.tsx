@@ -22,7 +22,7 @@ import { EXPERT_STATE } from '../../../../constants'
 import './style.sass'
 import { SocialMediaButtons } from '../../../components/NavigationBar/SocialMediaButtons'
 import navBackground from '../../../../assets/NavbarBackground.png'
-import { contextSelector } from '../../../../reducers/context/selectors'
+import { contextUserSelector } from '../../../../reducers/context/selectors'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { hideExpertsAskQuestionModal, showExpertsAskQuestionModal } from '../../../../actions/experts'
 import { ExpertAskQuestionModal } from '../../../components/Experts/ExpertAskQuestionModal'
@@ -71,30 +71,31 @@ const ExpertsSingleDetailsPage = () => {
   const hideModalAction = () => dispatch(hideExpertsAskQuestionModal())
   const showModalAction = () => dispatch(showExpertsAskQuestionModal())
 
-  const user = useSelector(state => contextSelector(state).user)
+  const user =  useSelector(contextUserSelector)
   const askQuestionModal = useSelector(
     state => expertsSelector(state).details.askQuestionModal,
   )
   const [tabIndex, setTabIndex] = useState(-1)
   const queryClient = useQueryClient()
 
-  const askExpert = (userName: string, question: string) => {
+  const askExpert = (userName: string, question: string, captchaValue: string) => {
     createQuestionMutation
-      .mutateAsync({ userName, question })
+      .mutateAsync({ userName, question, captchaValue })
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
           queryClient.invalidateQueries('queryExpertDetails')
           toast.success('Your question was submitted successfully')
+          hideModalAction()
+          history.push(`/experts/${expertId}`)
         } else {
-          toast.error('Your question was not submitted')
+          const errorMessage = response.payload?.error?.message
+          toast.error(errorMessage || 'Your question was not submitted')
         }
-        hideModalAction()
-        history.push(`/experts/${expertId}`)
       })
   }
   const createQuestionMutation = useMutation(
-    ({ userName, question }: { userName: string; question: string }) =>
-      askQuestion({ userName, question }, expertId),
+    ({ userName, question, captchaValue }: { userName: string; question: string, captchaValue: string }) =>
+      askQuestion({ userName, question, captchaValue }, expertId),
   )
 
   if (isLoading) {
@@ -107,7 +108,7 @@ const ExpertsSingleDetailsPage = () => {
   const expertIsOpened = expert && expert.state === EXPERT_STATE.OPEN
   const userExpert = expert && expert.user_id === user.id
   const editPermitted = userExpert || user.can_administer_site
-  const isLoggedIn = user && Object.keys(user).length > 0
+  const isLoggedIn = user && user.id && Object.keys(user).length > 0
 
   const createUserContent = () => {
     const md = new Remarkable('full', { typographer: true }).use(linkify)

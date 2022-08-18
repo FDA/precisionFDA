@@ -154,16 +154,9 @@
           </div>
         </div>
 
-        <% unless Utils.development_or_test? %>
-          <hr>
-          <div class="form-group form-group-lg">
-            <div class="col-sm-offset-5 col-sm-10">
-              <strong>Prove you are not a robot:</strong>
-              <br>
-              <%= recaptcha_tags %>
-            </div>
-          </div>
-        <% end %>
+        <% unless Utils.development_or_test? %> 
+              <%= recaptcha_v3(action: 'registration') %>
+        <% end %> 
 
         <div class="form-group form-group-lg">
             <div class="col-sm-offset-5 col-sm-10">

@@ -13,12 +13,14 @@ export enum FilesListActions {
 
 export enum FolderActions {
   'Add Folder' = 'Add Folder',
-  'Add Files' = 'Add Files'
+  'Add Files' = 'Add Files',
+  'Copy Files' = 'Copy Files',
+  'Choose Add Option' = 'Choose Add Option',
 }
 
-export type FileStatus = 'closed' | 'open'
+export type FileStatus = 'closed' | 'closing' | 'open'
 export type FileLocation = 'Public' | 'Private'
-export type FileType = 'UserFile' | 'Folder'
+export type FileType = 'UserFile' | 'Folder' | 'File'
 export type FileOrigin = 'UserFile'
 
 export type OriginType = 'User' | 'Job' | 'Comparison' | 'UserFile'

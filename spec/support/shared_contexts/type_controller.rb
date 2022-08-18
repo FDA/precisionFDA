@@ -39,7 +39,10 @@ RSpec.shared_context "type_controller", type: :controller do
   end
 
   def parsed_response
-    @parsed_response ||= JSON.parse(response.body)
+    @parsed_response ||= begin
+      parsed = JSON.parse(response.body)
+      parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    end
   end
 
   def last_app

@@ -1,10 +1,11 @@
 class BatchAppNewView
-  constructor: (app, @asset_licenses_to_accept, selectable_spaces, available_content_scopes) ->
+  constructor: (app, @asset_licenses_to_accept, selectable_spaces, available_content_scopes, instance_types) ->
     @uid = app.uid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
 
-    @availableInstances = Precision.INSTANCES
+    @availableInstances = instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type) 
+ 
     @defaultInstanceType = app.spec.instance_type
     @instanceType = ko.observable(app.spec.instance_type)
     @selectableSpaces = selectable_spaces
@@ -60,7 +61,7 @@ class BatchAppNewView
     )
 
     @isRunnable = ko.computed(() =>
-      isConfigReady = !_.isEmpty(@name())
+      isConfigReady = !_.isEmpty(@name()) && !_.isEmpty(@instanceType())
       areBatchInputsReady = _.every(@batchInputSpec(), (input) -> input.isReady())
       areOtherInputsReady = _.every(@otherInputSpec(), (input) -> input.isReady())
       areInputsReady = areBatchInputsReady && areOtherInputsReady
@@ -229,7 +230,8 @@ AppsController = Paloma.controller('Apps', {
       @params.app,
       @params.licenses_to_accept,
       @params.selectable_spaces,
-      @params.content_scopes
+      @params.content_scopes,
+      @params.instance_types,
     )
     ko.applyBindings(viewModel, $container[0])
 

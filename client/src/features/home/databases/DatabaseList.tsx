@@ -11,17 +11,18 @@ import { Refresh } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
   QuickActions,
   StyledHomeTable,
+  StyledPaginationSection,
   StyledRight,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
@@ -67,9 +68,10 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
     colWidths,
   } = useList<ListType>({
     fetchList: fetchDatabaseList,
-    onRowClick,
     resource: 'dbclusters',
-    scope,
+    params: {
+      scope: scope || undefined,
+    },
   })
   const { status, data } = query
 
@@ -122,7 +124,8 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
       <DatabaseListTable
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         data={data?.dbclusters}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
@@ -133,23 +136,23 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.dbclusters?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          isHidden={hidePagination(
+            query.isFetched,
+            data?.dbclusters?.length,
+            data?.meta?.pagination?.total_pages,
+          )}
+          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+          isNextData={data?.meta?.pagination?.next_page! !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit Database Info']?.modal}

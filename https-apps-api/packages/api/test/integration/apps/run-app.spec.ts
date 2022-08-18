@@ -146,6 +146,7 @@ describe('POST /apps/:id/run', () => {
     const inputComplete = {
       ...generate.app.runAppInput(),
       instanceType: 'himem-2',
+      jobLimit: 50,
       name: 'my-job-name',
       input: {
         duration: 60,
@@ -162,6 +163,7 @@ describe('POST /apps/:id/run', () => {
     // all overrides took place
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
     expect(platformCall).to.have.property('name', inputComplete.name)
+    expect(platformCall).to.have.property('costLimit', inputComplete.jobLimit)
     expect(platformCall).to.have.property('input').that.deep.equals({
       duration: inputComplete.input.duration,
       feature: allowedFeatures.ML_IP,
@@ -181,6 +183,7 @@ describe('POST /apps/:id/run', () => {
     const ttydAppInput = {
       ...generate.app.runTtydAppInput(),
       instanceType: 'himem-2',
+      jobLimit: 25.25,
       name: 'my-ttyd',
       input: {
         port: 8081,
@@ -194,6 +197,7 @@ describe('POST /apps/:id/run', () => {
 
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
     expect(platformCall).to.have.property('name', ttydAppInput.name)
+    expect(platformCall).to.have.property('costLimit', ttydAppInput.jobLimit)
     expect(platformCall).to.have.property('input').that.deep.equals({
       port: ttydAppInput.input.port,
     })
@@ -244,6 +248,7 @@ describe('POST /apps/:id/run', () => {
   it('accepts minimal input params (uses all defaults)', async () => {
     const inputComplete = {
       scope: 'private',
+      jobLimit: 50,
       input: {},
     }
     await supertest(getServer())

@@ -64,22 +64,6 @@ class Workflow < ApplicationRecord
     stages.find { |stage| stage[:slotId] == slot_id }
   end
 
-  def allow_batch_run?
-    return unless stages.any?
-
-    batch_input_spec.select { |s| s["allow_batch"] }.any?
-  end
-
-  def batch_input_spec
-    all_input_spec.map do |input|
-      input["allow_batch"] = allow_batch?(input)
-      input
-    end
-  end
-
-  def allow_batch?(input)
-    input["requiredRunInput"] && %w(file string).include?(input["class"])
-  end
 
   def all_input_spec
     stages.reduce([]) { |inputs, stage| inputs + stage["inputs"] }
