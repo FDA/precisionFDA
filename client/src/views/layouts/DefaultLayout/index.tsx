@@ -1,12 +1,10 @@
-import React from 'react'
+import React, { FC } from 'react'
 
+import { Header } from '../../../components/Header'
 import AlertNotifications from '../../components/AlertNotifications'
 import LoaderWrapper from '../../components/LoaderWrapper'
-import { Header } from '../../../components/Header'
-import { FC } from 'react'
 
-
-const DefaultLayout: FC = ({ children }) =>
+const DefaultLayout: FC = ({ children }) => (
   <LoaderWrapper>
     <>
       <Header />
@@ -14,5 +12,6 @@ const DefaultLayout: FC = ({ children }) =>
       <AlertNotifications />
     </>
   </LoaderWrapper>
+)
 
 export default DefaultLayout

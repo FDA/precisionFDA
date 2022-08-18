@@ -28,3 +28,7 @@ export const BackLink: FC<{ linkTo: string, onClick?: (e: any) => void}> = ({ li
     </StyledBackLink>
   )
 }
+
+export const BackLinkMargin = styled(BackLink)`
+  margin: 16px;
+`

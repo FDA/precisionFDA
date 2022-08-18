@@ -4,8 +4,8 @@ import { format } from 'date-fns'
 import { IChallenge } from '../../../../types/challenge'
 import Button from '../../Button'
 import ChallengeTimeRemaining from '../ChallengeTimeRemaining'
-import GuestRestrictedLink from '../../Controls/GuestRestrictedLink'
 import * as Styled from './styles'
+import { Link } from 'react-router-dom'
 
 
 interface IChallengeListItem extends IChallenge {
@@ -48,13 +48,12 @@ class ChallengesListItem extends Component<IChallengeListItemProps> {
             <div className='challenge-date-remaining'><ChallengeTimeRemaining challenge={challenge} /></div>
           </div>
           <p>{challenge.description}</p>
-          
           <Button onClick={() => handleItemDetails(challenge.id)}>View Details &rarr;</Button>
           {userCanEdit && (
-          <div className="btn-group pull-right">
-            <a className="btn btn-default" href={challenge.links.edit}><span className="fa fa-cog fa-fw"></span> Settings</a>
-            <a className="btn btn-default" href={challenge.links.editor} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
-          </div>
+            <div className="btn-group pull-right">
+              <Link to={`/challenges/${challenge.id}/edit`} title={'edit'} className="btn btn-default">  <span className="fa fa-cog fa-fw"></span> Settings</Link>
+              <a className="btn btn-default" href={challenge.links.editor} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+            </div>
           )}
         </Styled.ChallengeListItemContent>
       </Styled.ChallengeListItem>
@@ -74,10 +73,10 @@ class ChallengesListItemLanding extends ChallengesListItem {
         <Styled.ChallengeListItemLanding_LeftColumn>
           {challenge.isFirstItemInSection && (
             <>
-            <Styled.ChallengesListSectionHeader timeStatus={challenge.timeStatus}><hr /></Styled.ChallengesListSectionHeader>
-            <Styled.ChallengesListSectionHeader timeStatus={challenge.timeStatus}>
-              <Styled.SectionHeaderLabel_LeftColumn>{challenge.sectionHeading}</Styled.SectionHeaderLabel_LeftColumn>
-            </Styled.ChallengesListSectionHeader>
+              <Styled.ChallengesListSectionHeader timeStatus={challenge.timeStatus}><hr /></Styled.ChallengesListSectionHeader>
+              <Styled.ChallengesListSectionHeader timeStatus={challenge.timeStatus}>
+                <Styled.SectionHeaderLabel_LeftColumn>{challenge.sectionHeading}</Styled.SectionHeaderLabel_LeftColumn>
+              </Styled.ChallengesListSectionHeader>
             </>
           )}
         </Styled.ChallengeListItemLanding_LeftColumn>
@@ -95,10 +94,10 @@ class ChallengesListItemLanding extends ChallengesListItem {
 
           <Button onClick={() => handleItemDetails(challenge.id)}>View Details &rarr;</Button>
           {userCanEdit && (
-          <div className="btn-group pull-right">
-            <a className="btn btn-default" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
-            <a className="btn btn-default" href={`/challenges/${challenge.id}/editor`} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
-          </div>
+            <div className="btn-group pull-right">
+              <a className="btn btn-default" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
+              <a className="btn btn-default" href={`/challenges/${challenge.id}/editor`} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+            </div>
           )}
         </Styled.ChallengeListItemContent>
       </Styled.ChallengeListItem>

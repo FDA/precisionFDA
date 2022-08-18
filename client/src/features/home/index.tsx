@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
-import { useSelector } from 'react-redux'
 import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import { useQueryParam } from 'use-query-params'
 import { BannerPickedInfo, BannerPicker, BannerPickerItem, BannerRight, BannerTitle, ResourceBanner } from '../../components/Banner'
@@ -14,9 +13,7 @@ import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { FlapIcon } from '../../components/icons/FlapIcon'
 import { MenuCounter } from '../../components/MenuCounter'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { RootState } from '../../store'
 import { checkStatus } from '../../utils/api'
-import DefaultLayout from '../../views/layouts/DefaultLayout'
 import { AppList } from './apps/AppList'
 import { AppsShow } from './apps/AppsShow'
 import { AssetList } from './assets/AssetList'
@@ -34,6 +31,8 @@ import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
 import { WorkflowList } from './workflows/WorkflowList'
 import { WorkflowShow } from './workflows/WorkflowShow'
+import { useAuthUser } from '../auth/useAuthUser'
+import { UserLayout } from '../../views/layouts/UserLayout'
 
 
 interface CounterRequest {
@@ -56,7 +55,7 @@ export async function counterRequest(scope: ResourceScope): Promise<CounterReque
 }
 
 export const Home2 = () => {
-  const user = useSelector((state: RootState) => state.context.user)
+  const user = useAuthUser()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()
   const history = useHistory()
@@ -85,11 +84,11 @@ export const Home2 = () => {
       scope,
     }).toString()}`
 
-  if(user.is_guest) {
+  if(!user || user?.is_guest) {
     return (
-      <DefaultLayout>
+      <UserLayout>
         <GuestNotAllowed />
-      </DefaultLayout>
+      </UserLayout>
     )
   }
 
@@ -104,7 +103,7 @@ export const Home2 = () => {
   const scopeDescription = scopeDescriptions[scope]
 
   return (
-    <DefaultLayout>
+    <UserLayout>
       <ResourceBanner>
         <BannerTitle>My Home</BannerTitle>
         <BannerRight>
@@ -272,6 +271,6 @@ export const Home2 = () => {
           </Switch>
         </Main>
       </Row>
-    </DefaultLayout>
+    </UserLayout>
   )
 }
