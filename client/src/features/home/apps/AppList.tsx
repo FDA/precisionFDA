@@ -73,11 +73,11 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
   })
 
   if(scope) {
-    delete actions['Copy to private']
+    delete actions['Copy to My Home (private)']
   } else {
     // Disable actions in spaces
     delete actions['Make public']
-    delete actions['Copy to private']
+    delete actions['Copy to My Home (private)']
   }
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
@@ -166,7 +166,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Copy to private']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}

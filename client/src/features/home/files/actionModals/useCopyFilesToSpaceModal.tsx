@@ -75,7 +75,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const modalComp = (
     <Modal
       data-testid="modal-files-add-to-space"
-      headerText="Add Files To Shared Space"
+      headerText="Add Files To Space"
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={

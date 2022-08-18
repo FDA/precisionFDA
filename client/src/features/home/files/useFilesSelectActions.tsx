@@ -24,6 +24,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
+import { ISpace } from '../../spaces/spaces.types'
 
 export enum FileActions {
   'Track' = 'Track',
@@ -38,7 +39,7 @@ export enum FileActions {
   'Delete' = 'Delete',
   'Organize' = 'Organize',
   'Copy to space' = 'Copy to space',
-  'Copy to private' = 'Copy to private',
+  'Copy to My Home (private)' = 'Copy to My Home (private)',
   'Attach to...' = 'Attach to...',
   'Attach License' = 'Attach License',
   'Detach License' = 'Detach License',
@@ -51,13 +52,13 @@ export enum FileActions {
 export const useFilesSelectActions = ({
   scope,
   fileId,
-  spaceId,
+  space,
   selectedItems,
   resourceKeys,
   resetSelected,
 }: {
   scope?: ResourceScope
-  spaceId?: string
+  space?: ISpace
   fileId: string
   selectedItems: IFile[]
   resourceKeys: string[]
@@ -68,6 +69,7 @@ export const useFilesSelectActions = ({
   const selected = selectedItems.filter(x => x !== undefined)
   const user: IUser = useSelector((state: RootState) => state.context.user)
   const isAdmin: boolean = user?.admin
+  const isViewer: boolean = (space?.current_user_membership.role === 'viewer')
   const openSelected = selected.some(e => e.state === 'open')
 
   const featureMutation = useFeatureMutation({
@@ -137,11 +139,11 @@ export const useFilesSelectActions = ({
   } = useDeleteFileModal({
     selected,
     // eslint-disable-next-line no-nested-ternary
-    scope: scope ? (scope === 'me' ? 'private' : scope) : `space-${spaceId}`,
+    scope: scope ? (scope === 'me' ? 'private' : scope) : `space-${space?.id}`,
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-      if(spaceId) {
-        history.push(`/spaces/${spaceId}/files`)
+      if(space) {
+        history.push(`/spaces/${space.id}/files`)
       } else {
         history.push('/home/files')
       }
@@ -152,7 +154,7 @@ export const useFilesSelectActions = ({
     modalComp: organizeFileModal,
     setShowModal: setOrganizeFileModal,
     isShown: isShownOrganizeFileModal,
-  } = useOrganizeFileModal({ selected, scope, spaceId, onSuccess: () => {
+  } = useOrganizeFileModal({ selected, scope, spaceId: space?.id, onSuccess: () => {
       if(resetSelected) resetSelected()
     }, 
   })
@@ -312,8 +314,8 @@ export const useFilesSelectActions = ({
     'Delete': {
       type: 'modal',
       func: () => setDeleteFileModal(true),
-      isDisabled: selected.length === 0 ||
-        selected.some(e => !e.links.remove),
+      isDisabled: selected.length === 0 || selected.some(e => !e.links.remove),
+      shouldHide: isViewer,
       modal: deleteFileModal,
       showModal: isShownDeleteFileModal,
     },
@@ -326,7 +328,7 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: organizeFileModal,
       showModal: isShownOrganizeFileModal,
-      shouldHide: !isAdmin && scope !== 'me',
+      shouldHide: (!isAdmin) && (scope !== 'me') && isViewer,
     },
     'Copy to space': {
       type: 'modal',
@@ -336,8 +338,9 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
+      shouldHide: isViewer,
     },
-    'Copy to private': {
+    'Copy to My Home (private)': {
       type: 'modal',
       func: () => setCopyToPrivateModal(true),
       isDisabled: selected.length === 0,
