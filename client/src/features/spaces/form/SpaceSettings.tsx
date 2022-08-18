@@ -10,8 +10,8 @@ import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Divider, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
-import { BackLink } from '../../../components/Page/PageBackLink'
-import { PageContentItems, PageTitle } from '../../../components/Page/styles'
+import { BackLinkMargin } from '../../../components/Page/PageBackLink'
+import { PageTitle } from '../../../components/Page/styles'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useEditTagsModal } from '../../home/actionModals/useEditTagsModal'
@@ -24,7 +24,7 @@ import {
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { validationSchema } from './helpers'
-import { HintText, Row, StyledButton, StyledForm, StyledPageContent, StyledPageCenter } from './styles'
+import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './styles'
 
 
 const EditTags = ({ spaceId, tags = []}: { spaceId: string, tags?: string[]}) => {
@@ -196,7 +196,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Host Lead">
             <InputText
               label="Host Lead"
-              disabled={isSubmitting}
+              disabled
               {...register('host_lead_dxuser')}
             />
             <ErrorMessage
@@ -208,7 +208,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           <FieldGroup label="Guest Lead">
             <InputText
               label="Guest Lead"
-              disabled={isSubmitting}
+              disabled
               {...register('guest_lead_dxuser')}
             />
             <ErrorMessage
@@ -297,14 +297,14 @@ export const SpaceSettings = () => {
   }
 
   return (
-    <PageContentItems>
-      <BackLink linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLink>
+    <>
+      <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
       <StyledPageCenter>
         <StyledPageContent>
           <PageTitle>Space Settings</PageTitle>
           <SpaceSettingsForm space={data.space} />
         </StyledPageContent>
       </StyledPageCenter>
-    </PageContentItems>
+    </>
   )
 }

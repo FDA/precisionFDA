@@ -260,6 +260,7 @@ export const UsersList = () => {
           isNextData={data?.meta?.pagination?.nextPage! !== null}
           setPage={setPageParam as any}
           onPerPageSelect={setPerPageParam as any}
+          showListCount
         />
       </ContentWrapper>
     </DefaultLayout>

@@ -1,3 +1,4 @@
+import { MemberRole, MemberSide } from './members/members.types'
 
 export interface Counters {
   files: number;
@@ -41,6 +42,17 @@ export interface GuestLead {
   is_accepted: boolean;
 }
 
+export interface SpaceMembership {
+  active: boolean;
+  created_at: string;
+  id: number;
+  meta: Record<string, string>;
+  role: MemberRole;
+  side: MemberSide;
+  updated_at: string;
+  user_id: number;
+}
+
 export interface ConfidentialSpace {
   id: number;
   description: string;
@@ -55,7 +67,7 @@ export interface ConfidentialSpace {
   updatable: boolean;
   shared_space_id: number;
   tags: any[];
-  current_user_membership: boolean;
+  current_user_membership: SpaceMembership;
   host_lead: HostLead;
 }
 
@@ -75,7 +87,7 @@ export interface ISpace {
   links: Links;
   updatable: boolean;
   tags: any[];
-  current_user_membership: boolean;
+  current_user_membership: SpaceMembership;
   host_lead: HostLead;
   guest_lead: GuestLead;
   private_space_id?: string;

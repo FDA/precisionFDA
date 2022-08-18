@@ -103,10 +103,10 @@ class SpaceSerializer < ApplicationSerializer
     space_membership && object.confidential_space(space_membership)
   end
 
-  # Checks if user is a space member - used for RSA roles selection.
-  # @return [Boolean] Returns true if user is a space member, false otherwise.
+  # Checks if user is a space member, and returns that member
+  # @return [SpaceMembership]
   def current_user_membership
-    space_membership.present?
+    space_membership
   end
 
   def can_duplicate

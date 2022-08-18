@@ -186,7 +186,7 @@ export const Spaces2 = ({
             <Switch>
               <Route exact path={`/spaces/${space.id}/files`}>
                 <FileList
-                  spaceId={space.id}
+                  space={space}
                   showFolderActions={!!space.links.add_data}
                 />
               </Route>

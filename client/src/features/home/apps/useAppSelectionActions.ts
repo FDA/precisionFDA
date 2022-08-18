@@ -30,7 +30,7 @@ export enum AppActions {
   'Unfeature' = 'Unfeature',
   'Delete' = 'Delete',
   'Copy to space' = 'Copy to space',
-  'Copy to private' = 'Copy to private',
+  'Copy to My Home (private)' = 'Copy to My Home (private)',
   'Attach to...' = 'Attach to...',
   'Comments' = 'Comments',
   'Set as Challenge App' = 'Set as Challenge App',
@@ -237,7 +237,7 @@ export const useAppSelectionActions = ({
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
-    'Copy to private': {
+    'Copy to My Home (private)': {
       type: 'modal',
       func: () => setCopyToPrivateModal(true),
       isDisabled: selected.length === 0,

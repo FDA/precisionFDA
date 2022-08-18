@@ -93,8 +93,8 @@ export const ButtonRow = styled.div`
   align-items: center;
   margin-top: 24px;
 `
-export const Content = styled.div<{ overflowContent: boolean }>`
-  ${({ overflowContent }) => overflowContent && 'overflow-y: scroll;'}
+export const Content = styled.div<{ overflowContent?: boolean }>`
+  ${({ overflowContent = true }) => overflowContent && 'overflow-y: scroll;'}
   padding: 12px;
 `
 

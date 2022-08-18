@@ -12,6 +12,7 @@ import { useAddMembersModal } from './useAddMembersModal'
 
 export const StyledTitle = styled.h1`
   margin: 0;
+  margin-bottom: 32px;
 `
 
 export const StyledMemberListPage = styled.div`
@@ -36,26 +37,33 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   )
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
   const members = data?.space_memberships
-  const canAddMember = (space.type !== 'private_type') && (space.type !== 'administrator')
+  const canAddMember =
+    space.type !== 'private_type' && space.type !== 'administrator'
 
   return (
     <ErrorBoundary>
       <StyledMemberListPage>
         <StyledTitle>Shared Area Members</StyledTitle>
 
-        <StyledButtonGroup>
-          <RadioButtonGroup
-            options={[
-              { value: undefined, label: 'All' },
-              { value: 'reviewer', label: 'Reviewer' },
-              { value: 'sponsor', label: 'Sponsor' },
-            ]}
-            onChange={setSideRole}
-            ariaLabel="Members option filter"
-          />
+        {space.type === 'review' && (
+          <StyledButtonGroup>
+            <RadioButtonGroup
+              options={[
+                { value: undefined, label: 'All' },
+                { value: 'reviewer', label: 'Reviewer' },
+                { value: 'sponsor', label: 'Sponsor' },
+              ]}
+              onChange={setSideRole}
+              ariaLabel="Members option filter"
+            />
 
-          {space.updatable && canAddMember && (<ButtonSolidBlue onClick={() => setShowModal(true)}>Add Members</ButtonSolidBlue>)}
-        </StyledButtonGroup>
+            {space.updatable && canAddMember && (
+              <ButtonSolidBlue onClick={() => setShowModal(true)}>
+                Add Members
+              </ButtonSolidBlue>
+            )}
+          </StyledButtonGroup>
+        )}
 
         {status === 'loading' && (
           <div>
