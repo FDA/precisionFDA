@@ -39,5 +39,6 @@ export const StyledPageContent = styled.div`
   flex-direction: column;
   gap: 16px;
   max-width: 500px;
-  flex: 1 0 auto;
+  padding: 0 16px;
+  width: 100%;
 `

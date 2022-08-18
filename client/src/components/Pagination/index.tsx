@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../Button'
+import { ButtonSolidBlue } from '../Button'
 import { inputFocus, InputSelect } from '../form/styles'
 
 export const StyledInputJumpTo = styled.input`
@@ -65,18 +65,20 @@ export const Pagination = ({
   isNextData,
   isHidden,
   onPerPageSelect,
-  showListCount = true,
+  showPerPage = true,
+  showListCount = false,
 }: {
   page?: number
   setPage: (n: number) => void
   onPerPageSelect: (n: number) => void
   totalCount?: number
   totalPages?: number
-  perPage: number
+  perPage?: number
   isPreviousData: boolean
   isNextData: boolean
   isHidden: boolean
   showListCount?: boolean
+  showPerPage?: boolean
 }) => {
   if (isHidden) {
     return null
@@ -116,20 +118,22 @@ export const Pagination = ({
   return (
     <StyledPagination>
       {showListCount && <ItemsOf>{`${pageLowerBound}-${Math.min(totalCount, pageUpperBound)} of ${totalCount}`}</ItemsOf>}
-      <PerPage>
-        <StyledPerPageSelect
-          value={perPage}
-          name="perPage"
-          onChange={e => onPerPageSelect(parseInt(e.target.value, 10))}
-          data-testid="pagination-perpage-select"
-        >
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </StyledPerPageSelect>
-        Per Page
-      </PerPage>
+      {showPerPage && perPage &&
+        <PerPage>
+          <StyledPerPageSelect
+            value={perPage}
+            name="perPage"
+            onChange={e => onPerPageSelect(parseInt(e.target.value, 10))}
+            data-testid="pagination-perpage-select"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </StyledPerPageSelect>
+          Per Page
+        </PerPage>
+      }
       <ButtonSolidBlue
         data-testid="pagination-previous-page-button"
         type="button"

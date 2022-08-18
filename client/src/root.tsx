@@ -21,7 +21,7 @@ import history from './utils/history'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { NotificationsPage } from './views/pages/Account/Notifications'
 import { UsersList } from './features/admin/users'
-import ChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
+import OldChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
 import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
 import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
 import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
@@ -34,8 +34,11 @@ import NoFoundPage from './views/pages/NoFoundPage'
 import NewSpacePage from './views/pages/Spaces/NewSpacePage'
 import SpacePage from './views/pages/Spaces/SpacePage'
 import SpacesListPage from './views/pages/Spaces/SpacesListPage'
+import { ChallengeDetailsPage } from './features/challenges/details/ChallengeDetails'
 import { ToS } from './views/pages/ToS'
-
+import { ChallengesList } from './features/challenges/list/ChallengesList'
+import { EditChallengePage } from './features/challenges/form/EditChallenge'
+import { CreateChallengePage } from './features/challenges/form/CreateChallenge'
 
 const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
   new QueryClient({
@@ -135,19 +138,34 @@ const root = ({ store }: any) => {
                   render={props => <SpacePage {...props} />}
                 />
 
-                <Route exact path="/challenges">
+                <Route exact path="/challenges-old">
                   <ChallengesListPage />
+                </Route>
+                <Route exact path="/challenges">
+                  <ChallengesList />
+                </Route>
+                <Route exact path="/challenges/create">
+                  <CreateChallengePage />
+                </Route>
+                <Route exact path="/challenges/:challengeId/edit">
+                  <EditChallengePage />
                 </Route>
                 <Route exact path="/challenges/propose">
                   <ChallengeProposePage />
                 </Route>
+                <Route path="/challenges/:challengeId/:page">
+                  <ChallengeDetailsPage />
+                </Route>
                 <Route
-                  path="/challenges/:challengeId/:page"
-                  render={props => <ChallengeDetailsPage {...props} />}
+                  path="/challenges-old/:challengeId/:page"
+                  render={props => <OldChallengeDetailsPage {...props} />}
                 />
+                <Route path="/challenges/:challengeId">
+                  <ChallengeDetailsPage />
+                </Route>
                 <Route
-                  path="/challenges/:challengeId"
-                  render={props => <ChallengeDetailsPage {...props} />}
+                  path="/challenges-old/:challengeId"
+                  render={props => <OldChallengeDetailsPage {...props} />}
                 />
                 <Route exact path="/news">
                   <NewsListPage />
@@ -175,7 +193,12 @@ const root = ({ store }: any) => {
           </QueryParamProvider>
         </Router>
         <AuthModal {...authModal} />
-        <StyledToastContainer position="top-right" transition={Slide} hideProgressBar pauseOnHover />
+        <StyledToastContainer
+          position="top-right"
+          transition={Slide}
+          hideProgressBar
+          pauseOnHover
+        />
         {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
     </Provider>

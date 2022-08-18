@@ -13,7 +13,7 @@ const LoaderWrapper = styled.div<{shouldDisplayInline?: boolean}>`
   `}
 `
 type Props = {
-  height: number
+  height?: number
   shouldDisplayInline?: boolean
 }
 

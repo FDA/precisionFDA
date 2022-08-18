@@ -1,14 +1,10 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import { SUPPORT_EMAIL } from '../../constants'
 import { logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
-import {
-  isInitializedSelector,
-} from '../../reducers/context/selectors'
 import { IUser } from '../../types/user'
 import { CloudResourceModal } from '../CloudResourcesModal'
 import Dropdown from '../Dropdown'
@@ -26,13 +22,23 @@ import { StarIcon } from '../icons/StarIcon'
 import { StickyNoteIcon } from '../icons/StickyNote'
 import { TrophyIcon } from '../icons/TrophyIcon'
 import {
-  AvatarMenuItem, HeaderItemText,
-  HeaderLeft, HeaderRight,
-  HeaderSpacer, IconWrap,
-  LogoWrap, MenuItem, Nav, StyledDivider, StyledDropMenuLinks, StyledHeader,
-  StyledHeaderLogo, StyledLink, StyledLinkReactRoute, StyledOnClickModalDiv,
+  AvatarMenuItem,
+  HeaderItemText,
+  HeaderLeft,
+  HeaderRight,
+  HeaderSpacer,
+  IconWrap,
+  LogoWrap,
+  MenuItem,
+  Nav,
+  StyledDivider,
+  StyledDropMenuLinks,
+  StyledHeader,
+  StyledHeaderLogo,
+  StyledLink,
+  StyledLinkReactRoute,
+  StyledOnClickModalDiv,
 } from './styles'
-
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -42,54 +48,61 @@ type UserMenuProps = {
   showCloudResourcesModal: () => void
 }
 
-export const UserMenu = ({ user, userIsGuest, userCanAdministerSite, handleLogout, showCloudResourcesModal }: UserMenuProps) => (
+export const UserMenu = ({
+  user,
+  userIsGuest,
+  userCanAdministerSite,
+  handleLogout,
+  showCloudResourcesModal,
+}: UserMenuProps) => (
   <StyledDropMenuLinks>
-      <StyledLink href="/profile">Profile</StyledLink>
-      {user && !userIsGuest && (
-        <>
-          <StyledLink href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
-          <StyledOnClickModalDiv onClick={showCloudResourcesModal}>Cloud Resources</StyledOnClickModalDiv>
-        </>
-      )}
-      <StyledLink href="/licenses">Manage Licenses</StyledLink>
-      {!userIsGuest && (
-        <StyledLinkReactRoute to="/account/notifications">
-          Notification Settings
-        </StyledLinkReactRoute>
-      )}
-      <StyledDivider />
-      <StyledLinkReactRoute to="/about">About</StyledLinkReactRoute>
-      <StyledLink href="/guidelines">Guidelines</StyledLink>
-      <StyledLink href="/docs">Docs</StyledLink>
-      <StyledDivider />
-      {userCanAdministerSite && (
-        <>
-          <StyledLink href="/admin">Admin Dashboard</StyledLink>
-          <StyledDivider />
-        </>
-      )}
-      <StyledLink as="div" onClick={handleLogout}>
-        Log Out
-      </StyledLink>
-    </StyledDropMenuLinks>
-  )
+    <StyledLink href="/profile">Profile</StyledLink>
+    {user && !userIsGuest && (
+      <>
+        <StyledLink href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
+        <StyledOnClickModalDiv onClick={showCloudResourcesModal}>
+          Cloud Resources
+        </StyledOnClickModalDiv>
+      </>
+    )}
+    <StyledLink href="/licenses">Manage Licenses</StyledLink>
+    {!userIsGuest && (
+      <StyledLinkReactRoute to="/account/notifications">
+        Notification Settings
+      </StyledLinkReactRoute>
+    )}
+    <StyledDivider />
+    <StyledLinkReactRoute to="/about">About</StyledLinkReactRoute>
+    <StyledLink href="/guidelines">Guidelines</StyledLink>
+    <StyledLink href="/docs">Docs</StyledLink>
+    <StyledDivider />
+    {userCanAdministerSite && (
+      <>
+        <StyledLink href="/admin">Admin Dashboard</StyledLink>
+        <StyledDivider />
+      </>
+    )}
+    <StyledLink as="div" onClick={handleLogout}>
+      Log Out
+    </StyledLink>
+  </StyledDropMenuLinks>
+)
 
 const getUsername = (user: any) => {
   if (user) {
     if (user.full_name === ' ') {
       return user.dxuser
-    } 
-      return user.full_name
-    
+    }
+    return user.full_name
   }
   return '...'
 }
 
 export const Header: React.FC = () => {
   const { pathname } = useLocation()
-  const init = useSelector(isInitializedSelector)
   const user = useAuthUser()
-  const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
+  const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
+    useState(false)
 
   const userCanAdministerSite = user?.can_administer_site
   const userIsGuest = user?.is_guest
@@ -109,7 +122,7 @@ export const Header: React.FC = () => {
     return pathname.startsWith(linkPath)
   }
 
-  if (!init) return null
+  if (!user) return null
 
   const showGSRSLink = !isSpacesPath && !userIsGuest
 
@@ -121,7 +134,10 @@ export const Header: React.FC = () => {
             <StyledHeaderLogo />
           </LogoWrap>
           <HeaderLeft>
-            <Link to={isSpacesPath ? '/home' : '/'} title={isSpacesPath ? 'Back Home' : 'Overview'}>
+            <Link
+              to={isSpacesPath ? '/home' : '/'}
+              title={isSpacesPath ? 'Back Home' : 'Overview'}
+            >
               <MenuItem active={isActiveLink('/')}>
                 <IconWrap>
                   <HomeIcon height={16} />
@@ -206,7 +222,12 @@ export const Header: React.FC = () => {
             )}
           </HeaderLeft>
           <HeaderRight>
-            <a href={`mailto:${SUPPORT_EMAIL}`} target="_blank" title="Support" rel="noreferrer">
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              target="_blank"
+              title="Support"
+              rel="noreferrer"
+            >
               <MenuItem>
                 <IconWrap>
                   <CommentingIcon height={16} />
@@ -222,13 +243,20 @@ export const Header: React.FC = () => {
                 <HeaderItemText>Get Started</HeaderItemText>
               </MenuItem>
             </a>
-            <Dropdown trigger="click" content={<UserMenu
-              user={user}
-              userCanAdministerSite={userCanAdministerSite}
-              userIsGuest={userIsGuest}
-              handleLogout={handleLogout}
-              showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
-            />}>
+            <Dropdown
+              trigger="click"
+              content={
+                <UserMenu
+                  user={user}
+                  userCanAdministerSite={userCanAdministerSite}
+                  userIsGuest={userIsGuest}
+                  handleLogout={handleLogout}
+                  showCloudResourcesModal={() =>
+                    setCloudResourcesModalShown(true)
+                  }
+                />
+              }
+            >
               {dropdownProps => (
                 <AvatarMenuItem
                   {...dropdownProps}

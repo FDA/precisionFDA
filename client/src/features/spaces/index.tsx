@@ -1,6 +1,6 @@
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import DefaultLayout from '../../views/layouts/DefaultLayout'
+import { UserLayout } from '../../views/layouts/UserLayout'
 import { CreateSpace } from './form/CreateSpace'
 import { DuplicateSpace } from './form/DuplicateSpace'
 import { SpaceSettings } from './form/SpaceSettings'
@@ -8,12 +8,11 @@ import { SpaceShow } from './show/SpaceShow'
 import { Spaces2List } from './SpacesList'
 
 
-
 export const Spaces = () => {
   const { path } = useRouteMatch()
 
   return (
-    <DefaultLayout>
+    <UserLayout>
       <Switch>
         <Route exact path={`${path}`}>
           <Spaces2List />
@@ -31,6 +30,6 @@ export const Spaces = () => {
           <SpaceShow />
         </Route>
       </Switch>
-    </DefaultLayout>
+    </UserLayout>
   )
 }
