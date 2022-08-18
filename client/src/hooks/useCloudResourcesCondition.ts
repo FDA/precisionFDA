@@ -1,9 +1,8 @@
 /* eslint-disable no-multi-str */
 import { useQuery } from 'react-query'
-import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { requestOpts } from '../utils/api'
-import { contextUserSelector } from '../reducers/context/selectors'
+import { useAuthUser } from '../features/auth/useAuthUser'
 
 export type CloudResourcesResponse = {
   computeCharges: number
@@ -37,12 +36,12 @@ export type CloudResourcesConditionType =
   | 'all'
 
 export const useCloudResourcesCondition = (condition: CloudResourcesConditionType) => {
+  const user = useAuthUser()
   const query = useCloudResourcesQuery()
 
   const isUsageAvailable = query.isSuccess ? query.data!.usageAvailable > 0 : true
   const isJobLimitPositive = query.isSuccess ? query.data!.jobLimit > 0 : true
-  const user = useSelector(contextUserSelector)
-  const hasUserSomeResourcesAllowed = query.isSuccess ? user.resources.length > 0 : true
+  const hasUserSomeResourcesAllowed = query.isSuccess && user?.resources ? user.resources.length > 0 : true
   switch (condition) {
     case  'all': {
       const state = [
