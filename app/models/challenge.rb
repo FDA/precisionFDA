@@ -82,7 +82,7 @@ class Challenge < ApplicationRecord
   validates :status, inclusion: { in: ->(challenge) { challenge.available_statuses } }
   validates :meta, meta: true
   validates :app_id,
-            presence: true,
+            presence: { message: "The scoring app user must select an app for the challenge first" },
             unless: :status_setup_or_pre_registration?
   validates :pre_registration_url,
             presence: true,

@@ -141,7 +141,7 @@ Rails.application.routes.draw do
     get "home" => "home#index"
     get "home" => "home#index"
     get "/home/*all", to: "home#index"
-    
+
     # Old My Home
     # TODO: remove old code once new My Home is stable for release or two,
     #       but for now it still has utility for devs
@@ -151,6 +151,7 @@ Rails.application.routes.draw do
 
     get "/account/*all", to: "home#index"
     get "/challenges/propose", to: "challenges#index"
+    get "/challenges/create", to: "challenges#index"
 
     if ENV["GSRS_ENABLED"]
       match "/ginas/app/logout", to: "main#destroy", via: :all
@@ -191,8 +192,14 @@ Rails.application.routes.draw do
         get :years, on: :collection
       end
 
-      resources :challenges, only: %i(index show) do
+      resources :challenges, only: %i(index show create update) do
         get :years, on: :collection
+        get :scoring_app_users, on: :collection
+        get :host_lead_users, on: :collection
+        get :guest_lead_users, on: :collection
+        get :challenges_for_select, on: :collection
+        get :scopes_for_select, on: :collection
+
         post :save_editor_page, on: :member
         post :propose, on: :collection
       end
@@ -522,7 +529,6 @@ Rails.application.routes.draw do
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
       get "new", on: :collection, as: "new"
       get "join", on: :member
-      get "edit", on: :member
       get "editor(/:tab)", on: :member, action: :edit_page, as: "edit_page"
       post "editor/save_page", on: :member, action: :save_page, as: "save_page"
       get "(/:tab)", on: :member, action: :show, as: "show"

@@ -87,5 +87,5 @@ export const PageContentItems = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin: 16px 16px;
+  margin: 16px 0;
 `

@@ -2,8 +2,8 @@ import React from 'react'
 import { useMutation, useQueryClient } from 'react-query'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-import { BackLink } from '../../../components/Page/PageBackLink'
-import { PageContentItems, PageTitle } from '../../../components/Page/styles'
+import { BackLinkMargin } from '../../../components/Page/PageBackLink'
+import { PageTitle } from '../../../components/Page/styles'
 import { createSpaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
 import { StyledPageCenter, StyledPageContent } from './styles'
@@ -31,14 +31,14 @@ export const CreateSpace = () => {
   })
 
   return (
-    <PageContentItems>
-      <BackLink linkTo="/spaces">Back to Spaces</BackLink>
+    <>
+      <BackLinkMargin linkTo="/spaces">Back to Spaces</BackLinkMargin>
       <StyledPageCenter>
         <StyledPageContent>
           <PageTitle>Create Space</PageTitle>
           <SpaceForm mutation={mutation} />
         </StyledPageContent>
       </StyledPageCenter>
-    </PageContentItems>
+    </>
   )
 }
