@@ -76,13 +76,13 @@ const FileActions = ({
 }
 
 
-export const FileShow = ({ scope }: { scope?: ResourceScope }) => {
+export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
   const file = data?.files
   const meta = data?.meta
-  const backPath = getBackPath(location, 'files')
+  const backPath = getBackPath(location, 'files', spaceId)
 
   if (status === 'loading') {
     return  <HomeLoader />
@@ -108,7 +108,7 @@ export const FileShow = ({ scope }: { scope?: ResourceScope }) => {
   const scopeParamLink = `?scope=${scope?.toLowerCase()}`
   // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
   // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
-  const spaceId = file.space_id?.split('-')[1]
+  // const spaceId = file.space_id?.split('-')[1]
 
   return (
     <>

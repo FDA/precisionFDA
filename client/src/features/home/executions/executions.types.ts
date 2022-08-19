@@ -105,6 +105,8 @@ export interface IExecution {
   title: string;
   added_by: string;
   app_revision: string;
+  app_uid: string;
+  app_title: string;
   run_input_data: Array<any>;
   run_output_data: Array<any>;
   failure_message?: string;
@@ -116,7 +118,6 @@ export interface IExecution {
   instance_type: string;
   launched_by: string;
   launched_on: string;
-  app_title: string;
   location: string;
   revision: number;
   readme: string;
