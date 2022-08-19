@@ -21,7 +21,6 @@ const createUserCheckupTask = async (
   const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.USER_CHECKUP}` }
   const defaultTestQueue = queue.getStatusQueue()
   // .add() is stubbed by default
-  console.log(user)
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.USER_CHECKUP,
     user,

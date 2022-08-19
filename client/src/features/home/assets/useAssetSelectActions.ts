@@ -1,38 +1,45 @@
-import { useHistory } from 'react-router-dom';
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store";
-import { OBJECT_TYPES, useAttachToModal } from "../actionModals/useAttachToModal";
-import { useDeleteModal } from "../actionModals/useDeleteModal";
-import { useEditTagsModal } from "../actionModals/useEditTagsModal";
-import { useFeatureMutation } from "../actionModals/useFeatureMutation";
-import { ActionFunctionsType, ResourceScope } from "../types";
-import { useDownloadAssetsModal } from "./actionModals/useDownloadAssetsModal";
-import { useEditAssetModal } from "./actionModals/useEditAssetModal";
-import { deleteAssetsRequest } from "./assets.api";
-import { IAsset } from "./assets.types";
-import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal';
-import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal';
-import { useQueryClient } from 'react-query';
-import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal';
-import { pick } from 'ramda';
+import { useHistory } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useQueryClient } from 'react-query'
+import { pick } from 'ramda'
+import { RootState } from '../../../store'
+import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { useDeleteModal } from '../actionModals/useDeleteModal'
+import { useEditTagsModal } from '../actionModals/useEditTagsModal'
+import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { ActionFunctionsType, ResourceScope } from '../types'
+import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
+import { useEditAssetModal } from './actionModals/useEditAssetModal'
+import { deleteAssetsRequest } from './assets.api'
+import { IAsset } from './assets.types'
+import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
+import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
+import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
 
 export enum AssetActions {
-  "Rename" = "Rename",
-  "Download" = "Download",
-  "Feature" = "Feature",
-  "Unfeature" = "Unfeature",
-  "Make Public" = "Make Public",
-  "Attach to..." = "Attach to...",
-  "Delete" = "Delete",
-  "Attach License" = "Attach License",
-  "Detach License" = "Detach License",
-  "Request license approval" = "Request license approval",
-  "Accept License" = "Accept License",
-  "Edit tags" = "Edit tags",
-  "Comments" = "Comments",
+  'Rename' = 'Rename',
+  'Download' = 'Download',
+  'Feature' = 'Feature',
+  'Unfeature' = 'Unfeature',
+  'Make Public' = 'Make Public',
+  'Attach to...' = 'Attach to...',
+  'Delete' = 'Delete',
+  'Attach License' = 'Attach License',
+  'Detach License' = 'Detach License',
+  'Request license approval' = 'Request license approval',
+  'Accept License' = 'Accept License',
+  'Edit tags' = 'Edit tags',
+  'Comments' = 'Comments',
 }
 
-export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelected }: { scope?: ResourceScope, selectedItems: IAsset[], resourceKeys: string[], resetSelected?: () => void }) => {
+type AssetActionArgs = {
+  scope?: ResourceScope,
+  selectedItems: IAsset[],
+  resourceKeys: string[],
+  resetSelected?: () => void
+}
+
+export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs) => {
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -43,8 +50,9 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     resource: 'assets',
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
+
   const {
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
@@ -66,9 +74,9 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     request: deleteAssetsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries('assets')
-      history.push(`/home/assets`)
+      history.push('/home/assets')
       resetSelected && resetSelected()
-    }
+    },
   })
   const {
     modalComp: editModal,
@@ -85,7 +93,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     selected: selected[0],
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 
   const {
@@ -97,7 +105,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     selected: selected[0],
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 
   const {
@@ -121,100 +129,110 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     selected: selected[0],
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
 
 
   let actions: ActionFunctionsType<AssetActions> = {
-    "Rename": {
+    'Rename': {
+      type: 'modal',
       isDisabled: selected.length !== 1,
       func: () => setEditModal(true),
       modal: editModal,
       showModal: isShownEditModal,
     },
-    "Download": {
+    'Download': {
+      type: 'modal',
       isDisabled: selected.length === 0 || selected.some(e => !e.links?.download),
       func: () => setDownloadModal(true),
       modal: downloadModal,
       showModal: isShownDownloadModal,
     },
-    "Feature": {
+    'Feature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      hide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || scope !== 'everybody',
     },
-    "Unfeature": {
+    'Unfeature': {
+      type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      hide: !isAdmin || (scope !== 'featured' && scope !== 'everybody'),
+      shouldHide: !isAdmin || (scope !== 'featured' && scope !== 'everybody'),
     },
-    "Make Public": {
-      func: () => { },
+    'Make Public': {
+      type: 'link',
       isDisabled: selected.length !== 1 || !selected[0]?.links?.publish,
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
-      }
+      },
     },
-    "Attach to...": {
+    'Attach to...': {
+      type: 'modal',
       isDisabled: selected.length === 0 || selected.some(e => !e?.links?.attach_to),
       func: () => setAttachToModal(true),
       modal: attachToModal,
       showModal: isShownAttachToModal,
     },
-    "Delete": {
+    'Delete': {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.remove,
       func: () => setDeleteModal(true),
       modal: deleteModal,
       showModal: isShownDeleteModal,
-      hide: scope === 'spaces'
+      shouldHide: scope === 'spaces',
     },
-    "Attach License": {
+    'Attach License': {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links?.license || !availableLicenses,
       func: () => setAttachLicensesModal(true),
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
     },
-    "Detach License": {
+    'Detach License': {
+      type: 'modal',
       isDisabled: selected.length !== 1 ||
         !selected[0].links.license ||
         !availableLicenses,
       func: () => setDetachLicensesModal(true),
       modal: detachLicensesModal,
       showModal: isShownDetachLicensesModal,
-      hide: selected.length !== 1 || !selected[0]?.links?.detach_license,
+      shouldHide: selected.length !== 1 || !selected[0]?.links?.detach_license,
     },
-    "Request license approval": {
+    'Request license approval': {
+      type: 'link',
       isDisabled: selected.length !== 1,
-      func: () => { },
       link: selected[0]?.links.request_approval_license,
-      hide: !selected[0]?.links.request_approval_license,
+      shouldHide: !selected[0]?.links.request_approval_license,
     },
-    "Accept License": {
+    'Accept License': {
+      type: 'modal',
       func: () => setAcceptLicensesModal(true),
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
       isDisabled: false,
-      hide: selected.length !== 1 || !selected[0]?.links.accept_license_action,
+      shouldHide: selected.length !== 1 || !selected[0]?.links.accept_license_action,
     },
     'Edit tags': {
+      type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      hide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1)
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
     },
-    "Comments": {
+    'Comments': {
+      type: 'link',
       isDisabled: selected.length !== 1,
-      func: () => { },
-      hide: selected.length !== 1,
-      link: `/assets/${selected[0]?.uid}/comments`
+      shouldHide: selected.length !== 1,
+      link: `/assets/${selected[0]?.uid}/comments`,
     },
   }
 

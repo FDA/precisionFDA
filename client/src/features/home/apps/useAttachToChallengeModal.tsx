@@ -77,7 +77,6 @@ const StyledForm = styled.form`
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  width: 90vw;
   @media(min-width: ${breakPoints.small}px) {
     min-width: 300px;
     width: auto;

@@ -146,10 +146,11 @@ module Presenters
 
     # Select records if page params is present
     def select_pages
-      to = params[:page].to_i * Paginationable::PAGE_SIZE - 1
-      from = to - Paginationable::PAGE_SIZE + 1
+      page_size = params[:per_page] ? params[:per_page].to_i : Paginationable::PAGE_SIZE
+      to = params[:page].to_i * page_size - 1
+      from = to - page_size + 1
       from = 0 if from.negative?
-      to = from + (response.size % Paginationable::PAGE_SIZE) if to > response.size
+      to = from + (response.size % page_size) if to > response.size
 
       @response = @response[from..to]
     end

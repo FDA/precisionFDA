@@ -34,7 +34,7 @@ import 'regenerator-runtime'
 import { DefaultColumnFilter } from './helpers'
 import { LoadingRows } from './LoadingRows'
 import { ReactTableStyles, StyledTable } from './styles'
-import { expandHook, rowActionColHook, selectionHook } from './tableHooks'
+import { expandHook, selectionHook } from './tableHooks'
 
 export interface IRowActionProps<T extends object = {}> extends CellProps<T> {
   context: any
@@ -42,6 +42,7 @@ export interface IRowActionProps<T extends object = {}> extends CellProps<T> {
 
 export interface ITable<T extends object = {}> extends TableOptions<T> {
   name: string
+  fillWidth?: boolean
   hiddenColumns?: string[]
   loading?: boolean
   loadingComponent?: any
@@ -59,7 +60,6 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   sortByPreference?: SortingRule<string>[]
   isExpandable?: boolean
   subcomponent?: (row: Row<T>) => ReactNode
-  rowActionsComponent?: (cellProps: IRowActionProps<T>) => ReactNode
   onAdd?: (instance: TableInstance<T>) => MouseEventHandler
   onDelete?: (instance: TableInstance<T>) => MouseEventHandler
   onEdit?: (instance: TableInstance<T>) => MouseEventHandler
@@ -73,16 +73,18 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   saveColumnResizeWidth?: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  getRowId?: Parameters<typeof useTable>[0]['getRowId']
+  shouldAllowScrollbar?: boolean
 }
 
 export default function Table<T extends object>(
   props: PropsWithChildren<ITable<T>>,
 ): ReactElement {
   const {
+    fillWidth = false,
     loading = true,
     columns,
     subcomponent,
-    rowActionsComponent,
     hiddenColumns,
     isSelectable = false,
     selectedRows,
@@ -103,6 +105,8 @@ export default function Table<T extends object>(
     rowProps,
     updateRowState,
     saveColumnResizeWidth,
+    manualFilters,
+    shouldAllowScrollbar,
   } = props
 
   const defaultColumn = {
@@ -128,7 +132,7 @@ export default function Table<T extends object>(
         selectedRowIds: selectedRows || ({} as any),
         sortBy: sortByPreference || [],
       },
-      manualFilters: true,
+      manualFilters,
       manualPagination: true,
       manualSortBy: true,
       disableMultiSort: true,
@@ -142,7 +146,6 @@ export default function Table<T extends object>(
     usePagination,
     useFlexLayout,
     isExpandable ? expandHook : () => {},
-    rowActionColHook<T>(context, rowActionsComponent),
     isSelectable ? useRowSelect : () => {},
     isSelectable ? selectionHook : () => {},
     isColsResizable ? useResizeColumns : () => {},
@@ -201,7 +204,7 @@ export default function Table<T extends object>(
 
   return (
     <StyledTable>
-      <ReactTableStyles>
+      <ReactTableStyles shouldFillWidth={fillWidth} shouldAllowScrollbar={shouldAllowScrollbar}>
         <div className="tableWrap">
           <div {...getTableProps()} className="table sticky">
             <div className="thead">

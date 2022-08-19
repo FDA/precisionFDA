@@ -1,6 +1,8 @@
 # Space serializer.
 # rubocop:disable Metrics/ClassLength
 class SpaceSerializer < ApplicationSerializer
+  delegate :all_tags_list, to: :object
+
   attributes(
     :id,
     :description,
@@ -21,8 +23,7 @@ class SpaceSerializer < ApplicationSerializer
     object.confidential? && !object.private_type?
   }
   attribute :private_space_id, if: -> { object.shared? && confidential_space }
-
-  attribute :tag_list, key: :tags
+  attribute :all_tags_list, key: :tags
 
   attribute :can_duplicate, if: -> { object.review? }
   attribute :current_user_membership, key: :current_user_membership
@@ -102,10 +103,10 @@ class SpaceSerializer < ApplicationSerializer
     space_membership && object.confidential_space(space_membership)
   end
 
-  # Checks if user is a space member - used for RSA roles selection.
-  # @return [Boolean] Returns true if user is a space member, false otherwise.
+  # Checks if user is a space member, and returns that member
+  # @return [SpaceMembership]
   def current_user_membership
-    space_membership.present?
+    space_membership
   end
 
   def can_duplicate

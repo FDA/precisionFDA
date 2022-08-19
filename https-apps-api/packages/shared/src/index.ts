@@ -22,3 +22,7 @@ export * as utils from './utils'
 export { ajv } from './utils'
 
 export * as queue from './queue'
+
+export * as validation from './validation'
+
+export { BaseEntity } from './database/base-entity'

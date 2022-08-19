@@ -1,6 +1,6 @@
-import { errors, utils, ajv } from '@pfda/https-apps-shared'
+import { errors, utils, ajv, entities } from '@pfda/https-apps-shared'
 
-export const makeParseUserContextMdw = () => (ctx: Api.Ctx, next) => {
+export const parseUserContextMdw = (ctx: Api.Ctx, next) => {
   // TODO(samuel) proper sanitization in case array is passed into query-string
   const id = ctx.request.query.id
   ctx.user = {
@@ -44,4 +44,18 @@ export const makeValidateUserContextMdw = () => {
     }
     return next()
   }
+}
+
+// ! This MDW should be used only after validating user ctx
+export const validateSiteAdminMdw = async (ctx: Api.Ctx, next) => {
+  const userFromDb = await ctx.em.findOneOrFail(entities.User, {
+    id: ctx.user.id,
+  });
+  const isSiteAdmin = await userFromDb.isSiteAdmin();
+  if (!isSiteAdmin) {
+    throw new errors.UserInvalidPermissionsError(
+      'User requires Site Admin permission to access this resource',
+    )
+  }
+  return next()
 }

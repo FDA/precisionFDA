@@ -1,5 +1,6 @@
 require "rails_helper"
-# rubocop:disable RSpec/AnyInstance
+# rubocop:todo RSpec/AnyInstance
+# rubocop:todo RSpec/MultipleMemoizedHelpers
 
 RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
@@ -701,6 +702,7 @@ RSpec.describe ApiController, type: :controller do
     before do
       authenticate!(user)
 
+      allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
       allow_any_instance_of(DNAnexusAPI).to(
         receive(:call).with("file", "new", anything).and_return(
           "id" => "file-Bx46ZqQ04Pz5Bq3x20pkBXP4",
@@ -755,6 +757,20 @@ RSpec.describe ApiController, type: :controller do
         end
       end
     end
+
+    context "when user exceeded charges limit" do
+      before do
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
+      end
+
+      it "responds with an error" do
+        post :create_file, format: :json
+
+        expect(response.status).to eq(422)
+        expect(parsed_response["error"]["message"]).to \
+          include(I18n.t("api.errors.exceeded_charges_limit"))
+      end
+    end
   end
 
   describe "POST #set_tags" do
@@ -796,5 +812,6 @@ RSpec.describe ApiController, type: :controller do
       end
     end
   end
+  # rubocop:enable RSpec/MultipleMemoizedHelpers
   # rubocop:enable RSpec/AnyInstance
 end

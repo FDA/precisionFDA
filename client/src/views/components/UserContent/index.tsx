@@ -2,14 +2,14 @@ import React from 'react'
 
 import { UserContentDisplay } from './UserContentDisplay'
 import { IOutlineAnchor, UserContentOutline } from './UserContentOutline'
-import { theme } from "../../../styles/theme"
+import { theme } from '../../../styles/theme'
 
 
 // Stripping HTML code in case user inserts links in the header
 // See https://jira.internal.dnanexus.com/browse/PFDA-2396
 //
 export const stripHTML = (html: string) => {
-  let doc = new DOMParser().parseFromString(html, 'text/html')
+  const doc = new DOMParser().parseFromString(html, 'text/html')
   return doc.body.textContent || ''
 }
 
@@ -19,7 +19,8 @@ export const stripHTML = (html: string) => {
 //
 class UserContent {
   anchors: IOutlineAnchor[] = []
-  userContentHTML: string = ''
+
+  userContentHTML = ''
 
   constructor(htmlContent: string, isLoggedIn: boolean) {
     // We extract <h1> and <h2> tags for the any user content
@@ -36,31 +37,31 @@ class UserContent {
       const maxAnchorIdLength = 20
       let slug = stripHTML(content).replace(/ /g, '_')
       slug = encodeURIComponent(slug.slice(0, maxAnchorIdLength))
-      const idTagContent = anchorId.toString() + '__' + slug
+      const idTagContent = `${anchorId.toString()  }__${  slug}`
       return idTagContent
     }
 
-    const anchors = Array.from(headingElements).map((el) => {
-      const tag = el.tagName
-      const content = (el.innerHTML ? el.innerHTML.trim() : '')
-      const anchorId = getNextAnchorId(content)
+    const anchors = Array.from(headingElements).map((ael) => {
+      const tag = ael.tagName
+      const content = (ael.innerHTML ? ael.innerHTML.trim() : '')
+      const aId = getNextAnchorId(content)
 
       // If user is not logged in, add a hidden anchor element to take the sticky header
       // into account by inserting a hidden anchor to scroll to
       if (isLoggedIn) {
-        el.setAttribute('id', anchorId)
+        ael.setAttribute('id', aId)
       }
       else {
-        var hiddenAnchor = document.createElement('section')
-        hiddenAnchor.setAttribute('id', anchorId)
+        const hiddenAnchor = document.createElement('section')
+        hiddenAnchor.setAttribute('id', aId)
         hiddenAnchor.style.position = 'relative'
         hiddenAnchor.style.top = `-${theme.values.navigationBarHeight+theme.values.contentMargin}px`
         hiddenAnchor.style.visibility = 'hidden'
         hiddenAnchor.style.zIndex = '321'
-        el.parentElement?.insertBefore(hiddenAnchor, el)
+        el.parentElement?.insertBefore(hiddenAnchor, ael)
       }
 
-      return { 'tag': tag.toLowerCase(), 'content': stripHTML(content), 'anchorId': anchorId }
+      return { 'tag': tag.toLowerCase(), 'content': stripHTML(content), 'anchorId': aId }
     })
 
     this.anchors = anchors

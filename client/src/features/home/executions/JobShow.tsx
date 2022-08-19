@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled, { css } from 'styled-components'
@@ -14,6 +14,7 @@ import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { HOME_TABS } from '../../../constants'
 import { colors } from '../../../styles/theme'
+import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsRow, StyledBackLink } from '../home.styles'
 import {
@@ -31,6 +32,7 @@ import {
   Topbox,
 } from '../show.styles'
 import { ResourceScope } from '../types'
+import { getBasePath } from '../utils'
 import { fetchExecution, syncFilesRequest } from './executions.api'
 import { IExecution, JobState } from './executions.types'
 import { InputsAndOutputs } from './InputsAndOutputs'
@@ -122,8 +124,9 @@ const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
 )
 
-export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
+export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const queryCache = useQueryClient()
+  const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
   const syncFiles = useMutation({
@@ -193,7 +196,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/executions${scopeParamLink}`}>
+      <StyledBackLink linkTo={getBackPath(location, 'executions', spaceId)}>
         Back to Executions
       </StyledBackLink>
       <Topbox>
@@ -288,10 +291,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
               {/* TODO: do not rely on link to get app id */}
               <MetadataVal>
                 <Link
-                  to={`/home/apps/${execution.links.app?.replace(
-                    '/apps/',
-                    '',
-                  )}`}
+                  to={`${getBasePath(spaceId)}/apps/${execution.links.app?.replace('/apps/', '')}`}
                 >
                   {execution.app_title}
                 </Link>
@@ -323,7 +323,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
               <MetadataVal>{execution.duration}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
-              <MetadataKey>Energy Consumed</MetadataKey>
+              <MetadataKey>Cost In Dollars</MetadataKey>
               <MetadataVal>{execution.energy_consumption}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
@@ -332,13 +332,15 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-        {execution.tags.length > 0 && (
-          <StyledTags>
-            {execution.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        <MetadataSection>
+          {execution.tags.length > 0 && (
+            <StyledTags>
+              {execution.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
 
       <div className="pfda-padded-t40" />

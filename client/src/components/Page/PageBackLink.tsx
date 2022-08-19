@@ -10,6 +10,7 @@ const backStyles = css`
   text-decoration: none;
   display: flex;
   align-items: center;
+  width: fit-content;
 `
 export const StyledBackLink = styled(Link)`
   ${backStyles}
@@ -27,3 +28,7 @@ export const BackLink: FC<{ linkTo: string, onClick?: (e: any) => void}> = ({ li
     </StyledBackLink>
   )
 }
+
+export const BackLinkMargin = styled(BackLink)`
+  margin: 16px;
+`

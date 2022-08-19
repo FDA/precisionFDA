@@ -1,4 +1,5 @@
-import { EntityManager, wrap } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
+import { wrap } from '@mikro-orm/core'
 import { config } from '../config'
 import { entities } from '../domain'
 import * as generate from './generate'

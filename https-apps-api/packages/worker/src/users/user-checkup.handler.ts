@@ -25,8 +25,9 @@ export const userCheckupHandler = async (bullJob: Job) => {
     dxuser: data.user.dxuser,
   }, 'Starting user checkup')
 
-  await new job.CheckUserJobsOperation(ctx).execute()
-  await new dbCluster.CheckUserDbClustersOperation(ctx).execute()
+  // TODO(samuel) typescript fix
+  await new job.CheckUserJobsOperation(ctx as any).execute()
+  await new dbCluster.CheckUserDbClustersOperation(ctx as any).execute()
 
   log.info({
     id: data.user.id,

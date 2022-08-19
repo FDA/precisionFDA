@@ -5,6 +5,8 @@ module Api
     include Sortable
 
     before_action :find_db_cluster, only: %i(show update)
+    # TODO(samuel) disabled now wait until database resources are specified in next iteration of cloud governance
+    # before_action :check_total_charges_limit, only: %i(create)
 
     rescue_from DXClient::Errors::DXClientError,
                 HttpsAppsClient::Error,
@@ -72,6 +74,10 @@ module Api
       https_apps_client.dbcluster_action(params[:dxids], params[:api_method])
 
       render json: {}, status: :no_content
+    end
+
+    def allowed_db_instances_by_user
+      render json: user_database_resource_labels
     end
 
     private

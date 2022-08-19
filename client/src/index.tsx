@@ -2,6 +2,7 @@
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 
+import Axios from 'axios'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import ReactModal from 'react-modal'
@@ -9,6 +10,9 @@ import ReactModal from 'react-modal'
 import Root from './root'
 import store from './store'
 import './styles/style.sass'
+import { getAuthenticityToken } from './utils/api'
+
+Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
 
 const renderApp = () => {
   let container = document.getElementById('app-root')

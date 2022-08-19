@@ -2,6 +2,7 @@ module Api
   # Challenges API controller.
   class ChallengesController < BaseController
     include Paginationable
+    include ChallengesHelper
 
     skip_before_action :require_api_login, except: :save_editor_page
     before_action :check_admin, only: :save_editor_page
@@ -20,15 +21,119 @@ module Api
              adapter: :json
     end
 
+    def create
+      ActiveRecord::Base.transaction do
+        @challenge = Challenge.new(challenge_params)
+        if @challenge.save
+
+          @challenge.update_card_image_url!
+          @challenge.provision_space!(
+            @context,
+            challenge_params[:host_lead_dxuser],
+            challenge_params[:guest_lead_dxuser],
+          )
+          render json: @challenge, adapter: :json
+        end
+      end
+    end
+
+    def update
+      @challenge = Challenge.find(params[:id])
+
+      ActiveRecord::Base.transaction do
+        if @challenge.update(update_challenge_params)
+          @challenge.update_card_image_url!
+          @challenge.update_order(challenge_params["replacement_id"])
+
+          unless @challenge.space
+            @challenge.provision_space!(
+              @context,
+              challenge_params[:host_lead_dxuser],
+              challenge_params[:guest_lead_dxuser],
+            )
+          end
+        else
+          render json: @challenge.errors, status: :unprocessable_entity
+          return
+        end
+      end
+      render json: @challenge, adapter: :json
+    end
+
     def show
       challenge = accessible_challenges.find_by(id: params[:id])
 
       unless challenge
-        render json: { error: I18n.t("api.challenges.not_found_or_forbidden") }
+        render json: { error: I18n.t("api.challenges.not_found_or_forbidden") }, status: :not_found
         return
       end
 
-      render json: challenge, adapter: :json
+      if params[:custom]
+        render json: challenge, adapter: :json, serializer: CustomChallengeSerializer
+      else
+        render json: challenge, adapter: :json
+      end
+    end
+
+    def scoring_app_users
+      render json: app_owners_for_select
+    end
+
+    def host_lead_users
+      render json: host_lead_dxusers
+    end
+
+    def guest_lead_users
+      render json: guest_lead_dxusers
+    end
+
+    def challenges_for_select
+      render json: challenge_order_for_select
+    end
+
+    def scopes_for_select
+      challenge = Challenge.new
+      if params[:id]
+        challenge = Challenge.find(params[:id])
+      end
+      render json: spaces_for_select(@context, challenge)
+    end
+
+    def challenge_params
+      params.require(:challenge).
+        permit(
+          :name,
+          :description,
+          :scope,
+          :app_owner_id,
+          :start_at,
+          :end_at,
+          :status,
+          :regions,
+          :card_image_id,
+          :card_image_url,
+          :replacement_id,
+          :host_lead_dxuser,
+          :guest_lead_dxuser,
+          :pre_registration_url,
+        )
+    end
+
+    def update_challenge_params
+      params.require(:challenge).
+        permit(
+          :name,
+          :description,
+          :scope,
+          :app_owner_id,
+          :start_at,
+          :end_at,
+          :status,
+          :card_image_id,
+          :card_image_url,
+          :replacement_id,
+          :pre_registration_url,
+        )
     end
 
     def years

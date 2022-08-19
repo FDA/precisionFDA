@@ -13,9 +13,9 @@ import { TrashIcon } from '../../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../../utils'
 import { Modal } from '../../../../modal'
 import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
-import { useModal } from '../../../../modal/useModal'
+import { useConditionalModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
-import { itemsCountString } from '../../../utils'
+import { itemsCountString } from '../../../../../utils/formatting'
 import {
   FilesMeta,
   FILE_STATUS,
@@ -44,15 +44,23 @@ const isUniqFile = (blobs: any, file: any) =>
       blob.path === file.path,
   )
 
+type UploadModalArgs = {
+  scope?: ResourceScope
+  folderId?: string
+  spaceId?: string
+  isAllowed: boolean
+  onViolation: () => void
+}
+  
 export const useFileUploadModal = ({
   scope,
   folderId,
-}: {
-  scope?: ResourceScope
-  folderId?: string
-}) => {
+  spaceId,
+  isAllowed,
+  onViolation,
+}: UploadModalArgs) => {
   const queryCache = useQueryClient()
-  const { isShown, setShowModal } = useModal()
+  const { isShown, setShowModal } = useConditionalModal(isAllowed, onViolation)
   const [filesMeta, setFilesMeta] = useImmer<FilesMeta[]>([])
   const [blobs, setBlobs] = useState<any[]>([])
 
@@ -75,6 +83,7 @@ export const useFileUploadModal = ({
       toast.success(`Success: uploaded ${itemsCountString('file', filesMeta.length)}`)
       queryCache.invalidateQueries('files')
       queryCache.invalidateQueries('counters')
+      if(spaceId) queryCache.invalidateQueries(['space', spaceId.toString()])
     }
   }, [uploadFinished])
 
@@ -111,8 +120,8 @@ export const useFileUploadModal = ({
         filesBlob: blobs,
         filesMeta,
         updateFileStatus: updateFilesStatus,
-        spaceId: 1,
         scope: scope === 'me' ? 'private' : scope === 'everybody' ? 'public' : scope,
+        spaceId,
         folderId,
       })
     } catch (error: any) {
@@ -138,13 +147,14 @@ export const useFileUploadModal = ({
               const uniqBlob: any[] = []
               const fil: any[] = []
               accepted.forEach((file: any) => {
-                if (isUniqFile(blobs, file)) {
-                  file.generatedId = idGenerator.next().value
-                  uniqBlob.push(file)
+                const f = file
+                if (isUniqFile(blobs, f)) {
+                  f.generatedId = idGenerator.next().value
+                  uniqBlob.push(f)
                   fil.push({
-                    id: file.generatedId,
-                    name: file.name,
-                    size: file.size,
+                    id: f.generatedId,
+                    name: f.name,
+                    size: f.size,
                     status: FILE_STATUS['added'],
                     uploadedSize: 0,
                   })
@@ -205,7 +215,7 @@ export const useFileUploadModal = ({
             Remove all
           </Button>
           {uploadFinished ? (
-            <ButtonSolidBlue onClick={() => handleClose()}>
+            <ButtonSolidBlue onClick={handleClose}>
               Close
             </ButtonSolidBlue>
           ) : (
@@ -221,6 +231,7 @@ export const useFileUploadModal = ({
       </Footer>
     </Modal>
   )
+
   return {
     modalComp,
     setShowModal,

@@ -1,7 +1,7 @@
-import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
-import { PlusIcon } from '../../components/icons/PlusIcon';
-import { useKeyPress } from '../../hooks/useKeyPress';
+import React, { FC } from 'react'
+import ReactDOM from 'react-dom'
+import { PlusIcon } from '../../components/icons/PlusIcon'
+import { useKeyPress } from '../../hooks/useKeyPress'
 import {
   Wrapper,
   Header,
@@ -11,7 +11,8 @@ import {
   Content,
   Backdrop,
   Footer,
-} from './styles';
+} from './styles'
+
 export interface ModalProps {
   isShown: boolean
   hide: () => void
@@ -19,11 +20,12 @@ export interface ModalProps {
   footer?: React.ReactNode
   blur?: boolean
   disableClose?: boolean
+  overflowContent?: boolean
 }
-const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, footer, blur = false, disableClose = false, ...rest }) => {
+const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, footer, blur = false, disableClose = false, overflowContent = true, ...rest }) => {
   useKeyPress('Escape', () => hide())
   return (
-    <React.Fragment>
+    <>
       <Backdrop onClick={disableClose ? undefined : hide} blur={blur} />
       <Wrapper aria-modal aria-label={headerText} tabIndex={-1} role="dialog" {...rest}>
         <StyledModal>
@@ -35,17 +37,16 @@ const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, f
               </CloseButton>
             }
           </Header>
-          <Content>
+          <Content overflowContent={overflowContent}>
             {children}
           </Content>
           {footer && <Footer>{footer}</Footer>}
         </StyledModal>
       </Wrapper>
-    </React.Fragment>
+    </>
   )
 }
-export const Modal: FC<ModalProps> = (props) => {
-  return props.isShown ? ReactDOM.createPortal(
-    <ModalComponent {...props}/>, document.body
+// eslint-disable-next-line react/destructuring-assignment
+export const Modal: FC<ModalProps> = (props) => props.isShown ? ReactDOM.createPortal(
+    <ModalComponent {...props}/>, document.body,
   ) : null
-}

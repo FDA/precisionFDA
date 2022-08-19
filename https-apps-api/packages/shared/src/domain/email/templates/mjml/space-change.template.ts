@@ -7,7 +7,7 @@ export type SpaceChangeTemplateInput = EmailTemplateInput & {
     action: string
     space: { name: string; id: number }
     receiversSides: object,
-    spaceMembership: { side: number }
+    spaceMembership: { side?: number }
     spaceMembershipSide: string,
     receiverMembershipSide: string,
   }

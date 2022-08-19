@@ -24,4 +24,7 @@ module.exports = {
       },
     },
   ],
+  rules: {
+    'import/group-exports': 0,
+  }
 }

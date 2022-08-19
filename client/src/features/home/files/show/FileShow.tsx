@@ -1,13 +1,17 @@
 import React from 'react'
 import { useQuery } from 'react-query'
 import { useParams } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Dropdown from '../../../../components/Dropdown'
+import { HomeLabel } from '../../../../components/HomeLabel'
 import { FileIcon } from '../../../../components/icons/FileIcon'
+import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../../components/Tags'
+import { Location } from '../../../../types/utils'
+import { getBackPath } from '../../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../../ActionDropdownContent'
 import { StyledBackLink } from '../../home.styles'
-import { HomeLabel } from '../../../../components/HomeLabel'
+import { License } from '../../licenses/License'
 import {
   ActionsButton,
   Header,
@@ -28,18 +32,19 @@ import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
-import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
-import { License } from '../../licenses/License'
 
 const FileActions = ({
   scope,
+  spaceId,
   file,
 }: {
-  scope: ResourceScope
+  scope?: ResourceScope
+  spaceId?: string
   file: IFile
 }) => {
   const actions = useFilesSelectActions({
     scope,
+    spaceId,
     fileId: file.id,
     selectedItems: [file],
     resourceKeys: ['file', file.uid],
@@ -70,12 +75,15 @@ const FileActions = ({
   )
 }
 
-export const FileShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
+
+export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+  const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
-  // const { files, meta: ma } = data!
   const file = data?.files
   const meta = data?.meta
+  const backPath = getBackPath(location, 'files', spaceId)
+
   if (status === 'loading') {
     return  <HomeLoader />
   }
@@ -97,14 +105,14 @@ export const FileShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
-  const scopeParamLink = `?scope=${scope.toLowerCase()}`
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
   // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
   // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
-  const spaceId = file.space_id?.split('-')[1]
+  // const spaceId = file.space_id?.split('-')[1]
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/files${scopeParamLink}`}>
+      <StyledBackLink linkTo={backPath}>
         Back to Files
       </StyledBackLink>
       <Topbox>
@@ -125,7 +133,7 @@ export const FileShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             </Title>
           </HeaderLeft>
           <HeaderRight>
-            <FileActions scope={scope} file={file} />
+            <FileActions scope={scope} spaceId={spaceId} file={file} />
           </HeaderRight>
         </Header>
 
@@ -199,14 +207,15 @@ export const FileShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-
-        {file.tags.length > 0 && (
-          <StyledTags>
-            {file.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        )}
+        <MetadataSection>
+          {file.tags.length > 0 && (
+            <StyledTags>
+              {file.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+              ))}
+            </StyledTags>
+          )}
+        </MetadataSection>
       </Topbox>
 
       <div className="pfda-padded-t40" />

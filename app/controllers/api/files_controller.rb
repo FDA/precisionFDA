@@ -162,7 +162,7 @@ module Api
         page_meta = pagination_meta(nodes.count)
         nodes = paginate_array(nodes)
 
-        render json: nodes, root: "files", adapter: :json, meta: page_meta
+        render json: nodes, root: "files", adapter: :json, meta: files_meta.merge(page_meta)
       end
     end
 
@@ -319,12 +319,14 @@ module Api
     # Creates a folder.
     # @param :public [Boolean] True/False
     # @param :parent_folder_id [Integer] Folder id - nil for root folder
+    # @param :space_id [Integer] id of the target space, if specified the public attribute is ignored
     # @param :name [String] a new folder name
     # @return json { path: path(), message: { type: type, text: text } }
     def create_folder
-      is_public_folder = params[:public] == "true"
-
-      if is_public_folder
+      if params[:space_id] && find_user_space
+        scope = @space.uid
+        parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
+      elsif params[:public] == "true"
         if @context.user.can_administer_site?
           parent_folder = Folder.accessible_by_public.find_by(id: params[:parent_folder_id])
           scope = "public"
@@ -332,7 +334,6 @@ module Api
           path = everybody_api_files_path
           type = :error
           text = "You are not allowed to create public folders"
-
           render json: { path: path, message: { type: type, text: text } }, adapter: :json
           return
         end
@@ -346,7 +347,6 @@ module Api
       if result.failure?
         type = :error
         text = result.value[:name]
-
       else
         type = :success
         text = "Folder '#{result.value.name}' successfully created."
@@ -357,7 +357,6 @@ module Api
       else
         scope == "public" ? everybody_api_files_path : api_files_path
       end
-
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
 
@@ -450,11 +449,9 @@ module Api
 
       return render(plain: page_dict[:total_count]) if show_count
 
-      render json: {
-        entries: nodes.map { |node| helpers.client_file(node, @space, current_user) },
-        meta: files_meta.merge(count(page_dict[:total_count])).
-          merge({ pagination: page_dict }),
-      }, root: "files"
+      render json: nodes, root: "files", adapter: :json,
+             meta: files_meta.merge(count(page_dict[:total_count])).
+             merge({ pagination: page_dict })
     end
 
     def render_files_list(files:, folders:)

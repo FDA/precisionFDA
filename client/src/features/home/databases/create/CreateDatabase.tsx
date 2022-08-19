@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
@@ -8,22 +10,22 @@ import Select from 'react-select'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
+import { getDatabaseAllowedInstances } from '../../../../api/home'
 import { ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, Hint, InputError } from '../../../../components/form/styles'
 import { InputText } from '../../../../components/InputText'
 import { Loader } from '../../../../components/Loader'
 import { StyledBackLink } from '../../home.styles'
+import { NotFound } from '../../show.styles'
 import { ResourceScope } from '../../types'
 import { createDatabaseRequest, fetchAccessibleFiles } from '../databases.api'
-import { instancesOptions, versionsOptions } from './options'
+import { versionsOptions } from './options'
 
-const useAccessibleFiles = () => {
-  return useQuery(['accessible-files'], () => fetchAccessibleFiles(), {
+const useAccessibleFiles = () => useQuery(['accessible-files'], () => fetchAccessibleFiles(), {
     onError: (e: Error) => {
-      toast.error(`Error: fetching files '${e.message}'`);
-    }
+      toast.error(`Error: fetching files '${e.message}'`)
+    },
   })
-}
 
 const StyledForm = styled.form`
   margin: 16px;
@@ -40,6 +42,10 @@ const Row = styled.div`
   align-items: center;
   gap: 16px;
 `
+
+const replaceNbspSubstring = (str: string, substringLength: number) =>
+  str.replace(' '.repeat(substringLength), '\xa0'.repeat(substringLength))
+
 interface CreateDatabaseForm {
   name: string
   description: string
@@ -72,9 +78,15 @@ const validationSchema = Yup.object().shape({
     .nullable().required('Required'),
 })
 
+// eslint-disable-next-line react/require-default-props
 export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const history = useHistory()
   const { data, isLoading } = useAccessibleFiles()
+  const allowedInstancesQuery = useQuery(['dbclusters','allowedInstances'], () => getDatabaseAllowedInstances(), {
+    onError: (e: Error) => {
+      toast.error(`Error: fetching allowed Db instance types '${e.message}'`)
+    },
+  })
   
   const accessibleFiles = data || []
 
@@ -85,7 +97,7 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
     formState: { errors },
     setValue,
     watch,
-    getValues
+    getValues,
   } = useForm<CreateDatabaseForm>({
     mode: 'onBlur',
     resolver: yupResolver(validationSchema),
@@ -110,16 +122,14 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
         history.push(`/home/databases/${res?.db_cluster?.dxid}`)
         queryClient.invalidateQueries('dbclusters')
         toast.success('Success: creating database.')
-      } else {
-        if (res?.error) {
+      } else if (res?.error) {
           toast.error(`${res.error.type}: ${res.error.message}`)
         } else {
           toast.error('Something went wrong!')
         }
-      }
     },
     onError: () => {
-      toast.error('Error: Adding database.');
+      toast.error('Error: Adding database.')
     },
   })
 
@@ -149,12 +159,37 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
 
   const isSubmitting = createDatabaseMutation.isLoading
 
+  if (allowedInstancesQuery.error) {
+    return (
+      <div>
+        {JSON.stringify(allowedInstancesQuery.error)}
+      </div>
+    )
+  }
+  if (allowedInstancesQuery.isLoading) {
+    return <Loader />
+  }
+  if (Array.isArray(allowedInstancesQuery.data?.payload) && allowedInstancesQuery.data?.payload.length === 0) {
+    return (
+      <>
+        <StyledBackLink linkTo="/home/databases">
+          Back to Databases
+        </StyledBackLink>
+        <NotFound>
+          No database resources allowed - contact your Site Administrator to adjust database resources access
+        </NotFound>
+      </>
+    )
+  }
+  const dbInstanceOptions = allowedInstancesQuery.data!.payload.map((option) => ({
+    ...option,
+    label: replaceNbspSubstring(option.label, 4),
+  }))
   return (
     <>
-      <StyledBackLink linkTo={`/home/databases`}>
+      <StyledBackLink linkTo="/home/databases">
         Back to Databases
       </StyledBackLink>
-
       <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
         <FieldGroup>
           <label>Name (required)</label>
@@ -183,15 +218,15 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
           <Controller
             name="ddl_file_uid"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur }}) => (
               <Select
                 options={filesOptions}
-                placeholder={'Choose...'}
+                placeholder="Choose..."
                 onChange={onChange}
                 isLoading={isLoading}
                 defaultValue={{ label: 'Select...', value: '' }}
-                isClearable={true}
-                isSearchable={true}
+                isClearable
+                isSearchable
                 onBlur={onBlur}
                 value={value}
                 isDisabled={isSubmitting}
@@ -256,14 +291,14 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
           <Controller
             name="dxInstanceClass"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur }}) => (
               <Select
-                options={instancesOptions(watch().engine)}
-                placeholder={'Choose...'}
+                options={watch().engine ? dbInstanceOptions : []}
+                placeholder="Choose..."
                 onChange={onChange}
                 defaultValue={null}
-                isClearable={true}
-                isSearchable={true}
+                isClearable
+                isSearchable
                 onBlur={onBlur}
                 value={value}
                 isDisabled={isSubmitting}
@@ -281,17 +316,17 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
           <Controller
             name="engineVersion"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur }}) => (
               <Select
                 options={versionsOptions(
                   watch().engine,
                   watch().dxInstanceClass?.value ?? '',
                 )}
-                placeholder={'Choose...'}
+                placeholder="Choose..."
                 onChange={onChange}
                 defaultValue={null}
-                isClearable={true}
-                isSearchable={true}
+                isClearable
+                isSearchable
                 onBlur={onBlur}
                 value={value}
                 isDisabled={isSubmitting}
