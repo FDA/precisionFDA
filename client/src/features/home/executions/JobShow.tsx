@@ -196,7 +196,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'executions')}>
+      <StyledBackLink linkTo={getBackPath(location, 'executions', spaceId)}>
         Back to Executions
       </StyledBackLink>
       <Topbox>
