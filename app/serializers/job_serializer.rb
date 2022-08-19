@@ -9,6 +9,7 @@ class JobSerializer < ApplicationSerializer
     :state,
     :name,
     :app_title,
+    :app_uid,
     :app_revision,
     :app_active,
     :workflow_title,
@@ -83,6 +84,10 @@ class JobSerializer < ApplicationSerializer
   # @return [String] app title.
   def app_title
     object.app&.title
+  end
+
+  def app_uid
+    object.app&.uid
   end
 
   # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column

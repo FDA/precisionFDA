@@ -71,7 +71,7 @@ export const Spaces2 = ({
   const spaceActions = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
 
-  if (user.is_guest) {
+  if (user?.is_guest) {
     return <GuestNotAllowed />
   }
 
@@ -191,19 +191,19 @@ export const Spaces2 = ({
                 />
               </Route>
               <Route exact path={`/spaces/${space.id}/files/:fileId`}>
-                <FileShow />
+                <FileShow spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/apps`}>
                 <AppList spaceId={space.id} />
               </Route>
               <Route path={`/spaces/${space.id}/apps/:appUid`}>
-                <AppsShow />
+                <AppsShow spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/workflows`}>
                 <WorkflowList spaceId={space.id} />
               </Route>
               <Route path={`/spaces/${space.id}/workflows/:workflowUid`}>
-                <WorkflowShow />
+                <WorkflowShow spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/executions`}>
                 <ExecutionList spaceId={space.id} />
@@ -212,7 +212,7 @@ export const Spaces2 = ({
                 exact
                 path={`/spaces/${space.id}/executions/:executionUid`}
               >
-                <JobShow />
+                <JobShow spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
                 <MembersList space={space} />
