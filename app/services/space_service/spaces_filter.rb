@@ -40,7 +40,7 @@ module SpaceService
       conditions << space_arel[:updated_at].matches(wildcard(filters[:updated_at])) if filters[:updated_at]
       conditions << space_arel[:description].matches(wildcard(filters[:description])) if filters[:description]
       conditions.reduce(nil) do |where, condition|
-        where ? where.or(condition) : condition
+        where ? where.and(condition) : condition
       end
     end
 
