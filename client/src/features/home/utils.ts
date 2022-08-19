@@ -53,6 +53,20 @@ export function formatScopeQ(scope?: ResourceScope) {
   return scopeQ
 }
 
+export const getBasePath = (spaceId?: string|number) => {
+  if(spaceId) return `/spaces/${spaceId}`
+  return '/home'
+}
+
+export const getSpaceIdFromScope = (scope: string): string | undefined => {
+  if(scope) {
+    const [resource, id] = scope.split('-')
+    const spaceId = resource === 'space' ? id : undefined
+    return spaceId
+  }
+  return undefined
+}
+
 export function prepareListFetch(filters: IFilter[], params: Params) {
   let modFilters = filters
   modFilters = renameFilterKeys(modFilters)

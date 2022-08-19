@@ -32,6 +32,7 @@ import {
   Topbox,
 } from '../show.styles'
 import { ResourceScope } from '../types'
+import { getBasePath } from '../utils'
 import { fetchExecution, syncFilesRequest } from './executions.api'
 import { IExecution, JobState } from './executions.types'
 import { InputsAndOutputs } from './InputsAndOutputs'
@@ -123,7 +124,7 @@ const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
 )
 
-export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
+export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const queryCache = useQueryClient()
   const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
@@ -290,10 +291,7 @@ export const JobShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
               {/* TODO: do not rely on link to get app id */}
               <MetadataVal>
                 <Link
-                  to={`/home/apps/${execution.links.app?.replace(
-                    '/apps/',
-                    '',
-                  )}`}
+                  to={`${getBasePath(spaceId)}/apps/${execution.links.app?.replace('/apps/', '')}`}
                 >
                   {execution.app_title}
                 </Link>

@@ -14,6 +14,7 @@ import {
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { StyledLinkCell } from '../home.styles'
 import { KeyVal } from '../types'
+import { getBasePath, getSpaceIdFromScope } from '../utils'
 import { IExecution } from './executions.types'
 
 export const useExecutionColumns = ({
@@ -57,13 +58,8 @@ export const useExecutionColumns = ({
           width: colWidths?.name || 300,
           Cell: ({ cell, row, value }) => {
             const rowType = row.original.workflow_series_id ? 'workflows' : 'executions'
-            let pathname
-            if(path.startsWith('/home')){
-              pathname = `/home/${rowType}/${cell.row.original.uid}`
-            }
-            if(path.startsWith('/spaces')){
-              pathname = `/spaces/${rowType}/${cell.row.original.uid}`
-            }
+            const spaceId = getSpaceIdFromScope(row.original.scope)
+            const pathname = `${getBasePath(spaceId)}/${rowType}/${cell.row.original.uid}`
             const to = { pathname, state: { from: location.pathname, fromSearch: location.search }}
 
             return row.original.jobs ? (
@@ -86,12 +82,18 @@ export const useExecutionColumns = ({
           accessor: 'workflow_title',
           Filter: DefaultColumnFilter,
           width: colWidths?.workflow_title || 200,
-          Cell: props => props.value === 'N/A' ? props.value : (
-              <StyledLinkCell to={`/home/workflows/${props.row.original.workflow_uid}`}>
+          Cell: ({ row, value }) => {
+            const spaceId = getSpaceIdFromScope(row.original.scope)
+            if(value === 'N/A') {
+              return value
+            }
+            return (
+              <StyledLinkCell to={`${getBasePath(spaceId)}/workflows/${row.original.workflow_uid}`}>
                 <BoltIcon height={14} />
-                {props.value}
+                {value}
               </StyledLinkCell>
-            ),
+            )
+          },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-workflow-title` } : {},
         },
         {
@@ -115,15 +117,19 @@ export const useExecutionColumns = ({
           accessor: 'app_title',
           Filter: DefaultColumnFilter,
           width: colWidths?.app_title || 200,
-          Cell: props =>
-            props.row.original.jobs ? (
-              <></>
-            ) : (
-              <StyledLinkCell to={`/home${props.row.original.links.app}`}>
+          Cell: ({ row, value }) => {
+            const spaceId = getSpaceIdFromScope(row.original.scope)
+            if(row.original.jobs) {
+              return null
+            }
+
+            return (
+              <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`}>
                 <CubeIcon height={14} />
-                {props.value}
+                {value}
               </StyledLinkCell>
-            ),
+            )
+          },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-app-title` } : {},
         },
         {

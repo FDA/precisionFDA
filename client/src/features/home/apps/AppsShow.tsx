@@ -2,8 +2,8 @@
 import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from 'react-query'
-import { useLocation, useParams } from 'react-router'
-import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
+import { useLocation, useParams, useRouteMatch } from 'react-router'
+import { Link, Redirect, Route, Switch } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
@@ -158,7 +158,7 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ scope }: { scope?: ResourceScope }) => {
+export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
@@ -183,7 +183,7 @@ export const AppsShow = ({ scope }: { scope?: ResourceScope }) => {
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'apps')}>
+      <StyledBackLink linkTo={getBackPath(location, 'apps', spaceId) }>
         Back to Apps
       </StyledBackLink>
       <Topbox>
