@@ -143,6 +143,11 @@ export const StyledLink = styled.a`
   cursor: pointer;
 `
 
+export const StyledOnClickModalDiv = styled.div`
+  ${linkCss}
+  cursor: pointer;
+`
+
 export const HeaderLeft = styled.div`
   display: flex;
   flex-wrap: wrap;

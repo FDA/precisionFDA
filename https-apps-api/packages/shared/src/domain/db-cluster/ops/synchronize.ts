@@ -10,9 +10,9 @@ import { errors } from '../../..'
 import { STATUS, STATUSES } from '../db-cluster.enum'
 
 export class SyncDbClusterOperation extends WorkerBaseOperation<
-  UserOpsCtx,
-  SyncDbClusterJob['payload'],
-  Maybe<DbCluster>
+UserOpsCtx,
+SyncDbClusterJob['payload'],
+Maybe<DbCluster>
 > {
   static getBullJobId(dbClusterDxId: string): string {
     return `${TASK_TYPE.SYNC_DBCLUSTER_STATUS}.${dbClusterDxId}`
@@ -39,8 +39,10 @@ export class SyncDbClusterOperation extends WorkerBaseOperation<
     this.ctx.log.info({ dbClusterId: dbCluster.id }, 'SyncDbClusterOperation: Processing job')
 
     if (dbCluster.status === STATUS.TERMINATED) {
-      this.ctx.log.info({ input, dbCluster },
-        'SyncDbClusterOperation: DB Cluster already has terminated status. Removing task')
+      this.ctx.log.info(
+        { input, dbCluster },
+        'SyncDbClusterOperation: DB Cluster already has terminated status. Removing task',
+      )
       await removeRepeatable(this.ctx.job)
       return
     }
@@ -70,16 +72,21 @@ export class SyncDbClusterOperation extends WorkerBaseOperation<
       return
     }
 
-    this.ctx.log.info({ data: describeDbClusterRes },
-      'SyncDbClusterOperation: Received dbcluster describe response from platform')
+    this.ctx.log.info(
+      { data: describeDbClusterRes },
+      'SyncDbClusterOperation: Received dbcluster describe response from platform',
+    )
 
     const currentStatus = STATUSES[invertObj(STATUS)[dbCluster.status]]
 
-    if (currentStatus === describeDbClusterRes.status &&
-        dbCluster.host == describeDbClusterRes.endpoint &&
-        dbCluster.port == describeDbClusterRes.port?.toString()) {
-      this.ctx.log.info({ dxid: dbCluster.dxid },
-        'SyncDbClusterOperation: Status, endpoint or port have not been changed, no updates')
+    if (currentStatus === describeDbClusterRes.status
+        // TODO(samuel) validate if there is some possible type mismatch - if you git blame properly I didn't code it, just ran eslint
+        && dbCluster.host == describeDbClusterRes.endpoint
+        && dbCluster.port == describeDbClusterRes.port?.toString()) {
+      this.ctx.log.info(
+        { dxid: dbCluster.dxid },
+        'SyncDbClusterOperation: Status, endpoint or port have not been changed, no updates',
+      )
       return
     }
 

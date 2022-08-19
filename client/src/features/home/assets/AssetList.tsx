@@ -9,12 +9,12 @@ import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { RootState } from '../../../store'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
-import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../utils'
 import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
@@ -42,10 +42,11 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
     resetSelected,
   } = useList<ListType>({
     fetchList: fetchAssets,
-    onRowClick,
     resource: 'assets',
-    scope,
-    spaceId
+    params: {
+      spaceId: spaceId || undefined,
+      scope: scope || undefined,
+    },
   })
   const { status, data, error, isFetching } = query
 
@@ -97,7 +98,8 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
         isAdmin={isAdmin}
         scope={scope}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery)}
+        // TODO(samuel) Typescript fix
+        filters={toArrayFromObject(filterQuery as any)}
         apps={data?.assets}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
@@ -108,22 +110,23 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <Pagination
-        page={data?.meta?.pagination?.current_page!}
-        totalCount={data?.meta?.pagination?.total_count!}
-        totalPages={data?.meta?.pagination?.total_pages!}
-        perPage={perPageParam}
-        hide={hidePagination(
-          query.isFetched,
-          data?.assets?.length,
-          data?.meta?.pagination?.total_pages,
-        )}
-        isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-        isNextData={data?.meta?.pagination?.next_page! !== null}
-        setPage={setPageParam}
-        onPerPageSelect={setPerPageParam}
-      />
-
+      <StyledPaginationSection>
+        <Pagination
+          page={data?.meta?.pagination?.current_page!}
+          totalCount={data?.meta?.pagination?.total_count!}
+          totalPages={data?.meta?.pagination?.total_pages!}
+          perPage={perPageParam}
+          isHidden={hidePagination(
+            query.isFetched,
+            data?.assets?.length,
+            data?.meta?.pagination?.total_pages,
+          )}
+          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
+          isNextData={data?.meta?.pagination?.next_page! !== null}
+          setPage={setPageParam}
+          onPerPageSelect={setPerPageParam}
+        />
+      </StyledPaginationSection>
       {actions['Delete']?.modal}
       {actions['Download']?.modal}
       {actions['Attach to...']?.modal}

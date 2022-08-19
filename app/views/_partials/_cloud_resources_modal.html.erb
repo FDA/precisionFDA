@@ -1,0 +1,41 @@
+<%# Modal is accessible from every route, because absence of Paloma controller in coffee-script files
+rendering of modal is restricted in erb template %>
+<% if @context.logged_in?%>
+  <script type="text/html" id="cloud-resources-modal-template">
+    <div id="cloud_resources_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: isLoading}">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Cloud usage report</h4>
+          </div>
+          <div class="loader-container">
+            <div class="loader">
+              <i class="fa fa-spinner fa-spin"></i>
+            </div>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped table-spec">
+              <thead>
+                <tr><th>Resource</th><th>Usage</th></tr>
+              </thead>
+                <tbody data-bind="foreach: resourceTable">
+                  <tr>
+                    <td data-bind="text: resource, style: { fontWeight: bold ? 'bold' : 'normal' }"></td>
+                    <td data-bind="text: usage, style: { fontWeight: bold ? 'bold' : 'normal' }"></td>
+                  </tr>
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </script>
+  <div data-bind="template: {
+    name: 'cloud-resources-modal-template',
+    data: $root,
+    afterRender: function() { loadStats(isLoading, resourceTable) }
+  }">
+<% end %>

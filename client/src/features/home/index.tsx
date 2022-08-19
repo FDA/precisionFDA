@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
-import { useSelector } from 'react-redux'
 import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
-import { StringParam, useQueryParam } from 'use-query-params'
+import { useQueryParam } from 'use-query-params'
+import { BannerPickedInfo, BannerPicker, BannerPickerItem, BannerRight, BannerTitle, ResourceBanner } from '../../components/Banner'
 import { GuestNotAllowed } from '../../components/GuestNotAllowed'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
@@ -10,27 +10,30 @@ import { CubeIcon } from '../../components/icons/CubeIcon'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
+import { FlapIcon } from '../../components/icons/FlapIcon'
+import { MenuCounter } from '../../components/MenuCounter'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { RootState } from '../../store'
 import { checkStatus } from '../../utils/api'
-import DefaultLayout from '../../views/layouts/DefaultLayout'
 import { AppList } from './apps/AppList'
 import { AppsShow } from './apps/AppsShow'
-import { AssetList } from "./assets/AssetList"
+import { AssetList } from './assets/AssetList'
 import { AssetShow } from './assets/AssetShow'
 import { CreateDatabase } from './databases/create/CreateDatabase'
 import { DatabaseList } from './databases/DatabaseList'
 import { DatabaseShow } from './databases/DatabaseShow'
 import { ExecutionList } from './executions/ExecutionList'
 import { JobShow } from './executions/JobShow'
-import { FileList } from "./files/FileList"
-import { FileShow } from "./files/show/FileShow"
-import { Expand, Fill, HomeBanner, HomeTitle, Main, MenuItem, MenuText, Row,
-  ScopeDescription, ScopeDetails, ScopePicker, ScopePickerItem, StyledMenu, StyledMenuCounter } from './home.styles'
+import { FileList } from './files/FileList'
+import { FileShow } from './files/show/FileShow'
+import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.styles'
 import { ResourceScope } from './types'
+import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
-import { WorkflowList } from './workflows/WorflowList'
+import { WorkflowList } from './workflows/WorkflowList'
 import { WorkflowShow } from './workflows/WorkflowShow'
+import { useAuthUser } from '../auth/useAuthUser'
+import { UserLayout } from '../../views/layouts/UserLayout'
+
 
 interface CounterRequest {
   apps: string,
@@ -41,31 +44,25 @@ interface CounterRequest {
   workflows: string,
 }
 
-export async function counterRequest(scope: string): Promise<CounterRequest> {
+export async function counterRequest(scope: ResourceScope): Promise<CounterRequest> {
   let apiRoute = '/api/counters'
-  // TODO: Consider making scope an enum
   if (scope !== 'me') {
     apiRoute = `${apiRoute}/${scope}`
   }
-  const req = await fetch(apiRoute).then(checkStatus);
-  let json = await req.json();
+  const req = await fetch(apiRoute).then(checkStatus)
+  const json = await req.json()
   return json
 }
 
-const MenuCounter = ({count, active}:{count?: string, active?: boolean}) => {
-  const displayedCount = count ?? "0"
-  return (<StyledMenuCounter isLong={displayedCount.length > 2} active={active}>{displayedCount}</StyledMenuCounter>)
-}
-
 export const Home2 = () => {
-  const user = useSelector((state: RootState) => state.context.user)
-  const [expandedSidebar, setExpandedSidebar] = useLocalStorage<any>('expandedMyHomeSidebar', true)
-  const { path, isExact, url, params } = useRouteMatch()
+  const user = useAuthUser()
+  const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
+  const { path } = useRouteMatch()
   const history = useHistory()
-  const [scopeQuery, setScopeQuery] = useQueryParam('scope', StringParam)
-  const [scope, setScope] = useState<string>(scopeQuery as ResourceScope || 'me' as ResourceScope)
-  const {data} = useQuery(['counters', scope], () => counterRequest(scope))
-  const [activeResource, setActiveResource] = useState<string>()
+  const [scopeQuery, setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
+  const [scope, setScope] = useState<ResourceScope>(scopeQuery || 'me')
+  const { data: counterData } = useQuery(['counters', scope], () => counterRequest(scope))
+  const [activeResource] = useActiveResourceFromUrl('myhome')
 
   const handleScopeClick = async (newScope: ResourceScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
@@ -77,26 +74,21 @@ export const Home2 = () => {
   }
 
   useEffect(() => {
-    const [,,resource] = history.location.pathname.split('/')
-    setActiveResource(resource)
-  }, [history.location])
-
-  useEffect(() => {
     if(scopeQuery) {
       setScope(scopeQuery)
     }
   }, [scopeQuery])
   
-  const routeScopeParam = '?' +
+  const routeScopeParam = `?${ 
     new URLSearchParams({
-      scope
-    }).toString()
+      scope,
+    }).toString()}`
 
-  if(user.is_guest) {
+  if(!user || user?.is_guest) {
     return (
-      <DefaultLayout>
+      <UserLayout>
         <GuestNotAllowed />
-      </DefaultLayout>
+      </UserLayout>
     )
   }
 
@@ -111,45 +103,45 @@ export const Home2 = () => {
   const scopeDescription = scopeDescriptions[scope]
 
   return (
-    <DefaultLayout>
-      <HomeBanner>
-        <HomeTitle>My Home</HomeTitle>
-        <ScopeDetails>
-          <ScopePicker>
-            <ScopePickerItem
+    <UserLayout>
+      <ResourceBanner>
+        <BannerTitle>My Home</BannerTitle>
+        <BannerRight>
+          <BannerPicker>
+            <BannerPickerItem
               data-testid="me-button"
               onClick={() => handleScopeClick('me')}
-              active={scope === 'me'}
+              isActive={scope === 'me'}
             >
               Me
-            </ScopePickerItem>
-            <ScopePickerItem
+            </BannerPickerItem>
+            <BannerPickerItem
               data-testid="featured-button"
               onClick={() => handleScopeClick('featured')}
-              active={scope === 'featured'}
+              isActive={scope === 'featured'}
             >
               Featured
-            </ScopePickerItem>
-            <ScopePickerItem
+            </BannerPickerItem>
+            <BannerPickerItem
               data-testid="everyone-button"
               onClick={() => handleScopeClick('everybody')}
-              active={scope === 'everybody'}
+              isActive={scope === 'everybody'}
             >
               Everyone
-            </ScopePickerItem>
-            <ScopePickerItem
+            </BannerPickerItem>
+            <BannerPickerItem
               data-testid="spaces-button"
               onClick={() => handleScopeClick('spaces')}
-              active={scope === 'spaces'}
+              isActive={scope === 'spaces'}
             >
               Spaces
-            </ScopePickerItem>
-          </ScopePicker>
-          <ScopeDescription>
+            </BannerPickerItem>
+          </BannerPicker>
+          <BannerPickedInfo>
             {scopeDescription}
-          </ScopeDescription>
-        </ScopeDetails>
-      </HomeBanner>
+          </BannerPickedInfo>
+        </BannerRight>
+      </ResourceBanner>
       <Row>
         <StyledMenu expanded={expandedSidebar}>
           <MenuItem
@@ -161,7 +153,7 @@ export const Home2 = () => {
             <FileIcon height={14} />
             <MenuText>Files</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.files} active={activeResource === 'files'} />
+              <MenuCounter count={counterData?.files} active={activeResource === 'files'} />
             )}
           </MenuItem>
           <MenuItem
@@ -173,7 +165,7 @@ export const Home2 = () => {
             <CubeIcon height={14} />
             <MenuText>Apps</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.apps} active={activeResource === 'apps'} />
+              <MenuCounter count={counterData?.apps} active={activeResource === 'apps'} />
             )}
           </MenuItem>
           <MenuItem
@@ -185,7 +177,7 @@ export const Home2 = () => {
             <DatabaseIcon height={14} />
             <MenuText>Databases</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.dbclusters} active={activeResource === 'databases'} />
+              <MenuCounter count={counterData?.dbclusters} active={activeResource === 'databases'} />
             )}
           </MenuItem>
           <MenuItem
@@ -197,7 +189,7 @@ export const Home2 = () => {
             <FileZipIcon height={14} />
             <MenuText>Assets</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.assets} active={activeResource === 'assets'} />
+              <MenuCounter count={counterData?.assets} active={activeResource === 'assets'} />
             )}
           </MenuItem>
           <MenuItem
@@ -209,7 +201,7 @@ export const Home2 = () => {
             <BoltIcon height={14} />
             <MenuText>Workflows</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.workflows} active={activeResource === 'workflows'} />
+              <MenuCounter count={counterData?.workflows} active={activeResource === 'workflows'} />
             )}
           </MenuItem>
           <MenuItem
@@ -221,7 +213,7 @@ export const Home2 = () => {
             <CogsIcon height={14} />
             <MenuText>Executions</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={data?.jobs} active={activeResource === 'executions'} />
+              <MenuCounter count={counterData?.jobs} active={activeResource === 'executions'} />
             )}
           </MenuItem>
           <Fill />
@@ -229,49 +221,49 @@ export const Home2 = () => {
             data-testid="expand-sidebar"
             onClick={() => setExpandedSidebar(!expandedSidebar)}
           >
-            {expandedSidebar ? `<` : `>`}
+            <FlapIcon />
           </Expand>
         </StyledMenu>
         <Main>
           <Switch>
             <Route exact path={`${path}/files`}>
-              <FileList scope={scope as ResourceScope} />
+              <FileList scope={scope} showFolderActions={(scope === 'everybody' && user.admin) || scope === 'me'} />
             </Route>
             <Route exact path={`${path}/apps`}>
-              <AppList scope={scope as ResourceScope} />
+              <AppList scope={scope} />
             </Route>
             <Route path={`${path}/apps/:appUid`}>
-              <AppsShow scope={scope as ResourceScope} />
+              <AppsShow scope={scope} />
             </Route>
             <Route exact path={`${path}/databases`}>
-              <DatabaseList scope={scope as ResourceScope} />
+              <DatabaseList scope={scope} />
             </Route>
             <Route exact path={`${path}/databases/create`}>
-              <CreateDatabase scope={scope as ResourceScope} />
+              <CreateDatabase scope={scope} />
             </Route>
             <Route exact path={`${path}/databases/:dxid`}>
-              <DatabaseShow scope={scope as ResourceScope} />
+              <DatabaseShow scope={scope} />
             </Route>
             <Route exact path={`${path}/assets`}>
-              <AssetList scope={scope as ResourceScope} />
+              <AssetList scope={scope} />
             </Route>
             <Route exact path={`${path}/assets/:assetUid`}>
-              <AssetShow scope={scope as ResourceScope} />
+              <AssetShow scope={scope} />
             </Route>
             <Route exact path={`${path}/workflows`}>
-              <WorkflowList scope={scope as ResourceScope} />
+              <WorkflowList scope={scope} />
             </Route>
             <Route path={`${path}/workflows/:workflowUid`}>
-              <WorkflowShow scope={scope as ResourceScope} />
+              <WorkflowShow scope={scope} />
             </Route>
             <Route path={`${path}/files/:fileId`}>
-              <FileShow scope={scope as ResourceScope} />
+              <FileShow scope={scope} />
             </Route>
             <Route exact path={`${path}/executions`}>
-              <ExecutionList scope={scope as ResourceScope} />
+              <ExecutionList scope={scope} />
             </Route>
             <Route path={`${path}/executions/:executionUid`}>
-              <JobShow scope={scope as ResourceScope} />
+              <JobShow scope={scope} />
             </Route>
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
             <Route path={`${path}/jobs/:executionUid`} render={(props) => <Redirect to={`${path}/executions/${props.match.params.executionUid}`} />} />
@@ -279,6 +271,6 @@ export const Home2 = () => {
           </Switch>
         </Main>
       </Row>
-    </DefaultLayout>
+    </UserLayout>
   )
 }

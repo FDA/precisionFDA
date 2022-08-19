@@ -25,6 +25,10 @@ module PrecisionFda
         last_name: last_name,
         email: email,
         normalized_email: email,
+        pricing_map: CloudResourceDefaults::PRICING_MAP,
+        job_limit: CloudResourceDefaults::JOB_LIMIT,
+        total_limit: CloudResourceDefaults::TOTAL_LIMIT,
+        resources: CloudResourceDefaults::RESOURCES,
       )
 
       org = Org.create!(
@@ -50,6 +54,10 @@ module PrecisionFda
         first_name: "Challenge",
         last_name: "Bot",
         email: "challengebot+123@dnanexus.com",
+        pricing_map: CloudResourceDefaults::PRICING_MAP,
+        job_limit: CloudResourceDefaults::JOB_LIMIT,
+        total_limit: CloudResourceDefaults::TOTAL_LIMIT,
+        resources: CloudResourceDefaults::RESOURCES,
       )
     end
 

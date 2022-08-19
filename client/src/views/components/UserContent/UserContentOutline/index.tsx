@@ -5,24 +5,23 @@ import styled from 'styled-components'
 import { theme } from '../../../../styles/theme'
 import CollapsibleMenu from '../../CollapsibleMenu'
 
-
 const StyledUserContentOutline = styled.div`
-width: 100%;
+  width: 100%;
 
-.outline-item-h1 {
-  margin-top: 3px;
+  .outline-item-h1 {
+    margin-top: 3px;
 
-  a {
-    color: ${theme.colors.textDarkGrey};
-    font-weight: 400;
-    font-size: ${theme.fontSize.subheading};
-    margin-top: 12px;
+    a {
+      color: ${theme.colors.textDarkGrey};
+      font-weight: 400;
+      font-size: ${theme.fontSize.subheading};
+      margin-top: 12px;
 
-    &:hover {
-      color: ${theme.colors.textMediumGrey};
+      &:hover {
+        color: ${theme.colors.textMediumGrey};
+      }
     }
   }
-}
 `
 
 const OutlineItemH2 = styled.div`
@@ -41,19 +40,20 @@ const OutlineItemH2 = styled.div`
   }
 `
 
-
 interface IOutlineAnchor {
-  tag: string,
-  content: string,
-  anchorId?: string,
-  action?: () => void,
+  tag: string
+  content: string
+  anchorId?: string
+  action?: () => void
 }
 
 interface IUserContentOutline {
-  anchors: IOutlineAnchor[],
+  anchors: IOutlineAnchor[]
 }
 
-export const UserContentOutline: FunctionComponent<IUserContentOutline> = ({ anchors }) => {
+export const UserContentOutline: FunctionComponent<IUserContentOutline> = ({
+  anchors,
+}) => {
   // Translate the flat list of h1, h2, etc tags into hierarchical menu structure
   // that can be converted to a list of CollapsibleMenu components
   //
@@ -61,45 +61,49 @@ export const UserContentOutline: FunctionComponent<IUserContentOutline> = ({ anc
   const menus = []
   let items: any = []
   for (const element of anchors) {
-    const tag = element.tag
+    const { tag } = element
     if (tag == 'h1') {
       items = []
-      currentMenu = { ...element, 'items': items }
+      currentMenu = { ...element, items }
       menus.push(currentMenu)
-    }
-    else if (!currentMenu && tag == 'h2') {
+    } else if (!currentMenu && tag == 'h2') {
       // See PFDA-2448 - if h2 tags appear before any h1 tag, also add them to the outline
-      menus.push( { ...element, 'items': [] } )
-    }
-    else {
+      menus.push({ ...element, items: []})
+    } else {
       items.push(element)
     }
   }
 
   return (
     <StyledUserContentOutline>
-    {menus.map((menu, index) => {
-      if (menu.tag == 'h2') {
+      {menus.map((menu, index) => {
+        if (menu.tag === 'h2') {
+          return (
+            <OutlineItemH2 key={index}>
+              <HashLink smooth to={`#${menu.anchorId}`}>
+                {menu.content}
+              </HashLink>
+            </OutlineItemH2>
+          )
+        }
         return (
-          <OutlineItemH2 key={index}>
-            <HashLink smooth to={'#'+menu.anchorId}>{menu.content}</HashLink>
-          </OutlineItemH2>
+          <CollapsibleMenu
+            title={menu.content}
+            titleAnchor={`#${menu.anchorId}`}
+            key={index}
+          >
+            {menu.items.map((item: any, index: number) => (
+              <OutlineItemH2 key={index}>
+                <HashLink smooth to={`#${item.anchorId}`}>
+                  {item.content}
+                </HashLink>
+              </OutlineItemH2>
+            ))}
+          </CollapsibleMenu>
         )
-      }
-      return <CollapsibleMenu title={menu.content} titleAnchor={'#'+menu.anchorId} key={index}>
-              { menu.items.map((item: any, index: number) => {
-                return (
-                  <OutlineItemH2 key={index}>
-                    <HashLink smooth to={'#'+item.anchorId}>{item.content}</HashLink>
-                  </OutlineItemH2>
-                )
-              })}
-            </CollapsibleMenu>
-    })}
+      })}
     </StyledUserContentOutline>
   )
 }
 
-export type {
-  IOutlineAnchor,
-}
+export type { IOutlineAnchor }

@@ -1,8 +1,9 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { email } from '@pfda/https-apps-shared'
-import { defaultMiddlewares, makeValidationMdw } from '../server/middleware'
-import { pickOpsCtx } from '../utils'
+import { defaultMiddlewares } from '../server/middleware'
+import { makeSchemaValidationMdw } from '../server/middleware/validation'
+import { pickOpsCtx } from '../utils/pick-ops-ctx'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
@@ -10,7 +11,7 @@ router.use(defaultMiddlewares)
 
 router.post(
   '/:emailId/send',
-  makeValidationMdw({
+  makeSchemaValidationMdw({
     params: email.inputs.sendEmailParamSchema,
     body: email.inputs.sendEmailBodySchema,
   }),

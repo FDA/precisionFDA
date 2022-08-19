@@ -1,10 +1,12 @@
 # Responsible for apps-related actions.
 class AppsController < ApplicationController
   include ErrorProcessable
+  include CloudResourcesConcern
 
   skip_before_action :require_login, only: %i(index featured explore show fork new)
   before_action :require_login_or_guest, only: %i(index featured explore show fork new)
   before_action :validate_app_before_export, only: %i(export cwl_export wdl_export)
+  before_action :check_total_and_job_charges_limit, only: %i(batch_app run)
 
   def index
     if @context.guest?
@@ -153,6 +155,12 @@ class AppsController < ApplicationController
   end
 
   def edit
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
     @app = App.find_by(uid: unsafe_params[:id])
     @app = nil unless @app.editable_by?(@context)
 
@@ -163,7 +171,11 @@ class AppsController < ApplicationController
       redirect_to edit_app_path(@app.app_series.latest_revision_app) && return
     else
       attrs = %i(dxid name scope title version revision readme spec internal release entity_type)
-      js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
+      js(
+        app: @app.slice(*attrs),
+        instance_types: user_compute_resource_labels,
+        ubuntu_releases: UBUNTU_RELEASES,
+      )
     end
   end
 
@@ -173,11 +185,27 @@ class AppsController < ApplicationController
       return
     end
 
-    js(ubuntu_releases: UBUNTU_RELEASES, app: { release: UBUNTU_16 })
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
+    js(
+      ubuntu_releases: UBUNTU_RELEASES,
+      app: { release: UBUNTU_16 },
+      instance_types: user_compute_resource_labels,
+    )
   end
 
   # rubocop:disable Metrics/MethodLength
   def batch_app
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
     @app = App.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
     if @app.nil?
@@ -221,11 +249,18 @@ class AppsController < ApplicationController
       licenses_accepted: licenses_accepted,
       selectable_spaces: selectable_spaces,
       content_scopes: content_scopes,
+      instance_types: user_compute_resource_labels,
     )
   end
   # rubocop:enable Metrics/MethodLength
 
   def fork
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
     @app = App.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
     if @app.nil?
@@ -234,7 +269,11 @@ class AppsController < ApplicationController
     end
 
     attrs = %i(dxid name title version revision readme spec internal release entity_type)
-    js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
+    js(
+      app: @app.slice(*attrs),
+      ubuntu_releases: UBUNTU_RELEASES,
+      instance_types: user_compute_resource_labels,
+    )
   end
 
   # TODO: do refactoring of this method later!
@@ -252,6 +291,7 @@ class AppsController < ApplicationController
   def run
     # rubocop:disable Style/SignalException
     # Parameter 'id' should be of type String
+
     id = unsafe_params[:id]
     fail "App ID is not a string" unless id.is_a?(String) && id != ""
 
@@ -263,10 +303,12 @@ class AppsController < ApplicationController
     inputs = unsafe_params["inputs"]
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
+    job_limit = params[:job_limit].to_f.zero? ? current_user.job_limit : params[:job_limit].to_f
+    fail "Job limit exceeds maximum user setting - #{current_user.job_limit}" if job_limit > current_user.job_limit
+
     run_instance_type = unsafe_params[:instance_type]
-    if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(run_instance_type)
-    end
+
+    fail I18n.t("app_instance_type_forbidden") unless current_user.resources.include?(run_instance_type)
 
     # App should exist and be accessible and runnable by a user.
     @app = App.find_by!(uid: id)
@@ -291,6 +333,7 @@ class AppsController < ApplicationController
             @app.dxid,
             name: name,
             instanceType: run_instance_type,
+            jobLimit: job_limit,
             scope: Scopes::SCOPE_PRIVATE,
             input: input_info.run_inputs,
           )
@@ -327,6 +370,7 @@ class AppsController < ApplicationController
       name: name,
       input_info: input_info,
       run_instance_type: run_instance_type,
+      job_limit: job_limit,
       scope: space&.uid,
     )
 

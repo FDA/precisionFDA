@@ -128,11 +128,6 @@ export interface Links {
   feature: string;
 }
 
-export interface FetchWorkflowRequest {
-  meta: WorkflowMeta
-  workflow: IWorkflow
-}
-
 export interface IWorkflow {
   id: string;
   uid: string;
@@ -146,6 +141,7 @@ export interface IWorkflow {
   app_title: string;
   location: string;
   revision: number;
+  job_count: number;
   readme: string;
   workflow_series_id: number;
   version: string;
@@ -158,3 +154,7 @@ export interface IWorkflow {
   tags: any[];
 }
 
+export interface FetchWorkflowRequest {
+  meta: WorkflowMeta
+  workflow: IWorkflow
+}

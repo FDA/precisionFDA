@@ -8,6 +8,8 @@ import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import ChallengesList from '../../../components/Challenges/ChallengesList'
 import ChallengesYearList from '../../../components/Challenges/ChallengesYearList'
 import CollapsibleMenu from '../../../components/CollapsibleMenu'
+import { ButtonSolidBlue } from '../../../../components/Button'
+import { PlusIcon } from '../../../../components/icons/PlusIcon'
 import {
   fetchChallenges,
   challengesSetPage,
@@ -105,7 +107,14 @@ class ChallengesListPage extends Component {
           </div>
           <div className="right-column right-column--override pfda-main-content-sidebar">
             {userCanCreateChallenge && (
-              <button className="btn btn-primary btn-block" onClick={() => window.location.assign('/challenges/new')} style={{ marginBottom: '12px' }}>Create a new challenge</button>
+              <ButtonSolidBlue
+              data-testid="challenge-create-link"
+              as={Link}
+              to={`/challenges/create`}
+            >
+              <PlusIcon height={12} style={{ 'marginRight':'4px' }} /> Create Challenge
+            </ButtonSolidBlue>
+
             )}
             <CollapsibleMenu title="CHALLENGES" options={sideMenuOptions} />
             <hr />

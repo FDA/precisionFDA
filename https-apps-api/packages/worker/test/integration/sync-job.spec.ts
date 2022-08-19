@@ -174,6 +174,29 @@ describe('TASK: sync_job_status', () => {
     expect(fakes.queue.createSyncWorkstationFilesTask.calledOnce).to.be.true()
   })
 
+  it('sends a warning email to user if job is failed', async () => {
+    const job = create.jobHelper.create(
+      em,
+      { user, app },
+      { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
+    )
+    await em.flush()
+
+    fakes.client.jobDescribeFake.returns({ state: JOB_STATE.FAILED })
+    await createSyncJobTask(
+      { dxid: job.dxid },
+      { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+    )
+
+    expect(fakes.client.jobDescribeFake.calledOnce).to.be.true()
+    expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
+
+    const [email, userCtx] = fakes.queue.createEmailSendTaskFake.getCall(0).args
+    expect(email).to.have.property('to', user.email)
+    expect(email).to.have.property('subject', `Execution "${job.name}" failed`)
+    expect(userCtx).to.have.property('id', user.id)
+  })
+
   context('stale job', () => {
     it('calls job termination client call when job is running for too long', async () => {
       const job = create.jobHelper.create(em, { user, app }, { ...generate.job.simple })

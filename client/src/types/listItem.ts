@@ -1,6 +1,5 @@
 interface IListItem {
-    id: string | number
-  }
+  id: string | number
+}
   
 export type { IListItem }
- 

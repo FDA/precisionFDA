@@ -12,6 +12,10 @@ class UserSerializer < ApplicationSerializer
     :links,
     :is_guest,
     :gravatar_url,
+    :job_limit,
+    :pricing_map,
+    :resources,
+    :total_limit,
   )
 
   attribute :guest?, key: :is_guest

@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import PropTypes from 'prop-types'
-import ReCAPTCHA from 'react-google-recaptcha'
 
 import Modal from '../../Modal'
 import Button from '../../Button'
 import TextareaField from '../../FormComponents/TextareaField'
-import { RECAPTCHA_KEYS } from '../../../../constants'
-
+import { GoogleReCaptchaV3 } from '../../../../components/ReCaptchaV3'
 
 const Footer = ({ hideAction, action, isAskingDisabled }) => (
   <>
@@ -18,7 +17,6 @@ const Footer = ({ hideAction, action, isAskingDisabled }) => (
 const ExpertAskQuestionModalComponent = ({
   hideAction,
   action,
-  expert = {},
   title,
   user,
   isOpen,
@@ -26,41 +24,38 @@ const ExpertAskQuestionModalComponent = ({
   isLoggedIn,
 }) => {
   const [askedQuestion, setAskedQuestion] = useState('')
-  const [showCaptcha, setShowCaptcha] = useState(false)
+  const [triggerCaptcha, setTriggerCaptcha] = useState(false)
   const isAskingDisabled = (askedQuestion === '')
 
   const submitQuestion = () => {
-    // Captcha render is disabled for now
-    // if (!isLoggedIn) {
-    //   console.log(": submitQuestion Before ReCAPTCHA: isLoggedIn  = ",isLoggedIn)
-    //   console.log(": submitQuestion Before ReCAPTCHA: RECAPTCHA_KEYS.SITE  = ",RECAPTCHA_KEYS.SITE)
-      // setShowCaptcha(true)
-      // console.log(": submitQuestion showCaptcha = ",showCaptcha)
-    // } else {
-      action(user.full_name, askedQuestion, expert.id)
-    // }
+    if (!isLoggedIn) {
+      setTriggerCaptcha(true)
+    } else {
+      action(user.full_name, askedQuestion, null)
+    }
   }
 
-  const captchaCheck = () => {
-    // to add a Captcha result check call
+  const onCaptchaSuccess = (captchaValue) => {
+    action(user.full_name, askedQuestion, captchaValue)
   }
 
   const closeAction = () => {
     setAskedQuestion('')
-    setShowCaptcha(false)
+    setTriggerCaptcha(false)
     hideAction()
   }
 
-  var submitter
-    if (isLoggedIn) {
-      submitter = (
-        <a href={`/users/${user.dxuser}`} target="_blank" rel="noopener noreferrer">{user.full_name}</a>
-      )
-    } else {
-      submitter = 'Anonymous'
-    }
 
-  return (
+  let submitter
+  if (isLoggedIn) {
+    submitter = (
+      <a href={`/users/${user.dxuser}`} target="_blank" rel="noopener noreferrer">{user.full_name}</a>
+    )
+  } else {
+    submitter = 'Anonymous'
+  }
+
+  const renderModal = () => (
     <div className="objects-actions-modal">
       <Modal
         isOpen={isOpen}
@@ -81,7 +76,7 @@ const ExpertAskQuestionModalComponent = ({
           </span>
           <div className='modal-body'>
             <TextareaField
-              label={''}
+              label=""
               placeholder='Submit a question..'
               aria_label='Ask a question to submit to Expert'
               style={{ height: '100px' }}
@@ -89,17 +84,30 @@ const ExpertAskQuestionModalComponent = ({
               name='asking'
               onChange={(e) => setAskedQuestion(e.target.value)}
             />
-            {showCaptcha && (
-              <ReCAPTCHA
-                sitekey={RECAPTCHA_KEYS.SITE}
-                onChange={captchaCheck}
-              />
+            {triggerCaptcha && (
+              <GoogleReCaptchaV3 callback={onCaptchaSuccess} action='question' />
             )}
           </div>
         </div>
       </Modal>
     </div>
   )
+
+  const renderModalWithCaptcha = () => {
+    if (PROD_OR_STAGE) {
+      return (
+        <GoogleReCaptchaProvider
+          reCaptchaKey={RECAPTCHA_SITE_KEY}
+          useEnterprise={true}
+        >
+          {renderModal()}
+        </GoogleReCaptchaProvider>
+      )
+    }
+    return renderModal()
+  }
+
+  return (isLoggedIn ? renderModal() : renderModalWithCaptcha())
 }
 
 ExpertAskQuestionModalComponent.propTypes = {
@@ -115,10 +123,9 @@ ExpertAskQuestionModalComponent.propTypes = {
 }
 
 ExpertAskQuestionModalComponent.defaultProps = {
-  action: () => {},
+  action: () => { },
   title: 'Submit a new question',
-  expert: {},
-  hideAction: () => {},
+  hideAction: () => { },
 }
 
 Footer.propTypes = {

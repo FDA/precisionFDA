@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 
 import PublicLayout from '../../../layouts/PublicLayout'
-import NavigationBar, { NavigationBarBanner } from '../../../components/NavigationBar/NavigationBar'
+import NavigationBar, { NavigationBarBanner, NavigationBarPublicLandingTitle } from '../../../components/NavigationBar/NavigationBar'
 import { PFDALogoLight } from '../../../components/NavigationBar/PFDALogo'
 import NewsList from '../../../components/News/NewsList'
 import { NewsListItemSmall } from '../../../components/News/NewsListItem'
@@ -28,9 +28,8 @@ import { SectionHeading } from '../../../components/Controls/SectionHeading'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
 import { PageContainer } from '../../../../components/Page/styles'
+import { Tagline } from '../Tagline'
 
-
-const pFDATagLine = 'A secure, collaborative, high-performance computing platform that builds a community of experts around the analysis of biological datasets in order to advance precision medicine.'
 
 const challengeListFilter = (items: IChallengeListItem[]) => {
   const firstCompletedChallenge = items.find((item) => item.timeStatus == CHALLENGE_TIME_STATUS.ENDED)
@@ -114,31 +113,6 @@ const PrecisionFDATeam = styled.div`
   overflow: scroll;
 `
 
-const NavigationBarPublicLandingTitle = styled.div`
-  flex-shrink: 1;
-  flex-grow: 1;
-  margin-bottom: ${theme.padding.mainContentVertical};
-
-  h1 {
-    color: #fff;
-    font-size: 32px;
-    font-weight: 400;
-    margin: 0;
-  }
-
-  h2 {
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 133%;
-    padding-bottom: 0px;
-    margin-bottom: 0px;
-  }
-
-  .pfda-navbar-logo {
-    width: 180px;
-    height: 40px;
-  }
-`
 const LandingPageRightColumnHr = styled.hr`
   border-color: ${theme.colors.textMediumGrey};
   margin: 32px 0 0 0;
@@ -193,7 +167,7 @@ const LandingPage : FunctionComponent = () => {
           <NavigationBarBanner>
             <NavigationBarPublicLandingTitle>
               <PFDALogoLight />
-              <h2>{pFDATagLine}</h2>
+              <Tagline />
             </NavigationBarPublicLandingTitle>
             <SocialMediaButtons showText={false} />
           </NavigationBarBanner>
@@ -257,7 +231,7 @@ const LandingPage : FunctionComponent = () => {
             <NavigationBarBanner>
               <NavigationBarPublicLandingTitle>
                 <h1>{guestWelcomeTitle}</h1>
-                <h2>{pFDATagLine}</h2>
+                <Tagline />
               </NavigationBarPublicLandingTitle>
               <SocialMediaButtons>
                 <a href="mailto:precisionfda@fda.hhs.gov" className="fa fa-envelope"></a>

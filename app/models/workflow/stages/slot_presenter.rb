@@ -14,6 +14,7 @@ class Workflow
       validates :prev_slot, 'workflow/non_empty_string': true, if: :prev_slot_condition
       validates :next_slot, 'workflow/non_empty_string': true, if: :next_slot_condition
       validate :input_objects_valid?
+      validate :instance_type_accessible?
 
       delegate :context, :slot_objects, :max_stage_index, to: :base_presenter
 
@@ -79,6 +80,14 @@ class Workflow
 
       def next_slot_condition
         stage_index && stage_index != max_stage_index
+      end
+
+      def instance_type_accessible?
+        return if context.user.resources.include?(instance_type)
+
+        errors.add \
+          :instance_type,
+          "\"#{name}\" app instance type \"#{instance_type}\" is not accessbile by you"
       end
 
       def input_objects_valid?

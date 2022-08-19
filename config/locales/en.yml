@@ -46,6 +46,7 @@ en:
     by the current user.
   app_licence_not_accepted: This app contains one or more assets which need to be licensed.
     Please run the app first in order to accept the licenses.
+  app_instance_type_forbidden: Sorry, you don't have permissions to use this instance type.
   license_not_accessible: Sorry, this license does not exist or is not accessible by you.
   job_not_accessible: Sorry, this job does not exist or is not accessible by you.
   invalid_comparator: Invalid comparator

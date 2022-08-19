@@ -27,10 +27,10 @@ export const jobFinishedTemplate = (data: JobFinishedInputTemplate): string => `
           Hello ${data.receiver.firstName}!
         </mj-text>
         <mj-text>
-        An execution on precisionFDA has finished successfully.
-        The execution page can be viewed here: <a href="${generateJobDetailLink(
-          data.content.job.uid,
-        )}">${data.content.job.name}</a>
+          An execution on precisionFDA has finished successfully.
+          The execution page can be viewed here: <a href="${generateJobDetailLink(
+            data.content.job.uid,
+          )}">${data.content.job.name}</a>
         </mj-text>
         ${getMiddleSpacer()}
         <mj-text>

@@ -104,23 +104,28 @@ class ProfileController < ApplicationController
           papi = DNAnexusAPI.new(ADMIN_TOKEN)
           papi.call(ORG_EVERYONE, "invite", invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true)
 
-          user = {}
-          user[:dxuser] = @suggested_username
-          user[:org_id] = @user.org.id
-          user[:schema_version] = User::CURRENT_SCHEMA
-          user[:first_name] = @first
-          user[:last_name] = @last
-          user[:email] = @email
-          user[:normalized_email] = @normalized_email
-          u = nil
+          new_user = User.new do |u|
+            u.dxuser = @suggested_username
+            u.org_id = @user.org.id
+            u.schema_version = User::CURRENT_SCHEMA
+            u.first_name = @first
+            u.last_name = @last
+            u.email = @email
+            u.normalized_email = @normalized_email
+            u.pricing_map = CloudResourceDefaults::PRICING_MAP
+            u.job_limit = CloudResourceDefaults::JOB_LIMIT
+            u.total_limit = CloudResourceDefaults::TOTAL_LIMIT
+            u.resources = CloudResourceDefaults::RESOURCES
+            u.charges_baseline = @user.charges_baseline
+          end
           ActiveRecord::Base.transaction do
-            u = User.create!(user)
-            NotificationPreference.create_for_user!(u)
+            new_user.save!
+            NotificationPreference.create_for_user!(new_user)
             auditor_data = {
               action: "create",
               record_type: "Provision User",
               record: {
-                message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{u.as_json} by '#{@user.dxuser}'",
+                message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{new_user.as_json} by '#{@user.dxuser}'",
               },
             }
             Auditor.perform_audit(auditor_data)

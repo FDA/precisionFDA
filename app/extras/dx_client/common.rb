@@ -75,5 +75,12 @@ module DXClient
     rescue DXClient::Errors::NotFoundError
       false
     end
+
+    # Gets user's charges.
+    # @param user [User] User for whom we get charges.
+    # @return [ActiveSupport::HashWithIndifferentAccess] User's charges hash.
+    def user_charges(user)
+      org_describe(user.org.dxid).slice(:computeCharges, :storageCharges, :dataEgressCharges)
+    end
   end
 end

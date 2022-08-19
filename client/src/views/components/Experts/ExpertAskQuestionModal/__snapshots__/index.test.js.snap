@@ -1,46 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExpertAskQuestionModal test should render 1`] = `
-<div
-  className="objects-actions-modal"
+<Component
+  reCaptchaKey="some-key"
+  useEnterprise={true}
 >
-  <Modal
-    hideModalHandler={[Function]}
-    modalFooterContent={
-      <Footer
-        action={[Function]}
-        hideAction={[Function]}
-        isAskingDisabled={true}
-      />
-    }
-    noPadding={true}
-    title="Submit a new question"
+  <div
+    className="objects-actions-modal"
   >
-    <div
-      className="modal-header"
-    >
-      <span>
-        Asking as: 
-        Anonymous
-      </span>
-      <div
-        className="modal-body"
-      >
-        <TextareaField
-          aria_label="Ask a question to submit to Expert"
-          label=""
-          name="asking"
-          onChange={[Function]}
-          placeholder="Submit a question.."
-          style={
-            Object {
-              "height": "100px",
-            }
-          }
-          value=""
+    <Modal
+      hideModalHandler={[Function]}
+      modalFooterContent={
+        <Footer
+          action={[Function]}
+          hideAction={[Function]}
+          isAskingDisabled={true}
         />
+      }
+      noPadding={true}
+      title="Submit a new question"
+    >
+      <div
+        className="modal-header"
+      >
+        <span>
+          Asking as: 
+          Anonymous
+        </span>
+        <div
+          className="modal-body"
+        >
+          <TextareaField
+            aria_label="Ask a question to submit to Expert"
+            label=""
+            name="asking"
+            onChange={[Function]}
+            placeholder="Submit a question.."
+            style={
+              Object {
+                "height": "100px",
+              }
+            }
+            value=""
+          />
+        </div>
       </div>
-    </div>
-  </Modal>
-</div>
+    </Modal>
+  </div>
+</Component>
 `;

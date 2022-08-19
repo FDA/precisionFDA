@@ -2,6 +2,7 @@ module OrgService
   # Responsible user leaving organization process.
   class LeaveOrgProcess
     include OrgService::Errors
+    include OrgService::BaselineCharges
 
     # Constructor.
     # @param user_api [DNAnexusAPI] User API instance.
@@ -206,6 +207,7 @@ module OrgService
         )
 
         @user.update!(org: org)
+        raw_update_user_baseline_charges!(@user, @user_api)
       end
     end
   end

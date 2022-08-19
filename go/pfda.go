@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.1
+// Version 2.1.2
 //
 //
 package main
@@ -32,7 +32,7 @@ const defaultSkipVerify = "false"
 const usageString = `
 
 ***********************
-PFDA COMMAND LINE TOOL v2.1.1
+PFDA COMMAND LINE TOOL v2.1.2
 ***********************
 To upload a file:
 

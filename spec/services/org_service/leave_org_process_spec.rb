@@ -106,6 +106,12 @@ RSpec.describe OrgService::LeaveOrgProcess do
             with(public_comparisons_project).
             and_return("name" => old_public_comparisons_project_name)
 
+          allow(user_api).to receive(:user_charges).and_return({
+            computeCharges: 2,
+            storageCharges: 1,
+            dataEgressCharges: 5,
+          })
+
           allow(Org).to receive(:create!).and_return(new_org)
           allow(admin).to receive(:update!)
           allow(orgname_generator).to receive(:call).and_return(new_org_handle_base)

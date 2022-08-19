@@ -29,6 +29,7 @@ import {
 import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
 import { TASK_TYPE } from '../queue/task.input'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
+import { SyncJobOperation } from '../domain/job'
 
 const chance = new Chance()
 
@@ -171,18 +172,21 @@ const app = {
   },
   runAppInput: (): AnyObject => ({
     scope: 'private',
+    jobLimit: 32.67,
     input: {
       duration: 30,
     },
   }),
   runTtydAppInput: () => ({
     scope: 'private',
+    jobLimit: 50,
     input: {
       port: 8080,
     },
   }),
   runRshinyAppInput: () => ({
     scope: 'private',
+    jobLimit: 50,
     input: {
       app_gz: 'app-gzipped-file',
     },
@@ -424,13 +428,37 @@ const bullQueue = {
 }
 
 const bullQueueRepeatable = {
-  syncDbClusterStatus: (dbClusterDxid) => ({
+  syncDbClusterStatus: dbClusterDxid => ({
+    key: `__default__:${SyncDbClusterOperation.getBullJobId(dbClusterDxid)}:::*/2 * * * *`,
+    name: '__default__',
     id: SyncDbClusterOperation.getBullJobId(dbClusterDxid),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',
     every: null,
     next: Date.now() + (60 * 1000),
+  }),
+  syncJobStatus: jobDxid => ({
+    key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
+    name: '__default__',
+    id: SyncJobOperation.getBullJobId(jobDxid),
+    endDate: null,
+    tz: null,
+    cron: '*/2 * * * *',
+    every: null,
+    next: Date.now() + (60 * 1000),
+  }),
+  // In orphaned cases the 'next' timestamp (in milliseconds) has passed and
+  // they sit idle in BullQueue
+  syncJobStatusOrphaned: jobDxid => ({
+    key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
+    name: '__default__',
+    id: SyncJobOperation.getBullJobId(jobDxid),
+    endDate: null,
+    tz: null,
+    cron: '*/2 * * * *',
+    every: null,
+    next: Date.now() - (5 * 60 * 1000),
   }),
 }
 
