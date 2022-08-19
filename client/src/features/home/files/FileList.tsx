@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { Link, useHistory, useRouteMatch } from 'react-router-dom'
+import { Link, useHistory, useRouteMatch, useLocation } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { StringParam, useQueryParam } from 'use-query-params'
 import {
@@ -38,6 +38,7 @@ type ListType = { files: IFile[]; meta: IMeta }
 
 export const FileList = ({ scope, space, showFolderActions = false }: { scope?: ResourceScope, space?: ISpace, showFolderActions?: boolean }) => {
   const { path } = useRouteMatch()
+  const location = useLocation()
   
   const [folderIdParam, setFolderIdParam] = useQueryParam(
     'folder_id',
@@ -46,7 +47,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const isAdmin = useSelector((state: any) => state.context.user.admin)
 
   const history = useHistory()
-  const onRowClick = (id: string) => history.push(`${path}/${id}`)
+  const onRowClick = (id: string) => history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
 
   const {
     setPerPageParam,
