@@ -13,36 +13,17 @@ import { useModal } from '../../../modal/useModal'
 import { itemsCountString } from '../../../../utils/formatting'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
+import { DownloadListResponse } from '../../types'
 
 const StyledPath = styled.div`
   min-width: 150px;
 `
 
 const DeleteFiles = ({
-  selected,
-  scope,
+  data,
 }: {
-  selected: IFile[]
-  scope: string
-}) => {
-  const {
-    data = [],
-    status,
-    refetch,
-  } = useQuery(
-    ['download_list', selected],
-    () =>
-      fetchFilesDownloadList(
-        selected.map(s => s.id),
-        scope,
-      ),
-    {
-      onError: () => {
-        toast.error('Error: Fetching download list.')
-      },
-    },
-  )
-  return (
+  data: DownloadListResponse[]
+}) => (
     <ResourceTable
       rows={data.map(s => ({
           name: (
@@ -57,7 +38,6 @@ const DeleteFiles = ({
         }))}
     />
   )
-}
 
 export const useDeleteFileModal = ({
   selected,
@@ -71,17 +51,36 @@ export const useDeleteFileModal = ({
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
+
+  const {
+    data = [],
+    status,
+  } = useQuery(
+    ['download_list', selected],
+    () =>
+      fetchFilesDownloadList(
+        selected.map(s => s.id),
+        scope,
+      ),
+    {
+      onError: () => {
+        toast.error('Error: Fetching download list.')
+      },
+    },
+  )
+
   const mutation = useMutation({
     mutationFn: (ids: string[]) => deleteFilesRequest(ids),
     onError: () => {
-      toast.error(`Error: Deleting ${selected.length} files or folders.`)
+      toast.error(`Error: Deleting ${data.length} files or folders.`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries('files')
+      // TODO counters are only for My Home, spaces have counters in request for space
       queryClient.invalidateQueries('counters')
       onSuccess()
       setShowModal(false)
-      toast.success(`Success: Deleted ${selected.length} files or folders.`)
+      toast.success(`Success: Deleted ${data.length} files or folders.`)
     },
   })  
 
@@ -92,10 +91,9 @@ export const useDeleteFileModal = ({
   const modalComp = (
     <Modal
       data-testid="modal-files-delete"
-      headerText={`Delete ${itemsCountString('item', momoSelected.length)}?`}
+      headerText={`Delete ${itemsCountString('item', data.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
-      title="Modal window to select files for deletion"
       footer={
         <>
           {mutation.isLoading && <Loader />}
@@ -114,7 +112,7 @@ export const useDeleteFileModal = ({
       {status === 'loading' ? (
         <div>Loading...</div>
       ) : (
-        <DeleteFiles selected={momoSelected} scope={scope} />
+        <DeleteFiles data={data} />
       )}
     </Modal>
   )
