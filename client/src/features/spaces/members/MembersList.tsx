@@ -44,9 +44,8 @@ export const MembersList = ({ space }: { space: ISpace }) => {
     <ErrorBoundary>
       <StyledMemberListPage>
         <StyledTitle>Shared Area Members</StyledTitle>
-
-        {space.type === 'review' && (
-          <StyledButtonGroup>
+        <StyledButtonGroup>
+          {space.type === 'review' && (
             <RadioButtonGroup
               options={[
                 { value: undefined, label: 'All' },
@@ -56,14 +55,14 @@ export const MembersList = ({ space }: { space: ISpace }) => {
               onChange={setSideRole}
               ariaLabel="Members option filter"
             />
+          )}
 
-            {space.updatable && canAddMember && (
-              <ButtonSolidBlue onClick={() => setShowModal(true)}>
-                Add Members
-              </ButtonSolidBlue>
-            )}
-          </StyledButtonGroup>
-        )}
+          {space.updatable && canAddMember && (
+            <ButtonSolidBlue onClick={() => setShowModal(true)}>
+              Add Members
+            </ButtonSolidBlue>
+          )}
+        </StyledButtonGroup>
 
         {status === 'loading' && (
           <div>
