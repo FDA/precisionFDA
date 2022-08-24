@@ -12,6 +12,6 @@ class AnalysesController < ApplicationController
       return
     end
 
-    js workflow: @workflow.slice(:uid, :spec, :title).merge(scopes: @workflow.accessible_scopes)
+    js workflow: @workflow.slice(:uid, :spec, :title, :scope).merge(scopes: @workflow.accessible_scopes)
   end
 end
