@@ -49,6 +49,22 @@ export enum FileActions {
   'Comments' = 'Comments',
 }
 
+const getScope = (scope: ResourceScope | undefined, space: ISpace | undefined): string => {
+  if (scope) {
+    switch (scope) {
+      case 'me':
+        return 'private'
+      case 'everybody':
+        return 'public'
+      case 'featured':
+        return 'public'
+      default :
+        return scope
+    }
+  } 
+  return `space-${space?.id}`
+}
+
 export const useFilesSelectActions = ({
   scope,
   fileId,
@@ -138,8 +154,7 @@ export const useFilesSelectActions = ({
     isShown: isShownDeleteFileModal,
   } = useDeleteFileModal({
     selected,
-    // eslint-disable-next-line no-nested-ternary
-    scope: scope ? (scope === 'me' ? 'private' : scope) : `space-${space?.id}`,
+    scope: getScope(scope, space),
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
       if(space) {

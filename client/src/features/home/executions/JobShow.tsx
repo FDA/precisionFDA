@@ -1,3 +1,4 @@
+import { omit } from 'ramda'
 import React, { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useLocation, useParams } from 'react-router'
@@ -42,8 +43,8 @@ const ExecutionActions = ({
   scope,
   execution,
 }: {
-  scope?: ResourceScope
-  execution: IExecution
+  scope?: ResourceScope;
+  execution: IExecution;
 }) => {
   const actions = useExecutionActions({
     scope,
@@ -54,9 +55,9 @@ const ExecutionActions = ({
     <>
       <Dropdown
         trigger="click"
-        content={<ActionsDropdownContent actions={actions} />}
+        content={<ActionsDropdownContent actions={['terminated', 'failed', 'done'].includes(execution.state) ? actions : omit(['Copy to space'], actions) }/>}
       >
-        {dropdownProps => (
+        {(dropdownProps) => (
           <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
         )}
       </Dropdown>
@@ -188,7 +189,9 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
       execution.links.sync_files &&
         syncFiles
           .mutateAsync(execution.links.sync_files)
-          .then(() => queryCache.invalidateQueries(['execution', executionUid]))
+          .then(() =>
+            queryCache.invalidateQueries(['execution', executionUid]),
+          )
     } else {
       alert(`Cannot sync files as workstation is ${execution.state}`)
     }
@@ -225,8 +228,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
           </HeaderLeft>
           <div>
             <ActionsRow>
-              {execution.state === 'terminated' ||
-              execution.state === 'done' ? null : (
+              {['terminated', 'failed', 'done'].includes(execution.state) ? null : (
                 <StyledRefresh spin={isFetching} onClick={() => refetch()}>
                   <SyncIcon />
                 </StyledRefresh>
@@ -335,9 +337,9 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
         <MetadataSection>
           {execution.tags.length > 0 && (
             <StyledTags>
-              {execution.tags.map(tag => (
+              {execution.tags.map((tag) => (
                 <StyledTagItem key={tag}>{tag}</StyledTagItem>
-                ))}
+              ))}
             </StyledTags>
           )}
         </MetadataSection>
