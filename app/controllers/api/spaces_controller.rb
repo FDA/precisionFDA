@@ -116,6 +116,7 @@ module Api
 
       if space_update_form.valid?
         space.update!(update_space_naming_params)
+        space.confidential_spaces.each { |confidential_space| confidential_space.update!(update_space_naming_params) }
         api = DIContainer.resolve("api.admin")
 
         space.leads_updates(space_update_form, api)
