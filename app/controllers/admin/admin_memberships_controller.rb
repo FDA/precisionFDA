@@ -92,12 +92,14 @@ module Admin
     # Adds a user to the site admins organization.
     def add_user_to_org(dxid)
       admin_member_processor = DIContainer.resolve("orgs.admin_member_provisioner")
-      admin_member_processor.call(dxid)
+      result = admin_member_processor.call(dxid)
+      logger.info("AdminMembershipsController: Site admin org invite API call result: #{result}")
+      result
     end
 
     # Adding new site admin to all existing Administrator Spaces
     def add_to_admin_spaces(user)
-      api = DIContainer.resolve("api.admin")
+      api = DIContainer.resolve("api.user")
 
       Space.admin_spaces.each do |space|
         logger.info("Adding site admin #{user.dxuser} to admin space #{space.id}")
@@ -106,21 +108,29 @@ module Admin
         membership = space.space_memberships.active.where(user_id: user.id).first_or_initialize
         membership.attributes = { role: SpaceMembership::ROLE_ADMIN, side: admin_membership.side }
 
-        api.org_invite(
+        logger.info("AdminMembershipsController: Org invite API call using api.user, org: #{space.host_dxorg}, user: #{user.dxid}")
+
+        result = api.org_invite(
           space.host_dxorg,
           user.dxid,
           level: DNAnexusAPI::ORG_MEMBERSHIP_ADMIN,
           suppressEmailNotification: true,
         )
 
+        logger.info("AdminMembershipsController: Org invite API call result #{result}")
+
         project_dxid = space.host_project
-        api.project_invite(
+        logger.info("AdminMembershipsController: Project invite API call using api.user, project: #{project_dxid}, org: #{Setting.review_app_developers_org}")
+
+        result2 = api.project_invite(
           project_dxid,
           Setting.review_app_developers_org,
           DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
           suppressEmailNotification: true,
           suppressAllNotifications: true,
         )
+
+        logger.info("AdminMembershipsController: Project invite API call result #{result2}")
 
         space.space_memberships << membership
         space.save!
