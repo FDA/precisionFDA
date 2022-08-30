@@ -1,12 +1,17 @@
 import React from 'react'
-import styled, { css } from "styled-components"
+import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
-import { Button } from "../Button"
-import { Svg } from "../icons/Svg"
+import { Button } from '../Button'
+import { Svg } from '../icons/Svg'
 
 export const StyledTable = styled.table`
   border-spacing: 0;
   width: 100%;
+
+  th {
+    text-align: left;
+    padding: 8px;
+  }
 `
 
 export const StyledAction = styled(Button)`
@@ -33,8 +38,7 @@ type Row = {
   [key: string]: React.ReactNode;
 }
 
-export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => {
-  return (
+export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => (
     <StyledTable {...rest}>
       <thead>
         <tr>
@@ -51,4 +55,3 @@ export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => {
       </tbody>
     </StyledTable>
   )
-}
