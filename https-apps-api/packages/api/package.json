@@ -8,8 +8,8 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=16.15.0",
-    "npm": "^8.12.1"
+    "node": ">=16.17.0",
+    "npm": "^8.15.0"
   },
   "scripts": {
     "build": "npm run clean && npm run compile",
