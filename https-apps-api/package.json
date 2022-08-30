@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "engines": {
-    "node": ">=16.15.0",
-    "npm": "^8.12.1"
+    "node": ">=16.17.0",
+    "npm": "^8.15.0"
   },
   "resolutions": {
     "**/@mikro-orm/core/**/glob-parent": "^5.1.2",
@@ -20,8 +20,8 @@
   "devDependencies": {
     "nodemon": "^2.0.5",
     "snyk": "^1.520.0",
-    "ts-node": "^9.0.0",
-    "ts-node-dev": "^1.1.8",
+    "ts-node": "^10",
+    "ts-node-dev": "^2",
     "tsconfig-paths": "^3.9.0"
   }
 }
