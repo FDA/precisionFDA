@@ -273,6 +273,18 @@ const createCheckStaleJobsTask = async (
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
+const createSyncSpacesPermissionsTask = async (
+  user: UserCtx,
+) => {
+  const wrapped = {
+    type: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
+    payload: undefined,
+    user,
+  }
+  const options: JobOptions = { jobId: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS }
+  return await addToQueue(wrapped, maintenanceQueue, options)
+}
+
 const createDbClusterSyncTask = async (
   data: types.SyncDbClusterJob['payload'],
   user: UserCtx,
@@ -333,6 +345,7 @@ export {
   createSendEmailTask,
   removeFromEmailQueue,
   createCheckStaleJobsTask,
+  createSyncSpacesPermissionsTask,
   createDbClusterSyncTask,
   createUserCheckupTask,
   createCheckUserJobsTask,
