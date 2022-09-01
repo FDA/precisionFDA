@@ -446,6 +446,7 @@ Rails.application.routes.draw do
     get "profile/provision_org", to: "profile#provision_org"
     post "profile/provision_org", to: "profile#provision_org", as: "provision_org"
     post "profile/run_report", to: "profile#run_report", as: "run_report"
+    post "profile/check_spaces_permissions", to: "profile#check_spaces_permissions", as: "check_spaces_permissions"
 
     resources :apps do
       resources :jobs, only: %i(new create)

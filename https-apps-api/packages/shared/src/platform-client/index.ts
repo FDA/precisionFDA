@@ -7,186 +7,13 @@ import { config } from '../config'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
-import { FILE_STATE_DX } from '../domain/user-file/user-file.enum'
 import { OrgMembershipError } from '../errors'
+import { BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, FindSpaceMembersParams,
+  JobCreateParams, JobDescribeParams, JobTerminateParams, ListFilesParams, MoveFilesParams, RemoveFolderParams, RenameFolderParams, UserResetMfaParams, UserUnlockParams } from './platform-client.params'
+import { JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, ListFilesResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
+ DescribeFilesResponse, FindSpaceMembersReponse } from './platform-client.responses'
 
-// TODO(samuel) refactor this so that headers aren't mixed with URL params
-type BaseParams = {
-  accessToken: string
-}
-type JobDescribeParams = BaseParams & { jobId: string }
-type JobTerminateParams = BaseParams & { jobId: string }
-
-type JobCreateParams = BaseParams & {
-  appId: string
-  project: string
-  name?: string
-  costLimit: number
-  input: AnyObject
-  systemRequirements: AnyObject
-  timeoutPolicyByExecutable: AnyObject
-  snapshot?: {
-    $dnanexus_link: {
-      project?: string
-      id: string
-    }
-  }
-}
-
-type ListFilesParams = BaseParams & {
-  project: string
-  folder?: string
-  includeDescProps?: boolean
-  // the API uses it as a starting point when doing pagination
-  starting?: {
-    project: string
-    id: string
-  }
-}
-
-type DescribeFilesParams = BaseParams & {
-  fileIds: string[]
-}
-
-type DescribeFoldersParams = BaseParams & {
-  projectId: string
-}
-
-type RenameFolderParams = BaseParams & {
-  folderPath: string
-  newName: string
-  projectId: string
-}
-
-type RemoveFolderParams = BaseParams & {
-  folderPath: string
-  projectId: string
-}
-
-type CreateFolderParams = BaseParams & {
-  folderPath: string
-  projectId: string
-}
-
-type MoveFilesParams = BaseParams & {
-  destinationFolderPath: string
-  fileIds: string[]
-  projectId: string
-}
-
-type UserResetMfaParams = {
-  headers: BaseParams
-  dxid: string
-  data: {
-    user_id: string
-    org_id: string
-  }
-}
-
-type UserUnlockParams = {
-  headers: BaseParams
-  dxid: string
-  data: {
-    user_id: string
-    org_id: string
-  }
-}
-
-type ListFilesResponse = {
-  results: Array<{
-    id: string
-    project: string
-    describe?: {
-      id: string
-      name: string
-      size: number
-      state: FILE_STATE_DX
-    }
-  }>
-  // if set up, we might want to paginate
-  next?: {
-    project: string
-    id: string
-  }
-}
-
-type DescribeFilesResponse = {
-  results: Array<{
-    describe: {
-      id: string
-      name: string
-      size: number
-      // add more here
-    }
-  }>
-}
-
-type DescribeFoldersResponse = {
-  id: string
-  folders: string[]
-}
-
-type JobCreateResponse = {
-  id: string
-}
-
-type JobTerminateResponse = JobCreateResponse
-
-type ClassIdResponse = {
-  id: string
-}
-
-// just basic types we are interested in at the moment
-type JobDescribeResponse = {
-  state: string
-  project: string
-  billTo: string
-  httpsApp: {
-    ports: number[]
-    shared_access: string
-    enabled: boolean
-    dns: {
-      url?: string
-    }
-  }
-  failureCount?: any
-  failureReason?: string
-  failureMessage?: string
-} & AnyObject
-
-type DbClusterActionParams = BaseParams & { dxid: string }
 type DbClusterAction = 'start' | 'stop' | 'terminate'
-
-type DbClusterCreateParams = BaseParams & {
-  name: string
-  project: string
-  engine: string
-  engineVersion: string
-  dxInstanceClass: string
-  adminPassword: string
-}
-
-type DbClusterDescribeParams = BaseParams & {
-  dxid: string
-  project?: string
-}
-
-type DbClusterDescribeResponse = {
-  id: string
-  project: string
-  name: string
-  created: number
-  modified: number
-  createdBy: { user: string }
-  dxInstanceClass: string
-  engine: string
-  engineVersion: string
-  status: string
-  endpoint?: string
-  port?: number
-  statusAsOf?: number
-  failureReason?: string
-} & AnyObject
 
 export enum PlatformErrors {
   ResourceNotFound = 'ResourceNotFound',
@@ -283,6 +110,24 @@ class PlatformClient {
 
   async jobDescribe(params: JobDescribeParams): Promise<JobDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.jobId}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  async findSpaceMembers(params: FindSpaceMembersParams): Promise<FindSpaceMembersReponse> {
+    const url = `${config.platform.apiUrl}/${params.spaceOrg}/findMembers`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {},
