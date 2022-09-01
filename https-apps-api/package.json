@@ -15,10 +15,10 @@
   "scripts": {},
   "dependencies": {
     "typescript": "^4.0.3",
-    "yarn": "^1.22.17"
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
-    "nodemon": "^2.0.5",
+    "nodemon": "^2.0.19",
     "snyk": "^1.520.0",
     "ts-node": "^10",
     "ts-node-dev": "^2",
