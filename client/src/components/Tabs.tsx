@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom"
-import styled from "styled-components"
+import { NavLink } from 'react-router-dom'
+import styled from 'styled-components'
 
 export const StyledTabList = styled.div`
     list-style-type: none;
@@ -15,7 +15,7 @@ export const StyledTab = styled(NavLink)`
     padding: 5px 10px;
     background: #F2F2F2;
     border: 1px solid #DDDDDD;
-    border-bottom: none;
+    border-bottom: 1px solid #DDDDDD;
     cursor: pointer;
     margin-left: 10px;
     margin-bottom: -1px;
@@ -26,6 +26,7 @@ export const StyledTab = styled(NavLink)`
    
     &.active {
       background-color: #fff;
+      border-bottom: none;
     }
 `
 
