@@ -7,7 +7,6 @@ import { Svg } from '../icons/Svg'
 export const StyledTable = styled.table`
   border-spacing: 0;
   width: 100%;
-
   th {
     text-align: left;
     padding: 8px;
@@ -39,19 +38,19 @@ type Row = {
 }
 
 export const ResourceTable: React.FC<{ rows: Row[]}> = ({ rows, ...rest }) => (
-    <StyledTable {...rest}>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Location</th>
+  <StyledTable {...rest}>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row, i) => (
+        <tr key={i}>
+          {Object.keys(row).map((col, n) => <StyledTD key={n}>{row[col]}</StyledTD>)}
         </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, i) => (
-          <tr key={i}>
-            {Object.keys(row).map((col, n) => <StyledTD key={n}>{row[col]}</StyledTD>)}
-          </tr>
-        ))}
-      </tbody>
-    </StyledTable>
-  )
+      ))}
+    </tbody>
+  </StyledTable>
+)

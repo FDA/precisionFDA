@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { Svg } from '../../components/icons/Svg'
-import { breakPoints, colors, fontSize, fontWeight, sizing } from '../../styles/theme'
+import { colors, fontSize, fontWeight, sizing } from '../../styles/theme'
 
 export const Wrapper = styled.div`
   position: fixed;
@@ -9,7 +9,9 @@ export const Wrapper = styled.div`
   transform: translate(-50%, -50%);
   z-index: 700;
   outline: 0;
-  width: 80%;
+  width: fit-content;
+  min-width: 400px;
+  max-height: max(100% - 232px, 90%);
 `
 export const Backdrop = styled.div<{ blur: boolean }>`
   ${({ blur }) => blur && css`
@@ -26,8 +28,8 @@ export const Backdrop = styled.div<{ blur: boolean }>`
 export const StyledModal = styled.div`
   z-index: 100;
   background: white;
-  position: relative;
-  margin: 24px auto;
+  max-height: 70vh;
+
   border-radius: ${sizing.modalBorderRadius};
   display: flex;
   flex-direction: column;
@@ -40,13 +42,10 @@ export const StyledModal = styled.div`
     border-spacing: 2px;
     border-color: grey;
   }
-
-  width: auto;
-  @media(min-width: ${breakPoints.medium}px) {
-    width: 640px;
-  }
 `
 export const Header = styled.div`
+`
+export const HeaderTop = styled.div`
   border-radius: ${sizing.modalBorderRadius} ${sizing.modalBorderRadius} 0 0;
   display: flex;
   justify-content: space-between;
@@ -58,13 +57,14 @@ export const Header = styled.div`
   font-weight: ${fontWeight.bold};
   color: ${colors.textBlack};
 `
+
 export const Footer = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
   border-top: 1px solid #e5e5e5;
-  padding: 12px;
+  padding: 16px;
 `
 export const HeaderText = styled.div`
   align-self: center;
@@ -91,7 +91,6 @@ export const ButtonRow = styled.div`
   gap: 8px;
   justify-content: flex-end;
   align-items: center;
-  margin-top: 24px;
 `
 export const Content = styled.div<{ overflowContent?: boolean }>`
   ${({ overflowContent = true }) => overflowContent && 'overflow-y: scroll;'}
