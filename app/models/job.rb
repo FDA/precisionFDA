@@ -160,7 +160,7 @@ class Job < ApplicationRecord
   end
 
   def energy_string
-    ("#{energy}$" || "TBD").to_s
+    ("$#{energy}" || "TBD").to_s
   end
 
   def https_job_external_url
