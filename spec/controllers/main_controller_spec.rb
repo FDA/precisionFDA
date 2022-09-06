@@ -22,7 +22,7 @@ RSpec.describe MainController, type: :controller do
 
   describe "GET return_from_login" do
     before do
-      stub_request(:any, %r{#{ENV['HTTPS_APPS_API_URL']}/users/checkup.*}).to_return(status: 200)
+      stub_request(:any, %r{#{ENV['HTTPS_APPS_API_URL']}/account/checkup.*}).to_return(status: 200)
     end
 
     it "doesn't flash an error" do

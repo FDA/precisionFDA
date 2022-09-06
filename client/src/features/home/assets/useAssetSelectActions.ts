@@ -68,9 +68,8 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     setShowModal: setDeleteModal,
     isShown: isShownDeleteModal,
   } = useDeleteModal({
-    resource: 'assets',
-    selected: selected.map(s => ({ id: s.uid, name: s.name })),
-    scope,
+    resource: 'asset',
+    selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
     request: deleteAssetsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries('assets')

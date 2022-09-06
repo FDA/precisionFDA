@@ -11,8 +11,8 @@ export function mapSizeFilter(filters: IFilter[]): IFilter[] {
   if (!filter) {
     return filters
   }
-  filter.value && filters.push({ id: 'size', value: filter.value[0] } as IFilter)
-  filter.value && filters.push({ id: 'size2', value: filter.value[1] } as IFilter)
+  filter.value?.[0] && filters.push({ id: 'size', value: filter.value[0] } as IFilter)
+  filter.value?.[1] && filters.push({ id: 'size2', value: filter.value[1] } as IFilter)
   return filters.filter(f => f.id !== 'file_size')
 }
 
@@ -32,15 +32,17 @@ export function renameFilterKeys(filters: IFilter[]) {
   })
 }
 
+const customKeyMappings = {
+  file_size: 'size',
+  created_at_date_time: 'created_at',
+  launched_by: 'username',
+  launched_on: 'created_at',
+  dx_instance_class: 'instance',
+}
 // Some of the list API's order_by values do not match their keys in JSON responses
 // so we need a custom mapping
-const renameOrderByKeys = (key?: string) => key ? {
-    file_size: 'size',
-    created_at_date_time: 'created_at',
-    launched_by: 'username',
-    launched_on: 'created_at',
-    dx_instance_class: 'instance',
-  }[key] : key
+const renameOrderByKeys = (key?: string) => key && key in customKeyMappings ?
+  customKeyMappings[key as keyof typeof customKeyMappings] : key
 
 export type Params = { folderId?: string, spaceId?: string, scope?: ResourceScope, page?: string, perPage?: number, sortBy?: SortBy }
 

@@ -124,7 +124,7 @@ Send email
 `curl -sk --request PATCH "https://localhost:3001/email/$EMAIL_ID/?$USER_CONTEXT"`
 
 Start user checkup task
-`curl -sk "https://localhost:3001/users/checkup?$USER_CONTEXT" | python -m json.tool`
+`curl -sk "https://localhost:3001/account/checkup?$USER_CONTEXT" | python -m json.tool`
 
 Stale job report task (admin)
 `curl -sk "https://localhost:3001/admin/checkStaleJobs?$USER_CONTEXT" | python -m json.tool`
