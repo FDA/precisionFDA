@@ -325,7 +325,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
               <MetadataVal>{execution.duration}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
-              <MetadataKey>Cost In Dollars</MetadataKey>
+              <MetadataKey>Cost</MetadataKey>
               <MetadataVal>{execution.energy_consumption}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
