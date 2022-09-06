@@ -129,9 +129,8 @@ export const useAppSelectionActions = ({
     setShowModal: setDeleteModal,
     isShown: isShownDeleteModal,
   } = useDeleteModal({
-    resource: 'apps',
-    selected: selected.map(s => ({ name: s.name, id: s.uid })),
-    scope,
+    resource: 'app',
+    selected: selected.map(s => ({ name: s.name, location: s.location, id: s.uid })),
     request: deleteAppsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries('apps')

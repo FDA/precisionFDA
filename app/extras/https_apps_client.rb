@@ -12,7 +12,7 @@ class HttpsAppsClient
   # healthy and to check the general health of the user account
   def user_checkup
     request(
-      "/users/checkup",
+      "/account/checkup",
       {},
       Net::HTTP::Get::METHOD,
     )
@@ -48,6 +48,18 @@ class HttpsAppsClient
       "/jobs/#{job_dxid}/syncFiles",
       {},
       Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  # Checks all spaces where current user has ADMIN or LEAD access against platform.
+  # Only checks user's side of space (Host or Guest)
+  # and validates that all members saved in PFDA have their correct counterparts on Platform
+  # Result of this are just logs of permission issues (for now)
+  def check_spaces_permissions
+    request(
+      "/account/checkSpacesPermissions",
+      {},
+      Net::HTTP::Post::METHOD,
     )
   end
 
