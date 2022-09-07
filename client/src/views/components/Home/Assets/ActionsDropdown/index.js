@@ -18,6 +18,8 @@ import {
   hideAssetsAttachLicenseModal,
   showAssetsLicenseModal,
   hideAssetsLicenseModal,
+  showAssetsAcceptLicenseModal,
+  hideAssetsAcceptLicenseModal,
 } from '../../../../../actions/home'
 import {
   homeAssetsEditTagsModalSelector,
@@ -27,15 +29,16 @@ import {
   homeAssetsDeleteModalSelector,
   homeAssetsAttachLicenseModalSelector,
   homeAssetsLicenseModalSelector,
+  homeAssetsAcceptLicenseModalSelector,
 } from '../../../../../reducers/home/assets/selectors'
 import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { OBJECT_TYPES, HOME_FILES_ACTIONS } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeEditTagsModal from '../../HomeEditTagsModal'
-import RenameObjectModal from '../../../Files/RenameObjectModal'
+import RenameObjectModal from '../../../RenameObjectModal'
 import AssetsActionModal from '../AssetsActionModal'
 import AttachLicenseModal from '../../AttachLicenseModal'
 import HomeLicenseModal from '../../HomeLicenseModal'
@@ -51,8 +54,8 @@ const ACTIONS_TO_REMOVE = {
 
 const ActionsDropdown = (props) => {
   const { assets, page = 'private' } = props
-  const assetsIds = assets.map(app => app.id)
-  const assetsUids = assets.map(app => app.uid)
+  const assetsIds = assets.map(asset => asset.id)
+  const assetsUids = assets.map(asset => asset.uid)
 
   const links = {}
   if (assets[0] && assets[0].links) {
@@ -64,7 +67,7 @@ const ActionsDropdown = (props) => {
   const actions = [
     {
       text: 'Rename',
-      isDisabled: assets.length !== 1 || !links.rename,
+      isDisabled: assets.length !== 1,
       onClick: () => props.showRenameModal(),
     },
     {
@@ -83,12 +86,6 @@ const ActionsDropdown = (props) => {
       onClick: () => props.makeFeatured(links.feature, assetsUids, false),
       isDisabled: assets.length === 0 || assets.some(e => !e.featured || !e.links.feature),
       hide: !isAdmin,
-    },
-    {
-      text: 'Authorize URL',
-      isDisabled: assets.length !== 1 || !links.link,
-      link: links.link,
-      method: 'post',
     },
     {
       text: 'Make public',
@@ -118,6 +115,16 @@ const ActionsDropdown = (props) => {
       hide: assets.length !== 1 || !links.detach_license,
     },
     {
+      text: 'Request license approval',
+      link: links.request_approval_license,
+      hide: !links.request_approval_license || page !== 'details',
+    },
+    {
+      text: 'Accept License',
+      onClick: () => props.showAssetsAcceptLicenseModal(),
+      hide: !links.accept_license_action || page !== 'details',
+    },
+    {
       text: 'Edit tags',
       onClick: () => props.showEditTagsModal(),
       hide: !props.editTags,
@@ -136,7 +143,7 @@ const ActionsDropdown = (props) => {
       <DropdownMenu
         title='Actions'
         options={availableActions}
-        message={page === 'spaces' ? 'To perform other actions on this assets, access it from the Space' : ''}
+        message={page === 'spaces' ? 'To perform other actions on these assets, access it from the Space' : ''}
       />
       <HomeAttachToModal
         isOpen={props.attachToModal.isOpen}
@@ -144,7 +151,7 @@ const ActionsDropdown = (props) => {
         hideAction={() => props.hideAttachToModal()}
         ids={assetsIds}
         attachAction={(items, noteUids) => props.attachTo(items, noteUids)}
-        itemsType={OBJECT_TYPES.APP}
+        itemsType={OBJECT_TYPES.ASSET}
       />
       <HomeEditTagsModal
         isOpen={props.editTagsModal.isOpen}
@@ -156,7 +163,7 @@ const ActionsDropdown = (props) => {
       />
       {assets.length === 1 &&
         <RenameObjectModal
-          isFolder
+          isAsset
           defaultFileName={assets[0] && assets[0].origin.text}
           isOpen={props.renameModal.isOpen}
           isLoading={props.renameModal.isLoading}
@@ -197,6 +204,15 @@ const ActionsDropdown = (props) => {
         fileLicense={assets[0] && assets[0].fileLicense}
         modalAction={(link) => props.assetsLicenseAction(link)}
       />
+      <HomeLicenseModal
+        isLoading={props.acceptLicenseModal.isLoading}
+        isOpen={props.acceptLicenseModal.isOpen}
+        hideAction={() => props.hideAssetsAcceptLicenseModal()}
+        fileLicense={assets[0] && assets[0].fileLicense}
+        modalAction={() => props.assetsAcceptLicenseAction(links.accept_license_action)}
+        actionType='accept'
+        title='Accept License'
+      />
     </>
   )
 }
@@ -234,6 +250,10 @@ ActionsDropdown.propTypes = {
   showAssetsLicenseModal: PropTypes.func,
   hideAssetsLicenseModal: PropTypes.func,
   assetsLicenseAction: PropTypes.func,
+  acceptLicenseModal: PropTypes.object,
+  showAssetsAcceptLicenseModal: PropTypes.func,
+  hideAssetsAcceptLicenseModal: PropTypes.func,
+  assetsAcceptLicenseAction: PropTypes.func,
 }
 
 ActionsDropdown.defaultProps = {
@@ -246,6 +266,7 @@ ActionsDropdown.defaultProps = {
   attachLicenseModal: {},
   context: {},
   licenseModal: {},
+  acceptLicenseModal: {},
 }
 
 const mapStateToProps = (state) => ({
@@ -257,6 +278,7 @@ const mapStateToProps = (state) => ({
   attachLicenseModal: homeAssetsAttachLicenseModalSelector(state),
   context: contextSelector(state),
   licenseModal: homeAssetsLicenseModalSelector(state),
+  acceptLicenseModal: homeAssetsAcceptLicenseModalSelector(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -274,6 +296,8 @@ const mapDispatchToProps = (dispatch) => ({
   hideAttachLicenseModal: () => dispatch(hideAssetsAttachLicenseModal()),
   showAssetsLicenseModal: () => dispatch(showAssetsLicenseModal()),
   hideAssetsLicenseModal: () => dispatch(hideAssetsLicenseModal()),
+  showAssetsAcceptLicenseModal: () => dispatch(showAssetsAcceptLicenseModal()),
+  hideAssetsAcceptLicenseModal: () => dispatch(hideAssetsAcceptLicenseModal()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionsDropdown)

@@ -24,6 +24,7 @@ import Input from '../../../FormComponents/Input'
 import Pagination from '../../../../components/TableComponents/Pagination'
 import Counters from '../../../../components/TableComponents/Counters'
 import Icon from '../../../Icon'
+import Select from '../../../FormComponents/Select'
 import { getSpacesIcon } from '../../../../../helpers/spaces'
 import { debounce } from '../../../../../utils'
 
@@ -82,7 +83,7 @@ const HomeWorkflowsEveryoneTable = ({ workflows, isFetching, isCheckedAll, toggl
             <Th>featured</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
@@ -183,10 +184,41 @@ const Row = ({ workflow, toggleWorkflowCheckbox, context = {}, makeFeatured }) =
 }
 
 const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
-  const filtersConfig = ['', 'name', 'title', 'addedBy', '', 'tags']
+  const filtersConfig = ['', 'name', 'title', 'featured', 'addedBy', '', 'tags']
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>
+
+    if (filter === 'featured') {
+      const options = [
+        {
+          value: '',
+          label: '--',
+        },
+        {
+          value: true,
+          label: 'yes',
+        },
+        {
+          value: false,
+          label: 'no',
+        },
+      ]
+
+      return (
+        <td key={i}>
+          <Select
+            name={filter}
+            options={options}
+            autoComplete='off'
+            value={fieldsSearch.get(filter) || ''}
+            onChange={(e) => {
+              onChangeFieldsValue(fieldsSearch.set(filter, e.target.value))
+            }}
+          />
+        </td>
+      )
+    }
 
     return (
       <td key={i}>

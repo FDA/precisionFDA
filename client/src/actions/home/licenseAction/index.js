@@ -20,42 +20,42 @@ import {
 import { OBJECT_TYPES, HOME_ASSETS_MODALS } from '../../../constants'
 
 
-const licenseActionStart = (objectType) => {
+const licenseActionStart = (objectType, modal) => {
   switch (objectType) {
     case OBJECT_TYPES.FILE:
-      return createAction(HOME_LICENSE_ACTION_START)
+      return createAction(HOME_LICENSE_ACTION_START, modal)
     case OBJECT_TYPES.ASSET:
-      return createAction(HOME_ASSETS_MODAL_ACTION_START, HOME_ASSETS_MODALS.LICENSE)
+      return createAction(HOME_ASSETS_MODAL_ACTION_START, modal)
     default:
       throw new Error('Unhandled object type.')
   }
 }
 
-const licenseActionSuccess = (objectType) => {
+const licenseActionSuccess = (objectType, modal) => {
   switch (objectType) {
     case OBJECT_TYPES.FILE:
-      return createAction(HOME_LICENSE_ACTION_SUCCESS)
+      return createAction(HOME_LICENSE_ACTION_SUCCESS, modal)
     case OBJECT_TYPES.ASSET:
-      return createAction(HOME_ASSETS_MODAL_ACTION_SUCCESS, HOME_ASSETS_MODALS.LICENSE)
+      return createAction(HOME_ASSETS_MODAL_ACTION_SUCCESS, modal)
     default:
       throw new Error('Unhandled object type.')
   }
 }
 
-const licenseActionFailure = (objectType) => {
+const licenseActionFailure = (objectType, modal) => {
   switch (objectType) {
     case OBJECT_TYPES.FILE:
-      return createAction(HOME_LICENSE_ACTION_FAILURE)
+      return createAction(HOME_LICENSE_ACTION_FAILURE, modal)
     case OBJECT_TYPES.ASSET:
-      return createAction(HOME_ASSETS_MODAL_ACTION_FAILURE, HOME_ASSETS_MODALS.LICENSE)
+      return createAction(HOME_ASSETS_MODAL_ACTION_FAILURE, modal)
     default:
       throw new Error('Unhandled object type.')
   }
 }
 
-export default (link, objectType) => (
+export default (link, objectType, modal = HOME_ASSETS_MODALS.LICENSE) => (
   async (dispatch) => {
-    dispatch(licenseActionStart(objectType))
+    dispatch(licenseActionStart(objectType, modal))
     try {
       const { status, payload } = await API.postApiCall(link)
       const statusIsOK = status === httpStatusCodes.OK
@@ -63,7 +63,7 @@ export default (link, objectType) => (
       if (statusIsOK) {
         const message = payload.message
 
-        dispatch(licenseActionSuccess(objectType))
+        dispatch(licenseActionSuccess(objectType, modal))
 
         if (message) {
           if (message.type === 'success')
@@ -74,7 +74,7 @@ export default (link, objectType) => (
           dispatch(showAlertAboveAllSuccess({ message: 'Successful action.' }))
         }
       } else {
-        dispatch(licenseActionFailure(objectType))
+        dispatch(licenseActionFailure(objectType, modal))
         if (payload?.error) {
           const { message: message_1 } = payload.error
           dispatch(showAlertAboveAll({ message: message_1 }))

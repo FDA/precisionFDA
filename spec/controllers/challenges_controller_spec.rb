@@ -4,7 +4,7 @@ RSpec.describe ChallengesController, type: :controller do
   let(:admin) { create(:user, :admin) }
   let(:user1) { create(:user, dxuser: "user_1") }
   let(:user2) { create(:user, dxuser: "user_2") }
-  let(:challenge) { create(:challenge, :open, :skip_validate) }
+  let(:challenge) { create(:challenge, :skip_validate) }
 
   before { create(:challenge, :archived, :skip_validate) }
 

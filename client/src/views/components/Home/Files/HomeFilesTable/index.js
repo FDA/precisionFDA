@@ -100,7 +100,7 @@ const HomeFilesTable = ({ files, isFetching, isCheckedAll, toggleAllFilesCheckbo
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='size'>size</Th>
               <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='created_at'>created</Th>
               <Th>origin</Th>
-              <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='tags'>tags</Th>
+              <Th>tags</Th>
             </Thead>
             <Tbody>
               <>
@@ -224,13 +224,12 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>
-
     if (filter === 'size') return (
       <td key={i} style={{ display: 'flex' }}>
         <Input
           style={{ maxWidth: 100 }}
           name={filter}
-          placeholder='--'
+          placeholder='Min (KB)'
           value={fieldsSearch.get(filter) || ''}
           autoComplete='off'
           onChange={(e) => {
@@ -240,7 +239,7 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
         <Input
           style={{ maxWidth: 100 }}
           name={filter + 2}
-          placeholder='--'
+          placeholder='Max (KB)'
           value={fieldsSearchTwo.get(filter + 2) || ''}
           autoComplete='off'
           onChange={(e) => {

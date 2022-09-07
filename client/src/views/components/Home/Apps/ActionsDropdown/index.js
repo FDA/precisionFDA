@@ -23,7 +23,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_APPS_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import AppsActionModal from '../AppsActionModal'
 import HomeExportModal from '../../HomeExportModal'
@@ -122,11 +122,6 @@ const ActionsDropdown = (props) => {
       text: 'Attach to...',
       isDisabled: apps.length === 0 || !props.appsAttachTo,
       onClick: () => props.showAppsAttachToModal(),
-    },
-    {
-      text: 'Attach License',
-      isDisabled: apps.length === 0,
-      hide: true,
     },
     {
       text: 'Comments',

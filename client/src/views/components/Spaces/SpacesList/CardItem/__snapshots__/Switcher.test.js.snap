@@ -5,7 +5,7 @@ exports[`<Switcher /> matches snapshot 1`] = `
   className="spaces-list-card-switcher spaces-list-card-switcher--locked"
 >
   <div
-    className="spaces-list-card-switcher__status spaces-list-card-switcher__status--active"
+    className="spaces-list-card-switcher__status spaces-list-card-switcher__status--active remediation-card-switcher-active"
   >
     active
   </div>
@@ -27,7 +27,7 @@ exports[`<Switcher /> matches snapshot 1`] = `
     />
   </div>
   <div
-    className="spaces-list-card-switcher__status spaces-list-card-switcher__status--locked"
+    className="spaces-list-card-switcher__status spaces-list-card-switcher__status--locked remediation-card-switcher-locked"
   >
     locked
   </div>

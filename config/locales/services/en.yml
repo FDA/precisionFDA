@@ -4,3 +4,8 @@ en:
       OTPMismatchError: The one-time password was incorrect
       UsernameOrPasswordError: The password was incorrect
       InvalidInput: Password or one-time password are not supplied
+  workflows:
+    errors:
+      unsupported_instance_types: The workflow %{name} contains instance types that are not
+                                  currently available to you, please update it with the ones
+                                  you have access to.

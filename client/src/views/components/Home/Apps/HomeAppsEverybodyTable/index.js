@@ -87,7 +87,7 @@ const HomeAppsEverybodyTable = (props) => {
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='revision'>revision</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
@@ -159,12 +159,12 @@ const Row = ({ app, toggleAppCheckbox, context = {}, makeFeatured }) => {
           <span>{app.title}</span>
         </Link>
       </td>
-      <td className='home-page-layout__data-table_featured'>
+      <td align='center' className='home-page-layout__data-table_featured'>
         <span className={classNames({ 'home-page-layout__data-table_action': isAdmin })} >
           <Icon icon={heartClasses} onClick={() => onHeartClick()} />
         </span>
       </td>
-      <td style={{ width: 150 }}>{app.revision}</td>
+      <td align='center' style={{ width: 150 }}>{app.revision}</td>
       <td className='home-page-layout__data-table_full-name'>
         <a href={app.links.user}>
           <span>{app.addedByFullname}</span>

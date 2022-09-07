@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      name: "https_apps_worker",
+      script: "./packages/worker/dist/index.js",
+      node_args: "--max_old_space_size=6144",
+      instances: <%= @instances %>,
+      exec_mode: "cluster",
+      watch: false,
+      log_file: "../log/https-worker.log",
+      time: true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import { homeCurrentTabSelector } from '../../../reducers/home/page/selectors'
 import HomeAppsPage from './HomeApps/HomeAppsPage'
@@ -8,6 +8,9 @@ import HomeAppsFeaturedPage from './HomeApps/HomeAppsFeaturedPage'
 import HomeAppsEverybodyPage from './HomeApps/HomeAppsEverybodyPage'
 import HomeAppsSpacesPage from './HomeApps/HomeAppsSpacesPage'
 import HomeAppsSinglePage from './HomeApps/HomeAppsSinglePage'
+import { HomeDatabasesPage } from './HomeDatabases/HomeDatabasesPage'
+import { HomeDatabasesSinglePage } from './HomeDatabases/HomeDatabasesSinglePage'
+import { HomeDatabasesCreatePage } from './HomeDatabases/HomeDatabasesCreatePage'
 import HomeFilesSinglePage from './HomeFiles/HomeFilesSinglePage'
 import HomeLayout from '../../layouts/HomeLayout'
 import HomeFilesPage from './HomeFiles/HomeFilesPage'
@@ -29,17 +32,31 @@ import HomeAssetsFeaturedPage from './HomeAssets/HomeAssetsFeaturedPage'
 import HomeAssetsEverybodyPage from './HomeAssets/HomeAssetsEverybodyPage'
 import HomeAssetsSpacesPage from './HomeAssets/HomeAssetsSpacesPage'
 import HomeAssetSinglePage from './HomeAssets/HomeAssetSinglePage'
+import { contextUserSelector } from '../../../reducers/context/selectors'
+import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
+import DefaultLayout from '../../layouts/DefaultLayout'
+import { HOME_DATABASES_ACTIONS } from '../../../constants'
 
 
-const HomePage = ({ match, currentTab }) => {
+const HomePage = ({ match }) => {
   let { page } = match.params
+  const currentTab = useSelector(homeCurrentTabSelector)
+  const user = useSelector(contextUserSelector)
+
+  if(user.is_guest) {
+    return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
+  }
 
   let uid
   let tab = match.params.tab ? `/${match.params.tab}` : ''
+
   if (match.params.tab && match.params.tab.split('-')[0]) {
     switch (match.params.tab.split('-')[0]) {
       case 'app':
         tab = '/app-page'
+        break
+      case 'dbcluster':
+        tab = '/database-page'
         break
       case 'file':
         tab = '/file-page'
@@ -67,6 +84,15 @@ const HomePage = ({ match, currentTab }) => {
       return <HomeAppsSpacesPage />
     case 'apps/app-page':
       return <HomeAppsSinglePage uid={uid} />
+    case 'databases':
+      return <HomeDatabasesPage />
+    case 'databases/database-page':
+      return <HomeDatabasesSinglePage dxid={uid} />
+    case 'databases/new':
+      return <HomeDatabasesCreatePage
+        currentTab={'Private'}
+        action={HOME_DATABASES_ACTIONS.CREATE}
+      />
     case 'files':
       return <HomeFilesPage />
     case 'files/featured':
@@ -114,14 +140,9 @@ const HomePage = ({ match, currentTab }) => {
 
 HomePage.propTypes = {
   match: PropTypes.any,
-  currentTab: PropTypes.string,
 }
 
-const mapStateToProps = (state) => ({
-  currentTab: homeCurrentTabSelector(state),
-})
-
-export default connect(mapStateToProps, null)(HomePage)
+export default HomePage
 
 export {
   HomePage,

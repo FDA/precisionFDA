@@ -1,23 +1,26 @@
 source "https://rubygems.org"
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "2.7.1"
+ruby "2.7.5"
 
-# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "~> 6.0.3.4"
+gem "rails", "= 6.1.6.1"
+
+gem "rails-html-sanitizer", "~> 1.4.3"
+
 # Use SCSS for stylesheets
-gem "sass-rails", "~> 6.0", ">= 6.0.0"
+gem "sass-rails", "~> 6.0"
 # Use Uglifier as compressor for JavaScript assets
-gem "uglifier", ">= 1.3.0"
+gem "uglifier"
 # Use CoffeeScript for .coffee assets and views
-gem "coffee-rails", "~> 5.0", ">= 5.0.0"
+gem "coffee-rails", "~> 5.0"
 
 # Use jquery as the JavaScript library
-gem "jquery-rails", "~> 4.4", ">= 4.4.0"
+gem "jquery-rails", "~> 4.4"
 # Turbolinks makes navigating your web application faster
 gem "turbolinks", "~> 5"
 # Build JSON APIs with ease
 gem "jbuilder", "~> 2.5"
+
+gem "rails-reverse-proxy"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", ">= 1.4.6", require: false
@@ -26,7 +29,7 @@ gem "bootsnap", ">= 1.4.6", require: false
 gem "sdoc", ">= 1.0.0", group: :doc
 
 # ActiveModelSerializers brings convention over configuration to your JSON generation.
-gem "active_model_serializers", "~> 0.10.10"
+gem "active_model_serializers", "~> 0.10.12"
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -45,13 +48,13 @@ gem "paloma", "~> 5.1.0"
 # Websocket support (for fetching logs)
 gem "websocket"
 
-# Affix sprocket version as per vuln derscribed in PFDA-495
-gem "sprockets", "= 3.7.2"
+gem "sprockets", "~> 4.0"
+gem "sprockets-rails", "~> 3.3.0", require: "sprockets/railtie"
 
-gem "hashdiff", [">= 1.0.0.beta1", "< 2.0.0"]
+gem "hashdiff", "~> 1.0.1"
 
 # For reCaptcha
-gem "recaptcha", ">= 5.5.0"
+gem "recaptcha", "~> 5.8.1"
 
 # Excel spreadsheet generation
 gem "axlsx", "3.0.0.pre"
@@ -63,34 +66,31 @@ gem "secure_headers", "~> 6.3"
 gem "gravtastic"
 
 # Adds pagination support to models
-gem "bootstrap-kaminari-views", ">= 0.0.5"
-gem "kaminari", ">= 1.2.1", "< 2.0"
+gem "bootstrap-kaminari-views"
+gem "kaminari", "~> 1.2"
 
 # For getting user's local time
 gem "local_time"
 
 # Add comments on any model
-gem "acts-as-taggable-on", "~> 6.5", github: "mbleigh/acts-as-taggable-on"
-gem "acts_as_commentable_with_threading"
+gem "acts-as-taggable-on", "~> 9.0", github: "mbleigh/acts-as-taggable-on"
+gem "acts_as_commentable_with_threading", ">= 2.0.1"
 gem "awesome_nested_set", github: "collectiveidea/awesome_nested_set"
 
 gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
 gem "acts_as_votable"
 
 # For inline-css in emails
-gem "inky-rb", ">= 1.3.8.0", require: "inky"
-gem "premailer-rails", ">= 1.11.1"
+gem "inky-rb", require: "inky"
+gem "premailer-rails"
 
 gem "mysql2"
 
-gem "gretel", ">= 4.0.2"
+gem "gretel", "~> 4.4"
 
 gem "rack-utf8_sanitizer", "~> 1.7"
 
-# View outgoing HTTP requests
-gem "httplog"
-
-gem "simple_form", "~> 5.0.2"
+gem "simple_form", "~> 5.1"
 
 # PDF builder
 gem "prawn"
@@ -104,9 +104,13 @@ gem "dry-container"
 
 gem "rubyzip", "=1.3.0"
 
-gem "sidekiq"
+gem "sidekiq", "~> 6.4"
 
 gem "whenever", require: false
+
+gem "soapforce"
+
+gem "dotenv-rails", "~> 2.7"
 
 group :development do
   # Annotate models
@@ -114,24 +118,23 @@ group :development do
   gem "brakeman"
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
-  gem "web-console", ">= 4.0.4"
+  gem "web-console"
 
-  gem "listen", ">= 3.0.5", "< 3.2"
+  gem "listen"
 
   # Automatic Ruby code checking tool.
-  # Bump versions to be along with GitHub pronto-actions.
-  gem "rubocop", "= 0.80.1", require: false
-  gem "rubocop-rails", "= 2.4.2", require: false
-  gem "rubocop-rspec", "= 1.38.1", require: false
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rspec", require: false
 
-  gem "pronto", "= 0.10.0"
-  gem "pronto-rubocop", "= 0.10.0", require: false
-  gem "pronto-brakeman", "= 0.10.0", require: false
+  gem "pronto"
+  gem "pronto-rubocop", require: false
+  gem "pronto-brakeman", require: false
 
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 
   gem "pry"
-  gem "pry-byebug"
+  gem "pry-byebug", github: "deivid-rodriguez/pry-byebug"
   gem "pry-rails"
   gem "pry-remote"
   gem "pry-stack_explorer"
@@ -141,8 +144,12 @@ group :development do
 end
 
 group :development, :test, :ui_test do
-  gem "dotenv-rails", ">= 2.7.6"
-  gem "thin"
+  gem "thin", "~> 1.8"
+end
+
+group :development, :test, :ui_test, :staging, :dev do
+  # View outgoing HTTP requests in logs
+  gem "httplog"
 end
 
 group :test do
@@ -156,8 +163,7 @@ group :test do
   gem "webmock", "~> 3.1", ">= 3.1.1"
 end
 
-group :production do
-  gem "exception_notification", "4.1.1"
-  gem "soapforce", ">= 0.8.0"
-  gem "unicorn", "~> 4.9.0"
+group :production, :staging, :dev do
+  gem "exception_notification", "~> 4.4"
+  gem "puma", "~> 5.6", ">= 5.6.4"
 end

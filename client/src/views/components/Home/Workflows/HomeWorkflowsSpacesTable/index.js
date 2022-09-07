@@ -76,10 +76,10 @@ const HomeWorkflowsSpacesTable = ({ workflows, isFetching, isCheckedAll, toggleA
             </th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='name'>name</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='name'>title</Th>
-            <Th>location</Th>
+            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='location'>location</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortWorkflowsHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
@@ -161,7 +161,7 @@ const linkShow = workflow.links ? `/home${workflow.links.show}` : null
 }
 
 const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
-  const filtersConfig = ['', 'name', 'title', '', 'addedBy', '', 'tags']
+  const filtersConfig = ['', 'name', 'title', 'location', 'addedBy', '', 'tags']
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>

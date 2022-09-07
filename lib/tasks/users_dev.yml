@@ -1,0 +1,42 @@
+---
+- dxuser: pfda_autotest1
+  first_name: John
+  last_name: Johnlastname
+  email: pkryshenyk-cf+pfda_autotest1@dnanexus.com
+  org_handle: autotestorg1
+  admin_roles:
+  - space
+- dxuser: pfda_autotest2
+  first_name: Bill
+  last_name: Billlastname
+  email: pkryshenyk-cf+pfda_autotest2@dnanexus.com
+  org_handle: autotestorg2
+- dxuser: precisionfda.admin_dev
+  first_name: PrecisionFDA
+  last_name: Admin - Dev
+  email: pkryshenyk-cf+precisionfda.admin_dev@dnanexus.com
+  org_handle: pamellaaccounttwo
+  admin_roles:
+  - site
+- dxuser: mmaltcev3
+  first_name: Mikhail
+  last_name: Maltcev
+  email: pkryshenyk-cf+pfdalocal_user@dnanexus.com
+  org_handle: maltcevorg
+- dxuser: randall.ebert
+  first_name: Randall
+  last_name: Ebert
+  email: pkryshenyk-cf+testusertwenty@dnanexus.com
+  org_handle: randall.ebert
+  admin_roles:
+  - site
+- dxuser: sirius.black
+  first_name: Sirius
+  last_name: Black
+  email: pkryshenyk-cf+testuserblack@dnanexus.com
+  org_handle: sirius.black
+- dxuser: harry.potter
+  first_name: Harry
+  last_name: Potter
+  email: pkryshenyk-cf+testuserpotter@dnanexus.com
+  org_handle: harry.potter

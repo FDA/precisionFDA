@@ -2,27 +2,19 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import DefaultLayout from '../DefaultLayout'
-import Tabs from './Tabs'
 import Menu from './Menu'
 
 import './style.sass'
 
 
-const HomeLayout = ({ children, hideTabs }) => {
+const HomeLayout = ({ children }) => {
   return (
     <DefaultLayout>
-      <div className="home-page-layout pfda-margin-t-20">
-        <div className='home-page-layout__container'>
-          <Menu />
-          <div className="home-page-layout__content">
-            {!hideTabs &&
-              <div>
-                <Tabs />
-              </div>
-            }
-            <div className="pfda-padded-20">
-              {children}
-            </div>
+      <div className='home-page-layout home-page-layout__container'>
+        <Menu />
+        <div className="home-page-layout__content">
+          <div className="pfda-padded-20">
+            {children}
           </div>
         </div>
       </div>

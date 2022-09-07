@@ -50,6 +50,8 @@ const showAssetsAttachLicenseModal = () => createAction(HOME_ASSETS_SHOW_MODAL, 
 const hideAssetsAttachLicenseModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.ATTACH_LICENSE)
 const showAssetsLicenseModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_ASSETS_MODALS.LICENSE)
 const hideAssetsLicenseModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.LICENSE)
+const showAssetsAcceptLicenseModal = () => createAction(HOME_ASSETS_SHOW_MODAL, HOME_ASSETS_MODALS.ACCEPT_LICENSE)
+const hideAssetsAcceptLicenseModal = () => createAction(HOME_ASSETS_HIDE_MODAL, HOME_ASSETS_MODALS.ACCEPT_LICENSE)
 
 export {
   fetchAssets,
@@ -88,4 +90,6 @@ export {
   hideAssetsAttachLicenseModal,
   showAssetsLicenseModal,
   hideAssetsLicenseModal,
+  showAssetsAcceptLicenseModal,
+  hideAssetsAcceptLicenseModal,
 }

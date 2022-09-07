@@ -1,0 +1,20 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.22.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-RUBY-ACTIONCABLE-20338:
+    - '*':
+        reason: No upgrade or patch available
+        expires: 2022-10-13T17:29:57.484Z
+        created: 2021-10-13T17:29:57.504Z
+  SNYK-RUBY-RACK-1061917:
+    - '*':
+        reason: No upgrade or patch available
+        expires: 2022-10-13T17:30:22.552Z
+        created: 2021-10-13T17:30:22.575Z
+  'snyk:lic:rubygems:sidekiq:LGPL-3.0':
+    - '*':
+        reason: No upgrade or patch available
+        expires: 2022-10-13T17:38:09.532Z
+        created: 2021-10-13T17:38:09.555Z
+patch: {}

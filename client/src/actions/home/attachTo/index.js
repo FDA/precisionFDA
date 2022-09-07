@@ -1,4 +1,5 @@
 import httpStatusCodes from 'http-status-codes'
+import { toast } from 'react-toastify'
 
 import { createAction } from '../../../utils/redux'
 import * as API from '../../../api/home'
@@ -25,11 +26,6 @@ import {
   HOME_ASSETS_MODAL_ACTION_SUCCESS,
   HOME_ASSETS_MODAL_ACTION_FAILURE,
 } from '../assets/types'
-import {
-  showAlertAboveAll,
-  showAlertAboveAllSuccess,
-  showAlertAboveAllWarning,
-} from '../../alertNotifications'
 import { OBJECT_TYPES, HOME_EXECUTIONS_MODALS, HOME_ASSETS_MODALS } from '../../../constants'
 
 
@@ -102,27 +98,33 @@ export default (objectType, items, noteUids) => (
         if (messages) {
           messages.forEach(message => {
             if (message.type === 'success')
-              dispatch(showAlertAboveAllSuccess({ message: message.message }))
+              toast.success(message.message)
+              // dispatch(showAlertAboveAllSuccess({ message: message.message }))
             else if (message.type === 'warning')
-              dispatch(showAlertAboveAllWarning({ message: message.message }))
+              toast.error(message.message)
+              // dispatch(showAlertAboveAllWarning({ message: message.message }))
           })
         } else {
-          dispatch(showAlertAboveAllSuccess({ message: 'Objects attached successfully.' }))
+          toast.success('Objects attached successfully.')
+          // dispatch(showAlertAboveAllSuccess({ message: 'Objects attached successfully.' }))
         }
       } else {
         dispatch(attachToFailure(objectType))
         if (payload?.error) {
           const { message: message_1 } = payload.error
-          dispatch(showAlertAboveAll({ message: message_1 }))
+          toast.error(message_1)
+          // dispatch(showAlertAboveAll({ message: message_1 }))
         } else {
-          dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
+          toast.error('Something went wrong!')
+          // dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
         }
       }
 
       return { status, payload }
     } catch (e) {
       console.error(e)
-      dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
+      toast.error('Something went wrong!')
+      // dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
     }
   }
 )

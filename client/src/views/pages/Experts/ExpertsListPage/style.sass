@@ -1,0 +1,22 @@
+@import "../../../../styles/common.sass"
+@import "../../../../styles/variables.sass"
+
+
+.experts-page-layout
+	@extend .main-container-two-columns
+
+.expert-highlight-heading
+  @extend .pfda-subsection-heading
+  margin-left: $sizing-smaller-column-width + $padding-main-content-horizontal
+
+.experts-page-layout.right-column--override
+  margin-top: 24px
+
+  hr
+    color: #646464
+    width: 1px
+    margin: 0 16px
+
+.pfda-main-content-sidebar
+  p
+    padding-top: 8px

@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { withRouter } from 'react-router'
+import { withRouter } from 'react-router-dom'
 
 import HomeLayout from '../../../../layouts/HomeLayout'
 import Icon from '../../../../components/Icon'
@@ -13,6 +13,7 @@ import TabsSwitch from '../../../../components/TabsSwitch'
 import Loader from '../../../../components/Loader'
 import TagsList from '../../../../components/TagsList'
 import HomeEditTagsModal from '../../../../components/Home/HomeEditTagsModal'
+import HomeWorkflowExecutionsTable from '../../../../components/Home/Workflows/HomeWorkflowsExecutionsTable'
 import {
   homeWorkflowsWorkflowDetailsSelector,
   homeWorkflowsEditTagsModalSelector,
@@ -31,6 +32,8 @@ import {
 import { OBJECT_TYPES } from '../../../../../constants'
 import { getSelectedTab } from '../../../../../helpers/home'
 import ActionsDropdown from '../../../../components/Home/Workflows/ActionsDropdown'
+import HomeWorkflowsDiagram from '../../../../components/Home/Workflows/HomeWorkflowsDiagram'
+import Markdown from '../../../../components/Markdown'
 
 
 const HomeWorkflowsSinglePage = (props) => {
@@ -66,6 +69,10 @@ const HomeWorkflowsSinglePage = (props) => {
         header: 'location',
         value: 'location',
         link: workflow.links.space && `${workflow.links.space}/workflows`,
+      },
+      {
+        header: 'name',
+        value: 'name',
       },
       {
         header: 'id',
@@ -111,8 +118,19 @@ const HomeWorkflowsSinglePage = (props) => {
       tab: <HomeWorkflowsSpec spec={meta.spec} />,
     },
     {
+      header: `Executions (${Object.keys(meta.executions).length})`,
+      tab: <HomeWorkflowExecutionsTable
+        uid={uid}
+        space={workflow.links.space && workflow.location}
+      />,
+    },
+    {
       header: 'Diagram',
-      tab: <div>Executions</div>,
+      tab: <HomeWorkflowsDiagram uid={workflow.uid}/>,
+    },
+    {
+      header: 'Readme',
+      tab: <Markdown data={workflow.readme}/>,
     },
   ]
 

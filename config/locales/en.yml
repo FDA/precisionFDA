@@ -25,6 +25,12 @@ en:
     header: A secure, collaborative, high-performance computing platform that builds a community
             of experts around the analysis of biological datasets in order to advance precision
             medicine, inform regulatory science, and enable improvements in health outcomes.
+    login_as_guest_warning: |
+      You are currently browsing precisionFDA as a guest. To log in and complete this
+      action, your user account must be provisioned. Your account is currently being
+      reviewed by an FDA administrator for provisioning. If you do not receive full
+      access within 14 days, please contact precisionfda@fda.hhs.gov to request an
+      upgraded account with end-level access.
   email_taken: |
     Error. This email address is already being used for a %{side} account.
     Please choose a different email address for precisionFDA.
@@ -40,6 +46,7 @@ en:
     by the current user.
   app_licence_not_accepted: This app contains one or more assets which need to be licensed.
     Please run the app first in order to accept the licenses.
+  app_instance_type_forbidden: Sorry, you don't have permissions to use this instance type.
   license_not_accessible: Sorry, this license does not exist or is not accessible by you.
   job_not_accessible: Sorry, this job does not exist or is not accessible by you.
   invalid_comparator: Invalid comparator
@@ -52,6 +59,36 @@ en:
     accessible by you.
   error_default: Something went wrong!
   workflow_not_accessible: Sorry, this workflow does not exist or is not accessible by you.
+
+  provision:
+    org_invitation_but_self_represented_on:
+      The original invitation included an organization
+      but also ticked the 'self-represented' box. Make sure you are making the right
+      choice between those two options.
+
+    both_org_admin_and_self_represented_on:
+      The original invitation ticked both the organization
+      admin and 'self-represented' boxes. Make sure you are making the right choice
+      between those two options.
+
+    self_represented_on_but_org:
+      The original invitation ticked the 'self-represented' box but you supplied
+      an organization. Please double-check this is what you want.
+
+    org_but_self_represented_on:
+      The original invitation supplied an organization but you are about to
+      provision a self-represented user. Please double-check this is what you want.
+
+    org_admin_but_self_represented_on:
+      The original invitation ticked the organization admin box but you are about
+      to provision a self-represented user. Please double-check this is what you want.
+
+    profile_link: Click here to visit their profile
+
+    dxuser_already_used:
+      There is already another user on precisionFDA with the username '%{username}'.
+      %{link} to make sure that the person you are trying to provision doesn't already exist
+      on precisionFDA. The suggested username has been adjusted to avoid conflicts.
 
   activerecord:
     attributes:

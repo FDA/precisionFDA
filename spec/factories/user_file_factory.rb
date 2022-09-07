@@ -19,6 +19,8 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  entity_type             :integer          default("regular"), not null
+#  featured                :boolean          default(FALSE)
 #
 
 FactoryBot.define do
@@ -27,6 +29,7 @@ FactoryBot.define do
 
     sequence(:dxid) { "file-#{SecureRandom.hex(12)}" }
     sequence(:name) { |n| "file-#{n}" }
+    sequence(:uid) { |n| "#{dxid}-#{n}" }
     sequence(:project) { "project-#{SecureRandom.hex(12)}" }
 
     state { UserFile::STATE_CLOSED }

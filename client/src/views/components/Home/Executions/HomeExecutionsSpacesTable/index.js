@@ -90,7 +90,7 @@ const HomeExecutionsSpacesTable = (props) => {
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='name'>name</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='apptitle'>app title</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='username'>launched by</Th>
-            <Th>location</Th>
+            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='location'>location</Th>
             <Th>instance type</Th>
             <Th>duration</Th>
             <Th>energy</Th>
@@ -258,7 +258,7 @@ const Row = ({ toggleExecutionCheckbox, execution, isWorkflowExecution }) => {
 }
 
 const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
-  const filtersConfig = ['', '', 'state', 'name', 'apptitle', 'username', '', '', '', '', '', 'tags']
+  const filtersConfig = ['', '', 'state', 'name', 'apptitle', 'username', 'location', '', '', '', '', 'tags']
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>

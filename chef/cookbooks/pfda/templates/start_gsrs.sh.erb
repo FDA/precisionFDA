@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rm -f RUNNING_PID && \
+<%= @gsrs_path %>/bin/ginas \
+  <%= @java_opts %> \
+  -Dconfig.file=<%= @gsrs_pfda_conf %> \
+  -Dhttp.port=<%= @gsrs_port %> \
+  -Djava.awt.headless=true

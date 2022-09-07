@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { withRouter } from 'react-router'
+import { withRouter } from 'react-router-dom'
 
 import HomeLayout from '../../../../layouts/HomeLayout'
 import Icon from '../../../../components/Icon'
@@ -77,6 +77,10 @@ const HomeAppsSinglePage = (props) => {
         header: 'location',
         value: 'location',
         link: app.links.space && `${app.links.space}/apps`,
+      },
+      {
+        header: 'name',
+        value: 'name',
       },
       {
         header: 'id',

@@ -33,6 +33,7 @@ const SpacesListSearch = ({ filterSpacesHandler }) => {
           type="text"
           autoComplete="off"
           className="form-control"
+          aria-label="Search box to filter Spaces by State, Name, Type or User..."
         />
         {(showIcon) && (
           <div className="spaces-list-search__icon">

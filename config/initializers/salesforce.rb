@@ -6,4 +6,6 @@
 #  SALESFORCE_FDA_EMAIL_ID
 #  SALESFORCE_NOTIFIER_EMAIL_ID
 
-ActionMailer::Base.add_delivery_method :salesforce, SalesforceSender
+Rails.application.config.to_prepare do
+  ActionMailer::Base.add_delivery_method :salesforce, SalesforceSender
+end

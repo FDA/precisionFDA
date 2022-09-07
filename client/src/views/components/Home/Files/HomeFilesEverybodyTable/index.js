@@ -21,6 +21,7 @@ import {
   toggleFileEverybodyCheckbox,
   setFileEverybodyFilterValue,
   makeFeatured,
+  fetchFilesEverybody,
 } from '../../../../../actions/home'
 import { getOrder } from '../../../../../helpers'
 import { OBJECT_TYPES } from '../../../../../constants'
@@ -31,6 +32,7 @@ import Pagination from '../../../../components/TableComponents/Pagination'
 import Counters from '../../../../components/TableComponents/Counters'
 import Icon from '../../../Icon'
 import { debounce } from '../../../../../utils'
+import { getFolderId } from '../../../../../helpers/home'
 
 
 const breadcrumbs = (path) => (
@@ -38,9 +40,9 @@ const breadcrumbs = (path) => (
     <span className="space-files-table__breadcrumbs-label">You are here:</span>
     {
       ([{ id: 0, name: 'Files', href: '/home/files/everybody' }]
-        .concat((path || [])
-          .map(folder => ({
-            id: folder.id,
+          .concat((path || [])
+            .map(folder => ({
+              id: folder.id,
             name: folder.name,
             href: `/home/files/everybody?folderId=${folder.id}`,
           }))).map(folder => <Link key={`folder-${folder.id}`} to={folder.href || ''}>{folder.name}</Link>)
@@ -100,7 +102,7 @@ const HomeFilesEverybodyTable = ({ files, isFetching, isCheckedAll, toggleAllFil
         <Table>
           <Thead>
             <th className="pfda-padded-l10">
-              <Icon onClick={toggleAllFilesCheckboxes} icon={checkboxClasses} />
+            <Icon onClick={toggleAllFilesCheckboxes} icon={checkboxClasses} />
             </th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='name'>name</Th>
             <Th>featured</Th>
@@ -108,7 +110,7 @@ const HomeFilesEverybodyTable = ({ files, isFetching, isCheckedAll, toggleAllFil
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='size'>size</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='created_at'>created</Th>
             <Th>origin</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortFilesHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
@@ -196,7 +198,12 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
   })
 
   const onHeartClick = () => {
-    if (isAdmin) makeFeatured(file.links.feature, [file.uid], !file.featured)
+    if (isAdmin) {
+      if (file.type === 'Folder'){
+        makeFeatured(file.links.feature, [file.id], !file.featured)
+      } else 
+          makeFeatured(file.links.feature, [file.uid], !file.featured)
+    }
   }
 
   let originLink = ''
@@ -218,7 +225,7 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
       <td>
         <FileLink file={file} />
       </td>
-      <td className='home-page-layout__data-table_featured'>
+      <td align='center' className='home-page-layout__data-table_featured'>
         <span className={classNames({ 'home-page-layout__data-table_action': isAdmin })}>
           <Icon icon={heartClasses} onClick={() => onHeartClick()} />
         </span>
@@ -259,7 +266,7 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
         <Input
           style={{ maxWidth: 100 }}
           name={filter}
-          placeholder='--'
+          placeholder='Min (KB)'
           value={fieldsSearch.get(filter) || ''}
           autoComplete='off'
           onChange={(e) => {
@@ -269,7 +276,7 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
         <Input
           style={{ maxWidth: 100 }}
           name={filter + 2}
-          placeholder='--'
+          placeholder='Max (KB)'
           value={fieldsSearchTwo.get(filter + 2) || ''}
           autoComplete='off'
           onChange={(e) => {
@@ -301,6 +308,10 @@ const FilterRow = ({ fieldsSearch, fieldsSearchTwo, onChangeFieldsValue, onChang
             name={filter}
             options={options}
             autoComplete='off'
+            value={fieldsSearch.get(filter) || ''}
+            onChange={(e) => {
+              onChangeFieldsValue(fieldsSearch.set(filter, e.target.value))
+            }}
           />
         </td>
       )
@@ -372,11 +383,14 @@ const mapStateToProps = (state) => ({
   path: homePathEverybodySelector(state),
 })
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch, ownProps) => ({
   toggleAllFilesCheckboxes: () => dispatch(toggleAllFilesEverybodyCheckboxes()),
   toggleFileCheckbox: (id) => dispatch(toggleFileEverybodyCheckbox(id)),
   setFileFilterValue: (filter, value) => dispatch(setFileEverybodyFilterValue(filter, value)),
-  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)),
+  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)).then(({ statusIsOK }) => {
+    const folderId = getFolderId(ownProps.location)
+    if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
+  }),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeFilesEverybodyTable)

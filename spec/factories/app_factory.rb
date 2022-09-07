@@ -19,6 +19,9 @@
 #  uid           :string(255)
 #  dev_group     :string(255)
 #  release       :string(255)      not null
+#  entity_type   :integer          default("regular"), not null
+#  featured      :boolean          default(FALSE)
+#  deleted       :boolean          default(FALSE), not null
 #
 
 FactoryBot.define do

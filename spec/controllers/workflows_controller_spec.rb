@@ -1,7 +1,8 @@
 require "rails_helper"
 
+# rubocop:todo RSpec/MultipleMemoizedHelpers
 RSpec.describe WorkflowsController, type: :controller do
-  let(:user) { create(:user, dxuser: "user") }
+  let(:user) { create(:user, dxuser: "user", job_limit: 100) }
   let(:folder) { create(:folder, :private, user_id: user.id) }
   let(:app_input) do
     [
@@ -75,6 +76,45 @@ RSpec.describe WorkflowsController, type: :controller do
   end
 
   let(:workflow) { create(:workflow, user_id: user.id, spec: workflow_spec) }
+
+  describe "GET batch_workflow" do
+    before do
+      authenticate!(user)
+    end
+
+    context "when user exceeded charges limit" do
+      before do
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
+      end
+
+      it "responds with an error" do
+        get :batch_workflow, params: { id: workflow.uid }
+
+        expect(response).to have_http_status(:found)
+        expect(flash[:error]).to include(I18n.t("api.errors.exceeded_charges_limit"))
+      end
+    end
+  end
+
+  describe "POST run_batch" do
+    before do
+      authenticate!(user)
+    end
+
+    context "when user exceeded charges limit" do
+      before do
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
+      end
+
+      it "responds with an error" do
+        post :run_batch, params: { id: workflow.uid }, format: :json
+
+        expect(response.status).to eq(422)
+        expect(parsed_response["error"]["message"]).to \
+          include(I18n.t("api.errors.exceeded_charges_limit"))
+      end
+    end
+  end
 
   describe "GET output_folder_create" do
     let(:new_folder_name) { FFaker::Lorem.word }
@@ -166,3 +206,4 @@ RSpec.describe WorkflowsController, type: :controller do
     end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers

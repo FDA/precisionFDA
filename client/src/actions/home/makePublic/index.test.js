@@ -4,9 +4,9 @@ import { mockStore } from '../../../../test/helper'
 import makePublic from '.'
 import reducer from '../../../reducers'
 import {
-  HOME_MAKE_PUBLICK_APP_START,
-  HOME_MAKE_PUBLICK_APP_SUCCESS,
-  HOME_MAKE_PUBLICK_APP_FAILURE,
+  HOME_MAKE_PUBLIC_FOLDER_START,
+  HOME_MAKE_PUBLIC_FOLDER_SUCCESS,
+  HOME_MAKE_PUBLIC_FOLDER_FAILURE,
 } from '../types'
 import { ALERT_SHOW_ABOVE_ALL } from '../../alertNotifications/types'
 import { ALERT_ABOVE_ALL, OBJECT_TYPES } from '../../../constants'
@@ -19,9 +19,9 @@ describe('makePublic()', () => {
 
   describe('dispatch actions', () => {
     const store = mockStore(reducer({}, { type: undefined }))
-    const objectType = OBJECT_TYPES.APP
+    const objectType = OBJECT_TYPES.FILE
     const ids = [1, 2, 3]
-    const copyLink = '/api/apps/copy'
+    const link = '/api/folders/publish_folders'
 
     afterEach(() => {
       store.clearActions()
@@ -29,27 +29,18 @@ describe('makePublic()', () => {
 
     it('dispatches correct actions on success response', () => {
       const messages = [
-        { type: 'warning', message: 'message 1' },
-        { type: 'success', message: 'message 2' },
+        { type: 'success', message: 'Objects are successfully published.' },
       ]
-      fetchMock.post(copyLink, { meta: { messages }})
+      fetchMock.post(link, messages)
 
-      return store.dispatch(makePublic(copyLink, objectType, ids)).then(() => {
+      return store.dispatch(makePublic(link, objectType, ids)).then(() => {
         const actions = store.getActions()
-
         expect(actions).toEqual([
-          { type: HOME_MAKE_PUBLICK_APP_START, payload: {}},
-          { type: HOME_MAKE_PUBLICK_APP_SUCCESS, payload: {}},
+          { type: HOME_MAKE_PUBLIC_FOLDER_START, payload: {}},
+          { type: HOME_MAKE_PUBLIC_FOLDER_SUCCESS, payload: {}},
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
-              message: 'message 1',
-              style: 'warning',
-              type: ALERT_ABOVE_ALL,
-            },
-          },
-          {
-            type: ALERT_SHOW_ABOVE_ALL, payload: {
-              message: 'message 2',
+              message: 'Objects are successfully published.',
               style: 'success',
               type: ALERT_ABOVE_ALL,
             },
@@ -58,15 +49,37 @@ describe('makePublic()', () => {
       })
     })
 
-    it('dispatches correct actions on failure response', () => {
-      fetchMock.post(copyLink, { status: 500, body: {}})
+    it('dispatches correct actions on warning response', () => {
+      const messages = [
+        { messages: [{ type: 'warning', text: 'message 1' }]},
+      ]
+      fetchMock.post(link, messages[0])
 
-      return store.dispatch(makePublic(copyLink, objectType, ids)).then(() => {
+      return store.dispatch(makePublic(link, objectType, ids)).then(() => {
+        const actions = store.getActions()
+        expect(actions).toEqual([
+          { type: HOME_MAKE_PUBLIC_FOLDER_START, payload: {}},
+          { type: HOME_MAKE_PUBLIC_FOLDER_SUCCESS, payload: {}},
+          {
+            type: ALERT_SHOW_ABOVE_ALL, payload: {
+              message: 'message 1',
+              style: 'warning',
+              type: ALERT_ABOVE_ALL,
+            },
+          },
+        ])
+      })
+    })
+
+    it('dispatches correct actions on failure response', () => {
+      fetchMock.post(link, { status: 500, body: {}})
+
+      return store.dispatch(makePublic(link, objectType, ids)).then(() => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
-          { type: HOME_MAKE_PUBLICK_APP_START, payload: {}},
-          { type: HOME_MAKE_PUBLICK_APP_FAILURE, payload: {}},
+          { type: HOME_MAKE_PUBLIC_FOLDER_START, payload: {}},
+          { type: HOME_MAKE_PUBLIC_FOLDER_FAILURE, payload: {}},
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'Something went wrong!',

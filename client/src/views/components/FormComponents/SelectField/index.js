@@ -6,12 +6,13 @@ import { ALERT_STYLES } from '../../../../constants'
 import Select from '../Select'
 
 
-const SelectField = ({ children, name, label, status, options, value, selectLabel, helpText, multiple, ...rest }) => {
+const SelectField = ({ children, name, label, status, options, value, selectLabel, helpText, multiple, class_name, ...rest }) => {
+
   selectLabel && options.unshift({ label: selectLabel, value: null })
 
   return (
     <div className={classNames('form-group', { [`has-${status}`]: status })}>
-      <label className="control-label" htmlFor={name}>{label}</label>
+      <label className={`control-label ${class_name}`} htmlFor={name}>{label}</label>
       <Select options={options} name={name} value={value} multiple={multiple} {...rest} />
       {!!helpText && <span className="help-block">{helpText}</span>}
       {children}
@@ -39,6 +40,7 @@ SelectField.propTypes = {
   helpText: PropTypes.string,
   multiple: PropTypes.bool,
   children: PropTypes.node,
+  class_name: PropTypes.string,
 }
 
 export default SelectField

@@ -29,7 +29,7 @@ export const homeFilesGetFileDetails = (state) => state.home.files.fileDetails
 
 export const homeFilesRenameModalSelector = (state) => state.home.files.renameModal
 export const homeFilesCopyToSpaceModalSelector = (state) => state.home.files.copyToSpaceModal
-export const homeFilesMakePublicModalSelector = (state) => state.home.files.makePublicModal
+export const homeFilesMakePublicFolderModalSelector = (state) => state.home.files.makePublicFolderModal
 export const homeFilesAddFolderModalSelector = (state) => state.home.files.addFolderModal
 export const homeFilesDeleteModalSelector = (state) => state.home.files.deleteModal
 export const homeFilesAttachToModalSelector = (state) => state.home.files.filesAttachToModal
@@ -38,3 +38,4 @@ export const homeFilesAttachLicenseModalSelector = (state) => state.home.files.a
 export const homeFilesActionModalSelector = (state) => state.home.files.actionModal
 export const homeFilesEditTagsModalSelector = (state) => state.home.files.editTagsModal
 export const homeFilesLicenseModalSelector = (state) => state.home.files.licenseModal
+export const homeFilesAcceptLicenseModalSelector = (state) => state.home.files.acceptLicenseModal

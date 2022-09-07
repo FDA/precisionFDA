@@ -15,6 +15,7 @@ const filesState = {
     totalCount: null,
     fields: new Map(),
   },
+  path: [],
 }
 
 const modalState = {
@@ -31,7 +32,7 @@ export default {
   isFetchFiles: false,
   renameModal: modalState,
   copyToSpaceModal: modalState,
-  makePublicModal: modalState,
+  makePublicFolderModal: modalState,
   addFolderModal: modalState,
   deleteModal: modalState,
   filesAttachToModal: modalState,
@@ -56,4 +57,5 @@ export default {
   },
   editTagsModal: modalState,
   licenseModal: modalState,
+  acceptLicenseModal: modalState,
 }

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Activation /> renders 1`] = `
-<DefaultLayout>
+<Fragment>
   <div
     className="container-fluid pfda-padded-30 space-activation"
   >
@@ -17,18 +17,14 @@ exports[`<Activation /> renders 1`] = `
       >
         <div
           className="space-members_role"
-        >
-          Host Lead
-        </div>
+        />
       </div>
       <div
         className="col-xs-6"
       >
         <div
           className="space-members_role"
-        >
-          Space Lead
-        </div>
+        />
       </div>
       <div
         className="col-xs-6"
@@ -56,7 +52,7 @@ exports[`<Activation /> renders 1`] = `
       </div>
     </div>
     <div
-      className="activation"
+      className="activation accept_space"
     >
       <div
         className="activation__info"
@@ -76,17 +72,11 @@ exports[`<Activation /> renders 1`] = `
           <div
             className="activation__small"
           >
-            Both 
-            Host Lead
-             and 
-            Space Lead
-             must 
-            "Accept Space"
-             to activate it.
+             must "Accept Space" to activate it.
           </div>
         </div>
       </div>
     </div>
   </div>
-</DefaultLayout>
+</Fragment>
 `;

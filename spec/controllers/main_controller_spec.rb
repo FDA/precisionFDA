@@ -21,6 +21,10 @@ RSpec.describe MainController, type: :controller do
   end
 
   describe "GET return_from_login" do
+    before do
+      stub_request(:any, %r{#{ENV['HTTPS_APPS_API_URL']}/account/checkup.*}).to_return(status: 200)
+    end
+
     it "doesn't flash an error" do
       get :return_from_login, params: { code: "123" }
       expect(flash[:error]).to be_falsey

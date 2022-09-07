@@ -23,6 +23,8 @@
 #  user_state                  :integer          default("enabled"), not null
 #  expiration                  :integer
 #  disable_message             :string(255)
+#  jupyter_project             :string(255)
+#  ttyd_project                :string(255)
 #
 
 require "rails_helper"

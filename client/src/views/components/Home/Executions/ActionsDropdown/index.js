@@ -23,7 +23,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeExecutionsActionModal from '../HomeExecutionsActionModal'
@@ -63,7 +63,7 @@ const ActionsDropdown = (props) => {
     },
     {
       text: 'Terminate',
-      isDisabled: singleExecutions.length !== 1 || !singleExecutions.some(e => e.links.terminate),
+      isDisabled: !singleExecutions && !singleExecutions.all(e => e.links.terminate),
       onClick: () => props.showTerminateModal(),
     },
     {

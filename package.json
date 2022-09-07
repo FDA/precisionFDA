@@ -4,14 +4,18 @@
   "description": "This package.json is only here to unit test JS/React/CoffeeScript part of the project.",
   "main": "index.js",
   "dependencies": {},
+  "resolutions": {
+    "**/lodash": "^4.17.21"
+  },
   "devDependencies": {
     "coffeescript": "^2.5.1",
-    "jest": "^25.1.0",
+    "jest": "^26.6.3",
     "knockout": "^3.5.1",
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.21",
+    "y18n": "^4.0.1"
   },
   "scripts": {
-    "test": "jest",
+    "test": "TZ=America/New_York jest",
     "test:watch": "jest --watch"
   },
   "jest": {

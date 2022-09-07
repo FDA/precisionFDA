@@ -48,6 +48,7 @@ const AddFolderModal = ({ addFolderAction, hideAction, isOpen, isLoading }) => {
       hideModalHandler={hideHandler}
     >
       <Input
+        title="Enter folder name"
         name="space-file-addFolder"
         placeholder="Enter Name..."
         value={folderName}

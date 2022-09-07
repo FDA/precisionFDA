@@ -17,7 +17,8 @@ import Menu from './Menu'
 import Actions from './Actions'
 import './style.sass'
 import Button from '../../components/Button'
-
+// eslint-disable-next-line
+import { SPACE_PRIVATE_TYPE } from '../../../constants'
 
 class SpaceLayout extends Component {
   componentDidMount() {
@@ -28,9 +29,15 @@ class SpaceLayout extends Component {
 
   render() {
     const { space, isFetching, isInitialized, children } = this.props
-    const containerClasses = classNames({
-      'space-page-layout__container--shared': !space.isPrivate,
-    }, 'space-page-layout__container')
+    const containerClasses = classNames(
+      {
+        'space-page-layout__container--shared':
+          !space.isPrivate & (space.type !== SPACE_PRIVATE_TYPE),
+        'space-page-layout__container--exclusive':
+          space.type === SPACE_PRIVATE_TYPE,
+      },
+      'space-page-layout__container',
+    )
 
     if (isInitialized && isFetching) {
       return <ContainerLoader text="Loading Space" />
@@ -40,9 +47,13 @@ class SpaceLayout extends Component {
       return (
         <>
           <div className="space-forbidden">
-            <span className="text">You are not allowed to access this space.</span>
+            <span className="text">
+              You are not allowed to access this space.
+            </span>
             <Link to="/spaces">
-              <Button type="primary" size="lg">To Spaces List</Button>
+              <Button type="primary" size="lg">
+                To Spaces List
+              </Button>
             </Link>
           </div>
         </>
@@ -72,9 +83,7 @@ class SpaceLayout extends Component {
           <div className={containerClasses}>
             <Menu space={space} />
             <div className="space-page-layout__content">
-              <div className="pfda-padded-20">
-                {children}
-              </div>
+              <div className="pfda-padded-20">{children}</div>
             </div>
           </div>
         </div>
@@ -98,7 +107,7 @@ SpaceLayout.propTypes = {
 
 SpaceLayout.defaultProps = {
   isInitialized: false,
-  loadSpace: () => { },
+  loadSpace: () => {},
 }
 
 const mapStateToProps = state => ({
@@ -107,11 +116,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  loadSpace: (spaceId) => dispatch(fetchSpace(spaceId)),
+  loadSpace: spaceId => dispatch(fetchSpace(spaceId)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SpaceLayout)
 
-export {
-  SpaceLayout,
-}
+export { SpaceLayout }

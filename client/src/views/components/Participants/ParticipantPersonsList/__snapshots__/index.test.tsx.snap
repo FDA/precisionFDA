@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ParticipantPersonsList matches snapshot 1`] = `
+<ContextProvider
+  value={false}
+>
+  <ContextProvider
+    value={
+      QueryClient {
+        "defaultOptions": Object {},
+        "mutationCache": MutationCache {
+          "config": Object {},
+          "listeners": Array [],
+          "mutationId": 0,
+          "mutations": Array [],
+        },
+        "mutationDefaults": Array [],
+        "queryCache": QueryCache {
+          "config": Object {},
+          "listeners": Array [],
+          "queries": Array [],
+          "queriesMap": Object {},
+        },
+        "queryDefaults": Array [],
+      }
+    }
+  >
+    <ParticipantPersonsList />
+  </ContextProvider>
+</ContextProvider>
+`;

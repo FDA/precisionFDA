@@ -19,7 +19,7 @@ import Loader from '../../../Loader'
 import Icon from '../../../Icon'
 import LinkTargetBlank from '../../../LinkTargetBlank'
 import { Table, Tbody, Thead, Th } from '../../../TableComponents'
-import { toggleFileCheckbox, toggleAllFileCheckboxes } from '../../../../../actions/spaces/files'
+import { toggleFileCheckbox, toggleAllFileCheckboxes } from '../../../../../actions/spaces'
 import { STATE_REMOVING, STATE_COPYING } from '../../../../../constants'
 import './style.sass'
 import Counters from '../../../TableComponents/Counters'
@@ -27,7 +27,7 @@ import Pagination from '../../../TableComponents/Pagination'
 import TagsList from '../../../TagsList'
 
 
-const FolderLink = ({ file, spaceId, isDisabled }) => {
+const FolderLink = ({ file, spaceId, isDisabled, ariaLabel }) => {
   if (isDisabled) {
     return (
       <span>
@@ -38,15 +38,15 @@ const FolderLink = ({ file, spaceId, isDisabled }) => {
   }
 
   return (
-    <Link to={{ pathname: `/spaces/${spaceId}/files`, search: `?folderId=${file.id}` }}>
+    <Link to={{ pathname: `/spaces/${spaceId}/files`, search: `?folderId=${file.id}` }} aria-label={ariaLabel}>
       <Icon icon='fa-folder' fw />
       {file.name}
     </Link>
   )
 }
 
-const FileLink = ({ file, spaceId, isDisabled }) => {
-  if (file.isFolder) return <FolderLink file={file} spaceId={spaceId} isDisabled={isDisabled} />
+const FileLink = ({ file, spaceId, isDisabled, ariaLabel }) => {
+  if (file.isFolder) return <FolderLink file={file} spaceId={spaceId} isDisabled={isDisabled} aria-label={ariaLabel} />
 
   if (!file.links.filePath || isDisabled) {
     return (
@@ -60,7 +60,7 @@ const FileLink = ({ file, spaceId, isDisabled }) => {
   const linkShow = file.links.filePath ? `/home${file.links.filePath}` : null
 
   return (
-    <LinkTargetBlank url={linkShow}>
+    <LinkTargetBlank url={linkShow} aria-label={ariaLabel}>
       <Icon icon='fa-file-o' fw />
       <span>{file.name}</span>
     </LinkTargetBlank>
@@ -68,8 +68,8 @@ const FileLink = ({ file, spaceId, isDisabled }) => {
 }
 
 const OriginalLink = ({ file }) => {
-  const { originPath } = file.links
-  const url = originPath.href ? `/home${originPath.href}` : null
+  const originPath = file.origin
+  const url = originPath?.href ? `/home${originPath.href}` : null
 
   switch (typeof originPath) {
     case 'object':
@@ -99,6 +99,7 @@ const Row = ({ file, spaceId, toggleCheckbox }) => {
   const toggleHandler = () => toggleCheckbox(file.id)
   const isDisabled = [STATE_REMOVING, STATE_COPYING].includes(file.state)
   const rowClasses = classNames({ 'disabled-row': isDisabled })
+  const ariaLabel = `View ${file.name} file details in new window`
 
   return (
     <tr className={rowClasses}>
@@ -106,7 +107,7 @@ const Row = ({ file, spaceId, toggleCheckbox }) => {
         {!isDisabled ? <Icon icon={checkboxClasses} onClick={toggleHandler} /> : null}
       </td>
       <td>
-        <FileLink file={file} spaceId={spaceId} isDisabled={isDisabled} />
+        <FileLink file={file} spaceId={spaceId} isDisabled={isDisabled} ariaLabel={ariaLabel}/>
       </td>
       <td>{file.type}</td>
       <td>{file.org}</td>
@@ -128,7 +129,7 @@ const Row = ({ file, spaceId, toggleCheckbox }) => {
 
 const breadcrumbs = (path, spaceId) => (
   <div className="space-files-table__breadcrumbs">
-    <span className="space-files-table__breadcrumbs-label">You are here:</span>
+    <span className="space-files-table__breadcrumbs-label page-tracker">You are here:</span>
     {
       ([{ id: 0, name: 'Files', href: `/spaces/${spaceId}/files` }]
         .concat((path || [])
@@ -169,18 +170,18 @@ const FilesTable = ({ sortHandler, toggleCheckbox, toggleAllCheckboxes, spaceId,
               <th className="pfda-padded-l10">
                 <Icon onClick={toggleAllCheckboxes} icon={checkboxClasses} />
               </th>
-              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='name'>name</Th>
-              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='type'>type</Th>
-              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='org'>org</Th>
-              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='added_by'>added
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='name' class_name="spaces-list-headers-blue">name</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='type' class_name="spaces-list-headers-blue">type</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='org' class_name="spaces-list-headers-blue">org</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='added_by' class_name="spaces-list-headers-blue">added
               by</Th>
-              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='size'>size</Th>
-              <Th>origin</Th>
+              <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir} type='size' class_name="spaces-list-headers-blue">size</Th>
+              <Th class_name="spaces-list-headers-grey">origin</Th>
               <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir}
-                type='created_at'>created</Th>
+                type='created_at' class_name="spaces-list-headers-blue">created</Th>
               <Th sortHandler={sortHandler} sortType={sortType} sortDir={sortDir}
-                type='state'>state</Th>
-              <Th>tags</Th>
+                type='state' class_name="spaces-list-headers-blue">state</Th>
+              <Th class_name="spaces-list-headers-grey">tags</Th>
             </Thead>
             <Tbody>
               {files.map((file) => <Row file={file} toggleCheckbox={toggleCheckbox} spaceId={spaceId}
@@ -265,12 +266,14 @@ FileLink.propTypes = {
   file: PropTypes.exact(FileShape),
   spaceId: PropTypes.string,
   isDisabled: PropTypes.bool,
+  ariaLabel: PropTypes.string,
 }
 
 FolderLink.propTypes = {
   file: PropTypes.exact(FileShape),
   spaceId: PropTypes.string,
   isDisabled: PropTypes.bool,
+  ariaLabel: PropTypes.string,
 }
 
 OriginalLink.propTypes = {

@@ -1,8 +1,6 @@
 @import '../../../styles/variables'
-  
+
 .home-page-layout
-  margin-top: -20px
-  
   &__tabs
     display: flex
     height: 40px
@@ -120,7 +118,7 @@
 
   &__header-row
     display: flex
-  
+
   .dropdown-menu
     max-height: 350px
 
@@ -135,7 +133,7 @@
     position: absolute
     bottom: 15px
     left: 15px
-    color: #F4F8FD
+    color: $color-subtle-blue
     cursor: pointer
 
   &__table-wrapper
@@ -183,10 +181,10 @@
 
     &_name
       min-width: 220px
-    
+
     &_created
       min-width: 190px
-    
+
     &_title
       min-width: 220px
 
@@ -195,6 +193,9 @@
 
     &_featured
       min-width: 100px
+
+    &_narrow_field
+      min-width: 70px
 
     &_action
       i
@@ -225,7 +226,7 @@
       color: #8198BC
       font-size: 12px
       padding-right: 10px
-    
+
     i
       margin-right: 5px
 
@@ -249,7 +250,7 @@
       i.fa
         position: absolute
         top: 10px
-  
+
   .home-single-page
     &__back-buttons
       display: flex
@@ -279,7 +280,7 @@
 
       &_right-block
         margin-left: auto
-      
+
       &_title
         display: flex
         align-items: center
@@ -296,7 +297,7 @@
     &__object-options
       display: flex
       justify-content: space-between
-      padding: 0
+      //padding: 0
       margin: 0
       padding: 10px 15px
 
@@ -304,11 +305,24 @@
         color: #1F70B5
 
       &--second-line
+        display: flex
+        justify-content: space-between // flex-start
+        margin: 0
+        padding: 10px 15px
+
+        li
+          margin-right: 160px
+          list-style-type: none
+
+      &--third-line
+        display: flex
         justify-content: flex-start
+        margin: 0
+        padding: 10px 15px
 
         li
           margin-right: 60px
-        
+          list-style-type: none
 
       &_header
         color: #8198BC
@@ -316,6 +330,7 @@
         text-transform: uppercase
 
       &_value
+        //justify-content: flex-start
         color: #52698F
         font-size: 16px
         font-weight: 700

@@ -12,6 +12,8 @@
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #  verified               :boolean          default(FALSE), not null
+#  featured               :boolean          default(FALSE)
+#  deleted                :boolean          default(FALSE), not null
 #
 
 FactoryBot.define do

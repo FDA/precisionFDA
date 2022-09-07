@@ -11,6 +11,7 @@ exports[`<CardItem /> matches snapshot 1`] = `
       className="spaces-list-card__title"
     >
       <Link
+        aria-label="This link will navigate to some name Space"
         to="/spaces/undefined"
       >
         some name

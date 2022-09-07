@@ -1,0 +1,34 @@
+SecRule REQUEST_URI "@beginsWith /api" "id:1,ctl:ruleEngine=DetectionOnly"
+SecRule REQUEST_URI "@beginsWith /jobs" "id:2,ctl:ruleEngine=DetectionOnly"
+SecRule REQUEST_URI "@beginsWith /docs" "id:3,ctl:ruleEngine=DetectionOnly"
+SecRule REQUEST_URI "@beginsWith /spaces" "id:4,ctl:ruleEngine=DetectionOnly"
+SecRule REQUEST_URI "@beginsWith /admin" "id:5,ctl:ruleEngine=DetectionOnly"
+
+#Fix for session cookie false positive issue (PFDA-1331)
+SecRule REQUEST_URI "@beginsWith /" "phase:1,nolog,pass,id:7,ctl:ruleRemoveTargetById=941100;REQUEST_COOKIES:_precision-fda_session"
+
+SecRuleRemoveById 942100
+
+# Added for WAF diagnostics
+SecAction "id:980145,phase:5,pass,t:none,log,noauditlog,\
+    msg:'Incoming and Outgoing Score: %{TX.ANOMALY_SCORE} %{TX.OUTBOUND_ANOMALY_SCORE}'"
+
+# ModSecurity Rule Exclusion: 980130 Suppress statistics for blocked requests by rule 980130
+SecRuleRemoveById 980130
+
+SecAction "id:900110,phase:1,pass,nolog,\
+  setvar:tx.inbound_anomaly_score_threshold=5,\
+  setvar:tx.outbound_anomaly_score_threshold=5"
+
+SecAction "id:900000,phase:1,pass,nolog,\
+  setvar:tx.paranoia_level=1"
+
+#Fix for PFDA-1291, PFDA-1324
+SecAction "id:942190,phase:1,pass,nolog,\
+  setvar:tx.inbound_anomaly_score_threshold=6,\
+  setvar:tx.outbound_anomaly_score_threshold=6"
+
+#Fix for PFDA-1291, PFDA-1324
+SecAction "id:949110,phase:1,pass,nolog,\
+  setvar:tx.inbound_anomaly_score_threshold=6,\
+  setvar:tx.outbound_anomaly_score_threshold=6"

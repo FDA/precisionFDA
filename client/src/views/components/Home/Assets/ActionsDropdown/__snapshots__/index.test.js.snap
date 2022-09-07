@@ -24,12 +24,6 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "isDisabled": true,
-          "link": undefined,
-          "method": "post",
-          "text": "Authorize URL",
-        },
-        Object {
-          "isDisabled": true,
           "link": "undefined&scope=public",
           "method": "post",
           "text": "Make public",
@@ -57,6 +51,16 @@ exports[`ActionsDropdown test should render 1`] = `
         },
         Object {
           "hide": true,
+          "link": undefined,
+          "text": "Request license approval",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Accept License",
+        },
+        Object {
+          "hide": true,
           "onClick": [Function],
           "text": "Edit tags",
         },
@@ -73,7 +77,7 @@ exports[`ActionsDropdown test should render 1`] = `
     attachAction={[Function]}
     hideAction={[Function]}
     ids={Array []}
-    itemsType="APP"
+    itemsType="ASSET"
   />
   <HomeEditTagsModal
     name=""
@@ -98,6 +102,12 @@ exports[`ActionsDropdown test should render 1`] = `
   <Connect(HomeLicenseModal)
     hideAction={[Function]}
     modalAction={[Function]}
+  />
+  <Connect(HomeLicenseModal)
+    actionType="accept"
+    hideAction={[Function]}
+    modalAction={[Function]}
+    title="Accept License"
   />
 </Fragment>
 `;

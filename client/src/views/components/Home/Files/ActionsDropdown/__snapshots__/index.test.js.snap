@@ -14,13 +14,12 @@ exports[`ActionsDropdown test should render 1`] = `
         Object {
           "isDisabled": true,
           "onClick": [Function],
-          "text": "Download",
+          "text": "Open",
         },
         Object {
           "isDisabled": true,
-          "link": undefined,
-          "method": "post",
-          "text": "Authorize URL",
+          "onClick": [Function],
+          "text": "Download",
         },
         Object {
           "isDisabled": true,
@@ -28,9 +27,16 @@ exports[`ActionsDropdown test should render 1`] = `
           "text": "Rename",
         },
         Object {
+          "hide": true,
           "isDisabled": true,
-          "link": "undefined&scope=public",
+          "link": "undefined&public=true",
           "method": "post",
+          "text": "Make public",
+        },
+        Object {
+          "hide": false,
+          "isDisabled": true,
+          "onClick": [Function],
           "text": "Make public",
         },
         Object {
@@ -45,6 +51,7 @@ exports[`ActionsDropdown test should render 1`] = `
           "text": "Delete",
         },
         Object {
+          "hide": false,
           "isDisabled": true,
           "onClick": [Function],
           "text": "Organize",
@@ -69,6 +76,21 @@ exports[`ActionsDropdown test should render 1`] = `
           "isDisabled": true,
           "onClick": [Function],
           "text": "Detach License",
+        },
+        Object {
+          "hide": true,
+          "link": undefined,
+          "text": "Request license approval",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Accept License",
+        },
+        Object {
+          "hide": true,
+          "link": undefined,
+          "text": "Comments",
         },
         Object {
           "hide": true,
@@ -110,6 +132,14 @@ exports[`ActionsDropdown test should render 1`] = `
     modalAction={[Function]}
   />
   <FilesActionModal
+    action="open"
+    fetchFilesByAction={[Function]}
+    files={Array []}
+    hideAction={[Function]}
+    isOpen={false}
+    modal={Object {}}
+  />
+  <FilesActionModal
     action="download"
     fetchFilesByAction={[Function]}
     files={Array []}
@@ -119,6 +149,19 @@ exports[`ActionsDropdown test should render 1`] = `
   />
   <Connect(HomeLicenseModal)
     hideAction={[Function]}
+    modalAction={[Function]}
+  />
+  <Connect(HomeLicenseModal)
+    actionType="accept"
+    hideAction={[Function]}
+    modalAction={[Function]}
+    title="Accept License"
+  />
+  <FilesActionModal
+    fetchFilesByAction={[Function]}
+    files={Array []}
+    hideAction={[Function]}
+    modal={Object {}}
     modalAction={[Function]}
   />
 </Fragment>

@@ -25,7 +25,7 @@ import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_WORKFLOWS_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
 import WorkflowsActionModal from '../../Workflows/WorkflowsActionModal'
 import HomeExportModal from '../../HomeExportModal'
@@ -124,6 +124,11 @@ const ActionsDropdown = (props) => {
       },
     },
     {
+      text: 'Comments',
+      link: props.comments,
+      hide: !props.comments,
+    },
+    {
       text: 'Edit tags',
       onClick: () => props.editTags(),
       hide: !props.editTags,
@@ -218,6 +223,7 @@ ActionsDropdown.propTypes = {
   hideWorkflowsCopyToSpaceModal: PropTypes.func,
   showWorkflowsDeleteModal: PropTypes.func,
   deleteModal: PropTypes.object,
+  comments: PropTypes.string,
 }
 
 ActionsDropdown.defaultProps = {

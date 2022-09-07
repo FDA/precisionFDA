@@ -19,6 +19,7 @@ const Input = ({ type, name, lg, id, placeholder, styleClasses, value, defaultVa
       className={classes}
       value={value}
       defaultValue={defaultValue}
+      maxLength="256"
       autoComplete={autoComplete}
       {...rest}
     />
@@ -26,7 +27,7 @@ const Input = ({ type, name, lg, id, placeholder, styleClasses, value, defaultVa
 }
 
 Input.propTypes = {
-  type: PropTypes.oneOf(TYPES).isRequired,
+  type: PropTypes.oneOf(TYPES),
   name: PropTypes.string.isRequired,
   id: PropTypes.string,
   styleClasses: PropTypes.string,

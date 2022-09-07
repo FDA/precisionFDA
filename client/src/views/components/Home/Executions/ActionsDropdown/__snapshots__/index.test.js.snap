@@ -12,7 +12,7 @@ exports[`ActionsDropdown test should render 1`] = `
           "text": "View Logs",
         },
         Object {
-          "isDisabled": true,
+          "isDisabled": false,
           "onClick": [Function],
           "text": "Terminate",
         },

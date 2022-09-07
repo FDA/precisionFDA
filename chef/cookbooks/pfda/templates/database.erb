@@ -1,0 +1,10 @@
+<%= @rails_env %>:
+  sslca: "<%= @sslca %>"
+  adapter: "mysql2"
+  database: "<%= @config['database'] %>"
+  encoding: "utf8"
+  host: "<%= @config['host'] %>"
+  username: "<%= @config['username'] %>"
+  password: "<%= @config['password'] %>"
+  reconnect: "<%= @config['reconnect'] %>"
+  port: <%= @config['port'] %>

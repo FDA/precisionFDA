@@ -1,0 +1,176 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExpertsListItem test should render ExpertsListItemBlogEntry 1`] = `
+<div
+  className="experts-list-item"
+>
+  <div
+    className="experts-list-item__left-column"
+  >
+    <img
+      alt="Profile icon for Experts 1's blog"
+      className="expert-image img-circle"
+      src=""
+    />
+  </div>
+  <div
+    className="experts-list-item__right-column experts-item-content"
+  >
+    <h1>
+      Blog Title 1
+    </h1>
+    <div
+      style={
+        Object {
+          "marginTop": "4px",
+        }
+      }
+    >
+      <span
+        className="expert-name"
+      >
+        Experts 1
+      </span>
+      <span
+        className="expert-date"
+      >
+        Mar 01, 2021
+      </span>
+    </div>
+    <p>
+      Blog Preview 1
+    </p>
+    <div
+      className="experts-list-item__buttons pull-left"
+      style={
+        Object {
+          "marginTop": "6px",
+        }
+      }
+    >
+      <Button
+        className=""
+        onClick={[Function]}
+        size="md"
+        type="default"
+      >
+        Expert Q&A
+      </Button>
+      <Link
+        to="/experts/1"
+      >
+        <Icon
+          fw={true}
+          icon="fa-star-o"
+        />
+        <span
+          aria-label="Click to view more information about Experts 1"
+        >
+          About This Expert
+        </span>
+      </Link>
+      <Link
+        to="/experts/1/blog"
+      >
+        <span
+          aria-label="Click to read Experts 1's blog post"
+        >
+          Read Expert Blog Post ↗
+        </span>
+      </Link>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ExpertsListItem test should render ExpertsListItemBlogEntrySmall 1`] = `
+<div
+  className="experts-list-item-small"
+>
+  <div
+    className="experts-list-item-small__left-column"
+  >
+    <img
+      alt="Profile icon for Experts 1's blog"
+      className="expert-image img-circle"
+      src=""
+    />
+  </div>
+  <div
+    className="experts-list-item-small__right-column experts-item-content"
+  >
+    <div
+      className="expert-name"
+    >
+      Experts 1
+    </div>
+    <div
+      className="expert-blog-title"
+    >
+      Blog Title 1
+    </div>
+    <div
+      className="expert-date"
+    >
+      Mar 01, 2021
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ExpertsListItem test should render ExpertsListItemQuestionsAndAnswers 1`] = `
+<div
+  className="experts-list-item-small"
+>
+  <div
+    className="experts-list-item-small__left-column"
+  >
+    <img
+      alt="Profile icon for Experts 1's blog"
+      className="expert-image img-circle"
+      src=""
+    />
+  </div>
+  <div
+    className="experts-list-item-small__right-column experts-item-content"
+  >
+    <div
+      className="expert-name"
+    >
+      <Link
+        to="/experts/1"
+      >
+        <span>
+          Experts 1
+        </span>
+      </Link>
+    </div>
+    <div
+      className="answers-comments-container"
+    >
+      <div>
+        <span>
+          10
+        </span>
+         
+        <span
+          className="answers-comments"
+        >
+          Answers
+        </span>
+      </div>
+      <div>
+        <span>
+          11
+        </span>
+         
+        <span
+          className="answers-comments"
+        >
+          Comments
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

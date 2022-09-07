@@ -9,6 +9,7 @@ import TextareaField from '../../../FormComponents/TextareaField'
 import SelectField from '../../../FormComponents/SelectField'
 import { spaceMembersAddModalSelector } from '../../../../../reducers/spaces/members/selectors'
 import { hideAddMembersModal } from '../../../../../actions/spaces'
+import './style.sass'
 
 
 const DEFAULT_VALUE = SPACE_MEMBERS_ROLES[0].value
@@ -73,6 +74,7 @@ const AddMembersModal = ({ addMembersAction }) => {
         placeholder={SPACE_MEMBERS_ROLES[0].value}
         helpText="Select a new member(s) role..."
         value={inviteesRole}
+        class_name="modal_attr_label"
       />
     </Modal>
   )
@@ -82,6 +84,7 @@ export default AddMembersModal
 AddMembersModal.propTypes = {
   hideAction: PropTypes.func,
   addMembersAction: PropTypes.func,
+  space: PropTypes.object,
   isOpen: PropTypes.bool,
   isLoading: PropTypes.bool,
 }

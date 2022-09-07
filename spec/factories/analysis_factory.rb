@@ -18,8 +18,27 @@ FactoryBot.define do
   factory :analysis do
     user
     workflow
-
-    name { "default_title" }
+    name { FFaker::Lorem.word }
     sequence(:dxid) { "job-#{SecureRandom.hex(12)}" }
+
+    trait :batch do
+      transient do
+        size { batch_size }
+        user { user }
+      end
+
+      after(:create) do |record, options|
+        dxid = options.workflow.dxid
+        record.update(user: options.user, batch_id: dxid)
+        record.workflow.update(user: options.user)
+
+        if options.size > 1
+          create_list(:analysis, (options.size - 1),
+                      user: options.user,
+                      workflow: options.workflow,
+                      batch_id: dxid)
+        end
+      end
+    end
   end
 end

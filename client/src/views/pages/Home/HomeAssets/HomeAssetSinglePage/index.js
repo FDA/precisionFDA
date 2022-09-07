@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { withRouter } from 'react-router'
+import { withRouter } from 'react-router-dom'
 
 import HomeLayout from '../../../../layouts/HomeLayout'
 import Icon from '../../../../components/Icon'
@@ -13,7 +13,7 @@ import {
   homeAssetsAssetDetailsSelector,
 } from '../../../../../reducers/home/assets/selectors'
 import { homeCurrentTabSelector } from '../../../../../reducers/home/page/selectors'
-import { HOME_TABS } from '../../../../../constants'
+import { HOME_TABS, OBJECT_TYPES } from '../../../../../constants'
 import {
   fetchAssetDetails,
   setCurrentTab,
@@ -23,17 +23,18 @@ import {
   deleteObjects,
   assetsAttachLicence,
   assetsLicenseAction,
+  assetsAcceptLicenseAction,
 } from '../../../../../actions/home'
 import { getSelectedTab } from '../../../../../helpers/home'
-import { OBJECT_TYPES } from '../../../../../constants'
 import Markdown from '../../../../components/Markdown'
 import ArchiveContents from '../../../../components/Home/Assets/ArchiveContents'
 import ActionsDropdown from '../../../../components/Home/Assets/ActionsDropdown'
 import HomeLicense from '../../../../components/Home/HomeLicense'
+import HomeLabel from '../../../../components/Home/HomeLabel'
 
 
 const HomeAssetSinglePage = (props) => {
-  const { assetDetails, currentTab, uid, fetchAssetDetails, setCurrentTab, editTags, attachTo, rename, deleteAsset, attachLicense, assetsLicenseAction } = props
+  const { assetDetails, currentTab, uid, fetchAssetDetails, setCurrentTab, editTags, attachTo, rename, deleteAsset, attachLicense, assetsLicenseAction, assetsAcceptLicenseAction } = props
 
   useLayoutEffect(() => {
     if (uid) fetchAssetDetails(uid).then(({ status, payload }) => {
@@ -142,6 +143,7 @@ const HomeAssetSinglePage = (props) => {
                 <div className='home-single-page__header-section_title'>
                   <Icon icon='fa-file-zip-o' />&nbsp;
                   {asset.origin && asset.origin.text}
+                  {asset.showLicensePending && <HomeLabel value='License Pending Approval' icon='fa-clock-o' type='warning'/>}
                 </div>
               </div>
               <div className='home-single-page__header-section_right-block'>
@@ -153,7 +155,9 @@ const HomeAssetSinglePage = (props) => {
                   deleteAsset={(link, uids) => deleteAsset(link, uids, tab)}
                   attachLicense={attachLicense}
                   assetsLicenseAction={assetsLicenseAction}
+                  assetsAcceptLicenseAction={assetsAcceptLicenseAction}
                   page='details'
+                  comments={meta.links?.comments}
                 />
               </div>
             </div>
@@ -189,6 +193,7 @@ HomeAssetSinglePage.propTypes = {
   editTags: PropTypes.func,
   attachLicense: PropTypes.func,
   assetsLicenseAction: PropTypes.func,
+  assetsAcceptLicenseAction: PropTypes.func,
 }
 
 HomeAssetSinglePage.defaultProps = {
@@ -217,6 +222,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (statusIsOK) dispatch(fetchAssetDetails(ownProps.uid))
   }),
   assetsLicenseAction: (link) => dispatch(assetsLicenseAction(link)).then(({ statusIsOK }) => {
+    if (statusIsOK) dispatch(fetchAssetDetails(ownProps.uid))
+  }),
+  assetsAcceptLicenseAction: (link) => dispatch(assetsAcceptLicenseAction(link)).then(({ statusIsOK }) => {
     if (statusIsOK) dispatch(fetchAssetDetails(ownProps.uid))
   }),
 })

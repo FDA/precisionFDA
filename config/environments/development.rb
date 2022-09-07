@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -39,6 +38,10 @@ Rails.application.configure do
   config.action_mailer.delivery_method = ENV.fetch("DELIVERY_METHOD", :file).to_sym
   config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
 
+  # debugging
+  # config.action_mailer.delivery_method = :salesforce
+  # config.action_mailer.perform_deliveries = true
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
@@ -74,22 +77,18 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
+  # NOTE - ARM64V8 ENV variable
+  # As ruby images have to be emulated on arm64v8 architectures, due to mysql2 not working properly
+  # native packages, such as `inotify` won't compile. Ruby uses "ActiveSupport::FileUpdateChecker" by default
+  # https://guides.rubyonrails.org/configuring.html#config-file-watcher
+
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
-  config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  config.file_watcher = ActiveSupport::EventedFileUpdateChecker unless ENV["ARM64V8_DEVELOPMENT_PATCH"]
 
   # SSL
   config.force_ssl = true
 
   # Allow access from any ip
   config.web_console.whiny_requests = false
-
-  # STDOUT logging
-  if ENV["RAILS_LOG_TO_STDOUT"]
-    STDOUT.sync = true
-    logger = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger = ActiveSupport::TaggedLogging.new(logger)
-  end
 end
-# rubocop:enable Metrics/BlockLength

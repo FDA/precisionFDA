@@ -50,14 +50,30 @@ Rails.application.routes.draw do
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
-      get "edit_user", to: "users#edit"
-      get "update_user", to: "users#update"
+      post "set_total_limit", to: "users#set_total_limit"
+      post "set_job_limit", to: "users#set_job_limit"
+      post "bulk_reset_2fa", to: "users#bulk_reset_2fa"
+      post "bulk_unlock", to: "users#bulk_unlock"
+      post "bulk_activate", to: "users#bulk_activate"
+      post "bulk_deactivate", to: "users#bulk_deactivate"
+      post "bulk_enable_resource", to: "users#bulk_enable_resource"
+      post "bulk_enable_all_resources", to: "users#bulk_enable_all_resources"
+      post "bulk_disable_resource", to: "users#bulk_disable_resource"
+      post "bulk_disable_all_resources", to: "users#bulk_disable_all_resources"
 
       resources :apps, only: [], param: :uid do
         collection do
           post :set_comparison_app
           post :remove_from_comparators
           post :add_to_comparators
+        end
+      end
+
+      resources :invitations, only: %i(index) do
+        collection do
+          post "search"
+          post "provision"
+          post "browse"
         end
       end
 
@@ -87,10 +103,14 @@ Rails.application.routes.draw do
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
+    # hotfix for PFDA-2432
+    get "/challenges/14" => redirect("/challenges/13")
+
     # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
+    get "check_webapp" => "main#check_webapp"
     post "publish" => "main#publish"
     get "track" => "main#track"
     get "request_access" => "main#request_access"
@@ -99,12 +119,15 @@ Rails.application.routes.draw do
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"
     get "about/:section" => "main#about"
-    get "terms" => "main#terms"
+    get "terms" => "home#index"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+    post "/spaces/:id/copy_to_cooperative",
+         to: "main#copy_to_cooperative",
+         as: :copy_to_cooperative_space
 
     resources :org_requests do
       collection do
@@ -116,13 +139,37 @@ Rails.application.routes.draw do
 
     # My Home (Site-Wide UI & API Redesign)
     get "home" => "home#index"
+    get "home" => "home#index"
     get "/home/*all", to: "home#index"
+
+    # Old My Home
+    # TODO: remove old code once new My Home is stable for release or two,
+    #       but for now it still has utility for devs
+    # get "home-old" => "home#index"
+    # get "home-old" => "home#index"
+    # get "/home-old/*all", to: "home#index"
+
+    get "/account/*all", to: "home#index"
+    get "/challenges/propose", to: "challenges#index"
+    get "/challenges/create", to: "challenges#index"
+
+    if ENV["GSRS_ENABLED"]
+      match "/ginas/app/logout", to: "main#destroy", via: :all
+      get "/ginas/app/api/v1/substances:path", to: "ginas#skip_request",
+        constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
+      match "/ginas/app/api/v1/substances", to: "ginas#substances", via: %i(put post)
+      match "/ginas/*path", to: "ginas#index", via: :all
+    end
 
     # API
     namespace "api" do
       get "update_active", to: "base#update_active"
 
-      get :user, to: "users#show"
+      resource :user, only: %i(show) do
+        get :cloud_resources
+      end
+
+      resources :users, only: %i(update)
 
       namespace "activity_reports" do
         get "total"
@@ -141,8 +188,34 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
-      resources :challenges, only: [] do
-        post "save_editor_page", on: :member
+      resources :news_items, path: "news", only: %i(index show) do
+        get :years, on: :collection
+      end
+
+      resources :challenges, only: %i(index show create update) do
+        get :years, on: :collection
+        get :scoring_app_users, on: :collection
+        get :host_lead_users, on: :collection
+        get :guest_lead_users, on: :collection
+        get :challenges_for_select, on: :collection
+        get :scopes_for_select, on: :collection
+
+        post :save_editor_page, on: :member
+        post :propose, on: :collection
+      end
+
+      resources :submissions, only: %i(index) do
+        get :my_entries, on: :collection
+      end
+
+      resources :experts, controller: :experts,
+                param: :id, only: %i(index show ask_question blog) do
+        get :years, on: :collection
+        post :ask_question, on: :member
+      end
+
+      resources :participants, path: "participants" do
+        get :index
       end
 
       resources :apps do
@@ -156,6 +229,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :user_compute_resources
 
           put :feature, to: "apps#invert_feature"
           put :delete, to: "apps#soft_delete"
@@ -210,6 +284,10 @@ Rails.application.routes.draw do
       end
 
       resources :licenses, only: %i(index show) do
+        post "accept",
+             on: :member,
+             action: :accept,
+             as: "accept"
         post "remove_item/:item_uid",
              on: :member,
              action: :remove_item,
@@ -218,6 +296,11 @@ Rails.application.routes.draw do
              on: :member,
              action: :license_item,
              as: "license_item"
+        match "request_approval",
+              on: :member,
+              action: :request_approval,
+              as: "request_approval",
+              via: %i(get post)
       end
 
       resources :files, param: :uid, only: %i(index update show) do
@@ -239,13 +322,14 @@ Rails.application.routes.draw do
       end
 
       resources :jobs, only: %i(index show create) do
+        get :open_external, on: :member
+        patch :sync_files, on: :member
+
         collection do
           get :featured
           get :everybody
           get :spaces
-
           get :log
-
           post :copy
           post :terminate
           put :feature, to: "jobs#invert_feature"
@@ -253,6 +337,9 @@ Rails.application.routes.draw do
       end
 
       resources :workflows, only: %i(index show create) do
+        get :diagram, on: :member, to: "workflows#diagram"
+        get :jobs, on: :member, to: "jobs#workflow"
+
         collection do
           get :featured
           get :everybody
@@ -272,13 +359,32 @@ Rails.application.routes.draw do
           get :spaces
 
           post :rename
-          # post :copy
-          # post :terminate
           put :feature, to: "assets#invert_feature"
         end
       end
 
-      post "related_to_publish"
+      resources :dbclusters, controller: :db_clusters,
+                             param: :dxid, only: %i(index show create update) do
+        post ":api_method", on: :collection,
+                            to: "db_clusters#run",
+                            as: :run,
+                            api_method: /(start|stop|terminate)/
+        get :allowed_instances, on: :collection, to: "db_clusters#allowed_db_instances_by_user"
+        resources :comments
+      end
+
+      resource :counters do
+        get :index
+        get :featured
+        get :everybody
+        get :spaces
+      end
+
+      resources :notification_preferences do
+        get :index
+        post "change", on: :collection
+      end
+
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"
@@ -323,6 +429,8 @@ Rails.application.routes.draw do
       post "assign_app"
       get "list_licenses"
     end
+    # end API
+
 
     # FHIR
     scope "/fhir" do
@@ -335,11 +443,10 @@ Rails.application.routes.draw do
     get "profile", to: "profile#index"
     put "profile", to: "profile#update"
     post "profile/provision_user", to: "profile#provision_user", as: "provision_user"
-    get "profile/provision_new_user", to: "profile#provision_new_user"
-    post "profile/provision_new_user", to: "profile#provision_new_user", as: "provision_new_user"
     get "profile/provision_org", to: "profile#provision_org"
     post "profile/provision_org", to: "profile#provision_org", as: "provision_org"
     post "profile/run_report", to: "profile#run_report", as: "run_report"
+    post "profile/check_spaces_permissions", to: "profile#check_spaces_permissions", as: "check_spaces_permissions"
 
     resources :apps do
       resources :jobs, only: %i(new create)
@@ -375,7 +482,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :jobs, except: :index do
+    resources :jobs, except: %i(index update edit) do
       member do
         get "log"
       end
@@ -396,18 +503,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :files do
-      post "download", on: :member
-      post "link", on: :member
-      post "rename", on: :member
-      get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
-      post "move", on: :collection
-      post "create_folder", on: :collection
-      post "rename_folder", on: :member
-      post "download_list", on: :collection
-      post "remove", on: :collection
-      post "publish", on: :collection
+    resources :files, only: [] do
       resources :comments
     end
 
@@ -418,24 +514,25 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :assets, path: "/assets" do
-      # resources :assets, path: "/app_assets" do
-      post "rename", on: :member
-      get "featured", on: :collection, as: "featured"
-      get "explore", on: :collection, as: "explore"
+    resources :assets, only: :new do
       resources :comments
     end
 
     get "challenges/mislabeling" => redirect("/mislabeling")
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: "active_meta_appathon"
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: "appathon_in_a_box"
+    get "challenges", to: "challenges#index"
+    get "old_challenges/treasure", to: "challenges#treasure_old"
+    get "old_challenges/treasure(/:tab)", to: "challenges#treasure_old"
+
     resources :challenges do
       get "consistency(/:tab)", on: :collection, action: :consistency, as: "consistency"
       get "truth(/:tab)", on: :collection, action: :truth, as: "truth"
+      get "new", on: :collection, as: "new"
       get "join", on: :member
-      get "view(/:tab)", on: :member, action: :show, as: "show"
       get "editor(/:tab)", on: :member, action: :edit_page, as: "edit_page"
       post "editor/save_page", on: :member, action: :save_page, as: "save_page"
+      get "(/:tab)", on: :member, action: :show, as: "show"
       resources :challenge_resources, only: %i(new create destroy) do
         post "rename", on: :member
       end
@@ -493,6 +590,7 @@ Rails.application.routes.draw do
       post "close", on: :member
       get "dashboard", on: :member
       get "blog", on: :member
+      get "qa", on: :member
       nested do
         scope "/dashboard" do
           resources :expert_questions, as: "edit_question"
@@ -505,55 +603,15 @@ Rails.application.routes.draw do
     end
 
     resource :org, only: :update
-
-    resources :spaces, only: %i(index) do
-      member do
-        get "tasks"
-        get "feed"
-        get "reports"
-        get "notes"
-        get "comparisons"
-        get "assets"
-        get "discuss"
-        post "invite"
-        post "copy_to_cooperative" # copy a single item to cooperative, used everywhere
-        post "search_content" # used in discuss only
-      end
-
-      resources :comments
-
-      resources :tasks, only: %i(create destroy update show) do
-        post "accept", on: :collection
-        post "complete", on: :collection
-        post "decline", on: :collection
-        post "make_active", on: :collection
-        post "reopen", on: :collection
-        post "reassign", on: :member
-        post "copy", on: :member
-        get "task", on: :member
-        resources :comments
-      end
-
-      resources :space_feed, only: [:index] do
-        collection do
-          get "object_types"
-          get "chart"
-        end
-      end
-
-      resources :space_reports, only: [:index] do
-        collection do
-          get "counters"
-          get "download_report"
-        end
-      end
-    end
+    resources :spaces, only: :index
 
     get "/spaces/*all", to: "spaces#index"
+    get "/spaces-old/*all", to: "spaces#index"
 
-    resources :notification_preferences, only: [:index] do
-      post "change", on: :collection
-    end
+    # to debug
+    # resources :notification_preferences, only: [:index] do
+    #   post "change", on: :collection
+    # end
 
     resources :meta_appathons, constraints: { appathon_id: %r{[^/]+} } do
       post "rename", on: :member
