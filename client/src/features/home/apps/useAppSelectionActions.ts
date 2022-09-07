@@ -1,22 +1,20 @@
-import { useQueryClient } from 'react-query'
-import { useSelector } from 'react-redux'
-import { useHistory } from 'react-router'
 import { pick } from 'ramda'
-import { RootState } from '../../../store'
-import { IUser } from '../../../types/user'
+import { useQueryClient } from 'react-query'
+import { useHistory } from 'react-router'
+import { IChallenge } from '../../../types/challenge'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
-import { useAttachToChallengeModal } from './useAttachToChallengeModal'
+import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useComparatorModal } from '../comparators/useComparatorModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
 import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.api'
 import { IApp } from './apps.types'
+import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
-import { useComparatorModal } from '../comparators/useComparatorModal'
-import { IChallenge } from '../../../types/challenge'
-import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -60,8 +58,8 @@ export const useAppSelectionActions = ({
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
-  const user: IUser = useSelector((state: RootState) => state.context.user)
-  const isAdmin: boolean = user?.admin
+  const user = useAuthUser()
+  const isAdmin = user?.admin
 
   const featureMutation = useFeatureMutation({ resource: 'apps', onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
@@ -271,7 +269,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user.dxuser) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || (selected.length !== 1),
     },
     'Add to Comparators': {
       type: 'modal',
