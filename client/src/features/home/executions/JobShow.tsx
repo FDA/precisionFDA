@@ -1,3 +1,4 @@
+import { omit } from 'ramda'
 import React, { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useLocation, useParams } from 'react-router'
@@ -54,7 +55,7 @@ const ExecutionActions = ({
     <>
       <Dropdown
         trigger="click"
-        content={<ActionsDropdownContent actions={actions} />}
+        content={<ActionsDropdownContent actions={['terminated', 'failed', 'done'].includes(execution.state) ? actions : omit(['Copy to space'], actions) }/>}
       >
         {(dropdownProps) => (
           <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
@@ -324,7 +325,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
               <MetadataVal>{execution.duration}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
-              <MetadataKey>Cost In Dollars</MetadataKey>
+              <MetadataKey>Cost</MetadataKey>
               <MetadataVal>{execution.energy_consumption}</MetadataVal>
             </MetadataItem>
             <MetadataItem>

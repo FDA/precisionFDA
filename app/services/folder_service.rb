@@ -227,10 +227,14 @@ class FolderService
       )
     end
 
-    begin
-      DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
-    rescue DXClient::Errors::NotFoundError
-      # do nothing
+    # remove the file from the platform only when it's the last with given dxid
+    if UserFile.where(dxid: file.dxid).count == 1
+      Rails.logger.info "FolderService::remove_file removing file #{file.dxid} from platform"
+      begin
+        DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
+      rescue DXClient::Errors::NotFoundError
+        # do nothing
+      end
     end
 
     UserFile.transaction { file.destroy }
