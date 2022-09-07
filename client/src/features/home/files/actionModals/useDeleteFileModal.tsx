@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -13,31 +13,53 @@ import { useModal } from '../../../modal/useModal'
 import { itemsCountString } from '../../../../utils/formatting'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
-import { DownloadListResponse } from '../../types'
 
 const StyledPath = styled.div`
   min-width: 150px;
 `
 
 const DeleteFiles = ({
-  data,
+  selected,
+  scope,
+  setNumberOfFilesToDelete,
 }: {
-  data: DownloadListResponse[]
-}) => (
+  selected: IFile[]
+  scope: string
+  setNumberOfFilesToDelete: (n: number) => void
+}) => {
+  const { data, status } = useQuery(
+    ['download_list', selected],
+    () =>
+      fetchFilesDownloadList(
+        selected.map(s => s.id),
+        scope,
+      ),
+    {
+      onSuccess: (res) => {
+        setNumberOfFilesToDelete(res.length)
+      },
+      onError: () => {
+        toast.error('Error: Fetching download list.')
+      },
+    },
+  )
+  if (status === 'loading') return <div>Loading...</div>
+  return (
     <ResourceTable
       rows={data.map(s => ({
-          name: (
-            <StyledName href={s.viewURL} target="_blank">
-              <VerticalCenter>
-                {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-              </VerticalCenter>
-              {s.name}
-            </StyledName>
-          ),
-          path: <StyledPath>{s.fsPath}</StyledPath>,
-        }))}
+        name: (
+          <StyledName href={s.viewURL} target="_blank">
+            <VerticalCenter>
+              {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
+            </VerticalCenter>
+            {s.name}
+          </StyledName>
+        ),
+        path: <StyledPath>{s.fsPath}</StyledPath>,
+      }))}
     />
   )
+}
 
 export const useDeleteFileModal = ({
   selected,
@@ -50,29 +72,13 @@ export const useDeleteFileModal = ({
 }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
-  const momoSelected = useMemo(() => selected, [isShown])
-
-  const {
-    data = [],
-    status,
-  } = useQuery(
-    ['download_list', selected],
-    () =>
-      fetchFilesDownloadList(
-        selected.map(s => s.id),
-        scope,
-      ),
-    {
-      onError: () => {
-        toast.error('Error: Fetching download list.')
-      },
-    },
-  )
+  const memoSelected = useMemo(() => selected, [isShown])
+  const [numberOfFilesToDelete, setNumberOfFilesToDelete] = useState<number>()
 
   const mutation = useMutation({
     mutationFn: (ids: string[]) => deleteFilesRequest(ids),
     onError: () => {
-      toast.error(`Error: Deleting ${data.length} files or folders.`)
+      toast.error(`Error: Deleting ${numberOfFilesToDelete} files or folders.`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries('files')
@@ -80,18 +86,18 @@ export const useDeleteFileModal = ({
       queryClient.invalidateQueries('counters')
       onSuccess()
       setShowModal(false)
-      toast.success(`Success: Deleted ${data.length} files or folders.`)
+      toast.success(`Success: Deleted ${numberOfFilesToDelete} files or folders.`)
     },
-  })  
+  })
 
   const handleSubmit = () => {
-    mutation.mutateAsync(momoSelected.map(s => s.id))
+    mutation.mutateAsync(memoSelected.map(s => s.id))
   }
 
   const modalComp = (
     <Modal
       data-testid="modal-files-delete"
-      headerText={`Delete ${itemsCountString('item', data.length)}?`}
+      headerText={`Delete ${numberOfFilesToDelete ? itemsCountString('item', numberOfFilesToDelete) : '...'}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={
@@ -109,11 +115,7 @@ export const useDeleteFileModal = ({
         </>
       }
     >
-      {status === 'loading' ? (
-        <div>Loading...</div>
-      ) : (
-        <DeleteFiles data={data} />
-      )}
+      <DeleteFiles selected={memoSelected} scope={scope} setNumberOfFilesToDelete={setNumberOfFilesToDelete} />
     </Modal>
   )
   return {

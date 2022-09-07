@@ -1,31 +1,23 @@
 import React, { useMemo } from 'react'
 import { useMutation } from 'react-query'
 import { toast } from 'react-toastify'
-import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { ResourceTable } from '../../../components/ResourceTable'
 import { Modal } from '../../modal'
-import { ButtonRow, ModalScroll } from '../../modal/styles'
+import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { APIResource, ResourceScope } from '../types'
 import { itemsCountString } from '../../../utils/formatting'
 
-const StyledResourceTable = styled(ResourceTable)`
-  padding: 0.5rem;
-  min-width: 300px;
-`
 
-export function useDeleteModal<T extends { id: string; name: string }>({
+export function useDeleteModal<T extends { id: string; name: string; location: string }>({
   resource,
   selected,
-  scope,
   request,
   onSuccess,
 }: {
-  resource: APIResource
+  resource: 'app' | 'asset' | 'workflow'
   selected: T[]
-  scope?: ResourceScope
   request: (ids: string[]) => Promise<any>
   onSuccess?: (res: any) => void
 }) {
@@ -41,9 +33,11 @@ export function useDeleteModal<T extends { id: string; name: string }>({
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
         return
       }
-      if(onSuccess) onSuccess(res)
+      if (onSuccess) onSuccess(res)
       setShowModal(false)
-      toast.success(`Success: Deleted ${itemsCountString(resource, momoSelected.length)}`)
+      toast.success(
+        `Success: Deleted ${itemsCountString(resource, momoSelected.length)}`,
+      )
     },
   })
 
@@ -68,13 +62,12 @@ export function useDeleteModal<T extends { id: string; name: string }>({
         </ButtonRow>
       }
     >
-      <ModalScroll>
-        <StyledResourceTable
-          rows={selected.map(s => ({
-              name: <div>{s.name}</div>,
-            }))}
-        />
-      </ModalScroll>
+      <ResourceTable
+        rows={momoSelected.map(s => ({
+          name: <div>{s.name}</div>,
+          path: <div>{s.location}</div>,
+        }))}
+      />
     </Modal>
   )
   return {

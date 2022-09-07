@@ -72,6 +72,8 @@ export * as comment from './comment'
 
 export * as dbCluster from './db-cluster'
 
+export * as space from './space'
+
 export {
   entities,
   AdminGroup,

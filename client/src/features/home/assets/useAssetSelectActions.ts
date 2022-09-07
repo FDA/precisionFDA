@@ -1,20 +1,19 @@
-import { useHistory } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { useQueryClient } from 'react-query'
 import { pick } from 'ramda'
-import { RootState } from '../../../store'
+import { useQueryClient } from 'react-query'
+import { useHistory } from 'react-router-dom'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
+import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
+import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
 import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
 import { deleteAssetsRequest } from './assets.api'
 import { IAsset } from './assets.types'
-import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
-import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
 
 export enum AssetActions {
   'Rename' = 'Rename',
@@ -43,8 +42,8 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
-  const user = useSelector((state: RootState) => state.context.user)
-  const isAdmin: boolean = user?.admin
+  const user = useAuthUser()
+  const isAdmin = user?.admin
 
   const featureMutation = useFeatureMutation({
     resource: 'assets',
@@ -68,9 +67,8 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     setShowModal: setDeleteModal,
     isShown: isShownDeleteModal,
   } = useDeleteModal({
-    resource: 'assets',
-    selected: selected.map(s => ({ id: s.uid, name: s.name })),
-    scope,
+    resource: 'asset',
+    selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
     request: deleteAssetsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries('assets')
@@ -226,7 +224,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || (selected.length !== 1),
     },
     'Comments': {
       type: 'link',
