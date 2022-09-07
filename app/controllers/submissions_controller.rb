@@ -1,5 +1,7 @@
 # Submissions controller
 class SubmissionsController < ApplicationController
+  include CloudResourcesConcern
+
   skip_before_action :require_login, only: []
   before_action :require_login_or_guest, only: []
   before_action :check_challenge_access
@@ -24,6 +26,12 @@ class SubmissionsController < ApplicationController
     unless @challenge.accepting_submissions?
       flash[:error] = "Sorry, this challenge is currently not accepting submissions."
       redirect_to challenge_path(@challenge)
+      return
+    end
+
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
       return
     end
 
@@ -56,7 +64,8 @@ class SubmissionsController < ApplicationController
        app: @app.slice(:dxid, :spec, :title),
        scopes_permitted: %w(public private),
        licenses_to_accept: licenses_to_accept.uniq(&:id),
-       licenses_accepted: licenses_accepted
+       licenses_accepted: licenses_accepted,
+       instance_types: user_compute_resource_labels
   end
 
   def edit
@@ -197,7 +206,7 @@ class SubmissionsController < ApplicationController
       return
     end
     unless @submission.job.terminal?
-      User.sync_challenge_jobs!
+      Job.sync_challenge_jobs!
       @submission.job.reload
     end
 
@@ -297,9 +306,12 @@ class SubmissionsController < ApplicationController
 
     @app = App.find(@challenge.app_id)
 
-    clone_inputs_to_space
+    cloned_inputs = clone_inputs_to_space
+    job_run_inputs = cloned_inputs.copies.to_h { |copy| [copy.source.uid, copy.object.uid] } unless cloned_inputs.nil?
 
     input_info ||= input_spec_preparer.run(@app, @inputs)
+
+    input_info.run_inputs.each { |k, v| input_info.run_inputs[k] = job_run_inputs[v] } unless cloned_inputs.nil?
 
     job = job_creator.create(
       app: @app,
@@ -314,6 +326,8 @@ class SubmissionsController < ApplicationController
       challenge_id: @challenge.id,
       _inputs: input_info.file_dxids,
     )
+
+    job.update!(project: @challenge.space.host_project, scope: @challenge.space.scope)
 
     Event::SubmissionCreated.create_for(submission, @context.user)
 
@@ -341,7 +355,7 @@ class SubmissionsController < ApplicationController
     )
 
     begin
-      challenge_bot_copy_service.copy(files, @challenge.space.scope)
+      copied_files = challenge_bot_copy_service.copy(files, @challenge.space.scope)
     ensure
       api.project_decrease_permissions(
         @context.user.private_files_project,
@@ -349,6 +363,7 @@ class SubmissionsController < ApplicationController
         "user-#{CHALLENGE_BOT_DX_USER}",
       )
     end
+    copied_files
   end
 
   def challenge_bot_copy_service

@@ -137,7 +137,7 @@
                     <th></th>
                   </thead>
                   <tbody class="table-hover">
-                  <!-- ko if: !_.isArray(value()) -->
+                  <!-- ko if: !_.isArray(value()) && value().name -->
                     <tr>
                       <td ><span data-bind="text: $data.value().name"/></td>
                       <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeItem"></a></td>

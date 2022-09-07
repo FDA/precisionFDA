@@ -1,0 +1,51 @@
+<table class="table table-striped">
+  <thead>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Email</th>
+    <th>DUNS</th>
+    <th></th>
+  </thead>
+  <tbody>
+  <!-- ko foreach: invitations -->
+    <tr>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.firstName" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.lastName" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.email" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.duns" />
+      </td>
+      <td data-bind="click: $root.removeInvitation">
+        <button class="btn btn-danger">
+          <i class="fa fa-times"></i>
+        </button>
+      </td>
+    </tr>
+    <tr class="invitations-original-values">
+      <td data-bind="text: $data.original.first_name"></td>
+      <td data-bind="text: $data.original.last_name"></td>
+      <td data-bind="text: $data.original.email"></td>
+      <td data-bind="text: $data.original.duns"></td>
+      <td></td>
+    </tr>
+    <!-- ko if: $data.errors().length -->
+      <!-- ko foreach: $data.errors -->
+      <tr class='bg-danger text-danger'>
+        <td colspan="12" data-bind="text: $data"></td>
+      </tr>
+      <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: $data.success() -->
+      <tr class='bg-success text-success'>
+        <td colspan="12">Request completed successfully.</td>
+      </tr>
+    <!-- /ko -->
+  <!-- /ko -->
+  </tbody>
+</table>

@@ -1,8 +1,8 @@
 module ApplicationHelper
   include PathHelper
-  include VerifiedSpaceHelper
   include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
+  # rubocop:disable Rails/HelperInstanceVariable
 
   def page_title(separator = " – ")
     [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
@@ -38,10 +38,10 @@ module ApplicationHelper
   end
 
   def alert_help(text, path, prompt = "Need help?")
-    prompt = "<span class='pfda-help-prompt'>#{h(prompt)}</span>" if !prompt.blank?
+    prompt = "<span class='pfda-help-prompt alert-help-remediated'>#{h(prompt)}</span>" if !prompt.blank?
     raw """
     <div class='pfda-help-block'>
-      <span class='fa fa-question-circle' aria-hidden='true'></span>#{prompt}<a href='#{path}' target='_blank'>#{h(text)} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
+      <span class='fa fa-question-circle' aria-hidden='true'></span>#{prompt}<a href='#{path}' class='review-doc-text' target='_blank'>#{h(text)} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
     </div>
     """
   end
@@ -66,6 +66,8 @@ module ApplicationHelper
     case item.klass
     when "file"
       "fa-file-o"
+    when "db-cluster"
+      "fa-database"
     when "note"
       "fa-sticky-note"
     when "answer"
@@ -95,41 +97,16 @@ module ApplicationHelper
     end
   end
 
-  # Provide a node origin links to use on Home (Space) Files page
-  # @param node [Node] Node to get origin for.
-  # @return [String] - file link object node of type "UserFile"
-  def node_origin(node)
-    if node.klass == "folder"
-      nil
-    elsif node.parent_type == "Node" && node.parent.blank?
-      "Copied"
-    elsif node.parent_type != "User"
-      node_origin_link(unilinkfw(node.parent, { no_home: true }))
-    else
-      "Uploaded"
-    end
-  end
-
-  def node_origin_link(html_link)
-    parsed_html_link = Nokogiri::HTML(html_link)
-    parsed_a_element = parsed_html_link.at("a")
-    parsed_span_element = parsed_html_link.at("span")
-
-    origin_link = {}
-    origin_link[:href] = parsed_a_element["href"] if parsed_a_element
-    origin_link[:fa] = parsed_span_element.to_h["class"] if parsed_span_element
-    origin_link[:text] = parsed_html_link.text
-
-    origin_link
-  end
-
   # Valid options
   # icon_class: "fa-fw fa-2x"  # Appends to span class
   # scope_icon: true           # Displays scope icon instead of fa_class(item) as icon
   # title_class                # CSS class to apply to title
   # nolink: true               # Show a label, not a link
   # noicon: false              # Show/hide the icon
-  def unilink(item, opts = {})
+  # rubocop:disable Metrics/MethodLength
+  def unilink(item, opts = {}, context_user = nil)
+    current_user = opts[:current_user] || context_user
+
     return if item.nil?
 
     icon = fa_class(item)
@@ -149,25 +126,23 @@ module ApplicationHelper
       icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     end
 
-    # rubocop:disable Rails/HelperInstanceVariable
-    if item.check_accessibility(@context)
-      html_opts = { class: opts[:title_class] }
+    if item.check_accessibility(current_user)
+      html_opts = { class: opts[:title_class], target: opts[:target] }
       html_opts[:data] = opts[:data] if opts[:data]
       if opts[:nolink]
         icon_span + item.title.to_s
       else
-        link_to(icon_span + item.title.to_s, concat_path(item, opts[:no_home]), html_opts)
+        link_to(icon_span + item.title.to_s, home_path_to_item(item, opts[:no_home]), html_opts)
       end
     else
       icon_span + item.title.to_s # do not show item uid if unaccessible
     end
-    # rubocop:enable Rails/HelperInstanceVariable
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Concat item path with '/home' to create a link to Home - for specific items
-  def concat_path(item, no_home = false)
-    if !no_home && (%w(file folder app app-series job
-                       asset workflow workflow-series).include? item.klass)
+  def home_path_to_item(item, no_home = false)
+    if !no_home && (%w(app app-series job workflow workflow-series).include? item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)
@@ -175,15 +150,20 @@ module ApplicationHelper
   end
 
   # Shortcut for unilink(..., icon_class: fa-fw)
-  #
+
   def unilinkfw(item, opts = {})
+    current_user = opts[:current_user] || @context.user
+
     local_opts = opts.deep_dup
     if local_opts[:icon_class].present?
       local_opts[:icon_class] += " fa-fw"
     else
       local_opts[:icon_class] = "fa-fw"
     end
-    unilink(item, local_opts)
+    local_opts.merge!(data: { turbolinks: false })
+    local_opts.merge!(current_user: current_user)
+
+    unilink(item, local_opts, current_user)
   end
 
   def guest_hide
@@ -233,4 +213,5 @@ module ApplicationHelper
       action_name == "show" &&
       space.present?
   end
+  # rubocop:enable Rails/HelperInstanceVariable
 end

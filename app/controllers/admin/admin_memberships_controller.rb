@@ -43,9 +43,11 @@ module Admin
       membership.transaction do
         membership.save!
         add_user_to_org(user.dxid) if admin_group.site?
-        flash[:alert] = "User has been added."
-      rescue StandardError
+        add_to_admin_spaces(user) if admin_group.site?
+        flash[:alert] = "User #{user.dxuser} has been added."
+      rescue StandardError => e
         flash[:error] = "Couldn't provision a new #{admin_group.role.titleize} admin!"
+        Rails.logger.error(e.message)
         raise ActiveRecord::Rollback
       end
 
@@ -58,9 +60,11 @@ module Admin
       membership.transaction do
         membership.destroy!
         remove_user_from_org(membership.user.dxid) if membership.site?
-        flash[:alert] = "User has been removed."
-      rescue StandardError
-        flash[:error] = "User couldn't be removed!"
+        remove_from_admin_spaces(membership.user) if membership.site?
+        flash[:alert] = "User #{membership.user.dxuser} has been removed from admin group #{membership.admin_group_id}."
+      rescue StandardError => e
+        flash[:error] = "User #{membership.user.dxuser} couldn't be removed!"
+        Rails.logger.error(e.message)
         raise ActiveRecord::Rollback
       end
 
@@ -88,7 +92,63 @@ module Admin
     # Adds a user to the site admins organization.
     def add_user_to_org(dxid)
       admin_member_processor = DIContainer.resolve("orgs.admin_member_provisioner")
-      admin_member_processor.call(dxid)
+      result = admin_member_processor.call(dxid)
+      logger.info("AdminMembershipsController: Site admin org invite API call result: #{result}")
+      result
+    end
+
+    # Adding new site admin to all existing Administrator Spaces
+    def add_to_admin_spaces(user)
+      api = DIContainer.resolve("api.user")
+
+      Space.admin_spaces.each do |space|
+        logger.info("Adding site admin #{user.dxuser} to admin space #{space.id}")
+        admin_membership = space.space_memberships.find_by(user: space.host_lead)
+
+        membership = space.space_memberships.active.where(user_id: user.id).first_or_initialize
+        membership.attributes = { role: SpaceMembership::ROLE_ADMIN, side: admin_membership.side }
+
+        logger.info("AdminMembershipsController: Org invite API call using api.user, org: #{space.host_dxorg}, user: #{user.dxid}")
+
+        result = api.org_invite(
+          space.host_dxorg,
+          user.dxid,
+          level: DNAnexusAPI::ORG_MEMBERSHIP_ADMIN,
+          suppressEmailNotification: true,
+        )
+
+        logger.info("AdminMembershipsController: Org invite API call result #{result}")
+
+        project_dxid = space.host_project
+        logger.info("AdminMembershipsController: Project invite API call using api.user, project: #{project_dxid}, org: #{Setting.review_app_developers_org}")
+
+        result2 = api.project_invite(
+          project_dxid,
+          Setting.review_app_developers_org,
+          DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+          suppressEmailNotification: true,
+          suppressAllNotifications: true,
+        )
+
+        logger.info("AdminMembershipsController: Project invite API call result #{result2}")
+
+        space.space_memberships << membership
+        space.save!
+      end
+    end
+
+    # Removing site admin from all existing Administrator Spaces
+    def remove_from_admin_spaces(user)
+      admin_api = DIContainer.resolve("api.admin")
+      user_api = DIContainer.resolve("api.user")
+
+      Space.admin_spaces.each do |space|
+        logger.info("Removing site admin #{user.dxuser} from admin space #{space.id}")
+        user_membership = space.space_memberships.find_by(user: user)
+        admin_membership = space.space_memberships.find_by(user: space.host_lead)
+
+        SpaceMembershipService::Delete.call(admin_api, user_api, space, user_membership, admin_membership)
+      end
     end
   end
 end

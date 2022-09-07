@@ -24,6 +24,8 @@ module PathHelper
       end
     when "app"
       app_comments_path(item)
+    when "db-cluster"
+      api_dbcluster_comments_path(item.dxid)
     when "job"
       job_comments_path(item)
     when "asset"
@@ -34,12 +36,8 @@ module PathHelper
       discussion_comments_path(item)
     when "answer"
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
-    when "space"
-      space_comments_path(item)
     when "workflow"
       workflow_comments_path(item)
-    when "task"
-      space_task_comments_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_comments_path(item)
     when "appathon"
@@ -54,7 +52,7 @@ module PathHelper
   def pathify(item)
     case item.klass
     when "file"
-      file_path(item)
+      "/home/files/#{item.uid}"
     when "note"
       if item.note_type == "Answer"
         pathify(item.answer)
@@ -67,16 +65,14 @@ module PathHelper
       app_path(item)
     when "app-series"
       pathify(item.latest_accessible(@context))
+    when "db-cluster"
+      "/home/databases/#{item.dxid}"
     when "job"
       job_path(item)
     when "asset"
-      asset_path(item)
+      "/home/assets/#{item.uid}"
     when "comment"
-      if item.commentable_type == 'Space'
-        discuss_space_path(item.commentable)
-      else
-        pathify_comments(item.commentable)
-      end
+      pathify_comments(item.commentable)
     when "comparison"
       comparison_path(item)
     when "discussion"
@@ -89,8 +85,6 @@ module PathHelper
       license_path(item)
     when "space"
       _space_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
@@ -115,12 +109,11 @@ module PathHelper
   # @return [String] Folder's URL.
   def pathify_folder(folder)
     if folder.private?
-      files_path(folder_id: folder.id)
+      "/home/files?folderId=#{folder.id}"
     elsif folder.public?
-      explore_files_path(folder_id: folder.id)
+      "/home/files/everybody?folderId=#{folder.id}"
     elsif folder.in_space?
-      space = folder.space
-      api_files_path(space_id: space.id, folder_id: folder.id)
+      "/home/files/spaces?folderId=#{folder.id}"
     else
       raise "Unable to build folder's path"
     end
@@ -143,15 +136,11 @@ module PathHelper
       end
     when "workflow"
       return workflow_analyses_path(item) if request.referer =~ /analyses/
-
-      workflow_path(item)
-    when "space"
-      discuss_space_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
-    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset",
-      "comparison", "answer", "folder"
+      concat_path(item)
+    when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"
       pathify(item)
+    when "file", "folder", "app", "job", "asset"
+      concat_path(item)
     else
       raise "Unknown class #{item.klass}"
     end

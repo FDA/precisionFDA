@@ -17,14 +17,14 @@ module JobsConcern
     return if @job.terminal?
 
     if @job.from_submission?
-      User.sync_challenge_job!(@job.id)
+      Job.sync_challenge_job!(@job.id)
     else
-      User.sync_job!(@context, @job.id)
+      Job.sync_job!(@context, @job.id)
     end
   end
 
   # Refresh state of jobs, if needed
   def sync_jobs(jobs)
-    User.sync_jobs!(@context, jobs)
+    Job.sync_jobs!(@context, jobs)
   end
 end

@@ -50,75 +50,19 @@
         <div class="form-group form-group-lg">
           <%= f.label :first_name, "First name", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required' %>
+            <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required', minlength: 2 %>
           </div>
         </div>
         <div class="form-group form-group-lg">
           <%= f.label :last_name, "Last name", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required' %>
+            <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required', minlength: 2 %>
           </div>
         </div>
         <div class="form-group form-group-lg">
           <%= f.label :email, "Email address", class: 'control-label col-sm-4 request_access_form_font_color' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.email_field :email, class: 'form-control input-lg', required: 'required' %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :address1, "Address 1", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :address1, class: 'form-control input-lg', required: 'required' %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :address2, "Address 2", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :address2, class: 'form-control input-lg', placeholder: 'Optional' %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :city, "City", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :city, class: 'form-control input-lg', required: 'required' %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :country_id, "Country", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.select :country_id, @countries, {include_blank: true}, {class: 'form-control input-lg', required: 'required'} %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :postal_code, "Postal Code", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :postal_code, class: 'form-control input-lg', required: 'required' %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :us_state, "US State", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.select :us_state, @us_states_list, {include_blank: true}, {class: 'form-control input-lg', required: 'required', disabled: true} %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :phone_country_id, "Country Code", class: 'control-label col-sm-4 request_access_form_font_color' %>
-          <div class="col-sm-offset-1 col-sm-3">
-            <%= f.select :phone_country_id, @dial_codes, {include_blank: true}, {class: 'form-control input-lg', required: 'required'} %>
-          </div>
-          <!--<div class="col-sm-offset-1 col-sm-6">-->
-          <%#= <button class="btn btn-lg btn-primary hidden" data-bind="click: showConfirmPhoneModal, disable: disableConfirmPhoneButton, css: {
-              hidden: !showConfirmPhoneButton()
-            }">Request text validation code</button>
-            <div class="text-success hidden phone-confirmed" data-bind="css: {hidden: !phoneConfirmed()}">Phone number has been validated</div> %>
-          <!--</div>-->
-        </div>
-        <div class="form-group form-group-lg">
-          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4 request_access_form_font_color', id: 'phone_label' %>
-           
-          <div class="col-sm-offset-1 col-sm-10">
-            <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required', "aria-labelledby": 'phone_label' %>
-            <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" value="true" />
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
@@ -188,7 +132,7 @@
             <%= f.text_field :req_software, class: 'form-control input-lg', placeholder: 'Optional' %>
           </div>
         </div>
-        <div class="form-group form-group-lg">
+        <div class="intended-use form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
             Ultimately, what do you see as your intended use for precisionFDA?
             <div class="checkbox">
@@ -203,8 +147,6 @@
             </div>
           </div>
         </div>
-        <br>
-        <br>
 
         <div class="form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
@@ -212,15 +154,9 @@
           </div>
         </div>
 
-        <hr>
-
-        <div class="form-group form-group-lg">
-          <div class="col-sm-offset-5 col-sm-10">
-            <strong>Prove you are not a robot:</strong>
-            <br>
-            <%= recaptcha_tags %>
-          </div>
-        </div>
+        <% unless Utils.development_or_test? %> 
+              <%= recaptcha_v3(action: 'registration') %>
+        <% end %> 
 
         <div class="form-group form-group-lg">
             <div class="col-sm-offset-5 col-sm-10">

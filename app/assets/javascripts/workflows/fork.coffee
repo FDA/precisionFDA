@@ -14,6 +14,7 @@ WorkflowsController = Paloma.controller('Workflows', {
       @params.apps,
       @params.workflow,
       @params.scope,
+      @params.instance_types,
       'fork'
     )
     ko.applyBindings(viewModel, $container[0])

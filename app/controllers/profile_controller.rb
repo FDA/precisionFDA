@@ -1,11 +1,13 @@
 # TODO: to be refactored
 #
 class ProfileController < ApplicationController
-  # rubocop:disable Metrics/MethodLength
   include ErrorProcessable
-  helper_method :time_zones
-  before_action :find_admin, only: %i(provision_org provision_new_user)
+  include Naming
 
+  helper_method :time_zones
+  before_action :find_admin, only: %i(provision_org)
+
+  # rubocop:disable Metrics/MethodLength
   def index
     usa_id = Country.find_by(name: "United States").id
     @user = User.includes(:org).find(@context.user_id)
@@ -36,86 +38,6 @@ class ProfileController < ApplicationController
       render json: profile.view_fields, status: :ok
     else
       render json: profile.errors, status: :unprocessable_entity
-    end
-  end
-
-  def provision_new_user
-    if request.get?
-      @invitations = Invitation.
-        order(id: :desc).
-        page(params[:page])
-      @state = "step1"
-      return
-    end
-
-    @inv = unsafe_params[:inv]
-    @invitation = Invitation.find(@inv)
-
-    if @invitation.user
-      editable_params = User.provision_params(@invitation.user_id)
-      @first_name = (unsafe_params[:first_name] || editable_params[:first_name]).to_s.strip
-      @last_name = (unsafe_params[:last_name] || editable_params[:last_name]).to_s.strip
-      @email = (unsafe_params[:email] || editable_params[:email]).to_s.strip
-    else
-      @first_name = (unsafe_params[:first_name] || @invitation.first_name).to_s.strip
-      @last_name = (unsafe_params[:last_name] || @invitation.last_name).to_s.strip
-      @email = (unsafe_params[:email] || @invitation.email).to_s.strip
-    end
-
-    @address1 = (unsafe_params[:address1] || @invitation.address1).to_s.strip
-    @address2 = (unsafe_params[:address2] || @invitation.address2).to_s.strip
-    @postal_code = (unsafe_params[:postal_code] || @invitation.postal_code).to_s.strip
-    @country = (unsafe_params[:country] || @invitation.country.name).to_s.strip
-    @city = (unsafe_params[:city] || @invitation.city).to_s.strip
-    @us_state = (unsafe_params[:us_state] || @invitation.us_state).to_s.strip
-    @full_phone = (unsafe_params[:full_phone] || @invitation.full_phone).to_s.strip
-    @duns = (unsafe_params[:duns] || @invitation.duns).to_s.strip
-
-    username = User.construct_username(@first_name, @last_name)
-    @suggested_username = find_unused_username(username)
-    org = "#{@first_name} #{@last_name} (#{@suggested_username})"
-    org_handle = @suggested_username
-    singular = true
-
-    case unsafe_params[:state]
-    when "step2"
-      @state = "step2"
-
-    when "step3"
-      errors_verifiable_attributes = {
-        first_name: @first_name,
-        last_name: @last_name,
-        email: @email,
-        org: org,
-        org_handle: org_handle,
-      }
-      @errors = add_errors(errors_verifiable_attributes)
-
-      if @errors.any?
-        @state = "step2"
-        return
-      end
-      add_warnings(@first_name, @last_name, @invitation, org, org_handle)
-      @state = "step3"
-
-    when "step4"
-      provision_params = {
-        org: org,
-        username: @suggested_username,
-        org_handle: org_handle,
-        email: @email,
-        first_name: @first_name,
-        last_name: @last_name,
-        address: @address1,
-        duns: @duns,
-        phone: @full_phone,
-        singular: singular,
-      }
-
-      service = DIContainer.resolve("orgs.provisioner")
-      service.call(@user, @invitation, provision_params)
-
-      @state = "step4"
     end
   end
 
@@ -182,24 +104,32 @@ class ProfileController < ApplicationController
           papi = DNAnexusAPI.new(ADMIN_TOKEN)
           papi.call(ORG_EVERYONE, "invite", invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true)
 
-          user = {}
-          user[:dxuser] = @suggested_username
-          user[:org_id] = @user.org.id
-          user[:schema_version] = User::CURRENT_SCHEMA
-          user[:first_name] = @first
-          user[:last_name] = @last
-          user[:email] = @email
-          user[:normalized_email] = @normalized_email
-          u = User.create!(user)
-
-          auditor_data = {
-            action: "create",
-            record_type: "Provision User",
-            record: {
-              message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{u.as_json} by '#{@user.dxuser}'",
-            },
-          }
-          Auditor.perform_audit(auditor_data)
+          new_user = User.new do |u|
+            u.dxuser = @suggested_username
+            u.org_id = @user.org.id
+            u.schema_version = User::CURRENT_SCHEMA
+            u.first_name = @first
+            u.last_name = @last
+            u.email = @email
+            u.normalized_email = @normalized_email
+            u.pricing_map = CloudResourceDefaults::PRICING_MAP
+            u.job_limit = CloudResourceDefaults::JOB_LIMIT
+            u.total_limit = CloudResourceDefaults::TOTAL_LIMIT
+            u.resources = CloudResourceDefaults::RESOURCES
+            u.charges_baseline = @user.charges_baseline
+          end
+          ActiveRecord::Base.transaction do
+            new_user.save!
+            NotificationPreference.create_for_user!(new_user)
+            auditor_data = {
+              action: "create",
+              record_type: "Provision User",
+              record: {
+                message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{new_user.as_json} by '#{@user.dxuser}'",
+              },
+            }
+            Auditor.perform_audit(auditor_data)
+          end
           @state = "step3"
         end
       end
@@ -246,7 +176,7 @@ class ProfileController < ApplicationController
 
     when "step3"
 
-      if unsafe_params[:organization_administration] != 'admin'
+      if unsafe_params[:organization_administration] != "admin"
         # clean out org vars.
         @org = nil
         @org_handle = nil
@@ -265,7 +195,8 @@ class ProfileController < ApplicationController
         @state = "step2"
         return
       end
-      add_warnings(@first_name, @last_name, @invitation, @org, @org_handle)
+
+      @warnings = add_warnings(@invitation, @org, @org_handle, @suggested_username)
       @state = "step3"
 
     when "step4"
@@ -287,6 +218,11 @@ class ProfileController < ApplicationController
 
       @state = "step4"
     end
+  end
+
+  def check_spaces_permissions
+    https_apps_client = DIContainer.resolve("https_apps_client")
+    https_apps_client.check_spaces_permissions
   end
 
   def run_report
@@ -330,43 +266,6 @@ class ProfileController < ApplicationController
   def find_admin
     @user = User.find(@context.user_id)
     raise unless @user.can_administer_site?
-  end
-
-  def add_warnings(first_name, last_name, invitation, org, org_handle)
-    @warnings = []
-
-    username = User.construct_username(first_name, last_name)
-    if username != "#{first_name.downcase}.#{last_name.downcase}"
-      @warnings << "The entered name contains characters other than English letters (such as spaces, dashes, or accented characters). Those characters cannot be represented in the username. Therefore, please double-check the suggested username; if needed, go back to make changes to the name."
-    end
-    @suggested_username = find_unused_username(username)
-    if @suggested_username != username
-      if User.find_by(dxuser: username).present?
-        @warnings << "".html_safe + "There is already another user on precisionFDA with the username '#{username}'. " + view_context.link_to("Click here to visit their profile", user_path(username), target: "_blank") + " to make sure that the person you are trying to provision doesn't already exist on precisionFDA. The suggested username has been adjusted to avoid conflicts."
-      else
-        @warnings << "".html_safe + "There is already another DNAnexus user with the username '#{username}'. The suggested username has been adjusted to avoid conflicts."
-      end
-    end
-    if invitation.singular && invitation.org.present?
-      @warnings << "The original invitation included an organization but also ticked the 'self-represented' box. Make sure you are making the right choice between those two options."
-    end
-    if invitation.singular && invitation.organization_admin
-      @warnings << "The original invitation ticked both the organization admin and 'self-represented' boxes. Make sure you are making the right choice between those two options."
-    end
-    if invitation.singular && !invitation.org.present? && org.present?
-      @warnings << "The original invitation ticked the 'self-represented' box but you supplied an organization. Please double-check this is what you want."
-    end
-    if !invitation.singular && invitation.org.present? && !org.present? && !org_handle.present?
-      @warnings << "The original invitation supplied an organization but you are about to provision a self-represented user. Please double-check this is what you want."
-    end
-    if invitation.organization_admin && org.blank?
-      @warnings << "The original invitation ticked the organization admin box but you are about to provision a self-represented user. Please double-check this is what you want."
-    end
-  end
-
-  def find_unused_username(username)
-    api = DNAnexusAPI.new(@context.token)
-    UnusedUsernameGenerator.new(api).call(username)
   end
 
   # Returns array of time zones ordered by UTC offset.

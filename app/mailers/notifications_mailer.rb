@@ -1,8 +1,7 @@
 class NotificationsMailer < ApplicationMailer
-  add_template_helper(SpacesHelper)
   helper :application, :client_url
 
-  if ENV["DNANEXUS_BACKEND"] == "production"
+  if Rails.env.production?
     default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
              reply_to: "PrecisionFDA@fda.hhs.gov"
   end
@@ -15,9 +14,7 @@ class NotificationsMailer < ApplicationMailer
   def invitation_email(invitation)
     @invitation = invitation
     recipients = ["precisionfda-support@dnanexus.com"]
-    if ENV["DNANEXUS_BACKEND"] == "production"
-      recipients << "precisionfda@fda.hhs.gov"
-    end
+    recipients << "precisionfda@fda.hhs.gov" if Rails.env.production?
 
     mail to: recipients,
          reply_to: "precisionfda-support@dnanexus.com",
@@ -58,7 +55,13 @@ class NotificationsMailer < ApplicationMailer
 
   def space_activation_email(space, membership)
     @space = space
-    @membership = membership
+    @activation_request_lead =
+      if space.administrator?
+        membership.side_alias == "host" ? "creator" : "approver"
+      else
+        "#{membership.side_alias} #{membership.role}"
+      end
+    @leads_names = space.administrator? ? "creator and approver" : "host and guest"
     @user = membership.user
     mail to: @user.email,
          subject: "Action required to activate new space \"#{@space.title}\""
@@ -66,7 +69,6 @@ class NotificationsMailer < ApplicationMailer
 
   def space_activated_email(space, membership)
     @space = space
-    @membership = membership
     @user = membership.user
     mail to: @user.email,
          subject: "Your space was activated: \"#{@space.title}\""
@@ -77,6 +79,7 @@ class NotificationsMailer < ApplicationMailer
     @membership = membership
     @user = membership.user
     @admin = admin
+
     mail to: @user.email,
          reply_to: admin.user.email,
          subject: "#{admin.user.full_name} added you to the space \"#{space.title}\""
@@ -141,34 +144,6 @@ class NotificationsMailer < ApplicationMailer
          subject: "A new question was submitted by \"#{name}\""
   end
 
-  def new_task_email(task)
-    @task = task
-    mail to: @task.assignee.email,
-         subject: "Task \"#{@task.name}\" was assigned to you"
-  end
-
-  def task_updated_email(task, receiver, action)
-    @task = task
-    @action = action
-    @receiver = receiver
-    @task_creator = @task.user.id == @receiver.id ? 'you' : @task.user.full_name
-    @task_assignee = @task.assignee.id == @receiver.id ? 'you' : @task.assignee.full_name
-    mail to: @receiver.email,
-         subject: "Task \"#{@task.name}\" was #{@action}"
-  end
-
-  def user_failed_to_acknowledge_task_email(task)
-    @task = task
-    mail to: @task.user.email,
-         subject: "User failed to ackowledge task \"#{@task.name}\""
-  end
-
-  def user_failed_to_complete_task_email(task)
-    @task = task
-    mail to: @task.user.email,
-         subject: "User failed to complete task \"#{@task.name}\" in time"
-  end
-
   def challenge_results(file, user_id, test_email=nil)
     @user = User.find(user_id)
 
@@ -177,9 +152,27 @@ class NotificationsMailer < ApplicationMailer
     }
 
     if test_email.present?
-      mail(to: test_email, from: 'notification@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
+      mail(
+        to: test_email,
+        from: "notification@dnanexus.com",
+        subject: "Results of NCI-CPTAC challenge",
+      )
     else
       mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
     end
+  end
+
+  def challenge_proposal_received(proposal)
+    recipients = CHALLENGE_PROPOSAL_RECIPIENTS.fetch(Rails.env.to_sym, [])
+
+    return if recipients.blank?
+
+    @subject = "[#{Rails.env.titleize}] New challenge proposal received from " \
+               "#{proposal[:name]} (#{proposal[:email]})"
+    @proposal = proposal
+
+    mail to: recipients,
+         reply_to: SUPPORT_EMAIL,
+         subject: @subject
   end
 end

@@ -53,7 +53,6 @@
             <div data-bind="template: { name: 'pfda_app_input_template', data: $data }"></div>
           </td>
           <td>
-            <!-- ko if: $data.showBatchInput -->
               <div class="radio">
                 <label data-bind="attr: {for: $data.id + '_batch_input_1'}">
                   <input
@@ -70,10 +69,8 @@
                   <span data-bind="text: $data.type"></span>
                 </label>
               </div>
-            <!-- /ko -->
           </td>
           <td>
-            <!-- ko if: $data.showBatchInput -->
               <div class="radio">
                 <label data-bind="attr: {for: $data.id + '_batch_input_2'}">
                   <input
@@ -91,7 +88,6 @@
                   <span data-bind="text: $data.type"></span>
                 </label>
               </div>
-            <!-- /ko -->
           </td>
         </tr>
       <!-- /ko -->

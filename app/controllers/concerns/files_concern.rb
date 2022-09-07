@@ -2,6 +2,7 @@
 #
 module FilesConcern
   include ActiveSupport::Concern
+  include ActionView::Helpers::NumberHelper
 
   def user_real_files(params, context)
     # rubocop:disable Style/SignalException

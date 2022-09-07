@@ -34,6 +34,15 @@ module DXClient
       def file_rename(file_dxid, project_dxid, name)
         call(file_dxid, "rename", { project: project_dxid, name: name })
       end
+
+      # Describes a file object.
+      # @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
+      # @param file_dxid [String] ID of file object.
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def file_describe(file_dxid, opts = {})
+        call(file_dxid, "describe", opts)
+      end
     end
   end
 end

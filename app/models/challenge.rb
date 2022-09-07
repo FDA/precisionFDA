@@ -2,29 +2,33 @@
 #
 # Table name: challenges
 #
-#  id              :integer          not null, primary key
-#  name            :string(255)
-#  admin_id        :integer
-#  app_owner_id    :integer
-#  app_id          :integer
-#  description     :text(65535)
-#  meta            :text(65535)
-#  start_at        :datetime
-#  end_at          :datetime
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
-#  status          :string(255)
-#  automated       :boolean          default(TRUE)
-#  card_image_url  :string(255)
-#  card_image_id   :string(255)
-#  specified_order :integer
-#  space_id        :integer
+#  id                   :integer          not null, primary key
+#  name                 :string(255)
+#  admin_id             :integer
+#  app_owner_id         :integer
+#  app_id               :integer
+#  description          :text(65535)
+#  meta                 :text(16777215)
+#  start_at             :datetime
+#  end_at               :datetime
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  status               :string(255)
+#  automated            :boolean          default(TRUE)
+#  card_image_url       :string(255)
+#  card_image_id        :string(255)
+#  space_id             :integer
+#  specified_order      :integer
+#  scope                :string(255)      default("public"), not null
+#  pre_registration_url :string(255)
 #
 
 class Challenge < ApplicationRecord
+  paginates_per 5
   include Auditor
 
   STATUS_SETUP =    "setup".freeze
+  STATUS_PRE_REGISTRATION = "pre-registration".freeze
   STATUS_OPEN =     "open".freeze
   STATUS_PAUSED =   "paused".freeze
   STATUS_ARCHIVED = "archived".freeze
@@ -41,6 +45,17 @@ class Challenge < ApplicationRecord
   acts_as_followable
 
   after_create :initialize_order
+  after_save :send_email_on_open,
+             if: proc { |ch|
+                   [
+                     STATUS_SETUP,
+                     STATUS_PRE_REGISTRATION,
+                   ].include?(ch.status_previous_change&.first) &&
+                     ch.status_previous_change&.last == STATUS_OPEN
+                 }
+
+  after_save :send_email_on_prereg,
+             if: proc { |ch| ch.status_previous_change&.last == STATUS_PRE_REGISTRATION }
 
   attr_accessor :replacement_id
   store :meta, accessors: [:regions], coder: JSON
@@ -67,18 +82,28 @@ class Challenge < ApplicationRecord
   validates :status, inclusion: { in: ->(challenge) { challenge.available_statuses } }
   validates :meta, meta: true
   validates :app_id,
+            presence: { message: "The scoring app user must select an app for the challenge first" },
+            unless: :status_setup_or_pre_registration?
+  validates :pre_registration_url,
             presence: true,
-            unless: :status_setup?
+            if: :status_pre_registration?
   validate :validate_end_at
   validate :validate_start_at
-  validate :can_open?
+  validate :can_open?, if: :status_open?
   validate :scope_should_be_valid
 
   attr_accessor :host_lead_dxuser, :guest_lead_dxuser
 
   class << self
     def available_statuses
-      [STATUS_SETUP, STATUS_OPEN, STATUS_PAUSED, STATUS_ARCHIVED, STATUS_RESULT_ANNOUNCED]
+      [
+        STATUS_SETUP,
+        STATUS_PRE_REGISTRATION,
+        STATUS_OPEN,
+        STATUS_PAUSED,
+        STATUS_ARCHIVED,
+        STATUS_RESULT_ANNOUNCED,
+      ]
     end
 
     def add_app_dev(context, challenge_id, app_id)
@@ -95,10 +120,6 @@ class Challenge < ApplicationRecord
       end
 
       result
-    end
-
-    def featured(context)
-      accessible_by(context).order(specified_order: "desc")
     end
 
     def app_owned_by(context)
@@ -145,12 +166,26 @@ class Challenge < ApplicationRecord
     self.class.accessible_by(context).exists?(id)
   end
 
-  def editable_by?(context)
-    context.challenge_admin?
+  def editable_by?(context_or_user)
+    user = context_or_user.is_a?(User) ? context_or_user : context_or_user.user
+
+    user.site_or_challenge_admin?
+  end
+
+  def space_member?(user)
+    space&.space_memberships&.map(&:user_id)&.include?(user.id)
   end
 
   def status_setup?
     status == STATUS_SETUP
+  end
+
+  def status_pre_registration?
+    status == STATUS_PRE_REGISTRATION
+  end
+
+  def status_setup_or_pre_registration?
+    status == STATUS_SETUP || status == STATUS_PRE_REGISTRATION
   end
 
   def status_open?
@@ -178,11 +213,11 @@ class Challenge < ApplicationRecord
   end
 
   def available_statuses
-    return [STATUS_SETUP] if new_record?
+    return [STATUS_SETUP, STATUS_PRE_REGISTRATION] if new_record?
     return [STATUS_RESULT_ANNOUNCED, STATUS_ARCHIVED, status].uniq if over?
     return [STATUS_OPEN, STATUS_PAUSED, status].uniq if started?
 
-    [STATUS_OPEN, STATUS_PAUSED, status].uniq
+    [STATUS_SETUP, STATUS_PRE_REGISTRATION, STATUS_OPEN, STATUS_PAUSED, status].uniq
   end
 
   # not available statuses for select!
@@ -220,7 +255,7 @@ class Challenge < ApplicationRecord
   def can_assign_specific_app?(context, checked_app)
     if !context.logged_in? ||
        over? ||
-       ![STATUS_PAUSED, STATUS_SETUP].include?(status) ||
+       ![STATUS_PAUSED, STATUS_SETUP, STATUS_PRE_REGISTRATION].include?(status) ||
        app_owner != context.user ||
        app_id == checked_app.id
       false
@@ -290,18 +325,14 @@ class Challenge < ApplicationRecord
       description: description,
       host_lead_dxuser: host_lead_dxuser,
       guest_lead_dxuser: guest_lead_dxuser,
-      space_type: "groups",
+      space_type: SpaceForm::TYPE_GROUPS,
     )
 
-    space = SpaceService::Create.call(space_form, api: context.api, user: context.user)
-    membership = space.space_memberships.find_by(user_id: space.host_lead.id)
-
-    SpaceService::Invite.call(
-      context.api,
-      space,
-      membership,
-      User.find_by(dxuser: CHALLENGE_BOT_DX_USER),
-      SpaceMembership::ROLE_ADMIN,
+    space = SpaceService::Create.call(
+      space_form,
+      api: context.api,
+      user: context.user,
+      for_challenge: true,
     )
 
     update!(space: space)
@@ -313,6 +344,18 @@ class Challenge < ApplicationRecord
   # Usage in a challenges create on Challenges#new
   def initialize_order
     self.specified_order = id
+  end
+
+  def send_email_on_open
+    email_type_id = NotificationPreference.email_types[:notification_challenge_opened]
+    client = DIContainer.resolve("https_apps_client")
+    client.email_send(email_type_id, { challengeId: id })
+  end
+
+  def send_email_on_prereg
+    email_type_id = NotificationPreference.email_types[:notification_challenge_preregister]
+    client = DIContainer.resolve("https_apps_client")
+    client.email_send(email_type_id, { challengeId: id, scope: scope, name: name })
   end
 
   def validate_end_at

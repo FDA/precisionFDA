@@ -15,13 +15,13 @@ class DNAnexusAuth
     end
   end
 
-  def fetch_token(code)
+  def fetch_token(code, redirect_url)
     uri = URI("#{@authserver_url}#{FETCH_TOKEN_PATH}")
 
     post_params = {
       grant_type: "authorization_code",
       code: code,
-      redirect_uri: OAUTH2_REDIRECT_URI,
+      redirect_uri: redirect_url,
       client_id: OAUTH2_CLIENT_ID,
     }
 

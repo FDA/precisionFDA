@@ -25,7 +25,13 @@ module Api
       "username" => %w(users.first_name users.last_name),
     }.freeze
 
-    PAGE_SIZE = Paginationable::PAGE_SIZE
+    SORT_FIELDS = {
+      "created_at" => ->(left, right) { left.created_at <=> right.created_at },
+      "name" => ->(left, right) { left.name <=> right.name },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
+      "size" => ->(left, right) { left.file_size <=> right.file_size },
+      "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
+    }.freeze
 
     # GET /api/assets
     # api_assets_path
@@ -38,10 +44,7 @@ module Api
         accessible_by_private.
         eager_load(user: :org).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).
-        page(page_from_params).per(PAGE_SIZE)
-      assets = FileService::FilesFilter.call(assets, params[:filters])
+        search_by_tags(params.dig(:filters, :tags))
 
       render_assets_list assets
     end
@@ -55,10 +58,7 @@ module Api
         accessible_by_public.
         eager_load(user: :org).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).
-        page(page_from_params).per(PAGE_SIZE)
-      assets = FileService::FilesFilter.call(assets, params[:filters])
+        search_by_tags(params.dig(:filters, :tags))
 
       render_assets_list assets
     end
@@ -73,10 +73,7 @@ module Api
         accessible_by_public.
         eager_load(user: :org).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).
-        page(page_from_params).per(PAGE_SIZE)
-      assets = FileService::FilesFilter.call(assets, params[:filters])
+        search_by_tags(params.dig(:filters, :tags))
 
       render_assets_list assets
     end
@@ -92,23 +89,19 @@ module Api
         editable_by(@context).where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         eager_load(user: :org).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).
-        page(page_from_params).per(PAGE_SIZE)
-      assets = FileService::FilesFilter.call(assets, params[:filters])
+        search_by_tags(params.dig(:filters, :tags))
 
-      render_assets_list assets
-    end
+      assets = FileService::FilesFilter.call(assets, params[:filters]).to_a
 
-    # A common method for assets list json rendering.
-    # @param assets [Array] Array of Asset objects.
-    # @return render assets as json with meta
-    def render_assets_list(assets)
-      page_dict = pagination_dict(assets)
-      render json: assets, root: "assets", adapter: :json,
-             meta: assets_meta.
-               merge(count(page_dict[:total_count])).
-               merge({ pagination: page_dict })
+      if show_count
+        render plain: assets.count
+      else
+        assets = sort_array_by_fields(assets, "created_at")
+        page_meta = pagination_meta(assets.count)
+        assets = paginate_array(assets)
+
+        render json: assets, meta: page_meta, root: "assets", adapter: :json
+      end
     end
 
     # GET /api/asset/:id  api_asset_path
@@ -124,8 +117,8 @@ module Api
       comments_data(@asset)
       load_licenses(@asset)
 
-      render json:
-               @asset, adapter: :json,
+      render json: @asset,
+             adapter: :json,
              meta: {
                user_licenses: @licenses,
                object_license: @license,
@@ -221,6 +214,28 @@ module Api
     end
 
     private
+
+    # A common method for assets list json rendering.
+    # @param assets [Array] Array of Asset objects.
+    # @return render assets as json with meta
+    def render_assets_list(assets)
+      filtered_assets = FileService::FilesFilter.call(assets, params[:filters]).
+        order(order_from_params).
+        page(page_from_params).
+        per(page_size)
+
+      page_dict = pagination_dict(filtered_assets)
+
+      return render(plain: page_dict[:total_count]) if show_count
+
+      render json: filtered_assets,
+             root: Asset.model_name.plural,
+             adapter: :json,
+             meta: assets_meta.merge(
+               count: page_dict[:total_count],
+               pagination: page_dict,
+             )
+    end
 
     # Refresh state of assets, if needed
     def sync_assets

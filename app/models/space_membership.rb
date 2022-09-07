@@ -83,4 +83,12 @@ class SpaceMembership < ApplicationRecord
   def custom_role
     { role => self[:role] }
   end
+
+  def side_alias
+    if spaces.first&.review?
+      host? ? SIDE_HOST_ALIAS : SIDE_GUEST_ALIAS
+    else
+      host? ? SIDE_HOST : SIDE_GUEST
+    end
+  end
 end

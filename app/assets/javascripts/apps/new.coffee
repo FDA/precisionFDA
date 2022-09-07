@@ -150,11 +150,19 @@ class NewAppViewModel extends Precision.models.AppEditorModel
           Precision.alert.showAboveAll(text)
     })
 
+  hideAppModal: () ->
+    window.open("/home/apps/#{@newAppUid()}")
+    @importSuccessModal.modal('hide')
+
+  hideAssetModal: () ->
+    window.open("/home/assets/#{@newAssetUid()}")
+    @importSuccessModal.modal('hide')
+
   wdlTextValueOnInput: (root, e) =>
     @wdlTextValue(e.target.value)
 
-  constructor: (data, ubuntuReleases) ->
-    super(data, ubuntuReleases, 'new')
+  constructor: (data, ubuntuReleases, instanceTypes) ->
+    super(data, ubuntuReleases, instanceTypes, 'new')
     @importModal = $('#import_cwl_wdl_modal')
     @importSuccessModal = $('#import_cwl_wdl_success_modal')
     @wdlFileInput = $('#wdl_file_input')
@@ -164,8 +172,8 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     @wdlTextValue = ko.observable()
     @newAppUid = ko.observable()
     @newAssetUid = ko.observable()
-    @newAppURL = ko.computed(=> "/apps/#{@newAppUid()}")
-    @newAssetURL = ko.computed(=> "/assets/#{@newAssetUid()}")
+    @newAppURL = ko.computed(=> "/home/apps/#{@newAppUid()}")
+    @newAssetURL = ko.computed(=> "/home/assets/#{@newAssetUid()}")
     @dockerImage = ko.observable(null)
     @modalTitle = ko.computed(() =>
       switch @importType()
@@ -200,6 +208,10 @@ class NewAppViewModel extends Precision.models.AppEditorModel
 AppsController = Paloma.controller('Apps', {
   new: ->
     $container = $("body main")
-    viewModel = new NewAppViewModel(@params.app, @params.ubuntu_releases)
+    viewModel = new NewAppViewModel(
+      @params.app,
+      @params.ubuntu_releases,
+      @params.instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type),
+    )
     ko.applyBindings(viewModel, $container[0])
 })

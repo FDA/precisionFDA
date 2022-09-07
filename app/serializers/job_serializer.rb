@@ -9,6 +9,7 @@ class JobSerializer < ApplicationSerializer
     :state,
     :name,
     :app_title,
+    :app_uid,
     :app_revision,
     :app_active,
     :workflow_title,
@@ -20,6 +21,8 @@ class JobSerializer < ApplicationSerializer
     :duration,
     :duration_in_seconds,
     :energy_consumption,
+    :failure_reason,
+    :failure_message,
     :created_at,
     :created_at_date_time,
     :scope,
@@ -28,13 +31,15 @@ class JobSerializer < ApplicationSerializer
     :launched_on,
     :featured,
     :links,
+    :entity_type,
     :logged_dxuser,
   )
 
   attribute :all_tags_list, key: :tags
   attr_reader :launched_on
 
-  delegate :name, to: :object
+  delegate :name, :location, to: :object
+  delegate :failure_reason, :failure_message, to: :object
 
   # Returns a run input_data for each input.
   # @return [Array] of objects [
@@ -67,27 +72,36 @@ class JobSerializer < ApplicationSerializer
   # Returns a run_data output file uid, updated if output is of type 'file'
   # @return run_data [Hash] Contains:
   #   { ... "run_outputs" => { "qf1 " => "file-Fz1qBXQ06fZ9PGyy3yKxqb0j-1" } }
+  # Be careful that not all run_outputs values are strings, e.g.
+  #   { ... "run_outputs" => { "float_output" => 0.997611725020877 } }
   def run_data_updates
-    object.run_data["run_outputs"]&.each { |_k, v| v&.concat("-1") if v[0..3] == "file" }
+    object.run_data["run_outputs"]&.each { |_k, v| v&.concat("-1") if v.is_a?(String) && v[0..3] == "file" }
     object.run_data
   end
 
+  # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
   # Returns a title of an app.
   # @return [String] app title.
   def app_title
-    object.app.title
+    object.app&.title
   end
 
+  def app_uid
+    object.app&.uid
+  end
+
+  # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
   # Returns a revision of an app.
   # @return [Numeric] app revision.
   def app_revision
-    object.app.revision
+    object.app&.revision
   end
 
+  # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
   # Returns if app is active (not-deleted).
   # @return [Boolean] app active flag.
   def app_active
-    object.app.not_deleted?
+    object.app&.not_deleted?
   end
 
   # Returns a user who has created this Job.
@@ -168,8 +182,9 @@ class JobSerializer < ApplicationSerializer
       links[:show] = job_path(object)
       # link to user who run a job - api_job_path
       links[:user] = user_path(object.user.dxuser)
+      # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
       # show job's app details page - api_app_path
-      links[:app] = app_path(object.app)
+      links[:app] = app_path(object.app) if object.app
       # show job's workflow details page
       links[:workflow] =
         object.try(:analysis).try(:workflow) ? workflow_path(object.analysis.workflow) : "N/A"
@@ -180,26 +195,35 @@ class JobSerializer < ApplicationSerializer
       # GET show job's logs page: TODO: move to api/jobs
       links[:log] = log_job_path(object)
       # GET track single object
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       # POST /api/attach_to: api_attach_to_notes, discussions, answers
       links[:attach_to] = api_attach_to_notes_path
       # POST /api/jobs/copy  copy_api_jobs
       links[:copy] = copy_api_jobs_path
       # POST /api/jobs/terminate
       links[:terminate] = terminate_api_jobs_path unless object.terminal?
+
+      # GET /api/jobs/:id/open_external
+      links[:open_external] = open_external_api_job_path(object) if object.https? && object.running?
+      # GET /api/jobs/:id/sync_files
+      links[:sync_files] = sync_files_api_job_path(object.dxid) if object.https? && object.running?
+
       # this job's app single run
       if object.in_space?
         unless member_viewer?
           links[:run_job] = new_app_job_path(
-            object.app.app_series.latest_version_app || object.app.app_series.latest_revision_app,
+            # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
+            object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
           )
           links[:space] = space_path
         end
       else
         links[:run_job] = new_app_job_path(
-          object.app.app_series.latest_version_app || object.app.app_series.latest_revision_app,
+          # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
+          object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
         )
       end
+
       if logged_user.can_administer_site?
         # PUT /api/jobs/feature
         links[:feature] = feature_api_jobs_path

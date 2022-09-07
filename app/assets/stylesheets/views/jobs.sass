@@ -4,6 +4,20 @@
   form
     .control-label
       font-weight: normal
+
+    [for=job_limit]
+      margin-right: 20px
+
+    input[name=job_limit]
+      text-align: center
+
+    @media (max-width: $screen-sm-min - 1)
+      [for=job_limit]
+        margin-top: 15px
+
+      input[name=job_limit]
+        text-align: left
+
     .required .control-label
       font-weight: bold
 

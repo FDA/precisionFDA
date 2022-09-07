@@ -4,7 +4,6 @@ module Api
   class FilesController < ApiController
     include SpaceConcern
     include CommonConcern
-    include FilesConcern
     include Paginationable
     include Sortable
     include Scopes
@@ -16,6 +15,7 @@ module Api
     before_action :sync_files, only: %i(index)
 
     DOWNLOAD_ACTION = "download".freeze
+    OPEN_ACTION = "open".freeze
     PUBLISH_ACTION = "publish".freeze
     DELETE_ACTION = "delete".freeze
     COPY_ACTION = "copy".freeze
@@ -29,63 +29,54 @@ module Api
       "username" => %w(users.first_name users.last_name),
     }.freeze
 
+    SORT_FIELDS = {
+      "created_at" => ->(left, right) { left.created_at <=> right.created_at },
+      "name" => ->(left, right) { left.name <=> right.name },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
+      "size" => ->(left, right) { left.file_size <=> right.file_size },
+      "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
+    }.freeze
+
     # GET /api/files or GET /api/files/?space_id=params[:space_id]
     # A common UserFies fetch method for space and home pages, depends upon @params[:space_id].
     # @param space_id [Integer] Space id for files fetch. When it is nil, then fetching for
     #   all files, editable by current user.
     # @param order_by, order_dir [String] Params for ordering.
     # @return files [UserFile] Array of UserFile objects if they exist OR files: [].
-    # rubocop:disable Metrics/MethodLength
     def index
       # Fetches space files.
-      if params[:space_id]
-        nodes = []
-        if find_user_space
-          folder_id = params[:folder_id]
-          nodes = @space.nodes.files_and_folders.
-            where(scoped_parent_folder_id: folder_id).
-            includes(:taggings).eager_load(user: :org).
-            search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).
-            page(page_from_params).per(PAGE_SIZE)
-          nodes = FileService::FilesFilter.call(nodes, params[:filters])
-        end
+      respond_with_space_files && return if params[:space_id]
 
-        page_dict = pagination_dict(nodes)
+      # Fetches all user 'private' files.
+      filter_tags = params.dig(:filters, :tags)
 
-        render json: {
-          entries: nodes.map { |node| helpers.client_file(node, @space, current_user) },
-          meta: files_meta.merge(count(page_dict[:total_count])).
-            merge({ pagination: page_dict }),
-        }, root: "files"
-      else
-        # Fetches all user 'private' files.
-        filter_tags = params.dig(:filters, :tags)
+      files = UserFile.
+        real_files.
+        editable_by(@context).
+        accessible_by_private.
+        where.not(parent_type: ["Comparison", nil]).
+        includes(:taggings).
+        eager_load(user: :org).
+        search_by_tags(filter_tags)
 
-        files = UserFile.
-          real_files.
-          editable_by(@context).
-          where(parent_folder_id: @parent_folder_id).
-          accessible_by_private.
-          where.not(parent_type: ["Comparison", nil]).
-          includes(:taggings).eager_load(user: :org).
-          search_by_tags(filter_tags)
-        files = FileService::FilesFilter.call(files, params[:filters])
+      return render(plain: files.size) if show_count
 
-        folders = private_folders(@parent_folder_id).includes(:taggings).
-          eager_load(user: :org).search_by_tags(filter_tags)
-        folders = FileService::FilesFilter.call(folders, params[:filters])
+      files = files.where(parent_folder_id: @parent_folder_id)
+      files = FileService::FilesFilter.call(files, params[:filters])
 
-        user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-          order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+      folders = private_folders(@parent_folder_id).includes(:taggings).
+        eager_load(user: :org).search_by_tags(filter_tags)
+      folders = FileService::FilesFilter.call(folders, params[:filters])
 
-        render json: user_files, root: "files", adapter: :json,
-          meta: files_meta.
-            merge(count(UserFile.private_count(@context.user))).
-            merge({ pagination: pagination_dict(user_files) })
-      end
+      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
+        order(order_params).page(page_from_params).per(page_size)
+      page_dict = pagination_dict(user_files)
+
+      render json: user_files, root: "files", adapter: :json,
+             meta: files_meta.
+               merge(count(UserFile.private_count(@context.user))).
+               merge({ pagination: page_dict })
     end
-    # rubocop:enable Metrics/MethodLength
 
     # GET /api/files/featured
     # A fetch method for files, accessible by public and with user taggings.
@@ -96,26 +87,21 @@ module Api
 
       files = UserFile.real_files.
         featured.accessible_by(@context).
+        where(parent_folder_id: @parent_folder_id).
         includes(:user, :taggings).eager_load(user: :org).
         search_by_tags(filter_tags)
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = Folder.
-        featured.accessible_by(@context).
-        includes(:taggings).eager_load(user: :org).
+        featured.
+        accessible_by(@context).
+        where(parent_folder_id: @parent_folder_id).
+        includes(:taggings).
         eager_load(user: :org).
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-
-      page_dict = pagination_dict(user_files)
-
-      render json: user_files, root: "files", adapter: :json,
-        meta: files_meta.
-          merge(count(page_dict[:total_count])).
-          merge({ pagination: page_dict })
+      render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/everybody
@@ -129,22 +115,16 @@ module Api
         UserFile.real_files.
           accessible_by_public.
           includes(:taggings).eager_load(user: :org).
-          where(parent_folder_id: @parent_folder_id).
           search_by_tags(filter_tags)
+
+      files = files.where(parent_folder_id: @parent_folder_id) unless show_count
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = explore_folders(@parent_folder_id).includes(:taggings).
         eager_load(user: :org).search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-      page_dict = pagination_dict(user_files)
-
-      render json: user_files, root: "files", adapter: :json,
-        meta: files_meta.
-          merge(count(page_dict[:total_count])).
-          merge({ pagination: page_dict })
+      render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/spaces
@@ -160,8 +140,9 @@ module Api
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         accessible_by(@context).
         includes(:taggings).eager_load(user: :org).
-        where(scoped_parent_folder_id: @parent_folder_id).
         search_by_tags(filter_tags)
+
+      files = files.where(scoped_parent_folder_id: @parent_folder_id) unless show_count
       files = FileService::FilesFilter.call(files, params[:filters])
 
       folders = Folder.
@@ -172,14 +153,17 @@ module Api
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-      page_dict = pagination_dict(user_files)
+      if show_count
+        render plain: files.size
+      else
+        nodes = Node.where(id: files + folders).eager_load(user: :org).to_a
 
-      render json: user_files, root: "files", adapter: :json,
-        meta: files_meta.
-          merge(count(page_dict[:total_count])).
-          merge({ pagination: page_dict })
+        nodes = sort_array_by_fields(nodes, "created_at")
+        page_meta = pagination_meta(nodes.count)
+        nodes = paginate_array(nodes)
+
+        render json: nodes, root: "files", adapter: :json, meta: files_meta.merge(page_meta)
+      end
     end
 
     # GET /api/files/:id
@@ -194,12 +178,12 @@ module Api
       load_licenses(@file)
 
       # TODO: move common data to common_concern.rb
-      comparison = if @file.parent_type != "Comparison"
+      comparison = if @file.parent_type == "Comparison"
+        @file.parent.slice(:id, :user_id, :scope, :state)
+      else
         synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
         synchronizer.sync_comparisons!(@context.user)
         @file.comparisons.accessible_by(@context).includes(:taggings)
-      else
-        @file.parent.slice(:id, :user_id, :scope, :state)
       end
 
       comments = if @file.in_space?
@@ -222,16 +206,16 @@ module Api
         discussions.order(id: :desc).page(params[:discussions_page])
 
       render json: @file, root: "files", adapter: :json,
-        meta: {
-          user_licenses: @licenses,
-          object_license: @license,
-          comments: comments,
-          discussions: discussions,
-          answers: answers,
-          notes: notes,
-          comparisons: comparison,
-          links: meta_links(@file),
-        }
+             meta: {
+               user_licenses: @licenses,
+               object_license: @license,
+               comments: comments,
+               discussions: discussions,
+               answers: answers,
+               notes: notes,
+               comparisons: comparison,
+               links: meta_links(@file),
+             }
     end
     # rubocop:enable Metrics/MethodLength
 
@@ -250,38 +234,30 @@ module Api
     def copy
       nodes = Node.accessible_by(@context).where(id: params[:item_ids])
 
-      copies = node_copier.copy(nodes, params[:scope])
+      NodeCopyWorker.perform_async(
+        params[:scope],
+        nodes.pluck(:id),
+        session_auth_params,
+      )
 
-      # TODO: change old UI to handle json-response!
-      respond_to do |format|
-        messages = build_copy_messages(copies)
-
-        format.html do
-          success_msg = messages.find { |msg| msg[:type] == "success" }&.fetch(:message, nil)
-          warn_msg = messages.find { |msg| msg[:type] == "warning" }&.fetch(:message, nil)
-
-          flash[:success] = success_msg if success_msg
-          flash[:alert] = warn_msg if warn_msg
-
-          redirect_to pathify(nodes.first)
-        end
-
-        format.json do
-          render json: copies.all, root: "nodes", adapter: :json, meta: { messages: messages }
-        end
-      end
+      render json: nodes, root: "nodes", adapter: :json,
+             meta: {
+               messages: [{
+                 type: "success",
+                 message: I18n.t("api.files.copy.files_are_copying"),
+               }],
+             }
     end
 
     # POST /api/files/download_list
     # Responds with the files list.
-    # TODO: the similar route exists in old Files Controller. Both should be merged into one.
-    #   This only works for Spaces now.
+    # This only works for Spaces now.
     def download_list
       task = params[:task]
       files = []
 
       case task
-      when DOWNLOAD_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
+      when DOWNLOAD_ACTION, OPEN_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
         nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when PUBLISH_ACTION
@@ -299,18 +275,19 @@ module Api
         nodes = Node.editable_by(@context).where(id: params[:ids]).to_a
         files += nodes
         nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
+        files.filter! { |file| file.scope == params[:scope] }
       else
         raise ApiError, "Parameter 'task' is not defined!"
       end
 
-      render json: files, each_serializer: FileActionsSerializer,
-        scope_name: params[:scope] || SCOPE_PRIVATE,
-        action_name: task
+      render json: files,
+             each_serializer: FileActionsSerializer,
+             scope_name: params[:scope] || SCOPE_PRIVATE,
+             action_name: task
     end
 
     # GET /api/files/download
     # Responds with a link to download a file.
-    # TODO: the similar route exists in old Files Controller. Both should be merged into one.
     def download
       file = UserFile.exist_refresh_state(@context, params[:uid])
 
@@ -324,19 +301,32 @@ module Api
 
       file_url = file.file_url(@context, params[:inline])
 
-      redirect_to URI.parse(file_url).to_s
+      respond_to do |format|
+        format.html do
+          redirect_to URI.parse(file_url).to_s
+        end
+
+        format.json do
+          render json: {
+            file_url: file_url,
+            file_size: file.file_size,
+          }, adapter: :json
+        end
+      end
     end
 
     # POST /api/files/create_folder - create_folder_api_files_path
     # Creates a folder.
     # @param :public [Boolean] True/False
     # @param :parent_folder_id [Integer] Folder id - nil for root folder
+    # @param :space_id [Integer] id of the target space, if specified the public attribute is ignored
     # @param :name [String] a new folder name
     # @return json { path: path(), message: { type: type, text: text } }
     def create_folder
-      is_public_folder = params[:public] == "true"
-
-      if is_public_folder
+      if params[:space_id] && find_user_space
+        scope = @space.uid
+        parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
+      elsif params[:public] == "true"
         if @context.user.can_administer_site?
           parent_folder = Folder.accessible_by_public.find_by(id: params[:parent_folder_id])
           scope = "public"
@@ -344,7 +334,6 @@ module Api
           path = everybody_api_files_path
           type = :error
           text = "You are not allowed to create public folders"
-
           render json: { path: path, message: { type: type, text: text } }, adapter: :json
           return
         end
@@ -357,7 +346,7 @@ module Api
 
       if result.failure?
         type = :error
-        text = result.value.values
+        text = result.value[:name]
       else
         type = :success
         text = "Folder '#{result.value.name}' successfully created."
@@ -368,7 +357,6 @@ module Api
       else
         scope == "public" ? everybody_api_files_path : api_files_path
       end
-
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
 
@@ -379,7 +367,8 @@ module Api
     # @return { path: path, message: { type: type, text: text } } - standard path object
     def move
       target_folder_id = params[:target_id] == "root" ? nil : params[:target_id]
-      target_folder = target_folder_id ? Folder.editable_by(@context).find(target_folder_id) : nil
+      target_folder =
+        target_folder_id ? Folder.accessible_by_user(@context.user).find(target_folder_id) : nil
       service = FolderService.new(@context)
 
       result = service.move(
@@ -412,22 +401,84 @@ module Api
     # @param scope [String] - 'public', 'private' or 'space-XX'.
     def remove
       service = FolderService.new(@context)
-      files = Node.editable_by(@context).where(id: unsafe_params[:ids])
-      res = service.remove(files)
+      nodes = Node.editable_by(@context).where(id: unsafe_params[:ids])
+      result = service.remove(nodes)
 
-      if res.success?
+      if result.success?
         type = :success
         text = "Node(s) successfully removed."
       else
         type = :error
-        text = "Error when Node(s) removing: '#{res.value.values}'."
+        text = "Error when Node(s) removing: #{result.value[:message]}."
       end
-      path = unsafe_params[:scope] == "public" ? everybody_api_files_path : api_files_path
+
+      path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
 
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
 
+    # Overridden version: it accepts not only file-uids, but also folder id.
+    # Result of this operation not only invert flag of folder(s),
+    # but also all PUBLIC children items.
+    # @param item_ids [Array] array of [String] uid-s.
+    # @param featured [Boolean] new 'feature' value, false if empty.
+    # @return items [Array] list of folder/files with inverted 'feature' flag
+    def update_feature_flag
+      raise ApiExceptionHandler, Message.not_allowed unless @context.user.site_admin?
+
+      FileService::ToggleFeaturePublicFolderService.new(params, @context).call
+    end
+
     private
+
+    def respond_with_space_files
+      nodes = []
+
+      if find_user_space
+        folder_id = params[:folder_id]
+        nodes = @space.nodes.files_and_folders.
+          where(scoped_parent_folder_id: folder_id).
+          includes(:taggings).eager_load(user: :org).
+          search_by_tags(params.dig(:filters, :tags)).
+          order(order_params).
+          page(page_from_params).per(page_size)
+        nodes = FileService::FilesFilter.call(nodes, params[:filters])
+      end
+
+      page_dict = pagination_dict(nodes)
+
+      return render(plain: page_dict[:total_count]) if show_count
+
+      render json: nodes, root: "files", adapter: :json,
+             meta: files_meta.merge(count(page_dict[:total_count])).
+             merge({ pagination: page_dict })
+    end
+
+    def render_files_list(files:, folders:)
+      files_size = files.size
+
+      return render(plain: files_size) if show_count
+
+      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
+        order(order_params).page(page_from_params).per(page_size)
+
+      page_dict = pagination_dict(user_files)
+      page_dict[:total_count] = files_size
+
+      render json: user_files, root: "files", adapter: :json,
+             meta: files_meta.
+               merge(count(page_dict[:total_count])).
+               merge({ pagination: page_dict })
+    end
+
+    # Default to reverse chronological order unless overriden by params
+    def order_params
+      if params[:order_by]
+        order_from_params
+      else
+        { created_at: Sortable::DIRECTION_DESC }
+      end
+    end
 
     # Get a FolderService new instance for a current context
     def folder_service
@@ -495,8 +546,10 @@ module Api
     end
 
     def find_user_file
-      @file = UserFile.not_assets.accessible_by(@context).
+      @file = UserFile.where.not(parent_type: "Asset").accessible_by(@context).
         includes(:user).find_by!(uid: params[:uid])
+    rescue ActiveRecord::RecordNotFound => e
+      raise ApiError, Message.not_found(e.exception.model)
     end
 
     def can_edit?
@@ -520,53 +573,6 @@ module Api
 
       raise ApiError, "You have no permissions to copy files to the scope '#{scope}'"
     end
-
-    # TODO: move message building away from the controller?
-    # Builds response notifications for the copy action.
-    # @param copies [CopyService::Copies] Copies
-    # @return [Array<Hash>] Array of notifications.
-    # rubocop:disable Metrics/MethodLength
-    def build_copy_messages(copies)
-      copied_count = copies.select(&:copied).size
-      messages = []
-
-      if copied_count.positive?
-        messages << {
-          type: "success",
-          message: I18n.t("api.files.copy.success", count: copied_count),
-        }
-      end
-
-      not_copied_files =
-        copies.select { |copy| copy.object.is_a?(UserFile) && !copy.copied }.map(&:object)
-      not_copied_folders =
-        copies.select { |copy| copy.object.is_a?(Folder) && !copy.copied }.map(&:object)
-
-      if not_copied_files.present?
-        messages << {
-          type: "warning",
-          message: I18n.t(
-            "api.files.copy.files_not_copied",
-            count: not_copied_files.size,
-            files: not_copied_files.map(&:name).join(", "),
-          ),
-        }
-      end
-
-      if not_copied_folders.present?
-        messages << {
-          type: "warning",
-          message: I18n.t(
-            "api.files.copy.folders_not_copied",
-            count: not_copied_folders.size,
-            folders: not_copied_folders.map(&:name).join(", "),
-          ),
-        }
-      end
-
-      messages
-    end
-    # rubocop:enable Metrics/MethodLength
   end
   # rubocop:enable Metrics/ClassLength
 end

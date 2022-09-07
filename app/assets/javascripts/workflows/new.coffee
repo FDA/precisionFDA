@@ -169,11 +169,19 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
           Precision.alert.showAboveAll(text)
     })
 
+  hideWorkflowModal: () ->
+    window.open("/home/workflows/#{@newWorkflowUid()}")
+    @importSuccessModal.modal('hide')
+
+  hideAssetModal: (data) ->
+    window.open("/home/assets/#{data}")
+    @importSuccessModal.modal('hide')
+
   wdlTextValueOnInput: (root, e) =>
     @wdlTextValue(e.target.value)
 
-  constructor: (apps, scope) ->
-    super(apps, null, scope, 'new')
+  constructor: (apps, scope, instance_types) ->
+    super(apps, null, scope, instance_types, 'new')
     @importModal = $('#import_cwl_wdl_modal')
     @importSuccessModal = $('#import_cwl_wdl_success_modal')
     @wdlFileInput = $('#wdl_file_input')
@@ -183,7 +191,7 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
     @wdlTextValue = ko.observable()
     @newWorkflowUid = ko.observable()
     @newAssetUids = ko.observableArray()
-    @newWorkflowURL = ko.computed(=> "/workflows/#{@newWorkflowUid()}")
+    @newWorkflowURL = ko.computed(=> "/home/workflows/#{@newWorkflowUid()}")
     @dockerImage = ko.observable(null)
     @dockerImagesArray = ko.observableArray([])
     @modalTitle = ko.computed(() =>
@@ -219,7 +227,11 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
 WorkflowsController = Paloma.controller('Workflows', {
   new: ->
     $container = $("body main")
-    viewModel = new NewWorkflowView(@params.apps, @params.scope)
+    viewModel = new NewWorkflowView(
+      @params.apps,
+      @params.scope,
+      @params.instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type)
+    )
     ko.applyBindings(viewModel, $container[0])
     Precision.wfEditor.addLoadAppsOnScroll(viewModel)
 })

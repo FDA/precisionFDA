@@ -5,9 +5,9 @@ module SpaceService
 
     # Filters spaces.
     # @param user [User] User.
-    # @param query [String] Search query.
+    # @param filters [hash] filter params
     # @return [ActiveRecord::Relation<Space>] Filtered spaces.
-    def call(user, query = nil)
+    def call(user, filters = nil)
       spaces_site_admin = user.site_admin? ? Space.groups : Space.none
 
       spaces_rsa = user.review_space_admin? ? Space.shared : Space.none
@@ -21,34 +21,31 @@ module SpaceService
             Space.shared.or(Space.where.not(space_type: "review")).visible_by(user),
           )
 
-      spaces = spaces.where(build_where(query)).joins(:users) if query.present?
+      spaces = spaces.where(build_where(filters)).joins(:users) if filters.present?
 
       spaces
     end
 
     # Builds AREL where clause.
-    # @param query [String] Search query.
+    # @param filters [hash] filter params.
     # @return [Arel::Node] Built where AREL node.
-    def build_where(query)
+    def build_where(filters)
       conditions = []
       space_arel = Space.arel_table
-      users_arel = User.arel_table
-      sanitized_query = "%" + ActiveRecord::Base.sanitize_sql_like(query) + "%"
+      space_type = Space.space_types[filters[:type]]
 
-      state = Space.states[query]
-      space_type = Space.space_types[query]
-
-      conditions << space_arel[:state].eq(state) if state
       conditions << space_arel[:space_type].eq(space_type) if space_type
-
-      conditions << space_arel[:name].matches(sanitized_query)
-      conditions << users_arel[:dxuser].matches(sanitized_query)
-      conditions << users_arel[:first_name].matches(sanitized_query)
-      conditions << users_arel[:last_name].matches(sanitized_query)
-
+      conditions << space_arel[:name].matches(wildcard(filters[:name])) if filters[:name]
+      conditions << space_arel[:created_at].matches(wildcard(filters[:created_at])) if filters[:created_at]
+      conditions << space_arel[:updated_at].matches(wildcard(filters[:updated_at])) if filters[:updated_at]
+      conditions << space_arel[:description].matches(wildcard(filters[:description])) if filters[:description]
       conditions.reduce(nil) do |where, condition|
-        where ? where.or(condition) : condition
+        where ? where.and(condition) : condition
       end
+    end
+
+    def wildcard(value)
+      "%#{value}%"
     end
 
     private_class_method :build_where

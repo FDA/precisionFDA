@@ -1,8 +1,9 @@
 @import "_common"
 
 .navbar
+  background-color: $navbar-bg-color
   padding-left: $navbar-padding-horizontal
-  padding-right: $navbar-padding-horizontal
+  padding-right: $navbar-padding-horizontal-react
 
   .nav-icon
     color: $navbar-inverse-link-color
@@ -10,6 +11,8 @@
 .navbar-brand
   font-family: $brand-font-family
   font-weight: 300
+  padding-top: 10px
+  padding-bottom: 10px
   font-size: 20px
   letter-spacing: -1px
   display: block
@@ -22,33 +25,49 @@
   li > a
     color: $navbar-inverse-link-color
     font-weight: 400
+    color: #fff
 
     .nav-icon
-      font-size: 28px
+      font-size: 16px
+      color: #fff
 
     &:hover, &:hover .nav-icon
-      color: $brand-blue-subtler
+      color: $brand-blue-tertiary
 
-  li.active
-    > a, > a:hover, > a:focus
-      background-color: transparent
+  li.active > a
+    background-color: $navbar-active-color
+
+    &:hover, &:hover .nav-icon
       color: #fff
-      .nav-icon
-        color: $brand-red-primary
+
+  .dropdown-menu
+    li > a, p 
+      color: $gray-dark
+    // li > p is a workaround
+    li > p
+      margin: 0
+      padding: 3px 20px
+      &:hover
+        cursor: pointer
+        background-color: #f5f5f5
+      
+  .dropdown-toggle
+    li > a
+      background-color: none !important
+      color: #fff
 
 .navbar-nav
   @media (min-width: $grid-float-breakpoint)
     > li
       > a
-        padding-top:    10px
-        padding-bottom: 10px
+        padding: 14px 6px
 
 .nav-spacer
   margin: 10px 0
   padding: 24px 0
-  padding-left: $padding-base-horizontal
-  margin-right: $padding-base-horizontal
-  border-right: 1px solid lighten($brand-blue-primary, 5%)
+  padding-left: $padding-base-horizontal/2
+  margin-right: $padding-base-horizontal/2
+  border-right: 1px solid $navbar-spacer-color
 
 @media (max-width: $screen-sm-min)
   .nav > li.nav-spacer
@@ -58,15 +77,12 @@
   .navbar-nav, .navbar-nav .dropdown a
     text-align: center
 
-  .navbar-brand
-    padding-top: 10px
-    padding-bottom: 10px
 
 @media (min-width: $screen-sm-min)
   .navbar-brand
     height: auto
-    padding-top: 10px
-    padding-bottom: 20px
+    padding-top: 15px
+    padding-bottom: 10px
 
 @media (max-width: $screen-sm-max)
   .navbar-inverse .navbar-nav.nav-links

@@ -6,6 +6,7 @@ module SpaceService
       space.confidential_spaces.each(&:deleted!)
 
       delete_files(space)
+      # delete_memberships(space)
 
       SpaceEventService.call(space.id, admin_member.user_id, admin_member, space, :space_deleted)
     end
@@ -19,6 +20,10 @@ module SpaceService
       files.destroy_all
     end
 
+    def self.delete_memberships(space)
+      # TODO: fill in stub
+    end
+
     def self.remove_objects_from_platform(files)
       api = DNAnexusAPI.for_admin
       projects = {}
@@ -30,8 +35,8 @@ module SpaceService
       projects.each do |project, project_files|
         begin
           api.call(project, "removeObjects", objects: project_files.map(&:dxid))
-        rescue Net::HTTPClientException => e
-          raise e unless e.message =~ /^404/
+        rescue DXClient::Errors::NotFoundError
+          # do nothing
         end
       end
     end

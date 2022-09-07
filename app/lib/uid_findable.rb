@@ -6,12 +6,13 @@ module UidFindable
   # @raise [ActiveRecord::RecordNotFound] If unable to find entity.
   # @return [Mixed] Found entity.
   def item_from_uid(uid, specified_klass = nil)
-    if uid =~ /^(job|app|file|workflow)-(.{24,})$/
+    if uid =~ /^(job|app|file|workflow|dbcluster)-(.{24,})$/
       klass = {
         "app" => App,
         "file" => UserFile,
         "job" => Job,
         "workflow" => Workflow,
+        "dbcluster" => DbCluster,
       }[$1]
 
       if specified_klass && klass != specified_klass

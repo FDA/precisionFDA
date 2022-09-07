@@ -15,22 +15,22 @@
       <div class="modal-body">
         <p>
           <b>Workflow URL:</b>
-          <a target="_blank" data-bind="text: newWorkflowUid, attr: {href: newWorkflowURL}"></a>
+          <a target="_blank" data-bind="text: newWorkflowUid, attr: {href: newWorkflowURL}, click: hideWorkflowModal"></a>
         </p>
         <!-- ko if: newAssetUids().length > 0 -->
-          <p>
-            <b>Asset URLs:</b>
-          </p>
+        <p>
+          <b>Asset URLs:</b>
+        </p>
 
-          <!-- ko foreach: newAssetUids() -->
-            <p>
-              <a target="_blank" data-bind="text: $data, attr: {href: '/assets/' + $data}"></a>
-            </p>
-          <!-- /ko -->
+        <!-- ko foreach: newAssetUids() -->
+        <p>
+          <a target="_blank" data-bind="text: $data, attr: {href: '/home/assets/' + $data}, click: hideAssetModal"></a>
+        </p>
+        <!-- /ko -->
         <!-- /ko -->
       </div>
       <div class="modal-footer">
-        <a data-bind="attr: {href: newWorkflowURL}">
+        <a data-bind="attr: {href: newWorkflowURL}, click: hideWorkflowModal">
           <input type="button" class="btn btn-primary" tabindex="-1" value="Ok">
         </a>
       </div>

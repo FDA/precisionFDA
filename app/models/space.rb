@@ -20,6 +20,11 @@
 #  restrict_to_template :boolean          default(FALSE)
 #  inactivity_notified  :boolean          default(FALSE)
 #
+#
+#  Notes:
+#  space_id is used primarily for Review Spaces where private areas of the Sponsor and
+#           Reviewer sides refer to the host space
+#           It is also used for Private Spaces which points back to itself
 
 class Space < ActiveRecord::Base
   paginates_per 25
@@ -34,8 +39,10 @@ class Space < ActiveRecord::Base
   STATE_LOCKED = "locked".freeze
   STATE_DELETED = "deleted".freeze
 
-  TYPES = %i(groups review verification).freeze
   STATES = [STATE_UNACTIVATED, STATE_ACTIVE, STATE_LOCKED, STATE_DELETED].freeze
+
+  TYPES = %w(groups review verification private_type government administrator).freeze
+  EXCLUSIVE_TYPES = %w(private_type government administrator).freeze
 
   SCOPE_PATTERN = /^space-(\d+)$/.freeze
 
@@ -47,7 +54,6 @@ class Space < ActiveRecord::Base
 
   has_many :users, through: :space_memberships
   has_many :confidential_spaces, class_name: "Space"
-  has_many :tasks, dependent: :destroy
   has_many :space_events
   has_many :space_invitations
 
@@ -71,7 +77,8 @@ class Space < ActiveRecord::Base
   attr_accessor :invitees,
                 :invitees_role,
                 :host_lead_dxuser,
-                :guest_lead_dxuser
+                :guest_lead_dxuser,
+                :sponsor_lead_dxuser
 
   scope :top_level, -> { where(space_id: nil) }
   scope :shared, -> { review.top_level }
@@ -79,6 +86,7 @@ class Space < ActiveRecord::Base
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
   scope :non_groups, -> { where.not(space_type: :groups) }
+  scope :admin_spaces, -> { where(space_type: :administrator) }
   scope :undeleted, -> { where.not(state: :deleted) }
   scope :restricted, -> { confidential.where(restrict_to_template: true) }
   scope :editable_by, lambda { |context|
@@ -190,6 +198,14 @@ class Space < ActiveRecord::Base
     Comparison.accessible_by_space(self)
   end
 
+  def workflow_series
+    WorkflowSeries.accessible_by_space(self)
+  end
+
+  def latest_revision_workflows
+    Workflow.where(id: workflow_series.pluck(:latest_revision_workflow_id))
+  end
+
   def workflows
     Workflow.accessible_by_space(self)
   end
@@ -206,6 +222,10 @@ class Space < ActiveRecord::Base
     confidential_spaces.reviewer.first
   end
 
+  def confidential_sponsor_space
+    confidential_spaces.sponsor.first
+  end
+
   def reviewer?
     review? && host_dxorg.present?
   end
@@ -218,47 +238,147 @@ class Space < ActiveRecord::Base
     review? && !confidential?
   end
 
+  # To distinct all Private spaces of private_type
+  def exclusive?
+    (space_id.present? && space_id == id) || EXCLUSIVE_TYPES.include?(space_type)
+  end
+
+  # Find a space, oposite to a given area of a current review space:
+  #   if a current space is confidential and reviewer,
+  #   then opposite space will be a sponsor one. And vice versa.
+  # @param shared_space [Space object] shared space for self space
+  # @return space [Space object] the opposite space
+  def opposite_private_space(shared_space)
+    if reviewer? && confidential?
+      shared_space.confidential_spaces.sponsor.first
+    else
+      shared_space.confidential_spaces.reviewer.first
+    end
+  end
+
   def verified?
     return false if space_type != "verification"
     verified ? true : false
   end
 
+  # this is always false for confidential review spaces
+  # this is always true for exclusive private spaces
   def accepted?
-    accepted_by_host = accepted_by?(host_lead_member)
-    condition = verification?
-    condition &&= (guest_lead_member.blank? || host_lead_member.user == guest_lead_member.user)
-    return accepted_by_host if condition
-    accepted_by_host && accepted_by?(guest_lead_member)
+    return true if exclusive?
+
+    accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
   end
 
+  # @param member [SpaceMembership object] - space member, host- or guest- lead.
+  # @return [true, false] depends upon member acceptance of a space
   def accepted_by?(member)
-    return false if member.blank?
-    if member.host?
-      return false if host_project.blank?
-      return true unless review?
-      return true if confidential?
-      confidential_reviewer_space.host_lead_member.present?
-    else
-      return false if guest_project.blank?
-      return true unless review?
-      confidential_spaces.sponsor.first.guest_lead_member.present? unless confidential?
-      guest_lead_member.present?
+    return false unless member
+    return true if review? && confidential?
+
+    if groups? || government? || administrator?
+      return member.host? && host_project.present? ||
+             member.guest? && guest_project.present?
     end
+
+    # below are the checks for a shared review space
+    member.host? && confidential_reviewer_space&.host_lead_member.present? ||
+      member.guest? && confidential_sponsor_space&.guest_lead_member.present?
   end
 
   def uid
     "space-#{id}"
   end
 
+  # @param update_space_params [Object] - consists of SpaceEditForm attributes
+  # @param api [DNAnexusAPI]
+  def leads_updates(update_space_params, api)
+    return unless review?
+
+    lead_invite_and_update(
+      host_lead_dxuser,
+      update_space_params.host_lead_dxuser,
+      update_space_params.current_user,
+      SpaceMembership::SIDE_HOST,
+      api,
+    )
+
+    lead_invite_and_update(
+      guest_lead_dxuser,
+      update_space_params.sponsor_lead_dxuser,
+      update_space_params.current_user,
+      SpaceMembership::SIDE_GUEST,
+      api,
+    )
+  end
+
+  # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
+  # @param updated_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
+  # @param side [String] dxuser of a current space lead - to be changed to Admin.
+  # @param api [DNAnexusAPI]
+  def lead_invite_and_update(space_lead_dxuser, updated_lead_dxuser, current_user, side, api)
+    return if space_lead_dxuser == updated_lead_dxuser
+
+    membership = leads.find_by(side: side)
+
+    return if user_member(updated_lead_dxuser).present?
+
+    invite(membership, updated_lead_dxuser, current_user, api)
+    update_role(updated_lead_dxuser, side, api)
+  end
+
+  def user_member(dxuser)
+    # An active user's space memberships
+    space_memberships.active.joins(:user).find_by(users: { dxuser: dxuser })
+  end
+
+  # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
+  # @param new_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
+  # @param api [DNAnexusAPI]
+  def update_role(new_lead_dxuser, side, api)
+    admin_member = leads.find_by(side: side)
+    # An active user member changing to be Lead
+    member = space_memberships.active.joins(:user).find_by(users: { dxuser: new_lead_dxuser })
+    SpaceMembershipService::ToLead.call(api, self, member, admin_member)
+  end
+
+  def space_sponsor
+    User.find_by(dxuser: sponsor_lead_dxuser)
+  end
+
+  def invite(membership, dxuser, current_user, api)
+    space_invite_form = SpaceInviteForm.new(
+      space: self,
+      invitees_role: SpaceMembership::ROLE_ADMIN,
+      space_id: id,
+      invitees: dxuser,
+      current_user: current_user,
+    )
+
+    return unless space_invite_form.valid?
+
+    begin
+      space_invite_form.invite(membership, api)
+    rescue StandardError
+      "An error has occurred during inviting"
+    end
+  end
+
   alias_method :scope, :uid
 
+  # Space title for spaces list in actions modals
   def title
     if review?
-      confidential? ? "#{name}(Private)" : "#{name}(Shared)"
+      confidential? ? "#{name} (Private Review)" : "#{name} (Shared Review)"
     elsif verification?
-      "#{name}(Verification)"
+      "#{name} (Verification)"
+    elsif groups?
+      "#{name} (Group)"
+    elsif private_type?
+      "#{name} (Private)"
+    elsif government?
+      "#{name} (Government)"
     else
-      "#{name}(Group)"
+      "#{name} (Administrator)"
     end
   end
 
@@ -290,7 +410,6 @@ class Space < ActiveRecord::Base
 
   def project_for_user(user)
     member = space_memberships.find_by(user_id: user.id)
-
     member ||= SpaceMembership.new_by_admin(user) if user.review_space_admin? || user.challenge_bot?
 
     project_dxid(member)
@@ -380,21 +499,31 @@ class Space < ActiveRecord::Base
       !(restrict_to_template? && confidential?)
   end
 
+  # def updatable_by?(user)
+  #   active? && (user.review_space_admin? && reviewer? ||
+  #     space_memberships.active.lead_or_admin.exists?(user: user))
+  # end
+
   # Checks if user is able to update a space via Edit page.
   # @return [Boolean] Returns true if user is able to update a space, false otherwise.
   def updatable_by?(user)
-    active? && (user.review_space_admin? && reviewer? ||
-      space_memberships.active.lead_or_admin.exists?(user: user))
+    active? &&
+      updatable_by_rsa?(user) || space_memberships.active.lead_or_admin.exists?(user: user)
+  end
+
+  # Checks if user is RSA and able to update a space via Edit page.
+  # @return [Boolean] Returns true if user is RSA in review space and:
+  #   does not member of a space (to be able to add himself) or
+  #   is member of a space already, with 'lead' or 'admin' role.
+  def updatable_by_rsa?(user)
+    user.review_space_admin? && reviewer? &&
+      (!space_memberships.active.exists?(user: user) ||
+        space_memberships.active.lead_or_admin.exists?(user: user))
   end
 
   # Scopes of files that can be used to run an app.
   def accessible_scopes
     [uid, shared_space.try(:uid)].compact
-  end
-
-  # Scopes of content that can be moved to an space.
-  def accessible_scopes_for_move
-    [SCOPE_PRIVATE].freeze
   end
 
   # Determine, whether a space is accessible by a user.
@@ -417,65 +546,5 @@ class Space < ActiveRecord::Base
     user_membership = space_memberships.active.find_by(user: user)
 
     user_membership.present? && (unactivated? || active? || locked? && user_membership.host?)
-  end
-
-  # Used in discuss only
-  def search_content(content_type, query)
-    case content_type
-    when "Note"
-      notes.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |note| [note.id, note.title] }
-    when "File"
-      files.where("LOWER(name) LIKE LOWER(?)", "%#{query}%").where(parent_type: "User")
-        .map { |file| [file.id, file.name] }
-    when "Asset"
-      assets.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |asset| [asset.id, asset.name] }
-    when "Comparison"
-      comparisons.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |comparison| [comparison.id, comparison.name] }
-    when "App"
-      apps.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |app| [app.id, app.title] }
-    when "Workflow"
-      workflows.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |workflow| [workflow.id, workflow.title] }
-    when "Job"
-      jobs.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |job| [job.id, job.name] }
-    else
-      []
-    end.map { |i, j| { id: i, name: j } }
-  end
-
-  def can_verify_space(context)
-    (space_memberships.host.lead[0].user.dxuser == context.user.dxuser) && active?
-  end
-
-  def content_counters(user_id)
-    tasks = self.tasks.where("user_id = :user_id or assignee_id = :user_id", user_id: user_id)
-    open_tasks = tasks.open.count
-    accepted_tasks = tasks.accepted_and_failed_deadline.count
-    declined_tasks = tasks.declined.count
-    completed_tasks = tasks.completed.count
-    tasks = open_tasks + accepted_tasks + declined_tasks + completed_tasks
-
-    feed = space_events.count
-
-    {
-      feed: feed,
-      tasks: tasks,
-      notes: notes.count,
-      files: files.count,
-      apps: apps.count,
-      jobs: jobs.count,
-      comparisons: comparisons.count,
-      assets: assets.count,
-      workflows: workflows.count,
-      open_tasks: open_tasks,
-      accepted_tasks: accepted_tasks,
-      declined_tasks: declined_tasks,
-      completed_tasks: completed_tasks,
-    }
   end
 end

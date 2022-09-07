@@ -17,10 +17,16 @@ class CopyService
       return copies if nodes.empty?
 
       @parent_folder_col = Node.scope_column_name(scope)
+      @opposite_parent_folder_col = Node.opposite_scope_column_name(scope)
 
       parent_folder = nil
 
-      nodes.each { |node| copies.concat(copy_node(node, scope, parent_folder)) }
+      Node.transaction do
+        nodes.each do |node|
+          copied_node = copy_node(node, scope, parent_folder)
+          copies.concat(copied_node)
+        end
+      end
 
       copies
     end
@@ -34,6 +40,7 @@ class CopyService
     # @param scope [String] A destination scope.
     # @return [CopyService::Copies] An object that contains copied files and/or folders.
     def copy_node(node, scope, parent_folder = nil)
+      Rails.logger.info("NodeCopier::copy_node #{node.id}, scope #{scope}")
       if node.is_a?(Folder)
         copy_folder(node, scope, parent_folder)
       else
@@ -46,19 +53,32 @@ class CopyService
     # @param scope [String] A destination scope.
     # @param parent_folder [Folder, nil] A parent folder of a folder.
     # @return [CopyService::Copies] An object that contains copied files and folders.
-    # rubocop:disable Metrics/MethodLength
+    # rubocop:todo Metrics/MethodLength
     def copy_folder(folder, scope, parent_folder = nil)
+      Rails.logger.info("NodeCopier::copy_folder id {folder.id} name #{folder.name} to scope #{scope}")
       copies = Copies.new
 
-      existed_folder = Folder.find_by(
-        scope: scope,
-        name: folder.name,
-        @parent_folder_col => parent_folder&.id,
-      )
+      existing_folder = if scope == Scopes::SCOPE_PRIVATE
+        Folder.find_by(
+          scope: scope,
+          name: folder.name,
+          user: @user,
+          @parent_folder_col => parent_folder&.id,
+        )
+      else
+        Folder.find_by(
+          scope: scope,
+          name: folder.name,
+          @parent_folder_col => parent_folder&.id,
+        )
+      end
 
-      if existed_folder
+      if existing_folder
+        Rails.logger.info("NodeCopier::copy_folder found existing folder id #{existing_folder.id} " \
+                          "name #{existing_folder.name}")
+
         copies.push(
-          object: existed_folder,
+          object: existing_folder,
           source: folder,
           copied: false,
         )
@@ -68,10 +88,14 @@ class CopyService
 
       copied_folder = folder.dup.tap do |new_folder|
         new_folder.scope = scope
+        new_folder.entity_type = Folder::TYPE_REGULAR
         new_folder.user = user
         new_folder[@parent_folder_col] = parent_folder&.id
+        new_folder[@opposite_parent_folder_col] = nil
         new_folder.save!
       end
+
+      Rails.logger.info("NodeCopier::copy_folder copied folder id #{copied_folder.id} name #{copied_folder.name}")
 
       copies.push(
         object: copied_folder,
@@ -97,10 +121,9 @@ class CopyService
     # @param parent_folder [Folder, nil] A parent folder of a file.
     # @return [CopyService::Copies] An object that contains copied and source files.
     def copy_file(file, scope, parent_folder = nil)
-      copies = file_copier.copy(file, scope)
-      file_copy = copies[0]
-      file_copy.object.update!(@parent_folder_col => parent_folder&.id) if file_copy&.copied
-      copies
+      Rails.logger.info("NodeCopier::copy_file id #{file.id} name #{file.name} to scope #{scope}")
+
+      file_copier.copy(file, scope, parent_folder&.id)
     end
   end
 end

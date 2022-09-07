@@ -1,4 +1,3 @@
-
 # == Schema Information
 #
 # Table name: licenses
@@ -18,6 +17,7 @@ class License < ApplicationRecord
   include Permissions
   include CommonPermissions
   include Licenses
+  include ObjectLocation
 
   belongs_to :user
   has_many :licensed_items, dependent: :destroy
@@ -26,6 +26,7 @@ class License < ApplicationRecord
   has_many :files, through: :licensed_items, source: :licenseable, source_type: "UserFile"
   has_many :assets, through: :licensed_items, source: :licenseable, source_type: "Asset"
   has_many :licensed_users, through: :accepted_licenses, source: :user
+  has_many :dbclusters, through: :licensed_items, source: :licenseable, source_type: "DbCluster"
 
   acts_as_taggable
 
@@ -45,19 +46,19 @@ class License < ApplicationRecord
     end
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
+  def publishable_by?(*)
     false
   end
 
   def rename(new_name, context)
-    update_attributes(title: new_name)
+    update(title: new_name)
   end
 
   def describe_fields
-    ["title", "content", "approval_required"]
+    %w(title content approval_required)
   end
 
   def accepted_licenses_pending
-    accepted_licenses.where(state: 'pending')
+    accepted_licenses.where(state: "pending")
   end
 end

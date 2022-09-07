@@ -13,6 +13,7 @@ class WorkflowSerializer < ApplicationSerializer
     :app_title,
     :location,
     :revision,
+    :readme,
     :workflow_series_id,
     :version,
     :scope,
@@ -24,16 +25,21 @@ class WorkflowSerializer < ApplicationSerializer
   )
 
   attribute :all_tags_list, key: :tags
+  attribute :job_count, key: :job_count
 
   # Returns manually assigned jobs - do not confuse with object.jobs.
   attr_accessor :jobs
   attr_reader :launched_on
   attr_writer :title
 
-  delegate :uid, to: :object
+  delegate :uid, :location, :name, to: :object
 
   def title
     @title || object.title
+  end
+
+  def job_count
+    object.analyses.distinct.count
   end
 
   # Returns a tags list for a Workflow

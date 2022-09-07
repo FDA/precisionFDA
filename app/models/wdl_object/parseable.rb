@@ -66,7 +66,7 @@ class WDLObject
       # parse top level inputs definition
       raw.each_line.each_with_index do |line, index|
         # break if line's matched any top level section definition
-        break if line =~ /^.+?\s*\{\s*$/ && index != 0
+        break if line =~ /^.+?\s*\{\s*$/ && index != 0 && line.exclude?("input")
 
         input = line[/^\s*([A-Z][\w_\?]+\s+[a-zA-Z][a-zA-Z0-9_]+)\s*$/, 1]
 

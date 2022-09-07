@@ -10,5 +10,9 @@ class Message
     def bad_request(error = "")
       ["Bad request", error].compact.join(" ")
     end
+
+    def can_not_serialize
+      "Record can not be serialized"
+    end
   end
 end

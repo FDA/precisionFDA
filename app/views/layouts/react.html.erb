@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <%= render "_partials/head_react" %>
+</head>
+  <!-- revision: <%= @context.token %> /-->
+  <!-- revision: <%= git_revision %> /-->
+  <body>
+  <main role="main">
+    <noscript>This website requires JavaScript</noscript>
+    <!-- TODO(samuel) temporary workaround for server-side errors, should be migrated to toastify -->
+    <%= render partial: "_partials/messages", flash: flash %>
+    <%= content_for?(:content) ? yield(:content) : yield %>
+  </main>
+</body>
+</html>

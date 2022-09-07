@@ -20,14 +20,17 @@
 #  uid             :string(255)
 #  local_folder_id :integer
 #  featured        :boolean          default(FALSE)
+#  entity_type     :integer          default("regular"), not null
 #
 
 class Job < ApplicationRecord
   include Auditor
   include Permissions
   include CommonPermissions
-  include InternalUid
   include Featured
+  include InternalUid
+  include JobsSyncing
+  include ObjectLocation
   include Scopes
   include TagsContainer
 
@@ -47,15 +50,22 @@ class Job < ApplicationRecord
     "hidisk-8" => "mem1_ssd2_x8_fedramp",
     "hidisk-16" => "mem1_ssd2_x16_fedramp",
     "hidisk-36" => "mem1_ssd2_x36_fedramp",
+    "gpu-8" => "mem3_ssd1_gpu_x8_fedramp",
   }.freeze
 
   STATE_DONE = "done".freeze
   STATE_FAILED = "failed".freeze
   STATE_IDLE = "idle".freeze
+  STATE_RUNNING = "running".freeze
   STATE_TERMINATED = "terminated".freeze
   STATE_TERMINATING = "terminating".freeze
 
   TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED].freeze
+
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
+
+  DEFAULT_HTTPS_PORT = 443
 
   belongs_to :app
   belongs_to :user
@@ -78,9 +88,14 @@ class Job < ApplicationRecord
   acts_as_votable
 
   scope :done, -> { where(state: STATE_DONE) }
-  scope :terminal, -> { where(state: [TERMINAL_STATES]) }
+  scope :terminal, -> { where(state: TERMINAL_STATES) }
 
-  delegate :input_spec, :output_spec, to: :app
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
+
+  delegate :input_spec, :output_spec, to: :app, allow_nil: true
 
   attr_accessor :current_user
 
@@ -112,8 +127,18 @@ class Job < ApplicationRecord
     state == STATE_DONE
   end
 
+  def running?
+    state == STATE_RUNNING
+  end
+
   def failed?
     state == STATE_FAILED
+  end
+
+  def failure_reason
+    return "" if !failed? || !describe.key?("failureReason")
+
+    describe["failureReason"]
   end
 
   def failure_message
@@ -131,11 +156,18 @@ class Job < ApplicationRecord
   def energy
     return nil unless describe.key?("totalPrice")
 
-    ((describe["totalPrice"] * 400 + 5).to_i / 5.0).to_i * 5
+    (describe["totalPrice"] * 100).to_i / 100.0
   end
 
   def energy_string
-    (energy || "TBD").to_s
+    ("$#{energy}" || "TBD").to_s
+  end
+
+  def https_job_external_url
+    return unless https?
+
+    https_port = describe.dig(:runInput, :port) || DEFAULT_HTTPS_PORT
+    describe.dig(:httpsApp, :dns, :url).chomp("/") + ":#{https_port}"
   end
 
   def update_provenance!

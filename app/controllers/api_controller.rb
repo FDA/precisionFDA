@@ -1,13 +1,15 @@
+# rubocop:todo Style/SignalException
 class ApiController < ApplicationController
   include ErrorProcessable
   include WorkflowConcern
   include FilesConcern
   include UidFindable
   include ApiExceptionHandler
+  include CloudResourcesConcern
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
-  # rubocop:disable Rails/LexicallyScopedActionFilter
+  # rubocop:todo Rails/LexicallyScopedActionFilter
   before_action :require_api_login,
                 except: %i(
                   destroy
@@ -36,64 +38,21 @@ class ApiController < ApplicationController
                   search_assets
                 )
   before_action :validate_create_asset, only: :create_asset
+  before_action :check_total_and_job_charges_limit, only: %i(run_workflow)
+  before_action :check_total_charges_limit, only: %i(create_file create_asset)
   before_action :validate_create_file, only: :create_file
   before_action :validate_get_upload_url, only: :get_upload_url
 
   rescue_from ApiError, with: :render_error_method
 
-  # rubocop:disable Style/SignalException
+  attr_accessor :show_count
+  attr_writer :context
 
   # A common method to add Objects count into api response
   # @param count [Integer] Object's count
   # @return Object { count: Object's count }
   def count(count)
     { count: count }
-  end
-
-  # Collects an Array of children for object in params.
-  # @param uid [Object Id].
-  # @param scope [String] A scope to be published into.
-  # @return [Hash with Array value] An Array of relative children for a given Object.
-  def related_to_publish
-    id = unsafe_params[:uid]
-    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
-
-    item = item_from_uid(id)
-    raise "You do not have permission to access #{id}" unless item.accessible_by?(@context)
-
-    publishing_service = SpaceService::Publishing.new(@context)
-    check_result = publishing_service.scope_check(unsafe_params[:scope])
-    scope = check_result[:scope]
-
-    relatives_graph = GraphDecorator.for_publisher(@context, item, scope).to_json
-    children = children_to_publish(relatives_graph)
-
-    render json: children
-  end
-
-  # Collects an array of children from a relatives graph.
-  # Filtering by private objects only to be included into children array.
-  # Prepare values for 'path' and 'fa_class' attributes.
-  # @param relatives_graph [Array of Objects] From GraphDecorator.
-  # @return children [Array of Objects] With the following example content:
-  #  {
-  #    \"uid\"=>\"app-0b9811c31ff0812273068d54-1\",
-  #    \"klass\"=>\"app\", \"title\"=>\"default_title\", \"owned\"=>false,
-  #    \"public\"=>true, \"in_space\"=>false, \"publishable\"=>false,
-  #    \"children\"=>[]
-  #  }
-  def children_to_publish(relatives_graph)
-    all_children = JSON.parse(relatives_graph)[0]["children"]
-    children = []
-    all_children.uniq.each do |child|
-      next if child["in_space"] || child["public"]
-
-      object = item_from_uid(child["uid"])
-      child["path"] = object.accessible_by?(@context) ? pathify(object) : nil
-      child["fa_class"] = view_context.fa_class(object)
-      children << child
-    end
-    children
   end
 
   # Inputs
@@ -296,7 +255,6 @@ class ApiController < ApplicationController
   #     Files inside folders are also sorted.
   #  uids: array of all found file's uid values
   #
-  # rubocop:disable Style/SignalException
   def files_regex_search
     page = params[:page].to_i.positive? ? params[:page] : 1
     files = user_real_files(params, @context).files_conditions
@@ -323,7 +281,6 @@ class ApiController < ApplicationController
     rescue RegexpError => e
       fail "RegEx Invalid: #{e}"
     end
-    # rubocop:enable Style/SignalException
   end
 
   # Inputs:
@@ -334,6 +291,8 @@ class ApiController < ApplicationController
   #   leave blank for all
   # editable (Boolean, optional): if filtering for only editable_by the context user,
   #   otherwise accessible_by
+  # search_string (string, optional): if specified, file names are matched to this string
+  #   (wildcard on both ends)
   # describe (object, optional)
   #     fields (array, optional):
   #         Array containing field name [field_1, field_2, ...]
@@ -356,17 +315,19 @@ class ApiController < ApplicationController
     User.sync_files!(@context)
     files = user_real_files(params, @context)
 
-    count = files.count if unsafe_params[:offset] == 0
-
     if unsafe_params[:limit] && unsafe_params[:offset]
       files = files.limit(unsafe_params[:limit]).offset(unsafe_params[:offset])
     end
 
-    result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
-      describe_for_api(file, unsafe_params[:describe])
-    end
+    search_string = params[:search_string].presence || ""
 
-    render json: unsafe_params[:offset] == 0 ? { objects: result, count: count } : result
+    result = files.eager_load(:license, user: :org).
+      where("nodes.name LIKE ?", "%#{search_string}%").
+      order(id: :desc).map do |file|
+      describe_for_api(file, unsafe_params[:describe])
+    end.compact
+
+    render json: unsafe_params[:offset]&.zero? ? { objects: result, count: result.length } : result
   end
 
   # Inputs
@@ -773,6 +734,7 @@ class ApiController < ApplicationController
   #
   # name (string, required, nonempty)
   # description (string, optional)
+  # scope (string, optional) 'public' | 'private' | <SPACE_ID>
   #
   # Outputs:
   #
@@ -802,9 +764,8 @@ class ApiController < ApplicationController
   # Creates a challenge logo - to be visible as a challenge card image
   # @return [Hash] - a uid of a file uploaded as a card image
   #
-  # rubocop:disable Style/SignalException
   def create_challenge_card_image
-    return unless @context.can_administer_site? || @context.challenge_admin?
+    return unless current_user.site_or_challenge_admin?
 
     name = unsafe_params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
@@ -829,7 +790,6 @@ class ApiController < ApplicationController
       scope: "public",
     )
 
-    # rubocop:enable Style/SignalException
     render json: { id: file.uid }
   end
 
@@ -843,7 +803,7 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_challenge_resource
-    return unless @context.challenge_admin?
+    return unless current_user.site_or_challenge_admin?
 
     challenge = Challenge.find_by!(id: unsafe_params[:challenge_id])
     unless challenge.editable_by?(@context)
@@ -914,7 +874,7 @@ class ApiController < ApplicationController
 
     url = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).generate_permanent_link(file)
 
-    resource.update_attributes(url: url)
+    resource.update(url: url)
 
     render json: { id: file.uid, url: url }
   end
@@ -929,12 +889,10 @@ class ApiController < ApplicationController
     if file.state != "closed"
       if file.parent_type == "Asset"
         User.sync_asset!(@context, file.id)
+      elsif file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
+        User.sync_challenge_file!(file.id)
       else
-        if file.created_by_challenge_bot? && (@context.can_administer_site? || @context.challenge_admin?)
-          User.sync_challenge_file!(file.id)
-        else
-          User.sync_file!(@context, file.id)
-        end
+        User.sync_file!(@context, file.id)
       end
       file.reload
     end
@@ -952,7 +910,7 @@ class ApiController < ApplicationController
       # So we may have to store a reference to the file and generate
       # a shorter duration url each time it is rendered
 
-      token = if file.created_by_challenge_bot? && (@context.can_administer_site? || @context.challenge_admin?)
+      token = if file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
         CHALLENGE_BOT_TOKEN
       else
         @context.token
@@ -1019,11 +977,10 @@ class ApiController < ApplicationController
     file = UserFile.where(parent_type: "User").find_by_uid!(id)
     token = @context.token
     if file.user_id != @context.user_id
-      if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
-        token = CHALLENGE_BOT_TOKEN
-      else
-        fail "The current user does not have access to the file."
-      end
+      have_access = file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
+      raise "The current user does not have access to the file." unless have_access
+
+      token = CHALLENGE_BOT_TOKEN
     end
 
     if file.state == "open"
@@ -1149,7 +1106,7 @@ class ApiController < ApplicationController
   #
   # note_uids (Array[String], required): array of note, discussion, answer uids
   # item (Array[Object], required): array of items with id, type
-  #     item.type (String): type of string from App, Comparison, Job, or UserFile
+  #     item.type (String): type of string from App, Comparison, Job, UserFile or Asset
   #
   # Outputs:
   #
@@ -1157,14 +1114,23 @@ class ApiController < ApplicationController
   # items_added (Array[Integer])
   #
   def attach_to_notes
+    items = unsafe_params[:items]
     note_uids = unsafe_params[:note_uids]
-    unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
+
+    unless note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
       fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids"
     end
 
-    items = unsafe_params[:items]
-    unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
-      fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
+    valid_items =
+      items.all? do |item|
+        item[:id].is_a?(Numeric) &&
+          item[:type].is_a?(String) &&
+          %w(App Asset Comparison Job UserFile).include?(item[:type])
+      end
+
+    unless valid_items
+      fail "Items need to be an array of objects with id and type " \
+           "(one of App, Comparison, Job, UserFile or Asset)"
     end
 
     notes_added = {}
@@ -1174,7 +1140,7 @@ class ApiController < ApplicationController
       note_uids.each do |note_uid|
         note_item = item_from_uid(note_uid)
 
-        next unless !note_item.nil? && note_item.editable_by?(@context)
+        next unless note_item&.editable_by?(@context)
 
         items.each do |item|
           item[:type] = if item[:type].blank?
@@ -1246,7 +1212,6 @@ class ApiController < ApplicationController
   # Outputs:
   # id: the submission id
   #
-  # rubocop:disable Style/SignalException
   def update_submission
     id = unsafe_params[:id].to_i
     fail "id needs to be an Integer" unless id.is_a?(Integer)
@@ -1269,7 +1234,6 @@ class ApiController < ApplicationController
       id: submission.id,
     }
   end
-  # rubocop:enable Style/SignalException
 
   # Inputs
   #
@@ -1465,15 +1429,7 @@ class ApiController < ApplicationController
   def invert_feature
     raise ApiError, "Only Site Admin can perform this action" unless @context.can_administer_site?
 
-    featured = !params[:featured].nil?
-    items = pick_values(params[:item_ids]).map do |uid|
-      item = item_from_uid(uid)
-      next unless item.scope == Scopes::SCOPE_PUBLIC && item.featured ^ featured
-
-      item.update(featured: featured)
-      item.current_user = @context.user
-      item
-    end.compact
+    items = update_feature_flag
 
     messages =
       if items.count.positive?
@@ -1491,11 +1447,27 @@ class ApiController < ApplicationController
     render json: items, root: "items", adapter: :json, meta: messages
   end
 
+  # Iterate over params[:item_ids], try to find items by uid and feature/un-feature PUBLIC
+  # @param item_ids [Array] array of [String] uid-s.
+  # @param featured [Boolean] new 'feature' value, false if empty.
+  # @return items [Array] list of items with inverted 'feature' flag
+  def update_feature_flag
+    featured = !params[:featured].nil?
+    Array(params[:item_ids]).map do |uid|
+      item = item_from_uid(uid)
+      next unless item.scope == Scopes::SCOPE_PUBLIC && item.featured ^ featured
+
+      item.update(featured: featured)
+      item.current_user = @context.user
+      item
+    end.compact
+  end
+
   # Soft-deletion for Items.
   # @param item_ids [Array] array of [String] uid-s.
   # @return items [Array] list of deleted items (active: false)
   def soft_delete
-    items = pick_values(params[:item_ids]).map do |uid|
+    items = Array(params[:item_ids]).map do |uid|
       item = item_from_uid(uid)
       if item.editable_by?(@context)
         item.update(deleted: true)
@@ -1571,21 +1543,10 @@ class ApiController < ApplicationController
       fail "Asset path should be a non-empty String of size less than 4096"
     end
   end
-  # rubocop:enable Style/SignalException
 
   # Validates and initializes parameters for a file creation.
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:todo Metrics/MethodLength
   def validate_create_file
-    file_name = params[:name].presence
-    if file_name.blank? || !file_name.is_a?(String)
-      raise_api_error "File name needs to be a non-empty String"
-    end
-
-    description = params[:description].presence
-    if description && !description.is_a?(String)
-      raise_api_error "File description needs to be a String"
-    end
-
     folder_id = params[:folder_id].presence
     @folder =
       begin
@@ -1596,6 +1557,18 @@ class ApiController < ApplicationController
 
     if @folder && !@folder.editable_by?(@context)
       raise_api_error "You don't have permissions to add files to the folder."
+    end
+
+    raise_api_error "You're not allowed to create a file in an HTTPS folder." if @folder&.https?
+
+    file_name = params[:name].presence
+    if file_name.blank? || !file_name.is_a?(String)
+      raise_api_error "File name needs to be a non-empty String"
+    end
+
+    description = params[:description].presence
+    if description && !description.is_a?(String)
+      raise_api_error "File description needs to be a String"
     end
 
     @scope = if ActiveModel::Type::Boolean.new.cast(params[:public_scope])
@@ -1617,18 +1590,10 @@ class ApiController < ApplicationController
 
     raise_api_error "The folder doesn't belong to a scope #{@scope}."
   end
+  # rubocop:enable Metrics/MethodLength
 
-  private
-
-  # Convert input value to array.
-  # @param order
-  # @return [Array] with order inside.
-  def pick_values(order)
-    case order
-    when Array then order
-    when String then [order]
-    else []
-    end
+  def https_apps_client
+    DIContainer.resolve("https_apps_client")
   end
-  # rubocop:enable all
+  # rubocop:enable Style/SignalException
 end

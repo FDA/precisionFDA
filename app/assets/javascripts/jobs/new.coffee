@@ -1,9 +1,11 @@
 class JobsNewView
-  constructor: (app, @asset_licenses_to_accept, selectable_spaces, available_content_scopes) ->
+  constructor: (app, @asset_licenses_to_accept, selectable_spaces, available_content_scopes, job_limit, instance_types) ->
     @uid = app.uid
     @available_content_scopes = available_content_scopes
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
+    @maxJobLimit = job_limit
+    @jobLimit = ko.observable(job_limit)
 
     @licenseSelector = new Precision.models.LicensesSelectorModel({
       onAcceptCallback: @run
@@ -41,19 +43,23 @@ class JobsNewView
       )
     )
 
+    @availableInstances = instance_types
+
+    @selectableSpaces = selectable_spaces
+    @defaultInstanceType = app.spec.instance_type if app.spec.instance_type in instance_types.map (instance_type) -> instance_type.value
+    @instanceType = ko.observable(app.spec.instance_type)
+
     @isRunnable = ko.computed(() =>
-      isConfigReady = !_.isEmpty(@name())
+      isConfigReady = !_.isEmpty(@name()) && !_.isEmpty(@instanceType()) && @jobLimit() != ''
+      # parsedJobLimit = parseInt(@jobLimit(), 10)
+      # isJobLimitInRange = parsedJobLimit >= 0 && parsedJobLimit <= @maxJobLimit
       areInputsReady = _.every(@inputModels(), (inputModel) ->
         inputModel.isReady()
       )
 
       return !@busy() && isConfigReady && areInputsReady
+      #&& isJobLimitInRange
     )
-
-    @availableInstances = Precision.INSTANCES
-    @selectableSpaces = selectable_spaces
-    @defaultInstanceType = app.spec.instance_type
-    @instanceType = ko.observable(app.spec.instance_type)
 
   validateLicenses: () ->
     # Reset licenses and recompute which ones to accept
@@ -76,6 +82,7 @@ class JobsNewView
       params = {
         id: @uid,
         name: @name.peek(),
+        job_limit: @jobLimit(),
         inputs: {}
       }
 
@@ -91,7 +98,7 @@ class JobsNewView
       Precision.api('/apps/run', params)
         .done((rs) =>
           if !rs.error?
-            window.location = if @spaceId() then "/spaces/#{@spaceId()}/jobs" else "/home/apps/#{@uid}/jobs"
+            window.location = if @spaceId() then "/spaces/#{@spaceId()}/executions/#{rs.id}" else "/home/jobs/#{rs.id}"
           else
             @busy(false)
             @running(false)
@@ -119,7 +126,9 @@ JobsController = Paloma.controller('Jobs', {
       @params.app,
       @params.licenses_to_accept,
       @params.selectable_spaces,
-      @params.content_scopes
+      @params.content_scopes,
+      @params.job_limit,
+      @params.instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type),
     )
     ko.applyBindings(viewModel, $container[0])
 

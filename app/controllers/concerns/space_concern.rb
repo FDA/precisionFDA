@@ -5,7 +5,7 @@ module SpaceConcern
   def find_space
     @space = Space.find(params[:space_id])
 
-    head(:forbidden) unless @space.accessible_by?(@context)
+    head(:forbidden) unless @context.user.review_space_admin? || @space.accessible_by?(@context)
   end
 
   # Finds a space by id, accessible by current user.
@@ -16,13 +16,13 @@ module SpaceConcern
     @space = Space.undeleted.find(params[:space_id])
     raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 
-    return nil unless @space.accessible_by_user?(current_user)
+    return unless @space.accessible_by_user?(current_user)
 
     @space
   end
 
   # Checks if user is able to modify content of a space.
   def can_edit?
-    head(:forbidden) unless @space.editable_by?(current_user)
+    head(:forbidden) unless current_user.review_space_admin? || @space.editable_by?(current_user)
   end
 end

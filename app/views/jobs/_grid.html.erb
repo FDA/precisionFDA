@@ -47,7 +47,7 @@
     humanize_seconds(job.runtime)
   end
 
-  g.column name: 'Energy Consumption' do |job|
+  g.column name: 'Cost in dollars' do |job|
     content_tag(:span, " ", class: "fa fa-industry fa-fw") + " " + job.energy_string
   end
 

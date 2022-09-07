@@ -18,24 +18,19 @@ module Api
     ORDER_FIELDS = { # we use this order-fields Hash for simple filtering (JobService::JobFilter)
       "created_at" => %w(created_at),
       "name" => %w(name),
-      "apptitle" => %w(apps.title),
+      "app_title" => %w(apps.title),
       "username" => %w(users.first_name users.last_name),
-    }.freeze
-
-    ORDER_GROUP_FIELDS = { # we use this order-fields Hash for advanced filtering with grouping
-      "analyses.batch_id" => Sortable::DIRECTION_DESC,
-      "workflows.id" => Sortable::DIRECTION_DESC,
+      "workflow" => %w(workflows.title),
     }.freeze
 
     SORT_FIELDS = { # additional sorting for grouped and serialized values (see render_jobs_list)
       "created_at" => ->(left, right) { left.created_at_date_time <=> right.created_at_date_time },
       "launched_on" => ->(left, right) { left.launched_on <=> right.launched_on },
       "name" => ->(left, right) { left.name <=> right.name },
-      "apptitle" => ->(left, right) { left.app_title <=> right.app_title },
+      "app_title" => ->(left, right) { left.app_title <=> right.app_title },
       "username" => ->(left, right) { left.launched_by <=> right.launched_by },
+      "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
     }.freeze
-
-    PAGE_SIZE = Paginationable::PAGE_SIZE
 
     # GET /api/jobs or GET /api/jobs?space_id=params[:space_id]
     # api_jobs_path
@@ -54,18 +49,22 @@ module Api
             eager_load(:app, user: :org, analysis: :workflow).
             includes(:taggings).
             search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).page(page_from_params).per(PAGE_SIZE)
+            order(order_from_params).page(page_from_params).per(page_size)
           jobs.each { |job| job.current_user = @context.user }
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
-
           sync_jobs(jobs)
         end
 
         page_dict = pagination_dict(jobs)
 
-        render json: jobs, root: "jobs", meta: count(page_dict[:total_count]).
-          merge({ pagination: page_dict }), adapter: :json
+        if show_count
+          render plain: page_dict[:total_count]
+        else
+          render json: jobs, root: Job.model_name.plural,
+                 meta: { count: page_dict[:total_count], pagination: page_dict },
+                 adapter: :json
+        end
       else
         # Fetches all user 'private' jobs.
         jobs = Job.
@@ -73,14 +72,189 @@ module Api
           accessible_by_private.
           eager_load(:app, user: :org, analysis: :workflow).
           includes(:taggings).
-          search_by_tags(params.dig(:filters, :tags)).
-          order(ORDER_GROUP_FIELDS)
+          search_by_tags(params.dig(:filters, :tags))
+
         jobs = JobService::JobsFilter.call(jobs, params[:filters])
+        sync_jobs(jobs)
 
         render_jobs_list(jobs)
       end
     end
     # rubocop:enable Metrics/MethodLength
+
+    # GET /api/jobs/featured
+    # A fetch method for jobs, accessible by public and with admin taggings.
+    # @param created_at [String] Param for ordering.
+    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
+    def featured
+      jobs = Job.featured.
+        accessible_by_public.
+        eager_load(:app, user: :org, analysis: :workflow).
+        includes(:taggings).
+        search_by_tags(params.dig(:filters, :tags))
+
+      jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      sync_jobs(jobs)
+
+      render_jobs_list(jobs)
+    end
+
+    # GET /api/jobs/everybody
+    # A fetch method for jobs, accessible by public.
+    # Fetches all user 'public' jobs.
+    # @param created_at [String] Param for ordering.
+    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
+    def everybody
+      jobs = Job.
+        accessible_by_public.
+        eager_load(:app, user: :org, analysis: :workflow).
+        includes(:taggings).
+        search_by_tags(params.dig(:filters, :tags))
+
+      jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      sync_jobs(jobs)
+
+      render_jobs_list(jobs)
+    end
+
+    # GET /api/workflows/:id/jobs
+    # A fetch method for jobs from apps.
+    # @param uid [Integer] Param for Workflows fetch.
+    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
+    def workflow
+      workflow = Workflow.find_by(uid: unsafe_params[:id])
+      analyses = workflow.analyses.
+        eager_load(:jobs, :workflow, :batch_items)
+
+      presenter = Presenters::WorkflowExecutionsPresenter.
+        new(analyses, @context, unsafe_params).call
+      payload = { jobs: presenter.response, meta: pagination_meta(presenter.size) }
+
+      render json: payload, adapter: :json
+    rescue StandardError => e
+      raise ApiError, Message.bad_request(e.message)
+    end
+
+    # GET /api/apps/:id/jobs
+    # A fetch method for jobs from apps.
+    # @param uid [Integer] Param for App fetch.
+    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
+    def app
+      jobs = App.find_by(uid: unsafe_params[:id]).
+        app_series.jobs.accessible_by(@context).
+        eager_load(:app, user: :org, analysis: :workflow).
+        includes(:taggings).
+        search_by_tags(params.dig(:filters, :tags)).
+        order(order_from_params).page(page_from_params).per(page_size)
+
+      jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      jobs.each { |job| job.current_user = @context.user }
+
+      page_dict = pagination_dict(jobs)
+
+      render json: jobs, root: Job.model_name.plural,
+             meta: { count: page_dict[:total_count], pagination: page_dict },
+             adapter: :json
+    end
+
+    # GET /api/jobs/spaces
+    # A fetch method for jobs, accessible by user and of 'space' scope.
+    # @param created_at [String] Param for ordering.
+    # @return jobs [UserFile] Array of UserFile objects,
+    #   which scope is not 'private' or 'public', i.e.
+    #   jobs scope is one of 'space-...', if they exist OR jobs: [].
+    def spaces
+      jobs = Job.where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
+        accessible_by_user(@context.user).
+        eager_load(:app, user: :org, analysis: :workflow).
+        includes(:taggings).
+        search_by_tags(params.dig(:filters, :tags))
+
+      jobs = JobService::JobsFilter.call(jobs, params[:filters])
+      sync_jobs(jobs)
+
+      render_jobs_list(jobs)
+    rescue StandardError => e
+      raise ApiError, Message.bad_request(e.message)
+    end
+
+    # GET /api/jobs/:id  api_job_path
+    # A fetch method for job by file :id, accessible by user.
+    # @param id [Integer] Param for job fetch.
+    # @return job Job object with arrays of assosiated objects:
+    #   notes, answers, comments, discussions, comparisons.
+    # rubocop:disable Metrics/MethodLength
+    def show
+      find_job
+      sync_job!
+      load_relations(@job)
+      comments_data(@job)
+      @job.current_user = current_user
+
+      @item_comments_path = pathify_comments(@job)
+
+      render json:
+               @job, adapter: :json,
+             meta: {
+               notes: @notes,
+               answers: @answers,
+               discussions: @discussions,
+               comments: @comments,
+               links: meta_links(@job),
+             }
+    end
+
+    # POST /api/jobs/terminate terminate_api_jobs_path
+    # Provide a call to DNAnexusAPI - to terminate an accessible job.
+    # @param id [Integer] Param for job fetch.
+    def terminate
+      service = Jobs::TerminateService.call(unsafe_params.dig(:job, :id), @context)
+      raise ApiError, service.message unless service.success?
+
+      render json: { message: { type: service.status, text: service.message } }
+    end
+
+    # POST /api/jobs/copy
+    # Copies selected jobs to another scope (space, public, private).
+    def copy
+      copies = CopyService::Copies.new
+      Job.accessible_by(@context).where(uid: params[:item_ids]).each do |job|
+        copies.push(object: job_copier.copy(job, params[:scope]), source: nil)
+      end
+
+      render json: copies.all, root: Job.model_name.plural, adapter: :json,
+             meta: { messages: build_copy_messages(copies) }
+    end
+
+    # Open HTTPS external job url.
+    def open_external
+      job = Job.accessible_by(@context).find_by(uid: params[:id])
+
+      raise ApiError, "You have no permissions to access this job" unless job
+
+      redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
+      redirect_to(job.https_job_external_url) && return if Utils.development_or_test?
+
+      api = DIContainer.resolve("api.auth_user")
+      code = api.get_https_job_auth_token(job)
+      authorized_job_uri = URI.join(
+        job.https_job_external_url,
+        "oauth2/access",
+        "?#{URI.encode_www_form(code: code)}",
+      )
+
+      redirect_to authorized_job_uri.to_s
+    end
+
+    # Trigger files sync from a running workstation
+    def sync_files
+      service = Jobs::SyncFilesService.call(params[:id], @context)
+      raise ApiError, service.message unless service.success?
+
+      render json: { message: { type: service.status, text: service.message } }
+    end
+
+    private
 
     # A common method for apps list json rendering.
     # Added a virtual attribute `current_user` - to use in serializer
@@ -89,6 +263,10 @@ module Api
     # or 2. just single job [Job]
     # rubocop:disable Metrics/MethodLength
     def render_jobs_list(jobs)
+      jobs_size = jobs.size
+
+      render :plain && (return jobs_size) if show_count
+
       workflow_with_jobs = []
       workflow_batch = {}
 
@@ -142,161 +320,13 @@ module Api
 
       page_array = paginate_array(sort_array_by_fields(workflow_with_jobs))
       page_meta = pagination_meta(workflow_with_jobs.count)
-      page_meta[:count] = page_meta.dig(:pagination, :total_count)
+
+      page_meta[:pagination][:total_count] = jobs_size
+      page_meta[:count] = jobs_size
 
       render json: { jobs: page_array, meta: page_meta }, adapter: :json
     end
     # rubocop:enable Metrics/MethodLength
-
-    # Create meta data for jobs json
-    # @param jobs [Array] Array of Job objects.
-    def jobs_meta(jobs)
-      { count: {} }.tap do |meta|
-        # jobs count
-        meta[:count] = jobs.count
-      end
-    end
-
-    # GET /api/jobs/featured
-    # A fetch method for jobs, accessible by public and with admin taggings.
-    # @param created_at [String] Param for ordering.
-    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
-    def featured
-      jobs = Job.featured.
-        accessible_by_public.
-        eager_load(:app, user: :org, analysis: :workflow).
-        includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(ORDER_GROUP_FIELDS)
-      jobs = JobService::JobsFilter.call(jobs, params[:filters])
-
-      render_jobs_list(jobs)
-    end
-
-    # GET /api/jobs/everybody
-    # A fetch method for jobs, accessible by public.
-    # Fetches all user 'public' jobs.
-    # @param created_at [String] Param for ordering.
-    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
-    def everybody
-      jobs = Job.
-        accessible_by_public.
-        eager_load(:app, user: :org, analysis: :workflow).
-        includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(ORDER_GROUP_FIELDS)
-      jobs = JobService::JobsFilter.call(jobs, params[:filters])
-
-      render_jobs_list(jobs)
-    end
-
-    # GET /api/apps/:id/jobs
-    # A fetch method for jobs from apps.
-    # @param uid [Integer] Param for App fetch.
-    # @return jobs [Job] Array of Job objects if they exist OR jobs: [].
-    def app
-      jobs = App.find_by(uid: unsafe_params[:id]).
-        app_series.jobs.editable_by(@context).
-        eager_load(:app, user: :org, analysis: :workflow).
-        includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-      jobs.each { |job| job.current_user = @context.user }
-
-      jobs = JobService::JobsFilter.call(jobs, params[:filters])
-
-      page_dict = pagination_dict(jobs)
-
-      render json: jobs, root: "jobs", meta: count(page_dict[:total_count]).
-        merge({ pagination: page_dict }), adapter: :json
-    end
-
-    # GET /api/jobs/spaces
-    # A fetch method for jobs, accessible by user and of 'space' scope.
-    # @param created_at [String] Param for ordering.
-    # @return jobs [UserFile] Array of UserFile objects,
-    #   which scope is not 'private' or 'public', i.e.
-    #   jobs scope is one of 'space-...', if they exist OR jobs: [].
-    def spaces
-      jobs = Job.where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
-        accessible_by_user(@context.user).
-        eager_load(:app, user: :org, analysis: :workflow).
-        includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params)
-
-      jobs = JobService::JobsFilter.call(jobs, params[:filters])
-
-      render_jobs_list(jobs)
-    rescue StandardError => e
-      raise ApiError, Message.bad_request(e.message)
-    end
-
-    # GET /api/jobs/:id  api_job_path
-    # A fetch method for job by file :id, accessible by user.
-    # @param id [Integer] Param for job fetch.
-    # @return job Job object with arrays of assosiated objects:
-    #   notes, answers, comments, discussions, comparisons.
-    # rubocop:disable Metrics/MethodLength
-    def show
-      find_job
-      sync_job!
-      load_relations(@job)
-      comments_data(@job)
-      @job.current_user = current_user
-
-      @item_comments_path = pathify_comments(@job)
-
-      render json:
-               @job, adapter: :json,
-             meta: {
-               notes: @notes,
-               answers: @answers,
-               discussions: @discussions,
-               comments: @comments,
-               links: meta_links(@job),
-             }
-    end
-
-    # POST /api/jobs/terminate terminate_api_jobs_path
-    # Provide a call to DNAnexusAPI - to terminate an accessible job.
-    # @param id [Integer] Param for job fetch.
-    def terminate
-      find_job
-      if @job.nil?
-        type = :error
-        text = "Sorry, this job does not exist or is not accessible by you"
-        path = api_jobs_path
-
-        render json: { path: path, message: { type: type, text: text } }, adapter: :json
-        return
-      end
-      if !@job.terminal?
-        DNAnexusAPI.new(@context.token).call(@job.dxid, "terminate")
-        type = :success
-        text = "Job was successfully terminated"
-      else
-        type = :warning
-        text = "Job is in terminal state and can not be terminated"
-      end
-      path = api_job_path(@job)
-
-      render json: { path: path, message: { type: type, text: text } }, adapter: :json
-    end
-
-    # POST /api/jobs/copy
-    # Copies selected jobs to another scope (space, public, private).
-    def copy
-      copies = CopyService::Copies.new
-      Job.accessible_by(@context).where(uid: params[:item_ids]).each do |job|
-        copies.push(object: job_copier.copy(job, params[:scope]), source: nil)
-      end
-
-      render json: copies.all, root: "jobs", adapter: :json,
-             meta: { messages: build_copy_messages(copies) }
-    end
-
-    private
 
     def job_copier
       @job_copier ||= CopyService::JobCopier.new(api: @context.api, user: current_user)
@@ -363,6 +393,10 @@ module Api
       end || batch.size
 
       workflow_batch[analysis.batch_id].insert(insert_at, new_item)
+    end
+
+    def order_dir
+      unsafe_params[:order_dir] || :DESC
     end
 
     # Enumerate Workflow title based on batch side (like "Title (1 of 3)")
