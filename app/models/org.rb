@@ -18,7 +18,9 @@
 class Org < ApplicationRecord
   default_scope { where.not(state: "deleted") }
 
-  PFDA_PREFIX = "org-pfda..".freeze
+  ORG_PREFIX = "org-".freeze
+  PFDA_PREFIX = "pfda..".freeze
+  HANDLE_MAX_LENGTH = 33
 
   include Auditor
 
@@ -33,33 +35,33 @@ class Org < ApplicationRecord
           -> { where(action_type: OrgActionRequest::Type::DISSOLVE) },
           class_name: "OrgActionRequest"
 
-  def self.construct_dxorg(handle)
-    raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
+  scope :real_orgs, -> { where(singular: false) }
 
-    PFDA_PREFIX + handle
-  end
+  class << self
+    def construct_dxorg(handle)
+      raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
 
-  def self.handle_by_id(id)
-    id.sub(/^org-/, '')
-  end
-
-  def self.featured
-    Org.find_by(handle: ORG_EVERYONE_HANDLE)
-  end
-
-  def self.real_orgs
-    where(singular: false)
-  end
-
-  def self.reports(sheet)
-    order(:name).find_each do |org|
-      %w(name handle address phone).each do |label|
-        sheet.add_row ["Organization #{label}:", org.send(label)]
-      end
-      org.admin_in_report(sheet)
-      org.users_in_report(sheet)
+      ORG_PREFIX + PFDA_PREFIX + handle
     end
-    sheet
+
+    def handle_by_id(id)
+      id.sub(/^org-/, "")
+    end
+
+    def featured
+      Org.find_by(handle: ORG_EVERYONE_HANDLE)
+    end
+
+    def reports(sheet)
+      order(:name).find_each do |org|
+        %w(name handle address phone).each do |label|
+          sheet.add_row ["Organization #{label}:", org.send(label)]
+        end
+        org.admin_in_report(sheet)
+        org.users_in_report(sheet)
+      end
+      sheet
+    end
   end
 
   def admin_in_report(sheet)
@@ -102,10 +104,10 @@ class Org < ApplicationRecord
   end
 
   def dxid
-    PFDA_PREFIX + handle
+    ORG_PREFIX + PFDA_PREFIX + handle
   end
 
   def dxorg
-    Org.construct_dxorg(handle)
+    self.class.construct_dxorg(handle)
   end
 end

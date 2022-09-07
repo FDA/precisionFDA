@@ -9,8 +9,6 @@ module Api
     include SpaceConcern
     include Scopes
 
-    PAGE_SIZE = Paginationable::PAGE_SIZE
-
     # GET /api/workflows
     # A common Workflow fetch method for space and home pages, depends upon @params[:space_id].
     # @param space_id [Integer] Space id for workflows fetch. When it is nil, then fetching for
@@ -19,44 +17,46 @@ module Api
     # @return workflows [App] Array of workflows objects if they exist OR workflows: [].
     # rubocop:disable Metrics/MethodLength
     def index
-      page_meta = {}
-      workflows = []
-
       if params[:space_id]
-        if find_user_space
-          workflows = @space.workflows.unremoved.
-            eager_load(:workflow_series, :user).includes(:taggings).
-            search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).
-            page(page_from_params).per(PAGE_SIZE)
-          workflows = Workflows::WorkflowFilter.call(workflows, params[:filters])
-          workflows.each { |workflow| workflow.current_user = @context.user }
+        workflows = []
+        filters = params[:filters]
 
-          page_meta = { pagination: pagination_dict(workflows) }
+        if find_user_space
+          workflows = @space.latest_revision_workflows.unremoved.
+            eager_load(:workflow_series, :user).includes(:taggings)
+          workflows = filter_workflows(workflows, filters)
+          workflows.each { |workflow| workflow.current_user = @context.user }
+          workflows = sort_array_by_fields(workflows)
+          page_meta = pagination_meta(workflows.count)
+          workflows = paginate_array(workflows)
         end
 
-        render json: workflows, root: "workflows",
-               meta: workflows_meta.merge(page_meta), adapter: :json
-      else
-        filters = params[:filters]
-        workflows = WorkflowSeries.accessible_by(@context).
-          eager_load(latest_revision_workflow: [user: :org]).
-          accessible_by_private.unremoved.
-          includes(latest_revision_workflow: [user: :org]).
-          order(order_from_params).
-          includes(:taggings).
-          map do |series|
-            latest = series.latest_accessible(@context)
-            latest if Workflows::WorkflowFilter.match(latest, filters)
-          end.compact
-        workflows.each { |workflow| workflow.current_user = @context.user }
+        page_dict = pagination_dict(workflows)
 
-        workflows = sort_array_by_fields(workflows)
-        page_meta = pagination_meta(workflows.count)
-        workflows = paginate_array(workflows)
+        if show_count
+          render plain: page_dict[:total_count]
+        else
+          render json: workflows,
+                 root: Workflow.model_name.plural,
+                 meta: workflows_meta.merge(page_meta),
+                 adapter: :json
+        end
 
-        render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+        return
       end
+
+      workflows = WorkflowSeries.accessible_by(@context).
+        eager_load(latest_revision_workflow: [user: :org]).
+        accessible_by_private.unremoved.
+        includes(latest_revision_workflow: [user: :org]).
+        includes(:taggings).
+        order(order_from_params).
+        map do |series|
+          latest = series.latest_accessible(@context)
+          latest if Workflows::WorkflowFilter.match(latest, filters)
+        end.compact
+
+      render_workflows_list workflows
     end
     # rubocop:enable Metrics/MethodLength
 
@@ -68,17 +68,13 @@ module Api
       filters = params[:filters]
       workflows = WorkflowSeries.featured.unremoved.
         accessible_by_public.eager_load(:user, :taggings).
+        order(order_from_params).
         search_by_tags(params.dig(:filters, :tags)).map do |series|
           latest = series.latest_accessible(@context)
           latest if Workflows::WorkflowFilter.match(latest, filters)
         end.compact
-      workflows.each { |workflow| workflow.current_user = @context.user }
 
-      workflows = sort_array_by_fields(workflows)
-      page_meta = pagination_meta(workflows.count)
-      workflows = paginate_array(workflows)
-
-      render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      render_workflows_list workflows
     end
 
     # GET /api/workflows/everybody
@@ -92,17 +88,13 @@ module Api
         accessible_by_public.
         eager_load(latest_revision_workflow: [user: :org]).
         includes(:taggings).
+        order(order_from_params).
         map do |series|
           latest = series.latest_accessible(@context)
           latest if Workflows::WorkflowFilter.match(latest, filters)
         end.compact
-      workflows.each { |workflow| workflow.current_user = @context.user }
 
-      workflows = sort_array_by_fields(workflows)
-      page_meta = pagination_meta(workflows.count)
-      workflows = paginate_array(workflows)
-
-      render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      render_workflows_list workflows
     end
 
     # GET /api/workflows/spaces
@@ -112,26 +104,19 @@ module Api
     #   which scope is not 'private' or 'public', i.e.
     #   workflows scope is one of 'space-...', if they exist OR workflows: [].
     def spaces
-      filters = params[:filters]
       workflows = WorkflowSeries.accessible_by(@context).
         eager_load(latest_revision_workflow: [user: :org]).
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         unremoved.includes(:taggings).
-        order(order_from_params).
         map do |series|
           series_wf = series.latest_accessible(@context)
           if series_wf.in_space? && Workflows::WorkflowFilter.
-              match(series_wf, filters)
+              match(series_wf, params[:filters])
             series_wf
           end
         end.compact
-      workflows.each { |workflow| workflow.current_user = @context.user }
 
-      workflows = sort_array_by_fields(workflows)
-      page_meta = pagination_meta(workflows.count)
-      workflows = paginate_array(workflows)
-
-      render json: workflows, meta: page_meta, root: "workflows", adapter: :json
+      render_workflows_list workflows
     end
 
     # GET /api/workflows/:id (show)
@@ -197,7 +182,7 @@ module Api
                       success: "The workflow has been published successfully!"
         end
 
-        format.json { render json: new_workflows, root: "workflows", adapter: :json }
+        format.json { render json: new_workflows, root: Workflow.model_name.plural, adapter: :json }
       end
     rescue StandardError => e
       raise ApiError, Message.bad_request(e.message)
@@ -209,7 +194,8 @@ module Api
           workflow = Workflows::Builder.call(presenter)
           render json: { id: workflow.uid, asset_uids: presenter.assets.map(&:uid) }
         else
-          render json: { errors: presenter.errors.full_messages }, status: :unprocessable_entity
+          render json: { error: { message: presenter.errors.full_messages.first } },
+                 status: :unprocessable_entity
         end
       end
     rescue StandardError => e
@@ -221,10 +207,39 @@ module Api
         e.message
       end
 
-      render json: { errors: [message] }, status: :unprocessable_entity
+      render json: { error: { message: message } }, status: :unprocessable_entity
+    end
+
+    def diagram
+      workflow = Workflow.accessible_by(@context).find_by!(uid: unsafe_params[:id])
+
+      render json: WorkflowDiagramPresenter.call(workflow)
+    rescue ActiveRecord::RecordNotFound => e
+      raise ApiError, Message.bad_request(e.message)
     end
 
     private
+
+    def filter_workflows(workflows, filters)
+      workflows.map do |workflow|
+        if Workflows::WorkflowFilter.
+            match(workflow, filters)
+          workflow
+        end
+      end.compact
+    end
+
+    def render_workflows_list(workflows)
+      if show_count
+        render plain: workflows.count
+      else
+        workflows.each { |workflow| workflow.current_user = @context.user }
+        page_meta = pagination_meta(workflows.count)
+        workflows = paginate_array(workflows)
+
+        render json: workflows, meta: page_meta, root: Workflow.model_name.plural, adapter: :json
+      end
+    end
 
     def presenter
       @presenter ||= begin

@@ -7,6 +7,7 @@ module SpaceService
       elsif space.verification?
         ProjectBuilders::VerificationSpace
       else
+        # for Group, Gov and Admin types of spaces
         ProjectBuilders::GroupSpace
       end
     end

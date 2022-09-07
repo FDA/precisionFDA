@@ -5,14 +5,17 @@ class UserPolicy
     # Visibility of the spaces' button
     def can_see_spaces?(context)
       return false unless context.logged_in?
-      return true if context.user.review_space_admin?
-      return true if context.user.can_administer_site?
+      context.user.can_see_spaces?
+    end
 
-      context.user.space_memberships.active.count > 0
+    def can_see_gsrs?(context)
+      return false unless context.logged_in?
+
+      !context.user.guest?
     end
 
     def access_notification_preference?(user)
-      user.spaces.review.any?
+      user.spaces.any?
     end
 
   end

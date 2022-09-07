@@ -75,12 +75,4 @@ module ProfileHelper
       "Removing is approved"
     end
   end
-
-  def user_exists_attribute(invitation, attribute)
-    if invitation.user
-      User.user_helper_attribute(invitation.user_id, attribute)
-    else
-      invitation[attribute]
-    end
-  end
 end

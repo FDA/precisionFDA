@@ -26,7 +26,6 @@ module Api
     # Activates a space.
     def accept
       membership = @space.space_memberships.find_by(user: current_user)
-
       if SpaceMembershipPolicy.can_accept?(@space, membership)
         SpaceService::Accept.call(api, @space, membership)
 
@@ -68,16 +67,21 @@ module Api
     # Fetches spaces list.
     def index
       allowed_orderings = %w(created_at name space_type updated_at).freeze
-      page = params[:page].presence || 1
 
       order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
 
       spaces = SpaceService::SpacesFilter.
-        call(@context.user, unsafe_params[:query]).
-        order(order).
-        page(page)
+        call(@context.user, unsafe_params[:filters]).
+        includes(:taggings).
+        search_by_tags(params.dig(:filters, :tags)).
+        order(order).page(page_from_params).per(page_size)
 
-      render json: spaces, meta: pagination_dict(spaces).merge(order: order), adapter: :json
+      page_dict = pagination_dict(spaces)
+      spaces = sort_array_by_fields(spaces)
+      page_meta = pagination_meta(spaces.count)
+
+      render json: spaces, root: "spaces", adapter: :json,
+             meta: page_meta.merge({ pagination: page_dict })
     end
 
     # GET /api/spaces/info
@@ -94,14 +98,36 @@ module Api
 
     # PUT /api/spaces/:id
     # Updates a space.
+    # @param id [String] - space id in a string form: id: "9-spacename"
+    # @param update_space_params [Object] - space params from SpaceEditForm
     def update
       space = Space.undeleted.find(params[:id])
 
       head(:forbidden) && return unless space.updatable_by?(current_user)
 
-      space.update!(update_space_params)
+      space_edit_params = update_space_params.merge(
+        current_user: current_user,
+        space_host_lead: space.host_lead_dxuser,
+        source_space_id: space.id,
+      )
 
-      render json: space, adapter: :json
+      space_edit_params = space_edit_params.merge(space_guest_lead: space.guest_lead_dxuser) unless space.exclusive?
+      space_update_form = SpaceEditForm.new(space_edit_params)
+
+      if space_update_form.valid?
+        space.update!(update_space_naming_params)
+        space.confidential_spaces.each { |confidential_space| confidential_space.update!(update_space_naming_params) }
+        api = DIContainer.resolve("api.admin")
+
+        space.leads_updates(space_update_form, api)
+
+        render json: space, adapter: :json
+      else
+        errors = [space_update_form.errors&.full_messages&.join("\n ")]
+
+        render json: { errors: { messages: errors } },
+               status: :unprocessable_entity, adapter: :json
+      end
     end
 
     # GET /api/spaces/:id/members
@@ -136,7 +162,7 @@ module Api
 
       jobs = @space.jobs.order(order)
 
-      User.sync_jobs!(@context, jobs)
+      Job.sync_jobs!(@context, jobs)
 
       render json: jobs, adapter: :json
     end
@@ -147,44 +173,51 @@ module Api
       head(:forbidden) && return unless @space.editable_by?(current_user)
 
       grouped = @items.group_by(&:klass)
-
       user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
       files = Array(user_files) + Array(assets)
-      apps ||= []
-
-      copied_files = nil
-
-      if files.present?
-        destination_project = UserFile.publication_project!(current_user, @space.scope)
-
-        UserFile.transaction do
-          # create initial copies of files with a COPYING state, in order to show them in the UI.
-          copied_files = files.map do |file|
-            CopyService::FileCopier.copy_record(
-              file,
-              @space.scope,
-              destination_project,
-              state: UserFile::STATE_COPYING,
-              scoped_parent_folder_id: params[:folder_id],
-            )
-          end
-
-          FileCopyWorker.perform_async(
-            @space.scope,
-            files.map(&:id),
-            params[:folder_id],
-            session_auth_params,
-          )
-        end
-      end
-
+      copy_files_to_space(files)
       workflows&.each { |workflow| copy_service.copy(workflow, @space.scope) }
-      apps.each { |app| copy_service.copy(app, @space.scope) }
+      apps&.each { |app| copy_service.copy(app, @space.scope) }
 
       head :ok
     end
 
     private
+
+    # Copy files to a space using the worker.
+    def copy_files_to_space(files)
+      return if files.blank?
+
+      prepare_files_to_copy(files)
+
+      FileCopyWorker.perform_async(
+        @space.scope,
+        files.map(&:id),
+        params[:folder_id],
+        session_auth_params,
+      )
+    end
+
+    # Create initial copies of files with a COPYING state, in order to show them in the UI.
+    def prepare_files_to_copy(files)
+      destination_project = UserFile.publication_project!(current_user, @space.scope)
+
+      UserFile.transaction do
+        files.each do |file|
+          next if !file.closed? ||
+                  file.project == destination_project ||
+                  UserFile.exists?(dxid: file.dxid, project: destination_project)
+
+          CopyService::FileCopier.copy_record(
+            file,
+            @space.scope,
+            destination_project,
+            state: UserFile::STATE_COPYING,
+            scoped_parent_folder_id: params[:folder_id],
+          )
+        end
+      end
+    end
 
     def sync_files
       User.sync_files!(@context)
@@ -210,8 +243,11 @@ module Api
 
     def space_types
       [].tap do |types|
+        types << :private_type
         types << :groups if @context.can_administer_site?
+        types << :government if @context.gov_user?
         types << :review if @context.review_space_admin?
+        types << :administrator if @context.can_administer_site?
       end
     end
 
@@ -220,7 +256,8 @@ module Api
     def find_space
       @space = Space.undeleted.find(params[:id])
 
-      return if @space.accessible_by_user?(current_user)
+      return if @space.accessible_by_user?(current_user) ||
+                (current_user.review_space_admin? && @space.review?)
 
       raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 
@@ -272,8 +309,13 @@ module Api
       end
     end
 
-    def update_space_params
+    def update_space_naming_params
       params.require(:space).permit(:name, :description, :cts)
+    end
+
+    def update_space_params
+      params.require(:space).permit(:name, :description, :cts, :space_type, :current_user,
+                                    :host_lead_dxuser, :guest_lead_dxuser, :sponsor_lead_dxuser)
     end
 
     def create_space_params

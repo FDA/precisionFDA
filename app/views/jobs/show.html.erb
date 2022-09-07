@@ -22,7 +22,7 @@
     <%= render "_partials/metadata_access", item: @job %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">App</h5>
-      <p class="list-group-item-text"><%= unilink(@job.app) %></p>
+      <p class="list-group-item-text"><%= unilink(@job.app, @context.user) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Launched by</h5>
@@ -47,9 +47,19 @@
       <p class="list-group-item-text"><%= humanize_seconds(@job.runtime) %></p>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Energy Consumed</h5>
+      <h5 class="list-group-item-heading">Cost In Dollars</h5>
       <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.energy_string %></p>
     </li>
+    <% if @job.https? && @job.running? %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Job URL</h5>
+        <p class="list-group-item-text">
+          <%= link_to(open_external_api_job_path(@job), "data-turbolinks" => false) do %>
+            <span class="fa fa-external-link"></span> open
+          <% end %>
+        </p>
+      </li>
+    <% end %>
   </ul>
 </div>
 

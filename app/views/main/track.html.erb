@@ -1,7 +1,7 @@
 <% content_for :title do %>Track <%= @item.title %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-flip-vertical fa-sitemap"></span> Track  <small><%= unilink(@item) %></small></div>
+  <div class="page-title"><span class="fa fa-flip-vertical fa-sitemap"></span> Track  <small><%= unilink(@item, { current_user: @context.user }) %></small></div>
 </div>
 
 <div class="container-fluid container-padded">
@@ -11,7 +11,7 @@
 
   <div class="panel panel-default">
     <div class="track-canvas-wrapper">
-      <svg class="track-canvas"><g></g></svg>
+      <svg class="track-canvas" alt="Stack of files denoting an app execution"><g></g></svg>
     </div>
   </div>
 </div>

@@ -23,6 +23,8 @@ module SpaceMembershipService
     end
 
     def self.update_current_lead(space, admin_member)
+      return false unless admin_member
+
       lead = space.leads.where(side: admin_member[:side]).first
       lead.role = SpaceMembership::ROLE_ADMIN
       lead.save!

@@ -52,10 +52,15 @@ class ExpertQuestionsController < ApplicationController
       else
         new_state = "open"
       end
-      raise unless @selected_question.update_attributes(
-         :state => new_state,
-         :body => unsafe_params[:expert_question][:body])
+
+      unless @selected_question.update(
+        state: new_state,
+        body: unsafe_params[:expert_question][:body],
+      )
+        raise
+      end
     end
+
     flash[:success] = "Question/answer information updated successfully."
     redirect_to expert_edit_question_path(@expert, @selected_question)
 

@@ -4,14 +4,17 @@ class AppSerializer < ApplicationSerializer
     :id,
     :uid,
     :dxid,
+    :entity_type,
     :name,
     :title,
     :added_by,
     :added_by_fullname,
     :created_at,
     :created_at_date_time,
+    :updated_at,
     :location,
     :readme,
+    :scope,
     :revision,
     :app_series_id,
     :run_by_you,
@@ -23,6 +26,17 @@ class AppSerializer < ApplicationSerializer
   )
 
   attribute :all_tags_list, key: :tags
+  attribute :job_count, key: :job_count
+  attribute :scope_id, key: :scope
+  delegate :updated_at, to: :object
+
+  def scope_id
+    object.scope
+  end
+
+  def job_count
+    object.app_series.jobs.distinct.count
+  end
 
   # Returns a tags list for an App
   def all_tags_list
@@ -79,7 +93,7 @@ class AppSerializer < ApplicationSerializer
       links[:space] = space_path if object.in_space?
       links[:jobs] = jobs_api_app_path(object)
       # GET track single app
-      links[:track] = track_object
+      links[:track] = track_path(id: object.uid)
       # GET /apps/:id/fork - fork a single app
       links[:fork] = fork_app_path(object)
       # POST export a single app to a docker container
@@ -112,18 +126,14 @@ class AppSerializer < ApplicationSerializer
       if can_run? && !object.in_locked_space?
         unless member_viewer?
           # app single run
-          links[:run_job] = new_app_job_path(
-            object.app_series.latest_version_app || object.app_series.latest_revision_app,
-          )
+          links[:run_job] = new_app_job_path(object.uid)
           # GET app batch run
           links[:batch_run] = batch_app_app_path(object.uid)
         end
       end
       unless object.in_space?
         # app single run
-        links[:run_job] = new_app_job_path(
-          object.app_series.latest_version_app || object.app_series.latest_revision_app,
-        )
+        links[:run_job] = new_app_job_path(object.uid)
         # GET app batch run
         links[:batch_run] = batch_app_app_path(object.uid)
       end

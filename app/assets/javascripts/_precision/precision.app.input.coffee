@@ -404,7 +404,7 @@ class AppInputModel
             data.toString()
           )
         when 'float'
-          value = _.map(value, (data) =>
+          value = _.map(value.split(','), (data) =>
             data = $.trim(data)
             parseFloat(data, 10)
           )

@@ -1,6 +1,7 @@
 # rubocop:todo Style/Documentation
 class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   include Recaptcha::Adapters::ControllerMethods
+  include RecaptchaHelper
 
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
@@ -16,14 +17,14 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                destroy
                                                presskit
                                                news
-                                               mislabeling)
+                                               mislabeling
+                                               track)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  # rubocop:todo Rails/LexicallyScopedActionFilter
-  skip_before_action :require_login, only: %i(track ae_anomaly_detection)
-  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
+
+  layout "react", only: %i(about index)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -67,7 +68,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         end
 
         login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
-        login_tasks_processor.call(@context.user)
+        login_tasks_processor.call(@context.user, @context.api)
       else
         @tutorials = [
           {
@@ -79,7 +80,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           },
           {
             title: "Explore files",
-            path: Rails.application.routes.url_helpers.explore_files_path,
+            path: "/home/files/everybody",
             help_label: "Learn",
             help_path: Rails.application.routes.url_helpers.show_docs_path("files"),
             description: "Browse the datasets have been publicly shared with the precisionFDA community",
@@ -100,7 +101,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           },
           {
             title: "Browse Assets",
-            path: Rails.application.routes.url_helpers.explore_assets_path,
+            path: "/home/assets/everybody",
             help_label: "Learn",
             help_path: Rails.application.routes.url_helpers.show_docs_path("creating_apps") + "#dev-assets",
             description: "Browse the collection of software assets that are used as building blocks in apps.",
@@ -204,9 +205,25 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def login
     if @context.guest?
-      render "_partials/_error", status: :forbidden, locals: { message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, your user account must be provisioned. Your account is currently being reviewed by an FDA administrator for provisioning. If you do not receive full access within 14 days, please contact precisionfda@fda.hhs.gov to request an upgraded account with end-level access." }
+      render "_partials/_error", status: :forbidden,
+                                 locals: { message: I18n.t("main.login_as_guest_warning") }
     else
-      redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode_www_form_component(OAUTH2_REDIRECT_URI)}"
+      user_return_to = params[:user_return_to].presence
+
+      uri_attrs = [oauth2_redirect_url]
+      uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
+
+      query_params = URI.encode_www_form(
+        response_type: "code",
+        client_id: OAUTH2_CLIENT_ID,
+        redirect_uri: URI.join(*uri_attrs),
+      )
+
+      redirect_to URI.join(
+        DNANEXUS_AUTHSERVER_URI,
+        "oauth2/authorize",
+        "?#{query_params}",
+      ).to_s
     end
   end
 
@@ -218,7 +235,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     # Exchange the code for a token
     result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).
-      fetch_token(unsafe_params[:code])
+      fetch_token(unsafe_params[:code], oauth2_redirect_url)
 
     if result["access_token"].blank? ||
        result["token_type"] != "bearer"
@@ -302,22 +319,47 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           user.last_login = Time.zone.now
           user.save(validate: false)
         end
+
+        post_login_checks user, token
       end
 
       Session.delete_expired
 
+      redirect_url = root_url
+
       if Session.limit_reached?(user)
         flash[:error] = "You have reached a limit for login. You can use only #{SESSIONS_LIMIT} active sessions."
       else
+        redirect_url = params[:redirect_uri].presence || redirect_url
         Session.where(key: session_id).delete_all
         reset_session
         save_session(user.id, username, token, expiration_time, user.org_id)
         log_session("User #{username} logged in")
         Event::UserLoggedIn.create_for(user)
       end
+
       distribute_results user, token
-      redirect_to root_url
+      redirect_to redirect_url
     end
+  end
+
+  def post_login_checks(user, token)
+    # User logged in successfully, a good time to run user checkup with the new token
+    https_apps_client = HttpsAppsClient.new(token, user)
+    https_apps_client.user_checkup
+  rescue StandardError => e
+    # Error in requesting a user checkup shouldn't interrupt the login process
+    Rails.logger.error("Error requesting user checkup: #{e.message}")
+  end
+
+  def check_webapp
+    job_dxid = (params[:redirect_uri].presence || "")[/job-[^\.]+/]
+    head(:unprocessable_entity) && return unless job_dxid
+
+    job = Job.accessible_by(@context).find_by(dxid: job_dxid)
+    head(:forbidden) && return unless job
+
+    redirect_to open_external_api_job_path(job)
   end
 
   def distribute_results(user, token) # rubocop:todo Metrics/MethodLength
@@ -373,7 +415,9 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def create_request_access
     @invitation = Invitation.new
 
-    if verify_recaptcha(model: @invitation)
+    token = unsafe_params.dig("g-recaptcha-response-data", :registration)
+
+    if verify_captcha_assessment(token, "registration")
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
     end
 
@@ -399,7 +443,13 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     end
 
     if request.post? # rubocop:todo Style/GuardClause
-      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
+      save_session(
+        -1,
+        "Guest-#{@invitation.id}",
+        Context::INVALID_TOKEN,
+        @invitation.expires_at.to_i,
+        -1,
+      )
       auditor_data = {
         action: "create",
         record_type: "Access Request",
@@ -577,12 +627,42 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     end
   end
 
+  # This action is only for backward compatibility with the old pages and was moved here from
+  # the old Spaces Controller. It copies an item from a current confidential space to cooperative.
+  # Only needed for the old Comparisons and Notes pages.
+  def copy_to_cooperative
+    space = Space.confidential.accessible_by(current_user).find(unsafe_params[:id])
+    object = item_from_uid(unsafe_params[:object_id])
+    copy_service = CopyService.new(api: @context.api, user: @context.user)
+
+    if space.editable_by?(current_user) && space.member_in_cooperative?(@context.user_id)
+      copy_service.copy(object, space.shared_space.uid).each do |new_object|
+        SpaceEventService.call(
+          space.shared_space.id,
+          @context.user_id,
+          nil,
+          new_object,
+          "copy_to_cooperative",
+        )
+      end
+
+      flash[:success] = "#{object.class} successfully copied"
+    else
+      flash[:warning] = "You have no permission to copy object(s) to cooperative."
+    end
+
+    redirect_back(fallback_location: _space_path(space))
+  end
+
   private
+
+  def oauth2_redirect_url
+    URI.join(request.base_url, "/return_from_login").to_s
+  end
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def concat_path(item)
-    if ["file", "folder", "app", "app-series", "job", "asset", "workflow", "workflow-series"].
-        include? item.klass
+    if ["app", "app-series", "job", "workflow", "workflow-series"].include?(item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)

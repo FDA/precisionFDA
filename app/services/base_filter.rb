@@ -22,8 +22,13 @@ module BaseFilter
   # @param filters [Hash] Filter object.
   # @return [ActiveRecord::Relation<AppSeries>] or [ActiveRecord::Relation<App>] Filtered nodes.
   def call(records, filters)
+    return records if filters.nil?
+
     records = records.where(build_where(filters.except(:tags))) if filters.present?
+
     records
+  rescue StandardError
+    []
   end
 
   # Builds AREL where clause.
@@ -58,5 +63,9 @@ module BaseFilter
   # @return sanitized [String] wrapped with '%'.
   def sanitize(query)
     "%" + ActiveRecord::Base.sanitize_sql_like(query) + "%"
+  end
+
+  def to_bool(value)
+    ActiveModel::Type::Boolean.new.cast(value)
   end
 end

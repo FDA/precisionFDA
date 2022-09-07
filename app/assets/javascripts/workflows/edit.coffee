@@ -14,6 +14,7 @@ WorkflowsController = Paloma.controller('Workflows', {
       @params.apps,
       @params.workflow,
       @params.scope,
+      @params.instance_types.map (instance_type) -> window.Precision.utils.sanitizeInstanceTypeNbsp(instance_type),
       'edit'
     )
     ko.applyBindings(viewModel, $container[0])

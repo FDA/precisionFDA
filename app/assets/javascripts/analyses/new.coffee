@@ -5,6 +5,7 @@ class WorkflowViewModel
     @errorMessage = ko.observable()
     @isRunning = ko.observable(false)
     @accessibleScope = workflow.scopes
+    @scope = workflow.scope
     @stages = ko.computed( =>
       for io in workflow.spec.input_spec.stages
         new stageModel(io, @accessibleScope)
@@ -38,6 +39,12 @@ class WorkflowViewModel
 
   data_inputs: (data) ->
     ko.utils.arrayFilter(data.inputs(), (input) -> !input.values.id?)
+
+  isInSpace: (scope) ->
+    return scope.startsWith('space-') if scope?
+  
+  getSpaceId: (scope) ->
+    return scope.substring(scope.indexOf('-') + 1);
 
   run_workflow: () =>
     @isRunning(true)
@@ -80,7 +87,7 @@ class WorkflowViewModel
     }
     Precision.api('/api/run_workflow', params)
       .done( =>
-        window.location.replace("/home/workflows/#{@workflowUid}")
+        window.location.replace(if (@isInSpace(@scope)) then "/spaces/#{@getSpaceId(@scope)}/workflows/#{@workflowUid}" else "/home/workflows/#{@workflowUid}")
     )
       .fail((error) =>
         @isRunning(false)

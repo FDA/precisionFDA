@@ -2,7 +2,7 @@
   g.blank_slate partial: "_partials/empty_grid"
 
   g.column name: "Title", attribute: "title" do |app|
-    link_to app.title, app_path(app)
+    link_to app.title, home_path_to_item(app), target: "_blank", rel: "noopener noreferrer"
   end
 
   g.column name: "Name", attribute: "name", assoc: :app_series do |app|

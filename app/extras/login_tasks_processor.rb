@@ -2,6 +2,7 @@
 class LoginTasksProcessor
   include OrgService::Errors
   include OrgService::RequestFilter
+  include OrgService::BaselineCharges
 
   # Constructor.
   # @param leave_org_processor [OrgService::LeaveOrgProcess] Processor of leaving organization
@@ -11,8 +12,20 @@ class LoginTasksProcessor
   end
 
   # Invokes tasks for provided user.
-  # @param user User to process tasks for.
-  def call(user)
+  # @param user [User] User to process tasks for.
+  # @param api [DNAnexusAPI] User API object.
+  def call(user, api)
+    process_org_leave_and_dissolve!(user)
+    set_user_baseline_charges!(user, api)
+  end
+
+  private
+
+  attr_reader :request
+
+  # Process Org leaving and dissolving.
+  # @param user [User] User to process tasks for.
+  def process_org_leave_and_dissolve!(user)
     @user = user
     @request = find_request
 
@@ -22,10 +35,6 @@ class LoginTasksProcessor
     process_org_leaving!
     process_org_dissolving! if org.admin == @user
   end
-
-  private
-
-  attr_reader :request
 
   # Checks if admin tries to leave non-empty organization.
   # @return [true, false] Returns true if user is an admin and admin tries to leave an org

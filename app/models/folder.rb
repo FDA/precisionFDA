@@ -19,6 +19,7 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  entity_type             :integer          default("regular"), not null
 #  featured                :boolean          default(FALSE)
 #
 
@@ -103,8 +104,7 @@ class Folder < Node # :nodoc:
   end
 
   def children
-    column = self.class.connection.quote_column_name(Node.scope_column_name(scope))
-    Node.where("#{column} = ?", id)
+    Node.where(scope_column_name => id, scope: scope)
   end
 
   def sub_folders

@@ -1,10 +1,10 @@
 <% content_for :title do %>Create New Challenge<% end %>
 
 <div class="page-header">
-  <div class="page-title">
+  <h2 class="page-title">
     <span class="fa fa-trophy"></span>
     Create a new Challenge
-  </div>
+  </h2>
 </div>
 
 <div class="container-fluid container-padded">
@@ -19,7 +19,7 @@
         } %>
       </div>
     </div>
-    <div class="col-sm-offset-3 text-muted pfda-padded-v" data-bind="visible: !imageUrl()">
+    <div class="col-sm-offset-3 text-muted pfda-padded-v challenge-upload-image-text" data-bind="visible: !imageUrl()">
       Please upload an image for the challenge.
     </div>
   <% end %>

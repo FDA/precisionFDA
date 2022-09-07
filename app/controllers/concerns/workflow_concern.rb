@@ -23,10 +23,10 @@ module WorkflowConcern
   # Proceed with workflow jobs sync
   def jobs_sync
     if @workflow.in_space?
-      User.sync_jobs!(@context, @workflow.jobs, @workflow.project)
+      Job.sync_jobs!(@context, @workflow.jobs, @workflow.project)
       @space = @workflow.space_object
     else
-      User.sync_jobs!(@context)
+      Job.sync_jobs!(@context)
     end
   end
 
@@ -62,6 +62,10 @@ module WorkflowConcern
 
     inputs = workflow_params["inputs"] || []
     fail "If provided, the workflow 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |s| s.is_a?(Hash) }
+
+    unless workflow.stages.all? { |stage| @context.user.resources.include?(stage[:instanceType]) }
+      raise_api_error I18n.t("workflows.errors.unsupported_instance_types", name: workflow.name)
+    end
 
     workflow_input_spec = workflow.input_spec_hash
     unseen_workflow_inputs = workflow.unused_input_spec_hash
@@ -137,7 +141,7 @@ module WorkflowConcern
 
     analysis_dxid = response["id"]
     analysis = Analysis.create!(
-      name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id
+      name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id,
     )
 
     response["stages"].each_with_index do |job_id, idx|
@@ -150,7 +154,7 @@ module WorkflowConcern
         if input_value.is_a?(Hash)
           if input_value["$dnanexus_link"].is_a?(String) && /^file-/.match(input_value["$dnanexus_link"])
             input_file_dxids << input_value["$dnanexus_link"]
-            run_inputs[input_name] = input_value["$dnanexus_link"]
+            run_inputs[input_name] = inputs.dig(idx, :input_value)
           end
         else
           run_inputs[input_name] = input_value

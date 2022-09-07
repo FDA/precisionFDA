@@ -60,6 +60,7 @@ class CopyService
         opts[:scope] = scope
         opts[:name] = app.name
         opts[:title] = app.title
+        opts[:entity_type] = app.entity_type
         opts[:release] = app.release
         opts[:output_spec] = app.output_spec
         opts[:code] = app.code
@@ -108,7 +109,7 @@ class CopyService
     def copy_assets(app, scope)
       return [] unless app.assets.exists?
 
-      file_copier.copy(app.assets, scope).all
+      file_copier.copy(app.assets, scope, nil, true).all
     end
 
     # Copies default input files from a source app.

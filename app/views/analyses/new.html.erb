@@ -3,7 +3,7 @@
 <div class="affix-spacer">
   <div class="affix-container">
     <div class="page-header clearfix">
-      <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @workflow.title, workflow_path(@workflow.uid), target: "_blank" %></div>
+      <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @workflow.title, home_path_to_item(@workflow), target: "_blank", rel: "noopener noreferrer" %></div>
       <div class="btn-group pull-right">
         <button class="btn btn-primary btn-lg " data-bind="text: isRunning()? 'Running...' : 'Run Workflow', disable: !canRunWorkflow() || isRunning(), click: function () { run_workflow(); }"><span class="fa fa-bolt"></span> <span ></span></button>
       </div>

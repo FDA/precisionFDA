@@ -10,7 +10,7 @@
   end
 
   g.column name: 'Title', attribute: 'title', assoc: :latest_version_app do |series|
-    unilink(series.latest_version_app, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+    unilink(series.latest_version_app, scope_icon: (defined?(scope_icon) ? scope_icon : true), target: "_blank")
   end
 
   g.column name: 'Revision', attribute: 'revision', assoc: :latest_version_app do |series|
@@ -57,7 +57,7 @@
     elsif app_ids.present?
       "Not this revision"
     else
-      link_to "Try", new_app_job_path(series.latest_version_app), class: 'btn btn-primary btn-xs'
+      link_to "Try", new_app_job_path(series.latest_version_app)
     end
   end
 

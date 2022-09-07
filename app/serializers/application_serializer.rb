@@ -13,9 +13,19 @@ class ApplicationSerializer < ActiveModel::Serializer
   end
 
   # license of the file with selected attributes
-  # when file doe not have license - return {}
+  # when file does not have license - return {}
   def file_license
     object.license&.slice(:id, :uid, :title) || {}
+  end
+
+  # Returns license pending status for the object
+  # @return [show_license_pending] true or false
+  def show_license_pending
+    if object.license&.approval_required
+      object.license_status?(current_user, "pending")
+    else
+      false
+    end
   end
 
   # Check whether object could be licensed - means,
@@ -54,45 +64,12 @@ class ApplicationSerializer < ActiveModel::Serializer
     current_membership&.role == "lead"
   end
 
-  # GET
-  # Returns url for object tracking.
-  # @param object.uid [String]
-  # @return [String] url.
-  def track_object
-    "/track?id=#{object.uid}"
-  end
-
   # POST
   # Returns url for object tracking.
   # @param object.uid [String]
   # @return [String] url.
   def publish_object
     "/publish?id=#{object.uid}"
-  end
-
-  # POST
-  # Returns url for object associating to the license.
-  # @param license_id [Integer]
-  # @param [object.uid] [Array of object uids]
-  # @return [String] url.
-  def licensed_object
-    "/licenses/:id/license_item?items_to_license=#{[object.uid]}"
-  end
-
-  # Returns object's location - its scope
-  # @return [String] Scope - a value on of: 'public', 'private' or 'space-xxx'.
-  #   Scope or Space name are titleized.
-  def location
-    if object.in_space?
-      space_name = object.space_object.name
-      if object.space_object.confidential?
-        space_name + " - Private"
-      else
-        space_name + " - Shared"
-      end
-    else
-      object.scope.titleize
-    end
   end
 
   # Returns a user who has created this app.

@@ -3,7 +3,7 @@ class UploadUrlFetcher
 
   def initialize(context, uid)
     @context = context
-    @uid = uid
+    @file = UserFile.open.find_by!(uid: uid)
   end
 
   # Returns:
@@ -33,20 +33,13 @@ class UploadUrlFetcher
 
   private
 
-  def file
-    # Check that the file exists, is accessible by the user
-    #   and is in the open state. Throw 404 if otherwise.
-    @file ||= UserFile.open.find_by_uid!(uid)
-  end
-
   def token
     @token ||= begin
       if file.user_id != context.user_id
-        if file.created_by_challenge_bot? && context.user.is_challenge_admin?
-          CHALLENGE_BOT_TOKEN
-        else
-          raise "The current user does not have access to the file."
-        end
+        have_access = file.created_by_challenge_bot? && context.user.site_or_challenge_admin?
+        raise "The current user does not have access to the file." unless have_access
+
+        CHALLENGE_BOT_TOKEN
       else
         context.token
       end
@@ -57,5 +50,5 @@ class UploadUrlFetcher
     api ||= DNAnexusAPI.new(token)
   end
 
-  attr_reader :context, :uid
+  attr_reader :context, :file
 end

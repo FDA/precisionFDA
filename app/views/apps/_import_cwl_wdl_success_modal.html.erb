@@ -15,17 +15,17 @@
       <div class="modal-body">
         <p>
           <b>App URL:</b>
-          <a target="_blank" data-bind="text: newAppUid, attr: {href: newAppURL}"></a>
+          <a target="_blank" data-turbolinks="false" data-bind="text: newAppUid, attr: {href: newAppURL}"></a>
         </p>
         <!-- ko if: newAssetUid -->
         <p>
           <b>Asset URL:</b>
-          <a target="_blank" data-bind="text: newAssetUid, attr: {href: newAssetURL}"></a>
+          <a target="_blank" data-turbolinks="false" data-bind="text: newAssetUid, attr: {href: newAssetURL}"></a>
         </p>
         <!-- /ko -->
       </div>
       <div class="modal-footer">
-        <a data-bind="attr: {href: newAppURL}">
+        <a data-turbolinks="false" data-bind="attr: {href: newAppURL}, click: hideAppModal" target="_blank">
           <input type="button" class="btn btn-primary" tabindex="-1" value="Ok">
         </a>
       </div>

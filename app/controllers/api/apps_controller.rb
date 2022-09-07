@@ -12,7 +12,10 @@ module Api
     include Sortable
     include ErrorProcessable
     include Scopes
+    include CloudResourcesConcern
 
+    skip_before_action :require_api_login, only: %i(everybody featured)
+    before_action :require_api_login_or_guest, only: %i(everybody featured)
     before_action :validate_app, only: :create
     before_action :can_copy_to_scope?, only: %i(copy)
     before_action :user_notes_objects, only: %i(index spaces everybody)
@@ -27,23 +30,19 @@ module Api
     # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def index
       apps = []
-      page_meta = {}
+      filters = params[:filters]
 
       if params[:space_id]
         if find_user_space
-          apps = @space.latest_revision_apps.unremoved.
-            eager_load(:app_series, :user).includes(:taggings).
-            search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).page(page_from_params).per(PAGE_SIZE)
-          apps = AppSeriesService::AppSeriesFilter.call(apps, params[:filters])
-
-          page_meta = { pagination: pagination_dict(apps) }
+          apps = @space.latest_revision_apps.unremoved.eager_load(:app_series, :user).includes(:taggings)
+          apps = filter_apps(apps, filters)
         end
       else
-        apps_series = AppSeries.accessible_by(@context).accessible_by_private.unremoved.
+        apps_series = AppSeries.
+          accessible_by(@context).
+          unremoved.
           eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
-        filters = params[:filters]
         apps = apps_series.map do |series|
           latest = series.latest_accessible(@context)
           if (latest&.scope == "private") && AppSeriesService::AppSeriesFilter.
@@ -51,11 +50,11 @@ module Api
             latest
           end
         end.compact
-
-        apps = sort_array_by_fields(apps)
-        page_meta = pagination_meta(apps.count)
-        apps = paginate_array(apps)
       end
+
+      apps = sort_array_by_fields(apps)
+      page_meta = pagination_meta(apps.count)
+      apps = paginate_array(apps)
 
       render_apps_list(apps, page_meta)
     end
@@ -88,7 +87,9 @@ module Api
     # @param order_by, order_dir [String] Params for ordering.
     # @return apps [App] Array of Apps objects if they exist OR apps: [].
     def everybody
-      apps_series = AppSeries.unremoved.
+      apps_series = AppSeries.
+        unremoved.
+        accessible_by_public.
         eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
       filters = params[:filters]
@@ -137,7 +138,11 @@ module Api
     # @param apps [Array] Array of App objects.
     # @param add_meta [Hash] Hash of additional meta params.
     def render_apps_list(apps, add_meta = {})
-      render json: apps, root: "apps", meta: apps_meta(apps).merge(add_meta), adapter: :json
+      if show_count
+        render plain: add_meta.dig(:pagination, :total_count) || 0
+      else
+        render json: apps, root: "apps", meta: apps_meta(apps).merge(add_meta), adapter: :json
+      end
     end
 
     # GET /api/apps/:id (show)
@@ -151,14 +156,14 @@ module Api
       load_relations(@app)
       load_challenges
 
-      User.sync_jobs!(@context)
+      Job.sync_jobs!(@context)
 
       render json:
         @app, adapter: :json,
         meta:  {
           spec: @app.spec,
           revisions: @revisions,
-          jobs: @app.editable_jobs(@context),
+          jobs: @app.accessible_jobs(@context),
           assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
           challenges: @assignable_challenges.select do |ch|
             ch.accessible_by?(@context) || ch.app_owner == @context.user
@@ -219,7 +224,7 @@ module Api
       app = create_app(unsafe_params)
 
       render json: { id: app.uid }
-    rescue DXClient::Errors::ChargesMismatchError => e
+    rescue DXClient::Errors::ChargesMismatchError, DXClient::Errors::DXClientError => e
       render json: { error: { message: e.message } }, status: :unprocessable_entity
     rescue StandardError => e
       logger.error([e.message, e.backtrace.join("\n")].join("\n"))
@@ -250,7 +255,7 @@ module Api
       end
     rescue Psych::SyntaxError
       render json: { errors: ["CWL has incorrect format"] }, status: :unprocessable_entity
-    rescue DXClient::Errors::ChargesMismatchError => e
+    rescue DXClient::Errors::ChargesMismatchError, DXClient::Errors::DXClientError => e
       render json: { errors: [e.message] }, status: :unprocessable_entity
     rescue StandardError => e
       logger.error e.message
@@ -307,7 +312,20 @@ module Api
       render json: apps
     end
 
+    def user_compute_resources
+      render json: user_compute_resource_labels
+    end
+
     private
+
+    def filter_apps(apps, filters)
+      apps.map do |app|
+        if AppSeriesService::AppSeriesFilter.
+            match(app, filters)
+          app
+        end
+      end.compact
+    end
 
     # Add Rdoc
     def apps_meta(apps)

@@ -7,8 +7,9 @@ class JobCreator
     @project = project
   end
 
-  def create(app:, name:, input_info:, run_instance_type: nil, scope: nil)
-    dxjob_id = create_dx_job(app, input_info, name, run_instance_type)
+  def create(app:, name:, input_info:, job_limit: CloudResourceDefaults::JOB_LIMIT,
+    run_instance_type: nil, scope: nil)
+    dxjob_id = create_dx_job(app, input_info, name, run_instance_type, job_limit)
 
     Job.transaction do
       job = Job.create!(
@@ -32,8 +33,8 @@ class JobCreator
     end
   end
 
-  def create_dx_job(app, input_info, name, run_instance_type)
-    input = api_input(app, name, input_info, run_instance_type)
+  def create_dx_job(app, input_info, name, run_instance_type, job_limit)
+    input = api_input(app, name, input_info, run_instance_type, job_limit)
 
     api.app_run(app.dxid, nil, input)["id"]
   end
@@ -42,14 +43,15 @@ class JobCreator
 
   attr_reader :api, :user, :context, :project
 
-  def api_input(app, name, input_info, run_instance_type)
+  def api_input(app, name, input_info, run_instance_type, job_limit)
     {
       name: name,
       input: input_info.dx_run_input,
       project: project,
-      timeoutPolicyByExecutable: { app.dxid => { "*" => { "days" => 2 } } },
+      timeoutPolicyByExecutable: { app.dxid => { "*" => { "days" => 10 } } },
       singleContext: true,
       systemRequirements: system_requirements(run_instance_type),
+      costLimit: job_limit,
     }.delete_if { |_, value| value.nil? }
   end
 

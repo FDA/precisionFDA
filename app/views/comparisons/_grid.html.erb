@@ -44,7 +44,7 @@
       content_tag(:div) do
         [comparison.inputs.map do |file|
           content_tag(:div) do
-            unilinkfw(file.user_file) unless benchmark?(file.role)
+            unilinkfw(file.user_file, target: "_blank") unless benchmark?(file.role)
           end
         end,
 
@@ -61,7 +61,7 @@
       content_tag(:div) do
         [comparison.inputs.map do |file|
           content_tag(:div) do
-            unilinkfw(file.user_file) if benchmark?(file.role)
+            unilinkfw(file.user_file, target: "_blank") if benchmark?(file.role)
           end
         end,
 

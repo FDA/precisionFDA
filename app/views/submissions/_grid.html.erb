@@ -21,7 +21,7 @@
     content_tag(:ul, "", class: "submission-ul") do
       submission.job.input_files.enum_for(:each_with_index).collect do |file, index|
         if file.present?
-          content_tag(:li, unilinkfw(file))
+          content_tag(:li, unilinkfw(file, target: "_blank"))
         else
           content_tag(:li,
             content_tag(:span, " ", class: "fa fa-file-o fa-fw") + " " + submission._inputs[index]

@@ -1,5 +1,5 @@
 class AppEditorModel
-  constructor: (app, ubuntuReleases, @mode = 'edit') ->
+  constructor: (app, ubuntuReleases, @availableInstances, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
     @loadingAssets = ko.observable(false)
@@ -7,6 +7,7 @@ class AppEditorModel
 
     @ubuntuReleases = ko.observableArray(ubuntuReleases)
     @dxid = app?.dxid
+    @entityType = app?.entity_type
     @name = ko.observable(app?.name)
     @name.cache = ko.computed(
       read: () =>
@@ -67,7 +68,6 @@ class AppEditorModel
 
     @internetAccess = ko.observable(app?.spec?.internet_access ? false)
 
-    @availableInstances = Precision.INSTANCES
     @defaultInstanceType = app?.spec?.instance_type ? "baseline-8"
     @instanceType = ko.observable(@defaultInstanceType)
 
@@ -205,6 +205,7 @@ class AppEditorModel
       ordered_assets: @getAssetsForSave()
       packages: @packages.peek()
       code: @code.peek() ? ""
+      entity_type: @entityType
 
     Precision.api('/api/apps', params)
       .done((data) =>

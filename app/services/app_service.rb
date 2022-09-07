@@ -22,7 +22,7 @@ class AppService
   # @return [App] Created app.
   def create_app(opts)
     app = nil
-    scope = opts[:scope] || Scopes::SCOPE_PRIVATE
+    scope = select_scope(opts[:scope])
 
     assets = Asset.accessible_by_user(user).
       where(
@@ -69,6 +69,7 @@ class AppService
         revision: revision,
         title: opts[:title],
         readme: opts[:readme],
+        entity_type: opts[:entity_type] || App::TYPE_REGULAR,
         user: user,
         scope: scope,
         app_series: app_series,
@@ -85,11 +86,24 @@ class AppService
 
       app_series.update!(latest_revision_app: app)
       app_series.update!(latest_version_app: app) if Space.valid_scope?(scope)
+      app_series.update!(deleted: false) if app_series.deleted?
 
       Event::AppCreated.create_for(app, user)
     end
 
     app
+  end
+
+  # Determine a proper scope for new app copy, depends upon current scope.
+  # Every new revision is private or of current space scope.
+  # @param scope [String] 'private', 'public', nil or 'space-xxx'
+  # @return scope [String] 'private' or 'space-xxx'
+  def select_scope(scope)
+    if [Scopes::SCOPE_PRIVATE, Scopes::SCOPE_PUBLIC, nil].include?(scope)
+      Scopes::SCOPE_PRIVATE
+    else
+      scope
+    end
   end
 
   # Creates new applet on the platform.

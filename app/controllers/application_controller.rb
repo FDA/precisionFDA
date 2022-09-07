@@ -4,8 +4,9 @@ class ApplicationController < ActionController::Base
   include UidFindable
 
   # Prevent CSRF attacks by raising an exception.
+  # N.B.: GET and HEAD requests are not checked
   # For APIs, you may want to use :null_session instead.
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, unless: -> { Rails.env.development? || Rails.env.dev? }
 
   # if we have some invalid forms redirect to root page.
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
@@ -102,19 +103,26 @@ class ApplicationController < ActionController::Base
 
   # Redirects user to login page if user is not logged in.
   def require_login
-    redirect_to login_url unless @context.logged_in?
+    redirect_to return_to_login_url unless @context.logged_in?
   end
 
   # Redirect user to login page if user is not either guest or logged in.
   def require_login_or_guest
-    redirect_to login_url unless @context.logged_in_or_guest?
+    redirect_to return_to_login_url unless @context.logged_in_or_guest?
+  end
+
+  def return_to_login_url
+    URI.join(
+      login_url,
+      "?#{URI.encode_www_form(user_return_to: request.original_fullpath)}",
+    ).to_s
   end
 
   # Tries to authorize user if the user is not authorized or guest one yet.
   # Renders Unauthorized if it was unable to authorize user.
   def require_api_login_or_guest
     if @context.logged_in_or_guest?
-      return if verified_request?
+      return if verified_request? || Rails.env.development? || Rails.env.dev?
     else
       process_authorization_header
       return if @context.logged_in?
@@ -127,7 +135,7 @@ class ApplicationController < ActionController::Base
   # Renders Unauthorized if it was unable to authorize user.
   def require_api_login
     if @context.logged_in?
-      return if verified_request?
+      return if verified_request? || Rails.env.development? || Rails.env.dev?
     else
       process_authorization_header
       return if @context.logged_in?
@@ -152,6 +160,8 @@ class ApplicationController < ActionController::Base
         decrypted = JSON.parse(rails_encryptor.decrypt_and_verify(key))
         if decrypted.is_a?(Hash) && decrypted["context"].is_a?(Hash)
           fields = %w(user_id username token expiration org_id).map { |f| decrypted["context"][f] }
+          # Flag indicating, that user is calling from CLI
+          fields.push(true)
           init_context(*fields)
         end
       rescue
@@ -165,8 +175,8 @@ class ApplicationController < ActionController::Base
   # @param token [String] User's token.
   # @param expiration [Integer] Token's expiration.
   # @param org_id [Integer] User org's ID.
-  def init_context(user_id, username, token, expiration, org_id)
-    @context = Context.new(user_id, username, token, expiration, org_id)
+  def init_context(user_id, username, token, expiration, org_id, cli_client = false)
+    @context = Context.new(user_id, username, token, expiration, org_id, cli_client)
     DIContainer.configure(@context.user, token) unless @context.guest?
   end
 
@@ -198,7 +208,7 @@ class ApplicationController < ActionController::Base
       owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
-      file_path: object.is_a?(UserFile) ? object.file_full_path(scope) : nil,
+      file_path: object.is_a?(UserFile) ? object.full_path(scope) : nil,
       parent_folder_name: object.is_a?(UserFile) ? object.parent_folder_name(scope) : nil,
       public: object.public?,
       private: object.private?,
@@ -257,7 +267,7 @@ class ApplicationController < ActionController::Base
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def concat_path(item)
-    if %w(file folder app app-series job asset workflow workflow-series).include? item.klass
+    if %w(app app-series job workflow workflow-series).include?(item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)

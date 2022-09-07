@@ -1,16 +1,6 @@
 module SpaceEventService
   # Responsible for sending notifications.
   class NotificationSender
-    TASK_TYPES = %w(
-      task_created
-      task_reassigned
-      task_accepted
-      task_completed
-      task_declined
-      task_deleted
-      task_reopened
-    ).freeze
-
     CONTENT_TYPES = %w(
       file_added
       note_added
@@ -39,15 +29,14 @@ module SpaceEventService
     ).freeze
 
     class << self
-      def call(event)
-        notification_class(event).try(:send, event)
+      def call(event, nodejs_api_client)
+        notification_class(event).try(:send, event, nodejs_api_client)
       end
 
       private
 
       def notification_class(event)
         case event.activity_type
-        when *TASK_TYPES       then SpaceEventService::TaskNotifications
         when *CONTENT_TYPES    then SpaceEventService::ContentNotifications
         when *COMMENT_TYPES    then SpaceEventService::CommentNotifications
         when *SPACE_TYPES      then SpaceEventService::SpaceNotifications

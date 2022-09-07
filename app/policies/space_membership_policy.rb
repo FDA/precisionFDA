@@ -10,28 +10,6 @@ class SpaceMembershipPolicy
         membership.lead_or_admin_or_contributor?
     end
 
-    def can_move_content_by_user?(space, user)
-      can_move_content?(
-        space,
-        space.space_memberships.find_by(user: user),
-      )
-    end
-
-    # Check, whether space member can make actions with a space content, for ex. with a file.
-    #   Actions could be one of: 'publish', 'delete' or 'copy_to_cooperative'.
-    # @param space [Space] - space.
-    # @param member [SpaceMembership] - an Object with a user data, who is space member.
-    # @return [true or false] - depends upon: space, member and member's role.
-    def can_move_content?(space, member)
-      return false if space.restrict_to_template? && !space.shared?
-      return false if member.blank?
-      return false unless space.active?
-      return false if member.new_record?
-      return false if member.inactive?
-
-      member.lead_or_admin_or_contributor?
-    end
-
     def can_disable?(space, admin, member)
       suitable_admin_and_member?(space, admin, member)
     end
@@ -117,6 +95,15 @@ class SpaceMembershipPolicy
       return false unless admin.lead_or_admin?
 
       if for_enable
+        space_invite_params = {
+          invitees: member.user.dxuser,
+          invitees_role: member.role,
+          space_id: _space.id,
+          side: member.side,
+          current_user: admin.user,
+        }
+        return false unless check_valid_invite_form?(space_invite_params, _space)
+
         return false if member.active?
       elsif member.inactive?
         return false
@@ -125,6 +112,11 @@ class SpaceMembershipPolicy
       return false if member.lead?
 
       admin.side == member.side
+    end
+
+    def check_valid_invite_form?(space_invite_params, space)
+      space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: space))
+      space_invite_form.valid?
     end
   end
 end

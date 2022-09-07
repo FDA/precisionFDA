@@ -213,31 +213,31 @@
             <tr>
               <td>Baseline 2</td>
               <td>2</td>
-              <td>3.8 GB</td>
+              <td>4 GB</td>
               <td>32 GB</td>
             </tr>
             <tr>
               <td>Baseline 4</td>
               <td>4</td>
-              <td>7.5 GB</td>
+              <td>8 GB</td>
               <td>80 GB</td>
             </tr>
             <tr>
               <td>Baseline 8</td>
               <td>8</td>
-              <td>15 GB</td>
+              <td>16 GB</td>
               <td>160 GB</td>
             </tr>
             <tr>
               <td>Baseline 16</td>
               <td>16</td>
-              <td>30 GB</td>
+              <td>32 GB</td>
               <td>320 GB</td>
             </tr>
             <tr>
               <td>Baseline 36</td>
               <td>36</td>
-              <td>60 GB</td>
+              <td>72 GB</td>
               <td>640 GB</td>
             </tr>
             <tr>
@@ -246,31 +246,31 @@
             <tr>
               <td>High Mem 2</td>
               <td>2</td>
-              <td>15 GB</td>
+              <td>16 GB</td>
               <td>32 GB</td>
             </tr>
             <tr>
               <td>High Mem 4</td>
               <td>4</td>
-              <td>30.5 GB</td>
+              <td>32 GB</td>
               <td>80 GB</td>
             </tr>
             <tr>
               <td>High Mem 8</td>
               <td>8</td>
-              <td>61 GB</td>
+              <td>64 GB</td>
               <td>160 GB</td>
             </tr>
             <tr>
               <td>High Mem 16</td>
               <td>16</td>
-              <td>122 GB</td>
+              <td>128 GB</td>
               <td>320 GB</td>
             </tr>
             <tr>
               <td>High Mem 32</td>
               <td>32</td>
-              <td>244 GB</td>
+              <td>256 GB</td>
               <td>640 GB</td>
             </tr>
             <tr>
@@ -305,6 +305,15 @@
               <td>36</td>
               <td>60 GB</td>
               <td>2880 GB</td>
+            </tr>
+            <tr>
+              <td colspan=4></td>
+            </tr>
+            <tr>
+              <td>GPU 8</td>
+              <td>8</td>
+              <td>60 GB</td>
+              <td>160 GB</td>
             </tr>
           </tbody>
         </table>
@@ -409,7 +418,7 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
         <p>The tool requires an "authorization key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective link in the "Add Assets" page. Copy the key from that page and paste it in the command below where it says <strong>KEY</strong>. For your security, the key is valid for 24h.</p>
         <p>Run <code>./pfda --cmd upload-asset --key KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>. This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file. The tarball name must end in either <code>.tar.gz</code> or <code>.tar</code> (in which latter case it will not be compressed).</p>
         <div class="alert alert-info">
-          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.pfda_config</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
         </div>
 
       </div>

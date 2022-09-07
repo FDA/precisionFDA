@@ -8,15 +8,12 @@ module Api
       before_action :can_edit?, except: %i(subfolders)
 
       # POST /api/spaces/:space_id/files/publish_files
-      # Makes selected files/folders public.
+      # Makes selected files public.
       def publish_files
         files = @space.files.where(id: params[:ids])
-        folders = @space.folders.where(id: params[:ids])
-        head(:unprocessable_entity) && return unless files.exists? && folders.exists?
-        folder_children = folders.flat_map(&:all_children)
+        head(:unprocessable_entity) && return unless files.exists?
 
-        count = UserFile.publish(files + folders + folder_children,
-                                 @context, UserFile::SCOPE_PUBLIC)
+        count = UserFile.publish(files, @context, UserFile::SCOPE_PUBLIC)
 
         render json: { count: count }
       end
@@ -30,7 +27,7 @@ module Api
         result = folder_service.move(
           nodes,
           target_folder,
-          @space.uid,
+          target_folder&.scope || @space.uid,
         )
 
         raise ApiError, result.value[:message] if result.failure?
@@ -56,15 +53,10 @@ module Api
           nodes.where(sti_type: "Folder").find_each do |folder|
             folder.all_children.each { |node| node.update!(state: UserFile::STATE_REMOVING) }
           end
-
-          Array(nodes.pluck(:id)).in_groups_of(1000, false) do |ids|
-            job_args = ids.map do |node_id|
-              [node_id, session_auth_params]
-            end
-
-            Sidekiq::Client.push_bulk("class" => RemoveNodeWorker, "args" => job_args)
-          end
         end
+
+        job_args = nodes.pluck(:id).in_groups_of(1, false).map { |id| id << session_auth_params }
+        RemoveNodeWorker.perform_bulk(job_args, batch_size: 100)
 
         head :ok
       end
@@ -74,7 +66,8 @@ module Api
       def create_folder
         parent_folder = @space.folders.find_by(id: params[:parent_folder_id])
 
-        result = folder_service.add_folder(params[:name], parent_folder, @space.uid)
+        scope = parent_folder&.scope || @space.uid
+        result = folder_service.add_folder(params[:name], parent_folder, scope)
 
         raise ApiError, result.value.values.flatten.first if result.failure?
 

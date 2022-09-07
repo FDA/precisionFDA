@@ -83,6 +83,6 @@ class Appathon < ApplicationRecord
   end
 
   def rename(new_name, context)
-    update_attributes(name: new_name)
+    update(name: new_name)
   end
 end

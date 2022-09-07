@@ -48,14 +48,16 @@
         <span class="fa fa-fw fa-image"></span> Set Profile Gravatar
       <% end %>
       <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-legal") + "Manage Licenses", licenses_path, class: 'btn btn-default') %>
+      <% if params[:permissionsDebug]=='true' %>
+       <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-refresh") + "Check spaces permissions ", check_spaces_permissions_path, method: 'post', class: 'btn btn-default') %>
+       <% end  %>
     </div>
   </div>
 </div>
 
-<div class="infoframe-outer contact-information">
+<div class="infoframe-outer contact-information" data-bind="css: {hidden: !contacts.isEditing(), loading: contacts.isLoading()}">
   <div class="infoframe-inner">
     <h4 class="infoframe-title">Contact Information</h4>
-      <%= render 'profile/profile_contacts_view' %>
       <%= render 'profile/profile_contacts_form' %>
       <%#= render '_partials/phone_confirmation_modal' %>
       <%= render '_partials/auth_credentials_modal' %>

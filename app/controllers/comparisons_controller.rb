@@ -226,6 +226,7 @@ class ComparisonsController < ApplicationController
     else
       user_files = UserFile.arel_table
       files = @comparison.outputs.where(user_files[:description].matches("%html_report"))
+      @comparator_app = comparator_app(@comparison.app_dxid)
 
       @output_files = files.map do |file|
         { name: file.name, url: file.file_url(@context, "true", false) }
@@ -478,6 +479,13 @@ class ComparisonsController < ApplicationController
   end
 
   private
+
+  # find a non-default comparator app by its :dxid
+  # @param app_dxid [String] - @comparison.app_dxid
+  # @return @comparator_app [App Object]
+  def comparator_app(app_dxid)
+    App.find_by(dxid: app_dxid)
+  end
 
   # Renders array of errors returning bad request status.
   # @param errors [Array<String>] Array of errors.

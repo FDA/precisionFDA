@@ -19,7 +19,9 @@
 #  uid           :string(255)
 #  dev_group     :string(255)
 #  release       :string(255)      not null
+#  entity_type   :integer          default("regular"), not null
 #  featured      :boolean          default(FALSE)
+#  deleted       :boolean          default(FALSE), not null
 #
 
 class App < ApplicationRecord
@@ -28,9 +30,13 @@ class App < ApplicationRecord
   include CommonPermissions
   include InternalUid
   include Featured
+  include ObjectLocation
   include Scopes
   include SoftRemovable
   include TagsContainer
+
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
 
   belongs_to :user
   has_one :org, through: :user
@@ -56,6 +62,11 @@ class App < ApplicationRecord
 
   VALID_IO_CLASSES = %w(file string boolean int float).freeze
 
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
+
   def to_param
     uid
   end
@@ -64,9 +75,9 @@ class App < ApplicationRecord
   # Jobs are serialized.
   #  @param context [Context] The user context.
   #  @return jobs [Array of serialized Job objects.
-  def editable_jobs(context)
+  def accessible_jobs(context)
     app_series.jobs.
-      editable_by(context).
+      accessible_by(context).
       includes(:taggings).
       order(created_at: :desc).
       map { |job| JobSerializer.new(job) }
@@ -87,7 +98,7 @@ class App < ApplicationRecord
   # Check whether app is not in space of any type
   # @return [true, false]
   def not_in_spaces
-    !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
+    !in_space? || Space::TYPES.exclude?(space_object.space_type)
   end
 
   # Scopes that can be used to run an app.

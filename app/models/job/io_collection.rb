@@ -3,11 +3,11 @@ class Job::IOCollection
   delegate :each, to: :records
 
   def self.build_outputs(job)
-    build(Output, job.output_spec, job.run_outputs, project: job.project)
+    build(::Job::IOCollection::Output, job.output_spec, job.run_outputs, project: job.project)
   end
 
   def self.build_inputs(job)
-    build(Input, job.input_spec, job.run_inputs)
+    build(::Job::IOCollection::Input, job.input_spec, job.run_inputs)
   end
 
   def self.build(record_class, spec, data, options = {})

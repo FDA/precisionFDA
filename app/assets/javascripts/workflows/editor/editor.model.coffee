@@ -259,10 +259,10 @@ class WorkflowEditorModel
         @loadingAllApps(false)
     )
 
-  constructor: (apps, @workflow, scope, @mode = EDIT_MODE) ->
+  constructor: (apps, @workflow, scope, instance_types, @mode = EDIT_MODE) ->
     editableModes = [EDIT_MODE, FORK_MODE]
     isNewModes = [CREATE_MODE, FORK_MODE]
-    @instanceTypes = Precision.INSTANCES
+    @instanceTypes = instance_types
     @readme = ko.observable(@workflow?.readme)
     @readmePreview = ko.computed(=>
       Precision.md.render(@readme())

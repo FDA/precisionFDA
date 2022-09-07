@@ -18,6 +18,7 @@ module Sortable
     "title" => ->(left, right) { left.title <=> right.title },
     "username" => ->(left, right) { left.user.full_name <=> right.user.full_name },
     "revision" => ->(left, right) { left.revision <=> right.revision },
+    "location" => ->(left, right) { left.location.downcase <=> right.location.downcase },
   }.freeze
 
   def order_direction(candidate)
@@ -38,18 +39,19 @@ module Sortable
   # @param array input arrays of objects for sort.
   # @param sort_fields list of lambdas.
   # @return sorted array.
-  def sort_array_by_fields(array)
-    sort_by = self.class::SORT_FIELDS[params[:order_by] || "created_at"]
+  def sort_array_by_fields(array, default_order = "launched_on")
+    sort_by = self.class::SORT_FIELDS[params[:order_by] || default_order]
     array = array.sort(&sort_by)
 
     params[:order_dir] != Sortable::DIRECTION_ASC ? array.reverse : array
   end
 
   # Prepare Order/OrderDirection pair from params (only allowed values).
-  # @return { order => order_dir }, { :created_at => 'DESC' } if no param values provided.
-  def order_from_params
+  # @return { order => order_dir }, { :launched_on => 'DESC' }
+  #   if no param values provided.
+  def order_from_params(default_order = "launched_on")
     order_field_values = self.class::ORDER_FIELDS.values.flatten
-    order_query(self.class::ORDER_FIELDS[params[:order_by] || "created_at"],
+    order_query(self.class::ORDER_FIELDS[params[:order_by] || default_order],
                 params[:order_dir], order_field_values)
   end
 

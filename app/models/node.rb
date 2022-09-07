@@ -19,6 +19,7 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  entity_type             :integer          default("regular"), not null
 #  featured                :boolean          default(FALSE)
 #
 
@@ -27,6 +28,7 @@ class Node < ApplicationRecord
   extend Scopes
   include Scopes
   include Featured
+  include ObjectLocation
   include TagsContainer
 
   self.inheritance_column = :sti_type
@@ -37,13 +39,81 @@ class Node < ApplicationRecord
   # pFDA internal state, used for files that are being removing by a worker.
   STATE_REMOVING = "removing".freeze
 
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
+
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
   belongs_to :scoped_parent_folder, class_name: "Folder"
 
+  attr_accessor :current_user
+
   scope :files_and_folders, -> { where(sti_type: %w(Folder UserFile)) }
   scope :files, -> { where(sti_type: %w(UserFile)) }
   scope :folders, -> { where(sti_type: %w(Folder)) }
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
+
+  acts_as_taggable
+
+  class << self
+    def scope_column_name(scope)
+      if [SCOPE_PRIVATE, SCOPE_PUBLIC, nil].include?(scope)
+        :parent_folder_id
+      else
+        :scoped_parent_folder_id
+      end
+    end
+
+    def opposite_scope_column_name(scope)
+      (%i(parent_folder_id scoped_parent_folder_id) - [scope_column_name(scope)]).first
+    end
+
+    def folder_content(files, folders)
+      Node.where(id: (files + folders).map(&:id))
+    end
+  end
+
+  # Collects a string of item's path.
+  # @param dir_set [Array<String>] ordered array of folder names
+  # @return [String] file path or "/" for root. Ex. "/second_level_folder/third_level_folder/"
+  def collect_path_string(dir_set)
+    path = "/"
+    dir_set.each { |dir| path += "#{dir}/" }
+    path
+  end
+
+  # Returns a full path to the current file or folder
+  # @param [item_scope] the scope
+  # @return [String] the path or "/" for root
+  def full_path(item_scope = scope)
+    parent_folder = parent_folder(item_scope)
+    folders = []
+    if parent_folder.blank?
+      "/"
+    else
+      folders << parent_folder_name(item_scope)
+      folders << parent_folder.ancestors(item_scope).pluck(:name)
+    end
+
+    collect_path_string(folders.flatten.reverse)
+  end
+
+  def parent_folder(file_scope = scope)
+    column_name = Node.scope_column_name(file_scope)
+    Folder.find_by(id: self[column_name])
+  end
+
+  # Returns a parent folder name of an item
+  # @param [item_scope] the scope
+  # @return [String] the name or "/" for root
+  def parent_folder_name(item_scope = scope)
+    folder = parent_folder(item_scope)
+    folder.blank? ? "/" : folder.name
+  end
 
   def title
     parent_type == "Asset" ? self.becomes(Asset).prefix : name
@@ -57,8 +127,16 @@ class Node < ApplicationRecord
     build_ancestors_tree(self, scope)
   end
 
-  def parent_folder
-    Folder.find_by(id: self[self.class.scope_column_name(scope)])
+  def scope_column_name
+    self.class.scope_column_name(scope)
+  end
+
+  def opposite_scope_column_name
+    self.class.opposite_scope_column_name(scope)
+  end
+
+  def folder_id
+    self[scope_column_name]
   end
 
   # Check, whether node is publishable. A node should be 'private' or in space.
@@ -66,16 +144,6 @@ class Node < ApplicationRecord
   # @return [Boolean] Returns true if a node can be published by a user, false otherwise.
   def publishable?(user)
     user.present? && !public?
-  end
-
-  class << self
-    def scope_column_name(scope)
-      [SCOPE_PRIVATE, SCOPE_PUBLIC].include?(scope) ? :parent_folder_id : :scoped_parent_folder_id
-    end
-
-    def folder_content(files, folders)
-      Node.where(id: (files + folders).map(&:id))
-    end
   end
 
   private

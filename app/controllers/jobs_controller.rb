@@ -1,9 +1,15 @@
+# Jobs controller
+
 class JobsController < ApplicationController
+  include ErrorProcessable
+  include CloudResourcesConcern
+
   skip_before_action :require_login,     only: [:show]
   before_action :require_login_or_guest, only: [:show]
+  before_action :check_total_and_job_charges_limit, only: :new
 
   def show
-    @job = Job.accessible_by(@context).includes(:user).find_by_uid(unsafe_params[:id])
+    @job = Job.accessible_by(@context).includes(:user).find_by(uid: params[:id])
 
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or is not accessible by you"
@@ -16,6 +22,7 @@ class JobsController < ApplicationController
     @items_from_params = [@job]
     @item_path = pathify(@job)
     @item_comments_path = pathify_comments(@job)
+
     if @job.in_space?
       space = item_from_uid(@job.scope)
       @comments = Comment.where(commentable: space, content_object: @job).order(id: :desc).page unsafe_params[:comments_page]
@@ -26,15 +33,15 @@ class JobsController < ApplicationController
     @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
     @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
     @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
+
     js id: @job.id, desc: @job.from_submission? ? @job.submission.desc : ""
   end
 
   def log
-    @job = Job.accessible_by(@context).find_by_uid(unsafe_params[:id])
+    @job = Job.accessible_by(@context).find_by(uid: params[:id])
 
     if @job.nil? || @job.log_unaccessible?(@context)
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
-      redirect_to apps_path
       return
     end
 
@@ -75,7 +82,6 @@ class JobsController < ApplicationController
         json = JSON.parse(msg.to_s)
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
-
         if json["code"]
           flash[:error] = "Sorry, something went wrong. Please, try later"
           return
@@ -91,7 +97,7 @@ class JobsController < ApplicationController
   end
 
   def new
-    @app = App.find_by!(uid: unsafe_params[:app_id])
+    @app = App.find_by!(uid: params[:app_id])
 
     unless @app.runnable_by?(current_user)
       redirect_back(
@@ -99,6 +105,13 @@ class JobsController < ApplicationController
         flash: { error: I18n.t("app_not_accessible_or_runnable") },
       ) && return
     end
+    if user_has_no_compute_resources_allowed
+      redirect_back(
+        fallback_location: apps_path,
+        flash: { error: I18n.t("api.errors.no_allowed_instance_types") },
+      ) && return
+    end
+
 
     licenses_to_accept = []
     @app.assets.each do |asset|
@@ -133,31 +146,37 @@ class JobsController < ApplicationController
        licenses_to_accept: licenses_to_accept.uniq(&:id),
        licenses_accepted: licenses_accepted,
        selectable_spaces: selectable_spaces,
-       content_scopes: content_scopes
+       content_scopes: content_scopes,
+       instance_types: user_compute_resource_labels,
+       job_limit: current_user.job_limit
   end
 
   def destroy
-    @job = Job.where(user_id: @context.user_id).find_by_uid(unsafe_params[:id])
+    @job = Job.where(user_id: @context.user_id).find_by(uid: params[:id])
+
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or is not accessible by you"
       redirect_to apps_path
       return
     end
-    if !@job.terminal?
-      DNAnexusAPI.new(@context.token).call(@job.dxid, "terminate")
+
+    unless @job.terminal?
+      api = @job.https? ? DIContainer.resolve("https_apps_client") : DIContainer.resolve("api.user")
+      api.job_terminate(@job.dxid)
     end
+
     redirect_to job_path(@job)
   end
 
   private
 
   def sync_job!
-    return if @job.terminal?
+    return if @job.terminal? || @job.https?
 
     if @job.from_submission?
-      User.sync_challenge_job!(@job.id)
+      Job.sync_challenge_job!(@job.id)
     else
-      User.sync_job!(@context, @job.id)
+      Job.sync_job!(@context, @job.id)
     end
   end
 end

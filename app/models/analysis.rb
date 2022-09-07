@@ -24,10 +24,10 @@ class Analysis < ApplicationRecord
   belongs_to :user
   has_many :batch_items, class_name: "Analysis", foreign_key: :batch_id, primary_key: :batch_id
 
+  attr_accessor :current_user
+
   def batch_jobs
-    batch_items.map do |i|
-      i.jobs
-    end
+    batch_items.map(&:jobs)
   end
 
   def self.editable_by(context)
@@ -62,7 +62,7 @@ class Analysis < ApplicationRecord
                  instance_type: job.resolved_instance_type,
                  energy_consumption: job.energy_string,
                  launched_by: job.user.full_name,
-                 location: ApplicationSerializer.new(job).location,
+                 location: job.location,
                  app_uid: job.app.uid,
                  app_title: job.app.title,
                  batch_id: batch_item.batch_id,
@@ -96,7 +96,7 @@ class Analysis < ApplicationRecord
           instance_type: job.resolved_instance_type,
           energy_consumption: job.energy_string,
           launched_by: job.user.full_name,
-          location: ApplicationSerializer.new(job).location,
+          location: job.location,
           app_title: job.app.title,
           batch_id: analysis.batch_id,
           batch_children: options[:stop].nil? && analysis.batch_id.present? ? self.job_hash(analysis.batch_items, options.merge({stop: true})) : nil,

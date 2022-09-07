@@ -17,12 +17,12 @@ class SpaceForm
 
   TYPE_GROUPS = "groups".freeze
   TYPE_REVIEW = "review".freeze
-  TYPE_VERIFICATION = "verification".freeze
+  TYPE_PRIVATE = "private_type".freeze
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
   validate :validate_leads_orgs, if: -> { space_type == TYPE_REVIEW }
-  validate :validate_guest_lead_dxuser, if: -> { space_type.in?([TYPE_GROUPS, TYPE_VERIFICATION]) }
+  validate :validate_guest_lead_dxuser, if: -> { space_type == TYPE_GROUPS }
   validate :validate_sponsor_lead_dxuser, if: -> { space_type == TYPE_REVIEW }
 
   class << self
@@ -35,8 +35,18 @@ class SpaceForm
     SpaceService::Create.call(self, api: api, user: user)
   end
 
+  def host_admin
+    @host_admin ||= User.find_by(dxuser: host_lead_dxuser)
+  end
+
+  def guest_admin
+    @guest_admin ||= User.find_by(dxuser: guest_lead_dxuser)
+  end
+
   def space_sponsor
-    User.find_by(dxuser: sponsor_lead_dxuser)
+    return unless space_type == TYPE_REVIEW
+
+    @space_sponsor ||= User.find_by(dxuser: sponsor_lead_dxuser)
   end
 
   private
@@ -52,19 +62,14 @@ class SpaceForm
       errors.add(:guest_lead_dxuser, "can't be the same as Host lead")
     end
 
-    return unless guest_lead_in_groups || guest_lead_in_verification
+    return unless guest_lead_in_groups
 
     errors.add(:guest_lead_dxuser, "'#{guest_lead_dxuser}' not found")
   end
 
   # Check guest lead in space of "groups" type
   def guest_lead_in_groups
-    space_type == "groups" && !(guest_lead_dxuser.present? && guest_admin)
-  end
-
-  # Check guest lead in space of "verification" type
-  def guest_lead_in_verification
-    space_type == "verification" && guest_lead_dxuser.present? && guest_admin.nil?
+    space_type == TYPE_GROUPS && !(guest_lead_dxuser.present? && guest_admin)
   end
 
   # A sponsor lead user validation
@@ -84,13 +89,5 @@ class SpaceForm
     return unless space_sponsor.org_id == host_admin.org_id
 
     errors.add(:sponsor_lead_dxuser, "can't belong to the same Org as Reviewer lead")
-  end
-
-  def host_admin
-    User.find_by(dxuser: host_lead_dxuser)
-  end
-
-  def guest_admin
-    User.find_by(dxuser: guest_lead_dxuser)
   end
 end

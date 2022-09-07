@@ -210,7 +210,7 @@ class LicensesController < ApplicationController
       AcceptedLicense.transaction do
         accepted_license = license.accepted_licenses.find_by(user_id: user.id)
         if !accepted_license.nil?
-          accepted_license.update_attributes(state: 'active')
+          accepted_license.update(state: "active")
           accepted_license.reload
           NotificationsMailer.license_approved_email(license, user).deliver_now!
         end

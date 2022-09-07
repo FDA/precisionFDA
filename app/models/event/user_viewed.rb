@@ -11,6 +11,7 @@
 #  param3     :string(255)
 #  created_at :datetime         not null
 #  param4     :string(255)
+#  data       :text(65535)
 #
 
 class Event::UserViewed < Event

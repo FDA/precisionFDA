@@ -16,6 +16,8 @@
 #
 
 class NewsItem < ApplicationRecord
+  paginates_per 10
+
   belongs_to :user
   validates :link, :video, url: true
   validates :title, presence: true

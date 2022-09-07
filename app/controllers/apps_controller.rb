@@ -1,10 +1,12 @@
 # Responsible for apps-related actions.
 class AppsController < ApplicationController
   include ErrorProcessable
+  include CloudResourcesConcern
 
   skip_before_action :require_login, only: %i(index featured explore show fork new)
   before_action :require_login_or_guest, only: %i(index featured explore show fork new)
   before_action :validate_app_before_export, only: %i(export cwl_export wdl_export)
+  before_action :check_total_and_job_charges_limit, only: %i(batch_app run)
 
   def index
     if @context.guest?
@@ -51,7 +53,7 @@ class AppsController < ApplicationController
       where(jobs: { user_id: @context.user_id }).
       map { |series| series.latest_accessible(@context) }.compact
 
-    User.sync_jobs!(@context)
+    Job.sync_jobs!(@context)
 
     jobs = if @app.present?
       @app.app_series.jobs.origin.editable_by(@context).order(created_at: :desc)
@@ -136,7 +138,7 @@ class AppsController < ApplicationController
         page(unsafe_params[:comments_page])
     end
 
-    User.sync_jobs!(@context)
+    Job.sync_jobs!(@context)
 
     jobs = @app.app_series.jobs.editable_by(@context).includes(:taggings).order(created_at: :desc)
     @jobs_grid = jobs_grid(jobs)
@@ -153,17 +155,27 @@ class AppsController < ApplicationController
   end
 
   def edit
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
     @app = App.find_by(uid: unsafe_params[:id])
     @app = nil unless @app.editable_by?(@context)
 
     if @app.nil?
       flash[:error] = I18n.t("app_not_accessible")
-      redirect_to apps_path && return
+      redirect_to(apps_path) && return
     elsif @app.id != @app.app_series.latest_revision_app_id
       redirect_to edit_app_path(@app.app_series.latest_revision_app) && return
     else
-      attrs = %i(dxid name scope title version revision readme spec internal release)
-      js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
+      attrs = %i(dxid name scope title version revision readme spec internal release entity_type)
+      js(
+        app: @app.slice(*attrs),
+        instance_types: user_compute_resource_labels,
+        ubuntu_releases: UBUNTU_RELEASES,
+      )
     end
   end
 
@@ -173,11 +185,27 @@ class AppsController < ApplicationController
       return
     end
 
-    js(ubuntu_releases: UBUNTU_RELEASES, app: { release: UBUNTU_16 })
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
+    js(
+      ubuntu_releases: UBUNTU_RELEASES,
+      app: { release: UBUNTU_16 },
+      instance_types: user_compute_resource_labels,
+    )
   end
 
   # rubocop:disable Metrics/MethodLength
   def batch_app
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
     @app = App.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
     if @app.nil?
@@ -221,22 +249,34 @@ class AppsController < ApplicationController
       licenses_accepted: licenses_accepted,
       selectable_spaces: selectable_spaces,
       content_scopes: content_scopes,
+      instance_types: user_compute_resource_labels,
     )
   end
   # rubocop:enable Metrics/MethodLength
 
   def fork
+    if user_has_no_compute_resources_allowed
+      flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
+      redirect_to apps_path
+      return
+    end
+
     @app = App.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
     if @app.nil?
       flash[:error] = I18n.t("app_fork_forbidden")
       redirect_to apps_path && return
-    else
-      attrs = %i(dxid name title version revision readme spec internal release)
-      js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
     end
+
+    attrs = %i(dxid name title version revision readme spec internal release entity_type)
+    js(
+      app: @app.slice(*attrs),
+      ubuntu_releases: UBUNTU_RELEASES,
+      instance_types: user_compute_resource_labels,
+    )
   end
 
+  # TODO: do refactoring of this method later!
   # Inputs
   #
   # id (string, required): the dxid of the app to run
@@ -251,6 +291,7 @@ class AppsController < ApplicationController
   def run
     # rubocop:disable Style/SignalException
     # Parameter 'id' should be of type String
+
     id = unsafe_params[:id]
     fail "App ID is not a string" unless id.is_a?(String) && id != ""
 
@@ -262,6 +303,13 @@ class AppsController < ApplicationController
     inputs = unsafe_params["inputs"]
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
+    job_limit = params[:job_limit].to_f.zero? ? current_user.job_limit : params[:job_limit].to_f
+    fail "Job limit exceeds maximum user setting - #{current_user.job_limit}" if job_limit > current_user.job_limit
+
+    run_instance_type = unsafe_params[:instance_type]
+
+    fail I18n.t("app_instance_type_forbidden") unless current_user.resources.include?(run_instance_type)
+
     # App should exist and be accessible and runnable by a user.
     @app = App.find_by!(uid: id)
 
@@ -270,6 +318,32 @@ class AppsController < ApplicationController
     # Check if asset licenses have been accepted
     unless @app.assets.all? { |a| a.license.blank? || a.licensed_by?(@context) }
       fail "Asset licenses must be accepted"
+    end
+
+    # Call JupiterLab service if https app is running
+    if @app.https?
+      https_apps_client = DIContainer.resolve("https_apps_client")
+      input_info = input_spec_preparer.run(@app, inputs)
+
+      fail input_spec_preparer.first_error unless input_spec_preparer.valid?
+
+      result =
+        begin
+          https_apps_client.app_run(
+            @app.dxid,
+            name: name,
+            instanceType: run_instance_type,
+            jobLimit: job_limit,
+            scope: Scopes::SCOPE_PRIVATE,
+            input: input_info.run_inputs,
+          )
+        rescue HttpsAppsClient::Error => e
+          fail e.message
+        end
+
+      job = Job.find_by!(dxid: result["dxid"])
+
+      render(json: { id: job.uid }) && return
     end
 
     space_id = unsafe_params[:space_id]
@@ -282,13 +356,6 @@ class AppsController < ApplicationController
     input_info = input_spec_preparer.run(@app, inputs, space&.accessible_scopes)
 
     fail input_spec_preparer.first_error unless input_spec_preparer.valid?
-
-    run_instance_type = unsafe_params[:instance_type]
-
-    # User can override the instance type
-    if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(run_instance_type)
-    end
 
     if space
       project = space.project_for_user(@context.user)
@@ -303,6 +370,7 @@ class AppsController < ApplicationController
       name: name,
       input_info: input_info,
       run_instance_type: run_instance_type,
+      job_limit: job_limit,
       scope: space&.uid,
     )
 

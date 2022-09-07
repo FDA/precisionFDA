@@ -32,7 +32,7 @@ class WorkflowEditorModel
               inputs: inputs,
               outputs: outputs
             }
-            new_slot = new slotModel(spec, this, stage, true)
+            new_slot = new slotModel(spec, this, @availableInstances, stage, true)
             @slots.push(new_slot)
             if spec.outputs.length > 0
               @eligibleSlots.push(new_slot)
@@ -49,7 +49,7 @@ class WorkflowEditorModel
         current_slot[0].nextSlot(next_slot[0])
       @checkConfiguredSlots()
 
-  constructor: (apps, workflow, @mode = 'edit') ->
+  constructor: (apps, workflow, instance_types, @mode = 'edit') ->
     @workflow = workflow
     @all_apps = ko.observableArray(apps.private_apps.concat(apps.public_apps).sort((a, b) -> a.id - b.id) )
     @private_apps = ko.observableArray(apps.private_apps)
@@ -79,7 +79,7 @@ class WorkflowEditorModel
     @updatingWorkflow = ko.observableArray(false)
     @inputBeingEdited = ko.observableArray()
     @eligibleSlots = ko.observableArray()
-    @availableInstances = Precision.INSTANCES
+    @availableInstances = instance_types
     @numberStagesUnConfigured = ko.computed(=>
       ko.utils.arrayFilter(@slots(), (slot) ->
         if slot.inputs().length > 0
@@ -336,7 +336,7 @@ class WorkflowEditorModel
             revision: app.revision
             inputs: inputs
             outputs: outputs
-          new_slot = new slotModel(spec, this)
+          new_slot = new slotModel(spec, this, @availableInstances)
           @slots.push(new_slot)
           if spec.outputs.length > 0
             @eligibleSlots.push(new_slot)
@@ -481,7 +481,7 @@ class IOModel
       'Set'
 
 class slotModel
-  constructor: (spec, viewModel, stage = null, configured = false) ->
+  constructor: (spec, viewModel, instanceTypes ,stage = null, configured = false) ->
     @id = spec.dxid
     @uid = spec.uid
     @slotId = ko.computed( () ->
@@ -494,7 +494,7 @@ class slotModel
     @name = ko.observable(spec.name)
     @originalName = spec.originalName || spec.name
     @revision = spec.revision
-    @instanceTypes = Precision.INSTANCES
+    @instanceTypes = instanceTypes
     @instanceType = ko.observable(stage?.instanceType || spec?.instanceType)
     @inputs = ko.observableArray()
     @addInputs = ko.computed(=>

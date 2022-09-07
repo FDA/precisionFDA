@@ -51,7 +51,7 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Comparator App</h5>
         <p class="list-group-item-text">
-          <%= link_to(App.find_by(dxid: @comparison.app_dxid).name, "/home".concat(app_path(@comparison.app_dxid)))  %>
+          <%= link_to(@comparator_app.name, home_path_to_item(@comparator_app), target: "_blank", rel: "noopener noreferrer") %>
         </p>
       </li>
     <% else %>
@@ -303,10 +303,10 @@
   <div class="tab-pane" id="tab-outputs">
     <div class="comparison-outputs panel">
       <%= grid(@outputs_grid) do |g|
-        g.blank_slate partial:  "_partials/empty_grid"
+        g.blank_slate partial: "_partials/empty_grid"
 
         g.column name: 'Name' do |file|
-          unilinkfw(file)
+          unilinkfw(file, target: "_blank")
         end
 
         g.column name: 'Size' do |file|

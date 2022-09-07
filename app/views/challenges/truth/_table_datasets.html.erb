@@ -11,10 +11,10 @@
       <tr>
         <td><a href="/discussions/6-precisionfda-truth-challenge/answers/<%= result[:'Answer id'] %>"><%= result[:'Label'] %></a></td>
         <td>
-          <%= link_to truncate(result[:'HG001 VCF filename'], length: 50), file_path(result[:'HG001 VCF file id']), title: result[:'HG001 VCF filename'] %>
+          <%= link_to truncate(result[:'HG001 VCF filename'], length: 50), "/home/files/#{result[:'HG001 VCF file id']}", title: result[:'HG001 VCF filename'] %>
         </td>
         <td>
-          <%= link_to truncate(result[:'HG002 VCF filename'], length: 50), file_path(result[:'HG002 VCF file id']), title: result[:'HG002 VCF filename'] %>
+          <%= link_to truncate(result[:'HG002 VCF filename'], length: 50), "/home/files/#{result[:'HG002 VCF file id']}", title: result[:'HG002 VCF filename'] %>
         </td>
       </tr>
     <% end %>

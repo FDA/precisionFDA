@@ -17,7 +17,7 @@
           <div class="pfda-help-block">
             <strong>Need to compile binaries in a compatible environment?</strong>
             <br>
-            <a target="_blank" class="btn btn-primary btn-sm" href="https://dl.dnanex.us/F/D/GQzjBj014vbqz0kyQBgy49YkqGx4gq54x3qx2qqz/precisionFDA-dev-50GB-vm-II-nopass-ssh.ova"><span class="fa fa-clone"></span> Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine, and SSH into localhost (port 2222) as the <code>ubuntu</code> user (no password is required to log in).
+            <a target="_blank" class="btn btn-primary btn-sm" href="https://pfda-production-static-files.s3.amazonaws.com/vmi/precisionFDA-dev-50GB-vm-II-nopass-ssh.ova"><span class="fa fa-clone"></span> Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine, and SSH into localhost (port 2222) as the <code>ubuntu</code> user (no password is required to log in).
           </div>
         </li>
         <li class="list-group-item">
@@ -28,19 +28,23 @@
           </p>
         </li>
         <li class="list-group-item">
-          <p class="list-group-item-heading lead">Step 3 <strong class="text-regular">Download the precisionFDA uploader</strong></p>
+          <p class="list-group-item-heading lead">Step 3 <strong class="text-regular">Download the precisionFDA CLI</strong></p>
           <p>
-            <a class="btn btn-primary btn-lg" href="/pfda-2.0.0.tar.gz">
+            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.1.2.tar.gz">
               <span class="fa fa-download"></span> Linux
             </a>
-            <a class="btn btn-primary btn-lg" href="/pfda-darwin-2.0.0.zip">
+            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.1.2.tar.gz">
               <span class="fa fa-download"></span> Mac OS X
             </a>
-            <a class="btn btn-primary btn-lg" href="/pfda-windows-2.0.0.zip">
+            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.1.2.zip">
               <span class="fa fa-download"></span> Windows
             </a>
           </p>
           <p>Note: On Linux and Mac OS, after unzipping the downloaded file, you may need to run the following command to make the binary executable: <code>chmod +x pfda</code>.</p>
+          <p>Version 2.1.2 (8/03/2022): Fixed windows asset upload.</p>
+          <p>Version 2.1.1 (7/18/2022): Improvements to asset upload.</p>
+          <p>Version 2.1 (2/22/2022): Added download feature, upload to space, --cmd flag is now optional.</p>
+          <p>Version 2.0.1 (8/26/2021): Fix an issue uploading very large files.</p>
           <p>Version 2.0.0 (6/21/2018): TLS 1.2 and FIPS 140-2 support.</p>
           <p>Version 1.0.4 (1/5/2016): Reduced memory usage of each thread.</p>
           <p>Version 1.0.3 (12/14/2015): The uploader can now be used for both assets and files.</p>
@@ -56,12 +60,13 @@
           </p>
         </li>
         <li class="list-group-item">
-          <p class="list-group-item-heading lead">Step 5 <strong class="text-regular">Run the precisionFDA uploader</strong></p>
+          <p class="list-group-item-heading lead">Step 5 <strong class="text-regular">Run the precisionFDA CLI</strong></p>
           <p class="help-block">
             This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file (replace <strong>KEY</strong> below with the actual content of your authorization key copied from the page in step 4, and pasted directly in the command line):
           </p>
-          <p><code>./pfda --cmd upload-asset --key KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code></p>
-          <p>TIP: The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.</p>
+          <p><code>./pfda upload-asset --key KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code></p>
+          <p>TIP: The CLI saves your key in <code>$HOME/.pfda_config</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.</p>
+          <p>TIP 2: The CLI can do a lot more than uploading assets, please see the <a href="/docs/cli">Command Line Interface documentation page</a></p>
         </li>
       </ul>
     </div>
