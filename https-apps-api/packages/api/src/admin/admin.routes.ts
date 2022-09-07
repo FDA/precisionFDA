@@ -10,7 +10,6 @@ import { enumValidator, makeCloudGovBulkUserUpdateMiddlewareSchema, numericBodyV
 
 
 // Routes with /admin prefix
-
 const router = new Router<DefaultState, PaginationCtxT>()
 
 router.use(defaultMiddlewares)

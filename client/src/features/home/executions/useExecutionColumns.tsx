@@ -45,9 +45,9 @@ export const useExecutionColumns = ({
             const { jobs } = props.row.original
             if (jobs) {
               return <div>{jobs[jobs.length - 1].state}</div>
-            } 
+            }
               return <div>{props.row.original.state}</div>
-            
+
           },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {},
         },
@@ -181,14 +181,14 @@ export const useExecutionColumns = ({
             const { jobs } = props.row.original
             if (jobs) {
               return <>{jobs[jobs.length - 1].duration}</>
-            } 
+            }
               return <>{props.row.original.duration}</>
-            
+
           },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {},
         },
         {
-          Header: 'Cost In Dollars',
+          Header: 'Cost',
           accessor: 'jobs',
           id: 'energy',
           disableFilters: true,
@@ -199,9 +199,9 @@ export const useExecutionColumns = ({
             const { jobs } = props.row.original
             if (jobs) {
               return <>{jobs[jobs.length - 1].energy_consumption}</>
-            } 
+            }
               return <>{props.row.original.energy_consumption}</>
-            
+
           },
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {},
         },

@@ -1,5 +1,5 @@
-import axios from 'axios'
 import React, { useEffect, useMemo, useState } from 'react'
+import axios from 'axios'
 import { UseMutationResult, useQuery } from 'react-query'
 import { Column } from 'react-table'
 import { toast } from 'react-toastify'
@@ -8,7 +8,6 @@ import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
-import { breakPoints } from '../../../styles/theme'
 import { getSelectedObjectsFromIndexes } from '../../../utils/object'
 import { Modal } from '../../modal'
 import { ButtonRow } from '../../modal/styles'
@@ -38,10 +37,10 @@ const ResourceTable = ({
   resource: ResourceTypes
   setSelectedUids: (a: string[]) => void
 }) => {
-  const [selected, setSelected] = useState<
-    Record<string, boolean> | undefined
-  >({})
-  const { data, isLoading } = useQuery<{ id: string, uid: string }[]>(
+  const [selected, setSelected] = useState<Record<string, boolean> | undefined>(
+    {},
+  )
+  const { data, isLoading } = useQuery<{ id: string; uid: string }[]>(
     ['resource_list', resource],
     () => fetchResourceListRequest(resource),
     {
@@ -54,18 +53,15 @@ const ResourceTable = ({
     {
       Header: 'Name',
       accessor: 'name',
-      minWidth: 30,
-      width: 150,
-      maxWidth: 200,
+      minWidth: 450,
       // eslint-disable-next-line react/no-unstable-nested-components
-      Cell: ({ value }) => (<StyledName>{value}</StyledName>),
+      Cell: ({ value }) => <StyledName>{value}</StyledName>,
     },
     {
       Header: 'Revision',
       accessor: 'revision',
-      minWidth: 30,
-      width: 15,
-      maxWidth: 200,
+      minWidth: 80,
+      maxWidth: 80,
     },
   ]
 
@@ -77,7 +73,7 @@ const ResourceTable = ({
   const d = useMemo(() => data, [data])
 
   if (isLoading) return <div>Loading....</div>
-  
+
   return (
     <Table<IApp>
       fillWidth
@@ -94,66 +90,6 @@ const ResourceTable = ({
   )
 }
 
-
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  @media (min-width: ${breakPoints.small}px) {
-    width: auto;
-  }
-`
-
-const AddToSpaceForm = ({
-  spaceId,
-  resource,
-  mutation,
-  setShowModal,
-  onSuccess,
-}: {
-  spaceId: string
-  resource: ResourceTypes
-  setShowModal: (show: boolean) => void
-  mutation: UseMutationResult<any, unknown, {
-    spaceId: string;
-    uids: string[];
-}, unknown>
-  onSuccess: (res: any) => void
-}) => {
-  const [selectedUids, setSelectedUids] = useState<string[]>()
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault()
-    if (selectedUids) {
-      mutation.mutateAsync({ spaceId, uids: selectedUids }).then(onSuccess)
-    }
-  }
-  return (
-    <StyledForm onSubmit={handleSubmit}>
-      <ResourceTable
-        resource={resource}
-        setSelectedUids={setSelectedUids}
-      />
-      <ButtonRow>
-        {mutation.isLoading && <Loader height={14} />}
-        <Button
-          onClick={() => setShowModal(false)}
-          disabled={mutation.isLoading}
-        >
-          Cancel
-        </Button>
-        <ButtonSolidBlue
-          type="submit"
-          disabled={!selectedUids || mutation.isLoading}
-        >
-          Add to Space
-        </ButtonSolidBlue>
-      </ButtonRow>
-    </StyledForm>
-  )
-}
-
 export function useAddResourceToModal({
   spaceId,
   resource,
@@ -162,13 +98,26 @@ export function useAddResourceToModal({
 }: {
   spaceId: string
   resource: ResourceTypes
-  mutation: UseMutationResult<any, unknown, {
-    spaceId: string;
-    uids: string[];
-}, unknown>
+  mutation: UseMutationResult<
+    any,
+    unknown,
+    {
+      spaceId: string
+      uids: string[]
+    },
+    unknown
+  >
   onSuccess: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()
+  const [selectedUids, setSelectedUids] = useState<string[]>([])
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault()
+    if (selectedUids) {
+      mutation.mutateAsync({ spaceId, uids: selectedUids }).then(onSuccess)
+    }
+  }
 
   const modalComp = (
     <Modal
@@ -176,14 +125,26 @@ export function useAddResourceToModal({
       headerText={`Add ${resource} to space`}
       isShown={isShown}
       hide={() => setShowModal(false)}
+      footer={
+        <ButtonRow>
+          {mutation.isLoading && <Loader height={14} />}
+          <Button
+            onClick={() => setShowModal(false)}
+            disabled={mutation.isLoading}
+          >
+            Cancel
+          </Button>
+          <ButtonSolidBlue
+            type="submit"
+            onClick={handleSubmit}
+            disabled={!selectedUids || mutation.isLoading}
+          >
+            Add to Space
+          </ButtonSolidBlue>
+        </ButtonRow>
+      }
     >
-      <AddToSpaceForm
-        spaceId={spaceId}
-        mutation={mutation}
-        resource={resource}
-        setShowModal={setShowModal}
-        onSuccess={onSuccess}
-      />
+      <ResourceTable resource={resource} setSelectedUids={setSelectedUids} />
     </Modal>
   )
   return {

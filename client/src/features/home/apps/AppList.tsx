@@ -20,12 +20,15 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppsColumns } from './useAppsColumns'
 import { useAppSelectionActions } from './useAppSelectionActions'
+import { useAuthUser } from '../../auth/useAuthUser'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
 export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const history = useHistory()
-  const isAdmin = useSelector((state: any) => state.context.user.admin)
+  const user = useAuthUser()
+  const isAdmin = user?.isAdmin
+
   const onRowClick = (id: string) => history.push(`/home/apps/${id}`)
   const {
     setPerPageParam,

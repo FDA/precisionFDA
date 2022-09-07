@@ -1,9 +1,8 @@
 import { pick } from 'ramda'
 import { useQueryClient } from 'react-query'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-import { RootState } from '../../../store'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
@@ -17,7 +16,7 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
-  const user = useSelector((state: RootState) => state.context.user)
+  const user = useAuthUser()
   const isAdmin = user ? user.admin : false
 
   const featureMutation = useFeatureMutation({ resource: 'workflows', onSuccess: () => {
@@ -56,9 +55,8 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
     setShowModal: setDeleteModal,
     isShown: isShownDeleteModal,
   } = useDeleteModal({
-    resource: 'workflows',
-    selected: selected.map(s => ({ name: s.name, id: s.uid })),
-    scope,
+    resource: 'workflow',
+    selected: selected.map(s => ({ name: s.name, id: s.uid, location: s.location })),
     request: deleteWorkflowRequest,
     onSuccess: () => {
       queryClient.invalidateQueries('workflows')

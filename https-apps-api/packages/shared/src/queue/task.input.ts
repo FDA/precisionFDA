@@ -18,6 +18,7 @@ export enum TASK_TYPE {
   CHECK_USER_JOBS = 'check_user_jobs',
   CHECK_NON_TERMINATED_DBCLUSTERS = 'check_non_terminated_dbclusters',
   SYNC_DBCLUSTER_STATUS = 'sync_dbcluster_status',
+  SYNC_SPACES_PERMISSIONS = 'sync_spaces_permissions',
   USER_CHECKUP = 'user_checkup',
   DEBUG_MAX_MEMORY = 'debug_test_max_memory',
 }
@@ -50,6 +51,9 @@ export type SyncWorkstationFiles = TaskWithAuth & {
 export type CheckNonTerminatedDbClustersJob = {
   type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS
 }
+export type SyncSpacesPermissionsJob = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_SPACES_PERMISSIONS
+}
 
 export type DebugMaxMemory = {
   type: TASK_TYPE.DEBUG_MAX_MEMORY
@@ -62,5 +66,6 @@ export type Task =
   | CheckStaleJobsJob
   | CheckNonTerminatedDbClustersJob
   | SyncDbClusterJob
+  | SyncSpacesPermissionsJob
   | SyncWorkstationFiles
   | DebugMaxMemory

@@ -7,6 +7,7 @@ import { router as emailsRouter } from '../emails'
 import { router as dbClustersRouter } from '../dbclusters'
 import { router as usersRouter } from '../users'
 import { router as adminRouter } from '../admin'
+import { router as accountRouter } from '../account'
 import { router as debugRouter } from '../debug'
 import { router as expertsRouter } from '../experts'
 
@@ -21,6 +22,7 @@ router.use('/folders', foldersRouter.routes(), foldersRouter.allowedMethods())
 router.use('/jobs', jobsRouter.routes(), jobsRouter.allowedMethods())
 
 router.use('/users', usersRouter.routes(), usersRouter.allowedMethods())
+router.use('/account', accountRouter.routes(), accountRouter.allowedMethods())
 // TODO: Add an admin authentication middleware, but not urgent
 router.use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
 router.use('/debug', debugRouter.routes(), debugRouter.allowedMethods())

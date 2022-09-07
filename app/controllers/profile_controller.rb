@@ -220,6 +220,11 @@ class ProfileController < ApplicationController
     end
   end
 
+  def check_spaces_permissions
+    https_apps_client = DIContainer.resolve("https_apps_client")
+    https_apps_client.check_spaces_permissions
+  end
+
   def run_report
     @user = User.includes(:org).find(@context.user_id)
     raise unless @user.can_administer_site?

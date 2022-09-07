@@ -34,6 +34,7 @@ export const StyledDropSection = styled.div`
   align-items: center;
   padding: 16px;
   gap: 8px;
+  border-bottom: 1px solid #e5e5e5;
 `
 
 export const StyledUploadInfoSection = styled.div`
@@ -47,6 +48,9 @@ export const UploadFilesTable = styled.table`
   thead {
     tr {
       font-weight: bold;
+    }
+    th {
+      text-align: left;
     }
   }
   td {

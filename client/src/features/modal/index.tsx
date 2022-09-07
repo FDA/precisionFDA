@@ -11,18 +11,21 @@ import {
   Content,
   Backdrop,
   Footer,
+  HeaderTop,
 } from './styles'
 
 export interface ModalProps {
   isShown: boolean
   hide: () => void
   headerText: string
+  title?: string
+  header?: React.ReactNode
   footer?: React.ReactNode
   blur?: boolean
   disableClose?: boolean
   overflowContent?: boolean
 }
-const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, footer, blur = false, disableClose = false, overflowContent = true, ...rest }) => {
+const ModalComponent: FC<ModalProps> = ({ header, headerText, isShown, hide, children, footer, blur = false, disableClose = false, overflowContent = true, ...rest }) => {
   useKeyPress('Escape', () => hide())
   return (
     <>
@@ -30,12 +33,15 @@ const ModalComponent: FC<ModalProps> = ({ headerText, isShown, hide, children, f
       <Wrapper aria-modal aria-label={headerText} tabIndex={-1} role="dialog" {...rest}>
         <StyledModal>
           <Header>
-            <HeaderText>{headerText}</HeaderText>
-            {!disableClose &&
-              <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
-                <PlusIcon height={16} />
-              </CloseButton>
-            }
+            <HeaderTop>
+              <HeaderText>{headerText}</HeaderText>
+              {!disableClose &&
+                <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
+                  <PlusIcon height={16} />
+                </CloseButton>
+              }
+            </HeaderTop>
+            {header && <div>{header}</div>}
           </Header>
           <Content overflowContent={overflowContent}>
             {children}
