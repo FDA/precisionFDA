@@ -7,6 +7,10 @@ import {
   HOME_WORKFLOWS_HIDE_MODAL,
   HOME_WORKFLOWS_SET_FILTER_VALUE,
   HOME_WORKFLOWS_RESET_FILTERS,
+  HOME_WORKFLOWS_EXECUTIONS_EXPAND_EXECUTION,
+  HOME_WORKFLOWS_EXECUTIONS_EXPAND_ALL_EXECUTIONS,
+  HOME_WORKFLOWS_EXECUTIONS_SET_FILTER_VALUE,
+  HOME_WORKFLOWS_EXECUTIONS_RESET_FILTERS,
 } from '../workflows/types'
 import { HOME_WORKFLOW_TYPES, HOME_WORKFLOWS_MODALS, OBJECT_TYPES } from '../../../constants'
 import fetchWorkflows from './fetchWorkflows'
@@ -14,7 +18,17 @@ import fetchWorkflowsFeatured from './fetchWorkflowsFeatured'
 import fetchWorkflowsEveryone from './fetchWorkflowsEveryone'
 import fetchWorkflowsSpaces from './fetchWorkflowsSpaces'
 import fetchWorkflowDetails from './fetchWorkflowDetails'
+import fetchWorkflowDiagram from './fetchWorkflowDiagram'
+import fetchWorkflowExecutions from './fetchWorkflowExecutions'
 
+
+const expandExecution = (key) => createAction(HOME_WORKFLOWS_EXECUTIONS_EXPAND_EXECUTION, { key })
+const expandAllExecutions = () => createAction(HOME_WORKFLOWS_EXECUTIONS_EXPAND_ALL_EXECUTIONS)
+const setExecutionsFilterValue = (value) => createAction(HOME_WORKFLOWS_EXECUTIONS_SET_FILTER_VALUE, { value })
+const resetExecutionsFiltersValue = () => createAction(HOME_WORKFLOWS_EXECUTIONS_RESET_FILTERS)
+
+const setWorkflowExecutionsFilterValue = (value) => createAction(HOME_WORKFLOWS_SET_FILTER_VALUE, { workflowsType: 'workflowExecutions', value })
+const resetWorkflowExecutionsFiltersValue = () => createAction(HOME_WORKFLOWS_RESET_FILTERS, { workflowsType: 'workflowExecutions' })
 
 const toggleAllWorkflowsCheckboxes = () => createAction(HOME_WORKFLOWS_TOGGLE_ALL_CHECKBOXES, HOME_WORKFLOW_TYPES.PRIVATE)
 const toggleWorkflowCheckbox = (id) => createAction(HOME_WORKFLOWS_TOGGLE_CHECKBOX, { workflowsType: HOME_WORKFLOW_TYPES.PRIVATE, id })
@@ -63,7 +77,6 @@ const workflowsAttachTo = (items, noteUids) => createAction(OBJECT_TYPES.WORKFLO
 const showWorkflowEditTagsModal = () => createAction(HOME_WORKFLOWS_SHOW_MODAL, HOME_WORKFLOWS_MODALS.EDIT_TAGS)
 const hideWorkflowEditTagsModal = () => createAction(HOME_WORKFLOWS_HIDE_MODAL, HOME_WORKFLOWS_MODALS.EDIT_TAGS)
 
-
 export {
   showWorkflowEditTagsModal,
   hideWorkflowEditTagsModal,
@@ -72,6 +85,8 @@ export {
   fetchWorkflowsEveryone,
   fetchWorkflowsSpaces,
   fetchWorkflowDetails,
+  fetchWorkflowDiagram,
+  fetchWorkflowExecutions,
   toggleAllWorkflowsCheckboxes,
   toggleWorkflowCheckbox,
   setWorkflowFilterValue,
@@ -104,4 +119,10 @@ export {
   showWorkflowsAttachToModal,
   hideWorkflowsAttachToModal,
   workflowsAttachTo,
+  setWorkflowExecutionsFilterValue,
+  resetWorkflowExecutionsFiltersValue,
+  expandExecution,
+  expandAllExecutions,
+  setExecutionsFilterValue,
+  resetExecutionsFiltersValue,
 }

@@ -9,9 +9,9 @@ import {
   HOME_EXECUTIONS_FETCH_SUCCESS,
   HOME_EXECUTIONS_FETCH_FAILURE,
 } from '../types'
-import { setPageCounters, setInitialPageCounters } from '../../index'
+import { setPageCounters } from '../../index'
 import { homeExecutionsFiltersSelector } from '../../../../reducers/home/executions/selectors'
-import { HOME_ENTRIES_TYPES } from '../../../../constants'
+import { HOME_ENTRIES_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -51,8 +51,7 @@ export default () => (
           const counters = {
             jobs: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
-          dispatch(setInitialPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.PRIVATE))
         }
 
         dispatch(fetchExecutionsSuccess(executions, pagination))

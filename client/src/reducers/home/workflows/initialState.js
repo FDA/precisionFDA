@@ -12,6 +12,17 @@ const defaultWorkspaceFilters = {
   totalCount: null,
 }
 
+const filtersState = {
+  sortType: null,
+  sortDirection: null,
+  currentPage: 1,
+  nextPage: null,
+  prevPage: null,
+  totalPages: null,
+  totalCount: null,
+  fields: new Map(),
+}
+
 const defaultWorkspaceTabState = {
   workflows: [],
   isFetching: false,
@@ -46,5 +57,16 @@ export default {
     isFetching: false,
     workflow: {},
     meta: {},
+  },
+  workflowDiagram: {
+    isFetching: false,
+    stages: [],
+  },
+  workflowExecutions: {
+    isFetching: false,
+    isExpandedAll: false,
+    jobs: [],
+    filters: filtersState,
+    pagination: {},
   },
 }

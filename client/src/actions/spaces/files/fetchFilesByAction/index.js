@@ -17,10 +17,11 @@ const fetchFilesByActionSuccess = (action, files) => createAction(SPACE_FETCH_FI
 
 const fetchFilesByActionFailure = () => createAction(SPACE_FETCH_FILES_BY_ACTION_FAILURE)
 
-export default (ids, action) => (
+export default (ids, action, scope) => (
   (dispatch) => {
     dispatch(fetchFilesByActionStart(action))
-    return API.getFilesByAction(ids, action, 'private')
+
+    return API.getFilesByAction(ids, action, scope)
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
           const files = response.payload.map(mapToFileActionItem)

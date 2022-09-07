@@ -31,6 +31,7 @@ export const homeCurrentPageSelector = (state) => state.home.workflows.currentPa
 export const homeAccessibleSpacesSelector = (state) => state.home.workflows.accessibleSpaces
 export const homePageCountersSelector = (state) => state.home.workflows.counters
 export const homePageAdminStatusSelector = (state) => state.home.workflows.adminStatus
+
 export const homeWorkflowsCopyToSpaceModalSelector = (state) => state.home.workflows.copyToSpaceModal
 export const homeWorkflowsDeleteModalSelector = (state) => state.home.workflows.deleteModal
 export const homeWorkflowsRunModalSelector = (state) => state.home.workflows.runWorkflowModal
@@ -38,3 +39,8 @@ export const homeWorkflowsRunBatchModalSelector = (state) => state.home.workflow
 export const homeWorkflowsAttachToModalSelector = (state) => state.home.workflows.attachToModal
 export const homeWorkflowsWorkflowDetailsSelector = (state) => state.home.workflows.workflowDetails
 export const homeWorkflowsEditTagsModalSelector = (state) => state.home.workflows.editTagsModal
+
+export const homeWorkflowsWorkflowDiagramSelector = (state) => state.home.workflows.workflowDiagram
+export const homeWorkflowsWorkflowExecutionsSelector = (state) => state.home.workflows.workflowExecutions
+export const homeWorkflowsWorkflowExecutionsIsExpandedAllSelector = (state) => state.home.workflows.workflowExecutions.isExpandedAll
+export const homeWorkflowsWorkflowExecutionsFiltersSelector = (state) => state.home.workflows.workflowExecutions.filters

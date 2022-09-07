@@ -26,6 +26,7 @@ const HomeJobShape = {
   featured: PropTypes.bool,
   isChecked: PropTypes.bool,
   isWorkflow: PropTypes.bool,
+  inSpace: PropTypes.bool,
 }
 
 const HomeWorkflowShape = {
@@ -43,6 +44,8 @@ const HomeWorkflowShape = {
   isExpanded: PropTypes.bool,
   isWorkflow: PropTypes.bool,
   key: PropTypes.string,
+  jobs: PropTypes.array,
+  inSpace: PropTypes.bool,
 }
 
 const getExecution = (data) => ({
@@ -65,12 +68,15 @@ const getExecution = (data) => ({
   runDataUpdates: data.run_data_updates,
   runInputData: data.run_input_data,
   runOutputData: data.run_output_data,
+  failureReason: data.failure_reason,
+  failureMessage: data.failure_message,
   uid: data.uid,
   tags: data.tags,
   appRevision: data.app_revision,
   featured: data.featured,
   isChecked: false,
   isWorkflow: false,
+  inSpace: false,
   key: PropTypes.string,
 })
 
@@ -88,6 +94,9 @@ const getWorkflow = (data) => ({
   isChecked: false,
   isExpanded: false,
   isWorkflow: true,
+  inSpace: data.in_space,
+  workflowTitle: data.workflow_title,
+  jobs: data.jobs,
 })
 
 const mapToJob = (data, i) => {

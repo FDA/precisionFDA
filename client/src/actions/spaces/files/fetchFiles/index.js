@@ -39,7 +39,7 @@ export default (spaceId, folderId) => (
     return API.getFiles(spaceId, params)
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
-          const files = response.payload.entries.map(mapToFile)
+          const files = response.payload.files.map(mapToFile)
           const { links, path } = response.payload.meta
           const pagination = response.payload.meta ? mapToPagination(response.payload.meta.pagination) : {}
 

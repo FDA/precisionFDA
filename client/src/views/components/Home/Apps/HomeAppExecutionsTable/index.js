@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useLayoutEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import { HomeJobShape, HomeWorkflowShape } from '../../../../shapes/HomeJobShape'
@@ -24,19 +24,21 @@ import { getSpacesIcon } from '../../../../../helpers/spaces'
 import { debounce } from '../../../../../utils'
 
 
-const HomeAppsExecutionsTable = ({ uid, appExecutions, resetAppExecutionsFiltersValue, fetchAppExecutions, setAppExecutionsFilterValue, space }) => {
-  useLayoutEffect(() => {
+const HomeAppsExecutionsTable = ({ uid, appExecutions, space }) => {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
     if (uid) {
-      resetAppExecutionsFiltersValue()
-      fetchAppExecutions(uid)
+      dispatch(resetAppExecutionsFiltersValue())
+      dispatch(setAppExecutionsFilterValue(uid))
     }
   }, [uid])
 
   const handleFilterValue = (value) => {
-    setAppExecutionsFilterValue(value)
-    fetchAppExecutions(uid)
+    dispatch(setAppExecutionsFilterValue(value))
+    dispatch(fetchAppExecutions(uid))
   }
-  
+
   const { isFetching, jobs, filters } = appExecutions
   const { sortType, sortDirection, currentPage, nextPage, prevPage, totalPages, totalCount, fields } = filters
 
@@ -171,7 +173,7 @@ const FilterRow = ({ fieldsSearch, onChangeFieldsValue, space }) => {
         <Input
           name={filter}
           placeholder='--'
-          value={fieldsSearch.get(filter) || ''}
+          value={fieldsSearch?.get(filter) || ''}
           autoComplete='off'
           onChange={(e) => {
             onChangeFieldsValue(fieldsSearch.set(filter, e.target.value))
@@ -189,17 +191,7 @@ const FilterRow = ({ fieldsSearch, onChangeFieldsValue, space }) => {
 }
 
 HomeAppsExecutionsTable.propTypes = {
-  isFetching: PropTypes.bool,
-  jobs: PropTypes.arrayOf(PropTypes.oneOfType([
-    PropTypes.shape(HomeWorkflowShape),
-    PropTypes.shape(HomeJobShape),
-  ])),
-  filters: PropTypes.object,
-  handleFilterValue: PropTypes.func,
   appExecutions: PropTypes.object,
-  fetchAppExecutions: PropTypes.func,
-  resetAppExecutionsFiltersValue: PropTypes.func,
-  setAppExecutionsFilterValue: PropTypes.func,
   uid: PropTypes.string,
   space: PropTypes.string,
 }
@@ -229,13 +221,7 @@ const mapStateToProps = (state) => ({
   appExecutions: homeAppsAppExecutionsSelector(state),
 })
 
-const mapDispatchToProps = (dispatch) => ({
-  fetchAppExecutions: (uid) => dispatch(fetchAppExecutions(uid)),
-  resetAppExecutionsFiltersValue: () => dispatch(resetAppExecutionsFiltersValue()),
-  setAppExecutionsFilterValue: (value) => dispatch(setAppExecutionsFilterValue(value)),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(HomeAppsExecutionsTable)
+export default connect(mapStateToProps)(HomeAppsExecutionsTable)
 
 export {
   HomeAppsExecutionsTable,

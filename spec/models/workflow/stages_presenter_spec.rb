@@ -6,7 +6,7 @@ RSpec.describe Workflow::StagesPresenter, type: :model do
 
   subject(:presenter) { described_class.new(raw, context) }
 
-  let(:user) { create(:user) }
+  let(:user) { create(:user, resources: CloudResourceDefaults::RESOURCES) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
   let(:raw) { params["slots"] }
   let(:subject_response) { presenter.build }

@@ -15,7 +15,7 @@ import { HOME_TABS, HOME_PAGES } from '../../../constants'
 import { setCurrentPage, setIsLeftMenuOpen } from '../../../actions/home'
 
 
-const MenuLink = ({ url, icon, text, counter = 0, page, currentPage, setCurrentPage, isDisabled }) => {
+const MenuLink = ({ url, icon, text, counter, page, currentPage, setCurrentPage, isDisabled }) => {
   const classes = classNames({
     'home-page-layout__menu-item--disabled': isDisabled,
   }, 'home-page-layout__menu-item')
@@ -41,7 +41,7 @@ const MenuLink = ({ url, icon, text, counter = 0, page, currentPage, setCurrentP
       <Icon icon={icon} />
       <span className='home-page-layout__menu-item-text'>
         <span>{text}</span>
-        {(!isNaN(counter)) && <span className='home-page-layout__menu-item-counter'>({counter})</span>}
+        <span className='home-page-layout__menu-item-counter'>({counter})</span>
       </span>
     </NavLink>
   )
@@ -67,6 +67,8 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
     'home-page-layout__menu-switcher': true,
   })
 
+  const tabCounters = counters[currentTab] || {}
+
   return (
     <div className={classes}>
       <div className='home-page-layout__menu-items'>
@@ -74,7 +76,7 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           url={`/home/files${tab}`}
           icon={'fa-files-o'}
           text='Files'
-          counter={counters.files}
+          counter={tabCounters.files}
           page={HOME_PAGES.FILES}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -83,8 +85,17 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           url={`/home/apps${tab}`}
           icon={'fa-cube'}
           text='Apps'
-          counter={counters.apps}
+          counter={tabCounters.apps}
           page={HOME_PAGES.APPS}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+        <MenuLink
+          url={`/home/databases${tab}`}
+          icon={'fa-cube'}
+          text='Databases'
+          counter={tabCounters.dbclusters}
+          page={HOME_PAGES.DATABASES}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
         />
@@ -92,7 +103,7 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           url={`/home/assets${tab}`}
           icon={'fa-file-zip-o'}
           text='Assets'
-          counter={counters.assets}
+          counter={tabCounters.assets}
           page={HOME_PAGES.ASSETS}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -101,7 +112,7 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           url={`/home/workflows${tab}`}
           icon={'fa-bolt'}
           text='Workflows'
-          counter={counters.workflows}
+          counter={tabCounters.workflows}
           page={HOME_PAGES.WORKFLOWS}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -110,7 +121,7 @@ const Menu = ({ currentTab, currentPage, setCurrentPage, counters = {}, match, i
           url={`/home/jobs${tab}`}
           icon={'fa-cogs'}
           text='Executions'
-          counter={counters.jobs}
+          counter={tabCounters.jobs}
           page={HOME_PAGES.JOBS}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -141,7 +152,10 @@ MenuLink.propTypes = {
   url: PropTypes.string,
   icon: PropTypes.string,
   text: PropTypes.string,
-  counter: PropTypes.number,
+  counter: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
   page: PropTypes.string,
   currentPage: PropTypes.string,
   setCurrentPage: PropTypes.func,

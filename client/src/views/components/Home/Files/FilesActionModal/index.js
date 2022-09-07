@@ -1,20 +1,27 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
+import HomeFileShape from '../../../../shapes/HomeFileShape'
 import Modal from '../../../Modal'
 import Button from '../../../Button'
-import { HOME_FILES_ACTIONS } from '../../../../../constants'
+import { HOME_FILES_ACTIONS, SPACE_FILES_ACTIONS } from '../../../../../constants'
 import FilesList from './FilesList'
 
 
 const switchTitle = (action) => {
   switch (action) {
-    case HOME_FILES_ACTIONS.MAKE_PUBLIC:
+    case HOME_FILES_ACTIONS.MAKE_PUBLIC_FOLDER:
       return 'Make Public'
     case HOME_FILES_ACTIONS.DELETE:
       return 'Delete'
+    case HOME_FILES_ACTIONS.OPEN:
+      return 'Open'
     case HOME_FILES_ACTIONS.DOWNLOAD:
       return 'Download'
+    case SPACE_FILES_ACTIONS.PUBLISH:
+      return 'Publish'
+    case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+      return 'Copy To Private'
     default:
       return 'Some Action'
   }
@@ -22,7 +29,7 @@ const switchTitle = (action) => {
 
 const SwitchFooter = ({ action, hideAction, modalAction }) => {
   switch (action) {
-    case HOME_FILES_ACTIONS.MAKE_PUBLIC:
+    case HOME_FILES_ACTIONS.MAKE_PUBLIC_FOLDER:
       return (
         <>
           <Button onClick={hideAction}>Cancel</Button>
@@ -36,6 +43,20 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
           <Button type="danger" onClick={modalAction}>Delete</Button>
         </>
       )
+    case SPACE_FILES_ACTIONS.PUBLISH:
+      return (
+        <>
+          <Button onClick={hideAction}>Cancel</Button>
+          <Button type="success" onClick={modalAction}>Publish</Button>
+        </>
+      )
+    case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+      return (
+        <>
+          <Button onClick={hideAction}>Cancel</Button>
+          <Button type="success" onClick={modalAction}>Copy</Button>
+        </>
+      )
     default:
       return (
         <Button onClick={hideAction}>Close</Button>
@@ -43,12 +64,15 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
   }
 }
 
+// This component logic - is for My page
 const FilesActionModal = ({ modalAction, hideAction, action, files = [], isOpen, isLoading, fetchFilesByAction, modal = {}}) => {
   const title = switchTitle(action)
   const getFilesAction = () => fetchFilesByAction()
+
   useEffect(() => {
     if (isOpen) getFilesAction()
   }, [isOpen, files])
+
   return (
     <div className="objects-actions-modal">
       <Modal
@@ -66,7 +90,7 @@ const FilesActionModal = ({ modalAction, hideAction, action, files = [], isOpen,
 }
 
 FilesActionModal.propTypes = {
-  files: PropTypes.array,
+  files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
   modalAction: PropTypes.func,
   hideAction: PropTypes.func,
   action: PropTypes.string,

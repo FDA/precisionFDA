@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
+import PropTypes from 'prop-types'
 
 import { errorPageSelector } from './selectors'
 import { ERROR_PAGES } from '../../../constants'
@@ -17,6 +18,10 @@ const ErrorWrapper = ({ children }) => {
   }
 
   return children
+}
+
+ErrorWrapper.propTypes = {
+  children: PropTypes.object,
 }
 
 export default ErrorWrapper

@@ -11,13 +11,13 @@ import {
 } from '../../types'
 import { setPageCounters } from '../../index'
 import { homeFilesFeaturedFiltersSelector } from '../../../../reducers/home/files/selectors'
-import { HOME_FILE_TYPES } from '../../../../constants'
+import { HOME_FILE_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
 const fetchFilesFeaturedStart = () => createAction(HOME_FILES_FETCH_START, HOME_FILE_TYPES.FEATURED)
 
-const fetchFilesFeaturedSuccess = (files, pagination) => createAction(HOME_FILES_FETCH_SUCCESS, { filesType: HOME_FILE_TYPES.FEATURED, files, pagination })
+const fetchFilesFeaturedSuccess = (files, pagination, path) => createAction(HOME_FILES_FETCH_SUCCESS, { filesType: HOME_FILE_TYPES.FEATURED, files, pagination, path })
 
 const fetchFilesFeaturedFailure = () => createAction(HOME_FILES_FETCH_FAILURE, HOME_FILE_TYPES.FEATURED)
 
@@ -42,19 +42,20 @@ export default (folderId) => (
 
     try {
       const response = await API.getFilesFeatured(params)
-      
+
       if (response.status === httpStatusCodes.OK) {
         const files = response.payload.files ? response.payload.files.map(mapToHomeFile) : []
         const pagination = response.payload.meta ? mapToPagination(response.payload.meta.pagination) : {}
-        
+        const path = response.payload.meta ? response.payload.meta.path : []
+
         if (response.payload.meta) {
           const counters = {
             files: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.FEATURED))
         }
 
-        dispatch(fetchFilesFeaturedSuccess(files, pagination))
+        dispatch(fetchFilesFeaturedSuccess(files, pagination, path))
       } else {
         dispatch(fetchFilesFeaturedFailure())
         dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))

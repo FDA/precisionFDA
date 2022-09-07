@@ -1,0 +1,119 @@
+@import "../../../../styles/common.sass"
+@import "../../../../styles/variables.sass"
+
+
+h1
+  @extend .pfda-section-heading
+  margin: 4px 0 4px 0
+
+.expert-name
+  font-weight: bold
+  font-size: $pfda-font-size-body
+  padding-right: 12px
+
+  a
+    color: $color-text-black
+
+.expert-date
+  font-size: 13px
+  color: $color-text-medium-grey
+
+.experts-list-item
+  display: flex
+  flex-flow: row nowrap
+  list-style: none
+  margin-bottom: $padding-main-content-vertical
+
+  &__left-column
+    width: $sizing-smaller-column-width
+    flex: 0 0 $sizing-smaller-column-width
+    align-items: flex-start
+    padding: 0
+
+  &__right-column
+    flex-grow: 1
+    align-items: flex-start
+    padding-left: 0
+    padding-right: $padding-main-content-horizontal
+
+  .expert-image
+    width: $sizing-smaller-column-width
+    height: $sizing-smaller-column-width
+    object-fit: cover
+    overflow: hidden
+
+  .experts-item-content
+    flex-grow: 1
+    vertical-align: top
+    padding: 0 0 0 $padding-main-content-horizontal
+
+    h1
+      @extend .pfda-section-heading
+      margin-bottom: 6px
+
+    p
+      font-size: $pfda-font-size-body
+      font-weight: 400
+      color: $color-text-medium-grey
+      margin-top: 5px
+
+  &__buttons
+    button
+      margin-right: $padding-button-spacing * 1.5
+
+    a
+      margin-right: $padding-button-spacing * 1.5
+
+
+  @media (min-width: 768px)
+    flex-flow: row nowrap
+
+
+.experts-list-item-small
+  display: flex
+  margin-bottom: $padding-main-content-vertical / 2
+
+  &__left-column
+    width: 60x
+    flex: 0 0 60px
+    align-items: flex-start
+    padding: 0
+
+  &__right-column
+    flex-shrink: 1
+    align-items: center
+    padding: 0 0 0 12px
+    margin: auto 0
+    font-size: 12px
+
+  .expert-image
+    width: $sizing-icon-small
+    height: $sizing-icon-small
+    margin: auto
+    object-fit: cover
+    overflow: hidden
+
+  .expert-name
+    font-size: 13px
+    margin-bottom: 2px
+
+  .expert-blog-title
+    margin: 3px 0px
+
+  .expert-date
+    font-size: 12px
+
+  .answers-comments-container
+    display: flex
+    justify-content: space-between
+
+    div
+      width: 50%
+
+    .answers-comments
+      color: $color-text-medium-grey
+      margin-left: 3px
+      margin-right: 6px
+
+.btn-borderless
+  border: none

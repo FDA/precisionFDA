@@ -19,14 +19,16 @@ import ActionModal from '../ActionModal'
 import RenameModal from '../RenameModal'
 import CopyModal from '../CopyModal'
 import { showMoveModal } from '../MoveModal/actions'
+import './style.sass'
 
 
 const Divider = () => (<li role="separator" className="divider" />)
 
 const Item = ({ text, icon, isDisabled, handler }) => {
+  var isDisabled_class = isDisabled ? 'disabled_menu_color' : ''
   const classes = classNames({
     'dropdown-menu__item--disabled': isDisabled,
-  }, 'dropdown-menu__item')
+  }, 'dropdown-menu__item', isDisabled_class)
 
   const onClick = () => {
     if (!isDisabled && typeof handler === 'function') handler()
@@ -49,6 +51,7 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
 
   const showPublishModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.PUBLISH))
   const showDownloadModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.DOWNLOAD))
+  const showOpenModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.OPEN))
   const showDeleteModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.DELETE))
   const showCopyToPrivateModal = () => {
     dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.COPY_TO_PRIVATE))
@@ -69,7 +72,7 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
   return (
     <div className="btn-group">
       <div className="dropdown">
-        <Button type="primary" id="space_files_actions" data-toggle="dropdown">
+        <Button type="primary" id="space_files_actions" data-toggle="dropdown" aria-label="file actions dropdown menu">
           <Icon icon="fa-cog" />
         </Button>
         <ul className="dropdown-menu dropdown-menu-right" aria-labelledby="space_files_actions">
@@ -93,6 +96,9 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
           <Divider />
           <Item isDisabled={!isAnyFileChecked}
             icon="fa-download" text="Download" handler={showDownloadModal} />
+          <Divider />
+          <Item isDisabled={!isAnyFileChecked}
+            icon="fa-file-o" text="Open" handler={showOpenModal} />
         </ul>
       </div>
       <ActionModal files={checkedFiles} loadFilesHandler={loadFilesHandler} />

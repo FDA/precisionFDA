@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 
 import HomeFileShape from '../../../../shapes/HomeFileShape'
 import {
-  makePublicFiles,
   showFilesCopyToSpaceModal,
   hideFilesCopyToSpaceModal,
   showFilesRenameModal,
@@ -17,34 +16,38 @@ import {
   hideFilesMoveModal,
   showFilesAttachLicenseModal,
   hideFilesAttachLicenseModal,
-  showFilesMakePublicModal,
-  hideFilesMakePublicModal,
+  showFilesMakePublicFolderModal,
+  hideFilesMakePublicFolderModal,
   fetchFilesByAction,
   showFilesLicenseModal,
   hideFilesLicenseModal,
+  showFilesAcceptLicenseModal,
+  hideFilesAcceptLicenseModal,
 } from '../../../../../actions/home'
 import {
   homeFilesRenameModalSelector,
   homeFilesCopyToSpaceModalSelector,
-  homeFilesMakePublicModalSelector,
+  homeFilesMakePublicFolderModalSelector,
   homeFilesDeleteModalSelector,
   homeFilesAttachToModalSelector,
   homeFilesModalSelector,
   homeFilesAttachLicenseModalSelector,
   homeFilesActionModalSelector,
   homeFilesLicenseModalSelector,
+  homeFilesAcceptLicenseModalSelector,
 } from '../../../../../reducers/home/files/selectors'
 import {
   contextSelector,
 } from '../../../../../reducers/context/selectors'
 import { HOME_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
-import DropdownMenu from '../../../DropdownMenu'
+import { DropdownMenu } from '../../../DropdownMenu'
 import CopyToSpaceModal from '../../CopyToSpaceModal'
-import RenameObjectModal from '../../../Files/RenameObjectModal'
+import RenameObjectModal from '../../../RenameObjectModal'
 import HomeAttachToModal from '../../HomeAttachToModal'
 import HomeMoveModal from '../../../../../views/components/Home/HomeMoveModal'
 import AttachLicenseModal from '../../AttachLicenseModal'
-import FilesActionModal from '../FilesActionModal'
+import MyFilesActionModal from '../FilesActionModal'
+import FilesActionModal from '../../../../../views/components/Files/FilesActionModal'
 import HomeLicenseModal from '../../HomeLicenseModal'
 
 
@@ -57,8 +60,10 @@ const ACTIONS_TO_REMOVE = {
 }
 
 const ActionsDropdown = (props) => {
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
-  const { files, page = 'private' } = props
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false)
+  const [isFileOpenModalOpen, setIsFileOpenModalOpen] = useState(false)
+
+  const { files, page = 'private', scope } = props
   const filesIds = files.map(file => file.id)
   const filesUids = files.map(file => file.uid)
   const isFolder = files.every(e => e.type === 'Folder')
@@ -72,40 +77,48 @@ const ActionsDropdown = (props) => {
   const actions = [
     {
       text: 'Track',
-      isDisabled: files.length !== 1 || !links.publish,
+      isDisabled: files.length !== 1 || !links.track,
       link: links.track,
     },
     {
-      text: 'Download',
-      isDisabled: files.length === 0,
-      onClick: () => setIsExportModalOpen(true),
+      text: 'Open',
+      isDisabled: files.length === 0 ||
+                  files.some(e => e.type === 'Folder' || e.type === 'UserFile' && !e.links.download),
+      onClick: () => setIsFileOpenModalOpen(true),
     },
     {
-      text: 'Authorize URL',
-      isDisabled: files.length !== 1 || isFolder,
-      link: links.link,
-      method: 'post',
+      text: 'Download',
+      isDisabled: files.length === 0 ||
+                  files.some(e => e.type === 'Folder' || e.type === 'UserFile' && !e.links.download),
+      onClick: () => setIsDownloadModalOpen(true),
     },
     {
       text: isFolder ? 'Rename' : 'Edit File Info',
-      isDisabled: files.length !== 1 || (isFolder ? !links.rename_folder : !links.rename),
+      isDisabled: files.length !== 1 || isFolder && !links.rename_folder,
       onClick: () => props.showFilesRenameModal(),
     },
     {
       text: 'Make public',
       isDisabled: files.length !== 1 || !links.publish,
-      link: `${links.publish}&scope=public`,
+      link: `${links.publish}&public=true`,
       method: 'post',
+      hide: isFolder,
+    },
+    {
+      text: 'Make public',
+      isDisabled: !isAdmin || files.length !== 1 || !links.publish,
+      onClick: () => props.showFilesMakePublicFolderModal(),
+      hide: !isFolder,
     },
     {
       text: 'Feature',
-      onClick: () => props.makeFeatured(files[0].links.feature, filesUids, true),
+      onClick: () => props.makeFeatured(files[0].links.feature, filesIds.concat(filesUids), true),
       isDisabled: files.length === 0 || !files.every(e => !e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public',
     },
     {
       text: 'Unfeature',
-      onClick: () => props.makeFeatured(files[0].links.feature, filesUids, false),
+      onClick: () => props.makeFeatured(files[0].links.feature, filesIds.concat(filesUids), false),
       isDisabled: files.length === 0 || !files.every(e => e.featured || !e.links.feature),
       hide: !isAdmin || page !== 'public' && page !== 'featured',
     },
@@ -118,15 +131,16 @@ const ActionsDropdown = (props) => {
       text: 'Organize',
       isDisabled: files.length === 0 || files.some((e) => !e.links.organize),
       onClick: () => props.showFilesMoveModal(),
+      hide: !isAdmin && (['featured', 'public'].includes(page) || page === 'details' && files[0]?.location === 'Public'),
     },
     {
       text: 'Copy to space',
-      isDisabled: files.length === 0,
+      isDisabled: files.length === 0 || files.some(e => !e.links.copy),
       onClick: () => props.showCopyToSpaceModal(),
     },
     {
       text: 'Attach to...',
-      isDisabled: !links.publish || files.length === 0 || !props.filesAttachTo || !files.every(e => e.links.publish),
+      isDisabled: files.length === 0 || !props.filesAttachTo || files.some(e => !e.links.attach_to),
       onClick: () => props.showFilesAttachToModal(),
     },
     {
@@ -139,6 +153,21 @@ const ActionsDropdown = (props) => {
       isDisabled: files.length !== 1,
       onClick: () => props.showFilesLicenseModal(),
       hide: files.length !== 1 || !links.detach_license,
+    },
+    {
+      text: 'Request license approval',
+      link: links.request_approval_license,
+      hide: !links.request_approval_license || page !== 'details',
+    },
+    {
+      text: 'Accept License',
+      onClick: () => props.showFilesAcceptLicenseModal(),
+      hide: !links.accept_license_action || page !== 'details',
+    },
+    {
+      text: 'Comments',
+      link: props.comments,
+      hide: !props.comments,
     },
     {
       text: 'Edit tags',
@@ -154,7 +183,7 @@ const ActionsDropdown = (props) => {
       <DropdownMenu
         title='Actions'
         options={availableActions}
-        message={page === 'spaces' ? 'To perform other actions on this files, access it from the Space' : ''} />
+        message={page === 'spaces' ? 'To perform other actions on these files, access it from the Space' : ''} />
       <CopyToSpaceModal
         isLoading={props.copyToSpaceModal.isLoading}
         isOpen={props.copyToSpaceModal.isOpen}
@@ -189,7 +218,8 @@ const ActionsDropdown = (props) => {
         currentFolderId={filesUids}
         hideAction={() => props.hideFilesMoveModal()}
         moveAction={(targetId) => props.filesMove(filesIds, targetId, links.organize)}
-        scope={page}
+        scope={page === 'details' ? scope : page}
+        spaceId={props.spaceId}
       />
       <AttachLicenseModal
         isLoading={props.attachLicenseModal.isLoading}
@@ -200,20 +230,43 @@ const ActionsDropdown = (props) => {
         link={links.license}
         objectLicense={files[0] && files[0].fileLicense}
       />
+      {page === 'private' &&
+        <MyFilesActionModal
+          isOpen={props.deleteModal.isOpen}
+          isLoading={props.deleteModal.isLoading}
+          hideAction={() => props.hideFilesDeleteModal()}
+          modalAction={() => props.deleteFiles(files[0].links.remove, filesIds)}
+          files={files}
+          action={HOME_FILES_ACTIONS.DELETE}
+          fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, 'private')}
+          modal={props.homeFilesActionModalSelector}
+        />
+      }
+      {page !== 'private' &&
+        <FilesActionModal
+          isOpen={props.deleteModal.isOpen}
+          isLoading={props.deleteModal.isLoading}
+          hideAction={() => props.hideFilesDeleteModal()}
+          modalAction={() => props.deleteFiles(files[0].links.remove, filesIds)}
+          files={files}
+          action={HOME_FILES_ACTIONS.DELETE}
+          fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, page)}
+          modal={props.homeFilesActionModalSelector}
+        />
+      }
       <FilesActionModal
-        isOpen={props.deleteModal.isOpen}
+        isOpen={isFileOpenModalOpen}
         isLoading={props.deleteModal.isLoading}
-        hideAction={() => props.hideFilesDeleteModal()}
-        modalAction={() => props.deleteFiles(files[0].links.remove, filesIds)}
+        hideAction={() => setIsFileOpenModalOpen(false)}
         files={files}
-        action={HOME_FILES_ACTIONS.DELETE}
-        fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, 'private')}
+        action={HOME_FILES_ACTIONS.OPEN}
+        fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.OPEN, 'private')}
         modal={props.homeFilesActionModalSelector}
       />
       <FilesActionModal
-        isOpen={isExportModalOpen}
+        isOpen={isDownloadModalOpen}
         isLoading={props.deleteModal.isLoading}
-        hideAction={() => setIsExportModalOpen(false)}
+        hideAction={() => setIsDownloadModalOpen(false)}
         files={files}
         action={HOME_FILES_ACTIONS.DOWNLOAD}
         fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DOWNLOAD, 'private')}
@@ -228,26 +281,44 @@ const ActionsDropdown = (props) => {
         fileLicense={files[0] && files[0].fileLicense}
         modalAction={(link) => props.filesLicenseAction(link)}
       />
+      <HomeLicenseModal
+        isLoading={props.acceptLicenseModal.isLoading}
+        isOpen={props.acceptLicenseModal.isOpen}
+        hideAction={() => props.hideFilesAcceptLicenseModal()}
+        fileLicense={files[0] && files[0].fileLicense}
+        modalAction={() => props.filesAcceptLicenseAction(links.accept_license_action)}
+        actionType='accept'
+        title='Accept License'
+      />
+      <FilesActionModal
+        isOpen={props.makePublicFolderModal.isOpen}
+        isLoading={props.makePublicFolderModal.isLoading}
+        hideAction={() => props.hideFilesMakePublicFolderModal()}
+        modalAction={() => props.makePublicFolder(links.publish, filesIds)}
+        files={files}
+        action={HOME_FILES_ACTIONS.MAKE_PUBLIC_FOLDER}
+        fetchFilesByAction={() => props.fetchFilesByAction(filesIds, HOME_FILES_ACTIONS.DELETE, 'private')}
+        modal={props.homeFilesActionModalSelector}
+      />
     </>
   )
 }
 
 ActionsDropdown.propTypes = {
   files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
-  makePublic: PropTypes.func,
   copyToSpace: PropTypes.func,
   renameFile: PropTypes.func,
   attachLicense: PropTypes.func,
   renameModal: PropTypes.object,
   copyToSpaceModal: PropTypes.object,
-  makePublicModal: PropTypes.object,
+  makePublicFolderModal: PropTypes.object,
   attachLicenseModal: PropTypes.object,
   hideFilesRenameModal: PropTypes.func,
   showFilesRenameModal: PropTypes.func,
   showCopyToSpaceModal: PropTypes.func,
   hideCopyToSpaceModal: PropTypes.func,
-  showFilesMakePublicModal: PropTypes.func,
-  hideFilesMakePublicModal: PropTypes.func,
+  showFilesMakePublicFolderModal: PropTypes.func,
+  hideFilesMakePublicFolderModal: PropTypes.func,
   makeFeatured: PropTypes.func,
   context: PropTypes.object,
   page: PropTypes.string,
@@ -272,6 +343,14 @@ ActionsDropdown.propTypes = {
   licenseModal: PropTypes.object,
   showFilesLicenseModal: PropTypes.func,
   hideFilesLicenseModal: PropTypes.func,
+  acceptLicenseModal: PropTypes.object,
+  showFilesAcceptLicenseModal: PropTypes.func,
+  hideFilesAcceptLicenseModal: PropTypes.func,
+  filesAcceptLicenseAction: PropTypes.func,
+  scope: PropTypes.string,
+  spaceId: PropTypes.string,
+  comments: PropTypes.string,
+  makePublicFolder: PropTypes.func,
 }
 
 ActionsDropdown.defaultProps = {
@@ -279,7 +358,7 @@ ActionsDropdown.defaultProps = {
   context: {},
   page: 'private',
   copyToSpaceModal: {},
-  makePublicModal: {},
+  makePublicFolderModal: {},
   renameModal: {},
   deleteModal: {},
   filesAttachToModal: {},
@@ -287,12 +366,13 @@ ActionsDropdown.defaultProps = {
   attachLicenseModal: {},
   homeFilesActionModalSelector: {},
   licenseModal: {},
+  acceptLicenseModal: {},
 }
 
 const mapStateToProps = (state) => ({
   renameModal: homeFilesRenameModalSelector(state),
   copyToSpaceModal: homeFilesCopyToSpaceModalSelector(state),
-  makePublicModal: homeFilesMakePublicModalSelector(state),
+  makePublicFolderModal: homeFilesMakePublicFolderModalSelector(state),
   context: contextSelector(state),
   deleteModal: homeFilesDeleteModalSelector(state),
   filesAttachToModal: homeFilesAttachToModalSelector(state),
@@ -300,16 +380,16 @@ const mapStateToProps = (state) => ({
   attachLicenseModal: homeFilesAttachLicenseModalSelector(state),
   homeFilesActionModalSelector: homeFilesActionModalSelector(state),
   licenseModal: homeFilesLicenseModalSelector(state),
+  acceptLicenseModal: homeFilesAcceptLicenseModalSelector(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  makePublic: (ids) => dispatch(makePublicFiles(ids)),
   showCopyToSpaceModal: () => dispatch(showFilesCopyToSpaceModal()),
   hideCopyToSpaceModal: () => dispatch(hideFilesCopyToSpaceModal()),
   showFilesRenameModal: () => dispatch(showFilesRenameModal()),
   hideFilesRenameModal: () => dispatch(hideFilesRenameModal()),
-  showFilesMakePublicModal: () => dispatch(showFilesMakePublicModal()),
-  hideFilesMakePublicModal: () => dispatch(hideFilesMakePublicModal()),
+  showFilesMakePublicFolderModal: () => dispatch(showFilesMakePublicFolderModal()),
+  hideFilesMakePublicFolderModal: () => dispatch(hideFilesMakePublicFolderModal()),
   showFilesDeleteModal: () => dispatch(showFilesDeleteModal()),
   hideFilesDeleteModal: () => dispatch(hideFilesDeleteModal()),
   showFilesAttachToModal: () => dispatch(showFilesAttachToModal()),
@@ -318,9 +398,11 @@ const mapDispatchToProps = (dispatch) => ({
   hideFilesMoveModal: () => dispatch(hideFilesMoveModal()),
   showAttachLicenseModal: () => dispatch(showFilesAttachLicenseModal()),
   hideAttachLicenseModal: () => dispatch(hideFilesAttachLicenseModal()),
-  fetchFilesByAction: (ids, action) => dispatch(fetchFilesByAction(ids, action, 'private')),
+  fetchFilesByAction: (ids, action, scope) => dispatch(fetchFilesByAction(ids, action, scope)),
   showFilesLicenseModal: () => dispatch(showFilesLicenseModal()),
   hideFilesLicenseModal: () => dispatch(hideFilesLicenseModal()),
+  showFilesAcceptLicenseModal: () => dispatch(showFilesAcceptLicenseModal()),
+  hideFilesAcceptLicenseModal: () => dispatch(hideFilesAcceptLicenseModal()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActionsDropdown)

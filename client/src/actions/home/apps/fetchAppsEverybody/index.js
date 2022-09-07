@@ -11,7 +11,7 @@ import {
 } from '../../types'
 import { setPageCounters } from '../../index'
 import { homeAppsEverybodyFiltersSelector } from '../../../../reducers/home/apps/selectors'
-import { HOME_APP_TYPES } from '../../../../constants'
+import { HOME_APP_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -51,7 +51,7 @@ export default () => (
           const counters = {
             apps: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.EVERYBODY))
         }
 
         dispatch(fetchAppsSuccess(apps, pagination))

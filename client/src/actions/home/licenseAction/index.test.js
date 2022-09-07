@@ -38,8 +38,8 @@ describe('licenseAction()', () => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
-          { type: HOME_LICENSE_ACTION_START, payload: {}},
-          { type: HOME_LICENSE_ACTION_SUCCESS, payload: {}},
+          { type: HOME_LICENSE_ACTION_START, payload: 'licenseModal' },
+          { type: HOME_LICENSE_ACTION_SUCCESS, payload: 'licenseModal' },
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'message 1',
@@ -58,8 +58,8 @@ describe('licenseAction()', () => {
         const actions = store.getActions()
 
         expect(actions).toEqual([
-          { type: HOME_LICENSE_ACTION_START, payload: {}},
-          { type: HOME_LICENSE_ACTION_FAILURE, payload: {}},
+          { type: HOME_LICENSE_ACTION_START, payload: 'licenseModal' },
+          { type: HOME_LICENSE_ACTION_FAILURE, payload: 'licenseModal' },
           {
             type: ALERT_SHOW_ABOVE_ALL, payload: {
               message: 'Something went wrong!',

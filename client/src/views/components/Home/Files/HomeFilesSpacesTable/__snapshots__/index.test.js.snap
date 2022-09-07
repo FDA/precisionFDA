@@ -39,7 +39,10 @@ exports[`HomeFilesSpacesTable test should render 1`] = `
           >
             name
           </Th>
-          <Th>
+          <Th
+            sortHandler={[Function]}
+            type="location"
+          >
             location
           </Th>
           <Th
@@ -63,10 +66,7 @@ exports[`HomeFilesSpacesTable test should render 1`] = `
           <Th>
             origin
           </Th>
-          <Th
-            sortHandler={[Function]}
-            type="tags"
-          >
+          <Th>
             tags
           </Th>
         </Thead>

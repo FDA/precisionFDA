@@ -1,5 +1,6 @@
 require "rails_helper"
-# rubocop:disable RSpec/AnyInstance
+# rubocop:todo RSpec/AnyInstance
+# rubocop:todo RSpec/MultipleMemoizedHelpers
 
 RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
@@ -55,111 +56,6 @@ RSpec.describe ApiController, type: :controller do
         it "returns a list of files" do
           post :list_files
           expect(response).to have_http_status(200)
-        end
-      end
-    end
-  end
-
-  describe "POST related_to_publish" do
-    let(:app_series) { create(:app_series) }
-    let(:app) { create(:app, app_series_id: app_series.id) }
-    let(:job) { create(:job, app_id: app.id, app_series_id: app_series.id) }
-
-    before do
-      authenticate!(user)
-      allow_any_instance_of(SpaceService::Publishing).
-        to receive(:scope_check).
-        with(params[:scope]).
-        and_return(scope: params[:scope])
-    end
-
-    context "when api call with app" do
-      let(:params) do
-        {
-          uid: app.uid,
-          scope: review_space_uid,
-        }
-      end
-
-      before do
-        allow_any_instance_of(App).to receive(:accessible_by?).and_return(true)
-      end
-
-      it "returns a content_type 'json'" do
-        post :related_to_publish, params: params
-        expect(response.media_type).to eq "application/json"
-      end
-
-      it "returns a http_status 200" do
-        post :related_to_publish, params: params
-        expect(response).to have_http_status 200
-      end
-
-      it "returns an empty array of children for the App object" do
-        post :related_to_publish, params: params
-        expect(parsed_response).to eq []
-      end
-    end
-
-    context "when api call with job" do
-      let(:params) do
-        {
-          uid: job.uid,
-          scope: review_space_uid,
-        }
-      end
-
-      before do
-        allow_any_instance_of(Job).to receive(:accessible_by?).and_return(true)
-        allow_any_instance_of(App).to receive(:accessible_by?).and_return(true)
-      end
-
-      it "returns a content_type 'json'" do
-        post :related_to_publish, params: params
-        expect(response.media_type).to eq "application/json"
-      end
-
-      it "returns a http_status 200" do
-        post :related_to_publish, params: params
-        expect(response).to have_http_status 200
-      end
-
-      it "returns a non empty array of children for the Job object" do
-        post :related_to_publish, params: params
-        expect(parsed_response).not_to eq []
-      end
-
-      it "returns an array of children contains an App object" do
-        post :related_to_publish, params: params
-        expect(parsed_response[0]["uid"]).to eq app.uid
-      end
-
-      it "returns an array where child contains path and fa_class of an App object" do
-        post :related_to_publish, params: params
-        child = parsed_response[0]
-        expect(child["path"]).to eq "/apps/".concat(app.uid)
-        expect(child["fa_class"]).to eq "fa-cube"
-      end
-
-      context "when app is public" do
-        before do
-          app.update(scope: "public")
-        end
-
-        it "returns an empty array of children for the App object" do
-          post :related_to_publish, params: params
-          expect(parsed_response).to eq []
-        end
-      end
-
-      context "when app is published in a space" do
-        before do
-          app.update(scope: review_space_uid)
-        end
-
-        it "returns an empty array of children for the App object" do
-          post :related_to_publish, params: params
-          expect(parsed_response).to eq []
         end
       end
     end
@@ -806,6 +702,7 @@ RSpec.describe ApiController, type: :controller do
     before do
       authenticate!(user)
 
+      allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
       allow_any_instance_of(DNAnexusAPI).to(
         receive(:call).with("file", "new", anything).and_return(
           "id" => "file-Bx46ZqQ04Pz5Bq3x20pkBXP4",
@@ -860,6 +757,20 @@ RSpec.describe ApiController, type: :controller do
         end
       end
     end
+
+    context "when user exceeded charges limit" do
+      before do
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
+      end
+
+      it "responds with an error" do
+        post :create_file, format: :json
+
+        expect(response.status).to eq(422)
+        expect(parsed_response["error"]["message"]).to \
+          include(I18n.t("api.errors.exceeded_charges_limit"))
+      end
+    end
   end
 
   describe "POST #set_tags" do
@@ -901,5 +812,6 @@ RSpec.describe ApiController, type: :controller do
       end
     end
   end
+  # rubocop:enable RSpec/MultipleMemoizedHelpers
   # rubocop:enable RSpec/AnyInstance
 end

@@ -11,6 +11,8 @@ import {
   SPACE_LAYOUT_SHOW_UNLOCK_MODAL,
   SPACE_LAYOUT_HIDE_DELETE_MODAL,
   SPACE_LAYOUT_SHOW_DELETE_MODAL,
+  SPACE_LAYOUT_HIDE_CREATE_SPACE_MODAL,
+  SPACE_LAYOUT_SHOW_CREATE_SPACE_MODAL,
   SPACE_HIDE_ADD_DATA_MODAL,
   SPACE_SHOW_ADD_DATA_MODAL,
   SPACE_FILES_ADD_DATA_TOGGLE_CHECKBOX,
@@ -98,6 +100,9 @@ const spaceSideMenuToggle = () => createAction(SPACE_SIDE_MENU_TOGGLE)
 
 const spacesSetPage = (page) => createAction(SPACES_SET_PAGE, page)
 
+const hideLayoutCreateSpaceModal = () => createAction(SPACE_LAYOUT_HIDE_CREATE_SPACE_MODAL)
+const showLayoutCreateSpaceModal = () => createAction(SPACE_LAYOUT_SHOW_CREATE_SPACE_MODAL)
+
 const hideLayoutLockModal = () => createAction(SPACE_LAYOUT_HIDE_LOCK_MODAL)
 const showLayoutLockModal = () => createAction(SPACE_LAYOUT_SHOW_LOCK_MODAL)
 
@@ -157,6 +162,8 @@ export {
   showLayoutUnlockModal,
   hideLayoutDeleteModal,
   showLayoutDeleteModal,
+  hideLayoutCreateSpaceModal,
+  showLayoutCreateSpaceModal,
   lockSpace,
   unlockSpace,
   deleteSpace,

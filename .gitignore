@@ -11,47 +11,79 @@
 /db/*.sqlite3
 /db/*.sqlite3-journal
 
+# Ignore database config
+/config/database.yml
+
+# Ignore Rspec code coverage data
+/coverage/*
+
 # Ignore all logfiles and tempfiles.
 /log/*
+/tmp/*
 !/log/.keep
-/tmp
+!/tmp/.keep
 *.swp
+
+# Ignore uploaded files in development
+/storage/*
+!/storage/.keep
+
+/node_modules
+yarn-error.log
 
 # Ignore generated assets
 /public/assets
 
-#Ignore generated node modules
-/node_modules
+.byebug_history
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key
 
 # Ignore deployed gems
 /vendor/bundle
 
-# Ignore CSV in assets
-/app/assets/csv
-
 # Ignore OSX hidden file
 .DS_Store
 
+.gems/
+
+# Ignore local environment
+.env
+
+# Ignore IDE files
+.idea/
+
 # Ignore application configuration
 /config/application.yml
-/public/FISMA_docs/2018_FDA_OC_PrecisionFDA\ Decision\ Memo.pdf
-/config/initializers/globals.rb
-/config/initializers/fips.rb
-/config/database.yml.ci
-app/assets/images/presskit
-app/assets/images/participants
-app/assets/images/misc
-app/assets/images/logo-*
-app/assets/images/precisionFDA*
-app/assets/images/ubuntu-1*
-scripts/jenkins_entrypoint.sh
-app/assets/images/docs/site_administration
-app/assets/images/docs/verification_spaces
-app/assets/images/docs/review_spaces
-app/assets/images/docs/site_customization
-app/assets/images/docs/challenge_workbench
-app/assets/images/challenges
-app/assets/images/docs/users_and_usage.png
-app/assets/images/docs/site_activity_reporting.png
 
+# Ignore client node_modules
+/client/node_modules
+/client/coverage
+/app/assets/packs
 
+# Ignore local scripts
+run-ui-test.sh
+
+# Foreman's Procfile
+/Procfile
+
+###### nodejs server
+dist/
+# mikro-orm metadata provider helper
+temp/
+/https-apps-api/test-emails/*
+!/https-apps-api/test-emails/.gitkeep
+
+*.tsbuildinfo
+node_modules/
+
+lerna-debug.log
+
+cert.pem
+key.pem
+
+vendor/cache
+
+# Commented out, as docker-compose symlink expected
+# More on the topic in the docs
+docker/docker-compose.yml

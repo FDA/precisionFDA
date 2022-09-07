@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsDropdown test should render 1`] = `
+<Fragment>
+  <DropdownMenu
+    message=""
+    options={
+      Array [
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Start",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Stop",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Terminate",
+        },
+        Object {
+          "isDisabled": true,
+          "link": undefined,
+          "text": "Track",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Copy to space",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Move to Archive",
+        },
+        Object {
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Attach License",
+        },
+        Object {
+          "hide": true,
+          "isDisabled": true,
+          "onClick": [Function],
+          "text": "Detach License",
+        },
+        Object {
+          "hide": true,
+          "onClick": [Function],
+          "text": "Edit tags",
+        },
+      ]
+    }
+    title="Actions"
+  />
+  <DatabasesActionModal
+    action=""
+    databases={Array []}
+    hideAction={[Function]}
+    modalAction={[Function]}
+  />
+</Fragment>
+`;

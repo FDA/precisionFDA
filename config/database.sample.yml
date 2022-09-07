@@ -1,0 +1,26 @@
+default: &default
+  adapter: mysql2
+  pool: 5
+  timeout: 5000
+  host: db
+  username: root
+  password: password
+  collation: utf8_unicode_ci
+  variables:
+    sql_mode: TRADITIONAL
+
+development:
+  <<: *default
+  database: precision-fda
+
+test:
+  <<: *default
+  database: precisionfda-test
+
+ui_test:
+  <<: *default
+  database: precisionfda-ui-test
+
+production:
+  <<: *default
+  database: precisionfda-production

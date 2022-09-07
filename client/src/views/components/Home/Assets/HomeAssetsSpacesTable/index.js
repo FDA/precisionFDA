@@ -75,11 +75,11 @@ const HomeAssetsSpacesTable = ({ assets, isFetching, isCheckedAll, toggleAllAsse
               <Icon onClick={toggleAllAssetsCheckboxes} icon={checkboxClasses} />
             </th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='name'>name</Th>
-            <Th>location</Th>
+            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='location'>location</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='size'>size</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
@@ -148,7 +148,7 @@ const Row = ({ asset, toggleAssetCheckbox }) => {
 
 
 const FilterRow = ({ fieldsSearch, onChangeFieldsValue }) => {
-  const filtersConfig = ['', 'name', '', 'username', 'size', '', 'tags']
+  const filtersConfig = ['','name', 'location', 'username', 'size', '', 'tags']
 
   const filters = filtersConfig.map((filter, i) => {
     if (!filter) return <td key={i}></td>

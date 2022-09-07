@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChallengeProposeForm matches snapshot 1`] = `
+<div
+  className="challenge-propose-form-container"
+>
+  <form
+    className="challenge-propose-form"
+  >
+    <h2
+      className="pfda-subsection-heading"
+    >
+      PRECISIONFDA CHALLENGE INQUIRY
+    </h2>
+    <p>
+      Please complete this form for your new challenge proposal. Thank you!
+    </p>
+    <TextField
+      label="Name"
+      name="name"
+      onChange={[Function]}
+      placeholder="Enter your name"
+      row={true}
+      type="text"
+    />
+    <TextField
+      label="Contact Email"
+      name="email"
+      onChange={[Function]}
+      placeholder="Enter your contact email"
+      row={true}
+      type="text"
+    />
+    <TextField
+      label="Organisation/Institute"
+      name="organisation"
+      onChange={[Function]}
+      placeholder="Enter your organization/institute"
+      row={true}
+      type="text"
+    />
+    <Radio
+      initialValue="Yes"
+      label="Do you have specific scientific question driving the challenge?"
+      name="specific_question"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "ariaLabel": "Select Yes to specific scientific question driving the challenge",
+            "htmlFor": "Opt Yes to specific scientific question driving the challenge",
+            "label": "Yes",
+            "value": "Yes",
+          },
+          Object {
+            "ariaLabel": "Select No to specific scientific question driving the challenge",
+            "htmlFor": "Opt No to specific scientific question driving the challenge",
+            "label": "No",
+            "value": "No",
+          },
+        ]
+      }
+    />
+    <TextareaField
+      aria_label="Please provide details for any scientific questions"
+      disabled={false}
+      label="Please provide details"
+      name="specific_question_text"
+      onChange={[Function]}
+      placeholder="Enter question details"
+    />
+    <Radio
+      initialValue="Yes"
+      inline={true}
+      label="Do you have access to data for the challenge?"
+      name="data_details"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "ariaLabel": "Select Yes for access to data for the challenge",
+            "htmlFor": "Opt Yes to access to data for the challenge",
+            "label": "Yes",
+            "value": "Yes",
+          },
+          Object {
+            "ariaLabel": "Select No for access to data for the challenge",
+            "htmlFor": "Opt No to access to data for the challenge",
+            "label": "No",
+            "value": "No",
+          },
+        ]
+      }
+    />
+    <TextareaField
+      aria_label="Please provide details about data for the challenge"
+      disabled={false}
+      label="Please provide details about the data (e.g. data type, sample number, etc)"
+      name="data_details_text"
+      onChange={[Function]}
+      placeholder="Enter data details"
+    />
+    <div
+      style={
+        Object {
+          "alignItems": "center",
+          "display": "flex",
+          "justifyContent": "space-between",
+          "padding": 0,
+        }
+      }
+    >
+      <div
+        className="missing_data"
+      >
+        <div>
+          Please complete the missing fields to submit this form.
+        </div>
+      </div>
+      <div>
+        <Button
+          disabled={true}
+          onClick={[Function]}
+          type="primary"
+        >
+          Submit Inquiry
+        </Button>
+      </div>
+    </div>
+  </form>
+</div>
+`;

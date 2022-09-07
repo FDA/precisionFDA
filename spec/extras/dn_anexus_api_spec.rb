@@ -46,6 +46,19 @@ describe DNAnexusAPI do
     end
   end
 
+  describe "#app_describe" do
+    it_behaves_like "call" do
+      let(:app_dxid) { "some-app_dxid" }
+
+      let(:client_method) { :app_describe }
+      let(:client_method_args) { [app_dxid, payload] }
+
+      let(:expected_subject) { app_dxid }
+      let(:expected_method) { "describe" }
+      let(:expected_payload) { payload }
+    end
+  end
+
   describe "#app_new" do
     it_behaves_like "call" do
       let(:client_method) { :app_new }
@@ -133,6 +146,19 @@ describe DNAnexusAPI do
       let(:expected_subject) { file_dxid }
       let(:expected_method) { "rename" }
       let(:expected_payload) { { project: project_dxid, name: name } }
+    end
+  end
+
+  describe "#file_describe" do
+    it_behaves_like "call" do
+      let(:file_dxid) { "some-file_dxid" }
+
+      let(:client_method) { :file_describe }
+      let(:client_method_args) { [file_dxid, payload] }
+
+      let(:expected_subject) { file_dxid }
+      let(:expected_method) { "describe" }
+      let(:expected_payload) { payload }
     end
   end
 
@@ -367,15 +393,15 @@ describe DNAnexusAPI do
     end
   end
 
-  describe "#file_download" do
+  describe "#applet_describe" do
     it_behaves_like "call" do
-      let(:file) { "some-file" }
+      let(:applet_dxid) { "some-applet_dxid" }
 
-      let(:client_method) { :file_download }
-      let(:client_method_args) { [file, payload] }
+      let(:client_method) { :applet_describe }
+      let(:client_method_args) { [applet_dxid, payload] }
 
-      let(:expected_subject) { file }
-      let(:expected_method) { "download" }
+      let(:expected_subject) { applet_dxid }
+      let(:expected_method) { "describe" }
       let(:expected_payload) { payload }
     end
   end
@@ -404,6 +430,39 @@ describe DNAnexusAPI do
     end
   end
 
+  describe "#system_find_orgs" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_orgs }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findOrgs" }
+      let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#system_find_projects" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_projects }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findProjects" }
+      let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#system_find_apps" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_apps }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findApps" }
+      let(:expected_payload) { payload }
+    end
+  end
+
   describe "#app_run" do
     let(:app_dxid) { "some-dxid" }
 
@@ -428,6 +487,19 @@ describe DNAnexusAPI do
         let(:expected_method) { "run" }
         let(:expected_payload) { payload }
       end
+    end
+  end
+
+  describe "#job_terminate" do
+    let(:job_dxid) { "some-dxid" }
+
+    it_behaves_like "call" do
+      let(:client_method) { :job_terminate }
+      let(:client_method_args) { [job_dxid, payload] }
+
+      let(:expected_subject) { job_dxid }
+      let(:expected_method) { "terminate" }
+      let(:expected_payload) { payload }
     end
   end
 end

@@ -16,6 +16,7 @@ const Switcher = ({ space, lockToggleHandler }) => {
   const statusClasses = classNames(
     'spaces-list-card-switcher__status',
     `spaces-list-card-switcher__status--${space.status}`,
+    `remediation-card-switcher-${space.status}`,
   )
 
   if (!space.hasLockLink) {
@@ -28,11 +29,11 @@ const Switcher = ({ space, lockToggleHandler }) => {
 
   return (
     <div className={classes}>
-      <div className="spaces-list-card-switcher__status spaces-list-card-switcher__status--active">active</div>
+      <div className="spaces-list-card-switcher__status spaces-list-card-switcher__status--active remediation-card-switcher-active">active</div>
       <div className="spaces-list-card-switcher__toggle">
         <ToggleSwitch space={space} toggleHandler={lockToggleHandler} />
       </div>
-      <div className="spaces-list-card-switcher__status spaces-list-card-switcher__status--locked">locked</div>
+      <div className="spaces-list-card-switcher__status spaces-list-card-switcher__status--locked remediation-card-switcher-locked">locked</div>
     </div>
   )
 }

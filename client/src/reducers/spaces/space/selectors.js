@@ -7,6 +7,7 @@ export const spaceCanDuplicateSelector = (state) => state.spaces.space.data.canD
 export const spaceLayoutLockModalSelector = (state) => state.spaces.space.lockSpaceModal
 export const spaceLayoutUnlockModalSelector = (state) => state.spaces.space.unlockSpaceModal
 export const spaceLayoutDeleteModalSelector = (state) => state.spaces.space.deleteSpaceModal
+export const spaceLayoutCreateSpaceModalSelector = (state) => state.spaces.space.createSpaceModal
 
 export const spaceAddDataModalSelector = (state) => state.spaces.space.spaceAddDataModal
 

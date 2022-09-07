@@ -1,0 +1,57 @@
+---
+site:
+  - Adam.Berger@fda.hhs.gov
+  - zeke.maier
+  - Zivana.Tezak@fda.hhs.gov
+  - pamella.tater.2
+  - ezekiel.maier
+  - sam.westreich
+  - min.yi
+  - john.didion
+  - holly.stephens
+  - aabramenko.adminstage
+  - alekadmin.suradmin
+  - aleksandr.moroz.3
+  - aleksei.ivanishchev
+  - singularmasterr.singularmasterr
+  - siteadmin.aabramenko
+  - davis.feng
+  - stanley.lan
+  - sean.watford
+  - mitchell.mello
+  - xavier.autoteststagesiteadmin
+  - collin.lobb
+  - brijesh.prajapati
+  - pablo.kriscenia
+  - randall.ebert
+  - nainathangaraj.sitadmin
+  - precisionfda.admin_dev
+space:
+  - john.didion
+  - aabramenko.adminstage
+  - alekadmin.suradmin
+  - alekone.surone
+  - stagetestuser.lastname
+  - ezekiel.maier
+  - sam.westreich
+  - hollystephens723
+  - rsa.aabramenko
+  - erik.barraza
+  - nainathangaraj.spaceadmin
+  - mitchell.mello
+  - william.autoteststagersa
+  - pavlos.krischenikos
+challenge_eval:
+  - elaine.johanson
+  - ezekiel.maier.2
+  - heike.sichtig
+  - min.yi
+  - sharon.liang
+  - yi.yan
+  - you.li
+  - zivana.tezak
+  - pamella.tater.2
+  - mitchell.mello
+challenge_admin:
+  - ezekiel.maier
+  - errol.strain

@@ -10,6 +10,8 @@
 #  scope                       :string(255)
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
+#  featured                    :boolean          default(FALSE)
+#  deleted                     :boolean          default(FALSE), not null
 #
 
 FactoryBot.define do

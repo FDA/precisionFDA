@@ -1,3 +1,4 @@
+# rubocop:todo RSpec/InstanceVariable
 RSpec.shared_context "type_controller", type: :controller do
   before do
     rack = PlatformRack.new
@@ -21,7 +22,7 @@ RSpec.shared_context "type_controller", type: :controller do
   def authenticate_as_guest!
     @request.session[:user_id] = -1
     @request.session[:username] = "Guest-1"
-    @request.session[:token] = "INVALID"
+    @request.session[:token] = Context::INVALID_TOKEN
     @request.session[:expiration] = 30.day.since.to_i
     @request.session[:org_id] = -1
   end
@@ -38,7 +39,10 @@ RSpec.shared_context "type_controller", type: :controller do
   end
 
   def parsed_response
-    @parsed_response ||= JSON.parse(response.body)
+    @parsed_response ||= begin
+      parsed = JSON.parse(response.body)
+      parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    end
   end
 
   def last_app
@@ -64,3 +68,4 @@ RSpec.shared_context "type_controller", type: :controller do
     }
   end
 end
+# rubocop:enable RSpec/InstanceVariable

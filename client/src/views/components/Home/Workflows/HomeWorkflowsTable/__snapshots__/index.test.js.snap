@@ -41,10 +41,7 @@ exports[`HomeWorkflowsTable test should render 1`] = `
         >
           created
         </Th>
-        <Th
-          sortHandler={[Function]}
-          type="tags"
-        >
+        <Th>
           tags
         </Th>
       </Thead>

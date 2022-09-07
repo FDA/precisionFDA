@@ -21,9 +21,9 @@ import {
   HOME_COPY_FILE_TO_SPACE_START,
   HOME_COPY_FILE_TO_SPACE_SUCCESS,
   HOME_COPY_FILE_TO_SPACE_FAILURE,
-  HOME_MAKE_PUBLICK_FILE_START,
-  HOME_MAKE_PUBLICK_FILE_SUCCESS,
-  HOME_MAKE_PUBLICK_FILE_FAILURE,
+  HOME_MAKE_PUBLIC_FOLDER_START,
+  HOME_MAKE_PUBLIC_FOLDER_SUCCESS,
+  HOME_MAKE_PUBLIC_FOLDER_FAILURE,
   HOME_FILES_SET_FILTER_VALUE,
   HOME_FILES_RESET_FILTERS,
   HOME_FILES_MAKE_FEATURED_SUCCESS,
@@ -159,8 +159,8 @@ export default createReducer(initialState, {
       isOpen: false,
       isLoading: false,
     },
-    makePublicModal: {
-      ...state.makePublicModal,
+    makePublicFolderModal: {
+      ...state.makePublicFolderModal,
       isOpen: false,
       isLoading: false,
     },
@@ -263,27 +263,27 @@ export default createReducer(initialState, {
     },
   }),
 
-  [HOME_MAKE_PUBLICK_FILE_START]: (state) => ({
+  [HOME_MAKE_PUBLIC_FOLDER_START]: (state) => ({
     ...state,
-    makePublicModal: {
-      ...state.makePublicModal,
+    makePublicFolderModal: {
+      ...state.makePublicFolderModal,
       isLoading: true,
     },
   }),
 
-  [HOME_MAKE_PUBLICK_FILE_SUCCESS]: (state) => ({
+  [HOME_MAKE_PUBLIC_FOLDER_SUCCESS]: (state) => ({
     ...state,
-    makePublicModal: {
-      ...state.makePublicModal,
+    makePublicFolderModal: {
+      ...state.makePublicFolderModal,
       isOpen: false,
       isLoading: false,
     },
   }),
 
-  [HOME_MAKE_PUBLICK_FILE_FAILURE]: (state) => ({
+  [HOME_MAKE_PUBLIC_FOLDER_FAILURE]: (state) => ({
     ...state,
-    makePublicModal: {
-      ...state.makePublicModal,
+    makePublicFolderModal: {
+      ...state.makePublicFolderModal,
       isLoading: false,
     },
   }),
@@ -430,8 +430,9 @@ export default createReducer(initialState, {
       ...state,
       [HOME_FILE_TYPES.EVERYBODY]: {
         ...state[HOME_FILE_TYPES.EVERYBODY],
-        files,
+        items,
         isCheckedAll,
+        isFetching: false,
       },
     }
   },
@@ -452,7 +453,7 @@ export default createReducer(initialState, {
         files,
       },
     }),
-  
+
 
   [HOME_FETCH_FILES_BY_ACTION_FAILURE]: (state) => ({
     ...state,
@@ -501,27 +502,27 @@ export default createReducer(initialState, {
     }
   },
 
-  [HOME_LICENSE_ACTION_START]: (state) => ({
+  [HOME_LICENSE_ACTION_START]: (state, modal) => ({
     ...state,
-    licenseModal: {
-      ...state.licenseModal,
+    [modal]: {
+      ...state[modal],
       isLoading: true,
     },
   }),
 
-  [HOME_LICENSE_ACTION_SUCCESS]: (state) => ({
+  [HOME_LICENSE_ACTION_SUCCESS]: (state, modal) => ({
     ...state,
-    licenseModal: {
-      ...state.licenseModal,
+    [modal]: {
+      ...state[modal],
       isOpen: false,
       isLoading: false,
     },
   }),
 
-  [HOME_LICENSE_ACTION_FAILURE]: (state) => ({
+  [HOME_LICENSE_ACTION_FAILURE]: (state, modal) => ({
     ...state,
-    licenseModal: {
-      ...state.licenseModal,
+    [modal]: {
+      ...state[modal],
       isLoading: false,
     },
   }),

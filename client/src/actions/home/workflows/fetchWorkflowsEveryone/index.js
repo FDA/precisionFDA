@@ -10,8 +10,8 @@ import {
   HOME_WORKFLOWS_FETCH_FAILURE,
 } from '../../workflows/types'
 import { setPageCounters } from '../../index'
-import { homeWorkflowsFiltersSelector } from '../../../../reducers/home/workflows/selectors'
-import { HOME_WORKFLOW_TYPES } from '../../../../constants'
+import { homeWorkflowsEveryoneFiltersSelector } from '../../../../reducers/home/workflows/selectors'
+import { HOME_WORKFLOW_TYPES, HOME_TABS } from '../../../../constants'
 import { showAlertAboveAll } from '../../../alertNotifications'
 
 
@@ -23,7 +23,7 @@ const fetchWorkflowsFailure = () => createAction(HOME_WORKFLOWS_FETCH_FAILURE, H
 
 export default () => (
   async (dispatch, getState) => {
-    const filters = homeWorkflowsFiltersSelector(getState())
+    const filters = homeWorkflowsEveryoneFiltersSelector(getState())
     const { sortType, sortDirection, currentPage, fields } = filters
 
     const params = { page: currentPage }
@@ -51,7 +51,7 @@ export default () => (
           const counters = {
             workflows: response.payload.meta.count,
           }
-          dispatch(setPageCounters(counters))
+          dispatch(setPageCounters(counters, HOME_TABS.EVERYBODY))
         }
 
         dispatch(fetchWorkflowsSuccess(workflows, pagination))

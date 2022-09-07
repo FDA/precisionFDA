@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExpertsYearList matches snapshot 1`] = `
+<QueryList
+  className="year-list"
+  emptyMessage="No previous experts"
+  listExtractor={[Function]}
+  query={[Function]}
+  template={[Function]}
+/>
+`;

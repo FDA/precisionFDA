@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { FileActionItemShape } from '../../../shapes/FileShape'
+import HomeFileShape from '../../../shapes/HomeFileShape'
 import LinkTargetBlank from '../../LinkTargetBlank'
 import Icon from '../../Icon'
 import { SPACE_FILES_ACTIONS } from '../../../../constants'
@@ -10,8 +10,8 @@ import { SPACE_FILES_ACTIONS } from '../../../../constants'
 const Item = ({ file, action }) => (
   <tr>
     <td>
-      <LinkTargetBlank url={file.viewURL}>
-        <Icon icon="fa-file-o" fw />
+      <LinkTargetBlank url={file.links.show}>
+        <Icon icon="fa-file-o" fw />&nbsp;
         <span>{file.name}</span>
       </LinkTargetBlank>
     </td>
@@ -23,6 +23,14 @@ const Item = ({ file, action }) => (
         <a href={file.downloadURL} target="_blank" rel="noopener noreferrer">
           <Icon icon="fa-download" fw />&nbsp;
           download
+        </a>
+      </td>
+    )}
+    {(action === SPACE_FILES_ACTIONS.OPEN) && (
+      <td>
+        <a href={`${file.downloadURL}?inline=true`} target="_blank" rel="noopener noreferrer">
+          <Icon icon="fa-file-o" fw />&nbsp;
+          open
         </a>
       </td>
     )}
@@ -40,11 +48,11 @@ const FilesList = ({ files, action }) => (
 export default FilesList
 
 FilesList.propTypes = {
-  files: PropTypes.arrayOf(PropTypes.exact(FileActionItemShape)),
+  files: PropTypes.arrayOf(PropTypes.exact(HomeFileShape)),
   action: PropTypes.string,
 }
 
 Item.propTypes = {
-  file: PropTypes.exact(FileActionItemShape),
+  file: PropTypes.exact(HomeFileShape),
   action: PropTypes.string,
 }

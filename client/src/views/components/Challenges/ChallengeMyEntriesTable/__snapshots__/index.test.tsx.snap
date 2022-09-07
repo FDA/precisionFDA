@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChallengeMyEntriesTable test should render 1`] = `
+<div
+  className="text-center"
+>
+  In order to participate in this challenge, please 
+  <a
+    href="/login"
+  >
+    login
+  </a>
+  . If you don't have a PrecisionFDA account, please 
+  <a
+    href="/request_access"
+  >
+    submit an access request
+  </a>
+   to join and engage in the community!
+</div>
+`;

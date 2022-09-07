@@ -77,7 +77,7 @@ const HomeAppsTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCheckboxes
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='revision'>revision</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='username'>added by</Th>
             <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='created_at'>created</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortAppsHandler} type='tags'>tags</Th>
+            <Th>tags</Th>
           </Thead>
           <Tbody>
             <>
@@ -127,7 +127,7 @@ const Row = ({ app, toggleAppCheckbox }) => {
           <span>{app.title}</span>
         </Link>
       </td>
-      <td style={{ width: 150 }}>{app.revision}</td>
+      <td align='center' style={{ width: 150 }}>{app.revision}</td>
       <td className='home-page-layout__data-table_full-name'>
         <a href={app.links.user}>
           <span>{app.addedByFullname}</span>

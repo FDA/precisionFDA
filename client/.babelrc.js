@@ -9,11 +9,13 @@ module.exports = {
         development: process.env.NODE_ENV !== "production",
       },
     ],
+    ["@babel/preset-typescript", { "allExtensions": true, "isTSX": true }],
   ],
   plugins: [
-    "@babel/plugin-proposal-class-properties",
+    "babel-plugin-styled-components",
     ["@babel/plugin-transform-runtime", { "regenerator": true }]
   ],
+  sourceMaps: true,
   env: {
     production: {
       plugins: [

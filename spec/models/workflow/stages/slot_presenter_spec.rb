@@ -6,7 +6,7 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
 
   subject { presenter }
 
-  let(:user) { create(:user) }
+  let(:user) { create(:user, resources: CloudResourceDefaults::RESOURCES) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
   let(:slots) { params["slots"] }
   let(:slot) { slots.second }

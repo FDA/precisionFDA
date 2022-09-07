@@ -8,7 +8,7 @@
   .space-members
     font-size: 18px
     padding: 20px
-    background-color: #f4f8fd
+    background-color: $color-subtle-blue
     margin-top: 20px
 
     &_role
@@ -18,6 +18,9 @@
     &_status
       font-style: italic
       color: #888888
+
+    .space-members_status
+       color: #6b6b6b !important
 
   .activation
     margin-top: 20px
@@ -51,3 +54,10 @@
     &__small
       font-size: 18px
       margin-top: 10px
+
+  .accept_space
+    .btn-success
+      background-color: #218353
+    .activation__accepted
+      color: #4579a5
+      

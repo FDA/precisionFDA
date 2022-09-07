@@ -7,11 +7,11 @@ import Button from '../../Button'
 import Modal from '../../Modal'
 import Icon from '../../Icon'
 import Input from '../../FormComponents/Input'
-import Markdown from '../../Markdown'
 import { fetchAttachingItems } from '../../../../actions/home'
 import { homeAttachingItemsSelector } from '../../../../reducers/home/page/selectors'
 import { OBJECT_TYPES } from '../../../../constants'
 import './style.sass'
+import { Markdown } from '../../../../components/Markdown'
 
 
 const Footer = ({ hideAction, attachAction, isCopyDisabled }) => (
@@ -55,9 +55,11 @@ const HomeAttachToModal = (props) => {
 
   const onClickAttachAction = () => {
     const types = {
+      [OBJECT_TYPES.ASSET]: 'Asset',
       [OBJECT_TYPES.FILE]: 'UserFile',
       [OBJECT_TYPES.APP]: 'App',
       [OBJECT_TYPES.JOB]: 'Job',
+      [OBJECT_TYPES.ASSET]: 'Asset',
       [OBJECT_TYPES.WORKFLOW]: 'Workflow',
     }
 
@@ -115,7 +117,7 @@ const HomeAttachToModal = (props) => {
       hideModalHandler={hideAction}
       noPadding
     >
-      <div className='home-attach-to-modal'>
+      <div data-testid="modal-attachto" className='home-attach-to-modal'>
         <div className='home-attach-to-modal__menu-container'>
           <div className='home-attach-to-modal__menu-item'>
             <Input

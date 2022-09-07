@@ -37,9 +37,9 @@ const throwIfError = (status) => {
   }
 }
 
-export const uploadFiles = (files, spaceId, folderId) => (
+export const uploadFiles = (files, spaceId, folderId, scope) => (
   (dispatch, getState) => {
-    const scope = `space-${spaceId}`
+    const scopeToUpload = scope || `space-${spaceId}`
     const meta = uploadModalFilesSelector(getState())
 
     filterFiles(files, meta).forEach(file => {
@@ -51,7 +51,7 @@ export const uploadFiles = (files, spaceId, folderId) => (
 
       dispatch(updateFile(uploadInfo))
 
-      createFile(file.name, scope, folderId)
+      createFile(file.name, scopeToUpload, folderId)
         .then(response => {
           throwIfError(response.status)
 

@@ -1,4 +1,6 @@
-require 'spec_helper'
+require "spec_helper"
+require "factory_bot_rails"
+require "shoulda/matchers"
 
 ENV['RAILS_ENV'] ||= 'test'
 ENV['ADMIN_TOKEN'] ||= 'admin_token'
@@ -6,13 +8,18 @@ ENV['CHALLENGE_BOT_TOKEN'] ||= 'challenge_bot_token'
 
 require_relative '../config/environment'
 
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+abort("The Rails environment is running in production mode!") if Utils.aws_env?
 
 require 'rspec/rails'
 
 ActiveRecord::Migration.maintain_test_schema!
 
 RSpec.configure do |config|
+  config.mock_with :rspec do |mocks|
+    mocks.allow_message_expectations_on_nil = true
+  end
+
+  config.include Rails.application.routes.url_helpers
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.

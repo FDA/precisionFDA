@@ -19,6 +19,7 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  entity_type             :integer          default("regular"), not null
 #
 
 require "rails_helper"
@@ -327,9 +328,22 @@ RSpec.describe UserFile, type: :model do
     end
 
     context "when public file is a challenge card image" do
+      let(:describe_params) do
+        {
+          objects: [file_public.dxid],
+        }
+      end
+
+      let(:describe_response) do
+        { "results" =>
+          [{ "describe" =>
+              { "id" => file_public.uid,
+                "project" => challenge_bot.private_files_project } }] }
+      end
+
       let(:params) do
         {
-          project: file_public.project,
+          project: challenge_bot.private_files_project,
           preauthenticated: true,
           filename: file_public.name,
           duration: 86_400,
@@ -343,6 +357,9 @@ RSpec.describe UserFile, type: :model do
           parent_id: challenge_bot.id,
         )
         allow(User).to receive(:challenge_bot).and_return(challenge_bot)
+        allow_any_instance_of(DNAnexusAPI).to receive(:call).
+          with("system", "describeDataObjects", objects: [file_public.dxid]).
+          and_return(describe_response)
         allow_any_instance_of(DNAnexusAPI).to receive(:call).
           with(file_public.dxid, "download", params).and_return("url")
         allow(Event::FileDownloaded).to receive(:create_for).

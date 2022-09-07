@@ -1,0 +1,110 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.19.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-DECOMPRESSTAR-559095:
+    - bin-build > decompress > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bin-build > decompress > decompress-tarbz2 > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bin-build > decompress > decompress-targz > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bin-build > download > decompress > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bin-build > download > decompress > decompress-tarbz2 > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bin-build > download > decompress > decompress-targz > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bull-repl > node-jq > bin-build > decompress > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bull-repl > node-jq > download > decompress > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bull-repl > node-jq > bin-build > decompress > decompress-tarbz2 > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bull-repl > node-jq > download > decompress > decompress-tarbz2 > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bull-repl > node-jq > bin-build > decompress > decompress-targz > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.762Z'
+    - bull-repl > node-jq > download > decompress > decompress-targz > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - bull-repl > node-jq > bin-build > download > decompress > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - bull-repl > node-jq > bin-build > download > decompress > decompress-tarbz2 > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - bull-repl > node-jq > bin-build > download > decompress > decompress-targz > decompress-tar:
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+  SNYK-JS-GLOBPARENT-1016905:
+    - mocha > chokidar > glob-parent:
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - '@mikro-orm/core > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - '@mikro-orm/reflection > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - '@pfda/https-apps-api > @mikro-orm/core > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.763Z'
+    - '@pfda/https-apps-worker > @mikro-orm/core > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-api > @mikro-orm/reflection > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-worker > @mikro-orm/reflection > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@mikro-orm/reflection > ts-morph > @ts-morph/common > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-api > @pfda/https-apps-shared > @mikro-orm/core > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-worker > @pfda/https-apps-shared > @mikro-orm/core > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-api > @pfda/https-apps-shared > @mikro-orm/reflection > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-worker > @pfda/https-apps-shared > @mikro-orm/reflection > globby > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-api > @mikro-orm/reflection > ts-morph > @ts-morph/common > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-worker > @mikro-orm/reflection > ts-morph > @ts-morph/common > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-api > @pfda/https-apps-shared > @mikro-orm/reflection > ts-morph > @ts-morph/common > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@pfda/https-apps-worker > @pfda/https-apps-shared > @mikro-orm/reflection > ts-morph > @ts-morph/common > fast-glob > glob-parent':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+  SNYK-JS-HOSTEDGITINFO-1088355:
+    - '@strv/eslint-config-base > eslint-plugin-import > read-pkg-up > read-pkg > normalize-package-data > hosted-git-info':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@strv/eslint-config-node > @strv/eslint-config-base > eslint-plugin-import > read-pkg-up > read-pkg > normalize-package-data > hosted-git-info':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+    - '@strv/eslint-config-typescript > @strv/eslint-config-base > eslint-plugin-import > read-pkg-up > read-pkg > normalize-package-data > hosted-git-info':
+        reason: None given
+        expires: '2021-05-09T09:35:25.764Z'
+patch: {}

@@ -69,6 +69,13 @@ $smaller-fs: 20px
       &:hover
         color: #333
 
+    &--exclusive
+      background-color: $color-private
+      color: #fff
+
+      &:hover
+        color: #fff
+
     &:first-child
       margin-right: 5px
 
@@ -78,6 +85,9 @@ $smaller-fs: 20px
 
     &--shared
       border-top: 10px solid $color-public
+
+    &--exclusive
+      border-top: 10px solid $color-private
 
   &__menu
     background-color: #333
@@ -95,7 +105,7 @@ $smaller-fs: 20px
         color: #333
 
         &--active
-          background-color: #f4f8fd
+          background-color: $color-subtle-blue
 
         &:hover
           color: #333
@@ -122,6 +132,10 @@ $smaller-fs: 20px
     &--shared
       background-color: $color-public
       color: #333
+
+    &--exclusive
+      background-color: $color-private
+      color: #fff
 
   &__menu-item
     color: #fff
@@ -167,3 +181,6 @@ $smaller-fs: 20px
 
   .text
     margin-bottom: 16px
+
+.btn-spaces-margin
+  margin-left: 10px

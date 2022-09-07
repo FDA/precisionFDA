@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChallengesListItem test should render 1`] = `
+<styles__ChallengeListItem>
+  <styles__ChallengeListItemThumbnail>
+    <img
+      alt="Image representing Challenge 1"
+      onClick={[Function]}
+      src="https://images.newscientist.com/wp-content/uploads/2019/05/03155847/gettyimages-932737574-2.jpg"
+    />
+  </styles__ChallengeListItemThumbnail>
+  <styles__ChallengeListItemContent>
+    <h1
+      onClick={[Function]}
+    >
+      Challenge 1
+    </h1>
+    <div
+      className="date-area"
+    >
+      <span
+        className="challenge-date-label"
+      >
+        Starts
+      </span>
+      <span
+        className="challenge-date"
+      >
+        03/01/2021
+      </span>
+      <span
+        style={
+          Object {
+            "marginRight": "8px",
+          }
+        }
+      >
+        →
+      </span>
+      <span
+        className="challenge-date-label"
+      >
+        Ends
+      </span>
+      <span
+        className="challenge-date"
+      >
+        03/09/2021
+         
+      </span>
+      <div
+        className="challenge-date-remaining"
+      >
+        <ChallengeTimeRemaining
+          challenge={
+            Object {
+              "cardImageUrl": "https://images.newscientist.com/wp-content/uploads/2019/05/03155847/gettyimages-932737574-2.jpg",
+              "description": "This is challenge number 1",
+              "endAt": 2021-03-09T02:21:00.000Z,
+              "id": 1,
+              "name": "Challenge 1",
+              "startAt": 2021-03-01T20:21:00.000Z,
+            }
+          }
+        />
+      </div>
+    </div>
+    <p>
+      This is challenge number 1
+    </p>
+    <Button
+      onClick={[Function]}
+    >
+      View Details →
+    </Button>
+  </styles__ChallengeListItemContent>
+</styles__ChallengeListItem>
+`;

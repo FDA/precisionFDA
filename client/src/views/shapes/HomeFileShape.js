@@ -5,7 +5,7 @@ const HomeFileShape = {
   id: PropTypes.number,
   addedBy: PropTypes.string,
   createdAtDateTime: PropTypes.string,
-  createdAt: PropTypes.string, 
+  createdAt: PropTypes.string,
   name: PropTypes.string,
   revision: PropTypes.number,
   tags: PropTypes.arrayOf(PropTypes.string),
@@ -28,6 +28,8 @@ const HomeFileShape = {
   viewURL: PropTypes.string,
   downloadURL: PropTypes.string,
   fileLicense: PropTypes.object,
+  showLicensePending: PropTypes.bool,
+  spaceId: PropTypes.string,
 }
 
 const mapToHomeFile = (data) => ({
@@ -51,6 +53,9 @@ const mapToHomeFile = (data) => ({
   uid: data.uid,
   featured: data.featured,
   fileLicense: data.file_license,
+  showLicensePending: data.show_license_pending,
+  spaceId: data.space_id,
+  downloadURL: data.links.download,
 })
 
 export default HomeFileShape

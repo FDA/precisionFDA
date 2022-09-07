@@ -7,7 +7,7 @@ import HomeFileShape from '../../../../shapes/HomeFileShape'
 import {
   homeFilesEverybodyListSelector,
   homeFilesAddFolderModalSelector,
- } from '../../../../../reducers/home/files/selectors'
+} from '../../../../../reducers/home/files/selectors'
 import { homePageAdminStatusSelector } from '../../../../../reducers/home/page/selectors'
 import {
   fetchFilesEverybody,
@@ -26,6 +26,7 @@ import {
   createFolder,
   hideFilesAddFolderModal,
 } from '../../../../../actions/home'
+import { showUploadModal } from '../../../../../features/space/fileUpload/actions'
 import Icon from '../../../../components/Icon'
 import Button from '../../../../components/Button'
 import HomeLayout from '../../../../layouts/HomeLayout'
@@ -34,9 +35,10 @@ import ActionsDropdown from '../../../../components/Home/Files/ActionsDropdown'
 import { OBJECT_TYPES } from '../../../../../constants'
 import { getFolderId } from '../../../../../helpers/home'
 import FilesAddFolderModal from '../../../../components/Files/AddFolderModal'
+import UploadModal from '../../../../../features/space/fileUpload/UploadModal'
 
 
-const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesModals, resetFilesEverybodyFiltersValue, isAdmin, location, deleteFiles, copyToSpace, filesAttachTo, makeFeatured, setFileEverybodyFilterValue, renameFile, filesMove, attachLicense, filesLicenseAction, showAddFolderModal, folderModal, createFolder, hideAddFolderModal }) => {  
+const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesModals, resetFilesEverybodyFiltersValue, isAdmin, location, deleteFiles, copyToSpace, filesAttachTo, makeFeatured, setFileEverybodyFilterValue, renameFile, filesMove, attachLicense, filesLicenseAction, showAddFolderModal, folderModal, createFolder, hideAddFolderModal, showUploadModal }) => {
   const folderId = getFolderId(location)
   useLayoutEffect(() => {
     resetFilesModals()
@@ -54,44 +56,41 @@ const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesMod
 
   const checkedFiles = files.filter(file => file.isChecked)
   const createFolderLink = '/api/files/create_folder'
-  const filderIdLink = folderId ? `?folder_id=${folderId}&public="true"` : '?public="true"'
-  
+
   return (
     <HomeLayout>
       <div className='home-page-layout__header-row'>
         <div className="home-page-layout__actions">
           {isAdmin &&
-            <> 
-            <Button type="primary" onClick={showAddFolderModal}>
-              <span>
-                <Icon icon="fa-plus"/>&nbsp;
-                Add Folder
-              </span>
-            </Button>
-            <a href={`/api/create_file${filderIdLink}`}>
-              <Button type="primary">
+            <>
+              <Button type="primary" onClick={showAddFolderModal}>
+                <span>
+                  <Icon icon="fa-plus" />&nbsp;
+                  Add Folder
+                </span>
+              </Button>
+              <Button type="primary" onClick={showUploadModal}>
                 <span>
                   <Icon icon="fa-plus" />&nbsp;
                   Add Files
                 </span>
               </Button>
-            </a>
-          </>
+            </>
           }
         </div>
         <div className='home-page-layout__actions--right'>
-        <ActionsDropdown
-          files={checkedFiles}
-          copyToSpace={copyToSpace}
-          filesAttachTo={filesAttachTo}
-          deleteFiles={(link, ids) => deleteFiles(link, ids)}
-          page='public'
-          makeFeatured={makeFeatured}
-          renameFile={renameFile}
-          filesMove={filesMove}
-          attachLicense={attachLicense}
-          filesLicenseAction={filesLicenseAction}
-        />
+          <ActionsDropdown
+            files={checkedFiles}
+            copyToSpace={copyToSpace}
+            filesAttachTo={filesAttachTo}
+            deleteFiles={(link, ids) => deleteFiles(link, ids)}
+            page='public'
+            makeFeatured={makeFeatured}
+            renameFile={renameFile}
+            filesMove={filesMove}
+            attachLicense={attachLicense}
+            filesLicenseAction={filesLicenseAction}
+          />
         </div>
       </div>
       <div className='pfda-padded-t20'>
@@ -99,13 +98,20 @@ const HomeFilesEverybodyPage = ({ files = [], fetchFilesEverybody, resetFilesMod
       </div>
       {
         folderModal &&
-          <FilesAddFolderModal
+        <FilesAddFolderModal
           isOpen={folderModal.isOpen}
           isLoading={folderModal.isLoading}
           addFolderAction={(folderName) => createFolder(createFolderLink, folderName, folderId, 'true')}
-          hideAction={() => {hideAddFolderModal()}}
-      />
+          hideAction={() => { hideAddFolderModal() }}
+        />
       }
+      <div className='home-page-layout__upload-files-modal' >
+        <UploadModal
+          scope='public'
+          onClose={() => fetchFilesEverybody(folderId)}
+          title='Upload files to Public Area'
+        />
+      </div>
     </HomeLayout>
   )
 }
@@ -130,6 +136,7 @@ HomeFilesEverybodyPage.propTypes = {
   folderModal: PropTypes.object,
   createFolder: PropTypes.func,
   hideAddFolderModal: PropTypes.func,
+  showUploadModal: PropTypes.func,
 }
 
 HomeFilesEverybodyPage.defaultProps = {
@@ -156,12 +163,16 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   }),
   filesAttachTo: (items, noteUids) => dispatch(filesAttachTo(items, noteUids)),
   setFileEverybodyFilterValue: (value) => dispatch(setFileEverybodyFilterValue(value)),
-  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)),
+  makeFeatured: (link, uids, featured) => dispatch(makeFeatured(link, OBJECT_TYPES.FILE, uids, featured)).then(({ statusIsOK }) => {
+    const folderId = getFolderId(ownProps.location)
+    if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
+  }),
+
   renameFile: (link, name, description, type, folderId) => dispatch(renameFile(link, name, description, type, folderId)).then(({ statusIsOK }) => {
     const folderId = getFolderId(ownProps.location)
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
   }),
-  filesMove: (nodeIds, targetId, link) => dispatch(filesMove(nodeIds, targetId, link)).then(({ statusIsOK }) => {
+  filesMove: (nodeIds, targetId, link) => dispatch(filesMove(nodeIds, targetId, link, 'public')).then(({ statusIsOK }) => {
     const folderId = getFolderId(ownProps.location)
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
   }),
@@ -177,6 +188,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (statusIsOK) dispatch(fetchFilesEverybody(folderId))
   }),
   hideAddFolderModal: () => dispatch(hideFilesAddFolderModal()),
+  showUploadModal: () => dispatch(showUploadModal()),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(HomeFilesEverybodyPage))

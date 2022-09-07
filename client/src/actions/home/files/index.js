@@ -54,8 +54,8 @@ const hideUploadModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MOD
 const showFilesRenameModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.RENAME)
 const hideFilesRenameModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.RENAME)
 
-const showFilesMakePublicModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.MAKE_PUBLIC)
-const hideFilesMakePublicModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.MAKE_PUBLIC)
+const showFilesMakePublicFolderModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.MAKE_PUBLIC_FOLDER)
+const hideFilesMakePublicFolderModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.MAKE_PUBLIC_FOLDER)
 
 const showFilesDeleteModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.DELETE)
 const hideFilesDeleteModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.DELETE)
@@ -74,6 +74,9 @@ const hideFileEditTagsModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FIL
 
 const showFilesLicenseModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.LICENSE)
 const hideFilesLicenseModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.LICENSE)
+
+const showFilesAcceptLicenseModal = () => createAction(HOME_FILES_SHOW_MODAL, HOME_FILES_MODALS.ACCEPT_LICENSE)
+const hideFilesAcceptLicenseModal = () => createAction(HOME_FILES_HIDE_MODAL, HOME_FILES_MODALS.ACCEPT_LICENSE)
 
 export {
   fetchFiles,
@@ -106,8 +109,8 @@ export {
   hideFilesRenameModal,
   showFilesCopyToSpaceModal,
   hideFilesCopyToSpaceModal,
-  showFilesMakePublicModal,
-  hideFilesMakePublicModal,
+  showFilesMakePublicFolderModal,
+  hideFilesMakePublicFolderModal,
   showFilesAddFolderModal,
   hideFilesAddFolderModal,
   showUploadModal,
@@ -125,4 +128,6 @@ export {
   hideFileEditTagsModal,
   showFilesLicenseModal,
   hideFilesLicenseModal,
+  showFilesAcceptLicenseModal,
+  hideFilesAcceptLicenseModal,
 }

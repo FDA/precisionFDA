@@ -9,25 +9,19 @@ import PaginationShape from '../../../shapes/PaginationShape'
 import Loader from '../../Loader'
 import CardItem from './CardItem'
 import SpacesTable from './SpacesTable'
+import { fetchSpaceLockToggle, fetchSpaces, sortSpacesList, spacesSetPage } from '../../../../actions/spaces'
 import {
-  fetchSpaces,
-  sortSpacesList,
-  fetchSpaceLockToggle,
-  spacesSetPage,
-} from '../../../../actions/spaces'
-import {
-  spacesListSelector,
   listViewTypeSelector,
   spacesListIsFetchingSelector,
-  spacesListSortTypeSelector,
-  spacesListSortDirectionSelector,
   spacesListPaginationSelector,
+  spacesListSelector,
+  spacesListSortDirectionSelector,
+  spacesListSortTypeSelector,
 } from '../../../../reducers/spaces/list/selectors'
 import './style.sass'
 import Pagination from '../../TableComponents/Pagination'
 
-
-const SpacesList = (props) => {
+const SpacesList = props => {
   const { spaces, viewType, pagintion, isFetching, sortType, sortDir } = props
   const { sortHandler, lockToggleHandler, setPageHandler } = props
 
@@ -37,7 +31,7 @@ const SpacesList = (props) => {
   const classes = classNames({
     'spaces-list': true,
     'spaces-list--card-view': isCardView,
-    'spaces-list--table-view': isTableView,
+    'spaces-list-table': isTableView,
   })
 
   if (isFetching) {
@@ -52,7 +46,9 @@ const SpacesList = (props) => {
     return (
       <>
         <div className={classes}>
-          {spaces.map((space) => <CardItem space={space} key={space.id} lockToggleHandler={lockToggleHandler} />)}
+          {spaces.map(space => (
+            <CardItem space={space} key={space.id} lockToggleHandler={lockToggleHandler} />
+          ))}
         </div>
         <Pagination data={pagintion} setPageHandler={setPageHandler} />
       </>
@@ -92,9 +88,9 @@ SpacesList.propTypes = {
 
 SpacesList.defaultProps = {
   spaces: [],
-  sortHandler: () => { },
-  lockToggleHandler: () => { },
-  setPageHandler: () => { },
+  sortHandler: () => {},
+  lockToggleHandler: () => {},
+  setPageHandler: () => {},
 }
 
 const mapStateToProps = state => ({
@@ -107,11 +103,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  sortHandler: (type) => {
+  sortHandler: type => {
     dispatch(sortSpacesList(type))
     dispatch(fetchSpaces())
   },
-  setPageHandler: (page) => {
+  setPageHandler: page => {
     dispatch(spacesSetPage(page))
     dispatch(fetchSpaces())
   },
@@ -120,6 +116,4 @@ const mapDispatchToProps = dispatch => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(SpacesList)
 
-export {
-  SpacesList,
-}
+export { SpacesList }

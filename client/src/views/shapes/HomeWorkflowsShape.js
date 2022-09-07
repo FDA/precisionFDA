@@ -8,6 +8,7 @@ const HomeWorkflowsShape = {
   title: PropTypes.string,
   location: PropTypes.string,
   addedBy: PropTypes.string,
+  readme: PropTypes.string,
   createdAt: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
   isOpen: PropTypes.bool,
@@ -30,6 +31,7 @@ const mapToHomeWorkflow = (data) => ({
   isChecked: data.isChecked,
   featured: data.featured,
   revision: data.revision,
+  readme: data.readme,
 })
 
 export default HomeWorkflowsShape

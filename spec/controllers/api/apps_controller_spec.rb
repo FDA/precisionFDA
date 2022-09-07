@@ -52,6 +52,7 @@ RSpec.describe Api::AppsController, type: :controller do
         input_spec: input,
         output_spec: output,
         release: UBUNTU_14,
+        scope: Scopes::SCOPE_PRIVATE,
       }, as: :json
     end
 
@@ -97,7 +98,7 @@ RSpec.describe Api::AppsController, type: :controller do
         "instance_type" => "baseline-8",
         "internet_access" => false,
         "code" => "test-code",
-        "scope" => "private",
+        "scope" => Scopes::SCOPE_PRIVATE,
       )
     end
 

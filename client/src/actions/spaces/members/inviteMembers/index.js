@@ -16,9 +16,9 @@ const inviteMembersStart = () => createAction(SPACE_MEMBERS_ADD_START)
 const inviteMembersSuccess = () => createAction(SPACE_MEMBERS_ADD_SUCCESS)
 const inviteMembersFailure = (errors = {}) => createAction(SPACE_MEMBERS_ADD_FAILURE, errors)
 
-export default (spaceId, fieldsValues) => (
+export default (spaceId, fieldsValues, side) => (
   (dispatch, getState) => {
-    let params = { invitees: fieldsValues.invitees, invitees_role: fieldsValues.inviteesRole }
+    let params = { invitees: fieldsValues.invitees, invitees_role: fieldsValues.inviteesRole, side: side }
 
     dispatch(inviteMembersStart())
 

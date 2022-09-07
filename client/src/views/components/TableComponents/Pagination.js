@@ -14,6 +14,7 @@ const getPages = ({ currentPage, nextPage, prevPage, totalPages }) => {
     pages.push({
       label: '<<',
       value: prevPage,
+      isPrev: true,
     })
   }
 
@@ -42,6 +43,7 @@ const getPages = ({ currentPage, nextPage, prevPage, totalPages }) => {
     pages.push({
       label: '>>',
       value: nextPage,
+      isNext: true,
     })
   }
 
@@ -51,6 +53,8 @@ const getPages = ({ currentPage, nextPage, prevPage, totalPages }) => {
 const Page = ({ page, setPageHandler }) => {
   const classes = classNames({
     'pfda-pagination__page--active': page.isActive,
+    'pfda-pagination__page--prev': page.isPrev,
+    'pfda-pagination__page--next': page.isNext,
   }, 'pfda-pagination__page')
 
   const onClick = () => {
@@ -59,7 +63,7 @@ const Page = ({ page, setPageHandler }) => {
   }
 
   return (
-    <a onClick={onClick} className={classes}>{page.label}</a>
+    <a onClick={onClick} className={classes} aria-label={`Click this link to navigate to page number ${page.value}`}>{page.label}</a>
   )
 }
 
@@ -89,6 +93,8 @@ Page.propTypes = {
     ]),
     value: PropTypes.number,
     isActive: PropTypes.bool,
+    isPrev: PropTypes.bool,
+    isNext: PropTypes.bool,
   }),
   setPageHandler: PropTypes.func,
 }

@@ -19,6 +19,8 @@
 #  analysis_id     :integer
 #  uid             :string(255)
 #  local_folder_id :integer
+#  entity_type     :integer          default("regular"), not null
+#  featured        :boolean          default(FALSE)
 #
 
 FactoryBot.define do

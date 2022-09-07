@@ -93,7 +93,8 @@ const HomeExecutionsTable = (props) => {
             <Th>instance type</Th>
             <Th>duration</Th>
             <Th>energy</Th>
-            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='created_at'>launched on</Th>
+            <Th sortType={sortType} sortDir={sortDirection} sortHandler={sortHandler} type='launched_on'>launched
+              on</Th>
             <Th>tags</Th>
           </Thead>
           <Tbody>

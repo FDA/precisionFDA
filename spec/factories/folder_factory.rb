@@ -19,6 +19,8 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
+#  entity_type             :integer          default("regular"), not null
+#  featured                :boolean          default(FALSE)
 #
 
 FactoryBot.define do
@@ -35,6 +37,10 @@ FactoryBot.define do
 
     trait :public do
       scope { :public }
+    end
+
+    trait :in_space do
+      scope { "space-#{rand(1..100)}" }
     end
   end
 end

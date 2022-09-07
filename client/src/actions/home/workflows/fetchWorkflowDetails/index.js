@@ -7,7 +7,7 @@ import {
   HOME_WORKFLOWS_FETCH_WORKFLOW_DETAILS_START,
   HOME_WORKFLOWS_FETCH_WORKFLOW_DETAILS_SUCCESS,
   HOME_WORKFLOWS_FETCH_WORKFLOW_DETAILS_FAILURE,
-} from '../../workflows/types'
+} from '../types'
 import { showAlertAboveAll, showAlertAboveAllSuccess } from '../../../alertNotifications'
 
 

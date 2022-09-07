@@ -13,7 +13,13 @@ RSpec.shared_examples "not_editable" do
 end
 
 RSpec.describe Api::FilesController, type: :controller do
-  let(:user) { create(:user) }
+  let(:user) { create(
+    :user,
+    total_limit: CloudResourceDefaults::TOTAL_LIMIT,
+    job_limit: CloudResourceDefaults::JOB_LIMIT,
+    resources: CloudResourceDefaults::RESOURCES,
+    ) }
+  let(:admin) { create(:user, :admin) }
   let(:file) { create(:user_file, :private, user: user) }
 
   describe "PUT update" do
@@ -67,6 +73,8 @@ RSpec.describe Api::FilesController, type: :controller do
 
         allow(UserFile).to receive(:exist_refresh_state).and_return(file)
         allow(file).to receive(:file_url).and_return(redirect_url)
+
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
       end
 
       it "redirects to a file download url" do
@@ -112,10 +120,6 @@ RSpec.describe Api::FilesController, type: :controller do
     end
   end
 
-  describe "POST download_list" do
-    pending
-  end
-
   describe "POST copy" do
     context "when user is authenticated" do
       let(:space) { create(:space, :review, :active, host_lead_id: user.id) }
@@ -130,8 +134,7 @@ RSpec.describe Api::FilesController, type: :controller do
       end
 
       it "copies files and folders" do
-        node_copier = instance_double(CopyService::NodeCopier, copy: CopyService::Copies.new)
-        allow(CopyService::NodeCopier).to receive(:new).and_return(node_copier)
+        allow(NodeCopyWorker).to receive(:perform_async)
 
         node_ids = [file_one.id, folder_one.id, file_two.id, file_other.id]
 
@@ -140,19 +143,15 @@ RSpec.describe Api::FilesController, type: :controller do
           item_ids: node_ids,
         }, format: :json
 
-        expected_nodes = Node.where(id: node_ids[0..-2])
-
-        expect(node_copier).to have_received(:copy).with(
-          match_array(expected_nodes),
-          space.uid,
-        )
+        expect(NodeCopyWorker).to have_received(:perform_async).
+          with(space.scope, node_ids[0..-2], anything)
 
         expect(response).to be_successful
       end
 
       context "when user doesn't have contributor access to a scope" do
-        let(:another_user) { create(:user) }
         let(:space) do
+          another_user = create(:user)
           create(
             :space,
             :review,
@@ -178,6 +177,58 @@ RSpec.describe Api::FilesController, type: :controller do
       end
 
       it_behaves_like "unauthenticated"
+    end
+  end
+
+  describe "PUT feature files and folders" do
+    context "when user is authenticated" do
+      let(:folder_one) { create(:folder, :public, user: admin) }
+      let(:file_other) { create(:user_file, :public, user: admin) }
+
+      before do
+        create(:user_file, :private, user: user, parent_folder_id: folder_one.id)
+        create(:user_file, :public, user: admin, parent_folder_id: folder_one.id)
+
+        authenticate!(admin)
+      end
+
+      it "response is success" do
+        put :invert_feature, params: { item_ids: [file_other.uid, folder_one.id],
+                                       featured: true }, format: :json
+
+        expect(response).to be_successful
+      end
+
+      it "feature file and folder in one response" do
+        put :invert_feature, params: { item_ids: [file_other.uid, folder_one.id],
+                                       featured: true }, format: :json
+
+        expect(response).to be_successful
+        expect { folder_one.reload }.to change(folder_one, :featured).from(false).to(true)
+        expect { file_other.reload }.to change(file_other, :featured).from(false).to(true)
+      end
+    end
+
+    context "when user is not authenticated" do
+      let(:folder_one) { create(:folder, :public, user: admin) }
+
+      it "un-feature folder" do
+        put :invert_feature, params: { item_ids: folder_one.id,
+                                       featured: true }, format: :json
+
+        expect(response).to be_unauthorized
+      end
+    end
+
+    context "when user is not an admin" do
+      let(:folder_one) { create(:folder, :public, user: user) }
+
+      it "un-feature folder" do
+        put :invert_feature, params: { item_ids: folder_one.id,
+                                       featured: true }, format: :json
+
+        expect(response).to be_unauthorized
+      end
     end
   end
 end

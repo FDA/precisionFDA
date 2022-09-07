@@ -12,23 +12,20 @@ en:
           comparisons: Comparisons
           apps: Apps
           creating_apps: Creating Apps
+          workstations: Workstations
           workflows: Workflows
           tracking: Tracking
           publishing: Publishing
           licenses: Licenses
           spaces: Spaces
+          cli: Command Line Interface
       site_admin:
         title: Administrator Features
         sections:
           challenge_workbench: Challenge Workbench
-          verification_spaces: Verified Apps
           site_activity_reporting: Site Activity Reporting
           site_customization: Site Customization
           site_administration: Site Administration
-      review_space_admin:
-        title: Administrator Features
-        sections:
-          verification_spaces: Verified Apps
       org_admin:
         title: Organizations deprecation
         sections:
@@ -91,9 +88,6 @@ en:
         challenge_workbench:
           title: Challenge Workbench
           url: https://www.youtube.com/embed/SKqH5OfO5G8
-        verified_apps:
-          title: Verified Apps
-          url: https://www.youtube.com/embed/9x8JgxpciFY
         site_activity_reporting:
           title: Site Activity Reporting
           url: https://www.youtube.com/embed/KJ-Rk-ejjBM
@@ -105,6 +99,3 @@ en:
           url: https://www.youtube.com/embed/mPW82NtdKuo
       review_space_admin:
         <<: *common_videos
-        verified_apps:
-          title: Verified Apps
-          url: https://www.youtube.com/embed/9x8JgxpciFY

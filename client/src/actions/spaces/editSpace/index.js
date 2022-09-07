@@ -25,6 +25,7 @@ export default (params, spaceId) => (
     return putApiCall(editSpaceLink, { space: params })
       .then(response => {
         const statusIsOk = response.status === httpStatusCodes.OK
+
         if (statusIsOk) {
           dispatch(spaceEditingSuccess())
           dispatch(showAlertAboveAllSuccess({ message: 'Space was successfully updated.' }))
@@ -33,13 +34,18 @@ export default (params, spaceId) => (
           dispatch(spaceEditingFailure())
           processLockedSpaceForbidden(dispatch, space)
         } else {
-          if (response.payload) {
-            dispatch(spaceEditingFailure(response.payload))
+          const { payload } = response
+
+          if (payload?.errors) {
+            const message = payload.errors.messages[0]
+            dispatch(spaceEditingFailure(payload))
+            dispatch(showAlertAboveAll({ message: message }))
           } else {
             dispatch(spaceEditingFailure())
             dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
           }
         }
+
         return statusIsOk
       }).catch(e => console.error(e))
   }

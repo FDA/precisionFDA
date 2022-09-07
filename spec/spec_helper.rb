@@ -1,6 +1,8 @@
 require "sidekiq/testing"
 require "simplecov"
 require "webmock/rspec"
+require "database_cleaner"
+require "ffaker"
 
 SimpleCov.start "rails" do
   add_filter "/app/errors/"
@@ -10,14 +12,20 @@ SimpleCov.start "rails" do
   add_filter "/db/"
   add_filter "/config/"
   add_filter "/spec/"
+  add_filter "/https-apps-api/"
 end
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
+  # we always want to run tests in test configuration
+  # if developer does set env tests delete whole dev database
+  ENV["RAILS_ENV"] = "test"
+
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
   config.include JsonResponse, type: :controller
+  config.include UserContext
 
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction

@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { withRouter } from 'react-router'
+import { withRouter } from 'react-router-dom'
 
 import HomeLayout from '../../../../layouts/HomeLayout'
 import Icon from '../../../../components/Icon'
@@ -29,25 +29,27 @@ import {
   editFileTags,
   filesMove,
   filesLicenseAction,
+  filesAcceptLicenseAction,
 } from '../../../../../actions/home'
 import { getSelectedTab } from '../../../../../helpers/home'
 import HomeLicense from '../../../../components/Home/HomeLicense'
+import HomeLabel from '../../../../components/Home/HomeLabel'
 
 
 const HomeFilesSinglePage = (props) => {
-  const { fileDetails, currentTab, uid, fetchFileDetails, deleteFiles, copyToSpace, filesAttachTo, attachLicense, renameFile } = props
-  const { editTagsModal, showFileEditTagsModal, hideFileEditTagsModal, editFileTags, filesMove, filesLicenseAction } = props
+  const { fileDetails, currentTab, uid, fetchFileDetails, deleteFiles, copyToSpace, filesAttachTo, attachLicense, renameFile, setCurrentTab } = props
+  const { editTagsModal, showFileEditTagsModal, hideFileEditTagsModal, editFileTags, filesMove, filesLicenseAction, filesAcceptLicenseAction } = props
 
   useLayoutEffect(() => {
-    if (uid) fetchFileDetails(uid)
+    if (uid) fetchFileDetails(uid).then(({ statusIsOK, payload }) => {
+      if (statusIsOK) {
+        const selectedTab = getSelectedTab(payload.files.location, payload.files.links.space)
+        setCurrentTab(selectedTab)
+      }
+    })
   }, [uid])
 
   const { file, meta, isFetching } = fileDetails
-
-  if (!currentTab && file && file.links) {
-    const selectedTab = getSelectedTab(file.location, file.links.space)
-    setCurrentTab(selectedTab)
-  }
 
   if (isFetching) {
     return (
@@ -132,6 +134,8 @@ const HomeFilesSinglePage = (props) => {
   ]
 
   const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
+  const scope = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
+  const spaceId = file.spaceId?.split('-')[1]
 
   return (
     <HomeLayout hideTabs>
@@ -152,6 +156,7 @@ const HomeFilesSinglePage = (props) => {
                 <div className='home-single-page__header-section_title'>
                   <Icon icon='fa-files-o' />&nbsp;
                   {file.name}
+                  {file.showLicensePending && <HomeLabel value='License Pending Approval' icon='fa-clock-o' type='warning'/>}
                   <h3 className="description">{file.desc}</h3>
                 </div>
                 <div className='home-single-page__header-section_description'>{file.description ? file.description : 'This file has no description.'}</div>
@@ -168,6 +173,10 @@ const HomeFilesSinglePage = (props) => {
                   editTags={meta.links.edit_tags && showFileEditTagsModal}
                   filesMove={filesMove}
                   filesLicenseAction={filesLicenseAction}
+                  filesAcceptLicenseAction={filesAcceptLicenseAction}
+                  scope={scope}
+                  spaceId={spaceId}
+                  comments={meta.links?.comments}
                 />
               </div>
             </div>
@@ -189,7 +198,7 @@ const HomeFilesSinglePage = (props) => {
       <HomeEditTagsModal
         isOpen={editTagsModal.isOpen}
         isLoading={editTagsModal.isLoading}
-        name={file.title}
+        name={file.name}
         tags={file.tags}
         showSuggestedTags
         hideAction={hideFileEditTagsModal}
@@ -215,6 +224,8 @@ HomeFilesSinglePage.propTypes = {
   editFileTags: PropTypes.func,
   filesMove: PropTypes.func,
   filesLicenseAction: PropTypes.func,
+  filesAcceptLicenseAction: PropTypes.func,
+  setCurrentTab: PropTypes.func,
 }
 
 HomeFilesSinglePage.defaultProps = {
@@ -255,6 +266,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   filesLicenseAction: (link) => dispatch(filesLicenseAction(link)).then(({ statusIsOK }) => {
     if (statusIsOK) dispatch(fetchFileDetails(ownProps.uid))
   }),
+  filesAcceptLicenseAction: (link) => dispatch(filesAcceptLicenseAction(link)).then(({ statusIsOK }) => {
+    if (statusIsOK) dispatch(fetchFileDetails(ownProps.uid))
+  }),
+  setCurrentTab: (tab) => dispatch(setCurrentTab(tab)),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(HomeFilesSinglePage))
