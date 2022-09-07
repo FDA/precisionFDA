@@ -1,0 +1,94 @@
+services:
+  base_ruby:
+    build:
+      context: ../
+      dockerfile: docker/images/isolation.Dockerfile
+      args:
+        - RUBY_IMAGE_TAG=2.7.5
+    environment:
+      - RAILS_LOG_TO_STDOUT=1
+      - LOG_REQUESTS=1
+      - NO_FIPS=1
+      - REDIS_WORKER_URL=redis://redis:6379/0
+  base_nodejs:
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/node.isolated-qa.Dockerfile
+      args:
+        - NODEJS_IMAGE_TAG=12.22.10
+
+  web:
+    extends:
+      service: base_ruby
+    volumes:
+      - type: bind
+        source: ../
+        target: /precision-fda
+    working_dir: /precision-fda
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - redis
+      - sidekiq
+    entrypoint: ./docker/entrypoint/isolation.docker-entrypoint.sh
+
+  frontend:
+    build:
+      context: ../client
+      dockerfile: ./docker/images/isolation.Dockerfile
+      args:
+        - FRONTEND_IMAGE_TAG=12
+    volumes:
+      - type: bind
+        source: ../app/assets/packs/bundle.js
+        target: /precision-fda/dist/bundle.js
+    working_dir: /precision-fda
+    command: yarn watch:docker
+  # TODO(samuel) setup correct NODE_ENV here
+  nodejs-api:
+    extends:
+      service: base_nodejs
+    command: ['make', 'run-dist']
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+      - redis
+  nodejs-worker:
+    extends:
+      service: base_nodejs
+    command: ['make', 'run-worker-dist']
+    depends_on:
+      - db
+      - redis
+  sidekiq:
+    extends:
+      service: base_ruby
+    volumes:
+      - type: bind
+        source: ../
+        target: /precision-fda
+    entrypoint: docker/entrypoint/sidekiq.entrypoint.sh
+    depends_on:
+      - redis
+  db:
+    # ! Don't forget to update "db_emulated" image when updating version
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 32800:3306
+
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+
+  # Emulated images
+  # Note - it's better to keep this in this file as all the versions are at the same place
+
+  db_emulated:
+    extends:
+      service: db
+    image: amd64/mysql:5.7

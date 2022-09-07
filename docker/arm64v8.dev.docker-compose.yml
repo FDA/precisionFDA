@@ -1,0 +1,115 @@
+version: '3.7'
+
+# NOTE(samuel) - docs - volumes have to always be in leaf docker compose files
+volumes:
+  bundler-deps-cache-ruby:
+  db-pfda-mysql-volume:
+  webpack-cache-client:
+  yarn-network-cache-client:
+  yarn-network-cache-nodejs-api:
+  yarn-network-cache-nodejs-worker:
+  yarn-deps-cache-client:
+  yarn-deps-cache-nodejs-api:
+  yarn-deps-cache-nodejs-worker:
+
+services:
+  web:
+    extends:
+      file: ./base.services.yml
+      service: web
+    build:
+      context: ../
+      dockerfile: docker/images/isolation.arm64v8.Dockerfile
+    environment:
+      - ARM64V8_DEVELOPMENT_PATCH=1
+      - RAILS_ENV=development
+      - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
+      - SKIP_DB_SETUP=${SKIP_DB_SETUP}
+    volumes:
+      - type: volume
+        source: bundler-deps-cache-ruby
+        target: /usr/local/bundle
+      - db-pfda-mysql-volume:/var/lib/mysql
+  frontend:
+    extends:
+      file: ./base.services.yml
+      service: frontend
+    build:
+      context: ../client
+      dockerfile: ./docker/images/isolation.arm64v8.dev.Dockerfile
+    environment:
+      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
+    volumes:
+      - type: volume
+        source: webpack-cache-client
+        target: /precision-fda/.build_cache/
+      - type: bind
+        source: ../client/src
+        target: /precision-fda/src
+      - yarn-network-cache-client:${YARNV1_CACHE_DIR}
+      - yarn-deps-cache-client:/precision-fda/node_modules
+  nodejs-api:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-api
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/node.isolated-dev.Dockerfile
+    command: ['make', 'watch']
+    environment:
+      - NODE_ENV=development
+      - NODE_DATABASE_NAME=precision-fda
+      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+    volumes:
+      - type: bind
+        source: ../https-apps-api/packages
+        target: /app/packages
+      - yarn-network-cache-nodejs-api:${YARNV1_CACHE_DIR}
+      - yarn-deps-cache-nodejs-api:/app/node_modules
+
+  nodejs-worker:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-worker
+    build:
+      context: ../
+      dockerfile: ./https-apps-api/docker/images/node.isolated-dev.Dockerfile
+    command: ['make', 'watch-worker']
+    environment:
+      - NODE_ENV=development
+      - NODE_DATABASE_NAME=precision-fda
+      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+    volumes:
+      - type: bind
+        source: ../https-apps-api/packages
+        target: /app/packages
+      - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
+      - yarn-deps-cache-nodejs-worker:/app/node_modules
+  db:
+    extends:
+      file: ./base.services.yml
+      service: db_emulated
+    volumes:
+      - db-pfda-mysql-volume:/var/lib/mysql
+  redis:
+    extends:
+      file: ./base.services.yml
+      service: redis
+  sidekiq:
+    extends:
+      file: ./base.services.yml
+      service: sidekiq
+    build:
+      context: ../
+      dockerfile: docker/images/isolation.arm64v8.Dockerfile
+    environment:
+      - ARM64V8_DEVELOPMENT_PATCH=1
+      - RAILS_ENV=development
+      - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
+      - SKIP_DB_SETUP=${SKIP_DB_SETUP}
+    volumes:
+      - type: volume
+        source: bundler-deps-cache-ruby
+        target: /usr/local/bundle

@@ -20,7 +20,7 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
     * `\curl -sSL https://get.rvm.io | bash -s stable`
 
 * Install ruby
-    * `rvm install 2.7.1`
+    * `rvm install 2.7.5`
 
 * Move to project's root directory
     * `cd <wherever you've clonned project>`
@@ -30,7 +30,7 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
 
       __OR__ to keep the current bundler version from Gemfile.lock, run
 
-      `gem install bundler -v 2.1.4`
+      `gem install bundler -v 2.2.33`
 
 * (Mac) To overcome `bundle install` errors, you may need to install the following dependencies manually:
     * `cmake` (required to build `rugged` gem)
