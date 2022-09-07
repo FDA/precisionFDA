@@ -1,16 +1,14 @@
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store";
-import { IUser } from "../../../types/user";
-import { useAttachLicensesModal } from "../licenses/useAttachLicensesModal";
-import { useCopyToSpaceModal } from "../actionModals/useCopyToSpace";
-import { useDetachLicenseModal } from "../licenses/useDetachLicenseModal";
-import { useEditTagsModal } from "../actionModals/useEditTagsModal";
-import { ActionFunctionsType } from "../types";
-import { copyDatabasesRequest } from "./databases.api";
-import { DBStatus, IDatabase } from "./databases.types";
-import { useEditDatabaseModal } from "./useEditDatabaseModal";
-import { useMethodModal } from "./useMethodModal";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from 'react-query'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
+import { useEditTagsModal } from '../actionModals/useEditTagsModal'
+import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
+import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
+import { ActionFunctionsType } from '../types'
+import { copyDatabasesRequest } from './databases.api'
+import { DBStatus, IDatabase } from './databases.types'
+import { useEditDatabaseModal } from './useEditDatabaseModal'
+import { useMethodModal } from './useMethodModal'
 
 export const HOME_DATABASES_ACTIONS = {
   START: 'start',
@@ -35,7 +33,7 @@ export enum DatabaseActions {
 
 export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKeys: string[]) => {
   const queryClient = useQueryClient()
-  const user: IUser = useSelector((state: RootState) => state.context.user)
+  const user = useAuthUser()
   const selected = selectedItems.filter(x => x !== undefined)
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
 
@@ -45,7 +43,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal({ resource: 'dbclusters', selected, updateFunction: copyDatabasesRequest, onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
-  }})
+  } })
 
   const {
     modalComp: attachLicensesModal,
@@ -53,7 +51,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownAttachLicensesModal,
   } = useAttachLicensesModal({ selected: selected[0], resource: 'dbclusters', onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
-  }})
+  } })
 
   const {
     modalComp: detachLicenseModal,
@@ -61,7 +59,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownDetachLicenseModal,
   } = useDetachLicenseModal({ selected: selected[0], resource: 'dbclusters', onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
-  }})
+  } })
 
   const {
     modalComp: methodStartModal,
@@ -92,7 +90,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
   } = useEditTagsModal<IDatabase>({
     resource: 'dbclusters', selected: selected[0], onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
-    }
+    },
   })
 
   const isDisabledByStatus = (status: DBStatus) => {
@@ -118,7 +116,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     return actionsDisabled
   }
 
-  let actionFunctions: ActionFunctionsType<DatabaseActions> = {
+  const actionFunctions: ActionFunctionsType<DatabaseActions> = {
     'Start': {
       isDisabled: selected.length !== 1 || !selected[0]?.links.start || isDisabledByStatus(selected[0].status).start,
       func: () => setMethodStartModal(true),
@@ -178,7 +176,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
-    }
+    },
   }
 
   return actionFunctions

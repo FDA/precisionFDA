@@ -1,18 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import Dropdown from '../../../components/Dropdown'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
-import { RootState } from '../../../store'
 import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
-  ActionsRow, StyledHomeTable, StyledPaginationSection
+  ActionsRow, StyledHomeTable, StyledPaginationSection,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
@@ -28,7 +27,9 @@ type ListType = { jobs: IExecution[]; meta: IMeta }
 
 export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const history = useHistory()
-  const isAdmin = useSelector((state: RootState) => state.context.user.admin)
+  const user = useAuthUser()
+  const isAdmin = user?.isAdmin
+
   const onRowClick = (uid: string) => history.push(`/home/executions/${uid}`)
   const {
     setPerPageParam,
@@ -57,7 +58,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     selectedIndexes,
     data?.jobs,
   )
-  const actions = useExecutionActions({ scope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
+  const actions = useExecutionActions({ scope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -139,7 +140,7 @@ export const ExecutionsListTable = ({
   sortBy,
   scope,
   saveColumnResizeWidth,
-  colWidths
+  colWidths,
 }: {
   isAdmin?: boolean
   filters: IFilter[]
@@ -213,18 +214,16 @@ export const ExecutionsListTable = ({
             : {}
         }
         rowProps={row => ({
-          className: 'hideExpand'
+          className: 'hideExpand',
         })}
         updateRowState={row => ({
           ...row,
-          hideExpand: !row.original.jobs
+          hideExpand: !row.original.jobs,
         })}
-        subcomponent={row => {
-          return (
+        subcomponent={row => (
             <>
               {row.original.jobs &&
-                row.original.jobs.map((job, index) => {
-                  return (
+                row.original.jobs.map((job, index) => (
                     <div
                       className="tr sub"
                       {...row.getRowProps()}
@@ -236,11 +235,9 @@ export const ExecutionsListTable = ({
                     >
                       {row.cells.map(cell => getSubComponentValue(job, cell))}
                     </div>
-                  )
-                })}
+                  ))}
             </>
-          )
-        }}
+          )}
       />
     </StyledHomeTable>
   )

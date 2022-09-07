@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { Link, useHistory, useRouteMatch, useLocation } from 'react-router-dom'
+import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { StringParam, useQueryParam } from 'use-query-params'
 import {
   BreadcrumbDivider,
   BreadcrumbLabel,
-  StyledBreadcrumbs,
+  StyledBreadcrumbs
 } from '../../../components/Breadcrumb'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -16,6 +15,7 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
@@ -23,7 +23,7 @@ import {
   LoadingList,
   QuickActions,
   StyledHomeTable,
-  StyledPaginationSection,
+  StyledPaginationSection
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
@@ -44,7 +44,8 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     'folder_id',
     StringParam,
   )
-  const isAdmin = useSelector((state: any) => state.context.user.admin)
+  const user = useAuthUser()
+  const isAdmin = user?.isAdmin
 
   const history = useHistory()
   const onRowClick = (id: string) => history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
