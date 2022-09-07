@@ -9,7 +9,9 @@ import { checkStaleJobsHandler } from './check-stale-jobs.handler'
 import { dbClusterSyncHandler } from './db-cluster-sync.handler'
 import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
 import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclusters.handler'
+import { syncSpacesPermissionsHandler } from './sync-spaces-permissions.handler'
 import { checkUserJobsHandler } from './check-user-jobs.handler'
+
 
 export const handler = async (job: Job<queue.types.Task>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -37,6 +39,9 @@ export const handler = async (job: Job<queue.types.Task>) => {
       return
     case queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS:
       await dbClusterSyncHandler(job)
+      return
+    case queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS:
+      await syncSpacesPermissionsHandler(job as any)
       return
     case queue.types.TASK_TYPE.USER_CHECKUP:
       await userCheckupHandler(job)
