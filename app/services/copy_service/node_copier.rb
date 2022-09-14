@@ -90,6 +90,9 @@ class CopyService
         new_folder.scope = scope
         new_folder.entity_type = Folder::TYPE_REGULAR
         new_folder.user = user
+        new_folder.project = nil if Space.valid_scope?(scope)
+        new_folder.parent_id = folder.id
+        new_folder.parent_type = folder.sti_type
         new_folder[@parent_folder_col] = parent_folder&.id
         new_folder[@opposite_parent_folder_col] = nil
         new_folder.save!
