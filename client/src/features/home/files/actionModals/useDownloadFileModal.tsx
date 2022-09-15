@@ -7,7 +7,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import {
   ResourceTable,
   StyledAction,
-  StyledName,
+  StyledNameWithoutLink,
 } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
@@ -36,12 +36,12 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
       <ResourceTable
         rows={momoSelected.map((s, i) => ({
             name: (
-              <StyledName key={`${i}-name`} href={s.links.show} target="_blank">
+              <StyledNameWithoutLink key={`${i}-name`}>
                 <VerticalCenter>
                   <FileIcon />
                 </VerticalCenter>
                 {s.name}
-              </StyledName>
+              </StyledNameWithoutLink>
             ),
             action: (
               <StyledAction
