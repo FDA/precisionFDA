@@ -74,7 +74,7 @@ export const UserMenu = ({
     <StyledDivider />
     <StyledLinkReactRoute to="/about">About</StyledLinkReactRoute>
     <StyledLink href="/guidelines">Guidelines</StyledLink>
-    <StyledLink href="/docs">Docs</StyledLink>
+    <StyledLink as={Link} to="/docs">Docs</StyledLink>
     <StyledDivider />
     {userCanAdministerSite && (
       <>
@@ -235,14 +235,14 @@ export const Header: React.FC = () => {
                 <HeaderItemText>Support</HeaderItemText>
               </MenuItem>
             </a>
-            <a href="/docs" title="Get Started">
-              <MenuItem active={isActiveLink('/docs')}>
+            <Link to="/docs/introduction" title="Get Started">
+              <MenuItem active={isActiveLink('/docs/introduction')}>
                 <IconWrap>
                   <QuestionIcon height={16} />
                 </IconWrap>
                 <HeaderItemText>Get Started</HeaderItemText>
               </MenuItem>
-            </a>
+            </Link>
             <Dropdown
               trigger="click"
               content={

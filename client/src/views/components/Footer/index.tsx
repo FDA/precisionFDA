@@ -51,8 +51,7 @@ const StyledFDALogo = styled.a`
 `
 
 
-const PFDAFooter = () => {
-  return (
+const PFDAFooter = () => (
     <StyledFooterContainer>
       <StyledFooterWrapper>
         <StyledFooter role="contentInfo">
@@ -66,25 +65,25 @@ const PFDAFooter = () => {
               <li><Link to="/" title="precisionFDA Home Page">precisionFDA</Link></li>
               <li className="text-muted"  aria-hidden="true">|</li>
               <li><Link to="/about">About</Link></li>
-              <li><a href="/docs">Docs</a></li>
+              <li><Link to="/docs">Docs</Link></li>
               <li><Link to="/terms" title="precisionFDA Terms of Service">Terms of Service</Link></li>
               <li><a href="/guidelines">Guidelines</a></li>
               <li><a href="/presskit">Press Kit</a></li>
               <li className="text-muted" aria-hidden="true">|</li>
-              <li><a href="mailto:precisionfda@fda.hhs.gov"><span className="fa fa-envelope" aria-hidden="true"></span> Email the team</a></li>
-              <li><ExternalLink to="https://twitter.com/precisionfda"><span className="fa fa-twitter" aria-hidden="true"></span> Twitter</ExternalLink></li>
+              <li><a href="mailto:precisionfda@fda.hhs.gov"><span className="fa fa-envelope" aria-hidden="true" /> Email the team</a></li>
+              <li><ExternalLink to="https://twitter.com/precisionfda"><span className="fa fa-twitter" aria-hidden="true" /> Twitter</ExternalLink></li>
               <li><ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin"> LinkedIn</ExternalLink></li>
             </ul>
             <ul className="list-inline">
-              <li><a href="http://www.fda.gov/" target="_blank" title="FDA Home Page" aria-label='Navigate to the FDA home page in another window'>FDA</a></li>
+              <li><a href="http://www.fda.gov/" target="_blank" title="FDA Home Page" aria-label='Navigate to the FDA home page in another window' rel="noreferrer">FDA</a></li>
               <li className="text-muted" aria-hidden="true">|</li>
-              <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm" target="_blank" title="Accessibility">Accessibility</a></li>
-              <li><a href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm" target="_blank" title="FDA Basics">Basics</a></li>
-              <li><a href="http://www.fda.gov/RegulatoryInformation/FOI/default.htm" target="_blank" title="Freedom of Information Act">FOIA</a></li>
-              <li><a href="http://www.fda.gov/AboutFDA/WorkingatFDA/NoFearAct/default.htm" target="_blank" title="No Fear Act">No Fear Act</a></li>
-              <li><a href="http://www.fda.gov/AboutFDA/Transparency/default.htm" target="_blank" title="Transparency">Transparency</a></li>
-              <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/WebsitePolicies/default.htm" target="_blank" title="Website Policies">Website Policies</a></li>
-              <li><a href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html" target="_blank" title="Vulnerability Disclosure Policy">Vulnerability Disclosure Policy</a></li>
+              <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/Accessibility/default.htm" target="_blank" title="Accessibility" rel="noreferrer">Accessibility</a></li>
+              <li><a href="http://www.fda.gov/AboutFDA/Transparency/Basics/default.htm" target="_blank" title="FDA Basics" rel="noreferrer">Basics</a></li>
+              <li><a href="http://www.fda.gov/RegulatoryInformation/FOI/default.htm" target="_blank" title="Freedom of Information Act" rel="noreferrer">FOIA</a></li>
+              <li><a href="http://www.fda.gov/AboutFDA/WorkingatFDA/NoFearAct/default.htm" target="_blank" title="No Fear Act" rel="noreferrer">No Fear Act</a></li>
+              <li><a href="http://www.fda.gov/AboutFDA/Transparency/default.htm" target="_blank" title="Transparency" rel="noreferrer">Transparency</a></li>
+              <li><a href="http://www.fda.gov/AboutFDA/AboutThisWebsite/WebsitePolicies/default.htm" target="_blank" title="Website Policies" rel="noreferrer">Website Policies</a></li>
+              <li><a href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html" target="_blank" title="Vulnerability Disclosure Policy" rel="noreferrer">Vulnerability Disclosure Policy</a></li>
             </ul>
           </div>
           <StyledFooterAddress>
@@ -92,8 +91,8 @@ const PFDAFooter = () => {
               <strong>U.S. Food and Drug Administration</strong><br/>
               10903 New Hampshire Avenue<br/>
               Silver Spring, MD 20993<br/>
-              <span className="icon-phone" aria-hidden="true"></span> 1-888-INFO-FDA (1-888-463-6332)<br/>
-              <span className="icon-envelope-alt" aria-hidden="true"></span> <a href="http://www.fda.gov/AboutFDA/ContactFDA/default.htm" title="Contact FDA">Contact FDA</a>
+              <span className="icon-phone" aria-hidden="true" /> 1-888-INFO-FDA (1-888-463-6332)<br/>
+              <span className="icon-envelope-alt" aria-hidden="true" /> <a href="http://www.fda.gov/AboutFDA/ContactFDA/default.htm" title="Contact FDA">Contact FDA</a>
             </address>
           </StyledFooterAddress>
           <div className="site-footer-main disclaimer accessible-text-muted">
@@ -104,6 +103,5 @@ const PFDAFooter = () => {
       </StyledFooterWrapper>
     </StyledFooterContainer>
   )
-}
 
 export default PFDAFooter
