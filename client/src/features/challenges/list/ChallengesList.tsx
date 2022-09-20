@@ -6,10 +6,10 @@ import { Link, useLocation } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
+import { PageContainerMargin } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
   ButtonRow,
-  Container,
   Content,
   ItemBody,
   ItemButton,
@@ -136,7 +136,7 @@ export const ChallengesList = () => {
         subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."
         user={user}
       />
-      <Container>
+      <PageContainerMargin>
         <PageRow>
           {isLoading ? (
             <NewsLoaderWrapper>
@@ -281,7 +281,7 @@ export const ChallengesList = () => {
             </RightSideItem>
           </RightSide>
         </PageRow>
-      </Container>
+      </PageContainerMargin>
     </PublicLayout>
   )
 }
