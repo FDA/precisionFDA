@@ -401,7 +401,7 @@ const dbCluster = {
     scope: STATIC_SCOPE.PRIVATE,
     dxInstanceClass: 'db_std1_x2',
     engine: ENGINES.MYSQL,
-    engineVersion: '5.7.12',
+    engineVersion: '5.7.mysql_aurora.2.07.8',
     adminPassword: random.password(),
   }),
 }
