@@ -6,8 +6,8 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { MainBanner } from '../../../components/Banner'
 import { ButtonSolidBlue } from '../../../components/Button/index'
 import { Loader } from '../../../components/Loader'
+import { PageContainerMargin } from '../../../components/Page/styles'
 import {
-  Container,
   ListItem,
   PageMainBody,
   PageRow,
@@ -232,8 +232,7 @@ export const ChallengeDetails = ({
   document.title = `${challenge.name} - PrecisionFDA Challenge`
 
   return (
-    <>
-      <Container>
+    <PageContainerMargin>
         <PageRow>
           <PageMainBody>
             {isNoInfoProvided && (
@@ -327,8 +326,7 @@ export const ChallengeDetails = ({
             </RightSide>
           )}
         </PageRow>
-      </Container>
-    </>
+      </PageContainerMargin>
   )
 }
 

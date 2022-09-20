@@ -39,6 +39,7 @@ import { ToS } from './views/pages/ToS'
 import { ChallengesList } from './features/challenges/list/ChallengesList'
 import { EditChallengePage } from './features/challenges/form/EditChallenge'
 import { CreateChallengePage } from './features/challenges/form/CreateChallenge'
+import { NewsPage } from './features/news/NewsPage'
 
 const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
   new QueryClient({
@@ -168,7 +169,7 @@ const root = ({ store }: any) => {
                   render={props => <OldChallengeDetailsPage {...props} />}
                 />
                 <Route exact path="/news">
-                  <NewsListPage />
+                  <NewsPage />
                 </Route>
                 <Route path="/experts/:expertId/:page">
                   <ExpertsSinglePage />
