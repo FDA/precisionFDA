@@ -19,7 +19,7 @@ import { StyledBackLink } from '../../home.styles'
 import { NotFound } from '../../show.styles'
 import { ResourceScope } from '../../types'
 import { createDatabaseRequest, fetchAccessibleFiles } from '../databases.api'
-import { versionsOptions } from './options'
+import { DatabaseEngineType, versionsOptions } from './options'
 
 const useAccessibleFiles = () => useQuery(['accessible-files'], () => fetchAccessibleFiles(), {
     onError: (e: Error) => {
@@ -51,7 +51,7 @@ interface CreateDatabaseForm {
   description: string
   adminPassword: string
   confirmPassword: string
-  engine: string
+  engine: DatabaseEngineType | null
   dxInstanceClass: { label: string; value: string } | null
   engineVersion: { label: string; value: string } | null
   ddl_file_uid: { label: string; value: string } | null
@@ -82,9 +82,14 @@ const validationSchema = Yup.object().shape({
 export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const history = useHistory()
   const { data, isLoading } = useAccessibleFiles()
-  const allowedInstancesQuery = useQuery(['dbclusters','allowedInstances'], () => getDatabaseAllowedInstances(), {
-    onError: (e: Error) => {
-      toast.error(`Error: fetching allowed Db instance types '${e.message}'`)
+  const allowedInstancesQuery = useQuery<{
+    payload: {
+      label: string
+      value: string
+    }[] | null
+  }>(['dbclusters','allowedInstances'], () => getDatabaseAllowedInstances(), {
+    onError: (e: any) => {
+      toast.error(`Error: fetching allowed Db instance types '${e?.message}'`)
     },
   })
   
@@ -104,7 +109,7 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
     defaultValues: {
       name: '',
       description: '',
-      engine: '',
+      engine: null,
       adminPassword: '',
       confirmPassword: '',
       ddl_file_uid: null,
@@ -181,10 +186,10 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
       </>
     )
   }
-  const dbInstanceOptions = allowedInstancesQuery.data!.payload.map((option) => ({
+  const dbInstanceOptions = allowedInstancesQuery.data?.payload?.map((option) => ({
     ...option,
     label: replaceNbspSubstring(option.label, 4),
-  }))
+  })) ?? []
   return (
     <>
       <StyledBackLink linkTo="/home/databases">
