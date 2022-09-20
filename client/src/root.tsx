@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { PushReplaceHistory, QueryParamProvider } from 'use-query-params'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import { AuthModal } from './features/auth/AuthModal'
+import { Docs } from './features/docs'
 import { Home2 } from './features/home'
 import { FileShow } from './features/home/files/show/FileShow'
 import { useModal } from './features/modal/useModal'
@@ -101,6 +102,9 @@ const root = ({ store }: any) => {
                 </Route>
                 <Route exact path="/about">
                   <AboutPage />
+                </Route>
+                <Route path="/docs">
+                  <Docs />
                 </Route>
                 <Route exact path="/files/:fileId">
                   <FileShow />

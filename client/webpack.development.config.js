@@ -135,10 +135,6 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/docs': {
-        target: TARGET,
-        secure: false,
-      },
     },
   },
 })

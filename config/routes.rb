@@ -139,8 +139,9 @@ Rails.application.routes.draw do
 
     # My Home (Site-Wide UI & API Redesign)
     get "home" => "home#index"
-    get "home" => "home#index"
     get "/home/*all", to: "home#index"
+    get "docs" => "docs#index"
+    get "/docs/*all", to: "docs#index"
 
     # Old My Home
     # TODO: remove old code once new My Home is stable for release or two,
@@ -625,10 +626,6 @@ Rails.application.routes.draw do
     end
 
     resources :queries, only: %i(create destroy)
-
-    resources :docs do
-      get ":section", on: :collection, action: :show, as: "show"
-    end
 
     resources :phone_confirmations, only: [:create] do
       get "check_code", on: :collection
