@@ -39,6 +39,7 @@ Rails.application.routes.draw do
       end
 
       get "users", to: "users#index"
+      get "users_list", to: "users#list"
       get "all_users", to: "users#all_users"
       get "active_users", to: "users#active"
       get "reset_mfa_user", to: "users#reset_2fa"

@@ -40,6 +40,7 @@ import { ToS } from './views/pages/ToS'
 import { ChallengesList } from './features/challenges/list/ChallengesList'
 import { EditChallengePage } from './features/challenges/form/EditChallenge'
 import { CreateChallengePage } from './features/challenges/form/CreateChallenge'
+import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import { NewsPage } from './features/news/NewsPage'
 
 const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
@@ -68,6 +69,7 @@ const possiblyMismatchedRoutes = [
   
 const root = ({ store }: any) => {
   const authModal = useModal()
+  const expiringSessionModal = useModal()
   toast.configure()
 
   return (
@@ -87,16 +89,6 @@ const root = ({ store }: any) => {
             {/* <SessionExpiration authModal={authModal} /> */}
             <ErrorWrapper>
               <Switch>
-                { // TODO(samuel) temporary hotfix for incorrect routing, remove when admin dashboard gets implemented in react
-                  (function () {
-                    const isRouteMismatched = possiblyMismatchedRoutes.includes(window.location.pathname)
-                    // TODO(samuel) for some reason history.location is not overwritten sometimes
-                    if (isRouteMismatched) {
-                      return <Redirect exact from='/' to={window.location.pathname} />
-                    }
-
-                  })()
-                }
                 <Route exact path="/">
                   <LandingPage />
                 </Route>
@@ -189,6 +181,7 @@ const root = ({ store }: any) => {
                 </Route>
                 <Route exact path="/admin/users">
                   <UsersList />
+                  
                 </Route>
                 <Route path="*">
                   <NoFoundPage />
@@ -198,6 +191,7 @@ const root = ({ store }: any) => {
           </QueryParamProvider>
         </Router>
         <AuthModal {...authModal} />
+        <ExpiringSessionModal modal={expiringSessionModal} />
         <StyledToastContainer
           position="top-right"
           transition={Slide}
