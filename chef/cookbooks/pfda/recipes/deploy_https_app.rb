@@ -4,9 +4,10 @@ app_dir = node["rails_app_dir"]
 https_apps_dir = File.join(app_dir, "https-apps-api")
 nodejs_bin = node["nodejs"]["bin_path"]
 
-application app_dir do
+directory app_dir do
   owner node[:deploy_user]
   group node[:deploy_user_group]
+end
 
   ruby_block "set envs" do
     block do
@@ -19,7 +20,7 @@ application app_dir do
     end
   end
 
-  environment lazy { ENV.to_hash }
+  # environment lazy { ENV.to_hash }
 
   # probably checkout the correct branch
   git app_dir do
@@ -75,4 +76,3 @@ application app_dir do
     command "pm2 startOrReload ./pm2-worker.json"
     environment lazy { ENV.to_hash }
   end
-end
