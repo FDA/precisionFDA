@@ -21,9 +21,9 @@ ruby_block "set envs" do
 end
 
 # TODO: remove GSRS dist folder from the base AMI.
-execute "Remove old GSRS distribution directory" do
-  command "rm -rf #{gsrs_path}"
-end
+#execute "Remove old GSRS distribution directory" do
+#  command "rm -rf #{gsrs_path}"
+#end
 
 git gsrs_path do
   repository node[:gsrs][:repo_url]
@@ -73,15 +73,44 @@ end
 
 execute "Copy ginas indexes" do
   cwd gsrs_path
-  user deploy_user
-  command "aws s3 cp s3://#{gsrs_indexes_bucket}/ginas.ix/ ginas.ix --recursive"
+  #user deploy_user
+  # TODO - revert to deploy_user once we figure out PFDA-3691
+  user 'root'
+  command "aws s3 sync s3://#{gsrs_indexes_bucket}/ginas.ix/ ginas.ix --delete"
   environment ENV.to_hash
 end
 
-poise_service "gsrs" do
-  directory gsrs_path
-  user deploy_user
-  provider :systemd
-  command gsrs_run_script
-  environment lazy { ENV.to_hash }
+gsrs_environment_file = "/etc/pfda-gsrs-environment.conf"
+gsrs_unit_path = "/etc/systemd/system/pfda-gsrs.service"
+
+template gsrs_environment_file do
+  source "environment.erb"
+  user 'root'
+  group 'root'
+end
+
+template gsrs_unit_path do
+  source "pfda-gsrs.service.erb"
+  variables lazy { {
+      gsrs_run_script: gsrs_run_script,
+      gsrs_path: gsrs_path,
+      gsrs_environment_file: gsrs_environment_file,
+      user: deploy_user
+    } }
+  user 'root'
+  group 'root'
+end
+
+systemd_unit "pfda-gsrs.service" do
+  content lazy { ::File.read(gsrs_unit_path) }
+  action [:create, :enable]
+  #user deploy_user
+end
+
+service "pfda-gsrs" do
+  #user deploy_user
+  #start_command ENV.keys.collect {|k| "#{k}=#{ENV[k]}"}.join(' ')+gsrs_run_script
+  #stop_command "kill `cat #{gsrs_path}/RUNNING_PID`"
+
+  action :start
 end
