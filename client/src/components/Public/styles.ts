@@ -104,10 +104,8 @@ export const PageRow = styled.div`
   width: 100%;
   flex-direction: column-reverse;
   gap: 64px;
-  padding: 64px 8px;
+  padding: 64px 0;
   @media (min-width: ${breakPoints.large}px) {
-    padding-left: 32px;
-    padding-right: 32px;
     flex-direction: row;
     justify-content: space-between;
     ${RightSide} {

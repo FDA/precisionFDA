@@ -116,7 +116,7 @@ module SpaceService
     #   which have space_form.guest_lead_dxuser == '' and space_form.sponsor_lead_dxuser == ''
     #   - for Private type spaces we do not create dxorg here
     def construct_guest_dxorg(guest_lead_dxuser, sponsor_lead_dxuser, uuid)
-      return if guest_lead_dxuser.empty? && sponsor_lead_dxuser.empty?
+      return if guest_lead_dxuser && guest_lead_dxuser.empty? && sponsor_lead_dxuser && sponsor_lead_dxuser.empty?
 
       Org.construct_dxorg("space_guest_#{uuid}")
     end

@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { PushReplaceHistory, QueryParamProvider } from 'use-query-params'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import { AuthModal } from './features/auth/AuthModal'
+import { Docs } from './features/docs'
 import { Home2 } from './features/home'
 import { FileShow } from './features/home/files/show/FileShow'
 import { useModal } from './features/modal/useModal'
@@ -39,6 +40,8 @@ import { ToS } from './views/pages/ToS'
 import { ChallengesList } from './features/challenges/list/ChallengesList'
 import { EditChallengePage } from './features/challenges/form/EditChallenge'
 import { CreateChallengePage } from './features/challenges/form/CreateChallenge'
+import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
+import { NewsPage } from './features/news/NewsPage'
 
 const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
   new QueryClient({
@@ -66,6 +69,7 @@ const possiblyMismatchedRoutes = [
   
 const root = ({ store }: any) => {
   const authModal = useModal()
+  const expiringSessionModal = useModal()
   toast.configure()
 
   return (
@@ -85,21 +89,14 @@ const root = ({ store }: any) => {
             {/* <SessionExpiration authModal={authModal} /> */}
             <ErrorWrapper>
               <Switch>
-                { // TODO(samuel) temporary hotfix for incorrect routing, remove when admin dashboard gets implemented in react
-                  (function () {
-                    const isRouteMismatched = possiblyMismatchedRoutes.includes(window.location.pathname)
-                    // TODO(samuel) for some reason history.location is not overwritten sometimes
-                    if (isRouteMismatched) {
-                      return <Redirect exact from='/' to={window.location.pathname} />
-                    }
-
-                  })()
-                }
                 <Route exact path="/">
                   <LandingPage />
                 </Route>
                 <Route exact path="/about">
                   <AboutPage />
+                </Route>
+                <Route path="/docs">
+                  <Docs />
                 </Route>
                 <Route exact path="/files/:fileId">
                   <FileShow />
@@ -168,7 +165,7 @@ const root = ({ store }: any) => {
                   render={props => <OldChallengeDetailsPage {...props} />}
                 />
                 <Route exact path="/news">
-                  <NewsListPage />
+                  <NewsPage />
                 </Route>
                 <Route path="/experts/:expertId/:page">
                   <ExpertsSinglePage />
@@ -184,6 +181,7 @@ const root = ({ store }: any) => {
                 </Route>
                 <Route exact path="/admin/users">
                   <UsersList />
+                  
                 </Route>
                 <Route path="*">
                   <NoFoundPage />
@@ -193,6 +191,7 @@ const root = ({ store }: any) => {
           </QueryParamProvider>
         </Router>
         <AuthModal {...authModal} />
+        <ExpiringSessionModal modal={expiringSessionModal} />
         <StyledToastContainer
           position="top-right"
           transition={Slide}

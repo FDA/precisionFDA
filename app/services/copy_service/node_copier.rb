@@ -55,7 +55,7 @@ class CopyService
     # @return [CopyService::Copies] An object that contains copied files and folders.
     # rubocop:todo Metrics/MethodLength
     def copy_folder(folder, scope, parent_folder = nil)
-      Rails.logger.info("NodeCopier::copy_folder id {folder.id} name #{folder.name} to scope #{scope}")
+      Rails.logger.info("NodeCopier::copy_folder id #{folder.id} name #{folder.name} to scope #{scope}")
       copies = Copies.new
 
       existing_folder = if scope == Scopes::SCOPE_PRIVATE
@@ -90,6 +90,9 @@ class CopyService
         new_folder.scope = scope
         new_folder.entity_type = Folder::TYPE_REGULAR
         new_folder.user = user
+        new_folder.project = nil if Space.valid_scope?(scope)
+        new_folder.parent_id = folder.id
+        new_folder.parent_type = folder.sti_type
         new_folder[@parent_folder_col] = parent_folder&.id
         new_folder[@opposite_parent_folder_col] = nil
         new_folder.save!
@@ -121,7 +124,7 @@ class CopyService
     # @param parent_folder [Folder, nil] A parent folder of a file.
     # @return [CopyService::Copies] An object that contains copied and source files.
     def copy_file(file, scope, parent_folder = nil)
-      Rails.logger.info("NodeCopier::copy_file id #{file.id} name #{file.name} to scope #{scope}")
+      Rails.logger.info("NodeCopier::copy_file id #{file.id} uid #{file.uid} name #{file.name} to scope #{scope}")
 
       file_copier.copy(file, scope, parent_folder&.id)
     end

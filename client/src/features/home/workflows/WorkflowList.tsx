@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
@@ -8,9 +7,9 @@ import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
-import { RootState } from '../../../store'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
@@ -37,7 +36,9 @@ export const WorkflowList = ({
   spaceId?: string
 }) => {
   const history = useHistory()
-  const isAdmin = useSelector((state: RootState) => state.context.user.admin)
+  const user = useAuthUser()
+  const isAdmin = user?.isAdmin
+
   const onRowClick = (id: string) => history.push(`/home/workflows/${id}`)
   const {
     sortBy,

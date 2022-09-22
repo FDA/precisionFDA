@@ -1,16 +1,15 @@
-import { useMutation, useQueryClient } from 'react-query'
-import { useSelector } from 'react-redux'
 import { pick } from 'ramda'
-import { RootState } from '../../../store'
+import { useMutation, useQueryClient } from 'react-query'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
-import { useTerminateModal } from './useTerminateModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
 import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
+import { useTerminateModal } from './useTerminateModal'
 
 export enum ExecutionAction {
   'View Logs' = 'View Logs',
@@ -28,7 +27,7 @@ export enum ExecutionAction {
 export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { scope?: ResourceScope, selectedItems: IExecution[], resourceKeys: string[]}) => {
   const queryClient = useQueryClient()
   const selected = selectedItems.filter(x => x !== undefined)
-  const user = useSelector((state: RootState) => state.context.user)
+  const user = useAuthUser()
   const isAdmin = user ? user.admin : false
 
   const featureMutation = useFeatureMutation({ resource: 'jobs', onSuccess: () => {
@@ -142,7 +141,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.launched_by !== user.full_name) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.launched_by !== user?.full_name) || (selected.length !== 1),
     },
   }
 
