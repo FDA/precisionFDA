@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
@@ -8,8 +7,8 @@ import { QuestionIcon } from '../../../components/icons/QuestionIcon'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
-import { RootState } from '../../../store'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
 import { ActionsButton } from '../show.styles'
@@ -24,7 +23,9 @@ type ListType = { assets: IAsset[]; meta: IMeta }
 
 export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
   const history = useHistory()
-  const isAdmin = useSelector((state: RootState) => state.context.user.admin)
+  const user = useAuthUser()
+  const isAdmin = user?.isAdmin
+
   const onRowClick = (uid: string) => history.push(`/home/assets/${uid}`)
   const {
     setPerPageParam,
@@ -65,7 +66,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
           <QuickActions>
             <ButtonSolidBlue
               as="a"
-              href={`/assets/new`}
+              href="/assets/new"
               data-testid="home-assets-create-link"
             >
               <QuestionIcon /> How to create assets

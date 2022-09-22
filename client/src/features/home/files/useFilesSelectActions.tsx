@@ -1,15 +1,14 @@
 import { pick } from 'ramda'
 import { useQueryClient } from 'react-query'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router'
-import { RootState } from '../../../store'
-import { IUser } from '../../../types/user'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { ISpace } from '../../spaces/spaces.types'
 import {
   OBJECT_TYPES,
   useAttachToModal,
 } from '../actionModals/useAttachToModal'
-import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
+import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
@@ -24,7 +23,6 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
-import { ISpace } from '../../spaces/spaces.types'
 
 export enum FileActions {
   'Track' = 'Track',
@@ -83,9 +81,9 @@ export const useFilesSelectActions = ({
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
-  const user: IUser = useSelector((state: RootState) => state.context.user)
-  const isAdmin: boolean = user?.admin
-  const isViewer: boolean = (space?.current_user_membership.role === 'viewer')
+  const user = useAuthUser()
+  const isAdmin = user?.admin
+  const isViewer = (space?.current_user_membership.role === 'viewer')
   const openSelected = selected.some(e => e.state === 'open')
 
   const featureMutation = useFeatureMutation({
@@ -261,7 +259,7 @@ export const useFilesSelectActions = ({
       func: () => setEditFileModal(true),
       modal: editFileModal,
       isDisabled:
-        selected.length !== 1 || user.full_name !== selected[0].added_by,
+        selected.length !== 1 || user?.full_name !== selected[0].added_by,
       showModal: isShownEditFileModal,
       shouldHide: isFolder || selected.length !== 1 || scope === 'spaces' || openSelected,
     },
@@ -420,7 +418,7 @@ export const useFilesSelectActions = ({
       modal: tagsModal,
       showModal: isShownTagsModal,
       shouldHide:
-        (!isAdmin && selected[0]?.added_by !== user.full_name) ||
+        (!isAdmin && selected[0]?.added_by !== user?.full_name) ||
         selected.length !== 1 ||
         scope === 'spaces',
     },

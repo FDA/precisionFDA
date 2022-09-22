@@ -1,15 +1,13 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
-import { contextUserSelector } from '../../../../reducers/context/selectors'
-import { RootState } from '../../../../store'
-import { Tabs, TabList, Tab, TabPanel } from 'react-tabs'
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 
-import PublicLayout from '../../../layouts/PublicLayout'
+import { useAuthUser } from '../../../../features/auth/useAuthUser'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../../layouts/PublicLayout'
 
 
 const AboutPage = () => {
-  const user = useSelector((state: RootState) => state.context.user)
+  const user = useAuthUser()
   const isLoggedIn = (user !== null)
   const title = 'About precisionFDA'
   return (
@@ -38,7 +36,7 @@ const AboutPage = () => {
               </a>
             </Tab>
             <Tab selectedClassName="active">
-              <a href={'/docs'}>
+              <a href="/docs">
                 <span className="tab-label">How?</span>
                 <span className="tab-help">Learn how to use the features</span>
               </a>
@@ -162,7 +160,7 @@ const AboutPage = () => {
               </div>
             </div>
           </TabPanel>
-          <TabPanel></TabPanel>
+          <TabPanel />
           </div>
         </Tabs>
 
@@ -176,7 +174,7 @@ const AboutPage = () => {
                 <p className="lead">For further information and to express interest in participating please submit our request access form.</p>
               </div>
               <div className="panel-body">
-                <a className="btn accessible-btn-success btn-lg" href="/request_access"><span className="fa fa-user-plus" aria-hidden="true"></span> Request Access</a>
+                <a className="btn accessible-btn-success btn-lg" href="/request_access"><span className="fa fa-user-plus" aria-hidden="true" /> Request Access</a>
               </div>
             </div>
           </div>

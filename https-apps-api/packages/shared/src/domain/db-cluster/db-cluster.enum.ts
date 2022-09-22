@@ -37,15 +37,13 @@ const allowedInstanceTypes = [
   'db_mem1_x32',
   'db_mem1_x48',
   'db_mem1_x64',
+  'db_mem1_x96',
 ]
 
 const allowedEngineVersions = [
-  '5.7.12',
-  '9.6.16',
-  '9.6.17',
-  '9.6.18',
-  '9.6.19',
-  '10.14',
+  '5.7.mysql_aurora.2.07.8',
+  '11.16',
+  '12.19',
 ]
 
 export {

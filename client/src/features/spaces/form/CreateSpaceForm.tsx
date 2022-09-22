@@ -39,9 +39,9 @@ export const SpaceForm = ({
 }: ISpaceForm) => {
   const user = useAuthUser()
 
-  const isGovUser = user.isGovUser || false
-  const isAdmin = user.isAdmin || false
-  const isReviewAdmin = user.review_space_admin || false
+  const isGovUser = user?.isGovUser || false
+  const isAdmin = user?.isAdmin || false
+  const isReviewAdmin = user?.review_space_admin || false
 
   const {
     control,
@@ -80,7 +80,7 @@ export const SpaceForm = ({
   const onSubmit = () => {
     const vals = getValues()
     if (vals.space_type === 'private_type') {
-      vals.host_lead_dxuser = user.dxuser
+      vals.host_lead_dxuser = user ? user.dxuser : null
       vals.sponsor_lead_dxuser = ''
       vals.guest_lead_dxuser = ''
     }
@@ -93,9 +93,12 @@ export const SpaceForm = ({
     }
     // TODO: weird naming in the form label but the backend expects host_lead to be the review_lead
     if (vals.space_type === 'administrator') {
-      vals.host_lead_dxuser = user.dxuser
+      vals.host_lead_dxuser = user ? user.dxuser : null
       vals.guest_lead_dxuser = ''
       vals.sponsor_lead_dxuser = ''
+    }
+    if (vals.space_type === 'government') {
+      vals.host_lead_dxuser = user ? user.dxuser : null
     }
     mutation.mutateAsync(vals)
   }

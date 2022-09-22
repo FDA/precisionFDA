@@ -9,15 +9,13 @@ import { PublicNavbar } from '../PublicNavbar'
 import { commonStyles } from '../../../../styles/commonStyles'
 import { Header } from '../../../../components/Header'
 import { MainBanner } from '../../../../components/Banner'
+import { PageContainerMargin } from '../../../../components/Page/styles'
 
 
 const NavigationBarBanner = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  padding: 0px ${theme.padding.mainContentHorizontal};
-  max-width: ${theme.sizing.mainContainerMaxWidth};
-  margin: 0 auto;
 
   @media (max-width: 640px) {
     flex-flow: column wrap;
@@ -101,6 +99,7 @@ const NavigationBarSubtitle = styled.div`
 
   @media (max-width: 640px) {
     margin: 0;
+    align-self: flex-start;
   }
 `
 
@@ -132,20 +131,22 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
   const renderTitleIfDefined = () => {
     if (title || subtitle || showSocialMediaButtonText) {
       return (
-        <NavigationBarBanner>
-          <NavigationBarLogoAndTitle>
-            {showLogoAboveTitle ? <PFDALogoLight /> : <div className="pfda-navbar-logo logo-img logo-img-none" />}
-            <h1>{title}</h1>
-          </NavigationBarLogoAndTitle>
-          {!showSocialMediaButtonText &&
-            <NavigationBarSubtitle>
-              <h2>{subtitle}</h2>
-            </NavigationBarSubtitle>
-          }
-          {showSocialMediaButtons &&
-            <SocialMediaButtons showText={showSocialMediaButtonText} />
-          }
-        </NavigationBarBanner>
+        <PageContainerMargin>
+          <NavigationBarBanner>
+            <NavigationBarLogoAndTitle>
+              {showLogoAboveTitle ? <PFDALogoLight /> : <div className="pfda-navbar-logo logo-img logo-img-none" />}
+              <h1>{title}</h1>
+            </NavigationBarLogoAndTitle>
+            {!showSocialMediaButtonText &&
+              <NavigationBarSubtitle>
+                <h2>{subtitle}</h2>
+              </NavigationBarSubtitle>
+            }
+            {showSocialMediaButtons &&
+              <SocialMediaButtons showText={showSocialMediaButtonText} />
+            }
+          </NavigationBarBanner>
+        </PageContainerMargin>
       )
     }
     return ''
@@ -169,7 +170,6 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
     </MainBanner>
   )
 }
-
 
 export {
   NavigationBar,
