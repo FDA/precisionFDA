@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "engines": {
-    "node": ">=16.17.0",
-    "npm": "^8.15.0"
+    "node": ">=18.9.0",
+    "npm": "^8.19.1"
   },
   "resolutions": {
     "**/@mikro-orm/core/**/glob-parent": "^5.1.2",
