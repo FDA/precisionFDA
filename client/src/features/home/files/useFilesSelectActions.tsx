@@ -63,6 +63,9 @@ const getScope = (scope: ResourceScope | undefined, space: ISpace | undefined): 
   return `space-${space?.id}`
 }
 
+const isInSpace = (scope?: ResourceScope) => 
+  !(scope && (scope === 'me' || scope === 'everybody' || scope === 'featured'))
+
 export const useFilesSelectActions = ({
   scope,
   fileId,
@@ -359,6 +362,7 @@ export const useFilesSelectActions = ({
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
+      shouldHide: !isInSpace(scope),
     },
     'Attach to...': {
       type: 'modal',
