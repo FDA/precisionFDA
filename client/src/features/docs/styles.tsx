@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import styled, { css } from 'styled-components'
-import { colors } from '../../styles/theme'
+import styled from 'styled-components'
+import { breakPoints, colors } from '../../styles/theme'
 
 export const DocsLayout = styled.div`
   display: flex;
@@ -26,7 +26,7 @@ export const DocsContent = styled.main`
   color: #333333;
   line-height: 1.428571429;
   font-size: 16px;
-  overflow-y: auto;
+  padding-top: 32px;
   box-sizing: border-box;
 
   p {
@@ -122,10 +122,31 @@ export const DocBody = styled.div`
   max-width: 820px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 32px;
-  padding-right: 32px;
   padding-bottom: 48px;
-  padding-top: 16px;
+`
+
+export const RightSide = styled.div`
+  flex: 1 0 auto;
+  display: none;
+  flex-direction: column;
+`
+
+export const DocRow = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column-reverse;
+  gap: 64px;
+  padding: 0 16px 64px 16px;
+  @media (min-width: ${breakPoints.large}px) {
+    flex-direction: row;
+    justify-content: space-between;
+    ${RightSide} {
+      display: flex;
+      flex: 0 1 auto;
+      min-width: 256px;
+      max-width: 256px;
+    }
+  }
 `
 export const DocTable = styled.table`
   border: 1px solid #ddd;
@@ -160,6 +181,27 @@ export const DocTable = styled.table`
       padding: 8px;
       line-height: 1.428571429;
       vertical-align: top;
+    }
+  }
+`
+
+export const PageMap = styled.ol`
+  position: sticky;
+  height: 300px;
+  top: 83px;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  font-size: 16px;
+  line-height: 20px;
+
+  li {
+    margin-bottom: 16px;
+    text-decoration: none;
+    border-left: 1px solid transparent;
+    padding-left: 16px;
+    &:hover {
+      border-left: 1px solid #2f7abc;
     }
   }
 `
