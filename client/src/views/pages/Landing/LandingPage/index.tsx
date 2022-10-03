@@ -28,7 +28,7 @@ import { ViewAllButton } from '../../../components/Controls/ViewAllButton'
 import { SectionHeading } from '../../../components/Controls/SectionHeading'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
-import { PageContainer } from '../../../../components/Page/styles'
+import { PageContainer, PageContainerMargin } from '../../../../components/Page/styles'
 import { Tagline } from '../Tagline'
 import { IUser } from '../../../../types/user'
 
@@ -165,13 +165,15 @@ const LandingPage : FunctionComponent = () => {
   const renderPublic = () => (
       <PublicLayout>
         <NavigationBar>
-          <NavigationBarBanner>
-            <NavigationBarPublicLandingTitle>
-              <PFDALogoLight />
-              <Tagline />
-            </NavigationBarPublicLandingTitle>
-            <SocialMediaButtons showText={false} />
-          </NavigationBarBanner>
+          <PageContainerMargin>
+            <NavigationBarBanner>
+              <NavigationBarPublicLandingTitle>
+                <PFDALogoLight />
+                <Tagline />
+              </NavigationBarPublicLandingTitle>
+              <SocialMediaButtons showText={false} />
+            </NavigationBarBanner>
+          </PageContainerMargin>
         </NavigationBar>
 
         <LandingPageLayout>
