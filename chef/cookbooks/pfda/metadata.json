@@ -9,7 +9,6 @@
 
   },
   "dependencies": {
-    "application": "~> 5.2.0",
     "aws": "~> 8.4.0",
     "nodejs": "~> 7.3.2"
   },
@@ -25,7 +24,7 @@
   "privacy": false,
   "chef_versions": [
     [
-      "~> 16.0"
+      "~> 17.10.3"
     ]
   ],
   "ohai_versions": [
