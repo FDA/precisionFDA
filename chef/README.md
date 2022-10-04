@@ -3,6 +3,25 @@
 Chef is the tool we use to deploy the pFDA server via AWS CodeBuild.
 It downloads and configures nginx, the backend, frontend and uses configurations from both Parameter Store and CodeBuild environment.
 
+# EC2 Instance Anatomy
+
+Chef scripts are run from EC2 userdata, as root user
+Deployment of pFDA and GSRS code are done using user 'deploy'
+
+Processes managed by systemd/systemctl:
+- puma (Ruby backend)
+- sidekiq
+- ginas (GSRS)
+
+Processes managed by pm2:
+- nodejs-api
+- nodejs-worker
+
+Notes:
+- Script located at `/etc/rc.local` is run at startup
+- Systemd service files are created at `/etc/systemd/system/`
+- Systemd services are run as --system rather than --user as intended. We will need to resolve this
+
 # Testing Chef Recipes
 
 1. Start an EC2 instance using the latest pfda_server AMI
@@ -39,3 +58,5 @@ you can run the following, but will need AWS credentials that has access to prod
 Run a specific recipe to test it directly, but be sure to invoke `pfda::get_ssm_parameters` first before the other steps:
 
   chef-client --chef-license accept-silent --no-fips -z -E dev -r "recipe[pfda::get_ssm_parameters],recipe[pfda::deploy_ruby]"
+  chef-client --chef-license accept-silent --no-fips -z -E dev -r "recipe[pfda::get_ssm_parameters],recipe[pfda::deploy_gsrs]"
+
