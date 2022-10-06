@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.5",
-    "snyk": "^1.520.0",
+    "snyk": "^1.996.0",
     "ts-node": "^9.0.0",
     "ts-node-dev": "^1.1.8",
     "tsconfig-paths": "^3.9.0"

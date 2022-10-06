@@ -452,7 +452,7 @@
   dependencies:
     "@types/mjml-core" "*"
 
-"@types/mocha@^8.0.3", "@types/mocha@^8.0.4":
+"@types/mocha@^8.2.3":
   version "8.2.3"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.3.tgz#bbeb55fbc73f28ea6de601fbfa4613f58d785323"
   integrity sha512-ekGvFhFgrc2zYQoX4JeZPmVzZxw6Dtllga7iGHzfbYIYkAMUx/sAFP2GdFpLff+vdHXu5fl7WX9AT+TtqYcsyw==
@@ -4533,7 +4533,7 @@ mkdirp@^1.0.4:
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
-mocha@^8.2.0, mocha@^8.2.1:
+mocha@^8.4.0:
   version "8.4.0"
   resolved "https://registry.yarnpkg.com/mocha/-/mocha-8.4.0.tgz#677be88bf15980a3cae03a73e10a0fc3997f0cff"
   integrity sha512-hJaO0mwDXmZS4ghXsvPVriOhsxQ7ofcpQdm8dE+jISUOKopitvnXFQmpRR7jd2K6VBG6E26gU3IAbXXGIbu4sQ==
@@ -5819,10 +5819,10 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
-snyk@^1.520.0:
-  version "1.914.0"
-  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.914.0.tgz#b98cc6feec4d8f44c38ec3b1a3088a84eab14e9f"
-  integrity sha512-fB9YUIhGSUb3rdvfxYKwYF/2VbXj7XvIkxS9Q2VbVcnDaE+z3yuYexxXRlVLrgTntzv9RKJ3PEQLGt/Xb2O60w==
+snyk@^1.996.0:
+  version "1.996.0"
+  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.996.0.tgz#0369ca9e6a3a148751294c1320f59a79d5eb3c88"
+  integrity sha512-nq//Ely0bSt50LzX9Er5lCQNqTpaKn7I7xkhUB3Z+8rs8Jqha360HeQwhbVzsuQS3xT/1+36zt6CcgyLPM1QbA==
 
 sonic-boom@^1.0.2:
   version "1.4.1"
