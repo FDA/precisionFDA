@@ -10,6 +10,7 @@ import * as Yup from 'yup'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
+import { capitalize } from '../../../utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Modal } from '../../modal'
 import { ButtonRow, StyledForm } from '../../modal/styles'
@@ -55,14 +56,18 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
     mutationFn: ({ role }: FormValues) =>
       changeMembershipRoleRequest({ spaceId, memberId: member.id, role: role.value }),
     onSuccess: res => {
-      if(authUser.dxuser === res.member && res.role === 'disable') {
+      if (authUser.dxuser === res.member && res.role === 'disable') {
         history.push('/spaces')
-        toast.success('Success: Disabled yourself from the space.')
+        toast.success('Disabled yourself from the space.')
       } else {
         reset()
         queryClient.invalidateQueries('space-members')
         setShowModal(false)
-        toast.success('Success: Changed member role.')
+        if (['enable','disable'].includes(res.role)){
+          toast.success(`${capitalize(res.role)}d member ${res.member} in the space.`)
+        } else {
+          toast.success(`Changed ${res.member} member role to ${res.role}.`)
+        }
       }
     },
     onError: (e) => {
@@ -116,7 +121,7 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
           <Controller
             name="role"
             control={control}
-            render={({ field: { value, onChange, onBlur }}) => (
+            render={({ field: { value, onChange, onBlur } }) => (
               <Select
                 options={roleOptions}
                 onChange={onChange}
