@@ -2,7 +2,11 @@
 
 sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVEL=2/g' /etc/ssl/openssl.cnf
 
-dockerize -wait tcp://db:3306
+if ! which bundler; then
+  gem install bundler -v $BUNDLER_VERSION
+fi
+
+wait-for-it db:3306 -- echo "DB connection established"
 
 cp config/database.sample.yml config/database.yml
 
