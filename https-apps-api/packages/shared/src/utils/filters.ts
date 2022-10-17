@@ -30,12 +30,17 @@ export type FilterWithColumnNode<
   EntityT extends BaseEntity,
   FilterSchemaT extends Record<string, FilterSchemaNode>,
   ResolvedFilterSchema = MapValuesToReturnType<MapValuesToReturnType<MapValueObjectByKey<'parser', FilterSchemaT, (...args: any[]) => any>>>,
+  // NOTE(samuel) although this field could be omitted
+  // Typescript 4.7. heavily uses `infer` `extends` combo, this introduced change that can break chained generics
+  // Implementing without this helper variable should result in error with mismatched keys
+  // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html#extends-constraints-on-infer-type-variables
+  KeyT extends keyof ResolvedFilterSchema = keyof ResolvedFilterSchema,
   Result = {
-    [key in keyof ResolvedFilterSchema]: {
+    [key in KeyT]: {
       value: ResolvedFilterSchema[key]
       columnNode: ColumnNode<EntityT>
     }
-  }[keyof ResolvedFilterSchema]
+  }[KeyT]
 > = Result
 
 export const bindGetValueToSchema = <FilterSchemaT extends Record<string, FilterSchemaNode>>(
@@ -62,19 +67,25 @@ export const buildFiltersWithColumnNodes = <
     path: Array<string | number>
   }>>,
 ): Array<FilterWithColumnNode<EntityT, FilterSchemaT>> =>
-  Object.entries(filters).map(([key, value]) => key in jsonColumnTypes ? {
-    columnNode: {
-      ...jsonColumnTypes[key],
-      type: 'json' as const,
-    },
-    value,
-  } : {
-    columnNode: {
-      type: 'standard' as const,
-      value: key as keyof EntityT,
-    },
-    value,
-  }) as any
+  Object.entries(filters).map(([key, value]) => {
+    if (key in jsonColumnTypes) {
+      const jsonColumnType = jsonColumnTypes[key]!
+      return {
+        columnNode: {
+          ...jsonColumnType,
+          type: 'json' as const,
+        },
+        value,
+      }
+    }
+    return {
+      columnNode: {
+        type: 'standard' as const,
+        value: key as keyof EntityT,
+      },
+      value,
+    }
+  })
 
 // Useful helpers - reusable filter schema nodes
 
