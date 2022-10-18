@@ -51,7 +51,7 @@ export const DuplicateSpace = () => {
               space_type: data.space.type,
               name: `${data.space.name} (copy)`,
               description: data.space.description,
-              host_lead_dxuser: data.space.host_lead.dxuser,
+              review_lead_dxuser: data.space.host_lead.dxuser,
               sponsor_lead_dxuser: data.space.guest_lead.dxuser,
               cts: data.space.cts,
             }}
