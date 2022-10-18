@@ -215,11 +215,12 @@ const LandingPage : FunctionComponent = () => {
           <a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </div>
 
-        <PrecisionFDATeamHeading>PRECISIONFDA TEAM</PrecisionFDATeamHeading>
-        <PrecisionFDATeam>
-          <ParticipantPersonsList />
-        </PrecisionFDATeam>
-
+        <div>
+          <PrecisionFDATeamHeading>PRECISIONFDA TEAM</PrecisionFDATeamHeading>
+          <PrecisionFDATeam>
+            <ParticipantPersonsList />
+          </PrecisionFDATeam>
+        </div>
       </PublicLayout>
     )
 
