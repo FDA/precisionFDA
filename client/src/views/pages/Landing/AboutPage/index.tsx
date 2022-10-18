@@ -14,7 +14,7 @@ const AboutPage = () => {
     <PublicLayout>
       <NavigationBar title={title} user={user} />
 
-        <Tabs>
+        <Tabs style={{ overflow: 'initial' }}>
         <div className="container-fluid">
           <TabList className="nav nav-tabs nav-tabs-padded nav-tabs-lg nav-justified">
             <Tab selectedClassName="active">
