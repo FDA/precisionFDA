@@ -1,4 +1,4 @@
-export const pluralize = (noun: string, count: number) => (count > 1) ? `${noun  }s` : noun
+export const pluralize = (noun: string, count: number, suffix = 's') => `${noun}${count !== 1 ? suffix : ''}`
 
 export const itemsCountString = (noun: string, count: number) => `${count} ${pluralize(noun, count)}`
 
