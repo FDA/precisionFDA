@@ -81,7 +81,7 @@ export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
   }}
 `
 
-export const ChallengesList = () => {
+const ChallengesList = () => {
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
@@ -285,3 +285,5 @@ export const ChallengesList = () => {
     </PublicLayout>
   )
 }
+
+export default ChallengesList

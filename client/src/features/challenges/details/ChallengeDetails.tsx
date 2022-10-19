@@ -330,7 +330,7 @@ export const ChallengeDetails = ({
   )
 }
 
-export const ChallengeDetailsPage = () => {
+const ChallengeDetailsPage = () => {
   const { challengeId, page } = useParams<{
     challengeId: string
     page?: string
@@ -367,3 +367,5 @@ export const ChallengeDetailsPage = () => {
     </PublicLayout>
   )
 }
+
+export default ChallengeDetailsPage

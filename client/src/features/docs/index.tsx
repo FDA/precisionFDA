@@ -28,7 +28,7 @@ import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
 
-export const Docs = () => {
+const Docs = () => {
   const user = useAuthUser()
   const { pathname } = useLocation()
   const { data } = useQuery(['user'], () => fetchCurrentUser())
@@ -269,3 +269,5 @@ export const Docs = () => {
     </PublicLayout>
   )
 }
+
+export default Docs

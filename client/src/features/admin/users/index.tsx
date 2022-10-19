@@ -166,7 +166,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
 ] as any as Column<User>[]
 
 
-export const UsersList = () => {
+const UsersList = () => {
   const {
     sortBy,
     setSortBy,
@@ -265,3 +265,5 @@ export const UsersList = () => {
     </UserLayout>
   )
 }
+
+export default UsersList

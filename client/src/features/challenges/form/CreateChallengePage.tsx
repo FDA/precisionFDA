@@ -15,7 +15,7 @@ import { createChallengeCardImage, createChallengeRequest } from './api'
 import { ChallengeForm } from './ChallengeForm'
 import { subtitle, title } from './common'
 
-export const CreateChallengePage = () => {
+const CreateChallengePage = () => {
   const history = useHistory()
   const user = useAuthUser()
   const [isSavingChallenge, setIsSavingChallenge] = useState(false)
@@ -94,3 +94,5 @@ export const CreateChallengePage = () => {
     </UserLayout>
   )
 }
+
+export default CreateChallengePage
