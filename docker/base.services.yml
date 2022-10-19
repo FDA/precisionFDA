@@ -45,8 +45,8 @@ services:
         - FRONTEND_IMAGE_TAG=18.9.1
     volumes:
       - type: bind
-        source: ../app/assets/packs/bundle.js
-        target: /precision-fda/dist/bundle.js
+        source: ../app/assets/packs
+        target: /precision-fda/dist
     working_dir: /precision-fda
     command: yarn watch:docker
   # TODO(samuel) setup correct NODE_ENV here

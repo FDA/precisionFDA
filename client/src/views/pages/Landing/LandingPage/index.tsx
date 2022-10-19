@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import styled from 'styled-components'
-
 import { Link } from 'react-router-dom'
 import PublicLayout from '../../../layouts/PublicLayout'
 import NavigationBar, { NavigationBarBanner, NavigationBarPublicLandingTitle } from '../../../components/NavigationBar/NavigationBar'
@@ -18,7 +17,6 @@ import ParticipantPersonsList from '../../../components/Participants/Participant
 import { fetchNews } from '../../../../actions/news'
 import { fetchExperts } from '../../../../actions/experts'
 import { fetchChallenges } from '../../../../actions/challenges'
-import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { queryRecentApps, queryFeaturedApps } from '../../../../api/apps'
 import { TopAppsList } from '../../../components/Apps/TopAppsList'
 import { CHALLENGE_TIME_STATUS, MAILING_LIST } from '../../../../constants'
@@ -30,16 +28,16 @@ import ExternalLink from '../../../components/Controls/ExternalLink'
 import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
 import { PageContainer, PageContainerMargin } from '../../../../components/Page/styles'
 import { Tagline } from '../Tagline'
-import { IUser } from '../../../../types/user'
+import { useAuthUser } from '../../../../features/auth/useAuthUser'
 
 
 const challengeListFilter = (items: IChallengeListItem[]) => {
-  const firstCompletedChallenge = items.find((item) => item.timeStatus == CHALLENGE_TIME_STATUS.ENDED)
+  const firstCompletedChallenge = items.find((item) => item.timeStatus === CHALLENGE_TIME_STATUS.ENDED)
   if (!firstCompletedChallenge) {
     return items
   }
   const indexOfFirstUpcoming = items.indexOf(firstCompletedChallenge)
-  const noCurrentOrUpcomingChallenges = (indexOfFirstUpcoming == 0)
+  const noCurrentOrUpcomingChallenges = (indexOfFirstUpcoming === 0)
   const numberOfItemsToShow = noCurrentOrUpcomingChallenges ? 1 : indexOfFirstUpcoming
   return items.slice(0, numberOfItemsToShow)
 }
@@ -161,6 +159,13 @@ export const StyledViewAllButton  = styled(ViewAllButton)`
 
 
 const LandingPage : FunctionComponent = () => {
+  const user = useAuthUser()
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(fetchNews())
+    dispatch(fetchExperts())
+    dispatch(fetchChallenges())
+  }, [])
 
   const renderPublic = () => (
       <PublicLayout>
@@ -224,12 +229,12 @@ const LandingPage : FunctionComponent = () => {
       </PublicLayout>
     )
 
-  const renderLoggedIn = (user: IUser) => {
+  const renderLoggedIn = () => {
     const guestWelcomeTitle = 'Welcome to precisionFDA'
 
     return (
       <PublicLayout>
-        {user.is_guest ? 
+        {user?.is_guest ? 
           <NavigationBar user={user}>
             <NavigationBarBanner>
               <NavigationBarPublicLandingTitle>
@@ -283,14 +288,14 @@ const LandingPage : FunctionComponent = () => {
             <GettingStarted>
               <GettingStartedHeading>GETTING STARTED</GettingStartedHeading>
               <Link to="/docs">For New Users</Link>
-              {user.can_see_spaces && 
+              {user?.can_see_spaces && 
               <Link to="/docs/spaces">For Reviewers</Link>
               }
               <GettingStartedHr />
               <Link to="/docs">Introduction to precisionFDA</Link>
               <Link to="/docs/files">Uploading Files &amp; Data</Link>
               <Link to="/docs/apps">Running Apps</Link>
-              {user.can_see_spaces && 
+              {user?.can_see_spaces && 
               <Link to="/docs/spaces">Review Spaces: Step by Step</Link>
               }
               <GettingStartedHr />
@@ -308,21 +313,11 @@ const LandingPage : FunctionComponent = () => {
     )
   }
 
-  const user = useSelector(contextUserSelector)
-  const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(fetchNews())
-    dispatch(fetchExperts())
-    dispatch(fetchChallenges())
-  }, [])
-
   const isLoggedIn = user && Object.keys(user).length > 0
-  if (isLoggedIn) {
-    return renderLoggedIn(user)
+  if(isLoggedIn) {
+    return renderLoggedIn()
   }
-  
-    return renderPublic()
-  
+  return renderPublic()
 }
 
 export {

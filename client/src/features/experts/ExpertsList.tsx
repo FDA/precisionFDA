@@ -143,7 +143,7 @@ export const ExpertsCondensedList = () => {
   )
 }
 
-export const ExpertsList = () => {
+const ExpertsList = () => {
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
@@ -307,3 +307,5 @@ export const ExpertsList = () => {
     </PublicLayout>
   )
 }
+
+export default ExpertsList
