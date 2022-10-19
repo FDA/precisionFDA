@@ -1,8 +1,8 @@
 describe RequestAccessService do
   subject(:service) { described_class }
 
-  let(:invitation_mail) { instance_double("Mailer", deliver_now!: nil) }
-  let(:guest_access_mail) { instance_double("Mailer", deliver_now!: nil) }
+  let(:invitation_mail) { instance_double("Mailer", deliver_later!: nil) }
+  let(:guest_access_mail) { instance_double("Mailer", deliver_later!: nil) }
 
   describe "::create_request_for_access" do
     before do
