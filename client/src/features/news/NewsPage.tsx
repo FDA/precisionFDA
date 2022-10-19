@@ -35,7 +35,7 @@ import {
 } from './styles'
 import { useNewsListQuery } from './useNewsListQuery'
 
-export const NewsPage = () => {
+const NewsPage = () => {
   const user = useAuthUser()
   const userCanCreateNews = user && user.can_administer_site
   const location = useLocation()
@@ -169,3 +169,5 @@ export const NewsPage = () => {
     </PublicLayout>
   )
 }
+
+export default NewsPage

@@ -26,11 +26,10 @@ import OldChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPa
 import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
 import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
 import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
-import { ExpertsSinglePage } from './views/pages/Experts/ExpertsSinglePage'
+import ExpertsSinglePage from './features/experts/details'
 import HomePage from './views/pages/Home'
 import AboutPage from './views/pages/Landing/AboutPage'
 import LandingPage from './views/pages/Landing/LandingPage'
-import NewsListPage from './views/pages/News/NewsListPage'
 import NoFoundPage from './views/pages/NoFoundPage'
 import NewSpacePage from './views/pages/Spaces/NewSpacePage'
 import SpacePage from './views/pages/Spaces/SpacePage'
@@ -40,8 +39,9 @@ import { ToS } from './views/pages/ToS'
 import { ChallengesList } from './features/challenges/list/ChallengesList'
 import { EditChallengePage } from './features/challenges/form/EditChallenge'
 import { CreateChallengePage } from './features/challenges/form/CreateChallenge'
+import { ExpertsList } from './features/experts/ExpertsList'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
-import { NewsPage } from './features/news/NewsPage'
+import NewsPage from './features/news/NewsPage'
 
 const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
   new QueryClient({
@@ -167,14 +167,11 @@ const root = ({ store }: any) => {
                 <Route exact path="/news">
                   <NewsPage />
                 </Route>
-                <Route path="/experts/:expertId/:page">
-                  <ExpertsSinglePage />
+                <Route exact path="/experts">
+                  <ExpertsList />
                 </Route>
                 <Route path="/experts/:expertId">
                   <ExpertsSinglePage />
-                </Route>
-                <Route exact path="/experts">
-                  <ExpertsListPage />
                 </Route>
                 <Route exact path="/terms">
                   <ToS />

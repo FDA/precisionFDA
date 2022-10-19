@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import { FC, useEffect } from 'react'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 
 interface CaptchaProps {
@@ -11,8 +11,7 @@ interface CaptchaProps {
  * @param props.action optinal action connected with captcha validation (has to be verified on backend
  * @param props.callback callback function that will be executed after evaluating the user interaction
  */
-export const GoogleReCaptchaV3: FC<CaptchaProps> = (props: CaptchaProps) => {
-
+export const GoogleReCaptchaV3: FC<CaptchaProps> = ({ action, callback }: CaptchaProps) => {
   const { executeRecaptcha } = useGoogleReCaptcha()
 
   useEffect(() => {
@@ -21,8 +20,8 @@ export const GoogleReCaptchaV3: FC<CaptchaProps> = (props: CaptchaProps) => {
     }
 
     const handleReCaptchaVerify = async () => {
-      const token = await executeRecaptcha(props.action)
-      token && props.callback(token)
+      const token = await executeRecaptcha(action)
+      if(token) callback(token)
     }
     handleReCaptchaVerify()
 
