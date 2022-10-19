@@ -322,6 +322,8 @@ const space = {
     name: chance.word(),
     state: 1, // ACTIVE,
     type: 1, // review type
+    guestDxOrg: `org-pfda..space_guest_${random.dxstr()}`,
+    hostDxOrg: `org-pfda..space_host_${random.dxstr()}`,
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
     name: chance.word(),

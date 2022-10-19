@@ -14,10 +14,10 @@ export class Space extends BaseEntity {
   @Property()
   title: string
 
-  @Property({ fieldName: 'host_dxorg'})
+  @Property({ fieldName: 'host_dxorg' })
   hostDxOrg: string
 
-  @Property({ fieldName: 'guest_dxorg'})
+  @Property({ fieldName: 'guest_dxorg' })
   guestDxOrg: string
 
   @Property()

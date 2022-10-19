@@ -228,6 +228,32 @@ const FILES_DESC_RES = {
   ],
 } as const
 
+const FIND_MEMBERS_RES = {
+  results: [
+    {
+      id: 'user-harry.potter',
+      level: 'ADMIN',
+      projectAccess: 'ADMINISTER',
+      appAccess: true,
+      allowBillableActivities: true,
+    },
+    {
+      id: 'user-mmaltcev3',
+      level: 'MEMBER',
+      projectAccess: 'CONTRIBUTE',
+      appAccess: true,
+      allowBillableActivities: false,
+    },
+    {
+      id: 'user-randall.ebert',
+      level: 'ADMIN',
+      projectAccess: 'ADMINISTER',
+      appAccess: true,
+      allowBillableActivities: true,
+    },
+  ],
+}
+
 export {
   DBCLUSTER_DESC_RES,
   FILES_LIST_RES_ROOT,
@@ -237,5 +263,6 @@ export {
   FOLDERS_LIST_RES_MEDIUM,
   FOLDERS_LIST_RES_LARGE,
   FILES_LIST_RES_TEST_FOLDER,
+  FIND_MEMBERS_RES,
 }
 

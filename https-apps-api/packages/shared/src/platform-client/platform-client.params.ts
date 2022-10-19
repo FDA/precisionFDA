@@ -63,6 +63,26 @@ type FindSpaceMembersParams = BaseParams & {
   spaceOrg: string
 }
 
+type UserInviteToOrgParams = BaseParams & {
+  orgDxId: string
+  data: {
+    invitee: string
+    level: 'MEMBER' | 'ADMIN'
+    projectAccess?: 'ADMINISTER' | 'CONTRIBUTE' | 'UPLOAD' | 'VIEW' | 'NONE'
+    allowBillableActivities?: boolean
+    appAccess?: boolean
+    suppressEmailNotification?: boolean
+  }
+}
+type UserRemoveFromOrgParams = BaseParams & {
+  orgDxId: string
+  data: {
+    user: string
+    revokeProjectPermissions?: boolean
+    revokeAppsPermissions?: boolean
+  }
+}
+
 type MoveFilesParams = BaseParams & {
   destinationFolderPath: string
   fileIds: string[]
@@ -116,9 +136,11 @@ export {
   DbClusterCreateParams,
   DescribeFilesParams,
   FindSpaceMembersParams,
+  UserInviteToOrgParams,
+  UserRemoveFromOrgParams,
   RemoveFolderParams,
   RenameFolderParams,
   ListFilesParams,
   UserResetMfaParams,
-  UserUnlockParams
+  UserUnlockParams,
 }

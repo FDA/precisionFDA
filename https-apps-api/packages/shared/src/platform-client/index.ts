@@ -9,9 +9,9 @@ import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 import { OrgMembershipError } from '../errors'
 import { BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, FindSpaceMembersParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, ListFilesParams, MoveFilesParams, RemoveFolderParams, RenameFolderParams, UserResetMfaParams, UserUnlockParams } from './platform-client.params'
+  JobCreateParams, JobDescribeParams, JobTerminateParams, ListFilesParams, MoveFilesParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams } from './platform-client.params'
 import { JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, ListFilesResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
- DescribeFilesResponse, FindSpaceMembersReponse } from './platform-client.responses'
+ DescribeFilesResponse, FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse } from './platform-client.responses'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -131,6 +131,46 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {},
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  // Invites user to provided organization.
+  //  @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+  async inviteUserToOrganization(params: UserInviteToOrgParams): Promise<UserInviteToOrgResponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/invite`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+   // Removes user from provided organization. Also revokes access to projects & apps associated with org.
+  //  @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+  async removeUserFromOrganization(params: UserRemoveFromOrgParams): Promise<UserRemoveFromOrgResponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/removeMember`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
       url,
       headers: this.setupHeaders(params),
     }
