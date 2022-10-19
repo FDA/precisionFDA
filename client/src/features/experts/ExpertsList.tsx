@@ -270,7 +270,7 @@ export const ExpertsList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as="a" href="/experts/new">
+                  <ButtonSolidBlue as="a" data-turbolinks='false' href="/experts/new">
                     Add an expert
                   </ButtonSolidBlue>
                 </ButtonRow>
