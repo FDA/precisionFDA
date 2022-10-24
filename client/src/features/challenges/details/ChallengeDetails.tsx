@@ -37,6 +37,7 @@ export const ChallengeDetails = ({
   isGuest = false,
   oldChallenge,
   page,
+  user,
 }: {
   challenge: Challenge
   oldChallenge?: { regions: { intro: string; results: string } }
@@ -45,6 +46,7 @@ export const ChallengeDetails = ({
   isGuest?: boolean
   isLoggedIn?: boolean
   page?: string
+  user?: any
 }) => {
   const [tabIndex, setTabIndex] = useState(-1)
   const history = useHistory()
@@ -153,6 +155,7 @@ export const ChallengeDetails = ({
       subroute: '/submissions',
       content: (
         <ChallengeSubmissionsTable
+          user={user}
           challengeId={challenge.id}
           isSpaceMember={challenge.is_space_member}
         />
@@ -163,6 +166,7 @@ export const ChallengeDetails = ({
       subroute: '/my_entries',
       content: (
         <ChallengeMyEntriesTable
+          user={user}  
           challengeId={challenge.id}
           isSpaceMember={challenge.is_space_member}
         />
@@ -363,6 +367,7 @@ const ChallengeDetailsPage = () => {
             isGuest={user?.is_guest}
             challenge={data?.challenge}
             page={page}
+            user={user}
           />
         </>
       )}

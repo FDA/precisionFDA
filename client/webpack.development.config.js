@@ -143,7 +143,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/challenges/*/editor': {
+      '/challenges/*/editor/*': {
+        target: TARGET,
+        secure: false,
+      },
+      '/publish': {
         target: TARGET,
         secure: false,
       },

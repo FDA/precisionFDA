@@ -190,7 +190,7 @@ const ChallengesList = () => {
                   page={data?.meta?.current_page}
                   totalCount={data?.meta?.total_count}
                   totalPages={data?.meta?.total_pages}
-                  hide={hidePagination(
+                  isHidden={hidePagination(
                     isFetched,
                     data?.challenges?.length,
                     data?.meta?.total_pages,
