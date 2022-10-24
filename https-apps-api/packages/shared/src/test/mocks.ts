@@ -28,10 +28,11 @@ const fakes = {
     dbClusterActionFake: sinon.stub(),
     dbClusterCreateFake: sinon.stub(),
     dbClusterDescribeFake: sinon.stub(),
+    projectCreateFake: sinon.stub(),
+    projectInviteFake: sinon.stub(),
     findSpaceMembersFake: sinon.stub(),
     inviteUserToOrganizationFake: sinon.stub(),
     removeUserFromOrganizationFake: sinon.stub(),
-
   },
   queue: {
     findRepeatableFake: sinon.stub(),
@@ -73,6 +74,8 @@ const mocksSetDefaultBehaviour = () => {
     id: generate.dbCluster.simple().dxid
   }))
   fakes.client.dbClusterDescribeFake.callsFake(() => DBCLUSTER_DESC_RES)
+  fakes.client.projectCreateFake.callsFake(() => ({ id: generate.space.projectId() }))
+  fakes.client.projectInviteFake.callsFake(()=> ({id: 'huh', state: 'accepted'})) //fix id
 }
 
 const mocksSetup = () => {
@@ -88,6 +91,8 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client.PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
   sandbox.replace(client.PlatformClient.prototype, 'removeFolderRec', fakes.client.folderRemoveFake)
+  sandbox.replace(client.PlatformClient.prototype, 'projectInvite', fakes.client.projectInviteFake)
+  sandbox.replace(client.PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
   sandbox.replace(client.PlatformClient.prototype, 'findSpaceMembers', fakes.client.findSpaceMembersFake)
   sandbox.replace(client.PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
   sandbox.replace(client.PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
@@ -137,6 +142,8 @@ const mocksReset = () => {
   fakes.client.dbClusterActionFake.reset()
   fakes.client.dbClusterCreateFake.reset()
   fakes.client.dbClusterDescribeFake.reset()
+  fakes.client.projectCreateFake.reset()
+  fakes.client.projectInviteFake.reset()
   fakes.client.findSpaceMembersFake.reset()
   fakes.client.inviteUserToOrganizationFake.reset()
   fakes.client.removeUserFromOrganizationFake.reset()
