@@ -55,6 +55,7 @@ export const ChallengeThumbnail = styled.img`
   object-fit: contain;
   overflow: hidden;
   box-shadow: 0px 0px 16px #000;
+  background: white;
 `
 
 export const ChallengeStateLabel = styled.span<{timeStatus: TimeStatus}>`

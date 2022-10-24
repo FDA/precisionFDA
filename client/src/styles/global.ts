@@ -1,5 +1,5 @@
-import styled, { createGlobalStyle } from 'styled-components';
-import { colors } from './theme';
+import styled, { createGlobalStyle } from 'styled-components'
+import { colors } from './theme'
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -8,6 +8,9 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   #app-root {
+  }
+  html {
+    scroll-padding-top: 70px;
   }
   html, body, main, #app-root, .pfda-loader-wrapper {
     height: 100%;
@@ -32,9 +35,9 @@ const GlobalStyle = createGlobalStyle`
     --toastify-toast-width: inherit;
   }
 
-`;
+`
 
 export const LayoutBody = styled.div`
 `
  
-export default GlobalStyle;
+export default GlobalStyle

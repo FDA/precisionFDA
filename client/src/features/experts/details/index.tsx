@@ -45,11 +45,6 @@ import {
 
 const StyledNavigationBar = styled.div`
   width: 100%;
-  background-color: rgb(22, 19, 14);
-  background-image: url(${navBackground});
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
   color: white;
   height: 140px;
   display: flex;
@@ -131,17 +126,11 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
 
   const content = displayContent()
 
-  const title = ''
-  const subtitle = ''
-  const showSocialMediaButtonText = false
-  const showLogoOnNavbar = true
-
   return (
     <PublicLayout>
       <NavigationBar
-        title={title}
-        subtitle={subtitle}
-        showLogoOnNavbar={showLogoOnNavbar}
+        title=""
+        subtitle=""
         user={user}
       >
         <StyledNavigationBar>
@@ -157,7 +146,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               </ExpertData>
             </ExpertRow>
             <StyledSocialMediaButtons>
-              <SocialMediaButtons showText={showSocialMediaButtonText} />
+              <SocialMediaButtons showText />
             </StyledSocialMediaButtons>
           </PageContainerMargin>
         </StyledNavigationBar>
