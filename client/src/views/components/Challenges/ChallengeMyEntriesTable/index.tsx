@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
@@ -5,7 +6,6 @@ import {
   fetchMyEntries,
 } from '../../../../actions/submissions'
 import { Table, Thead, Tbody, Th } from '../../TableComponents'
-import { contextUserSelector } from '../../../../reducers/context/selectors'
 import {
   ISubmissionElementProps,
   IChallengeSubmissionsTableProps,
@@ -45,7 +45,7 @@ class ChallengeMyEntriesTable extends Component<IChallengeSubmissionsTableProps>
 
   renderEmptyView() {
     return (
-      <div className="text-center">
+      <div>
         You have not submitted any entries for this challenge.
       </div>
     )
@@ -83,15 +83,13 @@ class ChallengeMyEntriesTable extends Component<IChallengeSubmissionsTableProps>
 const mapStateToProps = (state: any) => ({
   submissions: challengeMyEntriesDataSelector(state),
   isFetching: challengeMyEntriesIsFetchingSelector(state),
-  user: contextUserSelector(state),
 })
 
 const mapDispatchToPropsSubmissions = (dispatch: any) => ({
   fetchData: (challengeId: number) => dispatch(fetchMyEntries(challengeId)),
 })
 
-export {
-  ChallengeMyEntriesTable,
-}
+const ConnectedComp = connect(mapStateToProps, mapDispatchToPropsSubmissions)(ChallengeMyEntriesTable)
+const WrappedComp = (props: any) => <ConnectedComp {...props} />
 
-export default connect(mapStateToProps, mapDispatchToPropsSubmissions)(ChallengeMyEntriesTable)
+export default WrappedComp
