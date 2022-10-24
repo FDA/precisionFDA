@@ -166,7 +166,7 @@ export class User extends BaseEntity {
     entity: () => AdminMembership,
     mappedBy: 'user',
   })
-  adminMembership = new Collection<AdminMembership>(this)
+  adminMemberships = new Collection<AdminMembership>(this)
 
 
   constructor(org: Organization, emailNotificationSettings?: EmailNotification, expert?: Expert) {
@@ -207,10 +207,25 @@ export class User extends BaseEntity {
   }
 
   async isSiteAdmin() {
-    const siteAdminGroupMemberships = await this.adminMembership.matching({
+    const siteAdminGroupMemberships = await this.adminMemberships.matching({
       where: {
         adminGroup: {
           role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
+        },
+      },
+      populate: {
+        adminGroup: true,
+      },
+    })
+
+    return siteAdminGroupMemberships.length > 0
+  }
+
+  async isReviewSpaceAdmin() {
+    const siteAdminGroupMemberships = await this.adminMemberships.matching({
+      where: {
+        adminGroup: {
+          role: ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN,
         },
       },
       populate: {

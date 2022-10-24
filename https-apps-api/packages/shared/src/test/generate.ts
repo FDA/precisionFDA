@@ -324,12 +324,21 @@ const space = {
     type: 1, // review type
     guestDxOrg: `org-pfda..space_guest_${random.dxstr()}`,
     hostDxOrg: `org-pfda..space_host_${random.dxstr()}`,
+    spaceId: null as any,
+    hostProject: null as any,
+    guestProject: null as any,
+
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
     name: chance.word(),
     state: 1,
     type: 0, // GROUP type
+    spaceId: null as any,
+    hostProject: null as any,
+    guestProject: null as any,
   }),
+  // represents space on platform
+  projectId: () => `project-j47b1k3z8Jqqv001213v312j1`
 }
 
 const spaceMembership = {

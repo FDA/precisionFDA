@@ -249,6 +249,30 @@ class HttpsAppsClient
     )
   end
 
+  def accept_space(id)
+    request(
+      "/spaces/#{id}/accept",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  def unlock_space(id)
+    request(
+      "/spaces/#{id}/unlock",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  def lock_space(id)
+    request(
+      "/spaces/#{id}/lock",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   private
 
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {})
