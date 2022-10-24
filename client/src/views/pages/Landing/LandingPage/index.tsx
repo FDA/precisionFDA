@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import PublicLayout from '../../../layouts/PublicLayout'
 import NavigationBar, { NavigationBarBanner, NavigationBarPublicLandingTitle } from '../../../components/NavigationBar/NavigationBar'
-import { PFDALogoLight } from '../../../components/NavigationBar/PFDALogo'
 import NewsList from '../../../components/News/NewsList'
 import { NewsListItemSmall } from '../../../components/News/NewsListItem'
 import ChallengesBanner from '../../../components/Challenges/ChallengesBanner'
@@ -173,7 +172,6 @@ const LandingPage : FunctionComponent = () => {
           <PageContainerMargin>
             <NavigationBarBanner>
               <NavigationBarPublicLandingTitle>
-                <PFDALogoLight />
                 <Tagline />
               </NavigationBarPublicLandingTitle>
               <SocialMediaButtons showText={false} />
@@ -235,7 +233,7 @@ const LandingPage : FunctionComponent = () => {
     return (
       <PublicLayout>
         {user?.is_guest ? 
-          <NavigationBar user={user}>
+          <NavigationBar user={user} title="Overview">
             <NavigationBarBanner>
               <NavigationBarPublicLandingTitle>
                 <h1>{guestWelcomeTitle}</h1>
@@ -249,7 +247,7 @@ const LandingPage : FunctionComponent = () => {
             </NavigationBarBanner>
           </NavigationBar>
           :
-          <NavigationBar user={user} />
+          <NavigationBar user={user} title="Overview" />
         }
 
         <LandingPageLayout>
