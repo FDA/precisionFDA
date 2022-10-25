@@ -81,7 +81,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     Filter: DefaultColumnFilter,
     width: colWidths?.dxuser ?? 198,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value}
       </StyledLinkCell>
     ),
@@ -92,7 +92,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     Filter: DefaultColumnFilter,
     width: colWidths?.email ?? 300,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value}
       </StyledLinkCell>
     ),
@@ -105,7 +105,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => {
       const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
       return (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value && new Date(value).toLocaleDateString('en-US', {
           month: 'short',
           day: '2-digit',
@@ -130,7 +130,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     ],
     width: colWidths?.lastLogin ?? 300,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value.toUpperCase()}
       </StyledLinkCell>
     ),
@@ -144,7 +144,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     filterPlaceholderTo: 'Max $',
     width: colWidths?.lastLogin ?? 300,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {`$${value}`}
       </StyledLinkCell>
     ),
@@ -158,7 +158,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     filterPlaceholderFrom: 'Min $',
     filterPlaceholderTo: 'Max $',
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {`$${value}`}
       </StyledLinkCell>
     ),

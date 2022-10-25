@@ -29,7 +29,7 @@ class MyEntryRow extends Component<ISubmissionElementProps> {
       <tr>
         <SubmissionStateCell submission={submission} />
         <SubmissionNameCell submission={submission} />
-        <td><a href={`/challenges/${submission.challengeId}/submissions/${submission.id}/edit`}>Edit</a></td>
+        <td><a data-turbolinks="false" href={`/challenges/${submission.challengeId}/submissions/${submission.id}/edit`}>Edit</a></td>
         <SubmissionInputFilesCell submission={submission} user={user} />
         <SubmissionCreatedAtCell submission={submission} />
       </tr>

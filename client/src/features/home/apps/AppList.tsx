@@ -94,6 +94,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
               <ButtonSolidBlue
                 as="a"
                 href="/apps/new"
+                data-turbolinks="false"
                 data-testid="home-apps-create-button"
               >
                 <PlusIcon height={12} /> Create App

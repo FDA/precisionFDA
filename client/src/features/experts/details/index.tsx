@@ -173,6 +173,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               </StyledTab>
               <StyledTab
                 as="a"
+                data-turbolinks="false"
                 href={`/experts/${expert?.id}/qa`}
                 target="_blank"
                 rel="noreferrer"
@@ -203,6 +204,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
                   <div>
                     <ButtonSolidBlue
                       as="a"
+                      data-turbolinks="false"
                       href={`/experts/${expert?.id}/edit`}
                     >
                       Edit Expert Info

@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
+import { Link } from 'react-router-dom'
 import {
   DocBody,
   DocRow,
@@ -140,7 +141,7 @@ export const Workflows = () => (
 
       <p>
         A workflow may be published/moved to a group, review, or verification
-        space. See the <a href="/docs/spaces">Spaces</a> documentation for
+        space. See the <Link to="/docs/spaces">Spaces</Link> documentation for
         details.
       </p>
 

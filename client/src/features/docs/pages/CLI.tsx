@@ -58,7 +58,7 @@ export const CLI = () => (
       <h2 id="authorization-key">Authorization Key</h2>
 
       <p>
-        Visit the <a href="<%= new_asset_path %>">Create Assets</a> page and
+        Visit the <a data-turbolinks="false" href="/assets/new">Create Assets</a> page and
         click on Generate Authorization Key button to generate a key that you
         will need when using the CLI.
       </p>

@@ -52,7 +52,7 @@ class ChallengesListItem extends Component<IChallengeListItemProps> {
           {userCanEdit && (
             <div className="btn-group pull-right">
               <Link to={`/challenges/${challenge.id}/edit`} title={'edit'} className="btn btn-default">  <span className="fa fa-cog fa-fw"></span> Settings</Link>
-              <a className="btn btn-default" href={challenge.links.editor} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+              <a className="btn btn-default" data-turbolinks="false" href={challenge.links.editor}><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
             </div>
           )}
         </Styled.ChallengeListItemContent>
@@ -96,7 +96,7 @@ class ChallengesListItemLanding extends ChallengesListItem {
           {userCanEdit && (
             <div className="btn-group pull-right">
               <a className="btn btn-default" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
-              <a className="btn btn-default" href={`/challenges/${challenge.id}/editor`} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+              <a className="btn btn-default" href={`/challenges/${challenge.id}/editor`} data-turbolinks="false"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
             </div>
           )}
         </Styled.ChallengeListItemContent>

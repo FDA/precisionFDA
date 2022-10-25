@@ -36,10 +36,10 @@ const AboutPage = () => {
               </a>
             </Tab>
             <Tab selectedClassName="active">
-              <a href="/docs">
+              <Link to="/docs">
                 <span className="tab-label">How?</span>
                 <span className="tab-help">Learn how to use the features</span>
-              </a>
+              </Link>
             </Tab>
           </TabList>
           </div>

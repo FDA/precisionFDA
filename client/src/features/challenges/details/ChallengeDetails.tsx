@@ -302,6 +302,7 @@ export const ChallengeDetails = ({
                   className="btn btn-primary btn-block"
                   style={{ marginTop: '12px' }}
                   href={challenge.links.new_submission}
+                  data-turbolinks="false"
                 >
                   Submit Challenge Entry
                 </a>
@@ -320,7 +321,7 @@ export const ChallengeDetails = ({
                   <ListItem
                     as="a"
                     href={`/challenges/${challenge.id}/editor`}
-                    data-no-turbolink="true"
+                    data-turbolinks="false"
                   >
                     <span className="fa fa-file-code-o fa-fw" /> Edit Page
                   </ListItem>

@@ -42,7 +42,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
           rows={momoSelected.map(s => {
             return {
               name: (
-                <StyledName href={`/home/files/${s.uid}`} target="_blank">
+                <StyledName data-turbolinks="false" href={`/home/files/${s.uid}`} target="_blank">
                   <VerticalCenter>
                     <FileIcon />
                   </VerticalCenter>

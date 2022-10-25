@@ -65,6 +65,7 @@ const ExpertAskQuestionModalComponent = ({
   if (isLoggedIn) {
     submitter = (
       <a
+        data-turbolinks="false"
         href={`/users/${user.dxuser}`}
         target="_blank"
         rel="noopener noreferrer"

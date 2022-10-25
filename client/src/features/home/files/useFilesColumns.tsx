@@ -130,7 +130,7 @@ export const useFilesColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.added_by || 198,
           Cell: ({ cell, value }) => (
-            <a href={cell.row.original.links.user || ''}>{value}</a>
+            <a data-turbolinks="false" href={cell.row.original.links.user || ''}>{value}</a>
           ),
         },
         {

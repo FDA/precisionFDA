@@ -266,7 +266,7 @@ const ChallengesList = () => {
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Other Challenges</SectionTitle>
-              <a href="/challenges/app-a-thon-in-a-box">
+              <a href="/challenges/app-a-thon-in-a-box" data-turbolinks="false">
                 App-a-thon in a Box &rarr;
               </a>
             </RightSideItem>
