@@ -64,6 +64,7 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
             <div className="btn-group pull-right" style={{ marginTop: '4px' }}>
               <a
                 className="btn btn-default"
+                data-turbolinks="false"
                 href={`/experts/${expert.id}/edit`}
                 aria-label={`Click here to Edit the Expert ${expert.id}`}
               >
@@ -72,6 +73,7 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
               <a
                 className="btn btn-default"
                 href={`/experts/${expert.id}/dashboard`}
+                data-turbolinks="false"
                 aria-label={`Click here to View ${expert.id}'s Dashboard`}
               >
                 <span className="fa fa-dashboard fa-fw"></span> Dashboard

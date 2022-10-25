@@ -48,7 +48,7 @@ const DeleteFiles = ({
     <ResourceTable
       rows={data.map(s => ({
         name: (
-          <StyledName href={s.viewURL} target="_blank">
+          <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
             <VerticalCenter>
               {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
             </VerticalCenter>

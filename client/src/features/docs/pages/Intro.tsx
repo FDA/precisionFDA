@@ -25,12 +25,13 @@ export const Intro = () => (
       The first step to unlocking the features of precisionFDA is creating an
       account. You can sign up for a precisionFDA account by clicking "Request
       Access" on the front page, or by{' '}
-      <a href="request_access_path" aria-label="Request access to precisionFDA">
+      <a data-turbolinks="false" href="request_access_path" aria-label="Request access to precisionFDA">
         clicking here
       </a>
       . During the sign-up process, you will need a phone or other multi-factor
       authentication (MFA) device; you can find{' '}
       <a
+        data-turbolinks="false"
         href="/docs/PrecisionFDA_Okta_Verify_MFA_instructions.pdf"
         target="_blank"
         aria-label="Instructions on setting up your device"

@@ -28,6 +28,7 @@ import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaBut
 import { PageContainer, PageContainerMargin } from '../../../../components/Page/styles'
 import { Tagline } from '../Tagline'
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
+import { ButtonSolidBlue } from '../../../../components/Button'
 
 
 const challengeListFilter = (items: IChallengeListItem[]) => {
@@ -213,9 +214,8 @@ const LandingPage : FunctionComponent = () => {
           <ParticipantOrgsList />
         </CommunityParticipants>
 
-        <div style={{ textAlign: 'center', margin: '32px' }}>
-          <a className="btn accessible-btn-primary btn-md" href="/docs">Learn more about precisionFDA</a>
-          <a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '32px', gap: 8 }}>
+          <ButtonSolidBlue as={Link} to="/docs">Learn more about precisionFDA</ButtonSolidBlue><a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </div>
 
         <div>

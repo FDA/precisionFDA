@@ -208,7 +208,7 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
         <Link to={'/news'} className={getLinkClassName('/news')}>News</Link>
         <Link to={'/experts'} className={getLinkClassName('/experts')}>Experts</Link>
         <Link to={'/about'} className={getLinkClassName('/about')}>About</Link>
-        <a href="/uniisearch" target="_blank">UNII Search</a>
+        <a data-turbolinks="false" href="/uniisearch" target="_blank">UNII Search</a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons>
         <Button onClick={onRequestAccess}>Request Access</Button>

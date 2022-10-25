@@ -226,6 +226,7 @@ const ExpertsList = () => {
                           <ExpertButtonRow>
                             <Button
                               as="a"
+                              data-turbolinks="false"
                               href={`/experts/${n.id}/edit`}
                               aria-label={`Click here to Edit the Expert ${n.id}`}
                             >
@@ -234,6 +235,7 @@ const ExpertsList = () => {
                             </Button>
                             <Button
                               as="a"
+                              data-turbolinks="false"
                               href={`/experts/${n.id}/dashboard`}
                               aria-label={`Click here to View ${n.id}'s Dashboard`}
                             >
@@ -270,7 +272,7 @@ const ExpertsList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as="a" data-turbolinks='false' href="/experts/new">
+                  <ButtonSolidBlue as="a" data-turbolinks="false" href="/experts/new">
                     Add an expert
                   </ButtonSolidBlue>
                 </ButtonRow>

@@ -23,7 +23,7 @@ export const License = ({ license, className, link }: { license: ILicense, class
   return (
     <StyledLicense className={classes}>
       <StyledTitle>
-        <a href={link} target='_blank' rel='noopener noreferrer'>{license?.title}</a>
+        <a data-turbolinks="false" href={link} target='_blank' rel='noopener noreferrer'>{license?.title}</a>
       </StyledTitle>
       <Markdown data={license?.content} />
     </StyledLicense>

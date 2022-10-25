@@ -47,8 +47,8 @@ const renderChallengeSubmissionsTable = (submissions: ISubmission[],
   if (!isLoggedIn) {
     return (
       <div>
-        In order to participate in this challenge, please <a href="/login">login</a>.
-        If you don't have a PrecisionFDA account, please <a href="/request_access">submit an access request</a> to join and engage in the community!
+        In order to participate in this challenge, please <a data-turbolinks="false" href="/login">login</a>.
+        If you don't have a PrecisionFDA account, please <a data-turbolinks="false" href="/request_access">submit an access request</a> to join and engage in the community!
       </div>
     )
   }
@@ -153,7 +153,7 @@ class SubmissionRow extends Component<ISubmissionElementProps> {
     return (
       <tr>
         <SubmissionNameCell submission={submission} />
-        <td><a href={`/users/${submission.user.dxuser}`}>{submission.user.name}</a></td>
+        <td><a data-turbolinks="false" href={`/users/${submission.user.dxuser}`}>{submission.user.name}</a></td>
         <SubmissionInputFilesCell submission={submission} user={user} isSpaceMember={isSpaceMember} />
         <SubmissionCreatedAtCell submission={submission} />
       </tr>

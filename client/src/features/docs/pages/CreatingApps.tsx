@@ -299,12 +299,12 @@ export const CreatingApps = () => (
       </p>
       <ul>
         <li>
-          <a href="/assets/ubuntu-14-packages.txt">
+          <a data-turbolinks="false" href="/assets/ubuntu-14-packages.txt">
             Ubuntu 14.04 preinstalled packages
           </a>
         </li>
         <li>
-          <a href="/assets/ubuntu-16-packages.txt">
+          <a data-turbolinks="false" href="/assets/ubuntu-16-packages.txt">
             Ubuntu 16.04 preinstalled packages
           </a>
         </li>

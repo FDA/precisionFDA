@@ -76,7 +76,7 @@ export const useWorkflowColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.added_by || 200,
           Cell: props => (  
-            <a href={props.cell.row.original.links.user}>
+            <a data-turbolinks="false" href={props.cell.row.original.links.user}>
               {props.value}
             </a>
           ),

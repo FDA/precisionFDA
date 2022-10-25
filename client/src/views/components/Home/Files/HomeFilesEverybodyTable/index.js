@@ -231,7 +231,7 @@ const Row = ({ file, toggleFileCheckbox, context = {}, makeFeatured }) => {
         </span>
       </td>
       <td>
-        <a href={linkUser}>
+        <a data-turbolinks="false" href={linkUser}>
           {file.addedBy}
         </a>
       </td>

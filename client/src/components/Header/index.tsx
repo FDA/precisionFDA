@@ -55,29 +55,29 @@ export const UserMenu = ({
   showCloudResourcesModal,
 }: UserMenuProps) => (
   <StyledDropMenuLinks>
-    <StyledLink data-turbolinks='false' href="/profile">Profile</StyledLink>
+    <StyledLink data-turbolinks="false" href="/profile">Profile</StyledLink>
     {user && !userIsGuest && (
       <>
-        <StyledLink data-turbolinks='false' href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
+        <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
         <StyledOnClickModalDiv onClick={showCloudResourcesModal}>
           Cloud Resources
         </StyledOnClickModalDiv>
       </>
     )}
-    <StyledLink data-turbolinks='false' href="/licenses">Manage Licenses</StyledLink>
+    <StyledLink data-turbolinks="false" href="/licenses">Manage Licenses</StyledLink>
     {!userIsGuest && (
-      <StyledLink as={Link} data-turbolinks='false' to="/account/notifications">
+      <StyledLink as={Link} data-turbolinks="false" to="/account/notifications">
         Notification Settings
       </StyledLink>
     )}
     <StyledDivider />
     <StyledLink as={Link} to="/about">About</StyledLink>
-    <StyledLink data-turbolinks='false' href="/guidelines">Guidelines</StyledLink>
+    <StyledLink data-turbolinks="false" href="/guidelines">Guidelines</StyledLink>
     <StyledLink as={Link} to="/docs">Docs</StyledLink>
     <StyledDivider />
     {userCanAdministerSite && (
       <>
-        <StyledLink data-turbolinks='false' href="/admin">Admin Dashboard</StyledLink>
+        <StyledLink data-turbolinks="false" href="/admin">Admin Dashboard</StyledLink>
         <StyledDivider />
       </>
     )}
@@ -148,7 +148,7 @@ export const Header: React.FC = () => {
             </Link>
             {!isSpacesPath && (
               <>
-                <a data-turbolinks='false' href="/discussions" title="Discussions">
+                <a data-turbolinks="false" href="/discussions" title="Discussions">
                   <MenuItem active={isActiveLink('/discussions')}>
                     <IconWrap>
                       <CommentIcon height={16} />
@@ -182,7 +182,7 @@ export const Header: React.FC = () => {
                   </MenuItem>
                 </Link>
                 <HeaderSpacer />
-                <a data-turbolinks='false' href="/notes" title="Notes">
+                <a data-turbolinks="false" href="/notes" title="Notes">
                   <MenuItem active={isActiveLink('/notes')}>
                     <IconWrap>
                       <StickyNoteIcon height={16} />
@@ -190,7 +190,7 @@ export const Header: React.FC = () => {
                     <HeaderItemText>Notes</HeaderItemText>
                   </MenuItem>
                 </a>
-                <a data-turbolinks='false' href="/comparisons" title="Comparisons">
+                <a data-turbolinks="false" href="/comparisons" title="Comparisons">
                   <MenuItem active={isActiveLink('/comparisons')}>
                     <IconWrap>
                       <BullsEyeIcon height={16} />
@@ -210,7 +210,7 @@ export const Header: React.FC = () => {
               </MenuItem>
             </Link>
             {showGSRSLink && (
-              <a data-turbolinks='false' href="/ginas/app/beta" target="_blank" title="GSRS">
+              <a data-turbolinks="false" href="/ginas/app/beta" target="_blank" title="GSRS">
                 <MenuItem>
                   <IconWrap>
                     <GSRSIcon height={16} />
