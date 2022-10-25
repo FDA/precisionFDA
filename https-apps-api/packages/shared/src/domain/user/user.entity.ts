@@ -199,7 +199,7 @@ export class User extends BaseEntity {
   }
 
   isChallengeBot() {
-    return this.dxuser === config.users.challengeBotDxUser
+    return this.dxuser === config.platform.users.challengeBotDxUser
   }
 
   isGuest() {

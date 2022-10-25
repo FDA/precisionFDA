@@ -1,6 +1,6 @@
 /* eslint-disable multiline-ternary */
 import { BaseEntity } from '../database/base-entity'
-import { wrapMaybeNull, parseRegexFilterFromString, parseEnumValueFromString, parseNumericRange } from '../validation/parsers'
+import { wrapMaybeUndefined, parseEnumValueFromString, parseNumericRange, parseNonEmptyString } from '../validation/parsers'
 import { MapValueObjectByKey, MapValuesToReturnType } from './generics'
 import { ColumnNode } from './sql-json-column-utils'
 
@@ -87,13 +87,18 @@ export const buildFiltersWithColumnNodes = <
     }
   })
 
+export const parseRegexFilterFromString = (value: string | undefined) => {
+  const nonEmptyValue = parseNonEmptyString(value)
+  return new RegExp(`.*${nonEmptyValue}.*`, 'u');
+}
+
 // Useful helpers - reusable filter schema nodes
 
 // NOTE(samuel) all the functions are wrapped in `wrapMaybeNull`, as none of the filters are reuiqred by default to perform API call
 export const MATCH_FILTER = {
   type: 'match' as const,
   parser: (getValue: GetValue) => wrapFilterParser(
-    wrapMaybeNull(parseRegexFilterFromString),
+    wrapMaybeUndefined(parseRegexFilterFromString),
     getValue,
   ),
 }
@@ -101,7 +106,7 @@ export const MATCH_FILTER = {
 export const NUMERIC_RANGE_FILTER = {
   type: 'range' as const,
   parser: (getValue: GetValue) => wrapFilterParser(
-    wrapMaybeNull(parseNumericRange),
+    wrapMaybeUndefined(parseNumericRange),
     getValue,
   ),
 }
@@ -112,7 +117,7 @@ export const createEnumFilter = <T extends Exclude<string, ''>>(
 ) => ({
   type: 'exact' as const,
   parser: (getValue: GetValue) => wrapFilterParser(
-    wrapMaybeNull(parseEnumValueFromString(allowedValues)),
+    wrapMaybeUndefined(parseEnumValueFromString(allowedValues)),
     getValue,
   ),
 })
