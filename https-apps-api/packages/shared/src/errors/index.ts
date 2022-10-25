@@ -44,6 +44,7 @@ export enum ErrorCodes {
   AGGREGATE_ERROR = 'E_AGGREGATE_ERROR',
   MFA_ALREADY_RESET = 'E_MFA_ALREADY_RESET',
   ORG_MEMBERSHIP_ERROR = 'E_ORG_MEMBERSHIP_ERROR',
+  INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR'
 }
 
 export class BaseError extends Error {
@@ -208,7 +209,7 @@ export class ServiceError extends BaseError {
 export class MfaAlreadyResetError extends BaseError {
   constructor(
     message = 'MFA is already reset or not yet configured for the user',
-    props: MaybeBaseErrorProps = {}
+    props: MaybeBaseErrorProps = {},
   ) {
     super(message, {
       code: ErrorCodes.MFA_ALREADY_RESET,
@@ -221,12 +222,26 @@ export class MfaAlreadyResetError extends BaseError {
 export class OrgMembershipError extends BaseError {
   constructor(
     message = 'Permission denied, must be a user of the org.',
-    props: MaybeBaseErrorProps = {}
+    props: MaybeBaseErrorProps = {},
   ) {
     super(message, {
       code: ErrorCodes.ORG_MEMBERSHIP_ERROR,
       statusCode: 400,
       ...props,
+    })
+  }
+}
+
+export class InvalidIpHeaderError extends BaseError {
+  constructor(
+    message = 'Invalid IP Address',
+    props: {
+      validationError?: ValidationError
+    } = {},
+  ) {
+    super(message, {
+      code: ErrorCodes.INVALID_IP_HEADER_ERROR,
+      validationError: props?.validationError,
     })
   }
 }

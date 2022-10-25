@@ -190,6 +190,11 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
+      resources :site_settings do
+        get :sso_button, on: :collection
+        get :cdmh, on: :collection
+      end
+
       resources :news_items, path: "news", only: %i(index show) do
         get :years, on: :collection
       end

@@ -148,7 +148,7 @@ const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children
     <MainBanner id="navigation-bar">
       {!isLoggedIn && (
         <PublicNavbarWrapper>
-          <PublicNavbar showLogo />
+          <PublicNavbar shouldShowLogo />
         </PublicNavbarWrapper>
       )}
       {renderTitleIfDefined()}

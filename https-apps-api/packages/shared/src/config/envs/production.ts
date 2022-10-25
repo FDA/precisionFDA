@@ -1,11 +1,15 @@
+import { parseIpv4Cidr } from '../../validation/parsers'
 import { ConfigOverride } from '..'
 import { MAX_JOB_DURATION_MINUTES } from '../constants'
 
-export const config: ConfigOverride = {
+export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-prod',
   api: {
     railsHost: process.env.HOST,
     allowErrorTestingRoutes: false,
+    fdaSubnet: {
+      allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
+    },
   },
   logs: {
     pretty: false,
@@ -32,4 +36,12 @@ export const config: ConfigOverride = {
   redis: {
     isSecure: true,
   },
-}
+  // TODO(samuel) uncomment when ready for production deploy
+  // siteSettings: {
+  //   ssoButton: {
+  //     response: {
+  //       isEnabled: true,
+  //     },
+  //   },
+  // },
+})

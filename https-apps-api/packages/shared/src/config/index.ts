@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // eslint-disable-next-line import/no-named-default
 import { default as dotenv } from 'dotenv'
 // eslint-disable-next-line import/order
@@ -12,6 +13,7 @@ import { mergeDeepRight } from 'ramda'
 import { ENVS } from '../enums'
 // eslint-disable-next-line import/first
 import { DeepPartial } from '../types'
+// eslint-disable-next-line import/first
 import { MAX_JOB_DURATION_MINUTES } from './constants'
 // eslint-disable-next-line import/first
 import * as overrides from './envs'
@@ -45,6 +47,13 @@ const defaultConfig = {
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     allowErrorTestingRoutes:
       process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
+    fdaSubnet: {
+      allowedIpCidrBlock: {
+        ipv4Quadruple: [127, 0, 0, 1],
+        maskSize: 0,
+      },
+      nginxIpHeader: 'x-real-ip',
+    },
   },
   logs: {
     pretty: true,
@@ -71,6 +80,9 @@ const defaultConfig = {
     adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
     findDataObjectsQueryLimit: 100,
     orgEveryoneHandle: 'precisionfda_dev',
+    users: {
+      challengeBotDxUser: 'challenge.bot.2',
+    },
   },
   emails: {
     smtp: {
@@ -81,9 +93,6 @@ const defaultConfig = {
       host: process.env.SMTP_HOST ?? 'aws-ses-host',
       fromAddress: process.env.SMTP_FROM_ADDRESS ?? 'precisionfda-no-reply@dnanexus.com',
     },
-  },
-  users: {
-    challengeBotDxUser: 'challenge.bot.2',
   },
   redis: {
     url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
@@ -104,6 +113,9 @@ const defaultConfig = {
       },
       maintenance: {
         name: 'https-apps-worker-maintenance-queue',
+        onInit: {
+          shouldAddCheckNonterminatedClusters: false,
+        },
       },
     },
     syncJob: {
@@ -117,23 +129,55 @@ const defaultConfig = {
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *',
-    }
-  },
-  flags: {
-    dev: {
-      skipUserMiddlewareForDebugRoutes: false,
     },
   },
-  // TODO(samuel) - replace this flag with array of initial tasks
-  // TODO(samuel) - ideally replace ramda with better package that can deep-merge arrays in typescript
-  shouldAddCheckNonterminatedClustersOnInit: false,
+  // eslint-disable-next-line no-warning-comments
+  // TODO(samuel) apply "satisfies" operator
+  // https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator
+  siteSettings: {
+    ssoButton: {
+      middleware: {
+        shouldCheckFdaSubnet: true,
+        shouldRequireUserSession: false,
+      },
+      response: {
+        isEnabled: false,
+        data: {
+          fdaSsoUrl: 'https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D',
+        },
+      },
+    },
+    cdmh: {
+      middleware: {
+        shouldCheckFdaSubnet: true,
+        shouldRequireUserSession: true,
+      },
+      response: {
+        isEnabled: true,
+        data: {
+          cdmhPortal: 'https://cdmh-portal.precisionfda-dev.dnanexus.com/',
+          cdrBrowser: 'https://smilecdr.precisionfda-dev.dnanexus.com/',
+          cdrAdmin: 'https://smilecdr.precisionfda-dev.dnanexus.com/',
+          connectPortal: 'https://adeptia-portal.precisionfda-dev.dnanexus.com/',
+        },
+      },
+    },
+  },
+  devFlags: {
+    middleware: {
+      skipUserMiddlewareForDebugRoutes: false,
+    },
+    fda: {
+      skipFdaSubnetIpCheck: false,
+    },
+  },
 }
 
-// plug-in the overrides that are based on the NODE_ENV
-const envOverride = overrides[env] ? overrides[env] : {}
-const config: typeof defaultConfig = mergeDeepRight(defaultConfig, envOverride)
+// lazily plug-in the overrides that are based on the NODE_ENV
+const envOverride = overrides[env] ? overrides[env]() : {}
+const config: typeof defaultConfig = mergeDeepRight(defaultConfig, envOverride) as any
 Object.freeze(config)
 
-export type ConfigOverride = DeepPartial<typeof defaultConfig>
+export type ConfigOverride = () => DeepPartial<typeof defaultConfig>
 
 export { config, defaultConfig }

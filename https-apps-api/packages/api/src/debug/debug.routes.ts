@@ -11,7 +11,7 @@ interface IRemoveRepeatableParams {
 
 const router = new Router<DefaultState, Api.Ctx>()
 
-if (!config.flags.dev.skipUserMiddlewareForDebugRoutes) {
+if (!config.devFlags.middleware.skipUserMiddlewareForDebugRoutes) {
   router.use(defaultMiddlewares)
 }
 
@@ -95,7 +95,7 @@ if (config.api.allowErrorTestingRoutes) {
       queue.createTestMaxMemoryTask()
       ctx.body = { result: 'Test worker heap memory allocation test queued' }
       ctx.status = 200
-    }
+    },
   )
 }
 
