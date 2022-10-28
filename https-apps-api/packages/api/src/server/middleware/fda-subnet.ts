@@ -1,6 +1,7 @@
-import { config, errors } from '@pfda/https-apps-shared'
+import { config } from '@pfda/https-apps-shared'
 import { ipv4QuadrupleToBooleanArray, ipv4StringToQuadruple } from '../../utils/ipv4'
 
+// TODO(samuel) investigate if it's possible to have this logic on Nginx
 export const makeValidateFdaSubnetMdw = () => {
   const {
     ipv4Quadruple: cidrIpv4Quadruple,
@@ -10,16 +11,36 @@ export const makeValidateFdaSubnetMdw = () => {
   const cidrBlockString = `${cidrIpv4Quadruple.join('')}/${maskSize}`
   return async (ctx: Api.Ctx, next) => {
     // Header added by Nginx
-    const ipv4String = ctx.get(config.api.fdaSubnet.nginxIpHeader)
+    const ipv4Header = ctx.get(config.api.fdaSubnet.nginxIpHeader)
+    ctx.log.debug({ ipv4Header }, `Processing nginx header ${config.api.fdaSubnet.nginxIpHeader} with value "${ipv4Header}"`)
+    // Client IP should be 1st value in provided list
+    const ipv4String = ipv4Header.split(',')[0]
     ctx.log.debug({ ip: ipv4String }, 'Processing IP address')
-    const incomingIpv4Bits = ipv4QuadrupleToBooleanArray(ipv4StringToQuadruple(ipv4String))
+    let incomingIpv4Bits
+    try {
+      incomingIpv4Bits = ipv4QuadrupleToBooleanArray(ipv4StringToQuadruple(ipv4String))
+    } catch {
+      ctx.status = 400
+      const msg = `Expected request incoming from IPv4 requests, got ${
+        ipv4String
+      }. IPv6 isn't considered part of subnet as of now`
+      ctx.log.error({ ip: ipv4String }, msg)
+      ctx.body = msg
+      return
+    }
+
     const actualMaskPrefix = incomingIpv4Bits.slice(0, maskSize)
     if (!cidrMaskPrefix.every((bit, index) => bit === actualMaskPrefix[index])) {
-      throw new errors.InvalidIpHeaderError(`
+      ctx.status = 400
+      const msg = `
         Invalid IP address, expected IP to be in CIDR block ${cidrBlockString}, got "${ipv4String}"
-      `)
+      `
+      ctx.log.error({ ip: ipv4String }, msg)
+      ctx.body = msg
+      return
     }
     ctx.log.debug({ ip: ipv4String }, 'IP address within CIDR block')
+    // eslint-disable-next-line consistent-return
     return next()
   }
 }

@@ -52,7 +52,7 @@ const defaultConfig = {
         ipv4Quadruple: [127, 0, 0, 1],
         maskSize: 0,
       },
-      nginxIpHeader: 'x-real-ip',
+      nginxIpHeader: 'X-Forwarded-For',
     },
   },
   logs: {

@@ -293,7 +293,7 @@ class HttpsAppsClient
 
   def site_settings_sso_button(incoming_ip = nil)
     request_headers = {}
-    request_headers["X-Real-IP"] = incoming_ip if incoming_ip
+    request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
     request(
       "/site-settings/ssoButton",
       {},
@@ -305,7 +305,7 @@ class HttpsAppsClient
 
   def site_settings_cdmh(incoming_ip = nil)
     request_headers = {}
-    request_headers["X-Real-IP"] = incoming_ip if incoming_ip
+    request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
     request(
       "/site-settings/cdmh",
       {},
