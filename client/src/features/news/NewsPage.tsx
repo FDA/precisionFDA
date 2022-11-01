@@ -106,7 +106,7 @@ const NewsPage = () => {
                   page={data?.meta?.current_page}
                   totalCount={data?.meta?.total_count}
                   totalPages={data?.meta?.total_pages}
-                  hide={hidePagination(
+                  isHidden={hidePagination(
                     isFetched,
                     data?.news_items?.length,
                     data?.meta?.total_pages,
@@ -140,7 +140,7 @@ const NewsPage = () => {
             <RightSideItem>
               <SectionTitle>News Backlog</SectionTitle>
               <RightList>
-                <ItemButton selected={!query.year} as={Link} to="/news">
+                <ItemButton selected={!query.year} as={Link} to="/news" data-turbolinks="false">
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
@@ -148,6 +148,7 @@ const NewsPage = () => {
                     ?.map(y => y.toString())
                     .map(y => (
                       <ItemButton
+                        data-turbolinks="false"
                         as={Link}
                         key={y}
                         to={`/news?year=${y}`}

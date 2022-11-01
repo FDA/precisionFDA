@@ -52,6 +52,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/introduction', pathname)}
             to="/docs/introduction"
+            data-turbolinks="false"
           >
             Introduction
           </NavItem>
@@ -59,6 +60,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/video-tutorials', pathname)}
             to="/docs/video-tutorials"
+            data-turbolinks="false"
           >
             Video Tutorials
           </NavItem>
@@ -66,6 +68,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/discussions', pathname)}
             to="/docs/discussions"
+            data-turbolinks="false"
           >
             Discussions
           </NavItem>
@@ -73,6 +76,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/notes', pathname)}
             to="/docs/notes"
+            data-turbolinks="false"
           >
             Notes
           </NavItem>
@@ -80,6 +84,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/files', pathname)}
             to="/docs/files"
+            data-turbolinks="false"
           >
             Files
           </NavItem>
@@ -87,6 +92,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/comparisons', pathname)}
             to="/docs/comparisons"
+            data-turbolinks="false"
           >
             Comparisons
           </NavItem>
@@ -94,6 +100,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/apps', pathname)}
             to="/docs/apps"
+            data-turbolinks="false"
           >
             Apps
           </NavItem>
@@ -101,6 +108,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/creating-apps', pathname)}
             to="/docs/creating-apps"
+            data-turbolinks="false"
           >
             Creating Apps
           </NavItem>
@@ -108,6 +116,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/workstations', pathname)}
             to="/docs/workstations"
+            data-turbolinks="false"
           >
             Workstations
           </NavItem>
@@ -115,6 +124,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/workflows', pathname)}
             to="/docs/workflows"
+            data-turbolinks="false"
           >
             Workflows
           </NavItem>
@@ -122,6 +132,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/tracking', pathname)}
             to="/docs/tracking"
+            data-turbolinks="false"
           >
             Tracking
           </NavItem>
@@ -129,6 +140,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/publishing', pathname)}
             to="/docs/publishing"
+            data-turbolinks="false"
           >
             Publishing
           </NavItem>
@@ -136,12 +148,14 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/licenses', pathname)}
             to="/docs/licenses"
+            data-turbolinks="false"
           >
             Licenses
           </NavItem>
           <NavItem
             activeClassName='active'
             $active={isActiveLink('/docs/cli', pathname)} to="/docs/cli"
+            data-turbolinks="false"
           >
             Command Line Interface
           </NavItem>
@@ -149,6 +163,7 @@ const Docs = () => {
             activeClassName='active'
             $active={isActiveLink('/docs/spaces', pathname)}
             to="/docs/spaces"
+            data-turbolinks="false"
           >
             Spaces
           </NavItem>
@@ -159,6 +174,7 @@ const Docs = () => {
                 activeClassName='active'
                 $active={isActiveLink('/docs/challenge-workbench', pathname)}
                 to="/docs/challenge-workbench"
+                data-turbolinks="false"
               >
                 Challenge Workbench
               </NavItem>
@@ -166,6 +182,7 @@ const Docs = () => {
                 activeClassName='active'
                 $active={isActiveLink('/docs/site-activity-reporting', pathname)}
                 to="/docs/site-activity-reporting"
+                data-turbolinks="false"
               >
                 Site Activity Reporting
               </NavItem>
@@ -173,6 +190,7 @@ const Docs = () => {
                 activeClassName='active'
                 $active={isActiveLink('/docs/site-customization', pathname)}
                 to="/docs/site-customization"
+                data-turbolinks="false"
               >
                 Site Customization
               </NavItem>
@@ -180,6 +198,7 @@ const Docs = () => {
                 activeClassName='active'
                 $active={isActiveLink('/docs/site-administration', pathname)}
                 to="/docs/site-administration"
+                data-turbolinks="false"
               >
                 Site Administration
               </NavItem>
@@ -191,6 +210,7 @@ const Docs = () => {
                   pathname,
                 )}
                 to="/docs/organizations-deprecation"
+                data-turbolinks="false"
               >
                 Organizations Deprecation
               </NavItem>

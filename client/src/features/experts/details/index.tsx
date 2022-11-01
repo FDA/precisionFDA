@@ -138,7 +138,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             <ExpertRow>
               <ExpertImage src={expert?.image} alt="Expert's Logo" />
               <ExpertData>
-                <BackToModulePage to={{ pathname: '/experts' }}>
+                <BackToModulePage to={{ pathname: '/experts' }} data-turbolinks="false">
                   &larr; Back to All Experts
                 </BackToModulePage>
 
@@ -159,6 +159,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               <StyledTab
                 as={NavLink}
                 to={`/experts/${expert?.id}`}
+                data-turbolinks="false"
                 activeClassName="selected"
                 exact
               >
@@ -168,6 +169,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
                 as={NavLink}
                 to={`/experts/${expert?.id}/blog`}
                 activeClassName="selected"
+                data-turbolinks="false"
               >
                 Blog Post
               </StyledTab>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
@@ -36,7 +37,7 @@ const AboutPage = () => {
               </a>
             </Tab>
             <Tab selectedClassName="active">
-              <Link to="/docs">
+              <Link to="/docs" data-turbolinks="false">
                 <span className="tab-label">How?</span>
                 <span className="tab-help">Learn how to use the features</span>
               </Link>
