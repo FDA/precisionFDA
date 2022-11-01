@@ -52,11 +52,11 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
             >
               Expert Q&amp;A
             </Button>
-            <Link to={`/experts/${expert.id}`}>
+            <Link data-turbolinks="false" to={`/experts/${expert.id}`}>
               <Icon icon={getSpacesIcon('experts')} fw />
               <span aria-label={`Click to view more information about ${expert.title}`}>About This Expert</span>
             </Link>
-            <Link to={`/experts/${expert.id}/blog`}>
+            <Link data-turbolinks="false" to={`/experts/${expert.id}/blog`}>
               <span aria-label={`Click to read ${expert.title}'s blog post`}>Read Expert Blog Post &#x2197;</span>
             </Link>
           </div>
@@ -130,7 +130,7 @@ class ExpertsListItemQuestionsAndAnswers extends ExpertsListItem {
         </div>
         <div className="experts-list-item-small__right-column experts-item-content">
           <div className="expert-name">
-            <Link to={`/experts/${expert.id}`}>
+            <Link data-turbolinks="false" to={`/experts/${expert.id}`}>
               <span>{expert.title}</span>
             </Link>
           </div>

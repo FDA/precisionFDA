@@ -111,11 +111,11 @@ export const ExpertsCondensedList = () => {
     <StyledCondensedList>
       {data?.experts.map(e => (
         <ExpertRow key={e.id}>
-          <Link to={`/experts/${e.id}`}>
+          <Link to={`/experts/${e.id}`} data-turbolinks="false">
             <ExpertImageCircleSmall src={e.image} />
           </Link>
           <div>
-            <Link to={`/experts/${e.id}`}>{e.meta.title}</Link>
+            <Link to={`/experts/${e.id}`} data-turbolinks="false">{e.meta.title}</Link>
             <ExpertMeta>
               <div>{e.meta.totalAnswerCount || 0} {pluralize('Answer', e.meta.totalAnswerCount || 0)} </div>
               <div>{e.meta.totalCommentCount || 0} {pluralize('Comment', e.meta.totalCommentCount || 0)}</div>
@@ -130,7 +130,7 @@ export const ExpertsCondensedList = () => {
         page={data?.meta?.current_page}
         totalCount={data?.meta?.total_count}
         totalPages={data?.meta?.total_pages}
-        hide={hidePagination(
+        isHidden={hidePagination(
           isFetched,
           data?.experts?.length,
           data?.meta?.total_pages,
@@ -207,14 +207,14 @@ const ExpertsList = () => {
                           >
                             Expert Q&amp;A
                           </Button>
-                          <Link to={`/experts/${n.id}`}>
+                          <Link to={`/experts/${n.id}`} data-turbolinks="false">
                             <span
                               aria-label={`Click to view more information about ${n.meta.title}`}
                             >
                               ☆ About This Expert
                             </span>
                           </Link>
-                          <Link to={`/experts/${n.id}/blog`}>
+                          <Link to={`/experts/${n.id}/blog`} data-turbolinks="false">
                             <span
                               aria-label={`Click to read ${n.meta.title}'s blog post`}
                             >
@@ -253,7 +253,7 @@ const ExpertsList = () => {
                   page={data?.meta?.current_page}
                   totalCount={data?.meta?.total_count}
                   totalPages={data?.meta?.total_pages}
-                  hide={hidePagination(
+                  isHidden={hidePagination(
                     isFetched,
                     data?.experts?.length,
                     data?.meta?.total_pages,
@@ -281,7 +281,7 @@ const ExpertsList = () => {
             <RightSideItem>
               <SectionTitle>Previous expert blogs</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!year}>
+                <ItemButton as={Link} to="/challenges" selected={!year} data-turbolinks="false">
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
@@ -291,6 +291,7 @@ const ExpertsList = () => {
                       <ItemButton
                         as={Link}
                         to={`/challenges?year=${y}`}
+                        data-turbolinks="false"
                         key={i}
                         selected={y === year}
                       >

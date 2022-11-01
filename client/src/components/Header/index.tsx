@@ -71,9 +71,9 @@ export const UserMenu = ({
       </StyledLink>
     )}
     <StyledDivider />
-    <StyledLink as={Link} to="/about">About</StyledLink>
+    <StyledLink as={Link} to="/about" data-turbolinks="false">About</StyledLink>
     <StyledLink data-turbolinks="false" href="/guidelines">Guidelines</StyledLink>
-    <StyledLink as={Link} to="/docs">Docs</StyledLink>
+    <StyledLink as={Link} to="/docs" data-turbolinks="false">Docs</StyledLink>
     <StyledDivider />
     {userCanAdministerSite && (
       <>
@@ -129,13 +129,14 @@ export const Header: React.FC = () => {
     <>
       <StyledHeader>
         <Nav>
-          <LogoWrap as={Link} to="/">
+          <LogoWrap as={Link} to="/" data-turbolinks="false">
             <StyledHeaderLogo />
           </LogoWrap>
           <HeaderLeft>
             <Link
               to={isSpacesPath ? '/home' : '/'}
               title={isSpacesPath ? 'Back Home' : 'Overview'}
+              data-turbolinks="false"
             >
               <MenuItem active={isActiveLink('/')}>
                 <IconWrap>
@@ -156,7 +157,7 @@ export const Header: React.FC = () => {
                     <HeaderItemText>Discussions</HeaderItemText>
                   </MenuItem>
                 </a>
-                <Link to="/challenges" title="Challenges">
+                <Link to="/challenges" title="Challenges" data-turbolinks="false">
                   <MenuItem active={isActiveLink('/challenges')}>
                     <IconWrap>
                       <TrophyIcon height={16} />
@@ -164,7 +165,7 @@ export const Header: React.FC = () => {
                     <HeaderItemText>Challenges</HeaderItemText>
                   </MenuItem>
                 </Link>
-                <Link to="/experts" title="Experts">
+                <Link to="/experts" title="Experts" data-turbolinks="false">
                   <MenuItem active={isActiveLink('/experts')}>
                     <IconWrap>
                       <StarIcon height={16} />
@@ -173,7 +174,7 @@ export const Header: React.FC = () => {
                   </MenuItem>
                 </Link>
                 <HeaderSpacer />
-                <Link to="/home" title="My Home">
+                <Link to="/home" title="My Home" data-turbolinks="false">
                   <MenuItem active={isActiveLink('/home')}>
                     <IconWrap>
                       <FortIcon height={16} />
@@ -201,7 +202,7 @@ export const Header: React.FC = () => {
               </>
             )}
             <HeaderSpacer />
-            <Link to="/spaces" title="Spaces">
+            <Link to="/spaces" title="Spaces" data-turbolinks="false">
               <MenuItem active={isActiveLink('/spaces')}>
                 <IconWrap>
                   <ObjectGroupIcon height={16} />
@@ -234,7 +235,7 @@ export const Header: React.FC = () => {
                 <HeaderItemText>Support</HeaderItemText>
               </MenuItem>
             </a>
-            <Link to="/docs/introduction" title="Get Started">
+            <Link to="/docs/introduction" title="Get Started" data-turbolinks="false">
               <MenuItem active={isActiveLink('/docs/introduction')}>
                 <IconWrap>
                   <QuestionIcon height={16} />

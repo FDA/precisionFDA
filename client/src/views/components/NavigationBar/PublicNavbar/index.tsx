@@ -221,11 +221,11 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <StyledPFDALogoLight className="pfda-navbar-logo" hidden={!shouldShowLogo} />
       )}
       <PublicNavbarCenterButtons isSticky={sticky}>
-        <Link to='/' className={getLinkClassName('/')}>Overview</Link>
-        <Link to='/challenges' className={getLinkClassName('/challenges')}>Challenges</Link>
-        <Link to='/news' className={getLinkClassName('/news')}>News</Link>
-        <Link to='/experts' className={getLinkClassName('/experts')}>Experts</Link>
-        <Link to='/about' className={getLinkClassName('/about')}>About</Link>
+        <Link data-turbolinks="false" to='/' className={getLinkClassName('/')}>Overview</Link>
+        <Link data-turbolinks="false" to='/challenges' className={getLinkClassName('/challenges')}>Challenges</Link>
+        <Link data-turbolinks="false" to='/news' className={getLinkClassName('/news')}>News</Link>
+        <Link data-turbolinks="false" to='/experts' className={getLinkClassName('/experts')}>Experts</Link>
+        <Link data-turbolinks="false" to='/about' className={getLinkClassName('/about')}>About</Link>
         <a href="/uniisearch" target="_blank">UNII Search</a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons>

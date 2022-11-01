@@ -178,7 +178,7 @@ const ChallengesList = () => {
                       </DateArea>
                       <Content>{n.description}</Content>
                       <div>
-                        <ViewDetailsButton as={Link} to={`/challenges/${n.id}`}>
+                        <ViewDetailsButton as={Link} to={`/challenges/${n.id}`} data-turbolinks="false">
                           View Details &rarr;
                         </ViewDetailsButton>
                       </div>
@@ -207,7 +207,7 @@ const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as={Link} to="/challenges/create">
+                  <ButtonSolidBlue as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
                   </ButtonSolidBlue>
                 </ButtonRow>
@@ -216,10 +216,11 @@ const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Filter Challenges</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!time_status}>
+                <ItemButton as={Link} to="/challenges" selected={!time_status} data-turbolinks="false">
                   All
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=current"
                   selected={time_status === 'current'}
@@ -227,6 +228,7 @@ const ChallengesList = () => {
                   Currently Open
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=upcoming"
                   selected={time_status === 'upcoming'}
@@ -234,6 +236,7 @@ const ChallengesList = () => {
                   Upcoming
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=ended"
                   selected={time_status === 'ended'}
@@ -245,7 +248,7 @@ const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Previous Challenges</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!year}>
+                <ItemButton as={Link} to="/challenges" selected={!year} data-turbolinks="false">
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
@@ -253,6 +256,7 @@ const ChallengesList = () => {
                     ?.map(y => y.toString())
                     .map(y => (
                       <ItemButton
+                        data-turbolinks="false"
                         as={Link}
                         to={`/challenges?year=${y}`}
                         key={y}
@@ -277,7 +281,7 @@ const ChallengesList = () => {
                 any combination of the above that you would like to put in front
                 of the precisionFDA expert community.
               </div>
-              <Link to="/challenges/propose">Propose a Challenge &rarr;</Link>
+              <Link data-turbolinks="false" to="/challenges/propose">Propose a Challenge &rarr;</Link>
             </RightSideItem>
           </RightSide>
         </PageRow>

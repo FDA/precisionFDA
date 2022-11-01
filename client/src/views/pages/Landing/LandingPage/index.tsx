@@ -215,7 +215,7 @@ const LandingPage : FunctionComponent = () => {
         </CommunityParticipants>
 
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '32px', gap: 8 }}>
-          <ButtonSolidBlue as={Link} to="/docs">Learn more about precisionFDA</ButtonSolidBlue><a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
+          <ButtonSolidBlue data-turbolinks="false" as={Link} to="/docs">Learn more about precisionFDA</ButtonSolidBlue><a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </div>
 
         <div>
@@ -285,14 +285,14 @@ const LandingPage : FunctionComponent = () => {
           <RightColumn>
             <GettingStarted>
               <GettingStartedHeading>GETTING STARTED</GettingStartedHeading>
-              <Link to="/docs">For New Users</Link>
+              <Link data-turbolinks="false" to="/docs">For New Users</Link>
               {user?.can_see_spaces && 
-              <Link to="/docs/spaces">For Reviewers</Link>
+              <Link data-turbolinks="false" to="/docs/spaces">For Reviewers</Link>
               }
               <GettingStartedHr />
-              <Link to="/docs">Introduction to precisionFDA</Link>
-              <Link to="/docs/files">Uploading Files &amp; Data</Link>
-              <Link to="/docs/apps">Running Apps</Link>
+              <Link data-turbolinks="false" to="/docs">Introduction to precisionFDA</Link>
+              <Link data-turbolinks="false" to="/docs/files">Uploading Files &amp; Data</Link>
+              <Link data-turbolinks="false" to="/docs/apps">Running Apps</Link>
               {user?.can_see_spaces && 
               <Link to="/docs/spaces">Review Spaces: Step by Step</Link>
               }
