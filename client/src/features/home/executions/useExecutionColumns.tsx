@@ -138,7 +138,7 @@ export const useExecutionColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.launched_by || 200,
           Cell: props => (
-            <a href={props.row.original.links.user ?? '#'}>{props.value}</a>
+            <a data-turbolinks="false" href={props.row.original.links.user ?? '#'}>{props.value}</a>
           ),
           ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {},
         },

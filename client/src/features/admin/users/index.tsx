@@ -1,22 +1,22 @@
 // TODO(samuel) fix
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import axios from 'axios'
 import React, { useMemo } from 'react'
-import styled from 'styled-components'
 import { CellProps, Column } from 'react-table'
-import { withDefault, StringParam } from 'use-query-params'
-import DefaultLayout from '../../../views/layouts/DefaultLayout'
-import Table from '../../../components/Table/Table'
+import styled from 'styled-components'
+import { StringParam, withDefault } from 'use-query-params'
+import { UsersIcon } from '../../../components/icons/UserIcon'
+import { hidePagination, Pagination } from '../../../components/Pagination'
 import { DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter } from '../../../components/Table/filters'
 import { EmptyTable } from '../../../components/Table/styles'
-import { requestOpts } from '../../../utils/api'
-import { cleanObject, toArrayFromObject } from '../../../utils/object'
-import { FilterT, PaginationInput, prepareListFetch, SortInput } from '../../../utils/filters'
+import Table from '../../../components/Table/Table'
+import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
 import { MetaT, useList } from '../../../hooks/useList'
 import { colors } from '../../../styles/theme'
-import { hidePagination, Pagination } from '../../../components/Pagination'
-import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
-import { UsersIcon } from '../../../components/icons/UserIcon'
+import { FilterT, PaginationInput, prepareListFetch, SortInput } from '../../../utils/filters'
+import { cleanObject, toArrayFromObject } from '../../../utils/object'
+import { UserLayout } from '../../../views/layouts/UserLayout'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
 
@@ -44,8 +44,7 @@ export const fetchUsers = async (
 ) => {
   const query = prepareListFetch(filters, pagination, order)
   const paramQ = `?${  new URLSearchParams(cleanObject(query) as any).toString()}`
-  const res = await fetch(`/admin/users/${paramQ}`, requestOpts)
-  return res.json() as any as AdminUserListType
+  return axios.get(`/admin/users_list/${paramQ}`).then(r => r.data as AdminUserListType)
 }
 
 export const StyledLinkCell = styled.a`
@@ -82,7 +81,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     Filter: DefaultColumnFilter,
     width: colWidths?.dxuser ?? 198,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value}
       </StyledLinkCell>
     ),
@@ -93,7 +92,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     Filter: DefaultColumnFilter,
     width: colWidths?.email ?? 300,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value}
       </StyledLinkCell>
     ),
@@ -106,7 +105,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => {
       const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
       return (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value && new Date(value).toLocaleDateString('en-US', {
           month: 'short',
           day: '2-digit',
@@ -131,7 +130,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     ],
     width: colWidths?.lastLogin ?? 300,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {value.toUpperCase()}
       </StyledLinkCell>
     ),
@@ -145,7 +144,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     filterPlaceholderTo: 'Max $',
     width: colWidths?.lastLogin ?? 300,
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {`$${value}`}
       </StyledLinkCell>
     ),
@@ -159,7 +158,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
     filterPlaceholderFrom: 'Min $',
     filterPlaceholderTo: 'Max $',
     Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
+      <StyledLinkCell data-turbolinks="false" href={`/users/${row.original.dxuser}`}>
         {`$${value}`}
       </StyledLinkCell>
     ),
@@ -167,7 +166,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
 ] as any as Column<User>[]
 
 
-export const UsersList = () => {
+const UsersList = () => {
   const {
     sortBy,
     setSortBy,
@@ -205,7 +204,7 @@ export const UsersList = () => {
   }
   const filters = toArrayFromObject(filterQuery)
   return (
-    <DefaultLayout>
+    <UserLayout>
       <Topbox>
         <UsersIcon height={20} />
         <Title>
@@ -263,6 +262,8 @@ export const UsersList = () => {
           showListCount
         />
       </ContentWrapper>
-    </DefaultLayout>
+    </UserLayout>
   )
 }
+
+export default UsersList

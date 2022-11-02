@@ -33,9 +33,9 @@ const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to
   return (
     <>
       {userHasAccess ? 
-      <Link to={to} className={className} aria-label={ariaLabel}>{children}</Link>
+      <Link data-turbolinks="false" to={to} className={className} aria-label={ariaLabel}>{children}</Link>
       : 
-      <a className={className} onClick={() => openModal()} aria-label={ariaLabel}>{children}</a>
+      <a data-turbolinks="false" className={className} onClick={() => openModal()} aria-label={ariaLabel}>{children}</a>
       }
       <Modal
         isOpen={isOpen}

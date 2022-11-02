@@ -36,7 +36,7 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]){
       <ResourceTable
         rows={memoSelected.map((s, i) => ({
             name: (
-              <StyledName key={`${i}-name`} href={s.links.show} target="_blank">
+              <StyledName key={`${i}-name`} data-turbolinks="false" href={s.links.show} target="_blank">
                 <VerticalCenter>
                   <FileIcon />
                 </VerticalCenter>

@@ -91,6 +91,7 @@ export const WorkflowList = ({
               <ButtonSolidBlue
                 data-testid="home-workflows-create-link"
                 as="a"
+                data-turbolinks="false"
                 href="/workflows/new"
               >
                 <PlusIcon height={12} /> Create Workflow

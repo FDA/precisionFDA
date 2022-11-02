@@ -2,7 +2,7 @@ import { WorkerBaseOperation } from '../../../utils/base-operation'
 import type { SendEmailJob } from '../../../queue/task.input'
 import * as helper from '../email.helper'
 import { config } from '../../../config'
-import { emailClient } from '../../../services/salesforce.service'
+import { emailClient } from '../../../services/smtp.service'
 import { getBullJobIdForEmailOperation } from '../email.helper'
 import { EMAIL_TYPES } from '../email.config'
 import { OpsCtx } from '../../../types'
@@ -18,14 +18,12 @@ export class EmailSendOperation extends WorkerBaseOperation<
   }
 
   async run(input: SendEmailJob['payload']): Promise<boolean> {
-    if (config.emails.salesforce.isEnabled) {
+    if (config.emails.smtp.isEnabled) {
       try {
-        // todo: consider bulk sending since we need to login and everything
-        await emailClient.login()
         await emailClient.sendEmail(input)
         return true
       } catch (err) {
-        this.ctx.log.error({ err }, 'Salesforce client failed')
+        this.ctx.log.error({ err }, 'AWS SES client failed')
         throw err
       }
     }

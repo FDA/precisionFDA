@@ -116,7 +116,9 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   return (
     <>
       <CloudResourcesHeaderButton
+        data-turbolinks="false"
         href={`${workflow.links.show}/analyses/new`}
+        isLinkDisabled={!workflow.links.run_workflow}
         data-testid='workflow-show-actions-run'
         conditionType='all'
       >
@@ -126,7 +128,9 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         </>
       </CloudResourcesHeaderButton>
       <CloudResourcesHeaderButton
+        data-turbolinks="false"
         href={workflow.links.batch_run_workflow}
+        isLinkDisabled={!workflow.links.batch_run_workflow}
         data-testid='workflow-show-actions-run-batch'
         conditionType='all'
       >

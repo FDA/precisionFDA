@@ -35,7 +35,7 @@ function getWindowHWidth() {
   }
 }
 
-export default function useWindowWidth() {
+export function useWindowWidth() {
   const [windowWidth, setWindowDimensions] = useState(getWindowHWidth())
 
   useLayoutEffect(() => {
@@ -50,7 +50,7 @@ export default function useWindowWidth() {
   return windowWidth
 } 
 
-export const Spaces2List = () => {
+const SpacesList = () => {
   const resource = 'spaces'
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
   const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at', order_dir: 'DESC' }})
@@ -174,3 +174,5 @@ const TableTable = ({
     </StyledTable>
   )
 }
+
+export default SpacesList

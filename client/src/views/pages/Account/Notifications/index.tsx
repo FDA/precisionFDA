@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { useSelector } from 'react-redux'
 import Select from 'react-select'
 import {
   PageHeader,
@@ -11,10 +10,10 @@ import { ButtonSolidBlue } from '../../../../components/Button'
 import { Checkbox } from '../../../../components/Checkbox'
 import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
-import DefaultLayout from '../../../layouts/DefaultLayout'
-import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
 import { mapValues } from '../../../../utils/object'
+import { useAuthUser } from '../../../../features/auth/useAuthUser'
+import { UserLayout } from '../../../layouts/UserLayout'
 
 enum Roles {
   'reviewer' = 'reviewer',
@@ -103,8 +102,8 @@ const preference = {
   },
 }
 
-export const NotificationsPage = () => {
-  const user = useSelector(contextUserSelector)
+const NotificationsPage = () => {
+  const user = useAuthUser()
   const [localPrefSelection, setLocalPrefSelection] = useState<any>(preference)
   const roles = Object.keys(localPrefSelection) as Array<Roles>
   const options = roles.map(value => ({ value, label: RoleLabel[value] }))
@@ -174,12 +173,12 @@ export const NotificationsPage = () => {
   const enableChallengeOpenNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_opened //true
   const enableChallengePreregNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_preregister //true
 
-  if(user.is_guest) {
-    return <DefaultLayout><GuestNotAllowed /></DefaultLayout>
+  if(user?.is_guest) {
+    return <UserLayout><GuestNotAllowed /></UserLayout>
   }
 
   return (
-    <DefaultLayout>
+    <UserLayout>
       <form>
         <StyledPageContainer>
           <PageHeader>
@@ -275,6 +274,8 @@ export const NotificationsPage = () => {
           </StyledNotifications>
         </StyledPageContainer>
       </form>
-    </DefaultLayout>
+    </UserLayout>
   )
 }
+
+export default NotificationsPage

@@ -12,6 +12,7 @@ export interface IButton {
 export const Button = styled.button<IButton>`
   position: relative;
   display: flex;
+  width: fit-content;
   align-items: center;
   font-family: ${theme.fontFamily};
   font-weight: ${fontWeight.regular};

@@ -90,7 +90,7 @@ const createQueues = async (): Promise<void> => {
 
 const initMaintenanceQueue = async () => {
   log.info({}, 'Initializing maintenance queue')
-  if (config.shouldAddCheckNonterminatedClustersOnInit) {
+  if (config.workerJobs.queues.maintenance.onInit.shouldAddCheckNonterminatedClusters) {
     const checkNonTerminatedDbclustersTask = {
       type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
     }

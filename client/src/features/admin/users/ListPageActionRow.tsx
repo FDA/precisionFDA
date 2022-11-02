@@ -184,6 +184,7 @@ export const UsersListActionRow = ({
         as="a"
         href="/admin/invitations"
         data-testid="admin-users-provision-button"
+        data-turbolinks="false"
       >
         <PlusIcon height={12} />
         &nbsp;Provision new users

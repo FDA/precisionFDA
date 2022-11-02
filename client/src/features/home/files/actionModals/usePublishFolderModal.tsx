@@ -38,7 +38,7 @@ const PublishFolder = ({
       rows={data.map(s => {
         return {
           name: (
-            <StyledName href={s.viewURL} target="_blank">
+            <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
               <VerticalCenter>
                 <FileIcon />
               </VerticalCenter>

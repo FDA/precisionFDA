@@ -71,9 +71,10 @@ export const NewsListItem = styled.div`
 export const PageMainBody = styled.div`
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 `
 export const PageFilterTitle = styled.h2`
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   margin-bottom: 32px;
   margin-top: 0;
@@ -104,10 +105,8 @@ export const PageRow = styled.div`
   width: 100%;
   flex-direction: column-reverse;
   gap: 64px;
-  padding: 64px 8px;
+  padding: 64px 0;
   @media (min-width: ${breakPoints.large}px) {
-    padding-left: 32px;
-    padding-right: 32px;
     flex-direction: row;
     justify-content: space-between;
     ${RightSide} {
@@ -124,9 +123,9 @@ export const RightList = styled.div`
   gap: 16px;
 `
 export const ListItem = styled(Link)``
-export const Container = styled(PageContainer)`
-  display: flex;
-  width: 100%;
+export const Container = styled.div`
+  margin-inline: auto;
+  width: min(100% - 32px, 1100px);
 `
 
 export const ItemButton = styled.button<{ selected?: boolean }>`

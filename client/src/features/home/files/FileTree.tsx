@@ -1,6 +1,8 @@
 import React from 'react'
 import Tree, { TreeProps } from 'rc-tree'
 import { DataNode } from 'rc-tree/lib/interface'
+import 'rc-tree/assets/index.css'
+
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { FolderOpenIcon } from '../../../components/icons/FolderOpenIcon'
 import { TreeStyles } from './FileList.styles'

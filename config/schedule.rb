@@ -2,13 +2,11 @@ set :bundle_command, "/usr/local/bin/bundle exec"
 set :output, "log/cron.log"
 
 %w(
-  SALESFORCE_USERNAME
-  SALESFORCE_PASSWORD
-  SALESFORCE_SECRET_TOKEN
-  SALESFORCE_HOST
-  SALESFORCE_FDA_EMAIL_ID
-  SALESFORCE_NOTIFIER_EMAIL_ID
-  SECRET_KEY_BASE
+  SMTP_USER
+  SMTP_PASSWORD
+  SMTP_PORT
+  SMTP_HOST
+  SMTP_FROM_ADDRESS
 ).each do |name|
   env name, ENV[name]
 end

@@ -14,4 +14,8 @@ export class Organization extends BaseEntity {
 
   @Property()
   adminId?: number
+
+  getDxOrg(){
+    return `org-pfda..${this.handle}`
+  }
 }

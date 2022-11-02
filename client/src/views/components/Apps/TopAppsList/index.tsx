@@ -27,10 +27,10 @@ const AppListItem = (app: IApp) => {
   return (
     <div className="top-apps-list" key={app.id}>
       <div className="top-apps-list__icon">
-        <GuestRestrictedLink to={linkToApp} ariaLabel={ariaLabel}><img src={`/assets/apps/${iconImage}`} alt={iconImageAlt} /></GuestRestrictedLink>
+        <GuestRestrictedLink data-turbolinks="false" to={linkToApp} ariaLabel={ariaLabel}><img src={`/assets/apps/${iconImage}`} alt={iconImageAlt} /></GuestRestrictedLink>
       </div>
       <div className="top-apps-list__contents">
-        <div className="top-apps-list__name"><GuestRestrictedLink to={linkToApp} ariaLabel={ariaLabel}>{app.title}</GuestRestrictedLink></div>
+        <div className="top-apps-list__name"><GuestRestrictedLink data-turbolinks="false" to={linkToApp} ariaLabel={ariaLabel}>{app.title}</GuestRestrictedLink></div>
         <div className="top-apps-list__user">{app.org}</div>
         <div className="top-apps-list__date">Updated {timeDistance} ago</div>
       </div>
