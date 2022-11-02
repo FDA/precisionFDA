@@ -36,9 +36,8 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     if (input.folderId) {
       current = foldersInProject.find(f => f.id === input.folderId)
       if (!current) {
-        throw new errors.NotFoundError(
-          `Folder id ${input.folderId.toString()} does not exist under given project`,
-        )
+        throw new errors.NotFoundError(`Folder id ${input.folderId.toString()} `
+          + 'does not exist under given project')
       }
       // transfer folderId into API path string
       folderPath = getFolderPath(foldersInProject, current)
@@ -69,16 +68,30 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       includeDescProps: true,
     })
     const remoteFileDxids = map(prop('id'))(remoteFiles.results)
-    const localFileDxids = map(prop('dxid'))(localFiles)
+    const localFileDxids: string[] = map(prop('dxid'))(localFiles)
     const locallyCreatedFileDxids = map(prop('dxid'))(locallyCreatedFiles)
-    const toAdd = difference(remoteFileDxids, localFileDxids)
+    const toAddDifference = difference(remoteFileDxids, localFileDxids)
     const toRemove = difference(localFileDxids, remoteFileDxids)
 
+    // when dxid is found in db it is a copy of the original that has been deleted
+    // we don't want to recreate deleted file
+    const toAdd: string[] = []
+    for (const dxid of toAddDifference) {
+      const result = await fileRepo.find({ dxid: dxid })
+      if (result.length === 0) {
+        toAdd.push(dxid)
+      }
+    }
+
     if (localFileDxids.length > 0) {
-      this.ctx.log.debug({ localFileDxids, folderPath }, 'SyncFilesInFolderOperation: Local files detected in given subfolder')
+      this.ctx.log.debug({ localFileDxids, folderPath },
+        'SyncFilesInFolderOperation: Local files detected in given subfolder',
+      )
     }
     if (remoteFileDxids.length > 0) {
-      this.ctx.log.debug({ remoteFileDxids, folderPath }, 'SyncFilesInFolderOperation: Remote files detected in given subfolder')
+      this.ctx.log.debug({ remoteFileDxids, folderPath },
+        'SyncFilesInFolderOperation: Remote files detected in given subfolder',
+      )
     }
     this.ctx.log.info(
       { folderPath, toAdd, toRemove },
@@ -128,10 +141,11 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     // add new files
     if (input.runAdd) {
       toAdd.forEach(dxid => {
-        if (locallyCreatedFileDxids.includes(dxid)) {
+        if (locallyCreatedFileDxids.includes(dxid as string)) {
           this.ctx.log.warn(
             { dxid },
-            'SyncFilesInFolderOperation: File already exists in local database, but it is not HTTPS file. Recreating would crash the op.',
+            'SyncFilesInFolderOperation: File already exists in local database, '
+            + 'but it is not HTTPS file. Recreating would crash the op.',
           )
           return
         }

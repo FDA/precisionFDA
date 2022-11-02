@@ -2,7 +2,9 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { User, Folder, Job, UserFile, Asset } from '@pfda/https-apps-shared/src/domain'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import type { SyncFilesInFolderInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
+import type {
+  SyncFilesInFolderInput,
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
 import {
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
@@ -119,7 +121,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const file = create.filesHelper.create(
+    create.filesHelper.create(
       em,
       { user },
       {
@@ -207,7 +209,7 @@ describe('syncFilesInFolder operation', () => {
       { name: 'b', project, parentFolderId: folder.id },
     )
     await em.flush()
-    const file = create.filesHelper.create(
+    create.filesHelper.create(
       em,
       { user },
       {
@@ -292,7 +294,7 @@ describe('syncFilesInFolder operation', () => {
       { name: 'b', project, parentFolderId: folder.id },
     )
     await em.flush()
-    const file = create.filesHelper.create(
+    create.filesHelper.create(
       em,
       { user },
       {
@@ -466,6 +468,39 @@ describe('syncFilesInFolder operation', () => {
     // even though the file was returned from the api call
     expect(filesInDb.map(f => f.id)).to.have.members([remoteFile.id])
     expect(assetsInDb.map(f => f.id)).to.have.members([file.id])
+  })
+
+  it('does nothing when it finds file with given dxid regardless of project', async () => {
+    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    create.filesHelper.create(
+      em,
+      { user },
+      {
+        name: 'c',
+        project: 'different-project',
+        dxid: firstFileDxid,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+      },
+    )
+    await em.flush()
+    const op = new userFile.SyncFilesInFolderOperation({
+      em: database.orm().em.fork(),
+      log,
+      user: userCtx,
+    })
+    fakes.client.filesListFake
+      .onCall(0)
+      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 1), next: null })
+    const res = await op.execute(defaultInput)
+    // response shape
+    expect(Object.keys(res)).to.have.members(['folder', 'folderPath', 'files'])
+    expect(res.folderPath).to.equal('/a')
+
+    expect(fakes.client.filesListFake.calledOnce).to.be.true()
+    expect(fakes.client.filesDescFake.notCalled).to.be.true()
+    const nodesCount = await em.count(UserFile, {}, { filters: ['userfile'] })
+    expect(nodesCount).to.be.equal(1)
   })
 
   // todo: deletes file when folder is deleted
