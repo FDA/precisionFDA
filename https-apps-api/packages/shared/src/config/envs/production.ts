@@ -36,12 +36,11 @@ export const config: ConfigOverride = () => ({
   redis: {
     isSecure: true,
   },
-  // TODO(samuel) uncomment when ready for production deploy
-  // siteSettings: {
-  //   ssoButton: {
-  //     response: {
-  //       isEnabled: true,
-  //     },
-  //   },
-  // },
+  siteSettings: {
+    ssoButton: {
+      response: {
+        isEnabled: true,
+      },
+    },
+  },
 })

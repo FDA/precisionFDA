@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 /* eslint-disable max-len */
 // eslint-disable-next-line import/no-named-default
 import { default as dotenv } from 'dotenv'
@@ -131,11 +132,11 @@ const defaultConfig = {
       repeatPattern: '0 6 * * *',
     },
   },
-  // eslint-disable-next-line no-warning-comments
   // TODO(samuel) apply "satisfies" operator
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator
   siteSettings: {
     ssoButton: {
+      // TODO: Remove use of thse settings to configure middleware, these checks should just be hard-coded
       middleware: {
         shouldCheckFdaSubnet: true,
         shouldRequireUserSession: false,
@@ -148,6 +149,7 @@ const defaultConfig = {
       },
     },
     cdmh: {
+      // TODO: Remove use of thse settings to configure middleware, these checks should just be hard-coded
       middleware: {
         shouldCheckFdaSubnet: true,
         shouldRequireUserSession: true,
