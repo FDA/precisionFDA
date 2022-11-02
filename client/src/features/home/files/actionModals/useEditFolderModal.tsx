@@ -37,12 +37,13 @@ const EditFolderInfoForm = ({
     mutationFn: async (payload: { name: string; folderId: string }) => editFolderRequest(payload),
     onSuccess: (res) => {
       if(res?.error?.type) {
-        setError('name', {message: res.error.message, type: 'validate'})
+        // parsing the error from backend to human-readable message
+        setError('name', {message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate'})
         return
       }
       queryClient.invalidateQueries('files')
       handleClose()
-      toast.success('Success: Editing folder info.')
+      toast.success('Folder info changed.')
     },
     onError: () => {
       toast.error('Error: Editing folder info.')

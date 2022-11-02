@@ -12,6 +12,7 @@ const bpSuper = `@media(min-width: 1340px)`
 export const StyledHeaderLogo = styled(PFDALogoLight)`
   box-sizing: border-box;
   padding: 4px 0;
+  min-width: 143.98px;
 `
 
 export const LogoWrap = styled.div`
@@ -132,10 +133,6 @@ const linkCss = css`
   &:hover {
     background-color: ${theme.colors.textLightGrey};
   }
-`
-
-export const StyledLinkReactRoute = styled(Link)`
-  ${linkCss}
 `
 
 export const StyledLink = styled.a`

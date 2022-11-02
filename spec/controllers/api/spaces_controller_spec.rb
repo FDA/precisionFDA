@@ -293,191 +293,191 @@ RSpec.describe Api::SpacesController, type: :controller do
     end
   end
 
-  describe "POST accept" do
-    let(:space) do
-      create(:space, :group, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
-    end
+  # describe "POST accept" do
+  #   let(:space) do
+  #     create(:space, :group, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+  #   end
 
-    let(:guest_contribute_invite) do
-      {
-        invitee: space.guest_dxorg,
-        level: "CONTRIBUTE",
-        suppressEmailNotification: true,
-        suppressAllNotifications: true,
-      }
-    end
+  #   let(:guest_contribute_invite) do
+  #     {
+  #       invitee: space.guest_dxorg,
+  #       level: "CONTRIBUTE",
+  #       suppressEmailNotification: true,
+  #       suppressAllNotifications: true,
+  #     }
+  #   end
 
-    let(:host_contribute_invite) do
-      {
-        invitee: space.host_dxorg,
-        level: "CONTRIBUTE",
-        suppressEmailNotification: true,
-        suppressAllNotifications: true,
-      }
-    end
+  #   let(:host_contribute_invite) do
+  #     {
+  #       invitee: space.host_dxorg,
+  #       level: "CONTRIBUTE",
+  #       suppressEmailNotification: true,
+  #       suppressAllNotifications: true,
+  #     }
+  #   end
 
-    context "with host_admin" do
-      before do
-        authenticate!(host_lead)
-        post :accept, params: { id: space.id }
-        space.reload
-      end
+  #   context "with host_admin" do
+  #     before do
+  #       authenticate!(host_lead)
+  #       post :accept, params: { id: space.id }
+  #       space.reload
+  #     end
 
-      it "creates a dnanexus project" do
-        expect(space.host_project).to be_present
+  #     it "creates a dnanexus project" do
+  #       expect(space.host_project).to be_present
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
-          with(
-            body: {
-              name: "precisionfda-space-#{space.id}-HOST",
-              billTo: host_lead.billto,
-            },
-          )
-      end
+  #       expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+  #         with(
+  #           body: {
+  #             name: "precisionfda-space-#{space.id}-HOST",
+  #             billTo: host_lead.billto,
+  #           },
+  #         )
+  #     end
 
-      it "invites hosts" do
-        expect(WebMock).to have_requested(
-          :post,
-          "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite",
-        ).with(body: host_contribute_invite)
+  #     it "invites hosts" do
+  #       expect(WebMock).to have_requested(
+  #         :post,
+  #         "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite",
+  #       ).with(body: host_contribute_invite)
 
-        expect(WebMock).to have_requested(
-          :post,
-          "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite",
-        ).with(body: guest_contribute_invite)
-      end
+  #       expect(WebMock).to have_requested(
+  #         :post,
+  #         "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite",
+  #       ).with(body: guest_contribute_invite)
+  #     end
 
-      context "when review space" do
-        let(:space) do
-          create(:space, :review, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
-        end
+  #     context "when review space" do
+  #       let(:space) do
+  #         create(:space, :review, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+  #       end
 
-        it "adds user to the membership" do
-          expect(WebMock).not_to have_requested(:any, /.*/)
+  #       it "adds user to the membership" do
+  #         expect(WebMock).not_to have_requested(:any, /.*/)
 
-          private_space = space.confidential_spaces.reviewer.first
-          expect(private_space.space_memberships.count).to eq(1)
-        end
-      end
-    end
+  #         private_space = space.confidential_spaces.reviewer.first
+  #         expect(private_space.space_memberships.count).to eq(1)
+  #       end
+  #     end
+  #   end
 
-    context "with guest_admin" do
-      before do
-        authenticate!(guest_lead)
-        post :accept, params: { id: space.id }
+  #   context "with guest_admin" do
+  #     before do
+  #       authenticate!(guest_lead)
+  #       post :accept, params: { id: space.id }
 
-        space.reload
-      end
+  #       space.reload
+  #     end
 
-      it "creates a dnanexus project" do
-        expect(space.guest_project).to be_present
+  #     it "creates a dnanexus project" do
+  #       expect(space.guest_project).to be_present
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
-          with(
-            body: {
-              name: "precisionfda-space-#{space.id}-GUEST",
-              billTo: guest_lead.billto,
-            },
-          )
-      end
+  #       expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+  #         with(
+  #           body: {
+  #             name: "precisionfda-space-#{space.id}-GUEST",
+  #             billTo: guest_lead.billto,
+  #           },
+  #         )
+  #     end
 
-      it "invites guests" do
-        expect(WebMock).to(
-          have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
-          ).with(body: guest_contribute_invite),
-        )
+  #     it "invites guests" do
+  #       expect(WebMock).to(
+  #         have_requested(
+  #           :post,
+  #           "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+  #         ).with(body: guest_contribute_invite),
+  #       )
 
-        expect(WebMock).to(
-          have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
-          ).with(body: host_contribute_invite),
-        )
-      end
+  #       expect(WebMock).to(
+  #         have_requested(
+  #           :post,
+  #           "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+  #         ).with(body: host_contribute_invite),
+  #       )
+  #     end
 
-      context "when review space" do
-        before do
-          post :accept, params: { id: space.id }
+  #     context "when review space" do
+  #       before do
+  #         post :accept, params: { id: space.id }
 
-          space.reload
-        end
+  #         space.reload
+  #       end
 
-        let(:space) do
-          create(:space, :review, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
-        end
+  #       let(:space) do
+  #         create(:space, :review, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+  #       end
 
-        it "creates a dnanexus project" do
-          expect(space.guest_project).to be_present
+  #       it "creates a dnanexus project" do
+  #         expect(space.guest_project).to be_present
 
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
-            with(
-              body: {
-                name: "precisionfda-space-#{space.id}-GUEST",
-                billTo: guest_lead.billto,
-              },
-            )
-        end
+  #         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+  #           with(
+  #             body: {
+  #               name: "precisionfda-space-#{space.id}-GUEST",
+  #               billTo: guest_lead.billto,
+  #             },
+  #           )
+  #       end
 
-        it "invites guests" do
-          expect(WebMock).to have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
-          ).with(body: guest_contribute_invite)
+  #       it "invites guests" do
+  #         expect(WebMock).to have_requested(
+  #           :post,
+  #           "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+  #         ).with(body: guest_contribute_invite)
 
-          expect(WebMock).to have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
-          ).with(body: host_contribute_invite)
-        end
-      end
+  #         expect(WebMock).to have_requested(
+  #           :post,
+  #           "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+  #         ).with(body: host_contribute_invite)
+  #       end
+  #     end
 
-      context "when private review space" do
-        before do
-          post :accept, params: { id: space.id }
+  #     context "when private review space" do
+  #       before do
+  #         post :accept, params: { id: space.id }
 
-          space.reload
-        end
+  #         space.reload
+  #       end
 
-        let(:space) do
-          create(:space, :review, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
-        end
-        let(:private_space) { space.confidential_spaces.sponsor.first }
+  #       let(:space) do
+  #         create(:space, :review, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+  #       end
+  #       let(:private_space) { space.confidential_spaces.sponsor.first }
 
-        it "creates a dnanexus project" do
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
-            with(
-              body: {
-                name: "precisionfda-space-#{private_space.id}-GUEST-PRIVATE",
-                billTo: guest_lead.billto,
-              },
-            )
-          expect(private_space.guest_project).to be_present
-          expect(private_space.guest_dxorg).to be_present
-        end
+  #       it "creates a dnanexus project" do
+  #         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+  #           with(
+  #             body: {
+  #               name: "precisionfda-space-#{private_space.id}-GUEST-PRIVATE",
+  #               billTo: guest_lead.billto,
+  #             },
+  #           )
+  #         expect(private_space.guest_project).to be_present
+  #         expect(private_space.guest_dxorg).to be_present
+  #       end
 
-        it "invites a guest" do
-          call_string = "project-precisionfda-space-#{private_space.id}-GUEST-PRIVATE/invite"
-          expect(WebMock).to have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}#{call_string}",
-          ).with(
-            body: {
-              invitee: private_space.guest_dxorg,
-              level: "CONTRIBUTE",
-              suppressEmailNotification: true,
-              suppressAllNotifications: true,
-            },
-          )
-        end
+  #       it "invites a guest" do
+  #         call_string = "project-precisionfda-space-#{private_space.id}-GUEST-PRIVATE/invite"
+  #         expect(WebMock).to have_requested(
+  #           :post,
+  #           "#{DNANEXUS_APISERVER_URI}#{call_string}",
+  #         ).with(
+  #           body: {
+  #             invitee: private_space.guest_dxorg,
+  #             level: "CONTRIBUTE",
+  #             suppressEmailNotification: true,
+  #             suppressAllNotifications: true,
+  #           },
+  #         )
+  #       end
 
-        it "creates a membership" do
-          expect(private_space.space_memberships.count).to eq(1)
-        end
-      end
-    end
-  end
+  #       it "creates a membership" do
+  #         expect(private_space.space_memberships.count).to eq(1)
+  #       end
+  #     end
+  #   end
+  # end
 
   describe "jobs" do
     let(:space) do

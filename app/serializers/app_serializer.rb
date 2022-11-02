@@ -88,6 +88,11 @@ class AppSerializer < ApplicationSerializer
 
     # rubocop:disable Metrics/BlockLength
     {}.tap do |links|
+      user_role = if object.in_space?
+        object.space_object.space_memberships.active.find_by(user: current_user.id).role
+      else
+        "can_run"
+      end
       links[:show] = app_path(object)
       links[:user] = user_path(added_by)
       links[:space] = space_path if object.in_space?
@@ -110,12 +115,12 @@ class AppSerializer < ApplicationSerializer
         links[:attach_to] = api_attach_to_notes_path
         unless object.in_space? && member_viewer?
           # PUT /api/workflows/delete soft delete
-          links[:delete] = delete_api_apps_path
+          links[:delete] = delete_api_apps_path if user_role != "viewer"
           # edit a single app TODO: create update in api/apps_controller
-          links[:edit] = edit_app_path(object)
+          links[:edit] = edit_app_path(object) if user_role != "viewer"
         end
         links[:edit_tags] = api_set_tags_path if
-          object.owned_by_user?(current_user) && !member_viewer?
+          object.owned_by_user?(current_user)
 
         # POST set app as challenge App
         links[:assign_app] = api_assign_app_path
@@ -124,12 +129,11 @@ class AppSerializer < ApplicationSerializer
       end
 
       if can_run? && !object.in_locked_space?
-        unless member_viewer?
-          # app single run
-          links[:run_job] = new_app_job_path(object.uid)
-          # GET app batch run
-          links[:batch_run] = batch_app_app_path(object.uid)
-        end
+        # app single run
+        links[:run_job] = new_app_job_path(object.uid) if user_role != "viewer"
+        # links[:run_job] = null
+        # GET app batch run
+        links[:batch_run] = batch_app_app_path(object.uid) if user_role != "viewer"
       end
       unless object.in_space?
         # app single run

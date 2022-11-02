@@ -3,6 +3,7 @@ import { wrap } from '@mikro-orm/core'
 import { config } from '../config'
 import { entities } from '../domain'
 import * as generate from './generate'
+import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
 
 const userHelper = {
   create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
@@ -27,6 +28,26 @@ const userHelper = {
       email: `${config.platform.adminUser}@dnanexus.com`,
     })
   },
+
+  createRSA: (em: EntityManager) => {
+    const user = userHelper.create(em)
+    const adminGroup = adminGroupHelper.createReviewSpaceAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, {em})
+    em.persist(adminMembership)
+    return user
+  }
+}
+
+const adminGroupHelper = {
+  createReviewSpaceAdminGroup: (
+    em: EntityManager
+  ) => {
+    const RSAGroup = wrap(new entities.AdminGroup()).assign({
+      role: ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN,
+    })
+    em.persist(RSAGroup)
+    return RSAGroup
+  }
 }
 
 const dbClusterHelper = {

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
@@ -14,7 +15,7 @@ const AboutPage = () => {
     <PublicLayout>
       <NavigationBar title={title} user={user} />
 
-        <Tabs>
+        <Tabs style={{ overflow: 'initial' }}>
         <div className="container-fluid">
           <TabList className="nav nav-tabs nav-tabs-padded nav-tabs-lg nav-justified">
             <Tab selectedClassName="active">
@@ -36,10 +37,10 @@ const AboutPage = () => {
               </a>
             </Tab>
             <Tab selectedClassName="active">
-              <a href="/docs">
+              <Link to="/docs" data-turbolinks="false">
                 <span className="tab-label">How?</span>
                 <span className="tab-help">Learn how to use the features</span>
-              </a>
+              </Link>
             </Tab>
           </TabList>
           </div>

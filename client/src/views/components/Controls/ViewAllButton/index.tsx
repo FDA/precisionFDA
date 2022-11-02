@@ -22,7 +22,7 @@ class ViewAllButton extends Component<IViewAllButtonProps> {
     const { url, title } = this.props
     return (
       <StyledViewAllButtonContainer>
-        <Link to={url}>{title}</Link>
+        <Link data-turbolinks="false" to={url}>{title}</Link>
       </StyledViewAllButtonContainer>
     )
   }

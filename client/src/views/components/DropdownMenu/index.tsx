@@ -27,7 +27,7 @@ export const Item = ({ option }: {option: IItemOption}) => {
   if (link && !isDisabled) {
     return (
       <StyledItem>
-        <a style={{ padding: 0 }} href={link} data-method={method}>
+        <a style={{ padding: 0 }} data-turbolinks="false" href={link} data-method={method}>
           {icon && <Icon icon={icon} />}&nbsp;
           {text}
         </a>

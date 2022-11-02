@@ -19,10 +19,23 @@ module DXClient
                         "associated with the app"
 
         if e.message.include?(charges_error)
-          raise DXClient::Errors::ChargesMismatchError,
-                "You can't create a new revision from this app because the last revision was " \
-                "created from the different organization that is responsible for charges. " \
-                "Please create a fork instead."
+          # currently the only way to change billTo for new version in app series
+          # is to create the app with previous billTo and update with new billTo
+          # https://github.com/dnanexus/file-apps/blob/master/docs/App-Publishing-Checklist.md#how-to-update-apps-billto
+
+          parsed = e.message.scan(/\(([^()]*)\)/).flatten
+          current_bill_to = parsed[0].to_s
+          previous_bill_to = parsed[1].to_s
+
+          Rails.logger.info("Attempt to create app with billTo #{current_bill_to} failed, " \
+                            "because previous version was created with billTo #{previous_bill_to}")
+          Rails.logger.info("Creating new version with #{previous_bill_to} and updating billTo to #{current_bill_to}")
+
+          opts[:billTo] = previous_bill_to
+          res = call("app", "new", opts)
+
+          call(res["id"], "update", { billTo: current_bill_to })
+          return res
         end
 
         raise

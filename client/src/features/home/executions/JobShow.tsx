@@ -237,6 +237,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
                 <ButtonSolidBlue
                   as="a"
                   target="_blank"
+                  data-turbolinks="false"
                   href={execution.links.open_external}
                 >
                   Open Workstation
@@ -249,6 +250,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
               )}
               <ButtonSolidBlue
                 as="a"
+                data-turbolinks="false"
                 href={`/apps/${execution.links.app?.replace(
                   '/apps/',
                   '',
@@ -269,6 +271,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
                 {execution.scope.includes('space-') ? (
                   <a
                     target="_blank"
+                    data-turbolinks="false"
                     href={`/spaces/${execution.scope.replace(
                       'space-',
                       '',

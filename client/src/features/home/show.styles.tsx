@@ -1,13 +1,13 @@
-import React from "react"
-import styled from "styled-components"
-import { ButtonSolidBlue } from "../../components/Button"
-import { ArrowIcon } from "../../components/icons/ArrowIcon"
-import { Loader } from "../../components/Loader"
-import { colors } from "../../styles/theme"
+import React from 'react'
+import styled, { css } from 'styled-components'
+import { ButtonSolidBlue } from '../../components/Button'
+import { ArrowIcon } from '../../components/icons/ArrowIcon'
+import { Loader } from '../../components/Loader'
+import { colors, theme } from '../../styles/theme'
 
 export const MetadataSection = styled.div`
-  border-top: 1px solid #DDDDDD;
-  border-bottom: 1px solid #DDDDDD;
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
   padding: 10px 15px;
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@ export const MetadataKey = styled.div`
   line-height: 20px;
 `
 export const MetadataVal = styled.div`
-  color: #52698F;
+  color: #52698f;
   font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
@@ -47,9 +47,7 @@ export const NotFound = styled.div`
   gap: 1rem;
 `
 
-export const ResourceTitle = styled.h1`
-
-`
+export const ResourceTitle = styled.h1``
 export const HeaderRight = styled.div`
   padding: 16px;
 `
@@ -69,6 +67,14 @@ export const Topbox = styled.div`
 export const HeaderButton = styled(ButtonSolidBlue)`
   max-height: 34px;
   box-sizing: border-box;
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      background-color: ${theme.colors.lightBlue};
+      border-color: ${theme.colors.lightBlue};
+      cursor: not-allowed;
+      pointer-events: none;
+    `}
 `
 
 export const Title = styled.div`

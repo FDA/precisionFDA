@@ -33,7 +33,7 @@ function formatMutationErrors(
   return undefined
 }
 
-export const EditChallengePage = () => {
+const EditChallengePage = () => {
   const history = useHistory()
   const user = useAuthUser()
   const queryClient = useQueryClient()
@@ -132,3 +132,5 @@ export const EditChallengePage = () => {
     </UserLayout>
   )
 }
+
+export default EditChallengePage

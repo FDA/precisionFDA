@@ -1,6 +1,6 @@
 import { ConfigOverride } from '..'
 
-export const config: ConfigOverride = {
+export const config: ConfigOverride = () => ({
   // NOTE(samuel) copied from "staging.ts" configuration, so to avoid breaking changes, left unchanged
   appName: 'https-apps-worker-stg',
   api: {
@@ -20,10 +20,21 @@ export const config: ConfigOverride = {
       default: { name: 'https-apps-worker-queue-stg' },
       fileSync: { name: 'https-apps-worker-fileSync-queue-stg' },
       emails: { name: 'https-apps-worker-emails-queue-stg' },
+      maintenance: {
+        onInit: {
+          shouldAddCheckNonterminatedClusters: false,
+        },
+      },
     },
   },
   redis: {
     isSecure: true,
   },
-  shouldAddCheckNonterminatedClustersOnInit: false,
-}
+  siteSettings: {
+    ssoButton: {
+      response: {
+        isEnabled: true,
+      },
+    },
+  },
+})

@@ -322,12 +322,23 @@ const space = {
     name: chance.word(),
     state: 1, // ACTIVE,
     type: 1, // review type
+    guestDxOrg: `org-pfda..space_guest_${random.dxstr()}`,
+    hostDxOrg: `org-pfda..space_host_${random.dxstr()}`,
+    spaceId: null as any,
+    hostProject: null as any,
+    guestProject: null as any,
+
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
     name: chance.word(),
     state: 1,
     type: 0, // GROUP type
+    spaceId: null as any,
+    hostProject: null as any,
+    guestProject: null as any,
   }),
+  // represents space on platform
+  projectId: () => `project-j47b1k3z8Jqqv001213v312j1`
 }
 
 const spaceMembership = {
@@ -401,7 +412,7 @@ const dbCluster = {
     scope: STATIC_SCOPE.PRIVATE,
     dxInstanceClass: 'db_std1_x2',
     engine: ENGINES.MYSQL,
-    engineVersion: '5.7.12',
+    engineVersion: '5.7.mysql_aurora.2.07.8',
     adminPassword: random.password(),
   }),
 }

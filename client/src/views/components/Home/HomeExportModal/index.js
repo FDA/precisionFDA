@@ -26,7 +26,7 @@ const getConfirmationMessage = (title) => {
 const HomeExportModal = ({ isOpen, hideAction, isLoading, options, title }) => {
   const actionList = options.map((e) => {
     return (
-      <li data-turbolinks='false' key={e.label} className='home-export-modal__item'>
+      <li data-turbolinks="false" key={e.label} className='home-export-modal__item'>
         <a href={e.link} data-confirm={e.value && getConfirmationMessage(e.value)} data-method={e.isPost && 'post'}>{e.label}</a>
       </li>
     )

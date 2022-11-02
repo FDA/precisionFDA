@@ -17,9 +17,10 @@ module Api
     # @return workflows [App] Array of workflows objects if they exist OR workflows: [].
     # rubocop:disable Metrics/MethodLength
     def index
+      filters = params[:filters]
+
       if params[:space_id]
         workflows = []
-        filters = params[:filters]
 
         if find_user_space
           workflows = @space.latest_revision_workflows.unremoved.

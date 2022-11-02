@@ -130,6 +130,12 @@ class HttpsAppsClient
     )
   end
 
+  # ┌──────────────────────────┐
+  # │                          │
+  # │  admin/users/ endpoints  │
+  # │                          │
+  # └──────────────────────────┘
+
   def users_list(page, per_page, order_by, order_dir, filters)
     pagination_args = {}
     pagination_args[:page] = page if page
@@ -249,9 +255,69 @@ class HttpsAppsClient
     )
   end
 
+  # ┌──────────┐
+  # │          │
+  # │  spaces  │
+  # │          │
+  # └──────────┘
+
+  def accept_space(id)
+    request(
+      "/spaces/#{id}/accept",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  def unlock_space(id)
+    request(
+      "/spaces/#{id}/unlock",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  def lock_space(id)
+    request(
+      "/spaces/#{id}/lock",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  # ┌─────────────────────────┐
+  # │                         │
+  # │ site-settings endpoints │
+  # │                         │
+  # └─────────────────────────┘
+
+  def site_settings_sso_button(incoming_ip = nil)
+    request_headers = {}
+    request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
+    request(
+      "/site-settings/ssoButton",
+      {},
+      Net::HTTP::Get::METHOD,
+      {},
+      request_headers,
+    )
+  end
+
+  def site_settings_cdmh(incoming_ip = nil)
+    request_headers = {}
+    request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
+    request(
+      "/site-settings/cdmh",
+      {},
+      Net::HTTP::Get::METHOD,
+      {},
+      request_headers,
+    )
+  end
+
   private
 
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {})
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {}, additional_headers = {})
     query = auth_query.merge(additional_query).to_query
     uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{query}")
     use_ssl = uri.scheme == "https"
@@ -260,7 +326,7 @@ class HttpsAppsClient
     conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if use_ssl
 
     Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
-      handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers))
+      handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers.merge(additional_headers)))
     end
   rescue Errno::ECONNREFUSED
     raise Error, "Can't connect to nodejs-api service"

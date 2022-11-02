@@ -6,10 +6,10 @@ import { Link, useLocation } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
+import { PageContainerMargin } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
   ButtonRow,
-  Container,
   Content,
   ItemBody,
   ItemButton,
@@ -81,7 +81,7 @@ export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
   }}
 `
 
-export const ChallengesList = () => {
+const ChallengesList = () => {
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
@@ -136,7 +136,7 @@ export const ChallengesList = () => {
         subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."
         user={user}
       />
-      <Container>
+      <PageContainerMargin>
         <PageRow>
           {isLoading ? (
             <NewsLoaderWrapper>
@@ -178,7 +178,7 @@ export const ChallengesList = () => {
                       </DateArea>
                       <Content>{n.description}</Content>
                       <div>
-                        <ViewDetailsButton as={Link} to={`/challenges/${n.id}`}>
+                        <ViewDetailsButton as={Link} to={`/challenges/${n.id}`} data-turbolinks="false">
                           View Details &rarr;
                         </ViewDetailsButton>
                       </div>
@@ -190,7 +190,7 @@ export const ChallengesList = () => {
                   page={data?.meta?.current_page}
                   totalCount={data?.meta?.total_count}
                   totalPages={data?.meta?.total_pages}
-                  hide={hidePagination(
+                  isHidden={hidePagination(
                     isFetched,
                     data?.challenges?.length,
                     data?.meta?.total_pages,
@@ -207,7 +207,7 @@ export const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as={Link} to="/challenges/create">
+                  <ButtonSolidBlue as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
                   </ButtonSolidBlue>
                 </ButtonRow>
@@ -216,10 +216,11 @@ export const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Filter Challenges</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!time_status}>
+                <ItemButton as={Link} to="/challenges" selected={!time_status} data-turbolinks="false">
                   All
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=current"
                   selected={time_status === 'current'}
@@ -227,6 +228,7 @@ export const ChallengesList = () => {
                   Currently Open
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=upcoming"
                   selected={time_status === 'upcoming'}
@@ -234,6 +236,7 @@ export const ChallengesList = () => {
                   Upcoming
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=ended"
                   selected={time_status === 'ended'}
@@ -245,7 +248,7 @@ export const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Previous Challenges</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!year}>
+                <ItemButton as={Link} to="/challenges" selected={!year} data-turbolinks="false">
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
@@ -253,6 +256,7 @@ export const ChallengesList = () => {
                     ?.map(y => y.toString())
                     .map(y => (
                       <ItemButton
+                        data-turbolinks="false"
                         as={Link}
                         to={`/challenges?year=${y}`}
                         key={y}
@@ -266,7 +270,7 @@ export const ChallengesList = () => {
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Other Challenges</SectionTitle>
-              <a href="/challenges/app-a-thon-in-a-box">
+              <a href="/challenges/app-a-thon-in-a-box" data-turbolinks="false">
                 App-a-thon in a Box &rarr;
               </a>
             </RightSideItem>
@@ -277,11 +281,13 @@ export const ChallengesList = () => {
                 any combination of the above that you would like to put in front
                 of the precisionFDA expert community.
               </div>
-              <Link to="/challenges/propose">Propose a Challenge &rarr;</Link>
+              <Link data-turbolinks="false" to="/challenges/propose">Propose a Challenge &rarr;</Link>
             </RightSideItem>
           </RightSide>
         </PageRow>
-      </Container>
+      </PageContainerMargin>
     </PublicLayout>
   )
 }
+
+export default ChallengesList
