@@ -1,8 +1,9 @@
 import { Collection, Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
-import { SPACE_TYPE } from './space.enum'
+import { SPACE_TYPE, SPACE_STATE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
+
 @Entity({ tableName: 'spaces' })
 export class Space extends BaseEntity {
   @PrimaryKey()
@@ -12,19 +13,31 @@ export class Space extends BaseEntity {
   name: string
 
   @Property()
-  title: string
+  description: string
 
-  @Property({ fieldName: 'host_dxorg'})
+  @Property({ fieldName: 'host_dxorg' })
   hostDxOrg: string
 
-  @Property({ fieldName: 'guest_dxorg'})
+  @Property({ fieldName: 'guest_dxorg' })
   guestDxOrg: string
 
+  @Property({ fieldName: 'host_project',nullable: true })
+  hostProject: string
+
+  @Property({ fieldName: 'guest_project', nullable: true })
+  guestProject: string
+
   @Property()
-  state: number
+  state: SPACE_STATE
 
   @Property({ fieldName: 'space_type' })
   type: SPACE_TYPE
+
+  @Property({fieldName: 'space_id',nullable: true })
+  spaceId: number
+
+  @Property()
+  meta: string
 
   @ManyToMany(() => SpaceMembership, 'spaces', {
     pivotTable: 'space_memberships_spaces',
@@ -35,5 +48,17 @@ export class Space extends BaseEntity {
   @Property({ persist: false })
   get uid(): string {
     return getScopeFromSpaceId(this.id)
+  }
+
+  isConfidential(): boolean {
+    return this.spaceId !== null
+  }
+
+  isConfidentialReviewerSpace() {
+    return this.isConfidential() && this.hostDxOrg !== null
+  }
+
+  isConfidentialSponsorSpace() {
+    return this.isConfidential() && this.guestDxOrg !== null
   }
 }

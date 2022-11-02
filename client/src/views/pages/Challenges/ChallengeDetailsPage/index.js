@@ -229,7 +229,7 @@ class ChallengeDetailsPage extends React.Component {
                 <button className={joinChallengeButtonClasses} onClick={() => { if (userCanJoin) { this.handleJoinChallenge() } }}>{joinChallengeButtonTitle}</button>
             }
             {userCanSubmitEntry && (
-              <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} href={challenge.links.new_submission}>Submit Challenge Entry</a>
+              <a className="btn btn-primary btn-block" style={{ marginTop: '12px' }} data-turbolinks="false" href={challenge.links.new_submission}>Submit Challenge Entry</a>
             )}
             {currentTab && (
             <>
@@ -239,8 +239,8 @@ class ChallengeDetailsPage extends React.Component {
             )}
             {challenge.canEdit && (
             <div className="btn-group" style={{ marginTop: '24px', width: '100%' }}>
-              <a className="btn btn-default btn-block" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
-              <a className="btn btn-default btn-block" href={`/challenges/${challenge.id}/editor`} data-no-turbolink="true"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+              <a className="btn btn-default btn-block" data-turbolinks="false" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
+              <a className="btn btn-default btn-block" data-turbolinks="false" href={`/challenges/${challenge.id}/editor`}><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
             </div>
             )}
           </PageRightColumn>

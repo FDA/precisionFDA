@@ -36,8 +36,7 @@ SecureHeaders::Configuration.default do |config|
     ),
     img_src: %w(* data:),
     media_src: %w('self'),
-    object_src: %w('self'),
-    plugin_types: %w(application/x-shockwave-flash application/pdf),
+    object_src: %w('none'),
     script_src: %w(
       'self'
       'unsafe-inline'

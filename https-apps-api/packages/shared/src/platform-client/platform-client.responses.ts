@@ -60,6 +60,17 @@ type FindSpaceMembersReponse = {
   results: PlatformMember[]
 }
 
+type UserInviteToOrgResponse = {
+  id: string
+  state: string
+}
+
+type UserRemoveFromOrgResponse = {
+  id: string
+  projects: AnyObject[] // key:value pairs
+  apps: AnyObject[] // key:value pairs
+}
+
 type DescribeFoldersResponse = {
   id: string
   folders: string[]
@@ -104,4 +115,6 @@ export {
   ListFilesResponse,
   FindSpaceMembersReponse,
   PlatformMember,
+  UserInviteToOrgResponse,
+  UserRemoveFromOrgResponse,
 }

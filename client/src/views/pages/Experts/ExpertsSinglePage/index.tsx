@@ -48,11 +48,11 @@ const StyledNavigationBar = styled.div`
 `
 const StyledSocialMediaButtons = styled.div`
   margin-top: 100px;
-  margin-right: 2%
+  margin-right: 2%;
 `
 
 const BackToModulePage = styled(Link)`
-  color: ${colors.blueOnBlack} !important
+  color: ${colors.blueOnBlack} !important;
 `
 
 const ExpertsSingleDetailsPage = () => {
@@ -253,6 +253,7 @@ const ExpertsSingleDetailsPage = () => {
                   <a
                     className="btn btn-default btn-block"
                     href={`/experts/${expert?.id}/edit`}
+                    data-turbolinks="false"
                   >
                     Edit Expert Info
                   </a>

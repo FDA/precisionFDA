@@ -35,6 +35,15 @@ export const PageContainer = styled.div`
   margin-right: auto;
 `
 
+export const PageContainerMargin = styled.div`
+  margin-inline: auto;
+  width: min(100% - 32px, 1330px);
+
+  @media(min-width: 1045px) {
+    width: min(100% - 64px, 1330px);
+  }
+`
+
 export const PageTitle = styled.h1`
   ${commonStyles.pageTitle};
   color: ${colors.textBlack};

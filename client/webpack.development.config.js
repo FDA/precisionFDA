@@ -135,7 +135,19 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/docs': {
+      '/experts/*/edit': {
+        target: TARGET,
+        secure: false,
+      },
+      '/experts/*/qa': {
+        target: TARGET,
+        secure: false,
+      },
+      '/challenges/*/editor/*': {
+        target: TARGET,
+        secure: false,
+      },
+      '/publish': {
         target: TARGET,
         secure: false,
       },

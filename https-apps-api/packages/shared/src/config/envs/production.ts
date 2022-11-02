@@ -1,11 +1,15 @@
+import { parseIpv4Cidr } from '../../validation/parsers'
 import { ConfigOverride } from '..'
 import { MAX_JOB_DURATION_MINUTES } from '../constants'
 
-export const config: ConfigOverride = {
+export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-prod',
   api: {
     railsHost: process.env.HOST,
     allowErrorTestingRoutes: false,
+    fdaSubnet: {
+      allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
+    },
   },
   logs: {
     pretty: false,
@@ -15,9 +19,7 @@ export const config: ConfigOverride = {
   workerJobs: {
     syncJob: {
       repeatPattern: '*/2 * * * *', // Every 2 minutes
-      // Until PFDA-2431 is fixed, we prevent job termination warnings email from being sent out
-      staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*30, // 30 days
-      // staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*29, // 29 days
+      staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*29, // 29 days
       staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
     },
     queues: {
@@ -34,4 +36,11 @@ export const config: ConfigOverride = {
   redis: {
     isSecure: true,
   },
-}
+  siteSettings: {
+    ssoButton: {
+      response: {
+        isEnabled: true,
+      },
+    },
+  },
+})

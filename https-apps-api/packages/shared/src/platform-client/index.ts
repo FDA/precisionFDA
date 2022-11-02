@@ -9,9 +9,11 @@ import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 import { OrgMembershipError } from '../errors'
 import { BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, FindSpaceMembersParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, ListFilesParams, MoveFilesParams, RemoveFolderParams, RenameFolderParams, UserResetMfaParams, UserUnlockParams } from './platform-client.params'
+  JobCreateParams, JobDescribeParams, JobTerminateParams, ListFilesParams, MoveFilesParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams } from './platform-client.params'
 import { JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, ListFilesResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
- DescribeFilesResponse, FindSpaceMembersReponse } from './platform-client.responses'
+ DescribeFilesResponse, FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse } from './platform-client.responses'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -131,6 +133,46 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {},
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+  // Invites user to provided organization.
+  //  @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+  async inviteUserToOrganization(params: UserInviteToOrgParams): Promise<UserInviteToOrgResponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/invite`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+      headers: this.setupHeaders(params),
+    }
+    try {
+      this.logClientRequest(options, url)
+      const res = await axios.request(options)
+      return res.data
+    } catch (err) {
+      this.logClientFailed(options)
+      return this.handleFailed(err)
+    }
+  }
+
+   // Removes user from provided organization. Also revokes access to projects & apps associated with org.
+  //  @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+  async removeUserFromOrganization(params: UserRemoveFromOrgParams): Promise<UserRemoveFromOrgResponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/removeMember`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
       url,
       headers: this.setupHeaders(params),
     }
@@ -374,6 +416,67 @@ class PlatformClient {
       return this.handleFailed(err)
     }
   }
+
+    /**
+   * Creates a new project
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
+   * @param {string} name - OPTIONAL - overrides new project name.
+   * @param {Space} space - used for project name, can be overriden by name param.
+   * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
+   */
+     async projectCreate(params): Promise<ClassIdResponse> {
+      const url = `${config.platform.apiUrl}/project/new`
+      const options: AxiosRequestConfig = {
+        method: 'POST',
+        data: {
+          name: params.name ?? `precisionfda-${params.space.uid}-${SPACE_MEMBERSHIP_SIDE[params.admin.side]}`,
+          billTo: params.admin.user.getEntity().organization.getEntity().getDxOrg(),
+        },
+        url,
+        headers: this.setupHeaders(params),
+      }
+
+      try {
+        this.logClientRequest(options, url)
+        const res = await axios.request(options)
+        return res.data
+      } catch (err) {
+        this.logClientFailed(options)
+        return this.handleFailed(err)
+      }
+    }
+
+    /**
+     * Invite org or user in project.
+     *  @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-invite
+     *  @param {string} invitee - OrgDxID, UserID or user's email.
+     *  @param {string} level - Permission level.
+     *  @return [don't know yet]
+    */
+    async projectInvite(params): Promise<any> {
+      const url = `${config.platform.apiUrl}/${params.projectDxid}/invite`
+      const options: AxiosRequestConfig = {
+        method: 'POST',
+        data: {
+          invitee: params.invitee,
+          level: params.level,
+          // might add to params later for optional configuration
+          suppressEmailNotification: true,
+          suppressAllNotifications: true,
+        },
+        url,
+        headers: this.setupHeaders(params),
+      }
+
+      try {
+        this.logClientRequest(options, url)
+        const res = await axios.request(options)
+        return res.data
+      } catch (err) {
+        this.logClientFailed(options)
+        return this.handleFailed(err)
+      }
+    }
 
   private logClientRequest(options: AxiosRequestConfig, url: string): void {
     const sanitized = maskAuthHeader(options.headers)

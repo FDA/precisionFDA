@@ -17,11 +17,11 @@ class RequestAccessService
     end
 
     def send_invitation_email(invitation)
-      NotificationsMailer.invitation_email(invitation).deliver_now!
+      NotificationsMailer.invitation_email(invitation).deliver_later!
     end
 
     def send_guest_access_email(invitation)
-      NotificationsMailer.guest_access_email(invitation).deliver_now!
+      NotificationsMailer.guest_access_email(invitation).deliver_later!
     end
 
     # Creates an invitation for site access.

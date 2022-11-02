@@ -60,12 +60,13 @@ const LinkAction: React.FC<{
       ? (
         <CloudResourcesConditionalAnchor
           href={url}
+          data-turbolinks="false"
           dataMethod={method}
           conditionType={cloudResourcesConditionType}
         >
           {children}
         </CloudResourcesConditionalAnchor>
-      ) : <a href={url} data-method={method}>{children}</a>
+      ) : <a data-turbolinks="false" href={url} data-method={method}>{children}</a>
   )
 }
 

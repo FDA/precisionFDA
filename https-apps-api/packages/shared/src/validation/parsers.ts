@@ -29,7 +29,7 @@ export const parseEnumValueFromString = <T extends Exclude<string, ''>>(
 
 export const parseNumberFromString = (value: string | undefined, errorFormatter?: (value: string) => string) => {
   const nonEmptyValue = parseNonEmptyString(value)
-  const numericValue = parseInt(nonEmptyValue, 10);
+  const numericValue = parseInt(nonEmptyValue, 10)
   if (Number.isNaN(numericValue)) {
     const errorMsg = errorFormatter?.(nonEmptyValue) ?? `Value expected to be number, got ${nonEmptyValue}`
     throw new errors.ValidationError(errorMsg)
@@ -37,12 +37,24 @@ export const parseNumberFromString = (value: string | undefined, errorFormatter?
   return numericValue
 }
 
-export const parseRegexFilterFromString = (value: string | undefined) => {
-  const nonEmptyValue = parseNonEmptyString(value)
-  return new RegExp(`.*${nonEmptyValue}.*`, 'u');
+export const parseBoundedNumberFromString = (
+  lowerBound: number,
+  upperBound: number,
+) => (
+  value: string | undefined,
+  errorFormatter?: (value: string) => string
+) => {
+  const numericValue = parseNumberFromString(value, errorFormatter)
+  if (numericValue < lowerBound) {
+    throw new errors.ValidationError(`Expected value greater than ${lowerBound}, got ${value}`)
+  }
+  if (numericValue > upperBound) {
+    throw new errors.ValidationError(`Expected value lesser than ${upperBound}, got ${value}`)
+  }
+  return numericValue
 }
 
-export const wrapMaybeNull = <T>(wrappedParser: (value: string | undefined) => T) => (value: string | undefined) =>
+export const wrapMaybeUndefined = <T>(wrappedParser: (value: string | undefined) => T) => (value: string | undefined) =>
   value !== undefined ? wrappedParser(value) : null
 
 export const wrapMaybeEmpty = <T>(wrappedParser: (value: string | undefined) => T) => (value: string | undefined) =>
@@ -61,10 +73,12 @@ export const wrapTuple = <
   const nonEmptyString = parseNonEmptyString(value);
   const arrayValues = nonEmptyString.split(tupleDelimiter ?? ',').map((v) => v.trim())
   if (arrayValues.length !== size) {
-    const errorMsg = errorFormatter?.(nonEmptyString) ?? `Value expected to be tuple of length ${size}, got ${value}`
+    const errorMsg = errorFormatter?.(nonEmptyString) ?? `Value expected to be tuple of length ${
+      size
+    }, got ${value}`
     throw new errors.ValidationError(errorMsg)
   }
-  const parsers = Array<ReturnType<typeof wrapMaybeNull>>(size).fill(wrappedParser)
+  const parsers = Array<ReturnType<typeof wrapMaybeUndefined>>(size).fill(wrappedParser)
   const {
     result,
     errors: caughtErrors
@@ -106,3 +120,16 @@ export const parseNumericRange = (value: string | undefined) => {
     ...ltePresent ? {$lte} : {},
   }
 }
+
+export const parseIpv4Address = wrapTuple(4, parseBoundedNumberFromString(0, 255), '.')
+
+export const parseIpv4Cidr = (value: string | undefined) => {
+  const [ipv4String, maskString] = wrapTuple(2, parseNonEmptyString, '/')(value)
+  const ipv4Quadruple = parseIpv4Address(ipv4String)
+  const maskSize = parseBoundedNumberFromString(0, 32)(maskString)
+  return {
+    ipv4Quadruple,
+    maskSize,
+  }
+}
+

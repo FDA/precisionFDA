@@ -1,29 +1,21 @@
 module Api
   # Space requests controller.
   class SpaceRequestsController < ApiController
+    def https_apps_client
+      DIContainer.resolve("https_apps_client")
+    end
+
     # POST /api/spaces/:id/lock
     def lock
-      head(:forbidden) && return unless SpaceRequestPolicy.can_lock?(current_user, space)
 
-      Space.transaction do
-        space.locked!
-        space.confidential_spaces.each(&:locked!)
-        SpaceEventService.call(space.id, @context.user_id, membership, space, :space_locked)
-      end
-
+      https_apps_client.lock_space(space.id)
       render json: space, adapter: :json
     end
 
     # POST /api/spaces/:id/unlock
     def unlock
-      head(:forbidden) && return unless SpaceRequestPolicy.can_unlock?(current_user, space)
 
-      Space.transaction do
-        space.active!
-        space.confidential_spaces.each(&:active!)
-        SpaceEventService.call(space.id, @context.user_id, membership, space, :space_unlocked)
-      end
-
+      https_apps_client.unlock_space(space.id)
       render json: space, adapter: :json
     end
 

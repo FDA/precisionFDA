@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 const LinkTargetBlank = ({ url, children, ariaLabel }) => {
   return (
-    <a href={url} target='_blank' rel='noopener noreferrer' aria-label={ariaLabel}>
+    <a data-turbolinks="false" href={url} target='_blank' rel='noopener noreferrer' aria-label={ariaLabel}>
       {children}
     </a>
   )

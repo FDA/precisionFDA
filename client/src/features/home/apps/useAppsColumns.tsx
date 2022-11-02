@@ -96,7 +96,7 @@ export const useAppsColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.added_by || 200,
           Cell: props => (
-            <a href={props.cell.row.original.links.user}>{props.cell.row.original.added_by_fullname}</a>
+            <a data-turbolinks="false" href={props.cell.row.original.links.user}>{props.cell.row.original.added_by_fullname}</a>
           ),
         },
         {
@@ -120,7 +120,7 @@ export const useAppsColumns = ({
           disableFilters: true,
           width: colWidths?.run_by_you || 100,
           Cell: props => (
-            <StyledRunByYouLink href={`/apps/${props.row.original.uid}/jobs/new`}><Pill>{props.value}</Pill></StyledRunByYouLink>
+            <StyledRunByYouLink data-turbolinks="false" href={`/apps/${props.row.original.uid}/jobs/new`}><Pill>{props.value}</Pill></StyledRunByYouLink>
           ),
         },
         {

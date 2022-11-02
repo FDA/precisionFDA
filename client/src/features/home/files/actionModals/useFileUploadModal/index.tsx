@@ -2,7 +2,7 @@
 /* eslint-disable dot-notation */
 import { all, any } from 'ramda'
 import React, { useEffect, useState } from 'react'
-import Dropzone from 'react-dropzone'
+import { useDropzone } from 'react-dropzone'
 import { useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
@@ -12,7 +12,7 @@ import { InputError } from '../../../../../components/form/styles'
 import { TrashIcon } from '../../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../../utils'
 import { Modal } from '../../../../modal'
-import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
+import { ButtonRow } from '../../../../modal/styles'
 import { useConditionalModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
 import { itemsCountString } from '../../../../../utils/formatting'
@@ -21,7 +21,6 @@ import {
   FILE_STATUS,
   IUploadInfo,
   MAX_UPLOADABLE_FILES,
-  MAX_UPLOADABLE_FILE_SIZE,
 } from './constants'
 import { multiFileUpload } from './multiFileUpload'
 import {
@@ -79,6 +78,30 @@ export const useFileUploadModal = ({
     all(s => [FILE_STATUS['uploaded']].includes(s), statuses)
   const exceedsMax = filesMeta.length > MAX_UPLOADABLE_FILES
   const noneSelected = filesMeta.length === 0
+
+  const { getRootProps, getInputProps } = useDropzone({
+    disabled: uploadInProgress,
+    onDropAccepted: accepted => {
+      const uniqBlob: any[] = []
+      const fil: any[] = []
+      accepted.forEach((file: any) => {
+        const f = file
+        if (isUniqFile(blobs, f)) {
+          f.generatedId = idGenerator.next().value
+          uniqBlob.push(f)
+          fil.push({
+            id: f.generatedId,
+            name: f.name,
+            size: f.size,
+            status: FILE_STATUS['added'],
+            uploadedSize: 0,
+          })
+        }
+      })
+      setFilesMeta([...filesMeta, ...fil])
+      setBlobs([...blobs, ...uniqBlob])
+    },
+  })
 
   useEffect(() => {
     if (uploadFinished) {
@@ -143,40 +166,12 @@ export const useFileUploadModal = ({
       title="Modal dialog to upload files"
       header={
         <StyledDropSection>
-          <ButtonSolidBlue disabled={uploadInProgress}>
-            <Dropzone
-              noDrag
-              disabled={uploadInProgress}
-              maxSize={MAX_UPLOADABLE_FILE_SIZE}
-              onDropAccepted={accepted => {
-                const uniqBlob: any[] = []
-                const fil: any[] = []
-                accepted.forEach((file: any) => {
-                  const f = file
-                  if (isUniqFile(blobs, f)) {
-                    f.generatedId = idGenerator.next().value
-                    uniqBlob.push(f)
-                    fil.push({
-                      id: f.generatedId,
-                      name: f.name,
-                      size: f.size,
-                      status: FILE_STATUS['added'],
-                      uploadedSize: 0,
-                    })
-                  }
-                })
-                setFilesMeta([...filesMeta, ...fil])
-                setBlobs([...blobs, ...uniqBlob])
-              }}
-            >
-              {({ getRootProps, getInputProps }) => (
-                <div {...getRootProps()} className="upload-modal__dropzone">
-                  <input {...getInputProps()} />
-                </div>
-              )}
-            </Dropzone>
-            <span>Browse files for upload...</span>
-          </ButtonSolidBlue>
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            <ButtonSolidBlue disabled={uploadInProgress}>
+              Browse files for upload...
+            </ButtonSolidBlue>
+          </div>
           <SubTitle>You can upload up to 20 files at a time</SubTitle>
         </StyledDropSection>
       }

@@ -117,7 +117,7 @@ describe('member-change.handler', () => {
     })
 
     it('if other user is challenge bot, it is filter out', async () => {
-      anotherUser.dxuser = config.users.challengeBotDxUser
+      anotherUser.dxuser = config.platform.users.challengeBotDxUser
       // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
       // const spaceEventMemberAdded = create.spacesHelper.createEvent(
       //   em,
