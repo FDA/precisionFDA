@@ -30,4 +30,11 @@ export const config: ConfigOverride = () => ({
   redis: {
     isSecure: true,
   },
+  siteSettings: {
+    ssoButton: {
+      response: {
+        isEnabled: true,
+      },
+    },
+  },
 })
