@@ -23,7 +23,6 @@ import { SiteActivityReporting } from './pages/SiteActivityReporting'
 import { SiteAdministration } from './pages/SiteAdministration'
 import { SiteCustomization } from './pages/SiteCustomization'
 import { Tracking } from './pages/Tracking'
-import { VideoTutorials } from './pages/VideoTutorials'
 import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
@@ -55,14 +54,6 @@ const Docs = () => {
             data-turbolinks="false"
           >
             Introduction
-          </NavItem>
-          <NavItem
-            activeClassName='active'
-            $active={isActiveLink('/docs/video-tutorials', pathname)}
-            to="/docs/video-tutorials"
-            data-turbolinks="false"
-          >
-            Video Tutorials
           </NavItem>
           <NavItem
             activeClassName='active'
@@ -221,9 +212,6 @@ const Docs = () => {
           <Switch>
             <Route exact path="/docs/introduction">
               <Intro />
-            </Route>
-            <Route exact path="/docs/video-tutorials">
-              <VideoTutorials />
             </Route>
             <Route exact path="/docs/discussions">
               <Discussions />

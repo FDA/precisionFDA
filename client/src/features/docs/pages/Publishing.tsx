@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { DocBody, DocsTip, DocTable, VideoWrapper } from '../styles'
+import { DocBody, DocsTip, DocTable } from '../styles'
 
 export const Publishing = () => (
   <DocBody>
@@ -210,17 +210,5 @@ export const Publishing = () => (
       publication. This will give you an idea of what is accessible to everybody
       (shown in green) versus only to you (shown in white).
     </DocsTip>
-
-    <VideoWrapper>
-      <iframe
-        title="Publishing"
-        width="600"
-        height="300"
-        src="https://www.youtube.com/embed/dsOCn1zTBOo"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
   </DocBody>
 )

@@ -20,7 +20,7 @@ import wdljsoninputs2 from '../images/wdl_json_inputs_2.png'
 import {
   DocBody, DocCallout,
   DocRow, DocsTip, DocTable,
-  PageMap, RightSide, VideoWrapper,
+  PageMap, RightSide,
 } from '../styles'
 
 export const CreatingApps = () => (
@@ -43,17 +43,6 @@ export const CreatingApps = () => (
         Fork button from inside the app editor to complete the operation.
       </DocsTip>
 
-      <VideoWrapper>
-        <iframe
-          title="Creating Apps"
-          width="600"
-          height="300"
-          src="https://www.youtube.com/embed/f-DBLB2v1sM"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
       <h2 id="app-name">
         App naming conventions
       </h2>
@@ -1092,18 +1081,6 @@ export const CreatingApps = () => (
         cancel the operation. This allows you to see the app's script, assets,
         etc.
       </p>
-
-      <VideoWrapper>
-        <iframe
-          title="Apps Fork"
-          width="600"
-          height="300"
-          src="https://www.youtube.com/embed/oQgJ9WD7Nkg"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
 
       <h2 id="app-import">
         App Import

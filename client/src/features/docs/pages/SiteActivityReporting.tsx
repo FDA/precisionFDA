@@ -2,7 +2,7 @@
 import React from 'react'
 import siteactivityreporting from '../images/site_activity_reporting.png'
 import usersandusage from '../images/users_and_usage.png'
-import { DocBody, VideoWrapper } from '../styles'
+import { DocBody } from '../styles'
 
 export const SiteActivityReporting = () => (
   <DocBody>
@@ -70,17 +70,5 @@ export const SiteActivityReporting = () => (
       Clicking the "Export to CSV" button exports the table to a CSV formatted
       file to be looked at offline.
     </p>
-
-    <VideoWrapper>
-      <iframe
-        title="Site activity reporting"
-        width="600"
-        height="300"
-        src="https://www.youtube.com/embed/KJ-Rk-ejjBM"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
   </DocBody>
 )

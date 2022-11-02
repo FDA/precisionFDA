@@ -5,7 +5,6 @@ import {
   DocBody,
   DocTable,
   DocsTip,
-  VideoWrapper,
   DocRow,
   RightSide,
   PageMap,
@@ -147,17 +146,6 @@ export const Apps = () => (
         generate a new job that encapsulates that particular execution.
       </p>
 
-      <VideoWrapper>
-        <iframe
-          title="Running Apps"
-          width="100%"
-          src="https://www.youtube.com/embed/P90E3jgL134"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
-
       <h2 id="apps-batch-run">Batch running an app</h2>
 
       <p>
@@ -173,17 +161,6 @@ export const Apps = () => (
         The system will launch separate jobs for each of the varying input
         values.
       </p>
-
-      <VideoWrapper>
-        <iframe
-          title="Batch Running Apps"
-          width="100%"
-          src="https://www.youtube.com/embed/K9rHEef2FNs"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
       <h2 id="apps-export">Exporting an app</h2>
       <img
         width="100%"
@@ -282,17 +259,6 @@ export const Apps = () => (
         Type" are not reflected in the exported container. As always, we welcome
         your feedback and ideas on how to evolve this feature.
       </p>
-
-      <VideoWrapper>
-        <iframe
-          title="Exporting Apps"
-          width="100%"
-          src="https://www.youtube.com/embed/WeF9uj9QJIo"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
       <h2 id="cwl-export">CWL export</h2>
 
       <p>

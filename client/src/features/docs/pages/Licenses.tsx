@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
-import { DocBody, VideoWrapper } from '../styles'
+import { DocBody } from '../styles'
 
 export const Licenses = () => (
   <DocBody>
@@ -70,17 +70,5 @@ export const Licenses = () => (
       accepting the precisionFDA-specific GATK license agreement, you will be
       able to run apps that use it, or make and run your own GATK apps.
     </p>
-
-    <VideoWrapper>
-      <iframe
-        title="Licenses"
-        width="600"
-        height="300"
-        src="https://www.youtube.com/embed/7iwwnKmalyM"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
   </DocBody>
 )

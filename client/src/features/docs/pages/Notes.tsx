@@ -6,7 +6,6 @@ import {
   DocsTip,
   PageMap,
   RightSide,
-  VideoWrapper,
   DocRow,
 } from '../styles'
 
@@ -47,17 +46,6 @@ export const Notes = () => (
         <span className="fa fa-file-archive-o"> </span> = Asset.
       </p>
 
-      <VideoWrapper>
-        <iframe
-          title="Notes"
-          width="600"
-          height="300"
-          src="https://www.youtube.com/embed/c2-VlRxTZLM"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
       <h2 id="notes-edit">Editing notes</h2>
 
       <p>
