@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: ENV.fetch("SMTP_FROM_ADDRESS")
-  layout "mailer"
+  default from: "notification@dnanexus.com"
+  layout 'mailer'
 end

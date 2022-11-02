@@ -121,7 +121,7 @@ Sync workstation files
 `curl -sk --request PATCH "https://localhost:3001/jobs/$JOB_ID/syncFiles?$USER_CONTEXT"`
 
 Send email
-`curl -sk --request POST "https://localhost:3001/emails/$EMAIL_ID/send?$USER_CONTEXT"`
+`curl -sk --request PATCH "https://localhost:3001/email/$EMAIL_ID/?$USER_CONTEXT"`
 
 Start user checkup task
 `curl -sk "https://localhost:3001/account/checkup?$USER_CONTEXT" | python -m json.tool`

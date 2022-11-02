@@ -3,13 +3,11 @@ import { database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import type { SendEmailJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
-import { create, db } from '@pfda/https-apps-shared/src/test'
+import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { EMAIL_TYPES } from 'shared/src/domain/email/email.config'
-import {
-  fakes as queueFakes,
-  mocksReset as queueMocksReset,
-} from '../utils/mocks'
+
 
 const createSendEmailTask = async (
   payload: SendEmailJob['payload'],
@@ -23,6 +21,7 @@ const createSendEmailTask = async (
     user,
   })
 }
+
 describe('TASK: email-send', () => {
   let em: EntityManager
   let user: User
