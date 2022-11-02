@@ -23,13 +23,12 @@ type Maybe<T> = T | null
 
 const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
   // TODO(samuel) validate that this is not undefined
-  const value = parseInt(envValue, 10)
+  const value = parseInt(envValue!, 10)
   return isNaN(value) ? null : value
 }
-const parseBooleanFromProcess = (
-  value: string | undefined,
-  defaultValue = false,
-): boolean => value ? value.toLowerCase() === 'true' : defaultValue
+
+const parseBooleanFromProcess = (value: string | undefined, defaultValue = false): boolean =>
+  value ? value.toLowerCase() === 'true' : defaultValue
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const env = (process.env.NODE_ENV ?? ENVS.LOCAL) as ENVS
@@ -39,12 +38,8 @@ const defaultConfig = {
   api: {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
-    certPath:
-      process.env.NODE_PATH_CERT
-      ?? path.join(__dirname, '../../../../cert.pem'),
-    keyCertPath:
-      process.env.NODE_PATH_KEY_CERT
-      ?? path.join(__dirname, '../../../../key.pem'),
+    certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
+    keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     allowErrorTestingRoutes:
       process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
@@ -65,8 +60,7 @@ const defaultConfig = {
     // it is used for testing, not for default DB connection
     dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
     clientUrl:
-      process.env.NODE_DATABASE_URL
-      ?? 'mysql://root:password@localhost:3306/precision-fda',
+      process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
   },
   validation: {
@@ -86,13 +80,13 @@ const defaultConfig = {
     },
   },
   emails: {
-    smtp: {
+    salesforce: {
       isEnabled: true,
-      username: process.env.SMTP_USER ?? 'aws-ses-username',
-      password: process.env.SMTP_PASSWORD ?? 'aws-ses-password',
-      port: process.env.SMTP_PORT ?? 'aws-ses-port',
-      host: process.env.SMTP_HOST ?? 'aws-ses-host',
-      fromAddress: process.env.SMTP_FROM_ADDRESS ?? 'precisionfda-no-reply@dnanexus.com',
+      apiUrl: process.env.SALESFORCE_HOST ?? 'https://dnanexus--pFDAemail.cs33.my.salesforce.com',
+      username: process.env.SALESFORCE_USERNAME ?? 'sf-username',
+      password: process.env.SALESFORCE_PASSWORD ?? 'sf-password',
+      secretToken: process.env.SALESFORCE_SECRET_TOKEN ?? 'sf-secret',
+      fromAddress: process.env.SALESFORCE_FDA_EMAIL_ID ?? 'sf-org-id',
     },
   },
   redis: {
@@ -110,7 +104,7 @@ const defaultConfig = {
         name: 'https-apps-worker-emails-queue',
       },
       fileSync: {
-        name: 'https-apps-worker-filesSync-queue',
+        name: 'https-apps-worker-filesSync-queue'
       },
       maintenance: {
         name: 'https-apps-worker-maintenance-queue',
@@ -123,10 +117,10 @@ const defaultConfig = {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/1 * * * *',
-      staleJobsEmailAfter:
-        process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60 * 60 * 24 * 29, // 29 days
-      staleJobsTerminateAfter:
-        process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
+      // Until PFDA-2431 is fixed, we prevent job termination warnings email from being sent out
+      staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*30, // 30 days
+      // staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60*60*24*29, // 29 days
+      staleJobsTerminateAfter: process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *',

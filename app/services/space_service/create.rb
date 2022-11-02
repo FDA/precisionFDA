@@ -71,7 +71,7 @@ module SpaceService
         Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
                           " with admin membership #{admin_membership.id}")
         SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
-        NotificationsMailer.space_activated_email(space, admin_membership).deliver_later!
+        NotificationsMailer.space_activated_email(space, admin_membership).deliver_now!
         # rubocop:enable Layout/LineLength
       end
     end
@@ -181,7 +181,9 @@ module SpaceService
     def remove_pfda_admin_user(space, space_form)
       return if user.dxid == ADMIN_USER
 
-      admin_api.org_remove_member(space.host_dxorg, ADMIN_USER) unless space_form.host_admin.dxid == ADMIN_USER
+      unless space_form.host_admin.dxid == ADMIN_USER
+        admin_api.org_remove_member(space.host_dxorg, ADMIN_USER)
+      end
 
       return if space_form.guest_admin.nil? || space_form.guest_admin&.dxid == ADMIN_USER
 
@@ -192,7 +194,7 @@ module SpaceService
     # @param [Space]
     def send_emails(space)
       space.leads.find_each do |lead|
-        notification_mailer.space_activation_email(space, lead).deliver_later!
+        notification_mailer.space_activation_email(space, lead).deliver_now!
       end
     end
 
@@ -298,7 +300,7 @@ module SpaceService
       space_copier.copy(space, source_space)
     end
 
-    def guest_dx_org(uuid, _space, _space_form)
+    def guest_dx_org(uuid, space, space_form)
       Org.construct_dxorg("space_guest_#{uuid}")
     end
   end

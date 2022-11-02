@@ -78,22 +78,14 @@ Rails.application.configure do
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
+
   config.action_mailer.default_url_options = {
     host: "precisionfda-staging.dnanexus.com",
     protocol: "https",
   }
-  config.action_mailer.smtp_settings = {
-    address: ENV.fetch("SMTP_HOST"),
-    port: ENV.fetch("SMTP_PORT"),
-    user_name: ENV.fetch("SMTP_USER"),
-    password: ENV.fetch("SMTP_PASSWORD"),
-    tls: true,
-  }
 
-  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.delivery_method = :salesforce
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.default_options = { from: ENV.fetch("SMTP_FROM_ADDRESS") }
-  config.action_mailer.raise_delivery_errors = true
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -125,8 +117,8 @@ Rails.application.configure do
       end
     end,
     email: {
-      email_prefix: "[PrecisionFDA-Stage] ",
-      sender_address: "\"pFDA Staging\" <#{ENV.fetch('SMTP_FROM_ADDRESS')}>",
+      email_prefix: "[PrecisionFDA-Stage]",
+      sender_address: "\"notifier\" <notification@dnanexus.com>",
       exception_recipients: %w(precisionfda-dev@dnanexus.com),
       email_format: :html,
     },
