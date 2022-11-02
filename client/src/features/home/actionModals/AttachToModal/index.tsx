@@ -145,7 +145,7 @@ const HomeAttachToModal = (props: any) => {
         </div>
         <div className='__note-container'>
           <div className='__note-container_title'>
-            <a href={selectedItem.path} >{selectedItem.title}</a>
+            <a data-turbolinks="false" href={selectedItem.path} >{selectedItem.title}</a>
           </div>
           <Markdown data={selectedItem.content} />
           <div className='__note-container_no-content noResultContent'>

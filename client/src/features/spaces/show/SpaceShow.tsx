@@ -54,7 +54,7 @@ import {
 } from './styles'
 
 
-export const Spaces2 = ({
+const Spaces2 = ({
   space,
   isLoading,
 }: {
@@ -263,3 +263,5 @@ export const SpaceShow = () => {
 
   return <Spaces2 space={s} isLoading={isLoading} />
 }
+
+export default SpaceShow

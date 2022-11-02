@@ -20,7 +20,7 @@ const Item = ({ file, action }) => (
     </td>
     {(action === SPACE_FILES_ACTIONS.DOWNLOAD) && (
       <td>
-        <a href={file.downloadURL} target="_blank" rel="noopener noreferrer">
+        <a data-turbolinks="false" href={file.downloadURL} target="_blank" rel="noopener noreferrer">
           <Icon icon="fa-download" fw />&nbsp;
           download
         </a>
@@ -28,7 +28,7 @@ const Item = ({ file, action }) => (
     )}
     {(action === SPACE_FILES_ACTIONS.OPEN) && (
       <td>
-        <a href={`${file.downloadURL}?inline=true`} target="_blank" rel="noopener noreferrer">
+        <a data-turbolinks="false" href={`${file.downloadURL}?inline=true`} target="_blank" rel="noopener noreferrer">
           <Icon icon="fa-file-o" fw />&nbsp;
           open
         </a>

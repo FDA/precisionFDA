@@ -6,7 +6,7 @@
     </a>
   </li>
   <li role="presentation">
-    <a href="/docs">
+    <a data-turbolinks="false" href="/docs">
       <div class="nav-icon fa fa-question"></div>
       <div class="nav-pill-title">Get Started</div>
     </a>
@@ -37,8 +37,8 @@
       <% end %>
       <li role="separator" class="divider"></li>
       <li><a href="<%= about_path %>" data-turbolinks="false"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
-      <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
-      <li><a href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
+      <li><a href="<%= guidelines_path %>" data-turbolinks="false"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
+      <li><a href="<%= docs_path %>" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></li>
       <li role="separator" class="divider"></li>
       <% if @context.logged_in? && @context.can_administer_site? %>
         <li><%= link_to "Admin Dashboard", admin_root_path %></li>

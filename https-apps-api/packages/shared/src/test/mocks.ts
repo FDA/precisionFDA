@@ -8,6 +8,7 @@ import {
   FILES_LIST_RES_ROOT,
   FOLDERS_LIST_RES,
   DBCLUSTER_DESC_RES,
+  FIND_MEMBERS_RES,
 } from './mock-responses'
 
 const sandbox = sinon.createSandbox()
@@ -27,6 +28,11 @@ const fakes = {
     dbClusterActionFake: sinon.stub(),
     dbClusterCreateFake: sinon.stub(),
     dbClusterDescribeFake: sinon.stub(),
+    projectCreateFake: sinon.stub(),
+    projectInviteFake: sinon.stub(),
+    findSpaceMembersFake: sinon.stub(),
+    inviteUserToOrganizationFake: sinon.stub(),
+    removeUserFromOrganizationFake: sinon.stub(),
   },
   queue: {
     findRepeatableFake: sinon.stub(),
@@ -38,6 +44,7 @@ const fakes = {
     createSyncJobStatusTaskFake: sinon.fake(),
     createSyncWorkstationFilesTask: sinon.fake(),
     createUserCheckupTask: sinon.fake(),
+    createSyncSpacesPermissionsTask: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
@@ -58,6 +65,8 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
   fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
+  fakes.client.findSpaceMembersFake.callsFake(() => FIND_MEMBERS_RES)
+
   fakes.client.dbClusterActionFake.callsFake(() => ({
     id: generate.dbCluster.simple().dxid
   }))
@@ -65,6 +74,8 @@ const mocksSetDefaultBehaviour = () => {
     id: generate.dbCluster.simple().dxid
   }))
   fakes.client.dbClusterDescribeFake.callsFake(() => DBCLUSTER_DESC_RES)
+  fakes.client.projectCreateFake.callsFake(() => ({ id: generate.space.projectId() }))
+  fakes.client.projectInviteFake.callsFake(()=> ({id: 'huh', state: 'accepted'})) //fix id
 }
 
 const mocksSetup = () => {
@@ -80,6 +91,12 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client.PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
   sandbox.replace(client.PlatformClient.prototype, 'removeFolderRec', fakes.client.folderRemoveFake)
+  sandbox.replace(client.PlatformClient.prototype, 'projectInvite', fakes.client.projectInviteFake)
+  sandbox.replace(client.PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
+  sandbox.replace(client.PlatformClient.prototype, 'findSpaceMembers', fakes.client.findSpaceMembersFake)
+  sandbox.replace(client.PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
+  sandbox.replace(client.PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
+
   sandbox.replace(
     client.PlatformClient.prototype,
     'dbClusterAction',
@@ -108,6 +125,7 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
   sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
   sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
+  sandbox.replace(queue, 'createSyncSpacesPermissionsTask', fakes.queue.createSyncSpacesPermissionsTask)
 }
 
 const mocksReset = () => {
@@ -124,6 +142,11 @@ const mocksReset = () => {
   fakes.client.dbClusterActionFake.reset()
   fakes.client.dbClusterCreateFake.reset()
   fakes.client.dbClusterDescribeFake.reset()
+  fakes.client.projectCreateFake.reset()
+  fakes.client.projectInviteFake.reset()
+  fakes.client.findSpaceMembersFake.reset()
+  fakes.client.inviteUserToOrganizationFake.reset()
+  fakes.client.removeUserFromOrganizationFake.reset()
 
   fakes.queue.findRepeatableFake.reset()
 
@@ -135,6 +158,7 @@ const mocksReset = () => {
   fakes.queue.createSyncJobStatusTaskFake.resetHistory()
   fakes.queue.createSyncWorkstationFilesTask.resetHistory()
   fakes.queue.createUserCheckupTask.resetHistory()
+  fakes.queue.createSyncSpacesPermissionsTask.resetHistory()
 
   fakes.bull.processFake.resetHistory()
   fakes.bull.isReadyFake.resetHistory()

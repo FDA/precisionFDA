@@ -29,6 +29,14 @@ export const StyledName = styled.a<{ isCurrent?: boolean }>`
   }
 `
 
+export const StyledNameWithoutLink = styled.div<{ isCurrent?: boolean }>`
+  display: flex;
+  align-items: center;
+  ${Svg} {
+    padding-right: 0.8rem;
+  }
+`
+
 export const StyledTD = styled.td`
   padding: 8px;
   vertical-align: middle;

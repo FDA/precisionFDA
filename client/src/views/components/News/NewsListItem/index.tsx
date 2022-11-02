@@ -48,7 +48,7 @@ class NewsListItemSmall extends NewsListItem {
         <div className='news-item-title'>{newsItem.title}</div>
         <div style={{ display: 'flex' }}>
           <div className='news-item-date'>{format(newsItem.createdAt, 'MMM dd, yyyy')}</div>
-          <ExternalLink to={newsItem.link}>View &rarr;</ExternalLink>
+          <ExternalLink data-turbolinks="false" to={newsItem.link}>View &rarr;</ExternalLink>
         </div>
       </StyledNewsListItemSmall>
     )

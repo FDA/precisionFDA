@@ -1,5 +1,7 @@
-import React, { FunctionComponent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
+import { useQuery } from 'react-query'
+import axios from 'axios'
 import styled, { css } from 'styled-components'
 import classNames from 'classnames/bind'
 
@@ -8,11 +10,11 @@ import { theme } from '../../../../styles/theme'
 import Button from '../../Button'
 
 
-interface IPublicNavbarSticky {
-  sticky?: boolean,
+type StyledPublicNavbarProps = {
+  isSticky?: boolean,
 }
 
-const StyledPublicNavbar = styled.nav<IPublicNavbarSticky>`
+const StyledPublicNavbar = styled.nav<StyledPublicNavbarProps>`
   display: flex;
   height: ${theme.sizing.navigationBarHeight};
   text-align: center;
@@ -44,7 +46,7 @@ const StyledPublicNavbar = styled.nav<IPublicNavbarSticky>`
     overflow: scroll;
   }
 
-  ${props => props.sticky ? `
+  ${props => props.isSticky ? `
     position: fixed;
     top: 0;
     left: 0;
@@ -55,7 +57,7 @@ const StyledPublicNavbar = styled.nav<IPublicNavbarSticky>`
   ` : ''}
 `
 
-interface IHidable {
+type StyledPFDALogoProps = {
   hidden?: boolean,
 }
 
@@ -68,7 +70,7 @@ const pfdaLogoStyle = css`
   height: 40px;
 `
 
-const StyledPFDALogoLight = styled(PFDALogoLight)<IHidable>`
+const StyledPFDALogoLight = styled(PFDALogoLight)<StyledPFDALogoProps>`
   ${pfdaLogoStyle};
   ${props => props.hidden ? `
   visibility: hidden;
@@ -78,7 +80,7 @@ const StyledPFDALogoLight = styled(PFDALogoLight)<IHidable>`
 const StyledPFDALogoDark = styled(PFDALogoDark)`
   ${pfdaLogoStyle};
 `
-const PublicNavbarCenterButtons = styled.div<IPublicNavbarSticky>`
+const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
   display: inline-block;
   text-align: center;
   margin: auto;
@@ -90,14 +92,14 @@ const PublicNavbarCenterButtons = styled.div<IPublicNavbarSticky>`
     margin: 0.5em 1.25em;
     padding: 0.15em 0em;
     text-decoration: none;
-    ${props => props.sticky ? `
+    ${props => props.isSticky ? `
     color: ${theme.colors.textBlack};
     ` : `
     color: white;
     `}
 
     &:hover {
-      ${props => props.sticky ? `
+      ${props => props.isSticky ? `
       border-bottom: 2px solid black;
       ` : `
       border-bottom: 2px solid white;
@@ -110,7 +112,7 @@ const PublicNavbarCenterButtons = styled.div<IPublicNavbarSticky>`
     color: ${theme.colors.blueOnWhite};
     border-bottom: 2px solid ${theme.colors.blueOnWhite};
 
-    ${props => props.sticky ? `
+    ${props => props.isSticky ? `
     &:hover {
       border-bottom: 2px solid ${theme.colors.blueOnWhite};
       color: ${theme.colors.blueOnWhite};
@@ -141,14 +143,29 @@ const PublicNavbarRightButtons = styled.div`
   }
 `
 
-
-interface IPublicNavbarProps {
-  showLogo?: boolean,
+type SsoButtonResponse =
+| {
+  isEnabled: true
+  data: {
+    fdaSsoUrl: string
+  }
+}
+| {
+  isEnabled: false
 }
 
-const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }) => {
-  const [sticky, setSticky] = useState(false)
+const useSiteSettingsSsoButtonQuery = () =>
+  useQuery<SsoButtonResponse>(['site_settings', 'sso_button'], {
+    queryFn: () => axios.get('/api/site_settings/sso_button').then((r: any) => r.data),
+  })
 
+type Props = {
+  shouldShowLogo?: boolean,
+}
+
+const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
+  const [sticky, setSticky] = useState(false)
+  const { data: ssoButtonResponse } = useSiteSettingsSsoButtonQuery()
   // Set up the sticky header
   useEffect(() => {
     const header = document.getElementById('pfda-navbar')
@@ -166,6 +183,7 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
       }
     }
     window.addEventListener('scroll', scrollCallBack)
+    // eslint-disable-next-line consistent-return
     return () => {
       window.removeEventListener('scroll', scrollCallBack)
     }
@@ -179,10 +197,10 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
     window.location.assign('/login')
   }
   const onLogInWithSSO = () => {
-    window.location.assign('https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D')
+    if (ssoButtonResponse?.isEnabled) {
+      window.location.assign(ssoButtonResponse.data.fdaSsoUrl)
+    }
   }
-  const isStaging = window.location.host === 'precisionfda-staging.dnanexus.com'
-
   const { pathname } = useLocation()
   const getLinkClassName = (linkPath: string) => {
     if (linkPath === '/') { // Special case
@@ -196,24 +214,26 @@ const PublicNavbar : FunctionComponent<IPublicNavbarProps> = ({ showLogo=false }
   }
 
   return (
-    <StyledPublicNavbar id="pfda-navbar" sticky={sticky}>
+    <StyledPublicNavbar id="pfda-navbar" isSticky={sticky}>
       {sticky ? (
         <StyledPFDALogoDark className="pfda-navbar-logo" />
       ) : (
-        <StyledPFDALogoLight className="pfda-navbar-logo" hidden={!showLogo} />
+        <StyledPFDALogoLight className="pfda-navbar-logo" hidden={!shouldShowLogo} />
       )}
-      <PublicNavbarCenterButtons sticky={sticky}>
-        <Link to={'/'} className={getLinkClassName('/')}>Overview</Link>
-        <Link to={'/challenges'} className={getLinkClassName('/challenges')}>Challenges</Link>
-        <Link to={'/news'} className={getLinkClassName('/news')}>News</Link>
-        <Link to={'/experts'} className={getLinkClassName('/experts')}>Experts</Link>
-        <Link to={'/about'} className={getLinkClassName('/about')}>About</Link>
+      <PublicNavbarCenterButtons isSticky={sticky}>
+        <Link data-turbolinks="false" to='/' className={getLinkClassName('/')}>Overview</Link>
+        <Link data-turbolinks="false" to='/challenges' className={getLinkClassName('/challenges')}>Challenges</Link>
+        <Link data-turbolinks="false" to='/news' className={getLinkClassName('/news')}>News</Link>
+        <Link data-turbolinks="false" to='/experts' className={getLinkClassName('/experts')}>Experts</Link>
+        <Link data-turbolinks="false" to='/about' className={getLinkClassName('/about')}>About</Link>
         <a href="/uniisearch" target="_blank">UNII Search</a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons>
         <Button onClick={onRequestAccess}>Request Access</Button>
         <Button type="primary" onClick={onLogIn}>Log In</Button>
-        {isStaging && <Button type="primary" onClick={onLogInWithSSO}>Log In With SSO</Button>}
+        {ssoButtonResponse?.isEnabled && (
+          <Button type="primary" onClick={onLogInWithSSO}>Log In With SSO</Button>
+        )}
       </PublicNavbarRightButtons>
     </StyledPublicNavbar>
   )

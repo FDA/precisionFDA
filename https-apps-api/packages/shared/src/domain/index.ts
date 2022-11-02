@@ -50,6 +50,8 @@ const entities = {
 
 export * as adminGroup from './admin-group'
 
+export * as spaceEvent from './space-event'
+
 export * as app from './app'
 
 export * as job from './job'

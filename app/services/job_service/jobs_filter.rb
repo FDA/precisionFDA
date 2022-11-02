@@ -10,7 +10,7 @@ module JobService
 
     FILTER_FIELDS = {
       "name" => lambda do |value|
-        condition(WORKFLOW_TABLE[:title], value).or(condition(JOB_TABLE[:name], value))
+        condition(WORKFLOW_TABLE[:name], value).or(condition(JOB_TABLE[:name], value))
       end,
       "state" => ->(value) { condition(JOB_TABLE[:state], value) },
       "app_title" => ->(value) { condition(APP_TABLE[:title], value) },

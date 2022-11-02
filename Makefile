@@ -12,7 +12,7 @@ prepare-db-arm64v8-qa:
 	docker compose -p precision-fda-qa -f docker/arm64v8.qa.docker-compose.yml up --build web db
 
 run:
-	docker compose -f docker/dev.docker-compose.yml up --build
+	docker compose -p precision-fda-2 -f docker/dev.docker-compose.yml up --build
 run-qa:
 	docker compose -p precision-fda-qa -f docker/qa.docker-compose.yml up --build
 run-arm64v8-dev:

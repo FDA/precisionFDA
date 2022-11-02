@@ -66,6 +66,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
           <QuickActions>
             <ButtonSolidBlue
               as="a"
+              data-turbolinks="false"
               href="/assets/new"
               data-testid="home-assets-create-link"
             >

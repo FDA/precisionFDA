@@ -1,6 +1,7 @@
+import axios from 'axios'
 import { checkStatus, getApiRequestOpts } from '../../../utils/api'
 import { cleanObject } from '../../../utils/object'
-import { BaseError, DownloadListResponse, IFilter, IMeta, ResourceScope } from '../types'
+import { DownloadListResponse, IFilter, IMeta, ResourceScope } from '../types'
 import { formatScopeQ, Params, prepareListFetch } from '../utils'
 import { IFile } from './files.types'
 
@@ -105,7 +106,7 @@ export interface FetchFolderChildrenResponse {
   nodes: IFile[];
 }
 
-export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string, folderId?: string): Promise<FetchFolderChildrenResponse> => {
+export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string, folderId?: string) => {
   const queryParams = cleanObject({
     folder_id: folderId === 'ROOT' ? undefined : folderId,
     scope,
@@ -113,10 +114,7 @@ export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?
 
   const query = `?${new URLSearchParams(queryParams as Record<string, string>).toString()}`
   const url = spaceId ? `/api/spaces/${spaceId}/files/subfolders${query}` : `/api/folders/children${query}`
-  const res = await fetch(url, {
-    method: 'GET',
-  }).then(checkStatus)
-  return res.json()
+  return axios.get(url).then(res => res.data as FetchFolderChildrenResponse)
 }
 
 export const moveFilesRequest = async (nodeIds: string[], targetId: string, scope?: ResourceScope, spaceId?: string) => {

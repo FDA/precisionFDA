@@ -46,20 +46,7 @@ class UserContent {
       const content = (ael.innerHTML ? ael.innerHTML.trim() : '')
       const aId = getNextAnchorId(content)
 
-      // If user is not logged in, add a hidden anchor element to take the sticky header
-      // into account by inserting a hidden anchor to scroll to
-      if (isLoggedIn) {
-        ael.setAttribute('id', aId)
-      }
-      else {
-        const hiddenAnchor = document.createElement('section')
-        hiddenAnchor.setAttribute('id', aId)
-        hiddenAnchor.style.position = 'relative'
-        hiddenAnchor.style.top = `-${theme.values.navigationBarHeight+theme.values.contentMargin}px`
-        hiddenAnchor.style.visibility = 'hidden'
-        hiddenAnchor.style.zIndex = '321'
-        el.parentElement?.insertBefore(hiddenAnchor, ael)
-      }
+      ael.setAttribute('id', aId)
 
       return { 'tag': tag.toLowerCase(), 'content': stripHTML(content), 'anchorId': aId }
     })

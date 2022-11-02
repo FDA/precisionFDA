@@ -1,0 +1,12 @@
+import { useQuery } from 'react-query'
+import { toast } from 'react-toastify'
+import { newsListRequest } from './api'
+
+export const useNewsListQuery = (params: Record<string, any>) => useQuery(
+  ['news', params?.year, params?.pagination?.pageParam],
+  () => newsListRequest(params),
+  {
+    onError: (err: any) => {
+      if (err && err.message) toast.error(err.message)
+    },
+  })
