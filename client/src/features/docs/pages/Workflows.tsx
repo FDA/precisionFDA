@@ -7,7 +7,6 @@ import {
   DocsTip,
   PageMap,
   RightSide,
-  VideoWrapper,
 } from '../styles'
 import create from '../images/create.png'
 import stages from '../images/stages.png'
@@ -144,17 +143,6 @@ export const Workflows = () => (
         space. See the <Link to="/docs/spaces">Spaces</Link> documentation for
         details.
       </p>
-
-      <VideoWrapper>
-        <iframe
-          title="Workflows"
-          width="100%"
-          src="https://www.youtube.com/embed/jGYNt1Vw_Wo"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
     </DocBody>
     <RightSide>
       <PageMap>

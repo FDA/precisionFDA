@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
-import { DocBody, DocsTip, VideoWrapper } from '../styles'
+import { DocBody, DocsTip } from '../styles'
 
 export const Intro = () => (
   <DocBody>
@@ -41,11 +41,11 @@ export const Intro = () => (
       .
     </p>
 
-    <p>
+    {/* <p>
       Select a topic on the left to read more about it. We've also recorded
       short videos to demonstrate some aspects of the system, so make sure to
       check those as well.
-    </p>
+    </p> */}
 
     <DocsTip>
       <strong>TIP:</strong> The precisionFDA platform is currently in
@@ -56,16 +56,5 @@ export const Intro = () => (
       what you were trying to do at the time and how you got to the error page.
       We appreciate your help!
     </DocsTip>
-
-    <VideoWrapper>
-      <iframe
-        title="Introduction"
-        width="100%"
-        src="https://www.youtube.com/embed/U_vmcd93HkM"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
   </DocBody>
 )

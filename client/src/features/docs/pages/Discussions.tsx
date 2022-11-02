@@ -3,7 +3,6 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import {
   DocBody,
-  VideoWrapper,
   DocRow,
   RightSide,
   PageMap,
@@ -40,17 +39,6 @@ export const Discussions = () => (
         "Followers" to get a detailed list of users who have joined the
         discussion.
       </p>
-
-      <VideoWrapper>
-        <iframe
-          title="Discussions"
-          width="100%"
-          src="https://www.youtube.com/embed/KHgUe-a1v_k"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
 
       <h2>Creating a discussion</h2>
 

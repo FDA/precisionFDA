@@ -5,7 +5,7 @@ import create2 from '../images/create2.png'
 import edit1 from '../images/edit1.png'
 import edit2 from '../images/edit2.png'
 import phases from '../images/phases.png'
-import { DocBody, VideoWrapper } from '../styles'
+import { DocBody } from '../styles'
 
 export const ChallengeWorkbench = () => (
   <DocBody>
@@ -208,16 +208,5 @@ export const ChallengeWorkbench = () => (
       this time, users will be able to access the challenge info page.
     </p>
 
-    <VideoWrapper>
-      <iframe
-        title="Challenge Workbench"
-        width="600"
-        height="300"
-        src="https://www.youtube.com/embed/SKqH5OfO5G8"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
   </DocBody>
 )

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
-import { DocBody, VideoWrapper } from '../styles'
+import { DocBody } from '../styles'
 import schema from '../images/schema.png'
 import creating from '../images/creating.png'
 import creating2 from '../images/creating2.png'
@@ -251,28 +251,5 @@ export const ReviewSpaces = () => (
     <br/>
     <br/>
     <br/>
-
-    <VideoWrapper>
-      <iframe
-        title="Spaces"
-        width="600"
-        height="300"
-        src="https://www.youtube.com/embed/-YfSmb_Y-gk"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
-    <VideoWrapper>
-      <iframe
-        title="Review Spaces"
-        width="600"
-        height="300"
-        src="https://www.youtube.com/embed/mPW82NtdKuo"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
-    </VideoWrapper>
   </DocBody>
 )

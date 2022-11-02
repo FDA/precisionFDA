@@ -2,7 +2,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import {
-  VideoWrapper,
   DocBody,
   DocTable,
   DocRow,
@@ -79,17 +78,6 @@ export const Comparisons = () => (
         in the center. Click it and enter a name for your comparison to launch
         the comparison process.
       </p>
-
-      <VideoWrapper>
-        <iframe
-          title="Comparisons"
-          width="100%"
-          src="https://www.youtube.com/embed/qMd98K07U9M"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
 
       <h2 id="comparisons-bed">BED files</h2>
 

@@ -8,7 +8,6 @@ import {
   DocTable,
   PageMap,
   RightSide,
-  VideoWrapper,
 } from '../styles'
 
 export const Files = () => (
@@ -131,17 +130,6 @@ export const Files = () => (
         <Link to="/docs/cli">Command Line Interface documentation page</Link>
       </p>
 
-      <VideoWrapper>
-        <iframe
-          title="Upload Files"
-          width="100%"
-          src="https://www.youtube.com/embed/o5PmgUsWQGo"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
-
       <h2 id="files-origin">Examining file origin</h2>
 
       <p>
@@ -230,17 +218,6 @@ export const Files = () => (
           </tr>
         </tbody>
       </DocTable>
-
-      <VideoWrapper>
-        <iframe
-          title="Navigate Files"
-          width="100%"
-          src="https://www.youtube.com/embed/cj8a6I3KGvk"
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      </VideoWrapper>
     </DocBody>
     <RightSide>
       <PageMap>
