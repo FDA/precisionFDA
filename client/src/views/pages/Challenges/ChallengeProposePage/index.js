@@ -64,6 +64,4 @@ ChallengeProposePage.propTypes = {
   history: PropTypes.object,
 }
 
-export { ChallengeProposePage }
-
 export default ChallengeProposePage

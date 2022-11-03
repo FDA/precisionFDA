@@ -19,6 +19,8 @@ class SpaceMembershipPolicy
     end
 
     def can_lead?(space, admin, member)
+      return false unless admin.lead?
+
       suitable_admin_and_member?(space, admin, member)
     end
 

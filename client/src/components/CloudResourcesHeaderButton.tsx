@@ -12,7 +12,7 @@ type Props = {
 export const CloudResourcesHeaderButton = ({ children, href, isLinkDisabled, conditionType }: Props) => {
   const { isAllowed, onViolation } = useCloudResourcesCondition(conditionType)
   return (isAllowed ? (
-    <HeaderButton as="a" href={href} type="primary" disabled={isLinkDisabled}>
+    <HeaderButton data-turbolinks="false" as="a" href={href} type="primary" disabled={isLinkDisabled}>
       { children }
     </HeaderButton>
   ) : (

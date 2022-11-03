@@ -1,10 +1,9 @@
 import React, { FunctionComponent, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import styled from 'styled-components'
-
+import { Link } from 'react-router-dom'
 import PublicLayout from '../../../layouts/PublicLayout'
 import NavigationBar, { NavigationBarBanner, NavigationBarPublicLandingTitle } from '../../../components/NavigationBar/NavigationBar'
-import { PFDALogoLight } from '../../../components/NavigationBar/PFDALogo'
 import NewsList from '../../../components/News/NewsList'
 import { NewsListItemSmall } from '../../../components/News/NewsListItem'
 import ChallengesBanner from '../../../components/Challenges/ChallengesBanner'
@@ -17,7 +16,6 @@ import ParticipantPersonsList from '../../../components/Participants/Participant
 import { fetchNews } from '../../../../actions/news'
 import { fetchExperts } from '../../../../actions/experts'
 import { fetchChallenges } from '../../../../actions/challenges'
-import { contextUserSelector } from '../../../../reducers/context/selectors'
 import { queryRecentApps, queryFeaturedApps } from '../../../../api/apps'
 import { TopAppsList } from '../../../components/Apps/TopAppsList'
 import { CHALLENGE_TIME_STATUS, MAILING_LIST } from '../../../../constants'
@@ -27,17 +25,19 @@ import { ViewAllButton } from '../../../components/Controls/ViewAllButton'
 import { SectionHeading } from '../../../components/Controls/SectionHeading'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
-import { PageContainer } from '../../../../components/Page/styles'
+import { PageContainer, PageContainerMargin } from '../../../../components/Page/styles'
 import { Tagline } from '../Tagline'
+import { useAuthUser } from '../../../../features/auth/useAuthUser'
+import { ButtonSolidBlue } from '../../../../components/Button'
 
 
 const challengeListFilter = (items: IChallengeListItem[]) => {
-  const firstCompletedChallenge = items.find((item) => item.timeStatus == CHALLENGE_TIME_STATUS.ENDED)
+  const firstCompletedChallenge = items.find((item) => item.timeStatus === CHALLENGE_TIME_STATUS.ENDED)
   if (!firstCompletedChallenge) {
     return items
   }
   const indexOfFirstUpcoming = items.indexOf(firstCompletedChallenge)
-  const noCurrentOrUpcomingChallenges = (indexOfFirstUpcoming == 0)
+  const noCurrentOrUpcomingChallenges = (indexOfFirstUpcoming === 0)
   const numberOfItemsToShow = noCurrentOrUpcomingChallenges ? 1 : indexOfFirstUpcoming
   return items.slice(0, numberOfItemsToShow)
 }
@@ -159,18 +159,25 @@ export const StyledViewAllButton  = styled(ViewAllButton)`
 
 
 const LandingPage : FunctionComponent = () => {
+  const user = useAuthUser()
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(fetchNews())
+    dispatch(fetchExperts())
+    dispatch(fetchChallenges())
+  }, [])
 
-  const renderPublic = () => {
-    return (
+  const renderPublic = () => (
       <PublicLayout>
         <NavigationBar>
-          <NavigationBarBanner>
-            <NavigationBarPublicLandingTitle>
-              <PFDALogoLight />
-              <Tagline />
-            </NavigationBarPublicLandingTitle>
-            <SocialMediaButtons showText={false} />
-          </NavigationBarBanner>
+          <PageContainerMargin>
+            <NavigationBarBanner>
+              <NavigationBarPublicLandingTitle>
+                <Tagline />
+              </NavigationBarPublicLandingTitle>
+              <SocialMediaButtons showText={false} />
+            </NavigationBarBanner>
+          </PageContainerMargin>
         </NavigationBar>
 
         <LandingPageLayout>
@@ -179,7 +186,7 @@ const LandingPage : FunctionComponent = () => {
               <SmallLeftMarginContainer>
                 <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
               </SmallLeftMarginContainer>
-              <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
+              <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => items.slice(0, 1)} allowPagination={false} />
             </LeftColumnInset>
             <ChallengesBanner />
             <LeftColumnInset>
@@ -192,11 +199,11 @@ const LandingPage : FunctionComponent = () => {
           <RightColumn>
             <RightColumnInset>
               <SectionHeading>RECENT EXPERT BLOGS</SectionHeading>
-              <ExpertsList listItemComponent={ExpertsListItemBlogEntrySmall} filter={(items) => { return items.slice(1, 3) }} allowPagination={false} />
+              <ExpertsList listItemComponent={ExpertsListItemBlogEntrySmall} filter={(items) => items.slice(1, 3)} allowPagination={false} />
               <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
               <LandingPageRightColumnHr />
               <SectionHeading>LATEST NEWS</SectionHeading>
-              <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 3) }} allowPagination={false} />
+              <NewsList listItemComponent={NewsListItemSmall} filter={(items) => items.slice(0, 3)} allowPagination={false} />
               <StyledViewAllButton title="View All News" url="/news" />
             </RightColumnInset>
           </RightColumn>
@@ -207,41 +214,40 @@ const LandingPage : FunctionComponent = () => {
           <ParticipantOrgsList />
         </CommunityParticipants>
 
-        <div style={{ textAlign: 'center', margin: '32px' }}>
-          <a className="btn accessible-btn-primary btn-md" href="/docs">Learn more about precisionFDA</a>
-          <a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '32px', gap: 8 }}>
+          <ButtonSolidBlue data-turbolinks="false" as={Link} to="/docs">Learn more about precisionFDA</ButtonSolidBlue><a className="btn accessible-btn-link btn-md" href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </div>
 
-        <PrecisionFDATeamHeading>PRECISIONFDA TEAM</PrecisionFDATeamHeading>
-        <PrecisionFDATeam>
-          <ParticipantPersonsList />
-        </PrecisionFDATeam>
-
+        <div>
+          <PrecisionFDATeamHeading>PRECISIONFDA TEAM</PrecisionFDATeamHeading>
+          <PrecisionFDATeam>
+            <ParticipantPersonsList />
+          </PrecisionFDATeam>
+        </div>
       </PublicLayout>
     )
-  }
 
-  const renderLoggedIn = (user: any) => {
+  const renderLoggedIn = () => {
     const guestWelcomeTitle = 'Welcome to precisionFDA'
 
     return (
       <PublicLayout>
-        {user.is_guest ? 
-          <NavigationBar user={user}>
+        {user?.is_guest ? 
+          <NavigationBar user={user} title="Overview">
             <NavigationBarBanner>
               <NavigationBarPublicLandingTitle>
                 <h1>{guestWelcomeTitle}</h1>
                 <Tagline />
               </NavigationBarPublicLandingTitle>
               <SocialMediaButtons>
-                <a href="mailto:precisionfda@fda.hhs.gov" className="fa fa-envelope"></a>
-                <ExternalLink to="https://twitter.com/precisionfda" className="fa fa-twitter"></ExternalLink>
-                <ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin"></ExternalLink>
+                <a href="mailto:precisionfda@fda.hhs.gov" className="fa fa-envelope" />
+                <ExternalLink to="https://twitter.com/precisionfda" className="fa fa-twitter" />
+                <ExternalLink to="https://www.linkedin.com/showcase/precisionfda" className="fa fa-linkedin" />
               </SocialMediaButtons>
             </NavigationBarBanner>
           </NavigationBar>
           :
-          <NavigationBar user={user} />
+          <NavigationBar user={user} title="Overview" />
         }
 
         <LandingPageLayout>
@@ -270,7 +276,7 @@ const LandingPage : FunctionComponent = () => {
               </LargeLeftMarginContainer>
               <MediumGreyHr />
               <SectionHeading>EXPERT HIGHLIGHT</SectionHeading>
-              <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => { return items.slice(0, 1) }} allowPagination={false} />
+              <ExpertsList listItemComponent={ExpertsListItemBlogEntry} filter={(items) => items.slice(0, 1)} allowPagination={false} />
               <SmallLeftMarginContainer>
                 <StyledViewAllButton title="View All Expert Blogs" url="/experts" />
               </SmallLeftMarginContainer>
@@ -279,24 +285,24 @@ const LandingPage : FunctionComponent = () => {
           <RightColumn>
             <GettingStarted>
               <GettingStartedHeading>GETTING STARTED</GettingStartedHeading>
-              <a href={'/docs'}>For New Users</a>
-              {user.can_see_spaces && 
-              <a href={'/docs/spaces'}>For Reviewers</a>
+              <Link data-turbolinks="false" to="/docs">For New Users</Link>
+              {user?.can_see_spaces && 
+              <Link data-turbolinks="false" to="/docs/spaces">For Reviewers</Link>
               }
               <GettingStartedHr />
-              <a href={'/docs'}>Introduction to precisionFDA</a>
-              <a href={'/docs/files'}>Uploading Files &amp; Data</a>
-              <a href={'/docs/apps'}>Running Apps</a>
-              {user.can_see_spaces && 
-              <a href={'/docs/spaces'}>Review Spaces: Step by Step</a>
+              <Link data-turbolinks="false" to="/docs">Introduction to precisionFDA</Link>
+              <Link data-turbolinks="false" to="/docs/files">Uploading Files &amp; Data</Link>
+              <Link data-turbolinks="false" to="/docs/apps">Running Apps</Link>
+              {user?.can_see_spaces && 
+              <Link to="/docs/spaces">Review Spaces: Step by Step</Link>
               }
               <GettingStartedHr />
-              <a href={MAILING_LIST} target="_blank">precisionFDA Mailing List</a>
+              <a href={MAILING_LIST} target="_blank" rel="noreferrer">precisionFDA Mailing List</a>
             </GettingStarted>
             <RightColumnInset>
               <LandingPageRightColumnHr />
               <SectionHeading>LATEST NEWS</SectionHeading>
-              <NewsList listItemComponent={NewsListItemSmall} filter={(items) => { return items.slice(0, 8) }} allowPagination={false} />
+              <NewsList listItemComponent={NewsListItemSmall} filter={(items) => items.slice(0, 8)} allowPagination={false} />
               <StyledViewAllButton title="View All News" url="/news" />
             </RightColumnInset>
           </RightColumn>
@@ -305,21 +311,11 @@ const LandingPage : FunctionComponent = () => {
     )
   }
 
-  const user = useSelector(contextUserSelector)
-  const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(fetchNews())
-    dispatch(fetchExperts())
-    dispatch(fetchChallenges())
-  }, [])
-
   const isLoggedIn = user && Object.keys(user).length > 0
-  if (isLoggedIn) {
-    return renderLoggedIn(user)
+  if(isLoggedIn) {
+    return renderLoggedIn()
   }
-  else {
-    return renderPublic()
-  }
+  return renderPublic()
 }
 
 export {

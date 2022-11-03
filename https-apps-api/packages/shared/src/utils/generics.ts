@@ -1,7 +1,12 @@
 export type MapValuesToReturnType<
   T extends Record<string, (...args: any[]) => any | undefined>,
+  // NOTE(samuel) although this field could be omitted
+  // Typescript 4.7. heavily uses `infer` `extends` combo, this introduced change that can break chained generics
+  // Implementing without this helper variable should result in error with mismatched keys
+  // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html#extends-constraints-on-infer-type-variables
+  KeyT extends keyof T = keyof T,
   Result = {
-    [key in keyof T]: ReturnType<T[key]>
+    [key in KeyT]: ReturnType<T[key]>
   }
 > = Result
 
@@ -27,8 +32,13 @@ export type MapValueObjectByKey<
   UpperKey extends string,
   T extends Record<string, any>,
   Default extends any = undefined,
+  // NOTE(samuel) although this field could be omitted
+  // Typescript 4.7. heavily uses `infer` `extends` combo, this introduced change that can break chained generics
+  // Implementing without this helper variable should result in error with mismatched keys
+  // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html#extends-constraints-on-infer-type-variables
+  KeyT extends keyof T = keyof T,
   Result = {
-    [key in keyof T]: UpperKey extends keyof T[key] ? T[key][UpperKey] : Default
+    [key in KeyT]: UpperKey extends keyof T[key] ? T[key][UpperKey] : Default
   },
 > = Result
 

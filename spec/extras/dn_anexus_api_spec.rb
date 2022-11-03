@@ -69,25 +69,25 @@ describe DNAnexusAPI do
       let(:expected_payload) { payload }
     end
 
-    context "when charges mismatch response error was returned" do
-      before do
-        response_error = {
-          error: {
-            type: "InvalidInput",
-            message: "The specified user or org (org-pfda..garry.potter) that will be " \
-                      "responsible for charges associated with this app version does " \
-                      "not match the one responsible for charges associated with the app " \
-                      "(org-pfda..albus.dumbledore)",
-          },
-        }.to_json
+    # context "when charges mismatch response error was returned" do
+    #   before do
+    #     response_error = {
+    #       error: {
+    #         type: "InvalidInput",
+    #         message: "The specified user or org (org-pfda..garry.potter) that will be " \
+    #                   "responsible for charges associated with this app version does " \
+    #                   "not match the one responsible for charges associated with the app " \
+    #                   "(org-pfda..albus.dumbledore)",
+    #       },
+    #     }.to_json
 
-        allow(transport).to receive(:call).and_raise(RuntimeError, response_error)
-      end
+    #     allow(transport).to receive(:call).and_raise(RuntimeError, response_error)
+    #   end
 
-      it "raises ChargesMismatchError exception" do
-        expect { client.app_new(payload) }.to raise_error(DXClient::Errors::ChargesMismatchError)
-      end
-    end
+    #   it "raises ChargesMismatchError exception" do
+    #     expect { client.app_new(payload) }.to raise_error(DXClient::Errors::ChargesMismatchError)
+    #   end
+    # end
 
     context "when another kind of error was returned" do
       before do

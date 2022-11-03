@@ -49,7 +49,7 @@ const ExpertAskQuestionModalComponent = ({
   let submitter
   if (isLoggedIn) {
     submitter = (
-      <a href={`/users/${user.dxuser}`} target="_blank" rel="noopener noreferrer">{user.full_name}</a>
+      <a data-turbolinks="false" href={`/users/${user.dxuser}`} target="_blank" rel="noopener noreferrer">{user.full_name}</a>
     )
   } else {
     submitter = 'Anonymous'

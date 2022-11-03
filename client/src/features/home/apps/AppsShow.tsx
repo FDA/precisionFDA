@@ -115,6 +115,7 @@ const DetailActionsDropdown = (
     <>
       <CloudResourcesHeaderButton
         href={`/apps/${app.uid}/jobs/new`}
+        data-turbolinks="false"
         isLinkDisabled={!app.links.run_job}
         conditionType='all'
       >
@@ -125,6 +126,7 @@ const DetailActionsDropdown = (
       </CloudResourcesHeaderButton>
       <CloudResourcesHeaderButton
         href={`/apps/${app.uid}/batch_app`}
+        data-turbolinks="false"
         isLinkDisabled={!app.links.batch_run}
         conditionType='all'
       >

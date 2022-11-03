@@ -66,6 +66,7 @@ const FileActions = ({
       {actions['Delete']?.modal}
       {actions['Organize']?.modal}
       {actions['Copy to space']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}

@@ -5,9 +5,13 @@ import type { JSONSchema7 } from 'json-schema'
 import { defaultMiddlewares } from '../server/middleware'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
 
+interface IRemoveRepeatableParams {
+  key: string
+}
+
 const router = new Router<DefaultState, Api.Ctx>()
 
-if (!config.flags.dev.skipUserMiddlewareForDebugRoutes) {
+if (!config.devFlags.middleware.skipUserMiddlewareForDebugRoutes) {
   router.use(defaultMiddlewares)
 }
 
@@ -27,7 +31,7 @@ router.get(
     const res = await new queue.CleanupWorkerQueueOperation(ctx).execute()
     ctx.body = res
     ctx.status = 200
-  }
+  },
 )
 
 router.get(
@@ -39,13 +43,13 @@ router.get(
   },
 )
 
-router.delete (
+router.delete(
   '/queue/removeJobs/:pattern',
   async ctx => {
     const res = await queue.debug.removeJobs(ctx.params.pattern)
     ctx.body = res
     ctx.status = 200
-  }
+  },
 )
 
 const removeRepeatableSchema: JSONSchema7 = {
@@ -58,11 +62,12 @@ const removeRepeatableSchema: JSONSchema7 = {
 router.delete(
   '/queue/removeRepeatable',
   makeSchemaValidationMdw({ body: removeRepeatableSchema }),
-  async ctx => {
-    const res = await queue.debug.removeRepeatable(ctx.request.body.key)
+  async (ctx: Api.Ctx) => {
+    const { key } = ctx.request.body as IRemoveRepeatableParams
+    const res = await queue.debug.removeRepeatable(key)
     ctx.body = res
     ctx.status = 200
-  }
+  },
 )
 
 // Debugging exception capturing and memory
@@ -72,7 +77,7 @@ if (config.api.allowErrorTestingRoutes) {
     async ctx => {
       const err = new Error('This is a test error')
       throw err
-    }
+    },
   )
 
   router.get(
@@ -81,7 +86,7 @@ if (config.api.allowErrorTestingRoutes) {
       debug.testHeapMemoryAllocationError()
       ctx.body = { result: 'Test api heap memory allocation test finished - did not crash?' }
       ctx.status = 200
-    }
+    },
   )
 
   router.get(
@@ -90,7 +95,7 @@ if (config.api.allowErrorTestingRoutes) {
       queue.createTestMaxMemoryTask()
       ctx.body = { result: 'Test worker heap memory allocation test queued' }
       ctx.status = 200
-    }
+    },
   )
 }
 

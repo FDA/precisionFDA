@@ -1,7 +1,6 @@
 import React, { FC } from 'react'
 import styled from 'styled-components'
 
-import { Header } from '../../../components/Header'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUserQuery } from '../../../features/auth/useAuthUser'
@@ -37,7 +36,6 @@ export const UserLayout: FC = ({ children }) => {
   }
   return (
     <div className="pfda-loader-wrapper">
-      <Header />
       {content()}
       <AlertNotifications />
     </div>

@@ -54,7 +54,7 @@ export async function counterRequest(scope: ResourceScope): Promise<CounterReque
   return json
 }
 
-export const Home2 = () => {
+const Home2 = () => {
   const user = useAuthUser()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()
@@ -274,3 +274,5 @@ export const Home2 = () => {
     </UserLayout>
   )
 }
+
+export default Home2

@@ -85,12 +85,15 @@ class WorkflowSerializer < ApplicationSerializer
     object.not_deleted?
   end
 
-  # Builds links.
-  # @return [Hash] Links.
   def links
     return {} unless logged_user
 
     {}.tap do |links|
+      user_role = if object.in_space?
+        object.space_object.space_memberships.active.find_by(user: logged_user.id).role
+      else
+        "can_run"
+      end
       links[:show] = workflow_path(object) if can_access?(object)
       links[:user] = user_path(object.user.dxuser)
       links[:space] = space_path if object.in_space?
@@ -101,11 +104,11 @@ class WorkflowSerializer < ApplicationSerializer
       # POST /api/workflows/copy  copy_api_workflows
       links[:copy] = copy_api_workflows_path
       # POST /api/run_workflow workflow single run
-      links[:run_workflow] = api_run_workflow_path
+      links[:run_workflow] = api_run_workflow_path if user_role != "viewer"
       # GET /workflows/:id/batch_workflow workflow batch run
-      links[:batch_run_workflow] = batch_workflow_workflow_path(object)
+      links[:batch_run_workflow] = batch_workflow_workflow_path(object) if user_role != "viewer"
       # edit a single workflow
-      links[:edit] = edit_workflow_path(object)
+      links[:edit] = edit_workflow_path(object) if user_role != "viewer"
       # GET /workflows/:id/fork - fork a single workflow
       links[:fork] = fork_workflow_path(object)
       # GET cwl_export a single workflow to a cwl file
@@ -114,11 +117,10 @@ class WorkflowSerializer < ApplicationSerializer
       links[:wdl_export] = wdl_export_workflow_path(object)
       # POST tags with custom payload eg: set_tags_target
       links[:set_tags] = api_set_tags_path
-      if object.workflow_series
-        links[:set_tags_target] = "workflow-series-#{object.workflow_series.id}"
-      end
 
-      if object.owned_by_user?(object.user)
+      links[:set_tags_target] = "workflow-series-#{object.workflow_series.id}" if object.workflow_series
+
+      if object.owned_by_user?(object.user) && user_role != "viewer"
         # PUT /api/workflows/delete soft delete
         links[:delete] = delete_api_workflows_path
       end

@@ -22,17 +22,17 @@ module Api
 
     before_action :sync_files, only: %i(files)
 
+    def https_apps_client
+      DIContainer.resolve("https_apps_client")
+    end
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
-      membership = @space.space_memberships.find_by(user: current_user)
-      if SpaceMembershipPolicy.can_accept?(@space, membership)
-        SpaceService::Accept.call(api, @space, membership)
-
-        render json: @space, adapter: :json
-      else
-        head :forbidden
-      end
+      https_apps_client.accept_space(@space.id)
+      space = Space.undeleted.find(params[:id])
+      # Refactor this email action to node-api as well. (No template in node yet)
+      send_emails(space) if space.accepted?
+      render json: space, adapter: :json
     end
 
     # POST /api/spaces
@@ -183,6 +183,13 @@ module Api
     end
 
     private
+
+    # Sends space activatio email to leads.
+    def send_emails(space)
+      space.leads.find_each do |lead|
+        NotificationsMailer.space_activated_email(space, lead).deliver_now!
+      end
+    end
 
     # Copy files to a space using the worker.
     def copy_files_to_space(files)
