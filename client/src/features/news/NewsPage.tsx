@@ -20,6 +20,7 @@ import {
   SectionTitle,
   Title,
 } from '../../components/Public/styles'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import ExternalLink from '../../views/components/Controls/ExternalLink'
 import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
@@ -36,6 +37,7 @@ import {
 import { useNewsListQuery } from './useNewsListQuery'
 
 const NewsPage = () => {
+  usePageMeta({ title: 'precisionFDA - News' })
   const user = useAuthUser()
   const userCanCreateNews = user && user.can_administer_site
   const location = useLocation()
