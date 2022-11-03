@@ -1,5 +1,6 @@
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import { UserLayout } from '../../views/layouts/UserLayout'
 import { CreateSpace } from './form/CreateSpace'
 import { DuplicateSpace } from './form/DuplicateSpace'
@@ -9,6 +10,7 @@ import SpacesList from './SpacesList'
 
 
 const Spaces = () => {
+  usePageMeta({ title: 'precisionFDA - Spaces' })
   const { path } = useRouteMatch()
 
   return (

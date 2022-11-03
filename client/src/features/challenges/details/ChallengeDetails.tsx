@@ -14,6 +14,7 @@ import {
   RightSide,
   RightSideItem,
 } from '../../../components/Public/styles'
+import { usePageMeta } from '../../../hooks/usePageMeta'
 import { cleanObject } from '../../../utils/object'
 import ChallengeMyEntriesTable from '../../../views/components/Challenges/ChallengeMyEntriesTable'
 import ChallengeSubmissionsTable from '../../../views/components/Challenges/ChallengeSubmissionsTable'
@@ -48,9 +49,10 @@ export const ChallengeDetails = ({
   page?: string
   user?: any
 }) => {
+  usePageMeta({ title: `${challenge.name} - precisionFDA Challenge` })
   const [tabIndex, setTabIndex] = useState(-1)
   const history = useHistory()
-
+  
   const handleJoinChallenge = () => {
     if (challenge.is_followed) {
       return
@@ -58,30 +60,30 @@ export const ChallengeDetails = ({
     // this.props.history.push(`/challenges/${challengeId}/join`)
     window.location.assign(`/challenges/${challenge.id}/join`)
   }
-
+  
   const timeStatus = getTimeStatus(challenge.start_at, challenge.end_at)
-
+  
   const challengePreRegistration = challenge.status === 'pre-registration'
   const challengeSetupOrPreRegistration =
     challenge.status === 'setup' || challengePreRegistration
-
-  const userCanJoin =
+    
+    const userCanJoin =
     isLoggedIn &&
     !challenge.is_followed &&
     timeStatus === 'current' &&
     challenge.status === 'open'
-  const userCanSubmitEntry =
+    const userCanSubmitEntry =
     isLoggedIn &&
     challenge.is_followed &&
     timeStatus === 'current' &&
     challenge.status === 'open'
   const userIsChallengeAdmin = isLoggedIn && canCreate
-
+  
   const userCanSeePreRegistration =
     (challengePreRegistration ||
       (userIsChallengeAdmin && challengeSetupOrPreRegistration)) &&
-    !isOld
-
+      !isOld
+      
   // Introduction is visible to:
   //  - everyone when a challenge is not in pre-registration phase
   //  - challenge admins in all phases of a challenge
@@ -233,7 +235,7 @@ export const ChallengeDetails = ({
     'challenge-join-button',
   )
 
-  document.title = `${challenge.name} - PrecisionFDA Challenge`
+  // document.title = `${challenge.name} - PrecisionFDA Challenge`
 
   return (
     <PageContainerMargin>
