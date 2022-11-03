@@ -11,18 +11,13 @@ const StyledSocialMediaButtons = styled.div<ISocialMediaButtonProps>`
   text-align: right;
   font-family: ${theme.fontFamily};
   width: auto;
-  ${props => props.showText ? `
-    flex-grow: 1;
-    margin: auto 0;
-  ` : `
-    margin-bottom: ${theme.padding.mainContentVertical};
-  `}
 
   a {
     color: white;
     font-size: ${props => props.showText ? '14px' : '18px'};
     font-weight: bold;
     padding: 3px 6px;
+    cursor: pointer;
   }
 
   @media (min-width: 640px) {

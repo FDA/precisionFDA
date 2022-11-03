@@ -52,11 +52,11 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
             >
               Expert Q&amp;A
             </Button>
-            <Link to={`/experts/${expert.id}`}>
+            <Link data-turbolinks="false" to={`/experts/${expert.id}`}>
               <Icon icon={getSpacesIcon('experts')} fw />
               <span aria-label={`Click to view more information about ${expert.title}`}>About This Expert</span>
             </Link>
-            <Link to={`/experts/${expert.id}/blog`}>
+            <Link data-turbolinks="false" to={`/experts/${expert.id}/blog`}>
               <span aria-label={`Click to read ${expert.title}'s blog post`}>Read Expert Blog Post &#x2197;</span>
             </Link>
           </div>
@@ -64,6 +64,7 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
             <div className="btn-group pull-right" style={{ marginTop: '4px' }}>
               <a
                 className="btn btn-default"
+                data-turbolinks="false"
                 href={`/experts/${expert.id}/edit`}
                 aria-label={`Click here to Edit the Expert ${expert.id}`}
               >
@@ -72,6 +73,7 @@ class ExpertsListItemBlogEntry extends ExpertsListItem {
               <a
                 className="btn btn-default"
                 href={`/experts/${expert.id}/dashboard`}
+                data-turbolinks="false"
                 aria-label={`Click here to View ${expert.id}'s Dashboard`}
               >
                 <span className="fa fa-dashboard fa-fw"></span> Dashboard
@@ -128,7 +130,7 @@ class ExpertsListItemQuestionsAndAnswers extends ExpertsListItem {
         </div>
         <div className="experts-list-item-small__right-column experts-item-content">
           <div className="expert-name">
-            <Link to={`/experts/${expert.id}`}>
+            <Link data-turbolinks="false" to={`/experts/${expert.id}`}>
               <span>{expert.title}</span>
             </Link>
           </div>

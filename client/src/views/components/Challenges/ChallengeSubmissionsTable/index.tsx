@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import React, { Component, FunctionComponent } from 'react'
 import { connect } from 'react-redux'
 import Loader from '../../Loader'
@@ -11,7 +12,6 @@ import {
   challengeSubmissionsIsFetchingSelector,
 } from '../../../../reducers/challenges/challenge/selectors'
 import { Table, Thead, Tbody, Th } from '../../TableComponents'
-import { contextUserSelector } from '../../../../reducers/context/selectors'
 import './style.sass'
 import { getOrder } from '../../../../helpers'
 import * as C from '../../../../constants'
@@ -46,9 +46,9 @@ const renderChallengeSubmissionsTable = (submissions: ISubmission[],
   const isLoggedIn = (user && Object.keys(user).length > 0)
   if (!isLoggedIn) {
     return (
-      <div className='text-center'>
-        In order to participate in this challenge, please <a href="/login">login</a>.
-        If you don't have a PrecisionFDA account, please <a href="/request_access">submit an access request</a> to join and engage in the community!
+      <div>
+        In order to participate in this challenge, please <a data-turbolinks="false" href="/login">login</a>.
+        If you don't have a PrecisionFDA account, please <a data-turbolinks="false" href="/request_access">submit an access request</a> to join and engage in the community!
       </div>
     )
   }
@@ -61,7 +61,7 @@ const renderChallengeSubmissionsTable = (submissions: ISubmission[],
     )
   }
 
-  if (!submissions || submissions.length == 0) {
+  if (!submissions || submissions.length === 0) {
     return renderEmptyView()
   }
 
@@ -153,7 +153,7 @@ class SubmissionRow extends Component<ISubmissionElementProps> {
     return (
       <tr>
         <SubmissionNameCell submission={submission} />
-        <td><a href={`/users/${submission.user.dxuser}`}>{submission.user.name}</a></td>
+        <td><a data-turbolinks="false" href={`/users/${submission.user.dxuser}`}>{submission.user.name}</a></td>
         <SubmissionInputFilesCell submission={submission} user={user} isSpaceMember={isSpaceMember} />
         <SubmissionCreatedAtCell submission={submission} />
       </tr>
@@ -182,7 +182,7 @@ class ChallengeSubmissionsTable extends Component<IChallengeSubmissionsTableProp
 
   renderEmptyView() {
     return (
-      <div className="text-center">
+      <div>
         No entries have been successfully submitted for this challenge.
       </div>
     )
@@ -202,7 +202,7 @@ class ChallengeSubmissionsTable extends Component<IChallengeSubmissionsTableProp
     let sortedSubmissions = submissions
     if (sortType) {
       sortedSubmissions = [...submissions].sort((a: any, b: any) => {
-        const directionMultiplier = (sortDirection == C.SORT_DESC) ? -1 : 1
+        const directionMultiplier = (sortDirection === C.SORT_DESC) ? -1 : 1
         return (a[sortType] < b[sortType] ? -1 : 1) * directionMultiplier
       })
     }
@@ -238,7 +238,6 @@ class ChallengeSubmissionsTable extends Component<IChallengeSubmissionsTableProp
 const mapStateToProps = (state: any) => ({
   submissions: challengeSubmissionsDataSelector(state),
   isFetching: challengeSubmissionsIsFetchingSelector(state),
-  user: contextUserSelector(state),
 })
 
 const mapDispatchToProps = (dispatch: any) => ({
@@ -259,4 +258,7 @@ export {
   renderChallengeSubmissionsTable,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ChallengeSubmissionsTable)
+const ConnectedComp = connect(mapStateToProps, mapDispatchToProps)(ChallengeSubmissionsTable)
+const WrappedSubmissionTable = (props: any) => <ConnectedComp {...props} />
+
+export default WrappedSubmissionTable

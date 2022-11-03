@@ -67,6 +67,14 @@ const convertSecondsToDhms = (seconds) => {
   return dDisplay + hDisplay + mDisplay + sDisplay
 }
 
+const isActiveLink = (linkPath, locationPath) => {
+  if (linkPath === '/') {
+    // Special case
+    return locationPath === linkPath
+  }
+  return locationPath.startsWith(linkPath)
+}
+
 export {
   isHttpSuccess,
   getOrder,
@@ -74,5 +82,6 @@ export {
   getModalKey,
   isExpandedAllItems,
   convertSecondsToDhms,
+  isActiveLink,
 }
 

@@ -103,6 +103,7 @@ export function useExportToModal<T extends { id: string; name: string, links?: {
               <li key={e.label}>
                 <a
                   href={e.link}
+                  data-turbolinks="false"
                   data-confirm={e.value && getConfirmationMessage(e.value)}
                   data-method={e.isPost && 'post'}
                   download

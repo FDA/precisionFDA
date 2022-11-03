@@ -26,7 +26,7 @@ interface INewsListPageProps {
 }
 
 
-class NewsListPage extends Component<INewsListPageProps> {
+class NewsListPage extends Component<any> {
   static defaultProps = {
     loadNews: () => {},
     resetFilters: () => {},
@@ -90,6 +90,10 @@ class NewsListPage extends Component<INewsListPageProps> {
   }
 }
 
+NewsListPage.defaultProps = {
+  
+}
+
 const mapDispatchToProps = (dispatch: any) => ({
   loadNews: () => dispatch(fetchNews()),
   resetFilters: () => dispatch(newsListResetFilters()),
@@ -103,9 +107,5 @@ const mapStateToProps = (state: any) => ({
   user: contextUserSelector(state),
   year: newsListYearSelector(state),
 })
-
-export {
-  NewsListPage,
-}
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewsListPage)

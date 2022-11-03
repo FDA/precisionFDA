@@ -13,7 +13,7 @@ file "/etc/nginx/ssl/pfda.key" do
   only_if { node.run_state["ssm_params"]["app"]["enable_ssl"] }
 end
 
-template "/usr/local/conf/nginx.conf" do
+template "/etc/nginx/nginx.conf" do
   source "nginx.conf.erb"
   variables lazy { {
     app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0],

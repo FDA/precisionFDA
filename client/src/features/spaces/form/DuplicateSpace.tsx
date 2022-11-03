@@ -3,13 +3,11 @@ import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
-import { BackLink } from '../../../components/Page/PageBackLink'
-import { PageContentItems, PageTitle } from '../../../components/Page/styles'
-import {
-  createSpaceRequest,
-  spaceRequest,
-} from '../spaces.api'
+import { BackLinkMargin } from '../../../components/Page/PageBackLink'
+import { PageTitle } from '../../../components/Page/styles'
+import { createSpaceRequest, spaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
+import { StyledPageCenter, StyledPageContent } from './styles'
 
 export const DuplicateSpace = () => {
   const history = useHistory()
@@ -42,20 +40,24 @@ export const DuplicateSpace = () => {
   }
 
   return (
-    <PageContentItems>
-      <BackLink linkTo={`/spaces/${spaceId}`}>Back to Space</BackLink>
-      <PageTitle>Duplicate Space</PageTitle>
-      <SpaceForm
-        mutation={mutation}
-        defaultValues={{
-          space_type: data.space.type,
-          name: `${data.space.name} (copy)`,
-          description: data.space.description,
-          host_lead_dxuser: data.space.host_lead.dxuser,
-          sponsor_lead_dxuser: data.space.guest_lead.dxuser,
-          cts: data.space.cts,
-        }}
-      />
-    </PageContentItems>
+    <>
+      <BackLinkMargin linkTo={`/spaces/${spaceId}`}>Back to Space</BackLinkMargin>
+      <StyledPageCenter>
+        <StyledPageContent>
+          <PageTitle>Duplicate Space</PageTitle>
+          <SpaceForm
+            mutation={mutation}
+            defaultValues={{
+              space_type: data.space.type,
+              name: `${data.space.name} (copy)`,
+              description: data.space.description,
+              review_lead_dxuser: data.space.host_lead.dxuser,
+              sponsor_lead_dxuser: data.space.guest_lead.dxuser,
+              cts: data.space.cts,
+            }}
+          />
+        </StyledPageContent>
+      </StyledPageCenter>
+    </>
   )
 }

@@ -5,9 +5,9 @@ import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createUserCheckupTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getStatusQueue()

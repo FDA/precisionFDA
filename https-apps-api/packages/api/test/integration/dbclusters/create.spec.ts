@@ -2,9 +2,9 @@ import { expect } from 'chai'
 import { omit, pick, invertObj } from 'ramda'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { errors, database } from '@pfda/https-apps-shared'
+import { database } from '@pfda/https-apps-shared'
 import { create, generate, db, mockResponses } from '@pfda/https-apps-shared/src/test'
-import { DbCluster, User } from '@pfda/https-apps-shared/src/domain'
+import { User } from '@pfda/https-apps-shared/src/domain'
 import {
   STATUS as DB_CLUSTER_STATUS,
   ENGINE as DB_CLUSTER_ENGINE,
@@ -70,8 +70,8 @@ describe('POST /dbclusters/create', () => {
     fakes.client.dbClusterCreateFake.onCall(0).returns({ id: dxid })
     const userQueryData = getDefaultQueryData(user)
 
-    const { body } = await supertest(getServer())
-      .post(`/dbclusters/create`)
+    await supertest(getServer())
+      .post('/dbclusters/create')
       .query({ ...userQueryData })
       .send(createInput)
       .expect(201)
@@ -105,8 +105,8 @@ describe('POST /dbclusters/create', () => {
     const describeCallRes = { ...mockResponses.DBCLUSTER_DESC_RES, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(getServer())
-      .post(`/dbclusters/create`)
+    await supertest(getServer())
+      .post('/dbclusters/create')
       .query({ ...userQueryData })
       .send(generate.dbCluster.createInput())
       .expect(201)

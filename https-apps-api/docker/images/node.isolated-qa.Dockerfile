@@ -1,6 +1,9 @@
 ARG NODEJS_IMAGE_TAG
 
-FROM node:${NODEJS_IMAGE_TAG}
+FROM amd64/node:${NODEJS_IMAGE_TAG}
+
+RUN apt-get update && \
+    apt-get install -y default-mysql-client
 
 WORKDIR /app
 COPY https-apps-api/package.json https-apps-api/yarn.lock ./
@@ -17,3 +20,5 @@ COPY key.pem cert.pem ./
 COPY https-apps-api/ ./
 # build /dist
 RUN make build
+
+ENTRYPOINT [ "/app/docker/entrypoint/qa.entrypoint.sh" ]

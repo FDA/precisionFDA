@@ -1,6 +1,7 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { userFile, utils } from '@pfda/https-apps-shared'
+import { RenameFolderInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
@@ -16,15 +17,20 @@ router.patch(
     body: userFile.inputs.renameFolderSchema,
   }),
   async ctx => {
+    const { newName } = ctx.request.body as Omit<RenameFolderInput, 'id'>
+
     const updatedFolder = await new userFile.FolderRenameOperation(pickOpsCtx(ctx)).execute({
-      newName: ctx.request.body.newName,
+      newName,
       id: ctx.params.id as any,
     })
     ctx.body = updatedFolder
   },
 )
 
-router.delete('/:id', makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }), async ctx => {
+router.delete(
+  '/:id',
+  makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }),
+  async ctx => {
   const removedFoldersCnt = await new userFile.FolderDeleteOperation(pickOpsCtx(ctx)).execute({
     id: ctx.params.id as any,
   })

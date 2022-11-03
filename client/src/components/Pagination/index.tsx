@@ -67,6 +67,8 @@ export const Pagination = ({
   onPerPageSelect,
   showPerPage = true,
   showListCount = false,
+  showPageOf = true,
+  showPageJump = true,
 }: {
   page?: number
   setPage: (n: number) => void
@@ -79,6 +81,8 @@ export const Pagination = ({
   isHidden: boolean
   showListCount?: boolean
   showPerPage?: boolean
+  showPageOf?: boolean
+  showPageJump?: boolean
 }) => {
   if (isHidden) {
     return null
@@ -117,8 +121,13 @@ export const Pagination = ({
 
   return (
     <StyledPagination>
-      {showListCount && <ItemsOf>{`${pageLowerBound}-${Math.min(totalCount, pageUpperBound)} of ${totalCount}`}</ItemsOf>}
-      {showPerPage && perPage &&
+      {showListCount && (
+        <ItemsOf>{`${pageLowerBound}-${Math.min(
+          totalCount,
+          pageUpperBound,
+        )} of ${totalCount}`}</ItemsOf>
+      )}
+      {showPerPage && perPage && (
         <PerPage>
           <StyledPerPageSelect
             value={perPage}
@@ -133,7 +142,7 @@ export const Pagination = ({
           </StyledPerPageSelect>
           Per Page
         </PerPage>
-      }
+      )}
       <ButtonSolidBlue
         data-testid="pagination-previous-page-button"
         type="button"
@@ -150,26 +159,30 @@ export const Pagination = ({
       >
         Next Page
       </ButtonSolidBlue>
-      <StyledPageOf data-testid="pagination-page-of">
-        Page {localPage || '...'} of {localTotal || '...'}
-      </StyledPageOf>
-      <JumpToForm onSubmit={handleJumpToSubmit}>
-        <StyledInputJumpTo
-          data-testid="pagination-jumpto-input"
-          defaultValue={1}
-          type="number"
-          id="page-jumpto"
-          name="jumpto"
-          max={localTotal}
-          min={1}
-        />
-        <ButtonSolidBlue
-          data-testid="pagination-submit-jumpto-button"
-          type="submit"
-        >
-          Jump
-        </ButtonSolidBlue>
-      </JumpToForm>
+      {showPageOf && (
+        <StyledPageOf data-testid="pagination-page-of">
+          Page {localPage || '...'} of {localTotal || '...'}
+        </StyledPageOf>
+      )}
+      {showPageJump && (
+        <JumpToForm onSubmit={handleJumpToSubmit}>
+          <StyledInputJumpTo
+            data-testid="pagination-jumpto-input"
+            defaultValue={1}
+            type="number"
+            id="page-jumpto"
+            name="jumpto"
+            max={localTotal}
+            min={1}
+          />
+          <ButtonSolidBlue
+            data-testid="pagination-submit-jumpto-button"
+            type="submit"
+          >
+            Jump
+          </ButtonSolidBlue>
+        </JumpToForm>
+      )}
     </StyledPagination>
   )
 }

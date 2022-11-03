@@ -24,7 +24,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
-  layout "react", only: %i(about index)
+  layout "react", only: %i(about index news)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -75,42 +75,42 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
             title: "Explore notes",
             path: Rails.application.routes.url_helpers.explore_notes_path,
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path("notes"),
+            help_path: "/docs/notes",
             description: "Read what others are reporting describing their thoughts and their work",
           },
           {
             title: "Explore files",
             path: "/home/files/everybody",
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path("files"),
+            help_path: "/docs/files",
             description: "Browse the datasets have been publicly shared with the precisionFDA community",
           },
           {
             title: "Explore Comparisons",
             path: Rails.application.routes.url_helpers.explore_comparisons_path,
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path("comparisons"),
+            help_path: "/docs/comparisons",
             description: "View the differences between test sets and benchmark sets of genomic variants",
           },
           {
             title: "Explore Apps",
             path: Rails.application.routes.url_helpers.explore_apps_path,
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path("apps"),
+            help_path: "/docs/apps",
             description: "Have a look at bioinformatics apps &mdash; and even study their scripts by clicking 'Fork'.",
           },
           {
             title: "Browse Assets",
             path: "/home/assets/everybody",
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path("creating_apps") + "#dev-assets",
+            help_path: "/docs/creating-apps#dev-assets",
             description: "Browse the collection of software assets that are used as building blocks in apps.",
           },
           {
             title: "Try the app editor",
             path: Rails.application.routes.url_helpers.new_app_path,
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path("creating_apps"),
+            help_path: "/docs/creating-apps",
             description: "Find out how easy it is to assemble an app (read-only; results not saved)",
           },
         ]

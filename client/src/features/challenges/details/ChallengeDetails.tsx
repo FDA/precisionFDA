@@ -3,11 +3,10 @@ import classNames from 'classnames'
 import React, { useState } from 'react'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
-import { MainBanner } from '../../../components/Banner'
 import { ButtonSolidBlue } from '../../../components/Button/index'
 import { Loader } from '../../../components/Loader'
+import { PageContainerMargin } from '../../../components/Page/styles'
 import {
-  Container,
   ListItem,
   PageMainBody,
   PageRow,
@@ -19,7 +18,7 @@ import { cleanObject } from '../../../utils/object'
 import ChallengeMyEntriesTable from '../../../views/components/Challenges/ChallengeMyEntriesTable'
 import ChallengeSubmissionsTable from '../../../views/components/Challenges/ChallengeSubmissionsTable'
 import GuestRestrictedLink from '../../../views/components/Controls/GuestRestrictedLink'
-import PublicNavbar from '../../../views/components/NavigationBar/PublicNavbar'
+import NavigationBar from '../../../views/components/NavigationBar/NavigationBar'
 import UserContent from '../../../views/components/UserContent'
 import PublicLayout from '../../../views/layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
@@ -27,6 +26,7 @@ import { Challenge } from '../types'
 import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
 import { getTimeStatus } from '../util'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
+import { ChallengeNotFound } from './ChallengeNotFound'
 import { CallToActionButton, StyledTabs } from './styles'
 
 export const ChallengeDetails = ({
@@ -37,6 +37,7 @@ export const ChallengeDetails = ({
   isGuest = false,
   oldChallenge,
   page,
+  user,
 }: {
   challenge: Challenge
   oldChallenge?: { regions: { intro: string; results: string } }
@@ -45,6 +46,7 @@ export const ChallengeDetails = ({
   isGuest?: boolean
   isLoggedIn?: boolean
   page?: string
+  user?: any
 }) => {
   const [tabIndex, setTabIndex] = useState(-1)
   const history = useHistory()
@@ -153,6 +155,7 @@ export const ChallengeDetails = ({
       subroute: '/submissions',
       content: (
         <ChallengeSubmissionsTable
+          user={user}
           challengeId={challenge.id}
           isSpaceMember={challenge.is_space_member}
         />
@@ -163,6 +166,7 @@ export const ChallengeDetails = ({
       subroute: '/my_entries',
       content: (
         <ChallengeMyEntriesTable
+          user={user}  
           challengeId={challenge.id}
           isSpaceMember={challenge.is_space_member}
         />
@@ -232,140 +236,144 @@ export const ChallengeDetails = ({
   document.title = `${challenge.name} - PrecisionFDA Challenge`
 
   return (
-    <>
-      <Container>
-        <PageRow>
-          <PageMainBody>
-            {isNoInfoProvided && (
-              <div>
-                No information about this challenge has been provided yet.
-              </div>
-            )}
-            <StyledTabs>
-              <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
-                <TabList className="challenge-details-tabs__tab-list">
-                  {tabs.map(tab => (
-                    <Tab
-                      key={tab.title}
-                      className="challenge-details-tabs__tab"
-                      selectedClassName="challenge-details-tabs__tab--selected"
-                    >
-                      {tab.title}
-                    </Tab>
-                  ))}
-                </TabList>
-
-                {tabs.map(tab => (
-                  <TabPanel key={tab.title}>{tab.content}</TabPanel>
-                ))}
-              </Tabs>
-            </StyledTabs>
-          </PageMainBody>
-          {!isOld && (
-            <RightSide>
-              {challengePreRegistration ? (
-                <RightSideItem>
-                  <CallToActionButton onClick={onClickPreRegistrationButton}>
-                    Sign Up for Pre-Registration
-                  </CallToActionButton>
-                </RightSideItem>
-              ) : isGuest ? (
-                <RightSideItem>
-                  <GuestRestrictedLink
-                    to={`/challenges/${challenge.id}/join`}
-                    className={joinChallengeButtonClasses}
-                  >
-                    Join Challenge
-                  </GuestRestrictedLink>
-                </RightSideItem>
-              ) : (
-                <RightSideItem>
-                  <ButtonSolidBlue
-                    className={joinChallengeButtonClasses}
-                    onClick={() => {
-                      if (userCanJoin) {
-                        handleJoinChallenge()
-                      }
-                    }}
-                  >
-                    {joinChallengeButtonTitle}
-                  </ButtonSolidBlue>
-                </RightSideItem>
-              )}
-
-              {userCanSubmitEntry && (
-                <RightSideItem>
-                  <a
-                    className="btn btn-primary btn-block"
-                    style={{ marginTop: '12px' }}
-                    href={challenge.links.new_submission}
-                  >
-                    Submit Challenge Entry
-                  </a>
-                </RightSideItem>
-              )}
-              {currentTab?.outline?.props.anchors.length > 0 && (
-                <RightSideItem>{currentTab.outline}</RightSideItem>
-              )}
-
-              {challenge.can_edit && (
-                <RightSideItem>
-                  <RightList>
-                    <ListItem as={Link} to={`/challenges/${challenge.id}/edit`}>
-                      <span className="fa fa-cog fa-fw" /> Settings
-                    </ListItem>
-                    <ListItem
-                      as="a"
-                      href={`/challenges/${challenge.id}/editor`}
-                      data-no-turbolink="true"
-                    >
-                      <span className="fa fa-file-code-o fa-fw" /> Edit Page
-                    </ListItem>
-                  </RightList>
-                </RightSideItem>
-              )}
-            </RightSide>
+    <PageContainerMargin>
+      <PageRow>
+        <PageMainBody>
+          {isNoInfoProvided && (
+            <div>
+              No information about this challenge has been provided yet.
+            </div>
           )}
-        </PageRow>
-      </Container>
-    </>
+          <StyledTabs>
+            <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
+              <TabList className="challenge-details-tabs__tab-list">
+                {tabs.map(tab => (
+                  <Tab
+                    key={tab.title}
+                    className="challenge-details-tabs__tab"
+                    selectedClassName="challenge-details-tabs__tab--selected"
+                  >
+                    {tab.title}
+                  </Tab>
+                ))}
+              </TabList>
+
+              {tabs.map(tab => (
+                <TabPanel key={tab.title}>{tab.content}</TabPanel>
+              ))}
+            </Tabs>
+          </StyledTabs>
+        </PageMainBody>
+        {!isOld && (
+          <RightSide>
+            {challengePreRegistration ? (
+              <RightSideItem>
+                <CallToActionButton onClick={onClickPreRegistrationButton}>
+                  Sign Up for Pre-Registration
+                </CallToActionButton>
+              </RightSideItem>
+            ) : isGuest ? (
+              <RightSideItem>
+                <GuestRestrictedLink
+                  to={`/challenges/${challenge.id}/join`}
+                  className={joinChallengeButtonClasses}
+                >
+                  Join Challenge
+                </GuestRestrictedLink>
+              </RightSideItem>
+            ) : (
+              <RightSideItem>
+                <ButtonSolidBlue
+                  className={joinChallengeButtonClasses}
+                  onClick={() => {
+                    if (userCanJoin) {
+                      handleJoinChallenge()
+                    }
+                  }}
+                >
+                  {joinChallengeButtonTitle}
+                </ButtonSolidBlue>
+              </RightSideItem>
+            )}
+
+            {userCanSubmitEntry && (
+              <RightSideItem>
+                <a
+                  className="btn btn-primary btn-block"
+                  style={{ marginTop: '12px' }}
+                  href={challenge.links.new_submission}
+                  data-turbolinks="false"
+                >
+                  Submit Challenge Entry
+                </a>
+              </RightSideItem>
+            )}
+            {currentTab?.outline?.props.anchors.length > 0 && (
+              <RightSideItem>{currentTab.outline}</RightSideItem>
+            )}
+
+            {challenge.can_edit && (
+              <RightSideItem>
+                <RightList>
+                  <ListItem as={Link} to={`/challenges/${challenge.id}/edit`}>
+                    <span className="fa fa-cog fa-fw" /> Settings
+                  </ListItem>
+                  <ListItem
+                    as="a"
+                    href={`/challenges/${challenge.id}/editor`}
+                    data-turbolinks="false"
+                  >
+                    <span className="fa fa-file-code-o fa-fw" /> Edit Page
+                  </ListItem>
+                </RightList>
+              </RightSideItem>
+            )}
+          </RightSide>
+        )}
+      </PageRow>
+    </PageContainerMargin>
   )
 }
 
-export const ChallengeDetailsPage = () => {
+const ChallengeDetailsPage = () => {
   const { challengeId, page } = useParams<{
     challengeId: string
     page?: string
   }>()
 
   const user = useAuthUser()
-  const { data, isLoading } = useChallengeDetailsQuery(challengeId)
-  const isUserAvailable = !user?.id
+  const { data, isLoading, isFetched } = useChallengeDetailsQuery(challengeId)
+
+  if (isFetched && !data) {
+    return (
+      <PublicLayout>
+        <NavigationBar
+          user={user}
+        />
+        <ChallengeNotFound />
+      </PublicLayout>
+    )
+  }
+
   return (
     <PublicLayout>
       {isLoading ? (
         <Loader />
       ) : (
         <>
-          {isUserAvailable ? (
-            <MainBanner>
-              <PublicNavbar showLogo />
-              <ChallengeDetailsBanner challenge={data?.challenge} />
-            </MainBanner>
-          ) : (
-            <MainBanner>
-              <ChallengeDetailsBanner challenge={data?.challenge} />
-            </MainBanner>
-          )}
+          <ChallengeDetailsBanner challenge={data?.challenge} user={user} />
           <ChallengeDetails
             canCreate={user?.can_create_challenges}
             isLoggedIn={!!user?.id}
             isGuest={user?.is_guest}
             challenge={data?.challenge}
             page={page}
+            user={user}
           />
         </>
       )}
     </PublicLayout>
   )
 }
+
+export default ChallengeDetailsPage

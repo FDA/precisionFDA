@@ -619,7 +619,15 @@ class ApiController < ApplicationController
 
     taggable = item_from_uid(taggable_uid)
 
-    if taggable.editable_by?(@context) || @context.can_administer_site?
+    can_edit = false
+    if Space.valid_scope?(taggable_uid)
+      # if taggable is a space, need to pass only user, not whole context - using own method instead of concern.
+      can_edit = taggable.editable_by?(@context.user)
+    else
+      can_edit = taggable.editable_by?(@context)
+    end
+
+    if can_edit || @context.can_administer_site?
       path = pathify(taggable)
       message = "redirect to item"
       @context.user.tag(taggable, with: tags, on: tag_context.presence || :tags)

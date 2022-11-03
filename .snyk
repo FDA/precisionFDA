@@ -5,16 +5,21 @@ ignore:
   SNYK-RUBY-ACTIONCABLE-20338:
     - '*':
         reason: No upgrade or patch available
-        expires: 2022-10-13T17:29:57.484Z
+        expires: 2023-10-13T17:29:57.484Z
         created: 2021-10-13T17:29:57.504Z
+  SNYK-RUBY-ACTIONPACK-3086619:
+    - '*':
+        reason: No upgrade or patch available
+        expires: 2023-11-01T21:15:00.000Z
+        created: 2022-11-01T21:15:00.000Z
   SNYK-RUBY-RACK-1061917:
     - '*':
         reason: No upgrade or patch available
-        expires: 2022-10-13T17:30:22.552Z
+        expires: 2023-10-13T17:30:22.552Z
         created: 2021-10-13T17:30:22.575Z
   'snyk:lic:rubygems:sidekiq:LGPL-3.0':
     - '*':
         reason: No upgrade or patch available
-        expires: 2022-10-13T17:38:09.532Z
+        expires: 2023-10-13T17:38:09.532Z
         created: 2021-10-13T17:38:09.555Z
 patch: {}
