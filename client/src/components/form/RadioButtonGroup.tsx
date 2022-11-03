@@ -38,6 +38,10 @@ const Group = styled.div<{ disabled: boolean }>`
       &:last-of-type {
         border-radius: 0 3px 3px 0;
       }
+
+      &:only-of-type {
+        border-radius: 3px 3px 3px 3px;
+      }
     }
 
     &:checked + label {
