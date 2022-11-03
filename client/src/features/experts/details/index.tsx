@@ -185,10 +185,10 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             </StyledTabList>
 
             <Switch>
-              <Route exact path={`${path}/blog`}>
+              <Route exact path={`/experts/${expert?.id}/blog`}>
                 <ExpertBlog expert={expert} content={content} />
               </Route>
-              <Route path={`${path}`}>
+              <Route path={`/experts/${expert?.id}`}>
                 <ExpertAbout expert={expert} />
               </Route>
             </Switch>
