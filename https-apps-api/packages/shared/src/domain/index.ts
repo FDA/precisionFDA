@@ -76,6 +76,8 @@ export * as dbCluster from './db-cluster'
 
 export * as space from './space'
 
+export * as challenge from './challenge'
+
 export {
   entities,
   AdminGroup,

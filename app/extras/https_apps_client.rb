@@ -63,6 +63,14 @@ class HttpsAppsClient
     )
   end
 
+  def propose_challenge(proposal)
+    request(
+      "/challenges/propose",
+      proposal,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   # Rename a folder.
   # @param folder_id [Integer] Folder ID.
   # @param new_name [String] New folder name.

@@ -12,6 +12,7 @@ import { router as jobsRouter } from '../jobs'
 import { router as siteSettingsRouter } from '../site-settings'
 import { router as spacesRouter } from '../spaces'
 import { router as usersRouter } from '../users'
+import { router as challengesRouter } from '../challenges'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
@@ -28,6 +29,7 @@ router.use('/jobs', jobsRouter.routes(), jobsRouter.allowedMethods())
 router.use('/site-settings', siteSettingsRouter.routes(), siteSettingsRouter.allowedMethods())
 router.use('/spaces', spacesRouter.routes(), spacesRouter.allowedMethods())
 router.use('/users', usersRouter.routes(), usersRouter.allowedMethods())
+router.use('/challenges', challengesRouter.routes(), challengesRouter.allowedMethods())
 // TODO: Add an admin authentication middleware, but not urgent
 
 export { router }
