@@ -3,3 +3,8 @@
 # To ban all spiders from the entire site uncomment the next two lines:
 # User-agent: *
 # Disallow: /
+
+<% if node.environment == "staging" || node.environment == "dev" %>
+User-agent: *
+Disallow: /
+<% end %>
