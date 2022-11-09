@@ -3,6 +3,7 @@ module Api
   class ChallengesController < BaseController
     include Paginationable
     include ChallengesHelper
+    include RecaptchaHelper
 
     skip_before_action :require_api_login, except: :save_editor_page
     before_action :check_admin, only: :save_editor_page
@@ -170,8 +171,18 @@ module Api
       proposal = unsafe_params.slice(:name, :email, :organisation,
                                      :specific_question, :specific_question_text,
                                      :data_details, :data_details_text)
-      NotificationsMailer.challenge_proposal_received(proposal).deliver_now
-      render json: {}
+
+      # PREPARED LOGIC FOR MOVING TO NODE ONCE EMAIL TEMPLATES ARE THERE
+      # proposal[:captchaValue] = params[:captchaValue] unless @context.logged_in?
+      # https_apps_client.propose_challenge(proposal)
+
+      if @context.logged_in? || verify_captcha_assessment(params[:captchaValue], "propose")
+        NotificationsMailer.challenge_proposal_received(proposal).deliver_now
+        render json: {}
+      else
+        raise ApiError,
+              "Your proposal was not submitted because of ReCaptcha validation failed, Please try again."
+      end
     end
 
     private
@@ -197,6 +208,10 @@ module Api
       else
         challenges
       end
+    end
+
+    def https_apps_client
+      DIContainer.resolve("https_apps_client")
     end
   end
 end

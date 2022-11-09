@@ -1,11 +1,9 @@
 import React, { FunctionComponent, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-
-import { contextUserSelector } from '../../../../reducers/context/selectors'
 import Modal from '../../Modal'
 import Button from '../../Button'
 import { PFDA_EMAIL } from '../../../../constants'
+import { useAuthUser } from '../../../../features/auth/useAuthUser'
 
 
 interface IGuestRestrictedLinkProps {
@@ -16,6 +14,7 @@ interface IGuestRestrictedLinkProps {
 
 
 const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to, children, className, ariaLabel }) => {
+  const user = useAuthUser()
   const [isOpen, setIsOpen] = useState(false)
 
   const openModal = () => {
@@ -26,7 +25,6 @@ const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to
     setIsOpen(false)
   }
 
-  const user = useSelector(contextUserSelector)
   const isLoggedIn = user && Object.keys(user).length > 0
   const userHasAccess = isLoggedIn && !user.is_guest
 

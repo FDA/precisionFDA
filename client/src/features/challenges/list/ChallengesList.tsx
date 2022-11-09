@@ -24,6 +24,7 @@ import {
   SectionTitle,
   Title,
 } from '../../../components/Public/styles'
+import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParams } from '../../../hooks/usePaginationState'
 import { colors } from '../../../styles/theme'
 import NavigationBar from '../../../views/components/NavigationBar/NavigationBar'
@@ -82,6 +83,7 @@ export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
 `
 
 const ChallengesList = () => {
+  usePageMeta({ title: 'Challenges - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()

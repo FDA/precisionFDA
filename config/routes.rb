@@ -255,6 +255,7 @@ Rails.application.routes.draw do
           put :tags
           post :accept
           post :add_data
+          patch :fix_guest_permissions
 
           post :lock, controller: :space_requests
           post :unlock, controller: :space_requests

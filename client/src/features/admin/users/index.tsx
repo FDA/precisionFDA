@@ -13,6 +13,7 @@ import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
 import { MetaT, useList } from '../../../hooks/useList'
+import { usePageMeta } from '../../../hooks/usePageMeta'
 import { colors } from '../../../styles/theme'
 import { FilterT, PaginationInput, prepareListFetch, SortInput } from '../../../utils/filters'
 import { cleanObject, toArrayFromObject } from '../../../utils/object'
@@ -167,6 +168,7 @@ export const getAdminUserColumns = (colWidths: any) =>  [
 
 
 const UsersList = () => {
+  usePageMeta({ title: 'precisionFDA Admin - Users' })
   const {
     sortBy,
     setSortBy,
