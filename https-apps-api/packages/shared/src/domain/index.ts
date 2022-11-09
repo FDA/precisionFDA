@@ -76,7 +76,10 @@ export * as dbCluster from './db-cluster'
 
 export * as space from './space'
 
+export * as spaceMembership from './space-membership'
+
 export * as challenge from './challenge'
+
 
 export {
   entities,

@@ -293,6 +293,14 @@ class HttpsAppsClient
     )
   end
 
+  def fix_guest_permissions(id)
+    request(
+      "/spaces/#{id}/fix_guest_permissions",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   # ┌─────────────────────────┐
   # │                         │
   # │ site-settings endpoints │
