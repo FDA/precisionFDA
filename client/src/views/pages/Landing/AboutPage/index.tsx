@@ -9,7 +9,7 @@ import PublicLayout from '../../../layouts/PublicLayout'
 
 
 const AboutPage = () => {
-  usePageMeta({ title: 'precisionFDA - About' })
+  usePageMeta({ title: 'About - precisionFDA' })
   const user = useAuthUser()
   const isLoggedIn = (user !== null)
   const title = 'About precisionFDA'

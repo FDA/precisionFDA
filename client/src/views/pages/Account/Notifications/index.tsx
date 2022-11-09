@@ -14,6 +14,7 @@ import { GuestNotAllowed } from '../../../../components/GuestNotAllowed'
 import { mapValues } from '../../../../utils/object'
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
 import { UserLayout } from '../../../layouts/UserLayout'
+import { usePageMeta } from '../../../../hooks/usePageMeta'
 
 enum Roles {
   'reviewer' = 'reviewer',
@@ -103,6 +104,7 @@ const preference = {
 }
 
 const NotificationsPage = () => {
+  usePageMeta({ title: 'Notifications - precisionFDA' })
   const user = useAuthUser()
   const [localPrefSelection, setLocalPrefSelection] = useState<any>(preference)
   const roles = Object.keys(localPrefSelection) as Array<Roles>

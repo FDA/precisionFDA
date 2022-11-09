@@ -83,7 +83,7 @@ export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
 `
 
 const ChallengesList = () => {
-  usePageMeta({ title: 'precisionFDA - Challenges' })
+  usePageMeta({ title: 'Challenges - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()

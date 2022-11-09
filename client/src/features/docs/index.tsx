@@ -29,7 +29,7 @@ import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
 
 const Docs = () => {
-  usePageMeta({ title: 'precisionFDA - Docs' })
+  usePageMeta({ title: 'Docs - precisionFDA' })
   const user = useAuthUser()
   const { pathname } = useLocation()
   const { data } = useQuery(['user'], () => fetchCurrentUser())

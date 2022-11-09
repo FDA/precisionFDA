@@ -160,7 +160,7 @@ export const StyledViewAllButton  = styled(ViewAllButton)`
 
 
 const LandingPage : FunctionComponent = () => {
-  usePageMeta({ title: 'precisionFDA - Overview' })
+  usePageMeta({ title: 'Overview - precisionFDA' })
   const user = useAuthUser()
   const dispatch = useDispatch()
   useEffect(() => {

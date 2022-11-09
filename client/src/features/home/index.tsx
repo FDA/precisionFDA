@@ -56,7 +56,7 @@ export async function counterRequest(scope: ResourceScope): Promise<CounterReque
 }
 
 const Home2 = () => {
-  usePageMeta({ title: 'precisionFDA - My Home' })
+  usePageMeta({ title: 'My Home - precisionFDA' })
   const user = useAuthUser()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()
