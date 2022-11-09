@@ -224,7 +224,7 @@ module SpaceService
         suppressAllNotifications: true,
       )
 
-      if space.shared?
+      if space.shared? || space.groups?
         api.project_invite(
           project_dxid,
           space.guest_dxorg,

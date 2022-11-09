@@ -159,6 +159,11 @@ const defaultConfig = {
       },
     },
   },
+  recaptcha: {
+    projectId: process.env.RECAPTCHA_PROJECT_ID,
+    siteKey: process.env.RECAPTCHA_SITE_KEY,
+    apiKey: process.env.RECAPTCHA_API_KEY,
+  },
   devFlags: {
     middleware: {
       skipUserMiddlewareForDebugRoutes: false,

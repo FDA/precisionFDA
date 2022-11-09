@@ -182,6 +182,13 @@ module Api
       head :ok
     end
 
+    def fix_guest_permissions
+      response = https_apps_client.fix_guest_permissions(params[:id])
+      render json: response
+    rescue StandardError => e
+      raise ApiError, e.message
+    end
+
     private
 
     # Sends space activatio email to leads.

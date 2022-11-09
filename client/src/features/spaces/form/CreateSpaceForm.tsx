@@ -31,11 +31,13 @@ interface SpaceCreateForm {
 export interface ISpaceForm {
   mutation: UseMutationResult<CreateSpaceResponse, unknown, CreateSpacePayload, unknown>
   defaultValues?: Partial<SpaceCreateForm>
+  isDuplicate?: boolean
 }
 
 export const SpaceForm = ({
   mutation,
   defaultValues,
+  isDuplicate = false,
 }: ISpaceForm) => {
   const user = useAuthUser()
 
@@ -105,7 +107,7 @@ export const SpaceForm = ({
 
   const isSubmitting = mutation.isLoading
 
-  const options = getSpaceTypeOptions({ isAdmin, isGovUser, isReviewAdmin })
+  const options = getSpaceTypeOptions({ isAdmin, isGovUser, isReviewAdmin, isDuplicate })
 
   return (
     <StyledForm onSubmit={handleSubmit(onSubmit)}>

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
+import { usePageMeta } from '../../../../hooks/usePageMeta'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../../layouts/PublicLayout'
 
 
 const AboutPage = () => {
+  usePageMeta({ title: 'About - precisionFDA' })
   const user = useAuthUser()
   const isLoggedIn = (user !== null)
   const title = 'About precisionFDA'

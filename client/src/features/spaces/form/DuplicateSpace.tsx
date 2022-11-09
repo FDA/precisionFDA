@@ -55,6 +55,7 @@ export const DuplicateSpace = () => {
               sponsor_lead_dxuser: data.space.guest_lead.dxuser,
               cts: data.space.cts,
             }}
+            isDuplicate={true}
           />
         </StyledPageContent>
       </StyledPageCenter>
