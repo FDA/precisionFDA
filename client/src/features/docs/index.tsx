@@ -2,6 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import { useQuery } from 'react-query'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import { isActiveLink } from '../../helpers'
+import { usePageMeta } from '../../hooks/usePageMeta'
 import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
 import PublicLayout from '../../views/layouts/PublicLayout'
 import { fetchCurrentUser } from '../auth/api'
@@ -28,6 +29,7 @@ import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
 
 const Docs = () => {
+  usePageMeta({ title: 'Docs - precisionFDA' })
   const user = useAuthUser()
   const { pathname } = useLocation()
   const { data } = useQuery(['user'], () => fetchCurrentUser())

@@ -1,6 +1,6 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { email, space, spaceEvent } from '@pfda/https-apps-shared'
+import { email, space, spaceMembership, spaceEvent, entities, errors, client } from '@pfda/https-apps-shared'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
 
@@ -58,6 +58,74 @@ router.patch(
       receiverUserIds: [],
       emailTypeId: email.emailConfig.EMAIL_TYPES.spaceChanged as any,
     })
+
+    ctx.status = 204
+  },
+)
+
+router.patch(
+  '/:id/fix_guest_permissions',
+  async ctx => {
+
+    const spaceToFix = await ctx.em.findOne(
+      entities.Space,
+      { id: ctx.params.id as any }, {},
+    )
+
+    const membership = await ctx.em.findOne(
+      entities.SpaceMembership,
+      {
+        spaces: ctx.params.id as any,
+        user: ctx.user.id
+      }, {}
+    )
+
+    if (spaceToFix == null ||
+      membership == null ||
+      spaceToFix.type !== space.types.SPACE_TYPE.GROUPS ||
+      membership.role !== spaceMembership.types.SPACE_MEMBERSHIP_ROLE.LEAD) {
+      throw new errors.PermissionError("Operation not permitted.")
+    }
+
+    const platformClient = new client.PlatformClient(ctx.log)
+    if (membership.side === spaceMembership.types.SPACE_MEMBERSHIP_SIDE.GUEST) {
+      try {
+        // try to get some data from host project - should fail.
+        const res = await platformClient.projectDescribe({
+          projectDxid: spaceToFix.hostProject,
+          body: {},
+          accessToken: ctx.user.accessToken,
+        })
+      } catch (err) {
+        throw new errors.PermissionError("Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.")
+      }
+      // if no error, the permissions are correct.
+      throw new errors.PermissionError("Permissions are already corrected for guest side.")
+    } else {
+      // check project first.
+      const res = await platformClient.projectDescribe({
+        projectDxid: spaceToFix.hostProject,
+        body: {
+          "fields": {
+            "permissions": true
+          },
+        },
+        accessToken: ctx.user.accessToken,
+      })
+
+      if (spaceToFix.guestDxOrg in res.permissions) {
+        throw new errors.PermissionError("Permissions are already corrected for guest side.")
+      }
+
+      const response = await platformClient.projectInvite({
+        projectDxid: spaceToFix.hostProject,
+        invitee: spaceToFix.guestDxOrg,
+        level: 'CONTRIBUTE',
+        accessToken: ctx.user.accessToken,
+      })
+
+      ctx.log.info({ response }, "Guest organization invited to host project.")
+    }
 
     ctx.status = 204
   },

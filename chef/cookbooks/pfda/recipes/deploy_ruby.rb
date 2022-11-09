@@ -56,6 +56,12 @@ git app_dir do
   user node[:deploy_user]
 end
 
+template ::File.join(app_dir, "public", "robots.txt") do
+  source "robots.txt.erb"
+  user node[:deploy_user]
+  group node[:deploy_user_group]
+end
+
 execute "Install Bundler from Gemfile.lock" do
   cwd app_dir
   command %{

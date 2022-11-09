@@ -27,6 +27,6 @@ module RecaptchaHelper
 
     result.dig("tokenProperties", "valid") &&
       result.dig("tokenProperties", "action") == action &&
-      result.dig("riskAnalysis", "score") > minimal_score
+      result.dig("riskAnalysis", "score") >= minimal_score
   end
 end

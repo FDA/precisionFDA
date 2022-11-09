@@ -29,6 +29,7 @@ import { PageContainer, PageContainerMargin } from '../../../../components/Page/
 import { Tagline } from '../Tagline'
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
 import { ButtonSolidBlue } from '../../../../components/Button'
+import { usePageMeta } from '../../../../hooks/usePageMeta'
 
 
 const challengeListFilter = (items: IChallengeListItem[]) => {
@@ -159,6 +160,7 @@ export const StyledViewAllButton  = styled(ViewAllButton)`
 
 
 const LandingPage : FunctionComponent = () => {
+  usePageMeta({ title: 'Overview - precisionFDA' })
   const user = useAuthUser()
   const dispatch = useDispatch()
   useEffect(() => {
