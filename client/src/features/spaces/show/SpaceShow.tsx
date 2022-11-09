@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
+import { toast } from 'react-toastify'
 import {
   Redirect,
   Route,
@@ -39,7 +40,7 @@ import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { WorkflowList } from '../../home/workflows/WorkflowList'
 import { WorkflowShow } from '../../home/workflows/WorkflowShow'
 import { MembersList } from '../members/MembersList'
-import { spaceRequest } from '../spaces.api'
+import { spaceRequest, fixGuestPermissions } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { Activation } from './SpaceActivation'
@@ -70,6 +71,19 @@ const Spaces2 = ({
   const { path } = useRouteMatch()
   const spaceActions = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
+
+  const fixSpaceMutation = useMutation({
+    mutationFn: (payload: {
+      id: string
+    }) => fixGuestPermissions(payload),
+    onSuccess: () => {
+      toast.success("Permissions for guest side successfully updated.")
+
+    },
+    onError: (e:any) => {
+        toast.error(e.response.data.error.message)
+    }
+  })
 
   if (user?.is_guest) {
     return <GuestNotAllowed />
@@ -104,6 +118,14 @@ const Spaces2 = ({
                   onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
                 >
                   Duplicate Space
+                </ActionButton>
+              )}
+              {!spaceActions['Fix Permissions']?.shouldHide && (
+                <ActionButton
+                  data-testid="fix-space-button"
+                  onClick={() => fixSpaceMutation.mutate({id: space.id})}
+                >
+                  Fix Guest Side Permissions
                 </ActionButton>
               )}
             </Row>
