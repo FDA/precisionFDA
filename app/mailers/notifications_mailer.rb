@@ -2,7 +2,7 @@ class NotificationsMailer < ApplicationMailer
   helper :application, :client_url
 
   if Rails.env.production?
-    default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
+    default  from: "PrecisionFDA <PrecisionFDA@fda.hhs.gov>",
              reply_to: "PrecisionFDA@fda.hhs.gov"
   end
 
@@ -16,41 +16,41 @@ class NotificationsMailer < ApplicationMailer
     recipients = ["precisionfda-support@dnanexus.com"]
     recipients << "precisionfda@fda.hhs.gov" if Rails.env.production?
 
-    mail to: recipients,
+    mail(to: recipients,
          reply_to: "precisionfda-support@dnanexus.com",
-         subject: "New access request from #{invitation.first_name} #{invitation.last_name}"
+         subject: "New access request from #{invitation.first_name} #{invitation.last_name}")
   end
 
   def guest_access_email(invitation)
     @invitation = invitation
-    mail to: @invitation.email,
+    mail(to: @invitation.email,
          bcc: "precisionfda-support@dnanexus.com",
-         subject: "Your precisionFDA access request"
+         subject: "Your precisionFDA access request")
   end
 
   def license_request_email(license, user, message)
     @license = license
     @user = user
     @message = message
-    mail to: @license.user.email,
+    mail(to: @license.user.email,
          reply_to: @user.email,
-         subject: "#{@user.full_name} requested approval to \"#{@license.title}\""
+         subject: "#{@user.full_name} requested approval to \"#{@license.title}\"")
   end
 
   def license_approved_email(license, user)
     @license = license
     @user = user
-    mail to: @user.email,
+    mail(to: @user.email,
          reply_to: @license.user.email,
-         subject: "You were approved for \"#{@license.title}\""
+         subject: "You were approved for \"#{@license.title}\"")
   end
 
   def license_revoked_email(license, user)
     @license = license
     @user = user
-    mail to: @user.email,
+    mail(to: @user.email,
          reply_to: @license.user.email,
-         subject: "Your license was revoked for \"#{@license.title}\""
+         subject: "Your license was revoked for \"#{@license.title}\"")
   end
 
   def space_activation_email(space, membership)
@@ -63,15 +63,15 @@ class NotificationsMailer < ApplicationMailer
       end
     @leads_names = space.administrator? ? "creator and approver" : "host and guest"
     @user = membership.user
-    mail to: @user.email,
-         subject: "Action required to activate new space \"#{@space.title}\""
+    mail(to: @user.email,
+         subject: "Action required to activate new space \"#{@space.title}\"")
   end
 
   def space_activated_email(space, membership)
     @space = space
     @user = membership.user
-    mail to: @user.email,
-         subject: "Your space was activated: \"#{@space.title}\""
+    mail(to: @user.email,
+         subject: "Your space was activated: \"#{@space.title}\"")
   end
 
   def space_invitation_email(space, membership, admin)
@@ -80,9 +80,9 @@ class NotificationsMailer < ApplicationMailer
     @user = membership.user
     @admin = admin
 
-    mail to: @user.email,
+    mail(to: @user.email,
          reply_to: admin.user.email,
-         subject: "#{admin.user.full_name} added you to the space \"#{space.title}\""
+         subject: "#{admin.user.full_name} added you to the space \"#{space.title}\"")
   end
 
   def external_user_invited_to_space_email(space, email, admin, role)
@@ -93,9 +93,9 @@ class NotificationsMailer < ApplicationMailer
 
     subject = %(You have been invited to join "#{space.title}" space)
 
-    mail to: email,
+    mail(to: email,
          reply_to: admin.user.email,
-         subject: subject
+         subject: subject)
   end
 
   def user_remove_approved_email(org, member, approver)
@@ -103,10 +103,10 @@ class NotificationsMailer < ApplicationMailer
     @member = member
     @approver = approver
 
-    mail to: @org.admin.email,
+    mail(to: @org.admin.email,
          reply_to: @approver.email,
          subject: "#{@approver.full_name} approved your request to remove #{@member.full_name} "\
-                  "from your org (\"#{@org.name}\")"
+                  "from your org (\"#{@org.name}\")")
   end
 
   def user_leave_approved_email(org, member, approver)
@@ -114,41 +114,40 @@ class NotificationsMailer < ApplicationMailer
     @member = member
     @approver = approver
 
-    mail to: @org.admin.email,
+    mail(to: @org.admin.email,
          reply_to: @approver.email,
          subject: "#{@approver.full_name} approved #{@member.full_name}'s request to leave "\
-                  "your organization (\"#{@org.name}\")"
+                  "your organization (\"#{@org.name}\")")
   end
-
 
   def org_dissolve_approved_email(org, approver)
     @org = org
     @approver = approver
 
-    mail to: @org.admin.email,
+    mail(to: @org.admin.email,
          reply_to: @approver.email,
-         subject: "#{@approver.full_name} approved your request to dissolve \"#{@org.name}\" org"
+         subject: "#{@approver.full_name} approved your request to dissolve \"#{@org.name}\" org")
   end
 
   def new_expert_email(expert)
     @expert = expert
-    mail to: @expert.user.email,
-         subject: "A new Expert Q&A Session was created for \"#{@expert.user.full_name.titleize}\""
+    mail(to: @expert.user.email,
+         subject: "A new Expert Q&A Session was created for \"#{@expert.user.full_name.titleize}\"")
   end
 
   def new_expert_question_email(expert, question)
     @expert = expert
     @question = question
     name = @question.user.nil? ? "Anonymous" : @question.user.full_name.titleize
-    mail to: @expert.user.email,
-         subject: "A new question was submitted by \"#{name}\""
+    mail(to: @expert.user.email,
+         subject: "A new question was submitted by \"#{name}\"")
   end
 
-  def challenge_results(file, user_id, test_email=nil)
+  def challenge_results(file, user_id, test_email = nil)
     @user = User.find(user_id)
 
     attachments[File.basename(file)] = {
-      content: Base64.encode64(File.read(file))
+      content: Base64.encode64(File.read(file)),
     }
 
     if test_email.present?
@@ -171,8 +170,8 @@ class NotificationsMailer < ApplicationMailer
                "#{proposal[:name]} (#{proposal[:email]})"
     @proposal = proposal
 
-    mail to: recipients,
+    mail(to: recipients,
          reply_to: SUPPORT_EMAIL,
-         subject: @subject
+         subject: @subject)
   end
 end

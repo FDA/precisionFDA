@@ -13,7 +13,7 @@ export const config: ConfigOverride = () => ({
     debug: false,
   },
   emails: {
-    salesforce: {
+    smtp: {
       isEnabled: false,
     },
   },
