@@ -145,7 +145,7 @@ export const ExpertsCondensedList = () => {
 }
 
 const ExpertsList = () => {
-  usePageMeta({ title: 'precisionFDA - Experts' })
+  usePageMeta({ title: 'Experts - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()

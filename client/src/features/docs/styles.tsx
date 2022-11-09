@@ -26,6 +26,7 @@ export const DocsContent = styled.main`
   color: #333333;
   line-height: 1.428571429;
   font-size: 16px;
+  padding: 0 16px;
   padding-top: 32px;
   box-sizing: border-box;
 
@@ -135,9 +136,9 @@ export const DocRow = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column-reverse;
-  gap: 64px;
   padding: 0 16px 64px 16px;
   @media (min-width: ${breakPoints.large}px) {
+    gap: 32px;
     flex-direction: row;
     justify-content: space-between;
     ${RightSide} {

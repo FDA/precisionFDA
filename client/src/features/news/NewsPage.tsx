@@ -37,7 +37,7 @@ import {
 import { useNewsListQuery } from './useNewsListQuery'
 
 const NewsPage = () => {
-  usePageMeta({ title: 'precisionFDA - News' })
+  usePageMeta({ title: 'News - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateNews = user && user.can_administer_site
   const location = useLocation()

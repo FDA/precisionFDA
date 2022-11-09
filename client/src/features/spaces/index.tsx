@@ -10,7 +10,7 @@ import SpacesList from './SpacesList'
 
 
 const Spaces = () => {
-  usePageMeta({ title: 'precisionFDA - Spaces' })
+  usePageMeta({ title: 'Spaces - precisionFDA' })
   const { path } = useRouteMatch()
 
   return (
