@@ -38,6 +38,10 @@ const Group = styled.div<{ disabled: boolean }>`
       &:last-of-type {
         border-radius: 0 3px 3px 0;
       }
+
+      &:only-of-type {
+        border-radius: 3px 3px 3px 3px;
+      }
     }
 
     &:checked + label {
@@ -68,6 +72,7 @@ export function RadioButtonGroup<T extends string | undefined>({
   onBlur,
   disabled = false,
   ariaLabel,
+  name = ''
 }: {
   ariaLabel?: string
   value?: T
@@ -75,6 +80,7 @@ export function RadioButtonGroup<T extends string | undefined>({
   options: { value?: T; label: string }[]
   onChange: (value?: T) => void
   onBlur?: () => void
+  name?: string
 }) {
   const [selected, setSelected] = useState(value || options[0].value)
 
@@ -89,16 +95,16 @@ export function RadioButtonGroup<T extends string | undefined>({
           <input
             type="radio"
             className="radio-button"
-            name="radioButton"
+            name={`radioButton-${name}`}
             value={value}
-            id={`button${index}`}
+            id={`button-${name}-${index}`}
             autoComplete="off"
             checked={selected === value}
             onChange={() => setSelected(value)}
             disabled={disabled}
           />
 
-          <label aria-checked="false" htmlFor={`button${index}`}>{label}</label>
+          <label aria-checked="false" htmlFor={`button-${name}-${index}`}>{label}</label>
         </Fragment>
       ))}
     </Group>

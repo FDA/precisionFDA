@@ -33,11 +33,9 @@ module SpaceService
       end
 
       projects.each do |project, project_files|
-        begin
-          api.call(project, "removeObjects", objects: project_files.map(&:dxid))
-        rescue DXClient::Errors::NotFoundError
-          # do nothing
-        end
+        api.call(project, "removeObjects", objects: project_files.map(&:dxid))
+      rescue DXClient::Errors::NotFoundError
+        # do nothing
       end
     end
   end

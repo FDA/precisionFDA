@@ -1,5 +1,7 @@
 export { Space } from './space.entity'
 
+export * as types from './space.enum'
+
 export { SyncSpacesPermissionsOperation } from './ops/permissions-synchronize'
 
 export { SpaceAcceptOperation } from './ops/accept-space'

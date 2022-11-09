@@ -22,6 +22,16 @@ export interface CreateChallengePayload {
   pre_registration_url: string | null,
 }
 
+export interface ProposeChallengePayload {
+  name: string,
+  email: string,
+  organisation: string,
+  specific_question: boolean,
+  specific_question_text: string,
+  data_details: boolean,
+  data_details_text: string,
+}
+
 
 const throwIfError = (status: number, payload?: any) => {
   if (status !== httpStatusCodes.OK) {
@@ -44,8 +54,7 @@ export async function editChallengeRequest(payload: CreateChallengePayload, chal
 }
 
 export async function createChallengeCardImage(file: File, challengeCreationCallback: (payload: { id: string, url: string }) => void): Promise<any> {
-
-  await backendCall('/api/create_challenge_card_image', 'POST', { name: file.name, metadata: {}})
+  await backendCall('/api/create_challenge_card_image', 'POST', { name: file.name, metadata: {} })
     .then(response => {
       const numChunks = Math.ceil(file.size / CHUNK_SIZE)
       const reader = new FileReader()
@@ -91,7 +100,10 @@ export async function createChallengeCardImage(file: File, challengeCreationCall
       reader.readAsArrayBuffer(file as any)
     },
     )
+}
 
+export async function proposeChallengeRequest(payload: ProposeChallengePayload) {
+  return axios.post('/api/challenges/propose', payload).then(r => r.data)
 }
 
 export async function fetchScoringAppUsers(): Promise<[]> {

@@ -28,7 +28,7 @@ module SpaceService
         api.call(
           "project", "new",
           name: "precisionfda-space-#{space.id}-#{admin.side.upcase}",
-          billTo: admin.user.billto,
+          billTo: admin.user.billto
         )["id"]
       end
 

@@ -112,7 +112,6 @@ const ExpertAskQuestionModalComponent = ({
                 action="question"
               />
             )}
-
         </Content>
       </Modal>
     </div>

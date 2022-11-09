@@ -33,6 +33,7 @@ import { WorkflowList } from './workflows/WorkflowList'
 import { WorkflowShow } from './workflows/WorkflowShow'
 import { useAuthUser } from '../auth/useAuthUser'
 import { UserLayout } from '../../views/layouts/UserLayout'
+import { usePageMeta } from '../../hooks/usePageMeta'
 
 
 interface CounterRequest {
@@ -55,6 +56,7 @@ export async function counterRequest(scope: ResourceScope): Promise<CounterReque
 }
 
 const Home2 = () => {
+  usePageMeta({ title: 'My Home - precisionFDA' })
   const user = useAuthUser()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()

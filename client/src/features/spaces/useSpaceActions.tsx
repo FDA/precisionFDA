@@ -1,4 +1,5 @@
 import { useQueryClient } from 'react-query'
+import { useLocation } from 'react-router-dom'
 import { ActionFunctionsType } from '../home/types'
 import { ISpace } from './spaces.types'
 import { useUnlockSpaceModal } from './useUnlockSpaceModal'
@@ -8,10 +9,12 @@ export enum SpaceActions {
   'Edit Space' = 'Edit Space',
   'Duplicate Space' = 'Duplicate Space',
   'Delete' = 'Delete',
+  'Fix Permissions' = 'Fix Permissions'
 }
 
 export const useSpaceActions = ({ space }: { space: ISpace }) => {
   const queryClient = useQueryClient()
+  const { search } = useLocation()
 
   const modal = useUnlockSpaceModal({
     space,
@@ -48,6 +51,12 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
       isDisabled: false,
       shouldHide: !!space.links.delete,
     },
+    'Fix Permissions': {
+      type: 'modal',
+      func: () => {},
+      isDisabled: false,
+      shouldHide: !(space.type === 'groups' && search === '?permissionsDebug=true')
+    }
   }
 
   return actions
