@@ -15,6 +15,10 @@ export const pagePadding = css`
   }
 `
 
+export const PageLoadWrapper = styled.div`
+  flex: 1 0 auto;
+`
+
 export const PageLeftColumn = styled.div`
   flex: 1 1 auto;
 `

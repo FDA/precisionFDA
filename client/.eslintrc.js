@@ -42,6 +42,7 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'react/function-component-definition': 'off',
     'no-prototype-builtins': 'off',
+    'arrow-body-style': 'off',
     'import/prefer-default-export': 'off',
     'react/jsx-filename-extension': [1, { 'extensions': ['.tsx', '.jsx']}],
     'object-curly-spacing': [

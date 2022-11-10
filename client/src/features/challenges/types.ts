@@ -41,5 +41,6 @@ export type TimeStatus = 'upcoming' | 'ended' | 'current'
 export interface ChallengeListParams {
   year?: string
   time_status?: TimeStatus
-  pagination: PaginationParams
+  page?: number
+  perPage?: number
 }

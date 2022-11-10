@@ -52,7 +52,7 @@ const ProposeChallengePage = React.lazy(
 )
 const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
 const LandingPage = React.lazy(
-  () => import('./views/pages/Landing/LandingPage'),
+  () => import('./features/overview/OverviewPage'),
 )
 const AboutPage = React.lazy(() => import('./views/pages/Landing/AboutPage'))
 const NotificationsPage = React.lazy(() => import('./views/pages/Account/Notifications'))

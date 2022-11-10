@@ -12,9 +12,9 @@ import {
   Content,
   ItemBody,
   ItemButton,
-  NewsList,
-  NewsLoaderWrapper,
   PageFilterTitle,
+  PageList,
+  PageLoaderWrapper,
   PageMainBody,
   PageRow,
   RightList,
@@ -23,20 +23,16 @@ import {
   SectionTitle,
   Title,
 } from '../../components/Public/styles'
-import {
-  usePaginationParams,
-  usePaginationState,
-} from '../../hooks/usePaginationState'
+import { usePaginationParams } from '../../hooks/usePaginationState'
 import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
 import PublicLayout from '../../views/layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { expertsYearsListRequest } from './api'
+import { ExpertsCondensedList } from './ExpertsCondensedList/ExpertsCondensedList'
 import {
-  useExpertsListCondensedQuery,
   useExpertsListQuery,
 } from './useExpertsListQuery'
 import { PageContainerMargin } from '../../components/Page/styles'
-import { pluralize } from '../../utils/formatting'
 import { usePageMeta } from '../../hooks/usePageMeta'
 
 export const ChallengeListItem = styled.div`
@@ -100,50 +96,6 @@ export const ExpertMeta = styled.div`
   justify-content: space-between;
 `
 
-export const ExpertsCondensedList = () => {
-  const pagination = usePaginationState()
-  const { data, isLoading, isFetched } = useExpertsListCondensedQuery({
-    page: pagination.page,
-  })
-
-  if (isLoading) return <Loader />
-
-  return (
-    <StyledCondensedList>
-      {data?.experts.map(e => (
-        <ExpertRow key={e.id}>
-          <Link to={`/experts/${e.id}`} data-turbolinks="false">
-            <ExpertImageCircleSmall src={e.image} />
-          </Link>
-          <div>
-            <Link to={`/experts/${e.id}`} data-turbolinks="false">{e.meta.title}</Link>
-            <ExpertMeta>
-              <div>{e.meta.totalAnswerCount || 0} {pluralize('Answer', e.meta.totalAnswerCount || 0)} </div>
-              <div>{e.meta.totalCommentCount || 0} {pluralize('Comment', e.meta.totalCommentCount || 0)}</div>
-            </ExpertMeta>
-          </div>
-        </ExpertRow>
-      ))}
-      <Pagination
-        showPerPage={false}
-        showPageOf={false}
-        showPageJump={false}
-        page={data?.meta?.current_page}
-        totalCount={data?.meta?.total_count}
-        totalPages={data?.meta?.total_pages}
-        isHidden={hidePagination(
-          isFetched,
-          data?.experts?.length,
-          data?.meta?.total_pages,
-        )}
-        isPreviousData={data?.meta?.prev_page !== null}
-        isNextData={data?.meta?.next_page !== null}
-        setPage={n => pagination.setPage(n)}
-      />
-    </StyledCondensedList>
-  )
-}
-
 const ExpertsList = () => {
   usePageMeta({ title: 'Experts - precisionFDA' })
   const user = useAuthUser()
@@ -177,14 +129,14 @@ const ExpertsList = () => {
       <PageContainerMargin>
         <PageRow>
           {isLoading ? (
-            <NewsLoaderWrapper>
+            <PageLoaderWrapper>
               <Loader />
-            </NewsLoaderWrapper>
+            </PageLoaderWrapper>
           ) : (
             <PageMainBody>
               <PageFilterTitle>Expert Highlights</PageFilterTitle>
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
-              <NewsList>
+              <PageList>
                 {data?.experts?.length === 0 && (
                   <div>There are no experts.</div>
                 )}
@@ -267,14 +219,18 @@ const ExpertsList = () => {
                     pagination.setPerPageParam(n, 'replaceIn')
                   }
                 />
-              </NewsList>
+              </PageList>
             </PageMainBody>
           )}
           <RightSide>
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as="a" data-turbolinks="false" href="/experts/new">
+                  <ButtonSolidBlue
+                    as="a"
+                    data-turbolinks="false"
+                    href="/experts/new"
+                  >
                     Add an expert
                   </ButtonSolidBlue>
                 </ButtonRow>
