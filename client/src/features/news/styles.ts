@@ -13,9 +13,6 @@ export const ItemDate = styled.div`
   text-transform: uppercase;
   letter-spacing: 0.7px;
 `
-export const NewsLoaderWrapper = styled.div`
-  flex: 1 0 auto;
-`
 
 export const NewsListItem = styled.div`
   display: flex;

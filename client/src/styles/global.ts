@@ -34,7 +34,6 @@ const GlobalStyle = createGlobalStyle`
     --toastify-color-error: ${colors.primaryRed};
     --toastify-toast-width: inherit;
   }
-
 `
 
 export const LayoutBody = styled.div`

@@ -12,6 +12,8 @@ import {
   Content,
   ItemButton,
   PageFilterTitle,
+  PageList,
+  PageLoaderWrapper,
   PageMainBody,
   PageRow,
   RightList,
@@ -30,9 +32,7 @@ import { newsYearsListRequest } from './api'
 import {
   ItemBody,
   ItemDate,
-  NewsList,
   NewsListItem,
-  NewsLoaderWrapper,
 } from './styles'
 import { useNewsListQuery } from './useNewsListQuery'
 
@@ -46,7 +46,8 @@ const NewsPage = () => {
 
   const { data, isLoading, isFetched } = useNewsListQuery({
     year: query.year as string,
-    pagination,
+    page: pagination.pageParam,
+    perPage: pagination.perPageParam,
   })
   const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(
     'news-years',
@@ -68,13 +69,13 @@ const NewsPage = () => {
       <PageContainerMargin>
         <PageRow>
           {isLoading ? (
-            <NewsLoaderWrapper>
+            <PageLoaderWrapper>
               <Loader />
-            </NewsLoaderWrapper>
+            </PageLoaderWrapper>
           ) : (
             <PageMainBody>
               {query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
-              <NewsList>
+              <PageList>
                 {data?.news_items?.map(n => (
                   <NewsListItem key={n.id}>
                     <ItemDate>
@@ -119,7 +120,7 @@ const NewsPage = () => {
                     pagination.setPageParam(n, 'replaceIn')
                   }}
                 />
-              </NewsList>
+              </PageList>
             </PageMainBody>
           )}
           <RightSide>

@@ -4,32 +4,26 @@ import { useQuery } from 'react-query'
 import axios from 'axios'
 import styled, { css } from 'styled-components'
 import classNames from 'classnames/bind'
-
 import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
 import { theme } from '../../../../styles/theme'
-import Button from '../../Button'
-
+import { PageContainerMargin } from '../../../../components/Page/styles'
+import { Button, ButtonSolidBlue } from '../../../../components/Button/index'
 
 type StyledPublicNavbarProps = {
-  isSticky?: boolean,
+  isSticky?: boolean
 }
 
-const StyledPublicNavbar = styled.nav<StyledPublicNavbarProps>`
+const StyledPublicNavbar = styled(PageContainerMargin)<StyledPublicNavbarProps>`
   display: flex;
   height: ${theme.sizing.navigationBarHeight};
   text-align: center;
   vertical-align: middle;
-  transition: all .18s ease-in-out;
+  transition: all 0.18s ease-in-out;
+  flex-direction: row;
+  gap: 32px;
 
   nav > * {
     vertical-align: middle;
-  }
-
-  .logo-img {
-    display: inline-block;
-    text-align: left;
-    margin: auto;
-    margin-left: ${theme.padding.mainContentHorizontal};
   }
 
   .logo-img-dark {
@@ -41,28 +35,29 @@ const StyledPublicNavbar = styled.nav<StyledPublicNavbarProps>`
     height: 40px;
   }
 
-  @media (max-width: 640px) {
-    flex-flow: column wrap;
-    overflow: scroll;
+  @media (max-width: 930px) {
+    overflow-x: auto;
   }
 
-  ${props => props.isSticky ? `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: ${theme.colors.subtleBlue};
-    border-bottom: 1px solid ${theme.colors.borderDefault};
-    z-index: 20;
-  ` : ''}
+  ${props =>
+    props.isSticky
+      ? css`
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          background-color: ${theme.colors.subtleBlue};
+          border-bottom: 1px solid ${theme.colors.borderDefault};
+          z-index: 20;
+        `
+      : ''}
 `
 
 type StyledPFDALogoProps = {
-  hidden?: boolean,
+  hidden?: boolean
 }
 
 const pfdaLogoStyle = css`
-  display: inline-block;
   text-align: left;
   margin: auto;
   margin-left: ${theme.padding.mainContentHorizontal};
@@ -71,96 +66,114 @@ const pfdaLogoStyle = css`
 `
 
 const StyledPFDALogoLight = styled(PFDALogoLight)<StyledPFDALogoProps>`
-  ${pfdaLogoStyle};
-  ${props => props.hidden ? `
-  visibility: hidden;
-  ` : ''}
+  margin-top: 8px;
+  ${props =>
+    props.hidden
+      ? css`
+          visibility: hidden;
+        `
+      : ''}
 `
 
 const StyledPFDALogoDark = styled(PFDALogoDark)`
   ${pfdaLogoStyle};
 `
 const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
-  display: inline-block;
-  text-align: center;
-  margin: auto;
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding-top: 8px;
 
   a {
+    padding: 0;
+    height: 20px;
     text-align: center;
     font-size: 13px;
     font-weight: 400;
-    margin: 0.5em 1.25em;
-    padding: 0.15em 0em;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
     text-decoration: none;
-    ${props => props.isSticky ? `
-    color: ${theme.colors.textBlack};
-    ` : `
-    color: white;
-    `}
+    ${props =>
+      props.isSticky
+        ? css`
+            color: ${theme.colors.textBlack};
+          `
+        : css`
+            color: white;
+          `}
 
     &:hover {
-      ${props => props.isSticky ? `
-      border-bottom: 2px solid black;
-      ` : `
-      border-bottom: 2px solid white;
-      `}
+      ${props =>
+        props.isSticky
+          ? css`
+              border-bottom: 2px solid black;
+            `
+          : css`
+              border-bottom: 2px solid white;
+            `}
     }
   }
 
   a.current {
-    
-    color: ${theme.colors.blueOnWhite};
-    border-bottom: 2px solid ${theme.colors.blueOnWhite};
+    color: ${theme.colors.blueOnBlack};
+    border-bottom: 2px solid ${theme.colors.blueOnBlack};
 
-    ${props => props.isSticky ? `
-    &:hover {
-      border-bottom: 2px solid ${theme.colors.blueOnWhite};
-      color: ${theme.colors.blueOnWhite};
-    }
-    ` : `
-    &:hover {
-      color: #336e9e;
-    }
-    `}
+    ${props =>
+      props.isSticky
+        ? css`
+            &:hover {
+              border-bottom: 2px solid ${theme.colors.blueOnBlack};
+              color: ${theme.colors.blueOnBlack};
+            }
+          `
+        : css`
+            &:hover {
+              color: ${theme.colors.blueOnBlack};
+            }
+          `}
   }
 `
 
-const PublicNavbarRightButtons = styled.div`
-  display: inline-block;
-  text-align: right;
-  margin: auto;
-  margin-right: ${theme.padding.mainContentHorizontal};
+const PublicNavbarRightButtons = styled.div<StyledPublicNavbarProps>`
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 8px;
+  justify-self: flex-end;
 
   button {
-    vertical-align: middle;
-    margin-left: ${theme.padding.contentMargin};
+    font-weight: 700;
+    letter-spacing: normal;
   }
 
-  @media (max-width: 1024px) {
-    .btn {
-      margin-left: ${theme.padding.contentMarginHalf};
-    }
-  }
+  ${({ isSticky }) =>
+    isSticky &&
+    css`
+      margin-right: 32px;
+    `}
 `
 
 type SsoButtonResponse =
-| {
-  isEnabled: true
-  data: {
-    fdaSsoUrl: string
-  }
-}
-| {
-  isEnabled: false
-}
+  | {
+      isEnabled: true
+      data: {
+        fdaSsoUrl: string
+      }
+    }
+  | {
+      isEnabled: false
+    }
 
 const useSiteSettingsSsoButtonQuery = () =>
   useQuery<SsoButtonResponse>(['site_settings', 'sso_button'], {
-    queryFn: () => axios.get('/api/site_settings/sso_button').then((r: any) => r.data),
+    queryFn: () =>
+      axios.get('/api/site_settings/sso_button').then((r: any) => r.data),
   })
 
 type Props = {
-  shouldShowLogo?: boolean,
+  shouldShowLogo?: boolean
 }
 
 const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
@@ -203,45 +216,76 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
   }
   const { pathname } = useLocation()
   const getLinkClassName = (linkPath: string) => {
-    if (linkPath === '/') { // Special case
+    if (linkPath === '/') {
+      // Special case
       return classNames({
-        'current': pathname === linkPath,
+        current: pathname === linkPath,
       })
     }
     return classNames({
-      'current': pathname.startsWith(linkPath),
+      current: pathname.startsWith(linkPath),
     })
   }
 
   return (
-    <StyledPublicNavbar id="pfda-navbar" isSticky={sticky}>
+    <StyledPublicNavbar as="nav" id="pfda-navbar" isSticky={sticky}>
       {sticky ? (
         <StyledPFDALogoDark className="pfda-navbar-logo" />
       ) : (
-        <StyledPFDALogoLight className="pfda-navbar-logo" hidden={!shouldShowLogo} />
+        <StyledPFDALogoLight
+          className="pfda-navbar-logo"
+          hidden={!shouldShowLogo}
+        />
       )}
       <PublicNavbarCenterButtons isSticky={sticky}>
-        <Link data-turbolinks="false" to='/' className={getLinkClassName('/')}>Overview</Link>
-        <Link data-turbolinks="false" to='/challenges' className={getLinkClassName('/challenges')}>Challenges</Link>
-        <Link data-turbolinks="false" to='/news' className={getLinkClassName('/news')}>News</Link>
-        <Link data-turbolinks="false" to='/experts' className={getLinkClassName('/experts')}>Experts</Link>
-        <Link data-turbolinks="false" to='/about' className={getLinkClassName('/about')}>About</Link>
-        <a href="/uniisearch" target="_blank">UNII Search</a>
+        <Link data-turbolinks="false" to="/" className={getLinkClassName('/')}>
+          Overview
+        </Link>
+        <Link
+          data-turbolinks="false"
+          to="/challenges"
+          className={getLinkClassName('/challenges')}
+        >
+          Challenges
+        </Link>
+        <Link
+          data-turbolinks="false"
+          to="/news"
+          className={getLinkClassName('/news')}
+        >
+          News
+        </Link>
+        <Link
+          data-turbolinks="false"
+          to="/experts"
+          className={getLinkClassName('/experts')}
+        >
+          Experts
+        </Link>
+        <Link
+          data-turbolinks="false"
+          to="/about"
+          className={getLinkClassName('/about')}
+        >
+          About
+        </Link>
+        <a href="/uniisearch" target="_blank">
+          UNII Search
+        </a>
       </PublicNavbarCenterButtons>
-      <PublicNavbarRightButtons>
+      <PublicNavbarRightButtons isSticky={sticky}>
         <Button onClick={onRequestAccess}>Request Access</Button>
-        <Button type="primary" onClick={onLogIn}>Log In</Button>
+        <ButtonSolidBlue onClick={onLogIn}>Log In</ButtonSolidBlue>
         {ssoButtonResponse?.isEnabled && (
-          <Button type="primary" onClick={onLogInWithSSO}>Log In With SSO</Button>
+          <ButtonSolidBlue onClick={onLogInWithSSO}>
+            Log In With SSO
+          </ButtonSolidBlue>
         )}
       </PublicNavbarRightButtons>
     </StyledPublicNavbar>
   )
 }
 
-
-export {
-  PublicNavbar,
-}
+export { PublicNavbar }
 
 export default PublicNavbar

@@ -3,7 +3,7 @@ import { toast } from 'react-toastify'
 import { newsListRequest } from './api'
 
 export const useNewsListQuery = (params: Record<string, any>) => useQuery(
-  ['news', params?.year, params?.pagination?.pageParam],
+  ['news', params?.year, params?.page],
   () => newsListRequest(params),
   {
     onError: (err: any) => {

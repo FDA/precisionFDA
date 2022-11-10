@@ -9,7 +9,7 @@ export interface NewsListResponse {
 }
 
 export async function newsListRequest(params: NewsListParams): Promise<NewsListResponse> {
-  const filters = cleanObject({ year: params.year, page: params.pagination.pageParam, per_page: params.pagination.perPageParam })
+  const filters = cleanObject({ year: params.year, page: params.page, per_page: params.perPage })
   const paramQ = `?${new URLSearchParams(filters as any).toString()}`
   return axios.get(`/api/news${paramQ}`).then(response => response.data)
 }

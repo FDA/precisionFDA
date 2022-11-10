@@ -1,11 +1,13 @@
+/* eslint-disable react/prefer-stateless-function */
+/* eslint-disable max-classes-per-file */
 import React, { Component } from 'react'
 import { format } from 'date-fns'
 
+import { Link } from 'react-router-dom'
 import { IChallenge } from '../../../../types/challenge'
 import Button from '../../Button'
 import ChallengeTimeRemaining from '../ChallengeTimeRemaining'
 import * as Styled from './styles'
-import { Link } from 'react-router-dom'
 
 
 interface IChallengeListItem extends IChallenge {
@@ -21,9 +23,7 @@ interface IChallengeListItemProps {
 
 class ChallengesListItem extends Component<IChallengeListItemProps> {
   render() {
-    const challenge = this.props.challenge
-    const userCanJoin = this.props.userCanJoin
-    const handleItemDetails = this.props.handleItemDetails
+    const { challenge, userCanJoin, handleItemDetails } = this.props
     const userCanEdit = challenge.canEdit
 
     return (
@@ -63,9 +63,9 @@ class ChallengesListItem extends Component<IChallengeListItemProps> {
 
 class ChallengesListItemLanding extends ChallengesListItem {
   render() {
-    const challenge = this.props.challenge
-    const userCanJoin = this.props.userCanJoin
-    const handleItemDetails = this.props.handleItemDetails
+    const { challenge } = this.props
+    const { userCanJoin } = this.props
+    const { handleItemDetails } = this.props
     const userCanEdit = challenge.canEdit
 
     return (
@@ -96,7 +96,7 @@ class ChallengesListItemLanding extends ChallengesListItem {
           {userCanEdit && (
             <div className="btn-group pull-right">
               <a data-turbolinks="false" className="btn btn-default" href={`/challenges/${challenge.id}/edit`}><span className="fa fa-cog fa-fw"></span> Settings</a>
-              <a data-turbolinks="false" className="btn btn-default" href={`/challenges/${challenge.id}/editor`} data-turbolinks="false"><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+              <a data-turbolinks="false" className="btn btn-default" href={`/challenges/${challenge.id}/editor`}><span className="fa fa-file-code-o fa-fw"></span> Edit Page</a>
             </div>
           )}
         </Styled.ChallengeListItemContent>

@@ -1,6 +1,44 @@
 import { formatDistance } from 'date-fns'
+import { colors } from '../../styles/theme'
 import { TimeStatus } from './types'
 
+export const renderEmpty = (ts: TimeStatus) => {
+  switch (ts) {
+    case 'current':
+    case 'upcoming':
+      return `There are no ${ts} challenges on precisionFDA at the moment.  Check back regularly or subscribe to the mailing list to be informed of new community challenges.`
+    case 'ended':
+      return 'No ended challenges.'
+    default:
+      return 'No challenges found.'
+  }
+}
+
+export const getTimeStatusName = (ts: TimeStatus) => {
+  switch (ts) {
+    case 'current':
+      return 'Currently Open'
+    case 'upcoming':
+      return 'Upcoming'
+    case 'ended':
+      return 'Ended'
+    default:
+      return null
+  }
+}
+
+export const getTimeStatusColor = (ts: TimeStatus) => {
+  switch (ts) {
+    case 'current':
+      return colors.highlightGreen
+    case 'upcoming':
+      return colors.darkYellow
+    case 'ended':
+      return colors.darkGreyOnGrey
+    default:
+      return colors.darkGreyOnGrey
+  }
+}
 
 export const getTimeStatus = (startAt: Date, endAt: Date): TimeStatus => {
   const timeNow = (new Date()).getTime()

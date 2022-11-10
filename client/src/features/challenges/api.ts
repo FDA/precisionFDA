@@ -12,7 +12,7 @@ export interface ChallengesListResponse {
 
 
 export async function challengesRequest(params: ChallengeListParams): Promise<ChallengesListResponse> {
-  const filters = cleanObject({ year: params.year, time_status: params.time_status, page: params.pagination.pageParam, per_page: params.pagination.perPageParam })
+  const filters = cleanObject({ year: params.year, time_status: params.time_status, page: params.page, per_page: params.perPage })
   const paramQ = `?${new URLSearchParams(filters as any).toString()}`
   return axios.get(`/api/challenges${paramQ}`).then(response => response.data).then(d => ({
     ...d,
