@@ -83,3 +83,21 @@ export const editValidationSchema = Yup.object().shape({
     .nullable()
     .required('Status is required'),
 })
+
+export const proposeValidationSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  email: Yup.string().email().required('Email is required'),
+  organisation: Yup.string().required('Organisation is required'),
+  specific_question: Yup.string().required("Please select one of the options"),
+  specific_question_text: Yup.string().when('specific_question', {
+    is: (specific_question: string) => specific_question === 'Yes',
+    then: Yup.string().required('Field is required'),
+    otherwise: Yup.string().nullable()
+  }),
+  data_details: Yup.string().required("Please select one of the options"),
+  data_details_text: Yup.string().when('data_details', {
+    is: (data_details: string) => data_details === 'Yes',
+    then: Yup.string().required('Field is required'),
+    otherwise: Yup.string().nullable()
+  })
+})

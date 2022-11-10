@@ -47,8 +47,8 @@ const CreateChallengePage = React.lazy(
 const EditChallengePage = React.lazy(
   () => import('./features/challenges/form/EditChallenge'),
 )
-const ChallengeProposePage = React.lazy(
-  () => import('./views/pages/Challenges/ChallengeProposePage'),
+const ProposeChallengePage = React.lazy(
+  () => import('./features/challenges/form/ProposeChallengePage'),
 )
 const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
 const LandingPage = React.lazy(
@@ -113,7 +113,7 @@ const root = ({ store }: any) => {
                     <EditChallengePage />
                   </Route>
                   <Route exact path="/challenges/propose">
-                    <ChallengeProposePage />
+                    <ProposeChallengePage />
                   </Route>
                   <Route path="/challenges/:challengeId/:page">
                     <ChallengeDetailsPage />

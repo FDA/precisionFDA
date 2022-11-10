@@ -1,11 +1,16 @@
 import * as Yup from 'yup'
 import { ISpace } from '../spaces.types'
 
-export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin }: {
+export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin, isDuplicate }: {
   isGovUser: boolean,
   isAdmin: boolean,
   isReviewAdmin: boolean,
+  isDuplicate?: boolean
 }) => {
+  if (isDuplicate) {
+    return [{ value: 'review', label: 'Review' }]
+  }
+
   const options: { value: ISpace['type']; label: string }[] = [
     { value: 'private_type', label: 'Private' },
   ]
