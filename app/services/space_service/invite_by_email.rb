@@ -5,7 +5,7 @@ module SpaceService
       space.space_invitations.create!(inviter: admin.user, email: email, role: role)
 
       NotificationsMailer.external_user_invited_to_space_email(space, email, admin, role).
-        deliver_now!
+        deliver_later!
     end
   end
 end

@@ -22,6 +22,10 @@ export async function spaceRequest({ id }: { id: string }): Promise<{meta: unkno
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
+export async function fixGuestPermissions({id}:{id: string}): Promise<unknown> {
+  return axios.patch(`/api/spaces/${id}/fix_guest_permissions`).then(res => res.data)
+}
+
 export async function unlockSpaceRequest({ link = '' }: { id: string, op: 'lock' | 'unlock', link?: string }): Promise<unknown> {
   // const res = await fetch(`/api/spaces/${id}/${op}`, { method: 'POST'})
   const res = await fetch(link, {

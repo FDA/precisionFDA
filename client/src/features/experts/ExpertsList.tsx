@@ -37,6 +37,7 @@ import {
 } from './useExpertsListQuery'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { pluralize } from '../../utils/formatting'
+import { usePageMeta } from '../../hooks/usePageMeta'
 
 export const ChallengeListItem = styled.div`
   display: flex;
@@ -144,6 +145,7 @@ export const ExpertsCondensedList = () => {
 }
 
 const ExpertsList = () => {
+  usePageMeta({ title: 'Experts - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()

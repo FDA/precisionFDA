@@ -15,11 +15,11 @@ import { Remarkable } from 'remarkable'
 import { linkify } from 'remarkable/linkify'
 import styled from 'styled-components'
 import { askQuestion } from '../../../api/experts'
-import navBackground from '../../../assets/NavbarBackground.png'
 import { ButtonSolidBlue } from '../../../components/Button/index'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { EXPERT_STATE } from '../../../constants'
+import { usePageMeta } from '../../../hooks/usePageMeta'
 import { colors } from '../../../styles/theme'
 import history from '../../../utils/history'
 import NavigationBar from '../../../views/components/NavigationBar/NavigationBar'
@@ -70,7 +70,7 @@ const BackToModulePage = styled(Link)`
 `
 
 const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
-  const { path } = useRouteMatch()
+  usePageMeta({ title: `${expert?.title} - precisionFDA Experts` })
   const queryClient = useQueryClient()
   const user = useAuthUser()
   const modal = useModal()
@@ -185,10 +185,10 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             </StyledTabList>
 
             <Switch>
-              <Route exact path={`${path}/blog`}>
+              <Route exact path={`/experts/${expert?.id}/blog`}>
                 <ExpertBlog expert={expert} content={content} />
               </Route>
-              <Route path={`${path}`}>
+              <Route path={`/experts/${expert?.id}`}>
                 <ExpertAbout expert={expert} />
               </Route>
             </Switch>

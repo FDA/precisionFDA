@@ -32,6 +32,13 @@ Rails.application.configure do
   # Store uploaded files on the local file system in a temporary directory
   config.active_storage.service = :test
 
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_HOST"),
+    port: ENV.fetch("SMTP_PORT"),
+    user_name: ENV.fetch("SMTP_USER"),
+    password: ENV.fetch("SMTP_PASSWORD"),
+  }
+
   config.action_mailer.perform_caching = false
 
   # Tell Action Mailer not to deliver emails to the real world.

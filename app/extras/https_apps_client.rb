@@ -63,6 +63,14 @@ class HttpsAppsClient
     )
   end
 
+  def propose_challenge(proposal)
+    request(
+      "/challenges/propose",
+      proposal,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   # Rename a folder.
   # @param folder_id [Integer] Folder ID.
   # @param new_name [String] New folder name.
@@ -280,6 +288,14 @@ class HttpsAppsClient
   def lock_space(id)
     request(
       "/spaces/#{id}/lock",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  def fix_guest_permissions(id)
+    request(
+      "/spaces/#{id}/fix_guest_permissions",
       {},
       Net::HTTP::Patch::METHOD,
     )
