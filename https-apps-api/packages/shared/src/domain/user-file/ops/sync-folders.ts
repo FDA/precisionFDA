@@ -14,7 +14,7 @@ import {
 } from '../user-file.helper'
 import { User, UserFile } from '../..'
 import { errors } from '../../..'
-import { FILE_ORIGIN_TYPE } from '../user-file.enum'
+import { FILE_ORIGIN_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
 import { getFolderPath, getParentFolders } from '../user-file.helper'

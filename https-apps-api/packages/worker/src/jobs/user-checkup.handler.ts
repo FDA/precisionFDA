@@ -1,4 +1,4 @@
-import { database, job, dbCluster } from '@pfda/https-apps-shared'
+import { database, user } from '@pfda/https-apps-shared'
 import type { BasicUserJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
@@ -20,17 +20,5 @@ export const userCheckupHandler = async (bullJob: Job) => {
     job: bullJob,
   }
 
-  log.info({
-    id: data.user.id,
-    dxuser: data.user.dxuser,
-  }, 'Starting user checkup')
-
-  // TODO(samuel) typescript fix
-  await new job.CheckUserJobsOperation(ctx as any).execute()
-  await new dbCluster.CheckUserDbClustersOperation(ctx as any).execute()
-
-  log.info({
-    id: data.user.id,
-    dxuser: data.user.dxuser,
-  }, 'Completed user checkup')
+  await new user.UserCheckupOperation(ctx as any).execute()
 }

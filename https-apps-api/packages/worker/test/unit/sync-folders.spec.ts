@@ -4,7 +4,7 @@ import { Folder, Tagging, User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import type { SyncFoldersInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.enum'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
 
 describe('syncFolders operation', () => {
   let em: EntityManager<MySqlDriver>

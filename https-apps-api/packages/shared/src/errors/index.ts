@@ -149,8 +149,17 @@ export class DbClusterStatusMismatchError extends BaseError {
   }
 }
 
+export class FileNotFoundError extends NotFoundError {
+  constructor(message = 'Error: File not found', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.USER_FILE_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
 export class FolderNotFoundError extends NotFoundError {
-  constructor(message = 'Error: Folder entity not found', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Folder not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.FOLDER_NOT_FOUND,
       ...props,

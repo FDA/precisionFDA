@@ -20,7 +20,8 @@ module Api
                     workflows
                   )
 
-    before_action :sync_files, only: %i(files)
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # before_action :sync_files, only: %i(files)
 
     def https_apps_client
       DIContainer.resolve("https_apps_client")
@@ -233,9 +234,10 @@ module Api
       end
     end
 
-    def sync_files
-      User.sync_files!(@context)
-    end
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # def sync_files
+    #   User.sync_files!(@context)
+    # end
 
     def copy_service
       @copy_service ||= CopyService.new(api: api, user: current_user)

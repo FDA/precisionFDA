@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { wrap } from '@mikro-orm/core'
+import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { entities } from '../domain'
+import { entities, user } from '../domain'
 import * as generate from './generate'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
 
@@ -35,7 +35,32 @@ const userHelper = {
     const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, {em})
     em.persist(adminMembership)
     return user
-  }
+  },
+
+  createSiteAdmin: (em: EntityManager) => {
+    const user = userHelper.create(em)
+    const adminGroup = adminGroupHelper.createSiteAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, {em})
+    em.persist(adminMembership)
+    return user
+  },
+
+  createChallengeAdmin: (em: EntityManager) => {
+    const user = userHelper.create(em)
+    const adminGroup = adminGroupHelper.createChallengeAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, {em})
+    em.persist(adminMembership)
+    return user
+  },
+
+  createChallengeBot: (em: EntityManager) => {
+    const user = userHelper.create(em, {
+      dxuser: config.platform.challengeBotUser,
+    })
+    return user
+  },
+
+  getChallengeBotToken: () => config.platform.challengeBotAccessToken
 }
 
 const adminGroupHelper = {
@@ -47,7 +72,27 @@ const adminGroupHelper = {
     })
     em.persist(RSAGroup)
     return RSAGroup
-  }
+  },
+
+  createSiteAdminGroup: (
+    em: EntityManager
+  ) => {
+    const group = wrap(new entities.AdminGroup()).assign({
+      role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
+    })
+    em.persist(group)
+    return group
+  },
+
+  createChallengeAdminGroup: (
+    em: EntityManager
+  ) => {
+    const group = wrap(new entities.AdminGroup()).assign({
+      role: ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN,
+    })
+    em.persist(group)
+    return group
+  },
 }
 
 const dbClusterHelper = {
@@ -149,6 +194,7 @@ const filesHelper = {
     const input = {
       ...defaults,
       ...data,
+      parentId: references.user.id,
     }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
     em.persist(file)
@@ -165,8 +211,43 @@ const filesHelper = {
     const input = {
       ...defaults,
       ...data,
+      parentId: references.user.id,
     }
     const file = wrap(new entities.Asset(references.user)).assign(input, { em })
+    em.persist(file)
+    return file
+  },
+  createJobOutput: (
+    em: EntityManager,
+    params: {
+      user: InstanceType<typeof entities.User>
+      jobId: number
+    },
+    data?: Partial<InstanceType<typeof entities.UserFile>>,
+  ) => {
+    const defaults = generate.userFile.simpleJobOutput(params.jobId, data?.dxid)
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const file = wrap(new entities.UserFile(params.user)).assign(input, { em })
+    em.persist(file)
+    return file
+  },
+  createComparisonOutput: (
+    em: EntityManager,
+    params: {
+      user: InstanceType<typeof entities.User>
+      comparisonId: number
+    },
+    data?: Partial<InstanceType<typeof entities.UserFile>>,
+  ) => {
+    const defaults = generate.userFile.simpleComparisonOutput(params.comparisonId, data?.dxid)
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const file = wrap(new entities.UserFile(params.user)).assign(input, { em })
     em.persist(file)
     return file
   },
@@ -305,6 +386,34 @@ const challengeHelper = {
   },
 }
 
+const challengeResourceHelper = {
+  create: (
+    em: EntityManager,
+    references: {
+      user?: InstanceType<typeof entities.User>
+      challenge?: InstanceType<typeof entities.Challenge>
+      file?: InstanceType<typeof entities.UserFile>
+    },
+    data?: Partial<InstanceType<typeof entities.ChallengeResource>>,
+  ) => {
+    const input = {
+      ...data,
+    }
+    const challengeResource = wrap(new entities.ChallengeResource()).assign(input, { em })
+    if (references.user) {
+      challengeResource.user = Reference.create(references.user)
+    }
+    if (references.challenge) {
+      challengeResource.challenge = Reference.create(references.challenge)
+    }
+    if (references.file) {
+      challengeResource.userFile = Reference.create(references.file)
+    }
+    em.persist(challengeResource)
+    return challengeResource
+  },
+}
+
 const commentHelper = {
   create: (
     em: EntityManager,
@@ -322,14 +431,36 @@ const commentHelper = {
   },
 }
 
+const comparisonHelper = {
+  create: (
+    em: EntityManager,
+    references: {
+      app: InstanceType<typeof entities.App>
+      user: InstanceType<typeof entities.User>
+    },
+    data?: Partial<InstanceType<typeof entities.Comparison>>,
+  ) => {
+    const defaults = generate.comparison.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const comparison = wrap(new entities.Comparison(references.user, references.app)).assign(input)
+    em.persist(comparison)
+    return comparison
+  },
+}
+
 export {
   userHelper,
   jobHelper,
   appHelper,
   filesHelper,
-  tagsHelper,
-  spacesHelper,
-  commentHelper,
   challengeHelper,
+  challengeResourceHelper,
+  commentHelper,
+  comparisonHelper,
   dbClusterHelper,
+  spacesHelper,
+  tagsHelper,
 }
