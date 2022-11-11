@@ -9,7 +9,7 @@ import { database } from '@pfda/https-apps-shared'
 import {
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
-} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
 
@@ -63,6 +63,9 @@ describe('PATCH /folders/:id/rename', () => {
       scopedParentFolderId: null,
       description: null,
       state: null,
+      isAsset: false,
+      isFile: false,
+      isFolder: true,
     })
   })
 

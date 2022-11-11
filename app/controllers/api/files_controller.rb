@@ -12,7 +12,8 @@ module Api
     before_action :find_file, :can_edit?, only: %i(update)
     before_action :find_user_file, only: %i(show)
     before_action :can_copy_to_scope?, only: %i(copy)
-    before_action :sync_files, only: %i(index)
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # before_action :sync_files, only: %i(index)
 
     DOWNLOAD_ACTION = "download".freeze
     OPEN_ACTION = "open".freeze
@@ -289,7 +290,9 @@ module Api
     # GET /api/files/download
     # Responds with a link to download a file.
     def download
-      file = UserFile.exist_refresh_state(@context, params[:uid])
+      # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+      # file = UserFile.exist_refresh_state(@context, params[:uid])
+      file = UserFile.accessible_found_by(@context, params[:uid])
 
       if file.state != UserFile::STATE_CLOSED
         raise ApiError, "Files can only be downloaded if they are in the 'closed' state"
@@ -486,9 +489,10 @@ module Api
     end
 
     # Refresh state of files, if needed
-    def sync_files
-      User.sync_files!(@context)
-    end
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # def sync_files
+    #   User.sync_files!(@context)
+    # end
 
     def init_parent_folder
       @parent_folder_id = unsafe_params[:folder_id]

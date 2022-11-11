@@ -10,6 +10,7 @@ import {
   DBCLUSTER_DESC_RES,
   FIND_MEMBERS_RES,
 } from './mock-responses'
+import { FileCloseParams } from '../platform-client/platform-client.params'
 
 const sandbox = sinon.createSandbox()
 
@@ -18,6 +19,8 @@ const fakes = {
     jobDescribeFake: sinon.stub(),
     jobCreateFake: sinon.stub(),
     jobTerminateFake: sinon.stub(),
+    fileCloseFake: sinon.stub(),
+    fileStatesFake: sinon.stub(),
     filesListFake: sinon.stub(),
     filesDescFake: sinon.stub(),
     foldersListFake: sinon.stub(),
@@ -41,6 +44,7 @@ const fakes = {
     createCheckUserJobsTask: sinon.fake(),
     createDbClusterSyncTaskFake: sinon.fake(),
     createEmailSendTaskFake: sinon.fake(),
+    createSyncFilesStateTask: sinon.fake(),
     createSyncJobStatusTaskFake: sinon.fake(),
     createSyncWorkstationFilesTask: sinon.fake(),
     createUserCheckupTask: sinon.fake(),
@@ -58,6 +62,7 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.jobDescribeFake.callsFake(() => ({ result: 'yep' }))
   fakes.client.jobCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
+  fakes.client.fileCloseFake.callsFake((params: FileCloseParams) => ({ id: params.fileDxid }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderRemoveFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
@@ -84,7 +89,9 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'jobDescribe', fakes.client.jobDescribeFake)
   sandbox.replace(client.PlatformClient.prototype, 'jobCreate', fakes.client.jobCreateFake)
   sandbox.replace(client.PlatformClient.prototype, 'jobTerminate', fakes.client.jobTerminateFake)
-  sandbox.replace(client.PlatformClient.prototype, 'filesListPaginated', fakes.client.filesListFake)
+  sandbox.replace(client.PlatformClient.prototype, 'fileClose', fakes.client.fileCloseFake)
+  sandbox.replace(client.PlatformClient.prototype, 'fileStates', fakes.client.fileStatesFake)
+  sandbox.replace(client.PlatformClient.prototype, 'filesList', fakes.client.filesListFake)
   sandbox.replace(client.PlatformClient.prototype, 'folderCreate', fakes.client.folderCreateFake)
   sandbox.replace(client.PlatformClient.prototype, 'filesMoveToFolder', fakes.client.filesMoveFake)
   // sandbox.replace(client.PlatformClient.prototype, 'filesDescribe', fakes.client.filesDescFake)
@@ -122,6 +129,7 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createCheckUserJobsTask', fakes.queue.createCheckUserJobsTask)
   sandbox.replace(queue, 'createDbClusterSyncTask', fakes.queue.createDbClusterSyncTaskFake)
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
+  sandbox.replace(queue, 'createSyncFilesStateTask', fakes.queue.createSyncFilesStateTask)
   sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
   sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
   sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
@@ -132,6 +140,8 @@ const mocksReset = () => {
   fakes.client.jobDescribeFake.reset()
   fakes.client.jobCreateFake.reset()
   fakes.client.jobTerminateFake.reset()
+  fakes.client.fileCloseFake.reset()
+  fakes.client.fileStatesFake.reset()
   fakes.client.filesListFake.reset()
   fakes.client.filesDescFake.reset()
   fakes.client.foldersListFake.reset()
@@ -155,6 +165,7 @@ const mocksReset = () => {
   fakes.queue.createCheckUserJobsTask.resetHistory()
   fakes.queue.createDbClusterSyncTaskFake.resetHistory()
   fakes.queue.createEmailSendTaskFake.resetHistory()
+  fakes.queue.createSyncFilesStateTask.resetHistory()
   fakes.queue.createSyncJobStatusTaskFake.resetHistory()
   fakes.queue.createSyncWorkstationFilesTask.resetHistory()
   fakes.queue.createUserCheckupTask.resetHistory()

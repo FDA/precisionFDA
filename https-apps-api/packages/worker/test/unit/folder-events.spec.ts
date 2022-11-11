@@ -6,7 +6,7 @@ import { create, db } from '@pfda/https-apps-shared/src/test'
 import { EVENT_TYPES } from 'shared/src/domain/event/event.helper'
 import { expect } from 'chai'
 import { SyncFoldersInput } from 'shared/src/domain/user-file/user-file.input'
-import { PARENT_TYPE } from 'shared/src/domain/user-file/user-file.enum'
+import { PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
 
 describe('folder events tests', () => {
     let em: EntityManager<MySqlDriver>
