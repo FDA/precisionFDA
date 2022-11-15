@@ -203,7 +203,7 @@ export default function Table<T extends object>(
   }, [columnResizing])
 
   return (
-    <StyledTable>
+    <StyledTable data-testid="pfda-table">
       <ReactTableStyles shouldFillWidth={fillWidth} shouldAllowScrollbar={shouldAllowScrollbar}>
         <div className="tableWrap">
           <div {...getTableProps()} className="table sticky">

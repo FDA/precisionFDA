@@ -1,6 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import configureStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-
 
 const BACKEND_URL = 'https://example.com'
 

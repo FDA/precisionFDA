@@ -1,10 +1,10 @@
-/* global module process */
+/* eslint-disable import/no-import-module-exports */
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 
 import Axios from 'axios'
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
 
 import Root from './root'
@@ -15,17 +15,18 @@ import { getAuthenticityToken } from './utils/api'
 Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
 
 const renderApp = () => {
-  let container = document.getElementById('app-root')
+  const container = document.getElementById('app-root')
+  const root = createRoot(container!)
 
   if (container) {
     ReactModal.setAppElement('#app-root')
-    ReactDOM.render(<Root store={store} />, container)
+    root.render(<Root store={store} />)
   }
 }
 
 document.addEventListener('DOMContentLoaded', renderApp)
 document.addEventListener('page:load', renderApp)
 
-if (process.env.NODE_ENV === 'development' && module.hot) {
+if (NODE_ENV === 'development' && module.hot) {
   module.hot.accept()
 }

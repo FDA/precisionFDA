@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { getSelectedTab, getWorkflowState } from './home'
 import * as C from '../constants'
 

@@ -106,7 +106,7 @@ const Home2 = () => {
 
   return (
     <UserLayout>
-      <ResourceBanner>
+      <ResourceBanner data-testid="home-banner">
         <BannerTitle>My Home</BannerTitle>
         <BannerRight>
           <BannerPicker>

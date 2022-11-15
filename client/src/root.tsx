@@ -13,27 +13,11 @@ import history from './utils/history'
 import ErrorWrapper from './views/components/ErrorWrapper'
 import { Header } from './components/Header'
 import { Loader } from './components/Loader'
-import ExpertsSinglePage from './features/experts/details'
+import ExpertsSinglePage from './features/experts/details/index'
 import NoFoundPage from './views/pages/NoFoundPage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
+import queryClient from './utils/queryClient'
 
-const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        // We disable refetching on focus as it can extend the session without user input
-        refetchOnWindowFocus: false,
-        onSuccess: (res: any) => {
-          // Catch if cookie expired
-          // if(process.env.NODE_ENV !== 'development') {
-          if (res?.failure === 'Authentication failure') {
-            onAuthFailure()
-          }
-          // }
-        },
-      },
-    },
-  })
 
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
@@ -60,6 +44,7 @@ const ExpertsListPage = React.lazy(() => import('./features/experts/ExpertsList'
 const ChallengeDetailsPage = React.lazy(() => import('./features/challenges/details/ChallengeDetails'))
 const UsersList = React.lazy(() => import('./features/admin/users'))
 const ToS = React.lazy(() => import('./views/pages/ToS'))
+
 
 const root = ({ store }: any) => {
   const authModal = useModal()
