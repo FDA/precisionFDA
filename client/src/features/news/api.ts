@@ -1,10 +1,10 @@
 import axios from 'axios'
+import { Pagination } from '../../types/pagination'
 import { cleanObject } from '../../utils/object'
-import { IPagination } from '../home/types'
 import { NewsItem, NewsListParams } from './types'
 
 export interface NewsListResponse {
-  meta?: IPagination,
+  meta?: Pagination,
   news_items?: NewsItem[],
 }
 

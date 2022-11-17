@@ -6,9 +6,7 @@ import Axios from 'axios'
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
-
 import Root from './root'
-import store from './store'
 import './styles/style.sass'
 import { getAuthenticityToken } from './utils/api'
 
@@ -20,7 +18,7 @@ const renderApp = () => {
 
   if (container) {
     ReactModal.setAppElement('#app-root')
-    root.render(<Root store={store} />)
+    root.render(<Root />)
   }
 }
 

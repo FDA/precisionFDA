@@ -11,8 +11,8 @@ const StyledChallengesBanner = styled.div`
   align-items: center;
   background-color: ${colors.subtleBlue};
   justify-content: space-between;
-  margin-top: 32px;
   margin-bottom: 32px;
+
 `
 
 const StyledChallengesBannerLeft = styled.div`

@@ -2,13 +2,11 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useMutation, UseQueryResult } from 'react-query'
 import { toast } from 'react-toastify'
-import { useSelector } from 'react-redux'
 import {
   checkStatus,
   displayPayloadMessage,
   getApiRequestOpts,
 } from '../../../utils/api'
-import { contextUserSelector } from '../../../reducers/context/selectors'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
@@ -18,6 +16,7 @@ import { Dropdown } from '../../../components/Dropdown'
 import { ResourceDropdownContent } from './ResourceDropdown'
 import { UserLimitForm } from './UserLimitForm'
 import { buildMessageFromMfaResponse } from './buildMfaErrorMessage'
+import { useAuthUser } from '../../auth/useAuthUser'
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -100,8 +99,7 @@ export const UsersListActionRow = ({
   const [totalLimitInput, setTotalLimitInput] = useState(NaN)
   const [jobLimitInput, setJobLimitInput] = useState(NaN)
 
-  // TODO(samuel) refactor into ctx
-  const currentUserCtx = useSelector(contextUserSelector) as User
+  const currentUserCtx = useAuthUser()
 
   const selectedIds = selectedUsers.map(({ id }) => id)
   const resetMutation = useMutation({
