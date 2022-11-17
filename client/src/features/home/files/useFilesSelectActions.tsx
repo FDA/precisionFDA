@@ -4,7 +4,7 @@ import { useHistory } from 'react-router'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
 import {
-  OBJECT_TYPES,
+  ATTACHABLE_TYPES,
   useAttachToModal,
 } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
@@ -204,7 +204,7 @@ export const useFilesSelectActions = ({
     isShown: isShownAttachToModal,
   } = useAttachToModal(
     selected.map(s => s.id),
-    OBJECT_TYPES.FILE,
+    ATTACHABLE_TYPES.FILE,
   )
   const {
     modalComp: tagsModal,

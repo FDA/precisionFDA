@@ -13,7 +13,6 @@ import { proposeChallengeRequest } from './api'
 import { PrososeChallengeForm } from './ProposeChallengeForm'
 import { subtitle, title } from './common'
 import PublicLayout from '../../../views/layouts/PublicLayout'
-import '../../../../src/views/pages/Challenges/ChallengeProposePage/style.sass'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import {
   ItemButton,

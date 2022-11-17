@@ -245,7 +245,7 @@ export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
             <Markdown data={workflow.readme} />
           </Route>
           <Route path={`${match.path}/diagram`} exact>
-            <WorkflowsDiagram uid={workflow.uid} />
+            <WorkflowsDiagram workflowId={workflow.uid} />
           </Route>
           <Route path={`${match.path}/jobs`} exact>
             <WorkflowExecutionsList uid={workflowUid} />

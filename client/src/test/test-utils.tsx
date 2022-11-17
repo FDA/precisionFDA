@@ -5,28 +5,22 @@ import { render, RenderOptions } from '@testing-library/react'
 import React, { FC, ReactElement } from 'react'
 import { QueryParamProvider } from 'use-query-params'
 import { QueryClientProvider } from 'react-query'
-import { Provider } from 'react-redux'
 import { createMemoryHistory } from 'history'
 import { Router } from 'react-router-dom'
 import queryClient from '../utils/queryClient'
-import store from '../store'
 
 const history = createMemoryHistory()
 
 const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Provider store={store}>
-    <QueryClientProvider
-      client={queryClient({
-        onAuthFailure: () => console.log('AuthFailure'),
-      })}
-    >
-      <Router history={history}>
-        <QueryParamProvider>
-          {children}
-        </QueryParamProvider>
-      </Router>
-    </QueryClientProvider>
-  </Provider>
+  <QueryClientProvider
+    client={queryClient({
+      onAuthFailure: () => console.log('AuthFailure'),
+    })}
+  >
+    <Router history={history}>
+      <QueryParamProvider>{children}</QueryParamProvider>
+    </Router>
+  </QueryClientProvider>
 )
 
 const customRender = (
