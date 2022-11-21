@@ -68,15 +68,13 @@ type DescribeDataObjectsResponse = {
   }>
 }
 
-type DescribeFilesResponse = {
-  results: Array<{
-    describe: {
-      id: string
-      name: string
-      size: number
-      // add more here
-    }
-  }>
+type FileDescribeResponse = {
+  id: string
+  name: string
+  state: string
+  size?: number
+  // add more here
+  // See output of https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
 }
 
 type PlatformMember = {
@@ -147,7 +145,7 @@ export {
   JobDescribeResponse,
   JobTerminateResponse,
   ClassIdResponse,
-  DescribeFilesResponse,
+  FileDescribeResponse,
   DescribeFoldersResponse,
   DbClusterDescribeResponse,
   DescribeDataObjectsResponse,

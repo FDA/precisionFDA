@@ -20,6 +20,7 @@ const fakes = {
     jobCreateFake: sinon.stub(),
     jobTerminateFake: sinon.stub(),
     fileCloseFake: sinon.stub(),
+    fileDescribeFake: sinon.stub(),
     fileStatesFake: sinon.stub(),
     filesListFake: sinon.stub(),
     filesDescFake: sinon.stub(),
@@ -90,6 +91,7 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'jobCreate', fakes.client.jobCreateFake)
   sandbox.replace(client.PlatformClient.prototype, 'jobTerminate', fakes.client.jobTerminateFake)
   sandbox.replace(client.PlatformClient.prototype, 'fileClose', fakes.client.fileCloseFake)
+  sandbox.replace(client.PlatformClient.prototype, 'fileDescribe', fakes.client.fileDescribeFake)
   sandbox.replace(client.PlatformClient.prototype, 'fileStates', fakes.client.fileStatesFake)
   sandbox.replace(client.PlatformClient.prototype, 'filesList', fakes.client.filesListFake)
   sandbox.replace(client.PlatformClient.prototype, 'folderCreate', fakes.client.folderCreateFake)
@@ -141,6 +143,7 @@ const mocksReset = () => {
   fakes.client.jobCreateFake.reset()
   fakes.client.jobTerminateFake.reset()
   fakes.client.fileCloseFake.reset()
+  fakes.client.fileDescribeFake.reset()
   fakes.client.fileStatesFake.reset()
   fakes.client.filesListFake.reset()
   fakes.client.filesDescFake.reset()

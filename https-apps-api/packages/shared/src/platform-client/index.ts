@@ -12,13 +12,13 @@ import { OrgMembershipError } from '../errors'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import {
   BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
-  FileCloseParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
+  FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
   JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting,
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
-  FileCloseResponse, IPaginatedResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
-  DescribeFilesResponse, FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse
+  FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
+  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse,
 } from './platform-client.responses'
 
 
@@ -142,6 +142,26 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
+  /**
+   * Describe a single file's attributes
+   * API: /file-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
+   */
+  async fileDescribe(params: FileDescribeParams): Promise<FileDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.fileDxid}/describe`
+    const data: AnyObject = {
+      project: params.projectDxid,
+      defaultFields: true,
+    }
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+      headers: this.setupHeaders(params.accessToken),
+    }
+    return await this.sendRequest(options, url)
+  }
+
   async fileStatesPaginated(
     params: FileStatesParams,
     starting: Starting | undefined): Promise<FileStatesResponse> {
@@ -177,7 +197,12 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
-  async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
+  /**
+   * Given a list of fileDxids, query platform the the current file states
+   * This is designed to only query files within the same dx project, because without the project hint
+   * the /system/findDataObjects call is very inefficient and can take a long time
+   */
+   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
     return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(
       (nextMapping: Starting) => {
         return this.fileStatesPaginated(params, nextMapping)
@@ -444,7 +469,7 @@ class PlatformClient {
   //    P R O J E C T S
   // ---------------------
 
-  /**
+/**
  * Creates a new project
  * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
  * @param {string} name - OPTIONAL - overrides new project name.
@@ -650,7 +675,6 @@ export {
   JobCreateResponse,
   ListFilesResponse,
   ClassIdResponse,
-  DescribeFilesResponse,
   JobCreateParams,
   DescribeFoldersResponse,
   DbClusterCreateParams,

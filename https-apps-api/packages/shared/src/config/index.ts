@@ -122,7 +122,7 @@ const defaultConfig = {
       repeatPattern: '*/1 * * * *', // Every minute
     },
     syncFiles: {
-      repeatEvery: 15000, // Every 15 seconds
+      repeatPattern: '*/15 * * * * *', // Every 15 seconds
     },
     syncJob: {
       // every two minutes
