@@ -175,7 +175,8 @@ module Api
     # rubocop:disable Metrics/MethodLength
     def show
       # Refresh state of file, if needed
-      refresh_file(@file, @context)
+      # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+      # refresh_file(@file, @context)
       load_licenses(@file)
 
       # TODO: move common data to common_concern.rb

@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import { UserFile } from '../..'
 import { User } from '../../user/user.entity'
 import { client, config, errors, queue } from '../../..'
@@ -8,6 +9,7 @@ import { FILE_STATE_DX, FILE_STATE_PFDA } from '../user-file.types'
 import { createSyncFilesStateTask } from '../../../queue'
 import { findFileOrAssetWithUid } from '../user-file.helper'
 import { SyncFilesStateOperation } from './sync-files-state'
+import { FileUpdateOperation } from './file-update'
 
 
 const responseMap = {
@@ -72,7 +74,9 @@ FileCloseOperationResponse | null
       fileOrAsset.state = FILE_STATE_DX.CLOSING
       await em.flush()
 
-      const bullJobId = SyncFilesStateOperation.getBullJobId(this.ctx.user.dxuser)
+      const syncFilesOpDxuser = isChallengeBotFile ? config.platform.challengeBotUser : this.ctx.user.dxuser
+
+      const bullJobId = SyncFilesStateOperation.getBullJobId(syncFilesOpDxuser)
       log.info({ bullJobId }, 'FileCloseOperation: Looking for existing sync task in queue')
       let bullJob = await queue.findRepeatable(bullJobId)
       if (bullJob && queue.utils.isJobOrphaned(bullJob)) {
@@ -83,8 +87,8 @@ FileCloseOperationResponse | null
 
       if (!bullJob) {
         if (isChallengeBotFile) {
-          const challengeBotUser = await userRepo.findChallengeBotUser()
           log.info('FileCloseOperation: Creating SyncFilesStateTask for challenge bot user')
+          const challengeBotUser = await userRepo.findChallengeBotUser()
           const challengeBotCtx: UserCtx = {
             id: challengeBotUser.id,
             dxuser: challengeBotUser.dxuser,
@@ -97,6 +101,44 @@ FileCloseOperationResponse | null
         }
       } else {
         log.info({ bullJob }, 'FileCloseOperation: Not creating SyncFilesStateTask because one already exists')
+      }
+
+      if (!isChallengeBotFile) {
+        // TODO: This is to be removed in favour of async notifications once those are ready
+        //
+        // Quite often a file is in closed state after a short delay, and to improve our My Home upload UI
+        // we do this update so that the frontend has the correct state immediately after refresh
+        // This is not for challege bot files because we still want file sync to invoke it's
+        // card image update logic
+        const delay = ms => new Promise(r => setTimeout(r, ms))
+        const refreshFileState = async () => {
+          await delay(500).then(async () => {
+            log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
+            await new FileUpdateOperation(this.ctx).execute({ uid: fileOrAsset.uid })
+
+            const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.uid)
+            if (updatedFileOrAsset) {
+              if (updatedFileOrAsset.state === FILE_STATE_DX.CLOSED) {
+                log.info({
+                  uid: input.uid,
+                  state: updatedFileOrAsset.state,
+                  size: updatedFileOrAsset.fileSize,
+                }, 'FileCloseOperation: File is now closed after FileUpdateOperation')
+              } else {
+                log.info({
+                  uid: input.uid,
+                  state: updatedFileOrAsset.state,
+                  size: updatedFileOrAsset.fileSize,
+                }, 'FileCloseOperation: File is still not closed after FileUpdateOperation')
+              }
+            } else {
+              log.info({
+                uid: input.uid,
+              }, 'FileCloseOperation: File no longer exists after FileUpdateOperation?? What?!')
+            }
+          })
+        }
+        await refreshFileState()
       }
 
       return {}

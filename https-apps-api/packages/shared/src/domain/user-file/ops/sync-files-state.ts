@@ -33,7 +33,7 @@ void> {
 
     // This call can be particularly time-consuming, so log the times so we can later analyze
     this.log.info('SyncFilesStateOperation: Starting platform findDataObjects call')
-    // dx api system findDataObjects '{"scope": {"project": "project-xxxx"}, "describe":{"fields":{"state":true}}}'
+
     const params: FileStatesParams = {
       accessToken: this.ctx.user.accessToken,
       fileDxids,
@@ -118,7 +118,7 @@ void> {
         const openFilesInProject = openFilesByProject[projectDxid]
         this.log.info({
           projectDxid,
-          openFiles: openFilesInProject.map(f => ({ name: f.name, dxid: f.dxid })),
+          openFiles: openFilesInProject.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
         }, 'SyncFilesStateOperation: Syncing files state in project')
 
         await this.syncFilesInProject(projectDxid, openFilesInProject)
@@ -131,8 +131,9 @@ void> {
       this.log.info('SyncFilesStateOperation: Completed and all user files closed, removing repeatable job')
       await queue.removeRepeatable(this.ctx.job)
     } else {
-      this.log.info({ openFiles },
-        'SyncFilesStateOperation: Completed with open files remaining',
+      this.log.info({
+        openFiles: openFiles.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
+      }, 'SyncFilesStateOperation: Completed with open files remaining',
       )
     }
   }

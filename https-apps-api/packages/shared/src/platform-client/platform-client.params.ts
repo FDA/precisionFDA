@@ -44,6 +44,11 @@ type FileCloseParams = BaseParams & {
   fileDxid: string
 }
 
+type FileDescribeParams = BaseParams & {
+  fileDxid: string
+  projectDxid: string
+}
+
 type FileDownloadLinkParams = BaseParams & {
   fileDxid: string
   filename: string
@@ -153,6 +158,7 @@ export {
   Starting,
   IPaginatedParams,
   FileCloseParams,
+  FileDescribeParams,
   FileDownloadLinkParams,
   FileStatesParams,
   ListFilesParams,
