@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -18,7 +18,7 @@ const LayoutLoader = () => (
   </StyledLayoutLoader>
 )
 
-export const UserLayout: FC = ({ children }) => {
+export const UserLayout = ({ children }: { children: ReactNode }) => {
   const user = useAuthUserQuery()
 
   const content = () => {

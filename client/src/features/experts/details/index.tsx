@@ -41,10 +41,10 @@ const StyledNavigationBar = styled.div`
   height: 140px;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
 `
 const StyledSocialMediaButtons = styled.div`
   margin-top: 100px;
+  justify-self: flex-end;
 `
 
 const MainExpertContent = styled.div`
@@ -121,9 +121,13 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
 
   return (
     <PublicLayout>
-      <NavigationBar title="" subtitle="" user={user}>
-        <StyledNavigationBar>
+      <NavigationBar
+        title=""
+        subtitle=""
+        user={user}
+      >
           <PageContainerMargin>
+        <StyledNavigationBar>
             <ExpertRow>
               <ExpertImage src={expert?.image} alt="Expert's Logo" />
               <ExpertData>
@@ -140,8 +144,8 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             <StyledSocialMediaButtons>
               <SocialMediaButtons showText />
             </StyledSocialMediaButtons>
-          </PageContainerMargin>
         </StyledNavigationBar>
+          </PageContainerMargin>
       </NavigationBar>
       <PageContainerMargin>
         <ExpertRow>

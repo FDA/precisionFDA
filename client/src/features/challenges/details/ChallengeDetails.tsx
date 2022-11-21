@@ -360,7 +360,7 @@ const ChallengeDetailsPage = () => {
   return (
     <PublicLayout>
       {isLoading ? (
-        <Loader />
+        <PageContainerMargin><Loader /></PageContainerMargin>
       ) : (
         <>
           <ChallengeDetailsBanner challenge={data?.challenge} user={user} />

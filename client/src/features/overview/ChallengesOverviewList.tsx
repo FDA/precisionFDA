@@ -12,6 +12,11 @@ const StyledChallengesOverview = styled.div`
   margin-bottom: 64px;
 `
 
+const StyledSectionTitle = styled(SectionTitle)<{ tscolor?: string }>`
+  border-top: 3px solid ${({ tscolor }) => tscolor};
+  padding-top: 8px;
+`
+
 const StyledChallengeList = styled.div`
   display: flex;
   flex-direction: column;
@@ -21,13 +26,20 @@ const StyledChallengeList = styled.div`
 
 const Row = styled.div`
   display: flex;
-  gap: 32px;
-`
+  flex-direction: column;
+  gap: 16px;
 
-const StyledSectionTitle = styled(SectionTitle)<{ tscolor?: string }>`
-  border-top: 3px solid ${({ tscolor }) => tscolor};
-  padding-top: 8px;
-  width: 96px;
+  ${StyledSectionTitle} {
+    width: auto;
+  }
+
+  @media (min-width: 750px) {
+    flex-direction: row;
+    gap: 32px;
+    ${StyledSectionTitle} {
+      width: 96px;
+    }
+  }
 `
 
 const Filler = styled.div`

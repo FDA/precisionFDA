@@ -9,7 +9,13 @@ import { getChallengeTimeRemaining, getTimeStatus } from '../util'
 
 const StyledChallengeListItem = styled.div`
   display: flex;
-  gap: 32px;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+    gap: 32px;
+  }
 `
 
 export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => (

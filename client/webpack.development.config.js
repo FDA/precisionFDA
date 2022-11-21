@@ -12,8 +12,8 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
 
-const TARGET = 'https://precisionfda-dev.dnanexus.com'
-// const TARGET = 'https://localhost:3000'
+// const TARGET = 'https://precisionfda-dev.dnanexus.com'
+const TARGET = 'https://localhost:3000'
 
 const urlLoaderOptions = {
   limit: 2000,
@@ -147,10 +147,6 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         secure: false,
       },
       '/challenges/*/editor/*': {
-        target: TARGET,
-        secure: false,
-      },
-      '/publish': {
         target: TARGET,
         secure: false,
       },
