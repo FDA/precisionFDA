@@ -1,5 +1,5 @@
 import { pick } from 'ramda'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { IChallenge } from '../../../types/challenge'
 import { useAuthUser } from '../../auth/useAuthUser'
@@ -131,7 +131,7 @@ export const useAppSelectionActions = ({
     selected: selected.map(s => ({ name: s.name, location: s.location, id: s.uid })),
     request: deleteAppsRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries('apps')
+      queryClient.invalidateQueries(['apps'])
       if(spaceId) {
         history.push(`/spaces/${spaceId}/apps`)
       } else {

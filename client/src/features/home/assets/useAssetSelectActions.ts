@@ -1,5 +1,5 @@
 import { pick } from 'ramda'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router-dom'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ATTACHABLE_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
@@ -71,9 +71,9 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
     request: deleteAssetsRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries('assets')
+      queryClient.invalidateQueries(['assets'])
       history.push('/home/assets')
-      resetSelected && resetSelected()
+      if(resetSelected) resetSelected()
     },
   })
   const {

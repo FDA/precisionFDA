@@ -1,4 +1,4 @@
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLocation } from 'react-router-dom'
 import { ActionFunctionsType } from '../home/types'
 import { ISpace } from './spaces.types'
@@ -55,8 +55,8 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
       type: 'modal',
       func: () => {},
       isDisabled: false,
-      shouldHide: !(space.type === 'groups' && search === '?permissionsDebug=true')
-    }
+      shouldHide: !(space.type === 'groups' && search === '?permissionsDebug=true'),
+    },
   }
 
   return actions

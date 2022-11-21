@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { ButtonSolidGreen } from '../../../components/Button'
@@ -88,6 +88,7 @@ export function Activation({ space }: { space: ISpace }) {
   const user = useAuthUser()
 
   const acceptSpaceMutation = useMutation({
+    mutationKey: ['accept-space'],
     mutationFn: acceptSpaceRequest,
     onSuccess: () => {
       queryCache.invalidateQueries(['space', space.id.toString()])
@@ -101,7 +102,7 @@ export function Activation({ space }: { space: ISpace }) {
   const { name, description, created_at, id, type, host_lead, guest_lead } =
     space
   const currentUser = [host_lead, guest_lead].filter(
-    u => u && u.id === user.id,
+    u => u && u.id === user?.id,
   )[0]
   const isAcceptedByUser = currentUser && currentUser.is_accepted
   const hostLabel = hostLeadLabel(type)
