@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 
 type ItemType = {
   id: string | number;
@@ -14,5 +14,6 @@ export async function attachToRequest({ items, noteUids }: { items: ItemType[], 
 }
 
 export const useAttachToMutation = () => useMutation({
+  mutationKey: ['attach-to'],
   mutationFn: (args: { items: ItemType[], noteUids: string[] }) => attachToRequest(args),
 })

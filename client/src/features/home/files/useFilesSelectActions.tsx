@@ -1,5 +1,5 @@
 import { pick } from 'ramda'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'

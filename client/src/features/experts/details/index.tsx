@@ -1,14 +1,7 @@
 import httpStatusCodes from 'http-status-codes'
 import React from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
-import {
-  Link,
-  NavLink,
-  Route,
-  Switch,
-  useParams,
-  useRouteMatch,
-} from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link, NavLink, Route, Switch, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Remarkable } from 'remarkable'
@@ -74,8 +67,9 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
   const user = useAuthUser()
   const modal = useModal()
 
-  const createQuestionMutation = useMutation(
-    ({
+  const createQuestionMutation = useMutation({
+    mutationKey: ['create-question'],
+    mutationFn: ({
       userName,
       question,
       captchaValue,
@@ -85,7 +79,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
       captchaValue: string
     }) =>
       askQuestion({ userName, question, captchaValue }, expert.id.toString()),
-  )
+  })
   const askExpert = (
     userName: string,
     question: string,
@@ -95,7 +89,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
       .mutateAsync({ userName, question, captchaValue })
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
-          queryClient.invalidateQueries('queryExpertDetails')
+          queryClient.invalidateQueries(['queryExpertDetails'])
           toast.success('Your question was submitted successfully')
           modal.setShowModal(false)
           history.push(`/experts/${expert.id}`)
@@ -127,17 +121,16 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
 
   return (
     <PublicLayout>
-      <NavigationBar
-        title=""
-        subtitle=""
-        user={user}
-      >
+      <NavigationBar title="" subtitle="" user={user}>
         <StyledNavigationBar>
           <PageContainerMargin>
             <ExpertRow>
               <ExpertImage src={expert?.image} alt="Expert's Logo" />
               <ExpertData>
-                <BackToModulePage to={{ pathname: '/experts' }} data-turbolinks="false">
+                <BackToModulePage
+                  to={{ pathname: '/experts' }}
+                  data-turbolinks="false"
+                >
                   &larr; Back to All Experts
                 </BackToModulePage>
 
@@ -233,7 +226,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
 
 const ExpertsSingleDetailsPage = () => {
   const { expertId } = useParams<{ expertId: string }>()
-  const { isLoading, data } = useQuery('queryExpertDetails', () =>
+  const { isLoading, data } = useQuery(['queryExpertDetails'], () =>
     expertDetailsRequest(expertId),
   )
   if (isLoading) return <Loader />

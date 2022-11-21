@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios'
 import React, { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
@@ -73,21 +73,18 @@ const ProposeChallengePage = () => {
   const [submissionSuccess, setSubmissionSuccess] = useState(false)
   const [values, setValues] = useState()
 
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(
-    'challenges-years',
-    () => challengesYearsListRequest(),
-    {
-      onError: err => {
-        console.log(err)
-      },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['challenges-years'], () => challengesYearsListRequest(), {
+    onError: err => {
+      console.log(err)
     },
-  )
+  })
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
+    mutationKey: ['propose-challenge'],
     mutationFn: (payload: any) => proposeChallengeRequest(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries('challenges')
+      queryClient.invalidateQueries(['challenges'])
       setSubmissionSuccess(true)
       toast.success('Your challenge proposal has been received.')
     },

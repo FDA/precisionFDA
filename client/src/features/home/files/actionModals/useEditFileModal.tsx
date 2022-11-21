@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { ErrorMessage } from '@hookform/error-message'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
@@ -34,6 +34,7 @@ const EditFileInfoForm = ({
   })
 
   const editFileMutation = useMutation({
+    mutationKey: ['edit-file'],
     mutationFn: (payload: {
       name: string
       description: string

@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns'
 import queryString from 'query-string'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -49,15 +49,11 @@ const NewsPage = () => {
     page: pagination.pageParam,
     perPage: pagination.perPageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(
-    'news-years',
-    () => newsYearsListRequest(),
-    {
-      onError: err => {
-        console.log(err)
-      },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['news-years'], () => newsYearsListRequest(), {
+    onError: err => {
+      console.log(err)
     },
-  )
+  })
 
   return (
     <PublicLayout>

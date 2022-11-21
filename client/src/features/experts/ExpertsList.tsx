@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import queryString from 'query-string'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../components/Button'
@@ -109,15 +109,11 @@ const ExpertsList = () => {
     year,
     page: pagination.pageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(
-    'experts-years',
-    expertsYearsListRequest,
-    {
-      onError: err => {
-        console.log(err)
-      },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['experts-years'], expertsYearsListRequest, {
+    onError: err => {
+      console.log(err)
     },
-  )
+  })
 
   return (
     <PublicLayout>

@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-fragments */
 import React from 'react'
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Router, Switch } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'

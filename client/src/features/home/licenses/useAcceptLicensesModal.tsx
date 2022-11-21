@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -31,6 +31,7 @@ export function useAcceptLicensesModal<
   const { isShown, setShowModal } = useModal()
 
   const mutation = useMutation({
+    mutationKey: ['accept-license', resource],
     mutationFn: ({ licenseId }: { licenseId: string }) => {
       return acceptLicenseRequest({ licenseId })
     },
@@ -38,7 +39,7 @@ export function useAcceptLicensesModal<
       toast.error('Error: Accept license')
     },
     onSuccess: (res: any) => {
-      onSuccess && onSuccess(res)
+      if(onSuccess) onSuccess(res)
       setShowModal(false)
       toast.success('Success: Accept License')
     },
@@ -55,7 +56,7 @@ export function useAcceptLicensesModal<
   const modalComp = (
     <Modal
       data-testid="modal-accept-licenses"
-      headerText={`Accept License`}
+      headerText="Accept License"
       isShown={isShown}
       hide={handleClose}
       footer={

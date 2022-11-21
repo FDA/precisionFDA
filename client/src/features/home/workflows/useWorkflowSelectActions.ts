@@ -1,5 +1,5 @@
 import { pick } from 'ramda'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import { useAuthUser } from '../../auth/useAuthUser'
@@ -59,7 +59,7 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
     selected: selected.map(s => ({ name: s.name, id: s.uid, location: s.location })),
     request: deleteWorkflowRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries('workflows')
+      queryClient.invalidateQueries(['workflows'])
       if(spaceId) {
         history.push(`/spaces/${spaceId}/workflows`)
       } else {

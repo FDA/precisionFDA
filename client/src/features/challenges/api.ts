@@ -45,5 +45,5 @@ export async function challengeDetailsRequest(challengeId: string, custom?: bool
       created_at: convertDateToUserTime(d.challenge.created_at),
       updated_at: convertDateToUserTime(d.challenge.updated_at),
     },
-  }) as ChallengeDetailstResponse)
+  } as ChallengeDetailstResponse))
 }

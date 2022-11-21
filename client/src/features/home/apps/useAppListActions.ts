@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { addDataRequest } from '../../spaces/spaces.api'
 import { useAddResourceToModal } from '../actionModals/useAddResourceToSpace'
@@ -21,6 +21,7 @@ export const useAppListActions = ({
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
+    mutationKey: ['add-resource-to-space', 'apps'],
     mutationFn: addDataRequest,
     onError: (e: AxiosError) => {
       toast.error(`Error adding resource to space. ${e.message}`)

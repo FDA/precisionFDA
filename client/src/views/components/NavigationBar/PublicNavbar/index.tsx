@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import styled, { css } from 'styled-components'
 import classNames from 'classnames/bind'

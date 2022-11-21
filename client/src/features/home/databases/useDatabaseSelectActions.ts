@@ -1,4 +1,4 @@
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'

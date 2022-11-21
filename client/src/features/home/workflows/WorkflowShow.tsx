@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLocation, useParams } from 'react-router'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
