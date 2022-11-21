@@ -1,14 +1,11 @@
-import React, { FC } from 'react'
-import { LoaderWrapper } from '../../components/LoaderWrapper/LoaderWrapper'
+import React, { ReactNode } from 'react'
 import PFDAFooter from '../../components/Footer'
 
 
-const PublicLayout: FC = ({ children }) =>
-  <LoaderWrapper>
-    <>
-      {children}
-      <PFDAFooter />
-    </>
-  </LoaderWrapper>
+const PublicLayout = ({ children }: { children: ReactNode }) =>
+  <>
+    {children}
+    <PFDAFooter />
+  </>
 
 export default PublicLayout
