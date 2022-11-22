@@ -5,6 +5,7 @@ import { router as adminRouter } from '../admin'
 import { router as appsRouter } from '../apps'
 import { router as dbClustersRouter } from '../dbclusters'
 import { router as debugRouter } from '../debug'
+import { router as filesRouter } from '../files'
 import { router as emailsRouter } from '../emails'
 import { router as expertsRouter } from '../experts'
 import { router as foldersRouter } from '../folders'
@@ -22,6 +23,7 @@ router.use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
 router.use('/apps', appsRouter.routes(), appsRouter.allowedMethods())
 router.use('/dbclusters', dbClustersRouter.routes(), dbClustersRouter.allowedMethods())
 router.use('/debug', debugRouter.routes(), debugRouter.allowedMethods())
+router.use('/files', filesRouter.routes(), filesRouter.allowedMethods())
 router.use('/emails', emailsRouter.routes(), emailsRouter.allowedMethods())
 router.use('/experts', expertsRouter.routes(), expertsRouter.allowedMethods())
 router.use('/folders', foldersRouter.routes(), foldersRouter.allowedMethods())

@@ -2,7 +2,7 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { ButtonOutlineGrey, ButtonSolidBlue } from '../../../components/Button'
@@ -102,12 +102,13 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   })
 
   const mutation = useMutation({
+    mutationKey: ['edit-space'],
     mutationFn: (payload: CreateSpacePayload) =>
       editSpaceRequest(space.id, payload),
     onSuccess: res => {
       if (res?.space) {
         history.push(`/spaces/${res?.space?.id}`)
-        queryClient.invalidateQueries('spaces')
+        queryClient.invalidateQueries(['spaces'])
         toast.success('Success: editing space settings.')
       } else if (res?.errors) {
           toast.error(`Error: ${res.errors.messages.join('\r\n')}`)

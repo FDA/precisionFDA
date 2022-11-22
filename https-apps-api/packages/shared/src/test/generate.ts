@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
 import { DateTime } from 'luxon'
@@ -16,7 +17,7 @@ import {
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-} from '../domain/user-file/user-file.enum'
+} from '../domain/user-file/user-file.types'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
@@ -30,6 +31,8 @@ import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
 import { TASK_TYPE } from '../queue/task.input'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
 import { SyncJobOperation } from '../domain/job'
+import { SyncFilesStateOperation } from '../domain/user-file'
+import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 
 const chance = new Chance()
 
@@ -254,6 +257,36 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
+  simpleJobOutput: (jobId: number, customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      state: FILE_STATE_DX.CLOSED,
+      parentType: PARENT_TYPE.JOB,
+      parentId: jobId,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
+  simpleComparisonOutput: (comparisonId: number, customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      state: FILE_STATE_DX.CLOSED,
+      parentType: PARENT_TYPE.COMPARISON,
+      parentId: comparisonId,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
 }
 
 const asset = {
@@ -386,6 +419,14 @@ const comment = {
   }),
 }
 
+const comparison = {
+  simple: (): Partial<InstanceType<typeof entities.Comparison>> => ({
+    name: 'Test Comparison',
+    description: chance.sentence(),
+    state: COMPARISON_STATE.DONE,
+  }),
+}
+
 const dbCluster = {
   simple: (): Partial<InstanceType<typeof entities.DbCluster>> => {
     const dxid = `dbcluster-${random.dxstr()}`
@@ -418,15 +459,6 @@ const dbCluster = {
 }
 
 const bullQueue = {
-  syncJobStatus: (jobDxid, userContext) => ({
-    data: {
-      payload: {
-        dxid: jobDxid,
-      },
-      type: TASK_TYPE.SYNC_JOB_STATUS,
-      user: userContext,
-    },
-  }),
   syncDbClusterStatus: (dbClusterDxid, userContext) => ({
     data: {
       payload: {
@@ -436,10 +468,25 @@ const bullQueue = {
       user: userContext,
     },
   }),
+  syncFilesState: userContext => ({
+    data: {
+      type: TASK_TYPE.SYNC_FILES_STATE,
+      user: userContext,
+    },
+  }),
+  syncJobStatus: (jobDxid, userContext) => ({
+    data: {
+      payload: {
+        dxid: jobDxid,
+      },
+      type: TASK_TYPE.SYNC_JOB_STATUS,
+      user: userContext,
+    },
+  }),
 }
 
 const bullQueueRepeatable = {
-  syncDbClusterStatus: dbClusterDxid => ({
+  syncDbClusterStatus: (dbClusterDxid: string) => ({
     key: `__default__:${SyncDbClusterOperation.getBullJobId(dbClusterDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: SyncDbClusterOperation.getBullJobId(dbClusterDxid),
@@ -449,7 +496,17 @@ const bullQueueRepeatable = {
     every: null,
     next: Date.now() + (60 * 1000),
   }),
-  syncJobStatus: jobDxid => ({
+  syncFilesState: (dxuser: string) => ({
+    key: `__default__:${SyncFilesStateOperation.getBullJobId(dxuser)}:::*/2 * * * *`,
+    name: '__default__',
+    id: SyncFilesStateOperation.getBullJobId(dxuser),
+    endDate: null,
+    tz: null,
+    cron: '*/2 * * * *',
+    every: null,
+    next: Date.now() + (60 * 1000),
+  }),
+  syncJobStatus: (jobDxid: string) => ({
     key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: SyncJobOperation.getBullJobId(jobDxid),
@@ -487,6 +544,7 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
+  comparison,
   challenge,
   dbCluster,
   bullQueue,

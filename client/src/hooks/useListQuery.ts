@@ -1,6 +1,6 @@
-import { useQuery, UseQueryOptions } from 'react-query';
-import { PaginationInput, SortInput } from '../utils/filters';
-import { toArrayFromObject } from '../utils/object';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query'
+import { PaginationInput, SortInput } from '../utils/filters'
+import { toArrayFromObject } from '../utils/object'
 
 type UseListQueryParams<T extends Record<string, any>, SortT = SortInput<Extract<keyof T, string>>> = {
   resource: string
@@ -28,7 +28,7 @@ export function useListQuery<T>({
     pagination?.perPage,
     order?.orderBy,
     order?.orderDir,
-    Object.entries(additionalParams).map(([_,v]) => v),
+    Object.entries(additionalParams).map(([_, v]) => v),
   ]
   const query = useQuery<T>(
     cacheKey,

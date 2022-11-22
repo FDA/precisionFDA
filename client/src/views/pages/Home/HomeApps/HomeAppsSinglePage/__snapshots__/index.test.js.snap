@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`HomeAppsSinglePage test should render 1`] = `
-<HomeLayout>
-  <span>
-    App not found
-  </span>
-</HomeLayout>
-`;

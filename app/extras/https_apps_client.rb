@@ -71,6 +71,16 @@ class HttpsAppsClient
     )
   end
 
+  # Close an uploaded file or asset
+  # @param file_uid [String] uid of the file or asset
+  def file_close(file_uid)
+    request(
+      "/files/#{file_uid}/close",
+      {},
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   # Rename a folder.
   # @param folder_id [Integer] Folder ID.
   # @param new_name [String] New folder name.

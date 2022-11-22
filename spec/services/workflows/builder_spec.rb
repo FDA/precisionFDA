@@ -14,6 +14,8 @@ RSpec.describe Workflows::Builder, type: :service do
     create(:app, dxid:  raw["slots"].first["uid"].split("-1").first, user_id: user.id)
     rack = PlatformRack.new
     stub_request(:any, /^#{rack.path}/).to_rack(rack)
+    stub_request(:patch, "https://localhost:3001/files/file-A1S1-1/close").with(query: hash_including({})).
+      to_return(status: 200, body: "{}", headers: {})
     allow_any_instance_of(Context).to receive(:logged_in?).and_return(true)
   end
 

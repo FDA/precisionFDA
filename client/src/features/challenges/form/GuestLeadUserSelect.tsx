@@ -1,10 +1,10 @@
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import Select from 'react-select'
 import { fetchGuestLeads } from './api'
 
 const useFetchGuestLeadUsersQuery = () =>
-  useQuery('guest-lead-users', fetchGuestLeads, {
+  useQuery(['guest-lead-users'], fetchGuestLeads, {
     select(data) {
       return data?.map(s => ({
         label: s,

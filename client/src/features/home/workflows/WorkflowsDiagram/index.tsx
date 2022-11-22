@@ -1,75 +1,12 @@
-import classNames from 'classnames/bind'
-import PropTypes from 'prop-types'
-import React, { useLayoutEffect } from 'react'
-import { connect } from 'react-redux'
+import React from 'react'
+import classNames from 'classnames'
 import { Link } from 'react-router-dom'
 import Xarrow from 'react-xarrows'
 import uniqid from 'uniqid'
-import { fetchWorkflowDiagram } from '../../../../actions/home'
 import { CubeIcon } from '../../../../components/icons/CubeIcon'
 import { Loader } from '../../../../components/Loader'
-import { homeWorkflowsWorkflowDiagramSelector } from '../../../../reducers/home/workflows/selectors'
 import { StyledWorkflowDiagram } from './styles'
-
-
-const WorkflowsDiagram = (props: any) => {
-  const { workflowDiagram, uid, fetchWorkflowDiagram } = props
-  const { isFetching, stages } = workflowDiagram
-
-  useLayoutEffect(() => {
-    if (uid) {
-      fetchWorkflowDiagram(uid)
-    }
-  }, [uid])
-
-  if (isFetching)
-    return (
-      <div className="text-center">
-        <Loader />
-      </div>
-    )
-
-  const stageList = Object.entries(stages).map((apps, idx) => {
-    return (
-      <Stage key={uniqid(`${idx}`)} stageIndex={idx} apps={apps[1] as any} />
-    )
-  })
-
-  return (
-    <StyledWorkflowDiagram className="<form form-horizontal">
-      <div className="workflows standard container">
-        <div className="workflows">
-          <div className="wf-diagram">
-            <div className="wf-diagram-stages">
-              <>{stageList}</>
-            </div>
-          </div>
-        </div>
-      </div>
-    </StyledWorkflowDiagram>
-  )
-}
-
-const Stage = ({ apps, stageIndex }: { apps?: any; stageIndex: number }) => {
-  if (apps.length === 0) return <NoData />
-
-  const stageApps = apps.map((app: any, idx: string) => {
-    return (
-      <div key={uniqid(idx)} className="wf-diagram-slot">
-        <SlotApp app={app} />
-      </div>
-    )
-  })
-
-  return (
-    <>
-      <h3>{`Stage ${stageIndex + 1}`}</h3>
-      <div className="wf-diagram-slots">
-        <>{stageApps}</>
-      </div>
-    </>
-  )
-}
+import { useWorkflowDiagramQuery } from './useWorkflowDiagramQuery'
 
 const NoData = () => {
   return <div className="text-center">No data found</div>
@@ -84,65 +21,72 @@ const AppOutputs = ({
 }) => {
   if (outputs.length === 0) return null
 
-  const outputsList = outputs.map((output, idx) => {
-    const refs = !!(output && output.values && output.values.id)
-    const outputRef = refs && 'from-' + slotId + output.name
-    const title = output.name
+  return (
+    <>
+      {outputs.map((output, idx) => {
+        const refs = !!(output && output.values && output.values.id)
+        const outputRef = refs && `from-${slotId}${output.name}`
+        const title = output.name
 
-    const outputClass = classNames({
-      'fa fa-arrow-down': true,
-      'text-muted': !refs,
-      'workflow-digaram-gly': refs,
-    })
+        const outputClass = classNames({
+          'fa fa-arrow-down': true,
+          'text-muted': !refs,
+          'workflow-digaram-gly': refs,
+        })
 
-    return (
-      <div key={uniqid(`${idx}`)} className="shifted-io">
-        <i id={outputRef.toString()} className={outputClass} title={title} />
-      </div>
-    )
-  })
-
-  return <>{outputsList}</>
+        return (
+          <div key={uniqid(`${idx}`)} className="shifted-io">
+            <i
+              id={outputRef.toString()}
+              className={outputClass}
+              title={title}
+            />
+          </div>
+        )
+      })}
+    </>
+  )
 }
 
 const AppInputs = ({ inputs, slotId }: { inputs: any[]; slotId: string }) => {
   if (inputs.length === 0) return null
 
-  const inputsList = inputs.map((input, idx) => {
-    const refs = !!(input && input.values && input.values.id)
-    const inputRef = refs && 'to-' + slotId + input.name
-    const outputRef = refs && 'from-' + input.values.id + input.values.name
-    const title = input.name
+  return (
+    <>
+      {inputs.map((input, idx) => {
+        const refs = !!(input && input.values && input.values.id)
+        const inputRef = refs && `to-${slotId}${input.name}`
+        const outputRef = refs && `from-${input.values.id}${input.values.name}`
+        const title = input.name
 
-    const inputClass = classNames({
-      'glyphicon glyphicon-filter': true,
-      'text-muted': !refs,
-      'workflow-digaram-gly': refs,
-    })
+        const inputClass = classNames({
+          'glyphicon glyphicon-filter': true,
+          'text-muted': !refs,
+          'workflow-digaram-gly': refs,
+        })
 
-    const appArrows = refs ? (
-      //@ts-ignore
-      <Xarrow
-        start={outputRef as any}
-        end={inputRef as any}
-        startAnchor="bottom"
-        endAnchor="top"
-        curveness={1.5}
-        headSize={2}
-        color="#1F70B5"
-        strokeWidth={1}
-      />
-    ) : null
+        const appArrows = refs ? (
+          <Xarrow
+            start={outputRef as any}
+            end={inputRef as any}
+            startAnchor="bottom"
+            endAnchor="top"
+            curveness={1.5}
+            headSize={2}
+            color="#1F70B5"
+            strokeWidth={1}
+          />
+        ) : null
 
-    return (
-      <div key={uniqid(`${idx}`)} className="shifted-io">
-        <i id={inputRef.toString()} className={inputClass} title={title} />
-        {appArrows}
-      </div>
-    )
-  })
-
-  return <>{inputsList}</>
+        return (
+          <div key={uniqid(`${idx}`)} className="shifted-io">
+            <i id={inputRef.toString()} className={inputClass} title={title} />
+            {appArrows}
+          </div>
+        )
+      })}
+    </>
+  )
 }
 
 const SlotApp = ({ app }: { app: any }) => {
@@ -172,37 +116,46 @@ const SlotApp = ({ app }: { app: any }) => {
   )
 }
 
-Stage.propTypes = {
-  apps: PropTypes.array.isRequired,
-  stageIndex: PropTypes.number,
+const Stage = ({ apps, stageIndex }: { apps?: any; stageIndex: number }) => {
+  if (apps.length === 0) return <NoData />
+
+  const stageApps = apps.map((app: any, idx: string) => {
+    return (
+      <div key={uniqid(idx)} className="wf-diagram-slot">
+        <SlotApp app={app} />
+      </div>
+    )
+  })
+
+  return (
+    <>
+      <h3>{`Stage ${stageIndex + 1}`}</h3>
+      <div className="wf-diagram-slots">{stageApps}</div>
+    </>
+  )
 }
 
-AppInputs.propTypes = {
-  inputs: PropTypes.array,
-  slotId: PropTypes.string,
+const WorkflowsDiagram = ({ workflowId }: { workflowId: string }) => {
+  const { data, isLoading } = useWorkflowDiagramQuery(workflowId)
+  if (isLoading) return <Loader />
+
+  const stageList = Object.entries(data!.stages).map((apps, idx) => {
+    return (
+      <Stage key={uniqid(`${idx}`)} stageIndex={idx} apps={apps[1] as any} />
+    )
+  })
+
+  return (
+    <StyledWorkflowDiagram className="<form form-horizontal">
+      <div className="workflows standard container">
+        <div className="workflows">
+          <div className="wf-diagram">
+            <div className="wf-diagram-stages">{stageList}</div>
+          </div>
+        </div>
+      </div>
+    </StyledWorkflowDiagram>
+  )
 }
 
-AppOutputs.propTypes = {
-  outputs: PropTypes.array,
-  slotId: PropTypes.string,
-}
-
-SlotApp.propTypes = {
-  app: PropTypes.object,
-}
-
-WorkflowsDiagram.propTypes = {
-  uid: PropTypes.string,
-  workflowDiagram: PropTypes.object,
-  fetchWorkflowDiagram: PropTypes.func,
-}
-
-const mapDispatchToProps = (dispatch: any) => ({
-  fetchWorkflowDiagram: (uid: string) => dispatch(fetchWorkflowDiagram(uid)),
-})
-
-const mapStateToProps = (state: any) => ({
-  workflowDiagram: homeWorkflowsWorkflowDiagramSelector(state),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(WorkflowsDiagram)
+export default WorkflowsDiagram

@@ -1,6 +1,7 @@
-import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, Enum, IdentifiedReference, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { FILE_STI_TYPE } from './user-file.enum'
+import { User } from '../user/user.entity'
+import { FILE_STI_TYPE } from './user-file.types'
 
 @Entity({
   abstract: true,
@@ -12,6 +13,7 @@ export class Node extends BaseEntity {
   @PrimaryKey()
   id: number
 
+  // This is optional because local Folders do not have dxids
   @Property()
   dxid?: string
 
@@ -20,6 +22,21 @@ export class Node extends BaseEntity {
 
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
+
+  @Property({ persist: false })
+  get isAsset(): boolean {
+    return this.stiType === FILE_STI_TYPE.ASSET
+  }
+
+  @Property({ persist: false })
+  get isFile(): boolean {
+    return this.stiType === FILE_STI_TYPE.USERFILE
+  }
+
+  @Property({ persist: false })
+  get isFolder(): boolean {
+    return this.stiType === FILE_STI_TYPE.FOLDER
+  }
 
   // todo: more
 }

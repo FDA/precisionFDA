@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { HashLink } from 'react-router-hash-link'
-import { v4 as uuidv4 } from 'uuid'
+
 
 import Icon from '../Icon'
 import './style.sass'
@@ -65,7 +65,7 @@ const CollapsibleMenu = ({ title, titleAnchor, children, options }) => {
     return <Item {...e} key={e.text} onClick={e.onClick} entityType={e.entityType}/>
   })}
 
-  const menuId = uuidv4()
+  const menuId = self.crypto.randomUUID()
   const collapseMenuId = 'collapseMenu'+menuId+title
   const collapseBodyId = 'collapseBody'+menuId+title
 

@@ -71,7 +71,7 @@ RSpec.describe Api::FilesController, type: :controller do
       before do
         authenticate!(user)
 
-        allow(UserFile).to receive(:exist_refresh_state).and_return(file)
+        allow(UserFile).to receive(:accessible_found_by).and_return(file)
         allow(file).to receive(:file_url).and_return(redirect_url)
 
         allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)

@@ -15,6 +15,7 @@ import {
 } from './styles'
 
 export interface ModalProps {
+  id: string
   isShown: boolean
   hide: () => void
   headerText: string

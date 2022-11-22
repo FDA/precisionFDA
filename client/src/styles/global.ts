@@ -8,6 +8,8 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   #app-root {
+    display: flex;
+    flex-direction: column;
   }
   html {
     scroll-padding-top: 70px;
@@ -34,7 +36,6 @@ const GlobalStyle = createGlobalStyle`
     --toastify-color-error: ${colors.primaryRed};
     --toastify-toast-width: inherit;
   }
-
 `
 
 export const LayoutBody = styled.div`

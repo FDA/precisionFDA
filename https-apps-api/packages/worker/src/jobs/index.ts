@@ -2,7 +2,8 @@ import { path } from 'ramda'
 import { queue, errors, debug } from '@pfda/https-apps-shared'
 import { Job } from 'bull'
 import { log } from '../utils'
-import { userCheckupHandler } from '../users/user-checkup.handler'
+import { userCheckupHandler } from './user-checkup.handler'
+import { syncFileStatesHandler } from './files-state.handler'
 import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
@@ -19,7 +20,13 @@ export const handler = async (job: Job<queue.types.Task>) => {
     throw new errors.WorkerError('Job data does not specify task type', { jobData: job.data })
   }
 
+  // TODO - Refactor into a registry, with task to handler mapping, e.g.
+  //        const handler = handlerRegistry.get(job.data.type)
+  //        handler.invoke(job)
   switch (job.data.type) {
+    case queue.types.TASK_TYPE.SYNC_FILES_STATE:
+      await syncFileStatesHandler(job)
+      return
     case queue.types.TASK_TYPE.SYNC_JOB_STATUS:
       await jobStatusHandler(job)
       return

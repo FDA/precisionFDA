@@ -1,15 +1,15 @@
 import axios from 'axios'
+import { Pagination } from '../../types/pagination'
 import { cleanObject } from '../../utils/object'
-import { IPagination } from '../home/types'
 import { NewsItem, NewsListParams } from './types'
 
 export interface NewsListResponse {
-  meta?: IPagination,
+  meta?: Pagination,
   news_items?: NewsItem[],
 }
 
 export async function newsListRequest(params: NewsListParams): Promise<NewsListResponse> {
-  const filters = cleanObject({ year: params.year, page: params.pagination.pageParam, per_page: params.pagination.perPageParam })
+  const filters = cleanObject({ year: params.year, page: params.page, per_page: params.perPage })
   const paramQ = `?${new URLSearchParams(filters as any).toString()}`
   return axios.get(`/api/news${paramQ}`).then(response => response.data)
 }

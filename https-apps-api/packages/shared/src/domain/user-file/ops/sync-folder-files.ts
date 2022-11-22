@@ -5,7 +5,7 @@ import { BaseOperation } from '../../../utils'
 import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { errors, client } from '../../..'
-import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.enum'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 
 export type SyncFolderFilesOutput = {
@@ -61,13 +61,13 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     // todo: handle possible pagination here
 
     // find remote file ids in a given subfolder
-    const remoteFiles = await platformClient.filesListPaginated({
+    const remoteFiles = await platformClient.filesList({
       accessToken: this.ctx.user.accessToken,
       folder: folderPath,
       project: input.projectDxid,
       includeDescProps: true,
     })
-    const remoteFileDxids = map(prop('id'))(remoteFiles.results)
+    const remoteFileDxids = map(prop('id'))(remoteFiles)
     const localFileDxids: string[] = map(prop('dxid'))(localFiles)
     const locallyCreatedFileDxids = map(prop('dxid'))(locallyCreatedFiles)
     const toAddDifference = difference(remoteFileDxids, localFileDxids)
@@ -107,7 +107,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       if (toRemove.includes(userfile.dxid)) {
         return
       }
-      const remoteState = remoteFiles.results.find(r => r.id === userfile.dxid)
+      const remoteState = remoteFiles.find(r => r.id === userfile.dxid)
       if (!remoteState) {
         throw new errors.NotFoundError('Remote state for local file was not found', {
           details: { fileId: userfile.id },
@@ -149,7 +149,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
           )
           return
         }
-        const remoteDetails = remoteFiles.results.find(remoteFile => remoteFile.id === dxid)
+        const remoteDetails = remoteFiles.find(remoteFile => remoteFile.id === dxid)
         if (!remoteDetails) {
           throw new Error('remote details not found for file dxid')
         }

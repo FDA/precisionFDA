@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
@@ -34,6 +34,7 @@ const EditFolderInfoForm = ({
   })
 
   const mutation = useMutation({
+    mutationKey: ['edit-folder'],
     mutationFn: async (payload: { name: string; folderId: string }) => editFolderRequest(payload),
     onSuccess: (res) => {
       if(res?.error?.type) {
@@ -41,7 +42,7 @@ const EditFolderInfoForm = ({
         setError('name', {message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate'})
         return
       }
-      queryClient.invalidateQueries('files')
+      queryClient.invalidateQueries(['files'])
       handleClose()
       toast.success('Folder info changed.')
     },

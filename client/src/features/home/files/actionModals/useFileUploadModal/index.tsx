@@ -3,7 +3,7 @@
 import { all, any } from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
 import { Button, ButtonSolidBlue } from '../../../../../components/Button'
@@ -108,8 +108,8 @@ export const useFileUploadModal = ({
       toast.success(
         `Success: uploaded ${itemsCountString('file', filesMeta.length)}`,
       )
-      queryCache.invalidateQueries('files')
-      queryCache.invalidateQueries('counters')
+      queryCache.invalidateQueries(['files'])
+      queryCache.invalidateQueries(['counters'])
       if (spaceId) queryCache.invalidateQueries(['space', spaceId.toString()])
     }
   }, [uploadFinished])

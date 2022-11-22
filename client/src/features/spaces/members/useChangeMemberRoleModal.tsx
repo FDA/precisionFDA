@@ -2,7 +2,7 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
@@ -53,6 +53,7 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
     resolver: yupResolver(validationSchema),
   })
   const mutation = useMutation({
+    mutationKey: ['change-membership-role'],
     mutationFn: ({ role }: FormValues) =>
       changeMembershipRoleRequest({ spaceId, memberId: member.id, role: role.value }),
     onSuccess: res => {
@@ -61,7 +62,7 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
         toast.success('Disabled yourself from the space.')
       } else {
         reset()
-        queryClient.invalidateQueries('space-members')
+        queryClient.invalidateQueries(['space-members'])
         setShowModal(false)
         if (['enable','disable'].includes(res.role)){
           toast.success(`${capitalize(res.role)}d member ${res.member} in the space.`)

@@ -55,6 +55,10 @@ run-prettier:
 run-worker-repl:
 	$(bin)bull-repl
 
+test-shared:
+	NODE_ENV=test $(bin)mocha --config ./packages/shared/.mocharc.js \
+	--recursive "./packages/shared/test/**/*.spec.ts"
+
 test-api:
 	NODE_ENV=test $(bin)mocha --config ./packages/api/.mocharc.js \
 	--recursive "./packages/api/test/**/*.spec.ts"

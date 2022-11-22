@@ -2,7 +2,7 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
@@ -43,11 +43,12 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
     resolver: yupResolver(validationSchema),
   })
   const mutation = useMutation({
+    mutationKey: ['add-members-to-space'],
     mutationFn: ({ invitees, invitees_role }: FormValues) =>
       addMembersToSpaceRequest({ spaceId, invitees, invitees_role: invitees_role.value }),
     onSuccess: res => {
       reset()
-      queryClient.invalidateQueries('space-members')
+      queryClient.invalidateQueries(['space-members'])
       setShowModal(false)
       toast.success('Success: Adding members.')
     },

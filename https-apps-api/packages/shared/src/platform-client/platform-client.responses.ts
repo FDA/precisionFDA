@@ -1,6 +1,5 @@
 import { AnyObject } from '../types'
-import { FILE_STATE_DX } from '../domain/user-file/user-file.enum'
-
+import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 
 type DbClusterDescribeResponse = {
   id: string
@@ -19,33 +18,63 @@ type DbClusterDescribeResponse = {
   failureReason?: string
 } & AnyObject
 
-type ListFilesResponse = {
-  results: Array<{
-    id: string
-    project: string
-    describe?: {
-      id: string
-      name: string
-      size: number
-      state: FILE_STATE_DX
-    }
-  }>
-  // if set up, we might want to paginate
+interface IPaginatedResponse<T> {
   next?: {
     project: string
     id: string
   }
+  results: T[]
 }
 
-type DescribeFilesResponse = {
+type FileCloseResponse = {
+  id: string
+  detail?: string
+}
+
+type FileDownloadLinkResponse = {
+  url: string
+}
+
+type ListFilesResult = {
+  id: string
+  project: string
+  describe?: {
+    id: string
+    name: string
+    size: number
+    state: FILE_STATE_DX
+  }
+}
+
+type ListFilesResponse = IPaginatedResponse<ListFilesResult>
+
+type FileStateResult = {
+  id: string
+  project: string
+  describe?: {
+    name: string
+    size: number
+    state: FILE_STATE_DX
+  }
+}
+
+type FileStatesResponse = IPaginatedResponse<FileStateResult>
+
+type DescribeDataObjectsResponse = {
   results: Array<{
-    describe: {
-      id: string
-      name: string
-      size: number
-      // add more here
-    }
+    describe?: any[]
+    error?: any[]
+    statusCode: number
   }>
+}
+
+type FileDescribeResponse = {
+  id: string
+  name: string
+  state: string
+  size?: number
+  // add more here
+  // See output of https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
 }
 
 type PlatformMember = {
@@ -105,14 +134,21 @@ type JobDescribeResponse = {
 } & AnyObject
 
 export {
+  IPaginatedResponse,
+  FileCloseResponse,
+  FileDownloadLinkResponse,
+  FileStateResult,
+  FileStatesResponse,
+  ListFilesResult,
+  ListFilesResponse,
   JobCreateResponse,
   JobDescribeResponse,
   JobTerminateResponse,
   ClassIdResponse,
-  DescribeFilesResponse,
+  FileDescribeResponse,
   DescribeFoldersResponse,
   DbClusterDescribeResponse,
-  ListFilesResponse,
+  DescribeDataObjectsResponse,
   FindSpaceMembersReponse,
   PlatformMember,
   UserInviteToOrgResponse,

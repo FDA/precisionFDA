@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns'
 import queryString from 'query-string'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -12,6 +12,8 @@ import {
   Content,
   ItemButton,
   PageFilterTitle,
+  PageList,
+  PageLoaderWrapper,
   PageMainBody,
   PageRow,
   RightList,
@@ -30,9 +32,7 @@ import { newsYearsListRequest } from './api'
 import {
   ItemBody,
   ItemDate,
-  NewsList,
   NewsListItem,
-  NewsLoaderWrapper,
 } from './styles'
 import { useNewsListQuery } from './useNewsListQuery'
 
@@ -46,17 +46,14 @@ const NewsPage = () => {
 
   const { data, isLoading, isFetched } = useNewsListQuery({
     year: query.year as string,
-    pagination,
+    page: pagination.pageParam,
+    perPage: pagination.perPageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(
-    'news-years',
-    () => newsYearsListRequest(),
-    {
-      onError: err => {
-        console.log(err)
-      },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['news-years'], () => newsYearsListRequest(), {
+    onError: err => {
+      console.log(err)
     },
-  )
+  })
 
   return (
     <PublicLayout>
@@ -68,13 +65,13 @@ const NewsPage = () => {
       <PageContainerMargin>
         <PageRow>
           {isLoading ? (
-            <NewsLoaderWrapper>
+            <PageLoaderWrapper>
               <Loader />
-            </NewsLoaderWrapper>
+            </PageLoaderWrapper>
           ) : (
             <PageMainBody>
               {query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
-              <NewsList>
+              <PageList>
                 {data?.news_items?.map(n => (
                   <NewsListItem key={n.id}>
                     <ItemDate>
@@ -119,7 +116,7 @@ const NewsPage = () => {
                     pagination.setPageParam(n, 'replaceIn')
                   }}
                 />
-              </NewsList>
+              </PageList>
             </PageMainBody>
           )}
           <RightSide>

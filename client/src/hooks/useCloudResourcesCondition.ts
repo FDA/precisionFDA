@@ -1,5 +1,5 @@
 /* eslint-disable no-multi-str */
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { requestOpts } from '../utils/api'
 import { useAuthUser } from '../features/auth/useAuthUser'

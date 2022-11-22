@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidRed } from '../../../../components/Button'
@@ -76,14 +76,15 @@ export const useDeleteFileModal = ({
   const [numberOfFilesToDelete, setNumberOfFilesToDelete] = useState<number>()
 
   const mutation = useMutation({
+    mutationKey: ['delete-files'],
     mutationFn: (ids: string[]) => deleteFilesRequest(ids),
     onError: () => {
       toast.error(`Error: Deleting ${numberOfFilesToDelete} files or folders.`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries('files')
+      queryClient.invalidateQueries(['files'])
       // TODO counters are only for My Home, spaces have counters in request for space
-      queryClient.invalidateQueries('counters')
+      queryClient.invalidateQueries(['counters'])
       onSuccess()
       setShowModal(false)
       toast.success(`Success: Deleted ${numberOfFilesToDelete} files or folders.`)

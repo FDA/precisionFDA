@@ -11,6 +11,7 @@ type TaskWithMaybeAuth = {
 
 
 export enum TASK_TYPE {
+  SYNC_FILES_STATE = 'sync_files_state',
   SYNC_JOB_STATUS = 'sync_job_status',
   SYNC_WORKSTATION_FILES = 'sync_workstation_files',
   SEND_EMAIL = 'send_email',
@@ -27,6 +28,7 @@ export enum TASK_TYPE {
 export type BasicUserJob = TaskWithAuth & {
   type: (TASK_TYPE.USER_CHECKUP | TASK_TYPE.CHECK_USER_JOBS)
 }
+
 export type CheckStatusJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_JOB_STATUS
   payload: { dxid: string }
@@ -36,21 +38,30 @@ export type SendEmailJob = TaskWithMaybeAuth & {
   type: TASK_TYPE.SEND_EMAIL
   payload: EmailSendInput
 }
+
 export type CheckStaleJobsJob = TaskWithAuth & {
   payload: undefined
   type: TASK_TYPE.CHECK_STALE_JOBS
 }
+
 export type SyncDbClusterJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_DBCLUSTER_STATUS
   payload: { dxid: string }
 }
+
+export type SyncFileStatesJob = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_FILES_STATE
+}
+
 export type SyncWorkstationFiles = TaskWithAuth & {
   type: TASK_TYPE.SYNC_WORKSTATION_FILES
 }
+
 // NOTE(samuel) - task running without user context
 export type CheckNonTerminatedDbClustersJob = {
   type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS
 }
+
 export type SyncSpacesPermissionsJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_SPACES_PERMISSIONS
 }
@@ -66,6 +77,7 @@ export type Task =
   | CheckStaleJobsJob
   | CheckNonTerminatedDbClustersJob
   | SyncDbClusterJob
+  | SyncFileStatesJob
   | SyncSpacesPermissionsJob
   | SyncWorkstationFiles
   | DebugMaxMemory
