@@ -20,7 +20,7 @@ const StyledFooterWrapper = styled.div`
 
 const StyledFooter = styled.footer`
   display: grid;
-  grid-template-columns: ${theme.sizing.largeColumnWidth} 1fr;
+  grid-template-columns: 1fr;
   padding: ${theme.padding.mainContentVertical} ${theme.padding.mainContentHorizontal};
   font-size: 14px;
   line-height: 1.428571429;
@@ -39,6 +39,10 @@ const StyledFooter = styled.footer`
     margin: 0 0 10px;
     color: #555555;
   }
+
+  @media (min-width: 770px) {
+    grid-template-columns: ${theme.sizing.largeColumnWidth} 1fr;
+  }
 `
 
 const StyledFooterAddress = styled.div`
@@ -54,7 +58,7 @@ const StyledFDALogo = styled.a`
 const PFDAFooter = () => (
     <StyledFooterContainer>
       <StyledFooterWrapper>
-        <StyledFooter role="contentInfo">
+        <StyledFooter role="contentinfo">
           <div>
             <StyledFDALogo href="http://www.fda.gov" title="FDA Home Page">
               <img src={fdaLogo} alt="FDA Home Page" width="41px" height="46px"/>

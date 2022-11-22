@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -109,9 +109,10 @@ const ChallengeAppForm = ({
   const [selectedId, setSelectedId] = useState<string>()
 
   const mutation = useMutation({
+    mutationKey: ['challenge-app-form'],
     mutationFn: assignToChallengeRequest,
     onSuccess: (res: any) => {
-      onSuccess && onSuccess(res)
+      if(onSuccess) onSuccess(res)
       setShowModal(false)
       displayPayloadMessage(res)
     },

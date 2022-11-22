@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import { isActiveLink } from '../../helpers'
 import { usePageMeta } from '../../hooks/usePageMeta'

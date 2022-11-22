@@ -104,8 +104,9 @@ export const ButtonSolidBlue = styled(Button)`
 
   &:hover {
     ${({ disabled }) => !disabled && css`
-      background-color: rgb(24, 85, 137);
       color: ${theme.colors.textWhite};
+      background-color: #185589;
+      border-color: #12426b;
     `}
     ${({ disabled }) => disabled && css`
       background-color: ${theme.colors.lightBlue};

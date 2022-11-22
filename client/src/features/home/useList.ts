@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { UseQueryOptions } from 'react-query'
+import { UseQueryOptions } from '@tanstack/react-query'
 import { usePrevious } from '../../hooks/usePrevious'
 import { columnFilters } from './columnFilters'
 import { APIResource, IMeta, ResourceScope } from './types'

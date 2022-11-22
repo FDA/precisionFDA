@@ -79,11 +79,10 @@ const defaultConfig = {
     authApiUrl: 'https://stagingauth.dnanexus.com',
     adminUser: 'precisionfda.admin_dev',
     adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
-    findDataObjectsQueryLimit: 100,
+    challengeBotUser: 'challenge.bot.2',
+    challengeBotAccessToken: process.env.CHALLENGE_BOT_TOKEN ?? '',
+    findDataObjectsQueryLimit: 1000,
     orgEveryoneHandle: 'precisionfda_dev',
-    users: {
-      challengeBotDxUser: 'challenge.bot.2',
-    },
   },
   emails: {
     smtp: {
@@ -118,6 +117,12 @@ const defaultConfig = {
           shouldAddCheckNonterminatedClusters: false,
         },
       },
+    },
+    syncDbClusters: {
+      repeatPattern: '*/1 * * * *', // Every minute
+    },
+    syncFiles: {
+      repeatPattern: '*/15 * * * * *', // Every 15 seconds
     },
     syncJob: {
       // every two minutes

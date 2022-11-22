@@ -100,7 +100,7 @@ class FilesNewView
         if fileLinkData.errorType == "FileNotClosed"
           setTimeout(=>
             @permaLink(fileModel, doneFn)
-          , 500)
+          , 3000)
         else
           alert(fileLinkData.error)
       else

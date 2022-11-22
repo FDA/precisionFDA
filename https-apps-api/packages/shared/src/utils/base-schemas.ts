@@ -19,6 +19,20 @@ const idInputSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
+const uidProp: JSONSchema7Definition = {
+  type: 'string',
+  minLength: 1,
+  maxLength: config.validation.maxIdStrLen,
+}
+const uidInputSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    uid: uidProp,
+  },
+  required: ['uid'],
+  additionalProperties: false,
+}
+
 const getDxidsInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'ids') => ({
   type: 'object',
   properties: {
@@ -71,6 +85,7 @@ const schemas = {
   idProp,
   dxidProp,
   paginationSchema,
+  uidInputSchema,
 }
 
 export { schemas }

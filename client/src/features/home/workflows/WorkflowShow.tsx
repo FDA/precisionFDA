@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLocation, useParams } from 'react-router'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
@@ -245,7 +245,7 @@ export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
             <Markdown data={workflow.readme} />
           </Route>
           <Route path={`${match.path}/diagram`} exact>
-            <WorkflowsDiagram uid={workflow.uid} />
+            <WorkflowsDiagram workflowId={workflow.uid} />
           </Route>
           <Route path={`${match.path}/jobs`} exact>
             <WorkflowExecutionsList uid={workflowUid} />

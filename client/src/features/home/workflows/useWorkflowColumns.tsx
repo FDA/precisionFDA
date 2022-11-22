@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLocation, useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import { Column } from 'react-table'

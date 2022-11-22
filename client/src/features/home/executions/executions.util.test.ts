@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { createMockExecution, createMockWorkflowExecution } from '../../../test/mocks'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList, isJobExecution, isWorkflowExecution } from './executions.util'
@@ -48,11 +52,11 @@ describe('getExecutionJobsList()', () => {
 
   it('works on mixed jobs and workflows list', () => {
     const executions: IExecution[] = [
-      createMockExecution(`job-1`, `job-1-1`),
-      createMockWorkflowExecution(`workflow-2`, `workflow-2-1`, 2),
-      createMockExecution(`job-3`, `job-3-1`),
-      createMockWorkflowExecution(`workflow-4`, `workflow-4-1`, 3),
-      createMockExecution(`job-5`, `job-5-1`),
+      createMockExecution('job-1', 'job-1-1'),
+      createMockWorkflowExecution('workflow-2', 'workflow-2-1', 2),
+      createMockExecution('job-3', 'job-3-1'),
+      createMockWorkflowExecution('workflow-4', 'workflow-4-1', 3),
+      createMockExecution('job-5', 'job-5-1'),
     ]
     const jobs = getExecutionJobsList(executions)
     expect(jobs).toHaveLength(8)

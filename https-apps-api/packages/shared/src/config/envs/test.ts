@@ -21,9 +21,8 @@ export const config: ConfigOverride = () => ({
     url: 'redis://localhost:6379',
   },
   platform: {
-    users: {
-      challengeBotDxUser: 'challenge-bot-test',
-    },
+    challengeBotUser: 'challenge-bot-test',
+    challengeBotAccessToken: 'challenge-bot-test-access-token',
   },
   workerJobs: {
     queues: {

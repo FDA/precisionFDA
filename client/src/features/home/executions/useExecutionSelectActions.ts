@@ -1,7 +1,7 @@
 import { pick } from 'ramda'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { ATTACHABLE_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -64,7 +64,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), OBJECT_TYPES.JOB)
+  } = useAttachToModal(selected.map(s => s.id), ATTACHABLE_TYPES.JOB)
 
   const {
     modalComp: terminateoModal,
@@ -72,7 +72,10 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     isShown: isShownTerminateModal,
   } = useTerminateModal({ selected })
 
-  const attachLicenseMutation = useMutation({ mutationFn: async (id: string) => { } })
+  const attachLicenseMutation = useMutation({
+    mutationKey: ['attach-license'],
+    mutationFn: async (id: string) => { }
+  })
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const links = selected[0]?.links

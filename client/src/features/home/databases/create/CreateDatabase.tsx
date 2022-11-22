@@ -4,7 +4,7 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
@@ -121,11 +121,12 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   
   const queryClient = useQueryClient()
   const createDatabaseMutation = useMutation({
+    mutationKey: ['create-database'],
     mutationFn: (payload: any) => createDatabaseRequest(payload),
     onSuccess: (res) => {
       if (res?.db_cluster) {
         history.push(`/home/databases/${res?.db_cluster?.dxid}`)
-        queryClient.invalidateQueries('dbclusters')
+        queryClient.invalidateQueries(['dbclusters'])
         toast.success('Success: creating database.')
       } else if (res?.error) {
           toast.error(`${res.error.type}: ${res.error.message}`)

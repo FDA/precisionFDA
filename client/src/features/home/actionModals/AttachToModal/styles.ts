@@ -1,39 +1,53 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
+import { Markdown } from '../../../../components/Markdown'
+
+export const NotesMarkdown = styled(Markdown)`
+  padding: 0;
+`
+
+export const SearchInput = styled.div`
+  padding: 16px 0;
+  padding-right: 16px;
+`
+
+export const LeftBar = styled.div`
+  width: 300px;
+  overflow-y: auto;
+  padding: 16px;
+  padding-right: 0;
+`
+
+export const NoteContainer = styled.div`
+  padding: 6px 12px;
+  width: 700px;
+  overflow-y: auto;
+  border-left: 1px solid #ddd;
+
+  ._title {
+    font-size: 30px;
+    margin: 15px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  ._no-content {
+    color: #777777;
+  }
+`
 
 export const StyledAttachToModal = styled.div`
+  overflow: hidden;
   display: flex;
 
-  .__menu-container {
-    width: 300px;
-    overflow-y: auto;
-  }
   .__items-list {
-    height: 300px;
     list-style: none;
     margin: 0;
     padding: 0;
-  }
-  .__note-container {
-    padding: 6px 12px;
-    width: 700px;
-    overflow-x: auto;
-    border-left: 1px solid #ddd;
-
-    &_title {
-      font-size: 30px;
-      margin: 15px 0;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #e5e5e5;
-    }
-    &_no-content {
-      color: #777777;
-    }
   }
   .__menu-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
+    padding: 8px 16px;
     border-bottom: 1px solid #ddd;
 
     &:hover &_chevron {
@@ -57,9 +71,6 @@ export const StyledAttachToModal = styled.div`
       font-weight: 700;
       text-transform: uppercase;
       font-size: 75%;
-    }
-    &_title {
-      word-break: break-all;
     }
     &_label-wrapper {
       display: flex;

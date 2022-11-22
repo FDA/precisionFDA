@@ -10,11 +10,11 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'prettier',
   ],
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly",
-    "PROD_OR_STAGE": "readonly",
-    "RECAPTCHA_SITE_KEY": "readonly",
+  'globals': {
+    'Atomics': 'readonly',
+    'SharedArrayBuffer': 'readonly',
+    'PROD_OR_STAGE': 'readonly',
+    'RECAPTCHA_SITE_KEY': 'readonly',
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -37,13 +37,13 @@ module.exports = {
     'comma-dangle': ['error', 'always-multiline'],
     'import/extensions': 'off',
     'no-redeclare': 'off',
-    'dot-notation': 'off',
-    '@typescript-eslint/no-empty-function': 'off',
-    'react/jsx-props-no-spreading': 'off',
+    'no-plusplus': 'off',
     'react/function-component-definition': 'off',
     'no-prototype-builtins': 'off',
+    'arrow-body-style': 'off',
     'import/prefer-default-export': 'off',
     'react/jsx-filename-extension': [1, { 'extensions': ['.tsx', '.jsx']}],
+    'import/no-extraneous-dependencies': ['error', { 'devDependencies': ['**/*.test.{ts,tsx,js,jsx}', '**/*/webpack.*.config.js']}],
     'object-curly-spacing': [
       'error', 'always', { 'objectsInObjects': false, 'arraysInObjects': false },
     ],

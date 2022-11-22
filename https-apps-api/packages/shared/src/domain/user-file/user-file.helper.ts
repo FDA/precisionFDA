@@ -1,8 +1,11 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { User, Node, UserFile } from '..'
+import { User, Node, UserFile, Asset } from '..'
+import { AssetRepository } from './asset.repository'
 import { Folder } from './folder.entity'
 import { FolderRepository } from './folder.repository'
-import { FILE_STI_TYPE } from './user-file.enum'
+import { UserFileRepository } from './user-file.repository'
+import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
 
 const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
   if (node instanceof Folder) {
@@ -280,6 +283,32 @@ const findFolderForPath = (
   }
 }
 
+const findFileOrAssetWithUid = async (
+  em: EntityManager,
+  uid: string,
+): Promise<IFileOrAsset | null> => {
+  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
+  const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
+  if (file) {
+    return file
+  }
+
+  const assetRepo = em.getRepository(Asset) as AssetRepository
+  return await assetRepo.findAssetWithUid(uid)
+}
+
+const findUnclosedFilesOrAssets = async (
+  em: EntityManager,
+  userId: number
+): Promise<IFileOrAsset[]> => {
+  let results: IFileOrAsset[] = []
+  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
+  const assetRepo = em.getRepository(Asset) as AssetRepository
+  results = results.concat(await userFileRepo.findUnclosedFiles(userId))
+  results = results.concat(await assetRepo.findUnclosedAssets(userId))
+  return results
+}
+
 
 export {
   parseFoldersFromClient,
@@ -296,4 +325,6 @@ export {
   getStiEnumTypeFromInstance,
   filterLeafPaths,
   findFolderForPath,
+  findFileOrAssetWithUid,
+  findUnclosedFilesOrAssets,
 }

@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { isCheckedAllCheckboxes, isExpandedAllItems, convertSecondsToDhms, isHttpSuccess } from '.'
 
 

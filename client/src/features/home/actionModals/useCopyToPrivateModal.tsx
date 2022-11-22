@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -15,8 +15,6 @@ const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
   min-width: 300px;
 `
-
-
 
 export function useCopyToPrivateModal<T extends { id: string; name: string }>({
   resource,
@@ -34,6 +32,7 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
+    mutationKey: ['copy-to-private', resource],
     mutationFn: request,
     onError: () => {
       toast.error(`Error: Copying to private ${resource}`)
@@ -41,9 +40,8 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
     onSuccess: (res: any) => {
       if (res?.meta?.messages[0].type === 'error') {
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
-        return
       } else {
-        onSuccess && onSuccess(res)
+        if(onSuccess) onSuccess(res)
         setShowModal(false)
         toast.success(`Success: Copy to private ${itemsCountString(resource, momoSelected.length)}`)
       }

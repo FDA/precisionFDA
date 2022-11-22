@@ -5,6 +5,16 @@ type BaseParams = {
   accessToken: string
 }
 
+type Starting = {
+  project: string
+  id: string
+}
+
+interface IPaginatedParams {
+  // the API uses it as a starting point when doing pagination
+  starting?: Starting
+}
+
 type JobDescribeParams = BaseParams & { jobId: string }
 type JobTerminateParams = BaseParams & { jobId: string }
 
@@ -24,15 +34,31 @@ type JobCreateParams = BaseParams & {
   }
 }
 
-type ListFilesParams = BaseParams & {
+type ListFilesParams = BaseParams & IPaginatedParams & {
   project: string
   folder?: string
   includeDescProps?: boolean
-  // the API uses it as a starting point when doing pagination
-  starting?: {
-    project: string
-    id: string
-  }
+}
+
+type FileCloseParams = BaseParams & {
+  fileDxid: string
+}
+
+type FileDescribeParams = BaseParams & {
+  fileDxid: string
+  projectDxid: string
+}
+
+type FileDownloadLinkParams = BaseParams & {
+  fileDxid: string
+  filename: string
+  project: string
+  duration: number // in seconds
+}
+
+type FileStatesParams = BaseParams & {
+  fileDxids: string[]
+  projectDxid: string
 }
 
 type DescribeFilesParams = BaseParams & {
@@ -105,6 +131,10 @@ type DbClusterDescribeParams = BaseParams & {
 
 type DbClusterActionParams = BaseParams & { dxid: string }
 
+type DescribeDataObjectsParams = BaseParams & {
+  objects: Array<string | Record<string, string>>
+}
+
 type UserResetMfaParams = {
   headers: BaseParams
   dxid: string
@@ -125,6 +155,13 @@ type UserUnlockParams = {
 
 export {
   BaseParams,
+  Starting,
+  IPaginatedParams,
+  FileCloseParams,
+  FileDescribeParams,
+  FileDownloadLinkParams,
+  FileStatesParams,
+  ListFilesParams,
   JobDescribeParams,
   JobCreateParams,
   JobTerminateParams,
@@ -140,7 +177,7 @@ export {
   UserRemoveFromOrgParams,
   RemoveFolderParams,
   RenameFolderParams,
-  ListFilesParams,
+  DescribeDataObjectsParams,
   UserResetMfaParams,
   UserUnlockParams,
 }

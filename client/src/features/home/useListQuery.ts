@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions } from 'react-query'
+import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { toArrayFromObject } from '../../utils/object'
 import { APIResource, IMeta, ResourceScope } from './types'
 

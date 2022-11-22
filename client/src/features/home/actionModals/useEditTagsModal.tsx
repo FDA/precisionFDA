@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -63,6 +63,7 @@ const EditTagsForm = ({
   })
 
   const mutation = useMutation({
+    mutationKey: ['edit-resource-tags', resource],
     mutationFn: (tags: string) => editTagsRequest({ uid, tags }),
     onSuccess: (res) => {
       if(onSuccess) onSuccess(res)
