@@ -73,7 +73,7 @@
     "uniqid": "^5.2.0",
     "url-parse": "^1.5.9",
     "use-immer": "^0.6.0",
-    "use-query-params": "^1.2.3",
+    "use-query-params": "^2.1.2",
     "y18n": "^4.0.0",
     "yup": "^0.32.11"
   },
