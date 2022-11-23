@@ -67,19 +67,20 @@ module Api
     # GET /api/spaces
     # Fetches spaces list.
     def index
-      allowed_orderings = %w(created_at name space_type updated_at).freeze
+      allowed_orderings = %w(created_at name state space_type updated_at).freeze
 
+      params[:order_by] = "space_type" if params[:order_by] == "type"
       order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
+      filter_tags = params.dig(:filters, :tags)
 
       spaces = SpaceService::SpacesFilter.
         call(@context.user, unsafe_params[:filters]).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
+        search_by_tags(filter_tags).
         order(order).page(page_from_params).per(page_size)
 
       page_dict = pagination_dict(spaces)
-      spaces = sort_array_by_fields(spaces)
-      page_meta = pagination_meta(spaces.count)
+      page_meta = pagination_meta(spaces.count(:all))
 
       render json: spaces, root: "spaces", adapter: :json,
              meta: page_meta.merge({ pagination: page_dict })
