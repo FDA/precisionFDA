@@ -1,5 +1,5 @@
 import { cleanObject } from '../../utils/object'
-import { IFilter, SortBy } from './types'
+import { IFilter, ResourceScope, SortBy } from './types'
 
 // Only return the objects with keys from the pick array
 export function pickActions<T>(actions: T, pick: string[]) {

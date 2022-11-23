@@ -69,6 +69,7 @@ class AssetService
       upload(asset.uid, asset_io)
 
       close(asset.uid)
+      asset
     end
   end
 
@@ -157,15 +158,14 @@ class AssetService
   end
 
   def close(uid)
-    asset = Asset.open.find_by!(user_id: context.user_id, uid: uid)
+    https_apps_client.file_close(uid)
 
-    api.call(asset.dxid, "close")
-
-    asset.reload
-
-    asset.update!(state: "closing") if asset.open?
-
-    asset
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # asset = Asset.open.find_by!(user_id: context.user_id, uid: uid)
+    # api.call(asset.dxid, "close")
+    # asset.reload
+    # asset.update!(state: "closing") if asset.open?
+    # asset
   end
 
   # we need to wait until the asset becomes closed
@@ -234,6 +234,10 @@ class AssetService
 
   def api
     @api ||= DNAnexusAPI.new(context.token)
+  end
+
+  def https_apps_client
+    @https_apps_client ||= HttpsAppsClient.new(context.token, User.find(context.user_id))
   end
 
   attr_reader :context

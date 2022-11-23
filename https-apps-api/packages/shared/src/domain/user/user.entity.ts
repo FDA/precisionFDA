@@ -127,7 +127,7 @@ export class User extends BaseEntity {
   @Property({
     type: WorkaroundJsonType,
     columnType: 'text',
-  })
+    })
   cloudResourceSettings?: CloudResourceSettings
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
@@ -143,7 +143,7 @@ export class User extends BaseEntity {
     entity: () => EmailNotification,
     mappedBy: 'user',
     nullable: true,
-  })
+    })
   emailNotificationSettings: IdentifiedReference<EmailNotification>;
 
   [EntityRepositoryType]?: UserRepository
@@ -152,20 +152,20 @@ export class User extends BaseEntity {
     entity: () => Expert,
     mappedBy: 'user',
     orphanRemoval: true,
-  })
+    })
   expert: IdentifiedReference<Expert>
 
   @OneToMany({
     entity: () => ExpertQuestion,
     mappedBy: 'user',
     orphanRemoval: true,
-  })
+    })
   expertQuestions = new Collection<ExpertQuestion>(this)
 
   @OneToMany({
     entity: () => AdminMembership,
     mappedBy: 'user',
-  })
+    })
   adminMemberships = new Collection<AdminMembership>(this)
 
 
@@ -194,23 +194,27 @@ export class User extends BaseEntity {
     return spaceUids
   }
 
-  isMemberOfSpace(spaceUid: string) {
+  isMemberOfSpace(spaceUid: string): boolean {
     return Object.values(this.spaceUids).includes(spaceUid)
   }
 
-  isChallengeBot() {
-    return this.dxuser === config.platform.users.challengeBotDxUser
+  isChallengeBot(): boolean {
+    return this.dxuser === config.platform.challengeBotUser
   }
 
-  isGuest() {
+  static getChallengeBotToken(): string {
+    return config.platform.challengeBotAccessToken
+  }
+
+  isGuest(): boolean {
     return this.dxuser.startsWith('Guest-')
   }
 
-  async isSiteAdmin() {
+  async isMemberOfAdminGroup(adminGroup: ADMIN_GROUP_ROLES): Promise<boolean> {
     const siteAdminGroupMemberships = await this.adminMemberships.matching({
       where: {
         adminGroup: {
-          role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
+          role: adminGroup,
         },
       },
       populate: {
@@ -221,18 +225,15 @@ export class User extends BaseEntity {
     return siteAdminGroupMemberships.length > 0
   }
 
-  async isReviewSpaceAdmin() {
-    const siteAdminGroupMemberships = await this.adminMemberships.matching({
-      where: {
-        adminGroup: {
-          role: ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN,
-        },
-      },
-      populate: {
-        adminGroup: true,
-      },
-    })
+  async isSiteAdmin(): Promise<boolean> {
+    return await this.isMemberOfAdminGroup(ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN)
+  }
 
-    return siteAdminGroupMemberships.length > 0
+  async isReviewSpaceAdmin(): Promise<boolean> {
+    return await this.isMemberOfAdminGroup(ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN)
+  }
+
+  async isChallengeAdmin(): Promise<boolean> {
+    return await this.isMemberOfAdminGroup(ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN)
   }
 }

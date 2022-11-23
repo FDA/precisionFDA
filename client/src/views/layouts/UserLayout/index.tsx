@@ -1,10 +1,8 @@
-import React, { FC } from 'react'
+import React, { ReactNode } from 'react'
 import styled from 'styled-components'
-
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUserQuery } from '../../../features/auth/useAuthUser'
-import AlertNotifications from '../../components/AlertNotifications'
 
 const StyledLayoutLoader = styled.div`
   display: flex;
@@ -20,7 +18,7 @@ const LayoutLoader = () => (
   </StyledLayoutLoader>
 )
 
-export const UserLayout: FC = ({ children }) => {
+export const UserLayout = ({ children }: { children: ReactNode }) => {
   const user = useAuthUserQuery()
 
   const content = () => {
@@ -37,7 +35,6 @@ export const UserLayout: FC = ({ children }) => {
   return (
     <div className="pfda-loader-wrapper">
       {content()}
-      <AlertNotifications />
     </div>
   )
 }

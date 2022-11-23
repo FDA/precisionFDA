@@ -2,7 +2,7 @@ import { PlatformClient } from '../../../platform-client'
 import { Folder, User, UserFile } from '../..'
 import { BaseOperation } from '../../../utils'
 import { filterLeafPaths, getFolderPath, getPathsToBuild } from '../user-file.helper'
-import { FILE_STI_TYPE } from '../user-file.enum'
+import { FILE_STI_TYPE } from '../user-file.types'
 import { errors } from '../../..'
 import { UserOpsCtx } from '../../../types'
 

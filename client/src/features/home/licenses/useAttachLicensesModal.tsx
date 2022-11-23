@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -50,8 +50,22 @@ export function useAttachLicensesModal<
     fetchLicensesList(),
   )
 
+  const resetSelected = () => {
+    setSelectedLicenses(undefined)
+  }
+
+  const handleClose = () => {
+    resetSelected()
+    setShowModal(false)
+  }
+
+  const handleClickLicense = (s: License) => {
+    setSelectedLicenses(s.id)
+  }
+
   const licenses = data?.licenses
   const mutation = useMutation({
+    mutationKey: ['attach-license', resource],
     mutationFn: ({ dxid, licenseId }: { dxid: string; licenseId: string }) => {
       return attachLicenseRequest({ dxid, licenseId })
     },
@@ -59,8 +73,8 @@ export function useAttachLicensesModal<
       toast.error('Error: Attaching licenses')
     },
     onSuccess: (res: any) => {
-      queryClient.invalidateQueries('licenses')
-      onSuccess && onSuccess(res)
+      queryClient.invalidateQueries(['licenses'])
+      if(onSuccess) onSuccess(res)
       resetSelected()
       setShowModal(false)
       toast.success('Success: Attaching Licenses')
@@ -72,23 +86,10 @@ export function useAttachLicensesModal<
       mutation.mutateAsync({ dxid: selectedId, licenseId: selectedLicenseId })
   }
 
-  const handleClose = () => {
-    resetSelected()
-    setShowModal(false)
-  }
-
-  const resetSelected = () => {
-    setSelectedLicenses(undefined)
-  }
-
-  const handleClickLicense = (s: License) => {
-    setSelectedLicenses(s.id)
-  }
-
   const modalComp = (
     <Modal
       data-testid="modal-licenses-attach"
-      headerText={`Select a license`}
+      headerText="Select a license"
       isShown={isShown}
       hide={handleClose}
       footer={
@@ -96,7 +97,7 @@ export function useAttachLicensesModal<
           <Button onClick={handleClose}>Cancel</Button>
           <ButtonSolidBlue
             onClick={() => handleSubmit(selectedLicense)}
-            disabled={!Boolean(selectedLicense) || selectedLicense === selected?.file_license?.id}
+            disabled={!selectedLicense || selectedLicense === selected?.file_license?.id}
           >
             Attach
           </ButtonSolidBlue>
@@ -112,7 +113,7 @@ export function useAttachLicensesModal<
               return {
                 title: (
                   <StyledName
-                    as={'div'}
+                    as="div"
                     key={`${i}-name`}
                     onClick={() => handleClickLicense(s)}
                     isCurrent={isCurrent}

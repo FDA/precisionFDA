@@ -1,6 +1,6 @@
 import { omit } from 'ramda'
 import React, { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocation, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -131,6 +131,7 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
   const { executionUid } = useParams<{ executionUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
   const syncFiles = useMutation({
+    mutationKey: ['sync-files'],
     mutationFn: syncFilesRequest,
     onSuccess: ({ message }) => {
       if (message) {

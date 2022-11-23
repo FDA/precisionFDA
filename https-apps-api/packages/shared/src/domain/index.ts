@@ -21,6 +21,8 @@ import { Asset } from './user-file/asset.entity'
 import { Challenge } from './challenge/challenge.entity'
 import { AdminGroup } from './admin-group/admin-group.entity'
 import { AdminMembership } from './admin-membership/admin-membership.entity'
+import { ChallengeResource } from './challenge/challenge-resource.entity'
+import { Comparison } from './comparison/comparison.entity'
 
 const entities = {
   AdminGroup,
@@ -28,7 +30,9 @@ const entities = {
   App,
   Asset,
   Challenge,
+  ChallengeResource,
   Comment,
+  Comparison,
   DbCluster,
   EmailNotification,
   Expert,
@@ -88,7 +92,9 @@ export {
   App,
   Asset,
   Challenge,
+  ChallengeResource,
   Comment,
+  Comparison,
   DbCluster,
   Expert,
   ExpertAnswer,

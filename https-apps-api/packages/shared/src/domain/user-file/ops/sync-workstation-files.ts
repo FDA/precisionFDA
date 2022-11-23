@@ -8,7 +8,7 @@ import { Job } from "../../job"
 import { Tag } from "../../tag/tag.entity"
 import { Folder } from "../folder.entity"
 import { assignTags } from "../user-file-tags"
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from "../user-file.enum"
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from "../user-file.types"
 import { SyncFilesInFolderOperation, SyncFolderFilesOutput } from "./sync-folder-files"
 import { SyncFoldersOperation } from "./sync-folders"
 

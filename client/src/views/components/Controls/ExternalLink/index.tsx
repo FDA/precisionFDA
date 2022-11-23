@@ -1,12 +1,16 @@
 import React, { FunctionComponent, useState } from 'react'
+import styled from 'styled-components'
 
 import Modal from '../../Modal'
-import Button from '../../Button'
+import { Button, ButtonSolidBlue } from '../../../../components/Button/index';
 
-
+const StyledLink = styled.a`
+  cursor: pointer;
+`
 interface IExternalLinkProps {
   to: string,
   className?: string,
+  ariaLabel?: string,
   children?: React.ReactNode,
 }
 
@@ -28,14 +32,14 @@ const ExternalLink : FunctionComponent<IExternalLinkProps> = ({ to, className, c
 
   return (
     <>
-      <a onClick={() => openModal()} className={className} aria-label={ariaLabel}>{children}</a>
+      <StyledLink onClick={() => openModal()} className={className} aria-label={ariaLabel}>{children}</StyledLink>
       <Modal
         isOpen={isOpen}
         isLoading={false}
         title="Leaving precisionFDA"
         modalFooterContent={<>
           <Button onClick={closeModal}>Cancel</Button>
-          <Button type="primary" onClick={openLink}>Continue</Button>
+          <ButtonSolidBlue onClick={openLink}>Continue</ButtonSolidBlue>
         </>}
         hideModalHandler={closeModal}
       >

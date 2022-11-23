@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`<Icon /> matches snapshot 1`] = `
-<i
-  className="fa fa-user"
-/>
-`;

@@ -12,7 +12,8 @@ import { SyncJobOperation } from '../domain/job'
 import { formatDuration } from '../domain/job/job.helper'
 import { EmailSendOperation } from '../domain/email'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
-import { clearOrphanedRepeatableJobs, getJobStatusMessage } from './queue.utils'
+import { SyncFilesStateOperation } from '../domain/user-file'
+import * as utils from './queue.utils'
 import * as types from './task.input'
 
 let statusQueue: Bull.Queue
@@ -84,7 +85,7 @@ const createQueues = async (): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
-  const removedJobs = await clearOrphanedRepeatableJobs(statusQueue)
+  const removedJobs = await utils.clearOrphanedRepeatableJobs(statusQueue)
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
@@ -118,7 +119,7 @@ const addToQueue = async <T extends types.Task>(
   queue: Bull.Queue,
   options?: JobOptions,
   payloadFn?: (payload: AnyObject) => AnyObject,
-) => {
+): Promise<Job<T>> => {
   if (typeof queue === 'undefined') {
     throw new Error('The queue was not started')
   }
@@ -174,7 +175,28 @@ const findRepeatable = async (bullJobId: string) => {
   return result
 }
 
+
 // TASK PRODUCERS
+
+const createSyncFilesStateTask = async (
+  user: UserCtx,
+) => {
+  log.info({ userId: user.id },
+    'Creating SyncFilesStateTask',
+  )
+
+  const task = {
+    type: types.TASK_TYPE.SYNC_FILES_STATE as const,
+    user,
+  }
+
+  const options: JobOptions = {
+    // There should only be one sync files state task per user
+    jobId: SyncFilesStateOperation.getBullJobId(user.dxuser),
+    repeat: { cron: config.workerJobs.syncFiles.repeatPattern },
+  }
+  return await addToQueue(task, statusQueue, options)
+}
 
 const createSyncJobStatusTask = async (
   data: types.CheckStatusJob['payload'],
@@ -216,7 +238,7 @@ const createSyncWorkstationFilesTask = async (
   const existingJob = await fileSyncQueue.getJob(jobId)
   if (existingJob !== null) {
     // Do not allow a second file sync job to be added to the queue
-    let errorMessage = await getJobStatusMessage(existingJob, 'File sync')
+    let errorMessage = await utils.getJobStatusMessage(existingJob, 'File sync')
     const elapsedTime = Date.now() - existingJob.timestamp
     errorMessage += `. Current state is ${await existingJob.getState()}`
     errorMessage += `. Elapsed time ${formatDuration(elapsedTime)}`
@@ -297,7 +319,7 @@ const createDbClusterSyncTask = async (
 
   const options: JobOptions = {
     jobId: SyncDbClusterOperation.getBullJobId(data.dxid),
-    repeat: { cron: config.workerJobs.syncJob.repeatPattern },
+    repeat: { cron: config.workerJobs.syncDbClusters.repeatPattern },
   }
 
   return await addToQueue(wrapped, statusQueue, options)
@@ -340,6 +362,7 @@ export * as debug from './queue.debug'
 export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
 
 export {
+  createSyncFilesStateTask,
   createSyncJobStatusTask,
   createSyncWorkstationFilesTask,
   createSendEmailTask,
@@ -358,6 +381,7 @@ export {
   getQueues,
   disconnectQueues,
   types,
+  utils,
   removeRepeatable,
   removeRepeatableJob,
   findRepeatable,

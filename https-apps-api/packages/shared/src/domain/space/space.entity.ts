@@ -21,7 +21,7 @@ export class Space extends BaseEntity {
   @Property({ fieldName: 'guest_dxorg' })
   guestDxOrg: string
 
-  @Property({ fieldName: 'host_project',nullable: true })
+  @Property({ fieldName: 'host_project', nullable: true })
   hostProject: string
 
   @Property({ fieldName: 'guest_project', nullable: true })
@@ -33,7 +33,7 @@ export class Space extends BaseEntity {
   @Property({ fieldName: 'space_type' })
   type: SPACE_TYPE
 
-  @Property({fieldName: 'space_id',nullable: true })
+  @Property({fieldName: 'space_id', nullable: true })
   spaceId: number
 
   @Property()

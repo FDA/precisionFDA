@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
@@ -34,13 +34,14 @@ const EditDatabaseInfoForm = ({
   })
 
   const editFileMutation = useMutation({
+    mutationKey: ['edit-database'],
     mutationFn: (payload: {
       name: string
       description: string
     }) => editDatabaseRequest(payload, db.dxid),
     onSuccess: res => {
       queryClient.invalidateQueries(['dbcluster', db.dxid])
-      queryClient.invalidateQueries('dbclusters')
+      queryClient.invalidateQueries(['dbclusters'])
       handleClose()
       toast.success('Success: Editing database info')
     },

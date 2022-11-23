@@ -7,7 +7,7 @@ import { Svg } from './icons/Svg'
 const LoaderWrapper = styled.div<{shouldDisplayInline?: boolean}>`
   display: flex;
   justify-content: center;
-  margin-top: 16px;
+  padding-top: 16px;
   ${({ shouldDisplayInline }) => shouldDisplayInline && css`
     display: inline;
   `}

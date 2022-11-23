@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { AxiosError } from 'axios'
 import React from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
@@ -41,6 +41,7 @@ const EditChallengePage = () => {
   const { data, isLoading } = useChallengeDetailsQuery(challengeId, true)
 
   const mutation = useMutation({
+    mutationKey: ['edit-challenge'],
     mutationFn: (payload: any) => editChallengeRequest(payload, challengeId),
     onSuccess: () => {
       queryClient.invalidateQueries(['challenge-custom', challengeId])

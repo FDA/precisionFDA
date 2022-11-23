@@ -8,7 +8,7 @@ import type {
 import {
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import {
@@ -59,7 +59,7 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('does nothing when it finds no new files', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const subfolder = create.filesHelper.createFolder(
       em,
       { user },
@@ -92,7 +92,7 @@ describe('syncFilesInFolder operation', () => {
     })
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 1), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(0, 1))
     const input = { ...defaultInput, folderId: subfolder.id }
     const res = await op.execute(input)
     // response shape
@@ -107,7 +107,7 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('returns new file', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const createdFileDesc = FILES_DESC_RES.results[1].describe
     const subfolder = create.filesHelper.createFolder(
       em,
@@ -141,7 +141,7 @@ describe('syncFilesInFolder operation', () => {
     })
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(1, 2), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(1, 2))
     const input = { ...defaultInput, folderId: folder.id }
     const res = await op.execute(input)
     // in the folder these is only one file
@@ -153,7 +153,7 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('creates one more new file in a subfolder', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const createdFileDesc = FILES_DESC_RES.results[1].describe
     const subfolder = create.filesHelper.createFolder(
       em,
@@ -188,7 +188,7 @@ describe('syncFilesInFolder operation', () => {
     // fixme: responses mismatch
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(0, 2))
     fakes.client.filesDescFake
       .onCall(0)
       .returns({ results: FILES_DESC_RES.results.slice(1, 2), next: null })
@@ -202,7 +202,7 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('deletes file', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const subfolder = create.filesHelper.createFolder(
       em,
       { user },
@@ -227,14 +227,14 @@ describe('syncFilesInFolder operation', () => {
       log,
       user: userCtx,
     })
-    fakes.client.filesListFake.onCall(0).returns({ results: [], next: null })
+    fakes.client.filesListFake.onCall(0).returns([])
     const input = { ...defaultInput, folderId: subfolder.id }
     const res = await op.execute(input)
     expect(res).to.have.property('files').that.has.lengthOf(0)
   })
 
   it('runs file name change', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const subfolder = create.filesHelper.createFolder(
       em,
       { user },
@@ -260,19 +260,16 @@ describe('syncFilesInFolder operation', () => {
       user: userCtx,
     })
     // returns the same file but with a different name
-    fakes.client.filesListFake.onCall(0).returns({
-      results: [
-        {
-          ...FILES_LIST_RES_ROOT.results[0],
-          describe: {
-            id: FILES_LIST_RES_ROOT.results[0].id,
-            name: 'new-name',
-            size: 0,
-          },
+    fakes.client.filesListFake.onCall(0).returns([
+      {
+        ...FILES_LIST_RES_ROOT[0],
+        describe: {
+          id: FILES_LIST_RES_ROOT[0].id,
+          name: 'new-name',
+          size: 0,
         },
-      ],
-      next: null,
-    })
+      },
+    ])
     const input = { ...defaultInput, folderId: subfolder.id }
     const res = await op.execute(input)
     expect(res.files.map(f => f.dxid)).to.have.members([file.dxid])
@@ -286,8 +283,8 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('deletes existing file and creates another', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
-    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT[1].id
     const subfolder = create.filesHelper.createFolder(
       em,
       { user },
@@ -314,7 +311,7 @@ describe('syncFilesInFolder operation', () => {
     })
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(1, 2), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(1, 2))
     fakes.client.filesDescFake
       .onCall(0)
       .returns({ results: FILES_DESC_RES.results.slice(1, 2), next: null })
@@ -324,8 +321,8 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('works with uploaded files as well', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
-    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT[1].id
     // file was uploaded to the project manually
     const file = create.filesHelper.createUploaded(
       em,
@@ -352,7 +349,7 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(0, 2))
     const op = new userFile.SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
@@ -371,8 +368,8 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('works with uploaded files even in wrong subfolder', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
-    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT[1].id
     // file was uploaded to the project manually
     const file = create.filesHelper.createUploaded(
       em,
@@ -400,7 +397,7 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(0, 2))
     const op = new userFile.SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
@@ -421,8 +418,8 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('works with local asset files as well', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
-    const secondFileDxid = FILES_LIST_RES_ROOT.results[1].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
+    const secondFileDxid = FILES_LIST_RES_ROOT[1].id
     // file was uploaded to the project manually
     const file = create.filesHelper.createUploadedAsset(
       em,
@@ -450,7 +447,7 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 2), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(0, 2))
     const op = new userFile.SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
@@ -471,7 +468,7 @@ describe('syncFilesInFolder operation', () => {
   })
 
   it('does nothing when it finds file with given dxid regardless of project', async () => {
-    const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+    const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     create.filesHelper.create(
       em,
       { user },
@@ -491,7 +488,7 @@ describe('syncFilesInFolder operation', () => {
     })
     fakes.client.filesListFake
       .onCall(0)
-      .returns({ results: FILES_LIST_RES_ROOT.results.slice(0, 1), next: null })
+      .returns(FILES_LIST_RES_ROOT.slice(0, 1))
     const res = await op.execute(defaultInput)
     // response shape
     expect(Object.keys(res)).to.have.members(['folder', 'folderPath', 'files'])

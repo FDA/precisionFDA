@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios'
 import React, { useState } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -22,11 +22,12 @@ const CreateChallengePage = () => {
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
+    mutationKey: ['create-challenge'],
     mutationFn: (payload: any) => createChallengeRequest(payload),
     onSuccess: res => {
       setIsSavingChallenge(false)
       if (res?.challenge) {
-        queryClient.invalidateQueries('challenges')
+        queryClient.invalidateQueries(['challenges'])
         history.push('/challenges')
         toast.success('Success: Creating challenge.')
       } else if (res?.error) {
@@ -48,6 +49,7 @@ const CreateChallengePage = () => {
   )
 
   const imageMutation = useMutation({
+    mutationKey: ['create-challenge-image'],
     mutationFn: (v: any) =>
       createChallengeCardImage(v.cardImage[0], img =>
         mutation.mutateAsync({

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
-import { useQueryClient } from 'react-query'
-import { Link, useRouteMatch, useLocation } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouteMatch, useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'

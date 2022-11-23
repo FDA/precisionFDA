@@ -1,42 +1,43 @@
-import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import classNames from 'classnames/bind'
-import { fetchAttachingItems } from '../../../../actions/home'
-import { homeAttachingItemsSelector } from '../../../../reducers/home/page/selectors'
-import { OBJECT_TYPES } from '../../../../constants'
-import { Markdown } from '../../../../components/Markdown'
-import { ButtonSolidBlue, Button } from '../../../../components/Button'
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+import classNames from 'classnames'
+import React, { useEffect, useState } from 'react'
+import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import { TransparentButton } from '../../../../components/Dropdown/styles'
+import { InputText } from '../../../../components/InputText'
+import { Loader } from '../../../../components/Loader'
 import Icon from '../../../../views/components/Icon'
-import Modal from '../../../../views/components/Modal'
-import Input from '../../../../views/components/FormComponents/Input'
-import { StyledAttachToModal } from './styles'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer } from '../../../modal/styles'
+import { ATTACHABLE_TYPES } from '../useAttachToModal'
+import {
+  LeftBar,
+  NoteContainer,
+  NotesMarkdown,
+  SearchInput,
+  StyledAttachToModal,
+} from './styles'
+import { useAttachToMutation } from './useAttachToMutation'
+import { useListNotesQuery } from './useListNotesQuery'
 
-
-const Footer = ({ hideAction, attachAction, isCopyDisabled }: { hideAction: () => void, attachAction: () => void,  isCopyDisabled: boolean}) => (
-  <>
-    <Button onClick={hideAction}>Cancel</Button>
-    <ButtonSolidBlue onClick={attachAction} disabled={isCopyDisabled}>Attach</ButtonSolidBlue>
-  </>
-)
-
-const HomeAttachToModal = (props: any) => {
-  const { isOpen, hideAction, title, attachAction, isLoading, ids, itemsType, attachingItems, fetchAttachingItems } = props
-
-  const { items = []} = attachingItems
-
+export const AttachToModal = ({
+  isShown,
+  hideAction,
+  ids,
+  itemsType,
+}: {
+  isShown: boolean
+  hideAction: () => void
+  ids: string[] | number[]
+  itemsType: ATTACHABLE_TYPES
+}) => {
+  const { data: notesData, isLoading } = useListNotesQuery()
+  const mutation = useAttachToMutation()
+  const items = notesData || []
   const [search, setSearch] = useState('')
   const [selectedItem, setSelectedItem] = useState<any>({})
-  const [checkedItemIds, setCheckedItemIds] = useState(new Set())
-
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedItem({})
-      setCheckedItemIds(new Set())
-      setSearch('')
-      fetchAttachingItems()
-    }
-  }, [isOpen])
+  const [checkedItemIds, setCheckedItemIds] = useState(new Set<string>())
 
   useEffect(() => {
     if (items.length) setSelectedItem(items[0])
@@ -54,145 +55,139 @@ const HomeAttachToModal = (props: any) => {
 
   const onClickAttachAction = () => {
     const types = {
-      [OBJECT_TYPES.FILE]: 'UserFile',
-      [OBJECT_TYPES.APP]: 'App',
-      [OBJECT_TYPES.JOB]: 'Job',
-      [OBJECT_TYPES.ASSET]: 'Asset',
-      [OBJECT_TYPES.WORKFLOW]: 'Workflow',
-    }
+      [ATTACHABLE_TYPES.FILE]: 'UserFile',
+      [ATTACHABLE_TYPES.APP]: 'App',
+      [ATTACHABLE_TYPES.JOB]: 'Job',
+      [ATTACHABLE_TYPES.ASSET]: 'Asset',
+      [ATTACHABLE_TYPES.WORKFLOW]: 'Workflow',
+    } as any
 
-    const items = ids.map((id: string) => {
+    const it = ids.map((id: string|number) => {
       return {
         id,
         type: types[itemsType],
       }
     })
 
-    attachAction(items, [...checkedItemIds])
+    mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds]})
   }
 
   const reg = new RegExp(search, 'i')
-  const filteredItems = search ? items.filter((e: any) => reg.test(e.title)) : items
+  const filteredItems = search
+    ? items.filter((e: any) => reg.test(e.title))
+    : items
 
-  const itemsList = filteredItems.map((note: any) => {
-    const classes = classNames({
-      '__menu-item--selected': note.uid === selectedItem.uid,
-    }, '__menu-item')
+  if (isLoading) return <Loader />
+
+  const itemsList = filteredItems.map(note => {
+    const classes = classNames(
+      {
+        '__menu-item--selected': note.uid === selectedItem.uid,
+      },
+      '__menu-item',
+    )
 
     return (
-      <li key={note.uid} className={classes} onClick={() => setSelectedItem(note)}>
+      <li
+        key={note.uid}
+        className={classes}
+        onClick={() => setSelectedItem(note)}
+        onKeyPress={() => setSelectedItem(note)}
+      >
         <div>
-          <span className='__menu-item_label-wrapper' onClick={() => onCheckboxClick(note.uid)} >
+          <span
+            className="__menu-item_label-wrapper"
+            onClick={() => onCheckboxClick(note.uid)}
+          >
             <input
-              type='checkbox'
+              type="checkbox"
               name={note.uid}
               checked={checkedItemIds.has(note.uid)}
-              onChange={() => { }}
+              onChange={() => {}}
             />
-            <span className='__menu-item_class-label'>{note.className}</span>
-            <span className='__menu-item_title'>{note.title}</span>
+            <span className="__menu-item_class-label">{note.className}</span>
+            <span className="__menu-item_title">{note.title}</span>
           </span>
         </div>
-        <span className='__menu-item_chevron'>
-          <Icon icon='fa-chevron-right' />
+        <span className="__menu-item_chevron">
+          <Icon icon="fa-chevron-right" />
         </span>
       </li>
     )
   })
 
   return (
-    <Modal
-      className='resource_type__modal'
-      isOpen={isOpen}
-      isLoading={isLoading || attachingItems.isLoading}
-      title={title}
-      modalFooterContent={
-        <Footer
-          hideAction={hideAction}
-          isCopyDisabled={!checkedItemIds.size}
-          attachAction={onClickAttachAction}
-        />}
-      hideModalHandler={hideAction}
-      noPadding
+    <ModalNext
+      headerText="Attach note to:"
+      hide={hideAction}
+      isShown={isShown}
+      disableClose={false}
+      data-testid="modal-attachto"
     >
-      <StyledAttachToModal data-testid="modal-attachto">
-        <div className='__menu-container'>
-          <div className='__menu-item'>
-            <Input
-              name='search'
-              placeholder='Search...'
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Attach note to:"
+        hide={hideAction}
+      />
+      <StyledAttachToModal >
+        <LeftBar>
+          <SearchInput>
+            <InputText
+              name="search"
+              placeholder="Search..."
               value={search}
-              onChange={(e: any) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
             />
-            <span className='__menu-item_search-icons'>
-              {search ?
-                <Icon icon='fa-times' onClick={() => setSearch('')} /> :
-                <Icon icon='fa-search' />
-              }
+            <span className="__menu-item_search-icons">
+              {search ? (
+                <Icon icon="fa-times" onClick={() => setSearch('')} />
+              ) : (
+                <Icon icon="fa-search" />
+              )}
             </span>
-          </div>
+          </SearchInput>
           <div>
-            <ul className='__items-list'>
+            <ul className="__items-list">
               {itemsList}
-              {!itemsList.length &&
-                <div className='__menu-item'>
-                  <span className='text-muted noResultContent'>No results found</span>
-                  <span className='__menu-item_clear removeQuery' onClick={() => setSearch('')} >Clear query</span>
+              {!itemsList.length && (
+                <div className="__menu-item">
+                  <span className="text-muted noResultContent">
+                    No results found
+                  </span>
+                  <TransparentButton
+                    className="__menu-item_clear removeQuery"
+                    onClick={() => setSearch('')}
+                  >
+                    Clear query
+                  </TransparentButton>
                 </div>
-              }
+              )}
             </ul>
           </div>
-        </div>
-        <div className='__note-container'>
-          <div className='__note-container_title'>
-            <a data-turbolinks="false" href={selectedItem.path} >{selectedItem.title}</a>
+        </LeftBar>
+        <NoteContainer>
+          <div className="_title">
+            <a data-turbolinks="false" href={selectedItem.path}>
+              {selectedItem.title}
+            </a>
           </div>
-          <Markdown data={selectedItem.content} />
-          <div className='__note-container_no-content noResultContent'>
+          <NotesMarkdown data={selectedItem.content} />
+          <div className="_no-content noResultContent">
             {!selectedItem.content && 'No content written for this item'}
           </div>
-        </div>
+        </NoteContainer>
       </StyledAttachToModal>
-    </Modal>
+      <Footer>
+        <ButtonRow>
+          <Button onClick={hideAction}>Cancel</Button>
+          <ButtonSolidBlue
+            onClick={() => onClickAttachAction()}
+            disabled={!checkedItemIds.size}
+          >
+            Attach
+          </ButtonSolidBlue>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
-}
-
-HomeAttachToModal.propTypes = {
-  ids: PropTypes.arrayOf(PropTypes.number),
-  attachAction: PropTypes.func,
-  title: PropTypes.string,
-  isLoading: PropTypes.bool,
-  isOpen: PropTypes.bool,
-  hideAction: PropTypes.func,
-  itemsType: PropTypes.string,
-  attachingItems: PropTypes.object,
-  fetchAttachingItems: PropTypes.func,
-}
-
-HomeAttachToModal.defaultProps = {
-  ids: [],
-  attachAction: () => { },
-  title: 'Select a note or answer to attach to',
-  hideAction: () => { },
-  attachingItems: {},
-}
-
-Footer.propTypes = {
-  hideAction: PropTypes.func,
-  attachAction: PropTypes.func,
-  isCopyDisabled: PropTypes.bool,
-}
-
-const mapStateToProps = (state: any) => ({
-  attachingItems: homeAttachingItemsSelector(state),
-})
-
-const mapDispatchToProps = (dispatch: any) => ({
-  fetchAttachingItems: () => dispatch(fetchAttachingItems()),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(HomeAttachToModal)
-
-export {
-  HomeAttachToModal,
 }
