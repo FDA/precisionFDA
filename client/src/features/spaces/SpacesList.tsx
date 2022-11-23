@@ -11,7 +11,7 @@ import { StyledPaginationSection } from '../home/home.styles'
 import { IFilter, IMeta, KeyVal } from '../home/types'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from '../home/useFilterState'
-import { useOrderByState } from '../../hooks/useOrderByState'
+import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { toArrayFromObject } from '../../utils/object'
 import { useListQuery } from '../home/useListQuery'
@@ -53,9 +53,16 @@ export function useWindowWidth() {
 const SpacesList = () => {
   const resource = 'spaces'
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at', order_dir: 'DESC' }})
+  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
+  const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: () => setSelectedIndexes({}) })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
-  const { filterQuery, setSearchFilter } = useFilterParams({ filters: columnFilters })
+  const { filterQuery, setSearchFilter } = useFilterParams({
+    filters: columnFilters,
+    onSetFilter: () => {
+      setSelectedIndexes({})
+      setPageParam(1, 'replaceIn')
+    },
+  })
 
   const query = useListQuery<ListType>({
     fetchList: spacesListRequest,
@@ -86,6 +93,8 @@ const SpacesList = () => {
         isLoading={status === 'loading'}
         setSortBy={setSortBy}
         sortBy={sortBy}
+        selectedRows={selectedIndexes}
+        setSelectedRows={setSelectedIndexes}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}/>
       
@@ -137,6 +146,8 @@ const TableTable = ({
   sortBy,
   saveColumnResizeWidth,
   colWidths,
+  selectedRows,
+  setSelectedRows,
 }: {
   data?: ISpace[]
   filters: IFilter[]
@@ -148,6 +159,8 @@ const TableTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing']
   ) => void
+  selectedRows?: Record<string, boolean>
+  setSelectedRows: (ids: Record<string, boolean>) => void
 
 }) => {
   const columns = useSpacesColumns({ colWidths, isAdmin: false })
@@ -170,6 +183,8 @@ const TableTable = ({
         setSortByPreference={(a) => setSortBy(a)}
         filters={filters}
         setFilters={setFilters}
+        selectedRows={selectedRows}
+        setSelectedRows={setSelectedRows}
       />
     </StyledTable>
   )
