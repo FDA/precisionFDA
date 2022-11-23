@@ -312,7 +312,8 @@ class ApiController < ApplicationController
   # path (string): file_path of the file
   #
   def list_files
-    User.sync_files!(@context)
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # User.sync_files!(@context)
     files = user_real_files(params, @context)
 
     if unsafe_params[:limit] && unsafe_params[:offset]
@@ -540,8 +541,9 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_assets
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
     # Refresh state of assets, if needed
-    User.sync_assets!(@context)
+    # User.sync_assets!(@context)
 
     ids = unsafe_params[:ids]
     assets = if unsafe_params[:editable]
@@ -860,11 +862,12 @@ class ApiController < ApplicationController
       fail "Challenge resource cannot be modified by current user."
     end
 
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
     # Refresh state of file, if needed
-    if file.state != "closed"
-      User.sync_challenge_bot_files!(@context)
-      file.reload
-    end
+    # if file.state != "closed"
+    #   User.sync_challenge_bot_files!(@context)
+    #   file.reload
+    # end
 
     if file.state != "closed"
       render json: {
@@ -894,16 +897,16 @@ class ApiController < ApplicationController
     file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
 
     # Refresh state of file, if needed
-    if file.state != "closed"
-      if file.parent_type == "Asset"
-        User.sync_asset!(@context, file.id)
-      elsif file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-        User.sync_challenge_file!(file.id)
-      else
-        User.sync_file!(@context, file.id)
-      end
-      file.reload
-    end
+    # if file.state != "closed"
+    #   if file.parent_type == "Asset"
+    #     User.sync_asset!(@context, file.id)
+    #   elsif file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
+    #     User.sync_challenge_file!(file.id)
+    #   else
+    #     User.sync_file!(@context, file.id)
+    #   end
+    #   file.reload
+    # end
 
     if file.state != "closed"
       error = "Files can only be downloaded if they are in the 'closed' state"
@@ -980,30 +983,34 @@ class ApiController < ApplicationController
   #
   def close_file
     id = unsafe_params[:id]
-    fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
+    result = https_apps_client.file_close(id)
+    render json: result
 
-    file = UserFile.where(parent_type: "User").find_by_uid!(id)
-    token = @context.token
-    if file.user_id != @context.user_id
-      have_access = file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-      raise "The current user does not have access to the file." unless have_access
+    # id = unsafe_params[:id]
+    # fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
 
-      token = CHALLENGE_BOT_TOKEN
-    end
+    # file = UserFile.where(parent_type: "User").find_by_uid!(id)
+    # token = @context.token
+    # if file.user_id != @context.user_id
+    #   have_access = file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
+    #   raise "The current user does not have access to the file." unless have_access
 
-    if file.state == "open"
-      DNAnexusAPI.new(token).call(file.dxid, "close")
-      UserFile.transaction do
-        # Must recheck inside the transaction
-        file.reload
-        if file.state == "open"
-          file.state = "closing"
-          file.save!
-        end
-      end
-    end
+    #   token = CHALLENGE_BOT_TOKEN
+    # end
 
-    render json: {}
+    # if file.state == "open"
+    #   DNAnexusAPI.new(token).call(file.dxid, "close")
+    #   UserFile.transaction do
+    #     # Must recheck inside the transaction
+    #     file.reload
+    #     if file.state == "open"
+    #       file.state = "closing"
+    #       file.save!
+    #     end
+    #   end
+    # end
+
+    # render json: {}
   end
 
   # Inputs:
@@ -1013,15 +1020,20 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
-    asset_uid = unsafe_params[:id]
+    # This API is still used by the CLI
+    id = unsafe_params[:id]
+    result = https_apps_client.file_close(id)
+    render json: result
 
-    if !asset_uid.is_a?(String) || asset_uid.empty?
-      fail "id needs to be a non-empty String"
-    end
+    # asset_uid = unsafe_params[:id]
 
-    AssetService.close(@context, uid: asset_uid)
+    # if !asset_uid.is_a?(String) || asset_uid.empty?
+    #   fail "id needs to be a non-empty String"
+    # end
 
-    render json: {}
+    # AssetService.close(@context, uid: asset_uid)
+
+    # render json: {}
   end
 
   # Inputs

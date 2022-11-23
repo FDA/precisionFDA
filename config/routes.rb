@@ -165,6 +165,7 @@ Rails.application.routes.draw do
 
     # API
     namespace "api" do
+      get "auth_key" => "base#auth_key"
       get "update_active", to: "base#update_active"
 
       resource :user, only: %i(show) do

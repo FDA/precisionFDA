@@ -21,12 +21,10 @@ module.exports = ({ urlLoaderOptions }) => ({
     new MiniCssExtractPlugin({
       filename: 'bundle.css',
     }),
-    new webpack.ProvidePlugin({
-      process: 'process/browser',
-    }),
     new webpack.DefinePlugin({
       RECAPTCHA_SITE_KEY: JSON.stringify(captchaKey),
       PROD_OR_STAGE: JSON.stringify(isProdOrStage),
+      NODE_ENV: JSON.stringify(process.env.NODE_ENV),
     }),
   ],
   module: {

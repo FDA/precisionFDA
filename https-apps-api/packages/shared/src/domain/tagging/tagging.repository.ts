@@ -1,7 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from '..'
-import { FILE_STI_TYPE } from '../user-file/user-file.enum'
+import { FILE_STI_TYPE } from '../user-file/user-file.types'
 import { Tagging } from './tagging.entity'
 
 type FindInput = {

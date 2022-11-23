@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import { FileZipIcon } from '../../../components/icons/FileZipIcon'

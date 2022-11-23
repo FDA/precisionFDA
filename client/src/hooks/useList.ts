@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { UseQueryOptions } from 'react-query'
+import { UseQueryOptions } from '@tanstack/react-query'
 import { useQueryParams } from 'use-query-params'
 import { useOrderByParams } from './useOrderByState'
 import { useFilterParams } from './useFilterParams'

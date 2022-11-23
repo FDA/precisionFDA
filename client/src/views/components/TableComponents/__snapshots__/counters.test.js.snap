@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Counters test should render 1`] = `
-<div
-  className="pfda-table-counters"
->
-  NaN-undefined/undefined
-</div>
-`;

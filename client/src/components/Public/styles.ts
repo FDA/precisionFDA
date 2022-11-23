@@ -25,7 +25,7 @@ export const Title = styled.div`
   font-weight: bold;
   line-height: 20px;
 `
-export const NewsLoaderWrapper = styled.div`
+export const PageLoaderWrapper = styled.div`
   flex: 1 0 auto;
 `
 export const Content = styled.div`
@@ -33,7 +33,7 @@ export const Content = styled.div`
   font-size: 14px;
   line-height: 20px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -51,12 +51,15 @@ export const RightSide = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  order: -1;
   ${RightSideItem}:last-child {
     border-bottom: 0;
   }
 `
 
-export const SectionTitle = styled.div`
+export const SectionTitle = styled.h3`
+  margin: 0;
+  padding: 0;
   font-size: 14px;
   font-weight: bold;
   text-transform: uppercase;
@@ -70,6 +73,7 @@ export const NewsListItem = styled.div`
 `
 export const PageMainBody = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
   flex-grow: 1;
 `
@@ -82,7 +86,7 @@ export const PageFilterTitle = styled.h2`
   color: ${colors.textMediumGrey};
 `
 
-export const NewsList = styled.div`
+export const PageList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -110,6 +114,7 @@ export const PageRow = styled.div`
     flex-direction: row;
     justify-content: space-between;
     ${RightSide} {
+      order: 2;
       flex: 0 1 auto;
       min-width: 256px;
       max-width: 256px;

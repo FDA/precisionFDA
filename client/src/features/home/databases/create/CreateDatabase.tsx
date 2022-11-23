@@ -1,10 +1,11 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import React, { useEffect, useState } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React, { useEffect } from 'react'
+import { debounce } from 'lodash'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
@@ -21,7 +22,8 @@ import { ResourceScope } from '../../types'
 import { createDatabaseRequest, fetchAccessibleFiles } from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
 
-const useAccessibleFiles = () => useQuery(['accessible-files'], () => fetchAccessibleFiles(), {
+const useAccessibleFiles = (inputValue: string) => useQuery(['accessible-files', inputValue],
+  () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }), {
     onError: (e: Error) => {
       toast.error(`Error: fetching files '${e.message}'`)
     },
@@ -78,10 +80,10 @@ const validationSchema = Yup.object().shape({
     .nullable().required('Required'),
 })
 
-// eslint-disable-next-line react/require-default-props
 export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const history = useHistory()
-  const { data, isLoading } = useAccessibleFiles()
+  const [inputValue, setInputValue] = useState('')
+  const { data, isLoading } = useAccessibleFiles(inputValue)
   const allowedInstancesQuery = useQuery<{
     payload: {
       label: string
@@ -92,6 +94,9 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
       toast.error(`Error: fetching allowed Db instance types '${e?.message}'`)
     },
   })
+  const debouncedSqlFileInputSearch = debounce(v => {
+    setInputValue(v)
+  }, 500)
   
   const accessibleFiles = data || []
 
@@ -121,11 +126,12 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   
   const queryClient = useQueryClient()
   const createDatabaseMutation = useMutation({
+    mutationKey: ['create-database'],
     mutationFn: (payload: any) => createDatabaseRequest(payload),
     onSuccess: (res) => {
       if (res?.db_cluster) {
         history.push(`/home/databases/${res?.db_cluster?.dxid}`)
-        queryClient.invalidateQueries('dbclusters')
+        queryClient.invalidateQueries(['dbclusters'])
         toast.success('Success: creating database.')
       } else if (res?.error) {
           toast.error(`${res.error.type}: ${res.error.message}`)
@@ -228,10 +234,13 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
                 options={filesOptions}
                 placeholder="Choose..."
                 onChange={onChange}
+                onInputChange={debouncedSqlFileInputSearch}
                 isLoading={isLoading}
                 defaultValue={{ label: 'Select...', value: '' }}
                 isClearable
                 isSearchable
+                // Disabled client side filtering. for some reason the following line works
+                filterOption={(a) => a as any}
                 onBlur={onBlur}
                 value={value}
                 isDisabled={isSubmitting}

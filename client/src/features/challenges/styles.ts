@@ -1,6 +1,7 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
-import { fontWeight } from '../../styles/theme'
+import { colors, fontWeight } from '../../styles/theme'
+import { TimeStatus } from './types'
 
 export const DateArea = styled.div`
   display: flex;
@@ -27,4 +28,45 @@ export const DateArea = styled.div`
 export const ViewDetailsButton = styled(Button)`
   font-weight: ${fontWeight.bold};
   width: fit-content;
+`
+
+const statusCss = css`
+  display: block;
+  position: absolute;
+  padding: 2px 4px;
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+`
+export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
+  min-width: 200px;
+  max-width: 200px;
+
+  ${props => {
+    if (props.timeStatus === 'current')
+      return css`
+        &:before {
+          ${statusCss}
+          background: ${colors.highlightGreen};
+          content: 'OPEN';
+        }
+      `
+    if (props.timeStatus === 'upcoming')
+      return css`
+        &:before {
+          ${statusCss}
+          background: ${colors.darkYellow};
+          content: 'UPCOMING';
+        }
+      `
+    if (props.timeStatus === 'ended')
+      return css`
+        &:before {
+          ${statusCss}
+          background: ${colors.darkGreyOnGrey};
+          content: 'ENDED';
+        }
+      `
+    return null
+  }}
 `

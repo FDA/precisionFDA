@@ -1,5 +1,3 @@
-import { PaginationParams } from '../../hooks/usePaginationState'
-
 export interface NewsItem {
   id: number;
   title: string;
@@ -16,5 +14,6 @@ export interface NewsItem {
 
 export interface NewsListParams {
   year?: string
-  pagination: PaginationParams
+  page?: number
+  perPage?: number
 }

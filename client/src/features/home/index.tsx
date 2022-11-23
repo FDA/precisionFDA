@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import { useQueryParam } from 'use-query-params'
 import { BannerPickedInfo, BannerPicker, BannerPickerItem, BannerRight, BannerTitle, ResourceBanner } from '../../components/Banner'
@@ -106,7 +106,7 @@ const Home2 = () => {
 
   return (
     <UserLayout>
-      <ResourceBanner>
+      <ResourceBanner data-testid="home-banner">
         <BannerTitle>My Home</BannerTitle>
         <BannerRight>
           <BannerPicker>

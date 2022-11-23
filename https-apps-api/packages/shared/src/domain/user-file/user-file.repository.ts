@@ -1,7 +1,8 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.enum'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
 import { Asset } from '.'
+
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   async findProjectFilesInSubfolder(input: {
@@ -40,6 +41,35 @@ export class UserFileRepository extends EntityRepository<UserFile> {
   async findFilesInFolders(input: { folderIds: number[] }): Promise<UserFile[]> {
     return await this.find(
       { parentFolderId: { $in: input.folderIds } },
+      { filters: ['userfile'], populate: ['taggings.tag'] },
+    )
+  }
+
+  async findFileWithUid(uid: string, populate?: string[]): Promise<UserFile | null> {
+    return await this.findOne(
+      { uid },
+      {
+        filters: ['userfile'],
+        populate: populate || ['user', 'taggings.tag'],
+      },
+    )
+  }
+
+  async findFilesWithDxid(dxid: string): Promise<UserFile[]> {
+    return await this.find(
+      { dxid },
+      { filters: ['userfile'], populate: ['user', 'taggings.tag'] },
+    )
+  }
+
+  // Find files that are pending transition to closed state from the platform
+  async findUnclosedFiles(userId: number): Promise<UserFile[]> {
+    return await this.find(
+      {
+        parentId: userId,
+        parentType: PARENT_TYPE.USER,
+        state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
+      },
       { filters: ['userfile'], populate: ['taggings.tag'] },
     )
   }

@@ -1,6 +1,6 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]

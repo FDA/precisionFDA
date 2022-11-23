@@ -216,6 +216,7 @@ jobs:
         working-directory: ./https-apps-api
       - name: Test
         run: |
+          make test-shared
           make test-worker
           make test-api
         working-directory: ./https-apps-api

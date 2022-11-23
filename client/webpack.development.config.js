@@ -1,5 +1,4 @@
 /* globals module __dirname */
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
@@ -135,6 +134,10 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      '/publish': {
+        target: TARGET,
+        secure: false,
+      },
       '/experts/*/edit': {
         target: TARGET,
         secure: false,
@@ -144,10 +147,6 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         secure: false,
       },
       '/challenges/*/editor/*': {
-        target: TARGET,
-        secure: false,
-      },
-      '/publish': {
         target: TARGET,
         secure: false,
       },

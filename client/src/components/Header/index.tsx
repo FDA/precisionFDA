@@ -127,7 +127,7 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <StyledHeader>
+      <StyledHeader data-testid="main-header">
         <Nav>
           <LogoWrap as={Link} to="/" data-turbolinks="false">
             <StyledHeaderLogo />
