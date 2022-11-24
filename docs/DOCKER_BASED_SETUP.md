@@ -2,17 +2,9 @@
 
 
 This guide covers all the steps required to get docker based
-development environment. There are also a few _optional_ sections, that are strongly recommended to use for full-stack developer roles
+development environment. There are also a few _optional_ sections, that are recommended to use for full-stack developer roles
 
-## Prerequisites
-
-Make sure that you understand this [Makefile](../Makefile)
-
-Make sure you know, which configuration to use. Your configuration depends on following
-
-* role (qa | dev)
-* architecture of your workstation
-  * unless its windows, you can find it using command - `uname -m`
+_Last updated: 17.11.2022_
 
 ## Installing docker and docker-compose
 
@@ -20,38 +12,55 @@ Make sure you know, which configuration to use. Your configuration depends on fo
 
 The first step you have to do is to install [docker](https://docs.docker.com/install/) on your workstation. Instructions are **platform-specific**
 
-## Makefile and platform differences
+## Platform differences
 
 Because of platform differences between M1-silicon and Intel MacOS CPUs and technologies used in our stack, the docker environment setup is **platform-specific**, more on the topic [here](./MACOS_ARCHITECTURE_DIFFERENCES.md).
-Summary of all configurations is in top level [Makefile](../Makefile), which contains some basic commands. Feel free to add more according to your own need.
 
-Note that not all `docker compose` commands are implemented - so when you want to execute `docker compose` command, make sure you have corresponding flags (`-f <COMPOSE_FILE>`) according to [Makefile](../Makefile).
+For this reason localhost docker stack is maintained for two different architectures
 
-### Example scenario
+* MacOS intel
+* MacOS M1-sillicon (`arm64v8`)
 
-I am a dev using MacBook with `M1-silicon` CPU, and `nodejs-api` container just died (for some reason)
+Docker stack contains performance differences for different roles - for instance QA engineers are in higher need to drop volumes because of frequent branch changes. These changes shouldn't have impact on business logic of application code, instead they modify image build and container runtime.
 
-I can restart it with following command
+That produces in total 4 different configurations
+
+* `dev` (MacOS intel)
+* `qa` (MacOS intel)
+* `arm64v8.dev` (M1-sillicon)
+* `arm64v8.qa` (M1-sillicon)
+
+(Optional) to learn more about the `docker-compose.yml` files, feel free to look at [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md)
+
+## Makefile
+
+Make sure that you understand your role (dev, qa)
+
+You can also find out architecture of your workstation by running `uname -m` (unless it's windows)
+
+
+
+Most of the developemnt/testing use cases are documented in this [Makefile]
+(../Makefile)
+
+If you'd like to understand more about [Makefile](../Makefile), feel free to look at these resources
+
+* [Makefile tutorial](https://makefiletutorial.com/)
+* [Makefile built-in functions](https://www.gnu.org/software/make/manual/html_node/Functions.html)
+
+In order not to duplicate every [Makefile](../Makefile) target, user role (`dev`, `qa`) is defined as environment variable
 
 ```bash
-# Edited from "make run-arm64v8-dev"
-docker compose -f docker/arm64v8.dev.docker-compose.yml restart nodejs-api
-```
-## Minor fixes that it's better to setup in advance
-
-Majority of the UI is developed as React app - see [client/package.json](../client/package.json).
-Compiled react app is served from asset pipeline. For now it requires sharing files between two running containers, which is accomplished with bind mounts (feel free to read through `docker-compose.yml` files for better understanding of topic)
-
-To keep number of side effects minimal, single file `bundle.js` is mounted instead of whole directory. Although it's cleaner solution, this results in possible issue during initial setup, where source bind mount is missing. Fix it by running following commands
-
-```bash
-mkdir -p app/assets/packs
-touch app/assets/packs/bundle.js
+# Add following into ~/.bashrc or ~/.zshrc as dev
+export PFDA_ROLE=dev
+# Add following into ~/.bashrc or ~/.zshrc as qa
+export PFDA_ROLE=qa
 ```
 
-### Minor configuration differences for nodejs-api
+## Configuration differences for arm64v8.dev
 
-If you're running stack with `make run-arm64v8-dev` configuration, it uses different key paths for `nodejs-api`. Edit `https-apps-api/.env` with following values
+
+If you're running `make run` with `arm64v8.dev` configuration (i.e. `arm64v8` architecture and `PFDA_ROLE=dev`), it uses different key paths for `nodejs-api`. Edit `https-apps-api/.env` with following values
 
 ```
 NODE_PATH_CERT=/keys/cert.pem
@@ -83,18 +92,8 @@ The source of truth for `precision-fda` portal is `mysql` db, which is initializ
 
 ### 2. Prepare the database
 
-The command might vary, depending on your role (dev, qa), or on CPU architecture of the workstation (`x86_64`, `arm64`). You can find more details on the topic [here](./MACOS_ARCHITECTURE_DIFFERENCES.md)
-
 ```bash
-# UNTESTED
-# intel dev
 make prepare-db
-# intel qa
-make prepare-db-qa
-# arm64v8 (Apple M1 Silicon) dev
-make prepare-db-arm64v8-dev
-# arm64v8 (Apple M1 Silicon) qa
-make prepare-db-arm64v8-qa
 ```
 
 ## Nodejs API setup
@@ -135,36 +134,22 @@ docker compose exec \
 
 ## Running application
 
-Running again depends on role and workstation type
-
 ```bash
-# intel dev
 make run
-# intel qa
-make run-qa
-# arm64v8 (Apple M1 Silicon) dev
-make run-arm64v8-dev
-# arm64v8 (Apple M1 Silicon) qa
-make run-arm64v8-qa
 ```
 
 Once the application is correctly installed & configured, you should be able to access the portal at `https://localhost:3000/`.
 In order to log in to the system, ask for shared DEV credentials (ask some1 from the team)
 
-## Running application with external services
+### Running application with external services
 
 ```bash
-# intel dev
 make run-all
-# intel qa
-make run-all-qa
-# arm64v8 (Apple M1 Silicon) dev
-make run-all-arm64v8-dev
-# arm64v8 (Apple M1 Silicon) qa
-make run-all-arm64v8-qa
 ```
 
-### GSRS
+To get summary of all [Makefile](../Makefile) commands, take a look at [this summary](./SUMMARY_OF_MAKEFILE_COMMANDS.md)
+
+### GSRS - external service
 
 GSRS runs as a process on the same instance as pFDA but is completely separate codebase
 
@@ -211,6 +196,7 @@ docker compose up --build
 
 Note that this part of setup is experimental, potential side effects are suspected with this approach
 
-## Updating docker-compose files
+## Further reading
 
-Before updating anything related to docker setup, please take a look at [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md), to update according to repo best practices
+* [Summary of Makefile commands](./SUMMARY_OF_MAKEFILE_COMMANDS.md)
+* [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md)
