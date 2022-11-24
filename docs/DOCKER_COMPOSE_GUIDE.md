@@ -6,7 +6,7 @@ _Last updated: 14.6.2022_
 
 ## Prerequisites
 
-Make sure that you understand local configurations, described in [root "Makefike"](../Makefile) and ["docker-based setup" document](./DOCKER_BASED_SETUP.md)
+Make sure that you understand local configurations, described in ["docker-based setup" document](./DOCKER_BASED_SETUP.md)
 
 ## `extends` keyword
 
@@ -16,9 +16,7 @@ We use `extends` as primary tool to structure docker configuration with DRY prin
 
 ## Shared vs. specific
 
-As mentioned in ["docker-based setup" document](./DOCKER_BASED_SETUP.md) and defined in [root "Makefike"](../Makefile), we use 4 specific configurations. There are 2 main reasons for that. Firstly because QAs and devs have different requirements, but also because of bugs in docker for `M1-silicon` apple CPUs - list mentioned  on [docker website](https://docs.docker.com/desktop/mac/apple-silicon/)
-
-Summary of configurations
+As mentioned in ["docker-based setup"](./DOCKER_BASED_SETUP.md), there are 4 different configurations
 
 * `dev`
 * `qa`
@@ -47,7 +45,7 @@ _if you happen to find anything, feel free to apply it here_ :)
 
 ### Secrets
 
-First and foremost **never** add value that is considered secret into `docker-compose`. Even though kubernetes already has tooling to version secrets and it's possible in terms of technologies, this is not the time and place.
+First, **never** add value that is considered secret into `docker-compose` (fun fact k8s already solved this problem - [here](https://github.com/bitnami-labs/sealed-secrets))
 
 Environment variables that are considered secrets, shouldn't be versioned and consider defining them in corresponding `.env` file - preferably on service level. If secret value is required during build, consider adding it into [`./docker/.env`](../docker/.env.example), more information in [docker documentation](https://docs.docker.com/compose/environment-variables/#the-env-file)
 
