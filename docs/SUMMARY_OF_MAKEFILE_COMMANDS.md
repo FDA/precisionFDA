@@ -1,5 +1,7 @@
 # Summary of Makefile commands
 
+_Last updated: 25.11.2022_
+
 ## Basic docker commands
 
 ```bash

@@ -2,7 +2,9 @@
 
 This guide contains summary and best practices for dockerization in this repo.
 
-_Last updated: 14.6.2022_
+If you decide to update anything in `docker-compose.yml`, make sure that [QA troubleshooting Confluence guide](https://confluence.internal.dnanexus.com/display/XVGEN/Docker+troubleshooting+guide) stays up to date as well
+
+_Last updated: 25.11.2022_
 
 ## Prerequisites
 
