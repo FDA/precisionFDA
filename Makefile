@@ -1,4 +1,40 @@
 # ! BEFORE EDITING: Reflect changes to `docs/SUMMARY_OF_MAKEFILE_COMMANDS.md`
+# ! BEFORE EDITING: Reflect changes to confluence as well - namely https://confluence.internal.dnanexus.com/display/XVGEN/Docker+troubleshooting+guide
+
+repo-env-files-init:
+	echo Setting up .env files
+	cp -n docker/.env.example docker/.env || echo Skipping docker .env
+	cp -n https-apps-api/.env.example https-apps-api/.env || echo Skipping https-apps-api .env
+	cp -n .env.example .env || echo Skipping root directory .env
+
+repo-db-config-init:
+	echo Setting up db config
+	cp config/database.sample.yml config/database.yml
+
+repo-githooks-init:
+	chmod +x utils/githooks/*
+	ln -f utils/githooks/* .git/hooks
+
+repo-init: repo-db-config-init repo-env-files-init repo-githooks-init
+	echo Repo setup complete
+
+
+# ┌─────────────────┐
+# │                 │
+# │ dotenv commands │
+# │                 │
+# └─────────────────┘
+
+check-missing-env-variables:
+	./utils/scripts/check-missing-env-variables.sh .env .env.example
+	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example
+	./utils/scripts/check-missing-env-variables.sh https-apps-api/.env https-apps-api/.env.example
+
+check-unpublished-env-variables:
+	./utils/scripts/check-unpublished-env-variables.sh .env .env.example
+	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example
+	./utils/scripts/check-unpublished-env-variables.sh https-apps-api/.env https-apps-api/.env.example
+
 
 # ┌───────────────────────┐
 # │                       │
@@ -61,9 +97,9 @@ prepare-db:
 	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_SERVICES)
 run:
 	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build
-cleanup:
+stop:
 	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
-	echo Cleanup complete
+	echo Stopped
 
 # ┌───────────────────────────────────┐
 # │                                   │
@@ -172,6 +208,8 @@ cache-cleanup-$($(1)__TARGET_SUFFIX):
 	echo Cache cleanup complete
 endef
 
+POSSIBLE_CACHE_CLEANUPS := WEB_SIDEKIQ FRONTEND NODEJS_API NODEJS_WORKER
+
 $(foreach cache_cleanup,$(POSSIBLE_CACHE_CLEANUPS),$(eval $(call DYNAMIC__CACHE_CLEANUP,$(cache_cleanup))))
 
 # ┌───────────────────────────────────┐
@@ -201,9 +239,17 @@ cache-cleanup-$($(1)__TARGET_SUFFIX)-with-db-wipe:
 	echo Cache cleanup with db wipe complete
 endef
 
+
+define DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE
+cache-cleanup-$($(1)__TARGET_SUFFIX)-with-db-wipe:
+	$(call FRAGMENT__CACHE_CLEANUP,$(1))
+	$(call FRAGMENT__DB_WIPE)
+	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
+	echo Cache cleanup with db wipe complete
+endef
+
 # Dictionary workaroud
 # Inspiration - https://stackoverflow.com/questions/62005888/key-value-pair-in-makefile
 
-POSSIBLE_CACHE_CLEANUPS := WEB_SIDEKIQ FRONTEND NODEJS_API NODEJS_WORKER
-
 $(foreach cache_cleanup,$(POSSIBLE_CACHE_CLEANUPS),$(eval $(call DYNAMIC__CACHE_CLEANUP_WITH_DB_WIPE,$(cache_cleanup))))
+
