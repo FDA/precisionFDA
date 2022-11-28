@@ -163,7 +163,7 @@ module Api
         meta:  {
           spec: @app.spec,
           revisions: @revisions,
-          jobs: @app.accessible_jobs(@context),
+          jobs: [],
           assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
           challenges: @assignable_challenges.select do |ch|
             ch.accessible_by?(@context) || ch.app_owner == @context.user
