@@ -11,12 +11,12 @@ export class AssetRepository extends EntityRepository<Asset> {
     )
   }
 
-  // Find assets that are pending transition to closed state from the platform
+  // Find assets uploaded or owned by a user that are pending
+  // transition to closed state from the platform
   async findUnclosedAssets(userId: number): Promise<Asset[]> {
     return await this.find(
       {
-        parentId: userId,
-        parentType: 'User',
+        userId,
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
       { filters: ['asset'], populate: ['user', 'taggings.tag'] },

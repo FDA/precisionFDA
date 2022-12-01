@@ -62,12 +62,12 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     )
   }
 
-  // Find files that are pending transition to closed state from the platform
+  // Find files uploaded or owned by a user that are pending
+  // transition to closed state from the platform
   async findUnclosedFiles(userId: number): Promise<UserFile[]> {
     return await this.find(
       {
-        parentId: userId,
-        parentType: PARENT_TYPE.USER,
+        userId,
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
       { filters: ['userfile'], populate: ['taggings.tag'] },

@@ -46,7 +46,7 @@ describe('PATCH /folders/:id/rename', () => {
         newName: 'b',
       })
       .expect(200)
-    expect(body).to.be.deep.equal({
+    expect(body).to.be.deep.include({
       id: folder.id,
       dxid: null,
       project: folder.project,
