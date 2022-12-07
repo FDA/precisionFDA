@@ -219,6 +219,12 @@ module Api
       raise ApiError, Message.bad_request(e.message)
     end
 
+    def describe
+      find_workflow # check if workflow accesible by current user first
+      response = https_apps_client.describe(params[:id], "workflows")
+      render json: { workflow: response }
+    end
+
     private
 
     def filter_workflows(workflows, filters)

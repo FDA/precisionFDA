@@ -299,7 +299,7 @@ const findFileOrAssetWithUid = async (
 
 const findUnclosedFilesOrAssets = async (
   em: EntityManager,
-  userId: number
+  userId: number,
 ): Promise<IFileOrAsset[]> => {
   let results: IFileOrAsset[] = []
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository

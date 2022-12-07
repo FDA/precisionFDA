@@ -153,6 +153,15 @@ type UserUnlockParams = {
   }
 }
 
+type AppDescribeParams = BaseParams & {
+  dxid: string
+  data: {}
+}
+type WorkflowDescribeParams = BaseParams & {
+  dxid: string
+  data: {}
+}
+
 export {
   BaseParams,
   Starting,
@@ -180,4 +189,6 @@ export {
   DescribeDataObjectsParams,
   UserResetMfaParams,
   UserUnlockParams,
+  AppDescribeParams,
+  WorkflowDescribeParams,
 }

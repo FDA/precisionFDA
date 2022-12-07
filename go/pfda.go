@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.1.2
+// Version 2.2
 //
 //
 package main
@@ -7,6 +7,7 @@ package main
 import (
 	"crypto/tls"
 	"dnanexus.com/precision-fda-cli/precisionfda"
+	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -32,7 +33,7 @@ const defaultSkipVerify = "false"
 const usageString = `
 
 ***********************
-PFDA COMMAND LINE TOOL v2.1.2
+PFDA COMMAND LINE TOOL v2.2
 ***********************
 To upload a file:
 
@@ -118,6 +119,21 @@ var invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, o
 	return client.DownloadFile(*fileID, *outputFilePath)
 }
 
+var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType *string) error {
+	return client.DescribeEntity(*entityID, *entityType)
+}
+
+var invokeListSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
+	return client.ListSpaces(flags)
+}
+
+var invokeListing = func(client precisionfda.IPFDAClient, folderID *string, spaceID *string, flags map[string]bool) error {
+	return client.Ls(*folderID, *spaceID, flags)
+}
+
+var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
+	return client.RefreshToken(autoRefresh)
+}
 
 
 func main() {
@@ -133,12 +149,14 @@ func mainInternal() int {
 	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute. Must be one of ['upload-file','upload-asset','api'].")
 	authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
 	apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
-	jsonInput := flag.String("json", "", "JSON payload for specified API call (if any).")
+	jsonInput := flag.String("json-payload", "", "JSON payload for specified API call (if any).")
 	inputFilePath := flag.String("file", "", "Path to file for 'upload-file'")
 	assetFolderPath := flag.String("root", "", "Path to root folder for 'upload-asset'")
 	assetName := flag.String("name", "", "Name of uploaded asset file. Must end with '.tar' or '.tar.gz'.")
 	readmeFilePath := flag.String("readme", "", "Readme file for uploaded asset. Must end with '.txt' or '.md'.")
 	fileID := flag.String("file-id", "", "File ID of the file to be downloaded")
+	appID := flag.String("app-id", "", "App ID of the app to be described")
+	workflowID := flag.String("workflow-id", "", "Workflow ID of the workflow to be described")
 	folderID := flag.String("folder-id", "", "Folder ID of the target folder")
 	spaceID := flag.String("space-id", "", "Space ID of the target space")
 	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
@@ -147,6 +165,24 @@ func mainInternal() int {
 	server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
 	skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
 	pfda_version := flag.Bool("version", false, "[optional] Print version")
+
+	// help flag - does not run any command just prints help info
+	flagHelp := flag.Bool("help", false, "[optional] Print help info for the particular command")
+	flagHelpShort := flag.Bool("h", false, "[optional] Print help info for the particular command") // is there a better way to have aliases ??
+
+	// optional flags for adjusting the desired output values & format
+	flagBrief := flag.Bool("brief", false, "[optional] Only present brief info")
+	flagJson := flag.Bool("json", false, "[optional] Present result as JSON")
+	flagFilesOnly := flag.Bool("files", false, "[optional] Only present files")
+	flagFoldersOnly := flag.Bool("folders", false, "[optional] Only present folders")
+	flagLocked := flag.Bool("locked", false, "[optional] Only present locked spaces")
+	flagUnactivated := flag.Bool("unactivated", false, "[optional] Only present unactivated spaces")
+	flagPhiProtected := flag.Bool("protected", false, "[optional] Only present PHI protected spaces")
+	flagGroups := flag.Bool("groups", false, "[optional] Only present groups spaces")
+	flagReview := flag.Bool("review", false, "[optional] Only present review spaces")
+	flagPrivate := flag.Bool("private", false, "[optional] Only present private spaces")
+	flagAdministator := flag.Bool("administrator", false, "[optional] Only present administrator spaces")
+	flagGovernment := flag.Bool("government", false, "[optional] Only present government spaces")
 
 	// Support for ./pfda upload-file option of specifying a command, making --cmd optional
 	var positionalCmd string
@@ -229,6 +265,10 @@ func mainInternal() int {
 
 	switch *command {
 	case "upload-asset":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintUploadAssetHelp()
+		}
+
 		if *assetFolderPath == "" {
 			return inputError("Root directory for the asset is required. Provide it as [--root <ASSET_ROOT>].")
 		}
@@ -262,6 +302,10 @@ func mainInternal() int {
 		}
 
 	case "upload-file":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintUploadFileHelp()
+		}
+
 		if *inputFilePath == "" {
 			return inputError("Path to file for upload is required. Please provide it as [--file <FILE_PATH>].")
 		}
@@ -278,6 +322,10 @@ func mainInternal() int {
 		}
 
 	case "download":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintDownloadHelp()
+		}
+
 		if *fileID == "" {
 			return inputError("File ID of the file to be downloaded is required: [--file-id <FILE_ID>]")
 		}
@@ -287,6 +335,112 @@ func mainInternal() int {
 			printError(err)
 			return 1
 		}
+
+	case "describe-app":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintDescribeAppHelp()
+		}
+
+		if *appID == "" {
+			return inputError("App ID of the app to be described is required: [--app-id <APP_ID>]")
+		}
+
+		var entityType string = "app"
+		err := invokeDescribe(pfdaclient, appID, &entityType)
+		if err != nil {
+			printError(err)
+			return 1
+		}
+
+	case "describe-workflow":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintDescribeWorkflowHelp()
+		}
+
+		if *workflowID == "" {
+			return inputError("Workflow ID of the workflow to be described is required: [--workflow-id <WORKFLOW_ID>]")
+		}
+
+		var entityType string = "workflow"
+		err := invokeDescribe(pfdaclient, workflowID, &entityType)
+		if err != nil {
+			printError(err)
+			return 1
+		}
+
+	case "list-spaces":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintListSpacesHelp()
+		}
+
+		flags := map[string]bool{
+			"protected": *flagPhiProtected,
+			// state of space, must be exclusive
+			"locked": *flagLocked,
+			"unactivated": *flagUnactivated,
+			// types of space flag, multiple allowed
+			"review": *flagReview,
+			"groups": *flagGroups,
+			"private_type": *flagPrivate,
+			"administrator": *flagAdministator,
+			"government": *flagGovernment,
+			// present as JSON / pretty print
+			"json": *flagJson,
+
+		}
+		err := invokeListSpaces(pfdaclient, flags)
+		if err != nil {
+			printError(err)
+			return 1
+		}
+
+	case "ls":
+		if (*flagHelp || *flagHelpShort) {
+			return helpers.PrintLsHelp()
+		}
+
+		if (*flagFilesOnly && *flagFoldersOnly) {
+			return inputError("Cannot combine --folders and --files flags together. Please choose one of the flags only.")
+		}
+
+		flags := map[string]bool{
+			"brief": *flagBrief,
+			"files_only": *flagFilesOnly,
+			"folders_only": *flagFoldersOnly,
+			// present as JSON / pretty print
+			"json": *flagJson,
+		}
+
+		err := invokeListing(pfdaclient, folderID, spaceID, flags)
+		if err != nil {
+			printError(err)
+			return 1
+		}
+
+	// TEMPORARILY REMOVED FROM CLI v2.2
+	// case "refresh-key": {
+	// 	// add option for auto-refresh later
+	// 	newToken, err := invokeRefreshToken(pfdaclient, false)
+	// 	if err != nil {
+	// 		// do not print the error as there is too much info for regular user. Most likely 401 - token already expired.
+	// 		fmt.Printf("There was an error during key refresh action. Please provide new Key from pFDA website.\n")
+	// 		return 1
+	// 	}
+
+	// 	jsonData, err := json.Marshal(jsonConfig{
+	// 		Key: newToken,
+	// 	})
+
+	// 	//TODO: consolidate CLI config into a struct with common code to read/write the config
+	// 	err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'
+	// 	if err != nil {
+	// 		fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
+	// 	} else {
+	// 		fmt.Printf("The authorization key has been successfuly refreshed and saved in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
+	// 	}
+
+	// 	return 0
+	// }
 
 	case "api":
 		if *apiRoute == "" {
@@ -307,12 +461,12 @@ func mainInternal() int {
 		// Empty command
 		fmt.Println(usageString)
 		flag.Usage()
-		fmt.Println("Command to execute is required. Provide it as 'pfda {'upload-file','upload-asset','download','api'}'")
+		fmt.Println("Command to execute is required. Provide it as 'pfda {'upload-file','upload-asset','download','ls','list-spaces', 'descibe-app','describe-workflow'}'")
 		return 1
 
 	default:
 		// Invalid, non-empty command
-		fmt.Printf("Command ' %s' not found. Must be one of ['upload-file','upload-asset','download','api'}].\n", *command)
+		fmt.Printf("Command ' %s' not found. Must be one of \n'upload-file' \n'upload-asset' \n'download' \n'ls' \n'list-spaces' \n'describe-app' \n'describe-workflow''\n", *command)
 		return 1
 	}
 
@@ -326,7 +480,7 @@ func mainInternal() int {
 		})
 		if err != nil {
 			fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", configPath, err.Error())
-			fmt.Printf("You will need to submit authorization key in the command line in the next upload.\n")
+			fmt.Printf("You will need to submit authorization key in the command line in the next operation.\n")
 			// exit gracefully, without panic
 			return 0
 		}
@@ -338,6 +492,7 @@ func mainInternal() int {
 		// despite Linux style file permissions are given
 		// if .pfda_config exists it is truncaters before writing
 		// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it
+		//TODO: consolidate CLI config into a struct with common code to read/write the config
 		err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'
 		if err != nil {
 			fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())

@@ -9,5 +9,4 @@ const babel = require('./webpack.fragment.babel')
 
 module.exports = merge(base({}), babel, {
   mode: 'production',
-  devtool: 'eval',
 })

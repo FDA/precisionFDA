@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
-import { StringParam, useQueryParam } from 'use-query-params'
+import { useQueryParam } from 'use-query-params'
 import {
   BreadcrumbDivider,
   BreadcrumbLabel,
-  StyledBreadcrumbs
+  StyledBreadcrumbs,
 } from '../../../components/Breadcrumb'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -23,7 +23,7 @@ import {
   LoadingList,
   QuickActions,
   StyledHomeTable,
-  StyledPaginationSection
+  StyledPaginationSection,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
@@ -40,9 +40,8 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const { path } = useRouteMatch()
   const location = useLocation()
   
-  const [folderIdParam, setFolderIdParam] = useQueryParam(
+  const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>(
     'folder_id',
-    StringParam,
   )
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
@@ -101,10 +100,10 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const actions = useFilesSelectActions({
     scope,
     space,
-    fileId: folderIdParam!,
+    folderId: folderIdParam,
     selectedItems: selectedObjects,
     resetSelected,
-    resourceKeys: ['files'],
+    resourceKeys: ['files', folderIdParam],
   })
   delete actions['Comments']
   delete actions['Request license approval']

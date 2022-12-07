@@ -3,6 +3,7 @@ import { DefaultState } from 'koa'
 import { router as accountRouter } from '../account'
 import { router as adminRouter } from '../admin'
 import { router as appsRouter } from '../apps'
+import { router as workflowsRouter } from '../workflows'
 import { router as dbClustersRouter } from '../dbclusters'
 import { router as debugRouter } from '../debug'
 import { router as filesRouter } from '../files'
@@ -21,6 +22,7 @@ const router = new Router<DefaultState, Api.Ctx>()
 router.use('/account', accountRouter.routes(), accountRouter.allowedMethods())
 router.use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
 router.use('/apps', appsRouter.routes(), appsRouter.allowedMethods())
+router.use('/workflows', workflowsRouter.routes(), workflowsRouter.allowedMethods())
 router.use('/dbclusters', dbClustersRouter.routes(), dbClustersRouter.allowedMethods())
 router.use('/debug', debugRouter.routes(), debugRouter.allowedMethods())
 router.use('/files', filesRouter.routes(), filesRouter.allowedMethods())

@@ -136,7 +136,7 @@ export const Apps = () => (
         it (for example, if you are providing very large files, and the default
         instance type would cause the app to run out of hard disk space), then
         select a different instance type from the dropdown. See the{' '}
-        <Link to="creating_apps#dev-instance-types">
+        <Link to="creating-apps#app-instance-types">
           available instance types
         </Link>{' '}
         for more info.

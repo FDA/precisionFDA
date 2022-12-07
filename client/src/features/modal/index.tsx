@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, ReactNode } from 'react'
 import ReactDOM from 'react-dom'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { useKeyPress } from '../../hooks/useKeyPress'
@@ -25,8 +25,10 @@ export interface ModalProps {
   blur?: boolean
   disableClose?: boolean
   overflowContent?: boolean
+  children: ReactNode
 }
-const ModalComponent: FC<ModalProps> = ({ header, headerText, isShown, hide, children, footer, blur = false, disableClose = false, overflowContent = true, ...rest }) => {
+
+const ModalComponent = ({ header, headerText, isShown, hide, children, footer, blur = false, disableClose = false, overflowContent = true, ...rest }: ModalProps) => {
   useKeyPress('Escape', () => hide())
   return (
     <>
@@ -55,5 +57,5 @@ const ModalComponent: FC<ModalProps> = ({ header, headerText, isShown, hide, chi
 }
 // eslint-disable-next-line react/destructuring-assignment
 export const Modal: FC<ModalProps> = (props) => props.isShown ? ReactDOM.createPortal(
-    <ModalComponent {...props}/>, document.body,
+    <ModalComponent {...props} />, document.body,
   ) : null
