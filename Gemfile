@@ -8,8 +8,8 @@ gem "rails-html-sanitizer", "~> 1.4.3"
 
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0"
-# Use Uglifier as compressor for JavaScript assets
-gem "uglifier"
+# Use Terser as compressor for JavaScript assets
+gem "terser", "~> 1.1"
 # Use CoffeeScript for .coffee assets and views
 gem "coffee-rails", "~> 5.0"
 

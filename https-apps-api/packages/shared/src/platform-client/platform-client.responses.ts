@@ -115,6 +115,16 @@ type ClassIdResponse = {
   id: string
 }
 
+// add all actual data provided by platform
+type AppDescribeResponse = {
+  id: string
+}
+
+// add all actual data provided by platform
+type WorkflowDescribeResponse = {
+  id: string
+}
+
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
   state: string
@@ -153,4 +163,6 @@ export {
   PlatformMember,
   UserInviteToOrgResponse,
   UserRemoveFromOrgResponse,
+  AppDescribeResponse,
+  WorkflowDescribeResponse,
 }

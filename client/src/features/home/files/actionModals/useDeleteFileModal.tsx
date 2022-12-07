@@ -46,7 +46,7 @@ const DeleteFiles = ({
   if (status === 'loading') return <div>Loading...</div>
   return (
     <ResourceTable
-      rows={data.map(s => ({
+      rows={data!.map(s => ({
         name: (
           <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
             <VerticalCenter>
@@ -85,9 +85,9 @@ export const useDeleteFileModal = ({
       queryClient.invalidateQueries(['files'])
       // TODO counters are only for My Home, spaces have counters in request for space
       queryClient.invalidateQueries(['counters'])
-      onSuccess()
       setShowModal(false)
       toast.success(`Success: Deleted ${numberOfFilesToDelete} files or folders.`)
+      onSuccess()
     },
   })
 
@@ -97,6 +97,7 @@ export const useDeleteFileModal = ({
 
   const modalComp = (
     <Modal
+      id="modal-files-delete"
       data-testid="modal-files-delete"
       headerText={`Delete ${numberOfFilesToDelete ? itemsCountString('item', numberOfFilesToDelete) : '...'}`}
       isShown={isShown}

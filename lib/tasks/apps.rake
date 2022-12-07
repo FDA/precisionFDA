@@ -55,36 +55,40 @@ namespace :apps do
         %w(string file int boolean float).include?(spec["class"])
       end
 
-      packages = app_info.dig("runSpec", "execDepends").map do |package|
-        if package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"])
-          package["name"]
-        end
-      end.compact
+      packages = []
+      if (exec_depends = app_info.dig("runSpec", "execDepends"))
+        packages = exec_depends.map do |package|
+          package["name"] if package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"])
+        end.compact
+      end
 
-      assets = app_info.dig("runSpec", "bundledDepends").map do |asset_data|
-        asset_dxid = asset_data.dig("id", "$dnanexus_link")
-        asset_name = asset_data["name"]
+      assets = []
+      if (bundled_depends = app_info.dig("runSpec", "bundledDepends"))
+        assets = bundled_depends.map do |asset_data|
+          asset_dxid = asset_data.dig("id", "$dnanexus_link")
+          asset_name = asset_data["name"]
 
-        asset = Asset.find_by(dxid: asset_dxid)
+          asset = Asset.find_by(dxid: asset_dxid)
 
-        unless asset
-          described = api.file_describe(asset_dxid)
+          unless asset
+            described = api.file_describe(asset_dxid)
 
-          asset = Asset.create!(
-            project: described["project"],
-            dxid: asset_dxid,
-            name: asset_name,
-            state: described["state"],
-            file_size: described["size"],
-            user: created_by,
-            scope: Scopes::SCOPE_PUBLIC,
-          )
+            asset = Asset.create!(
+              project: described["project"],
+              dxid: asset_dxid,
+              name: asset_name,
+              state: described["state"],
+              file_size: described["size"],
+              user: created_by,
+              scope: Scopes::SCOPE_PUBLIC,
+            )
 
-          asset.update!(parent_type: "Asset", parent_id: asset.id)
-        end
+            asset.update!(parent_type: "Asset", parent_id: asset.id)
+          end
 
-        asset
-      end.compact
+          asset
+        end.compact
+      end
 
       revision = latest_revision + 1
 

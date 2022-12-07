@@ -1,5 +1,6 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { parse } from 'query-string'
 import { useParams } from 'react-router'
 import { Link, useLocation } from 'react-router-dom'
 import Dropdown from '../../../../components/Dropdown'
@@ -9,6 +10,7 @@ import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../../components/Tags'
 import { Location } from '../../../../types/utils'
 import { getBackPath } from '../../../../utils/getBackPath'
+import { ISpace } from '../../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../../ActionDropdownContent'
 import { StyledBackLink } from '../../home.styles'
 import { License } from '../../licenses/License'
@@ -35,19 +37,21 @@ import { FileDescription } from './styles'
 
 const FileActions = ({
   scope,
-  spaceId,
+  space,
   file,
+  folderId,
 }: {
   scope?: ResourceScope
-  spaceId?: string
+  space?: ISpace
   file: IFile
+  folderId?: string
 }) => {
   const actions = useFilesSelectActions({
     scope,
-    spaceId,
-    fileId: file.id,
+    space,
     selectedItems: [file],
     resourceKeys: ['file', file.uid],
+    folderId,
   })
   return (
     <>
@@ -77,13 +81,15 @@ const FileActions = ({
 }
 
 
-export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpace }) => {
   const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
   const file = data?.files
   const meta = data?.meta
-  const backPath = getBackPath(location, 'files', spaceId)
+  const backPath = getBackPath(location, 'files', space?.id)
+  const params = parse(location?.state?.fromSearch)
+  const folderId = params?.folder_id as string | undefined
 
   if (status === 'loading') {
     return  <HomeLoader />
@@ -134,7 +140,7 @@ export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
             </Title>
           </HeaderLeft>
           <HeaderRight>
-            <FileActions scope={scope} spaceId={spaceId} file={file} />
+            <FileActions scope={scope} space={space} file={file} folderId={folderId} />
           </HeaderRight>
         </Header>
 

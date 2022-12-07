@@ -15,7 +15,7 @@ module Api
     include CloudResourcesConcern
 
     skip_before_action :require_api_login, only: %i(everybody featured)
-    before_action :require_api_login_or_guest, only: %i(everybody featured)
+    before_action :require_api_login_or_guest, only: %i(everybody featured describe)
     before_action :validate_app, only: :create
     before_action :can_copy_to_scope?, only: %i(copy)
     before_action :user_notes_objects, only: %i(index spaces everybody)
@@ -163,7 +163,7 @@ module Api
         meta:  {
           spec: @app.spec,
           revisions: @revisions,
-          jobs: @app.accessible_jobs(@context),
+          jobs: [],
           assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
           challenges: @assignable_challenges.select do |ch|
             ch.accessible_by?(@context) || ch.app_owner == @context.user
@@ -314,6 +314,12 @@ module Api
 
     def user_compute_resources
       render json: user_compute_resource_labels
+    end
+
+    def describe
+      find_app # check if app accesible by current user first
+      response = https_apps_client.describe(params[:id], "apps")
+      render json: { app: response }
     end
 
     private
