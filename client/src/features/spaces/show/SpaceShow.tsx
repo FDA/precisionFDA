@@ -213,7 +213,7 @@ const Spaces2 = ({
                 />
               </Route>
               <Route exact path={`/spaces/${space.id}/files/:fileId`}>
-                <FileShow spaceId={space.id} />
+                <FileShow space={space} />
               </Route>
               <Route exact path={`/spaces/${space.id}/apps`}>
                 <AppList spaceId={space.id} />

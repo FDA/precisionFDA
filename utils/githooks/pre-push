@@ -1,0 +1,21 @@
+#!/bin/bash
+
+function pre_exit() {
+    echo
+    echo --------------------------
+    echo END OF THE PRE-PUSH HOOK
+}
+
+echo START OF THE PRE-PUSH HOOK
+echo --------------------------
+echo
+
+exit_code=0
+if ! make check-unpublished-env-variables; then
+    pre_exit
+    exit 1
+fi
+pre_exit
+if [[ "$PFDA_VERBOSE_MODE_CZ" ]] && which say; then
+    say -v Zuzana 'Pušujú pí ef dý ej změny do githabového repozitáře'
+fi

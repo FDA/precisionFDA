@@ -3,8 +3,9 @@ import React from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Router, Switch } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
+import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
 import 'react-toastify/dist/ReactToastify.css'
-import { PushReplaceHistory, QueryParamProvider } from 'use-query-params'
+import { QueryParamProvider } from 'use-query-params'
 import { AuthModal } from './features/auth/AuthModal'
 import { useModal } from './features/modal/useModal'
 import GlobalStyle from './styles/global'
@@ -64,11 +65,7 @@ const root = () => {
         <Router history={history}>
           <Header />
           <React.Suspense fallback={<Loader />}>
-            <QueryParamProvider
-              ReactRouterRoute={Route}
-              history={history as unknown as PushReplaceHistory}
-              location={history.location as unknown as Location}
-            >
+            <QueryParamProvider adapter={ReactRouter5Adapter}>
               <Switch>
                 <Route exact path="/">
                   <LandingPage />

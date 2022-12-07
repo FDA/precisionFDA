@@ -119,8 +119,7 @@ Rails.application.routes.draw do
     get "browse_access" => "main#browse_access"
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"
-    get "about/:section" => "main#about"
-    get "terms" => "home#index"
+    get "terms" => "main#terms"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
@@ -227,6 +226,7 @@ Rails.application.routes.draw do
       end
 
       resources :apps do
+        get :describe, on: :member, to: "apps#describe"
         get :jobs, on: :member, to: "jobs#app"
 
         collection do
@@ -246,6 +246,7 @@ Rails.application.routes.draw do
 
       resources :spaces, only: %i(index show create update) do
         collection do
+          get :cli
           get :editable_spaces
           get :info
         end
@@ -319,6 +320,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :cli # for CLI usage TODO: bring up better name :)
 
           post :copy
           post :download_list
@@ -348,6 +350,7 @@ Rails.application.routes.draw do
       resources :workflows, only: %i(index show create) do
         get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
+        get :describe, on: :member, to: "workflows#describe"
 
         collection do
           get :featured

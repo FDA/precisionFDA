@@ -46,6 +46,7 @@ const defaultConfig = {
       process.env.NODE_PATH_KEY_CERT
       ?? path.join(__dirname, '../../../../key.pem'),
     railsHost: process.env.HOST ?? 'https://localhost:3000',
+    // TODO - refactor to boolean
     allowErrorTestingRoutes:
       process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
     fdaSubnet: {
