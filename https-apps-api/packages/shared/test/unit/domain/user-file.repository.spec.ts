@@ -125,4 +125,29 @@ describe('UserFileRepository tests', () => {
     resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([files[5].uid])
   })
+
+  it('findUnclosedFiles should also find job outputs owned by user', async() => {
+    const repo = em.getRepository(UserFile) as UserFileRepository
+
+    // Add a couple of files that are created by jobs but owned by the user
+    const job = create.jobHelper.create(em, { user: user1 })
+    await em.flush()
+    const jobFile1 = create.filesHelper.createJobOutput(em,
+      { user: user1, jobId: job.id },
+      { state: FILE_STATE_DX.CLOSING },
+    )
+    const jobFile2 = create.filesHelper.createJobOutput(em,
+      { user: user1, jobId: job.id },
+      { state: FILE_STATE_DX.OPEN },
+    )
+    await em.flush()
+
+    let result = await repo.findUnclosedFiles(user1.id)
+    expect(result).to.have.length(2)
+    const resultUids = result.map(x => x.uid)
+    expect(resultUids).to.deep.equal([jobFile1.uid, jobFile2.uid])
+
+    result = await repo.findUnclosedFiles(user2.id)
+    expect(result).to.have.length(0)
+  })
 })

@@ -125,11 +125,12 @@ export const useSpacesColumns = ({
         {
           Header: 'Type',
           accessor: 'type',
+          disableSortBy: true,
           Filter: SelectColumnFilter,
           options: [
             { label: 'Groups', value: 'groups' },
             { label: 'Review', value: 'review' },
-            { label: 'Private type', value: 'private_type' },
+            { label: 'Private', value: 'private_type' },
             { label: 'Government', value: 'government' },
             { label: 'Administrator', value: 'administrator' },
           ],
@@ -163,7 +164,13 @@ export const useSpacesColumns = ({
           Header: 'State',
           accessor: 'state',
           width: colWidths?.state || 150,
-          disableFilters: true,
+          disableSortBy: true,
+          Filter: SelectColumnFilter,
+          options: [
+            { label: 'Active', value: 'active' },
+            { label: 'Locked', value: 'locked' },
+            { label: 'Unactivated', value: 'unactivated' },
+          ],
           Cell: ({ row }) => (
             <StatusCell isActive={row.original.state === 'active'}>
               <Dot />
@@ -200,6 +207,7 @@ export const useSpacesColumns = ({
         {
           Header: 'Reviewer/Host lead',
           accessor: 'host_lead',
+          disableSortBy: true,
           disableFilters: true,
           width: colWidths?.host_lead || 200,
           Cell: ({ row }) => <div>{row.original?.host_lead?.name}</div>,
@@ -207,6 +215,7 @@ export const useSpacesColumns = ({
         {
           Header: 'Sponsor/Guest lead',
           accessor: 'guest_lead',
+          disableSortBy: true,
           disableFilters: true,
           width: colWidths?.guest_lead || 200,
           Cell: ({ row }) => <div>{row.original?.guest_lead?.name}</div>,
@@ -214,6 +223,7 @@ export const useSpacesColumns = ({
         {
           Header: 'Counters',
           accessor: 'counters',
+          disableSortBy: true,
           disableFilters: true,
           width: colWidths?.counters || 300,
           Cell: ({ row }) => (

@@ -1,6 +1,5 @@
 import { omit } from 'ramda'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
