@@ -310,6 +310,21 @@ class HttpsAppsClient
       Net::HTTP::Patch::METHOD,
     )
   end
+  # ┌─────────────────────────┐
+  # │                         │
+  # │   TODO: category name   │
+  # │                         │
+  # └─────────────────────────┘
+
+  # uid in pFDA, not dxid !
+  def describe(uid, entity_type, options = nil)
+    request(
+      "/#{entity_type}/#{uid}/describe",
+      { options: options },
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
 
   # ┌─────────────────────────┐
   # │                         │

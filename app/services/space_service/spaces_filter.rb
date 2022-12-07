@@ -25,6 +25,29 @@ module SpaceService
       spaces
     end
 
+    def call_for_cli(user, params = nil)
+      spaces = Space.visible_by(user)
+      if params[:locked]
+        spaces = spaces.where(state: Space::STATE_LOCKED)
+      elsif params[:unactivated]
+        spaces = spaces.where(state: Space::STATE_UNACTIVATED)
+      else
+        spaces = spaces.where(state: Space::STATE_ACTIVE)
+      end
+
+      types = []
+      types << :private_type if params[:private_type]
+      types << :groups if params[:groups]
+      types << :government if params[:government]
+      types << :review if params[:review]
+      types << :administrator if params[:administrator]
+
+      if types.length > 0
+        spaces.where(space_type: types)
+      else
+        spaces
+      end
+    end
     # Builds AREL where clause.
     # @param filters [hash] filter params.
     # @return [Arel::Node] Built where AREL node.

@@ -191,6 +191,13 @@ module Api
       raise ApiError, e.message
     end
 
+    # used by CLI to list spaces available to user without any excess data
+    # allows to use flags like locked or unactivated to list those spaces.
+    def cli
+      spaces = SpaceService::SpacesFilter.call_for_cli(@context.user, params)
+      render json: spaces, :root => false, each_serializer: CliSpaceSerializer
+    end
+
     private
 
     # Sends space activatio email to leads.

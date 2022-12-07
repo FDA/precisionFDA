@@ -26,10 +26,10 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"text/tabwriter"
 )
 
-
-const userAgent = "Asset and File Uploader/2.1 (precisionFDA) Go-http-client/1.1"
+const userAgent = "Asset and File Uploader/2.2 (precisionFDA) Go-http-client/1.1"
 const defaultNumRoutines = 10
 const defaultChunkSize = 1<<26  // default 67MB (min. 5MB)
 const minRoutines = 1
@@ -50,6 +50,10 @@ type IPFDAClient interface {
 	UploadAsset(rootFolderPath string, name string, readmeFilePath string) error
 	UploadFile(path string, folderID string, spaceID string) error
 	DownloadFile(fileId string, outputFilePath string) error
+	DescribeEntity(entityID string, entityType string) error
+	ListSpaces(flags map[string]bool) error
+	Ls(folderID string, spaceID string, flags map[string]bool) error
+	RefreshToken(autoRefresh bool) (string, error)
 
 	SetChunkSize(chunkSize int)
 	SetNumRoutines(numRoutines int)
@@ -109,6 +113,9 @@ type jsonCreateFilePayload struct {
 	Desc string `json:"description"`
 	FolderID string `json:"folder_id"`
 	Scope string `json:"scope"`
+	ParentType string `json:"parent_type"`
+	ParentID string `json:"parent_id"`
+
 }
 
 type jsonCreateAssetPayload struct {
@@ -125,6 +132,38 @@ type jsonFileDownloadPayload struct {
 type uploadChunk struct {
 	index int
 	data []byte // slice/ptr
+}
+
+// better name needed
+type jsonSpace struct {
+	Id int `json:"id"`
+	Title string `json:"title"`
+	Role string `json:"role"`
+	Side string `json:"side"`
+	Type string `json:"type"`
+	State string `json:"state"`
+}
+
+// better name needed
+type jsonFile struct {
+	Id int `json:"id"`
+	Uid string `json:"uid"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+	State string `json:"state"`
+	AddedBy string `json:"added_by"`
+	CreatedAt string `json:"created_at"`
+	Size string `json:"file_size"`
+}
+
+type jsonMeta struct {
+	Scope string `json:"scope"`
+	Path string `json:"path"`
+}
+
+type jsonListingPayload struct {
+	Meta jsonMeta `json:"meta"`
+	Files []jsonFile `json:"files"`
 }
 
 
@@ -215,7 +254,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 
 	fmt.Println(">> Archiving asset...")
 
-	// different approarch for WinOS tar command
+	// different approach for WinOS tar command
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("tar", "-cf", name, "-C", rootFolderPath, ".")
 		if strings.HasSuffix(name, ".tar.gz") {
@@ -272,13 +311,15 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	return nil
 }
 
-// If folderID is empty, the file will be uploaded to the specified folder
+// If folderID is not empty, the file will be uploaded to the specified folder
 // If spaceID is empty, the file will be uploaded to the user's home
 func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) error {
 	createURL := c.BaseURL + "/api/create_file"
 	closeURL := c.BaseURL + "/api/close_file"
 
 	scope := ""
+	parentType := ""
+	parentId := ""
 	if spaceID != "" {
 		_, err := strconv.Atoi(spaceID)
 		if err != nil {
@@ -286,11 +327,19 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) er
 		}
 		scope = "space-" + spaceID
 	}
+
+	dxJobId, isPresent := os.LookupEnv("DX_JOB_ID")
+	if (isPresent) {
+		parentType = "Job"
+		parentId = dxJobId
+	}
 	jsonData, err := json.Marshal(jsonCreateFilePayload{
 		Name: filepath.Base(path),
 		Desc: "",
 		FolderID: folderID,
 		Scope: scope,
+		ParentType: parentType,
+		ParentID: parentId,
 	})
 	if err != nil {
 		return err
@@ -421,6 +470,134 @@ func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string) error {
 	return nil
 }
 
+func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
+	apiURL := fmt.Sprintf("%s/api/%ss/%s/describe", c.BaseURL, entityType, entityID)
+
+	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("%s ID %s not found. Please check that it exists and you have access to it.", entityType, entityID)
+		} else {
+			return err
+		}
+	}
+
+	var resultJSON map[string]interface{}
+	err = json.Unmarshal(body, &resultJSON)
+	if err != nil {
+		return err
+	}
+
+	if (resultJSON == nil) {
+		return fmt.Errorf("No response!\n\nResponse: %s", string(body))
+	}
+
+	prettyJSON, _ := json.MarshalIndent(resultJSON, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+
+	return nil
+}
+
+func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
+	apiURL := fmt.Sprintf("%s/api/spaces/cli?", c.BaseURL)
+
+	params := url.Values{}
+	for flag, value := range flags {
+		if(value) {
+		params.Add(flag , strconv.FormatBool(value))
+		}
+	}
+
+	status, body, err := c.makeRequestFail("GET", apiURL + params.Encode(), nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Something went wrong.")
+		} else {
+			return err
+		}
+	}
+
+	var spaces []jsonSpace
+	err = json.Unmarshal(body, &spaces)
+	if err != nil {
+		return err
+	}
+
+	//TODO check spaces are not empty or some error.
+	printListSpacesResponse(spaces, flags)
+
+	return nil
+}
+
+func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) error {
+	apiURL := fmt.Sprintf("%s/api/files/cli?", c.BaseURL)
+
+	params := url.Values{}
+
+	if spaceID != "" {
+		_, err := strconv.Atoi(spaceID)
+		if err != nil {
+			return err
+		}
+		params.Add("space_id", spaceID)
+	}
+
+	if folderID != "" {
+		_, err := strconv.Atoi(folderID)
+		if err != nil {
+			return err
+		}
+		params.Add("folder_id", folderID)
+	}
+
+	for flag, value := range flags {
+		if(value) {
+		 params.Add(flag, strconv.FormatBool(value))
+		}
+	}
+
+	status, body, err := c.makeRequestFail("GET",  apiURL + params.Encode(), nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Something went wrong.")
+		} else {
+			return err
+		}
+	}
+
+	var response jsonListingPayload
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return err
+	}
+
+	printListingResponse(response, flags)
+	return nil
+}
+
+
+// Just gets the new token, the logic for token replacement is in go/pfda.go
+func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
+	apiURL := fmt.Sprintf("%s/api/auth_key", c.BaseURL)
+
+	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return "", fmt.Errorf("Something went wrong.")
+		} else {
+			return "", err
+		}
+	}
+
+	var resultJSON map[string]interface{}
+	err = json.Unmarshal(body, &resultJSON) // do this just to ensure the json is valid
+	if err != nil {
+		return "", err
+	}
+
+	return resultJSON["Key"].(string), nil
+}
+
 func (c *PFDAClient) SetChunkSize(chunkSize int) {
 	if chunkSize > maxChunkSize || chunkSize < minChunkSize {
 		inputError("Chunk size must be between 5MB and 5GB.")
@@ -503,7 +680,7 @@ func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte
 	body, _ = ioutil.ReadAll(resp.Body)
 
 	if (!strings.HasPrefix(status, "2")) {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided app-id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
+		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
 	}
 	return status, body, err
 }
@@ -523,7 +700,7 @@ func (c *PFDAClient) makeRequestWithHeadersFail(requestType string, url string, 
 	body, _ = ioutil.ReadAll(resp.Body)
 
 	if (!strings.HasPrefix(status, "2")) {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided app-id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
+		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
 	}
 	return status, body, err
 }
@@ -603,6 +780,7 @@ func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
 //  HELPER FUNCTIONS
 //
 // TODO - All calls to panic should be removed in favour of returning errors
+// TODO - move this to a separate file as the helper functions set grows.
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -624,4 +802,77 @@ func yesNo(label string) bool {
 		log.Fatalf("Prompt failed %v\n", err)
 	}
 	return result == "Yes"
+}
+
+// pass all flags so we can optimize the table header - if in 'private' do not show added-by
+func printListingResponse(response jsonListingPayload, flags map[string]bool) {
+	if (flags["json"]) {
+		prettyJSON, _ := json.MarshalIndent(response.Files, "", "    ")
+		fmt.Printf("%s\n", string(prettyJSON))
+	} else if (flags["brief"]) {
+		printListingSimple(response.Files)
+	} else {
+		printListingVerbose(response.Files, response.Meta)
+	}
+}
+
+func printListingSimple(files []jsonFile) {
+	// simple table header
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+	fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID","Name"}, "\t") + "\t")
+
+    for _, file := range files {
+			if (file.Type == "UserFile") {
+				fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.Name}, "\t")+"\t")
+			} else {
+				fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(file.Id), file.Name}, "\t")+"\t")
+			}
+    }
+    writer.Flush()
+}
+
+func printListingVerbose(files []jsonFile, meta jsonMeta) {
+	fmt.Printf("Scope: %s\nPath: %s\n\n", meta.Scope, meta.Path)
+
+	isSpaceContext := strings.Contains(meta.Scope, "space")
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+	// verbose table header
+	if(isSpaceContext) {
+		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State ", "Type", "Size", "Created At", "Added By", "Name"}, "\t") + "\t")
+		for _, file := range files {
+			if (file.Type == "UserFile") {
+				fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.State , file.Type, file.Size, file.CreatedAt, file.AddedBy, file.Name},"\t")+ "\t")
+			} else {
+				fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(file.Id), "-", file.Type, "-", file.CreatedAt, file.AddedBy, file.Name},"\t") + "\t")
+			}
+		}
+	} else {
+		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State" + "\t", "Type", "Size", "Created At", "Name"}, "\t") + "\t")
+		for _, file := range files {
+			if (file.Type == "UserFile") {
+				fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.State + "\t", file.Type, file.Size, file.CreatedAt, file.Name},"\t")+ "\t")
+			} else {
+				fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(file.Id), "\t", file.Type, "", file.CreatedAt, file.Name},"\t")+ "\t")
+			}
+		}
+	}
+	writer.Flush()
+}
+
+func printListSpacesResponse(spaces []jsonSpace,  flags map[string]bool) {
+	if(flags["json"]) {
+		prettyJSON, _ := json.MarshalIndent(spaces, "", "    ")
+		fmt.Printf("%s\n", string(prettyJSON))
+	} else {
+		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+		fmt.Fprintln(writer, strings.Join([]string{"ID", "Type", "Role", "Side", "Name"}, "\t") + "\t")
+		for _, space := range spaces {
+			fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(space.Id), space.Type, space.Role, space.Side, space.Title},"\t")+ "\t")
+		}
+		writer.Flush()
+
+	}
 }
