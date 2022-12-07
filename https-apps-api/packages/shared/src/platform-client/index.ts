@@ -13,14 +13,13 @@ import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membersh
 import {
   BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
   FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting,
+  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams,
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
   FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
-  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse,
+  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, WorkflowDescribeResponse, AppDescribeResponse,
 } from './platform-client.responses'
-
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -164,7 +163,8 @@ class PlatformClient {
 
   async fileStatesPaginated(
     params: FileStatesParams,
-    starting: Starting | undefined): Promise<FileStatesResponse> {
+    starting: Starting | undefined,
+  ): Promise<FileStatesResponse> {
     const data: AnyObject = {
       class: 'file',
       limit: config.platform.findDataObjectsQueryLimit,
@@ -202,17 +202,14 @@ class PlatformClient {
    * This is designed to only query files within the same dx project, because without the project hint
    * the /system/findDataObjects call is very inefficient and can take a long time
    */
-   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(
-      (nextMapping: Starting) => {
-        return this.fileStatesPaginated(params, nextMapping)
-      },
-    )
+  async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping: Starting) => this.fileStatesPaginated(params, nextMapping))
   }
 
   private async filesListPaginated(
     params: ListFilesParams,
-    starting: Starting | undefined): Promise<ListFilesResponse> {
+    starting: Starting | undefined,
+  ): Promise<ListFilesResponse> {
     const data: AnyObject = {
       class: 'file',
       limit: config.platform.findDataObjectsQueryLimit,
@@ -249,11 +246,7 @@ class PlatformClient {
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>(
-      (nextMapping: Starting) => {
-        return this.filesListPaginated(params, nextMapping)
-      },
-    )
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping: Starting) => this.filesListPaginated(params, nextMapping))
   }
 
   /**
@@ -469,7 +462,7 @@ class PlatformClient {
   //    P R O J E C T S
   // ---------------------
 
-/**
+  /**
  * Creates a new project
  * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
  * @param {string} name - OPTIONAL - overrides new project name.
@@ -520,8 +513,36 @@ class PlatformClient {
       method: 'POST',
       data: params.body,
       url,
-      headers: this.setupHeaders(params),
+      headers: this.setupHeaders(params.accessToken),
     }
+    return await this.sendRequest(options, url)
+  }
+
+  // ---------------------
+  //    ENTITY-DESCRIBE
+  // ---------------------
+
+  async appDescribe(params: AppDescribeParams): Promise<AppDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params.accessToken),
+    }
+
+    return await this.sendRequest(options, url)
+  }
+
+  async workflowDescribe(params: WorkflowDescribeParams): Promise<WorkflowDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params.accessToken),
+    }
+
     return await this.sendRequest(options, url)
   }
 
@@ -558,9 +579,7 @@ class PlatformClient {
    *                    starting params to the reqeust
    * @returns Results of the aggregated request
    */
-  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(
-    requestFunc: (starting: Starting | undefined) => Promise<TResponse>,
-  ): Promise<T[]> {
+  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(requestFunc: (starting: Starting | undefined) => Promise<TResponse>): Promise<T[]> {
     let nextMapping: Starting | undefined
     const results: T[] = []
     const paginateSeq = async (): Promise<void> => {

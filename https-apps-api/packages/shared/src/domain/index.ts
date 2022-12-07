@@ -1,4 +1,5 @@
 import { App } from './app/app.entity'
+import { Workflow } from './workflow/workflow.entity'
 import { Comment } from './comment/comment.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
 import { Expert } from './expert/expert.entity'
@@ -28,6 +29,7 @@ const entities = {
   AdminGroup,
   AdminMembership,
   App,
+  Workflow,
   Asset,
   Challenge,
   ChallengeResource,
@@ -57,6 +59,8 @@ export * as adminGroup from './admin-group'
 export * as spaceEvent from './space-event'
 
 export * as app from './app'
+
+export * as workflow from './workflow'
 
 export * as job from './job'
 
@@ -90,6 +94,7 @@ export {
   AdminGroup,
   AdminMembership,
   App,
+  Workflow,
   Asset,
   Challenge,
   ChallengeResource,

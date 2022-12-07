@@ -226,6 +226,7 @@ Rails.application.routes.draw do
       end
 
       resources :apps do
+        get :describe, on: :member, to: "apps#describe"
         get :jobs, on: :member, to: "jobs#app"
 
         collection do
@@ -245,6 +246,7 @@ Rails.application.routes.draw do
 
       resources :spaces, only: %i(index show create update) do
         collection do
+          get :cli
           get :editable_spaces
           get :info
         end
@@ -318,6 +320,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :cli # for CLI usage TODO: bring up better name :)
 
           post :copy
           post :download_list
@@ -347,6 +350,7 @@ Rails.application.routes.draw do
       resources :workflows, only: %i(index show create) do
         get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
+        get :describe, on: :member, to: "workflows#describe"
 
         collection do
           get :featured
