@@ -47,7 +47,7 @@ const EditChallengePage = () => {
       queryClient.invalidateQueries(['challenge-custom', challengeId])
       queryClient.invalidateQueries(['challenge', challengeId])
       history.push('/challenges')
-      toast.success('Success: Editing challenge info.')
+      toast.success('Challenge successfully edited.')
     },
     onError: (e: AxiosError) => {
       if(e?.response?.data?.app_id) toast.error(`Error: ${e?.response?.data?.app_id}`)

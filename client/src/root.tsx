@@ -29,7 +29,7 @@ const CreateChallengePage = React.lazy(
   () => import('./features/challenges/form/CreateChallengePage'),
 )
 const EditChallengePage = React.lazy(
-  () => import('./features/challenges/form/EditChallenge'),
+  () => import('./features/challenges/form/EditChallengePage'),
 )
 const ProposeChallengePage = React.lazy(
   () => import('./features/challenges/form/ProposeChallengePage'),
