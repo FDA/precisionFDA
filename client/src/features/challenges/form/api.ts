@@ -53,13 +53,14 @@ export async function editChallengeRequest(payload: CreateChallengePayload, chal
   return axios.put(`/api/challenges/${challengeId}`, { challenge: payload }).then(r => r.data)
 }
 
-export async function createChallengeCardImage(file: File, challengeCreationCallback: (payload: { id: string, url: string }) => void): Promise<any> {
+export async function createChallengeCardImage(file: File): Promise<string> {
+  let fileUid: any = null
   await backendCall('/api/create_challenge_card_image', 'POST', { name: file.name, metadata: {} })
     .then(response => {
       const numChunks = Math.ceil(file.size / CHUNK_SIZE)
       const reader = new FileReader()
       const spark = new sparkMD5.ArrayBuffer()
-      const fileUid = response.payload.id
+      fileUid = response.payload.id
 
       reader.onload = () => {
         for (let i = 0; i < numChunks; i++) {
@@ -85,21 +86,21 @@ export async function createChallengeCardImage(file: File, challengeCreationCall
                 sentSize += buffer.byteLength
 
                 if (sentSize === file.size) {
-                  return closeFile(fileUid)
+                  closeFile(fileUid)
+                  return fileUid
                 }
               })
-              .then(() => backendCall('/api/get_file_link', 'POST', { id: fileUid })
-                .then(res => {
-                  // callback function used here will set the image url into the challenge that will be created
-                  challengeCreationCallback(res.payload)
-                }))
-
           }
         }
       }
       reader.readAsArrayBuffer(file as any)
     },
     )
+    return fileUid
+}
+
+export async function getChallengeImageLink(fileUid: string) {
+  return axios.post('/api/get_file_link', { id: fileUid }).then(r => r.data)
 }
 
 export async function proposeChallengeRequest(payload: ProposeChallengePayload) {

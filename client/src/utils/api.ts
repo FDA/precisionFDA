@@ -23,7 +23,7 @@ toast.error('Session expired. Please log in again', {
   onClick: () => history.push('/login'),
 })
 }
-// TODO: separate app errors from network errors. 
+// TODO: separate app errors from network errors.
 // Application errors, like validations, should not throw Error.
 // They should return error in the api response as an object of errors.
 export const checkStatus = async (res: Response) => {
@@ -117,6 +117,9 @@ export const getApiRequestOpts = (method: string, token: string = getAuthenticit
   return opts
 }
 
+/**
+ * @deprecated Use axios library instead.
+ */
 const backendCall = (route: string, method = 'POST', data = {}, token = getAuthenticityToken()) => {
   const opts: RequestInit = getApiRequestOpts(method, token)
 

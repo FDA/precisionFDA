@@ -299,7 +299,7 @@ class Challenge < ApplicationRecord
     card_image = UserFile.find_by!(uid: card_image_id)
     update(
       card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image),
-    )
+    ) if card_image.closed
   end
 
   # Updates specified_order of challenges setting challenge to appear after replacement challenge.
@@ -378,10 +378,11 @@ class Challenge < ApplicationRecord
 
   # Check if Chalenge can be opened?
   # Usage in a challenges cards on Challenges#create and Challenges#update
-  # @return errors Can't open challenge unless space is accepted if challenge active and
-  # space not accepted by leads
+  # @return errors Can't open challenge unless space is accepted if space not accepted by leads
+  # and Can't open challenge before start date if opened before start_at value
   def can_open?
-    errors.add(:status, "Can't open challenge unless space is accepted") if active? && !space&.accepted?
+    errors.add(:status, "Can't open challenge unless space is accepted") unless space&.accepted?
+    errors.add(:status, "Can't open challenge before start date.") unless active?
   end
 
   def scope_should_be_valid
