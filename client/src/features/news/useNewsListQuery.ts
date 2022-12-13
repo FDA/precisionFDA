@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { newsListRequest } from './api'
 

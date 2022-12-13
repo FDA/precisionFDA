@@ -1,10 +1,10 @@
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import Select from 'react-select'
 import { fetchChallengeScopes } from './api'
 
 const useFetchChallengeScopesQuery = (id?: string) =>
-  useQuery('challenge-scopes', () => fetchChallengeScopes(id), {
+  useQuery(['challenge-scopes'], () => fetchChallengeScopes(id), {
     select(data) {
       return data?.map(s => ({
         label: s[0],

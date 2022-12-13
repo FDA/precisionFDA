@@ -1,7 +1,7 @@
 import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
 import { useImmer } from 'use-immer'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
@@ -34,6 +34,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
     { key: 'ROOT', title: '/', checkable: false, children: []},
   ])
   const { mutateAsync, isLoading } = useMutation({
+    mutationKey: ['copy-files-to-space-add'],
     mutationFn: () => addData({ spaceId: spaceId || '', uids: selectedFiles }),
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])

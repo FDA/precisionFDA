@@ -89,6 +89,14 @@ describe('PATCH /files/:id/close', () => {
     const user = user1
     const file = files[0]
 
+    // To rework and remove after async notifications is merged
+    fakes.client.fileDescribeFake.callsFake(() => ({
+      id: file.dxid,
+      name: file.name,
+      size: 12345,
+      state: FILE_STATE_DX.CLOSED,
+    }))
+
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .query({ ...getDefaultQueryData(user) })
@@ -100,6 +108,10 @@ describe('PATCH /files/:id/close', () => {
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
     expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
+
+    expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
+    expect(fakes.queue.findRepeatableFake.getCall(0).args[0])
+      .to.equal(`sync_files_state.${user1.dxuser}`)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
   })
@@ -118,6 +130,14 @@ describe('PATCH /files/:id/close', () => {
       return (match.length > 0) ? match[0] : undefined
     })
 
+    // To rework and remove after async notifications is merged
+    fakes.client.fileDescribeFake.callsFake(() => ({
+      id: file.dxid,
+      name: file.name,
+      size: 12345,
+      state: FILE_STATE_DX.CLOSED,
+    }))
+
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .query({ ...getDefaultQueryData(user) })
@@ -127,6 +147,10 @@ describe('PATCH /files/:id/close', () => {
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
     expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
+
+    expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
+    expect(fakes.queue.findRepeatableFake.getCall(0).args[0])
+      .to.equal(`sync_files_state.${user2.dxuser}`)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
     const createCall = fakes.queue.createSyncFilesStateTask.getCall(0).args[0]
@@ -145,6 +169,14 @@ describe('PATCH /files/:id/close', () => {
       const match = bullJobsInQueue.filter((job => SyncFilesStateOperation.getBullJobId(user.dxuser) === bullJobId))
       return match.length > 0 ? match[0] : undefined
     })
+
+    // To rework and remove after async notifications is merged
+    fakes.client.fileDescribeFake.callsFake(() => ({
+      id: file.dxid,
+      name: file.name,
+      size: 12345,
+      state: FILE_STATE_DX.CLOSED,
+    }))
 
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
@@ -199,6 +231,14 @@ describe('PATCH /files/:id/close', () => {
     const user = user1
     const asset = assets[0]
 
+    // To rework and remove after async notifications is merged
+    fakes.client.fileDescribeFake.callsFake(() => ({
+      id: asset.dxid,
+      name: asset.name,
+      size: 12345,
+      state: FILE_STATE_DX.CLOSED,
+    }))
+
     const res = await supertest(getServer())
       .patch(`/files/${asset.uid}/close`)
       .query({ ...getDefaultQueryData(user) })
@@ -232,6 +272,11 @@ describe('PATCH /files/:id/close', () => {
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
     expect(call.accessToken).to.equal(create.userHelper.getChallengeBotToken())
     expect(call.fileDxid).to.equal(challengeBotFile.dxid)
+
+    // To guard for the case where the code checks for the wrong user's file sync task
+    expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
+    expect(fakes.queue.findRepeatableFake.getCall(0).args[0])
+      .to.equal('sync_files_state.challenge-bot-test')
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
     const createCall = fakes.queue.createSyncFilesStateTask.getCall(0).args[0]

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -106,9 +106,10 @@ const CopyToSpaceForm = ({
   const [selectedTarget, setSelectedTarget] = useState<string>()
 
   const mutation = useMutation({
+    mutationKey: ['copy-to-space', resource],
     mutationFn: (space: string) => updateFunction(space, selected),
     onSuccess: (res: any) => {
-      onSuccess && onSuccess(res)
+      if(onSuccess) onSuccess(res)
       setShowModal(false)
       displayPayloadMessage(res)
     },

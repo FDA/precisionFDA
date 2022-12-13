@@ -3,7 +3,13 @@ import styled from 'styled-components'
 
 export const StyledExpertListItem = styled.div`
   display: flex;
-  gap: 32px;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+    gap: 32px;
+  }
 `
 
 export const ItemImage = styled.div`
@@ -36,7 +42,6 @@ export const Info = styled.div`
 export const ExpertButtonRowWrap = styled.div`
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
 `
 export const ExpertButtonRow = styled.div`
   display: flex;
@@ -44,4 +49,6 @@ export const ExpertButtonRow = styled.div`
   align-items: center;
   width: fit-content;
   margin-top: 16px;
+  white-space: nowrap;
+  flex-wrap: wrap;
 `

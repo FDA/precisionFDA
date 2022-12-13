@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Select from 'react-select'
 import {
   PageHeader,
@@ -111,21 +111,17 @@ const NotificationsPage = () => {
   const options = roles.map(value => ({ value, label: RoleLabel[value] }))
   const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
 
-  const { data, status, error } = useQuery<any>(
-    'notifications',
-    fetchNotificationsPreferences,
-  )
+  const { data, status, error } = useQuery<any>(['notifications'], fetchNotificationsPreferences)
 
   const queryCache = useQueryClient()
   const { mutateAsync: notificationsMutation } = useMutation(
-    saveNotificationsPreferences,
     {
+      mutationKey: ['save-notifications-pref'],
+      mutationFn: saveNotificationsPreferences,
       onSuccess: () => {
-        queryCache.invalidateQueries('notifications')
-        // showInfoAlert('Saved!')
+        queryCache.invalidateQueries(['notifications'])
       },
       onError: () => {
-        // showErrorAlert('Error saving')
       },
     },
   )

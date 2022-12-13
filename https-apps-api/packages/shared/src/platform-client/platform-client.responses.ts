@@ -33,6 +33,8 @@ type FileCloseResponse = {
 
 type FileDownloadLinkResponse = {
   url: string
+  headers: AnyObject[] // key:value pairs
+  expires?: number
 }
 
 type ListFilesResult = {
@@ -68,15 +70,13 @@ type DescribeDataObjectsResponse = {
   }>
 }
 
-type DescribeFilesResponse = {
-  results: Array<{
-    describe: {
-      id: string
-      name: string
-      size: number
-      // add more here
-    }
-  }>
+type FileDescribeResponse = {
+  id: string
+  name: string
+  state: string
+  size?: number
+  // add more here
+  // See output of https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
 }
 
 type PlatformMember = {
@@ -117,6 +117,16 @@ type ClassIdResponse = {
   id: string
 }
 
+// add all actual data provided by platform
+type AppDescribeResponse = {
+  id: string
+}
+
+// add all actual data provided by platform
+type WorkflowDescribeResponse = {
+  id: string
+}
+
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
   state: string
@@ -147,7 +157,7 @@ export {
   JobDescribeResponse,
   JobTerminateResponse,
   ClassIdResponse,
-  DescribeFilesResponse,
+  FileDescribeResponse,
   DescribeFoldersResponse,
   DbClusterDescribeResponse,
   DescribeDataObjectsResponse,
@@ -155,4 +165,6 @@ export {
   PlatformMember,
   UserInviteToOrgResponse,
   UserRemoveFromOrgResponse,
+  AppDescribeResponse,
+  WorkflowDescribeResponse,
 }

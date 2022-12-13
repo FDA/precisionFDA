@@ -11,8 +11,8 @@ const StyledChallengesBanner = styled.div`
   align-items: center;
   background-color: ${colors.subtleBlue};
   justify-content: space-between;
-  margin-top: 32px;
   margin-bottom: 32px;
+
 `
 
 const StyledChallengesBannerLeft = styled.div`
@@ -40,12 +40,17 @@ const StyledChallengesBannerLeft = styled.div`
 `
 
 const StyledChallengesBannerRight = styled.div`
+  display: none;
   align-self: stretch;
   padding: 32px ${theme.values.paddingMainContentVertical * 2}px 0 0;
   background-image: url(${challengesBannerRight});
   background-repeat: no-repeat;
   background-position: 100% 50%;
   background-size: contain;
+
+  @media (min-width: 500px) {
+    display: initial;
+  }
 `
 
 export const ChallengesBanner = () => {

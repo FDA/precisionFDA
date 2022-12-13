@@ -12,7 +12,9 @@ if [[ ! $SKIP_FRONTEND_DEPS_SETUP || $SKIP_FRONTEND_DEPS_SETUP = 0 ]]; then
   if [[ $is_node_modules_empty ]]; then
     yarn --frozen-lockfile
   else
-    yarn check || yarn --frozen-lockfile
+    # Verifies only direct dependencies - i.e. skips errors from transitive dependencies
+    # https://classic.yarnpkg.com/en/docs/cli/check#toc-yarn-check-verify-tree
+    yarn check --verify-tree || yarn --frozen-lockfile
   fi
 fi
 

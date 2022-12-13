@@ -1,8 +1,8 @@
 import { pick } from 'ramda'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router-dom'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { ATTACHABLE_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -56,7 +56,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), OBJECT_TYPES.ASSET)
+  } = useAttachToModal(selected.map(s => s.id), ATTACHABLE_TYPES.ASSET)
   const {
     modalComp: downloadModal,
     setShowModal: setDownloadModal,
@@ -71,9 +71,9 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
     request: deleteAssetsRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries('assets')
+      queryClient.invalidateQueries(['assets'])
       history.push('/home/assets')
-      resetSelected && resetSelected()
+      if(resetSelected) resetSelected()
     },
   })
   const {

@@ -753,6 +753,12 @@ class ApiController < ApplicationController
   def create_file
     project = UserFile.publication_project!(current_user, @scope)
 
+    parent = current_user
+    # file could be uploaded by CLi inside job
+    if params[:parent_type] == "Job" && params[:parent_id] != ""
+      parent = Job.find_by!(dxid: params[:parent_id])
+    end
+
     api = DIContainer.resolve("api.user")
     file_dxid = api.file_new(params[:name], project)["id"]
 
@@ -763,7 +769,7 @@ class ApiController < ApplicationController
       state: "open",
       description: params[:description],
       user: current_user,
-      parent: current_user,
+      parent: parent,
       scope: @scope,
       UserFile.scope_column_name(@scope) => @folder&.id,
     )

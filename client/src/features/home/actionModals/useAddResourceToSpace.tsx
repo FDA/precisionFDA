@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import { UseMutationResult, useQuery } from 'react-query'
+import { UseMutationResult, useQuery } from '@tanstack/react-query'
 import { Column } from 'react-table'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'

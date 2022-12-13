@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { ParticipantsResponse } from './types'
 
 export async function getParticipantsQuery() {
@@ -7,5 +7,5 @@ export async function getParticipantsQuery() {
 }
 
 export const useParticipantsQuery = () => {
-  return useQuery('participants', getParticipantsQuery)
+  return useQuery(['participants'], getParticipantsQuery)
 }

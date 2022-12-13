@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import {
   Redirect,
@@ -73,16 +73,16 @@ const Spaces2 = ({
   const [activeResource] = useActiveResourceFromUrl('spaces')
 
   const fixSpaceMutation = useMutation({
+    mutationKey: ['fix-guest-permissions'],
     mutationFn: (payload: {
       id: string
     }) => fixGuestPermissions(payload),
     onSuccess: () => {
-      toast.success("Permissions for guest side successfully updated.")
-
+      toast.success('Permissions for guest side successfully updated.')
     },
     onError: (e:any) => {
         toast.error(e.response.data.error.message)
-    }
+    },
   })
 
   if (user?.is_guest) {
@@ -123,7 +123,7 @@ const Spaces2 = ({
               {!spaceActions['Fix Permissions']?.shouldHide && (
                 <ActionButton
                   data-testid="fix-space-button"
-                  onClick={() => fixSpaceMutation.mutate({id: space.id})}
+                  onClick={() => fixSpaceMutation.mutate({ id: space.id })}
                 >
                   Fix Guest Side Permissions
                 </ActionButton>
@@ -213,7 +213,7 @@ const Spaces2 = ({
                 />
               </Route>
               <Route exact path={`/spaces/${space.id}/files/:fileId`}>
-                <FileShow spaceId={space.id} />
+                <FileShow space={space} />
               </Route>
               <Route exact path={`/spaces/${space.id}/apps`}>
                 <AppList spaceId={space.id} />

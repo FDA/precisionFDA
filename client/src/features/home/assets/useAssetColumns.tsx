@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import ReactTooltip from 'react-tooltip'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import { FileZipIcon } from '../../../components/icons/FileZipIcon'
@@ -11,6 +12,10 @@ import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { StyledLinkCell, StyledNameCell } from '../home.styles'
 import { KeyVal } from '../types'
 import { IAsset } from './assets.types'
+import { colors } from '../../../styles/theme'
+
+const isUnclosedAsset = (asset: IAsset): boolean =>
+  asset.state === 'open' || asset.state === 'closing'
 
 export const useAssetColumns = ({
   isAdmin = false,
@@ -20,7 +25,7 @@ export const useAssetColumns = ({
   isAdmin?: boolean
   handleRowClick: (id: string) => void
   colWidths: KeyVal
-}) =>{
+}) => {
   const queryClient = useQueryClient()
   return useMemo<Column<IAsset>[]>(
     () =>
@@ -30,16 +35,32 @@ export const useAssetColumns = ({
           accessor: 'name',
           Filter: DefaultColumnFilter,
           width: colWidths?.name || 300,
-          Cell: props => (
+          Cell: ({ cell, value }) => (
             <>
-                <StyledNameCell
-                  onClick={() =>
-                    handleRowClick(props.cell.row.original.uid.toString())
-                  }
+              <StyledNameCell
+                data-tip
+                data-for={`assetNameTooltip${cell.row.original.uid}`}
+                color={
+                  isUnclosedAsset(cell.row.original)
+                    ? colors.stateLabelGrey
+                    : colors.primaryBlue
+                }
+                onClick={
+                  () => handleRowClick(cell.row.original.uid.toString())
+                }
+              >
+                <FileZipIcon height={14} />
+                {value}
+              </StyledNameCell>
+              {isUnclosedAsset(cell.row.original) && (
+                <ReactTooltip
+                  id={`assetNameTooltip${cell.row.original.uid}`}
+                  place="top"
+                  effect="solid"
                 >
-                  <FileZipIcon height={14} />
-                  {props.value}
-                </StyledNameCell>
+                  Asset is in {cell.row.original.state} state. Please refresh the list momentarily to update its status.
+                </ReactTooltip>
+              )}
             </>
           ),
         },

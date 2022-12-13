@@ -44,6 +44,11 @@ type FileCloseParams = BaseParams & {
   fileDxid: string
 }
 
+type FileDescribeParams = BaseParams & {
+  fileDxid: string
+  projectDxid: string
+}
+
 type FileDownloadLinkParams = BaseParams & {
   fileDxid: string
   filename: string
@@ -148,11 +153,21 @@ type UserUnlockParams = {
   }
 }
 
+type AppDescribeParams = BaseParams & {
+  dxid: string
+  data: {}
+}
+type WorkflowDescribeParams = BaseParams & {
+  dxid: string
+  data: {}
+}
+
 export {
   BaseParams,
   Starting,
   IPaginatedParams,
   FileCloseParams,
+  FileDescribeParams,
   FileDownloadLinkParams,
   FileStatesParams,
   ListFilesParams,
@@ -174,4 +189,6 @@ export {
   DescribeDataObjectsParams,
   UserResetMfaParams,
   UserUnlockParams,
+  AppDescribeParams,
+  WorkflowDescribeParams,
 }

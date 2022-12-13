@@ -1,4 +1,4 @@
-#docker build -f docker/ui_test.Dockerfile -t autoui .
+#docker build -f docker/images/ui_test.Dockerfile -t autoui .
 #docker run \
 #-e PFDA_AT_USER_1_PASSWORD_LOC \
 #-e PFDA_AT_USER_2_PASSWORD_LOC \

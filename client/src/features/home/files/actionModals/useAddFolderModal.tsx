@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
@@ -33,6 +33,7 @@ export const useAddFolderModal = ({ folderId, spaceId, scope, isAllowed, onViola
     setError,
   } = useForm({ defaultValues: { name: '' }})
   const mutation = useMutation({
+    mutationKey: ['add-folder'],
     mutationFn: (payload: { name: string }) =>
       addFolderRequest(payload, folderId, spaceId, scope),
     onSuccess: (res) => {
@@ -43,7 +44,7 @@ export const useAddFolderModal = ({ folderId, spaceId, scope, isAllowed, onViola
         return
       }
       reset()
-      queryClient.invalidateQueries('files')
+      queryClient.invalidateQueries(['files'])
       setShowModal(false)
       toast.success('Success: Adding folder.')
     },

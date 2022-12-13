@@ -1,5 +1,5 @@
 #!/bin/bash
-docker build -t pfda_ui -f docker/ui_test.Dockerfile . && \
+docker build -t pfda_ui -f docker/build/ui_test.Dockerfile . && \
 docker run \
 -e PFDA_AT_USER_1_PASSWORD_LOC=$PFDA_PASSWORD \
 -e PFDA_AT_USER_2_PASSWORD_LOC=$PFDA_PASSWORD \
