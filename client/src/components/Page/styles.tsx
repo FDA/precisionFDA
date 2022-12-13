@@ -40,6 +40,7 @@ export const PageContainer = styled.div`
 `
 
 export const PageContainerMargin = styled.div`
+  flex: 1 1 auto;
   margin-inline: auto;
   width: min(100% - 32px, 1330px);
 

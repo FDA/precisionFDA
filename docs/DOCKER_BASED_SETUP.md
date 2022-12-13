@@ -2,17 +2,9 @@
 
 
 This guide covers all the steps required to get docker based
-development environment. There are also a few _optional_ sections, that are strongly recommended to use for full-stack developer roles
+development environment. There are also a few _optional_ sections, that are recommended to use for full-stack developer roles
 
-## Prerequisites
-
-Make sure that you understand this [Makefile](../Makefile)
-
-Make sure you know, which configuration to use. Your configuration depends on following
-
-* role (qa | dev)
-* architecture of your workstation
-  * unless its windows, you can find it using command - `uname -m`
+_Last updated: 25.11.2022_
 
 ## Installing docker and docker-compose
 
@@ -20,89 +12,90 @@ Make sure you know, which configuration to use. Your configuration depends on fo
 
 The first step you have to do is to install [docker](https://docs.docker.com/install/) on your workstation. Instructions are **platform-specific**
 
-## Makefile and platform differences
+## Platform differences
 
-Because of platform differences between M1-silicon and Intel MacOS CPUs and technologies used in our stack, the docker environment setup is **platform-specific**, more on the topic [here](./MACOS_ARCHITECTURE_DIFFERENCES.md).
-Summary of all configurations is in top level [Makefile](../Makefile), which contains some basic commands. Feel free to add more according to your own need.
+Because of [platform differences](./MACOS_ARCHITECTURE_DIFFERENCES.md) between M1-silicon and Intel MacOS CPUs and technologies used in our stack, the docker environment setup is **platform-specific**.
 
-Note that not all `docker compose` commands are implemented - so when you want to execute `docker compose` command, make sure you have corresponding flags (`-f <COMPOSE_FILE>`) according to [Makefile](../Makefile).
+For this reason localhost docker stack is maintained for two different architectures
 
-### Example scenario
+* MacOS intel
+* MacOS M1-sillicon (`arm64v8`)
 
-I am a dev using MacBook with `M1-silicon` CPU, and `nodejs-api` container just died (for some reason)
+Docker stack contains performance differences for different roles - for instance QA engineers are in higher need to drop volumes because of frequent branch changes. These changes shouldn't have impact on business logic of application code, instead they modify image build and container runtime.
 
-I can restart it with following command
+That produces in total 4 different configurations
+
+* `dev` (MacOS intel)
+* `qa` (MacOS intel)
+* `arm64v8.dev` (M1-sillicon)
+* `arm64v8.qa` (M1-sillicon)
+
+(Optional) to learn more about the `docker-compose.yml` files, feel free to look at [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md)
+
+## Makefile
+
+Make sure that you understand your role (dev, qa)
+
+You can also find out architecture of your workstation by running `uname -m` (unless it's windows)
+
+
+
+Most of the developemnt/testing use cases are documented in this [Makefile]
+(../Makefile)
+
+If you'd like to understand more about [Makefile](../Makefile), feel free to look at these resources
+
+* [Makefile tutorial](https://makefiletutorial.com/)
+* [Makefile built-in functions](https://www.gnu.org/software/make/manual/html_node/Functions.html)
+
+In order not to duplicate every [Makefile](../Makefile) target, user role (`dev`, `qa`) is defined as environment variable
 
 ```bash
-# Edited from "make run-arm64v8-dev"
-docker compose -f docker/arm64v8.dev.docker-compose.yml restart nodejs-api
+# Add following into ~/.bashrc or ~/.zshrc as dev
+export PFDA_ROLE=dev
+# Add following into ~/.bashrc or ~/.zshrc as qa
+export PFDA_ROLE=qa
 ```
-## Minor fixes that it's better to setup in advance
 
-Majority of the UI is developed as React app - see [client/package.json](../client/package.json).
-Compiled react app is served from asset pipeline. For now it requires sharing files between two running containers, which is accomplished with bind mounts (feel free to read through `docker-compose.yml` files for better understanding of topic)
+## Setup before running
 
-To keep number of side effects minimal, single file `bundle.js` is mounted instead of whole directory. Although it's cleaner solution, this results in possible issue during initial setup, where source bind mount is missing. Fix it by running following commands
+Run
 
 ```bash
-mkdir -p app/assets/packs
-touch app/assets/packs/bundle.js
+make repo-init
 ```
 
-### Minor configuration differences for nodejs-api
+to do most of the required setup at once
 
-If you're running stack with `make run-arm64v8-dev` configuration, it uses different key paths for `nodejs-api`. Edit `https-apps-api/.env` with following values
+This does multiple things
+
+* Sets up .env files in `.`, `./docker`, `./https-apps-api` directories
+* Creates default database config in `config/database.sample.yml` 
+* Creates custom pre-push githooks that validate `.env.example` files
+
+What remains to be done, is ask a colleague for secrets to fill missing `.env` variables. Migration to [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/getting-started.html) is in progress
+
+
+To get summary of all [Makefile](../Makefile) commands, take a look at [this doc](./SUMMARY_OF_MAKEFILE_COMMANDS.md)
+
+## Configuration differences for arm64v8.dev
+
+
+If you're running `make run` with `arm64v8.dev` configuration (i.e. `arm64v8` architecture and `PFDA_ROLE=dev`), it uses different key paths for `nodejs-api`. Edit `https-apps-api/.env` with following values
 
 ```
 NODE_PATH_CERT=/keys/cert.pem
 NODE_PATH_KEY_CERT=/keys/key.pem
 ```
-## Database setup
 
-The source of truth for `precision-fda` portal is `mysql` db, which is initialized with
-* db migrations, that results in following [schema](../db/schema.rb)
-  * See `db/migrate` directory, for instance [this file](../db/migrate/20150904202622_create_users.rb)
-* `rake ` tasks that prepopulate the database, such as [this one](../lib/tasks/user.rake), that generates dummy users
-
-### 1. Configure
-
-* Create a `config/database.yml` file containing the database configuration
-    ```bash
-    # Run in 'precision-fda' root directory
-    # Use 'config/database.sample.yml' as a template
-    cp config/database.sample.yml config/database.yml
-    ```
-* Create a `.env` file in the project root with an additional environment variables to be passed into Docker containers.
-    ```bash
-    # NOTE - this env file is different from the one defined in "General Setup" section
-    cp .env.example .env
-    ```
-  * > This part is work in progress
-  * [`.env.example` file](../.env.example) is a reference file, however, there are a handful of secrets, ask a colleague to provide them
+### Githooks - use cases and troubleshooting
 
 
-### 2. Prepare the database
 
-The command might vary, depending on your role (dev, qa), or on CPU architecture of the workstation (`x86_64`, `arm64`). You can find more details on the topic [here](./MACOS_ARCHITECTURE_DIFFERENCES.md)
+If you happen to encounter blocking issues with githooks you can roll-back to initial state (with no adjustments) with following command
 
 ```bash
-# UNTESTED
-# intel dev
-make prepare-db
-# intel qa
-make prepare-db-qa
-# arm64v8 (Apple M1 Silicon) dev
-make prepare-db-arm64v8-dev
-# arm64v8 (Apple M1 Silicon) qa
-make prepare-db-arm64v8-qa
-```
-
-## Nodejs API setup
-
-There are also env variables specific for `nodejs` part of the repository, particularly `nodejs-api` and `nodejs-worker`
-
-```bash
-cp https-apps-api/.env.example https-apps-api/.env
+find ./utils/githooks -type f -exec sh -c 'rm ".git/hooks/$(basename {})"' \;
 ```
 
 ## (Optional) Account setup
@@ -113,6 +106,7 @@ an account yet, please refer to
 [New account registration](DEVELOPMENT_SETUP.md#new-account-registration)):
 
 ```bash
+# TODO refactor this into Makefile as well
 docker compose exec \
     -e PFDA_USER_FIRST_NAME=Florante \
     -e PFDA_USER_LAST_NAME=DelaCruz \
@@ -135,59 +129,39 @@ docker compose exec \
 
 ## Running application
 
-Running again depends on role and workstation type
-
 ```bash
-# intel dev
 make run
-# intel qa
-make run-qa
-# arm64v8 (Apple M1 Silicon) dev
-make run-arm64v8-dev
-# arm64v8 (Apple M1 Silicon) qa
-make run-arm64v8-qa
 ```
 
 Once the application is correctly installed & configured, you should be able to access the portal at `https://localhost:3000/`.
 In order to log in to the system, ask for shared DEV credentials (ask some1 from the team)
 
-## Running application with external services
+### Running application with external services
+
+To run PFDA with external integration part of local stack, set up the following env variable in your `.rc` file
 
 ```bash
-# intel dev
-make run-all
-# intel qa
-make run-all-qa
-# arm64v8 (Apple M1 Silicon) dev
-make run-all-arm64v8-dev
-# arm64v8 (Apple M1 Silicon) qa
-make run-all-arm64v8-qa
+# Add following into ~/.bashrc or ~/.zshrc to run GSRS
+export PFDA_SHOULD_RUN_GSRS=1
 ```
 
-### GSRS
+Run in the same way with
 
-GSRS runs as a process on the same instance as pFDA but is completely separate codebase
-
-_Last updated 14.6.2022_
-
-> Atm GSRS local setup is not fully functional, needs various fixes. Contact colleagues to get more information on this topic
+```bash
+make run
+```
 
 ## (Optional) Setup for impatient personalities
 
 There are a few [docker-related](../docker/arm64v8.dev..docker-compose.yml) [env variables](../docker/.env.example), that are used in `docker-compose.yml` files, such as `SKIP_RUBY_SETUP`
-After you run your docker setup successfully, and want to save some time by skipping dependency checks and reinstallations (assuming you've got them correct), feel free to setup
+After you run your docker setup successfully, and want to save some time by skipping dependency checks and reinstallations (assuming you've got them correct)
 
-```bash
-# Run in 'precision-fda' root directory
-cp docker/.env.example docker/.env
-```
-
-For obvious reasons these settings aren't versioned, and therefore are kept in separate [docker/.env](../docker/.env.example) file
+For obvious reasons these settings aren't versioned, and therefore are kept in separate [docker/.env](../docker/.env.example) file. Feel free to setup according your own need
 
 
-## (Optional) Symlink docker-compose.yml for less typing
+## (Alternative) Symlink docker-compose.yml for less typing
 
-If copy-pasting too many CLI options (such as `-f docker/dev.docker-compose.yml`) is getting frustrating, feel free to symlink your favourite configuration into `docker-compose.yml`
+If you want to use `docker compose` command with minimum of typing, you can symlink your preconfigured `docker-compose.yml` (for instance `docker/arm64v8.dev.docker-compose.yml`) into `docker/docker-compose.yml`. It is `.gitignore`d for this purposed
 
 For instance
 
@@ -203,14 +177,14 @@ ln -s docker/arm64v8.dev.docker-compose.yml docker/docker-compose.yml
 ln -s docker/arm64v8.qa.docker-compose.yml docker/docker-compose.yml
 ```
 
-This makes use of docker compose more trivial, you can start the stack with simply
+This should make use of docker compose pretty trivial as you can start it simply by running - in most cases you should be fine without GSRS
 
 ```bash
+# PWD=./docker
 docker compose up --build
 ```
 
-Note that this part of setup is experimental, potential side effects are suspected with this approach
+## Further reading
 
-## Updating docker-compose files
-
-Before updating anything related to docker setup, please take a look at [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md), to update according to repo best practices
+* [Summary of Makefile commands](./SUMMARY_OF_MAKEFILE_COMMANDS.md)
+* [Docker compose guide](./DOCKER_COMPOSE_GUIDE.md)

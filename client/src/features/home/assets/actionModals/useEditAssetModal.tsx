@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
@@ -33,12 +33,13 @@ const EditAssetInfoForm = ({
   })
 
   const editMutation = useMutation({
+    mutationKey: ['edit-asset-info'],
     mutationFn: (payload: { name: string; uid: string }) => editAssetRequest(payload),
     onSuccess: (res) => {
       if(res?.message.type === 'error') {
         toast.error(`API Error: ${res?.message.text}`)
       } else {
-        queryClient.invalidateQueries('assets')
+        queryClient.invalidateQueries(['assets'])
         queryClient.invalidateQueries(['asset', asset.uid])
         handleClose()
         toast.success('Success: Editing asset info.')

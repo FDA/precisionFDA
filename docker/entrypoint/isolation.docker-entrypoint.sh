@@ -2,7 +2,8 @@
 
 sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVEL=2/g' /etc/ssl/openssl.cnf
 
-if ! which bundler; then
+# Need to check bundler version as well, because ruby image come with "incorrect" pre-installed bundler
+if ! which bundler || [[ $(bundler -v) != $BUNDLER_VERSION ]]; then
   gem install bundler -v $BUNDLER_VERSION
 fi
 

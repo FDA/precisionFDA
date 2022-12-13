@@ -1,6 +1,6 @@
 import { formatDistance, parseISO } from 'date-fns'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../components/Button'
@@ -35,6 +35,8 @@ import {
   InfoRow,
   PFDATeamSection,
 } from './styles'
+import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
+import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 
 const StyledGetStarted = styled.div`
   background-color: rgb(242, 242, 242);
@@ -105,7 +107,13 @@ const GetStarted = ({ user }: { user?: IUser }) => {
 
 const TopAppsContainer = styled.div`
   display: flex;
+  flex-direction: column;
   margin-bottom: 64px;
+  gap: 32px;
+
+  @media(min-width: 660px) {
+    flex-direction: row;
+  }
 `
 
 const TopAppsColumn = styled.div`
@@ -153,12 +161,7 @@ const AppUpdatedAt = styled.div`
 
 const TopAppItem = ({ app }: { app: IApp }) => {
   const timeDistance = formatDistance(new Date(), parseISO(app.updated_at))
-  const iconImage =
-    app.entity_type === 'regular' ? 'AppIconBlue.png' : 'AppIconYellow.png'
-  const iconImageAlt =
-    app.entity_type === 'regular'
-      ? 'Normal Application icon'
-      : 'Interactive Workstation Application icon'
+  const isRegular = app.entity_type === 'regular'
   const linkToApp = `/home${app.links.show}`
   const ariaLabel = `Click this to navigate to the ${app.title} page`
 
@@ -166,12 +169,11 @@ const TopAppItem = ({ app }: { app: IApp }) => {
     <StyledTopAppItem>
       <div>
         <GuestRestrictedLink to={linkToApp} aria-label={ariaLabel}>
-          <img
-            src={`/assets/apps/${iconImage}`}
-            alt={iconImageAlt}
-            width="56"
-            height="56"
-          />
+          {isRegular ? (
+            <AppTypeIconBlue width={56} height={56} />
+          ) : (
+            <AppTypeIconYellow width={56} height={56} />
+          )}
         </GuestRestrictedLink>
       </div>
       <div>

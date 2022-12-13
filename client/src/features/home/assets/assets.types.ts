@@ -1,3 +1,5 @@
+import { FileStatus } from "../files/files.types";
+
 export enum AppActions {
   "Run" = "Run",
   "Run batch" = "Run batch",
@@ -55,6 +57,7 @@ export interface IAsset {
   uid: string;
   dxid: string;
   entity_type: string;
+  state: FileStatus
   file_size: string;
   file_license: FileLicense,
   show_license_pending: boolean,

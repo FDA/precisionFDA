@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios'
 import React, { useState } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -11,24 +11,26 @@ import NavigationBar from '../../../views/components/NavigationBar/NavigationBar
 import { UserLayout } from '../../../views/layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
-import { createChallengeCardImage, createChallengeRequest } from './api'
+import { createChallengeCardImage, createChallengeRequest, getChallengeImageLink } from './api'
 import { ChallengeForm } from './ChallengeForm'
 import { subtitle, title } from './common'
 
 const CreateChallengePage = () => {
   const history = useHistory()
   const user = useAuthUser()
-  const [isSavingChallenge, setIsSavingChallenge] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [imgUid, setImageUid] = useState('')
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
+    mutationKey: ['create-challenge'],
     mutationFn: (payload: any) => createChallengeRequest(payload),
     onSuccess: res => {
-      setIsSavingChallenge(false)
+      setIsSaving(false)
       if (res?.challenge) {
-        queryClient.invalidateQueries('challenges')
+        queryClient.invalidateQueries(['challenges'])
         history.push('/challenges')
-        toast.success('Success: Creating challenge.')
+        toast.success('Challenge created successfully.')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)
       } else {
@@ -36,7 +38,7 @@ const CreateChallengePage = () => {
       }
     },
     onError: () => {
-      setIsSavingChallenge(false)
+      setIsSaving(false)
       toast.error('Error: Adding challenge.')
     },
   })
@@ -48,29 +50,37 @@ const CreateChallengePage = () => {
   )
 
   const imageMutation = useMutation({
-    mutationFn: (v: any) =>
-      createChallengeCardImage(v.cardImage[0], img =>
-        mutation.mutateAsync({
-          name: v.name,
-          description: v.description,
-          scope: v.scope?.value,
-          app_owner_id: v.app_owner_id?.value,
-          start_at: v.start_at,
-          end_at: v.end_at,
-          status: v.status?.value,
-          host_lead_dxuser: v.host_lead_dxuser?.value,
-          guest_lead_dxuser: v.guest_lead_dxuser?.value,
-          card_image_id: img.id,
-          card_image_url: img.url,
-          pre_registration_url: v.pre_registration_url,
-        }),
-      ),
-    onError: () => setIsSavingChallenge(false),
+    mutationFn: (v: any) => createChallengeCardImage(v),
+    onError: () => setIsSaving(false),
+    mutationKey: ['create-challenge-image'],
   })
 
+  const linkMutation = useMutation({
+    mutationFn: (fileUid: string) => getChallengeImageLink(fileUid),
+  })
+
+  const handleImageSelection = async (img: File) => {
+    const result = await imageMutation.mutateAsync(img)
+    setImageUid(result)
+  }
+
   const handleSubmit = async (v: any) => {
-    setIsSavingChallenge(true)
-    await imageMutation.mutateAsync(v)
+    setIsSaving(true)
+    const link = await linkMutation.mutateAsync(imgUid)
+    await mutation.mutateAsync({
+      name: v.name,
+      description: v.description,
+      scope: v.scope?.value,
+      app_owner_id: v.app_owner_id?.value,
+      start_at: v.start_at,
+      end_at: v.end_at,
+      status: v.status?.value,
+      host_lead_dxuser: v.host_lead_dxuser?.value,
+      guest_lead_dxuser: v.guest_lead_dxuser?.value,
+      card_image_id: imgUid,
+      card_image_url: link.url,
+      pre_registration_url: v.pre_registration_url,
+    })
   }
 
   return (
@@ -83,7 +93,8 @@ const CreateChallengePage = () => {
             <PageTitle>Create a new challenge</PageTitle>
             <ChallengeForm
               onSubmit={handleSubmit}
-              isSavingChallenge={isSavingChallenge}
+              onImageSelection={handleImageSelection}
+              isSaving={isSaving}
               mutationErrors={mutationErrors}
             />
           </StyledPageContent>

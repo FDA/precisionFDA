@@ -143,6 +143,13 @@ $GOPATH/bin/goversion -crypto go/dist/pfda*
 
 # Version History
 
+### 2.2 (2022-12-07)
+
+- New feature - ls; list files from private home or a space
+- New feature - list-spaces; list all available spaces
+- New feature - describe-app; describe-workflow; describe the entity
+- Added new `--help` flag for all commands with examples and brief instructions
+
 ### 2.1.2 (2022-08-03)
 
 - Fixed windows asset upload

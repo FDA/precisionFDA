@@ -12,15 +12,15 @@ import { OrgMembershipError } from '../errors'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import {
   BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
-  FileCloseParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting,
+  FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
+  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams,
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
-  FileCloseResponse, IPaginatedResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
-  DescribeFilesResponse, FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse
+  FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
+  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
+  WorkflowDescribeResponse, AppDescribeResponse
 } from './platform-client.responses'
-
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -142,9 +142,30 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
+  /**
+   * Describe a single file's attributes
+   * API: /file-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
+   */
+  async fileDescribe(params: FileDescribeParams): Promise<FileDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.fileDxid}/describe`
+    const data: AnyObject = {
+      project: params.projectDxid,
+      defaultFields: true,
+    }
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+      headers: this.setupHeaders(params.accessToken),
+    }
+    return await this.sendRequest(options, url)
+  }
+
   async fileStatesPaginated(
     params: FileStatesParams,
-    starting: Starting | undefined): Promise<FileStatesResponse> {
+    starting: Starting | undefined,
+  ): Promise<FileStatesResponse> {
     const data: AnyObject = {
       class: 'file',
       limit: config.platform.findDataObjectsQueryLimit,
@@ -177,17 +198,19 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
+  /**
+   * Given a list of fileDxids, query platform the the current file states
+   * This is designed to only query files within the same dx project, because without the project hint
+   * the /system/findDataObjects call is very inefficient and can take a long time
+   */
   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(
-      (nextMapping: Starting) => {
-        return this.fileStatesPaginated(params, nextMapping)
-      },
-    )
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping: Starting) => this.fileStatesPaginated(params, nextMapping))
   }
 
   private async filesListPaginated(
     params: ListFilesParams,
-    starting: Starting | undefined): Promise<ListFilesResponse> {
+    starting: Starting | undefined,
+  ): Promise<ListFilesResponse> {
     const data: AnyObject = {
       class: 'file',
       limit: config.platform.findDataObjectsQueryLimit,
@@ -224,11 +247,7 @@ class PlatformClient {
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>(
-      (nextMapping: Starting) => {
-        return this.filesListPaginated(params, nextMapping)
-      },
-    )
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping: Starting) => this.filesListPaginated(params, nextMapping))
   }
 
   /**
@@ -236,7 +255,7 @@ class PlatformClient {
    * API: /file-xxxx/download
    * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-download
    */
-  async fileDownloadLink(params: FileDownloadLinkParams) {
+  async fileDownloadLink(params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
     const url = `${config.platform.apiUrl}/${params.fileDxid}/download`
     const data = {
       ...omit(['fileDxid'], params),
@@ -495,8 +514,36 @@ class PlatformClient {
       method: 'POST',
       data: params.body,
       url,
-      headers: this.setupHeaders(params),
+      headers: this.setupHeaders(params.accessToken),
     }
+    return await this.sendRequest(options, url)
+  }
+
+  // ---------------------
+  //    ENTITY-DESCRIBE
+  // ---------------------
+
+  async appDescribe(params: AppDescribeParams): Promise<AppDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params.accessToken),
+    }
+
+    return await this.sendRequest(options, url)
+  }
+
+  async workflowDescribe(params: WorkflowDescribeParams): Promise<WorkflowDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+      headers: this.setupHeaders(params.accessToken),
+    }
+
     return await this.sendRequest(options, url)
   }
 
@@ -533,9 +580,7 @@ class PlatformClient {
    *                    starting params to the reqeust
    * @returns Results of the aggregated request
    */
-  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(
-    requestFunc: (starting: Starting | undefined) => Promise<TResponse>,
-  ): Promise<T[]> {
+  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(requestFunc: (starting: Starting | undefined) => Promise<TResponse>): Promise<T[]> {
     let nextMapping: Starting | undefined
     const results: T[] = []
     const paginateSeq = async (): Promise<void> => {
@@ -650,7 +695,6 @@ export {
   JobCreateResponse,
   ListFilesResponse,
   ClassIdResponse,
-  DescribeFilesResponse,
   JobCreateParams,
   DescribeFoldersResponse,
   DbClusterCreateParams,

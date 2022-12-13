@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useRef, useState } from 'react'
-import { useMutation, UseQueryResult } from 'react-query'
+import { useMutation, UseQueryResult } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
@@ -128,6 +128,7 @@ type ResourceDropdownItemProps = {
 const ResourceDropdownItem = ({ status, onClick, label, isWaiting, onSuccess, onError, shouldConsiderRefetchLoader }: ResourceDropdownItemProps) => {
   const [isConsideringRefetchLoader, setConsideringRefetchLoader] = useState(false)
   const onClickMutation = useMutation({
+    mutationKey: ['resource-dropdown', label],
     // TS workaround - promise should be returned from this fn
     mutationFn: async () => onClick(),
     onSuccess: (res: any) => {

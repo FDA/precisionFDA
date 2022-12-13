@@ -32,7 +32,9 @@ export const ExpertRow = styled.div`
   display: flex;
   gap: 32px;
   padding: 32px 0;
+  flex: 1;
 `
+
 export const ExpertData = styled.div`
     flex: 1 0 auto;
     margin-bottom: 64px;

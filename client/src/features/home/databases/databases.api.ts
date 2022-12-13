@@ -1,8 +1,9 @@
-import { checkStatus, getApiRequestOpts, requestOpts } from "../../../utils/api";
-import { IFile } from "../files/files.types";
-import { IFilter, IMeta, ResourceScope } from "../types";
-import { formatScopeQ, Params, prepareListFetch } from "../utils";
-import { IDatabase, MethodType } from "./databases.types";
+import axios from 'axios'
+import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
+import { IFile } from '../files/files.types'
+import { IFilter, IMeta } from '../types'
+import { formatScopeQ, Params, prepareListFetch } from '../utils'
+import { IDatabase, MethodType } from './databases.types'
 
 export interface FetchDatabaseListQuery {
   workflows: IDatabase[]
@@ -37,13 +38,15 @@ interface IAccessibleFiles extends IFile {
   title: string
 }
 
-export async function fetchAccessibleFiles(): Promise<IAccessibleFiles[]> {
-  const res = await (await fetch('/api/list_files', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ scopes: []})
-  })).json()
-  if(res.failure) throw new Error(res.failure)
-  return res
+interface FetchAccessibleFilesRequest {
+  search_string?: string
+  limit?: number
+  offset?: number
+  scope?: 'public' | 'private'
+}
+
+export async function fetchAccessibleFiles(body: FetchAccessibleFilesRequest) {
+  return axios.post('/api/list_files', body).then(r => r.data.objects as IAccessibleFiles[])
 }
 
 export interface CreateDatabasePayload {
@@ -101,7 +104,7 @@ export async function copyDatabasesRequest(scope: string, ids: string[]) {
 export async function databaseMethodRequest(method: MethodType, dxids: string[]) {
   const res = await fetch(`/api/dbclusters/${method}`, {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ api_method: method, dxids })
+    body: JSON.stringify({ api_method: method, dxids }),
   }).then(checkStatus)
   return res
 }

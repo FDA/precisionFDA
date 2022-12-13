@@ -1,6 +1,6 @@
 import { Key } from 'rc-tree/lib/interface'
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { useImmer } from 'use-immer'
@@ -83,10 +83,11 @@ export const useOrganizeFileModal = ({
   const { isShown, setShowModal } = useModal()
   const selectedIds = selected.map(f => f.id)
   const mutation = useMutation({
+    mutationKey: ['movie-files'],
     mutationFn: (target: string) =>
       moveFilesRequest(selectedIds, target, scope, spaceId),
     onSuccess: (res) => {
-      queryClient.invalidateQueries('files')
+      queryClient.invalidateQueries(['files'])
       setShowModal(false)
       if(onSuccess) onSuccess()
       displayPayloadMessage(res)

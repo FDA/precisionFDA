@@ -1,10 +1,10 @@
 import { pick } from 'ramda'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
 import {
-  OBJECT_TYPES,
+  ATTACHABLE_TYPES,
   useAttachToModal,
 } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
@@ -68,7 +68,7 @@ const isInSpace = (scope?: ResourceScope) =>
 
 export const useFilesSelectActions = ({
   scope,
-  fileId,
+  folderId,
   space,
   selectedItems,
   resourceKeys,
@@ -76,7 +76,7 @@ export const useFilesSelectActions = ({
 }: {
   scope?: ResourceScope
   space?: ISpace
-  fileId: string
+  folderId?: string
   selectedItems: IFile[]
   resourceKeys: string[]
   resetSelected?: () => void
@@ -157,11 +157,23 @@ export const useFilesSelectActions = ({
     selected,
     scope: getScope(scope, space),
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
       if(space) {
-        history.push(`/spaces/${space.id}/files`)
+        if(folderId) {
+          history.push(`/spaces/${space.id}/files?folder_id=${folderId}`)
+          queryClient.invalidateQueries(['files', folderId])
+        } else {
+          history.push(`/spaces/${space.id}/files`)
+          queryClient.invalidateQueries(['files'])
+        }
       } else {
-        history.push('/home/files')
+        // eslint-disable-next-line no-lonely-if
+        if(folderId) {
+          history.push(`/home/files?folder_id=${folderId}`)
+          queryClient.invalidateQueries(['files', folderId])
+        } else {
+          history.push('/home/files')
+          queryClient.invalidateQueries(['files'])
+        }
       }
       if(resetSelected) resetSelected()
     },
@@ -204,7 +216,7 @@ export const useFilesSelectActions = ({
     isShown: isShownAttachToModal,
   } = useAttachToModal(
     selected.map(s => s.id),
-    OBJECT_TYPES.FILE,
+    ATTACHABLE_TYPES.FILE,
   )
   const {
     modalComp: tagsModal,
@@ -224,7 +236,7 @@ export const useFilesSelectActions = ({
   let actions: ActionFunctionsType<FileActions> = {
     'Track': {
       type: 'link',
-      link: selected[0]?.links?.track,
+      link: selected[0]?.links?.track || '',
       isDisabled: selected.length !== 1 || !selected[0].links.track || openSelected,
     },
     'Open': {

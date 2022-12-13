@@ -114,7 +114,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
     // fixing Platform to match pFDA state
     this.ctx.log.warn(
       {},
-      'SyncSpacesPermissionsOperation: Trying to fix space_id: %d platfrom members.',
+      'SyncSpacesPermissionsOperation: Trying to fix space_id: %d platform members.',
       space.id,
     )
     // add all missing members from pFDA to Platform

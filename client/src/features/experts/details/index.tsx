@@ -1,20 +1,12 @@
 import httpStatusCodes from 'http-status-codes'
 import React from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
-import {
-  Link,
-  NavLink,
-  Route,
-  Switch,
-  useParams,
-  useRouteMatch,
-} from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link, NavLink, Route, Switch, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Remarkable } from 'remarkable'
 import { linkify } from 'remarkable/linkify'
 import styled from 'styled-components'
-import { askQuestion } from '../../../api/experts'
 import { ButtonSolidBlue } from '../../../components/Button/index'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
@@ -28,7 +20,7 @@ import UserContent from '../../../views/components/UserContent'
 import PublicLayout from '../../../views/layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useModal } from '../../modal/useModal'
-import { expertDetailsRequest } from '../api'
+import { askQuestion, expertDetailsRequest } from '../api'
 import { ExpertDetails } from '../types'
 import { ExpertAbout } from './About'
 import { ExpertBlog } from './Blog'
@@ -49,10 +41,10 @@ const StyledNavigationBar = styled.div`
   height: 140px;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
 `
 const StyledSocialMediaButtons = styled.div`
   margin-top: 100px;
+  justify-self: flex-end;
 `
 
 const MainExpertContent = styled.div`
@@ -75,8 +67,9 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
   const user = useAuthUser()
   const modal = useModal()
 
-  const createQuestionMutation = useMutation(
-    ({
+  const createQuestionMutation = useMutation({
+    mutationKey: ['create-question'],
+    mutationFn: ({
       userName,
       question,
       captchaValue,
@@ -86,7 +79,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
       captchaValue: string
     }) =>
       askQuestion({ userName, question, captchaValue }, expert.id.toString()),
-  )
+  })
   const askExpert = (
     userName: string,
     question: string,
@@ -96,7 +89,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
       .mutateAsync({ userName, question, captchaValue })
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
-          queryClient.invalidateQueries('queryExpertDetails')
+          queryClient.invalidateQueries(['queryExpertDetails'])
           toast.success('Your question was submitted successfully')
           modal.setShowModal(false)
           history.push(`/experts/${expert.id}`)
@@ -133,12 +126,15 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
         subtitle=""
         user={user}
       >
-        <StyledNavigationBar>
           <PageContainerMargin>
+        <StyledNavigationBar>
             <ExpertRow>
               <ExpertImage src={expert?.image} alt="Expert's Logo" />
               <ExpertData>
-                <BackToModulePage to={{ pathname: '/experts' }} data-turbolinks="false">
+                <BackToModulePage
+                  to={{ pathname: '/experts' }}
+                  data-turbolinks="false"
+                >
                   &larr; Back to All Experts
                 </BackToModulePage>
 
@@ -148,8 +144,8 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             <StyledSocialMediaButtons>
               <SocialMediaButtons showText />
             </StyledSocialMediaButtons>
-          </PageContainerMargin>
         </StyledNavigationBar>
+          </PageContainerMargin>
       </NavigationBar>
       <PageContainerMargin>
         <ExpertRow>
@@ -234,7 +230,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
 
 const ExpertsSingleDetailsPage = () => {
   const { expertId } = useParams<{ expertId: string }>()
-  const { isLoading, data } = useQuery('queryExpertDetails', () =>
+  const { isLoading, data } = useQuery(['queryExpertDetails'], () =>
     expertDetailsRequest(expertId),
   )
   if (isLoading) return <Loader />

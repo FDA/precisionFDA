@@ -308,7 +308,7 @@ GEM
     mysql2 (0.5.3)
     nenv (0.3.0)
     nio4r (2.5.8)
-    nokogiri (1.13.9)
+    nokogiri (1.13.10)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
     nori (2.6.0)
@@ -509,6 +509,8 @@ GEM
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
     terminal-table (1.6.0)
+    terser (1.1.12)
+      execjs (>= 0.3.0, < 3)
     therubyracer (0.12.3)
       libv8 (~> 3.16.14.15)
       ref
@@ -524,8 +526,6 @@ GEM
     turbolinks-source (5.2.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
-    uglifier (4.2.0)
-      execjs (>= 0.3.0, < 3)
     unicode-display_width (2.1.0)
     wasabi (3.6.1)
       addressable
@@ -622,10 +622,10 @@ DEPENDENCIES
   soapforce
   sprockets (~> 4.0)
   sprockets-rails (~> 3.3.0)
+  terser (~> 1.1)
   therubyracer
   thin (~> 1.8)
   turbolinks (~> 5)
-  uglifier
   web-console
   webmock (~> 3.1, >= 3.1.1)
   websocket

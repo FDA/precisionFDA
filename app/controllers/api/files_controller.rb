@@ -8,7 +8,7 @@ module Api
     include Sortable
     include Scopes
 
-    before_action :init_parent_folder, only: %i(index featured everybody spaces)
+    before_action :init_parent_folder, only: %i(index featured everybody spaces cli)
     before_action :find_file, :can_edit?, only: %i(update)
     before_action :find_user_file, only: %i(show)
     before_action :can_copy_to_scope?, only: %i(copy)
@@ -77,6 +77,46 @@ module Api
              meta: files_meta.
                merge(count(UserFile.private_count(@context.user))).
                merge({ pagination: page_dict })
+    end
+
+    def cli
+      space_files_cli && return if params[:space_id]
+
+      files = []
+      folders = []
+      unless params[:folders_only] == "true"
+        files = UserFile.real_files.
+          editable_by(@context).
+          accessible_by_private.
+          where.not(parent_type: ["Comparison", nil]).
+          eager_load(user: :org)
+
+        files = files.where(parent_folder_id: @parent_folder_id)
+      end
+      unless params[:files_only] == "true"
+        folders = private_folders(@parent_folder_id).eager_load(user: :org)
+      end
+      user_files = files + folders
+
+      render json: user_files, root: "files", adapter: :json, each_serializer: CliNodeSerializer,
+             meta: cli_meta
+    end
+
+    def cli_meta
+      meta = {}
+      meta[:path] = "Files / "
+      if params[:space_id]
+        space = Space.find(params[:space_id])
+        meta[:scope] = "space-#{space.id} (#{space.name})"
+      else
+        meta[:scope] = "My Home"
+      end
+
+      if params[:folder_id]
+        folder = Folder.find(params[:folder_id])
+        meta[:path] = meta[:path] + build_path(folder, []).reverse.pluck(:name).join(" / ")
+      end
+      meta
     end
 
     # GET /api/files/featured
@@ -175,7 +215,8 @@ module Api
     # rubocop:disable Metrics/MethodLength
     def show
       # Refresh state of file, if needed
-      refresh_file(@file, @context)
+      # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+      # refresh_file(@file, @context)
       load_licenses(@file)
 
       # TODO: move common data to common_concern.rb
@@ -455,6 +496,26 @@ module Api
       render json: nodes, root: "files", adapter: :json,
              meta: files_meta.merge(count(page_dict[:total_count])).
              merge({ pagination: page_dict })
+    end
+
+    def space_files_cli
+      find_user_space
+      files = []
+      folders = []
+      folder_id = params[:folder_id]
+
+      unless params[:folders_only] == "true"
+        files = @space.nodes.files.
+          where(scoped_parent_folder_id: folder_id).eager_load(user: :org)
+      end
+      unless params[:files_only] == "true"
+        folders = @space.nodes.folders.
+          where(scoped_parent_folder_id: folder_id).eager_load(user: :org)
+      end
+      space_files = files + folders
+
+      render json: space_files, root: "files", adapter: :json, each_serializer: CliNodeSerializer,
+             meta: cli_meta
     end
 
     def render_files_list(files:, folders:)

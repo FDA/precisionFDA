@@ -193,7 +193,7 @@ const createSyncFilesStateTask = async (
   const options: JobOptions = {
     // There should only be one sync files state task per user
     jobId: SyncFilesStateOperation.getBullJobId(user.dxuser),
-    repeat: { every: config.workerJobs.syncFiles.repeatEvery },
+    repeat: { cron: config.workerJobs.syncFiles.repeatPattern },
   }
   return await addToQueue(task, statusQueue, options)
 }

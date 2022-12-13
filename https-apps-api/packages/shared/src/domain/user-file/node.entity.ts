@@ -1,6 +1,5 @@
-import { Entity, Enum, IdentifiedReference, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user/user.entity'
 import { FILE_STI_TYPE } from './user-file.types'
 
 @Entity({
@@ -19,6 +18,9 @@ export class Node extends BaseEntity {
 
   @Property({ unique: true })
   uid: string
+
+  @Property()
+  userId: number
 
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options

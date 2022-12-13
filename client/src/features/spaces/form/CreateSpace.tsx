@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -13,11 +13,12 @@ export const CreateSpace = () => {
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
+    mutationKey: ['create-space'],
     mutationFn: createSpaceRequest,
     onSuccess: res => {
       if (res?.space) {
         history.push(`/spaces/${res?.space?.id}`)
-        queryClient.invalidateQueries('spaces')
+        queryClient.invalidateQueries(['spaces'])
         toast.success('Success: creating space.')
       } else if (res?.error) {
         toast.error(`${res.error?.type}: ${res.error.message}`)
