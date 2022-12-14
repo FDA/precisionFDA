@@ -5,7 +5,7 @@ import { breakPoints, colors } from '../../styles/theme'
 export const DocsLayout = styled.div`
   display: flex;
   height: auto;
-  /* overflow: scroll; */
+  flex: 1 0 auto;
 `
 export const ButtonRow = styled.div`
   display: flex;

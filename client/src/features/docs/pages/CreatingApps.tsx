@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { OutdatedDocs } from '../common'
 import cwlwdlcreateapp from '../images/cwl_wdl_create_app.png'
 import importcwlio from '../images/import_cwl_io.png'
 import importcwlmodal from '../images/import_cwl_modal.png'
@@ -26,6 +27,7 @@ import {
 export const CreatingApps = () => (
   <DocRow>
     <DocBody>
+      <OutdatedDocs />
       <h1>Creating Apps</h1>
 
       <p>

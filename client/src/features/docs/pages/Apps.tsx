@@ -10,10 +10,12 @@ import {
   PageMap,
 } from '../styles'
 import exportScreenshot from '../images/export_screenshot.png'
+import { OutdatedDocs } from '../common'
 
 export const Apps = () => (
   <DocRow>
     <DocBody>
+      <OutdatedDocs />
       <h1>Apps</h1>
 
       <p>

@@ -90,6 +90,10 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      '/pdfs': {
+        target: TARGET,
+        secure: false,
+      },
       '/assets': {
         target: TARGET,
         secure: false,

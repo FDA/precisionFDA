@@ -14,10 +14,12 @@ import diagramgrid from '../images/diagram_grid.png'
 import configureapps from '../images/configure_apps.png'
 import selectoutputs from '../images/select_outputs.png'
 import finish from '../images/finish.png'
+import { OutdatedDocs } from '../common'
 
 export const Workflows = () => (
   <DocRow>
     <DocBody>
+      <OutdatedDocs />
       <h1>Workflows</h1>
 
       <p>

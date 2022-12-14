@@ -1,11 +1,13 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
+import { OutdatedDocs } from '../common'
 import runningworkstation from '../images/running_workstation.png'
 import { DocBody, DocRow, PageMap, RightSide } from '../styles'
 
 export const Workstations = () => (
   <DocRow>
     <DocBody>
+      <OutdatedDocs />
       <h1>Workstation Apps</h1>
 
       <p>
