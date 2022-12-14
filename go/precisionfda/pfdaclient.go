@@ -6,11 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/docker/go-units"
-	"github.com/gosuri/uilive"
-	"github.com/hashicorp/go-cleanhttp"     // required by go-retryablehttp
-	"github.com/hashicorp/go-retryablehttp" // use http libraries from hashicorp for implement retry logic
-    "github.com/manifoldco/promptui"
 	"io"
 	"io/ioutil"
 	"log"
@@ -25,8 +20,14 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 	"text/tabwriter"
+	"time"
+
+	"github.com/docker/go-units"
+	"github.com/gosuri/uilive"
+	"github.com/hashicorp/go-cleanhttp"     // required by go-retryablehttp
+	"github.com/hashicorp/go-retryablehttp" // use http libraries from hashicorp for implement retry logic
+	"github.com/manifoldco/promptui"
 )
 
 const userAgent = "Asset and File Uploader/2.2 (precisionFDA) Go-http-client/1.1"
@@ -49,7 +50,7 @@ type IPFDAClient interface {
 	CallAPI(route string, data string, outputFile string) error
 	UploadAsset(rootFolderPath string, name string, readmeFilePath string) error
 	UploadFile(path string, folderID string, spaceID string) error
-	DownloadFile(fileId string, outputFilePath string) error
+	DownloadFile(fileId string, outputFilePath string, overwrite string) error
 	DescribeEntity(entityID string, entityType string) error
 	ListSpaces(flags map[string]bool) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
@@ -393,7 +394,7 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string) er
 	return nil
 }
 
-func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string) error {
+func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string, overwrite string) error {
 	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, fileId)
 
 	fmt.Println(">> Preparing to download")
@@ -451,12 +452,14 @@ func (c *PFDAClient) DownloadFile(fileId string, outputFilePath string) error {
 	}
 	// After the above block, outputFilePath should contain the target file path and cannot be a directory
 
-	if _, err := os.Stat(outputFilePath); err == nil {
+	if _, err := os.Stat(outputFilePath); err == nil && overwrite == "" {
 		fmt.Printf(">> File %s already exists\n", outputFilePath)
-		overwrite := yesNo("  Overwrite? ")
-		if !overwrite {
+		dialogOverwrite := yesNo("  Overwrite? ")
+		if !dialogOverwrite {
 			return fmt.Errorf("Download cancelled")
 		}
+	} else if overwrite == "false" {
+		return fmt.Errorf("Download force-skipped.")
 	}
 
 	fmt.Printf(">> Output File :  %s\n", outputFilePath)
@@ -836,7 +839,7 @@ func printListingVerbose(files []jsonFile, meta jsonMeta) {
 	fmt.Printf("Scope: %s\nPath: %s\n\n", meta.Scope, meta.Path)
 
 	isSpaceContext := strings.Contains(meta.Scope, "space")
-	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', tabwriter.AlignRight)
 
 	// verbose table header
 	if(isSpaceContext) {
@@ -849,7 +852,7 @@ func printListingVerbose(files []jsonFile, meta jsonMeta) {
 			}
 		}
 	} else {
-		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State" + "\t", "Type", "Size", "Created At", "Name"}, "\t") + "\t")
+		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State" + "\t", "Type", "Size", "Created", "Name"}, "\t") + "\t")
 		for _, file := range files {
 			if (file.Type == "UserFile") {
 				fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.State + "\t", file.Type, file.Size, file.CreatedAt, file.Name},"\t")+ "\t")

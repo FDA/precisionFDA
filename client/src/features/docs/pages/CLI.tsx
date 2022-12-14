@@ -28,7 +28,7 @@ export const CLI = () => (
       <DocsTip>
         <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
         <strong>TIP:</strong> Each CLI command has its own specific help section with various examples. <br/>
-        Just add <code>--help</code> flag at the end of the command. Alias <code>-h</code> is also supported<br/>
+        Just add <code>--help</code> flag at the end of the command. Alias <code>-h</code> is also supported.<br/>
         Example: <code>./pfda ls -help</code>
       </DocsTip>
 
@@ -151,6 +151,11 @@ export const CLI = () => (
         <code>./pfda download --key KEY --file-id FILE_ID</code>
       </p>
       <p>
+        Download a file and preselect overwrite option if file with the same name already exists in the target location.
+        <br />
+        <code>./pfda download --key KEY --file-id FILE_ID --overwrite true</code>
+      </p>
+      <p>
         Download a file to the specified file path, ignoring its original name
         <br />
         <code>
@@ -168,7 +173,8 @@ export const CLI = () => (
       </p>
       <DocsTip>
         <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
-        <strong>NOTE:</strong> The trailing slash indicates a directory
+        <strong>NOTE:</strong> The trailing slash indicates a directory. <br/>
+        The <code>-overwrite</code> option is useful for scripting to avoid dialog selection if file already exists. Only supports true|false. If you want to decide in the dialog, omit the flag completely.
       </DocsTip>
 
       <h2 id="ls">Listing Files</h2>
