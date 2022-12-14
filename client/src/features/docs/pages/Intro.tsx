@@ -32,7 +32,7 @@ export const Intro = () => (
       authentication (MFA) device; you can find{' '}
       <a
         data-turbolinks="false"
-        href="/docs/PrecisionFDA_Okta_Verify_MFA_instructions.pdf"
+        href="/pdfs/PrecisionFDA_Okta_Verify_MFA_instructions.pdf"
         target="_blank"
         aria-label="Instructions on setting up your device"
       >
