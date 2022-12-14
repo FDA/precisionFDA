@@ -43,7 +43,7 @@ class CliNodeSerializer < ApplicationSerializer
   # Returns formatted created_at time.
   # @return [String] Formatted time.
   def created_at
-    formatted_time(object.created_at)
+    formatted_date_time(object.created_at)
   end
 
   # Returns a node's origin: one of Executable, Uploaded or Job origin data.
