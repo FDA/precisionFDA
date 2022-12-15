@@ -10,11 +10,14 @@ import {
   RightSide,
 } from '../styles'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
+import { useScrollToHash } from '../../../hooks/useScrollToHash'
 
-export const CLI = () => (
-  <DocRow>
-    <DocBody>
-      <h1>CLI</h1>
+export const CLI = () => {
+  useScrollToHash()
+  return (
+    <DocRow>
+      <DocBody>
+        <h1>CLI</h1>
 
       <p>
         The precisionFDA CLI allows you to conveniently upload or download large
@@ -32,7 +35,7 @@ export const CLI = () => (
         Example: <code>./pfda ls -help</code>
       </DocsTip>
 
-      <h2 id="download">Download the CLI</h2>
+        <h2 id="download">Download the CLI</h2>
 
       <ButtonRow>
         <a
@@ -64,13 +67,16 @@ export const CLI = () => (
         </a>
       </ButtonRow>
 
-      <h2 id="authorization-key">Authorization Key</h2>
+        <h2 id="authorization-key">Authorization Key</h2>
 
-      <p>
-        Visit the <a data-turbolinks="false" href="/assets/new">Create Assets</a> page and
-        click on Generate Authorization Key button to generate a key that you
-        will need when using the CLI.
-      </p>
+        <p>
+          Visit the{' '}
+          <a data-turbolinks="false" href="/assets/new">
+            Create Assets
+          </a>{' '}
+          page and click on Generate Authorization Key button to generate a key
+          that you will need when using the CLI.
+        </p>
 
       <h2 id="uploading-files">Uploading Files</h2>
       <p>
@@ -124,22 +130,22 @@ export const CLI = () => (
         Another option is to list available spaces via CLI with list-spaces command.
       </DocsTip>
 
-      <h2 id="uploading-assets">Uploading Assets</h2>
+        <h2 id="uploading-assets">Uploading Assets</h2>
 
-      <p>
-        To upload an asset to precisionFDA, prepare a folder path of the asset
-        contents and a readme file, and run the following command with the
-        desired asset name (must end in .tar or .tar.gz)
-      </p>
-      <p>
-        <code>
-          {
-            './pfda upload-asset --key KEY --name NAME{.tar or .tar.gz} --root /PATH/TO/ROOT/FOLDER --readme README{.txt or .md}>'
-          }
-        </code>
-      </p>
+        <p>
+          To upload an asset to precisionFDA, prepare a folder path of the asset
+          contents and a readme file, and run the following command with the
+          desired asset name (must end in .tar or .tar.gz)
+        </p>
+        <p>
+          <code>
+            {
+              './pfda upload-asset --key KEY --name NAME{.tar or .tar.gz} --root /PATH/TO/ROOT/FOLDER --readme README{.txt or .md}>'
+            }
+          </code>
+        </p>
 
-      <h2 id="downloading-files">Downloading Files</h2>
+        <h2 id="downloading-files">Downloading Files</h2>
 
       <p>
         To download files from My Home or a Space, you simply need the unique id
@@ -287,4 +293,4 @@ export const CLI = () => (
       </PageMap>
     </RightSide>
   </DocRow>
-)
+)}
