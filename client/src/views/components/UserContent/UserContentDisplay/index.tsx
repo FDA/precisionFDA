@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from 'react'
 import styled from 'styled-components'
+import { useScrollToHash } from '../../../../hooks/useScrollToHash'
 
 import { theme } from '../../../../styles/theme'
 
@@ -41,5 +42,7 @@ interface IUserContentDisplay {
 // For example, challenge introduction and results sections, or expert blog entries
 //
 export const UserContentDisplay: FunctionComponent<IUserContentDisplay> = ({ html }) => {
+  useScrollToHash()
+
   return <StyledUserContent dangerouslySetInnerHTML={{ __html: html }} />
 }
