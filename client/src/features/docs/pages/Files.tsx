@@ -11,6 +11,7 @@ import {
   RightSide,
 } from '../styles'
 
+
 export const Files = () => {
   useScrollToHash()
   return (
@@ -26,14 +27,12 @@ export const Files = () => {
         <h2 id="files-list">Listing files</h2>
 
         <p>
-          Clicking on "Files" at the top navigation bar takes you to the a page
-          that lists all the files accessible by your account. Files owned by
-          you are shown under "My Files." Public precisionFDA members'
-          contributions (including yours) are shown under "Explore". You can
-          further filter files by clicking on the "eye" icon, which will reveal
-          a filter bar. For example, you can search on filename by entering a
-          keyword in the "Name" field. Choose any filters and apply them by
-          clicking on the "funnel" icon.
+          Click on "My Home" at the top center of the page after login, the "Files"
+          will show up on the top of the left pane. Files owned by you are shown under "My Files".
+          Public precisionFDA members' contributions (including yours) are shown under "Everyone".
+          You can further filter files by clicking on the "eye" icon, which will reveal a filter bar.
+          For example, you can search on filename by entering a keyword in the "Name"
+          field. Choose any filters and apply them by clicking on the "funnel" icon.
         </p>
         <p>
           The precisionFDA system also allows users to organize files into
