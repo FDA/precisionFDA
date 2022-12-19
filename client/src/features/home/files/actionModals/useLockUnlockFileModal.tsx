@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
@@ -79,7 +79,6 @@ export const useLockUnlockFileModal = ({
   spaceId?: string,
   type: LockUnlockActionType
 }) => {
-  const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
   const [numberOfFiles, setNumberOfFiles] = useState<number>()
@@ -91,7 +90,6 @@ export const useLockUnlockFileModal = ({
       toast.error('Error: locking or unlocking')
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['files'])
       setShowModal(false)
       toast.success(`${ActionTypeName[type]}ed ${numberOfFiles} files or folders.`)
       if(onSuccess) onSuccess()

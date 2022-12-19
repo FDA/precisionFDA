@@ -196,6 +196,7 @@ export const useFilesSelectActions = ({
     type: 'unlock',
     spaceId: space?.id,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
       if (resetSelected) resetSelected()
     },
   })
@@ -209,6 +210,7 @@ export const useFilesSelectActions = ({
     type: 'lock',
     spaceId: space?.id,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
       if (resetSelected) resetSelected()
     },
   })
