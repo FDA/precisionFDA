@@ -56,9 +56,9 @@ export const OverviewPublic = () => {
           <PageMainBody>
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
-              {expertsIsLoading ? (
-                <Loader />
-              ) : expertsData?.experts[0] && <ExpertListItem expert={expertsData?.experts[0]} />}
+              {expertsData?.experts[0] && (expertsIsLoading ? (
+                <Loader displayInline />
+              ) : expertsData?.experts[0] && <ExpertListItem expert={expertsData.experts[0]} />)}
             </ExpertSection>
 
             <ChallengesBanner />

@@ -27,6 +27,7 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]){
 
   const modalComp = (
     <Modal
+      id="modal-assets-download"
       data-testid="modal-assets-download"
       headerText={`Download ${itemsCountString('asset', memoSelected.length)}?`}
       isShown={Boolean(isShown)}
