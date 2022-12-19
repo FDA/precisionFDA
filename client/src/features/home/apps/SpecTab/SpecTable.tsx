@@ -21,7 +21,7 @@ export const SpecTable = ({ title, config }: { title: string, config: any}) => {
     })
 
     const choices = spec.choices ? spec.choices.join(', ') : null
-    const title = spec.label.length ? spec.label : spec.name
+    const title = spec.label?.length ? spec.label : spec.name
 
     let defaultValue
     if (spec.default !== undefined) {

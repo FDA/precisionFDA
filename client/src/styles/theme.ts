@@ -123,6 +123,7 @@ export const sizing = {
 
 export const theme = {
   fontFamily: 'Lato, Helvetica, sans-serif',
+  monofontFamily: 'Monaco, Courier',
   colors,
   fontSize,
   fontWeight,

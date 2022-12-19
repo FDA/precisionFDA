@@ -33,6 +33,8 @@ type FileCloseResponse = {
 
 type FileDownloadLinkResponse = {
   url: string
+  headers: AnyObject[] // key:value pairs
+  expires?: number
 }
 
 type ListFilesResult = {

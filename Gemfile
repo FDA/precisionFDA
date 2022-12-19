@@ -4,7 +4,7 @@ ruby "2.7.5"
 
 gem "rails", "= 6.1.6.1"
 
-gem "rails-html-sanitizer", "~> 1.4.3"
+gem "rails-html-sanitizer", "~> 1.4.4"
 
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0"

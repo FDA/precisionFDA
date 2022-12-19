@@ -16,12 +16,19 @@ export const LeftColumn = styled.div`
 `
 
 export const RightColumn = styled.div`
-  padding: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
   min-width: 320px;
   flex: 1 1 auto;
+  padding: 32px 16px;
+`
+
+export const ChallengeThumbnail = styled.img`
+  height: 180px;
+  object-fit: contain;
+  overflow: hidden;
+  box-shadow: 0px 0px 16px #000;
 `
 
 export const StyledChallengeDetailsBanner = styled(PageContainer)`
@@ -33,6 +40,10 @@ export const StyledChallengeDetailsBanner = styled(PageContainer)`
 
   @media (min-width: ${breakPoints.medium}px) {
     flex-direction: row;
+
+    ${RightColumn} {
+      padding: 0 16px;
+    }
   }
 `
 
@@ -49,14 +60,7 @@ export const ChallengeDescription = styled.p`
   margin-top: ${theme.padding.contentMargin};
 `
 
-export const ChallengeThumbnail = styled.img`
-  width: ${theme.sizing.thumbnailWidth};
-  height: ${theme.sizing.thumbnailHeight};
-  object-fit: contain;
-  overflow: hidden;
-  box-shadow: 0px 0px 16px #000;
-  background: white;
-`
+
 
 export const ChallengeStateLabel = styled.span<{timeStatus: TimeStatus}>`
   ${commonStyles.sectionHeading};

@@ -25,6 +25,7 @@ class CopyService
           new_file.parent = file unless skip_parent
           new_file.entity_type = UserFile::TYPE_REGULAR
           new_file.archive_entries = file.archive_entries.map(&:dup) if defined? file.archive_entries
+          new_file.locked = false
           new_file.save!
         end
       end

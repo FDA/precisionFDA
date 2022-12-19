@@ -31,12 +31,13 @@ router.delete(
   '/:id',
   makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }),
   async ctx => {
-  const removedFoldersCnt = await new userFile.FolderDeleteOperation(pickOpsCtx(ctx)).execute({
-    id: ctx.params.id as any,
-  })
-  ctx.status = 200
-  ctx.body = removedFoldersCnt
-})
+    const removedFoldersCnt = await new userFile.FolderDeleteOperation(pickOpsCtx(ctx)).execute({
+      id: ctx.params.id as any,
+    })
+    ctx.status = 200
+    ctx.body = removedFoldersCnt
+  },
+)
 
 router.post('/recreate', async ctx => {
   await new userFile.FolderRecreateOperation(pickOpsCtx(ctx)).execute({

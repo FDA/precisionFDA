@@ -1,11 +1,12 @@
 package precisionfda
 
 import (
-	"dnanexus.com/precision-fda-cli/precisionfda/test"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"dnanexus.com/precision-fda-cli/precisionfda/test"
 )
 
 func TestNewPFDAClient(t *testing.T) {

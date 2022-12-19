@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -100,19 +100,14 @@ const NavigationBarSubtitle = styled.div`
   }
 `
 
-const PublicNavbarWrapper = styled.div`
-  height: ${theme.sizing.navigationBarHeight};
-  max-width: ${theme.sizing.mainContainerMaxWidth};
-  margin: 0 auto;
-`
-
 interface INavigationBarProps {
   title?: string,
   subtitle?: string,
   user?: any,
+  children: ReactNode
 }
 
-const NavigationBar : React.FunctionComponent<INavigationBarProps> = ({ children, title, subtitle, user }) => {
+const NavigationBar = ({ children, title, subtitle, user }: INavigationBarProps) => {
 
   const isLoggedIn = user && Object.keys(user).length > 0
   const showSocialMediaButtons = !children  // Show social media buttons unless there's a custom header like in ChallengesDetailsPage
