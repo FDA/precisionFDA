@@ -103,7 +103,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     folderId: folderIdParam,
     selectedItems: selectedObjects,
     resetSelected,
-    resourceKeys: ['files', folderIdParam],
+    resourceKeys: ['files'],
   })
   
   delete actions['Comments']
