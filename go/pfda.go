@@ -1,13 +1,11 @@
 // PrecisionFDA CLI
-// Version 2.2
+// Version 2.2.1
 //
 //
 package main
 
 import (
 	"crypto/tls"
-	"dnanexus.com/precision-fda-cli/precisionfda"
-	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -16,24 +14,26 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"rsc.io/goversion/version"
 	"runtime"
 	"strconv"
 	"strings"
-)
 
-import _ "crypto/tls/fipsonly"
+	"dnanexus.com/precision-fda-cli/helpers"
+	"dnanexus.com/precision-fda-cli/precisionfda"
+	"rsc.io/goversion/version"
+	_ "crypto/tls/fipsonly"
+)
 
 //
 // CONSTANTS
 //
 const defaultNumRoutines = 10
-const defaultChunkSize = 1<<24  // default 16.8MB (min. 5MB)
+const defaultChunkSize = 1 << 24 // default 16.8MB (min. 5MB)
 const defaultSkipVerify = "false"
 const usageString = `
 
 ***********************
-PFDA COMMAND LINE TOOL v2.2
+PFDA COMMAND LINE TOOL v2.2.1
 ***********************
 To upload a file:
 
@@ -51,17 +51,13 @@ To download a file from My Home or from a space you have access to:
 
   pfda download [--key <KEY>] --file-id <FILE_ID> [--output </PATH/TO/OUTPUT/FILE>]
 
-To call a precisionFDA API route:
-
-  pfda api [--key <KEY>] --route <API_ROUTE> --json <JSON_PAYLOAD> [--output </PATH/TO/OUTPUT/FILE>]
-
 To print version info and exit :
 
   pfda --version
 
 (--version flag can also be given with --cmd,
-then version info is printed before obtaining key and executing command)
-`
+then version info is printed before obtaining key and executing command)`
+
 //
 // N.B. the --cmd flag exists and is now deprecated, but the following should all work
 //
@@ -77,7 +73,6 @@ then version info is printed before obtaining key and executing command)
 // $ ./pfda api --server localhost:3000 --skipverify true --key $KEY --route "files/file-G70fbKj0qp9YGkg24kGxQvF4-1/download" --json '{ "format": "json" }'
 // $ ./pfda --cmd api --server localhost:3000 --skipverify true --key $KEY --route "files/file-G70fbKj0qp9YGkg24kGxQvF4-1/download" --json '{ "format": "json" }'
 
-
 //
 // GLOBAL VARIABLES
 //
@@ -86,10 +81,10 @@ var defaultURL = "precision.fda.gov"
 
 // these varaibles are populated by -ldflags -X command line options
 var (
-	commitID string
-	Version string
+	commitID  string
+	Version   string
 	BuildTime string
-	OsArch string
+	OsArch    string
 )
 
 type jsonConfig struct {
@@ -97,7 +92,6 @@ type jsonConfig struct {
 }
 
 var pfdaclient *precisionfda.PFDAClient
-
 
 //
 //  ACTION FUNCTIONS
@@ -115,8 +109,8 @@ var invokeUploadAsset = func(client precisionfda.IPFDAClient, assetFolderPath *s
 	return client.UploadAsset(*assetFolderPath, *assetName, *readmeFilePath)
 }
 
-var invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string) error {
-	return client.DownloadFile(*fileID, *outputFilePath)
+var invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string, overwriteFile *string) error {
+	return client.DownloadFile(*fileID, *outputFilePath, *overwriteFile)
 }
 
 var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType *string) error {
@@ -134,7 +128,6 @@ var invokeListing = func(client precisionfda.IPFDAClient, folderID *string, spac
 var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
 	return client.RefreshToken(autoRefresh)
 }
-
 
 func main() {
 	returnCode := mainInternal()
@@ -170,7 +163,7 @@ func mainInternal() int {
 	flagHelp := flag.Bool("help", false, "[optional] Print help info for the particular command")
 	flagHelpShort := flag.Bool("h", false, "[optional] Print help info for the particular command") // is there a better way to have aliases ??
 
-	// optional flags for adjusting the desired output values & format
+	// optional flags for adjusting the desired output values, format and behavior
 	flagBrief := flag.Bool("brief", false, "[optional] Only present brief info")
 	flagJson := flag.Bool("json", false, "[optional] Present result as JSON")
 	flagFilesOnly := flag.Bool("files", false, "[optional] Only present files")
@@ -183,6 +176,7 @@ func mainInternal() int {
 	flagPrivate := flag.Bool("private", false, "[optional] Only present private spaces")
 	flagAdministator := flag.Bool("administrator", false, "[optional] Only present administrator spaces")
 	flagGovernment := flag.Bool("government", false, "[optional] Only present government spaces")
+	flagOverwriteFile := flag.String("overwrite", "", "[optional] Preselect overwrite option what to do with already existing file.")
 
 	// Support for ./pfda upload-file option of specifying a command, making --cmd optional
 	var positionalCmd string
@@ -219,7 +213,7 @@ func mainInternal() int {
 		// Setting '--skipverify' true will allow devs to connect to local instances with self-signed certs
 		pfdaclient.Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
 			InsecureSkipVerify: true,
-			ServerName: *server,
+			ServerName:         *server,
 		}
 	} else {
 		pfdaclient.Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
@@ -265,7 +259,7 @@ func mainInternal() int {
 
 	switch *command {
 	case "upload-asset":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintUploadAssetHelp()
 		}
 
@@ -282,7 +276,7 @@ func mainInternal() int {
 			return inputError("Asset name (ending with .tar or .tar.gz) is required. Provide it as [--name <ASSET_NAME>].")
 		}
 
-		if !strings.HasSuffix(*assetName, ".tar") && !strings.HasSuffix(*assetName, ".tar.gz")  {
+		if !strings.HasSuffix(*assetName, ".tar") && !strings.HasSuffix(*assetName, ".tar.gz") {
 			return inputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *assetName))
 		}
 
@@ -302,7 +296,7 @@ func mainInternal() int {
 		}
 
 	case "upload-file":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintUploadFileHelp()
 		}
 
@@ -322,7 +316,7 @@ func mainInternal() int {
 		}
 
 	case "download":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintDownloadHelp()
 		}
 
@@ -330,14 +324,19 @@ func mainInternal() int {
 			return inputError("File ID of the file to be downloaded is required: [--file-id <FILE_ID>]")
 		}
 
-		err := invokeDownloadFile(pfdaclient, fileID, outputFilePath)
+		// we need tri-state as there is different behavior for -overwrite=false and completely ommited -overwrite flag
+		if *flagOverwriteFile != "true" && *flagOverwriteFile != "false" && *flagOverwriteFile != "" {
+			return inputError("overwrite flag only accepts true/false or omit it completely.")
+		}
+
+		err := invokeDownloadFile(pfdaclient, fileID, outputFilePath, flagOverwriteFile)
 		if err != nil {
 			printError(err)
 			return 1
 		}
 
 	case "describe-app":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintDescribeAppHelp()
 		}
 
@@ -353,7 +352,7 @@ func mainInternal() int {
 		}
 
 	case "describe-workflow":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintDescribeWorkflowHelp()
 		}
 
@@ -369,24 +368,23 @@ func mainInternal() int {
 		}
 
 	case "list-spaces":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintListSpacesHelp()
 		}
 
 		flags := map[string]bool{
 			"protected": *flagPhiProtected,
 			// state of space, must be exclusive
-			"locked": *flagLocked,
+			"locked":      *flagLocked,
 			"unactivated": *flagUnactivated,
 			// types of space flag, multiple allowed
-			"review": *flagReview,
-			"groups": *flagGroups,
-			"private_type": *flagPrivate,
+			"review":        *flagReview,
+			"groups":        *flagGroups,
+			"private_type":  *flagPrivate,
 			"administrator": *flagAdministator,
-			"government": *flagGovernment,
+			"government":    *flagGovernment,
 			// present as JSON / pretty print
 			"json": *flagJson,
-
 		}
 		err := invokeListSpaces(pfdaclient, flags)
 		if err != nil {
@@ -395,20 +393,20 @@ func mainInternal() int {
 		}
 
 	case "ls":
-		if (*flagHelp || *flagHelpShort) {
+		if *flagHelp || *flagHelpShort {
 			return helpers.PrintLsHelp()
 		}
 
-		if (*flagFilesOnly && *flagFoldersOnly) {
+		if *flagFilesOnly && *flagFoldersOnly {
 			return inputError("Cannot combine --folders and --files flags together. Please choose one of the flags only.")
 		}
 
 		flags := map[string]bool{
-			"brief": *flagBrief,
-			"files_only": *flagFilesOnly,
+			"brief":        *flagBrief,
+			"files_only":   *flagFilesOnly,
 			"folders_only": *flagFoldersOnly,
 			// present as JSON / pretty print
-			"json": *flagJson,
+			"json":         *flagJson,
 		}
 
 		err := invokeListing(pfdaclient, folderID, spaceID, flags)
@@ -417,7 +415,7 @@ func mainInternal() int {
 			return 1
 		}
 
-	// TEMPORARILY REMOVED FROM CLI v2.2
+	// TEMPORARILY REMOVED FROM CLI v2.2.1
 	// case "refresh-key": {
 	// 	// add option for auto-refresh later
 	// 	newToken, err := invokeRefreshToken(pfdaclient, false)
@@ -466,7 +464,7 @@ func mainInternal() int {
 
 	default:
 		// Invalid, non-empty command
-		fmt.Printf("Command ' %s' not found. Must be one of \n'upload-file' \n'upload-asset' \n'download' \n'ls' \n'list-spaces' \n'describe-app' \n'describe-workflow''\n", *command)
+		fmt.Printf("Command '%s' not found. Must be one of \n'upload-file' \n'upload-asset' \n'download' \n'ls' \n'list-spaces' \n'describe-app' \n'describe-workflow'\n", *command)
 		return 1
 	}
 
@@ -493,7 +491,7 @@ func mainInternal() int {
 		// if .pfda_config exists it is truncaters before writing
 		// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it
 		//TODO: consolidate CLI config into a struct with common code to read/write the config
-		err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'
+		err = ioutil.WriteFile(configPath, jsonData, 0644) // 0644 is '-rw -r- -r-'
 		if err != nil {
 			fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
 		} else {
@@ -518,7 +516,7 @@ func printInfo(pfdaclient *precisionfda.PFDAClient) {
 	transport := pfdaclient.Client.HTTPClient.Transport.(*http.Transport)
 	fmt.Printf("  TLS Version :    %s\n", GetTLSVersion(transport))
 
-	printCryptoInfo()
+	// printCryptoInfo()
 }
 
 func printCryptoInfo() {
@@ -532,6 +530,7 @@ func printCryptoInfo() {
 		fmt.Println("Unable to retrieve goversion info")
 	}
 
+	// TODO: find a new way to verify the build is FIPS 140-2 compliant.
 	if v.FIPSOnly {
 		fmt.Println("  FIPS        :    +crypto/tls/fipsonly verified")
 	} else {

@@ -12,10 +12,11 @@ import { InputFileCell, NameCell } from './SubmissionTable'
 import { useChallengeEntriesQuery } from './useChallengeEntriesQuery'
 
 const StyledStateCell = styled.div<{state: Submission['job_state']}>`
-  color: white;
+  color: ${colors.textDarkGrey};
   padding: 4px 15px;
   border-radius: 3px;
   width: fit-content;
+  margin-left: 15px;
 
   ${({ state }) => {
     if(state === 'running' || state === 'idle') {
@@ -36,7 +37,10 @@ const StyledStateCell = styled.div<{state: Submission['job_state']}>`
         background-color: #ffeeed;
       `
     }
-    return ''
+    return css`
+      color: ${colors.primaryBlue};
+      background-color: #f0f9fd;
+    `
   }}
 `
 
@@ -55,6 +59,10 @@ const StateCell = ({ jobState }: { jobState: Submission['job_state'] }) => {
   }
   return <StyledStateCell state={jobState}>{state}</StyledStateCell>
 }
+
+const Info = styled.div`
+  margin-bottom: 32px;
+`
 
 export const useSubmissionTableColumns = ({
   isSpaceMember,
@@ -132,17 +140,17 @@ export const ChallengeMyEntriesTable = ({
   const isLoggedIn = user && Object.keys(user).length > 0
   if (!isLoggedIn) {
     return (
-      <div>
+      <Info>
         In order to participate in this challenge, please{' '}
         <a data-turbolinks="false" href="/login">
           login
         </a>
-        . If you don't have a PrecisionFDA account, please{' '}
+        . If you don&apos;t have a PrecisionFDA account, please{' '}
         <a data-turbolinks="false" href="/request_access">
           submit an access request
         </a>{' '}
         to join and engage in the community!
-      </div>
+      </Info>
     )
   }
 
@@ -150,7 +158,7 @@ export const ChallengeMyEntriesTable = ({
 
   if (!data || data.length === 0) {
     return (
-      <div>No entries have been successfully submitted for this challenge.</div>
+      <Info>No entries have been successfully submitted for this challenge.</Info>
     )
   }
 

@@ -1,8 +1,8 @@
 # precisionFDA CLI
 
-##### Written using [fork of Go that uses BoringCrypto](https://github.com/golang/go/tree/dev.boringcrypto)
+##### Written using Go
 
-BoringCrypto fork of Go is used because of [FIPS 140-2 compliance](https://boringssl.googlesource.com/boringssl/+/master/crypto/fipsmodule/FIPS.md). Currently using go1.16.7b7 (N.B. the tag name derived <GoVersion>b<BoringCryptoVersion>)
+As of Go 1.18 the BoringCrypto fork has been merged with the main branch. BoringCrypto is used because of [FIPS 140-2 compliance](https://boringssl.googlesource.com/boringssl/+/master/crypto/fipsmodule/FIPS.md).
 
 Latest releases of boringcrypto are available [here](https://go.googlesource.com/go/+/dev.boringcrypto/misc/boring/RELEASES)
 
@@ -134,14 +134,16 @@ https://csrc.nist.gov/Projects/Cryptographic-Module-Validation-Program/Certifica
 
 The package is configured by itself solely by importing it, the relevant code is here: https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/fipsonly/fipsonly.go
 
-To test for FIPS compliance we can use goversion (https://pkg.go.dev/rsc.io/goversion/version)
-
-```go install rsc.io/goversion@latest
-$GOPATH/bin/goversion -crypto go/dist/pfda*
-```
+To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda` and ensure that crypto/internal/boring/sig.FIPSOnly.* is present.
 
 
 # Version History
+
+### 2.2.1 (2022-12-20)
+
+- improved output of ls command
+
+- added optional overwrite flag for download command if needed
 
 ### 2.2 (2022-12-07)
 

@@ -206,7 +206,7 @@ export const TopApps = () => {
         <SectionTitle>Most Recent Apps</SectionTitle>
         <TopAppsList>
           {isLoadingRecentAppsData ? (
-            <Loader />
+            <Loader displayInline />
           ) : (
             recentAppsData?.apps
               .slice(0, 4)
@@ -218,7 +218,7 @@ export const TopApps = () => {
         <SectionTitle>Top Featured Apps</SectionTitle>
         <TopAppsList>
           {isLoadingFeaturedAppsData ? (
-            <Loader />
+            <Loader displayInline />
           ) : (
             featuredAppsData?.apps
               .slice(0, 4)
@@ -247,11 +247,11 @@ export const OverviewAuthed = () => {
             <ChallengesOverviewList />
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
-              {expertsIsLoading ? (
-                <Loader />
+              {expertsData?.experts[0] && (expertsIsLoading ? (
+                <Loader displayInline />
               ) : (
-                <ExpertListItem expert={expertsData!.experts[0]} />
-              )}
+                <ExpertListItem expert={expertsData.experts[0]} />
+              ))}
             </ExpertSection>
           </PageMainBody>
           <RightSide>

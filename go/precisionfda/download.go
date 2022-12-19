@@ -2,11 +2,12 @@ package precisionfda
 
 import (
 	"fmt"
-	"github.com/docker/go-units"
-	"github.com/gosuri/uilive"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/docker/go-units"
+	"github.com/gosuri/uilive"
 )
 
 // ProgressWriter counts the number of bytes written to it.

@@ -27,7 +27,7 @@ export const config: ConfigOverride = () => ({
         onInit: {
           shouldAddCheckNonterminatedClusters: true,
         },
-      }
+      },
     },
   },
   platform: {

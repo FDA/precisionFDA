@@ -5,11 +5,11 @@ import { OverviewAuthed } from './OverviewAuthed'
 
 const OverviewPage = () => {
   const user = useAuthUser()
-  const isLoggedIn = user && Object.keys(user).length > 0
-  if (isLoggedIn) {
-    return <OverviewAuthed />
+  
+  if (!user) {
+    return <OverviewPublic />
   }
-  return <OverviewPublic />
+  return <OverviewAuthed />
 }
 
 export default OverviewPage

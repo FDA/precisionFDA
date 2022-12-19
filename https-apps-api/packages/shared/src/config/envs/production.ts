@@ -45,5 +45,10 @@ export const config: ConfigOverride = () => ({
         },
       },
     },
+    cdmh: {
+      response: {
+        isEnabled: false,
+      },
+    },
   },
 })

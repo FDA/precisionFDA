@@ -15,8 +15,11 @@ import expert2 from '../images/expert2.png'
 import expert3 from '../images/expert3.png'
 
 import { DocBody } from '../styles'
+import { useScrollToHash } from '../../../hooks/useScrollToHash'
 
-export const SiteCustomization = () => (
+export const SiteCustomization = () => {
+  useScrollToHash()
+  return(
   <DocBody>
     <h1>Site Customization</h1>
 
@@ -221,3 +224,4 @@ export const SiteCustomization = () => (
     </p>
   </DocBody>
 )
+  }

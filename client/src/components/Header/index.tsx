@@ -3,13 +3,14 @@ import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import { SUPPORT_EMAIL } from '../../constants'
-import { logout } from '../../features/auth/api'
+import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { IUser } from '../../types/user'
 import { CloudResourceModal } from '../CloudResourcesModal'
 import Dropdown from '../Dropdown'
 import { BullsEyeIcon } from '../icons/BullsEyeIcon'
 import { CaretIcon } from '../icons/CaretIcon'
+import { CDMHIcon } from '../icons/CDMHIcon'
 import { CommentIcon } from '../icons/CommentIcon'
 import { CommentingIcon } from '../icons/CommentingIcon'
 import { FortIcon } from '../icons/FortIcon'
@@ -22,7 +23,7 @@ import { StarIcon } from '../icons/StarIcon'
 import { StickyNoteIcon } from '../icons/StickyNote'
 import { TrophyIcon } from '../icons/TrophyIcon'
 import {
-  AvatarMenuItem,
+  DropdownMenuItem,
   HeaderItemText,
   HeaderLeft,
   HeaderRight,
@@ -38,46 +39,61 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
 } from './styles'
+import { CDMHNames, useSiteSettingsQuery } from './useSiteSettingsQuery'
 
 type UserMenuProps = {
   user: IUser | null | undefined
-  userIsGuest: boolean
-  userCanAdministerSite: boolean
+  userIsGuest?: boolean
+  userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
 }
 
 export const UserMenu = ({
   user,
-  userIsGuest,
-  userCanAdministerSite,
+  userIsGuest = true,
+  userCanAdministerSite = false,
   handleLogout,
   showCloudResourcesModal,
 }: UserMenuProps) => (
   <StyledDropMenuLinks>
-    <StyledLink data-turbolinks="false" href="/profile">Profile</StyledLink>
+    <StyledLink data-turbolinks="false" href="/profile">
+      Profile
+    </StyledLink>
     {user && !userIsGuest && (
       <>
-        <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`}>Public Profile</StyledLink>
+        <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`}>
+          Public Profile
+        </StyledLink>
         <StyledOnClickModalDiv onClick={showCloudResourcesModal}>
           Cloud Resources
         </StyledOnClickModalDiv>
       </>
     )}
-    <StyledLink data-turbolinks="false" href="/licenses">Manage Licenses</StyledLink>
+    <StyledLink data-turbolinks="false" href="/licenses">
+      Manage Licenses
+    </StyledLink>
     {!userIsGuest && (
       <StyledLink as={Link} data-turbolinks="false" to="/account/notifications">
         Notification Settings
       </StyledLink>
     )}
     <StyledDivider />
-    <StyledLink as={Link} to="/about" data-turbolinks="false">About</StyledLink>
-    <StyledLink data-turbolinks="false" href="/guidelines">Guidelines</StyledLink>
-    <StyledLink as={Link} to="/docs" data-turbolinks="false">Docs</StyledLink>
+    <StyledLink as={Link} to="/about" data-turbolinks="false">
+      About
+    </StyledLink>
+    <StyledLink data-turbolinks="false" href="/guidelines">
+      Guidelines
+    </StyledLink>
+    <StyledLink as={Link} to="/docs" data-turbolinks="false">
+      Docs
+    </StyledLink>
     <StyledDivider />
     {userCanAdministerSite && (
       <>
-        <StyledLink data-turbolinks="false" href="/admin">Admin Dashboard</StyledLink>
+        <StyledLink data-turbolinks="false" href="/admin">
+          Admin Dashboard
+        </StyledLink>
         <StyledDivider />
       </>
     )}
@@ -100,6 +116,7 @@ const getUsername = (user: any) => {
 export const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
+  const siteSettings = useSiteSettingsQuery()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
     useState(false)
 
@@ -124,6 +141,7 @@ export const Header: React.FC = () => {
   if (!user) return null
 
   const showGSRSLink = !isSpacesPath && !userIsGuest
+  const showCDMHLink = !isSpacesPath && !!siteSettings?.data?.isEnabled
 
   return (
     <>
@@ -149,7 +167,11 @@ export const Header: React.FC = () => {
             </Link>
             {!isSpacesPath && (
               <>
-                <a data-turbolinks="false" href="/discussions" title="Discussions">
+                <a
+                  data-turbolinks="false"
+                  href="/discussions"
+                  title="Discussions"
+                >
                   <MenuItem active={isActiveLink('/discussions')}>
                     <IconWrap>
                       <CommentIcon height={16} />
@@ -157,7 +179,11 @@ export const Header: React.FC = () => {
                     <HeaderItemText>Discussions</HeaderItemText>
                   </MenuItem>
                 </a>
-                <Link to="/challenges" title="Challenges" data-turbolinks="false">
+                <Link
+                  to="/challenges"
+                  title="Challenges"
+                  data-turbolinks="false"
+                >
                   <MenuItem active={isActiveLink('/challenges')}>
                     <IconWrap>
                       <TrophyIcon height={16} />
@@ -191,7 +217,11 @@ export const Header: React.FC = () => {
                     <HeaderItemText>Notes</HeaderItemText>
                   </MenuItem>
                 </a>
-                <a data-turbolinks="false" href="/comparisons" title="Comparisons">
+                <a
+                  data-turbolinks="false"
+                  href="/comparisons"
+                  title="Comparisons"
+                >
                   <MenuItem active={isActiveLink('/comparisons')}>
                     <IconWrap>
                       <BullsEyeIcon height={16} />
@@ -211,7 +241,12 @@ export const Header: React.FC = () => {
               </MenuItem>
             </Link>
             {showGSRSLink && (
-              <a data-turbolinks="false" href="/ginas/app/beta" target="_blank" title="GSRS">
+              <a
+                data-turbolinks="false"
+                href="/ginas/app/beta"
+                target="_blank"
+                title="GSRS"
+              >
                 <MenuItem>
                   <IconWrap>
                     <GSRSIcon height={16} />
@@ -219,6 +254,33 @@ export const Header: React.FC = () => {
                   <HeaderItemText>GSRS</HeaderItemText>
                 </MenuItem>
               </a>
+            )}
+            {showCDMHLink && (
+              <Dropdown
+                trigger="click"
+                content={
+                  <StyledDropMenuLinks>
+                    {siteSettings?.data?.data && Object.keys(siteSettings.data.data).map((s: CDMHKey) => {
+                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data.data[s]}>{CDMHNames[s]}</StyledLink>
+                    })}
+                  </StyledDropMenuLinks>
+                }
+              >
+                {dropdownProps => (
+                  <DropdownMenuItem
+                    {...dropdownProps}
+                    active={dropdownProps.isActive}
+                  >
+                    <IconWrap>
+                      <CDMHIcon height={20} />
+                    </IconWrap>
+                    <HeaderItemText>
+                      CDMH
+                      <CaretIcon height={6} />
+                    </HeaderItemText>
+                  </DropdownMenuItem>
+                )}
+              </Dropdown>
             )}
           </HeaderLeft>
           <HeaderRight>
@@ -235,7 +297,11 @@ export const Header: React.FC = () => {
                 <HeaderItemText>Support</HeaderItemText>
               </MenuItem>
             </a>
-            <Link to="/docs/introduction" title="Get Started" data-turbolinks="false">
+            <Link
+              to="/docs/introduction"
+              title="Get Started"
+              data-turbolinks="false"
+            >
               <MenuItem active={isActiveLink('/docs/introduction')}>
                 <IconWrap>
                   <QuestionIcon height={16} />
@@ -258,7 +324,7 @@ export const Header: React.FC = () => {
               }
             >
               {dropdownProps => (
-                <AvatarMenuItem
+                <DropdownMenuItem
                   {...dropdownProps}
                   active={dropdownProps.isActive}
                 >
@@ -269,7 +335,7 @@ export const Header: React.FC = () => {
                     {getUsername(user)}
                     <CaretIcon height={6} />
                   </HeaderItemText>
-                </AvatarMenuItem>
+                </DropdownMenuItem>
               )}
             </Dropdown>
           </HeaderRight>

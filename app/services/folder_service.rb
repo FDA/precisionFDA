@@ -1,4 +1,5 @@
-class FolderService
+# Folder actions service. Used in folder and node operations.
+class FolderService # rubocop:disable Metrics/ClassLength
   class Error < StandardError; end
 
   ROOT_DIR = "root".freeze
@@ -51,7 +52,7 @@ class FolderService
     if folder.in_locked_verification_space?
       return Rats.failure(
         message: "You have no permissions to remove '#{folder.name}', " \
-                 "as it is part of Locked Verification space."
+                 "as it is part of Locked Verification space.",
       )
     end
 
@@ -90,10 +91,12 @@ class FolderService
         return Rats.failure(message: "You have no permissions to remove '#{node.name}'.")
       end
 
+      raise ApiError, "Unable to remove #{node.name} because it is locked." if node.locked?
+
       if node.in_locked_verification_space?
         return Rats.failure(
           message: "You have no permissions to remove '#{node.name}', " \
-                   "as it is part of Locked Verification space."
+                   "as it is part of Locked Verification space.",
         )
       end
 
@@ -131,7 +134,7 @@ class FolderService
     nodes.each do |node|
       raise Error, "You're not allowed to move an HTTPS #{node.klass}." if node.https?
 
-      if node.public? && !context.can_administer_site? || !node.accessible_by?(context)
+      if (node.public? && !context.can_administer_site?) || !node.accessible_by?(context)
         raise Error, "You have no permissions to move '#{node.name}'."
       end
 
@@ -167,6 +170,7 @@ class FolderService
     if folder.public? && folder.all_files.present?
       return Rats.failure(message: "#{folder.name}: folder or any of its subfolders contain files.")
     end
+    raise ApiError, "Unable to remove #{folder.name} because it is locked." if folder.locked?
 
     folder.https? ? remove_https_folder(folder) : remove_regular_folder(folder)
   end
@@ -179,6 +183,8 @@ class FolderService
 
     folder_files = folder.files.where(scope: folder.scope)
     folder_files.each do |file|
+      raise ApiError, "Unable to remove #{file.name} because it is locked." if file.locked?
+
       res = remove_file(file)
 
       return res if res.failure?
@@ -212,20 +218,21 @@ class FolderService
     Rats.failure(message: e.message)
   end
 
-  def remove_file(file)
-    if file.comparisons.count > 0
+  def remove_file(file) # rubocop:disable Metrics/MethodLength
+    if file.comparisons.count.positive?
       return Rats.failure(
         message: "File #{file.name} cannot be deleted because it participates in one or " \
                  "more comparisons. Please delete all the comparisons first.",
       )
     end
 
-    if Participant.where(file: file).exists? && file.in_locked_verification_space?
+    if Participant.exists?(file: file) && file.in_locked_verification_space?
       return Rats.failure(
         message: "You have no permissions to remove '#{file.name}', " \
                  "as it is part of Locked Verification space.",
       )
     end
+    raise ApiError, "Unable to remove #{file.name} because it is locked." if file.locked?
 
     # remove the file from the platform only when it's the last with given dxid
     if UserFile.where(dxid: file.dxid).count == 1

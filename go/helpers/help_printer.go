@@ -62,12 +62,15 @@ func PrintDownloadHelp() int {
 	fmt.Fprintln(writer, strings.Join([]string{"  Examples:","download --file-id file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Downloads the file to current working directory]"}, "\t") + "\t")
 	fmt.Fprintln(writer, strings.Join([]string{"  ","download --file-id file-GJk1kpQ05xgQd8bP54kJFjzkz-1 --output \"data/results_final.csv\" [Downloads the file to existing folder named \"data\" under new name \"results_final.csv\"]"}, "\t") + "\t")
 	fmt.Fprintln(writer, strings.Join([]string{"  ","download --file-id file-GJk1kpQ05xgQd8bP54kJFjzkz-1 --output \"data/\" [Downloads the file to existing folder named \"data\" and keep original name]"}, "\t") + "\t")
+	fmt.Fprintln(writer, strings.Join([]string{"  ","download --file-id file-GJk1kpQ05xgQd8bP54kJFjzkz-1 --overwrite [Downloads the file to current working directory and overwrites already existing file if it exists]"}, "\t") + "\t")
 
 	fmt.Fprintln(writer, strings.Join([]string{"  ","  "}, "\t") + "\t")
 	fmt.Fprintln(writer, strings.Join([]string{"  Flags:","All flags listed below are OPTIONAL"}, "\t") + "\t")
 	fmt.Fprintln(writer, strings.Join([]string{"  ","  "}, "\t") + "\t")
 	fmt.Fprintln(writer, strings.Join([]string{"   -h, --help","Show this help message and exit"}, "\t") + "\t")
 	fmt.Fprintln(writer, strings.Join([]string{"   --output <PATH/TO/FILE>","Downloads file to given path"}, "\t") + "\t")
+	fmt.Fprintln(writer, strings.Join([]string{"   --overwrite true|false","Preselect overwrite option for dialog if file with the same name already exists in the target location."}, "\t") + "\t")
+
 	writer.Flush()
 	return 1
 }

@@ -14,10 +14,12 @@ import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } fr
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { useGenerateKeyModal } from '../../auth/useGenerateKeyModal'
 import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
 import { useAssetActions } from './useAssetSelectActions'
+import { KeyIcon } from '../../../components/icons/KeyIcon'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
 
@@ -49,13 +51,14 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
       scope: scope || undefined,
     },
   })
-  const { status, data, error, isFetching } = query
+  const { status, data, error } = query
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
     data?.assets,
   )
   const actions = useAssetActions({ scope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
+  const generateCLIKeyAction = useGenerateKeyModal()
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -70,7 +73,10 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
               href="/assets/new"
               data-testid="home-assets-create-link"
             >
-              <QuestionIcon /> How to create assets
+              <QuestionIcon height={13} /> How to create assets
+            </ButtonSolidBlue>
+            <ButtonSolidBlue onClick={() => generateCLIKeyAction.setShowModal(true)}>
+              <KeyIcon height={13} />Generate CLI Key
             </ButtonSolidBlue>
           </QuickActions>
           <Dropdown
@@ -114,19 +120,19 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
       />
       <StyledPaginationSection>
         <Pagination
-          page={data?.meta?.pagination?.current_page!}
-          totalCount={data?.meta?.pagination?.total_count!}
-          totalPages={data?.meta?.pagination?.total_pages!}
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={hidePagination(
             query.isFetched,
             data?.assets?.length,
             data?.meta?.pagination?.total_pages,
           )}
-          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-          isNextData={data?.meta?.pagination?.next_page! !== null}
-          setPage={setPageParam}
-          onPerPageSelect={setPerPageParam}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
       </StyledPaginationSection>
       {actions['Delete']?.modal}
@@ -137,6 +143,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Rename']?.modal}
+      {generateCLIKeyAction?.modalComp}
     </>
   )
 }
