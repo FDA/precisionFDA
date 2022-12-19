@@ -4,21 +4,21 @@ import styled, { css } from 'styled-components'
 import { colors } from '../styles/theme'
 import { Svg } from './icons/Svg'
 
-const LoaderWrapper = styled.div<{shouldDisplayInline?: boolean}>`
+const LoaderWrapper = styled.div<{displayInline?: boolean}>`
   display: flex;
   justify-content: center;
   padding-top: 16px;
-  ${({ shouldDisplayInline }) => shouldDisplayInline && css`
+  ${({ displayInline }) => displayInline && css`
     display: inline;
   `}
 `
 type Props = {
   height?: number
-  shouldDisplayInline?: boolean
+  displayInline?: boolean
 }
 
-export const Loader = ({ height = 16, shouldDisplayInline }: Props) => (
-  <LoaderWrapper shouldDisplayInline={shouldDisplayInline}>
+export const Loader = ({ height = 16, displayInline }: Props) => (
+  <LoaderWrapper displayInline={displayInline}>
     <Svg height={height} width={60}>
       <circle fill={colors.darkBlue} stroke="none" cx="6" cy={height / 2} r="6">
         <animate

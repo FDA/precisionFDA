@@ -18,7 +18,8 @@ import {
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
   FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
-  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, WorkflowDescribeResponse, AppDescribeResponse,
+  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
+  WorkflowDescribeResponse, AppDescribeResponse
 } from './platform-client.responses'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
@@ -254,7 +255,7 @@ class PlatformClient {
    * API: /file-xxxx/download
    * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-download
    */
-  async fileDownloadLink(params: FileDownloadLinkParams) {
+  async fileDownloadLink(params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
     const url = `${config.platform.apiUrl}/${params.fileDxid}/download`
     const data = {
       ...omit(['fileDxid'], params),

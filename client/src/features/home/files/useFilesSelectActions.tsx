@@ -23,6 +23,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
+import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 
 export enum FileActions {
   'Track' = 'Track',
@@ -44,10 +45,15 @@ export enum FileActions {
   'Request license approval' = 'Request license approval',
   'Accept License' = 'Accept License',
   'Edit tags' = 'Edit tags',
+  'Lock' = 'Lock',
+  'Unlock' = 'Unlock',
   'Comments' = 'Comments',
 }
 
-const getScope = (scope: ResourceScope | undefined, space: ISpace | undefined): string => {
+const getFileScope = (
+  scope: ResourceScope | undefined,
+  space: ISpace | undefined,
+): string => {
   if (scope) {
     switch (scope) {
       case 'me':
@@ -56,14 +62,14 @@ const getScope = (scope: ResourceScope | undefined, space: ISpace | undefined): 
         return 'public'
       case 'featured':
         return 'public'
-      default :
+      default:
         return scope
     }
-  } 
+  }
   return `space-${space?.id}`
 }
 
-const isInSpace = (scope?: ResourceScope) => 
+const isInSpace = (scope?: ResourceScope) =>
   !(scope && (scope === 'me' || scope === 'everybody' || scope === 'featured'))
 
 export const useFilesSelectActions = ({
@@ -86,7 +92,7 @@ export const useFilesSelectActions = ({
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user?.admin
-  const isViewer = (space?.current_user_membership.role === 'viewer')
+  const isViewer = space?.current_user_membership.role === 'viewer'
   const openSelected = selected.some(e => e.state === 'open')
 
   const featureMutation = useFeatureMutation({
@@ -149,16 +155,17 @@ export const useFilesSelectActions = ({
     setShowModal: setEditFolderModal,
     isShown: isShownEditFolderModal,
   } = useEditFolderModal(selected[0])
+
   const {
     modalComp: deleteFileModal,
     setShowModal: setDeleteFileModal,
     isShown: isShownDeleteFileModal,
   } = useDeleteFileModal({
     selected,
-    scope: getScope(scope, space),
+    scope: getFileScope(scope, space),
     onSuccess: () => {
-      if(space) {
-        if(folderId) {
+      if (space) {
+        if (folderId) {
           history.push(`/spaces/${space.id}/files?folder_id=${folderId}`)
           queryClient.invalidateQueries(['files', folderId])
         } else {
@@ -167,7 +174,7 @@ export const useFilesSelectActions = ({
         }
       } else {
         // eslint-disable-next-line no-lonely-if
-        if(folderId) {
+        if (folderId) {
           history.push(`/home/files?folder_id=${folderId}`)
           queryClient.invalidateQueries(['files', folderId])
         } else {
@@ -175,16 +182,49 @@ export const useFilesSelectActions = ({
           queryClient.invalidateQueries(['files'])
         }
       }
-      if(resetSelected) resetSelected()
+      if (resetSelected) resetSelected()
+    },
+  })
+
+  const {
+    modalComp: unlockFileModal,
+    setShowModal: setUnlockFileModal,
+    isShown: isShownUnlockFileModal,
+  } = useLockUnlockFileModal({
+    selected,
+    scope: getFileScope(scope, space),
+    type: 'unlock',
+    spaceId: space?.id,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+      if (resetSelected) resetSelected()
+    },
+  })
+  const {
+    modalComp: lockFileModal,
+    setShowModal: setLockFileModal,
+    isShown: isShownLockFileModal,
+  } = useLockUnlockFileModal({
+    selected,
+    scope: getFileScope(scope, space),
+    type: 'lock',
+    spaceId: space?.id,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+      if (resetSelected) resetSelected()
     },
   })
   const {
     modalComp: organizeFileModal,
     setShowModal: setOrganizeFileModal,
     isShown: isShownOrganizeFileModal,
-  } = useOrganizeFileModal({ selected, scope, spaceId: space?.id, onSuccess: () => {
-      if(resetSelected) resetSelected()
-    }, 
+  } = useOrganizeFileModal({
+    selected,
+    scope,
+    spaceId: space?.id,
+    onSuccess: () => {
+      if (resetSelected) resetSelected()
+    },
   })
   const {
     modalComp: copyToSpaceModal,
@@ -237,7 +277,8 @@ export const useFilesSelectActions = ({
     'Track': {
       type: 'link',
       link: selected[0]?.links?.track || '',
-      isDisabled: selected.length !== 1 || !selected[0].links.track || openSelected,
+      isDisabled:
+        selected.length !== 1 || !selected[0].links.track || openSelected,
     },
     'Open': {
       type: 'modal',
@@ -274,14 +315,15 @@ export const useFilesSelectActions = ({
       func: () => setEditFileModal(true),
       modal: editFileModal,
       isDisabled:
-        selected.length !== 1 || user?.full_name !== selected[0].added_by,
+        selected.length !== 1 || user?.full_name !== selected[0].added_by || selected.some(e => e.locked),
       showModal: isShownEditFileModal,
-      shouldHide: isFolder || selected.length !== 1 || scope === 'spaces' || openSelected,
+      shouldHide:
+        isFolder || selected.length !== 1 || scope === 'spaces' || openSelected,
     },
     'Edit folder info': {
       type: 'modal',
       func: () => setEditFolderModal(true),
-      isDisabled: selected.length !== 1,
+      isDisabled: selected.length !== 1 || selected.some(e => e.locked),
       modal: editFolderModal,
       showModal: isShownEditFolderModal,
       shouldHide: !isFolder || selected.length !== 1 || scope === 'spaces',
@@ -293,8 +335,12 @@ export const useFilesSelectActions = ({
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
       isDisabled: selected.length !== 1 || selected[0].location === 'Public',
-      shouldHide: isFolder || selected.length !== 1 || scope !== 'me' 
-        || selected[0].links?.publish === undefined || openSelected,
+      shouldHide:
+        isFolder ||
+        selected.length !== 1 ||
+        scope !== 'me' ||
+        selected[0].links?.publish === undefined ||
+        openSelected,
     },
     // 'Make folder public': {
     //   func: () => {},
@@ -347,6 +393,22 @@ export const useFilesSelectActions = ({
       modal: deleteFileModal,
       showModal: isShownDeleteFileModal,
     },
+    'Lock': {
+      type: 'modal',
+      func: () => setLockFileModal(true),
+      isDisabled: false,
+      shouldHide: isViewer || selected.every(e => e.locked),
+      modal: lockFileModal,
+      showModal: isShownLockFileModal,
+    },
+    'Unlock': {
+      type: 'modal',
+      func: () => setUnlockFileModal(true),
+      isDisabled: false,
+      shouldHide: isViewer || selected.every(e => !e.locked),
+      modal: unlockFileModal,
+      showModal: isShownUnlockFileModal,
+    },
     'Organize': {
       type: 'modal',
       func: () => setOrganizeFileModal(true),
@@ -356,12 +418,13 @@ export const useFilesSelectActions = ({
         openSelected,
       modal: organizeFileModal,
       showModal: isShownOrganizeFileModal,
-      shouldHide: (!isAdmin) && (scope !== 'me') && isViewer,
+      shouldHide: !isAdmin && scope !== 'me' && isViewer,
     },
     'Copy to space': {
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled: selected.length === 0 ||
+      isDisabled:
+        selected.length === 0 ||
         selected.some(e => !e.links.copy) ||
         openSelected,
       modal: copyToSpaceModal,
@@ -425,12 +488,13 @@ export const useFilesSelectActions = ({
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
       isDisabled: openSelected,
-      shouldHide: selected.length !== 1 || !selected[0]?.links?.accept_license_action,
+      shouldHide:
+        selected.length !== 1 || !selected[0]?.links?.accept_license_action,
     },
     'Edit tags': {
       type: 'modal',
       func: () => setTagsModal(true),
-      isDisabled: openSelected || isFolder,
+      isDisabled: openSelected || isFolder || selected.some(e => e.locked),
       modal: tagsModal,
       showModal: isShownTagsModal,
       shouldHide:

@@ -207,7 +207,7 @@ export const ChallengeDetails = ({
 
   const onSelectTab = (index: number) => {
     const url = `/challenges/${challenge.id}${tabSubroutes[index]}`
-    history.push(url)
+    history.replace(url)
     setTabIndex(index)
   }
 

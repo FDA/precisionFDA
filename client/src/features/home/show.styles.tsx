@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import { ButtonSolidBlue } from '../../components/Button'
 import { ArrowIcon } from '../../components/icons/ArrowIcon'
+import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
 import { colors, theme } from '../../styles/theme'
 
@@ -91,6 +92,20 @@ export const Description = styled.div`
   font-size: 16px;
   color: #52698f;
 `
+export const LockedRow = styled.div`
+  font-size: 14px;
+  color: #52698f;
+  background: ${theme.colors.lightYellow};
+  border-radius: 4px;
+  padding: 4px 7px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+
+  ${Svg} {
+    margin-right: 6px;
+  }
+`
 
 export const Pill = styled.div`
   border-radius: 10px;
@@ -112,3 +127,5 @@ export const ActionsButton = React.forwardRef((props: any, ref) => (
     Actions <ArrowIcon />
   </StyledActionsButton>
 ))
+
+ActionsButton.displayName = 'ActionsButton'

@@ -8,6 +8,7 @@ import { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from 
 import { errors } from '../../..'
 
 type SpaceLockInput = { spaceId: number }
+
 export class SpaceLockOperation extends BaseOperation<
 UserOpsCtx,
 SpaceLockInput,

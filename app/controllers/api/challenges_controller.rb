@@ -26,13 +26,12 @@ module Api
       ActiveRecord::Base.transaction do
         @challenge = Challenge.new(challenge_params)
         if @challenge.save
-
-          @challenge.update_card_image_url!
           @challenge.provision_space!(
             @context,
             challenge_params[:host_lead_dxuser],
             challenge_params[:guest_lead_dxuser],
           )
+          @challenge.update_card_image_url!
           render json: @challenge, adapter: :json
         end
       end

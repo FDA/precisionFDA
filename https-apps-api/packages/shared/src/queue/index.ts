@@ -162,7 +162,8 @@ const removeRepeatable = async (job: Job) => {
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
-  log.info({ jobId: job.id, cron: job.cron },
+  log.info(
+    { jobId: job.id, cron: job.cron },
     'removeRepeatableJob: trying to remove repeatable job',
   )
   // await statusQueue.removeRepeatableByKey(job.key)
@@ -181,7 +182,8 @@ const findRepeatable = async (bullJobId: string) => {
 const createSyncFilesStateTask = async (
   user: UserCtx,
 ) => {
-  log.info({ userId: user.id },
+  log.info(
+    { userId: user.id },
     'Creating SyncFilesStateTask',
   )
 
@@ -355,7 +357,6 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
   }
   return await addToQueue(data, maintenanceQueue, options)
 }
-
 
 export * as debug from './queue.debug'
 

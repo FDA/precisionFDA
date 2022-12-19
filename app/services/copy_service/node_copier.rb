@@ -95,6 +95,7 @@ class CopyService
         new_folder.parent_type = folder.sti_type
         new_folder[@parent_folder_col] = parent_folder&.id
         new_folder[@opposite_parent_folder_col] = nil
+        new_folder.locked = false
         new_folder.save!
       end
 

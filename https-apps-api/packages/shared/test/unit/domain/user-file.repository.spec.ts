@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { Folder, User, UserFile } from 'shared/src/domain'
 import { assert, expect } from 'chai'
+import { Folder, User, UserFile } from 'shared/src/domain'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from 'shared/src/test'
 import { FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
@@ -71,7 +71,7 @@ describe('UserFileRepository tests', () => {
   })
 
   it('findFileWithUid', async () => {
-    const repo = em.getRepository(UserFile) as UserFileRepository
+    const repo = em.getRepository(UserFile)
     let result = await repo.findFileWithUid(files[1].uid)
     expect(result).to.be.not.null()
     expect(result?.name).to.equal('user1_file2')
@@ -85,7 +85,7 @@ describe('UserFileRepository tests', () => {
   })
 
   it('findFilesWithDxid', async () => {
-    const repo = em.getRepository(UserFile) as UserFileRepository
+    const repo = em.getRepository(UserFile)
     let result = await repo.findFilesWithDxid(files[0].dxid)
     expect(result).to.have.length(1)
     expect(result[0].name).to.equal('user1_file1')
@@ -96,8 +96,8 @@ describe('UserFileRepository tests', () => {
     expect(result[1].name).to.equal('user2_file5_copy')
   })
 
-  it('findUnclosedFiles', async() => {
-    const repo = em.getRepository(UserFile) as UserFileRepository
+  it('findUnclosedFiles', async () => {
+    const repo = em.getRepository(UserFile)
     let result = await repo.findUnclosedFiles(user1.id)
     // There should be done for now
     expect(result).to.have.length(0)
@@ -126,17 +126,19 @@ describe('UserFileRepository tests', () => {
     expect(resultUids).to.deep.equal([files[5].uid])
   })
 
-  it('findUnclosedFiles should also find job outputs owned by user', async() => {
-    const repo = em.getRepository(UserFile) as UserFileRepository
+  it('findUnclosedFiles should also find job outputs owned by user', async () => {
+    const repo = em.getRepository(UserFile)
 
     // Add a couple of files that are created by jobs but owned by the user
     const job = create.jobHelper.create(em, { user: user1 })
     await em.flush()
-    const jobFile1 = create.filesHelper.createJobOutput(em,
+    const jobFile1 = create.filesHelper.createJobOutput(
+      em,
       { user: user1, jobId: job.id },
       { state: FILE_STATE_DX.CLOSING },
     )
-    const jobFile2 = create.filesHelper.createJobOutput(em,
+    const jobFile2 = create.filesHelper.createJobOutput(
+      em,
       { user: user1, jobId: job.id },
       { state: FILE_STATE_DX.OPEN },
     )
