@@ -1,13 +1,13 @@
 package main
 
 import (
-	"dnanexus.com/precision-fda-cli/precisionfda"
-	"dnanexus.com/precision-fda-cli/precisionfda/test"
 	"flag"
 	"os"
 	"testing"
-)
 
+	"dnanexus.com/precision-fda-cli/precisionfda"
+	"dnanexus.com/precision-fda-cli/precisionfda/test"
+)
 
 func TestMain(m *testing.M) {
 	// Not the most elegant way of avoiding usage spew in unit test output
@@ -24,30 +24,31 @@ func TestMain(m *testing.M) {
 }
 
 type InputFlags struct {
-	InputFilePath *string
-	FolderID *string
-	SpaceID *string
+	InputFilePath   *string
+	FolderID        *string
+	SpaceID         *string
 	AssetFolderPath *string
-	AssetName *string
-	ReadmeFilePath *string
-	FileID *string
-	OutputFilePath *string
-	EntityID *string
-	EntityType *string
+	AssetName       *string
+	ReadmeFilePath  *string
+	FileID          *string
+	OutputFilePath  *string
+	EntityID        *string
+	EntityType      *string
+	Overwrite       *string
 	// optional flags for ls, list-spaces
-	FlagHelp bool
-	FlagBrief bool
-	FlagJson bool
-	FlagFoldersOnly bool
-	FlagFilesOnly bool
-	FlagLocked bool
-	FlagUnactivated bool
-	FlagPhiProtected bool
-	FlagGroups bool
-	FlagReview bool
-	FlagPrivate bool
+	FlagHelp          bool
+	FlagBrief         bool
+	FlagJson          bool
+	FlagFoldersOnly   bool
+	FlagFilesOnly     bool
+	FlagLocked        bool
+	FlagUnactivated   bool
+	FlagPhiProtected  bool
+	FlagGroups        bool
+	FlagReview        bool
+	FlagPrivate       bool
 	FlagAdministrator bool
-	FlagGovernment bool
+	FlagGovernment    bool
 }
 
 func (f *InputFlags) Reset() {
@@ -111,7 +112,7 @@ func TestPositionalCmdInWrongPlace(t *testing.T) {
 	defer func() { os.Args = oldArgs }()
 
 	var funcWasCalled = false
-	invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string) error {
+	invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string, overwriteFile *string) error {
 		funcWasCalled = true
 		return nil
 	}
@@ -299,10 +300,11 @@ func TestInvokeDownloadFile(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string) error {
+	invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string, overwriteFile *string) error {
 		funcWasCalled = true
 		input.FileID = fileID
 		input.OutputFilePath = outputFilePath
+		input.Overwrite = overwriteFile
 		return nil
 	}
 
@@ -320,6 +322,16 @@ func TestInvokeDownloadFile(t *testing.T) {
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, "file-23456", *input.FileID)
+	reset()
+
+	// Case: download without --cmd, with -overwrite flag
+	os.Args = []string{"pfda", "download", "--file-id", "file-23456", "--key", "HELLO", "--overwrite", "true"}
+	returnCode = runMainInternal(false)
+	test.Equals(t, 0, returnCode)
+	test.Equals(t, true, funcWasCalled)
+	test.Equals(t, "file-23456", *input.FileID)
+	test.Equals(t, "true", *input.Overwrite)
+
 	reset()
 }
 

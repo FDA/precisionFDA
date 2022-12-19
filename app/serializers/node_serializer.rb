@@ -16,10 +16,11 @@ class NodeSerializer < ApplicationSerializer
     :featured,
     :scope,
     :space_id,
+    :locked,
   )
 
   attribute :sti_type, key: :type
-  attribute :origin, if: -> { object.is_a?(UserFile) || object.is_a?(Folder) && object.https? }
+  attribute :origin, if: -> { object.is_a?(UserFile) || (object.is_a?(Folder) && object.https?) }
   attribute :all_tags_list, key: :tags
   attribute :scope_id, key: :scope
 

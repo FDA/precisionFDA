@@ -8,12 +8,13 @@ module Api
     def children
       params[:scope] ||= "private"
 
-      children = if params[:scope] == Scopes::SCOPE_PRIVATE
+      children = case params[:scope]
+      when Scopes::SCOPE_PRIVATE
         @folder&.children ||
-          current_user.nodes.where(parent_folder_id: nil)
-      elsif params[:scope] == Scopes::SCOPE_PUBLIC
+        current_user.nodes.where(parent_folder_id: nil)
+      when Scopes::SCOPE_PUBLIC
         @folder&.children ||
-          Node.where(scope: params[:scope], parent_folder_id: nil)
+        Node.where(scope: params[:scope], parent_folder_id: nil)
       end
 
       if [Scopes::SCOPE_PRIVATE, Scopes::SCOPE_PUBLIC].include?(params[:scope])
@@ -37,6 +38,7 @@ module Api
 
       folders = Folder.where(id: params[:ids])
       head(:unprocessable_entity) && return unless folders.exists?
+
       files = folders.flat_map(&:all_children)
 
       names_match = folder_service.find_match_names(folders)

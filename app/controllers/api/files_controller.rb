@@ -93,9 +93,7 @@ module Api
 
         files = files.where(parent_folder_id: @parent_folder_id)
       end
-      unless params[:files_only] == "true"
-        folders = private_folders(@parent_folder_id).eager_load(user: :org)
-      end
+      folders = private_folders(@parent_folder_id).eager_load(user: :org) unless params[:files_only] == "true"
       user_files = files + folders
 
       render json: user_files, root: "files", adapter: :json, each_serializer: CliNodeSerializer,
@@ -264,8 +262,9 @@ module Api
     # Updates file name and description.
     # PUT /api/files/:uid
     def update
-      description = file_params[:description] || @file.description
+      raise ApiError, "File needs to be unlocked" if @file.locked?
 
+      description = file_params[:description] || @file.description
       raise ApiError, "Can't rename a file." unless @file.rename(file_params[:name], description)
 
       render json: @file, adapter: :json
@@ -366,6 +365,7 @@ module Api
     # @param :space_id [Integer] id of the target space, if specified the public attribute is ignored
     # @param :name [String] a new folder name
     # @return json { path: path(), message: { type: type, text: text } }
+    # rubocop:disable Metrics/MethodLength
     def create_folder
       if params[:space_id] && find_user_space
         scope = @space.uid
@@ -404,6 +404,7 @@ module Api
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
 
+    # rubocop:enable Metrics/MethodLength
     # POST /api/files/move - move_api_files path
     # @param target_id [Integer] target folder id
     # @param node_ids [Array of Integers] ids of nodes to be moved
@@ -446,6 +447,7 @@ module Api
     def remove
       service = FolderService.new(@context)
       nodes = Node.editable_by(@context).where(id: unsafe_params[:ids])
+
       result = service.remove(nodes)
 
       if result.success?
@@ -495,7 +497,7 @@ module Api
 
       render json: nodes, root: "files", adapter: :json,
              meta: files_meta.merge(count(page_dict[:total_count])).
-             merge({ pagination: page_dict })
+               merge({ pagination: page_dict })
     end
 
     def space_files_cli

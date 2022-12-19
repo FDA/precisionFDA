@@ -293,6 +293,11 @@ Rails.application.routes.draw do
         post :publish_folders, on: :collection
       end
 
+      resources :nodes, only: [] do
+        post :lock, on: :collection
+        post :unlock, on: :collection
+      end
+
       resources :licenses, only: %i(index show) do
         post "accept",
              on: :member,
@@ -442,7 +447,6 @@ Rails.application.routes.draw do
       get "list_licenses"
     end
     # end API
-
 
     # FHIR
     scope "/fhir" do

@@ -10,11 +10,14 @@ import {
   RightSide,
 } from '../styles'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
+import { useScrollToHash } from '../../../hooks/useScrollToHash'
 
-export const CLI = () => (
-  <DocRow>
-    <DocBody>
-      <h1>CLI</h1>
+export const CLI = () => {
+  useScrollToHash()
+  return (
+    <DocRow>
+      <DocBody>
+        <h1>CLI</h1>
 
       <p>
         The precisionFDA CLI allows you to conveniently upload or download large
@@ -28,15 +31,15 @@ export const CLI = () => (
       <DocsTip>
         <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
         <strong>TIP:</strong> Each CLI command has its own specific help section with various examples. <br/>
-        Just add <code>--help</code> flag at the end of the command. Alias <code>-h</code> is also supported<br/>
+        Just add <code>--help</code> flag at the end of the command. Alias <code>-h</code> is also supported.<br/>
         Example: <code>./pfda ls -help</code>
       </DocsTip>
 
-      <h2 id="download">Download the CLI</h2>
+        <h2 id="download">Download the CLI</h2>
 
       <ButtonRow>
         <a
-          href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.2.tar.gz"
+          href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.2.1.tar.gz"
           target="_blank"
           rel="noreferrer"
         >
@@ -45,7 +48,7 @@ export const CLI = () => (
           </ButtonSolidBlue>
         </a>
         <a
-          href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.2.tar.gz"
+          href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.2.1.tar.gz"
           target="_blank"
           rel="noreferrer"
         >
@@ -54,7 +57,7 @@ export const CLI = () => (
           </ButtonSolidBlue>
         </a>
         <a
-          href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.2.zip"
+          href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.2.1.zip"
           target="_blank"
           rel="noreferrer"
         >
@@ -64,13 +67,16 @@ export const CLI = () => (
         </a>
       </ButtonRow>
 
-      <h2 id="authorization-key">Authorization Key</h2>
+        <h2 id="authorization-key">Authorization Key</h2>
 
-      <p>
-        Visit the <a data-turbolinks="false" href="/assets/new">Create Assets</a> page and
-        click on Generate Authorization Key button to generate a key that you
-        will need when using the CLI.
-      </p>
+        <p>
+          Visit the{' '}
+          <a data-turbolinks="false" href="/assets/new">
+            Create Assets
+          </a>{' '}
+          page and click on Generate Authorization Key button to generate a key
+          that you will need when using the CLI.
+        </p>
 
       <h2 id="uploading-files">Uploading Files</h2>
       <p>
@@ -124,22 +130,22 @@ export const CLI = () => (
         Another option is to list available spaces via CLI with list-spaces command.
       </DocsTip>
 
-      <h2 id="uploading-assets">Uploading Assets</h2>
+        <h2 id="uploading-assets">Uploading Assets</h2>
 
-      <p>
-        To upload an asset to precisionFDA, prepare a folder path of the asset
-        contents and a readme file, and run the following command with the
-        desired asset name (must end in .tar or .tar.gz)
-      </p>
-      <p>
-        <code>
-          {
-            './pfda upload-asset --key KEY --name NAME{.tar or .tar.gz} --root /PATH/TO/ROOT/FOLDER --readme README{.txt or .md}>'
-          }
-        </code>
-      </p>
+        <p>
+          To upload an asset to precisionFDA, prepare a folder path of the asset
+          contents and a readme file, and run the following command with the
+          desired asset name (must end in .tar or .tar.gz)
+        </p>
+        <p>
+          <code>
+            {
+              './pfda upload-asset --key KEY --name NAME{.tar or .tar.gz} --root /PATH/TO/ROOT/FOLDER --readme README{.txt or .md}>'
+            }
+          </code>
+        </p>
 
-      <h2 id="downloading-files">Downloading Files</h2>
+        <h2 id="downloading-files">Downloading Files</h2>
 
       <p>
         To download files from My Home or a Space, you simply need the unique id
@@ -149,6 +155,11 @@ export const CLI = () => (
         Download a file to the current directory using its original name
         <br />
         <code>./pfda download --key KEY --file-id FILE_ID</code>
+      </p>
+      <p>
+        Download a file and preselect overwrite option if file with the same name already exists in the target location.
+        <br />
+        <code>./pfda download --key KEY --file-id FILE_ID --overwrite true</code>
       </p>
       <p>
         Download a file to the specified file path, ignoring its original name
@@ -168,7 +179,8 @@ export const CLI = () => (
       </p>
       <DocsTip>
         <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
-        <strong>NOTE:</strong> The trailing slash indicates a directory
+        <strong>NOTE:</strong> The trailing slash indicates a directory. <br/>
+        The <code>-overwrite</code> option is useful for scripting to avoid dialog selection if file already exists. Only supports true|false. If you want to decide in the dialog, omit the flag completely.
       </DocsTip>
 
       <h2 id="ls">Listing Files</h2>
@@ -281,4 +293,4 @@ export const CLI = () => (
       </PageMap>
     </RightSide>
   </DocRow>
-)
+)}

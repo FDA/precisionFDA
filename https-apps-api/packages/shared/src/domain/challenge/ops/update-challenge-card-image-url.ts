@@ -42,9 +42,9 @@ void
       accessToken: config.platform.challengeBotAccessToken,
     })
 
-    if (link) {
+    if (link.url) {
       log.info({ link }, 'ChallengeUpdateCardImageUrlOperation: Updating cardImageUrl')
-      challenge.cardImageUrl = link
+      challenge.cardImageUrl = link.url
       em.flush()
     }
   }

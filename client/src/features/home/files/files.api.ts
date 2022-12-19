@@ -34,14 +34,10 @@ export async function fetchTrack(fileId: number) {
   return res.json()
 }
 
-export async function fetchFilesDownloadList(ids: string[], scope: string): Promise<DownloadListResponse[]> {
-  const res = await fetch('/api/files/download_list', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      task: 'delete', ids, scope,
-    }),
-  }).then(checkStatus)
-  return res.json()
+export async function fetchFilesDownloadList(ids: string[], scope?: string) {
+  return axios.post('/api/files/download_list', {
+    task: 'delete', ids, scope,
+  }).then(r => r.data as DownloadListResponse[])
 }
 
 export async function deleteFilesRequest(ids: string[]): Promise<any> {
@@ -50,6 +46,12 @@ export async function deleteFilesRequest(ids: string[]): Promise<any> {
     body: JSON.stringify({ ids }),
   }).then(checkStatus)
   return res.json()
+}
+
+export type LockUnlockActionType = 'lock' | 'unlock'
+
+export async function lockUnlockFilesRequest(ids: string[], type: LockUnlockActionType) {
+  return axios.post(`/api/nodes/${type}`, { ids }).then(r => r.data)
 }
 
 export async function addFolderRequest({ name }: { name: string }, parentFolderId?: string, spaceId?: string, scope?: ResourceScope) {

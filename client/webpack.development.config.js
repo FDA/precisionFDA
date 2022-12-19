@@ -9,6 +9,8 @@ const { merge } = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 
+require('events').EventEmitter.defaultMaxListeners = 20
+
 const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
 
@@ -69,9 +71,12 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     historyApiFallback: true, // See https://stackoverflow.com/questions/56573363/react-router-v4-nested-routes-not-work-with-webpack-dev-server
     host: '0.0.0.0', // See https://github.com/webpack/webpack-dev-server/issues/547
     port: 4000,
-    https: {
-      key: fs.readFileSync(path.resolve('../key.pem')),
-      cert: fs.readFileSync(path.resolve('../cert.pem')),
+    server: {
+      type: 'https',
+      options: {
+        key: fs.readFileSync(path.resolve('../key.pem')),
+        cert: fs.readFileSync(path.resolve('../cert.pem')),
+      },
     },
     proxy: {
       '/logout': {
@@ -87,6 +92,10 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         secure: false,
       },
       '/api': {
+        target: TARGET,
+        secure: false,
+      },
+      '/pdfs': {
         target: TARGET,
         secure: false,
       },

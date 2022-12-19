@@ -4,7 +4,7 @@ import { IUser } from '../../types/user'
 
 export function useAuthUserQuery() {
   return useQuery(['auth-user'], {
-    queryFn: () => axios.get<{ user: IUser }>('/api/user').then(r => r.data),
+    queryFn: () => axios.get('/api/user').then(r => r.data as { user: IUser }),
     staleTime: Infinity,
     cacheTime: Infinity,
     retry: 1,

@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Prompt } from 'react-router'
 import styled from 'styled-components'
@@ -63,13 +63,15 @@ export const ChallengeForm = ({
   challenge,
   defaultValues = {},
   onSubmit,
-  isSavingChallenge = false,
+  onImageSelection,
+  isSaving = false,
   mutationErrors,
 }: {
   challenge?: Challenge
   defaultValues?: any
   onSubmit: (a: any) => Promise<any>
-  isSavingChallenge?: boolean
+  onImageSelection?: (img: File) => Promise<any>
+  isSaving?: boolean
   mutationErrors?: MutationErrors
 }) => {
   const isEditMode = !!challenge
@@ -82,6 +84,7 @@ export const ChallengeForm = ({
     register,
     handleSubmit,
     setError,
+    watch,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<CreateChallengeForm>({
     mode: 'onBlur',
@@ -105,6 +108,14 @@ export const ChallengeForm = ({
       ...defaultValues,
     },
   })
+
+  const img = watch().cardImage
+
+  useEffect(() => {
+    if (img?.[0] != null) {
+      onImageSelection && onImageSelection(img[0])
+    }
+  }, [watch().cardImage])
 
   useMutationErrorEffect(setError, mutationErrors)
 
@@ -150,11 +161,38 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
+            <label>Challenge image (required):</label>
+            {isEditMode ? (
+              <img
+                width={300}
+                src={challenge.card_image_url || undefined}
+                alt="challenge card"
+              />
+            ) : (
+              <>
+                <InputText
+                  label="cardImage"
+                  type="file"
+                  accept="image/*"
+                  {...register('cardImage')}
+                  disabled={isSubmitting || isEditMode}
+                />
+                <ErrorMessage
+                  errors={errors}
+                  name="cardImage"
+                  render={({ message }) => <InputError>{message}</InputError>}
+                />
+              </>
+            )}
+            {/* disabled changing image for edit mode */}
+          </FieldGroup>
+
+          <FieldGroup>
             <label>Scope (required):</label>
             <Controller
               name="scope"
               control={control}
-              render={({ field: { onChange, onBlur, value }}) => (
+              render={({ field: { onChange, onBlur, value } }) => (
                 <ScopeFieldSelect
                   challengeId={challenge?.id.toString() || undefined}
                   isSubmitting={isSubmitting}
@@ -176,7 +214,7 @@ export const ChallengeForm = ({
             <Controller
               name="app_owner_id"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <ScoringAppUserSelect
                   isSubmitting={isSubmitting}
                   onChange={onChange}
@@ -227,7 +265,7 @@ export const ChallengeForm = ({
             <Controller
               name="host_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <HostLeadUserSelect
                   isDisabled={isEditMode || isSubmitting}
                   onChange={onChange}
@@ -248,7 +286,7 @@ export const ChallengeForm = ({
             <Controller
               name="guest_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <GuestLeadUserSelect
                   onChange={onChange}
                   onBlur={onBlur}
@@ -265,38 +303,11 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Challenge image (required):</label>
-            {isEditMode ? (
-              <img
-                width={300}
-                src={challenge.card_image_url || undefined}
-                alt="challenge card"
-              />
-            ) : (
-              <>
-                <InputText
-                  label="cardImage"
-                  type="file"
-                  accept="image/*"
-                  {...register('cardImage')}
-                  disabled={isSubmitting || isEditMode}
-                />
-                <ErrorMessage
-                  errors={errors}
-                  name="cardImage"
-                  render={({ message }) => <InputError>{message}</InputError>}
-                />
-              </>
-            )}
-            {/* disabled changing image for edit mode */}
-          </FieldGroup>
-
-          <FieldGroup>
             <label>Status (required):</label>
             <Controller
               name="status"
               control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
+              render={({ field: { value, onChange, onBlur } }) => (
                 <StatusSelect
                   isEditing={isEditMode}
                   isSubmitting={isSubmitting}
@@ -339,7 +350,7 @@ export const ChallengeForm = ({
         </StyledForm>
       </div>
       <Modal
-        isShown={isSavingChallenge}
+        isShown={isSaving}
         hide={() => null}
         headerText={
           isEditMode ? 'Updating challenge' : 'Creating new challenge'
@@ -348,7 +359,7 @@ export const ChallengeForm = ({
       >
         <Content>
           The challenge is being {isEditMode ? 'updated' : 'created'}, please
-          wait until this message disappears
+          wait until this message disappears.
         </Content>
       </Modal>
     </>
