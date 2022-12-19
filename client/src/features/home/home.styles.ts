@@ -200,6 +200,7 @@ export const StyledRight = styled.div`
 
 export const StyledNameCell = styled.div<{ color?: string }>`
   display: flex;
+  flex-grow: 1;
   align-items: center;
   cursor: pointer;
   color: ${colors.primaryBlue};

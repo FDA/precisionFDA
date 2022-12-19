@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { colors } from "../../../../styles/theme";
+import styled from 'styled-components'
+import { colors } from '../../../../styles/theme'
 
 
 export const StyledFileBox = styled.div`
@@ -30,6 +30,9 @@ export const FileDescription = styled.div`
   font-size: 16px;
   color: #52698f;
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 `
 export const StyledTagContainer = styled.div`
   display: flex;
