@@ -10,6 +10,7 @@ class UserFileSerializer < NodeSerializer
     :links,
     :file_license,
     :show_license_pending,
+    :locked,
   )
 
   def file_size
@@ -68,12 +69,12 @@ class UserFileSerializer < NodeSerializer
       # link to license page if exists
       links[:show_license] = license_path(object.license.id) if object.license
 
-      if object.license.present? && object.license_status?(current_user, "active")
-        unless object.license.owned_by_user?(current_user)
-          links[:download] = download_api_file_path(object)
-          # POST /api/files/copy  copy_api_files
-          links[:copy] = copy_api_files_path
-        end
+      if object.license.present? &&
+         object.license_status?(current_user, "active") &&
+         !object.license.owned_by_user?(current_user)
+        links[:download] = download_api_file_path(object)
+        # POST /api/files/copy  copy_api_files
+        links[:copy] = copy_api_files_path
       end
 
       if object.license.present? && !object.license_status?(current_user, "active")
@@ -105,23 +106,21 @@ class UserFileSerializer < NodeSerializer
         links[:copy] = copy_api_files_path
       end
 
-      if object.owned_by_user?(current_user)
-        unless object.in_space? && member_viewer?
-          # publish single file if it is not public already and in a root folder
-          links[:publish] = publish_object unless object.public? || object.parent_folder_id
-          # POST: /api/files/remove - Delete file(s) & folder(s), being selected
-          links[:remove] = remove_api_files_path
-          # POST associate item to a license
-          links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
-          if object.license&.owned_by_user?(current_user)
-            # GET UserFile license object if exists
-            links[:object_license] = api_license_path(object.license&.id)
-            # POST detach license from item
-            links[:detach_license] = "/api/licenses/:id/remove_item/:item_uid"
-          end
-          # POST: Move file(s) and folder()s) to other folder
-          links[:organize] = move_api_files_path
+      if object.owned_by_user?(current_user) && !(object.in_space? && member_viewer?)
+        # publish single file if it is not public already and in a root folder
+        links[:publish] = publish_object unless object.public? || object.parent_folder_id
+        # POST: /api/files/remove - Delete file(s) & folder(s), being selected
+        links[:remove] = remove_api_files_path
+        # POST associate item to a license
+        links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
+        if object.license&.owned_by_user?(current_user)
+          # GET UserFile license object if exists
+          links[:object_license] = api_license_path(object.license&.id)
+          # POST detach license from item
+          links[:detach_license] = "/api/licenses/:id/remove_item/:item_uid"
         end
+        # POST: Move file(s) and folder()s) to other folder
+        links[:organize] = move_api_files_path
       end
 
       if current_user.can_administer_site?

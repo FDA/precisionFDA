@@ -34,5 +34,17 @@ const renameFolderSchema: JSONSchema7 = {
   required: ['newName'],
   additionalProperties: false,
 }
+type uidListInput = {
+  ids: number[]
+}
 
-export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema }
+const uidListSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    ids: { type: 'array' },
+  },
+  required: ['ids'],
+  additionalProperties: false,
+}
+
+export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput}

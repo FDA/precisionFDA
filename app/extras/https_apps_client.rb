@@ -1,5 +1,5 @@
 # The client for communicating with nodejs-api service.
-class HttpsAppsClient
+class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # @param token [String] User access token.
   # @param user [User] A user.
   def initialize(token, user)
@@ -78,6 +78,30 @@ class HttpsAppsClient
       "/files/#{file_uid}/close",
       {},
       Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  # Lock a folder/file.
+  # @param ids [Array] Folders/Files ID.
+  def nodes_lock(ids)
+    request(
+      "/nodes/lock",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Unlock a folder/file.
+  # @param ids [Array] Folders/Files ID.
+  def nodes_unlock(ids)
+    request(
+      "/nodes/unlock",
+      {
+        ids: ids,
+      },
+      Net::HTTP::Post::METHOD,
     )
   end
 
@@ -325,7 +349,6 @@ class HttpsAppsClient
     )
   end
 
-
   # ┌─────────────────────────┐
   # │                         │
   # │ site-settings endpoints │
@@ -358,6 +381,7 @@ class HttpsAppsClient
 
   private
 
+  # rubocop:disable Metrics/ParameterLists
   def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {}, additional_headers = {})
     query = auth_query.merge(additional_query).to_query
     uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{query}")
@@ -372,6 +396,7 @@ class HttpsAppsClient
   rescue Errno::ECONNREFUSED
     raise Error, "Can't connect to nodejs-api service"
   end
+  # rubocop:enable Metrics/ParameterLists
 
   # Returns connection options.
   # @return [Hash] Connection options.

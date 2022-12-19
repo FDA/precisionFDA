@@ -20,6 +20,7 @@ import {
   HeaderLeft,
   HeaderRight,
   HomeLoader,
+  LockedRow,
   MetadataItem,
   MetadataKey,
   MetadataRow,
@@ -34,6 +35,8 @@ import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
+import { LockIcon } from '../../../../components/icons/LockIcon'
+import { theme } from '../../../../styles/theme'
 
 const FileActions = ({
   scope,
@@ -76,6 +79,8 @@ const FileActions = ({
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Lock']?.modal}
+      {actions['Unlock']?.modal}
     </>
   )
 }
@@ -126,7 +131,7 @@ export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpa
         <Header>
           <HeaderLeft>
             <Title>
-              <FileIcon height={24} />
+              <FileIcon height={22} />
               &nbsp;{file.name}
               {file.show_license_pending && (
                 <HomeLabel
@@ -145,9 +150,14 @@ export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpa
         </Header>
 
         <FileDescription>
+          {file.locked && <LockedRow>
+            <LockIcon height={14} color={theme.colors.darkYellow} />
+            File is locked
+          </LockedRow>
+          }
           {file.description
             ? file.description
-            : 'This file has no description.'}
+            : 'No description provided.'}
         </FileDescription>
 
         <MetadataSection>

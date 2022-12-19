@@ -1,4 +1,4 @@
-import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/core'
+import { Collection, Entity, Enum, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { FILE_STI_TYPE } from './user-file.types'
 
@@ -7,7 +7,7 @@ import { FILE_STI_TYPE } from './user-file.types'
   discriminatorColumn: 'stiType',
   discriminatorMap: { UserFile: 'UserFile', Folder: 'Folder', Asset: 'Asset' },
   tableName: 'nodes',
-})
+  })
 export class Node extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -18,6 +18,13 @@ export class Node extends BaseEntity {
 
   @Property({ unique: true })
   uid: string
+L
+  @Property()
+
+  name: string
+
+  @Property()
+  locked: boolean
 
   @Property()
   userId: number

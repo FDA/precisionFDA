@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE} from './user-file.types'
 import { Asset } from '.'
 
 

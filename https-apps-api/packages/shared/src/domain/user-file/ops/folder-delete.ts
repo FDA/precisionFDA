@@ -7,9 +7,9 @@ import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
 import { User } from '../../user/user.entity'
 
 export class FolderDeleteOperation extends BaseOperation<
-  UserOpsCtx,
-  IdInput,
-  number
+UserOpsCtx,
+IdInput,
+number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
@@ -25,7 +25,6 @@ export class FolderDeleteOperation extends BaseOperation<
       if (!existingFolder) {
         throw new errors.FolderNotFoundError()
       }
-
       // subfolders include "existingFolder"
       const foldersInProject = await repo.findForSynchronization({
         userId: this.ctx.user.id,
@@ -36,6 +35,10 @@ export class FolderDeleteOperation extends BaseOperation<
       const filesToRemove = await userFileRepo.findFilesInFolders({
         folderIds: folderSubtree.map(f => f.id),
       })
+      const checkForLockedFiles = filesToRemove.filter(file => file.locked)
+      if (checkForLockedFiles.length) {
+        throw new errors.PermissionError(`Unable to remove, folder ${existingFolder.name} contains locked files`)
+      }
       const totalNodesCnt = folderSubtree.length + filesToRemove.length
       if (totalNodesCnt >= 10000) {
         this.ctx.log.warn(
@@ -49,7 +52,7 @@ export class FolderDeleteOperation extends BaseOperation<
         accessToken: this.ctx.user.accessToken,
       })
       userFileRepo.removeFilesWithTags(filesToRemove)
-      
+
       const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
       for (const folder of folderSubtree) {
         const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folder, folderPath, currentUser)
