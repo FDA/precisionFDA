@@ -34,10 +34,10 @@ export async function unlockSpaceRequest({ link = '' }: { id: string, op: 'lock'
   return res.json()
 }
 
-export async function addData({ spaceId, uids }: { spaceId: string, uids: string[] }): Promise<unknown> {
+export async function addData({ spaceId, folderId, uids }: { spaceId: string, folderId: string, uids: string[] }): Promise<unknown> {
   const res = await fetch(`/api/spaces/${spaceId}/add_data/`, {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ uids }),
+    body: JSON.stringify({ uids, folder_id: folderId }),
   })
   return res
 }
