@@ -8,6 +8,7 @@ import { useModal } from '../../../modal/useModal'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
 import { addData } from '../../../spaces/spaces.api'
+import { useQueryParam } from 'use-query-params'
 
 interface CustomDataNode extends DataNode {
   uid?: string
@@ -28,6 +29,7 @@ function findById<T extends DataNode>(tree: T[], nodeId: string): T {
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const queryClient = useQueryClient()
+  const [folderId] = useQueryParam<string | undefined>('folder_id')
   const { isShown, setShowModal } = useModal()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [treeData, setTreeData] = useImmer<CustomDataNode[]>([
@@ -35,7 +37,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   ])
   const { mutateAsync, isLoading } = useMutation({
     mutationKey: ['copy-files-to-space-add'],
-    mutationFn: () => addData({ spaceId: spaceId || '', uids: selectedFiles }),
+    mutationFn: () => addData({ spaceId: spaceId || '', folderId: folderId || '', uids: selectedFiles }),
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])
       setShowModal(false)
