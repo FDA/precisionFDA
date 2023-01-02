@@ -8,6 +8,8 @@ class JobsController < ApplicationController
   before_action :require_login_or_guest, only: [:show]
   before_action :check_total_and_job_charges_limit, only: :new
 
+  layout "react", only: [:new]
+
   def show
     @job = Job.accessible_by(@context).includes(:user).find_by(uid: params[:id])
 
@@ -97,58 +99,7 @@ class JobsController < ApplicationController
   end
 
   def new
-    @app = App.find_by!(uid: params[:app_id])
-
-    unless @app.runnable_by?(current_user)
-      redirect_back(
-        fallback_location: apps_path,
-        flash: { error: I18n.t("app_not_accessible_or_runnable") },
-      ) && return
-    end
-    if user_has_no_compute_resources_allowed
-      redirect_back(
-        fallback_location: apps_path,
-        flash: { error: I18n.t("api.errors.no_allowed_instance_types") },
-      ) && return
-    end
-
-
-    licenses_to_accept = []
-    @app.assets.each do |asset|
-      if asset.license.present? && !asset.licensed_by?(@context)
-        licenses_to_accept << {
-          license: describe_for_api(asset.license),
-          user_license: asset.user_license(@context)
-        }
-      end
-    end
-
-    licenses_accepted = @context.user.accepted_licenses.map do |license|
-      {
-        id: license.license_id,
-        pending: license.pending?,
-        active: license.active?,
-        unset: !license.pending? && !license.active?
-      }
-    end
-
-    available_spaces = @app.available_job_spaces(@context.user)
-
-    selectable_spaces = available_spaces.map do |space|
-      { value: space.id, label: space.title, space_type: space.space_type }
-    end
-
-    content_scopes = available_spaces.each_with_object({}) do |space, memo|
-      memo[space.id] = space.accessible_scopes
-    end
-
-    js app: @app.slice(:uid, :spec, :title, :space_scopes),
-       licenses_to_accept: licenses_to_accept.uniq(&:id),
-       licenses_accepted: licenses_accepted,
-       selectable_spaces: selectable_spaces,
-       content_scopes: content_scopes,
-       instance_types: user_compute_resource_labels,
-       job_limit: current_user.job_limit
+    # rendered by react
   end
 
   def destroy

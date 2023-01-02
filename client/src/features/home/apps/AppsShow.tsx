@@ -118,6 +118,7 @@ const DetailActionsDropdown = (
         data-turbolinks="false"
         isLinkDisabled={!app.links.run_job}
         conditionType='all'
+        asReactLink
       >
         <>
           Run App&nbsp;

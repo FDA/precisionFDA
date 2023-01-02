@@ -1262,6 +1262,16 @@ class ApiController < ApplicationController
   end
 
   # Inputs
+  # ids: array of file ids for which we want to get licenses
+  #
+  # Outputs
+  # list of license objects
+  def list_licenses_for_files
+    result = https_apps_client.list_licenses_for_files unsafe_params[:ids]
+    render json: result
+  end
+
+  # Inputs
   #
   # id (integer, required): the id of the note to be updated
   # title (string): the updated note title

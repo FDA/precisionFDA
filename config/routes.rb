@@ -228,6 +228,8 @@ Rails.application.routes.draw do
       resources :apps do
         get :describe, on: :member, to: "apps#describe"
         get :jobs, on: :member, to: "jobs#app"
+        get :selectable_spaces
+        get :licenses_to_accept
 
         collection do
           post "copy"
@@ -238,6 +240,7 @@ Rails.application.routes.draw do
           get :everybody
           get :spaces
           get :user_compute_resources
+          get :licenses_to_accept
 
           put :feature, to: "apps#invert_feature"
           put :delete, to: "apps#soft_delete"
@@ -311,6 +314,9 @@ Rails.application.routes.draw do
              on: :member,
              action: :license_item,
              as: "license_item"
+        collection do
+          get "accepted" => "licenses#accepted_licenses"
+        end
         match "request_approval",
               on: :member,
               action: :request_approval,
@@ -445,6 +451,7 @@ Rails.application.routes.draw do
       post "set_tags"
       post "assign_app"
       get "list_licenses"
+      post "list_licenses_for_files"
     end
     # end API
 

@@ -203,7 +203,7 @@ module Api
     # Sends space activatio email to leads.
     def send_emails(space)
       space.leads.find_each do |lead|
-        NotificationsMailer.space_activated_email(space, lead).deliver_now!
+        NotificationsMailer.space_activated_email(space, lead).deliver_later!
       end
     end
 

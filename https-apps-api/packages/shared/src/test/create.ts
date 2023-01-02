@@ -3,7 +3,71 @@ import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
 import { entities, user } from '../domain'
 import * as generate from './generate'
+import { getScopeFromSpaceId } from '../domain/space/space.helper'
+import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
+
+const acceptedLicenseHelper = {
+  create: (
+    em: EntityManager,
+    references: {
+      license: InstanceType<typeof entities.License>
+      user: InstanceType<typeof entities.User>
+    },
+    data?: Partial<InstanceType<typeof entities.AcceptedLicense>>,
+  ) => {
+    const acceptedLicense
+      = wrap(new entities.AcceptedLicense(references.license, references.user)).assign(data, { em })
+    em.persist(acceptedLicense)
+    return acceptedLicense
+  },
+}
+
+const assetHelper = {
+  create: (
+    em: EntityManager,
+    references: {user: InstanceType<typeof entities.User>},
+    data?: Partial<InstanceType<typeof entities.Asset>>
+  ) => {
+    const defaults = generate.asset.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    input.parentType = PARENT_TYPE.ASSET
+
+    const asset = wrap(new entities.Asset(references.user)).assign(input, { em })
+    em.persist(asset)
+    return asset
+  },
+}
+
+const licenceHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.License>>,
+  ) => {
+    const license = wrap(new entities.License(references.user)).assign(data, { em })
+    em.persist(license)
+    return license
+  },
+  createForAsset: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof entities.User>
+      asset: InstanceType<typeof entities.Asset>
+    },
+    data?: Partial<InstanceType<typeof entities.License>>,
+  ) => {
+    const license = wrap(new entities.License(references.user)).assign(data, { em })
+    em.persist(license)
+    const licensedItem = wrap(new entities.LicensedItem(license, references.asset.id))
+      .assign({ licenseableType: 'Node' }, { em })
+    em.persist(licensedItem)
+    return license
+  }
+}
 
 const userHelper = {
   create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
@@ -158,6 +222,24 @@ const appHelper = {
       ...data,
     }
     const app = wrap(new entities.App(references.user)).assign(input, { em })
+    em.persist(app)
+    return app
+  },
+  createWithSpace: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    appData: Partial<InstanceType<typeof entities.App>>,
+    spaceData: Partial<InstanceType<typeof entities.Space>>,
+  ) => {
+    const appDefaults = generate.app.regular()
+    const appInput = {
+      ...appDefaults,
+      ...appData,
+    }
+    const space = wrap(new entities.Space()).assign(spaceData, { em })
+    em.persist(space)
+    const app = wrap(new entities.App(references.user)).assign(appInput, { em })
+    app.scope = getScopeFromSpaceId(space.id)
     em.persist(app)
     return app
   },
@@ -452,15 +534,18 @@ const comparisonHelper = {
 }
 
 export {
+  assetHelper,
   userHelper,
   jobHelper,
   appHelper,
+  acceptedLicenseHelper,
   filesHelper,
+  tagsHelper,
+  licenceHelper,
+  spacesHelper,
+  commentHelper,
   challengeHelper,
   challengeResourceHelper,
-  commentHelper,
   comparisonHelper,
   dbClusterHelper,
-  spacesHelper,
-  tagsHelper,
 }

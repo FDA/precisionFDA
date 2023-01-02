@@ -249,16 +249,15 @@ export const JobShow = ({ scope = 'me', spaceId }: { scope?: ResourceScope, spac
                   Sync Files
                 </ButtonSolidBlue>
               )}
-              <ButtonSolidBlue
-                as="a"
-                data-turbolinks="false"
-                href={`/apps/${execution.links.app?.replace(
-                  '/apps/',
-                  '',
-                )}/jobs/new`}
+              <Link to={`/apps/${execution.links.app?.replace(
+                '/apps/',
+                '',
+              )}/jobs/new`}
               >
-                Re-Run Execution
-              </ButtonSolidBlue>
+                <ButtonSolidBlue>
+                  Re-Run Execution
+                </ButtonSolidBlue>
+              </Link>
               <ExecutionActions scope={scope} execution={execution} />
             </ActionsRow>
           </div>

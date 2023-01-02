@@ -11,4 +11,13 @@ export interface License {
   location: string;
   approval_required: boolean;
   tags: any[];
+  state: string;
+}
+
+export interface UserLicense {
+  id: string;
+  license: License; // license object
+  user: number; // user id
+  state: string;
+  message: string;
 }

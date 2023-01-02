@@ -64,7 +64,7 @@ export const colors = {
   brownOnGrey: '#b3453d', 
   blueOnBlack: '#368ad3',
   greyOnLightBlue: '#6d6d6d',
-  
+  orange: '#EB776F',
 }
 
 export const fontSize = {
