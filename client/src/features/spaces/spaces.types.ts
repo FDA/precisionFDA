@@ -73,12 +73,13 @@ export interface ConfidentialSpace {
 
 export type SideRole = 'reviewer' | 'sponsor'
 
+// PK's note: this interface represents Space, but rails transform DB entity to a different structure and node returns the data as it is stored in the DB
 export interface ISpace {
   id: string;
   description: string;
   state: 'active' | 'unactivated';
   name: string;
-  type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator'
+  type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator' | number // number is the value from DB, string is value from db translated to human readable
   cts?: any;
   created_at: string;
   updated_at: string;
@@ -87,6 +88,7 @@ export interface ISpace {
   links: Links;
   updatable: boolean;
   tags: any[];
+  spaceId: number;
   current_user_membership: SpaceMembership;
   host_lead: HostLead;
   guest_lead: GuestLead;
@@ -108,4 +110,13 @@ export const columnFilters = {
   host_lead: 'string',
   guest_lead: 'string',
   type: 'string',
+}
+
+export const SPACE_TYPES = {
+  GROUPS: 0,
+  REVIEW: 1,
+  VERIFICATION: 2,
+  PRIVATE_TYPE: 3,
+  GOVERNMENT: 4,
+  ADMINISTRATOR: 5,
 }

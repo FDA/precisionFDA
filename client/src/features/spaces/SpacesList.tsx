@@ -121,6 +121,8 @@ const SpacesList = () => {
 
 const StyledTable = styled.div`
   ${ReactTableStyles} {
+    margin-inline: auto;
+    width: min(100% - 32px, 100%);
     font-size: 14px;
     .table {
       .tr {

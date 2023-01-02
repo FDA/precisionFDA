@@ -5,11 +5,13 @@ import {
   IdentifiedReference,
   ManyToOne,
   OneToMany,
+  ManyToMany,
   Property,
   Reference,
 } from '@mikro-orm/core'
 import { Tagging, User } from '..'
 import { AssetRepository } from './asset.repository'
+import { App } from '../app'
 import { Node } from './node.entity'
 import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE, IFileOrAsset, FILE_STI_TYPE, ITrackable } from './user-file.types'
 
@@ -62,6 +64,9 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
 
   @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
+
+  @ManyToMany(() => App, app => app.assets)
+  apps = new Collection<App>(this)
 
   constructor(user: User) {
     super()

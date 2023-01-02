@@ -11,7 +11,7 @@ import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
-import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
+import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
@@ -127,7 +127,7 @@ export const useFilesSelectActions = ({
     modalComp: acceptLicensesModal,
     setShowModal: setAcceptLicensesModal,
     isShown: isShownAcceptLicensesModal,
-  } = useAcceptLicensesModal<IFile>({
+  } = useAcceptLicenseModal<IFile>({
     selected: selected[0],
     resource: 'files',
     onSuccess: () => {
