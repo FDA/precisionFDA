@@ -170,6 +170,7 @@ const app = {
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
+      verified: true,
     }
   },
   rshiny: (): Partial<InstanceType<typeof entities.App>> => {

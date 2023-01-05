@@ -55,7 +55,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user1 = create.userHelper.create(em, { email: generate.random.email() })
     user2 = create.userHelper.create(em, { email: generate.random.email() })
