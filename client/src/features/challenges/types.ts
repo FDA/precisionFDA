@@ -1,5 +1,3 @@
-import { PaginationParams } from '../home/usePaginationState'
-
 export interface Regions {
   'pre-registration'?: string;
   'intro'?: string;
