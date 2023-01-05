@@ -50,7 +50,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
       { uid },
       {
         filters: ['userfile'],
-        populate: populate || ['user', 'taggings.tag'],
+        populate: populate as never[] || ['user', 'taggings.tag'] as never[],
       },
     )
   }

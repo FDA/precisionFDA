@@ -217,9 +217,7 @@ export class User extends BaseEntity {
           role: adminGroup,
         },
       },
-      populate: {
-        adminGroup: true,
-      },
+      populate: ['adminGroup'],
     })
 
     return siteAdminGroupMemberships.length > 0

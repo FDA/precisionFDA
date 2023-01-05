@@ -53,7 +53,7 @@ describe('space-change.handler', () => {
     await em.flush()
 
     ctx = {
-      em: database.orm().em.fork(true),
+      em: database.orm().em.fork(),
       log: defaultLogger,
       user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
     }
