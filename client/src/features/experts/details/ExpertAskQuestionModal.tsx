@@ -78,43 +78,41 @@ const ExpertAskQuestionModalComponent = ({
   }
 
   const renderModal = () => (
-    <div className="objects-actions-modal">
-      <Modal
-        isShown={isOpen}
-        headerText={title}
-        hide={closeAction}
-        footer={
-          <Footer
-            hideAction={closeAction}
-            action={submitQuestion}
-            isAskingDisabled={isAskingDisabled}
-          />
-        }
-        >
-        <Content>
-          <Asking>
-            Asking as:&nbsp;
-            {submitter}
-          </Asking>
+    <Modal
+      id="ask-expert"
+      isShown={isOpen}
+      headerText={title}
+      hide={closeAction}
+      footer={
+        <Footer
+          hideAction={closeAction}
+          action={submitQuestion}
+          isAskingDisabled={isAskingDisabled}
+        />
+      }
+      >
+      <Content>
+        <Asking>
+          Asking as:&nbsp;
+          {submitter}
+        </Asking>
 
-            <StyledTextArea
-              label=""
-              placeholder="Submit a question.."
-              aria-label="Ask a question to submit to Expert"
-              style={{ height: '100px' }}
-              value={askedQuestion}
-              name="asking"
-              onChange={e => setAskedQuestion(e.target.value)}
+          <StyledTextArea
+            placeholder="Submit a question.."
+            aria-label="Ask a question to submit to Expert"
+            style={{ height: '100px' }}
+            value={askedQuestion}
+            name="asking"
+            onChange={e => setAskedQuestion(e.target.value)}
+          />
+          {triggerCaptcha && (
+            <GoogleReCaptchaV3
+              callback={onCaptchaSuccess}
+              action="question"
             />
-            {triggerCaptcha && (
-              <GoogleReCaptchaV3
-                callback={onCaptchaSuccess}
-                action="question"
-              />
-            )}
-        </Content>
-      </Modal>
-    </div>
+          )}
+      </Content>
+    </Modal>
   )
 
   const renderModalWithCaptcha = () => {

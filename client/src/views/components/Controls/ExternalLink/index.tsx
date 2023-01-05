@@ -1,12 +1,15 @@
 import React, { FunctionComponent, useState } from 'react'
 import styled from 'styled-components'
-
-import Modal from '../../Modal'
-import { Button, ButtonSolidBlue } from '../../../../components/Button/index';
+import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import { Modal } from '../../../../features/modal'
 
 const StyledLink = styled.a`
   cursor: pointer;
 `
+const StyledBody = styled.div`
+  margin: 12px;
+`
+
 interface IExternalLinkProps {
   to: string,
   className?: string,
@@ -34,17 +37,19 @@ const ExternalLink : FunctionComponent<IExternalLinkProps> = ({ to, className, c
     <>
       <StyledLink onClick={() => openModal()} className={className} aria-label={ariaLabel}>{children}</StyledLink>
       <Modal
-        isOpen={isOpen}
-        isLoading={false}
-        title="Leaving precisionFDA"
-        modalFooterContent={<>
+        id='external-link'
+        isShown={isOpen}
+        headerText="Leaving precisionFDA"
+        footer={<>
           <Button onClick={closeModal}>Cancel</Button>
           <ButtonSolidBlue onClick={openLink}>Continue</ButtonSolidBlue>
         </>}
-        hideModalHandler={closeModal}
+        hide={closeModal}
       >
-        <p>You are leaving the precisionFDA website.</p>
-        <p>Continue with {to}?</p>
+        <StyledBody>
+          <p>You are leaving the precisionFDA website.</p>
+          <p>Continue going to: {to}?</p>
+        </StyledBody>
       </Modal>
     </>
   )

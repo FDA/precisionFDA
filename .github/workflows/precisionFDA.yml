@@ -269,5 +269,5 @@ jobs:
         working-directory: ./client
 
       - name: Build production
-        run: npm rebuild node-sass && yarn run build:production
+        run: yarn run build:production
         working-directory: ./client
