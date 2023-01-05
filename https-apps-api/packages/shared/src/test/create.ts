@@ -1,11 +1,12 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { entities, user } from '../domain'
+import { AppSeries, entities, User, user } from '../domain'
 import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
+import { random } from './generate'
 
 const acceptedLicenseHelper = {
   create: (
