@@ -15,7 +15,7 @@ describe('AssetRepository tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     // log = getLogger()
