@@ -61,7 +61,7 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
       port: describeDbClusterRes.port,
       scope: this.input.scope,
       description: this.input.description,
-      statusAsOf: new Date(describeDbClusterRes.statusAsOf),
+      statusAsOf: describeDbClusterRes.statusAsOf ? new Date(describeDbClusterRes.statusAsOf) : null,
     })
 
     await this.em.persistAndFlush(dbCluster)

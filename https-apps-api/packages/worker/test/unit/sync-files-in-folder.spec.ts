@@ -255,7 +255,7 @@ describe('syncFilesInFolder operation', () => {
     )
     await em.flush()
     const op = new userFile.SyncFilesInFolderOperation({
-      em: database.orm().em.fork(true),
+      em: database.orm().em.fork(),
       log,
       user: userCtx,
     })

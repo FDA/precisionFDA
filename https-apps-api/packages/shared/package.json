@@ -32,9 +32,9 @@
     "sinon": "^9.2.3"
   },
   "dependencies": {
-    "@mikro-orm/core": "^4.5.9",
-    "@mikro-orm/mysql": "^4.5.9",
-    "@mikro-orm/reflection": "^4.5.9",
+    "@mikro-orm/core": "^5.6.3",
+    "@mikro-orm/mysql": "^5.6.3",
+    "@mikro-orm/reflection": "^5.6.3",
     "@types/ramda": "^0.27.28",
     "@types/bull": "^3.15.9",
     "ajv": "^8.0.5",
