@@ -27,7 +27,7 @@ describe('TASK: user-checkup', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })
