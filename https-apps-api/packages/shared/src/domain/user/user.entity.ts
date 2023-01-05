@@ -86,10 +86,6 @@ export class User extends BaseEntity {
   @Property({ nullable: true })
   schemaVersion?: number
 
-  // TODO(samuel) refactor this into foreign key
-  @Property()
-  orgId: number
-
   @Property()
   firstName: string
 

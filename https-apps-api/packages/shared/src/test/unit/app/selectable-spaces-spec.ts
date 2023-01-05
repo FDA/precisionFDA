@@ -14,7 +14,7 @@ describe('selectable spaces tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -29,7 +29,7 @@ describe('selectable spaces tests', () => {
         title: 'private-app',
         scope: 'private',
       },
-      { name: 'space-in-review', type: 3 },
+      { name: 'space-in-review', type: 3, description: 'desc', hostDxOrg: 'hostDxOrg' },
     ) // space type that doesn't fit anything
 
     await em.flush()
