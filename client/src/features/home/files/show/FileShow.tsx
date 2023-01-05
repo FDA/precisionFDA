@@ -35,6 +35,7 @@ import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
+import { Filler } from '../../../../components/Page/styles'
 import { LockIcon } from '../../../../components/icons/LockIcon'
 import { theme } from '../../../../styles/theme'
 
@@ -235,7 +236,7 @@ export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpa
         </MetadataSection>
       </Topbox>
 
-      <div className="pfda-padded-t40" />
+      <Filler size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )
