@@ -32,6 +32,7 @@ import { IAsset } from './assets.types'
 import { useAssetActions } from './useAssetSelectActions'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { License } from '../licenses/License'
+import { Filler } from '../../../components/Page/styles'
 
 const AssetActions = ({
   scope,
@@ -204,7 +205,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
         </MetadataSection>
       </Topbox>
 
-      <div className="pfda-padded-t40" />
+      <Filler size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )

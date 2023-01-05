@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { Markdown } from '../../../../components/Markdown'
+import { colors } from '../../../../styles/theme'
 
 export const NotesMarkdown = styled(Markdown)`
   padding: 0;
@@ -43,6 +44,7 @@ export const StyledAttachToModal = styled.div`
     margin: 0;
     padding: 0;
   }
+
   .__menu-item {
     display: flex;
     justify-content: space-between;
@@ -64,6 +66,12 @@ export const StyledAttachToModal = styled.div`
     }
     input {
       margin: 0;
+    }
+    .__menu-item_clear {
+      color: ${colors.primaryBlue};
+    }
+    ._no-content {
+      color: #777777;
     }
     &_class-label {
       padding: 0 10px;
