@@ -23,7 +23,7 @@ describe('POST /apps/:id/run', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })

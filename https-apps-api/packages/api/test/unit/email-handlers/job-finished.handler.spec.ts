@@ -22,7 +22,7 @@ describe('job-finished.handler', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
