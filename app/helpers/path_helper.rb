@@ -109,11 +109,11 @@ module PathHelper
   # @return [String] Folder's URL.
   def pathify_folder(folder)
     if folder.private?
-      "/home/files?folderId=#{folder.id}"
+      "/home/files?folder_id=#{folder.id}"
     elsif folder.public?
-      "/home/files/everybody?folderId=#{folder.id}"
+      "/home/files/everybody?folder_id=#{folder.id}"
     elsif folder.in_space?
-      "/home/files/spaces?folderId=#{folder.id}"
+      "/home/files/spaces?folder_id=#{folder.id}"
     else
       raise "Unable to build folder's path"
     end
