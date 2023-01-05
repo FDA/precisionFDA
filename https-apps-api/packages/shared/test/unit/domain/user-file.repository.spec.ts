@@ -1,11 +1,11 @@
 /* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { assert, expect } from 'chai'
+import { expect } from 'chai'
+import { database } from '../../../src/database'
 import { Folder, User, UserFile } from 'shared/src/domain'
-import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from 'shared/src/test'
 import { FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
-import { UserFileRepository } from 'shared/src/domain/user-file/user-file.repository'
+// import { database } from '@pfda/https-apps-shared'
 
 describe('UserFileRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -17,7 +17,7 @@ describe('UserFileRepository tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     // log = getLogger()
