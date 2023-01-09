@@ -41,7 +41,7 @@
     "chai-as-promised": "^7.1.1",
     "chance": "^1.1.7",
     "dirty-chai": "^2.0.1",
-    "luxon": "^1.27.0",
+    "luxon": "^2.5.2",
     "mocha": "^8.4.0",
     "sinon": "^9.2.1"
   }
