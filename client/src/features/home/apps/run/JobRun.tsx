@@ -129,6 +129,9 @@ const prepareDefaultValues = (
   return defaultValues
 }
 
+const getLabel = (inputSpec: InputSpec) => 
+  inputSpec.label ? inputSpec.label : inputSpec.name
+
 const prepareValidations = (
   inputSpecs: InputSpec[],
   user: IUser,
@@ -140,15 +143,15 @@ const prepareValidations = (
     .forEach(inputSpec => {
       if (inputSpec.class === INPUT_TYPES_CLASSES.BOOLEAN) {
         inputs[inputSpec.name] = Yup.boolean().required(
-          `${inputSpec.label} is required`,
+          `${getLabel(inputSpec)} is required`,
         )
       } else if (inputSpec.class === INPUT_TYPES_CLASSES.FILE) {
         inputs[inputSpec.name] = Yup.object().required(
-          `${inputSpec.label} is required`,
+          `${getLabel(inputSpec)} is required`,
         )
       } else {
         inputs[inputSpec.name] = Yup.string().required(
-          `${inputSpec.label} is required`,
+          `${getLabel(inputSpec)} is required`,
         )
       }
     })
@@ -475,7 +478,7 @@ const JobRun = ({
               {inputSpecs.length > 0 ? inputSpecs.map(inputSpec => (
                 <FieldGroup
                   key={inputSpec.name}
-                  label={inputSpec.label}
+                  label={getLabel(inputSpec)}
                   required={!inputSpec.optional}
                 >
                   <JobRunInput
