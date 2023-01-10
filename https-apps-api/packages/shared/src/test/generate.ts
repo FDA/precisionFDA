@@ -319,6 +319,7 @@ const folder = {
       parentId: 1,
       parentType: PARENT_TYPE.JOB,
       stiType: FILE_STI_TYPE.FOLDER,
+      locked: false
     }
   },
   simpleLocal: (): Partial<InstanceType<typeof entities.Folder>> => {
@@ -331,6 +332,7 @@ const folder = {
       parentId: 1,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.FOLDER,
+      locked: false
     }
   },
 }

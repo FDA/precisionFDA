@@ -5,13 +5,13 @@ import { FILE_STI_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 import { errors } from '../../..'
 import { userFile } from '../..'
-import { loadNodes } from './lock-node'
+import { loadNodes } from '../user-file.helper'
 
 class NodesUnlockOperation extends BaseOperation<UserOpsCtx, uidListInput, void> {
   async run(input: uidListInput): Promise<void> {
     this.ctx.log.info(input.ids, 'Unlocking ids')
     const em = this.ctx.em
-    const nodes: Node[] = await loadNodes(em, input, true)
+    const nodes: Node[] = await loadNodes(em, input, { locked: true })
     let unlockedFilesCount = 0
     let unlockedFoldersCount = 0
 

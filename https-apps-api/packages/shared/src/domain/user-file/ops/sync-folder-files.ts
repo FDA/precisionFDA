@@ -15,9 +15,9 @@ export type SyncFolderFilesOutput = {
 }
 
 export class SyncFilesInFolderOperation extends BaseOperation<
-  UserOpsCtx,
-  SyncFilesInFolderInput,
-  SyncFolderFilesOutput
+UserOpsCtx,
+SyncFilesInFolderInput,
+SyncFolderFilesOutput
 > {
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
     this.ctx.log.debug({ input }, 'SyncFilesInFolderOperation input params')
@@ -77,19 +77,21 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     // we don't want to recreate deleted file
     const toAdd: string[] = []
     for (const dxid of toAddDifference) {
-      const result = await fileRepo.find({ dxid: dxid })
+      const result = await fileRepo.find({ dxid })
       if (result.length === 0) {
         toAdd.push(dxid)
       }
     }
 
     if (localFileDxids.length > 0) {
-      this.ctx.log.debug({ localFileDxids, folderPath },
+      this.ctx.log.debug(
+        { localFileDxids, folderPath },
         'SyncFilesInFolderOperation: Local files detected in given subfolder',
       )
     }
     if (remoteFileDxids.length > 0) {
-      this.ctx.log.debug({ remoteFileDxids, folderPath },
+      this.ctx.log.debug(
+        { remoteFileDxids, folderPath },
         'SyncFilesInFolderOperation: Remote files detected in given subfolder',
       )
     }
@@ -119,15 +121,15 @@ export class SyncFilesInFolderOperation extends BaseOperation<
       )
 
       // we test name and size fields
-      if (userfile.name !== remoteState.describe!.name) {
+      if (userfile.name !== remoteState.describe.name) {
         // console.log('updating file name')
-        userfile.name = remoteState.describe!.name
+        userfile.name = remoteState.describe.name
       }
-      if (userfile.fileSize !== remoteState.describe!.size) {
-        userfile.fileSize = remoteState.describe!.size
+      if (userfile.fileSize !== remoteState.describe.size) {
+        userfile.fileSize = remoteState.describe.size
       }
-      if (userfile.state !== remoteState.describe!.state) {
-        userfile.state = remoteState.describe!.state
+      if (userfile.state !== remoteState.describe.state) {
+        userfile.state = remoteState.describe.state
       }
     })
 
@@ -141,7 +143,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
     // add new files
     if (input.runAdd) {
       toAdd.forEach(dxid => {
-        if (locallyCreatedFileDxids.includes(dxid as string)) {
+        if (locallyCreatedFileDxids.includes(dxid)) {
           this.ctx.log.warn(
             { dxid },
             'SyncFilesInFolderOperation: File already exists in local database, '
@@ -170,7 +172,7 @@ export class SyncFilesInFolderOperation extends BaseOperation<
             // userId: user?.id,
             parentType: PARENT_TYPE.JOB,
             parentId: input.parentId,
-            parentFolderId: current?.id,
+            ...current && { parentFolder: current },
             state: remoteDetails?.describe?.state ?? FILE_STATE_DX.CLOSED,
             stiType: FILE_STI_TYPE.USERFILE,
             entityType: FILE_ORIGIN_TYPE.HTTPS,

@@ -94,7 +94,7 @@ export const useFilesColumns = ({
                       onClick={() => onFolderClick(node.id.toString())}
                     >
                       <FolderIcon height={14} />
-                      {node.locked && <LockIcon height={12} />}
+                      {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
                       {value}
                     </StyledNameCell>
                   )}
