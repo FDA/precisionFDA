@@ -7,7 +7,7 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { User } from '../user'
-import { BaseEntity } from 'shared/src/database/base-entity'
+import { BaseEntity } from '../../database/base-entity'
 
 @Entity({ tableName: 'app_series' })
 export class AppSeries extends BaseEntity {
