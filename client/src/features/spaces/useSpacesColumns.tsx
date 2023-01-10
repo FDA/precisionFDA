@@ -195,12 +195,14 @@ export const useSpacesColumns = ({
         {
           Header: 'Created on',
           accessor: 'created_at',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.created_at || 150,
         },
         {
           Header: 'Modified on',
           accessor: 'updated_at',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.updated_at || 150,
         },

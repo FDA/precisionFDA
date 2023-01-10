@@ -34,7 +34,7 @@ export const useWorkflowColumns = ({
           accessor: 'name',
           Filter: DefaultColumnFilter,
           width: colWidths?.name || 198,
-          Cell: props => (  
+          Cell: props => (
             <StyledNameCell
               as={Link}
               to={{pathname: `${path}/${props.cell.row.original.uid}`, state: {from: location.pathname, fromSearch: location.search }}}
@@ -66,7 +66,7 @@ export const useWorkflowColumns = ({
           disableSortBy: true,
           options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false'}],
           width: colWidths?.featured || 93,
-          Cell: props => (  
+          Cell: props => (
             <div style={{ paddingLeft: 20 }}><FeaturedToggle disabled={!isAdmin} resource="workflows" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['workflows'])} /></div>
           ),
         },
@@ -75,7 +75,7 @@ export const useWorkflowColumns = ({
           accessor: 'added_by',
           Filter: DefaultColumnFilter,
           width: colWidths?.added_by || 200,
-          Cell: props => (  
+          Cell: props => (
             <a data-turbolinks="false" href={props.cell.row.original.links.user}>
               {props.value}
             </a>
@@ -84,6 +84,7 @@ export const useWorkflowColumns = ({
         {
           Header: 'Created',
           accessor: 'created_at_date_time',
+          sortDescFirst: true,
           width: colWidths?.created_at_date_time || 198,
           disableFilters: true,
         },

@@ -79,7 +79,7 @@ export const useAssetColumns = ({
           Filter: SelectColumnFilter,
           options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false'}],
           width: colWidths?.featured || 93,
-          Cell: props => (  
+          Cell: props => (
             <div style={{ paddingLeft: 20 }}><FeaturedToggle disabled={!isAdmin} resource="assets" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['assets'])} /></div>
           ),
         },
@@ -88,7 +88,7 @@ export const useAssetColumns = ({
           accessor: 'added_by',
           Filter: DefaultColumnFilter,
           width: colWidths?.added_by || 200,
-          Cell: props => (  
+          Cell: props => (
             <a data-turbolinks="false" href={props.cell.row.original.links.user || '#'}>
               {props.value}
             </a>
@@ -105,6 +105,7 @@ export const useAssetColumns = ({
         {
           Header: 'Created',
           accessor: 'created_at_date_time',
+          sortDescFirst: true,
           width: colWidths?.created_at_date_time || 198,
           disableFilters: true,
         },
