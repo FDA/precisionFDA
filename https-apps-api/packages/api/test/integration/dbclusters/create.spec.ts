@@ -60,7 +60,9 @@ describe('POST /dbclusters/create', () => {
       engine: DB_CLUSTER_ENGINE[invertObj(ENGINES)[describeCallRes.engine]],
       engineVersion: describeCallRes.engineVersion,
       dxInstanceClass: describeCallRes.dxInstanceClass,
-      user: user.id,
+    })
+    expect(body.user).to.include({
+      id: user.id,
     })
   })
 
