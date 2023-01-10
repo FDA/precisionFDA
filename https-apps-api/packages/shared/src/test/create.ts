@@ -250,9 +250,8 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
-      // todo: remove both
       parentFolder?: InstanceType<typeof entities.Folder>
-      parent?: InstanceType<typeof entities.Job>
+      parent?: InstanceType<typeof entities.UserFile>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
@@ -261,7 +260,13 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
+    if (references.parent) {
+      input.parentId = references.parent.id
+    }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    if (references.parentFolder) {
+      file.parentFolder = references.parentFolder
+    }
     em.persist(file)
     return file
   },
@@ -269,6 +274,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
@@ -279,6 +285,9 @@ const filesHelper = {
       parentId: references.user.id,
     }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    if (references.parentFolder) {
+      file.parentFolder = references.parentFolder
+    }
     em.persist(file)
     return file
   },
@@ -337,8 +346,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
-      // todo: remove
-      parent?: InstanceType<typeof entities.Folder>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
@@ -348,6 +356,9 @@ const filesHelper = {
       ...data,
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
+    if (references.parentFolder) {
+      folder.parentFolder = references.parentFolder
+    }
     em.persist(folder)
     return folder
   },
@@ -355,6 +366,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
@@ -364,6 +376,9 @@ const filesHelper = {
       ...data,
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
+    if (references.parentFolder) {
+      folder.parentFolder = references.parentFolder
+    }
     em.persist(folder)
     return folder
   },

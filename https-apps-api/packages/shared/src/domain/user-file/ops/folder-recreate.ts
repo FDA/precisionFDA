@@ -9,9 +9,9 @@ import { UserOpsCtx } from '../../../types'
 type RecreateFolderInput = {}
 
 export class FolderRecreateOperation extends BaseOperation<
-  UserOpsCtx,
-  RecreateFolderInput,
-  void
+UserOpsCtx,
+RecreateFolderInput,
+void
 > {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async run(input: RecreateFolderInput): Promise<void> {
@@ -39,11 +39,7 @@ export class FolderRecreateOperation extends BaseOperation<
     })
     this.ctx.log.debug({ folders: projectDesc.folders, projectId }, 'folders list in the platform')
     const remoteFolderPaths = projectDesc.folders
-    const localFoldersWithPath: Array<Folder & { folderPath: string }> = localFolders.map(
-      folder => {
-        return Object.assign(folder, { folderPath: getFolderPath(localFolders, folder) })
-      },
-    )
+    const localFoldersWithPath: Array<Folder & { folderPath: string }> = localFolders.map(folder => Object.assign(folder, { folderPath: getFolderPath(localFolders, folder) }))
     // all folder paths to move files into etc
     const pathsToHandleRemotely = getPathsToBuild(
       localFoldersWithPath.map(lf => lf.folderPath),
@@ -58,45 +54,38 @@ export class FolderRecreateOperation extends BaseOperation<
     this.ctx.log.debug({ pathsToBuildRemotely, projectId }, 'leaf paths to build in the platform')
 
     // todo: use p-limit
-    await Promise.all(
-      pathsToBuildRemotely.map(
-        async folderPath =>
-          await client.folderCreate({
-            folderPath,
-            projectId,
-            accessToken: this.ctx.user.accessToken,
-          }),
-      ),
-    )
+    await Promise.all(pathsToBuildRemotely.map(async folderPath =>
+      await client.folderCreate({
+        folderPath,
+        projectId,
+        accessToken: this.ctx.user.accessToken,
+      })))
     // fixme: refactor this back-and-forth, filter using getPathsToBuild
     const localFoldersToMigrate = localFoldersWithPath.filter(lf =>
-      pathsToHandleRemotely.includes(lf.folderPath),
-    )
-    await Promise.all(
-      localFoldersToMigrate.map(async lf => {
-        // find its files
-        const filesInFolder = await em.find(UserFile, {
-          project: projectId,
-          parentFolderId: lf.id,
-          stiType: { $ne: FILE_STI_TYPE.FOLDER },
+      pathsToHandleRemotely.includes(lf.folderPath))
+    await Promise.all(localFoldersToMigrate.map(async lf => {
+      // find its files
+      const filesInFolder = await em.find(UserFile, {
+        project: projectId,
+        parentFolder: lf.id,
+        stiType: { $ne: FILE_STI_TYPE.FOLDER },
+      })
+      this.ctx.log.debug(
+        { fileIds: filesInFolder.map(f => f.id), folderId: lf.id },
+        'will move files in the platform',
+      )
+      if (filesInFolder.length > 0) {
+        // run the api call
+        await client.filesMoveToFolder({
+          destinationFolderPath: lf.folderPath,
+          projectId,
+          accessToken: this.ctx.user.accessToken,
+          fileIds: filesInFolder.map(f => f.dxid),
         })
-        this.ctx.log.debug(
-          { fileIds: filesInFolder.map(f => f.id), folderId: lf.id },
-          'will move files in the platform',
-        )
-        if (filesInFolder.length > 0) {
-          // run the api call
-          await client.filesMoveToFolder({
-            destinationFolderPath: lf.folderPath,
-            projectId,
-            accessToken: this.ctx.user.accessToken,
-            fileIds: filesInFolder.map(f => f.dxid),
-          })
-        }
-        // should also change folder entity -> add project, maybe remove the entity_type -> ENTIRELY?
-        lf.project = projectId
-      }),
-    )
+      }
+      // should also change folder entity -> add project, maybe remove the entity_type -> ENTIRELY?
+      lf.project = projectId
+    }))
     await em.flush()
   }
 }
