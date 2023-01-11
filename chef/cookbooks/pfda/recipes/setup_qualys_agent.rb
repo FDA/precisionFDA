@@ -4,7 +4,7 @@
 # Prerequisites
 #
 # 1.  Copy qualys-keys.csv to s3://dnanexus-assets/qualys/keys/
-# 2.  Copy QualysCloudAgent.deb to s3://dnanexus-assets/qualys/5.0.2.4/
+# 2.  Copy QualysCloudAgent.deb to s3://dnanexus-assets/qualys/{version}/
 
 bash "install qualys-cloud-agent" do
   user "root"
