@@ -5823,10 +5823,10 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
-snyk@^1.520.0:
-  version "1.1007.0"
-  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.1007.0.tgz#c2eea4bf1c1a1ed67569affc8dd244bcae5c41a6"
-  integrity sha512-h5Ck5YqnKpBtZgPb6cxWs0MmdFea+4Oa3uY3LSnSAeEt6bP3iULpxYywYTpCYCtgeZ+JiuKSInlAch6z/WHk8A==
+snyk@^1.1064.0:
+  version "1.1064.0"
+  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.1064.0.tgz#e73b3a1aff585f6266f73ddd498c5cfd5e67aff0"
+  integrity sha512-f9mNO5rUc5nVVZ1sN+do2i5/RGHKlOQoNk5HiEO9WkPEn2pFllJv2XAw5Bn7sFj1eLXNFVUOUlo6SVqGnX7lXw==
 
 sonic-boom@^1.0.2:
   version "1.4.1"
