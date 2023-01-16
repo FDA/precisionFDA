@@ -341,7 +341,7 @@ func mainInternal() int {
 		}
 
 		if *appID == "" {
-			return inputError("App ID of the app to be described is required: [--app-id <APP_ID>]")
+			return inputError("App ID is required: [--app-id <APP_ID>]")
 		}
 
 		var entityType string = "app"
@@ -357,7 +357,7 @@ func mainInternal() int {
 		}
 
 		if *workflowID == "" {
-			return inputError("Workflow ID of the workflow to be described is required: [--workflow-id <WORKFLOW_ID>]")
+			return inputError("Workflow ID is required: [--workflow-id <WORKFLOW_ID>]")
 		}
 
 		var entityType string = "workflow"
