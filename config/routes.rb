@@ -125,6 +125,7 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+    get "db_stats" => "main#db_stats", constraints: AdminConstraint.new
     post "/spaces/:id/copy_to_cooperative",
          to: "main#copy_to_cooperative",
          as: :copy_to_cooperative_space
