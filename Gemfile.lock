@@ -594,6 +594,7 @@ DEPENDENCIES
   listen
   local_time
   mysql2
+  nokogiri (>= 1.13.10)
   paloma (~> 5.1.0)
   parallel
   prawn

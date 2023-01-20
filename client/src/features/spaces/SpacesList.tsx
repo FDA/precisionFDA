@@ -48,32 +48,40 @@ export function useWindowWidth() {
   }, [])
 
   return windowWidth
-} 
+}
 
 const SpacesList = () => {
   const resource = 'spaces'
-  const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
-  const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: () => setSelectedIndexes({}) })
-  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
+  const pagination = usePaginationParams()
+  const [selectedIndexes, setSelectedIndexes] = useState<
+    Record<string, boolean> | undefined
+  >({})
+  const { sortBy, sort, setSortBy } = useOrderByParams({
+    onSetSortBy: () => setSelectedIndexes({}),
+  })
+  const { colWidths, saveColumnResizeWidth } =
+    useColumnWidthLocalStorage(resource)
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
     onSetFilter: () => {
       setSelectedIndexes({})
-      setPageParam(1, 'replaceIn')
+      pagination.setPageParam(1, 'replaceIn')
     },
   })
 
   const query = useListQuery<ListType>({
     fetchList: spacesListRequest,
     resource,
-    pagination: { page: pageParam, perPage: perPageParam },
+    pagination: {
+      page: pagination.pageParam,
+      perPage: pagination.perPageParam,
+    },
     order: { order_by: sort.order_by, order_dir: sort.order_dir },
     filter: filterQuery,
   })
-  
+
   const { status, data, error } = query
-  const pagination = data?.meta?.pagination
+  const meta = data?.meta
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -96,24 +104,27 @@ const SpacesList = () => {
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
         saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}/>
-      
+        colWidths={colWidths}
+      />
+
       <StyledPaginationSection>
-        {pagination && <Pagination
-          page={pagination?.current_page}
-          totalCount={pagination?.total_count}
-          totalPages={pagination?.total_pages}
-          perPage={perPageParam}
-          hide={hidePagination(
-            query.isFetched,
-            data?.spaces?.length,
-            pagination?.total_pages,
+        {meta?.pagination && (
+          <Pagination
+            page={meta?.pagination?.current_page}
+            totalCount={meta?.pagination?.total_count}
+            totalPages={meta?.pagination?.total_pages}
+            perPage={pagination.perPageParam}
+            isHidden={hidePagination(
+              query.isFetched,
+              data?.spaces?.length,
+              meta?.pagination?.total_pages,
             )}
-            isPreviousData={pagination?.prev_page !== null}
-            isNextData={pagination?.next_page !== null}
-            setPage={setPageParam}
-            onPerPageSelect={setPerPageParam}
-        />}
+            isPreviousData={meta?.pagination?.prev_page !== null}
+            isNextData={meta?.pagination?.next_page !== null}
+            setPage={p => pagination.setPageParam(p, 'replaceIn')}
+            onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
+          />
+        )}
       </StyledPaginationSection>
     </>
   )
@@ -159,11 +170,10 @@ const TableTable = ({
   isLoading: boolean
   colWidths: KeyVal
   saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing']
+    columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
-
 }) => {
   const columns = useSpacesColumns({ colWidths, isAdmin: false })
   const mdata = useMemo(() => data || [], [data])
@@ -182,7 +192,7 @@ const TableTable = ({
         isFilterable
         loadingComponent={<div>Loading...</div>}
         sortByPreference={sortBy}
-        setSortByPreference={(a) => setSortBy(a)}
+        setSortByPreference={a => setSortBy(a)}
         filters={filters}
         setFilters={setFilters}
         selectedRows={selectedRows}
