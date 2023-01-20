@@ -25,3 +25,13 @@ export const getGuestLeadLabel = (type: ISpace['type']) => {
   }
   return ''
 }
+
+export const isActionDisabledBasedOnProtected = (authUserId?: number, space?: ISpace) => {
+  if(
+    space?.protected &&
+    (space?.host_lead?.id === authUserId || space?.guest_lead?.id === authUserId)
+  ) {
+    return false
+  }
+  return true
+}

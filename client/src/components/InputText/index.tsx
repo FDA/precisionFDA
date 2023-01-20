@@ -34,7 +34,7 @@ export const StyledInput = styled.input`
     `}
 `
 
-export const InputText = React.forwardRef((props: HTMLInputElement, ref) => (
+export const InputText = React.forwardRef((props: any, ref) => (
   <StyledInput ref={ref} type="text" {...props} />
 ))
 

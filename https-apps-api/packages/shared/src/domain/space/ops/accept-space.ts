@@ -115,6 +115,7 @@ void
       meta: space.meta,
       state: space.state,
       spaceId: space.id,
+      protected: space.protected,
     })
     await this.em.persistAndFlush(newSpace)
 

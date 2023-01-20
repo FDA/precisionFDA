@@ -103,6 +103,8 @@ gem "therubyracer"
 gem "dry-container"
 gem "dry-configurable"
 
+gem "nokogiri", ">=1.13.10"
+
 gem "rubyzip", "=1.3.0"
 
 gem "sidekiq", "~> 6.4"

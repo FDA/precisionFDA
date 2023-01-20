@@ -264,6 +264,8 @@ module Api
     def update
       raise ApiError, "File needs to be unlocked" if @file.locked?
 
+      verify_nodes_for_protection([@file], "update")
+
       description = file_params[:description] || @file.description
       raise ApiError, "Can't rename a file." unless @file.rename(file_params[:name], description)
 
@@ -274,6 +276,9 @@ module Api
     # Copies selected files and/or folders to another scope (space, public, private).
     def copy
       nodes = Node.accessible_by(@context).where(id: params[:item_ids])
+
+      verify_nodes_for_protection(nodes, "copy")
+      verify_target_scope_for_protection(nodes, params[:scope])
 
       NodeCopyWorker.perform_async(
         params[:scope],
@@ -333,6 +338,7 @@ module Api
       # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
       # file = UserFile.exist_refresh_state(@context, params[:uid])
       file = UserFile.accessible_found_by(@context, params[:uid])
+      verify_nodes_for_protection([file], "download")
 
       if file.state != UserFile::STATE_CLOSED
         raise ApiError, "Files can only be downloaded if they are in the 'closed' state"
@@ -448,6 +454,7 @@ module Api
       service = FolderService.new(@context)
       nodes = Node.editable_by(@context).where(id: unsafe_params[:ids])
 
+      verify_nodes_for_protection(nodes, "delete")
       result = service.remove(nodes)
 
       if result.success?
@@ -476,6 +483,30 @@ module Api
     end
 
     private
+
+    # Verifies if at least one node is in Protected space
+    # the target scope must be Protected space as wel and current
+    # user must have a leader role in it
+    # @param nodes list of nodes being copied
+    # @param scope scope id
+    # @return true if processing can continue, false if error has to be raised
+    def verify_target_scope_for_protection(nodes, scope)
+      return unless Space.valid_scope?(scope)
+
+      protected_nodes = nodes.select do |node|
+        if Space.valid_scope?(node.scope)
+          space = Space.from_scope(node.scope)
+          space.protected
+        end
+      end
+
+      return if protected_nodes.empty?
+
+      space = Space.from_scope(scope)
+      return if space.protected && !space.leads.where(user_id: @context.user.id).empty?
+
+      raise ApiError, "You can only copy to another Protected Space when you have the Lead role in both Spaces."
+    end
 
     def respond_with_space_files
       nodes = []

@@ -1,10 +1,10 @@
-import styled from "styled-components"
-import { Svg } from "../../components/icons/Svg"
-import { colors } from "../../styles/theme"
+import styled from 'styled-components'
+import { Svg } from '../../components/icons/Svg'
+import { colors } from '../../styles/theme'
 
 export const TableRow = styled.tr<{ isSelected?: boolean; onClick?: any }>`
   ${({ isSelected }) => isSelected && `color: ${colors.primaryBlue};`}
-  ${({ onClick }) => onClick && `cursor: pointer;`}
+  ${({ onClick }) => onClick && 'cursor: pointer;'}
 `
 
 export const HeaderRow = styled(TableRow)`
