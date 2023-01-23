@@ -35,6 +35,12 @@ export class Workflow extends BaseEntity {
   @Property()
   uid: string
 
+  @Property()
+  editVersion: number
+
+  @Property()
+  spec: string
+
   // TODO: Add missing when needed - there is more in DB
 
   // references

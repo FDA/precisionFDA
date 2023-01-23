@@ -55,8 +55,7 @@ export async function fetchSelectableSpaces(uid: string): Promise<ISpace[]> {
 }
 
 export async function fetchLicensesOnApp(uid: string): Promise<License[]> {
-  const res = await (await fetch(`/api/apps/${uid}/licenses_to_accept`)).json()
-  return res
+  return axios.get(`/api/apps/${uid}/licenses_to_accept`).then(r => r.data)
 }
 
 export async function fetchUserComputeInstances(): Promise<ComputeInstance[]> {

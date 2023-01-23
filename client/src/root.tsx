@@ -13,6 +13,7 @@ import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
 import { Header } from './components/Header'
 import { JobRunForm } from './features/home/apps/run/JobRun'
+import { WorkflowRunForm } from './features/home/workflows/run/WorkflowRun'
 import { Loader } from './components/Loader'
 import ExpertsSinglePage from './features/experts/details/index'
 import NoFoundPage from './views/pages/NoFoundPage'
@@ -87,7 +88,10 @@ const root = () => {
                   <Spaces />
                 </Route>
                 <Route exact path="/apps/:appUid/jobs/new">
-                    <JobRunForm />
+                  <JobRunForm />
+                </Route>
+                <Route exact path="/workflows/:workflowUid/analyses/new">
+                  <WorkflowRunForm />
                 </Route>
                 <Route exact path="/challenges">
                   <ChallengesList />
