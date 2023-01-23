@@ -94,11 +94,11 @@ module Api
     end
 
     # GET /api/apps/:appId/licenses_to_accept
-    # gets licenses to be accepted and licenses already accepted
+    # gets licenses to be accepted
     # @return object containing two arrays (licenses_to_accept and accepted_licenses)
     def licenses_to_accept
       app_id = unsafe_params[:app_id]
-      licenses = https_apps_client.licenses_to_accept(app_id)
+      licenses = https_apps_client.app_licenses_to_accept(app_id)
       render json: licenses
     rescue HttpsAppsClient::Error => e
       response[:errors] << e.message

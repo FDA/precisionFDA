@@ -311,8 +311,6 @@ const JobRun = ({
     defaultValues,
   })
 
-  
-
   const runJobMutation = useMutation({
     mutationFn: (payload: RunJobRequest) => runJob(payload),
     onSuccess: res => {
@@ -337,21 +335,22 @@ const JobRun = ({
   const onSubmit = async () => {
     const valid = await trigger()
     if (valid) {
-      const r = await Promise.all([
-        fetchLicensesOnApp(app.uid),
-        fetchLicensesOnFiles(getValues()),
-      ])
+      try {
+        const r = await Promise.all([
+          fetchLicensesOnApp(app.uid),
+          fetchLicensesOnFiles(getValues()),
+        ])
 
-      const acceptedLicenses = await fetchAcceptedLicenses()
-      const licensesToAccept = getLicensesToAccept(
-        r.flat(),
-        acceptedLicenses,
-      )
-      if (licensesToAccept.length > 0) {
-        setLicensesAndShow(licensesToAccept, acceptedLicenses)
-      } else {
-        const req = createRequestObject(getValues(), app, inputSpecs)
-        await runJobMutation.mutateAsync(req)
+        const acceptedLicenses = await fetchAcceptedLicenses()
+        const licensesToAccept = getLicensesToAccept(r.flat(), acceptedLicenses)
+        if (licensesToAccept.length > 0) {
+          setLicensesAndShow(licensesToAccept, acceptedLicenses)
+        } else {
+          const req = createRequestObject(getValues(), app, inputSpecs)
+          await runJobMutation.mutateAsync(req)
+        }
+      } catch (e) {
+        toast.error('Failed to run app')
       }
     }
   }
@@ -499,7 +498,6 @@ const JobRun = ({
           </Section>
         </AppsConfiguration>
         <ButtonSolidBlue
-          // disabled={Object.keys(errors).length > 0 || isSubmitting}
           disabled={isSubmitting}
           type="button"
           form="submitJobForm"
