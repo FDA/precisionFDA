@@ -81,6 +81,7 @@ export interface ISpace {
   name: string;
   type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator' | number // number is the value from DB, string is value from db translated to human readable
   cts?: any;
+  protected: boolean;
   created_at: string;
   updated_at: string;
   space_create: string;

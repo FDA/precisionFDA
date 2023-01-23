@@ -45,7 +45,7 @@
     "dirty-chai": "^2.0.1",
     "dotenv": "^8.2.0",
     "jsforce": "^2.0.0-beta.3",
-    "luxon": "^1.27.0",
+    "luxon": "^1.28.1",
     "mjml": "^4.9.0",
     "nanoid": "^3.1.31",
     "nodemailer": "^6.7.7",

@@ -58,6 +58,7 @@ export const useDatabaseColumns = ({
         {
           Header: 'Created',
           accessor: 'created_at_date_time',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.created_at_date_time || 198,
         },

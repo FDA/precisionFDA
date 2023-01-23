@@ -45,7 +45,6 @@ describe('syncFolders operation', () => {
     // todo: complete test of DB entry shape
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('name', 'foo')
-    expect(res[0]).to.have.property('parentFolderId', undefined)
     expect(res[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
 
     const loaded_from_db = await em.findOneOrFail(Folder, res[0].id)
@@ -69,13 +68,13 @@ describe('syncFolders operation', () => {
     const local = res.find(f => f.id === folder.id)
     expect(local).to.exist()
     // // foo/bar
-    const subfolder = res.find(f => f.name === 'bar' && f.parentFolderId === folder.id)
+    const subfolder = res.find(f => f.name === 'bar' && f.parentFolder.id === folder.id)
     expect(subfolder).to.exist()
-    expect(subfolder.parentFolderId).to.be.equal(local.id)
+    expect(subfolder.parentFolder.id).to.be.equal(local.id)
     // // foo/bar/bar
-    const subfolder2 = res.find(f => f.name === 'bar' && f.parentFolderId !== folder.id)
+    const subfolder2 = res.find(f => f.name === 'bar' && f.parentFolder.id !== folder.id)
     expect(subfolder2).to.exist()
-    expect(subfolder2.parentFolderId).to.be.equal(subfolder.id)
+    expect(subfolder2.parentFolder.id).to.be.equal(subfolder.id)
   })
 
   it('creates folders with the same name', async () => {
@@ -95,8 +94,8 @@ describe('syncFolders operation', () => {
     await em.flush()
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { name: 'bar', project, parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { name: 'bar', project },
     )
     await em.flush()
     // add taggings to both
@@ -127,14 +126,14 @@ describe('syncFolders operation', () => {
     await em.flush()
     const sub = create.filesHelper.createFolder(
       em,
-      { user },
-      { name: 'bar', project, parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { name: 'bar', project },
     )
     await em.flush()
     const sub2 = create.filesHelper.createFolder(
       em,
-      { user },
-      { name: 'baz', project, parentFolderId: sub.id },
+      { user, parentFolder: sub },
+      { name: 'baz', project },
     )
     await em.flush()
     create.tagsHelper.createTagging(em, { tag }, { folder, tagger: user })

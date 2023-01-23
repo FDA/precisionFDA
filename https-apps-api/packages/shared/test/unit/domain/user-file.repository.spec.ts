@@ -2,10 +2,9 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { database } from '../../../src/database'
-import { Folder, User, UserFile } from 'shared/src/domain'
 import { create, db } from 'shared/src/test'
 import { FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
-// import { database } from '@pfda/https-apps-shared'
+import { Folder, User, UserFile } from 'shared/src/domain'
 
 describe('UserFileRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -53,13 +52,13 @@ describe('UserFileRepository tests', () => {
     files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file1', parentType: PARENT_TYPE.USER, parentId: user1.id }))
     files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file2', parentType: PARENT_TYPE.USER, parentId: user1.id }))
     files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file3', parentType: PARENT_TYPE.USER, parentId: user1.id }))
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file4', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolderId: folders[0].id }))
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file5', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolderId: folders[1].id }))
+    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file4', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolder: folders[0] }))
+    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file5', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolder: folders[1] }))
 
     files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file1', parentType: PARENT_TYPE.USER, parentId: user2.id }))
     files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file2', parentType: PARENT_TYPE.USER, parentId: user2.id }))
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file3', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolderId: folders[2].id }))
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file4', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolderId: folders[3].id }))
+    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file3', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolder: folders[2] }))
+    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file4', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolder: folders[3] }))
     files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file5', parentType: PARENT_TYPE.USER, parentId: user2.id }))
     // Copy of the above file
     files.push(create.filesHelper.create(em, { user: user2 }, {

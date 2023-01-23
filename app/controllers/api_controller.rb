@@ -621,6 +621,8 @@ class ApiController < ApplicationController
 
     taggable = item_from_uid(taggable_uid)
 
+    verify_nodes_for_protection([taggable], "set tags") if taggable.is_a?(UserFile)
+
     can_edit = false
     if Space.valid_scope?(taggable_uid)
       # if taggable is a space, need to pass only user, not whole context - using own method instead of concern.
@@ -1522,6 +1524,32 @@ class ApiController < ApplicationController
   end
 
   protected
+
+  # Verifies that if nodes collection contains items that belong to Protected
+  # space current user has lead role in that space. Otherwise raises error for specified action.
+  # @param nodes [Array] array of nodes
+  # @param action action that the user is trying to perform (used for error message - delete, update)
+  def verify_nodes_for_protection(nodes, action)
+    nodes.each do |node|
+      next if verify_scope_for_protection(node.scope)
+
+      raise ApiError, "Only leads can #{action} files in Protected spaces."
+    end
+  end
+
+  # Verifies if given scope is Protected space and if it is the user
+  # must have lead role in that space
+  # @param scope scope id
+  # @return true if processing can continue, false if error has to be raised
+  def verify_scope_for_protection(scope)
+    return true unless scope.start_with?("space-")
+
+    space = Space.from_scope(scope)
+
+    return true unless space.protected
+
+    !space.leads.where(user_id: @context.user.id).empty?
+  end
 
   def check_scope!
     scopes = params[:scopes]

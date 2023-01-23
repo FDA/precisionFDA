@@ -74,14 +74,13 @@ export interface EditSpacePayload {
 export interface CreateSpaceResponse {
   space: ISpace
   error?: Error;
-  errors?: {
-    messages: string[]
-  };
+  errors?: string[];
 }
 
 export interface EditableSpace {
   scope: string
   title: string
+  protected: boolean
 }
 
 export type EditableSpacesResponse = EditableSpace[]
