@@ -130,7 +130,7 @@ const NavigationBar = ({ children, title, subtitle, user }: INavigationBarProps)
               </NavigationBarSubtitle>
             }
             {showSocialMediaButtons &&
-              <SocialMediaButtons showText={showSocialMediaButtonText} />
+              <SocialMediaButtons />
             }
           </NavigationBarBanner>
         </PageContainerMargin>
