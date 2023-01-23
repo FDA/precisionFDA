@@ -668,6 +668,7 @@ ActiveRecord::Schema.define(version: 2022_12_06_164002) do
     t.integer "sponsor_org_id"
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
+    t.boolean "protected"
   end
 
   create_table "submissions", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|

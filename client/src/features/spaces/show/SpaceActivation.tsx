@@ -15,6 +15,8 @@ import { getGuestLeadLabel, getHostLeadLabel } from '../../../helpers/spaces'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { acceptSpaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
+import { SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo } from './styles'
+import { ProtectedIcon } from '../ProtectedIcon'
 
 const Row = styled.div`
   display: flex;
@@ -115,11 +117,10 @@ export function Activation({ space }: { space: ISpace }) {
   return (
     <PageContainer>
       <Col>
-        <div>
-          <h1>{name}</h1>
-          <div>{description}</div>
-        </div>
-
+        <SpaceMainInfo>
+          <SpaceHeaderTitle>{name}</SpaceHeaderTitle>
+          <SpaceHeaderDescrip>{space.protected && <ProtectedIcon />}{description}</SpaceHeaderDescrip>
+        </SpaceMainInfo>
         <Row>
           <KeyVal>
             <Key>{hostLabel}</Key>

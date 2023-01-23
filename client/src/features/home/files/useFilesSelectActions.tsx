@@ -23,6 +23,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
+import { isActionDisabledBasedOnProtected } from '../../spaces/common'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 
 export enum FileActions {
@@ -231,6 +232,7 @@ export const useFilesSelectActions = ({
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal({
+    spaceId: space?.id,
     resource: 'files',
     selected,
     updateFunction: copyFilesRequest,
@@ -285,6 +287,7 @@ export const useFilesSelectActions = ({
       func: () => setOpenFileModal(true),
       isDisabled:
         selected.length === 0 ||
+        isActionDisabledBasedOnProtected(user?.id as number, space) ||
         selected.some(
           e =>
             e.type === 'Folder' ||
@@ -300,6 +303,7 @@ export const useFilesSelectActions = ({
       func: () => setDownloadModal(true),
       isDisabled:
         selected.length === 0 ||
+        isActionDisabledBasedOnProtected(user?.id as number, space) ||
         selected.some(
           e =>
             e.type === 'Folder' ||
@@ -388,7 +392,9 @@ export const useFilesSelectActions = ({
     'Delete': {
       type: 'modal',
       func: () => setDeleteFileModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.remove),
+      isDisabled: selected.length === 0 ||
+        selected.some(e => !e.links.remove) ||
+        isActionDisabledBasedOnProtected(user?.id as number, space),
       shouldHide: isViewer,
       modal: deleteFileModal,
       showModal: isShownDeleteFileModal,
@@ -434,7 +440,7 @@ export const useFilesSelectActions = ({
     'Copy to My Home (private)': {
       type: 'modal',
       func: () => setCopyToPrivateModal(true),
-      isDisabled: selected.length === 0,
+      isDisabled: selected.length === 0 || isActionDisabledBasedOnProtected(user?.id as number, space),
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
       shouldHide: !isInSpace(scope),

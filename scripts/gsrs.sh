@@ -100,7 +100,7 @@ GSRS_PORT=9001
 GSRS_PATH=./gsrs-play-dist
 
 install_deps() {
-  sudo apt -y install jq
+  sudo snap install jq
 }
 
 # Search the last created dump on S3.
@@ -116,38 +116,42 @@ download_dump() {
 }
 
 restore_dump() {
-  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --execute="CREATE DATABASE $NEW_DB_NAME;"
-  zcat $1 | mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS $NEW_DB_NAME
+  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED --execute="CREATE DATABASE $NEW_DB_NAME;"
+  zcat $1 | mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME
 }
 
 dump_users_and_roles() {
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --skip-tz-utc --no-create-info --extended-insert=FALSE --set-gtid-purged=OFF $OLD_DB_NAME ix_core_principal \
             --where="ID > 10000" > ix_core_principal.sql
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --skip-triggers --skip-tz-utc --no-create-info --extended-insert=FALSE --set-gtid-purged=OFF $OLD_DB_NAME ix_core_userprof \
             --where="ID > 10000" > ix_core_userprof.sql
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --add-drop-table --skip-tz-utc --set-gtid-purged=OFF $OLD_DB_NAME \
             ix_core_group_principal > ix_core_group_principal.sql
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --add-drop-table --skip-tz-utc --set-gtid-purged=OFF $OLD_DB_NAME ix_core_group > ix_core_group.sql
 }
 
 # this will fail if the dump has anyone else rather than admin.
 restore_users_and_roles() {
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_principal.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_principal.sql
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_userprof.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_userprof.sql
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_group.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_group.sql
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_group_principal.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_group_principal.sql
 }
 
 create_roles_trigger() {
-  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS $NEW_DB_NAME \
+  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME \
         -e "$ROLES_TRIGGER"
 }
 
