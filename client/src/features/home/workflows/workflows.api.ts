@@ -65,7 +65,7 @@ interface WorkflowExecutionParams extends Params {
 export async function fetchWorkflowExecutions(filters: IFilter[], params: WorkflowExecutionParams): Promise<FetchWorkflowExecutionsQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query as any).toString()}`
-  const res = await fetch(`/api/workflows/${params.uid}/jobs${paramQ}`)
+  const res = await fetch(`/api/workflows/${params.uid}/jobs${paramQ}`).then(checkStatus)
   return res.json()
 }
 
