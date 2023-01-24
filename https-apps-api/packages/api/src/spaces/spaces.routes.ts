@@ -87,14 +87,13 @@ router.patch(
       throw new errors.PermissionError("Operation not permitted.")
     }
 
-    const platformClient = new client.PlatformClient(ctx.log)
+    const platformClient = new client.PlatformClient(ctx.user.accessToken, ctx.log)
     if (membership.side === spaceMembership.types.SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.
         const res = await platformClient.projectDescribe({
           projectDxid: spaceToFix.hostProject,
           body: {},
-          accessToken: ctx.user.accessToken,
         })
       } catch (err) {
         throw new errors.PermissionError("Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.")
@@ -110,7 +109,6 @@ router.patch(
             "permissions": true
           },
         },
-        accessToken: ctx.user.accessToken,
       })
 
       if (spaceToFix.guestDxOrg in res.permissions) {
@@ -121,7 +119,6 @@ router.patch(
         projectDxid: spaceToFix.hostProject,
         invitee: spaceToFix.guestDxOrg,
         level: 'CONTRIBUTE',
-        accessToken: ctx.user.accessToken,
       })
 
       ctx.log.info({ response }, "Guest organization invited to host project.")

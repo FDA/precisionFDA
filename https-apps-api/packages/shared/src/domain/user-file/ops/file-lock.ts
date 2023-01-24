@@ -17,7 +17,7 @@ void
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
-    this.client = new PlatformClient(this.ctx.log)
+    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     const fileToLock = await userFileRepo.findOneOrFail(input.id)
 
     await em.begin()

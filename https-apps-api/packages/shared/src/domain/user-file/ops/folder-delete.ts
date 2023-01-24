@@ -13,7 +13,7 @@ number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     // Todo(samuel) - performance optimization - execute read operations before transaction start
     await em.begin()
@@ -49,7 +49,6 @@ number
       await platformClient.removeFolderRec({
         projectId: existingFolder.project,
         folderPath,
-        accessToken: this.ctx.user.accessToken,
       })
       userFileRepo.removeFilesWithTags(filesToRemove)
 
