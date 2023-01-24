@@ -42,11 +42,10 @@ router.get(
       }, { populate: ['user'] },
     )
 
-    const platformClient = new client.PlatformClient(ctx.log)
+    const platformClient = new client.PlatformClient(ctx.user.accessToken, ctx.log)
 
     const platformWorkflowData = await platformClient.workflowDescribe({
       dxid: workflow.dxid,
-      accessToken: ctx.user.accessToken,
       data: {},
     })
 

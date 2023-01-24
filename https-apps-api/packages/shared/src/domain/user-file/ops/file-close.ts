@@ -64,10 +64,9 @@ FileCloseOperationResponse | null
     if (fileOrAsset.state === FILE_STATE_DX.OPEN) {
       log.info({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: File is in open state. Syncing from platform')
 
-      const platformClient = new client.PlatformClient(this.ctx.log)
-      const response = await platformClient.fileClose({
+      const userClient = new client.PlatformClient(accessToken, this.ctx.log)
+      const response = await userClient.fileClose({
         fileDxid: fileOrAsset.dxid,
-        accessToken,
       })
       log.info({ response }, 'FileCloseOperation: Received response from platform')
 

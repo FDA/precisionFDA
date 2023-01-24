@@ -83,10 +83,9 @@ router.get(
       }, { populate: ['user'] },
     )
 
-    const platformClient = new client.PlatformClient(ctx.log)
+    const platformClient = new client.PlatformClient(ctx.user.accessToken, ctx.log)
     const platformAppData = await platformClient.appDescribe({
       dxid: app.dxid,
-      accessToken: ctx.user.accessToken,
       data: {},
     })
 
