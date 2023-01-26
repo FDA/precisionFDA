@@ -45,7 +45,7 @@ const ErrorMessageForField = ({ errors, fieldName }:
     render={({ message }) => <InputError>{message}</InputError>} />)
 }
 
-const getLabel = (input: InputOutput) => 
+const getLabel = (input: InputOutput) =>
   input.label ? input.label : input.name
 
 const convertToListedFile = (file: IFile): ListedFile => {
@@ -61,7 +61,7 @@ const getDefaultValue = (input: InputOutput, defaultFiles?: IFile[]): string | b
   if (input.class === INPUT_TYPES_CLASSES.FILE) {
     const defaultFile = defaultFiles?.find(file => file.uid === defaultValue)
     return (defaultFile) ? convertToListedFile(defaultFile) : undefined
-  } 
+  }
     return defaultValue
 }
 
@@ -102,13 +102,13 @@ const fetchLicensesOnFiles = (jobData: WorkflowRunData): Promise<License[]> => {
 
 /**
  * At least one input needs values.id null for Stage to show
- * @param stage 
+ * @param stage
  */
 const hasUnfilledInputs = (stage: Stage) => {
   return !stage.inputs.find(input => input.values.id !== null)
 }
 
-const prepareValidations = (user: any, stages?: Stage[]) => {
+const prepareValidations = (user?: IUser, stages?: Stage[]) => {
   const inputs: any = {}
   stages?.filter(stage => hasUnfilledInputs(stage))
     .flatMap(stage => stage.inputs)
@@ -128,7 +128,7 @@ const prepareValidations = (user: any, stages?: Stage[]) => {
     analysisName: Yup.string().required('Analysis name required'),
     jobLimit: Yup.number().required('Execution cost limit required')
       .positive().typeError('You must specify a number')
-      .max(user.job_limit, `Maximum job limit for current user is ${user.job_limit}`),
+      .max(user?.job_limit ?? 99, `Maximum job limit for current user is ${user?.job_limit ?? 99}`),
     inputs: Yup.object().shape(inputs),
   }
 
@@ -173,7 +173,7 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, de
       )}
     </>}
   </>)
-}  
+}
 
 const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?: Stage[]): RunWorkflowRequest => {
   const classes = new Map<string, string>(stages?.flatMap(stage => stage.inputs)
@@ -210,7 +210,7 @@ const WorkflowRun = (
   const user = useAuthUser()
   const defaultValues = prepareDefaultValues(workflow, user, stages, defaultFiles)
   const validationSchema = prepareValidations(user, stages)
-  
+
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
   const {
@@ -316,8 +316,8 @@ const WorkflowRun = (
               INPUTS
             </SectionHeader>
             <SectionBody>
-              {stages?.map(stage => <WorkflowStage key={stage.stageIndex} stage={stage} errors={errors} 
-                app={apps.find(app => app.dxid === stage.app_dxid)} control={control} register={register} isSubmitting={isSubmitting} 
+              {stages?.map(stage => <WorkflowStage key={stage.stageIndex} stage={stage} errors={errors}
+                app={apps.find(app => app.dxid === stage.app_dxid)} control={control} register={register} isSubmitting={isSubmitting}
                 defaultFiles={defaultFiles} />)}
             </SectionBody>
           </Section>
@@ -340,7 +340,7 @@ const fetchDefaultFiles = (meta: any): Promise<{ files: IFile, meta: any }[]> =>
         if (input.class === INPUT_TYPES_CLASSES.FILE && input.default_workflow_value) {
           const promise = fetchFile(input.default_workflow_value as string)
           promises.push(promise)
-        }    
+        }
       })
     }
   })
@@ -349,7 +349,7 @@ const fetchDefaultFiles = (meta: any): Promise<{ files: IFile, meta: any }[]> =>
 
 export const WorkflowRunForm = () => {
   const { workflowUid } = useParams<{ workflowUid: string }>()
-  const { data: workflowData, status: loadingWorkflowStatus } = useQuery(['workflow', workflowUid], () => 
+  const { data: workflowData, status: loadingWorkflowStatus } = useQuery(['workflow', workflowUid], () =>
     fetchWorkflow(workflowUid),
   )
 
