@@ -47,7 +47,7 @@ export const OverviewPublic = () => {
             <NavigationBarPublicLandingTitle>
               <Tagline />
             </NavigationBarPublicLandingTitle>
-            <SocialMediaButtons showText={false} />
+            <SocialMediaButtons />
           </NavigationBarBanner>
         </PageContainerMargin>
       </NavigationBar>

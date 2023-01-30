@@ -16,7 +16,7 @@ void
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async run(input: RecreateFolderInput): Promise<void> {
     const em = this.ctx.em
-    const client = new PlatformClient(this.ctx.log)
+    const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     const userId = this.ctx.user.id
     const user = await em.findOne(User, { id: userId })
     if (!user) {
@@ -35,7 +35,6 @@ void
     })
     const projectDesc = await client.foldersList({
       projectId,
-      accessToken: this.ctx.user.accessToken,
     })
     this.ctx.log.debug({ folders: projectDesc.folders, projectId }, 'folders list in the platform')
     const remoteFolderPaths = projectDesc.folders
@@ -58,7 +57,6 @@ void
       await client.folderCreate({
         folderPath,
         projectId,
-        accessToken: this.ctx.user.accessToken,
       })))
     // fixme: refactor this back-and-forth, filter using getPathsToBuild
     const localFoldersToMigrate = localFoldersWithPath.filter(lf =>
@@ -79,7 +77,6 @@ void
         await client.filesMoveToFolder({
           destinationFolderPath: lf.folderPath,
           projectId,
-          accessToken: this.ctx.user.accessToken,
           fileIds: filesInFolder.map(f => f.dxid),
         })
       }

@@ -286,7 +286,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setOpenFileModal(true),
       isDisabled:
-        selected.length === 0 ||
+        selected.length === 0 || selected.some(e => e.locked) ||
         isActionDisabledBasedOnProtected(user?.id as number, space) ||
         selected.some(
           e =>
@@ -302,7 +302,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setDownloadModal(true),
       isDisabled:
-        selected.length === 0 ||
+        selected.length === 0 || selected.some(e => e.locked) ||
         isActionDisabledBasedOnProtected(user?.id as number, space) ||
         selected.some(
           e =>
@@ -419,7 +419,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setOrganizeFileModal(true),
       isDisabled:
-        selected.length === 0 ||
+        selected.length === 0 || selected.some(e => e.locked) ||
         selected.some(e => !e.links.organize) ||
         openSelected,
       modal: organizeFileModal,

@@ -28,7 +28,7 @@ const assetHelper = {
   create: (
     em: EntityManager,
     references: {user: InstanceType<typeof entities.User>},
-    data?: Partial<InstanceType<typeof entities.Asset>>
+    data?: Partial<InstanceType<typeof entities.Asset>>,
   ) => {
     const defaults = generate.asset.simple()
     const input = {
@@ -549,6 +549,18 @@ const comparisonHelper = {
   },
 }
 
+const workflowHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Workflow>>,
+  ) => {
+    const workflow = wrap(new entities.Workflow(references.user)).assign(data, { em })
+    em.persist(workflow)
+    return workflow
+  },
+}
+
 export {
   assetHelper,
   userHelper,
@@ -564,4 +576,5 @@ export {
   challengeResourceHelper,
   comparisonHelper,
   dbClusterHelper,
+  workflowHelper,
 }

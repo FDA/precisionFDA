@@ -35,7 +35,7 @@ Maybe<DbCluster>
       return
     }
 
-    const client = new PlatformClient(this.ctx.log)
+    const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     this.ctx.log.info({ dbClusterId: dbCluster.id }, 'SyncDbClusterOperation: Processing job')
 
     if (dbCluster.status === STATUS.TERMINATED) {
@@ -52,7 +52,6 @@ Maybe<DbCluster>
       describeDbClusterRes = await client.dbClusterDescribe({
         dxid: dbCluster.dxid,
         project: dbCluster.project,
-        accessToken: this.ctx.user.accessToken,
       })
     } catch (err) {
       if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {

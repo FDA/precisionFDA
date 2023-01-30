@@ -106,7 +106,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
 
     expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
@@ -145,7 +144,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
 
     expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
@@ -185,7 +183,6 @@ describe('PATCH /files/:id/close', () => {
     expect(res.statusCode).to.equal(200)
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
@@ -248,7 +245,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(asset.dxid)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
@@ -270,7 +266,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal(create.userHelper.getChallengeBotToken())
     expect(call.fileDxid).to.equal(challengeBotFile.dxid)
 
     // To guard for the case where the code checks for the wrong user's file sync task
@@ -299,7 +294,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal(create.userHelper.getChallengeBotToken())
     expect(call.fileDxid).to.equal(challengeBotFile.dxid)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)

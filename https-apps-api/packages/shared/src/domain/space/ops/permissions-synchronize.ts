@@ -21,7 +21,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
   protected membership: SpaceMembership
 
   async run(input: SyncSpacesPermissionsInput): Promise<void> {
-    this.client = new PlatformClient(this.ctx.log)
+    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     const userId = this.ctx.user.id
     const em = this.ctx.em
     const spaceRepo = em.getRepository(Space)
@@ -71,7 +71,6 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
         try {
           const hostOrgMembers: FindSpaceMembersReponse = await this.client.findSpaceMembers({
             spaceOrg: space.hostDxOrg,
-            accessToken: this.ctx.user.accessToken,
           })
           await this.checkPermissions(host_members, hostOrgMembers.results, space)
         } catch (err) {
@@ -84,7 +83,6 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
         try {
           const guestOrgMembers: FindSpaceMembersReponse = await this.client.findSpaceMembers({
             spaceOrg: space.guestDxOrg,
-            accessToken: this.ctx.user.accessToken,
           })
           await this.checkPermissions(guest_members, guestOrgMembers.results, space)
         } catch (err) {
@@ -163,7 +161,6 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
     const params: UserInviteToOrgParams = {
       orgDxId: this.membership.side === SPACE_MEMBERSHIP_SIDE.GUEST ? space.guestDxOrg : space.hostDxOrg,
       data,
-      accessToken: this.ctx.user.accessToken,
     }
     const response = await this.client.inviteUserToOrganization(params)
     if (response.id !== null && response.state === 'accepted') {
@@ -193,7 +190,6 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
       data: {
         user: platformMember.id,
       },
-      accessToken: this.ctx.user.accessToken,
     }
     const response = await this.client.removeUserFromOrganization(params)
     if (response.id !== null) {
