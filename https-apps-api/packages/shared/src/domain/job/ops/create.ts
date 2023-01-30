@@ -29,7 +29,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     this.input = input
     this.jobInput = input.input ?? {}
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
     // whitelist https public apps
@@ -224,7 +224,6 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // shared payload here
     const payload: client.JobCreateParams = {
       project: this.projectId,
-      accessToken: this.ctx.user.accessToken,
       appId: app.dxid,
       systemRequirements: {
         '*': {

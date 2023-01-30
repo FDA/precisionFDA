@@ -1,5 +1,5 @@
 /* eslint-disable multiline-ternary */
-import { errors, queue, user, utils, client } from '@pfda/https-apps-shared'
+import { errors, queue, user, utils, client, config } from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { defaultMiddlewares } from '../server/middleware'
@@ -167,7 +167,8 @@ router.post(
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema()),
   async (ctx: Api.Ctx) => {
     const { ids } = ctx.request.body as IIdListParams
-    const results = await ctx.em.getRepository(user.User).bulkUpdateReset2fa(ids, new client.PlatformClient(ctx.log), ctx.user)
+    const adminUserClient = new client.PlatformClient(config.platform.adminUserAccessToken, ctx.log)
+    const results = await ctx.em.getRepository(user.User).bulkUpdateReset2fa(ids, adminUserClient, ctx.user)
     ctx.body = results
   },
 )
@@ -177,7 +178,8 @@ router.post(
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema()),
   async (ctx: Api.Ctx) => {
     const { ids } = ctx.request.body as IIdListParams
-    const results = await ctx.em.getRepository(user.User).bulkUpdateUnlock(ids, new client.PlatformClient(ctx.log), ctx.user)
+    const adminUserClient = new client.PlatformClient(config.platform.adminUserAccessToken, ctx.log)
+    const results = await ctx.em.getRepository(user.User).bulkUpdateUnlock(ids, adminUserClient, ctx.user)
     ctx.status = results.some(({ result }) => result.status === 'unhandledError')
       ? 400
       : 200

@@ -1,10 +1,5 @@
 import React, { ReactElement, useState } from 'react'
-import styled from 'styled-components'
 import { TabTitle } from './TabTitle'
-
-const StyledTabs = styled.div`
-  display: inline-block;
-`
 
 type Props = {
   children: ReactElement[]

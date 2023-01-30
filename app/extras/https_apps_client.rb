@@ -93,10 +93,20 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   # Get licenses that need to be accepted for given app id
-  # @param app_dxid [String] App dxid get licenses for
-  def licenses_to_accept(app_dxid)
+  # @param app_uid [String] App uid get licenses for
+  def app_licenses_to_accept(app_uid)
     request(
-      "/apps/#{app_dxid}/licenses-to-accept",
+      "/apps/#{app_uid}/licenses-to-accept",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Get licenses that need to be accepted for given workflow id
+  # @param workflow_dxid [String] App dxid get licenses for
+  def workflow_licenses_to_accept(workflow_uid)
+    request(
+      "/workflows/#{workflow_uid}/licenses-to-accept",
       {},
       Net::HTTP::Get::METHOD,
     )

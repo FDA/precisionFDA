@@ -22,7 +22,7 @@ SyncFolderFilesOutput
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
     this.ctx.log.debug({ input }, 'SyncFilesInFolderOperation input params')
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const folderRepo = em.getRepository(Folder)
     const fileRepo = em.getRepository(UserFile)
@@ -62,7 +62,6 @@ SyncFolderFilesOutput
 
     // find remote file ids in a given subfolder
     const remoteFiles = await platformClient.filesList({
-      accessToken: this.ctx.user.accessToken,
       folder: folderPath,
       project: input.projectDxid,
       includeDescProps: true,

@@ -11,7 +11,7 @@ import { UserOpsCtx } from '../../../types'
 export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxIdInput, Job> {
   async run(input: DxIdInput): Promise<Job> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const jobRepo = em.getRepository(Job)
     // scope is private/scope-x so this should work
@@ -34,7 +34,6 @@ export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxId
     // call the platform API
     const apiResult = await platformClient.jobTerminate({
       jobId: job.dxid,
-      accessToken: this.ctx.user.accessToken,
     })
     this.ctx.log.info({ jobId: job.id, jobDxId: job.dxid, apiResult }, 'Job set to terminate')
     // set to terminating

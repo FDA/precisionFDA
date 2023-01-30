@@ -142,7 +142,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               </ExpertData>
             </ExpertRow>
             <StyledSocialMediaButtons>
-              <SocialMediaButtons showText />
+              <SocialMediaButtons />
             </StyledSocialMediaButtons>
         </StyledNavigationBar>
           </PageContainerMargin>

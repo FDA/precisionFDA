@@ -363,6 +363,7 @@ Rails.application.routes.draw do
         get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
         get :describe, on: :member, to: "workflows#describe"
+        get :licenses_to_accept
 
         collection do
           get :featured

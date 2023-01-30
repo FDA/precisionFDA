@@ -23,11 +23,10 @@ IFileOrAsset
     }
 
     log.info('FileUpdateOperation: Calling platform fileDescribe')
-    const platformClient = new client.PlatformClient(log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, log)
     const fileDescribe = await platformClient.fileDescribe({
       fileDxid: fileOrAsset.dxid,
       projectDxid: fileOrAsset.project,
-      accessToken: this.ctx.user.accessToken,
     })
 
     log.info({ fileDescribe }, 'FileUpdateOperation: Platform fileDescribe response')

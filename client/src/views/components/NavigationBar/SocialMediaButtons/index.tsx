@@ -3,9 +3,15 @@ import styled from 'styled-components'
 
 import ExternalLink from '../../Controls/ExternalLink'
 import { theme } from '../../../../styles/theme'
+import { EnvelopeIcon } from '../../../../components/icons/EnvelopeIcon'
+import { TwitterIcon } from '../../../../components/icons/TwitterIcon'
+import { LinkedInIcon } from '../../../../components/icons/LinkedInIcon'
 
 
-const StyledSocialMediaButtons = styled.div<ISocialMediaButtonProps>`
+const StyledSocialMediaButtons = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   order: 3;
   align-self: flex-end;
   text-align: right;
@@ -13,11 +19,13 @@ const StyledSocialMediaButtons = styled.div<ISocialMediaButtonProps>`
   width: auto;
 
   a {
+    display: flex;
+    align-items: center;
     color: white;
-    font-size: ${props => props.showText ? '14px' : '18px'};
     font-weight: bold;
     padding: 3px 6px;
     cursor: pointer;
+    white-space: nowrap; 
   }
 
   @media (min-width: 640px) {
@@ -29,25 +37,12 @@ const StyledSocialMediaButtons = styled.div<ISocialMediaButtonProps>`
   }
 `
 
-const SocialMediaButtonText = styled.span`
-  color: white;
-  font-family: ${theme.fontFamily};
-  font-size: 14px;
-  font-weight: bold;
-  padding: 3px 6px;
-`
-
-
-interface ISocialMediaButtonProps {
-  showText?: boolean,
-}
-
-export const SocialMediaButtons : React.FunctionComponent<ISocialMediaButtonProps> = ({ showText=false }) => {
+export const SocialMediaButtons = () => {
   return (
-    <StyledSocialMediaButtons showText={showText}>
-      <a href='mailto:precisionfda@fda.hhs.gov' className="fa fa-envelope" aria-label='Click this icon to email the PrecisionFDA team'>{showText ? (<SocialMediaButtonText>Email the team</SocialMediaButtonText>) : ''}</a>
-      <ExternalLink to='https://twitter.com/precisionfda' className="fa fa-twitter" ariaLabel='Click this icon to view the PrecisionFDA Twitter page in a new Tab'>{showText ? (<SocialMediaButtonText>Twitter</SocialMediaButtonText>) : ''}</ExternalLink>
-      <ExternalLink to='https://www.linkedin.com/showcase/precisionfda' className="fa fa-linkedin" ariaLabel='Click this icon to view the PrecisionFDA LinkedIn page in a new tab'>{showText ? (<SocialMediaButtonText>LinkedIn</SocialMediaButtonText>) : ''}</ExternalLink>
+    <StyledSocialMediaButtons>
+      <a href='mailto:precisionfda@fda.hhs.gov' aria-label='Click this icon to email the PrecisionFDA team'><EnvelopeIcon /></a>
+      <ExternalLink to='https://twitter.com/precisionfda' ariaLabel='Click this icon to view the PrecisionFDA Twitter page in a new Tab'><TwitterIcon /></ExternalLink>
+      <ExternalLink to='https://www.linkedin.com/showcase/precisionfda' ariaLabel='Click this icon to view the PrecisionFDA LinkedIn page in a new tab'><LinkedInIcon /></ExternalLink>
     </StyledSocialMediaButtons>
   )
 }
