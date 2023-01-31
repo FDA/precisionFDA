@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
 import styled, { css } from 'styled-components'
 import classNames from 'classnames/bind'
 import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
 import { theme } from '../../../../styles/theme'
 import { PageContainerMargin } from '../../../../components/Page/styles'
 import { Button, ButtonSolidBlue } from '../../../../components/Button/index'
+import { onLogInWithSSO, useSiteSettingsSsoButtonQuery } from '../../../../features/auth/useSiteSettingsSsoButtonQuery'
 
 type StyledPublicNavbarProps = {
   isSticky?: boolean
@@ -155,23 +154,6 @@ const PublicNavbarRightButtons = styled.div<StyledPublicNavbarProps>`
     `}
 `
 
-type SsoButtonResponse =
-  | {
-      isEnabled: true
-      data: {
-        fdaSsoUrl: string
-      }
-    }
-  | {
-      isEnabled: false
-    }
-
-const useSiteSettingsSsoButtonQuery = () =>
-  useQuery<SsoButtonResponse>(['site_settings', 'sso_button'], {
-    queryFn: () =>
-      axios.get('/api/site_settings/sso_button').then((r: any) => r.data),
-  })
-
 type Props = {
   shouldShowLogo?: boolean
 }
@@ -209,11 +191,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
   const onLogIn = () => {
     window.location.assign('/login')
   }
-  const onLogInWithSSO = () => {
-    if (ssoButtonResponse?.isEnabled) {
-      window.location.assign(ssoButtonResponse.data.fdaSsoUrl)
-    }
-  }
+
   const { pathname } = useLocation()
   const getLinkClassName = (linkPath: string) => {
     if (linkPath === '/') {
@@ -277,7 +255,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <Button onClick={onRequestAccess}>Request Access</Button>
         <ButtonSolidBlue onClick={onLogIn}>Log In</ButtonSolidBlue>
         {ssoButtonResponse?.isEnabled && (
-          <ButtonSolidBlue onClick={onLogInWithSSO}>
+          <ButtonSolidBlue onClick={() => onLogInWithSSO(ssoButtonResponse)}>
             Log In With SSO
           </ButtonSolidBlue>
         )}

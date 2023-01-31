@@ -8,7 +8,10 @@ import { Modal } from '../modal'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { useAuthUserQuery } from './useAuthUser'
-
+import {
+  onLogInWithSSO,
+  useSiteSettingsSsoButtonQuery,
+} from './useSiteSettingsSsoButtonQuery'
 
 const getSessionExpiredAt = () => {
   const cookie = getCookie('sessionExpiredAt')
@@ -29,28 +32,21 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   const sessionExpirationApproaching = !sessionExpirationPassed
   const hasExpirationReachedLimit = sessionExpirationApproaching && subSeconds(expiredAt, 59) < currentTime
   const calcDiff = differenceInSeconds(expiredAt, currentTime)
+  const { data: ssoButtonResponse } = useSiteSettingsSsoButtonQuery()
 
   useEffect(() => {
-    // console.log(expiredAt)
-    // console.log(currentTime)
-    // console.log('approaching: ', sessionExpirationApproaching)
-    // console.log('passed: ', sessionExpirationPassed)
-    // console.log('in range: ', hasExpirationReachedLimit)
     if (hasExpirationReachedLimit) {
       if (calcDiff > 0) setTimer(calcDiff)
       modal.setShowModal(true)
     }
   }, [currentTime])
 
-  useInterval(
-   () => {
-      setExpiredAtTimer(getSessionExpiredAt())
-      if(!hasExpirationReachedLimit) {
-        setCurrentTime(new Date())
-      }
-    },
-    15000,
-  )
+  useInterval(() => {
+    setExpiredAtTimer(getSessionExpiredAt())
+    if (!hasExpirationReachedLimit) {
+      setCurrentTime(new Date())
+    }
+  }, 15000)
 
   useInterval(
     () => {
@@ -80,9 +76,16 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
       </Content>
       <Footer>
         {sessionExpirationPassed ? (
-          <ButtonSolidBlue onClick={() => window.location.assign('/login')}>
-            Log in again
-          </ButtonSolidBlue>
+          <>
+            {ssoButtonResponse?.isEnabled && (
+              <ButtonSolidBlue onClick={() => onLogInWithSSO(ssoButtonResponse)}>
+                Log In With SSO
+              </ButtonSolidBlue>
+            )}
+            <ButtonSolidBlue onClick={() => window.location.assign('/login')}>
+              Log in again
+            </ButtonSolidBlue>
+          </>
         ) : (
           <ButtonSolidBlue onClick={handleStayLoggedIn}>
             Extend session

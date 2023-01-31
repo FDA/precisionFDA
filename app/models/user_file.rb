@@ -376,7 +376,8 @@ class UserFile < Node
   def rename(new_name, new_description)
     return false unless valid?
 
-    if DIContainer.resolve("api.user").file_rename(dxid, project, new_name)
+    api = DIContainer.resolve("api.user")
+    if api.file_rename(dxid, project, new_name)
       update(name: new_name, description: new_description)
     else
       errors.add(:base, "File info could not be updated.")
