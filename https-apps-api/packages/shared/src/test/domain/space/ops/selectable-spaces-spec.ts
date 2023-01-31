@@ -3,8 +3,7 @@ import { create, db } from '@pfda/https-apps-shared/src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { expect } from 'chai'
 import P from 'pino'
-import { UidInput } from 'shared/src/types'
-import { app, User } from 'shared/src/domain'
+import { space, User } from 'shared/src/domain'
 
 describe('selectable spaces tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -21,31 +20,23 @@ describe('selectable spaces tests', () => {
     userCtx = { ...user, accessToken: 'foo' }
   })
 
-  it('test app has no selectable spaces', async () => {
-    // create test app
-    const privateApp = create.appHelper.createRegular(em, { user }, { title: 'private-app', scope: 'private' })
-    const appWithUnknownSpaceType = create.appHelper.createWithSpace(
+  it('test unsupported space type', async () => {
+    const unsupportedSpace = create.spacesHelper.create(em, { name: "space", type: 6 })
+    await em.flush()
+    create.appHelper.createRegular(
       em, { user }, {
         title: 'private-app',
-        scope: 'private',
-      },
-      { name: 'space-in-review', type: 3 },
-    ) // space type that doesn't fit anything
-
+        scope: `scope-${unsupportedSpace.id}`,
+      }
+    )
     await em.flush()
 
-    const op = new app.SelectableSpacesOperation({
+    const op = new space.SelectableSpacesOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
     })
-
-    const privateAppInput: UidInput = { uid: privateApp.uid }
-    const privateAppResult = await op.execute(privateAppInput)
-    expect(privateAppResult.length).to.equal(0)
-
-    const unknownInput: UidInput = { uid: appWithUnknownSpaceType.uid }
-    const unknownResult = await op.execute(unknownInput)
+    const unknownResult = await op.execute(unsupportedSpace.id)
     expect(unknownResult.length).to.equal(0)
   })
 
@@ -59,31 +50,16 @@ describe('selectable spaces tests', () => {
     const scopedApp = create.appHelper.createRegular(em, { user }, { title: 'private-app', scope: `space-${masterSpace.id}` })
     await em.flush()
 
-    const op = new app.SelectableSpacesOperation({
+    const op = new space.SelectableSpacesOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
     })
 
-    const scopedAppInput: UidInput = { uid: scopedApp.uid }
-    const scopedAppResult = await op.execute(scopedAppInput)
+    const scopedAppResult = await op.execute(masterSpace.id)
 
     // both spaces must appear in results
     expect(scopedAppResult.length).to.equal(2)
   })
 
-  it('test fails for non nexistent app id', async () => {
-    const op = new app.SelectableSpacesOperation({
-      em: database.orm().em.fork(),
-      log,
-      user: userCtx,
-    })
-
-    try {
-      await op.execute({ uid: 'bullshit' })
-      expect.fail('Operation is expected to fail')
-    } catch (error) {
-      expect(error.message).to.equal('App not found ({ uid: \'bullshit\' })')
-    }
-  })
 })
