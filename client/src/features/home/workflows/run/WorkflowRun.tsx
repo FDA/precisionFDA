@@ -4,8 +4,9 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { ErrorMessage } from '@hookform/error-message'
-import { Control, useForm, UseFormRegister } from 'react-hook-form'
+import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import Select from 'react-select'
 import DefaultLayout from '../../../../views/layouts/DefaultLayout'
 import { fetchLicensesOnWorkflow, fetchWorkflow, runWorkflow, RunWorkflowInput, RunWorkflowRequest } from '../workflows.api'
 import { InputOutput, IWorkflow, Stage } from '../workflows.types'
@@ -16,8 +17,8 @@ import { CubeIcon } from '../../../../components/icons/CubeIcon'
 import { ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup } from '../../../../components/form/FieldGroup'
 import { JobRunInput } from '../../apps/run/JobRunInput'
-import { AcceptedLicense, InputSpec, INPUT_TYPES_CLASSES, ListedFile } from '../../apps/apps.types'
-import { Section, SectionHeader, SectionBody, StyledLine, TopboxItem, StyledForm, Topbox, StyledBackLink } from '../../apps/run/styles'
+import { AcceptedLicense, InputSpec, INPUT_TYPES_CLASSES, ListedFile, SelectType } from '../../apps/apps.types'
+import { Section, SectionHeader, SectionBody, StyledLine, TopboxItem, StyledForm, Topbox, StyledBackLink, WrapSelect } from '../../apps/run/styles'
 import { StyledStageHeader, WorkflowConfiguration, StyledAnalysisName } from './styles'
 import { GearIcon } from '../../../../components/icons/GearIcon'
 import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
@@ -28,10 +29,12 @@ import { fetchFile } from '../../files/files.api'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { getSpaceIdFromScope } from '../../../../utils'
 import { IUser } from '../../../../types/user'
+import { fetchAndConvertSelectableSpaces } from '../../apps/run/job-run-helper'
 
 interface WorkflowRunData {
   analysisName: string;
   jobLimit: number;
+  spaceScope?: SelectType | null;
   inputs: {
     [key: string]: string | boolean | ListedFile | undefined,
   };
@@ -108,7 +111,7 @@ const hasUnfilledInputs = (stage: Stage) => {
   return !stage.inputs.find(input => input.values.id !== null)
 }
 
-const prepareValidations = (user?: IUser, stages?: Stage[]) => {
+const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
   const inputs: any = {}
   stages?.filter(stage => hasUnfilledInputs(stage))
     .flatMap(stage => stage.inputs)
@@ -124,12 +127,18 @@ const prepareValidations = (user?: IUser, stages?: Stage[]) => {
     }
   })
 
+  const spaceValidations =
+    scope && ['private', 'public'].includes(scope)
+      ? Yup.object().nullable()
+      : Yup.object().nullable().required('Scope is required')
+
   const validationObject = {
     analysisName: Yup.string().required('Analysis name required'),
     jobLimit: Yup.number().required('Execution cost limit required')
       .positive().typeError('You must specify a number')
       .max(user?.job_limit ?? 99, `Maximum job limit for current user is ${user?.job_limit ?? 99}`),
     inputs: Yup.object().shape(inputs),
+    spaceScope: spaceValidations,
   }
 
   return Yup.object().shape(validationObject)
@@ -190,26 +199,34 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
     inputs.push(input)
   })
 
-  const requestObject: RunWorkflowRequest = {
+  return {
     workflow_id: workflowId,
     name: vals.analysisName,
     job_limit: vals.jobLimit,
+    space_id: vals.spaceScope?.value,
     inputs,
-  }
-
-  return requestObject
+  } as RunWorkflowRequest
 }
 
 const WorkflowRun = (
-  { workflow, meta, defaultFiles }:
-    { workflow: IWorkflow, meta: any, defaultFiles?: IFile[]  },
+  { workflow, meta, defaultFiles, user }:
+    { workflow: IWorkflow, meta: any, defaultFiles?: IFile[], user: IUser },
 ) => {
   const { stages }: { stages: Stage[] } = meta.spec.input_spec
   const { apps }: { apps: [] } = meta
   const history = useHistory()
-  const user = useAuthUser()
   const defaultValues = prepareDefaultValues(workflow, user, stages, defaultFiles)
-  const validationSchema = prepareValidations(user, stages)
+  const validationSchema = prepareValidations(user, stages, workflow.scope)
+
+  const { data: selectableSpaces } = useQuery(
+    ['selectable-spaces', workflow.scope],
+    () => fetchAndConvertSelectableSpaces(workflow.scope),
+    {
+      onError: () => {
+        toast.error('Error loading spaces')
+      },
+    },
+  )
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
@@ -230,7 +247,12 @@ const WorkflowRun = (
     mutationFn: (payload: RunWorkflowRequest) => runWorkflow(payload),
     onSuccess: (res) => {
       if (res?.id) {
+        const spaceId = getValues().spaceScope?.value
+        if (spaceId) {
+          history.push(`/spaces/${spaceId}/executions`)
+        } else {
           history.push(`/home/workflows/${workflow.uid}/jobs`)
+        }
       } else if (res?.error) {
           toast.error(res.error.message)
         } else {
@@ -309,6 +331,35 @@ const WorkflowRun = (
                   <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                 </FieldGroup>
               </StyledLine>
+              {workflow.scope && workflow.scope.startsWith('space-') && (
+                <WrapSelect>
+                  <FieldGroup label="Space scope" required>
+                    <Controller
+                      name="spaceScope"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={selectableSpaces}
+                          placeholder="Choose..."
+                          onChange={value => {
+                            field.onChange(value)
+                            field.onBlur()
+                          }}
+                          isClearable
+                          isSearchable
+                          onBlur={field.onBlur}
+                          value={field.value}
+                          isDisabled={isSubmitting}
+                        />
+                      )}
+                    />
+                    <ErrorMessageForField
+                      errors={errors}
+                      fieldName="spaceScope"
+                    />
+                  </FieldGroup>
+                </WrapSelect>
+              )}
             </SectionBody>
           </Section>
           <Section>
@@ -362,7 +413,9 @@ export const WorkflowRunForm = () => {
     },
   )
 
-  if (loadingWorkflowStatus === 'loading' || defaultFilesLoading === 'loading') {
+  const user = useAuthUser()
+
+  if (loadingWorkflowStatus === 'loading' || defaultFilesLoading === 'loading' || !user) {
     return <HomeLoader />
   }
 
@@ -379,6 +432,6 @@ export const WorkflowRunForm = () => {
   )
 
   return (
-    <WorkflowRun workflow={workflow} meta={meta} defaultFiles={defaultFiles} />
+    <WorkflowRun workflow={workflow} meta={meta} defaultFiles={defaultFiles} user={user} />
   )
 }

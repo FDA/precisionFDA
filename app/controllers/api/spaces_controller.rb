@@ -207,6 +207,16 @@ module Api
       render json: spaces, :root => false, each_serializer: CliSpaceSerializer
     end
 
+    # GET /api/spaces/:id/selectable_spaces
+    # gets all selectable spaces for given space
+    # @return spaces [Space] Array of Space objects that can be selected for job
+    def selectable_spaces
+      spaces = https_apps_client.selectable_spaces(params[:id])
+      render json: spaces
+    rescue HttpsAppsClient::Error => e
+      response[:errors] << e.message
+    end
+
     private
 
     # Sends space activatio email to leads.

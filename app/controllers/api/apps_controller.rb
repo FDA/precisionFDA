@@ -82,17 +82,6 @@ module Api
       render_apps_list(apps, page_meta)
     end
 
-    # GET /api/apps/:appId/selectable_spaces
-    # gets all selectable spaces for given App
-    # @return spaces [Space] Array of Space objects that can be selected for job
-    def selectable_spaces
-      app_id = unsafe_params[:app_id]
-      spaces = https_apps_client.selectable_spaces(app_id)
-      render json: spaces
-    rescue HttpsAppsClient::Error => e
-      response[:errors] << e.message
-    end
-
     # GET /api/apps/:appId/licenses_to_accept
     # gets licenses to be accepted
     # @return object containing two arrays (licenses_to_accept and accepted_licenses)

@@ -128,4 +128,16 @@ router.patch(
   },
 )
 
+router.get(
+  '/:id/selectable-spaces',
+
+  async ctx => {
+    const res = await new space.SelectableSpacesOperation(pickOpsCtx(ctx))
+      .execute(parseInt(ctx.params.id))
+
+    ctx.body = res
+    ctx.status = 200
+  },
+)
+
 export { router }
