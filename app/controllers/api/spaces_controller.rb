@@ -271,7 +271,7 @@ module Api
     end
 
     def api
-      @api ||= DIContainer.resolve("api.user")
+      @api ||= DNAnexusAPI.new(session["token"])
     end
 
     def space_types
