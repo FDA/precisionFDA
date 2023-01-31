@@ -27,6 +27,7 @@ Space[]
     if (!(appSpace.type === SPACE_TYPE.REVIEW
       || appSpace.type === SPACE_TYPE.VERIFICATION
       || appSpace.type === SPACE_TYPE.GROUPS
+      || appSpace.type === SPACE_TYPE.ADMINISTRATOR
       || appSpace.type === SPACE_TYPE.PRIVATE_TYPE)) {
       return []
     }
