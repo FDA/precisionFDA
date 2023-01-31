@@ -365,7 +365,7 @@ class ComparisonsController < ApplicationController
       return
     end
 
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(session["token"])
 
     files_errors = []
     spec_inputs.files.each do |file|

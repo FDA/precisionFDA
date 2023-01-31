@@ -7,7 +7,7 @@ module Naming
     # @param username [String] Base name.
     # @return [String] Unused username.
     def find_unused_username(username)
-      api = DIContainer.resolve("api.user")
+      api = DNAnexusAPI.new(session["token"])
       UnusedUsernameGenerator.new(api).call(username)
     end
 
