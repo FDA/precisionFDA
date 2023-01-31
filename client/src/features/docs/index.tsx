@@ -27,7 +27,7 @@ import { Tracking } from './pages/Tracking'
 import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
-import { Tutorials } from './pages/Tutorials'
+import { TutorialMarkdown } from './tutorials/TutorialMarkdown'
 
 const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
@@ -49,6 +49,24 @@ const Docs = () => {
       />
       <DocsLayout>
         <DocsNav>
+          <DocsTitle>Tutorials</DocsTitle>
+          <NavItem
+            activeClassName='active'
+            $active={isActiveLink('/docs/tutorials/apps-workflows', pathname)}
+            to="/docs/tutorials/apps-workflows"
+            data-turbolinks="false"
+          >
+            Design Patterns for Apps and Workflows
+          </NavItem>
+          <NavItem
+            activeClassName='active'
+            $active={isActiveLink('/docs/tutorials/workstations', pathname)}
+            to="/docs/tutorials/workstations"
+            data-turbolinks="false"
+          >
+            Collaborative Data Science with Interactive Workstations and Databases
+          </NavItem>
+
           <DocsTitle>Guides</DocsTitle>
           <NavItem
             activeClassName='active'
@@ -57,14 +75,6 @@ const Docs = () => {
             data-turbolinks="false"
           >
             Introduction
-          </NavItem>
-          <NavItem
-            activeClassName='active'
-            $active={isActiveLink('/docs/tutorials', pathname)}
-            to="/docs/tutorials"
-            data-turbolinks="false"
-          >
-            Tutorials
           </NavItem>
           <NavItem
             activeClassName='active'
@@ -224,8 +234,11 @@ const Docs = () => {
             <Route exact path="/docs/introduction">
               <Intro />
             </Route>
-            <Route exact path="/docs/tutorials">
-              <Tutorials />
+            <Route exact path="/docs/tutorials/apps-workflows">
+              <TutorialMarkdown fileName="apps.md" />
+            </Route>
+            <Route exact path="/docs/tutorials/workstations">
+              <TutorialMarkdown fileName="workstations.md" />
             </Route>
             <Route exact path="/docs/discussions">
               <Discussions />
@@ -266,7 +279,6 @@ const Docs = () => {
             <Route exact path="/docs/cli">
               <CLI />
             </Route>
-
             <Route exact path="/docs/challenge-workbench">
               <ChallengeWorkbench />
             </Route>
