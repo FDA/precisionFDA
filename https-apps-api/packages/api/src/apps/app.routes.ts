@@ -20,23 +20,6 @@ const router = new Router<DefaultState, Api.Ctx>()
 router.use(defaultMiddlewares)
 
 router.get(
-  '/:appDxId/selectable-spaces',
-  makeSchemaValidationMdw({
-    params: utils.schemas.getDxidInputSchema('appDxId'),
-  }),
-
-  async ctx => {
-    const res = await new appDomain.SelectableSpacesOperation(pickOpsCtx(ctx)).execute({
-      ...ctx.request.body,
-      uid: ctx.params.appDxId,
-    })
-
-    ctx.body = res
-    ctx.status = 200
-  },
-)
-
-router.get(
   '/:appDxId/licenses-to-accept',
   makeSchemaValidationMdw({
     params: utils.schemas.getDxidInputSchema('appDxId'),

@@ -124,7 +124,7 @@ export const Files = () => {
           <strong>KEY</strong>. For your security, the key is valid for 24h.
         </p>
         <p>
-          Run <code>./pfda upload-file --key KEY --file /path/to/file</code>.
+          Run <code className="inline">./pfda upload-file --key KEY --file /path/to/file</code>.
           This command will upload the file to precisionFDA.
         </p>
         <DocsTip>

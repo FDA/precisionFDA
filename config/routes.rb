@@ -229,7 +229,6 @@ Rails.application.routes.draw do
       resources :apps do
         get :describe, on: :member, to: "apps#describe"
         get :jobs, on: :member, to: "jobs#app"
-        get :selectable_spaces
         get :licenses_to_accept
 
         collection do
@@ -258,6 +257,7 @@ Rails.application.routes.draw do
         member do
           get :jobs
           get :members
+          get :selectable_spaces
           put :tags
           post :accept
           post :add_data

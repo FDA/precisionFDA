@@ -82,11 +82,11 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  # Get selectable spaces for given app id
-  # @param app_dxid [String] App dxid get selectable spaces for
-  def selectable_spaces(app_dxid)
+  # Get selectable spaces for given space_id
+  # @param space_id [String] id of space to get selectable spaces for
+  def selectable_spaces(space_id)
     request(
-      "/apps/#{app_dxid}/selectable-spaces",
+      "/spaces/#{space_id}/selectable-spaces",
       {},
       Net::HTTP::Get::METHOD,
     )

@@ -21,6 +21,7 @@ export interface RunWorkflowRequest {
   inputs: RunWorkflowInput[]
   workflow_id: string
   job_limit: number
+  space_id: string
 }
 
 interface RunWorkflowResponse {

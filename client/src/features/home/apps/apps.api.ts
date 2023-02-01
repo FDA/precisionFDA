@@ -50,8 +50,8 @@ export async function fetchApp(uid: string): Promise<{ app: IApp, meta: any}> {
   return res
 }
 
-export async function fetchSelectableSpaces(uid: string): Promise<ISpace[]> {
-  return axios.get(`/api/apps/${uid}/selectable_spaces`).then(r => r.data)
+export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {
+  return axios.get(`/api/spaces/${id}/selectable_spaces`).then(r => r.data)
 }
 
 export async function fetchLicensesOnApp(uid: string): Promise<License[]> {
