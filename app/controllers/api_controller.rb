@@ -552,6 +552,8 @@ class ApiController < ApplicationController
       Asset.closed.accessible_by(@context)
     end
 
+    assets = assets.limit(unsafe_params[:limit]) if unsafe_params[:limit]
+
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
       assets = assets.where(uid: ids)
@@ -1104,28 +1106,30 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # prefix (string, required): the prefix to search for
+  # keyword (string, required): the keyword to search for
   #
   # Outputs:
   #
-  # uids (array:string): the matching asset uids
+  # the matching assets
   #
   def search_assets
-    prefix = unsafe_params[:prefix]
+    keyword = unsafe_params[:keyword]
 
-    if !prefix.is_a?(String) || prefix.size < 3
-      fail "Prefix should be a String of at least 3 characters"
+    fail "Prefix should be a String of at least 3 characters" if !keyword.is_a?(String) || keyword.size < 2
+
+    ids = Asset.closed.
+      accessible_by(@context).
+      with_search_keyword(keyword).
+      select(:uid).
+      distinct
+
+    assets = Asset.where(uid: ids).limit(unsafe_params[:limit])
+
+    result = assets.order(:name).map do |asset|
+      map_basic_asset(asset)
     end
 
-    assets = Asset.closed.
-      accessible_by(@context).
-      order(:name).
-      with_search_keyword(prefix).
-      select(:uid).
-      distinct.
-      limit(ASSETS_SEARCH_LIMIT)
-
-    render json: { uids: assets.map(&:uid) }
+    render json: result
   end
 
   # Use this to add multiple items of the same type to a note
@@ -1660,4 +1664,15 @@ class ApiController < ApplicationController
     DIContainer.resolve("https_apps_client")
   end
   # rubocop:enable Style/SignalException
+
+  private
+
+  def map_basic_asset(object)
+    {
+      id: object.id,
+      uid: object.uid,
+      fa_class: view_context.fa_class(object),
+      title: object.prefix,
+    }
+  end
 end
