@@ -17,7 +17,6 @@ import { IUser } from '../../../../types/user'
 import { getSpaceIdFromScope } from '../../../../utils'
 import DefaultLayout from '../../../../views/layouts/DefaultLayout'
 import { useAuthUser } from '../../../auth/useAuthUser'
-import { ISpace, SPACE_TYPES } from '../../../spaces/spaces.types'
 import { fetchFile } from '../../files/files.api'
 import { IFile } from '../../files/files.types'
 import {
@@ -30,7 +29,6 @@ import { HomeLoader, NotFound, Title } from '../../show.styles'
 import {
   fetchApp,
   fetchLicensesOnApp,
-  fetchSelectableSpaces,
   fetchUserComputeInstances,
   runJob,
   RunJobRequest,
@@ -60,24 +58,7 @@ import {
   TopboxItem,
   WrapSelect,
 } from './styles'
-
-const getTitle = (space: ISpace): string => {
-  if (space.type === SPACE_TYPES.REVIEW) {
-    return space.spaceId
-      ? `${space.name} (Private Review)`
-      : `${space.name} (Shared Review)`
-  }
-  if (space.type === SPACE_TYPES.VERIFICATION) {
-    return `${space.name} (Verification)`
-  }
-  if (space.type === SPACE_TYPES.GROUPS) {
-    return `${space.name} (Group)`
-  }
-  if (space.type === SPACE_TYPES.PRIVATE_TYPE) {
-    return `${space.name} (Private)`
-  }
-  return space.name
-}
+import { fetchAndConvertSelectableSpaces } from './job-run-helper'
 
 const convertToListedFile = (file: IFile): ListedFile =>
   ({
@@ -233,23 +214,6 @@ const getLicensesToAccept = (
   return remainingLicenses
 }
 
-const fetchAndConvertSelectableSpaces = async (
-  appUid: string,
-): Promise<
-  {
-    isDisabled: boolean
-    label: string
-    value: string
-  }[]
-> => {
-  const spaces: ISpace[] = await fetchSelectableSpaces(appUid)
-  return spaces.map(space => ({
-    isDisabled: false,
-    label: getTitle(space),
-    value: space.id,
-  }))
-}
-
 const fetchLicensesOnFiles = (jobData: JobRunData): Promise<License[]> => {
   const ids: number[] = []
   const { inputs } = jobData
@@ -286,8 +250,8 @@ const JobRun = ({
   const validationSchema = prepareValidations(inputSpecs, user, app.scope)
 
   const { data: selectableSpaces } = useQuery(
-    ['selectable-spaces', app.uid],
-    () => fetchAndConvertSelectableSpaces(app.uid),
+    ['selectable-spaces', app.scope],
+    () => fetchAndConvertSelectableSpaces(app.scope),
     {
       onError: () => {
         toast.error('Error loading spaces')
