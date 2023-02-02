@@ -40,6 +40,25 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Returns all licenses accepted by current user
+  def accepted_licenses
+    request(
+      "/licenses/accepted",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # List licenses for a file
+  # @param ids list of file ids
+  def list_licenses_for_files(ids)
+    request(
+      "/licenses/files",
+      { ids: ids },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   # Sync files for a running HTTPS app job.
   # @param job_dxid [String] Job dxid to terminate.
   # @param opts [Hash] Request body options.
@@ -60,6 +79,36 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/account/checkSpacesPermissions",
       {},
       Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Get selectable spaces for given space_id
+  # @param space_id [String] id of space to get selectable spaces for
+  def selectable_spaces(space_id)
+    request(
+      "/spaces/#{space_id}/selectable-spaces",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Get licenses that need to be accepted for given app id
+  # @param app_uid [String] App uid get licenses for
+  def app_licenses_to_accept(app_uid)
+    request(
+      "/apps/#{app_uid}/licenses-to-accept",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Get licenses that need to be accepted for given workflow id
+  # @param workflow_dxid [String] App dxid get licenses for
+  def workflow_licenses_to_accept(workflow_uid)
+    request(
+      "/workflows/#{workflow_uid}/licenses-to-accept",
+      {},
+      Net::HTTP::Get::METHOD,
     )
   end
 

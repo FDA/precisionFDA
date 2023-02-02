@@ -188,7 +188,7 @@ export const ExecutionsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={scope as any}
+        shouldResetFilters={[scope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no executions here.</EmptyTable>}

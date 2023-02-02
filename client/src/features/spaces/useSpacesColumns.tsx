@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Column } from 'react-table'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import {
   DefaultColumnFilter,
   SelectColumnFilter,
@@ -19,6 +19,7 @@ import { ProfileIcon } from '../../components/icons/ProfileIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { BoltIcon } from '../../components/icons/BoltIcon'
+import { ProtectedIcon } from './ProtectedIcon'
 
 export const SpaceTableNameCell = styled.div`
   display: flex;
@@ -28,7 +29,6 @@ export const SpaceTableNameCell = styled.div`
     font-weight: ${fontWeight.bold};
     font-size: 16px;
     line-height: 18px;
-    margin-bottom: 4px;
   }
 
   p {
@@ -43,27 +43,26 @@ export const Dot = styled.div`
   height: 8px;
   border-radius: 5px;
 `
-export const StyledName = styled.span`
-  margin-bottom: 4px;
+export const StyledName = styled.span<{ $isAccess: boolean }>`
   font-weight: 600;
   font-size: 16px;
-  cursor: not-allowed;
-  color: ${colors.textDarkGreyInactive};
-`
-export const StyledNameLink = styled(Link)`
-  margin-bottom: 4px;
-  font-weight: 600;
-  font-size: 16px;
+
+  ${({ $isAccess }) =>
+    !$isAccess &&
+    css`
+      color: ${colors.textDarkGreyInactive};
+      cursor: not-allowed;
+    `}
 `
 
-export const StatusCell = styled.div<{ isActive: boolean }>`
+export const StatusCell = styled.div<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
-  color: ${({ isActive }) => (isActive ? 'green' : 'red')};
+  color: ${({ $isActive }) => ($isActive ? 'green' : 'red')};
   text-transform: capitalize;
 
   ${Dot} {
-    color: ${({ isActive }) => (isActive ? 'green' : 'red')};
+    color: ${({ $isActive }) => ($isActive ? 'green' : 'red')};
     margin-right: 8px;
   }
 `
@@ -72,6 +71,13 @@ export const TypeDot = styled.div`
   width: 14px;
   height: 14px;
   border-radius: 16px;
+`
+
+export const NameRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
 `
 
 export const SpaceTableTypeCell = styled.div`
@@ -147,16 +153,31 @@ export const useSpacesColumns = ({
           accessor: 'name',
           width: colWidths?.name || 368,
           Filter: DefaultColumnFilter,
-          Cell: ({ row }) => (
+          Cell: ({ row: { original }}) => (
             <SpaceTableNameCell>
-              {row.original.current_user_membership ? (
-                <StyledNameLink to={{ pathname: `/spaces/${row.original.id}` }}>
-                  {row.original.name}
-                </StyledNameLink>
-              ) : (
-                <StyledName>{row.original.name}</StyledName>
-              )}
-              <p>{row.original.description}</p>
+              <NameRow>
+                {original.protected && (
+                  <ProtectedIcon
+                    color={
+                      original.current_user_membership
+                        ? undefined
+                        : colors.textDarkGreyInactive
+                    }
+                  />
+                )}
+                {original.current_user_membership ? (
+                  <StyledName
+                    $isAccess
+                    as={Link}
+                    to={{ pathname: `/spaces/${original.id}` }}
+                  >
+                    {original.name}
+                  </StyledName>
+                ) : (
+                  <StyledName $isAccess={false}>{original.name}</StyledName>
+                )}
+              </NameRow>
+              <p>{original.description}</p>
             </SpaceTableNameCell>
           ),
         },
@@ -172,7 +193,7 @@ export const useSpacesColumns = ({
             { label: 'Unactivated', value: 'unactivated' },
           ],
           Cell: ({ row }) => (
-            <StatusCell isActive={row.original.state === 'active'}>
+            <StatusCell $isActive={row.original.state === 'active'}>
               <Dot />
               {row.original.state}
             </StatusCell>
@@ -195,12 +216,14 @@ export const useSpacesColumns = ({
         {
           Header: 'Created on',
           accessor: 'created_at',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.created_at || 150,
         },
         {
           Header: 'Modified on',
           accessor: 'updated_at',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.updated_at || 150,
         },

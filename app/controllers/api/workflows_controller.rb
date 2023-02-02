@@ -138,12 +138,24 @@ module Api
           spec: @workflow.spec,
           apps: @workflow.apps,
           revisions: @revisions,
-          executions: analyses[:analyses_jobs],
-          batches: analyses[:batch_hash],
+          executions: [],
+          batches: [],
           challenges: @assignable_challenges,
           comments: @comments,
           links: meta_links(@workflow),
         }
+    end
+
+    # GET /api/workflows/:id/licenses_to_accept
+    # gets licenses to be accepted
+    # @param id [String] uid of Workflow object.
+    # @return object containing two arrays (licenses_to_accept and accepted_licenses)
+    def licenses_to_accept
+      workflow_uid = unsafe_params[:workflow_id]
+      licenses = https_apps_client.workflow_licenses_to_accept(workflow_uid)
+      render json: licenses
+    rescue HttpsAppsClient::Error => e
+      response[:errors] << e.message
     end
 
     # Workflow analyses jobs and Batch hash

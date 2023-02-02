@@ -3,12 +3,14 @@ import { AngleDownIcon } from './AngleDownIcon'
 import { AreaChartIcon } from './AreaChartIcon'
 import { ArrowIcon } from './ArrowIcon'
 import { ArrowLeftIcon } from './ArrowLeftIcon'
+import { ArrowUpRightFromSquareIcon } from './ArrowUpRightFromSquareIcon'
 import { BoltIcon } from './BoltIcon'
 import { BookIcon } from './BookIcon'
 import { BullsEyeIcon } from './BullsEyeIcon'
 import { CaretIcon } from './CaretIcon'
 import { CaretUpIcon } from './CaretUpIcon'
 import { CircleCheckIcon } from './CircleCheckIcon'
+import { ChevronRightIcon } from './ChevronRightIcon'
 import { CogsIcon } from './Cogs'
 import { CommentIcon } from './CommentIcon'
 import { CommentingIcon } from './CommentingIcon'
@@ -22,10 +24,12 @@ import { FolderIcon } from './FolderIcon'
 import { FolderOpenIcon } from './FolderOpenIcon'
 import { FortIcon } from './FortIcon'
 import { GSRSIcon } from './GSRSIcon'
+import { GlobeIcon } from './GlobeIcon'
 import { HeartSolidIcon, HeartOutlineIcon } from './HeartIcon'
 import { HistoryIcon } from './HistoryIcon'
 import { HomeIcon } from './HomeIcon'
 import { InfoCircleIcon } from './InfoCircleIcon'
+import { LockIcon } from './LockIcon'
 import { InstitutionIcon } from './InstitutionIcon'
 import { ObjectGroupIcon } from './ObjectGroupIcon'
 import { PlusIcon } from './PlusIcon'
@@ -44,12 +48,14 @@ export const IconNames = {
 'AreaChartIcon': AreaChartIcon,
 'ArrowIcon': ArrowIcon,
 'ArrowLeftIcon': ArrowLeftIcon,
+'ArrowUpRightFromSquareIcon': ArrowUpRightFromSquareIcon,
 'BoltIcon': BoltIcon,
 'BookIcon': BookIcon,
 'BullsEyeIcon': BullsEyeIcon,
 'CaretIcon': CaretIcon,
 'CaretUpIcon': CaretUpIcon,
 'CircleCheckIcon': CircleCheckIcon,
+'ChevronRightIcon': ChevronRightIcon,
 'CogsIcon': CogsIcon,
 'CommentIcon': CommentIcon,
 'CommentingIcon': CommentingIcon,
@@ -62,11 +68,13 @@ export const IconNames = {
 'FolderIcon': FolderIcon,
 'FolderOpenIcon': FolderOpenIcon,
 'FortIcon': FortIcon,
+'GlobeIcon': GlobeIcon,
 'GSRSIcon': GSRSIcon,
 'HeartSolidIcon': HeartSolidIcon,
 'HeartOutlineIcon': HeartOutlineIcon,
 'HistoryIcon': HistoryIcon,
 'HomeIcon': HomeIcon,
+'LockIcon': LockIcon,
 'InfoCircleIcon': InfoCircleIcon,
 'InstitutionIcon': InstitutionIcon,
 'ObjectGroupIcon': ObjectGroupIcon,

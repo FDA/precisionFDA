@@ -67,7 +67,7 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     client: {
       overlay: false,
     },
-    static: './dist',
+    static: ['./dist', path.join(__dirname, '../public')],
     historyApiFallback: true, // See https://stackoverflow.com/questions/56573363/react-router-v4-nested-routes-not-work-with-webpack-dev-server
     host: '0.0.0.0', // See https://github.com/webpack/webpack-dev-server/issues/547
     port: 4000,

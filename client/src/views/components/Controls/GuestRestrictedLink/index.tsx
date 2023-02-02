@@ -1,10 +1,14 @@
 import React, { FunctionComponent, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Modal from '../../Modal'
-import Button from '../../Button'
+import styled from 'styled-components'
+import { Button } from '../../../../components/Button'
 import { PFDA_EMAIL } from '../../../../constants'
 import { useAuthUser } from '../../../../features/auth/useAuthUser'
+import { Modal } from '../../../../features/modal'
 
+const StyledBody = styled.div`
+  margin: 12px;
+`
 
 interface IGuestRestrictedLinkProps {
 	to: string,
@@ -36,14 +40,16 @@ const GuestRestrictedLink : FunctionComponent<IGuestRestrictedLinkProps> = ({ to
       <a data-turbolinks="false" className={className} onClick={() => openModal()} aria-label={ariaLabel}>{children}</a>
       }
       <Modal
-        isOpen={isOpen}
-        isLoading={false}
-        title="Account Being Reviewed"
-        modalFooterContent={<Button onClick={closeModal}>Close</Button>}
-        hideModalHandler={closeModal}
+        id="guest-restricted"
+        isShown={isOpen}
+        headerText="Account Being Reviewed"
+        footer={<Button onClick={closeModal}>Close</Button>}
+        hide={closeModal}
       >
-        <p>You are currently browsing precisionFDA as a guest. To log in and complete this action, your user account must be provisioned. Your account is currently being reviewed by an FDA administrator for provisioning.</p>
-        <p>If you do not receive full access within 14 days, please contact <a href={`mailto:${PFDA_EMAIL}`}>{PFDA_EMAIL}</a> to request an upgraded account with end-level access.</p>
+        <StyledBody>
+          <p>You are currently browsing precisionFDA as a guest. To log in and complete this action, your user account must be provisioned. Your account is currently being reviewed by an FDA administrator for provisioning.</p>
+          <p>If you do not receive full access within 14 days, please contact <a href={`mailto:${PFDA_EMAIL}`}>{PFDA_EMAIL}</a> to request an upgraded account with end-level access.</p>
+        </StyledBody>
       </Modal>
     </>
   )

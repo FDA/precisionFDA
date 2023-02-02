@@ -4,18 +4,10 @@ class AssetsModel
     @refreshing = ko.observable(false)
     @query = ko.observable()
     @assets = ko.observableArray()
-    @assets.searchedIDs = ko.observableArray([])
     @assets.filtered = ko.computed(=>
       assets = @assets()
       query = @query()
-      if !_.isEmpty(query)
-        assetsSearchIDs = @assets.searchedIDs() || []
-        if assetsSearchIDs.length
-          return _.filter(assets, (asset) -> _.includes(assetsSearchIDs, asset.uid))
-        else
-          return _.filter(assets, (asset) -> asset.name.match(query))
-      else
-        return assets
+      return assets
     )
     @assets.selected = ko.observableArray()
     @assets.saved = ko.observableArray()
@@ -23,7 +15,11 @@ class AssetsModel
     @previewedAsset = ko.observable()
 
     @isQuerySearchable = ko.computed(=>
-      return @query()?.length >= 3
+      return @query()?.length >= 2
+    )
+
+    @isQueryEmpty = ko.computed(=>
+      return @query()?.length == 0
     )
 
     @queryActionClasses = ko.computed(=>
@@ -58,8 +54,8 @@ class AssetsModel
       if @isQuerySearchable()
         @loading(true)
         @searchAssets(query)
-      else
-        @assets.searchedIDs([])
+      else if @isQueryEmpty()
+        @refreshAssets()
     )
 
   createAssetModels: (assets) =>
@@ -73,7 +69,7 @@ class AssetsModel
       @loading(true)
       Precision.api(
         '/api/list_assets',
-        {},
+        { limit: 20 },
         (assets) =>
           @loading(false)
           @refreshing(false)
@@ -92,11 +88,12 @@ class AssetsModel
   searchAssets: _.debounce((query) ->
     Precision.api(
       '/api/search_assets',
-      { prefix: query },
-      (result) =>
+      { keyword: query, limit: 20 },
+      (assets) =>
         @loading(false)
-        @previewedAsset(null)
-        @assets.searchedIDs(result.ids)
+        @refreshing(false)
+        @updateAssetModels(assets)
+        # @setSelected(@assets.selected.peek())
       (error) =>
         Precision.alert.showAboveAll('Error while assets search!')
         @loading(false)

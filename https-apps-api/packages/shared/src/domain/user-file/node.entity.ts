@@ -29,6 +29,19 @@ L
   @Property()
   userId: number
 
+
+  @ManyToOne(() => Node)
+  parentFolder: Node
+
+  @OneToMany({
+    entity: () => Node,
+    mappedBy: n => n.parentFolder,
+    })
+  children = new Collection<Node>(this)
+
+  @Property()
+  scopedParentFolderId?: number
+
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
 

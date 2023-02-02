@@ -103,3 +103,7 @@ export const PageContentItems = styled.div`
   gap: 16px;
   margin: 16px 0;
 `
+
+export const Filler = styled.div<{size: number}>`
+  height: ${({ size }) => size}px;
+`

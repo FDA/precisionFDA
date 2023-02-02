@@ -18,7 +18,7 @@ module Api
     end
 
     def cloud_resources
-      api = DIContainer.resolve("api.user")
+      api = DNAnexusAPI.new(session["token"])
 
       resources = Users::ChargesFetcher.fetch(api, current_user)
 

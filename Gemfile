@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby "2.7.5"
 
-gem "rails", "= 6.1.6.1"
+gem "rails", "= 6.1.7.1"
 
 gem "rails-html-sanitizer", "~> 1.4.4"
 
@@ -101,6 +101,9 @@ gem "parallel"
 gem "therubyracer"
 
 gem "dry-container"
+gem "dry-configurable"
+
+gem "nokogiri", ">=1.13.10"
 
 gem "rubyzip", "=1.3.0"
 

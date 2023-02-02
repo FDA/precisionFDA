@@ -1,9 +1,73 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { entities, user } from '../domain'
-import * as generate from './generate'
+import { entities } from '../domain'
+import { getScopeFromSpaceId } from '../domain/space/space.helper'
+import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
+import * as generate from './generate'
+
+const acceptedLicenseHelper = {
+  create: (
+    em: EntityManager,
+    references: {
+      license: InstanceType<typeof entities.License>
+      user: InstanceType<typeof entities.User>
+    },
+    data?: Partial<InstanceType<typeof entities.AcceptedLicense>>,
+  ) => {
+    const acceptedLicense
+      = wrap(new entities.AcceptedLicense(references.license, references.user)).assign(data, { em })
+    em.persist(acceptedLicense)
+    return acceptedLicense
+  },
+}
+
+const assetHelper = {
+  create: (
+    em: EntityManager,
+    references: {user: InstanceType<typeof entities.User>},
+    data?: Partial<InstanceType<typeof entities.Asset>>,
+  ) => {
+    const defaults = generate.asset.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    input.parentType = PARENT_TYPE.ASSET
+
+    const asset = wrap(new entities.Asset(references.user)).assign(input, { em })
+    em.persist(asset)
+    return asset
+  },
+}
+
+const licenceHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.License>>,
+  ) => {
+    const license = wrap(new entities.License(references.user)).assign(data, { em })
+    em.persist(license)
+    return license
+  },
+  createForAsset: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof entities.User>
+      asset: InstanceType<typeof entities.Asset>
+    },
+    data?: Partial<InstanceType<typeof entities.License>>,
+  ) => {
+    const license = wrap(new entities.License(references.user)).assign(data, { em })
+    em.persist(license)
+    const licensedItem = wrap(new entities.LicensedItem(license, references.asset.id))
+      .assign({ licenseableType: 'Node' }, { em })
+    em.persist(licensedItem)
+    return license
+  }
+}
 
 const userHelper = {
   create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
@@ -161,6 +225,24 @@ const appHelper = {
     em.persist(app)
     return app
   },
+  createWithSpace: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    appData: Partial<InstanceType<typeof entities.App>>,
+    spaceData: Partial<InstanceType<typeof entities.Space>>,
+  ) => {
+    const appDefaults = generate.app.regular()
+    const appInput = {
+      ...appDefaults,
+      ...appData,
+    }
+    const space = wrap(new entities.Space()).assign(spaceData, { em })
+    em.persist(space)
+    const app = wrap(new entities.App(references.user)).assign(appInput, { em })
+    app.scope = getScopeFromSpaceId(space.id)
+    em.persist(app)
+    return app
+  },
 }
 
 const filesHelper = {
@@ -168,9 +250,8 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
-      // todo: remove both
       parentFolder?: InstanceType<typeof entities.Folder>
-      parent?: InstanceType<typeof entities.Job>
+      parent?: InstanceType<typeof entities.UserFile>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
@@ -179,7 +260,13 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
+    if (references.parent) {
+      input.parentId = references.parent.id
+    }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    if (references.parentFolder) {
+      file.parentFolder = references.parentFolder
+    }
     em.persist(file)
     return file
   },
@@ -187,6 +274,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
@@ -197,6 +285,9 @@ const filesHelper = {
       parentId: references.user.id,
     }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    if (references.parentFolder) {
+      file.parentFolder = references.parentFolder
+    }
     em.persist(file)
     return file
   },
@@ -255,8 +346,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
-      // todo: remove
-      parent?: InstanceType<typeof entities.Folder>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
@@ -266,6 +356,9 @@ const filesHelper = {
       ...data,
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
+    if (references.parentFolder) {
+      folder.parentFolder = references.parentFolder
+    }
     em.persist(folder)
     return folder
   },
@@ -273,6 +366,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
@@ -282,6 +376,9 @@ const filesHelper = {
       ...data,
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
+    if (references.parentFolder) {
+      folder.parentFolder = references.parentFolder
+    }
     em.persist(folder)
     return folder
   },
@@ -451,16 +548,32 @@ const comparisonHelper = {
   },
 }
 
+const workflowHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Workflow>>,
+  ) => {
+    const workflow = wrap(new entities.Workflow(references.user)).assign(data, { em })
+    em.persist(workflow)
+    return workflow
+  },
+}
+
 export {
+  assetHelper,
   userHelper,
   jobHelper,
   appHelper,
+  acceptedLicenseHelper,
   filesHelper,
+  tagsHelper,
+  licenceHelper,
+  spacesHelper,
+  commentHelper,
   challengeHelper,
   challengeResourceHelper,
-  commentHelper,
   comparisonHelper,
   dbClusterHelper,
-  spacesHelper,
-  tagsHelper,
+  workflowHelper,
 }

@@ -10,7 +10,7 @@ import { UserOpsCtx } from '../../../types'
 export class DescribeJobOperation extends BaseOperation<UserOpsCtx, DescribeJobInput, Job> {
   async run(input: DescribeJobInput): Promise<Job> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const job = await getJobAccessibleByContext(input.dxid, this.ctx)
     await em.populate(job, ['app', 'user'])
@@ -28,7 +28,6 @@ export class DescribeJobOperation extends BaseOperation<UserOpsCtx, DescribeJobI
 
     const platformJobData = await platformClient.jobDescribe({
       jobId: input.dxid,
-      accessToken: this.ctx.user.accessToken,
     })
     this.ctx.log.debug({ platformJobData }, 'JOB description object from the platform')
 

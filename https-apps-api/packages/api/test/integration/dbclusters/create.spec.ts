@@ -83,7 +83,6 @@ describe('POST /dbclusters/create', () => {
     expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
 
     expect(fakeCreateCallArgs).to.deep.equal({
-      accessToken: userQueryData.accessToken,
       name: createInput.name,
       project: createInput.project,
       engine: createInput.engine,
@@ -93,7 +92,6 @@ describe('POST /dbclusters/create', () => {
     })
 
     expect(fakeDescribeCallArgs).to.deep.equal({
-      accessToken: userQueryData.accessToken,
       dxid: dxid,
       project: createInput.project,
     })
