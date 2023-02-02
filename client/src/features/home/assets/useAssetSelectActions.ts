@@ -6,7 +6,7 @@ import { ATTACHABLE_TYPES, useAttachToModal } from '../actionModals/useAttachToM
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
-import { useAcceptLicensesModal } from '../licenses/useAcceptLicensesModal'
+import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
@@ -110,7 +110,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     modalComp: acceptLicensesModal,
     setShowModal: setAcceptLicensesModal,
     isShown: isShownAcceptLicensesModal,
-  } = useAcceptLicensesModal<IAsset>({
+  } = useAcceptLicenseModal<IAsset>({
     selected: selected[0],
     resource: 'assets',
     onSuccess: () => {

@@ -54,6 +54,7 @@ export const colors = {
   stateDoneColor: 'darken(#3c763d, 5%)',
   blacktextOnWhite: '#333333', 
   darkblueOnLightBlue: '#1f5cb7',
+  stageBlue: '#d9edf7',
   brownOnWhite: '#aa6708',
   borderBrownOnWhite: '#af6a08',
   disabledBlackTextOnGrey: '#130101', 
@@ -64,7 +65,7 @@ export const colors = {
   brownOnGrey: '#b3453d', 
   blueOnBlack: '#368ad3',
   greyOnLightBlue: '#6d6d6d',
-  
+  orange: '#EB776F',
 }
 
 export const fontSize = {

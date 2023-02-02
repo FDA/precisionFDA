@@ -75,10 +75,9 @@ describe('POST /folders/recreate', () => {
     await em.flush()
     const localSubfolder = create.filesHelper.createLocalOnlyFolder(
       em,
-      { user },
+      { user, parentFolder: localFolder },
       {
         parentId: user.id,
-        parentFolderId: localFolder.id,
       },
     )
     await em.flush()

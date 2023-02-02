@@ -8,7 +8,6 @@ module CwlExporter::Adapter
     def encode_with(coder)
       coder.tag = nil
       coder.scalar = @value
-      coder.style = Psych::Nodes::Scalar::SINGLE_QUOTED
     end
   end
 

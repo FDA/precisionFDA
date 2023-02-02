@@ -24,6 +24,15 @@ export const debounce = (inner, ms = 0) => {
   }
 }
 
+export const getSpaceIdFromScope = (scope) => {
+  if (scope) {
+    const [resource, id] = scope.split('-')
+    const spaceId = resource === 'space' ? id : undefined
+    return spaceId
+  }
+  return undefined
+}
+
 export const getQueryParam = (query, item) => (new URLSearchParams(query)).get(item)
 
 export const createSequenceGenerator = () => {

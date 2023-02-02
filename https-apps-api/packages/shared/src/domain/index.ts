@@ -6,6 +6,9 @@ import { Expert } from './expert/expert.entity'
 import { ExpertQuestion } from './expert-question/expert-question.entity'
 import { ExpertAnswer } from './expert-answer/expert-answer.entity'
 import { Job } from './job/job.entity'
+import { AcceptedLicense } from './accepted-license/accepted-license.entity'
+import { LicensedItem } from './licensed-item/licensed-item.entity'
+import { License } from './license/license.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
@@ -26,6 +29,7 @@ import { ChallengeResource } from './challenge/challenge-resource.entity'
 import { Comparison } from './comparison/comparison.entity'
 
 const entities = {
+  AcceptedLicense,
   AdminGroup,
   AdminMembership,
   App,
@@ -37,12 +41,14 @@ const entities = {
   Comparison,
   DbCluster,
   EmailNotification,
+  Event,
   Expert,
   ExpertAnswer,
   ExpertQuestion,
   Folder,
   Job,
-  Event,
+  License,
+  LicensedItem,
   Node,
   Organization,
   Space,
@@ -54,6 +60,8 @@ const entities = {
   UserFile,
 }
 
+export * as acceptedLicense from './accepted-license'
+
 export * as adminGroup from './admin-group'
 
 export * as spaceEvent from './space-event'
@@ -63,6 +71,8 @@ export * as app from './app'
 export * as workflow from './workflow'
 
 export * as job from './job'
+
+export * as license from './license'
 
 export * as user from './user'
 
@@ -91,6 +101,7 @@ export * as challenge from './challenge'
 
 export {
   entities,
+  AcceptedLicense,
   AdminGroup,
   AdminMembership,
   App,
@@ -106,6 +117,8 @@ export {
   ExpertQuestion,
   Folder,
   Job,
+  License,
+  LicensedItem,
   Node,
   Organization,
   Space,

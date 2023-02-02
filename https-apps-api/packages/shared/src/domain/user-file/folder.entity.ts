@@ -50,9 +50,6 @@ export class Folder extends Node implements ITrackable {
   parentType: PARENT_TYPE
 
   @Property()
-  parentFolderId?: number
-
-  @Property()
   scopedParentFolderId?: number
 
   // todo: micro-orm can do single table inheritance

@@ -6,6 +6,7 @@ import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { CircleCheckIcon } from '../../../components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '../../../components/ResourceTable'
 import { theme } from '../../../styles/theme'
+import { EmptyTable } from '../../../components/Table/styles'
 import { Modal } from '../../modal'
 import { useModal } from '../../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
@@ -106,7 +107,9 @@ export function useAttachLicensesModal<
     >
       {licenses && (
         <ScrollWrapper>
-          {licenses.length === 0 && <div>You do not have any licenses.</div>}
+          {licenses.length === 0 ? <EmptyTable>
+              You don&apos;t have any licenses.
+            </EmptyTable> :
           <ResourceTable
             rows={licenses.map((s, i) => {
               const isCurrent = selectedLicense === s.id
@@ -123,7 +126,7 @@ export function useAttachLicensesModal<
                 ),
                 action: (
                   <StyledAction
-                    key={`${i}-action`}
+                    key={`${i.id}-action`}
                     onClick={() => handleClickLicense(s)}
                     isCurrent={isCurrent}
                   >
@@ -132,7 +135,7 @@ export function useAttachLicensesModal<
                 ),
               }
             })}
-          />
+          />}
           {mutation.isError && mutation.error}
         </ScrollWrapper>
       )}

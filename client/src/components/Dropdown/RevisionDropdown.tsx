@@ -1,13 +1,14 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
+import { Link } from 'react-router-dom'
 import { Dropdown } from '.'
 import { CaretIcon } from '../icons/CaretIcon'
 import { HistoryIcon } from '../icons/HistoryIcon'
 import { colors } from '../../styles/theme'
 import { Revision } from '../../features/home/workflows/workflows.types'
-import { Link } from 'react-router-dom'
 
 const StyledRevisionDropdownButton = styled.button`
+  width: fit-content;
   height: 34px;
   background: white;
   border: 1px solid #daeffb;
@@ -101,27 +102,25 @@ export const RevisionDropdown = ({
   )
 
   return (
-    <>
-      <Dropdown
-        placement="bottom-start"
-        trigger="click"
-        content={<>{renderRevisionsList()}</>}
-      >
-        {dropdownProps => (
-          <StyledRevisionDropdownButton
-            {...dropdownProps}
-            active={dropdownProps.isActive}
-            data-testid="workflow-show-dropdown-revision-button"
-          >
-            <DropdownIcon>
-              <HistoryIcon height={13} />
-            </DropdownIcon>
-            Revision: <RevisionNum>{selectedValue}</RevisionNum>
-            {lastRevision === selectedValue && <TagPill>Latest</TagPill>}
-            <CaretIcon height={5} />
-          </StyledRevisionDropdownButton>
-        )}
-      </Dropdown>
-    </>
+    <Dropdown
+      placement="bottom-start"
+      trigger="click"
+      content={<>{renderRevisionsList()}</>}
+    >
+      {dropdownProps => (
+        <StyledRevisionDropdownButton
+          {...dropdownProps}
+          active={dropdownProps.isActive}
+          data-testid="workflow-show-dropdown-revision-button"
+        >
+          <DropdownIcon>
+            <HistoryIcon height={13} />
+          </DropdownIcon>
+          Revision: <RevisionNum>{selectedValue}</RevisionNum>
+          {lastRevision === selectedValue && <TagPill>Latest</TagPill>}
+          <CaretIcon height={5} />
+        </StyledRevisionDropdownButton>
+      )}
+    </Dropdown>
   )
 }

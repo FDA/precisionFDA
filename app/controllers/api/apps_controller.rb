@@ -82,6 +82,17 @@ module Api
       render_apps_list(apps, page_meta)
     end
 
+    # GET /api/apps/:appId/licenses_to_accept
+    # gets licenses to be accepted
+    # @return object containing two arrays (licenses_to_accept and accepted_licenses)
+    def licenses_to_accept
+      app_id = unsafe_params[:app_id]
+      licenses = https_apps_client.app_licenses_to_accept(app_id)
+      render json: licenses
+    rescue HttpsAppsClient::Error => e
+      response[:errors] << e.message
+    end
+
     # GET /api/apps/everybody
     # A fetch method for apps, accessible by public and of latest revisions.
     # @param order_by, order_dir [String] Params for ordering.

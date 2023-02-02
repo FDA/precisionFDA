@@ -12,5 +12,8 @@ StandardError=file:/srv/www/precision_fda/current/log/ginas.log
 
 SyslogIdentifier=ginas
 
+Restart=on-failure
+RestartSec=10s
+
 [Install]
 WantedBy=multi-user.target

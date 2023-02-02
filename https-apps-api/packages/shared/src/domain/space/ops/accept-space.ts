@@ -20,7 +20,7 @@ void
   private em: EntityManager
 
   async run(input: SpaceAcceptInput): Promise<void> {
-    this.platformClient = new PlatformClient(this.ctx.log)
+    this.platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     this.em = this.ctx.em
 
     const userId = this.ctx.user.id
@@ -115,13 +115,13 @@ void
       meta: space.meta,
       state: space.state,
       spaceId: space.id,
+      protected: space.protected,
     })
     await this.em.persistAndFlush(newSpace)
 
     const newProjectRes = await this.platformClient.projectCreate({
       name: `precisionfda-${newSpace.uid}-${SPACE_MEMBERSHIP_SIDE[admin.side]}-PRIVATE`,
       admin,
-      accessToken: this.ctx.user.accessToken,
     })
 
     const contributeOrg = getOrgDxid(space, admin)
@@ -132,7 +132,6 @@ void
       projectDxid: newProjectRes.id,
       invitee: contributeOrg,
       level: 'CONTRIBUTE',
-      accessToken: this.ctx.user.accessToken,
     })
 
     newSpace.spaceMemberships.add(admin)
@@ -142,7 +141,6 @@ void
     const newProjectRes = await this.platformClient.projectCreate({
       space,
       admin,
-      accessToken: this.ctx.user.accessToken,
     })
 
     const contributeOrg = getOrgDxid(space, admin)
@@ -153,14 +151,12 @@ void
       projectDxid: newProjectRes.id,
       invitee: contributeOrg,
       level: 'CONTRIBUTE',
-      accessToken: this.ctx.user.accessToken,
     })
 
     await this.platformClient.projectInvite({
       projectDxid: newProjectRes.id,
       invitee: oppositeOrg,
       level: 'CONTRIBUTE',
-      accessToken: this.ctx.user.accessToken,
     })
     // previously there was a call to project invite review_app_developers_org as well. Trying spaces without it.
 

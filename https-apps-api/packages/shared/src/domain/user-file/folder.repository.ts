@@ -22,7 +22,7 @@ export class FolderRepository extends EntityRepository<Folder> {
   }
 
   async findChildren({ parentFolderId }: FindRemote): Promise<Folder[]> {
-    return await this.find({ project: { $ne: null }, parentFolderId }, { filters: ['folder'] })
+    return await this.find({ project: { $ne: null }, parentFolder: parentFolderId }, { filters: ['folder'] })
   }
 
   // TODO: rename to findFoldersInProject

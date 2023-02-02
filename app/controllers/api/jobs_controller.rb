@@ -49,7 +49,7 @@ module Api
             eager_load(:app, user: :org, analysis: :workflow).
             includes(:taggings).
             search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).page(page_from_params).per(page_size)
+            order(order_params).page(page_from_params).per(page_size)
           jobs.each { |job| job.current_user = @context.user }
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
@@ -124,11 +124,16 @@ module Api
     def workflow
       workflow = Workflow.find_by(uid: unsafe_params[:id])
       analyses = workflow.analyses.
-        eager_load(:jobs, :workflow, :batch_items)
+        eager_load(:jobs, :workflow, :batch_items).
+        order(order_params).
+        page(page_from_params).
+        per(page_size)
+
+      page_dict = pagination_dict(analyses)
 
       presenter = Presenters::WorkflowExecutionsPresenter.
         new(analyses, @context, unsafe_params).call
-      payload = { jobs: presenter.response, meta: pagination_meta(presenter.size) }
+      payload = { jobs: presenter.response, meta: { count: page_dict[:total_count], pagination: page_dict } }
 
       render json: payload, adapter: :json
     rescue StandardError => e
@@ -255,6 +260,15 @@ module Api
     end
 
     private
+
+    # Default to reverse chronological order unless overriden by params
+    def order_params
+      if params[:order_by]
+        order_from_params
+      else
+        { created_at: Sortable::DIRECTION_DESC }
+      end
+    end
 
     # A common method for apps list json rendering.
     # Added a virtual attribute `current_user` - to use in serializer

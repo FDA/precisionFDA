@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, ReactNode } from 'react'
 import ReactDOM from 'react-dom'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { useKeyPress } from '../../hooks/useKeyPress'
@@ -16,9 +16,9 @@ export const ModalHeaderTop = ({
   headerText,
   disableClose,
 }: {
-  hide: () => void
-  headerText: string
-  disableClose: boolean
+  hide?: () => void
+  headerText?: string
+  disableClose?: boolean
 }) => {
   return (
     <HeaderTop>
@@ -41,18 +41,20 @@ export const ModalHeaderTop = ({
 export interface ModalNextProps {
   hide: () => void
   isShown: boolean
-  headerText: string
+  headerText?: string
   blur?: boolean
   disableClose?: boolean
+  children: ReactNode
 }
-const ModalComponent: FC<ModalNextProps> = ({
-  headerText,
-  hide,
-  children,
-  blur = false,
-  disableClose = false,
-  ...rest
-}) => {
+const ModalComponent = (props: ModalNextProps) => {
+  const {
+    headerText,
+    hide,
+    children,
+    blur = false,
+    disableClose = false,
+    ...rest
+  } = props
   useKeyPress('Escape', () => hide())
   return (
     <>
@@ -64,13 +66,16 @@ const ModalComponent: FC<ModalNextProps> = ({
         role="dialog"
         {...rest}
       >
-        <StyledModal>{children}</StyledModal>
+        <StyledModal>
+          {React.Children.map(children, child => (
+            React.cloneElement(child, { ...props })
+          ))}
+        </StyledModal>
       </Wrapper>
     </>
   )
 }
 // eslint-disable-next-line react/destructuring-assignment
-export const ModalNext: FC<ModalNextProps> = props =>
-  props.isShown
-    ? ReactDOM.createPortal(<ModalComponent {...props} />, document.body)
-    : null
+export const ModalNext: FC<ModalNextProps> = props => props.isShown
+  ? ReactDOM.createPortal(<ModalComponent {...props} />, document.body)
+  : null

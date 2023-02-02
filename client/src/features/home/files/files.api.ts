@@ -40,12 +40,8 @@ export async function fetchFilesDownloadList(ids: string[], scope?: string) {
   }).then(r => r.data as DownloadListResponse[])
 }
 
-export async function deleteFilesRequest(ids: string[]): Promise<any> {
-  const res = await fetch('/api/files/remove', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ ids }),
-  }).then(checkStatus)
-  return res.json()
+export async function deleteFilesRequest(ids: string[]) {
+  return axios.post('/api/files/remove', { ids }).then(r => r.data)
 }
 
 export type LockUnlockActionType = 'lock' | 'unlock'
@@ -73,11 +69,7 @@ export async function featureFileRequest({ ids, uids, featured }: { ids: string[
 
 export async function copyFilesRequest(scope: string, ids: string[]) {
   const item_ids = ids.map(id => parseInt(id, 10))
-  const res = await fetch('/api/files/copy', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids, scope }),
-  }).then(checkStatus)
-  return res.json()
+  return axios.post('/api/files/copy', { item_ids, scope }).then(r => r.data)
 }
 
 export async function editFileRequest({ name, description, fileId }: { name: string, description: string, fileId: string }) {

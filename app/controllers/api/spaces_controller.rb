@@ -51,6 +51,11 @@ module Api
 
       space = space_form.persist!(api, current_user)
 
+      if create_space_params[:protected]
+        space.tag_list = "Protected"
+        space.save
+      end
+
       render json: space, adapter: :json
     end
 
@@ -58,7 +63,7 @@ module Api
     # Returns editable spaces list. Used only for Copy to space dropdown for now.
     def editable_spaces
       spaces = Space.editable_by(@context).order(:name, :space_type).map do |space|
-        { scope: space.uid, title: space.title }
+        { scope: space.uid, title: space.title, protected: space.protected }
       end
 
       render json: spaces
@@ -106,6 +111,10 @@ module Api
       space = Space.undeleted.find(params[:id])
 
       head(:forbidden) && return unless space.updatable_by?(current_user)
+
+      if params.key?(:protected) && params[:protected] != space[:protected]
+        raise ApiError, "Parameter protected cannot be changed!"
+      end
 
       space_edit_params = update_space_params.merge(
         current_user: current_user,
@@ -198,12 +207,22 @@ module Api
       render json: spaces, :root => false, each_serializer: CliSpaceSerializer
     end
 
+    # GET /api/spaces/:id/selectable_spaces
+    # gets all selectable spaces for given space
+    # @return spaces [Space] Array of Space objects that can be selected for job
+    def selectable_spaces
+      spaces = https_apps_client.selectable_spaces(params[:id])
+      render json: spaces
+    rescue HttpsAppsClient::Error => e
+      response[:errors] << e.message
+    end
+
     private
 
     # Sends space activatio email to leads.
     def send_emails(space)
       space.leads.find_each do |lead|
-        NotificationsMailer.space_activated_email(space, lead).deliver_now!
+        NotificationsMailer.space_activated_email(space, lead).deliver_later!
       end
     end
 
@@ -262,7 +281,7 @@ module Api
     end
 
     def api
-      @api ||= DIContainer.resolve("api.user")
+      @api ||= DNAnexusAPI.new(session["token"])
     end
 
     def space_types
@@ -345,7 +364,7 @@ module Api
     def create_space_params
       params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
                                     :space_type, :cts, :sponsor_org_handle, :source_space_id,
-                                    :sponsor_lead_dxuser, :restrict_to_template)
+                                    :sponsor_lead_dxuser, :restrict_to_template, :protected)
     end
   end
   # rubocop:enable Metrics/ClassLength
