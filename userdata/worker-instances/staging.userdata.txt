@@ -97,6 +97,11 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}"
                      },
                      {
+                         "file_path": "/srv/www/precision_fda/current/log/ginas.log",
+                         "log_group_name": "staging/gsrs/ginas",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
                          "file_path": "/home/deploy/gsrs/logs/application.log",
                          "log_group_name": "staging/gsrs/logs",
                          "log_stream_name": "{instance_id}"

@@ -526,7 +526,6 @@ func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
 		return err
 	}
 
-	//TODO check spaces are not empty or some error.
 	printListSpacesResponse(spaces, flags)
 
 	return nil
@@ -820,7 +819,9 @@ func printListingResponse(response jsonListingPayload, flags map[string]bool) {
 }
 
 func printListingSimple(files []jsonFile) {
-	// simple table header
+	if len(files) == 0 {
+		return
+	}
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 
 	fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID","Name"}, "\t") + "\t")
@@ -836,12 +837,14 @@ func printListingSimple(files []jsonFile) {
 }
 
 func printListingVerbose(files []jsonFile, meta jsonMeta) {
+	if len(files) == 0 {
+		return
+	}
 	fmt.Printf("Scope: %s\nPath: %s\n\n", meta.Scope, meta.Path)
 
 	isSpaceContext := strings.Contains(meta.Scope, "space")
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', tabwriter.AlignRight)
 
-	// verbose table header
 	if(isSpaceContext) {
 		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State ", "Type", "Size", "Created At", "Added By", "Name"}, "\t") + "\t")
 		for _, file := range files {
@@ -868,7 +871,7 @@ func printListSpacesResponse(spaces []jsonSpace,  flags map[string]bool) {
 	if(flags["json"]) {
 		prettyJSON, _ := json.MarshalIndent(spaces, "", "    ")
 		fmt.Printf("%s\n", string(prettyJSON))
-	} else {
+	} else if len(spaces) > 0 {
 		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 
 		fmt.Fprintln(writer, strings.Join([]string{"ID", "Type", "Role", "Side", "Name"}, "\t") + "\t")

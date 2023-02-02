@@ -151,11 +151,11 @@ export const AttachToModal = ({
               {itemsList}
               {!itemsList.length && (
                 <div className="__menu-item">
-                  <span className="text-muted noResultContent">
+                  <span className="text-muted _no-content">
                     No results found
                   </span>
                   <TransparentButton
-                    className="__menu-item_clear removeQuery"
+                    className="__menu-item_clear"
                     onClick={() => setSearch('')}
                   >
                     Clear query
@@ -172,7 +172,7 @@ export const AttachToModal = ({
             </a>
           </div>
           <NotesMarkdown data={selectedItem.content} />
-          <div className="_no-content noResultContent">
+          <div className="_no-content">
             {!selectedItem.content && 'No content written for this item'}
           </div>
         </NoteContainer>

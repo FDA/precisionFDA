@@ -91,7 +91,7 @@ module CloudResourcesConcern
   end
 
   def validate_total_limit
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(session["token"])
     I18n.t("api.errors.exceeded_charges_limit") if Users::ChargesFetcher.exceeded_charges_limit?(api, current_user)
   end
 

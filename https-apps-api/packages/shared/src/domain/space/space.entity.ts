@@ -1,10 +1,11 @@
-import { Collection, Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
+import { Collection, Entity, EntityRepositoryType, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
-import { SPACE_TYPE, SPACE_STATE } from './space.enum'
+import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
+import { SpaceRepository } from './space.repository'
 
-@Entity({ tableName: 'spaces' })
+@Entity({ tableName: 'spaces', customRepository: () => SpaceRepository })
 export class Space extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -39,6 +40,9 @@ export class Space extends BaseEntity {
   @Property()
   meta: string
 
+  @Property()
+  protected: boolean
+
   @ManyToMany(() => SpaceMembership, 'spaces', {
     pivotTable: 'space_memberships_spaces',
     owner: true,
@@ -61,4 +65,6 @@ export class Space extends BaseEntity {
   isConfidentialSponsorSpace() {
     return this.isConfidential() && this.guestDxOrg !== null
   }
+
+  [EntityRepositoryType]?: SpaceRepository
 }

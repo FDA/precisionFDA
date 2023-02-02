@@ -47,7 +47,6 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const isAdmin = user?.isAdmin
 
   const history = useHistory()
-  const onRowClick = (id: string) => history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
 
   const {
     setPerPageParam,
@@ -73,12 +72,20 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     },
   })
 
+  const onRowClick = (id: string) => {
+    history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
+  }
+
   const { status, data, error } = query
 
-  const onFolderClick = async (folderId: string) => {
+  const onFolderClick = (folderId: string) => {
     resetSelected()
-    setFolderIdParam(folderId, 'pushIn')
-    setPageParam(1, 'replaceIn')
+    const search = new URLSearchParams({
+      folder_id: folderId,
+      scope: scope as string,
+      per_page: perPageParam.toString(),
+    }).toString()
+    history.push({ search })
   }
 
   // If the component is rendering for the first time, skip setting folderIdParam
@@ -184,6 +191,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        shouldResetFilters={[folderIdParam, scope]}
       />
       
       <StyledPaginationSection>
@@ -269,7 +277,9 @@ export const FilesListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  shouldResetFilters = [],
 }: {
+  shouldResetFilters?: any[]
   isAdmin: boolean
   filters: IFilter[]
   files?: IFile[]
@@ -333,7 +343,7 @@ export const FilesListTable = ({
         sortByPreference={sortBy}
         manualFilters
         filters={filters}
-        shouldResetFilters={scope as any}
+        shouldResetFilters={shouldResetFilters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no files here.</EmptyTable>}
         isColsResizable

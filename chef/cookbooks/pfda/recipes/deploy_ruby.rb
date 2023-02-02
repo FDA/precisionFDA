@@ -89,6 +89,7 @@ template ::File.join(app_dir, "config", "database.yml") do
   variables lazy {{
     rails_env: ENV.fetch("RAILS_ENV", "development"),
     config: node.run_state["ssm_params"]["app"]["database_config"] || {},
+    dbpool: node.run_state["ssm_params"]["app"]["environment"]["DB_POOL"] || 20,
     sslca: node[:mysql_rds_sslca_path],
   }}
   user node[:deploy_user]
@@ -108,11 +109,9 @@ end
 execute "Bundle frontend" do
   only_if { File.directory?(frontend_dir) }
 
-  # See pull request #1556 for explanation on the need to rebuild node-sass
   command %{
     export PATH=#{node[:nodejs][:prefix]}/bin:$PATH && \
     yarn --frozen-lockfile --production=false && \
-    npm rebuild node-sass && \
     yarn run build:production
   }
 

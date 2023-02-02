@@ -53,6 +53,7 @@ import {
   SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo,
   SpaceTypeHeader, TopSpaceHeader,
 } from './styles'
+import { ProtectedIcon } from '../ProtectedIcon'
 
 
 const Spaces2 = ({
@@ -99,7 +100,7 @@ const Spaces2 = ({
         <TopSpaceHeader>
           <SpaceMainInfo>
             <SpaceHeaderTitle>{space.name}</SpaceHeaderTitle>
-            <SpaceHeaderDescrip>{space.description}</SpaceHeaderDescrip>
+            <SpaceHeaderDescrip>{space.protected && <ProtectedIcon />}{space.description}</SpaceHeaderDescrip>
           </SpaceMainInfo>
 
           <ButtonRow>

@@ -36,6 +36,15 @@ const GlobalStyle = createGlobalStyle`
     --toastify-color-error: ${colors.primaryRed};
     --toastify-toast-width: inherit;
   }
+
+  /* Remove these when no longer referenced */
+  .pfda-cursor-pointer {
+    cursor: pointer
+  }
+  .pfda-loader {
+    font-size: 36px
+  }
+
 `
 
 export const LayoutBody = styled.div`

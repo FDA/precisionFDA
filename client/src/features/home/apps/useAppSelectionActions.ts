@@ -180,7 +180,7 @@ export const useAppSelectionActions = ({
     'Edit': {
       type: 'link',
       link: selected[0]?.links?.edit,
-      isDisabled: selected.length !== 1 || !selected[0].links.edit,
+      isDisabled: selected.length !== 1 || !selected[0].links.edit || !selected[0].latest_revision,
     },
     'Fork': {
       type: 'link',

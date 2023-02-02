@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { AxiosError } from 'axios'
 import styled from 'styled-components'
 import { Button, ButtonSolidRed } from '../../../../components/Button'
 import { FileIcon } from '../../../../components/icons/FileIcon'
@@ -78,7 +79,12 @@ export const useDeleteFileModal = ({
   const mutation = useMutation({
     mutationKey: ['delete-files'],
     mutationFn: (ids: string[]) => deleteFilesRequest(ids),
-    onError: () => {
+    onError: (e: AxiosError) => {
+      const error = e?.response?.data?.error
+      if(error?.message) {
+        toast.error(`${error?.type}: ${error?.message}`)
+        return
+      }
       toast.error(`Error: Deleting ${numberOfFilesToDelete} files or folders.`)
     },
     onSuccess: () => {

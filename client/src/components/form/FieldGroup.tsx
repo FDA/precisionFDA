@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
-import styled from 'styled-components';
-import { FieldGroup as StyledFieldGroup } from "./styles";
+import styled from 'styled-components'
+import { FieldGroup as StyledFieldGroup } from './styles'
 
 const Row = styled.div`
   display: flex;
@@ -14,6 +14,7 @@ const Pill = styled.div`
   background-color: #e3e8ee;
   padding: 3px 4px;
   border-radius: 3px;
+  margin-left: 4px;
 `
 
 const RequiredPill = () => (

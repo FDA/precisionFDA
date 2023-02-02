@@ -135,6 +135,7 @@ module SpaceService
         space_type: space_form.space_type,
         cts: space_form.cts,
         restrict_to_template: space_form.restrict_to_template,
+        protected: space_form.protected,
       )
     end
 
@@ -257,6 +258,7 @@ module SpaceService
         state: shared_space.state,
         host_dxorg: shared_space.host_dxorg,
         restrict_to_template: space_form.restrict_to_template,
+        protected: space_form.protected,
       )
 
       project_dxid = api.project_new(

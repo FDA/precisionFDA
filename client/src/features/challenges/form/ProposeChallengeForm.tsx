@@ -13,6 +13,7 @@ import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
 import { MutationErrors } from '../../../types/utils'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
 import { proposeValidationSchema } from './common'
+import { SectionTitle } from '../../../components/Public/styles'
 
 interface ProposeChallengeForm {
   name: string,
@@ -100,7 +101,7 @@ export const PrososeChallengeForm = ({
         message="There are unsaved changes, are you sure you want to leave?"
       />
       <div>
-        <h2 className="pfda-subsection-heading">PRECISIONFDA CHALLENGE INQUIRY</h2>
+        <SectionTitle>PrecisionFDA Challenge Inquiry</SectionTitle>
         <p>Please complete this form for your new challenge proposal. Thank you!</p>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FieldGroup>

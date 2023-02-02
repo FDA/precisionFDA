@@ -27,6 +27,7 @@ class AppSerializer < ApplicationSerializer
 
   attribute :all_tags_list, key: :tags
   attribute :job_count, key: :job_count
+  attribute :latest_revision, key: :latest_revision
   attribute :scope_id, key: :scope
   delegate :updated_at, to: :object
 
@@ -78,6 +79,11 @@ class AppSerializer < ApplicationSerializer
   # Returns if App was marked as 'deleted'.
   def active
     object.not_deleted?
+  end
+
+  # Returns if App is in it's latest revision
+  def latest_revision
+    object.id == object.app_series.latest_revision_app_id
   end
 
   # Builds links.

@@ -13,6 +13,7 @@ class SpaceForm
     :sponsor_lead_dxuser,
     :source_space_id,
     :restrict_to_template,
+    :protected,
   )
 
   TYPE_GROUPS = "groups".freeze

@@ -65,7 +65,7 @@ export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs,
 
   const debouncedSetFilterQuery = debounce(v => {
     v.file_size = fileSizeParamMap(v.file_size)
-    setFilterParam(v)
+    setFilterParam(v, 'replaceIn')
     if(onSetFilter) onSetFilter(v)
   }, 500)
 

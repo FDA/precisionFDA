@@ -32,11 +32,11 @@ module IOC
       register("https_apps_client") { HttpsAppsClient.new(config[:token], config[:user]) }
 
       namespace "api" do
-        register("user", memoize: true) { DNAnexusAPI.new(config[:token]) }
+        register("user") { DNAnexusAPI.new(config[:token]) }
         register("admin", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN) }
         register("challenge_bot", memoize: true) { DNAnexusAPI.new(CHALLENGE_BOT_TOKEN) }
         register("auth", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI) }
-        register("auth_user", memoize: true) do
+        register("auth_user") do
           DNAnexusAPI.new(config[:token], DNANEXUS_AUTHSERVER_URI)
         end
       end

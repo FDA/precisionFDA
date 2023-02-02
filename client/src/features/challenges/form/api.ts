@@ -3,8 +3,8 @@ import sparkMD5 from 'spark-md5'
 import httpStatusCodes from 'http-status-codes'
 
 import { getUploadURL, uploadChunk, closeFile } from '../../../api/files'
-import { CHUNK_SIZE } from '../../space/fileUpload/constants'
 import { backendCall } from '../../../utils/api'
+import { CHUNK_SIZE } from '../../home/files/actionModals/useFileUploadModal/constants'
 
 
 export interface CreateChallengePayload {

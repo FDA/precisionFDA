@@ -75,4 +75,5 @@ export const validationSchema = Yup.object().shape({
       is: (space_type: string) => space_type === 'review',
       then: Yup.string().nullable(),
     }),
+  protected: Yup.boolean().nullable(),
 })
