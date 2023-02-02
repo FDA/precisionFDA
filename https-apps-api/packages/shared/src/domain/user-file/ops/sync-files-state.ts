@@ -35,7 +35,6 @@ void> {
     this.log.info('SyncFilesStateOperation: Starting platform findDataObjects call')
 
     const params: FileStatesParams = {
-      accessToken: this.ctx.user.accessToken,
       fileDxids,
       projectDxid,
     }
@@ -101,7 +100,7 @@ void> {
       return
     }
 
-    this.platformClient = new client.PlatformClient(this.ctx.log)
+    this.platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     let openFiles = await findUnclosedFilesOrAssets(em, user.id)
 
     this.log.info({

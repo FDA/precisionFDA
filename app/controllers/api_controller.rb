@@ -552,6 +552,8 @@ class ApiController < ApplicationController
       Asset.closed.accessible_by(@context)
     end
 
+    assets = assets.limit(unsafe_params[:limit]) if unsafe_params[:limit]
+
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
       assets = assets.where(uid: ids)
@@ -620,6 +622,8 @@ class ApiController < ApplicationController
     tag_context = unsafe_params[:tag_context] # Optional
 
     taggable = item_from_uid(taggable_uid)
+
+    verify_nodes_for_protection([taggable], "set tags") if taggable.is_a?(UserFile)
 
     can_edit = false
     if Space.valid_scope?(taggable_uid)
@@ -759,7 +763,7 @@ class ApiController < ApplicationController
       parent = Job.find_by!(dxid: params[:parent_id])
     end
 
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(session["token"])
     file_dxid = api.file_new(params[:name], project)["id"]
 
     file = UserFile.create!(
@@ -1102,28 +1106,30 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # prefix (string, required): the prefix to search for
+  # keyword (string, required): the keyword to search for
   #
   # Outputs:
   #
-  # uids (array:string): the matching asset uids
+  # the matching assets
   #
   def search_assets
-    prefix = unsafe_params[:prefix]
+    keyword = unsafe_params[:keyword]
 
-    if !prefix.is_a?(String) || prefix.size < 3
-      fail "Prefix should be a String of at least 3 characters"
+    fail "Prefix should be a String of at least 3 characters" if !keyword.is_a?(String) || keyword.size < 2
+
+    ids = Asset.closed.
+      accessible_by(@context).
+      with_search_keyword(keyword).
+      select(:uid).
+      distinct
+
+    assets = Asset.where(uid: ids).limit(unsafe_params[:limit])
+
+    result = assets.order(:name).map do |asset|
+      map_basic_asset(asset)
     end
 
-    assets = Asset.closed.
-      accessible_by(@context).
-      order(:name).
-      with_search_keyword(prefix).
-      select(:uid).
-      distinct.
-      limit(ASSETS_SEARCH_LIMIT)
-
-    render json: { uids: assets.map(&:uid) }
+    render json: result
   end
 
   # Use this to add multiple items of the same type to a note
@@ -1259,6 +1265,16 @@ class ApiController < ApplicationController
     render json: {
       id: submission.id,
     }
+  end
+
+  # Inputs
+  # ids: array of file ids for which we want to get licenses
+  #
+  # Outputs
+  # list of license objects
+  def list_licenses_for_files
+    result = https_apps_client.list_licenses_for_files unsafe_params[:ids]
+    render json: result
   end
 
   # Inputs
@@ -1513,6 +1529,32 @@ class ApiController < ApplicationController
 
   protected
 
+  # Verifies that if nodes collection contains items that belong to Protected
+  # space current user has lead role in that space. Otherwise raises error for specified action.
+  # @param nodes [Array] array of nodes
+  # @param action action that the user is trying to perform (used for error message - delete, update)
+  def verify_nodes_for_protection(nodes, action)
+    nodes.each do |node|
+      next if verify_scope_for_protection(node.scope)
+
+      raise ApiError, "Only leads can #{action} files in Protected spaces."
+    end
+  end
+
+  # Verifies if given scope is Protected space and if it is the user
+  # must have lead role in that space
+  # @param scope scope id
+  # @return true if processing can continue, false if error has to be raised
+  def verify_scope_for_protection(scope)
+    return true unless scope.start_with?("space-")
+
+    space = Space.from_scope(scope)
+
+    return true unless space.protected
+
+    !space.leads.where(user_id: @context.user.id).empty?
+  end
+
   def check_scope!
     scopes = params[:scopes]
 
@@ -1622,4 +1664,15 @@ class ApiController < ApplicationController
     DIContainer.resolve("https_apps_client")
   end
   # rubocop:enable Style/SignalException
+
+  private
+
+  def map_basic_asset(object)
+    {
+      id: object.id,
+      uid: object.uid,
+      fa_class: view_context.fa_class(object),
+      title: object.prefix,
+    }
+  end
 end

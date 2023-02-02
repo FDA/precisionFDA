@@ -3,10 +3,66 @@ import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { HashLink } from 'react-router-hash-link'
-
-
+import styled from 'styled-components'
 import Icon from '../Icon'
-import './style.sass'
+import { colors } from '../../../styles/theme'
+
+const StyledMenu = styled.div`
+.collapsible-menu {
+  .title {
+    display: inline-block;
+    letter-spacing: 0;
+
+    a {
+      color: ${colors.textMediumGrey};
+
+      &:hover {
+        color: ${colors.textDarkGrey};
+      }
+    }
+  }
+}
+.collapsible-header {
+  .title {
+    letter-spacing: 0;
+
+    &:hover {
+      color: ${colors.textDarkGrey};
+      cursor: pointer;
+    }
+  }
+  #toggle-icon {
+    cursor: pointer;
+    margin-right: 6px;
+    transition: all 0.5s;
+
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    transform: rotate(0deg);
+
+    &.collapsed {
+      -webkit-transform: rotate(180deg);
+      -moz-transform: rotate(180deg);
+      transform: rotate(180deg);
+    }
+  }
+}
+.collapsible-menu__item {
+  display: block;
+  padding-left: 16px;
+
+  &--disabled {
+    color: #888;
+  }
+  a {
+    color: ${colors.textMediumGrey};
+
+    &:hover {
+      color: ${colors.textDarkGrey};
+    }
+  }
+}
+`
 
 
 // Usage: either set the 'children' or the 'options' property
@@ -70,6 +126,7 @@ const CollapsibleMenu = ({ title, titleAnchor, children, options }) => {
   const collapseBodyId = 'collapseBody'+menuId+title
 
   return (
+    <StyledMenu>
     <div className="accordion collapsible-menu" id={collapseMenuId}>
       {titleAnchor ? (
       <div className="accordion-header collapsible-header">
@@ -92,6 +149,7 @@ const CollapsibleMenu = ({ title, titleAnchor, children, options }) => {
         {children ? children : generateList()}
       </div>
     </div>
+    </StyledMenu>
   )
 }
 

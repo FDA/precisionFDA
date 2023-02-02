@@ -8,7 +8,7 @@ import { UserOpsCtx } from '../../../types'
 export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolderInput, Folder> {
   async run(input: RenameFolderInput): Promise<Folder> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const folderRepo = em.getRepository(Folder)
     const existingFolder = await folderRepo.findOneWithProject(input.id)
@@ -27,7 +27,6 @@ export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolde
     const folderPath = getFolderPath(folders, existingFolder)
     // client api call
     await platformClient.renameFolder({
-      accessToken: this.ctx.user.accessToken,
       folderPath,
       newName: input.newName,
       projectId: existingFolder.project,

@@ -365,14 +365,19 @@ class AppsController < ApplicationController
       project = @context.user.private_files_project
     end
 
-    job = job_creator(project).create(
-      app: @app,
-      name: name,
-      input_info: input_info,
-      run_instance_type: run_instance_type,
-      job_limit: job_limit,
-      scope: space&.uid,
-    )
+    job =
+      begin
+        job_creator(project).create(
+          app: @app,
+          name: name,
+          input_info: input_info,
+          run_instance_type: run_instance_type,
+          job_limit: job_limit,
+          scope: space&.uid,
+        )
+      rescue DXClient::Errors::DXClientError => e
+        fail e.message
+      end
 
     SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space&.review?
     # rubocop:enable Style/SignalException

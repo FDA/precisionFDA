@@ -191,6 +191,15 @@ module Api
       render json: { message: { type: type, text: text } }, adapter: :json
     end
 
+    # Returns all licenses accepted by current user
+    #
+    # Outputs
+    # list of accepted license objects
+    def accepted_licenses
+      result = https_apps_client.accepted_licenses
+      render json: result
+    end
+
     private
 
     def accessible_license

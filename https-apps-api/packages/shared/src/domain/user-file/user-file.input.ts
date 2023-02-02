@@ -38,6 +38,10 @@ type uidListInput = {
   ids: number[]
 }
 
+type nodeQueryFilter = {
+  locked?: boolean
+}
+
 const uidListSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -47,4 +51,4 @@ const uidListSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
-export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput}
+export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput, nodeQueryFilter }

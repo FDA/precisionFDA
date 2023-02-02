@@ -12,9 +12,10 @@ import {
   SelectColumnFilter,
 } from '../../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { getSpaceIdFromScope } from '../../../utils'
 import { StyledLinkCell } from '../home.styles'
 import { KeyVal } from '../types'
-import { getBasePath, getSpaceIdFromScope } from '../utils'
+import { getBasePath } from '../utils'
 import { IExecution } from './executions.types'
 
 export const useExecutionColumns = ({

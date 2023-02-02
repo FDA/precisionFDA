@@ -53,6 +53,9 @@ export const HeaderRight = styled.div`
   padding: 16px;
 `
 export const HeaderLeft = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   padding: 16px;
 `
 export const Header = styled.div`
@@ -79,13 +82,16 @@ export const HeaderButton = styled(ButtonSolidBlue)`
 `
 
 export const Title = styled.div`
-  display: flex;
+  display: inline-block;
   font-size: 24px;
   font-weight: bold;
   align-items: center;
   color: #52698f;
   margin-bottom: 16px;
   gap: 8px;
+  * {
+    margin-right: 8px;
+  }
 `
 
 export const Description = styled.div`

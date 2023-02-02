@@ -7,7 +7,6 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
 import Root from './root'
-import './styles/style.sass'
 import { getAuthenticityToken } from './utils/api'
 
 Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
