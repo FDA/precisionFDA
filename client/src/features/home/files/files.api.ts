@@ -50,12 +50,6 @@ export async function lockUnlockFilesRequest(ids: string[], type: LockUnlockActi
   return axios.post(`/api/nodes/${type}`, { ids }).then(r => r.data)
 }
 
-export type LockUnlockActionType = 'lock' | 'unlock'
-
-export async function lockUnlockFilesRequest(ids: string[], type: LockUnlockActionType) {
-  return axios.post(`/api/nodes/${type}`, { ids }).then(r => r.data)
-}
-
 export async function addFolderRequest({ name }: { name: string }, parentFolderId?: string, spaceId?: string, scope?: ResourceScope) {
   const data = cleanObject({ name, parent_folder_id: parentFolderId ?? null, public: scope === 'everybody' ? 'true' : null, space_id: spaceId ?? undefined })
   const res = await fetch('/api/files/create_folder', {
