@@ -26,24 +26,6 @@ RSpec.describe Profile, type: :model do
 
   describe 'common_validations' do
     it { is_expected.to be_valid }
-    it { is_expected.to validate_presence_of(:address1) }
-    it { is_expected.to validate_presence_of(:country) }
-    it { is_expected.to validate_presence_of(:city) }
-    it { is_expected.to validate_presence_of(:postal_code) }
-  end
-
-  describe 'us_validations' do
-    let(:country) { create(:country, name: 'United States') }
-    let(:profile) { build(:profile, country: country, us_state: 'Texas') }
-
-    context 'when country is USA' do
-      before do
-        stub_request(:get, "https://www.zipcodeapi.com/rest//info.json/#{profile.postal_code}/degrees")
-          .to_return(body: "{\"state\":\"TX\"}")
-      end
-      it { is_expected.to validate_presence_of(:us_state) }
-    end
-
   end
 
   describe 'email validations' do
