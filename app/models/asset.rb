@@ -42,12 +42,12 @@ class Asset < UserFile
     ActiveModel::Name.new(self, nil, "Asset")
   end
 
-  def self.with_search_keyword(prefix)
-    prefix = sanitize_sql_like(prefix)
+  def self.with_search_keyword(keyword)
+    keyword = sanitize_sql_like(keyword)
 
     joins(:archive_entries).where(
       "(archive_entries.name LIKE ? OR nodes.name LIKE ?)",
-      "#{prefix}%", "%#{prefix}%"
+      "%#{keyword}%", "%#{keyword}%"
     )
   end
 
