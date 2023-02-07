@@ -41,7 +41,7 @@ export class SpaceEvent {
   side: SPACE_MEMBERSHIP_SIDE
 
   @Property()
-  data: JsonType
+  data: string
 
   @ManyToOne(() => User)
   user: IdentifiedReference<User>

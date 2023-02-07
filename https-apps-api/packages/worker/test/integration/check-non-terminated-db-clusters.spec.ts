@@ -34,7 +34,7 @@ describe('TASK: check-non-terminated', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     adminUser = create.userHelper.createAdmin(em)
     user1 = create.userHelper.create(em)

@@ -28,7 +28,7 @@ describe('Space.action-policy ', () => {
 	beforeEach(async () => {
 		await db.dropData(database.connection())
 		// create DB mocks
-		em = database.orm().em
+		em = database.orm().em.fork()
 		em.clear()
 		rsaUser = create.userHelper.createRSA(em)
 		user = create.userHelper.create(em)

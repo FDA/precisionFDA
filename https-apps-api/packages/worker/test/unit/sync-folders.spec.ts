@@ -16,11 +16,11 @@ describe('syncFolders operation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
-    await em.clear()
+    em.clear()
     userCtx = { ...user, accessToken: 'foo' }
     defaultInput = {
       scope: 'private',
@@ -113,6 +113,7 @@ describe('syncFolders operation', () => {
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('id', folder.id)
     em.clear()
+
     const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
     expect(taggingsInDb).to.have.lengthOf(1)
     expect(taggingsInDb[0]).to.have.property('taggableId', folder.id)

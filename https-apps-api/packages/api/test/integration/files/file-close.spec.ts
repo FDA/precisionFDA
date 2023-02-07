@@ -28,7 +28,7 @@ describe('PATCH /files/:id/close', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)

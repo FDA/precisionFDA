@@ -98,7 +98,6 @@ gem "prawn"
 gem "aws-sdk-sns"
 gem "execjs"
 gem "parallel"
-gem "therubyracer"
 
 gem "dry-container"
 gem "dry-configurable"

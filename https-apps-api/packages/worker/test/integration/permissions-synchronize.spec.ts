@@ -32,7 +32,7 @@ describe('TASK: permissions-synchronize', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user1 = create.userHelper.create(em, { dxuser: 'randall.ebert' })
     user2 = create.userHelper.create(em, { dxuser: 'harry.potter' })
