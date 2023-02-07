@@ -22,7 +22,7 @@ describe('job-finished.handler', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
@@ -35,7 +35,7 @@ describe('job-finished.handler', () => {
     await em.flush()
 
     ctx = {
-      em: database.orm().em.fork(true),
+      em: database.orm().em.fork(),
       log: defaultLogger,
       user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
     }

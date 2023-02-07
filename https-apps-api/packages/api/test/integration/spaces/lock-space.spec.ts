@@ -25,7 +25,7 @@ describe('PATCH /spaces/:id/lock', () => {
 	beforeEach(async () => {
 		await db.dropData(database.connection())
 		// create DB mocks
-		em = database.orm().em
+		em = database.orm().em.fork()
 		em.clear()
 		notPermittedUser = create.userHelper.create(em)
 		user = create.userHelper.createRSA(em)

@@ -41,7 +41,9 @@ router.delete(
 
 router.post('/recreate', async ctx => {
   await new userFile.FolderRecreateOperation(pickOpsCtx(ctx)).execute({
+    //@ts-ignore TODO fix
     userId: ctx.request.body.userId,
+    //@ts-ignore TODO fix
     projectId: ctx.request.body.projectId,
   })
   ctx.status = 204
