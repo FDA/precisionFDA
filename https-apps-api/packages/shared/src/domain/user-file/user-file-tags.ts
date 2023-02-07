@@ -14,7 +14,7 @@ export const assignTags = async (
   nodes: Array<UserFile | Folder>,
   tag: Tag
 ): Promise<number> => {
-  const em = ctx.em.fork(true)
+  const em = ctx.em.fork()
   const taggingRepo = em.getRepository(Tagging)
   const existingRefs = await taggingRepo.findForFiles({
     fileIds: nodes.map(f => f.id),

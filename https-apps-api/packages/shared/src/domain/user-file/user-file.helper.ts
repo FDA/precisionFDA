@@ -285,8 +285,8 @@ const findUnclosedFilesOrAssets = async (
   userId: number,
 ): Promise<IFileOrAsset[]> => {
   let results: IFileOrAsset[] = []
-  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
-  const assetRepo = em.getRepository(Asset) as AssetRepository
+  const userFileRepo = em.getRepository(UserFile)
+  const assetRepo = em.getRepository(Asset)
   results = results.concat(await userFileRepo.findUnclosedFiles(userId))
   results = results.concat(await assetRepo.findUnclosedAssets(userId))
   return results

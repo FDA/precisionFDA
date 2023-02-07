@@ -1,11 +1,10 @@
 /* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { Asset, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
-import { database } from '@pfda/https-apps-shared'
+import { database } from '../../../src/database'
+import { Asset, User } from '../../../src/domain'
 import { create, db } from 'shared/src/test'
 import { FILE_STATE_DX } from 'shared/src/domain/user-file/user-file.types'
-import { AssetRepository } from 'shared/src/domain/user-file/asset.repository'
 
 describe('AssetRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -16,7 +15,7 @@ describe('AssetRepository tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     // log = getLogger()
@@ -40,7 +39,7 @@ describe('AssetRepository tests', () => {
   })
 
   it('findAssetWithUid', async () => {
-    const repo = em.getRepository(Asset) as AssetRepository
+    const repo = em.getRepository(Asset)
     let result = await repo.findAssetWithUid(assets[1].uid)
     expect(result).to.be.not.null()
     expect(result?.name).to.equal('user1_asset2')
@@ -53,8 +52,8 @@ describe('AssetRepository tests', () => {
     expect(result).to.be.null()
   })
 
-  it('findUnclosedAssets', async() => {
-    const repo = em.getRepository(Asset) as AssetRepository
+  it('findUnclosedAssets', async () => {
+    const repo = em.getRepository(Asset)
     let result = await repo.findUnclosedAssets(user1.id)
     // There should be done for now
     expect(result).to.have.length(0)

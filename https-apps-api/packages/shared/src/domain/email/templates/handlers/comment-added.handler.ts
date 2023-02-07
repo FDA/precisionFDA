@@ -19,11 +19,11 @@ import { generateObjectCommentsLink } from '../mjml/common'
 
 export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> implements EmailTemplate {
   templateFile = commentAddedTemplate
-  comment: Comment & { user: LoadedReference<User, User> }
-  spaceEvent: SpaceEvent & { space: LoadedReference<Space, Space> }
-  userFile: UserFile & { user: LoadedReference<User, User> }
-  app: App & { user: LoadedReference<User, User> }
-  job: Job & { user: LoadedReference<User, User> }
+  comment: Comment & { user: LoadedReference<User> }
+  spaceEvent: SpaceEvent & { space: LoadedReference<Space> }
+  userFile: UserFile & { user: LoadedReference<User> }
+  app: App & { user: LoadedReference<User> }
+  job: Job & { user: LoadedReference<User> }
   // to add workflow commenting in Home refactoring, on Rails side
   // workflow: Workflow
   objectCommentsLink: any

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { database } from '@pfda/https-apps-shared'
-import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
+import { User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { EntityManager } from '@mikro-orm/core'
 import { createFolderEvent, createJobClosed, EVENT_TYPES } from 'shared/src/domain/event/event.helper'
@@ -13,7 +13,7 @@ describe('event.helper', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email(), lastLogin: new Date() })
     await em.flush()
