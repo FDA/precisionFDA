@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import { Challenge, ChallengeResource, User, UserFile } from '@pfda/https-apps-shared/src/domain'
-import { database } from '@pfda/https-apps-shared'
+import { Challenge, ChallengeResource, User } from '@pfda/https-apps-shared/src/domain'
+import { database } from '../../../src/database'
 import { create, db, generate } from 'shared/src/test'
 
 describe('ChallengeResource tests', () => {
@@ -10,7 +10,7 @@ describe('ChallengeResource tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     challenge = create.challengeHelper.create(em, { userAndAdmin: user })

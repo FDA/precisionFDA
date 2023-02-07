@@ -33,6 +33,7 @@ import { SyncDbClusterOperation } from '../domain/db-cluster'
 import { SyncJobOperation } from '../domain/job'
 import { SyncFilesStateOperation } from '../domain/user-file'
 import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
+import { USER_STATE } from '../domain/user/user.entity'
 
 const chance = new Chance()
 
@@ -56,6 +57,9 @@ const user = {
     dxuser: `user-${random.dxstr()}`,
     privateFilesProject: `project-${random.dxstr()}`,
     publicFilesProject: `project-${random.dxstr()}`,
+    email: 'test@nexus-mail.com',
+    normalizedEmail: 'normalized@nexus-mail.com',
+    userState: USER_STATE.ENABLED,
     // privateComparisonsProject: `project-${random.dxstr()}`,
     // publicComparisonsProject: `project-${random.dxstr()}`,
   }),
@@ -141,12 +145,19 @@ const app = {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
+      uid: `${dxid}-1`,
       title: 'app-title',
       scope: 'public',
       spec:
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.NORMAL,
+      version: '1',
+      revision: 1,
+      readme: 'readme',
+      internal: 'internal',
+      verified: true,
+      devGroup: 'devGroup',
     }
   },
   https: (): Partial<InstanceType<typeof entities.App>> => {
@@ -159,6 +170,7 @@ const app = {
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
+      verified: true,
     }
   },
   rshiny: (): Partial<InstanceType<typeof entities.App>> => {
@@ -362,7 +374,8 @@ const space = {
     spaceId: null as any,
     hostProject: null as any,
     guestProject: null as any,
-
+    description: 'desc', 
+    meta: 'meta',
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
     name: chance.word(),

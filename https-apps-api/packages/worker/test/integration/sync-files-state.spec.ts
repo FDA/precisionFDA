@@ -51,11 +51,11 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
   let assets: Asset[]
   let filesAndAssets: IFileOrAsset[]
 
-  const FILE_SIZE = 65535
+  const FILE_SIZE = '65535'
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user1 = create.userHelper.create(em, { email: generate.random.email() })
     user2 = create.userHelper.create(em, { email: generate.random.email() })

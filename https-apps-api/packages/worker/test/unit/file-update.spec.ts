@@ -6,7 +6,6 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { Asset, User, UserFile } from 'shared/src/domain'
 import { UserCtx } from 'shared/src/types'
 import { FILE_STATE_DX } from 'shared/src/domain/user-file/user-file.types'
-import { FileNotFoundError } from 'shared/src/errors'
 
 describe('FileUpdateOperation tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -18,7 +17,7 @@ describe('FileUpdateOperation tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()

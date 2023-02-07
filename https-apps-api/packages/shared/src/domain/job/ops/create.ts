@@ -96,11 +96,11 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         describe: JSON.stringify({}),
         scope: input.scope,
         entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-        runData: {
+        runData: JSON.stringify({
           run_instance_type: this.instance,
           run_inputs: runInputDb,
           run_outputs: {},
-        },
+        }),
         provenance: {},
         appSeriesId: app.appSeriesId,
         uid: `${newJobClientRes.id}-1`,
