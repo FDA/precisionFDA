@@ -12,9 +12,8 @@ import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
 import { MutationErrors } from '../../../types/utils'
-import { Modal } from '../../modal'
-import { Content } from '../../modal/styles'
 import { Challenge } from '../types'
+import { ChallengeCreateUpdateModal } from './ChallengeCreateUpdateModal'
 import { createValidationSchema, editValidationSchema } from './common'
 import { GuestLeadUserSelect } from './GuestLeadUserSelect'
 import { HostLeadUserSelect } from './HostLeadUserSelect'
@@ -113,7 +112,7 @@ export const ChallengeForm = ({
 
   useEffect(() => {
     if (img?.[0] != null) {
-      onImageSelection && onImageSelection(img[0])
+      if(onImageSelection) onImageSelection(img[0])
     }
   }, [watch().cardImage])
 
@@ -192,7 +191,7 @@ export const ChallengeForm = ({
             <Controller
               name="scope"
               control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, onBlur, value }}) => (
                 <ScopeFieldSelect
                   challengeId={challenge?.id.toString() || undefined}
                   isSubmitting={isSubmitting}
@@ -214,7 +213,7 @@ export const ChallengeForm = ({
             <Controller
               name="app_owner_id"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <ScoringAppUserSelect
                   isSubmitting={isSubmitting}
                   onChange={onChange}
@@ -265,7 +264,7 @@ export const ChallengeForm = ({
             <Controller
               name="host_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <HostLeadUserSelect
                   isDisabled={isEditMode || isSubmitting}
                   onChange={onChange}
@@ -286,7 +285,7 @@ export const ChallengeForm = ({
             <Controller
               name="guest_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <GuestLeadUserSelect
                   onChange={onChange}
                   onBlur={onBlur}
@@ -307,7 +306,7 @@ export const ChallengeForm = ({
             <Controller
               name="status"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <StatusSelect
                   isEditing={isEditMode}
                   isSubmitting={isSubmitting}
@@ -349,19 +348,7 @@ export const ChallengeForm = ({
           </Row>
         </StyledForm>
       </div>
-      <Modal
-        isShown={isSaving}
-        hide={() => null}
-        headerText={
-          isEditMode ? 'Updating challenge' : 'Creating new challenge'
-        }
-        disableClose
-      >
-        <Content>
-          The challenge is being {isEditMode ? 'updated' : 'created'}, please
-          wait until this message disappears.
-        </Content>
-      </Modal>
+      <ChallengeCreateUpdateModal isEditMode={isEditMode} isSaving={isSaving} />
     </>
   )
 }
