@@ -21,6 +21,14 @@ import {
 import { useAttachToMutation } from './useAttachToMutation'
 import { useListNotesQuery } from './useListNotesQuery'
 
+const types = {
+  'FILE': 'UserFile',
+  'APP': 'App',
+  'JOB': 'Job',
+  'ASSET': 'Asset',
+  'WORKFLOW': 'Workflow',
+} as Record<ATTACHABLE_TYPES, string>
+
 export const AttachToModal = ({
   isShown,
   hideAction,
@@ -54,14 +62,6 @@ export const AttachToModal = ({
   }
 
   const onClickAttachAction = () => {
-    const types = {
-      [ATTACHABLE_TYPES.FILE]: 'UserFile',
-      [ATTACHABLE_TYPES.APP]: 'App',
-      [ATTACHABLE_TYPES.JOB]: 'Job',
-      [ATTACHABLE_TYPES.ASSET]: 'Asset',
-      [ATTACHABLE_TYPES.WORKFLOW]: 'Workflow',
-    } as any
-
     const it = ids.map((id: string|number) => {
       return {
         id,
@@ -118,7 +118,6 @@ export const AttachToModal = ({
 
   return (
     <ModalNext
-      headerText="Attach note to:"
       hide={hideAction}
       isShown={isShown}
       disableClose={false}
@@ -126,7 +125,7 @@ export const AttachToModal = ({
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText="Attach note to:"
+        headerText={`Attach note to ${types[itemsType]}:`}
         hide={hideAction}
       />
       <StyledAttachToModal >

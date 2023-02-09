@@ -28,8 +28,6 @@ export const Backdrop = styled.div<{ blur: boolean }>`
 export const StyledModal = styled.div`
   z-index: 100;
   background: white;
-  max-height: 70vh;
-
   border-radius: ${sizing.modalBorderRadius};
   display: flex;
   flex-direction: column;
@@ -94,7 +92,7 @@ export const ButtonRow = styled.div`
 `
 export const Content = styled.div<{ overflowContent?: boolean }>`
   ${({ overflowContent = true }) => overflowContent && 'overflow-y: scroll;'}
-  padding: 12px;
+  margin: 24px;
 `
 
 export const StyledForm = styled.form`
