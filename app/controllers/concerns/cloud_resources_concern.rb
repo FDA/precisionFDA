@@ -19,7 +19,7 @@ module CloudResourcesConcern
     { value: "gpu-8", label: "GPU 8", pricing: 7.584 },
   ].freeze
 
-  # TODO(samuel) define 
+  # TODO(samuel) define
   # https://confluence.internal.dnanexus.com/display/PFDA/Cloud+Resource+Governance+and+Enhanced+User+Administration#CloudResourceGovernanceandEnhancedUserAdministration-ConstrainDatabaseInstanceTypesandPresentPrice
   DATABASE_RESOURCE_LABELS = [
     { value: "db_std1_x2", label: "DB Baseline 1 x 2", pricing: 0.273 },
@@ -91,7 +91,7 @@ module CloudResourcesConcern
   end
 
   def validate_total_limit
-    api = DNAnexusAPI.new(session["token"])
+    api = DIContainer.resolve("api.user")
     I18n.t("api.errors.exceeded_charges_limit") if Users::ChargesFetcher.exceeded_charges_limit?(api, current_user)
   end
 
