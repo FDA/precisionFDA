@@ -763,7 +763,7 @@ class ApiController < ApplicationController
       parent = Job.find_by!(dxid: params[:parent_id])
     end
 
-    api = DNAnexusAPI.new(session["token"])
+    api = DIContainer.resolve("api.user")
     file_dxid = api.file_new(params[:name], project)["id"]
 
     file = UserFile.create!(
