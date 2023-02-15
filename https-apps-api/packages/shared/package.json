@@ -18,8 +18,8 @@
     "uninstall": "rm -rf ./node_modules"
   },
   "devDependencies": {
-    "@strv/eslint-config-node": "^2.2.2",
-    "@strv/eslint-config-typescript": "^2.3.0",
+    "@strv/eslint-config-node": "^3.2.0",
+    "@strv/eslint-config-typescript": "^3.2.0",
     "@types/ajv": "^1.0.0",
     "@types/dotenv": "^8.2.0",
     "@types/luxon": "^1.26.5",
@@ -50,7 +50,7 @@
     "nanoid": "^3.1.31",
     "nodemailer": "^6.7.7",
     "p-limit": "^3.1.0",
-    "pino": "^6.7.0",
+    "pino": "^8.9.0",
     "ramda": "^0.27.1"
   }
 }
