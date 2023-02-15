@@ -18,7 +18,7 @@ export class LicensesForWorkflowOperation extends BaseOperation<
     const parsedSpec = JSON.parse(workflow.spec)
 
     const licensePromises = parsedSpec.input_spec.stages
-      .map(stage => new LicensesForAppOperation(this.ctx)
+      .map((stage: any) => new LicensesForAppOperation(this.ctx)
         .execute({ uid: stage.app_uid }))
 
     const licenses = (await Promise.all(licensePromises)).flat()

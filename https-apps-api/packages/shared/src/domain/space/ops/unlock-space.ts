@@ -61,7 +61,9 @@ void
           entityType: PARENT_TYPE.SPACE,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.space_unlocked,
           objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
+          // @ts-ignore
           side: membership?.side,
+          // @ts-ignore
           role: membership?.role,
           data: JSON.stringify({ name: space.name }),
         })

@@ -10,7 +10,7 @@ import { enumValidator, makeCloudGovBulkUserUpdateMiddlewareSchema, numericBodyV
 
 
 // Routes with /admin prefix
-const router = new Router<DefaultState, PaginationCtxT>()
+const router = new Router<DefaultState, Api.Ctx>()
 
 router.use(defaultMiddlewares)
 // TODO(samuel) - implement redirect on client side - logic from Ruby
@@ -18,8 +18,8 @@ router.use(validateSiteAdminMdw)
 
 router.get(
   '/checkStaleJobs',
-  async ctx => {
-    const res = await queue.createCheckStaleJobsTask(ctx.user)
+  async (ctx: any) => {
+    const res = await queue.createCheckStaleJobsTask(ctx.user!)
     ctx.body = res
     ctx.status = 200
   },
@@ -44,13 +44,6 @@ const filterSchema = {
   totalLimit: utils.filters.NUMERIC_RANGE_FILTER,
   jobLimit: utils.filters.NUMERIC_RANGE_FILTER,
 }
-
-type PaginationCtxT = Api.Ctx<{pagination: {
-  enabled: true
-  paginatedEntity: user.User
-  sortColumn: typeof listUserSortableColumns[number]
-  filterSchema: typeof filterSchema
-}}>
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -80,9 +73,10 @@ router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableCo
     defaultPerPage: 50,
   },
   filter: {
+    // @ts-ignore
     schema: filterSchema,
   },
-}), async (ctx: PaginationCtxT) => {
+}), async (ctx: any) => {
   const { pagination } = ctx
   const { orderBy, filters } = pagination
   const res = orderBy === 'totalLimit' || orderBy === 'jobLimit' || Boolean(filters.totalLimit) || Boolean(filters.jobLimit)
@@ -97,6 +91,7 @@ router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableCo
               type: 'json' as const,
               // TODO(samuel) solve this camelCase vs snake_case issue
               sqlColumn: 'cloud_resource_settings',
+              // @ts-ignore
               path: [{
                 totalLimit: 'total_limit',
                 jobLimit: 'job_limit',
@@ -112,6 +107,7 @@ router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableCo
         } as any
         // Note(samuel) added 'as any' because of poor type resolution of conditionals
       })(),
+      // @ts-ignore
       filters: utils.filters.buildFiltersWithColumnNodes<user.User, typeof filterSchema>(filters, {
         totalLimit: {
           sqlColumn: 'cloud_resource_settings' as any,
@@ -168,7 +164,7 @@ router.post(
   async (ctx: Api.Ctx) => {
     const { ids } = ctx.request.body as IIdListParams
     const adminUserClient = new client.PlatformClient(config.platform.adminUserAccessToken, ctx.log)
-    const results = await ctx.em.getRepository(user.User).bulkUpdateReset2fa(ids, adminUserClient, ctx.user)
+    const results = await ctx.em.getRepository(user.User).bulkUpdateReset2fa(ids, adminUserClient, ctx.user!)
     ctx.body = results
   },
 )
@@ -179,7 +175,7 @@ router.post(
   async (ctx: Api.Ctx) => {
     const { ids } = ctx.request.body as IIdListParams
     const adminUserClient = new client.PlatformClient(config.platform.adminUserAccessToken, ctx.log)
-    const results = await ctx.em.getRepository(user.User).bulkUpdateUnlock(ids, adminUserClient, ctx.user)
+    const results = await ctx.em.getRepository(user.User).bulkUpdateUnlock(ids, adminUserClient, ctx.user!)
     ctx.status = results.some(({ result }) => result.status === 'unhandledError')
       ? 400
       : 200
@@ -190,10 +186,9 @@ router.post(
 router.put(
   '/users/activate',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
-    ids: (value: number[], _: string, ctx: Api.Ctx<{}, {
-      ids: number[]
-    }>) => {
-      const currentUserId = ctx.user.id
+    // @ts-ignore
+    ids: (value: number[], _: string, ctx: Api.Ctx<{}, {ids: number[]}>) => {
+      const currentUserId = ctx.user!.id
       if (value.includes(currentUserId)) {
         throw new errors.ValidationError('Cannot activate self')
       }
@@ -209,10 +204,11 @@ router.put(
 router.put(
   '/users/deactivate',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
+    // @ts-ignore
     ids: (value: number[], _: string, ctx: Api.Ctx<{}, {
       ids: number[]
     }>) => {
-      const currentUserId = ctx.user.id
+      const currentUserId = ctx.user!.id
       if (value.includes(currentUserId)) {
         throw new errors.ValidationError('Cannot deactivate self')
       }

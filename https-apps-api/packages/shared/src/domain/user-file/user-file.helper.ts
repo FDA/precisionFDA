@@ -317,7 +317,7 @@ const collectChildren = async (parentFolder: Node, wholeTree: Node[], em: SqlEnt
  * @param filters
  * @returns
  */
-const loadNodes = async (em, input: uidListInput, filters: nodeQueryFilter) => {
+const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter) => {
   const nodes: Node[] = await em.find(entities.Node, {
     $or: [
       {

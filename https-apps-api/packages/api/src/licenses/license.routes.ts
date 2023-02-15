@@ -13,7 +13,7 @@ router.get(
   '/accepted',
   async ctx => {
     const [acceptedLicenses]
-      = await ctx.em.findAndCount(acceptedLicense.AcceptedLicense, { user: ctx.user.id })
+      = await ctx.em.findAndCount(acceptedLicense.AcceptedLicense, { user: ctx.user!.id })
 
     ctx.body = acceptedLicenses
     ctx.status = 200

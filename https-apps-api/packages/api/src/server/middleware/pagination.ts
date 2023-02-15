@@ -35,25 +35,30 @@ const defaultKeyMapper = (key: string) => `filters[${key}]`
 //   }>>()
 // router.use(makePaginationParseMdw)
 
-export const makePaginationParseMdw = <
+export const makePaginationParseMdw =
+<
   T extends BaseEntity,
   SortColumnT extends string = Extract<keyof T, string>,
   FilterSchemaT extends Partial<Record<string, utils.filters.FilterSchemaNode>> = Partial<Record<Extract<keyof T, string>, utils.filters.FilterSchemaNode>>,
->(opts?: PaginationOpts<SortColumnT, FilterSchemaT>) => {
+>
+// @ts-ignore
+(opts?: PaginationOpts<SortColumnT, FilterSchemaT>) => {
   const defaultPage = opts?.pagination?.defaultPage ?? DEFAULT_PAGE
   const defaultPerPage = opts?.pagination?.defaultPerPage ?? DEFAULT_PER_PAGE
   const defaultOrderDir = opts?.sort?.defaultOrderDir ?? 'ASC'
   const sortableColums = opts?.sort?.sortableColumns ?? []
   const filterKeyMapper = opts?.filter?.keyMapper ?? defaultKeyMapper
+  // @ts-ignore
   const orderByParser = validation.parsers.parseEnumValueFromString<Extract<typeof opts['sort']['sortableColumns'][number], string>>(sortableColums as any, (value) => `"order_by" param was "${value}", expected ${JSON.stringify(sortableColums)}`)
   const orderDirParser = validation.parsers.parseEnumValueFromString(['ASC', 'DESC'], (value) => `"order_dir" param was "${value}", expected to be either "ASC" or "DESC"`)
 
+  // @ts-ignore
   return (ctx: Api.Ctx<{pagination: {
     enabled: true
     paginatedEntity: T,
     sortColumn: SortColumnT,
     filterSchema: FilterSchemaT,
-  }}>, next) => {
+  }}>, next: any) => {
     const pageFromQuery = ctx.query.page?.toString()
     const perPageFromQuery = ctx.query.per_page?.toString()
     const page = (pageFromQuery && parseInt(pageFromQuery, 10)) ?? defaultPage;
@@ -83,9 +88,12 @@ export const makePaginationParseMdw = <
       Object.entries(
         utils.filters.bindGetValueToSchema(
           (key) => ctx.query[filterKeyMapper(key)]?.toString(),
+          // @ts-ignore
           (opts?.filter?.schema ?? {}) as FilterSchemaT
         ),
+        // @ts-ignore
       ).map(([schemaKey, schemaValue]) => [schemaKey, schemaValue.parser(schemaKey)])
+      // @ts-ignore
     ) as utils.generics.MapValuesToReturnType<utils.generics.MapValuesToReturnType<utils.generics.MapValueObjectByKey<'parser', FilterSchemaT>>>
 
     ctx.pagination = {
@@ -95,7 +103,7 @@ export const makePaginationParseMdw = <
       orderDir,
       filters,
     }
-    ctx.log.debug({ userId: ctx.user.id }, 'Pagination params parsed')
+    ctx.log.debug({ userId: ctx.user!.id }, 'Pagination params parsed')
     return next()
   }
 }
