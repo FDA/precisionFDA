@@ -3,8 +3,8 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { database } from '../../../src/database'
 import { Asset, User } from '../../../src/domain'
-import { create, db } from 'shared/src/test'
-import { FILE_STATE_DX } from 'shared/src/domain/user-file/user-file.types'
+import { create, db } from '@pfda/https-apps-shared/src/test'
+import { FILE_STATE_DX } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 describe('AssetRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -15,7 +15,7 @@ describe('AssetRepository tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     // log = getLogger()

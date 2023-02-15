@@ -22,14 +22,14 @@ export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolde
     }
     const folders = await folderRepo.findForSynchronization({
       userId: this.ctx.user.id,
-      projectDxid: existingFolder.project,
+      projectDxid: existingFolder.project!,
     })
     const folderPath = getFolderPath(folders, existingFolder)
     // client api call
     await platformClient.renameFolder({
       folderPath,
       newName: input.newName,
-      projectId: existingFolder.project,
+      projectId: existingFolder.project!,
     })
     existingFolder.name = input.newName
     await em.flush()

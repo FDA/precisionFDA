@@ -109,7 +109,7 @@ FileCloseOperationResponse | null
         // we do this update so that the frontend has the correct state immediately after refresh
         // This is not for challege bot files because we still want file sync to invoke it's
         // card image update logic
-        const delay = ms => new Promise(r => setTimeout(r, ms))
+        const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
         const refreshFileState = async () => {
           await delay(500).then(async () => {
             log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
@@ -145,6 +145,7 @@ FileCloseOperationResponse | null
 
     if (fileOrAsset.state in responseMap) {
       return {
+        // @ts-ignore
         message: responseMap[fileOrAsset.state],
       }
     }

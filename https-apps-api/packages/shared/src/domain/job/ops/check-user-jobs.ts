@@ -8,7 +8,7 @@ import { isJobOrphaned } from '../../../queue/queue.utils'
 import { SyncJobOperation } from './synchronize'
 
 
-const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log): Promise<void> => {
+const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any): Promise<void> => {
   if (!job.isHTTPS()) {
     // We can support resolving stale syncing of jobs of normal (non HTTPS) apps once
     // the job_syncing.rb business logic is reimplemented as nodejs operations

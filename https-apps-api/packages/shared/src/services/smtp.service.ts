@@ -3,6 +3,7 @@ import { errors } from '..'
 import { config } from '../config'
 import { SendEmailJob } from '../queue/task.input'
 import { getLogger } from '../logger'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
 
 type SendEmailResponse = {
   success: string
@@ -18,9 +19,9 @@ class EmailClient {
   transporter: nodemailer.Transporter
 
   constructor() {
-    const transportConfig = {
+    const transportConfig: SMTPTransport.Options = {
       host: config.emails.smtp.host,
-      port: config.emails.smtp.port,
+      port: parseInt(config.emails.smtp.port),
       secure: true,
       auth: {
         user: config.emails.smtp.username,

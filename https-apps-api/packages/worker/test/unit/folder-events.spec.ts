@@ -3,10 +3,10 @@ import { User } from '@pfda/https-apps-shared/src/domain'
 import { Event } from '@pfda/https-apps-shared/src/domain/event'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import { EVENT_TYPES } from 'shared/src/domain/event/event.helper'
+import { EVENT_TYPES } from '@pfda/https-apps-shared/src/domain/event/event.helper'
 import { expect } from 'chai'
-import { SyncFoldersInput } from 'shared/src/domain/user-file/user-file.input'
-import { PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
+import { SyncFoldersInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
+import { PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 describe('folder events tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -18,7 +18,7 @@ describe('folder events tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -74,7 +74,7 @@ describe('folder events tests', () => {
   it('test SyncFoldersOperation to create CreateFolder and DeleteFolder events', async () => {
     // create three folders
     const op = new userFile.SyncFoldersOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

@@ -54,7 +54,7 @@ void
           SpaceMembership,
           { spaces: input.spaceId },
         )
-
+        
         const spaceEvent = this.em.create(SpaceEvent, {
           space,
           user,
@@ -62,7 +62,9 @@ void
           entityType: PARENT_TYPE.SPACE,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
           objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
+          //@ts-ignore
           side: membership?.side,
+          //@ts-ignore
           role: membership?.role,
           data: JSON.stringify({ name: space.name }),
         })

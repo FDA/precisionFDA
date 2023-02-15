@@ -119,17 +119,20 @@ SyncFolderFilesOutput
         'SyncFilesInFolderOperation: Updating file metadata',
       )
 
-      // we test name and size fields
-      if (userfile.name !== remoteState.describe.name) {
-        // console.log('updating file name')
-        userfile.name = remoteState.describe.name
-      }
-      if (userfile.fileSize !== remoteState.describe.size) {
-        userfile.fileSize = remoteState.describe.size
-      }
-      if (userfile.state !== remoteState.describe.state) {
-        userfile.state = remoteState.describe.state
-      }
+
+        // we test name and size fields
+        if (userfile.name !== remoteState?.describe?.name) {
+          // console.log('updating file name')
+          userfile.name = remoteState.describe?.name || ''
+        }
+        if (userfile.fileSize !== remoteState?.describe?.size) {
+          userfile.fileSize = remoteState.describe?.size
+        }
+        if (userfile.state !== remoteState?.describe?.state) {
+          // @ts-ignore
+          userfile.state = remoteState.describe?.state
+        }
+
     })
 
     // remove

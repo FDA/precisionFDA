@@ -12,6 +12,7 @@
     "npm": "^8.19.1"
   },
   "scripts": {
+    "dev": "wds --esbuild -w ./src/index.ts",
     "build": "npm run clean && npm run compile",
     "compile": "tsc -b tsconfig.build.json",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",

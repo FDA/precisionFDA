@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable max-len */
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { database, queue, errors, client } from '@pfda/https-apps-shared'
 import { User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
@@ -14,7 +14,7 @@ import {
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { Asset, SyncFilesStateOperation } from '@pfda/https-apps-shared/src/domain/user-file'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
-import { FileStatesParams } from 'shared/src/platform-client/platform-client.params'
+import { FileStatesParams } from '@pfda/https-apps-shared/src/platform-client/platform-client.params'
 import R from 'ramda'
 import { findFileOrAssetWithUid } from '@pfda/https-apps-shared/src/domain/user-file/user-file.helper'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
@@ -56,7 +56,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user1 = create.userHelper.create(em, { email: generate.random.email() })
     user2 = create.userHelper.create(em, { email: generate.random.email() })
