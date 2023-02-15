@@ -18,6 +18,7 @@ import { FileStatesParams } from 'shared/src/platform-client/platform-client.par
 import R from 'ramda'
 import { findFileOrAssetWithUid } from '@pfda/https-apps-shared/src/domain/user-file/user-file.helper'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
+import { errorsFactory } from '../utils/errors-factory'
 
 
 describe('SyncFilesStateOperation static methods', () => {
@@ -217,5 +218,21 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     await createSyncFilesStateTask(userCtx)
     expect(localFakes.addToQueueStub.calledOnce).to.be.true()
     expect(fakes.client.fileStatesFake.callCount).to.equal(0)
+  })
+
+  it('it handles InvalidAuthentication - ExpiredToken gracefully', async () => {
+    fakes.client.fileStatesFake.rejects(errorsFactory.createClientTokenExpiredError())
+
+    await createSyncFilesStateTask(user1Ctx)
+    expect(fakes.client.fileStatesFake.calledOnce).to.be.true()
+    expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
+  })
+
+  it('it handles ClientRequestError gracefully', async () => {
+    fakes.client.fileStatesFake.rejects(errorsFactory.createServiceUnavailableError())
+
+    await createSyncFilesStateTask(user1Ctx)
+    expect(fakes.client.fileStatesFake.calledOnce).to.be.true()
+    expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
   })
 })

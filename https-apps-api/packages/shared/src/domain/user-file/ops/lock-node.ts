@@ -9,7 +9,7 @@ import { loadNodes } from '../user-file.helper'
 
 class NodesLockOperation extends BaseOperation<UserOpsCtx, uidListInput, void> {
   async run(input: uidListInput): Promise<void> {
-    this.ctx.log.info(input.ids, 'Locking ids')
+    this.ctx.log.info(input.ids, 'NodesLockOperation: Locking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: false })
 
@@ -34,7 +34,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, uidListInput, void> {
 
       this.ctx.log.info(
         { foldersCount: lockedFoldersCount, filesCount: lockedFilesCount },
-        'Locked total objects',
+        'NodesLockOperation: Locked total objects',
       )
     } catch (err) {
       throw err
