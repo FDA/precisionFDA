@@ -57,6 +57,8 @@ type FileStateResult = {
   describe?: {
     name: string
     size: number
+    created: number
+    modified: number
     state: FILE_STATE_DX
   }
 }
