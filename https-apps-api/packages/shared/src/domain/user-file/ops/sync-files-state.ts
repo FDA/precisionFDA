@@ -2,7 +2,7 @@
 import { groupBy } from 'ramda'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { UserOpsCtx } from '../../../types'
-import { client, queue } from '../../..'
+import { client, errors, queue } from '../../..'
 import { User } from '../../user/user.entity'
 import { TASK_TYPE } from '../../../queue/task.input'
 import { PlatformClient } from '../../../platform-client'
@@ -12,6 +12,7 @@ import { FILE_STATE_DX, IFileOrAsset } from '../user-file.types'
 import { ChallengeUpdateCardImageUrlOperation } from '../../challenge/ops/update-challenge-card-image-url'
 import { ChallengeRepository } from '../../challenge/challenge.repository'
 import { Challenge } from '../../challenge'
+import { removeRepeatable } from '../../../queue'
 
 
 // Sync all files in non-closed states given a user context
@@ -109,19 +110,37 @@ void> {
       openFiles: openFiles.map(f => f.dxid),
     }, `SyncFilesStateOperation: Starting files state sync for ${dxuser}`)
 
-    // Group files based on project dxid, this is necessary to provide project hint to the
-    // platform API call, which is VERY slow if this is not present
-    const openFilesByProject = groupBy((file: IFileOrAsset) => file.project, openFiles)
-    for (const projectDxid in openFilesByProject) {
-      if (openFilesByProject.hasOwnProperty(projectDxid)) {
-        const openFilesInProject = openFilesByProject[projectDxid]
-        this.log.info({
-          projectDxid,
-          openFiles: openFilesInProject.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
-        }, 'SyncFilesStateOperation: Syncing files state in project')
+    try {
+      // Group files based on project dxid, this is necessary to provide project hint to the
+      // platform API call, which is VERY slow if this is not present
+      const openFilesByProject = groupBy((file: IFileOrAsset) => file.project, openFiles)
+      for (const projectDxid in openFilesByProject) {
+        if (openFilesByProject.hasOwnProperty(projectDxid)) {
+          const openFilesInProject = openFilesByProject[projectDxid]
+          this.log.info({
+            projectDxid,
+            openFiles: openFilesInProject.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
+          }, 'SyncFilesStateOperation: Syncing files state in project')
 
-        await this.syncFilesInProject(projectDxid, openFilesInProject)
+          await this.syncFilesInProject(projectDxid, openFilesInProject)
+        }
       }
+    } catch (err) {
+      if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {
+        if (err.props.clientStatusCode === 401) {
+          // Unauthorized. Expected scenario is that the user token has expired
+          // Removing the sync task will allow a new sync task to be recreated
+          // when user next logs in via UserCheckupTask
+          this.ctx.log.info({ error: err.props },
+            'SyncFilesStateOperation: Received 401 from platform, removing sync task')
+          await removeRepeatable(this.ctx.job)
+        }
+      }
+      else {
+        this.ctx.log.info({ error: err },
+          'SyncFilesStateOperation: Unhandled error from platform, will retry later')
+      }
+      return
     }
 
     // If user has no more unclosed files, remove this task
