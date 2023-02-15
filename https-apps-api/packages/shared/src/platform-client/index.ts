@@ -208,6 +208,8 @@ class PlatformClient {
       data.describe = {
         fields: {
           name: true,
+          created: true,
+          modified: true,
           size: true,
           state: true,
         },
