@@ -16,6 +16,7 @@ router.post(
     body: userFile.inputs.uidListSchema,
   }),
   async ctx => {
+    //@ts-ignore TODO fix
     const ids = ctx.request.body.ids as number[]
     await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ ids })
     ctx.status = 204
@@ -28,6 +29,7 @@ router.post(
     body: userFile.inputs.uidListSchema,
   }),
   async ctx => {
+    //@ts-ignore TODO fix
     const ids = ctx.request.body.ids as number[]
     await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
     ctx.status = 204
