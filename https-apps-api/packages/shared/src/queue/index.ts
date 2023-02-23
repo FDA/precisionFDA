@@ -55,7 +55,9 @@ const createQueues = async (): Promise<void> => {
     redis: redisOptions,
     defaultJobOptions: {
       removeOnComplete: true,
-      removeOnFail: false,
+      removeOnFail: true,
+      attempts: 3, // Re-try sending the email a few times in case of network issue
+      backoff: 5 * 60 * 1000, // 5 min delay between retries
       priority: 5,
     },
   })
