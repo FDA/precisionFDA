@@ -22,6 +22,6 @@ namespace :sidekiq do
   end
 
   task inspect: :environment do
-    run()
+    run
   end
 end
