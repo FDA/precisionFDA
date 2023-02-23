@@ -42,7 +42,7 @@ export const SocialMediaButtons = () => {
     <StyledSocialMediaButtons>
       <a href='mailto:precisionfda@fda.hhs.gov' aria-label='Click this icon to email the PrecisionFDA team'><EnvelopeIcon /></a>
       <ExternalLink to='https://twitter.com/precisionfda' ariaLabel='Click this icon to view the PrecisionFDA Twitter page in a new Tab'><TwitterIcon /></ExternalLink>
-      <ExternalLink to='https://www.linkedin.com/showcase/precisionfda' ariaLabel='Click this icon to view the PrecisionFDA LinkedIn page in a new tab'><LinkedInIcon /></ExternalLink>
+      <ExternalLink to='https://www.linkedin.com/company/fda' ariaLabel='Click this icon to view the PrecisionFDA LinkedIn page in a new tab'><LinkedInIcon /></ExternalLink>
     </StyledSocialMediaButtons>
   )
 }
