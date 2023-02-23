@@ -1,5 +1,5 @@
 namespace :sidekiq do
-  def run()
+  def run
     # See queues
     puts "Sidekiq::Queue.all"
     queues = Sidekiq::Queue.all
