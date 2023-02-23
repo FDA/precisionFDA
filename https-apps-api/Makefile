@@ -33,7 +33,7 @@ run-dev:
 	NODE_PATH_KEY_CERT=../key.pem \
 	NODE_PATH_CERT=../cert.pem \
 	NODE_DATABASE_URL=mysql://root:password@0.0.0.0:32800/precision-fda \
-	$(bin)ts-node-dev -r tsconfig-paths/register --files ./packages/api/src/index.ts
+	$(bin)ts-node-dev --transpile-only -r tsconfig-paths/register --files ./packages/api/src/index.ts
 
 run-dev-local:
 	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
