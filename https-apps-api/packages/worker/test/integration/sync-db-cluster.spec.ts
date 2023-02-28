@@ -29,7 +29,7 @@ describe('TASK: sync db cluster', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
     dbCluster = create.dbClusterHelper.create(em, { user })

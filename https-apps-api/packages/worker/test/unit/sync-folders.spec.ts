@@ -4,7 +4,7 @@ import { Folder, Tagging, User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database, getLogger, types } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import type { SyncFoldersInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 describe('syncFolders operation', () => {
   let em: EntityManager<MySqlDriver>
@@ -16,11 +16,11 @@ describe('syncFolders operation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
-    await em.clear()
+    em.clear()
     userCtx = { ...user, accessToken: 'foo' }
     defaultInput = {
       scope: 'private',
@@ -34,7 +34,7 @@ describe('syncFolders operation', () => {
   it('creates a folder', async () => {
     const op = new userFile.SyncFoldersOperation({
       // parentFolder init issues
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       // em,
       log,
       user: userCtx,
@@ -57,7 +57,7 @@ describe('syncFolders operation', () => {
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
     await em.flush()
     const op = new userFile.SyncFoldersOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -79,7 +79,7 @@ describe('syncFolders operation', () => {
 
   it('creates folders with the same name', async () => {
     const op = new userFile.SyncFoldersOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -113,6 +113,7 @@ describe('syncFolders operation', () => {
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('id', folder.id)
     em.clear()
+
     const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
     expect(taggingsInDb).to.have.lengthOf(1)
     expect(taggingsInDb[0]).to.have.property('taggableId', folder.id)

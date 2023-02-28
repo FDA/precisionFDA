@@ -76,6 +76,7 @@ Maybe<DbCluster>
       'SyncDbClusterOperation: Received dbcluster describe response from platform',
     )
 
+    // @ts-ignore
     const currentStatus = STATUSES[invertObj(STATUS)[dbCluster.status]]
 
     if (currentStatus === describeDbClusterRes.status
@@ -97,7 +98,9 @@ Maybe<DbCluster>
 
     const updatedDbCluster = wrap(dbCluster).assign(
       {
+        // @ts-ignore
         status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
+        // @ts-ignore
         statusAsOf: new Date(describeDbClusterRes.statusAsOf),
         host: describeDbClusterRes.endpoint,
         port: describeDbClusterRes.port?.toString(),

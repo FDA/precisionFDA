@@ -48,7 +48,7 @@ export function createServer(callback: KoaCallback) {
 
   const stopServer = async (): Promise<void> => {
     if (server?.listening) {
-      await new Promise(done => server.close(done))
+      await new Promise(done => server!.close(done))
     }
     log.info('Server: closed')
   }

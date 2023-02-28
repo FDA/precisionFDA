@@ -24,7 +24,7 @@ type MysqlJsonNode = {
 const mysqlJsonExtractKey = (sqlColumnName: string, jsonSelector: ReturnType<typeof buildJsonPath>) =>
   `JSON_EXTRACT(\`${sqlColumnName}\`, '$${jsonSelector}')`
 
-const renderMysqlNode = (node: MysqlJsonNode) => {
+const renderMysqlNode = (node: MysqlJsonNode): any => {
   switch (node.type) {
     case 'string':
       return `'${node.value}'`;

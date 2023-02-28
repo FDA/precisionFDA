@@ -2,7 +2,7 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { Asset, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import { database } from '@pfda/https-apps-shared'
+import { database } from '../../../src/database'
 import { findFileOrAssetWithUid } from 'shared/src/domain/user-file/user-file.helper'
 
 // TODO: Migrate tests from user-file.helper.spec.ts in api and worker packages here
@@ -18,7 +18,7 @@ describe('user-file.helper', () => {
 
     beforeEach(async () => {
       await db.dropData(database.connection())
-      em = database.orm().em
+      em = database.orm().em.fork()
       user = create.userHelper.create(em)
       await em.flush()
 

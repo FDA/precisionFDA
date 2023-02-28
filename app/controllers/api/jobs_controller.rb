@@ -125,7 +125,6 @@ module Api
       workflow = Workflow.find_by(uid: unsafe_params[:id])
       analyses = workflow.analyses.
         eager_load(:jobs, :workflow, :batch_items).
-        order(order_params).
         page(page_from_params).
         per(page_size)
 

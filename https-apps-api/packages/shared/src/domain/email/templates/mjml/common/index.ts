@@ -48,27 +48,29 @@ const footer = `
     </mjml>
 `
 
+type IDType = string | number
+
 // entity involved, space route does not work
-const generateCommentLink = (commentId: number, spaceId: number): string =>
+const generateCommentLink = (commentId: IDType, spaceId: IDType): string =>
   `${config.api.railsHost}/spaces/${spaceId.toString()}/discuss`
 
-const generateObjectCommentsLink = (tableName: string, objectUid: string): string =>
+const generateObjectCommentsLink = (tableName: IDType, objectUid: IDType): string =>
   `${config.api.railsHost}/${tableName}/${objectUid}/comments`
 
-const generateSpaceLink = (spaceId: number): string =>
+const generateSpaceLink = (spaceId: IDType): string =>
   `${config.api.railsHost}/spaces/${spaceId.toString()}`
 
-const generateJobDetailLink = (jobUid: string): string =>
+const generateJobDetailLink = (jobUid: IDType): string =>
   `${config.api.railsHost}/home/jobs/${jobUid}`
 
-const generateChallengeDetailLink = (challengeId: number): string =>
+const generateChallengeDetailLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
-const generateChallengePreregPageLink = (challengeId: number): string =>
+const generateChallengePreregPageLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
-const ctoButton = (text: string, generateLinkFn: (entityId: number | string) => string) => (
-  id: number | string,
+const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) => (
+  id: IDType,
 ) => `
   <mj-button
     background-color="#1F70B5"

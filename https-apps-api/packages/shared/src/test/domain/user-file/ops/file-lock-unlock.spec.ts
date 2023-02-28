@@ -4,7 +4,7 @@ import pino from 'pino'
 import { mocksReset } from '../../../mocks'
 import { User, UserFile, userFile } from '../../../../domain'
 import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from 'shared/src/test'
+import { create, db } from '@pfda/https-apps-shared/src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 
 describe('lock/unlock file tests', () => {
@@ -15,7 +15,7 @@ describe('lock/unlock file tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -40,7 +40,7 @@ describe('lock/unlock file tests', () => {
     await em.flush()
 
     const op = new userFile.FileLockOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -69,7 +69,7 @@ describe('lock/unlock file tests', () => {
     await em.flush()
 
     const op = new userFile.FileLockOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -98,7 +98,7 @@ describe('lock/unlock file tests', () => {
     await em.flush()
 
     const op = new userFile.FileUnlockOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

@@ -86,10 +86,6 @@ export class User extends BaseEntity {
   @Property({ nullable: true })
   schemaVersion?: number
 
-  // TODO(samuel) refactor this into foreign key
-  @Property()
-  orgId: number
-
   @Property()
   firstName: string
 
@@ -217,9 +213,7 @@ export class User extends BaseEntity {
           role: adminGroup,
         },
       },
-      populate: {
-        adminGroup: true,
-      },
+      populate: ['adminGroup'],
     })
 
     return siteAdminGroupMemberships.length > 0

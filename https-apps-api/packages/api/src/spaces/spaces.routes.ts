@@ -30,7 +30,7 @@ router.patch(
     })
     await new email.EmailProcessOperation(pickOpsCtx(ctx)).execute({
       input: {
-        initUserId: ctx.user.id,
+        initUserId: ctx.user!.id,
         spaceId: ctx.params.id,
         activityType: spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE.space_locked],
       },
@@ -51,7 +51,7 @@ router.patch(
 
     await new email.EmailProcessOperation(pickOpsCtx(ctx)).execute({
       input: {
-        initUserId: ctx.user.id,
+        initUserId: ctx.user!.id,
         spaceId: ctx.params.id,
         activityType: spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE.space_unlocked],
       },
@@ -76,7 +76,7 @@ router.patch(
       entities.SpaceMembership,
       {
         spaces: ctx.params.id as any,
-        user: ctx.user.id
+        user: ctx.user!.id
       }, {}
     )
 
@@ -87,7 +87,7 @@ router.patch(
       throw new errors.PermissionError("Operation not permitted.")
     }
 
-    const platformClient = new client.PlatformClient(ctx.user.accessToken, ctx.log)
+    const platformClient = new client.PlatformClient(ctx.user!.accessToken, ctx.log)
     if (membership.side === spaceMembership.types.SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.

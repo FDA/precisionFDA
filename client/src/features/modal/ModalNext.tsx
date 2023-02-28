@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react'
+import React, { PropsWithChildren } from 'react'
 import ReactDOM from 'react-dom'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { useKeyPress } from '../../hooks/useKeyPress'
@@ -14,7 +14,7 @@ import {
 export const ModalHeaderTop = ({
   hide,
   headerText,
-  disableClose,
+  disableClose = false,
 }: {
   hide?: () => void
   headerText?: string
@@ -44,9 +44,8 @@ export interface ModalNextProps {
   headerText?: string
   blur?: boolean
   disableClose?: boolean
-  children: ReactNode
 }
-const ModalComponent = (props: ModalNextProps) => {
+const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
   const {
     headerText,
     hide,
@@ -67,15 +66,13 @@ const ModalComponent = (props: ModalNextProps) => {
         {...rest}
       >
         <StyledModal>
-          {React.Children.map(children, child => (
-            React.cloneElement(child, { ...props })
-          ))}
+          {children}
         </StyledModal>
       </Wrapper>
     </>
   )
 }
 // eslint-disable-next-line react/destructuring-assignment
-export const ModalNext: FC<ModalNextProps> = props => props.isShown
-  ? ReactDOM.createPortal(<ModalComponent {...props} />, document.body)
+export const ModalNext = ({ children, ...rest }: PropsWithChildren<ModalNextProps>) => rest.isShown
+  ? ReactDOM.createPortal(<ModalComponent {...rest}>{children}</ModalComponent>, document.body)
   : null

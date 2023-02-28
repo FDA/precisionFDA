@@ -4,9 +4,8 @@ import { userFile, database, getLogger } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { Asset, User, UserFile } from 'shared/src/domain'
-import { UserCtx } from 'shared/src/types'
-import { FILE_STATE_DX } from 'shared/src/domain/user-file/user-file.types'
-import { FileNotFoundError } from 'shared/src/errors'
+import { UserCtx } from '@pfda/https-apps-shared/src/types'
+import { FILE_STATE_DX } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 describe('FileUpdateOperation tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -18,7 +17,7 @@ describe('FileUpdateOperation tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -35,7 +34,7 @@ describe('FileUpdateOperation tests', () => {
 
   it('syncs a file that is closed on platform', async () => {
     const op = new userFile.FileUpdateOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -56,7 +55,7 @@ describe('FileUpdateOperation tests', () => {
 
   it('syncs an asset that is closed on platform', async () => {
     const op = new userFile.FileUpdateOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -77,7 +76,7 @@ describe('FileUpdateOperation tests', () => {
 
   it('syncs a file that is not closed on platform', async () => {
     const op = new userFile.FileUpdateOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -97,7 +96,7 @@ describe('FileUpdateOperation tests', () => {
 
   it('throws exception if file uid is not found', async () => {
     const op = new userFile.FileUpdateOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

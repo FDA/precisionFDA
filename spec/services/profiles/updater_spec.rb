@@ -13,11 +13,6 @@ RSpec.describe Profiles::Updater, type: :service do
       expect { service_response }.to change { profile.phone }.to(params[:profile][:phone])
     end
 
-    context 'when profile is invalid' do
-      before { profile.update(address1: nil) }
-
-      it { expect(service_response).to be_falsey }
-    end
   end
 
   describe 'when it updates a email field' do

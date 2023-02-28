@@ -7,9 +7,9 @@ import { mocksReset, fakes } from '@pfda/https-apps-shared/src/test/mocks'
 import { database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from 'shared/src/domain/space-membership/space-membership.enum'
-import { SPACE_TYPE } from 'shared/src/domain/space/space.enum'
-import { random } from 'shared/src/test/generate'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
+import { SPACE_TYPE } from '@pfda/https-apps-shared/src/domain/space/space.enum'
+import { random } from '@pfda/https-apps-shared/src/test/generate'
 
 describe('PATCH /spaces/:id/accept', () => {
 	let em: EntityManager
@@ -24,7 +24,7 @@ describe('PATCH /spaces/:id/accept', () => {
 	beforeEach(async () => {
 		await db.dropData(database.connection())
 		// create DB mocks
-		em = database.orm().em
+		em = database.orm().em.fork() as EntityManager
 		em.clear()
 		notPermittedUser = create.userHelper.create(em)
 		user = create.userHelper.createRSA(em)
