@@ -18,9 +18,8 @@ export class Node extends BaseEntity {
 
   @Property({ unique: true })
   uid: string
-L
-  @Property()
 
+  @Property()
   name: string
 
   @Property()
@@ -28,7 +27,6 @@ L
 
   @Property()
   userId: number
-
 
   @ManyToOne(() => Node)
   parentFolder: Node

@@ -63,7 +63,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     const fileDeletesSeq = async (): Promise<void> => {
       for (const folder of folderPathsToCheck) {
         // !!!
-        const syncFilesEm = this.ctx.em.fork(true)
+        const syncFilesEm = this.ctx.em.fork()
         const syncFilesInFolderOp = new SyncFilesInFolderOperation({
           log: this.ctx.log,
           // operations run in parallel, they should have their own DB context
@@ -89,7 +89,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     const fileAddsSeq = async (): Promise<void> => {
       for (const folder of folderPathsToCheck) {
         // !!!
-        const syncFilesEm = this.ctx.em.fork(true)
+        const syncFilesEm = this.ctx.em.fork()
         const syncFilesInFolderOp = new SyncFilesInFolderOperation({
           log: this.ctx.log,
           // operations run in parallel, they should have their own DB context

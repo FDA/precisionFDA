@@ -22,8 +22,6 @@ class Profile < ApplicationRecord
   belongs_to :country
   belongs_to :phone_country, class_name: 'Country'
 
-  validates :address1, :country, :city, :postal_code, presence: true, if: :fields_changed?
-  validates :us_state, presence: true, if: -> { country.try(:usa?) && fields_changed? }
   validates :email, presence: true,
             uniqueness: { case_sensitive: false },
             email: true,

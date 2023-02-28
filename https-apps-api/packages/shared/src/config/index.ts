@@ -23,8 +23,11 @@ type Maybe<T> = T | null
 
 const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
   // TODO(samuel) validate that this is not undefined
-  const value = parseInt(envValue, 10)
-  return isNaN(value) ? null : value
+  if(envValue) {
+    const value = parseInt(envValue, 10)
+    return isNaN(value) ? null : value
+  }
+  return null
 }
 const parseBooleanFromProcess = (
   value: string | undefined,

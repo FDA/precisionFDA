@@ -28,7 +28,7 @@ describe('syncFilesInFolder operation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     job = create.jobHelper.create(em, { user })
     await em.flush()
@@ -247,7 +247,7 @@ describe('syncFilesInFolder operation', () => {
     )
     await em.flush()
     const op = new userFile.SyncFilesInFolderOperation({
-      em: database.orm().em.fork(true),
+      em: database.orm().em.fork(),
       log,
       user: userCtx,
     })

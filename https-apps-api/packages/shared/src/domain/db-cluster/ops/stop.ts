@@ -37,6 +37,7 @@ export class StopDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput,
       project: dbCluster.project,
     })
 
+    // @ts-ignore
     dbCluster.status = STATUS[invertObj(STATUSES)[describeResult.status]]
     await em.fork().persistAndFlush(dbCluster)
 

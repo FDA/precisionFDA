@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-require-imports */
+// @ts-nocheck
 import hmr from 'node-hmr'
 import { createEntrypoint } from './entrypoint'
 

@@ -8,7 +8,7 @@ import { TASK_TYPE } from '../task.input'
 import { SyncJobOperation } from "../../domain/job"
 
 // Clean up the bull queue
-const cleanupWorkerQueue = async (em, log): Promise<any> => {
+const cleanupWorkerQueue = async (em: any, log: any): Promise<any> => {
   const now = Date.now()
 
   // Cleanup sync_job_status tasks whose job has already been terminated
@@ -107,7 +107,7 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
 }
 
 // state: Any valid bull queue state like 'failed' or 'completed'
-const clearJobs = async (q, state, log): Promise<any> => {
+const clearJobs = async (q: any, state: any, log: any): Promise<any> => {
   const jobs = await q.getJobs(state)
   const count = jobs.length
   if (count > 0) {
@@ -121,11 +121,11 @@ const clearJobs = async (q, state, log): Promise<any> => {
   return jobs
 }
 
-const clearFailedJobs = async (q, log): Promise<any> => {
+const clearFailedJobs = async (q: any, log: any): Promise<any> => {
   return clearJobs(q, 'failed', log)
 }
 
-const clearCompletedJobs = async (q, log): Promise<any> => {
+const clearCompletedJobs = async (q: any, log: any): Promise<any> => {
   return clearJobs(q, 'completed', log)
 }
 

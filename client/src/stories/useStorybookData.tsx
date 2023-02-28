@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from 'react'
 
 export const useStroybookData = () => {
   const data = [
@@ -27,5 +27,5 @@ export const useStroybookData = () => {
       scope: 'private',
     },
   ]
-  return useMemo(() => data, []);
+  return useMemo(() => data, [])
 }

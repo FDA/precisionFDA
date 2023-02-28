@@ -23,7 +23,7 @@ describe('POST /apps/:id/run', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
@@ -38,18 +38,22 @@ describe('POST /apps/:id/run', () => {
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runAppInput())
       .expect(201)
-    expect(body).to.deep.equal({
+    expect(body).to.deep.include({
       id: 1,
-      app: app.id,
-      // appSeriesId: null,
       name: app.title,
       dxid: generate.job.jobId(),
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-      user: user.id,
-      // default app type
       project: user.privateFilesProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
+    })
+    expect(body.app).to.deep.include({
+      dxid: app.dxid,
+      title: app.title,
+      scope: app.scope,
+    })
+    expect(body.user).to.deep.include({
+      dxuser: user.dxuser,
     })
   })
 
@@ -90,17 +94,23 @@ describe('POST /apps/:id/run', () => {
       .query({ ...getDefaultQueryData(user) })
       .send(generate.app.runTtydAppInput())
       .expect(201)
-    expect(stripEntityDates(body)).to.deep.equal({
+    expect(stripEntityDates(body)).to.deep.include({
       id: 1,
-      app: app.id,
       name: app.title,
       dxid: generate.job.jobId(),
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-      user: user.id,
       // default app type
       project: user.privateFilesProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
+    })
+    expect(body.app).to.deep.include({
+      dxid: app.dxid,
+      title: app.title,
+      scope: app.scope,
+    })
+    expect(body.user).to.deep.include({
+      dxuser: user.dxuser,
     })
   })
 

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { Asset, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
@@ -8,10 +8,10 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
+import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { AbstractSqlDriver } from '@mikro-orm/mysql'
-import { FileCloseParams } from 'shared/src/platform-client/platform-client.params'
-import { SyncFilesStateOperation } from 'shared/src/domain/user-file'
+import { FileCloseParams } from '@pfda/https-apps-shared/src/platform-client/platform-client.params'
+import { SyncFilesStateOperation } from '@pfda/https-apps-shared/src/domain/user-file'
 
 
 describe('PATCH /files/:id/close', () => {
@@ -28,7 +28,7 @@ describe('PATCH /files/:id/close', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)

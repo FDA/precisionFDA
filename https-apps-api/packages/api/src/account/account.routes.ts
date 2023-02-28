@@ -12,7 +12,7 @@ router.use(defaultMiddlewares)
 router.post(
   '/checkSpacesPermissions',
   async ctx => {
-    const res = await queue.createSyncSpacesPermissionsTask(ctx.user)
+    const res = await queue.createSyncSpacesPermissionsTask(ctx.user!)
     ctx.body = res
     ctx.status = 204
   },
@@ -23,7 +23,7 @@ router.get(
   async ctx => {
     const res = await queue.createUserCheckupTask({
       type: queue.types.TASK_TYPE.USER_CHECKUP,
-      user: ctx.user,
+      user: ctx.user!,
     })
     ctx.body = res
   },

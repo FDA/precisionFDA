@@ -28,7 +28,7 @@ number
       // subfolders include "existingFolder"
       const foldersInProject = await repo.findForSynchronization({
         userId: this.ctx.user.id,
-        projectDxid: existingFolder.project,
+        projectDxid: existingFolder.project!,
       })
       const folderSubtree = await childrenTraverse(existingFolder, repo, [])
       const folderPath = getFolderPath(foldersInProject, existingFolder)
@@ -47,7 +47,7 @@ number
         )
       }
       await platformClient.removeFolderRec({
-        projectId: existingFolder.project,
+        projectId: existingFolder.project!,
         folderPath,
       })
       userFileRepo.removeFilesWithTags(filesToRemove)
