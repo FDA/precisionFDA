@@ -65,6 +65,7 @@ export abstract class PaginatedEntityRepository<T extends BaseEntity> extends En
     orderDir,
     filters
   }: FindPaginatedOpts<T>) {
+    //@ts-ignore PK: unable to resolve following compilatin issue
     const [entities, totalCount] = await this.findAndCount(this.cleanObject(filters), {
       limit: perPage,
       offset: (page - 1) * perPage,
@@ -95,7 +96,7 @@ export abstract class PaginatedEntityRepository<T extends BaseEntity> extends En
       qb.orderBy({ [resolveColumnNode(orderBy)]: orderDir })
     }
     const entities = await qb.getResult()
-    const count = await qb.count('id').execute('run', true)
+    const count: any = await qb.count('id').execute('run', true)
     const totalCount = count[0].count as number
     return this.transformPaginatedResponse(entities, totalCount, page, perPage)
   }

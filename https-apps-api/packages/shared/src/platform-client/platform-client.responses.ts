@@ -1,5 +1,6 @@
 import { AnyObject } from '../types'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
+import { JOB_STATE } from '../domain/job/job.enum'
 
 type DbClusterDescribeResponse = {
   id: string
@@ -13,7 +14,7 @@ type DbClusterDescribeResponse = {
   engineVersion: string
   status: string
   endpoint?: string
-  port?: number
+  port?: string
   statusAsOf?: number
   failureReason?: string
 } & AnyObject
@@ -131,7 +132,7 @@ type WorkflowDescribeResponse = {
 
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
-  state: string
+  state: JOB_STATE
   project: string
   billTo: string
   httpsApp: {

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_06_164002) do
+ActiveRecord::Schema.define(version: 2023_02_08_135439) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -486,6 +486,7 @@ ActiveRecord::Schema.define(version: 2022_12_06_164002) do
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.boolean "locked", default: false
+    t.index ["dxid", "sti_type"], name: "index_nodes_on_dxid_and_sti_type"
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
     t.index ["state"], name: "index_nodes_on_state"

@@ -12,7 +12,8 @@ export const SearchInput = styled.div`
 `
 
 export const LeftBar = styled.div`
-  width: 300px;
+  min-width: 300px;
+  max-width: 400px;
   overflow-y: auto;
   padding: 16px;
   padding-right: 0;
@@ -20,7 +21,7 @@ export const LeftBar = styled.div`
 
 export const NoteContainer = styled.div`
   padding: 6px 12px;
-  width: 700px;
+  min-width: 300px;
   overflow-y: auto;
   border-left: 1px solid #ddd;
 

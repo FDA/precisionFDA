@@ -43,7 +43,7 @@ export const ExpertListItem = ({ expert, isAdmin = false }: { expert: Expert, is
               href={`/experts/${expert.id}/edit`}
               aria-label={`Click here to Edit the Expert ${expert.id}`}
             >
-              <span className="fa fa-pencil" />
+              <span className="fa fa-pencil fa-fw" />
               Edit Expert
             </Button>
             <Button

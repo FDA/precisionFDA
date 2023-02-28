@@ -2,7 +2,7 @@ import { pick } from 'ramda'
 import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router-dom'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ATTACHABLE_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -56,7 +56,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), ATTACHABLE_TYPES.ASSET)
+  } = useAttachToModal(selected.map(s => s.id), 'ASSET')
   const {
     modalComp: downloadModal,
     setShowModal: setDownloadModal,

@@ -50,16 +50,19 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
       dxid: describeDbClusterRes.id,
       uid: `${describeDbClusterRes.id}-1`,
       name: describeDbClusterRes.name,
+      // @ts-ignore
       status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
       project: describeDbClusterRes.project,
       dxInstanceClass: describeDbClusterRes.dxInstanceClass,
+      // @ts-ignore
       engine: ENGINE[invertObj(ENGINES)[describeDbClusterRes.engine]],
       engineVersion: describeDbClusterRes.engineVersion,
       host: describeDbClusterRes.endpoint,
       port: describeDbClusterRes.port,
       scope: this.input.scope,
       description: this.input.description,
-      statusAsOf: new Date(describeDbClusterRes.statusAsOf),
+      // @ts-ignore
+      statusAsOf: describeDbClusterRes.statusAsOf ? new Date(describeDbClusterRes.statusAsOf) : null,
     })
 
     await this.em.persistAndFlush(dbCluster)

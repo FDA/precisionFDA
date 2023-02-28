@@ -21,6 +21,10 @@ template "/etc/nginx/nginx.conf" do
   } }
 end
 
+template "/etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf" do
+  source "json_analytics_log_format_for_prometheus.conf.erb"
+end
+
 template "/usr/local/conf/modsecurity.conf" do
   source "modsecurity.erb"
 end

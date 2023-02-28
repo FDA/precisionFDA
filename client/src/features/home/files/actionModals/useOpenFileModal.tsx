@@ -1,14 +1,14 @@
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { Button } from '../../../../components/Button';
-import { DownloadIcon } from '../../../../components/icons/DownloadIcon';
-import { FileIcon } from '../../../../components/icons/FileIcon';
-import { VerticalCenter } from '../../../../components/Page/styles';
-import { ResourceTable, StyledAction, StyledName, StyledTD } from '../../../../components/ResourceTable';
-import { Modal } from '../../../modal';
-import { ModalScroll } from '../../../modal/styles';
-import { useModal } from '../../../modal/useModal';
-import { IFile } from '../files.types';
+import React, { useMemo } from 'react'
+import styled from 'styled-components'
+import { Button } from '../../../../components/Button'
+import { DownloadIcon } from '../../../../components/icons/DownloadIcon'
+import { FileIcon } from '../../../../components/icons/FileIcon'
+import { VerticalCenter } from '../../../../components/Page/styles'
+import { ResourceTable, StyledAction, StyledName } from '../../../../components/ResourceTable'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
+import { useModal } from '../../../modal/useModal'
+import { IFile } from '../files.types'
 
 
 const StyledResourceTable = styled(ResourceTable)`
@@ -30,13 +30,13 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
   const modalComp = (
-    <Modal
+    <ModalNext
       data-testid="modal-files-organize"
       headerText={`Open ${momoSelected.length} items(s)`}
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}
     >
+      <ModalHeaderTop headerText={`Open ${momoSelected.length} items(s)`} hide={() => setShowModal(false)} />
       <ModalScroll>
         <StyledResourceTable
           rows={momoSelected.map(s => {
@@ -61,7 +61,12 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
           })}
         />
       </ModalScroll>
-    </Modal>
+      <Footer>
+        <ButtonRow>
+          <Button onClick={() => setShowModal(false)}>Cancel</Button>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

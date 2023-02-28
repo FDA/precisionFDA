@@ -25,7 +25,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
   receiversSides: any
 
   // to take away the following?
-  spaceMembership: SpaceMembership & { user: LoadedReference<User, User> } & { space: LoadedReference<Space, Space> }
+  spaceMembership: SpaceMembership & { user: LoadedReference<User> } & { space: LoadedReference<Space> }
   spaceMembershipSide: any
   receiverMembershipSide: any
 

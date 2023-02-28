@@ -183,7 +183,7 @@ class PlatformClient {
    * the /system/findDataObjects call is very inefficient and can take a long time
    */
   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping: Starting) => this.fileStatesPaginated(params, nextMapping))
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping) => this.fileStatesPaginated(params, nextMapping))
   }
 
   private async filesListPaginated(
@@ -227,7 +227,7 @@ class PlatformClient {
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping: Starting) => this.filesListPaginated(params, nextMapping))
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping) => this.filesListPaginated(params, nextMapping))
   }
 
   /**
@@ -433,7 +433,7 @@ class PlatformClient {
  * @param {Space} space - used for project name, can be overriden by name param.
  * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
  */
-  async projectCreate(params): Promise<ClassIdResponse> {
+  async projectCreate(params: any): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/project/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -453,7 +453,7 @@ class PlatformClient {
    *  @param {string} level - Permission level.
    *  @return [don't know yet]
   */
-  async projectInvite(params): Promise<{ id: string, state: string }> {
+  async projectInvite(params: any): Promise<{ id: string, state: string }> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/invite`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -469,7 +469,7 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
-  async projectDescribe(params): Promise<any> {
+  async projectDescribe(params: any): Promise<any> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',

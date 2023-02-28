@@ -118,7 +118,7 @@ const addToQueue = async <T extends types.Task>(
   task: T,
   queue: Bull.Queue,
   options?: JobOptions,
-  payloadFn?: (payload: AnyObject) => AnyObject,
+  payloadFn?: (payload: any) => any,
 ): Promise<Job<T>> => {
   if (typeof queue === 'undefined') {
     throw new Error('The queue was not started')
@@ -134,7 +134,7 @@ const addToQueue = async <T extends types.Task>(
         userId: (task as any)?.user?.id,
       },
       job: {
-        id: options.jobId,
+        id: options?.jobId,
       },
     },
     'adding a task to queue',
@@ -290,7 +290,7 @@ const createCheckStaleJobsTask = async (
 ) => {
   const wrapped = {
     type: types.TASK_TYPE.CHECK_STALE_JOBS as const,
-    payload: undefined,
+    payload: undefined as any,
     user,
   }
   const options: JobOptions = { jobId: types.TASK_TYPE.CHECK_STALE_JOBS }
@@ -302,7 +302,7 @@ const createSyncSpacesPermissionsTask = async (
 ) => {
   const wrapped = {
     type: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
-    payload: undefined,
+    payload: undefined as any,
     user,
   }
   const options: JobOptions = { jobId: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS }

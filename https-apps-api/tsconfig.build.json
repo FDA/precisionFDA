@@ -1,12 +1,18 @@
 {
+  "exclude": ["**/node_modules", "**/dist"],
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "ES2020",
     "module": "commonjs",
-    "sourceMap": true,
+    "sourceMap": false,
+    "strict": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "incremental": true
-  },
-  "exclude": ["**/node_modules", "**/dist"]
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "baseUrl": "./packages",
+    "paths": {
+      "@pfda/https-apps-shared": ["shared/src"]
+    }
+  }
 }

@@ -46,6 +46,7 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
           uid: dbcluster.uid,
           name: dbcluster.name,
           dxuser: dbcluster.user.getEntity().dxuser,
+          // @ts-ignore
           status: STATUSES[invertObj(STATUS)[dbcluster.status]],
           dxInstanceClass: dbcluster.dxInstanceClass,
           duration: dbcluster.elapsedTimeSinceCreationString(),

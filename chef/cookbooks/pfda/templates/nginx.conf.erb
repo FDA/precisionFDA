@@ -39,9 +39,10 @@ http {
    return 301 https://$host$request_uri;
   }
 
+  include /etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf;
   server {
     server_name <%= @app_domain %>;
-    access_log <%= node[:nginx][:log_dir] %>/<%= @app_domain %>-ssl.access.log;
+    access_log <%= node[:nginx][:log_dir] %>/<%= @app_domain %>-ssl.access.log json_analytics;
 
     listen 443 ssl http2;
     listen [::]:443 ssl http2;

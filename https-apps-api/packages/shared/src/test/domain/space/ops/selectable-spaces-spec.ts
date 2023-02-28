@@ -13,7 +13,7 @@ describe('selectable spaces tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
