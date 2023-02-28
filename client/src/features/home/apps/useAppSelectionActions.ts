@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { IChallenge } from '../../../types/challenge'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { ATTACHABLE_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
@@ -91,7 +91,7 @@ export const useAppSelectionActions = ({
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), ATTACHABLE_TYPES.APP)
+  } = useAttachToModal(selected.map(s => s.id), 'APP')
 
   const {
     modalComp: copyToSpaceModal,

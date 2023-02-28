@@ -3,10 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
-import {
-  ATTACHABLE_TYPES,
-  useAttachToModal,
-} from '../actionModals/useAttachToModal'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
@@ -23,7 +20,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
-import { isActionDisabledBasedOnLocked, isActionDisabledBasedOnProtected, isActionDisabledBasedOnRole } from '../../spaces/common'
+import { isActionDisabledBasedOnProtected, isActionDisabledBasedOnRole } from '../../spaces/common'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 
 export enum FileActions {
@@ -258,7 +255,7 @@ export const useFilesSelectActions = ({
     isShown: isShownAttachToModal,
   } = useAttachToModal(
     selected.map((s) => s.id),
-    ATTACHABLE_TYPES.FILE,
+    'FILE',
   )
   const {
     modalComp: tagsModal,

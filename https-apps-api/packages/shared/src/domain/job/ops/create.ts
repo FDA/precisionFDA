@@ -70,7 +70,9 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
 
     this.projectId = userHelper.getProjectToRunApp(user)
     this.instance =
-      this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
+    // @ts-ignore
+    this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
+        // @ts-ignore
         ? allowedInstanceTypes[this.input.instanceType]
         : DEFAULT_INSTANCE_TYPE
 
@@ -85,6 +87,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     await em.begin()
     let job: Job
     try {
+      // @ts-ignore
       job = repo.create({
         user: em.getReference(User, this.ctx.user.id),
         app: em.getReference(App, app.id),
@@ -96,11 +99,11 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         describe: JSON.stringify({}),
         scope: input.scope,
         entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-        runData: {
+        runData: JSON.stringify({
           run_instance_type: this.instance,
           run_inputs: runInputDb,
           run_outputs: {},
-        },
+        }),
         provenance: {},
         appSeriesId: app.appSeriesId,
         uid: `${newJobClientRes.id}-1`,

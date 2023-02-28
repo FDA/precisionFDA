@@ -69,10 +69,7 @@ export function SelectColumnFilter({
   return (
     <InputSelect
       value={filterValue}
-      onChange={e => {
-        console.log(e.target.value)
-        setFilter(e.target.value || undefined)
-      }}
+      onChange={e => setFilter(e.target.value || undefined)}
       data-testid={filterDataTestId}
     >
       <option value="">All</option>

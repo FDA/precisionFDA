@@ -4,7 +4,7 @@ import { ButtonSolidBlue } from '../../components/Button'
 import { useInterval } from '../../hooks/useInterval'
 import { getCookie } from '../../utils/cookies'
 import { pluralize } from '../../utils/formatting'
-import { Modal } from '../modal'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { useAuthUserQuery } from './useAuthUser'
@@ -63,13 +63,18 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   }
 
   return (
-    <Modal
+    <ModalNext
       isShown={modal.isShown}
       disableClose
-      headerText={sessionExpirationPassed ? 'Session Expired' : 'Session Expiring'}
       blur
+      hide={() => {}}
     >
-      <Content>
+      <ModalHeaderTop
+        disableClose
+        headerText={sessionExpirationPassed ? 'Session Expired' : 'Session Expiring'}
+        hide={() => modal.setShowModal(false)}
+      />
+      <Content overflowContent={false}>
         {sessionExpirationPassed
           ? 'You have been automatically logged out due to inactivity.'
           : `You are about to be logged out in ${timer} ${pluralize('second', timer)} due to inactivity.`}
@@ -92,6 +97,6 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
           </ButtonSolidBlue>
         )}
       </Footer>
-    </Modal>
+    </ModalNext>
   )
 }

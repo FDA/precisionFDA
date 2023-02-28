@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { App, Folder, Job, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -23,7 +23,7 @@ describe('PATCH /folders/:id/rename', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })

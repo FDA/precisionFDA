@@ -25,7 +25,7 @@ const queryRegistry = {
 
 export const buildEntityQueryAndFilter = (input: FilterableQueryInput): [{}, {}] => {
   let query = {}
-  let filters = {}
+  let filters = {} as any
   if (input.userId) {
     filters['ownedBy'] = { userId: input.userId }
   }

@@ -108,6 +108,7 @@ void
     }
     await this.handleSpaceAccept(space, admin)
     // accept as regular space + some extra logic for review space type
+    // @ts-ignore
     const newSpace = this.em.create(Space, {
       name: space.name,
       description: space.description,

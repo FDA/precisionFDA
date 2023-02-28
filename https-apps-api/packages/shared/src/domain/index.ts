@@ -1,4 +1,5 @@
 import { App } from './app/app.entity'
+import { AppSeries } from './app-series'
 import { Workflow } from './workflow/workflow.entity'
 import { Comment } from './comment/comment.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
@@ -33,6 +34,7 @@ const entities = {
   AdminGroup,
   AdminMembership,
   App,
+  AppSeries,
   Workflow,
   Asset,
   Challenge,
@@ -105,6 +107,7 @@ export {
   AdminGroup,
   AdminMembership,
   App,
+  AppSeries,
   Workflow,
   Asset,
   Challenge,

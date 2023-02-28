@@ -1,7 +1,7 @@
 //
 // Allocate a certain size to test if it can be done.
 //
-function alloc (size) {
+function alloc(size: number) {
   const numbers = size / 8
   const arr: any[] = []
   arr.length = numbers

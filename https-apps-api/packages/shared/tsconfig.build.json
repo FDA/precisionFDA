@@ -4,7 +4,10 @@
     "composite": true,
     "declaration": true,
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": true
   },
   "include": ["src/**/*"],
   "exclude": ["src/test"]

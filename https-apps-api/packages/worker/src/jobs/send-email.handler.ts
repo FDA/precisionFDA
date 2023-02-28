@@ -16,6 +16,7 @@ export const sendEmailHandler = async (bullJob: Job) => {
     // TODO(samuel) fix by declaration merging
     em: database.orm().em.fork() as any,
     log,
+    // @ts-ignore
     user: data.user,
     job: bullJob,
   }

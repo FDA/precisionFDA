@@ -1,10 +1,10 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { Asset, Comparison, Job, User } from 'shared/src/domain'
-import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { create, db } from 'shared/src/test'
-import { findParentEntity } from 'shared/src/domain/user-file/provenance'
-import { PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
+import { database } from '../../../src/database'
+import { Asset, Comparison, Job, User } from '@pfda/https-apps-shared/src/domain'
+import { create, db } from '@pfda/https-apps-shared/src/test'
+import { findParentEntity } from '@pfda/https-apps-shared/src/domain/user-file/provenance'
+import { PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 describe('Provenance tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -13,7 +13,7 @@ describe('Provenance tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em, { id: userId })
     await em.flush()
   })
