@@ -133,3 +133,10 @@ Debug jobs in bull queue
 `curl -sk "https://localhost:3001/debug/queue?$USER_CONTEXT" | python -m json.tool`
 
 `curl -sk "https://localhost:3001/debug/queue/job/$BULLJOB_ID?$USER_CONTEXT" | python -m json.tool`
+
+
+Cleanup bull queue. If redis is filled up due to failed email jobs, try cleaning up the queue to remove these dead entries
+This command returns a list of the removed jobs.
+
+`curl -sk "https://localhost:3001/debug/queue/cleanup?$USER_CONTEXT" | python -m json.tool`
+
