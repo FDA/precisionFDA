@@ -47,6 +47,17 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
 * Install the other required gems
     * `bundle install`
 
+## Installation of bower dependencies
+
+* Install [nvm](https://github.com/nvm-sh/nvm) according to [steps](https://github.com/nvm-sh/nvm)
+* Install latest `node` version
+
+    ```
+    nvm install node
+    ```
+* `npm i -g bower`
+* `bower install` - in the project directory
+
 ## Configure
 
 See [the Configure section in `DOCKER_BASED_SETUP.md`](./DOCKER_BASED_SETUP.md#1.-configure) for the details.
