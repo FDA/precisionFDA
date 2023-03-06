@@ -23,8 +23,9 @@ export const serializeExpert = async (expert: Expert) => {
   if (!title) {
     title = (await expert.user.load()).fullName;
   }
-  // Note(samuel) this is a workaround hack to serve metadata in correct format
-  return wrap(expert).assign({
+
+  const serializedExpert = {
+    ...wrap(expert).toJSON(),
     meta: {
       about: parsedMeta?._about,
       blog: parsedMeta?._blog,
@@ -33,6 +34,7 @@ export const serializeExpert = async (expert: Expert) => {
       title,
       totalQuestionCount: answeredQuestionCount + ignoredQuestionCount + openQuestionCount,
       totalAnswerCount: answeredQuestionCount,
-    } as any
-  });
+    },
+  }
+  return serializedExpert
 }
