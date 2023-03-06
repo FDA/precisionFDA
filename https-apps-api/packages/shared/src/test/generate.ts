@@ -11,7 +11,7 @@ import {
   ENGINES,
 } from '../domain/db-cluster/db-cluster.enum'
 import { STATIC_SCOPE } from '../enums'
-import type { AnyObject } from '../types'
+import type { AnyObject, UserCtx } from '../types'
 import {
   FILE_STATE_DX,
   FILE_STI_TYPE,
@@ -34,6 +34,7 @@ import { SyncJobOperation } from '../domain/job'
 import { SyncFilesStateOperation } from '../domain/user-file'
 import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 import { USER_STATE } from '../domain/user/user.entity'
+import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
 
 const chance = new Chance()
 
@@ -473,8 +474,27 @@ const dbCluster = {
   }),
 }
 
+const expert = {
+  simple: (): Partial<InstanceType<typeof entities.Expert>> => {
+    const expertName = chance.name()
+    const fileDxid = `file-${random.dxstr()}-1`
+    return {
+      scope: ExpertScope.PUBLIC,
+      state: ExpertState.OPEN,
+      meta: {
+        _prefname: expertName,
+        _about: `About - ${expertName}`,
+        _blog: `Blog - ${expertName}`,
+        _blog_title: `Blog Title - ${expertName}`,
+        _challenge: `Challenge - ${expertName}`,
+        _image_id: fileDxid,
+      }
+    }
+  },
+}
+
 const bullQueue = {
-  syncDbClusterStatus: (dbClusterDxid, userContext) => ({
+  syncDbClusterStatus: (dbClusterDxid: string, userContext: UserCtx) => ({
     data: {
       payload: {
         dxid: dbClusterDxid,
@@ -483,13 +503,13 @@ const bullQueue = {
       user: userContext,
     },
   }),
-  syncFilesState: userContext => ({
+  syncFilesState: (userContext: UserCtx) => ({
     data: {
       type: TASK_TYPE.SYNC_FILES_STATE,
       user: userContext,
     },
   }),
-  syncJobStatus: (jobDxid, userContext) => ({
+  syncJobStatus: (jobDxid: string, userContext: UserCtx) => ({
     data: {
       payload: {
         dxid: jobDxid,
@@ -562,6 +582,7 @@ export {
   comparison,
   challenge,
   dbCluster,
+  expert,
   bullQueue,
   bullQueueRepeatable,
 }
