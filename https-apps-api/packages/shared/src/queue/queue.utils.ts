@@ -1,4 +1,5 @@
-import { Job, JobInformation, Queue } from 'bull'
+import { Logger } from 'pino'
+import Bull, { Job, JobInformation, Queue } from 'bull'
 import { removeRepeatableJob } from '.'
 
 
@@ -41,8 +42,34 @@ const clearOrphanedRepeatableJobs = async (queue: Queue): Promise<JobInformation
   return jobsToRemove
 }
 
+// state: Any valid bull queue state like 'failed' or 'completed'
+const clearJobs = async (q: Queue, state: any, log: Logger): Promise<Job[]> => {
+  const jobs = await q.getJobs([state])
+  const count = jobs.length
+  if (count > 0) {
+    log.info({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
+    q.clean(0, state);
+    log.info({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
+  }
+  else {
+    log.info(`CleanupWorkerQueueOperation: No ${state} jobs in ${q.name}`)
+  }
+  return jobs
+}
+
+const clearFailedJobs = async (q: Queue, log: Logger): Promise<any> => {
+  return await clearJobs(q, 'failed', log)
+}
+
+const clearCompletedJobs = async (q: Queue, log: Logger): Promise<any> => {
+  return await clearJobs(q, 'completed', log)
+}
+
 export {
   getJobStatusMessage,
   isJobOrphaned,
   clearOrphanedRepeatableJobs,
+  clearJobs,
+  clearFailedJobs,
+  clearCompletedJobs,
 }

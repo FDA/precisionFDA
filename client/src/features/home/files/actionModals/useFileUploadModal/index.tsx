@@ -6,13 +6,11 @@ import { useDropzone } from 'react-dropzone'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
-import { Button, ButtonSolidBlue } from '../../../../../components/Button'
-import { TransparentButton } from '../../../../../components/Dropdown/styles'
+import { Button, ButtonSolidBlue, TransparentButton } from '../../../../../components/Button'
 import { InputError } from '../../../../../components/form/styles'
 import { TrashIcon } from '../../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../../utils'
-import { Modal } from '../../../../modal'
-import { ButtonRow } from '../../../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
 import { useConditionalModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
 import { itemsCountString } from '../../../../../utils/formatting'
@@ -30,6 +28,7 @@ import {
   SubTitle,
   UploadFilesTable,
 } from './styles'
+import { ModalHeaderTop, ModalNext } from '../../../../modal/ModalNext'
 
 const idGenerator = createSequenceGenerator()
 
@@ -158,24 +157,54 @@ export const useFileUploadModal = ({
   }
 
   const modalComp = (
-    <Modal
+    <ModalNext
       data-testid="modal-files-upload"
-      headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}
-      isShown={isShown}
-      hide={() => handleClose()}
-      title="Modal dialog to upload files"
-      header={
-        <StyledDropSection>
-          <div {...getRootProps()}>
-            <input {...getInputProps()} />
-            <ButtonSolidBlue disabled={uploadInProgress}>
-              Browse files for upload...
-            </ButtonSolidBlue>
-          </div>
-          <SubTitle>You can upload up to 20 files at a time</SubTitle>
-        </StyledDropSection>
-      }
-      footer={
+      isShown={Boolean(isShown)}
+      hide={handleClose}
+    >
+      <ModalHeaderTop
+        headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}
+        hide={handleClose}
+      />
+      <StyledDropSection>
+        <div {...getRootProps()}>
+          <input {...getInputProps()} />
+          <ButtonSolidBlue disabled={uploadInProgress}>
+            Browse files for upload...
+          </ButtonSolidBlue>
+        </div>
+        <SubTitle>You can upload up to 20 files at a time</SubTitle>
+      </StyledDropSection>
+      <ModalScroll>
+        {filesMeta.length > 0 && (
+          <UploadFilesTable>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <Status>Status</Status>
+                <Remove>Remove</Remove>
+              </tr>
+            </thead>
+            <tbody>
+              {filesMeta.map(f => (
+                <tr key={f.id}>
+                  <td>{f.name}</td>
+                  <Status>{f.status}</Status>
+                  <Remove>
+                    <TransparentButton
+                      disabled={uploadInProgress}
+                      onClick={() => handleRemoveFile(f.id)}
+                    >
+                      <TrashIcon height={16} />
+                    </TransparentButton>
+                  </Remove>
+                </tr>
+              ))}
+            </tbody>
+          </UploadFilesTable>
+        )}
+      </ModalScroll>
+      <Footer>
         <ButtonRow>
           <div>{filesMeta.length} Files Selected</div>
           {exceedsMax && (
@@ -201,36 +230,8 @@ export const useFileUploadModal = ({
             </ButtonSolidBlue>
           )}
         </ButtonRow>
-      }
-    >
-      {filesMeta.length > 0 && (
-        <UploadFilesTable>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <Status>Status</Status>
-              <Remove>Remove</Remove>
-            </tr>
-          </thead>
-          <tbody>
-            {filesMeta.map(f => (
-              <tr key={f.id}>
-                <td>{f.name}</td>
-                <Status>{f.status}</Status>
-                <Remove>
-                  <TransparentButton
-                    disabled={uploadInProgress}
-                    onClick={() => handleRemoveFile(f.id)}
-                  >
-                    <TrashIcon height={16} />
-                  </TransparentButton>
-                </Remove>
-              </tr>
-            ))}
-          </tbody>
-        </UploadFilesTable>
-      )}
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
 
   return {
