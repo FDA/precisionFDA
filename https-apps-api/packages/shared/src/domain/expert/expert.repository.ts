@@ -64,15 +64,17 @@ export class ExpertRepository extends EntityRepository<Expert> {
     const [experts, countResult ] = await Promise.all([selectQuery.execute<Expert[]>(), countQuery.execute<[{count: number}]>()])
     const { count } = countResult[0];
     const totalPages = Math.ceil(count / limit)
+    const serializedExperts =  await Promise.all(experts.map(async (expert) => {
+      const mappedExpert = this.map(expert)
+      // NOTE(samuel) - mikro-orm doesn't parse serialized json as we don't use json sql columns in db
+      // At least not for dev environment
+      const serializedExpert = await serializeExpert(mappedExpert)
+      // Note(samuel) - this is to eliminate collections that aren't initialized
+      return serializedExpert
+    }))
+
     return {
-      experts: await Promise.all(experts.map(async (expert) => {
-        const mappedExpert = this.map(expert)
-        // NOTE(samuel) - mikro-orm doesn't parse serialized json as we don't use json sql columns in db
-        // At least not for dev environment
-        const serializedExpert = await serializeExpert(mappedExpert)
-        // Note(samuel) - this is to eliminate collections that aren't initialized
-        return wrap(serializedExpert).toObject()
-      })),
+      experts: serializedExperts,
       meta: {
         current_page: page,
         next_page: page < totalPages ? page + 1 : null,
@@ -88,6 +90,8 @@ export class ExpertRepository extends EntityRepository<Expert> {
     const yearFragment = 'YEAR(`e`.created_at)'
     return qb.select(yearFragment, true).orderBy({
       [yearFragment]: -1
-    }).execute<{year: number}[]>().then((experts) => experts.map((expert) => expert.year));
+    }).execute<{[yearFragment]: number}[]>().then((experts) => {
+      return experts.map((expert) => expert[yearFragment])
+    })
   }
 }
