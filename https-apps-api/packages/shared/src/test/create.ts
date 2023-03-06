@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { AppSeries, entities, User, user } from '../domain'
+import { AppSeries, entities, Expert, User, user } from '../domain'
 import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
@@ -549,6 +549,23 @@ const comparisonHelper = {
   },
 }
 
+const expertHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Comment>>,
+  ): Expert => {
+    const defaults = generate.expert.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const expert = wrap(new entities.Expert(references.user)).assign(input)
+    em.persist(expert)
+    return expert
+  },
+}
+
 const workflowHelper = {
   create: (
     em: EntityManager,
@@ -576,5 +593,6 @@ export {
   challengeResourceHelper,
   comparisonHelper,
   dbClusterHelper,
+  expertHelper,
   workflowHelper,
 }

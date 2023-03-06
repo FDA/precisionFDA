@@ -35,7 +35,7 @@ import {
 import { PageContainerMargin } from '../../components/Page/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 
-export const ChallengeListItem = styled.div`
+export const ExpertListItem = styled.div`
   display: flex;
   gap: 32px;
 `
@@ -99,7 +99,7 @@ export const ExpertMeta = styled.div`
 const ExpertsList = () => {
   usePageMeta({ title: 'Experts - precisionFDA' })
   const user = useAuthUser()
-  const userCanCreateChallenge = user?.can_create_challenges
+  const userCanCreateExpert = user?.can_administer_site
   const location = useLocation()
   const { year }: any = queryString.parse(location.search)
 
@@ -137,7 +137,7 @@ const ExpertsList = () => {
                   <div>There are no experts.</div>
                 )}
                 {data?.experts?.map(n => (
-                  <ChallengeListItem key={n.id}>
+                  <ExpertListItem key={n.id}>
                     <ItemImage>
                       <img width="100%" src={n.image} alt="sf" />
                     </ItemImage>
@@ -196,7 +196,7 @@ const ExpertsList = () => {
                         )}
                       </ExpertButtonRowWrap>
                     </ItemBody>
-                  </ChallengeListItem>
+                  </ExpertListItem>
                 ))}
                 <Pagination
                   showPerPage={false}
@@ -219,7 +219,7 @@ const ExpertsList = () => {
             </PageMainBody>
           )}
           <RightSide>
-            {userCanCreateChallenge && (
+            {userCanCreateExpert && (
               <RightSideItem>
                 <ButtonRow>
                   <ButtonSolidBlue
@@ -235,7 +235,7 @@ const ExpertsList = () => {
             <RightSideItem>
               <SectionTitle>Previous expert blogs</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!year} data-turbolinks="false">
+                <ItemButton as={Link} to="/experts" selected={!year} data-turbolinks="false">
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
@@ -244,7 +244,7 @@ const ExpertsList = () => {
                     .map((y, i) => (
                       <ItemButton
                         as={Link}
-                        to={`/challenges?year=${y}`}
+                        to={`/experts?year=${y}`}
                         data-turbolinks="false"
                         key={i}
                         selected={y === year}

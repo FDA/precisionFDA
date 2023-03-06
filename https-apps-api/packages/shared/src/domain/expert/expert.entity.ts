@@ -52,6 +52,10 @@ export class Expert extends BaseEntity {
     this.user = Reference.create(user)
   }
 
+  getYear(): number {
+    return this.createdAt?.getFullYear()
+  }
+
   async getAnsweredQuestionsCount() {
     return (await this.questions.matching({ where: {
       state: ExpertQuestionState.ANSWERED,
