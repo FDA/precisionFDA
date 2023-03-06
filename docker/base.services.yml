@@ -5,7 +5,6 @@ services:
       dockerfile: docker/images/isolation.Dockerfile
       args:
         - RUBY_IMAGE_TAG=2.7.5
-        - COFFEE_MAJOR_NODE_VERSION=19
     environment:
       - BUNDLER_VERSION=2.3.7
       - RAILS_LOG_TO_STDOUT=1
