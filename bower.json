@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "SparkMD5": "~1.0.0",
-    "bootstrap-sass": "~3.3.6",
+    "bootstrap-sass": "~3.3.7",
     "d3": "~3.5.10",
     "fontawesome": "~4.5.0",
     "human-format": "~0.5.0",
