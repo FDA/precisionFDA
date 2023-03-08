@@ -1,11 +1,8 @@
 # The client for communicating with nodejs-api service.
+# Token and user information is passed using RequestContext
 class HttpsAppsClient # rubocop:disable Metrics/ClassLength
-  # @param token [String] User access token.
-  # @param user [User] A user.
-  def initialize(token, user)
-    @token = token
-    @user = user
-  end
+  # initializes the instance
+  def initialize; end
 
   # User checkup
   # To be run whenever user logs in to make sure sync tasks are
@@ -454,10 +451,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   def auth_query
+    unless RequestContext.instance
+      Rails.logger.info("RequestContext.instance is not present, auth query part will be empty")
+      return {}
+    end
+
     {
-      id: @user&.id,
-      dxuser: @user&.dxuser,
-      accessToken: @token,
+      id: RequestContext.instance.user_id,
+      dxuser: RequestContext.instance.username,
+      accessToken: RequestContext.instance.token,
     }.compact_blank
   end
 
