@@ -87,9 +87,11 @@ module SpaceService
 
       admin_membership = space.space_memberships.find_by(user: host_lead)
 
-      site_admins.each do |site_admin|
-        membership = space.space_memberships.active.where(user_id: site_admin.id).first
-        SpaceEventService.call(space.id, admin_membership.user_id, admin_membership, membership, :membership_added)
+      fork do
+        site_admins.each do |site_admin|
+          membership = space.space_memberships.active.where(user_id: site_admin.id).first
+          SpaceEventService.call(space.id, admin_membership.user_id, admin_membership, membership, :membership_added)
+        end
       end
     end
 

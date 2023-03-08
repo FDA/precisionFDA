@@ -26,6 +26,7 @@ class ApplicationController < ActionController::Base
 
   # Use time zone of current user
   around_action :user_time_zone, if: -> { !@context.guest? && current_user }
+  around_action :request_context
 
   helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder, :current_user
 
@@ -34,6 +35,18 @@ class ApplicationController < ActionController::Base
   add_flash_types :success, :error
 
   private
+
+  def request_context
+    # even documentation recommends this https://guides.rubyonrails.org/action_controller_overview.html
+    # rubocop:disable Style/RedundantBegin
+    begin
+      RequestContext.begin_request(session[:user_id], session[:username], session[:token])
+      yield
+    ensure
+      RequestContext.end_request
+    end
+    # rubocop:enable Style/RedundantBegin
+  end
 
   # Returns hash of params.
   # @return [Hash] Params.
