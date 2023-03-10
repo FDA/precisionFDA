@@ -1,7 +1,7 @@
 user www-data;
 worker_processes auto;
 pid /var/run/nginx.pid;
-error_log  <%= node[:nginx][:log_dir] %>/nginx_error.log debug;
+error_log  <%= node[:nginx][:log_dir] %>/nginx_error.log warn;
 load_module modules/ngx_http_modsecurity_module.so;
 
 events {
