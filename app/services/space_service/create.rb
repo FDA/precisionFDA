@@ -70,10 +70,10 @@ module SpaceService
         # rubocop:disable Layout/LineLength
         Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
                           " with admin membership #{admin_membership.id}")
-        SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
+        new_membership = SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
+        NotificationsMailer.space_activated_email(space, new_membership).deliver_later!
         # rubocop:enable Layout/LineLength
       end
-      NotificationsMailer.space_activated_email(space, admin_membership).deliver_later!
     end
 
     # Sends invitation emails to administrator space
