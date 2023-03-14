@@ -82,6 +82,10 @@ export const handlers = [
     ctx.status(200),
     ctx.json({ 'apps':'2','assets':'0','dbclusters':'0','jobs':1,'files':'0','workflows':'2' }),
   )),
+  rest.get('/api/auth_key', (re, res, ctx) => res(
+    ctx.status(200),
+    ctx.json({ 'Key':'L0ZPKkhUeWxwT09rRlpoVitJMHJESW5Qa1hxLzR4NmUvUG1NSEw3Tkp2S2owT2paYzN4Szd5Q3hMeWdTTDhReUwxSGRHYjNqdWN6amNUalkwNE1XQi84SEVmdzE5MHRQcUdncTFsVkRQalk5b3BXM2poTUVTSVFrOEpEMXhmNk1sTFBCbXlpaUVRUWx1aGZ3Y1BPaUVxZ0REOTFqZEhMRFcyZ04zclM5NVduUzRqMTJaT2pVV1BrOG9BWENkbHpMLS10dWNPb1M0cAI2Vzg4ZDNSc3lrTlRRPT0=--369b49d04cb7322c879bda6fcbecdcf5546d3617' }),
+  )),
   rest.get('/api/user', (req, res, ctx) => {
     const isAuthenticated = true
     if (!isAuthenticated) {

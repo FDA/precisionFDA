@@ -44,6 +44,7 @@ export interface ModalNextProps {
   headerText?: string
   blur?: boolean
   disableClose?: boolean
+  id: string
 }
 const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
   const {
