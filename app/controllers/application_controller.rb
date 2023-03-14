@@ -40,7 +40,18 @@ class ApplicationController < ActionController::Base
     # even documentation recommends this https://guides.rubyonrails.org/action_controller_overview.html
     # rubocop:disable Style/RedundantBegin
     begin
-      RequestContext.begin_request(session[:user_id], session[:username], session[:token])
+      fields = decrypt_auth_header
+      if fields
+        user_id = fields[0]
+        username = fields[1]
+        token = fields[2]
+      else
+        user_id = session[:user_id]
+        username = session[:username]
+        token = session[:token]
+      end
+
+      RequestContext.begin_request(user_id, username, token)
       yield
     ensure
       RequestContext.end_request
@@ -165,8 +176,14 @@ class ApplicationController < ActionController::Base
 
   # Tries to authorize user from Authentication header and to set application context.
   def process_authorization_header
-    auth = request.headers["Authorization"]
+    fields = decrypt_auth_header
+    init_context(*fields) if fields
+  end
 
+  # Decrypts Auth Key header if exist
+  # Returns array of values in this order: [user_id username token expiration org_id]
+  def decrypt_auth_header
+    auth = request.headers["Authorization"]
     if auth.is_a?(String) && auth =~ /^Key (.+)$/
       key = $1
       begin
@@ -175,13 +192,12 @@ class ApplicationController < ActionController::Base
           fields = %w(user_id username token expiration org_id).map { |f| decrypted["context"][f] }
           # Flag indicating, that user is calling from CLI
           fields.push(true)
-          init_context(*fields)
         end
       rescue
       end
     end
+    fields
   end
-
   # Initializes context and IOC container.
   # @param user_id [Integer] User's ID.
   # @param username [String] User's name.
