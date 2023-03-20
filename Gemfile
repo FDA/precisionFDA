@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby "2.7.5"
 
-gem "rails", "= 6.1.7.1"
+gem "rails", "= 6.1.7.3"
 
 gem "rails-html-sanitizer", "~> 1.4.4"
 
