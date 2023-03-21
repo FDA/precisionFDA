@@ -11,7 +11,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../../../utils/formatting'
+import { itemsCountString, pluralize } from '../../../../utils/formatting'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 
@@ -85,14 +85,14 @@ export const useDeleteFileModal = ({
         toast.error(`${error?.type}: ${error?.message}`)
         return
       }
-      toast.error(`Error: Deleting ${numberOfFilesToDelete} files or folders.`)
+      toast.error(`Error while Deleting ${numberOfFilesToDelete} ${pluralize('file', numberOfFilesToDelete ?? 1)} or ${pluralize('folder', numberOfFilesToDelete ?? 1)}.`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])
       // TODO counters are only for My Home, spaces have counters in request for space
       queryClient.invalidateQueries(['counters'])
       setShowModal(false)
-      toast.success(`Success: Deleted ${numberOfFilesToDelete} files or folders.`)
+      toast.success(`${numberOfFilesToDelete} ${pluralize('file', numberOfFilesToDelete ?? 1)} or ${pluralize('folder', numberOfFilesToDelete ?? 1)} deleted.`)
       onSuccess()
     },
   })
