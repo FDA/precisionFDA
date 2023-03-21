@@ -191,12 +191,14 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
 
   Object.keys(vals.inputs).forEach(key => {
     const value = vals.inputs[key]
-    const input: RunWorkflowInput = {
-      input_name: key.replace('#', '.'),
-      input_value: (typeof value === 'object') ? (value as ListedFile).uid: value,
-      class: classes.get(key) ?? '',
+    if (value) {
+      const input: RunWorkflowInput = {
+        input_name: key.replace('#', '.'),
+        input_value: (typeof value === 'object') ? (value as ListedFile).uid : value,
+        class: classes.get(key) ?? '',
+      }
+      inputs.push(input)
     }
-    inputs.push(input)
   })
 
   return {
