@@ -177,7 +177,11 @@ class ApplicationController < ActionController::Base
   # Tries to authorize user from Authentication header and to set application context.
   def process_authorization_header
     fields = decrypt_auth_header
-    init_context(*fields) if fields
+    if fields
+      # NOT USED AT THIS MOMENT AS NO BREAKING CHANGES WERE INTRODUCED.
+      # check_minimum_cli_version
+      init_context(*fields)
+    end
   end
 
   # Decrypts Auth Key header if exist
@@ -197,6 +201,14 @@ class ApplicationController < ActionController::Base
       end
     end
     fields
+  end
+
+  def check_minimum_cli_version
+    v_start =request.user_agent.index("/") + 1
+    v_end = request.user_agent.index("(") - 1
+    cli_version = Gem::Version.new(request.user_agent[v_start..v_end])
+    min_cli_version = Gem::Version.new("2.0")
+    raise ApiError, "CLI v#{cli_version.version} is deprecated. Please use v#{min_cli_version.version} or newer." unless cli_version >= min_cli_version
   end
   # Initializes context and IOC container.
   # @param user_id [Integer] User's ID.

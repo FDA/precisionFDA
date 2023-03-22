@@ -51,4 +51,24 @@ const uidListSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
-export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput, nodeQueryFilter }
+const CLINodeSearchSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    arg: { type: 'string' },
+    spaceId: { type: ['number' , 'null']},
+    folderId: { type: ['number' , 'null']},
+    type: {type: 'string' }
+
+  },
+  required: ['arg', 'type'],
+  additionalProperties: false,
+}
+
+type CLINodeSearchInput = {
+  arg: string,
+  type: string,
+  spaceId?: number,
+  folderId?: number
+}
+
+export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput, nodeQueryFilter, CLINodeSearchSchema, CLINodeSearchInput }
