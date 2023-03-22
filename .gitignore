@@ -55,6 +55,7 @@ yarn-error.log
 
 # Ignore IDE files
 .idea/
+*.iml
 
 # Ignore application configuration
 /config/application.yml

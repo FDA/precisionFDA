@@ -7,6 +7,7 @@ class CliSpaceSerializer < ApplicationSerializer
     :type,
     :role,
     :side,
+    :protected,
   )
 
   attribute :space_type, key: :type

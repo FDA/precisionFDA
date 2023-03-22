@@ -296,11 +296,11 @@ const findUnclosedFilesOrAssets = async (
 /**
  * Method recursively collects all children of given node if it's a folder.
  */
-const collectChildren = async (parentFolder: Node, wholeTree: Node[], em: SqlEntityManager) => {
+const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlEntityManager) => {
   await parentFolder.children.init()
   for (const childrenNode of parentFolder.children) {
     if (childrenNode.stiType === FILE_STI_TYPE.FOLDER) {
-      await collectChildren(childrenNode, wholeTree, em)
+      await collectChildren(childrenNode as Folder, wholeTree, em)
     } else {
       wholeTree.push(childrenNode)
     }
@@ -334,7 +334,7 @@ const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter)
   const wholeTree: Node[] = []
   for (const node of nodes) {
     if (node.stiType === FILE_STI_TYPE.FOLDER) {
-      await collectChildren(node, wholeTree, em)
+      await collectChildren(node as Folder, wholeTree, em)
     } else {
       wholeTree.push(node)
     }

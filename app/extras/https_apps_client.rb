@@ -151,6 +151,27 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def cli_node_search(arg, type, space_id, folder_id)
+    request(
+      "/cli/nodes",
+      {
+        arg: arg,
+        spaceId: space_id,
+        folderId: folder_id,
+        type: type,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def cli_latest_version
+    request(
+      "/cli/version/latest",
+      {},
+      Net::HTTP::Get::METHOD,
+      )
+  end
+
   # Rename a folder.
   # @param folder_id [Integer] Folder ID.
   # @param new_name [String] New folder name.

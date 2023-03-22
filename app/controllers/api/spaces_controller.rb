@@ -200,7 +200,7 @@ module Api
       raise ApiError, e.message
     end
 
-    # used by CLI to list spaces available to user without any excess data
+    # used by CLI by list-spaces command - listing available to user without any excess data
     # allows to use flags like locked or unactivated to list those spaces.
     def cli
       spaces = SpaceService::SpacesFilter.call_for_cli(@context.user, params)

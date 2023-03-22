@@ -332,9 +332,11 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
-          get :cli # for CLI usage TODO: bring up better name :)
+          get :cli
 
           post :copy
+          post :bulk_download
+          post :cli_node_search
           post :download_list
           post :create_folder
           post :remove
@@ -453,6 +455,7 @@ Rails.application.routes.draw do
       post "set_tags"
       post "assign_app"
       get "list_licenses"
+      get "cli_latest_version"
       post "list_licenses_for_files"
     end
     # end API

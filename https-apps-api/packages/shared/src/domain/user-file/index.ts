@@ -14,6 +14,8 @@ export * as helper from './user-file.helper'
 
 export { FileCloseOperation } from './ops/file-close'
 
+export { CLINodeSearchOperation } from './ops/cli-node-search'
+
 export { FileUpdateOperation } from './ops/file-update'
 
 export { FolderRenameOperation } from './ops/folder-rename'
