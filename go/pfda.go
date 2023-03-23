@@ -145,8 +145,8 @@ var invokeUploadAsset = func(client precisionfda.IPFDAClient, assetFolderPath *s
 }
 
 
-var invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, recursive bool, outputFilePath *string, overwriteFile *string) error {
-	return client.Download(*args, *folderID, *spaceID, recursive, *outputFilePath, *overwriteFile)
+var invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, public bool, recursive bool, outputFilePath *string, overwriteFile *string) error {
+	return client.Download(*args, *folderID, *spaceID, public, recursive, *outputFilePath, *overwriteFile)
 }
 
 var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType *string) error {
@@ -308,7 +308,9 @@ func mainInternal() int {
 		}
 	}
 
+	// PFDA-4194 - removed -force flags, but kept the logic for now
 	force := *flagForce || *flagForceShort
+	force = false // forcing false value
 	recursive := *flagRecursive || *flagRecursiveShort
 	parents := *flagParents || *flagParentsShort
 	help := *flagHelp || *flagHelpShort
@@ -432,7 +434,7 @@ func mainInternal() int {
 			args = []string{*fileID}
 		}
 
-		err := invokeDownload(pfdaclient, &args, folderID, spaceID, recursive, outputFilePath, flagOverwriteFile)
+		err := invokeDownload(pfdaclient, &args, folderID, spaceID, *flagPublic, recursive, outputFilePath, flagOverwriteFile)
 		if err != nil {
 			helpers.PrintError(err)
 			return 1
@@ -565,7 +567,7 @@ func mainInternal() int {
 
 	case "head":
 		if help {
-			return helpers.PrintRmHelp()
+			return helpers.PrintHeadHelp()
 		}
 		err := invokeHead(pfdaclient, &args[0], *flagLines)
 		if err != nil {
@@ -575,7 +577,7 @@ func mainInternal() int {
 
 	case "cat":
 		if help {
-			return helpers.PrintRmHelp()
+			return helpers.PrintCatHelp()
 		}
 		err := invokeCat(pfdaclient, &args[0])
 		if err != nil {

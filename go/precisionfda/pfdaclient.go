@@ -54,7 +54,7 @@ type IPFDAClient interface {
 	UploadFolder(folderPath string, folderID string, spaceID string) error
 	UploadMultipleFiles(paths []string, folderID string, spaceID string) error
 	DownloadFile(arg string, outputFilePath string, overwrite string) error
-	Download(args []string, folderID string, spaceID string, recursive bool, outputFilePath string, overwrite string) error
+	Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error
 	DescribeEntity(entityID string, entityType string) error
 	ListSpaces(flags map[string]bool) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
@@ -605,7 +605,7 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 	return nil
 }
 
-func (c *PFDAClient) Download(args []string, folderID string, spaceID string, recursive bool, outputFilePath string, overwrite string) error {
+func (c *PFDAClient) Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error {
 
 	fileIDs := make([]string, 0)
 	fileNames := make([]string, 0)
@@ -640,6 +640,10 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, re
 			params.Add("filters[filter]", helpers.TransformToSQLWildcards(fileName))
 		}
 
+		if public {
+			params.Add("public_scope", "true")
+		}
+
 		_, body, err := c.makeRequestFail("GET", apiURL+params.Encode(), nil)
 		if err != nil {
 			return err
@@ -660,7 +664,7 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, re
 				if err := os.MkdirAll(filepath.Join(outputFilePath, child.Name), os.ModePerm); err != nil {
 					log.Fatal(err)
 				}
-				c.Download([]string{fileName}, strconv.Itoa(child.Id), spaceID, recursive, filepath.Join(outputFilePath, child.Name), overwrite)
+				c.Download([]string{fileName}, strconv.Itoa(child.Id), spaceID, public, recursive, filepath.Join(outputFilePath, child.Name), overwrite)
 			}
 		}
 
@@ -847,7 +851,8 @@ func (c *PFDAClient) Rmdir(args []string, force bool) error {
 		if response[0].Children == 0 || force {
 			c.RemoveDir(arg)
 		} else {
-			fmt.Println(">> Unable to remove non-empty folder. Use flag -force to remove non-empty folders")
+			//fmt.Println(">> Unable to remove non-empty folder. Use flag -force to remove non-empty folders")
+			fmt.Println(">> Unable to remove non-empty folder.")
 		}
 	}
 
