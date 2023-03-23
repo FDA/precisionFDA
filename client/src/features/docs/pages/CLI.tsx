@@ -163,6 +163,7 @@ export const CLI = () => {
           To download files from My Home or a Space, you simply need the unique id
           for the file which is of the form <code>file-ABCDEF1234567890-1</code> or its name.
           In case you need to download whole content of a folder, use -folder-id flag with integer id.
+          To download files from public folders, use -public flag together with your command.
           Filename download supports wildcards, providing a handy way to download multiple files with just one command.
         </p>
         <p>
@@ -208,6 +209,11 @@ export const CLI = () => {
           Download top-level folder content to the current directory using its original name.
           <br />
           <code>./pfda download -folder-id FOLDER_ID -key KEY</code>
+        </p>
+        <p>
+          Download top-level public folder content to the current directory using its original name.
+          <br />
+          <code>./pfda download -folder-id FOLDER_ID -public -key KEY</code>
         </p>
         <p>
           Download whole folder content to the specified output directory
@@ -299,8 +305,8 @@ export const CLI = () => {
         <p>
           To remove folders from My Home or a Space, you simply need the unique id
           for the folder which is a positive integer.
-          By default, only empty folders are allowed to be removed. You will get an error message otherwise.
-          You can force deletion of non-empty directory with -force flag.
+          Only empty folders are allowed to be removed - an error is raised otherwise.
+          {/*You can force deletion of non-empty directory with -force flag.*/}
         </p>
         <strong>Please be cautious. This is a permanent destructive operation and cannot be undone.</strong>
         <p>
@@ -309,11 +315,11 @@ export const CLI = () => {
           <code>./pfda rmdir FOLDER_ID -key KEY</code>
         </p>
 
-        <p>
-          Force remove non-empty directory
-          <br />
-          <code>./pfda rmdir FOLDER_ID -force -key KEY</code>
-        </p>
+        {/*<p>*/}
+        {/*  Force remove non-empty directory*/}
+        {/*  <br />*/}
+        {/*  <code>./pfda rmdir FOLDER_ID -force -key KEY</code>*/}
+        {/*</p>*/}
 
         <p>
           Remove multiple folders
@@ -364,7 +370,8 @@ export const CLI = () => {
           <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
           <strong>NOTE:</strong>Removing files using filename also supports <strong>wildcards</strong>. <code>?</code> - 1 character, <code>*</code> - 0 or many characters.<br />
           If you wish to use wildcard remove, put the argument in simple quotes to prevent shell character expansion.
-          You will be prompted to confirm the action. You can force the prompt using -force flag.
+          You will be prompted to confirm the action.
+          {/*You can force the prompt using -force flag.*/}
         </DocsTip>
 
         <p>
