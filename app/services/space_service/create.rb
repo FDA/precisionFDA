@@ -48,7 +48,6 @@ module SpaceService
         create_site_admin_invitations_to_space(space, site_admins) if space.administrator?
       end
 
-      send_invitation_emails_to_site_admins(space, site_admins) if space.administrator?
       send_emails(space) unless space.private_type?
 
       space
