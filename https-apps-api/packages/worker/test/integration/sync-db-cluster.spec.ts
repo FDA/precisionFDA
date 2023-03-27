@@ -6,15 +6,15 @@ import type { SyncDbClusterJob } from '@pfda/https-apps-shared/src/queue/task.in
 import { expect } from 'chai'
 import { create, generate, db, mockResponses } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { STATUS, STATUSES } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { errorsFactory } from '../utils/errors-factory'
 
 const createSyncDbClusterTestTask = async (
   payload: SyncDbClusterJob['payload'],
   user: SyncDbClusterJob['user'],
 ) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS,
     payload,

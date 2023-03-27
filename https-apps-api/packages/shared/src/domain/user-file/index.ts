@@ -20,7 +20,15 @@ export { FileUpdateOperation } from './ops/file-update'
 
 export { FolderRenameOperation } from './ops/folder-rename'
 
-export { FolderDeleteOperation } from './ops/folder-delete'
+export { FolderRemoveRecursiveOperation } from './ops/folder-remove-recursive'
+
+export { StartRemoveNodesJob } from './ops/start-remove-nodes-job'
+
+export { FileRemoveOperation } from './ops/file-remove'
+
+export { FolderRemoveOperation } from './ops/folder-remove'
+
+export { NodesRemoveOperation } from './ops/nodes-remove'
 
 export { SyncFilesStateOperation } from './ops/sync-files-state'
 

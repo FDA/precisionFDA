@@ -277,7 +277,7 @@ module Api
 
       return if @items.all? { |item| item.accessible_by?(@context) }
 
-      raise ApiError, "Unaccessable items are detected"
+      raise ApiError, "Unaccessible items are detected"
     end
 
     def api

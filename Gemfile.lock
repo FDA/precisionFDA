@@ -603,6 +603,7 @@ DEPENDENCIES
   pry-remote
   pry-stack_explorer
   puma (~> 5.6, >= 5.6.4)
+  rack (>= 2.2.6.3)
   rack-utf8_sanitizer (~> 1.7)
   rails (= 6.1.7.3)
   rails-controller-testing (>= 1.0.5)

@@ -271,7 +271,7 @@ describe('syncFilesInFolder operation', () => {
     const files = await em.find(UserFile, {}, { filters: ['userfile'] })
     expect(files).to.be.an('array').with.lengthOf(1)
     expect(files[0]).to.have.property('name', 'new-name')
-    expect(files[0]).to.have.property('parentFolderId', subfolder.id)
+    expect(files[0].parentFolder).to.have.property('id', subfolder.id)
   })
 
   it('deletes existing file and creates another', async () => {

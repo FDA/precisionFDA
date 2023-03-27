@@ -31,7 +31,7 @@ router.delete(
   '/:id',
   makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }),
   async ctx => {
-    const removedFoldersCnt = await new userFile.FolderDeleteOperation(pickOpsCtx(ctx)).execute({
+    const removedFoldersCnt = await new userFile.FolderRemoveRecursiveOperation(pickOpsCtx(ctx)).execute({
       id: ctx.params.id as any,
     })
     ctx.status = 200

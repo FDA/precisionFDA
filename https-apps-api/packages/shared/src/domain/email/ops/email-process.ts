@@ -11,7 +11,7 @@ export class EmailProcessOperation extends BaseOperation<UserOpsCtx, EmailProces
     this.input = input
     const emailTemplate = await this.getEmailTemplate()
     const receivers = await emailTemplate.determineReceivers()
-    const activeReceivers = receivers.filter(user => !user.email.includes(DNANEXUS_INVALID_EMAIL))
+    const activeReceivers = receivers.filter(user => !user.email?.includes(DNANEXUS_INVALID_EMAIL))
     const emailObjects = await Promise.all(
       activeReceivers.map(async receiver => {
         const template = await emailTemplate.template(receiver)

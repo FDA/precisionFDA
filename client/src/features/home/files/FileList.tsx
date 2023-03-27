@@ -1,6 +1,8 @@
+import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
+import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
 import {
   BreadcrumbDivider,
@@ -13,6 +15,7 @@ import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
@@ -39,6 +42,7 @@ type ListType = { files: IFile[]; meta: IMeta }
 export const FileList = ({ scope, space, showFolderActions = false }: { scope?: ResourceScope, space?: ISpace, showFolderActions?: boolean }) => {
   const { path } = useRouteMatch()
   const location = useLocation()
+  const queryCache = useQueryClient()
   
   const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>(
     'folder_id',
@@ -75,6 +79,20 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const onRowClick = (id: string) => {
     history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
   }
+
+  const { lastJsonMessage } = useWebSocket(getNodeWsUrl(), 
+  { share: true, reconnectInterval: DEFAULT_RECONNECT_INTERVAL, 
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS, shouldReconnect: () => true })
+
+  useEffect(() => {
+    if (lastJsonMessage != null) {
+      const notification = JSON.parse(JSON.stringify(lastJsonMessage))
+      if (notification.action === 'NODES_REMOVED') {
+        queryCache.invalidateQueries(['files'])
+        queryCache.invalidateQueries(['counters'])
+      }
+    }
+  }, [lastJsonMessage])
 
   const { status, data, error } = query
 

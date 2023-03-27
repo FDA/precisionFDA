@@ -54,7 +54,7 @@ import {
   SpaceTypeHeader, TopSpaceHeader,
 } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
-
+import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 
 const Spaces2 = ({
   space,
@@ -93,6 +93,8 @@ const Spaces2 = ({
   if (space.state === 'unactivated') {
     return <Activation space={space} />
   }
+
+  useToastWSHandler(user)
 
   return (
     <>

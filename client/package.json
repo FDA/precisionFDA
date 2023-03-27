@@ -61,6 +61,7 @@
     "react-tabs": "^3.2.0",
     "react-toastify": "^8.1.0",
     "react-tooltip": "^4.2.13",
+    "react-use-websocket": "4.2.0",
     "react-xarrows": "^1.5.2",
     "regenerator-runtime": "^0.13.3",
     "rehype-highlight": "^6.0.0",

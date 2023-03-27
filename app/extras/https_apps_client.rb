@@ -56,6 +56,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Start nodes removal job
+  # @param ids [Array of Integers] id's of nodes to be removed
+  def remove_nodes(ids)
+    request(
+      "/nodes/remove",
+      { ids: ids, async: true },
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
   # Sync files for a running HTTPS app job.
   # @param job_dxid [String] Job dxid to terminate.
   # @param opts [Hash] Request body options.
@@ -135,6 +145,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       {
         ids: ids,
       },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Sends notification
+  # @param notification object
+  def send_notification(notification)
+    request(
+      "/notifications",
+      notification,
       Net::HTTP::Post::METHOD,
     )
   end
