@@ -104,6 +104,8 @@ gem "dry-configurable"
 
 gem "nokogiri", ">=1.13.10"
 
+gem "rack", ">=2.2.6.3"
+
 gem "rubyzip", "=1.3.0"
 
 gem "sidekiq", "~> 6.4"

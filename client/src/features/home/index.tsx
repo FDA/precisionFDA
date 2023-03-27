@@ -34,6 +34,7 @@ import { WorkflowShow } from './workflows/WorkflowShow'
 import { useAuthUser } from '../auth/useAuthUser'
 import { UserLayout } from '../../views/layouts/UserLayout'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { useToastWSHandler } from '../../hooks/useToastWSHandler'
 
 
 interface CounterRequest {
@@ -64,7 +65,8 @@ const Home2 = () => {
   const [scopeQuery, setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
   const [scope, setScope] = useState<ResourceScope>(scopeQuery || 'me')
   const { data: counterData } = useQuery(['counters', scope], () => counterRequest(scope))
-  const [activeResource] = useActiveResourceFromUrl('myhome')
+  const [activeResource] = useActiveResourceFromUrl('myhome')  
+  useToastWSHandler(user)
 
   const handleScopeClick = async (newScope: ResourceScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page

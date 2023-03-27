@@ -11,31 +11,35 @@ class EmailClient {
   transporter: nodemailer.Transporter
 
   constructor() {
-    const transportConfig : SMTPTransport.Options = {
-      host: config.emails.smtp.host,
-      port: parseInt(config.emails.smtp.port) || 0,
-      secure: true,
-      auth: {
-        user: config.emails.smtp.username,
-        pass: config.emails.smtp.password,
-      },
-    };
+    if (config.emails.smtp.isEnabled) {
+      const transportConfig: SMTPTransport.Options = {
+        host: config.emails.smtp.host,
+        port: parseInt(config.emails.smtp.port) || 0,
+        secure: true,
+        auth: {
+          user: config.emails.smtp.username,
+          pass: config.emails.smtp.password,
+        },
+      };
 
-    // Comment out the following to debug SMTP connection
-    // transportConfig.auth.pass = '[masked]'
-    // log.info({
-    //   transportConfig,
-    // }, 'Initializing SMTP transport')
+      // Comment out the following to debug SMTP connection
+      // transportConfig.auth.pass = '[masked]'
+      // log.info({
+      //   transportConfig,
+      // }, 'Initializing SMTP transport')
 
-    this.transporter = nodemailer.createTransport(transportConfig)
-    this.transporter.verify((error, success) => {
-      if (success) {
-        log.info({ success }, 'SMTP connection configuration is successful');
-      }
-      if (error) {
-        log.error({ error }, 'SMTP connection configuration failed');
-      }
-    });
+      this.transporter = nodemailer.createTransport(transportConfig)
+      this.transporter.verify((error, success) => {
+        if (success) {
+          log.info({success}, 'SMTP connection configuration is successful');
+        }
+        if (error) {
+          log.error({error}, 'SMTP connection configuration failed');
+        }
+      });
+    } else {
+      log.info('Email sending is disabled')
+    }
   }
 
   async sendEmail(input: SendEmailJob['payload']): Promise<void> {

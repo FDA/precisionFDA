@@ -1,12 +1,20 @@
 import { Folder, UserFile } from '../..'
 import { BaseOperation } from '../../../utils/base-operation'
 import { client, errors } from '../../..'
-import { childrenTraverse, getFolderPath } from '../user-file.helper'
+import {
+  childrenTraverse,
+  getFolderPath,
+  getNodePath,
+  validateProtectedSpaces
+} from '../user-file.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
 import { User } from '../../user/user.entity'
 
-export class FolderDeleteOperation extends BaseOperation<
+/**
+ * This operation removes also contents of the folder and is used by ruby backend.
+ */
+export class FolderRemoveRecursiveOperation extends BaseOperation<
 UserOpsCtx,
 IdInput,
 number
@@ -15,30 +23,29 @@ number
     const em = this.ctx.em
     const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
-    // Todo(samuel) - performance optimization - execute read operations before transaction start
-    await em.begin()
     try {
       const repo = em.getRepository(Folder)
       const userFileRepo = em.getRepository(UserFile)
-      const userRepo = em.getRepository(User)
       const existingFolder = await repo.findOneWithProject(input.id)
+
+      await em.begin()
       if (!existingFolder) {
         throw new errors.FolderNotFoundError()
       }
+
+      await validateProtectedSpaces(em, 'remove', this.ctx.user.id, existingFolder)
+
       // subfolders include "existingFolder"
       const foldersInProject = await repo.findForSynchronization({
         userId: this.ctx.user.id,
         projectDxid: existingFolder.project!,
       })
       const folderSubtree = await childrenTraverse(existingFolder, repo, [])
-      const folderPath = getFolderPath(foldersInProject, existingFolder)
+      const folderPath = await getNodePath(em, existingFolder)
+        // getFolderPath(foldersInProject, existingFolder)
       const filesToRemove = await userFileRepo.findFilesInFolders({
         folderIds: folderSubtree.map(f => f.id),
       })
-      const checkForLockedFiles = filesToRemove.filter(file => file.locked)
-      if (checkForLockedFiles.length) {
-        throw new errors.PermissionError(`Unable to remove, folder ${existingFolder.name} contains locked files`)
-      }
       const totalNodesCnt = folderSubtree.length + filesToRemove.length
       if (totalNodesCnt >= 10000) {
         this.ctx.log.warn(
@@ -46,7 +53,7 @@ number
           'Too many nodes to remove, removeFolder API call may not work',
         )
       }
-      await platformClient.removeFolderRec({
+      await platformClient.folderRemove({
         projectId: existingFolder.project!,
         folderPath,
       })
@@ -54,7 +61,12 @@ number
 
       const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
       for (const folder of folderSubtree) {
-        const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folder, folderPath, currentUser)
+        const folderEvent = await createFolderEvent(
+          EVENT_TYPES.FOLDER_DELETED,
+          folder,
+          folderPath,
+          currentUser
+        )
         em.persist(folderEvent)
         em.remove(folder)
       }

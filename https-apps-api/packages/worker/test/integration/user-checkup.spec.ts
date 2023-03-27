@@ -11,7 +11,7 @@ import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/moc
 import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 const createUserCheckupTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.USER_CHECKUP,
     user,

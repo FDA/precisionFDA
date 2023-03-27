@@ -6,6 +6,19 @@ enum PARENT_TYPE {
   SPACE = 'Space',
 }
 
+enum ENTITY_TYPE {
+  APP = 'App',
+  COMMENT = 'Comment',
+  COMPARISON = 'Comparison',
+  JOB = 'Job',
+  NODE = 'Node',
+  NOTE = 'Note',
+  SPACE = 'Space',
+  SPACE_MEMBERSHIP = 'SpaceMembership',
+  TASK = 'Task',
+  WORKFLOW = 'Workflow',
+}
+
 enum SPACE_EVENT_OBJECT_TYPE {
   SPACE = 0,
   MEMBERSHIP = 1,
@@ -54,4 +67,20 @@ enum SPACE_EVENT_ACTIVITY_TYPE {
   space_activated = 28,
 }
 
-export { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }
+enum EVENTS_MAPPING {
+  'app' = 'app_added',
+  'comparison' = 'comparison_added',
+  'file' = 'file_added',
+  'asset' = 'asset_added',
+  'job' = 'job_added',
+  'note' = 'note_added',
+  'workflow' = 'workflow_added',
+}
+
+export {
+  PARENT_TYPE,
+  ENTITY_TYPE,
+  SPACE_EVENT_ACTIVITY_TYPE,
+  SPACE_EVENT_OBJECT_TYPE,
+  EVENTS_MAPPING,
+}

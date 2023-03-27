@@ -53,6 +53,7 @@ module Api
 
       files = UserFile.
         real_files.
+        not_removing.
         editable_by(@context).
         accessible_by_private.
         where.not(parent_type: ["Comparison", nil]).
@@ -90,7 +91,7 @@ module Api
       folders = []
       unless params[:folders_only] == "true"
         # rubocop:disable Layout/LineLength
-        files = params[:public_scope] ? UserFile.real_files.accessible_by_public : UserFile.real_files.accessible_by_private.where(user: @context.user)
+        files = params[:public_scope] ? UserFile.real_files.not_removing.accessible_by_public : UserFile.real_files.not_removing.accessible_by_private.where(user: @context.user)
         # rubocop:enable Layout/LineLength
         files = files.where(parent_folder_id: @parent_folder_id).
           where.not(parent_type: ["Comparison", nil]).
@@ -164,6 +165,7 @@ module Api
       filter_tags = params.dig(:filters, :tags)
 
       files = UserFile.real_files.
+        not_removing.
         featured.accessible_by(@context).
         where(parent_folder_id: @parent_folder_id).
         includes(:user, :taggings).eager_load(user: :org).
@@ -172,6 +174,7 @@ module Api
 
       folders = Folder.
         featured.
+        not_removing.
         accessible_by(@context).
         where(parent_folder_id: @parent_folder_id).
         includes(:taggings).
@@ -191,6 +194,7 @@ module Api
 
       files =
         UserFile.real_files.
+          not_removing.
           accessible_by_public.
           includes(:taggings).eager_load(user: :org).
           search_by_tags(filter_tags)
@@ -215,6 +219,7 @@ module Api
       filter_tags = params.dig(:filters, :tags)
 
       files = UserFile.real_files.
+        not_removing.
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         accessible_by(@context).
         includes(:taggings).eager_load(user: :org).
@@ -225,6 +230,7 @@ module Api
 
       folders = Folder.
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
+        not_removing.
         accessible_by(@context).
         includes(:taggings).eager_load(user: :org).
         where(scoped_parent_folder_id: @parent_folder_id).
@@ -517,34 +523,11 @@ module Api
     end
 
     # POST /api/files/remove
-    # Remove file(s) & folder(s), being selected
+    # Remove file(s) & folder(s) including nested files and folders.
     # @param ids [Array of Integers] - ids of Nodes to be removed.
-    # @param scope [String] - 'public', 'private' or 'space-XX'.
     def remove
-      service = FolderService.new(@context)
-
-      if unsafe_params[:ids]
-        nodes = Node.editable_by(@context).where(id: unsafe_params[:ids]) # int ids (files and folders)
-      elsif unsafe_params[:uids]
-        nodes = Node.editable_by(@context).where(uid: unsafe_params[:uids])
-      else
-        nodes = []
-      end
-
-      verify_nodes_for_protection(nodes, "delete")
-      result = service.remove(nodes)
-
-      if result.success?
-        type = :success
-        text = "Node(s) successfully removed."
-      else
-        type = :error
-        text = "Error when Node(s) removing: #{result.value[:message]}."
-      end
-
-      path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
-
-      render json: { path: path, message: { type: type, text: text } }, adapter: :json
+      response = https_apps_client.remove_nodes(unsafe_params[:ids])
+      render json: response
     end
 
     # Overridden version: it accepts not only file-uids, but also folder id.
@@ -592,6 +575,7 @@ module Api
         folder_id = params[:folder_id]
         nodes = @space.nodes.files_and_folders.
           where(scoped_parent_folder_id: folder_id).
+          where(state: [nil, "closing", "closed", "open"]).
           includes(:taggings).eager_load(user: :org).
           search_by_tags(params.dig(:filters, :tags)).
           order(order_params).

@@ -17,7 +17,7 @@ import { EMAIL_TYPES } from 'shared/src/domain/email/email.config'
 const createCheckDbClusterTestTask = async (
   user: UserCtx,
 ) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
     undefined,

@@ -21,6 +21,7 @@ export {
   app,
   user,
   space,
+  notification,
   challenge,
   spaceMembership,
   userFile,
@@ -37,6 +38,8 @@ export * as utils from './utils'
 export { ajv } from './utils'
 
 export * as queue from './queue'
+
+export * as redis from './services/redis.service'
 
 export * as validation from './validation'
 

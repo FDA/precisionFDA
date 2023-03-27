@@ -35,6 +35,7 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   description?: string
 
   @Property()
+  //@ts-ignore IFileOrAsset introduced state as string
   state: FILE_STATE
 
   @Property()

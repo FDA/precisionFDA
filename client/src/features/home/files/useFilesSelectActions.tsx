@@ -396,7 +396,7 @@ export const useFilesSelectActions = ({
       isDisabled:
         selected.length === 0 ||
         selected.some((e) => !e.links.remove) ||
-        isActionDisabledBasedOnProtected(user?.id as number, space),
+        isActionDisabledBasedOnProtected(user?.id as number, space) || selected.every((e) => e.locked),
       shouldHide: isViewer,
       modal: deleteFileModal,
       showModal: isShownDeleteFileModal,
