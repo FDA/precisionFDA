@@ -340,6 +340,7 @@ Rails.application.routes.draw do
           post :download_list
           post :create_folder
           post :remove
+          post :cli_remove
           post :move
 
           put :feature, to: "files#invert_feature"

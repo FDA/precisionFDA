@@ -156,7 +156,6 @@ module Api
       fail e.message
     end
 
-
     # GET /api/files/featured
     # A fetch method for files, accessible by public and with user taggings.
     # @param created_at [String] Param for ordering.
@@ -302,6 +301,7 @@ module Api
                links: meta_links(@file),
              }
     end
+
     # rubocop:enable Metrics/MethodLength
 
     # Updates file name and description.
@@ -530,6 +530,18 @@ module Api
       render json: response
     end
 
+    def cli_remove
+      if unsafe_params[:uids]
+        node_ids = Node.editable_by(@context).where(uid: unsafe_params[:uids]).pluck(:id)
+        response = https_apps_client.cli_remove_nodes(node_ids)
+      else
+        response = https_apps_client.cli_remove_nodes(unsafe_params[:ids])
+      end
+      render json: { count: response }
+    rescue HttpsAppsClient::Error => e
+      raise ApiError, e.message
+    end
+
     # Overridden version: it accepts not only file-uids, but also folder id.
     # Result of this operation not only invert flag of folder(s),
     # but also all PUBLIC children items.
@@ -749,5 +761,6 @@ module Api
       end
     end
   end
+
   # rubocop:enable Metrics/ClassLength
 end
