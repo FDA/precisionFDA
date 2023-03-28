@@ -849,9 +849,9 @@ func (c *PFDAClient) Rmdir(args []string, force bool) error {
 		}
 
 		if response[0].Children == 0 || force {
-			c.RemoveDir(arg)
+			err := c.RemoveDir(arg)
+			c.HandleError(err)
 		} else {
-			//fmt.Println(">> Unable to remove non-empty folder. Use flag -force to remove non-empty folders")
 			fmt.Println(">> Unable to remove non-empty folder.")
 		}
 	}
@@ -861,7 +861,7 @@ func (c *PFDAClient) Rmdir(args []string, force bool) error {
 
 func (c *PFDAClient) Rm(args []string, folderID string, spaceID string, force bool) error {
 
-	c.ContinueOnError = len(args) > 1 || helpers.ContainsWildcard(args[0])
+	c.ContinueOnError = len(args) > 1
 
 	for _, arg := range args {
 

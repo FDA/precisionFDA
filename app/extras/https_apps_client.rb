@@ -66,6 +66,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Start nodes removal job in a synchronous way. Used exclusively by CLI
+  # @param ids [Array of Integers] id's of nodes to be removed
+  def cli_remove_nodes(ids)
+    request(
+      "/nodes/remove",
+      { ids: ids, async: false },
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
   # Sync files for a running HTTPS app job.
   # @param job_dxid [String] Job dxid to terminate.
   # @param opts [Hash] Request body options.
@@ -189,7 +199,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/cli/version/latest",
       {},
       Net::HTTP::Get::METHOD,
-      )
+    )
   end
 
   # Rename a folder.
@@ -421,6 +431,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       Net::HTTP::Patch::METHOD,
     )
   end
+
   # ┌─────────────────────────┐
   # │                         │
   # │   TODO: category name   │
@@ -483,6 +494,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   rescue Errno::ECONNREFUSED
     raise Error, "Can't connect to nodejs-api service"
   end
+
   # rubocop:enable Metrics/ParameterLists
 
   # Returns connection options.
