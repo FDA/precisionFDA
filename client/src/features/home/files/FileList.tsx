@@ -98,11 +98,11 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
 
   const onFolderClick = (folderId: string) => {
     resetSelected()
-    const search = new URLSearchParams({
+    const search = new URLSearchParams(cleanObject({
       folder_id: folderId,
       scope: scope as string,
       per_page: perPageParam.toString(),
-    }).toString()
+    })).toString()
     history.push({ search })
   }
 
