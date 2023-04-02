@@ -4,7 +4,6 @@ class AppEditorModel
     @saving = ko.observable(false)
     @loadingAssets = ko.observable(false)
     @errorMessage = ko.observable()
-
     @ubuntuReleases = ko.observableArray(ubuntuReleases)
     @dxid = app?.dxid
     @entityType = app?.entity_type
@@ -21,6 +20,7 @@ class AppEditorModel
     )
 
     @scope = ko.observable(app?.scope)
+    @forked_from = ko.observable(app?.uid)
     @title = ko.observable(app?.title)
     @release = ko.observable(app?.release)
     @revision = ko.observable(app?.revision)
@@ -193,6 +193,7 @@ class AppEditorModel
     @errorMessage(null)
     params =
       is_new: @isNewApp
+      forked_from: @forked_from.peek() ? null
       name: @name.peek()
       scope: @scope.peek() ? "private"
       title: @title.peek()

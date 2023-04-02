@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_08_135439) do
+ActiveRecord::Schema.define(version: 2023_03_22_132522) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -119,6 +119,7 @@ ActiveRecord::Schema.define(version: 2023_02_08_135439) do
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.boolean "deleted", default: false, null: false
+    t.string "forked_from"
     t.index ["app_series_id"], name: "index_apps_on_app_series_id"
     t.index ["deleted"], name: "index_apps_on_deleted"
     t.index ["dxid"], name: "index_apps_on_dxid"

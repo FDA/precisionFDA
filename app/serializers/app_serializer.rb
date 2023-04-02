@@ -15,6 +15,7 @@ class AppSerializer < ApplicationSerializer
     :location,
     :readme,
     :scope,
+    :forked_from,
     :revision,
     :app_series_id,
     :run_by_you,
@@ -107,6 +108,7 @@ class AppSerializer < ApplicationSerializer
       links[:track] = track_path(id: object.uid)
       # GET /apps/:id/fork - fork a single app
       links[:fork] = fork_app_path(object)
+      links[:forked_from] = "/home/apps/#{object.forked_from}" if object.forked_from
       # POST export a single app to a docker container
       links[:export] = export_app_path(object)
       # GET cwl_export a single app to a cwl file

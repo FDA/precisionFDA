@@ -268,7 +268,7 @@ class AppsController < ApplicationController
       redirect_to apps_path && return
     end
 
-    attrs = %i(dxid name title version revision readme spec internal release entity_type)
+    attrs = %i(dxid name title version revision readme spec internal release entity_type uid)
     js(
       app: @app.slice(*attrs),
       ubuntu_releases: UBUNTU_RELEASES,
