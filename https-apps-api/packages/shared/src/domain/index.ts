@@ -29,6 +29,7 @@ import { AdminGroup } from './admin-group/admin-group.entity'
 import { AdminMembership } from './admin-membership/admin-membership.entity'
 import { ChallengeResource } from './challenge/challenge-resource.entity'
 import { Comparison } from './comparison/comparison.entity'
+import { NewsItem } from './news-item/news-item.entity'
 import { ComparisonInput } from './comparison-input/comparison-input.entity'
 import { NotificationPreference } from './notification-preference/notification-preference.entity'
 import { Session } from './session'
@@ -58,6 +59,7 @@ const entities = {
   Job,
   License,
   LicensedItem,
+  NewsItem,
   Node,
   Organization,
   Space,
@@ -100,6 +102,8 @@ export * as org from './org'
 
 export * as email from './email'
 
+export * as newsItem from './news-item'
+
 export * as comment from './comment'
 
 export * as dbCluster from './db-cluster'
@@ -136,6 +140,7 @@ export {
   Job,
   License,
   LicensedItem,
+  NewsItem,
   Node,
   Organization,
   Space,

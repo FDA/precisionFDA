@@ -590,6 +590,23 @@ const expertHelper = {
   },
 }
 
+const newsHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.NewsItem>>,
+  ) => {
+    const defaults = generate.news.create()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const news = wrap(new entities.NewsItem(references.user)).assign(input)
+    em.persist(news)
+    return news
+  }
+}
+
 const workflowHelper = {
   create: (
     em: EntityManager,
@@ -618,5 +635,6 @@ export {
   comparisonHelper,
   dbClusterHelper,
   expertHelper,
+  newsHelper,
   workflowHelper,
 }

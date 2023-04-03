@@ -21,6 +21,7 @@ export {
   app,
   user,
   space,
+  newsItem,
   notification,
   challenge,
   spaceMembership,

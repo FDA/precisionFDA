@@ -3,6 +3,9 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "allowJs": true,

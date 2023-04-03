@@ -29,6 +29,7 @@ run-worker-dev-dist:
 
 # run app locally starting from worker API
 run-dev:
+	NODE_ENV=development \
 	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
 	NODE_PATH_KEY_CERT=../key.pem \
 	NODE_PATH_CERT=../cert.pem \

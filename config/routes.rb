@@ -9,11 +9,11 @@ Rails.application.routes.draw do
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   #   by wrapping everything into a scope.
   scope(format: false) do
+    get "/admin/news" => "main#news"
+    get "/admin/news/:id/edit" => "main#news"
+
     namespace(:admin) do
       root "dashboard#index"
-
-      resources :news_items, path: "news"
-      post "news/positions" => "news_items#positions"
 
       resources :activity_reports, only: [:index] do
         collection do
@@ -125,6 +125,7 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+
     get "db_stats" => "main#db_stats", constraints: AdminConstraint.new
     post "/spaces/:id/copy_to_cooperative",
          to: "main#copy_to_cooperative",
@@ -196,9 +197,15 @@ Rails.application.routes.draw do
         get :cdmh, on: :collection
       end
 
-      resources :news_items, path: "news", only: %i(index show) do
-        get :years, on: :collection
-      end
+      # News
+      get "news" => "news_items#index"
+      get "news/all" => "news_items#all"
+      post "news" => "news_items#create"
+      get "news/years" => "news_items#years"
+      post "news/positions" => "news_items#positions"
+      put "news/:id" => "news_items#edit"
+      get "news/:id" => "news_items#show"
+      delete "news/:id" => "news_items#delete"
 
       resources :challenges, only: %i(index show create update) do
         get :years, on: :collection
