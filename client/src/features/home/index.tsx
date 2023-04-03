@@ -34,6 +34,7 @@ import { WorkflowShow } from './workflows/WorkflowShow'
 import { useAuthUser } from '../auth/useAuthUser'
 import { UserLayout } from '../../views/layouts/UserLayout'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { useToastWSHandler } from '../../hooks/useToastWSHandler'
 
 
 interface CounterRequest {
@@ -61,11 +62,12 @@ const Home2 = () => {
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()
   const history = useHistory()
-  const [scopeQuery, setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
-  const [scope, setScope] = useState<ResourceScope>(scopeQuery || 'me')
-  const { data: counterData } = useQuery(['counters', scope], () => counterRequest(scope))
+  const [scopeQuery = 'me', setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
+  const [persistedScope, setPersistedScope] = useState<ResourceScope>(scopeQuery)
+  const { data: counterData } = useQuery(['counters', persistedScope], () => counterRequest(persistedScope))
   const [activeResource] = useActiveResourceFromUrl('myhome')
 
+  useToastWSHandler(user)
   const handleScopeClick = async (newScope: ResourceScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
     if(history.location.pathname === `/home/${activeResource}`) {
@@ -77,13 +79,13 @@ const Home2 = () => {
 
   useEffect(() => {
     if(scopeQuery) {
-      setScope(scopeQuery)
+      setPersistedScope(scopeQuery)
     }
   }, [scopeQuery])
   
   const routeScopeParam = `?${ 
     new URLSearchParams({
-      scope,
+      scope: persistedScope,
     }).toString()}`
 
   if(!user || user?.is_guest) {
@@ -102,7 +104,7 @@ const Home2 = () => {
     everybody: `${capitalizedResource} that are shared publicly, by you or anyone on precisionFDA`,
     spaces: `${capitalizedResource} in Spaces that you have access to`,
   }
-  const scopeDescription = scopeDescriptions[scope]
+  const scopeDescription = scopeDescriptions[persistedScope]
 
   return (
     <UserLayout>
@@ -113,28 +115,28 @@ const Home2 = () => {
             <BannerPickerItem
               data-testid="me-button"
               onClick={() => handleScopeClick('me')}
-              isActive={scope === 'me'}
+              isActive={persistedScope === 'me'}
             >
               Me
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="featured-button"
               onClick={() => handleScopeClick('featured')}
-              isActive={scope === 'featured'}
+              isActive={persistedScope === 'featured'}
             >
               Featured
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="everyone-button"
               onClick={() => handleScopeClick('everybody')}
-              isActive={scope === 'everybody'}
+              isActive={persistedScope === 'everybody'}
             >
               Everyone
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="spaces-button"
               onClick={() => handleScopeClick('spaces')}
-              isActive={scope === 'spaces'}
+              isActive={persistedScope === 'spaces'}
             >
               Spaces
             </BannerPickerItem>
@@ -229,43 +231,43 @@ const Home2 = () => {
         <Main>
           <Switch>
             <Route exact path={`${path}/files`}>
-              <FileList scope={scope} showFolderActions={(scope === 'everybody' && user.admin) || scope === 'me'} />
+              <FileList scope={scopeQuery} showFolderActions={(persistedScope === 'everybody' && user.admin) || persistedScope === 'me'} />
             </Route>
             <Route exact path={`${path}/apps`}>
-              <AppList scope={scope} />
+              <AppList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/apps/:appUid`}>
-              <AppsShow scope={scope} />
+              <AppsShow scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/databases`}>
-              <DatabaseList scope={scope} />
+              <DatabaseList scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/databases/create`}>
-              <CreateDatabase scope={scope} />
+              <CreateDatabase scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/databases/:dxid`}>
-              <DatabaseShow scope={scope} />
+              <DatabaseShow scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/assets`}>
-              <AssetList scope={scope} />
+              <AssetList scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/assets/:assetUid`}>
-              <AssetShow scope={scope} />
+              <AssetShow scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/workflows`}>
-              <WorkflowList scope={scope} />
+              <WorkflowList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/workflows/:workflowUid`}>
-              <WorkflowShow scope={scope} />
+              <WorkflowShow scope={scopeQuery} />
             </Route>
             <Route path={`${path}/files/:fileId`}>
-              <FileShow scope={scope} />
+              <FileShow scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/executions`}>
-              <ExecutionList scope={scope} />
+              <ExecutionList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/executions/:executionUid`}>
-              <JobShow scope={scope} />
+              <JobShow scope={scopeQuery} />
             </Route>
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
             <Route path={`${path}/jobs/:executionUid`} render={(props) => <Redirect to={`${path}/executions/${props.match.params.executionUid}`} />} />

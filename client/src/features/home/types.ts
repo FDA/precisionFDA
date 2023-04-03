@@ -93,4 +93,16 @@ export interface SortBy {
   order_dir: string
 }
 
+export enum SEVERITY {
+  ERROR = 'ERROR',
+  WARN = 'WARN',
+  INFO = 'INFO',
+}
+
+export type Notification = {
+  type: string,
+  message: string,
+  severity: SEVERITY,
+}
+
 export type KeyVal = { [key: string]: number | string | boolean }

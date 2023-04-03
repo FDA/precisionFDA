@@ -23,6 +23,7 @@ class ApiController < ApplicationController
                   list_related
                   describe
                   search_assets
+                  cli_latest_version
                 )
   # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :require_api_login_or_guest,
@@ -1525,6 +1526,11 @@ class ApiController < ApplicationController
       end
 
     render json: items, root: "items", adapter: :json, meta: { messages: messages }
+  end
+
+  def cli_latest_version
+    res = https_apps_client.cli_latest_version
+    render json: res, adapter: :json
   end
 
   protected

@@ -8,6 +8,7 @@ module FileService
 
     FILTER_FIELDS = {
       "name" => ->(value) { condition(NODE_TABLE[:name], value) },
+      "filter" => ->(value) { NODE_TABLE[:name].matches(value) }, # used by CLI name matching wildcards
       "state" => ->(value) { condition(NODE_TABLE[:state], value) },
       "size" => ->(value) { NODE_TABLE[:file_size].gteq(value.to_i * 1024) }, # in Kb
       "size2" => ->(value) { NODE_TABLE[:file_size].lteq(value.to_i * 1024) }, # in Kb

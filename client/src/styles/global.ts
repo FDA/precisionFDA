@@ -1,5 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components'
-import { colors } from './theme'
+import { colors, theme } from './theme'
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -45,6 +45,12 @@ const GlobalStyle = createGlobalStyle`
     font-size: 36px
   }
 
+  input[type="date"] { 
+    background: white;
+    border: 1px solid #d9d9d9;
+    padding: 4px 10px;
+    font-family: ${theme.fontFamily};
+  }
 `
 
 export const LayoutBody = styled.div`

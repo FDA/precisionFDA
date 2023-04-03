@@ -103,10 +103,10 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/admin': {
-        target: TARGET,
-        secure: false,
-      },
+      // '/admin': {
+      //   target: TARGET,
+      //   secure: false,
+      // },
       '/discussions': {
         target: TARGET,
         secure: false,

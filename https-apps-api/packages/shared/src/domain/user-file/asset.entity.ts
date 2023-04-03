@@ -33,6 +33,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   description?: string
 
   @Property()
+  //@ts-ignore IFileOrAsset introduced state as string
   state: FILE_STATE
 
   @Property()
@@ -59,7 +60,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   parentFolderId?: number
 
   @Property()
-  scopedParentFolderId?: number
+  scopedParentFolderId?: Node
 
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>

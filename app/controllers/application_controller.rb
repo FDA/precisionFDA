@@ -26,6 +26,7 @@ class ApplicationController < ActionController::Base
 
   # Use time zone of current user
   around_action :user_time_zone, if: -> { !@context.guest? && current_user }
+  around_action :request_context
 
   helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder, :current_user
 
@@ -34,6 +35,29 @@ class ApplicationController < ActionController::Base
   add_flash_types :success, :error
 
   private
+
+  def request_context
+    # even documentation recommends this https://guides.rubyonrails.org/action_controller_overview.html
+    # rubocop:disable Style/RedundantBegin
+    begin
+      fields = decrypt_auth_header
+      if fields
+        user_id = fields[0]
+        username = fields[1]
+        token = fields[2]
+      else
+        user_id = session[:user_id]
+        username = session[:username]
+        token = session[:token]
+      end
+
+      RequestContext.begin_request(user_id, username, token)
+      yield
+    ensure
+      RequestContext.end_request
+    end
+    # rubocop:enable Style/RedundantBegin
+  end
 
   # Returns hash of params.
   # @return [Hash] Params.
@@ -152,8 +176,18 @@ class ApplicationController < ActionController::Base
 
   # Tries to authorize user from Authentication header and to set application context.
   def process_authorization_header
-    auth = request.headers["Authorization"]
+    fields = decrypt_auth_header
+    if fields
+      # NOT USED AT THIS MOMENT AS NO BREAKING CHANGES WERE INTRODUCED.
+      # check_minimum_cli_version
+      init_context(*fields)
+    end
+  end
 
+  # Decrypts Auth Key header if exist
+  # Returns array of values in this order: [user_id username token expiration org_id]
+  def decrypt_auth_header
+    auth = request.headers["Authorization"]
     if auth.is_a?(String) && auth =~ /^Key (.+)$/
       key = $1
       begin
@@ -162,13 +196,20 @@ class ApplicationController < ActionController::Base
           fields = %w(user_id username token expiration org_id).map { |f| decrypted["context"][f] }
           # Flag indicating, that user is calling from CLI
           fields.push(true)
-          init_context(*fields)
         end
       rescue
       end
     end
+    fields
   end
 
+  def check_minimum_cli_version
+    v_start =request.user_agent.index("/") + 1
+    v_end = request.user_agent.index("(") - 1
+    cli_version = Gem::Version.new(request.user_agent[v_start..v_end])
+    min_cli_version = Gem::Version.new("2.0")
+    raise ApiError, "CLI v#{cli_version.version} is deprecated. Please use v#{min_cli_version.version} or newer." unless cli_version >= min_cli_version
+  end
   # Initializes context and IOC container.
   # @param user_id [Integer] User's ID.
   # @param username [String] User's name.

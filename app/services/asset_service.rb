@@ -237,7 +237,7 @@ class AssetService
   end
 
   def https_apps_client
-    @https_apps_client ||= HttpsAppsClient.new(context.token, User.find(context.user_id))
+    @https_apps_client ||= HttpsAppsClient.new
   end
 
   attr_reader :context

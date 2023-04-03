@@ -12,7 +12,7 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { config } from '../../config'
-import { SpaceMembership } from '..'
+import { NewsItem, SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
 import { EmailNotification } from '../email'
 import { Job } from '../job/job.entity'
@@ -164,6 +164,11 @@ export class User extends BaseEntity {
     })
   adminMemberships = new Collection<AdminMembership>(this)
 
+  @OneToMany({
+    entity: () => NewsItem,
+    mappedBy: 'user',
+    })
+  newsItems = new Collection<NewsItem>(this)
 
   constructor(org: Organization, emailNotificationSettings?: EmailNotification, expert?: Expert) {
     super()

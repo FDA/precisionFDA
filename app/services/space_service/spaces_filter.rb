@@ -35,6 +35,8 @@ module SpaceService
         spaces = spaces.where(state: Space::STATE_ACTIVE)
       end
 
+      spaces = spaces.where(protected: true) if params[:protected]
+
       types = []
       types << :private_type if params[:private_type]
       types << :groups if params[:groups]

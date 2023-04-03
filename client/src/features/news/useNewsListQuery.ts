@@ -1,12 +1,26 @@
-import { useQuery } from '@tanstack/react-query'
+import { QueryObserverOptions, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { newsListRequest } from './api'
+import { newsAdminAllRequest, newsListRequest } from './api'
 
-export const useNewsListQuery = (params: Record<string, any>) => useQuery(
-  ['news', params?.year, params?.page],
-  () => newsListRequest(params),
+type PramasType = Record<string, number | string | null | undefined>
+
+export const useNewsListQuery = (params: PramasType, opt?: QueryObserverOptions) => {
+  return useQuery(
+    ['news', params],
+    () => newsListRequest(params),
+    {
+      onError: (err: any) => {
+        if (err && err.message) toast.error(err.message)
+      },
+      ...opt as any,
+    })}
+
+export const useNewsAdminAllRequest = (params: PramasType, opt?: QueryObserverOptions) => useQuery(
+  ['news/admin', params],
+  () => newsAdminAllRequest(params),
   {
     onError: (err: any) => {
       if (err && err.message) toast.error(err.message)
     },
+    ...opt as any,
   })
