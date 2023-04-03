@@ -1,7 +1,7 @@
 user www-data;
 worker_processes auto;
 pid /var/run/nginx.pid;
-error_log  <%= node[:nginx][:log_dir] %>/nginx_error.log debug;
+error_log  <%= node[:nginx][:log_dir] %>/nginx_error.log warn;
 load_module modules/ngx_http_modsecurity_module.so;
 
 events {
@@ -67,6 +67,13 @@ http {
       #limit_req zone=pfdazone burst=20 nodelay;
       proxy_pass https://pfda;
       <%= render 'proxy_settings.conf.erb' %>
+    }
+
+    location /ws {
+      proxy_pass https://localhost:3001;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
     }
 
      error_page 500 502 503 504 /500.html;

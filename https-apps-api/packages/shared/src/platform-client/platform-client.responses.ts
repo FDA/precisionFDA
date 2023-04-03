@@ -73,6 +73,10 @@ type DescribeDataObjectsResponse = {
   }>
 }
 
+type FileRemoveResponse = {
+  id: string
+} & AnyObject
+
 type FileDescribeResponse = {
   id: string
   name: string
@@ -167,6 +171,7 @@ export {
   FindSpaceMembersReponse,
   PlatformMember,
   UserInviteToOrgResponse,
+  FileRemoveResponse,
   UserRemoveFromOrgResponse,
   AppDescribeResponse,
   WorkflowDescribeResponse,

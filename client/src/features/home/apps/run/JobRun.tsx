@@ -188,7 +188,10 @@ const createRequestObject = (
   const inputs: { [key: string]: string | number | boolean | undefined } = {}
 
   Object.keys(vals.inputs).forEach(key => {
-    inputs[key] = getValue(key, vals.inputs[key], inputSpecs)
+    const value = vals.inputs[key]
+    if (value) {
+      inputs[key] = getValue(key, value, inputSpecs)
+    }
   })
 
   return {

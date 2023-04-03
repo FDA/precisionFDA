@@ -1,14 +1,9 @@
 import { EntityRepository } from '@mikro-orm/mysql'
+import { PaginationParams } from '../../types/common'
 import { buildEntityQueryAndFilter } from '../permissions/permissions.filters'
 import { Job } from './job.entity'
 import { JOB_STATE } from './job.enum'
 
-
-// todo: Extract PaginationParams to a common interface file
-interface PaginationParams {
-  page: number
-  limit: number
-}
 
 // Either find by spaceId or userId
 interface JobsFindPaginatedParams extends PaginationParams {

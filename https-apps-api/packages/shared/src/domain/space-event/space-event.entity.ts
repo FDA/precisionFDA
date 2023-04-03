@@ -12,7 +12,7 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '../space-membership/space-membership.enum'
-import { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from './space-event.enum'
+import { ENTITY_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from './space-event.enum'
 
 @Entity({ tableName: 'space_events' })
 export class SpaceEvent {
@@ -26,7 +26,7 @@ export class SpaceEvent {
   entityId: number
 
   @Property()
-  entityType: PARENT_TYPE
+  entityType: ENTITY_TYPE
 
   @Property()
   activityType: SPACE_EVENT_ACTIVITY_TYPE
@@ -41,7 +41,7 @@ export class SpaceEvent {
   side: SPACE_MEMBERSHIP_SIDE
 
   @Property()
-  data: string
+  data?: string
 
   @ManyToOne(() => User)
   user: IdentifiedReference<User>

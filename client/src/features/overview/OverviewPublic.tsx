@@ -30,6 +30,7 @@ import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import {
   CommunityParticipants,
   ExpertSection,
+  Hr,
   InfoRow,
   PFDATeamSection,
 } from './styles'
@@ -68,14 +69,16 @@ export const OverviewPublic = () => {
             <RightSideItem>
               <SectionTitle>RECENT EXPERT BLOGS</SectionTitle>
               <OverviewExpertsCondensedList pick={3} />
-              <hr />
+              <Hr />
               <Link to="/experts">View All Expert Blogs</Link>
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Latest News</SectionTitle>
               <OverviewNewsList pick={3} />
-              <hr />
+              <Hr />
               <Link to="/news">View All News</Link>
+              <Hr />
+              <Link to="/news?type=publication">View All Publications</Link>
             </RightSideItem>
           </RightSide>
         </PageRow>
