@@ -464,6 +464,7 @@ ActiveRecord::Schema.define(version: 2023_03_22_132522) do
     t.boolean "published"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_publication", default: false
     t.index ["position"], name: "position_news_items_idx"
   end
 
@@ -670,7 +671,7 @@ ActiveRecord::Schema.define(version: 2023_03_22_132522) do
     t.integer "sponsor_org_id"
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
-    t.boolean "protected"
+    t.boolean "protected", default: false
   end
 
   create_table "submissions", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|

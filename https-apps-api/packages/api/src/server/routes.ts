@@ -9,6 +9,7 @@ import { router as debugRouter } from '../debug'
 import { router as filesRouter } from '../files'
 import { router as emailsRouter } from '../emails'
 import { router as expertsRouter } from '../experts'
+import { router as newsRouter } from '../news'
 import { router as licensesRouter } from '../licenses'
 import { router as foldersRouter } from '../folders'
 import { router as jobsRouter } from '../jobs'
@@ -32,6 +33,7 @@ router.use('/debug', debugRouter.routes(), debugRouter.allowedMethods())
 router.use('/files', filesRouter.routes(), filesRouter.allowedMethods())
 router.use('/emails', emailsRouter.routes(), emailsRouter.allowedMethods())
 router.use('/experts', expertsRouter.routes(), expertsRouter.allowedMethods())
+router.use('/news', newsRouter.routes(), newsRouter.allowedMethods())
 router.use('/folders', foldersRouter.routes(), foldersRouter.allowedMethods())
 router.use('/jobs', jobsRouter.routes(), jobsRouter.allowedMethods())
 router.use('/licenses', licensesRouter.routes(), licensesRouter.allowedMethods())

@@ -1,5 +1,6 @@
 services:
   base_ruby:
+    env_file: ../.env
     build:
       context: ../
       dockerfile: docker/images/isolation.Dockerfile

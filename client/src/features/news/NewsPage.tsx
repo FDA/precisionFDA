@@ -1,8 +1,8 @@
-import { format, parseISO } from 'date-fns'
-import queryString from 'query-string'
+import { format } from 'date-fns'
 import React from 'react'
+import { NumberParam, StringParam, useQueryParams } from 'use-query-params'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
@@ -40,12 +40,12 @@ const NewsPage = () => {
   usePageMeta({ title: 'News - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateNews = user && user.can_administer_site
-  const location = useLocation()
-  const query = queryString.parse(location.search)
   const pagination = usePaginationParams()
+  const [query, setQuery] = useQueryParams({ year: StringParam, type: StringParam })
 
   const { data, isLoading, isFetched } = useNewsListQuery({
-    year: query.year as string,
+    year: query.year,
+    type: query.type,
     page: pagination.pageParam,
     perPage: pagination.perPageParam,
   })
@@ -70,12 +70,15 @@ const NewsPage = () => {
             </PageLoaderWrapper>
           ) : (
             <PageMainBody>
-              {query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
+              {!isLoading && data?.news_items?.length === 0 && (
+                <div>No news items. Try changing the filter.</div>
+              )}
+              {data?.news_items?.length > 0 && query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
               <PageList>
                 {data?.news_items?.map(n => (
                   <NewsListItem key={n.id}>
                     <ItemDate>
-                      {format(parseISO(n.created_at), 'MMM dd, yyyy')}
+                      {format(new Date(n.createdAt), 'MMM dd, yyyy')}
                     </ItemDate>
                     <ItemBody>
                       <Title>{n.title}</Title>
@@ -86,7 +89,7 @@ const NewsPage = () => {
                             title="external video"
                             width="auto"
                             height="auto"
-                            src={n.video}
+                            src={n.video.replace('/watch?v=', '/embed/')}
                             frameBorder="0"
                             allow="autoplay; encrypted-media"
                             allowFullScreen
@@ -95,7 +98,7 @@ const NewsPage = () => {
                       )}
                       <div>
                         <ExternalLink to={n.link}>
-                          View News Source &rarr;
+                          View {n.isPublication ? 'Publication' : 'Article'} &rarr;
                         </ExternalLink>
                       </div>
                     </ItemBody>
@@ -123,34 +126,39 @@ const NewsPage = () => {
             {userCanCreateNews && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue
-                    onClick={() => window.location.assign('/admin/news/new')}
-                  >
-                    New article
-                  </ButtonSolidBlue>
-                  <ButtonSolidBlue
-                    onClick={() => window.location.assign('/admin/news')}
-                  >
+                  <ButtonSolidBlue as={Link} to="/admin/news">
                     Administer News
                   </ButtonSolidBlue>
                 </ButtonRow>
               </RightSideItem>
             )}
             <RightSideItem>
-              <SectionTitle>News Backlog</SectionTitle>
+              <SectionTitle>Filter News</SectionTitle>
               <RightList>
-                <ItemButton selected={!query.year} as={Link} to="/news" data-turbolinks="false">
+                <ItemButton selected={!query.type} onClick={() => setQuery({ type: null }, 'replaceIn')}>
+                  All
+                </ItemButton>
+                <ItemButton selected={query.type === 'publication'} onClick={() => setQuery({ type: 'publication' }, 'replaceIn')}>
+                  Publications
+                </ItemButton>
+                <ItemButton selected={query.type === 'article'} onClick={() => setQuery({ type: 'article' }, 'replaceIn')}>
+                  Articles
+                </ItemButton>
+              </RightList>
+            </RightSideItem>
+
+            <RightSideItem>
+              <SectionTitle>By Year</SectionTitle>
+              <RightList>
+                <ItemButton selected={!query.year}  onClick={() => setQuery({ year: null }, 'replaceIn')}>
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
                   yearsListData
-                    ?.map(y => y.toString())
                     .map(y => (
                       <ItemButton
-                        data-turbolinks="false"
-                        as={Link}
                         key={y}
-                        to={`/news?year=${y}`}
+                        onClick={() => setQuery({ year: y }, 'replaceIn')}
                         selected={y.toString() === query.year?.toString()}
                       >
                         {y}

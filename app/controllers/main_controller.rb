@@ -39,8 +39,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     @experts = Expert.public.order(created_at: :desc).limit(10) # TODO: filter by published ones only
 
-    @news_items = NewsItem.published.positioned
-
     @meta_appathon = MetaAppathon.active
     if @meta_appathon.present?
       @user_appathon = @context.user.appathon_from_meta(@meta_appathon) if @context.logged_in?
@@ -142,10 +140,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def guidelines; end
 
   def terms; end
-
-  def news
-    @news_items = NewsItem.positioned.published
-  end
 
   def presskit # rubocop:todo Metrics/MethodLength
     @images = [
