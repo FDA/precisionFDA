@@ -35,57 +35,6 @@ module Api
         render json: { count: result.value[:count] }
       end
 
-      # POST /api/spaces/:space_id/files/remove_nodes
-      # Removes folders or/and files from a space.
-      # Fires a background Sidekiq worker RemoveFolderWorker when all permissions are passed.
-      def remove
-        filtered_ids = (
-          @space.files.not_comparison_inputs.pluck(:id) +
-          @space.assets.not_comparison_inputs.pluck(:id) +
-          @space.folders.pluck(:id)
-        ) & params[:node_ids]
-
-        nodes = @space.nodes.where(id: filtered_ids)
-
-        Node.transaction do
-          nodes.find_each { |node| node.update!(state: UserFile::STATE_REMOVING) }
-
-          nodes.where(sti_type: "Folder").find_each do |folder|
-            folder.all_children.each { |node| node.update!(state: UserFile::STATE_REMOVING) }
-          end
-        end
-
-        job_args = nodes.pluck(:id).in_groups_of(1, false).map { |id| id << session_auth_params }
-        RemoveNodeWorker.perform_bulk(job_args, batch_size: 100)
-
-        head :ok
-      end
-
-      # POST /api/spaces/:space_id/files/create_folder
-      # Creates a folder.
-      def create_folder
-        parent_folder = @space.folders.find_by(id: params[:parent_folder_id])
-
-        scope = parent_folder&.scope || @space.uid
-        result = folder_service.add_folder(params[:name], parent_folder, scope)
-
-        raise ApiError, result.value.values.flatten.first if result.failure?
-
-        render json: result.value, adapter: :json
-      end
-
-      # POST /api/spaces/:space_id/files/:id/rename_folder
-      # Renames a folder.
-      def rename_folder
-        folder = @space.folders.find(params[:id])
-
-        result = folder_service.rename(folder, params[:name])
-
-        raise ApiError, result.value.values if result.failure?
-
-        render json: result.value, adapter: :json
-      end
-
       # Responds with the subfolders of a specified folder.
       def subfolders
         sub_folders =

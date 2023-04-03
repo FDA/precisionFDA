@@ -22,6 +22,8 @@ export enum TASK_TYPE {
   SYNC_SPACES_PERMISSIONS = 'sync_spaces_permissions',
   USER_CHECKUP = 'user_checkup',
   DEBUG_MAX_MEMORY = 'debug_test_max_memory',
+  REMOVE_NODES = 'remove_nodes',
+  OTHER_TASK = 'other',
 }
 
 // will be used in the sub-handler
@@ -37,6 +39,11 @@ export type CheckStatusJob = TaskWithAuth & {
 export type SendEmailJob = TaskWithMaybeAuth & {
   type: TASK_TYPE.SEND_EMAIL
   payload: EmailSendInput
+}
+
+export type RemoveNodesJob = TaskWithAuth & {
+  type: TASK_TYPE.REMOVE_NODES
+  payload: number[]
 }
 
 export type CheckStaleJobsJob = TaskWithAuth & {
@@ -81,3 +88,4 @@ export type Task =
   | SyncSpacesPermissionsJob
   | SyncWorkstationFiles
   | DebugMaxMemory
+  | RemoveNodesJob

@@ -64,6 +64,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
 
   return (
     <ModalNext
+      id="expiring-session-modal"
       isShown={modal.isShown}
       disableClose
       blur

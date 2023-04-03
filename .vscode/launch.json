@@ -1,0 +1,44 @@
+{
+
+    "version": "0.2.0",
+
+    "configurations": [
+
+        {
+
+            "type": "node",
+
+            "runtimeVersion": "12.22.12",
+
+            "request": "launch",
+
+            "name": "Mocha test",
+
+            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+
+            "args": [
+
+                "${workspaceRoot}/https-apps-api/packages/api/test/integration/folders/remove.spec.ts",
+
+                "--config ${workspaceRoot}/https-apps-api/packages/api/.mocharc.js"
+
+            ],
+
+            "cwd": "${workspaceRoot}/https-apps-api/packages/api",
+
+            "internalConsoleOptions": "openOnSessionStart",
+
+            "env": {
+
+                "NODE_ENV": "test", // not sure if it applies
+
+                "DATABASE_TEST_NAME": "precisionfda-test",
+
+                "DATABASE_TEST_URL": "mysql://root:password@localhost:32800/precisionfda-test"
+
+            }
+
+        }
+
+    ]
+}

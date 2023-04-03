@@ -14,6 +14,11 @@ SecureHeaders::Configuration.default do |config|
     child_src: %w('self' https://www.youtube.com blob:),
     connect_src: %w(
       'self'
+      wss://localhost:*
+      wss://precisionfda-dev.dnanexus.com
+      wss://precisionfda-staging.dnanexus.com
+      wss://precisionfda-staging.dnanexus.com
+      wss://precision.fda.gov
       https://dnanexus-platform-upload-prod.s3.amazonaws.com
       https://dnanexus-platform-upload-prod.s3-fips.us-east-1.amazonaws.com
       https://dnanexus-platform-upload-stg.s3.amazonaws.com

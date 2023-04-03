@@ -25,6 +25,7 @@ export interface Links {
   jobs: string;
   track: string;
   fork: string;
+  forked_from: string;
   export: string;
   cwl_export: string;
   wdl_export: string;
@@ -68,6 +69,7 @@ export interface IApp {
   links: Links;
   tags: any[];
   scope: string;
+  forked_from: string;
 }
 
 export interface InputSpec {

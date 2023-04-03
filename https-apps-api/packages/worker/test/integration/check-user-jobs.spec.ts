@@ -15,7 +15,7 @@ import { range } from 'ramda'
 
 
 const createCheckUserJobsTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
     payload: undefined,

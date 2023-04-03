@@ -2,11 +2,11 @@ import { wrap } from '@mikro-orm/core'
 import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
-import { JOB_DB_ENTITY_TYPE } from '../job.enum'
 import {
   buildIsOverMaxDuration,
   isStateActive,
   isStateTerminal,
+  sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
 import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
@@ -29,7 +29,6 @@ import { buildEmailTemplate } from '../../email/email.helper'
 import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
 import { EmailSendOperation } from '../../email'
-import { JobFailedEmailHandler } from '../../email/templates/handlers'
 
 // N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
 //      In the future we'd need to rename this to something more specific
@@ -169,7 +168,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
             failureReason: platformJobData.failureReason,
             failureMessage: platformJobData.failureMessage,
           }, 'SyncJobOperation: Detected failed job')
-          await this.sendJobFailedEmails()
+          await sendJobFailedEmails(job.id.toString(), this.ctx)
         }
       }
 
@@ -205,7 +204,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       }, 'SyncJobOperation: Detected failed job')
 
       try {
-        await this.sendJobFailedEmails()
+        await sendJobFailedEmails(this.job.id.toString(), this.ctx)
       } catch (e) {
         this.ctx.log.error({ job: updatedJob }, 'SyncJobOperation: Failed to send emails')
       }
@@ -235,34 +234,6 @@ export class SyncJobOperation extends WorkerBaseOperation<
       bullJobId: jobId,
     }, 'SyncJobOperation: Sending termination warning email to user')
     await createSendEmailTask(email, this.ctx.user, jobId)
-  }
-
-  private async sendJobFailedEmails(): Promise<void> {
-    const handler = new JobFailedEmailHandler(
-      EMAIL_TYPES.jobFailed,
-      { jobId: this.job.id },
-      this.ctx,
-    )
-    await handler.setupContext()
-
-    const receivers = await handler.determineReceivers()
-    const emails = await Promise.all(
-      receivers.map(async receiver => {
-        const template = await handler.template(receiver)
-        return template
-      }),
-    )
-
-    return Promise.all(emails.map(async email => {
-      this.ctx.log.info({
-        jobId: this.job.id,
-        jobDxid: this.job.dxid,
-        user: this.user.dxuser,
-        recipient: email.to,
-      }, 'SyncJobOperation: Sending failed job email to user')
-
-      await createSendEmailTask(email, this.ctx.user)
-    })) as any
   }
 
   private removeTerminationEmailJob() {

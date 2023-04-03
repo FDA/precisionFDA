@@ -31,7 +31,7 @@ const StyledLocked = styled.div<{ isLocked: boolean }>`
 `
 
 const isIncompleteFile = (state: IFile['state']) =>
-  state === 'open' || state === 'closing'
+  state === 'open' || state === 'closing' || state === 'removing'
 
 export const useFilesColumns = ({
   isAdmin = false,

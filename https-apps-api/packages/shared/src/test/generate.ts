@@ -493,6 +493,17 @@ const expert = {
   },
 }
 
+const news = {
+  create: (): Partial<InstanceType<typeof entities.NewsItem>> => {
+    return {
+      title: chance.sentence(),
+      content: chance.sentence(),
+      link: chance.url(),
+      published: true,
+    }
+  },
+}
+
 const bullQueue = {
   syncDbClusterStatus: (dbClusterDxid: string, userContext: UserCtx) => ({
     data: {
@@ -570,6 +581,7 @@ export {
   user,
   job,
   app,
+  comparison,
   userFile,
   folder,
   tag,
@@ -579,10 +591,10 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
-  comparison,
   challenge,
   dbCluster,
   expert,
+  news,
   bullQueue,
   bullQueueRepeatable,
 }

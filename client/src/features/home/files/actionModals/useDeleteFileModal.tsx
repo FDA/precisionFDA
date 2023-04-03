@@ -11,9 +11,11 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../../../utils/formatting'
+import { itemsCountString, pluralize } from '../../../../utils/formatting'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
+import { DownloadListResponse } from '../../types'
+import { ModalScroll } from '../../../modal/styles'
 
 const StyledPath = styled.div`
   min-width: 150px;
@@ -22,11 +24,11 @@ const StyledPath = styled.div`
 const DeleteFiles = ({
   selected,
   scope,
-  setNumberOfFilesToDelete,
+  setNodesToBeDeleted,
 }: {
   selected: IFile[]
   scope: string
-  setNumberOfFilesToDelete: (n: number) => void
+  setNodesToBeDeleted: (nodes: DownloadListResponse[]) => void
 }) => {
   const { data, status } = useQuery(
     ['download_list', selected],
@@ -37,7 +39,7 @@ const DeleteFiles = ({
       ),
     {
       onSuccess: (res) => {
-        setNumberOfFilesToDelete(res.length)
+        setNodesToBeDeleted(res)
       },
       onError: () => {
         toast.error('Error: Fetching download list.')
@@ -46,20 +48,53 @@ const DeleteFiles = ({
   )
   if (status === 'loading') return <div>Loading...</div>
   return (
-    <ResourceTable
-      rows={data!.map(s => ({
-        name: (
-          <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
-            <VerticalCenter>
-              {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-            </VerticalCenter>
-            {s.name}
-          </StyledName>
-        ),
-        path: <StyledPath>{s.fsPath}</StyledPath>,
-      }))}
-    />
+    <div>
+      {data && (
+        <ResourceTable
+          rows={data.map(s => ({
+            name: (
+              <StyledName href={s.viewURL} target="_blank">
+                <VerticalCenter>
+                  {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
+                </VerticalCenter>
+                {s.name}
+              </StyledName>
+            ),
+            path: <StyledPath>{s.fsPath}</StyledPath>,
+          }))}
+        />
+      )}
+    </div>
   )
+}
+
+const getPluralizedTerm = (itemCount: number, itemName: string): string => {
+  if (itemCount === 1) {
+    return `${itemCount.toString()} ${itemName}`
+  }
+  return `${itemCount.toString()} ${itemName}s`
+}
+
+const getMessage = (nodes?: DownloadListResponse[]) => {
+  let filesCount = 0
+  let foldersCount = 0
+
+  nodes?.forEach(node => {
+    if (node.type === 'file') {
+      filesCount += 1
+    } else {
+      foldersCount += 1
+    }
+  })
+
+  if (foldersCount > 0 && filesCount === 0) {
+    return `${getPluralizedTerm(foldersCount, 'folder')}`
+  }
+  if (filesCount > 0 && foldersCount === 0) {
+    return `${getPluralizedTerm(filesCount, 'file')}`
+  }
+  return `${getPluralizedTerm(filesCount, 'file')} and `
+    + `${getPluralizedTerm(foldersCount, 'folder')}`
 }
 
 export const useDeleteFileModal = ({
@@ -74,7 +109,7 @@ export const useDeleteFileModal = ({
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
-  const [numberOfFilesToDelete, setNumberOfFilesToDelete] = useState<number>()
+  const [nodesToBeDeleted, setNodesToBeDeleted] = useState<DownloadListResponse[]>()
 
   const mutation = useMutation({
     mutationKey: ['delete-files'],
@@ -85,14 +120,14 @@ export const useDeleteFileModal = ({
         toast.error(`${error?.type}: ${error?.message}`)
         return
       }
-      toast.error(`Error: Deleting ${numberOfFilesToDelete} files or folders.`)
+      toast.error(`Deleting of ${getMessage(nodesToBeDeleted)} has failed`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])
       // TODO counters are only for My Home, spaces have counters in request for space
       queryClient.invalidateQueries(['counters'])
       setShowModal(false)
-      toast.success(`Success: Deleted ${numberOfFilesToDelete} files or folders.`)
+      toast.success(`Deleting of ${getMessage(nodesToBeDeleted)} has been started`)
       onSuccess()
     },
   })
@@ -105,7 +140,7 @@ export const useDeleteFileModal = ({
     <Modal
       id="modal-files-delete"
       data-testid="modal-files-delete"
-      headerText={`Delete ${numberOfFilesToDelete ? itemsCountString('item', numberOfFilesToDelete) : '...'}`}
+      headerText={`Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={
@@ -123,7 +158,9 @@ export const useDeleteFileModal = ({
         </>
       }
     >
-      <DeleteFiles selected={memoSelected} scope={scope} setNumberOfFilesToDelete={setNumberOfFilesToDelete} />
+      <ModalScroll>
+        <DeleteFiles selected={memoSelected} scope={scope} setNodesToBeDeleted={setNodesToBeDeleted}/>
+      </ModalScroll>
     </Modal>
   )
   return {

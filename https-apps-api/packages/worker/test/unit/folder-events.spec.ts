@@ -32,7 +32,7 @@ describe('folder events tests', () => {
     }
   })
 
-  it('test FolderDeleteOperation to create an DeleteFolder event ', async () => {
+  it('test FolderRemoveRecursiveOperation to create an DeleteFolder event ', async () => {
     // create folder tree
     const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
     await em.flush()
@@ -44,7 +44,7 @@ describe('folder events tests', () => {
     await em.flush()
 
     // delete folder
-    const deleteOp = new userFile.FolderDeleteOperation({
+    const deleteOp = new userFile.FolderRemoveRecursiveOperation({
       em,
       log,
       user: userCtx,
@@ -56,14 +56,20 @@ describe('folder events tests', () => {
     deleteFolderInput = { id: parentFolder.id }
     await deleteOp.execute(deleteFolderInput)
 
-    const deleteChildEvent = await em.findOneOrFail(Event, { param1: '/foo/boo' + '', type: EVENT_TYPES.FOLDER_DELETED })
+    const deleteChildEvent = await em.findOneOrFail(
+      Event,
+      { param1: '/foo/boo', type: EVENT_TYPES.FOLDER_DELETED },
+    )
     const deleteChildData = JSON.parse(deleteChildEvent.data)
     expect(deleteChildData.path).to.equals('/foo/boo')
     expect(deleteChildData.id).to.equals(2)
     expect(deleteChildData.scope).to.equals('private')
     expect(deleteChildData.name).to.equals('boo')
 
-    const deleteParentEvent = await em.findOneOrFail(Event, { param1: '/foo' + '', type: EVENT_TYPES.FOLDER_DELETED })
+    const deleteParentEvent = await em.findOneOrFail(
+      Event,
+      { param1: '/foo', type: EVENT_TYPES.FOLDER_DELETED },
+    )
     const deleteParentData = JSON.parse(deleteParentEvent.data)
     expect(deleteParentData.path).to.equals('/foo')
     expect(deleteParentData.id).to.equals(1)

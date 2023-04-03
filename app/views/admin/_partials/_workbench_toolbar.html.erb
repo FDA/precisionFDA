@@ -6,11 +6,11 @@
         <span class="pill-label">Get started boxes</span>
       <% end %>
     </li>
-    <li class="<% if controller_name == 'news_items' %>active<% end %>">
-      <%= link_to admin_news_items_path do %>
+    <li>
+      <a href="/admin/news" data-turbolinks="false">
         <span class="fa fa-newspaper-o"></span>
         <span class="pill-label">News</span>
-      <% end %>
+      </a>
     </li>
     <li class="<% if controller_name == 'participants' %>active<% end %>">
       <%= link_to admin_participants_path do %>
