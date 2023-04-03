@@ -16,10 +16,10 @@ import {
   FILE_STI_TYPE,
   PARENT_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { SyncJobOperation } from '@pfda/https-apps-shared/src/domain/job'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SyncJobOperation } from '@pfda/https-apps-shared/src/domain/job'
 import { errorsFactory } from '../utils/errors-factory'
 
 describe('SyncJobOperation BullJobId', () => {
@@ -40,7 +40,7 @@ const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SYNC_JOB_STATUS,

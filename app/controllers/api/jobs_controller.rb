@@ -125,14 +125,11 @@ module Api
       workflow = Workflow.find_by(uid: unsafe_params[:id])
       analyses = workflow.analyses.
         eager_load(:jobs, :workflow, :batch_items).
-        page(page_from_params).
-        per(page_size)
-
-      page_dict = pagination_dict(analyses)
+        order({ created_at: Sortable::DIRECTION_DESC })
 
       presenter = Presenters::WorkflowExecutionsPresenter.
         new(analyses, @context, unsafe_params).call
-      payload = { jobs: presenter.response, meta: { count: page_dict[:total_count], pagination: page_dict } }
+      payload = { jobs: presenter.response, meta: pagination_meta(presenter.size) }
 
       render json: payload, adapter: :json
     rescue StandardError => e

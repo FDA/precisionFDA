@@ -38,7 +38,7 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
     })
 
     runningJobs.map(async (job) => {
-      const runningJob = await queue.getStatusQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
+      const runningJob = await queue.getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
       if (!runningJob) {
         await queue.createSyncJobStatusTask(job, this.ctx.user)
         this.ctx.log.info({}, `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`)

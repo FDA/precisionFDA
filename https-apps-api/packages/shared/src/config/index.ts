@@ -48,6 +48,7 @@ const defaultConfig = {
     keyCertPath:
       process.env.NODE_PATH_KEY_CERT
       ?? path.join(__dirname, '../../../../key.pem'),
+    url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
     allowErrorTestingRoutes:

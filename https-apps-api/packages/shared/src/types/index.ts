@@ -53,6 +53,10 @@ type IdInput = {
   id: number
 }
 
+type IdsInput = {
+  ids: number[]
+}
+
 type WorkerOpsCtx<Ctx extends OpsCtx> = Ctx & { job: Job}
 
 export type {
@@ -65,5 +69,6 @@ export type {
   DxIdInput,
   UidInput,
   IdInput,
+  IdsInput,
   WorkerOpsCtx,
 }

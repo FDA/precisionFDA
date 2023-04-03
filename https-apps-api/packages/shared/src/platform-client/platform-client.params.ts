@@ -29,6 +29,11 @@ type JobCreateParams = {
   }
 }
 
+type FileRemoveParams = {
+  projectId: string
+  ids: string[]
+}
+
 type ListFilesParams = IPaginatedParams & {
   project: string
   folder?: string
@@ -168,6 +173,7 @@ export {
   JobTerminateParams,
   CreateFolderParams,
   DescribeFoldersParams,
+  FileRemoveParams,
   MoveFilesParams,
   DbClusterActionParams,
   DbClusterDescribeParams,

@@ -53,6 +53,7 @@ module Api
 
       files = UserFile.
         real_files.
+        not_removing.
         editable_by(@context).
         accessible_by_private.
         where.not(parent_type: ["Comparison", nil]).
@@ -79,22 +80,30 @@ module Api
                merge({ pagination: page_dict })
     end
 
+    # GET /api/files/cli
+    # Used by CLI. Get all nodes accessible by current user.
+    # Allows filtering by space_id and/or folder_id.
+    # Allows filtering files/folders only.
     def cli
       space_files_cli && return if params[:space_id]
 
       files = []
       folders = []
       unless params[:folders_only] == "true"
-        files = UserFile.real_files.
-          editable_by(@context).
-          accessible_by_private.
+        # rubocop:disable Layout/LineLength
+        files = params[:public_scope] ? UserFile.real_files.not_removing.accessible_by_public : UserFile.real_files.not_removing.accessible_by_private.where(user: @context.user)
+        # rubocop:enable Layout/LineLength
+        files = files.where(parent_folder_id: @parent_folder_id).
           where.not(parent_type: ["Comparison", nil]).
           eager_load(user: :org)
-
-        files = files.where(parent_folder_id: @parent_folder_id)
       end
-      folders = private_folders(@parent_folder_id).eager_load(user: :org) unless params[:files_only] == "true"
-      user_files = files + folders
+
+      unless params[:files_only] == "true"
+        folders = params[:public_scope] ? Folder.accessible_by_public : Folder.accessible_by_private.where(user: @context.user)
+        folders = folders.where(parent_folder_id: @parent_folder_id).eager_load(user: :org)
+      end
+
+      user_files = folders + FileService::FilesFilter.call(files, params[:filters])
 
       render json: user_files, root: "files", adapter: :json, each_serializer: CliNodeSerializer,
              meta: cli_meta
@@ -107,7 +116,7 @@ module Api
         space = Space.find(params[:space_id])
         meta[:scope] = "space-#{space.id} (#{space.name})"
       else
-        meta[:scope] = "My Home"
+        meta[:scope] = params[:public_scope] ? "Public" : "My Home"
       end
 
       if params[:folder_id]
@@ -115,6 +124,36 @@ module Api
         meta[:path] = meta[:path] + build_path(folder, []).reverse.pluck(:name).join(" / ")
       end
       meta
+    end
+
+    # Listing nodes based on given criteria. Supports wildcard name search.
+    # Used by CLI exclusively with a custom response mapping.
+    def cli_node_search
+      res = https_apps_client.cli_node_search(params[:name], params[:type], params[:space_id], params[:parent_folder_id])
+
+      # temporary custom CLI mapping - can be removed once CLI is communication with node backend without a middle man.
+      merged = res[:files] + res[:folders]
+      user_files = merged.map do |node|
+        n = {
+          id: node[:id],
+          uid: node[:uid],
+          type: node[:stiType],
+          name: node[:name],
+          file_size: number_to_human_size(node[:fileSize]),
+          created_at: node[:createdAt].to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        n.merge!({ children: node[:children].length }) if node[:stiType] == "Folder"
+        n
+      end
+      if user_files.blank?
+        # no match | no permission | invalid id
+        render(plain: "[]", content_type: "application/json")
+      else
+        render json: user_files, root: true, adapter: :json
+      end
+      # usually permission issues
+    rescue HttpsAppsClient::Error => e
+      fail e.message
     end
 
     # GET /api/files/featured
@@ -125,6 +164,7 @@ module Api
       filter_tags = params.dig(:filters, :tags)
 
       files = UserFile.real_files.
+        not_removing.
         featured.accessible_by(@context).
         where(parent_folder_id: @parent_folder_id).
         includes(:user, :taggings).eager_load(user: :org).
@@ -133,6 +173,7 @@ module Api
 
       folders = Folder.
         featured.
+        not_removing.
         accessible_by(@context).
         where(parent_folder_id: @parent_folder_id).
         includes(:taggings).
@@ -152,6 +193,7 @@ module Api
 
       files =
         UserFile.real_files.
+          not_removing.
           accessible_by_public.
           includes(:taggings).eager_load(user: :org).
           search_by_tags(filter_tags)
@@ -176,6 +218,7 @@ module Api
       filter_tags = params.dig(:filters, :tags)
 
       files = UserFile.real_files.
+        not_removing.
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
         accessible_by(@context).
         includes(:taggings).eager_load(user: :org).
@@ -186,6 +229,7 @@ module Api
 
       folders = Folder.
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE]).
+        not_removing.
         accessible_by(@context).
         includes(:taggings).eager_load(user: :org).
         where(scoped_parent_folder_id: @parent_folder_id).
@@ -257,6 +301,7 @@ module Api
                links: meta_links(@file),
              }
     end
+
     # rubocop:enable Metrics/MethodLength
 
     # Updates file name and description.
@@ -363,6 +408,35 @@ module Api
       end
     end
 
+    # POST /api/files/bulk_download
+    # Responds with an array of links to platform for download requested files - filters out only accessible files.
+    # Used by CLI to reduce number of back-and-forth calls needed to download larger number of files
+    def bulk_download
+      # try refactor to node.js for speed improvement.
+      nodes = UserFile.accessible_by(@context).where(uid: params[:ids])
+
+      # rubocop:disable Layout/LineLength
+      nodes = nodes.reject { |node| node.state != UserFile::STATE_CLOSED || (node.license.present? && !file.licensed_by?(@context)) }
+      # rubocop:enable Layout/LineLength
+
+      files = []
+      nodes.each_slice(4) do |group|
+        group.map do |item|
+          # executed 4x in parallel to speed-up platform calls
+          Thread.new do
+            if verify_scope_for_protection(item.scope)
+              files << {
+                uid: item[:uid],
+                url: item.file_url(@context, false),
+              }
+            end
+          end
+        end.each(&:join)
+      end
+
+      render json: files
+    end
+
     # POST /api/files/create_folder - create_folder_api_files_path
     # Creates a folder.
     # @param :public [Boolean] True/False
@@ -396,9 +470,11 @@ module Api
       if result.failure?
         type = :error
         text = result.value[:name]
+        id = find_existing_folder_id(scope)
       else
         type = :success
         text = "Folder '#{result.value.name}' successfully created."
+        id = result.value.id
       end
 
       path = if parent_folder.present?
@@ -406,7 +482,7 @@ module Api
       else
         scope == "public" ? everybody_api_files_path : api_files_path
       end
-      render json: { path: path, message: { type: type, text: text } }, adapter: :json
+      render json: { path: path, id: id, message: { type: type, text: text } }, adapter: :json
     end
 
     # rubocop:enable Metrics/MethodLength
@@ -446,27 +522,23 @@ module Api
     end
 
     # POST /api/files/remove
-    # Remove file(s) & folder(s), being selected
+    # Remove file(s) & folder(s) including nested files and folders.
     # @param ids [Array of Integers] - ids of Nodes to be removed.
-    # @param scope [String] - 'public', 'private' or 'space-XX'.
     def remove
-      service = FolderService.new(@context)
-      nodes = Node.editable_by(@context).where(id: unsafe_params[:ids])
+      response = https_apps_client.remove_nodes(unsafe_params[:ids])
+      render json: response
+    end
 
-      verify_nodes_for_protection(nodes, "delete")
-      result = service.remove(nodes)
-
-      if result.success?
-        type = :success
-        text = "Node(s) successfully removed."
+    def cli_remove
+      if unsafe_params[:uids]
+        node_ids = Node.editable_by(@context).where(uid: unsafe_params[:uids]).pluck(:id)
+        response = https_apps_client.cli_remove_nodes(node_ids)
       else
-        type = :error
-        text = "Error when Node(s) removing: #{result.value[:message]}."
+        response = https_apps_client.cli_remove_nodes(unsafe_params[:ids])
       end
-
-      path = params[:scope] == Scopes::SCOPE_PUBLIC ? everybody_api_files_path : api_files_path
-
-      render json: { path: path, message: { type: type, text: text } }, adapter: :json
+      render json: { count: response }
+    rescue HttpsAppsClient::Error => e
+      raise ApiError, e.message
     end
 
     # Overridden version: it accepts not only file-uids, but also folder id.
@@ -514,6 +586,7 @@ module Api
         folder_id = params[:folder_id]
         nodes = @space.nodes.files_and_folders.
           where(scoped_parent_folder_id: folder_id).
+          where(state: [nil, "closing", "closed", "open"]).
           includes(:taggings).eager_load(user: :org).
           search_by_tags(params.dig(:filters, :tags)).
           order(order_params).
@@ -531,20 +604,22 @@ module Api
     end
 
     def space_files_cli
-      find_user_space
+      raise ApiError, "Space unreachable" unless find_user_space
       files = []
       folders = []
       folder_id = params[:folder_id]
 
       unless params[:folders_only] == "true"
-        files = @space.nodes.files.
-          where(scoped_parent_folder_id: folder_id).eager_load(user: :org)
+        files = FileService::FilesFilter.call(
+          @space.nodes.files.where(scoped_parent_folder_id: folder_id).
+          eager_load(user: :org), params[:filters]
+        )
       end
       unless params[:files_only] == "true"
         folders = @space.nodes.folders.
           where(scoped_parent_folder_id: folder_id).eager_load(user: :org)
       end
-      space_files = files + folders
+      space_files = folders + files
 
       render json: space_files, root: "files", adapter: :json, each_serializer: CliNodeSerializer,
              meta: cli_meta
@@ -670,6 +745,21 @@ module Api
 
       raise ApiError, "You have no permissions to copy files to the scope '#{scope}'"
     end
+
+    def find_existing_folder_id(scope)
+      if scope == "private"
+        Folder.editable_by(@context).
+          where(parent_folder_id: params[:parent_folder_id]).
+          where(name: params[:name]).
+          first.id
+      else
+        Folder.editable_by(@context).
+          where(scoped_parent_folder_id: params[:parent_folder_id]).
+          where(name: params[:name]).
+          first.id
+      end
+    end
   end
+
   # rubocop:enable Metrics/ClassLength
 end

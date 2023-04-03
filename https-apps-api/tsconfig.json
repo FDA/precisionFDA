@@ -14,6 +14,6 @@
     "baseUrl": "./packages",
     "paths": {
       "@pfda/https-apps-shared": ["shared/src"]
-    }
+    },
   }
 }

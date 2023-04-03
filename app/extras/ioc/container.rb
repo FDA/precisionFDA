@@ -29,7 +29,7 @@ module IOC
         )
       end
 
-      register("https_apps_client") { HttpsAppsClient.new(config[:token], config[:user]) }
+      register("https_apps_client") { HttpsAppsClient.new }
 
       namespace "api" do
         register("user") { DNAnexusAPI.new(config[:token]) }

@@ -32,7 +32,7 @@ describe('SyncFilesStateOperation static methods', () => {
 // Adding the task directly to the queue instead of using queue.createSyncFilesStateTask
 // as that function adds a repeatble job and won't be run during the test
 const createSyncFilesStateTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SYNC_FILES_STATE,
