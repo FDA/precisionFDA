@@ -62,8 +62,8 @@ const Home2 = () => {
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()
   const history = useHistory()
-  const [scopeQuery, setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
-  const [persistedScope, setPersistedScope] = useState<ResourceScope>(scopeQuery || 'me')
+  const [scopeQuery = 'me', setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
+  const [persistedScope, setPersistedScope] = useState<ResourceScope>(scopeQuery)
   const { data: counterData } = useQuery(['counters', persistedScope], () => counterRequest(persistedScope))
   const [activeResource] = useActiveResourceFromUrl('myhome')
 
