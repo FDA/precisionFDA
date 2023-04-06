@@ -1,9 +1,44 @@
-import { NOTIFICATION_ACTION, SEVERITY } from 'shared/src/enums'
+import { Entity, IdentifiedReference, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { BaseEntity } from '../../database/base-entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
+import { User } from '../user'
 
-// TODO to be made entity in near future
-export class Notification {
+@Entity({ tableName: 'notifications' })
+export class Notification extends BaseEntity {
+  @PrimaryKey()
+  id: number
+
+  @Property()
   action: NOTIFICATION_ACTION
+
+  @Property()
   message: string
+
+  @Property()
   severity: SEVERITY
-  userId: number
+
+  @Property()
+  deliveredAt?: Date
+
+  @ManyToOne(() => User)
+  user?: IdentifiedReference<User>
+
+  constructor(user: User | null,
+              action?: NOTIFICATION_ACTION,
+              message?: string,
+              severity?: SEVERITY,
+              createdAt?: Date,
+              updatedAt?: Date,
+  ) {
+    super()
+    if (user !== null) {
+      this.user = Reference.create(user)
+    }
+    if (action) this.action = action
+    if (message) this.message = message
+    if (severity) this.severity = severity
+    if (createdAt) this.createdAt = createdAt
+    if (updatedAt) this.updatedAt = updatedAt
+  }
+
 }

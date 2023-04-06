@@ -1,6 +1,6 @@
 import sinon from 'sinon'
 import Bull from 'bull'
-import { client, queue } from '..'
+import { client, queue, redis } from '..'
 // import { handler } from '../../src/jobs'
 import * as generate from './generate'
 import {
@@ -12,6 +12,7 @@ import {
   FILE_REMOVED_RES,
 } from './mock-responses'
 import { FileCloseParams } from '../platform-client/platform-client.params'
+import {createClient, RedisClient} from 'redis'
 
 const sandbox = sinon.createSandbox()
 
@@ -140,6 +141,9 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
   sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
   sandbox.replace(queue, 'createSyncSpacesPermissionsTask', fakes.queue.createSyncSpacesPermissionsTask)
+  sandbox.stub(redis, 'createRedisClient').returns({
+    publish(channel: string, value: string) { }
+  } as RedisClient)
 }
 
 const mocksReset = () => {

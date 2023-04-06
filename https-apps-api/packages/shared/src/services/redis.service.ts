@@ -4,10 +4,10 @@ import { getLogger } from '../logger'
 
 /**
  * Creates named redis client.
- * 
+ *
  * @param name named ident of the client (api, worker etc.)
- * 
- * @returns 
+ *
+ * @returns
  */
 export const createRedisClient = async (name?: string) => {
   const url = new URL(config.redis.url)
@@ -28,7 +28,7 @@ export const createRedisClient = async (name?: string) => {
     await client.connect()
     if (config.redis.isSecure) {
       //@ts-ignore doesn't compile, but needs to be here
-      await client.auth({ password: config.redis.authPassword })
+      client.auth({ password: config.redis.authPassword })
     }
     getLogger().info('connected to redis')
     return client

@@ -100,9 +100,13 @@ export enum SEVERITY {
 }
 
 export type Notification = {
+  id: number,
   type: string,
   message: string,
   severity: SEVERITY,
+  createdAt: Date,
+  updatedAt: Date,
+  deliveredAt: Date,
 }
 
 export type KeyVal = { [key: string]: number | string | boolean }

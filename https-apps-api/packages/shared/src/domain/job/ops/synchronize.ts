@@ -29,6 +29,48 @@ import { buildEmailTemplate } from '../../email/email.helper'
 import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
 import { EmailSendOperation } from '../../email'
+import { NotificationService } from '../../notification/services/notification.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+
+/**
+ * Checks job status if notifications should be triggered.
+ */
+const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteState: JOB_STATE) => {
+  if (job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING) {
+    await createNotification(
+      em,
+      `Job ${job.name} is running`,
+      SEVERITY.INFO,
+      NOTIFICATION_ACTION.JOB_RUNNING,
+      userId,
+    )
+  }
+  if (job.state !== JOB_STATE.TERMINATED && remoteState === JOB_STATE.TERMINATED) {
+    await createNotification(
+      em,
+      `Job ${job.name} has terminated`,
+      SEVERITY.INFO,
+      NOTIFICATION_ACTION.JOB_TERMINATED,
+      userId,
+    )
+  }
+  if (remoteState === JOB_STATE.FAILED) {
+    await createNotification(
+      em,
+      `Job ${job.name} has failed`,
+      SEVERITY.ERROR,
+      NOTIFICATION_ACTION.JOB_FAILED,
+      userId,
+    )
+  }
+}
+
+const createNotification = async (em: SqlEntityManager, message: string, severity: SEVERITY, action: NOTIFICATION_ACTION, userId: number) => {
+  const notificationService = new NotificationService(em)
+
+  await notificationService.createNotification({message, severity, action, userId,})
+}
 
 // N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
 //      In the future we'd need to rename this to something more specific
@@ -180,6 +222,8 @@ export class SyncJobOperation extends WorkerBaseOperation<
       createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
     }
 
+    await checkJobStatusForNotifications(em, this.ctx.user.id, job, remoteState)
+
     this.ctx.log.info({
       jobId: input.dxid,
       fromState: job.state,
@@ -195,7 +239,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     await em.flush()
 
     // Note(samuel) email has to be sent after em. flush, otherwise failureReason won't be propagated in database
-    // Alternative - pass failure reason and other 
+    // Alternative - pass failure reason and other
     if (remoteState === JOB_STATE.FAILED) {
       this.ctx.log.info({
         failureCounts: platformJobData.failureCounts,

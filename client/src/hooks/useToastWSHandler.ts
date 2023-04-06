@@ -1,9 +1,15 @@
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
+import { confirmNotification } from '../features/home/notifications/notifications.api'
 import { Notification, SEVERITY } from '../features/home/types'
 import { IUser } from '../types/user'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../utils/config'
+import {
+  DEFAULT_RECONNECT_ATTEMPTS,
+  DEFAULT_RECONNECT_INTERVAL,
+  getNodeWsUrl,
+  notificationsConfig,
+} from '../utils/config'
 
 export const useToastWSHandler = (user?: IUser) => {
   const { sendMessage, lastJsonMessage, readyState } = useWebSocket(getNodeWsUrl(), 
@@ -18,24 +24,27 @@ export const useToastWSHandler = (user?: IUser) => {
 
   useEffect(() => {
     if (lastJsonMessage != null) {
+      console.log(`Received notification ${lastJsonMessage}`)
       const notification: Notification = JSON.parse(JSON.stringify(lastJsonMessage))
       switch (notification.severity) {
         case SEVERITY.ERROR : {
-          toast.error(notification.message)
+          toast.error(notification.message, notificationsConfig)
           break
         }
         case SEVERITY.WARN : {
-          toast.warning(notification.message)
+          toast.warning(notification.message, notificationsConfig)
           break
         }
         case SEVERITY.INFO : {
-          toast.success(notification.message)
+          toast.success(notification.message, notificationsConfig)
           break
         }
         default: {
-          toast.error(notification.message)
+          toast.error(notification.message, notificationsConfig)
         }
       }
+      confirmNotification(notification.id)
+          .then(() => console.log(`Notification with id: ${notification.id} has been confirmed`))
     }
   }, [lastJsonMessage])
 }
