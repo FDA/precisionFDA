@@ -80,7 +80,7 @@ FileCloseOperationResponse | null
       let bullJob = await queue.findRepeatable(bullJobId)
       if (bullJob && queue.utils.isJobOrphaned(bullJob)) {
         log.info('FileCloseOperation: Existing SyncFilesStateTask is orphaned, removing it')
-        await queue.removeRepeatableJob(bullJob, queue.getStatusQueue())
+        await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
         bullJob = undefined
       }
 

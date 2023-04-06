@@ -8,6 +8,7 @@
 #  when       :date
 #  content    :text(65535)
 #  user_id    :integer
+#  is_publication    :boolean
 #  video      :string(255)
 #  position   :integer          default(0), not null
 #  published  :boolean

@@ -45,7 +45,7 @@ import { Location } from '../../../types/utils'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 
 const renderOptions = (app: IApp, scopeParamLink: string) => {
-  const columns = [
+  let columns = [
     {
       header: 'location',
       value: 'location',
@@ -70,7 +70,15 @@ const renderOptions = (app: IApp, scopeParamLink: string) => {
     },
   ]
 
-  const list = columns.map((e: any) => (
+    if (app.links.forked_from) {
+      columns.push({
+        header: 'Forked from',
+        value: 'forked_from',
+        link: app.links.forked_from
+      })
+    }
+
+const list = columns.map((e: any) => (
     <MetadataItem key={e.header}>
       <MetadataKey>{e.header}</MetadataKey>
       {e.header === 'location' && !e.link ? (

@@ -16,6 +16,7 @@ class CliNodeSerializer < ApplicationSerializer
     :file_size,
     :scope,
     :space_id,
+    :locked,
   )
 
   attribute :sti_type, key: :type

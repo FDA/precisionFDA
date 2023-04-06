@@ -263,12 +263,12 @@ class AppsController < ApplicationController
 
     @app = App.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
-    if @app.nil?
+    if @app.nil? || @app.https?
       flash[:error] = I18n.t("app_fork_forbidden")
       redirect_to apps_path && return
     end
 
-    attrs = %i(dxid name title version revision readme spec internal release entity_type)
+    attrs = %i(dxid name title version revision readme spec internal release entity_type uid)
     js(
       app: @app.slice(*attrs),
       ubuntu_releases: UBUNTU_RELEASES,

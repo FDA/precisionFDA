@@ -34,7 +34,7 @@ describe('Space.action-policy ', () => {
 		user = create.userHelper.create(em)
 		groupSpace = create.spacesHelper.create(em, generate.space.group())
 		reviewSpace = create.spacesHelper.create(em)
-		lockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
+		lockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
 		create.spacesHelper.addMember(em, { user, space: reviewSpace })
 		guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 		hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })

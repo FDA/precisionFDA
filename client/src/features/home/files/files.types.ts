@@ -18,7 +18,7 @@ export enum FolderActions {
   'Choose Add Option' = 'Choose Add Option',
 }
 
-export type FileStatus = 'closed' | 'closing' | 'open'
+export type FileStatus = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private'
 export type FileType = 'UserFile' | 'Folder' | 'File'
 export type FileOrigin = 'UserFile'

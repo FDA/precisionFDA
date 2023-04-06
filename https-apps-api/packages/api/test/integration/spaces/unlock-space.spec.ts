@@ -28,8 +28,8 @@ describe('PATCH /spaces/:id/unlock', () => {
     em.clear()
     notPermittedUser = create.userHelper.create(em)
     user = create.userHelper.createRSA(em)
-    space = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
-    alreadyUnlockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_ACTIVE })
+    space = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
+    alreadyUnlockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.ACTIVE })
     guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
     hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
@@ -63,7 +63,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     expect(fakes.queue.createEmailSendTaskFake.calledTwice).to.be.true()
     em.clear()
     const unlockedSpace = await em.getRepository(Space).findOneOrFail({ id: space.id })
-    expect(unlockedSpace.state).to.be.equal(SPACE_STATE.STATE_ACTIVE)
+    expect(unlockedSpace.state).to.be.equal(SPACE_STATE.ACTIVE)
   })
 
   context('error states', () => {
@@ -84,7 +84,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     })
 
     it('does not allow to unlock space (space already unlocked) and returns 403', async () => {
-      alreadyUnlockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_ACTIVE })
+      alreadyUnlockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.ACTIVE })
       create.spacesHelper.addMember(em, { user, space: alreadyUnlockedSpace })
       await em.flush()
 

@@ -40,12 +40,14 @@ export const PageContainer = styled.div`
 `
 
 export const PageContainerMargin = styled.div`
+  --container-width: 1330px;
+
   flex: 1 1 auto;
   margin-inline: auto;
-  width: min(100% - 32px, 1330px);
+  width: min(100% - 32px, var(--container-width));
 
   @media(min-width: 1045px) {
-    width: min(100% - 64px, 1330px);
+    width: min(100% - 64px, var(--container-width));
   }
 `
 

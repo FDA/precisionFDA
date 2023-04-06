@@ -15,7 +15,7 @@ const createSendEmailTask = async (
   payload: SendEmailJob['payload'],
   user: SendEmailJob['user'],
 ) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SEND_EMAIL,

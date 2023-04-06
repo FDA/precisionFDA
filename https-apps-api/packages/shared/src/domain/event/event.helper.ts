@@ -5,6 +5,17 @@ import { Folder } from '../user-file/folder.entity'
 import { UserFile } from '../user-file/user-file.entity'
 import { Event } from './event.entity'
 
+const EVENT_TYPES = {
+  FOLDER_CREATED: 'Event::FolderCreated',
+  FOLDER_DELETED: 'Event::FolderDeleted',
+  JOB_CLOSED: 'Event::JobClosed',
+  FOLDER_LOCKED: 'Event::FolderLocked',
+  FOLDER_UNLOCKED: 'Event::FolderUnlocked',
+  FILE_DELETED: 'Event::FileDeleted',
+  FILE_LOCKED: 'Event::FileLocked',
+  FILE_UNLOCKED: 'Event::FileUnlocked',
+}
+
 const createJobClosed = async (user: User, job: Job): Promise<Event> => {
   const event = new Event()
   const app = job.app
@@ -69,16 +80,6 @@ const createFileEvent = async (
     data,
   })
   return event
-}
-
-const EVENT_TYPES = {
-  FOLDER_CREATED: 'Event::FolderCreated',
-  FOLDER_DELETED: 'Event::FolderDeleted',
-  JOB_CLOSED: 'Event::JobClosed',
-  FOLDER_LOCKED: 'Event::FolderLocked',
-  FOLDER_UNLOCKED: 'Event::FolderUnlocked',
-  FILE_LOCKED: 'Event::FileLocked',
-  FILE_UNLOCKED: 'Event::FileUnlocked',
 }
 
 export { EVENT_TYPES, createJobClosed, createFolderEvent, createFileEvent }

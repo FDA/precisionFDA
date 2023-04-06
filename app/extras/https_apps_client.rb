@@ -1,11 +1,8 @@
 # The client for communicating with nodejs-api service.
+# Token and user information is passed using RequestContext
 class HttpsAppsClient # rubocop:disable Metrics/ClassLength
-  # @param token [String] User access token.
-  # @param user [User] A user.
-  def initialize(token, user)
-    @token = token
-    @user = user
-  end
+  # initializes the instance
+  def initialize; end
 
   # User checkup
   # To be run whenever user logs in to make sure sync tasks are
@@ -56,6 +53,26 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/licenses/files",
       { ids: ids },
       Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Start nodes removal job
+  # @param ids [Array of Integers] id's of nodes to be removed
+  def remove_nodes(ids)
+    request(
+      "/nodes/remove",
+      { ids: ids, async: true },
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  # Start nodes removal job in a synchronous way. Used exclusively by CLI
+  # @param ids [Array of Integers] id's of nodes to be removed
+  def cli_remove_nodes(ids)
+    request(
+      "/nodes/remove",
+      { ids: ids, async: false },
+      Net::HTTP::Delete::METHOD,
     )
   end
 
@@ -120,6 +137,75 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # News
+
+  def news_list(params)
+    request(
+      "/news",
+      {},
+      Net::HTTP::Get::METHOD,
+      params,
+    )
+  end
+
+  def news_all(params)
+    request(
+      "/news/all",
+      {},
+      Net::HTTP::Get::METHOD,
+      params,
+    )
+  end
+
+  def news_years
+    request(
+      "/news/years",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def news_create(body)
+    request(
+      "/news",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def news_edit(id, body)
+    request(
+      "/news/#{id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def news_show(id)
+    request(
+      "/news/#{id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def news_delete(id)
+    request(
+      "/news/#{id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def news_positions(body)
+    request(
+      "/news/positions",
+      body,
+      Net::HTTP::Post::METHOD,
+      body,
+    )
+  end
+
   # Close an uploaded file or asset
   # @param file_uid [String] uid of the file or asset
   def file_close(file_uid)
@@ -142,6 +228,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Sends notification
+  # @param notification object
+  def send_notification(notification)
+    request(
+      "/notifications",
+      notification,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   # Unlock a folder/file.
   # @param ids [Array] Folders/Files ID.
   def nodes_unlock(ids)
@@ -151,6 +247,27 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
         ids: ids,
       },
       Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def cli_node_search(arg, type, space_id, folder_id)
+    request(
+      "/cli/nodes",
+      {
+        arg: arg,
+        spaceId: space_id,
+        folderId: folder_id,
+        type: type,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def cli_latest_version
+    request(
+      "/cli/version/latest",
+      {},
+      Net::HTTP::Get::METHOD,
     )
   end
 
@@ -383,6 +500,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       Net::HTTP::Patch::METHOD,
     )
   end
+
   # ┌─────────────────────────┐
   # │                         │
   # │   TODO: category name   │
@@ -445,6 +563,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   rescue Errno::ECONNREFUSED
     raise Error, "Can't connect to nodejs-api service"
   end
+
   # rubocop:enable Metrics/ParameterLists
 
   # Returns connection options.
@@ -454,10 +573,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   def auth_query
+    unless RequestContext.instance
+      Rails.logger.info("RequestContext.instance is not present, auth query part will be empty")
+      return {}
+    end
+
     {
-      id: @user&.id,
-      dxuser: @user&.dxuser,
-      accessToken: @token,
+      id: RequestContext.instance.user_id,
+      dxuser: RequestContext.instance.username,
+      accessToken: RequestContext.instance.token,
     }.compact_blank
   end
 

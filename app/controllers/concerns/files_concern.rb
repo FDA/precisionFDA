@@ -10,9 +10,9 @@ module FilesConcern
     states = params[:states]
 
     files = if params[:editable]
-      UserFile.real_files.editable_by(context).accessible_by_private
+      UserFile.real_files.not_removing.editable_by(context).accessible_by_private
     else
-      UserFile.real_files.accessible_by(context)
+      UserFile.real_files.not_removing.accessible_by(context)
     end
 
     if scopes.present?
