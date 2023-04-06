@@ -29,7 +29,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
   }
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-organize"
       headerText={`Open ${momoSelected.length} items(s)`}

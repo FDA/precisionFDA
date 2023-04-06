@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { StyledInput } from '../../../components/InputText'
 import { ButtonSolidBlue } from '../../../components/Button'
@@ -14,13 +14,13 @@ type Props = {
 
 const LimitButtonWrapper = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 1px;
+  margin-left: 16px;
 `
 
 export const UserLimitForm = ({ buttonText, selectedUsers, onSubmit, onChange, isSubmitButtonDisabled }: Props) => (
   <LimitButtonWrapper>
     <StyledInput
-      // value={userLimitInput}
       type="number"
       step={0.01}
       onChange={(e) => {

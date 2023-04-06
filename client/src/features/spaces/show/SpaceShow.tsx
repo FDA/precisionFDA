@@ -106,32 +106,30 @@ const Spaces2 = ({
           </SpaceMainInfo>
 
           <ButtonRow>
-            <Row>
-              {!spaceActions['Edit Space']?.shouldHide && (
-                <ActionButton
-                  data-testid="edit-space-button"
-                  onClick={() => history.push(`/spaces/${space.id}/edit`)}
-                >
-                  Space Settings
-                </ActionButton>
-              )}
-              {!spaceActions['Duplicate Space']?.shouldHide && (
-                <ActionButton
-                  data-testid="duplicate-space-button"
-                  onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
-                >
-                  Duplicate Space
-                </ActionButton>
-              )}
-              {!spaceActions['Fix Permissions']?.shouldHide && (
-                <ActionButton
-                  data-testid="fix-space-button"
-                  onClick={() => fixSpaceMutation.mutate({ id: space.id })}
-                >
-                  Fix Guest Side Permissions
-                </ActionButton>
-              )}
-            </Row>
+            {!spaceActions['Edit Space']?.shouldHide && (
+              <ActionButton
+                data-testid="edit-space-button"
+                onClick={() => history.push(`/spaces/${space.id}/edit`)}
+              >
+                Space Settings
+              </ActionButton>
+            )}
+            {!spaceActions['Duplicate Space']?.shouldHide && (
+              <ActionButton
+                data-testid="duplicate-space-button"
+                onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
+              >
+                Duplicate Space
+              </ActionButton>
+            )}
+            {!spaceActions['Fix Permissions']?.shouldHide && (
+              <ActionButton
+                data-testid="fix-space-button"
+                onClick={() => fixSpaceMutation.mutate({ id: space.id })}
+              >
+                Fix Guest Side Permissions
+              </ActionButton>
+            )}
           </ButtonRow>
         </TopSpaceHeader>
         <SpaceTypeHeader expandedSidebar={expandedSidebar}>

@@ -29,6 +29,11 @@ export const StyledPagination = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: 5px;
+  font-size: 12px;
+
+  input, select, button {
+    font-size: 12px;
+  }
 `
 
 export const ItemsOf = styled.div`

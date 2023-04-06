@@ -6,6 +6,7 @@ import { BackLink } from '../../components/Page/PageBackLink'
 import { MainBanner } from '../../components/Banner'
 import { commonStyles } from '../../styles/commonStyles'
 import { colors, padding, sizing, fontSize, fontWeight } from '../../styles/theme'
+import { compactScrollBar } from '../../components/Page/styles'
 
 
 export const StyledBackLink = styled(BackLink)`
@@ -123,6 +124,7 @@ export const Row = styled.div`
   align-items: stretch;
   flex: 1 1 auto;
   flex-direction: row;
+  height: 0;
 `
 export const StyledMenu = styled.div<{ expanded: boolean }>`
   display: flex;
@@ -161,6 +163,9 @@ export const Main = styled.div`
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
+  ${compactScrollBar}
 `
 export const Expand = styled.div`
   position: relative;
@@ -180,7 +185,10 @@ export const Fill = styled.div`
 `
 
 export const StyledHomeTable = styled.div`
+  overflow-y: auto;
   font-size: 14px;
+  flex: 1;
+  ${compactScrollBar}
 `
 
 export const QuickActions = styled.div`
@@ -237,6 +245,7 @@ export const StyledRunByYouLink = styled.a`
 
 export const StyledPaginationSection = styled.div`
   padding-left: 12px;
-  padding-top: 32px;
-  padding-bottom: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-top: 1px solid #d5d5d5;
 `

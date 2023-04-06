@@ -10,7 +10,7 @@ export function useAttachToModal(
 ) {
   const { isShown, setShowModal } = useModal()
 
-  const modalComp = (
+  const modalComp = isShown && (
     <AttachToModal
       isShown={isShown}
       hideAction={() => setShowModal(false)}
@@ -18,6 +18,7 @@ export function useAttachToModal(
       itemsType={type}
     />
   )
+
   return {
     modalComp,
     setShowModal,

@@ -136,23 +136,27 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <StyledPaginationSection>
-        <Pagination
-          page={data?.meta?.pagination?.current_page!}
-          totalCount={data?.meta?.pagination?.total_count!}
-          totalPages={data?.meta?.pagination?.total_pages!}
-          perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.dbclusters?.length,
-            data?.meta?.pagination?.total_pages,
-          )}
-          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-          isNextData={data?.meta?.pagination?.next_page! !== null}
-          setPage={setPageParam}
-          onPerPageSelect={setPerPageParam}
-        />
-      </StyledPaginationSection>
+
+      {!hidePagination(
+        query.isFetched,
+        data?.dbclusters?.length,
+        data?.meta?.pagination?.total_pages,
+      ) && (
+        <StyledPaginationSection>
+          <Pagination
+            page={data?.meta?.pagination?.current_page}
+            totalCount={data?.meta?.pagination?.total_count}
+            totalPages={data?.meta?.pagination?.total_pages}
+            perPage={perPageParam}
+            isHidden={false}
+            isPreviousData={data?.meta?.pagination?.prev_page !== null}
+            isNextData={data?.meta?.pagination?.next_page !== null}
+            setPage={p => setPageParam(p, 'replaceIn')}
+            onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          />
+        </StyledPaginationSection>
+      )}
+
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit Database Info']?.modal}

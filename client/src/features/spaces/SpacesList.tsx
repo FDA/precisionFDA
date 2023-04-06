@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../components/Button'
-import { PageTitle } from '../../components/Page/styles'
+import { compactScrollBar, Filler, PageTitle } from '../../components/Page/styles'
 import { hidePagination, Pagination } from '../../components/Pagination'
 import { EmptyTable, ReactTableStyles } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
@@ -107,35 +107,43 @@ const SpacesList = () => {
         colWidths={colWidths}
       />
 
-      <StyledPaginationSection>
-        {meta?.pagination && (
-          <Pagination
-            page={meta?.pagination?.current_page}
-            totalCount={meta?.pagination?.total_count}
-            totalPages={meta?.pagination?.total_pages}
-            perPage={pagination.perPageParam}
-            isHidden={hidePagination(
-              query.isFetched,
-              data?.spaces?.length,
-              meta?.pagination?.total_pages,
-            )}
-            isPreviousData={meta?.pagination?.prev_page !== null}
-            isNextData={meta?.pagination?.next_page !== null}
-            setPage={p => pagination.setPageParam(p, 'replaceIn')}
-            onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
-          />
+      {!hidePagination(
+          query.isFetched,
+          data?.spaces?.length,
+          meta?.pagination?.total_pages,
+        ) && (
+          <StyledPaginationSection>
+            <Pagination
+              page={meta?.pagination?.current_page}
+              totalCount={meta?.pagination?.total_count}
+              totalPages={meta?.pagination?.total_pages}
+              perPage={pagination.perPageParam}
+              isHidden={false}
+              isPreviousData={meta?.pagination?.prev_page !== null}
+              isNextData={meta?.pagination?.next_page !== null}
+              setPage={p => pagination.setPageParam(p, 'replaceIn')}
+              onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
+            />
+          </StyledPaginationSection>
         )}
-      </StyledPaginationSection>
     </>
   )
 }
 
 const StyledTable = styled.div`
+  overflow-x: auto;
+  overflow-y: auto;
+  flex-grow: 1;
+  height: 0;
+
+  ${compactScrollBar}
+
   ${ReactTableStyles} {
     margin-inline: auto;
     width: min(100% - 32px, 100%);
     font-size: 14px;
     .table {
+      border-left:1px solid #d5d5d5;
       .tr {
         height: 56px;
         .td {
@@ -198,6 +206,7 @@ const TableTable = ({
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
       />
+      <Filler size={16} />
     </StyledTable>
   )
 }
