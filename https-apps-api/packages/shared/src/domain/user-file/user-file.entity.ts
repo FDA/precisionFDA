@@ -32,22 +32,14 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   project: string
 
   @Property()
-  name: string
-
-  @Property()
   description?: string
 
   @Property()
+  //@ts-ignore IFileOrAsset introduced state as string
   state: FILE_STATE
 
   @Property()
   entityType: FILE_ORIGIN_TYPE
-
-  @Property({ unique: true })
-  uid: string
-
-  @Property()
-  scope: string
 
   @Property({ type: 'bigint' })
   fileSize?: number
@@ -60,7 +52,7 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
   parentType: PARENT_TYPE
 
-  @Property({ fieldName: 'parent_folder_id' })
+  @Property()
   parentFolderId?: number
 
   @Property()

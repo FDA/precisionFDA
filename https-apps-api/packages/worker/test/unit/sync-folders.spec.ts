@@ -45,11 +45,12 @@ describe('syncFolders operation', () => {
     // todo: complete test of DB entry shape
     expect(res).to.be.an('array').with.lengthOf(1)
     expect(res[0]).to.have.property('name', 'foo')
+    expect(res[0]).to.not.have.own.property('parentFolder')
     expect(res[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
 
     const loaded_from_db = await em.findOneOrFail(Folder, res[0].id)
     expect(loaded_from_db).to.have.property('name', 'foo')
-    expect(loaded_from_db).to.have.property('parentFolderId', null)
+    expect(loaded_from_db.parentFolder).to.equal(null)
     expect(loaded_from_db).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
   })
 

@@ -21,6 +21,11 @@ export const ExpertSection = styled.div`
   margin-bottom: 32px;
 `
 
+export const Hr = styled.div`
+  border-bottom: 1px solid #dbdbdb;
+  margin: 1rem 0;
+`
+
 export const CommunityParticipants = styled.div`
   background-color: ${theme.colors.subtleBlue};
   margin: 0;

@@ -18,8 +18,8 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   // This also cleans up job sync tasks created before we assigned unique IDs
   //
   log.info('CleanupWorkerQueueOperation: Cleaning up status queue')
-  const statusQueue = queue.getStatusQueue()
-  const repeatableJobs = await statusQueue.getRepeatableJobs()
+  const mainQueue = queue.getMainQueue()
+  const repeatableJobs = await mainQueue.getRepeatableJobs()
 
   const jobRepo = em.getRepository(Job)
   const removedRepeatableJobs: any[] = []
@@ -42,7 +42,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
           key: job.key,
           hoursSinceNext,
         })
-        statusQueue.removeRepeatableByKey(job.key)
+        mainQueue.removeRepeatableByKey(job.key)
       }
       else if (isStateTerminal(jobFromDb.state)) {
         // Removing job sync if the job has terminated
@@ -56,7 +56,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
           key: job.key,
           hoursSinceNext,
         })
-        statusQueue.removeRepeatableByKey(job.key)
+        mainQueue.removeRepeatableByKey(job.key)
       }
     }
     else {
@@ -72,12 +72,12 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
       // The above is to inspect how often we get jobs whose 'next'
       // property in the past, after we have cleaned up the junk from existing queue
       // Leaving the above for the sake of studying the queue state in staging and production
-      // statusQueue.removeRepeatableByKey(job.key)
+      // mainQueue.removeRepeatableByKey(job.key)
     }
   }
   log.info({ removedRepeatableJobs }, 'CleanupWorkerQueueOperation: Removed orphaned repeatable jobs')
 
-  const failedStatusJobs = await clearFailedJobs(statusQueue, log)
+  const failedStatusJobs = await clearFailedJobs(mainQueue, log)
 
   // Cleanup file sync queue
   //

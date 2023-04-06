@@ -39,7 +39,7 @@ const createSyncWorkstationFilesTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES,

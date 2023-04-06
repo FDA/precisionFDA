@@ -2,7 +2,7 @@ import { queue } from '@pfda/https-apps-shared'
 
 // empty queue
 const emptyDefaultQueue = async () => {
-  const defaultQueue = queue.getStatusQueue()
+  const defaultQueue = queue.getMainQueue()
   await defaultQueue.empty()
 }
 

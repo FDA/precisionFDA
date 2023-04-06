@@ -7,6 +7,8 @@ _Last updated: 25.11.2022_
 ```bash
 # setup that runs db migrations (keeps db and web container running)
 make prepare-db
+# setup the test db for unit tests
+make prepare-db-test
 # run the stack
 make run
 # cleanup stack

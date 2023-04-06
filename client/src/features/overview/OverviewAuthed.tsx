@@ -32,6 +32,7 @@ import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import {
   CommunityParticipants,
   ExpertSection,
+  Hr,
   InfoRow,
   PFDATeamSection,
 } from './styles'
@@ -259,8 +260,10 @@ export const OverviewAuthed = () => {
             <RightSideItem>
               <SectionTitle>Latest News</SectionTitle>
               <OverviewNewsList pick={3} />
-              <hr />
+              <Hr />
               <Link to="/news">View All News</Link>
+              <Hr />
+              <Link to="/news?type=publication">View All Publications</Link>
             </RightSideItem>
           </RightSide>
         </PageRow>

@@ -72,6 +72,7 @@ class AppService
         entity_type: opts[:entity_type] || App::TYPE_REGULAR,
         user: user,
         scope: scope,
+        forked_from: opts[:forked_from],
         app_series: app_series,
         input_spec: opts[:input_spec],
         output_spec: opts[:output_spec],

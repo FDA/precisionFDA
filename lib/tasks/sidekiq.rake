@@ -1,5 +1,5 @@
 namespace :sidekiq do
-  def run
+  def inspect
     # See queues
     puts "Sidekiq::Queue.all"
     queues = Sidekiq::Queue.all
@@ -22,6 +22,6 @@ namespace :sidekiq do
   end
 
   task inspect: :environment do
-    run
+    inspect
   end
 end

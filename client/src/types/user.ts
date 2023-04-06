@@ -68,4 +68,5 @@ export interface IUser {
   last_name: string
   links: any
   handle: string
+  session_id: string
 }

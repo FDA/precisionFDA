@@ -95,6 +95,8 @@ endif
 # NOTE(samuel) prepare-db is a temporary command mostly useful for QAs, until db waiting for nodejs-api containers is implemented
 prepare-db:
 	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build $(PREPARE_DB_SERVICES)
+prepare-db-test:
+	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) run -e RAILS_ENV=test --name web_prepare-db-test --rm $(PREPARE_DB_SERVICES)
 run:
 	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) up --build
 stop:

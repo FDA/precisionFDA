@@ -139,18 +139,26 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.3 (2023-03-27)
+- improved syntax of commands 
+- added support for multiple files/folders to upload-file and download commands.
+- New feature - mkdir; create new folders in any location
+- New feature - rmdir; delete folders from any location
+- New feature - rm; delete files from any location
+- New feature - head, cat; print content of a file
+
+
 ### 2.2.1 (2022-12-20)
 
 - improved output of ls command
-
-- added optional overwrite flag for download command if needed
+- added `-overwrite` flag for download command
 
 ### 2.2 (2022-12-07)
 
 - New feature - ls; list files from private home or a space
 - New feature - list-spaces; list all available spaces
 - New feature - describe-app; describe-workflow; describe the entity
-- Added new `--help` flag for all commands with examples and brief instructions
+- Added new `-help` flag for all commands with examples and brief instructions
 
 ### 2.1.2 (2022-08-03)
 
@@ -165,9 +173,9 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 ### 2.1 (2022-02-22)
 
 - The CLI can now download files from private home or a space
-- When uploading files, add the --space-id option to specify a space
-- Specifying --folder-id will allow files to be uploaded to a specific folder
-- --version flag now prints FIPS only mode confirmation
+- When uploading files, add the -space-id option to specify a space
+- Specifying -folder-id will allow files to be uploaded to a specific folder
+- -version flag now prints FIPS only mode confirmation
 
 ### 2.0.1 (2021-08-26)
 

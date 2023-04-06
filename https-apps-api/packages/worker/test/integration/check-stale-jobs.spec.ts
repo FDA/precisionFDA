@@ -13,7 +13,7 @@ const createCheckStaleJobsTask = async (
   user: CheckStaleJobsJob['user'],
 ) => {
   const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.CHECK_STALE_JOBS}` }
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.CHECK_STALE_JOBS,

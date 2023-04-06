@@ -12,7 +12,7 @@ import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
 import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclusters.handler'
 import { syncSpacesPermissionsHandler } from './sync-spaces-permissions.handler'
 import { checkUserJobsHandler } from './check-user-jobs.handler'
-
+import { removeNodesHandler } from './remove-nodes.handler'
 
 export const handler = async (job: Job<queue.types.Task>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -40,6 +40,9 @@ export const handler = async (job: Job<queue.types.Task>) => {
       // not used at the moment -> the job is never put to queue
       // TODO(samuel) - typescript fix discriminated union type resolution, to avoid "as any"
       await checkStaleJobsHandler(job as any)
+      return
+    case queue.types.TASK_TYPE.REMOVE_NODES:
+      await removeNodesHandler(job)
       return
     case queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS:
       await checkNonTerminatedDbClustersHandler(job as any)
