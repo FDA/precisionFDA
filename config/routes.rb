@@ -254,6 +254,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :notifications do
+        member do
+          put :update
+        end
+      end
+
       resources :spaces, only: %i(index show create update) do
         collection do
           get :cli

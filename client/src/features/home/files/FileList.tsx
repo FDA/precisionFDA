@@ -87,7 +87,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   useEffect(() => {
     if (lastJsonMessage != null) {
       const notification = JSON.parse(JSON.stringify(lastJsonMessage))
-      if (notification.action === 'NODES_REMOVED') {
+      if (['NODES_REMOVED', 'NODES_COPIED'].includes(notification.action)) {
         queryCache.invalidateQueries(['files'])
         queryCache.invalidateQueries(['counters'])
       }

@@ -216,6 +216,19 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Update notification's delivered date time
+  # @param notification_id [String] id of the notification
+  # @param delivered_at [DateTime] date and time of delivery
+  def update_notification(notification_id, delivered_at)
+    request(
+      "/notifications/#{notification_id}",
+      {
+        deliveredAt: delivered_at,
+      },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
   # Lock a folder/file.
   # @param ids [Array] Folders/Files ID.
   def nodes_lock(ids)

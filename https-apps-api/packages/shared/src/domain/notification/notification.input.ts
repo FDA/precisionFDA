@@ -1,10 +1,12 @@
-import { NOTIFICATION_ACTION, SEVERITY } from 'shared/src/enums'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../src/enums'
 
 type NotificationInput = {
+  id?: number
   action: NOTIFICATION_ACTION
   message: string
   severity: SEVERITY
-  userId: number
+  deliveredAt?: Date
+  userId?: number
 }
 
 export { NotificationInput }

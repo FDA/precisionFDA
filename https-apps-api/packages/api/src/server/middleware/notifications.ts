@@ -4,7 +4,8 @@ import ws from 'ws'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { user as userDomain, redis, database } from '@pfda/https-apps-shared'
 import { log } from '../../logger'
-import { UserCtx } from 'shared/src/types'
+import { UserCtx } from '@pfda/https-apps-shared/src/types'
+import { notification as notificationDomain } from '@pfda/https-apps-shared'
 
 // list of client connections grouped together by user id for faster access
 const clientConnections = new Map<number, WebSocketConnection[]>()
@@ -24,7 +25,7 @@ const connectionsCleanup = () => {
 
 const storeConnection = (user: userDomain.User, wsc: WebSocketConnection) => {
   if (!clientConnections.get(user.id) || clientConnections.get(user.id)?.length === 0) {
-    log.info(`store connection ${wsc}`)
+    log.info(`Store WS connection`)
     clientConnections.set(user.id, [wsc])
   } else {
     clientConnections.get(user.id)?.push(wsc)
@@ -33,13 +34,14 @@ const storeConnection = (user: userDomain.User, wsc: WebSocketConnection) => {
   log.info(`Count of connectedClients ${clientConnections.size}`)
 }
 
-const authenticateUserConnection = (connection: any, message: any) => {
+const authenticateUserConnection = async (connection: any, message: any) => {
+  const notificationService = new notificationDomain.NotificationService(database.orm().em.fork() as SqlEntityManager)
   const authSessionOp = new userDomain.AuthSessionOperation({
     log,
     em: database.orm().em as SqlEntityManager,
     user: {} as UserCtx,
   })
-  authSessionOp.execute(message.session_id)
+  const user = await authSessionOp.execute(message.session_id)
     .then(user => {
       const wsc: WebSocketConnection = {
         connection,
@@ -48,6 +50,11 @@ const authenticateUserConnection = (connection: any, message: any) => {
         userId: user.id,
       }
       storeConnection(user, wsc)
+      notificationService.getUnreadNotifications(user.id).then(unread => {
+        unread.forEach(unreadNotification => {
+          connection.send(JSON.stringify(unreadNotification))
+        });
+      })
     })
     .catch(error => {
       log.error(`WebSocket connection fails. ${error}`)
@@ -77,7 +84,9 @@ export const setupWSServer = async (server: http.Server) => {
   client.subscribe(redis.NOTIFICATIONS_QUEUE, eventPayload => {
     //@ts-ignore compilation says it's instance of Error, but it's actually a string
     const notification = JSON.parse(eventPayload)
-    const wscs = clientConnections.get(notification.userId)
+    const userId = notification.user.id
+    notification.user = null // not sending user info to client
+    const wscs = clientConnections.get(userId)
     wscs?.forEach(wsc => {
       try {
         log.info(`sending notification to client ${JSON.stringify(notification)}`)

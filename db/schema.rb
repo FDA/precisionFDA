@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_22_132522) do
+ActiveRecord::Schema.define(version: 2023_03_28_102011) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -512,6 +512,17 @@ ActiveRecord::Schema.define(version: 2023_03_22_132522) do
     t.integer "user_id"
     t.text "data"
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
+  end
+
+  create_table "notifications", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.string "action", null: false
+    t.string "message", limit: 4096
+    t.string "severity", null: false
+    t.integer "user_id"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "org_action_requests", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
