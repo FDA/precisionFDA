@@ -1,15 +1,17 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
+import styled from 'styled-components'
 import { useImmer } from 'use-immer'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useQueryParam } from 'use-query-params'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll, StyledModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
+import { addData } from '../../../spaces/spaces.api'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
-import { addData } from '../../../spaces/spaces.api'
-import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { ButtonRow, Content, Footer } from '../../../modal/styles'
+
 
 interface CustomDataNode extends DataNode {
   uid?: string
@@ -81,7 +83,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
     })
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-add-to-space"
       headerText="Add Files To Space"
@@ -92,7 +94,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
         headerText="Add Files To Space"
         hide={() => setShowModal(false)}
       />
-      <Content overflowContent={false}>
+      <StyledModalScroll>
         <FileTree
           onExpand={() => {}}
           loadData={loadData}
@@ -101,7 +103,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
           treeData={treeData}
           onCheck={onFileCheck as any}
         />
-      </Content>
+      </StyledModalScroll>
       <Footer>
         <ButtonRow>
           <Button

@@ -190,7 +190,6 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         </ActionsRow>
         <ActionsRow>
           {breadcrumbs(path, data?.meta?.path, scope)}
-          {status === 'loading' && <LoadingList>Loading...</LoadingList>}
         </ActionsRow>
       </div>
 
@@ -212,23 +211,25 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         shouldResetFilters={[folderIdParam, scope]}
       />
       
-      <StyledPaginationSection>
-        <Pagination
-          page={data?.meta?.pagination?.current_page}
-          totalCount={data?.meta?.pagination?.total_count}
-          totalPages={data?.meta?.pagination?.total_pages}
-          perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.files?.length,
-            data?.meta?.pagination?.total_pages,
-            )}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
-          setPage={p => setPageParam(p, 'replaceIn')}
-          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
-        />
-      </StyledPaginationSection>
+      {!hidePagination(
+        query.isFetched,
+        data?.files?.length,
+        data?.meta?.pagination?.total_pages,
+      ) && (
+        <StyledPaginationSection>
+          <Pagination
+            page={data?.meta?.pagination?.current_page}
+            totalCount={data?.meta?.pagination?.total_count}
+            totalPages={data?.meta?.pagination?.total_pages}
+            perPage={perPageParam}
+            isHidden={false}
+            isPreviousData={data?.meta?.pagination?.prev_page !== null}
+            isNextData={data?.meta?.pagination?.next_page !== null}
+            setPage={p => setPageParam(p, 'replaceIn')}
+            onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          />
+        </StyledPaginationSection>
+      )}
 
       {listActions['Add Folder']?.modal}
       {listActions['Add Files']?.modal}

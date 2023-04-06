@@ -46,7 +46,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid={`modal-${resource}-delete`}
       headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
