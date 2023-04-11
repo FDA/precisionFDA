@@ -55,6 +55,47 @@ describe('Notification service tests', () => {
     redisClientMock.verify()
   })
 
+  it('Test create Notification with linkTitle and linkUrl', async() => {
+    const redisClient = {
+      publish: function(channel: string, message: string) {}
+    } as RedisClientType
+    const redisClientMock = sinon.mock(redisClient)
+    redisClientMock.expects('publish').withArgs(NOTIFICATIONS_QUEUE,
+      // N.B. ordering of keys seem to matter here
+      JSON.stringify({
+        id: 1,
+        action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
+        message: "msg",
+        severity: SEVERITY.WARN,
+        meta: {
+          linkTitle: 'hello',
+          linkUrl: 'https://world.xyz',
+        },
+      }))
+    // @ts-ignore
+    notificationService = new NotificationService(em, redisClient)
+    await notificationService.createNotification({
+      action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
+      message: "msg",
+      meta: {
+        linkTitle: 'hello',
+        linkUrl: 'https://world.xyz',
+      },
+      severity: SEVERITY.WARN,
+    })
+
+    const [notifications, count] = await em.findAndCount(notifDomain.Notification, {})
+    expect(count).to.be.equal(1)
+    expect(notifications[0].action).to.be.equal(NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED)
+    expect(notifications[0].message).to.be.equal("msg")
+    expect(notifications[0].meta).to.deep.equal({
+      linkTitle: 'hello',
+      linkUrl: 'https://world.xyz',
+    })
+    expect(notifications[0].severity).to.be.equal(SEVERITY.WARN)
+    redisClientMock.verify()
+  })
+
   it('Test get unread Notifications', async() => {
     const savedNotification = new notifDomain.Notification(
       user1, NOTIFICATION_ACTION.NODES_REMOVED, "test", SEVERITY.ERROR

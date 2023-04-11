@@ -24,7 +24,7 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { AppList } from '../../home/apps/AppList'
 import { AppsShow } from '../../home/apps/AppsShow'
 import { ExecutionList } from '../../home/executions/ExecutionList'
-import { JobShow } from '../../home/executions/JobShow'
+import { ExecutionDetails } from '../../home/executions/details/ExecutionDetails'
 import { FileList } from '../../home/files/FileList'
 import { FileShow } from '../../home/files/show/FileShow'
 import {
@@ -235,7 +235,7 @@ const Spaces2 = ({
                 exact
                 path={`/spaces/${space.id}/executions/:executionUid`}
               >
-                <JobShow spaceId={space.id} />
+                <ExecutionDetails spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
                 <MembersList space={space} />

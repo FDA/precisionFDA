@@ -1,3 +1,4 @@
+import { omit } from 'ramda'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
@@ -129,6 +130,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Attach to...']?.modal}
+      {actions['Snapshot']?.modal}
       {actions['Terminate']?.modal}
     </ErrorBoundary>
   )

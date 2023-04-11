@@ -32,44 +32,45 @@ import { EmailSendOperation } from '../../email'
 import { NotificationService } from '../../notification/services/notification.service'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { getServiceFactory } from '../../../services/service-factory'
 
 /**
  * Checks job status if notifications should be triggered.
  */
 const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteState: JOB_STATE) => {
+  const notificationService = getServiceFactory().getNotificationService(em)
+  const meta = {
+    linkTitle: 'View Execution',
+    linkUrl: `/home/executions/${job.uid}`,
+  }
+
   if (job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING) {
-    await createNotification(
-      em,
-      `Job ${job.name} is running`,
-      SEVERITY.INFO,
-      NOTIFICATION_ACTION.JOB_RUNNING,
+    await notificationService.createNotification({
+      message: `Job ${job.name} is running`,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.JOB_RUNNING,
       userId,
-    )
+      meta,
+    })
   }
   if (job.state !== JOB_STATE.TERMINATED && remoteState === JOB_STATE.TERMINATED) {
-    await createNotification(
-      em,
-      `Job ${job.name} has terminated`,
-      SEVERITY.INFO,
-      NOTIFICATION_ACTION.JOB_TERMINATED,
+    await notificationService.createNotification({
+      message: `Job ${job.name} has terminated`,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.JOB_TERMINATED,
       userId,
-    )
+      meta,
+    })
   }
   if (remoteState === JOB_STATE.FAILED) {
-    await createNotification(
-      em,
-      `Job ${job.name} has failed`,
-      SEVERITY.ERROR,
-      NOTIFICATION_ACTION.JOB_FAILED,
+    await notificationService.createNotification({
+      message: `Job ${job.name} has failed`,
+      severity: SEVERITY.ERROR,
+      action: NOTIFICATION_ACTION.JOB_FAILED,
       userId,
-    )
+      meta,
+    })
   }
-}
-
-const createNotification = async (em: SqlEntityManager, message: string, severity: SEVERITY, action: NOTIFICATION_ACTION, userId: number) => {
-  const notificationService = new NotificationService(em)
-
-  await notificationService.createNotification({message, severity, action, userId,})
 }
 
 // N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps

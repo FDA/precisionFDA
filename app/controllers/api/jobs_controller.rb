@@ -234,6 +234,10 @@ module Api
       raise ApiError, "You have no permissions to access this job" unless job
 
       redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
+
+      # Update the API key in the background
+      refresh_api_key_internal(job, background: true)
+
       redirect_to(job.https_job_external_url) && return if Utils.development_or_test?
 
       api = DIContainer.resolve("api.auth_user")
@@ -247,7 +251,66 @@ module Api
       redirect_to authorized_job_uri.to_s
     end
 
+    # PATCH /api/jobs/:id/refresh_api_key
+    # Refresh the pFDA CLI API key in the workstation
+    # The :id used should be the job's dxid
+    def refresh_api_key
+      job = Job.accessible_by(@context).find_by(dxid: params[:id])
+      raise ApiError, "You have no permissions to access this job" unless job
+
+      response = refresh_api_key_internal(job, background: false)
+      render json: response
+    rescue StandardError => e
+      raise ApiError, e.message
+    end
+
+    def refresh_api_key_internal(job, background: false)
+      api = DIContainer.resolve("api.auth_user")
+      code = api.get_https_job_auth_token(job)
+      key = generate_auth_key
+
+      return https_apps_client.workstation_set_api_key(job.dxid, code, key) unless background
+
+      context = RequestContext.instance.dup
+      # rubocop:disable Style/BlockDelimiters
+      Thread.start {
+        begin
+          RequestContext.begin_request(context.user_id, context.username, context.token)
+          https_apps_client.workstation_set_api_key(job.dxid, code, key)
+        ensure
+          RequestContext.end_request
+        end
+      }
+      # rubocop:enable Style/BlockDelimiters
+    end
+
+    # PATCH /api/jobs/:id/snapshot
+    # Ask the workstation to create a snapshot
+    #
+    # Note: The :id used above should be the job's dxid
+    def snapshot
+      job = Job.accessible_by(@context).find_by(dxid: params[:id])
+      raise ApiError, "You have no permissions to access this job" unless job
+
+      api = DIContainer.resolve("api.auth_user")
+      auth_code = api.get_https_job_auth_token(job)
+      api_key = generate_auth_key
+
+      response = https_apps_client.workstation_snapshot(
+        params[:id],
+        auth_code,
+        api_key,
+        params[:name],
+        params[:terminate],
+      )
+      render json: response
+    rescue StandardError => e
+      raise ApiError, e.message
+    end
+
+    # PATCH /api/jobs/:id/sync_files
     # Trigger files sync from a running workstation
+    # The :id used should be the job's dxid
     def sync_files
       service = Jobs::SyncFilesService.call(params[:id], @context)
       raise ApiError, service.message unless service.success?
@@ -422,6 +485,10 @@ module Api
       serialized_workflow.title += " (#{index + 1} of #{batch.size})"
     end
     # rubocop:enable Metrics/MethodLength
+
+    def https_apps_client
+      DIContainer.resolve("https_apps_client")
+    end
   end
   # rubocop:enable Metrics/ClassLength
 end

@@ -1,5 +1,5 @@
 # App serializer.
-class AppSerializer < ApplicationSerializer
+class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLength
   attributes(
     :id,
     :uid,
@@ -12,6 +12,8 @@ class AppSerializer < ApplicationSerializer
     :created_at,
     :created_at_date_time,
     :updated_at,
+    :platform_tags,
+    :workstation_api_version,
     :location,
     :readme,
     :scope,
@@ -31,6 +33,7 @@ class AppSerializer < ApplicationSerializer
   attribute :latest_revision, key: :latest_revision
   attribute :scope_id, key: :scope
   delegate :updated_at, to: :object
+  delegate :workstation_api_version, to: :object
 
   def scope_id
     object.scope

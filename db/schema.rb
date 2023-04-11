@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_28_102011) do
+ActiveRecord::Schema.define(version: 2023_04_10_200330) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -522,6 +522,7 @@ ActiveRecord::Schema.define(version: 2023_03_28_102011) do
     t.datetime "delivered_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "meta", limit: 4096
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
