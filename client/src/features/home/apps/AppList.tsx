@@ -4,13 +4,16 @@ import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
@@ -19,7 +22,6 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppsColumns } from './useAppsColumns'
 import { useAppSelectionActions } from './useAppSelectionActions'
-import { useAuthUser } from '../../auth/useAuthUser'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -150,12 +152,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         colWidths={colWidths}
       />
 
-      {!hidePagination(
-        query.isFetched,
-        data?.apps?.length,
-        data?.meta?.pagination?.total_pages,
-      ) && (
-        <StyledPaginationSection>
+        <ContentFooter>
           <Pagination
             page={data?.meta?.pagination?.current_page}
             totalCount={data?.meta?.pagination?.total_count}
@@ -167,8 +164,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
             setPage={p => setPageParam(p, 'replaceIn')}
             onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
           />
-        </StyledPaginationSection>
-      )}
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}

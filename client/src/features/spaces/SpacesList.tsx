@@ -1,19 +1,20 @@
-import React, { useMemo, useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../components/Button'
+import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
+import { ContentFooter } from '../../components/Page/ContentFooter'
 import { compactScrollBar, Filler, PageTitle } from '../../components/Page/styles'
-import { hidePagination, Pagination } from '../../components/Pagination'
+import { Pagination } from '../../components/Pagination'
 import { EmptyTable, ReactTableStyles } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
-import { StyledPaginationSection } from '../home/home.styles'
-import { IFilter, IMeta, KeyVal } from '../home/types'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
-import { useFilterParams } from '../home/useFilterState'
 import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { toArrayFromObject } from '../../utils/object'
+import { IFilter, IMeta, KeyVal } from '../home/types'
+import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
@@ -107,25 +108,20 @@ const SpacesList = () => {
         colWidths={colWidths}
       />
 
-      {!hidePagination(
-          query.isFetched,
-          data?.spaces?.length,
-          meta?.pagination?.total_pages,
-        ) && (
-          <StyledPaginationSection>
-            <Pagination
-              page={meta?.pagination?.current_page}
-              totalCount={meta?.pagination?.total_count}
-              totalPages={meta?.pagination?.total_pages}
-              perPage={pagination.perPageParam}
-              isHidden={false}
-              isPreviousData={meta?.pagination?.prev_page !== null}
-              isNextData={meta?.pagination?.next_page !== null}
-              setPage={p => pagination.setPageParam(p, 'replaceIn')}
-              onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
-            />
-          </StyledPaginationSection>
-        )}
+      <ContentFooter>
+        <Pagination
+          page={meta?.pagination?.current_page}
+          totalCount={meta?.pagination?.total_count}
+          totalPages={meta?.pagination?.total_pages}
+          perPage={pagination.perPageParam}
+          isHidden={false}
+          isPreviousData={meta?.pagination?.prev_page !== null}
+          isNextData={meta?.pagination?.next_page !== null}
+          setPage={p => pagination.setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
+        />
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
     </>
   )
 }

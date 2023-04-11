@@ -3,8 +3,10 @@ import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
@@ -15,7 +17,6 @@ import {
   ActionsRow,
   QuickActions,
   StyledHomeTable,
-  StyledPaginationSection,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
@@ -143,25 +144,20 @@ export const WorkflowList = ({
         colWidths={colWidths}
       />
 
-      {!hidePagination(
-        query.isFetched,
-        data?.workflows?.length,
-        data?.meta?.pagination?.total_pages,
-      ) && (
-        <StyledPaginationSection>
-          <Pagination
-            page={data?.meta?.pagination?.current_page}
-            totalCount={data?.meta?.pagination?.total_count}
-            totalPages={data?.meta?.pagination?.total_pages}
-            perPage={perPageParam}
-            isHidden={false}
-            isPreviousData={data?.meta?.pagination?.prev_page !== null}
-            isNextData={data?.meta?.pagination?.next_page !== null}
-            setPage={p => setPageParam(p, 'replaceIn')}
-            onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
-          />
-        </StyledPaginationSection>
-      )}
+      <ContentFooter>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          isHidden={false}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+        />
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
 
       {listActions['Create Workflow']?.modal}
       {listActions['Add Workflow']?.modal}

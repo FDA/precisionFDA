@@ -6,7 +6,9 @@ import React, { useMemo } from 'react'
 import { CellProps, Column } from 'react-table'
 import styled from 'styled-components'
 import { StringParam, withDefault } from 'use-query-params'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UserIcon'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
   DefaultColumnFilter,
@@ -302,7 +304,8 @@ const UsersList = () => {
           getRowId={user => (user as any).id}
         />
       </StyledTable>
-      <StyledPaginationSection>
+
+      <ContentFooter>
         <Pagination
           page={data?.meta?.pagination?.currentPage!}
           totalCount={data?.meta?.pagination?.totalCount!}
@@ -319,7 +322,8 @@ const UsersList = () => {
           onPerPageSelect={setPerPageParam as any}
           showListCount
         />
-      </StyledPaginationSection>
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
     </UserLayout>
   )
 }

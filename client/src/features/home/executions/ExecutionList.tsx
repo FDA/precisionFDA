@@ -3,7 +3,9 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import Dropdown from '../../../components/Dropdown'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { colors } from '../../../styles/theme'
@@ -12,7 +14,7 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
-  ActionsRow, StyledHomeTable, StyledPaginationSection,
+  ActionsRow, StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
@@ -106,26 +108,20 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-
-      {!hidePagination(
-        query.isFetched,
-        data?.jobs?.length,
-        data?.meta?.pagination?.total_pages,
-      ) && (
-        <StyledPaginationSection>
-          <Pagination
-            page={data?.meta?.pagination?.current_page}
-            totalCount={data?.meta?.pagination?.total_count}
-            totalPages={data?.meta?.pagination?.total_pages}
-            perPage={perPageParam}
-            isHidden={false}
-            isPreviousData={data?.meta?.pagination?.prev_page !== null}
-            isNextData={data?.meta?.pagination?.next_page !== null}
-            setPage={p => setPageParam(p, 'replaceIn')}
-            onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
-          />
-        </StyledPaginationSection>
-      )}
+      <ContentFooter>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          isHidden={false}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+        />
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
 
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
