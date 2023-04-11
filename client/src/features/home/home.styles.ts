@@ -242,10 +242,3 @@ export const ActionsRow = styled.div`
 export const StyledRunByYouLink = styled.a`
   font-size: 12px;
 `
-
-export const StyledPaginationSection = styled.div`
-  padding-left: 12px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  border-top: 1px solid #d5d5d5;
-`
