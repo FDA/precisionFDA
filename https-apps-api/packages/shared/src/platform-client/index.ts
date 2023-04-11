@@ -22,6 +22,7 @@ import {
   FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
   WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse,
 } from './platform-client.responses'
+import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -665,6 +666,8 @@ class PlatformClient {
 
 export {
   PlatformClient,
+  IPlatformAuthClient,
+  PlatformAuthClient,
   JobDescribeResponse,
   JobCreateResponse,
   ListFilesResponse,

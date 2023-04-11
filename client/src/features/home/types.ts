@@ -99,11 +99,17 @@ export enum SEVERITY {
   INFO = 'INFO',
 }
 
+export type NotificationMeta = {
+  linkTitle?: string,
+  linkUrl?: string,
+}
+
 export type Notification = {
   id: number,
   type: string,
   message: string,
   severity: SEVERITY,
+  meta?: NotificationMeta,
   createdAt: Date,
   updatedAt: Date,
   deliveredAt: Date,

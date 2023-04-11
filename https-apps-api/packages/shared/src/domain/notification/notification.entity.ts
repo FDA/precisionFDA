@@ -3,6 +3,11 @@ import { BaseEntity } from '../../database/base-entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import { User } from '../user'
 
+export type NotificationMeta = {
+  linkTitle?: string,
+  linkUrl?: string,
+}
+
 @Entity({ tableName: 'notifications' })
 export class Notification extends BaseEntity {
   @PrimaryKey()
@@ -18,6 +23,12 @@ export class Notification extends BaseEntity {
   severity: SEVERITY
 
   @Property()
+  userId: number
+
+  @Property({ type: 'json', nullable: true })
+  meta?: NotificationMeta
+
+  @Property()
   deliveredAt?: Date
 
   @ManyToOne(() => User)
@@ -29,6 +40,7 @@ export class Notification extends BaseEntity {
               severity?: SEVERITY,
               createdAt?: Date,
               updatedAt?: Date,
+              meta?: NotificationMeta,
   ) {
     super()
     if (user !== null) {
@@ -39,6 +51,7 @@ export class Notification extends BaseEntity {
     if (severity) this.severity = severity
     if (createdAt) this.createdAt = createdAt
     if (updatedAt) this.updatedAt = updatedAt
+    if (meta) this.meta = meta
   }
 
 }

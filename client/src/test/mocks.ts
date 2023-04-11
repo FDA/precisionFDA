@@ -53,11 +53,13 @@ export const createMockExecution = (id: string, uid: string): IExecution => {
   return {
     id: id,
     uid: uid,
+    app_uid: 'app-12345',
     state: 'running',
     name: `Execution name ${uid}`,
     title: `Execution title ${uid}`,
     added_by: "user",
     app_revision: "1",
+    workstation_api_version: null,
     run_input_data: [],
     run_output_data: [],
     created_at: "",

@@ -22,6 +22,7 @@ namespace :apps do
     puts "Found the app with dxid #{app_dxid} on the Platform"
 
     app_info = api.app_describe(app_dxid)
+    applet_info = api.app_describe(app_info["applet"])
 
     created_by = User.find_by(dxuser: app_info["createdBy"].sub(/^user-/, "")) ||
                  ENV["CREATED_BY"].present? && User.find_by(dxuser: ENV["CREATED_BY"]) ||
@@ -115,6 +116,7 @@ namespace :apps do
         internet_access: internet_access,
         instance_type: baseline,
         ordered_assets: assets.map(&:uid),
+        platform_tags: applet_info["tags"],
         packages: packages,
         code: nil,
         assets: assets,

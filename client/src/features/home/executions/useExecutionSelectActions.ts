@@ -10,6 +10,7 @@ import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
 import { useTerminateModal } from './useTerminateModal'
+import { useSnapshotModal } from './useSnapshotModal'
 
 export enum ExecutionAction {
   'View Logs' = 'View Logs',
@@ -17,6 +18,7 @@ export enum ExecutionAction {
   'Track' = 'Track',
   'Copy to space' = 'Copy to space',
   'Feature' = 'Feature',
+  'Snapshot' = 'Snapshot',
   'Unfeature' = 'Unfeature',
   'Make Public' = 'Make Public',
   'Attach to...' = 'Attach to...',
@@ -71,6 +73,12 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     setShowModal: setTerminateModal,
     isShown: isShownTerminateModal,
   } = useTerminateModal({ selected })
+
+  const {
+    modalComp: snapshotModal,
+    setShowModal: setSnapshotModal,
+    isShown: isSnapshotModal,
+  } = useSnapshotModal({ selected: selected[0] })
 
   const attachLicenseMutation = useMutation({
     mutationKey: ['attach-license'],
@@ -129,9 +137,17 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     'Attach to...': {
       type: 'modal',
       func: () => setAttachToModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links?.attach_to),
+      isDisabled: selected.length === 0 || selected.length > 1,
       modal: attachToModal,
       showModal: isShownAttachToModal,
+    },
+    'Snapshot': {
+      type: 'modal',
+      func: () => setSnapshotModal(true),
+      isDisabled: selected.length !== 1 || selected.some(e => !e.links?.open_external),
+      shouldHide: selected.some(e => !e.workstation_api_version),
+      modal: snapshotModal,
+      showModal: isSnapshotModal,
     },
     'Comments': {
       type: 'link',

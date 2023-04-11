@@ -9,8 +9,12 @@ import { errors } from '@pfda/https-apps-shared'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
-export class NotificationService {
-  protected redisClient?: RedisClientType
+export interface INotificationService {
+  createNotification: (notificationInput: NotificationInput) => Promise<void>
+}
+
+export class NotificationService implements INotificationService {
+  private redisClient?: RedisClientType
   protected em: SqlEntityManager
 
   constructor(em: SqlEntityManager, redisClient?: RedisClientType) {
@@ -35,7 +39,7 @@ export class NotificationService {
       user = await this.em.findOneOrFail(User, notificationInput.userId)
     }
     const notification = new Notification(user, notificationInput.action, notificationInput.message,
-      notificationInput.severity, new Date(), new Date())
+      notificationInput.severity, new Date(), new Date(), notificationInput.meta)
 
     await this.em.persistAndFlush(notification)
 

@@ -12,7 +12,11 @@ import {
   FILE_REMOVED_RES,
 } from './mock-responses'
 import { FileCloseParams } from '../platform-client/platform-client.params'
-import {createClient, RedisClient} from 'redis'
+import { createMockServiceFactory } from './mock-service-factory'
+import { RedisClient } from 'redis'
+
+
+const mockServiceFactory = createMockServiceFactory()
 
 const sandbox = sinon.createSandbox()
 
@@ -53,12 +57,18 @@ const fakes = {
     createSyncWorkstationFilesTask: sinon.fake(),
     createUserCheckupTask: sinon.fake(),
     createSyncSpacesPermissionsTask: sinon.fake(),
+    clearOrphanedRepeatableJobs: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
     processFake: sinon.fake(),
     isReadyFake: sinon.fake(),
+    addFake: sinon.stub(),
+    getJobFake: sinon.stub(),
   },
+  notificationService: mockServiceFactory.notificationService,
+  platformAuthClient: mockServiceFactory.platformAuthClient,
+  workstationClient: mockServiceFactory.workstationClient,
 }
 
 const mocksSetDefaultBehaviour = () => {
@@ -86,6 +96,11 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.dbClusterDescribeFake.callsFake(() => DBCLUSTER_DESC_RES)
   fakes.client.projectCreateFake.callsFake(() => ({ id: generate.space.projectId() }))
   fakes.client.projectInviteFake.callsFake(() => ({ id: 'huh', state: 'accepted' })) //fix id
+
+  fakes.bull.addFake.callsFake(() => { })
+  fakes.bull.getJobFake.callsFake(() => undefined)
+
+  mockServiceFactory.reset()
 }
 
 const mocksSetup = () => {
@@ -126,9 +141,13 @@ const mocksSetup = () => {
     'dbClusterDescribe',
     fakes.client.dbClusterDescribeFake,
   )
+
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
   sandbox.replace(Bull.prototype, 'isReady', fakes.bull.isReadyFake)
+  sandbox.replace(Bull.prototype, 'add', fakes.bull.addFake)
+  sandbox.replace(Bull.prototype, 'getJob', fakes.bull.getJobFake)
+
   // stub queue helpers
   sandbox.replace(queue, 'findRepeatable', fakes.queue.findRepeatableFake)
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
@@ -141,6 +160,7 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
   sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
   sandbox.replace(queue, 'createSyncSpacesPermissionsTask', fakes.queue.createSyncSpacesPermissionsTask)
+  sandbox.replace(queue, 'clearOrphanedRepeatableJobs', fakes.queue.clearOrphanedRepeatableJobs)
   sandbox.stub(redis, 'createRedisClient').returns({
     publish(channel: string, value: string) { }
   } as RedisClient)
@@ -182,9 +202,12 @@ const mocksReset = () => {
   fakes.queue.createSyncWorkstationFilesTask.resetHistory()
   fakes.queue.createUserCheckupTask.resetHistory()
   fakes.queue.createSyncSpacesPermissionsTask.resetHistory()
+  fakes.queue.clearOrphanedRepeatableJobs.resetHistory()
 
   fakes.bull.processFake.resetHistory()
   fakes.bull.isReadyFake.resetHistory()
+  fakes.bull.addFake.resetHistory()
+  fakes.bull.getJobFake.resetHistory()
 
   mocksSetDefaultBehaviour()
 }
