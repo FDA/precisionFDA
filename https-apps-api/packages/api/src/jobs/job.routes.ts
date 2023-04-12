@@ -4,7 +4,16 @@ import { job as jobDomain, utils } from '@pfda/https-apps-shared'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
-import { jobListQuerySchema, jobSyncFilesQuerySchema } from './job.schemas'
+import {
+  jobListQuerySchema,
+  jobSetAPIKeyBodySchema,
+  JobSetAPIKeyParams,
+  jobSnapshotBodySchema,
+  JobSnapshotParams,
+  jobSyncFilesQuerySchema,
+  workstationAliveBodySchema,
+  WorkstationAliveParams,
+} from './job.schemas'
 
 
 // Routes with /jobs prefix
@@ -37,6 +46,10 @@ router.get(
   },
 )
 
+// ------------------------
+//    HTTPS Workstations
+// ------------------------
+
 router.patch(
   '/:jobDxId/terminate',
   makeSchemaValidationMdw({ params: jobDxIdInputSchema }),
@@ -57,6 +70,45 @@ router.patch(
       force: ctx.validatedQuery.force,
     })
     ctx.body = res
+  },
+)
+
+router.patch(
+  '/:jobDxId/checkAlive',
+  makeSchemaValidationMdw({ params: jobDxIdInputSchema, body: workstationAliveBodySchema }),
+  async ctx => {
+    // const res = await new jobDomain.WorkstationCheckAliveOperation(pickOpsCtx(ctx)).execute()
+    const params = ctx.request.body as WorkstationAliveParams
+    const workstationService = await new jobDomain.WorkstationService(pickOpsCtx(ctx), params.code).initWithJob(ctx.params.jobDxId)
+    const res = await workstationService.alive()
+    ctx.body = res
+  },
+)
+
+router.patch(
+  '/:jobDxId/setAPIKey',
+  makeSchemaValidationMdw({ params: jobDxIdInputSchema, body: jobSetAPIKeyBodySchema }),
+  async ctx => {
+    const params = ctx.request.body as JobSetAPIKeyParams
+    const workstationService = await new jobDomain.WorkstationService(pickOpsCtx(ctx), params.code).initWithJob(ctx.params.jobDxId)
+    const res = await workstationService.setAPIKey(params.key)
+    ctx.body = res
+  },
+)
+
+router.patch(
+  '/:jobDxId/snapshot',
+  makeSchemaValidationMdw({ params: jobDxIdInputSchema, body: jobSnapshotBodySchema }),
+  async ctx => {
+    const params = ctx.request.body as JobSnapshotParams
+    const terminate = params.terminate ?? false
+    const input = {
+      ...params,
+      jobDxid: ctx.params.jobDxId,
+      terminate,
+    }
+    await new jobDomain.WorkstationSnapshotOperation(pickOpsCtx(ctx)).enqueue(input)
+    ctx.body = { 'message': `Snapshot for workstation ${input.jobDxid} started` }
   },
 )
 

@@ -20,8 +20,9 @@ import { useAuthUser } from '../../auth/useAuthUser'
 
 const ButtonsRow = styled.div`
   display: flex;
-  margin: 40px 0;
-  gap: 40px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  gap: 8px;
 `
 
 // TODO(samuel) Fix incorrect error handling with react-query

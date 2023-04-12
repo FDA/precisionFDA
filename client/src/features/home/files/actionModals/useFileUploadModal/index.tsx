@@ -156,7 +156,7 @@ export const useFileUploadModal = ({
     }
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-upload"
       isShown={Boolean(isShown)}

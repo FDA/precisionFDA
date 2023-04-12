@@ -88,7 +88,7 @@ export function useAttachLicensesModal<
       mutation.mutateAsync({ dxid: selectedId, licenseId: selectedLicenseId })
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-licenses-attach"
       headerText="Select a license"

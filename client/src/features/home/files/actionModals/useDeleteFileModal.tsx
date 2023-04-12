@@ -136,7 +136,7 @@ export const useDeleteFileModal = ({
     mutation.mutateAsync(memoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       id="modal-files-delete"
       data-testid="modal-files-delete"

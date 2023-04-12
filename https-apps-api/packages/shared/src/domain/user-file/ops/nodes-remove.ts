@@ -49,7 +49,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, RemoveNodesInput, n
     getLogger().info(input.ids, 'Removing ids')
     const em = this.ctx.em.fork()
     const nodes: Node[] = await loadNodes(em, { ids: input.ids }, {})
-    const notificationService = new NotificationService()
+    const notificationService = new NotificationService(em)
 
     let removedFilesCount = 0
     let removedFoldersCount = 0
@@ -69,7 +69,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, RemoveNodesInput, n
       }
 
       if (input.async) {
-        notificationService.createNotification({
+        await notificationService.createNotification({
           message: getSuccessMessage(removedFilesCount, removedFoldersCount),
           severity: SEVERITY.INFO,
           action: NOTIFICATION_ACTION.NODES_REMOVED,
@@ -83,7 +83,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, RemoveNodesInput, n
       )
     } catch (err) {
       if (input.async) {
-        notificationService.createNotification({
+        await notificationService.createNotification({
           message: 'Error deleting files and folders.',
           severity: SEVERITY.ERROR,
           action: NOTIFICATION_ACTION.NODES_REMOVED,

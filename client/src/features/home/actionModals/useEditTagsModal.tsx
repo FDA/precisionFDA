@@ -130,7 +130,7 @@ export function useEditTagsModal<
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid={`modal-${resource}-edit-tags`}
       isShown={isShown}

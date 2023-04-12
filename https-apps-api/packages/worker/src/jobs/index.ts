@@ -1,4 +1,8 @@
+import { UserOpsCtx, WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { getChildLogger } from '../utils'
 import { path } from 'ramda'
+import { database, job as jobDomain } from '@pfda/https-apps-shared'
 import { queue, errors, debug } from '@pfda/https-apps-shared'
 import { Job } from 'bull'
 import { log } from '../utils'
@@ -13,6 +17,28 @@ import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclu
 import { syncSpacesPermissionsHandler } from './sync-spaces-permissions.handler'
 import { checkUserJobsHandler } from './check-user-jobs.handler'
 import { removeNodesHandler } from './remove-nodes.handler'
+
+
+type WorkerContext = WorkerOpsCtx<UserOpsCtx>
+
+// A replacement for writing individual handler functions that differ only by
+// the line creating and executing the Operation
+const handleUserTask = async <TJob extends queue.types.TaskWithAuth> (
+  bullJob: Job,
+  execute: (ctx: WorkerContext, input: any) => Promise<any>,
+) => {
+const data = bullJob.data as TJob
+  const requestId = String(bullJob.id)
+  const log = getChildLogger(requestId)
+  const ctx: WorkerOpsCtx<UserOpsCtx> = {
+    em: database.orm().em.fork() as SqlEntityManager,
+    log,
+    user: data.user,
+    job: bullJob,
+  }
+  await execute(ctx, data.payload)
+}
+
 
 export const handler = async (job: Job<queue.types.Task>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -32,6 +58,11 @@ export const handler = async (job: Job<queue.types.Task>) => {
       return
     case queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES:
       await workstationSyncFilesHandler(job)
+      return
+    case queue.types.TASK_TYPE.WORKSTATION_SNAPSHOT:
+      await handleUserTask(job, async (ctx, input) => {
+        return await new jobDomain.WorkstationSnapshotOperation(ctx).execute(input)
+      })
       return
     case queue.types.TASK_TYPE.SEND_EMAIL:
       await sendEmailHandler(job)

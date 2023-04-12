@@ -31,7 +31,7 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-download"
       headerText={`Download ${itemsCountString('file', momoSelected.length)}?`}
@@ -43,7 +43,7 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
           'file',
           momoSelected.length,
         )}?`}
-        hide={() => null}
+        hide={() => setShowModal(false)}
       />
       <ModalScroll>
         <StyledResourceTable

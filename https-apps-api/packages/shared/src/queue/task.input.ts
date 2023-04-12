@@ -1,8 +1,11 @@
 import { EmailSendInput } from '../domain/email/email.config'
+import { WorkstationSnapshotOperationParams } from '../domain/job/ops/workstation-snapshot'
 import { UserCtx } from '../types'
 
-type TaskWithAuth = {
+export type TaskWithAuth = {
   user: UserCtx
+  // payload type is more strictly defined below depending on task
+  payload?: any
 }
 
 type TaskWithMaybeAuth = {
@@ -24,6 +27,8 @@ export enum TASK_TYPE {
   DEBUG_MAX_MEMORY = 'debug_test_max_memory',
   REMOVE_NODES = 'remove_nodes',
   OTHER_TASK = 'other',
+  // TODO - Standardize on DOMAIN_ACTION naming scheme
+  WORKSTATION_SNAPSHOT = 'workstation_snapshot'
 }
 
 // will be used in the sub-handler
@@ -77,6 +82,13 @@ export type DebugMaxMemory = {
   type: TASK_TYPE.DEBUG_MAX_MEMORY
 };
 
+// TODO - Consider renaming *Jobs to *Task, because Job already conflates with platform job and bull job
+export type WorkstationSnapshotTask = TaskWithAuth & {
+  type: TASK_TYPE.WORKSTATION_SNAPSHOT
+  payload: WorkstationSnapshotOperationParams
+}
+
+
 export type Task =
   | BasicUserJob
   | CheckStatusJob
@@ -89,3 +101,4 @@ export type Task =
   | SyncWorkstationFiles
   | DebugMaxMemory
   | RemoveNodesJob
+  | WorkstationSnapshotTask

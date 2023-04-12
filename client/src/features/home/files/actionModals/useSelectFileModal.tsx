@@ -215,7 +215,7 @@ export const useSelectFileModal = (title: string, type: DialogType, handleSelect
 
   const files = (filesData?.objects) ?? []
 
-  const modalComp = (
+  const modalComp = isShown && (
     <StyledModal
       headerText={title}
       isShown={isShown}

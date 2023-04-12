@@ -55,6 +55,7 @@ export const ButtonRow = styled.div`
   gap: 8px;
   justify-content: flex-end;
   height: 32px;
+  flex-wrap: wrap;
   ${marginBottom}
 `
 export const Tabs = styled.div`
