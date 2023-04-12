@@ -84,7 +84,7 @@ export const useEditFolderModal = (selectedItem: IFile) => {
   const selected = useMemo(() => selectedItem, [isShown])
   const handleClose = () => setShowModal(false)
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-folder-edit"
       headerText="Edit folder info"

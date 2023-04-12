@@ -239,7 +239,7 @@ export default function Table<T extends object>(
             </div>
 
             {isFilterable && (
-              <div className="thead">
+              <div className="thead filters">
                 {visibleColumns.map((column, i) => (
                   // eslint-disable-next-line react/jsx-key
                   <div {...column.getHeaderProps()} className="th">

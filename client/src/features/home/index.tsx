@@ -22,7 +22,7 @@ import { CreateDatabase } from './databases/create/CreateDatabase'
 import { DatabaseList } from './databases/DatabaseList'
 import { DatabaseShow } from './databases/DatabaseShow'
 import { ExecutionList } from './executions/ExecutionList'
-import { JobShow } from './executions/JobShow'
+import { ExecutionDetails } from './executions/details/ExecutionDetails'
 import { FileList } from './files/FileList'
 import { FileShow } from './files/show/FileShow'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.styles'
@@ -267,7 +267,7 @@ const Home2 = () => {
               <ExecutionList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/executions/:executionUid`}>
-              <JobShow scope={scopeQuery} />
+              <ExecutionDetails scope={scopeQuery} />
             </Route>
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
             <Route path={`${path}/jobs/:executionUid`} render={(props) => <Redirect to={`${path}/executions/${props.match.params.executionUid}`} />} />

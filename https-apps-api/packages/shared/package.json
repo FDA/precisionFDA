@@ -47,8 +47,10 @@
     "@types/pino": "^7.0.5",
     "pino-pretty": "^9.1.1",
     "@types/ramda": "^0.27.28",
+    "@types/tough-cookie": "^4.0.2",
     "ajv": "^8.0.5",
-    "axios": "^0.21.2",
+    "axios": "^0.21.4",
+    "axios-cookiejar-support": "^4.0.6",
     "bull": "^4.8.5",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -62,6 +64,7 @@
     "p-limit": "^3.1.0",
     "pino": "^8.9.0",
     "redis": "^4.3.1",
-    "ramda": "^0.27.1"
+    "ramda": "^0.27.1",
+    "tough-cookie": "^4.1.2"
   }
 }

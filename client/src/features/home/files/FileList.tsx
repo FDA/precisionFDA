@@ -11,8 +11,10 @@ import {
 } from '../../../components/Breadcrumb'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
@@ -22,11 +24,8 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
-  ActionsRow,
-  LoadingList,
-  QuickActions,
+  ActionsRow, QuickActions,
   StyledHomeTable,
-  StyledPaginationSection,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
@@ -87,7 +86,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   useEffect(() => {
     if (lastJsonMessage != null) {
       const notification = JSON.parse(JSON.stringify(lastJsonMessage))
-      if (notification.action === 'NODES_REMOVED') {
+      if (['NODES_REMOVED', 'NODES_COPIED'].includes(notification.action)) {
         queryCache.invalidateQueries(['files'])
         queryCache.invalidateQueries(['counters'])
       }
@@ -190,7 +189,6 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         </ActionsRow>
         <ActionsRow>
           {breadcrumbs(path, data?.meta?.path, scope)}
-          {status === 'loading' && <LoadingList>Loading...</LoadingList>}
         </ActionsRow>
       </div>
 
@@ -212,23 +210,20 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         shouldResetFilters={[folderIdParam, scope]}
       />
       
-      <StyledPaginationSection>
+      <ContentFooter>
         <Pagination
           page={data?.meta?.pagination?.current_page}
           totalCount={data?.meta?.pagination?.total_count}
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.files?.length,
-            data?.meta?.pagination?.total_pages,
-            )}
+          isHidden={false}
           isPreviousData={data?.meta?.pagination?.prev_page !== null}
           isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
-      </StyledPaginationSection>
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
 
       {listActions['Add Folder']?.modal}
       {listActions['Add Files']?.modal}

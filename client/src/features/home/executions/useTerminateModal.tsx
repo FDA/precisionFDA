@@ -48,7 +48,7 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
     mutation.mutateAsync(memoSelected.map(x => x.uid))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid={`modal-execution-terminate`}
       headerText={`Terminate selected execution?`}

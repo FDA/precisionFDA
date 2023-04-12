@@ -156,9 +156,11 @@ export const Workstations = () => {
           instance and all files will be placed in the locations where they were
           located when the snapshot was created.
         </p>
-        <p>To take a snapshot in the TTYD Workstation, run the command:</p>
         <p>
-          <code>dx-create-snapshot</code>
+          To take a snapshot in the TTYD Workstation, navigate to the execution
+          page and click on the "Snapshot" button. You'll be given a default name
+          that you can override, and an option to terminate the workstation once
+          the snapshot has been created.
         </p>
         <p>
           To take a snapshot with the JupyterLab Workstation, click on the

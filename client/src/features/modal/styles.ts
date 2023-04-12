@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components'
 import { Svg } from '../../components/icons/Svg'
+import { compactScrollBar } from '../../components/Page/styles'
 import { colors, fontSize, fontWeight, sizing } from '../../styles/theme'
 
 export const Wrapper = styled.div`
@@ -104,6 +105,11 @@ export const StyledForm = styled.form`
 export const ModalScroll = styled.div`
   max-height: 50vh;
   overflow-y: scroll;
+  ${compactScrollBar}
+`
+
+export const StyledModalScroll = styled(ModalScroll)`
+  padding-left: 12px;
 `
 
 export const StyledModalContent = styled.div`

@@ -78,7 +78,7 @@ export const usePublishFolderModal = (
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-publish-folder"
       headerText="Publish folder"

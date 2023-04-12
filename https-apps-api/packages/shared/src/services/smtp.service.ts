@@ -7,7 +7,11 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 const log = getLogger('nodemailer-logger')
 
-class EmailClient {
+interface IEmailService {
+  sendEmail: (input: SendEmailJob['payload']) => Promise<void>
+}
+
+class EmailClient implements IEmailService {
   transporter: nodemailer.Transporter
 
   constructor() {
@@ -70,4 +74,8 @@ class EmailClient {
 
 const emailClient = new EmailClient()
 
-export { emailClient }
+export {
+  emailClient,
+  EmailClient,
+  IEmailService,
+}
