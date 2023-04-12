@@ -3,24 +3,19 @@ import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { ErrorMessage } from '@hookform/error-message'
-import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
 import { InputText } from '../../../../components/InputText'
 import {
   ButtonRow,
   Footer,
-  ModalScroll,
   StyledForm,
+  StyledModalScroll,
 } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { editFileRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-
-const StyledModalScroll = styled(ModalScroll)`
-  padding-left: 12px;
-`
 
 const EditFileInfoForm = ({
   file,
@@ -66,7 +61,7 @@ const EditFileInfoForm = ({
   })
 
   const onSubmit = (vals: any) => {
-    editFileMutation.mutateAsync({
+    return editFileMutation.mutateAsync({
       name: vals.name,
       description: vals.description,
       fileId: file.uid,
@@ -127,7 +122,7 @@ export const useEditFileModal = (selectedItem: IFile) => {
   const handleClose = () => {
     setShowModal(false)
   }
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-edit"
       headerText="Edit file info"

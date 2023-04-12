@@ -62,7 +62,7 @@ export const useAddFolderModal = ({
     mutation.mutateAsync({ name: vals.name })
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-add-folder"
       isShown={Boolean(isShown)}

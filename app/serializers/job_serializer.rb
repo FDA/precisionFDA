@@ -1,11 +1,12 @@
 # Job serializer.
-class JobSerializer < ApplicationSerializer
+class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLength
   include ActionView::Helpers
   include ApplicationHelper
 
   attributes(
     :id,
     :uid,
+    :dxid,
     :state,
     :name,
     :app_title,
@@ -14,6 +15,8 @@ class JobSerializer < ApplicationSerializer
     :app_active,
     :workflow_title,
     :workflow_uid,
+    :platform_tags,
+    :workstation_api_version,
     :run_input_data,
     :run_output_data,
     :run_data_updates,
@@ -133,6 +136,14 @@ class JobSerializer < ApplicationSerializer
     else
       "N/A"
     end
+  end
+
+  def platform_tags
+    object.app&.platform_tags
+  end
+
+  def workstation_api_version
+    object.app&.workstation_api_version
   end
 
   # Returns an instance_type of the app.

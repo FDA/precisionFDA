@@ -57,7 +57,7 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid={`modal-${resource}-copy-to-private`}
       isShown={isShown}

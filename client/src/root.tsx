@@ -147,15 +147,15 @@ const root = () => {
               </Switch>
             </QueryParamProvider>
           </React.Suspense>
+          <StyledToastContainer
+            position="top-right"
+            transition={Slide}
+            hideProgressBar
+            pauseOnHover
+          />
         </Router>
         <AuthModal {...authModal} />
         <ExpiringSessionModal modal={expiringSessionModal} />
-        <StyledToastContainer
-          position="top-right"
-          transition={Slide}
-          hideProgressBar
-          pauseOnHover
-        />
       </QueryClientProvider>
     </React.Fragment>
   )

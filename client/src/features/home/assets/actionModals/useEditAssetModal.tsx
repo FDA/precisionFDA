@@ -102,7 +102,7 @@ export const useEditAssetModal = (selectedItem: IAsset) => {
   const selected = useMemo(() => selectedItem, [isShown])
   const handleClose = () => setShowModal(false)
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-asset-edit"
       isShown={isShown}

@@ -113,7 +113,7 @@ export const useEditDatabaseModal = (selectedItem: IDatabase) => {
   const handleClose = () => {
     setShowModal(false)
   }
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-dbclusters-edit"
       isShown={isShown}

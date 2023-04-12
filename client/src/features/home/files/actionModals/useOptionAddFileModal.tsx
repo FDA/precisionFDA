@@ -37,7 +37,7 @@ export const useOptionAddFileModal = ({
   setShowCopyFilesModal,
 }: any) => {
   const { isShown, setShowModal } = useModal()
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="choose-add-file-option-modal"
       headerText="How would you like to add files?"

@@ -187,7 +187,8 @@ const jobHelper = {
     },
     data?: Partial<InstanceType<typeof entities.Job>>,
   ) => {
-    const defaults = references.app?.isHTTPS() ? generate.job.simple() : generate.job.regular()
+    const isHTTPS = references.app?.isHTTPS()
+    const defaults = isHTTPS ? generate.job.simple(references.app!) : generate.job.regular()
     const input = {
       ...defaults,
       ...data,
