@@ -19,12 +19,16 @@ export const StyledBackButton = styled.button`
   ${backStyles}
 `
 
+const StyledText = styled.div`
+  min-width: fit-content;
+`
+
 export const BackLink = ({ linkTo, children, onClick, ...rest }: { children: ReactNode, linkTo: string, onClick?: (e: any) => void}) => {
   if(onClick) return <StyledBackButton {...rest} onClick={onClick}><ArrowLeftIcon />&nbsp;{children}</StyledBackButton>
   return (
     <StyledBackLink {...rest} to={linkTo}>
       <ArrowLeftIcon />&nbsp;
-      {children}
+      <StyledText>{children}</StyledText>
     </StyledBackLink>
   )
 }

@@ -28,6 +28,10 @@ const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
 const getQueues = (): Bull.Queue[] => [mainQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
 
+const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformation[]> => {
+  return await utils.clearOrphanedRepeatableJobs(q)
+}
+
 // set up the queues
 const createQueues = async (): Promise<void> => {
   log.info({}, 'Initializing queues')
@@ -87,7 +91,7 @@ const createQueues = async (): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
-  const removedJobs = await utils.clearOrphanedRepeatableJobs(mainQueue)
+  const removedJobs = clearOrphanedRepeatableJobs(mainQueue)
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
@@ -372,6 +376,31 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
   return await addToQueue(data, maintenanceQueue, options)
 }
 
+// Queue adding helpers
+//
+const addToQueueEnsureUnique = async <T extends types.Task>(
+  q: Queue,
+  task: T,
+  jobId: string | undefined,
+) => {
+  // If jobId is provided, there should not be multiple items with this jobId in the queue
+  if (jobId) {
+    // Do not allow a second job to be added to the queue
+    const existingJob = await q.getJob(jobId)
+    if (existingJob) {
+      let errorMessage = existingJob.hasOwnProperty('getState')
+        ? await utils.getJobStatusMessageWithElapsedTime(existingJob, task.type)
+        : `Job with id ${jobId} already exists in queue`
+      throw new InvalidStateError(errorMessage)
+    }
+  }
+
+  const options: JobOptions = {
+    jobId,
+  }
+  return await addToQueue(task, q, options)
+}
+
 export * as debug from './queue.debug'
 
 export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
@@ -401,4 +430,6 @@ export {
   removeRepeatable,
   removeRepeatableJob,
   findRepeatable,
+  addToQueueEnsureUnique,
+  clearOrphanedRepeatableJobs,
 }

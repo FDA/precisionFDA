@@ -1,14 +1,17 @@
 UBUNTU_14 = "14.04".freeze
 UBUNTU_16 = "16.04".freeze
+UBUNTU_20 = "20.04".freeze
 
 UBUNTU_RELEASES = [
   UBUNTU_14,
   UBUNTU_16,
+  UBUNTU_20,
 ].freeze
 
 UBUNTU_CODENAMES = {
   UBUNTU_14 => "trusty",
   UBUNTU_16 => "xenial",
+  UBUNTU_20 => "focal",
 }.freeze
 
 PRE_INSTALLED_PYTHON_PACKAGES = %w(
@@ -128423,5 +128426,12 @@ UBUNTU_PACKAGES = {
     zypper-common
     zypper-doc
     zziplib-bin
-  ).freeze
-}
+  ).freeze,
+  # N.B. I copied only the essential packages enough to transfer ttyd running on 20.04
+  #      Before regular apps are updated to use 20.04, we need to come up with the complete list
+  #      of packages that the instance image contain
+  UBUNTU_20 => %w(
+    ipython
+    pkg-config
+  ).freeze,
+}.freeze

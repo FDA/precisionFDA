@@ -85,7 +85,7 @@ export function useExportToModal<
     } as ExportType,
   ].filter(e => e.link !== undefined)
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       data-testid="modal-export-to"
       isShown={isShown}

@@ -44,7 +44,7 @@ export function useDetachLicenseModal<
     }
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-detach-license-confirmation"
       headerText="Detach License"

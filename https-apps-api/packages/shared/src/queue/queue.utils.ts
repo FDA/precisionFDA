@@ -1,6 +1,7 @@
 import { Logger } from 'pino'
 import Bull, { Job, JobInformation, Queue } from 'bull'
 import { removeRepeatableJob } from '.'
+import { formatDuration } from '../domain/job/job.helper'
 
 
 const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string> => {
@@ -29,6 +30,14 @@ const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string>
   return `${prefix} is in an unknown state`
 }
 
+const getJobStatusMessageWithElapsedTime = async (job: Job, jobLabel?: string): Promise<string> => {
+  let errorMessage = await getJobStatusMessage(job, jobLabel)
+  const elapsedTime = Date.now() - job.timestamp
+  errorMessage += `. Current state is ${await job.getState()}`
+  errorMessage += `. Elapsed time ${formatDuration(elapsedTime)}`
+  return errorMessage
+}
+
 // Orphaned repeatable jobs are ones where the 'next' property is in the past relative to
 // the current date.
 const isJobOrphaned = (jobInfo: JobInformation): boolean => {
@@ -48,7 +57,7 @@ const clearJobs = async (q: Queue, state: any, log: Logger): Promise<Job[]> => {
   const count = jobs.length
   if (count > 0) {
     log.info({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
-    q.clean(0, state);
+    q.clean(0, state)
     log.info({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
   }
   else {
@@ -67,6 +76,7 @@ const clearCompletedJobs = async (q: Queue, log: Logger): Promise<any> => {
 
 export {
   getJobStatusMessage,
+  getJobStatusMessageWithElapsedTime,
   isJobOrphaned,
   clearOrphanedRepeatableJobs,
   clearJobs,

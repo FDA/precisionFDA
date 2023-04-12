@@ -114,7 +114,7 @@ export const useOrganizeFileModal = ({
     }
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <ModalNext
       hide={() => setShowModal(false)}
       isShown={isShown}

@@ -254,6 +254,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :notifications do
+        member do
+          put :update
+        end
+      end
+
       resources :spaces, only: %i(index show create update) do
         collection do
           get :cli
@@ -356,6 +362,8 @@ Rails.application.routes.draw do
 
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
+        patch :refresh_api_key, on: :member
+        patch :snapshot, on: :member
         patch :sync_files, on: :member
 
         collection do

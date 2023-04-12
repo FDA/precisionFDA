@@ -119,7 +119,7 @@ export function useAddResourceToModal({
     }
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid={`modal-${resource}-add-resource`}
       headerText={`Add ${resource} to space`}
