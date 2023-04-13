@@ -58,6 +58,17 @@ const Row = styled.div`
   gap: 16px;
 `
 
+function getBase64(file?: File, callback?: (a: string | null) => void) {
+  if (file) {
+    const reader = new FileReader()
+    reader.addEventListener(
+      'load',
+      () => callback && callback(reader.result as string),
+    )
+    reader.readAsDataURL(file)
+  }
+}
+
 export const ChallengeForm = ({
   challenge,
   defaultValues = {},
@@ -73,6 +84,7 @@ export const ChallengeForm = ({
   isSaving?: boolean
   mutationErrors?: MutationErrors
 }) => {
+  const [base64Image, setBase64Image] = React.useState<string | null>(null)
   const isEditMode = !!challenge
   const ended = isEditMode
     ? new Date().getTime() > new Date(challenge.end_at).getTime()
@@ -112,7 +124,8 @@ export const ChallengeForm = ({
 
   useEffect(() => {
     if (img?.[0] != null) {
-      if(onImageSelection) onImageSelection(img[0])
+      if (onImageSelection) onImageSelection(img[0])
+      getBase64(img?.[0], setBase64Image)
     }
   }, [watch().cardImage])
 
@@ -161,28 +174,29 @@ export const ChallengeForm = ({
 
           <FieldGroup>
             <label>Challenge image (required):</label>
-            {isEditMode ? (
+            {(base64Image || challenge?.card_image_url) && (
               <img
                 width={300}
-                src={challenge.card_image_url || undefined}
+                src={base64Image || challenge?.card_image_url || undefined}
                 alt="challenge card"
               />
-            ) : (
-              <>
-                <InputText
-                  label="cardImage"
-                  type="file"
-                  accept="image/*"
-                  {...register('cardImage')}
-                  disabled={isSubmitting || isEditMode}
-                />
-                <ErrorMessage
-                  errors={errors}
-                  name="cardImage"
-                  render={({ message }) => <InputError>{message}</InputError>}
-                />
-              </>
             )}
+
+            <>
+              <InputText
+                label="cardImage"
+                type="file"
+                accept="image/*"
+                {...register('cardImage')}
+                disabled={isSubmitting}
+              />
+              <ErrorMessage
+                errors={errors}
+                name="cardImage"
+                render={({ message }) => <InputError>{message}</InputError>}
+              />
+            </>
+
             {/* disabled changing image for edit mode */}
           </FieldGroup>
 
@@ -339,7 +353,7 @@ export const ChallengeForm = ({
           </FieldGroup>
           <Row>
             <ButtonSolidBlue
-              disabled={Object.keys(errors).length > 0 || isSubmitting}
+              disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
             >
               Submit
