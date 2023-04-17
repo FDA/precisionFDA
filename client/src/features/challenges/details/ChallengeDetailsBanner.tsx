@@ -17,7 +17,7 @@ import {
   StyledChallengeDetailsBanner,
 } from './styles'
 import { getChallengeTimeRemaining, getTimeStatus } from '../util'
-import NavigationBar from '../../../views/components/NavigationBar/NavigationBar'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { IUser } from '../../../types/user'
 
 export const ChallengeDetailsBanner = ({
