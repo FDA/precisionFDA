@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
-import { PFDALogoLight } from '../../views/components/NavigationBar/PFDALogo'
+import { PFDALogoLight } from '../NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
 
 const bpSmall = '@media(min-width: 850px)'

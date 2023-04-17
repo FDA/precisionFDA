@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { colors } from '../../styles/theme'
 import { useNewsListQuery } from '../news/useNewsListQuery'
-import ExternalLink from '../../views/components/Controls/ExternalLink'
+import ExternalLink from '../../components/Controls/ExternalLink'
 
 
 export const StyledCondensedList = styled.div`

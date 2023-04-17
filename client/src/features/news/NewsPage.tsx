@@ -24,9 +24,9 @@ import {
 } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import ExternalLink from '../../views/components/Controls/ExternalLink'
-import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
-import PublicLayout from '../../views/layouts/PublicLayout'
+import ExternalLink from '../../components/Controls/ExternalLink'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { newsYearsListRequest } from './api'
 import {
