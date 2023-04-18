@@ -221,14 +221,14 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
       # this job's app single run
       if object.in_space?
-        unless member_viewer?
+        unless member_viewer? && !object.app.nil?
           links[:run_job] = new_app_job_path(
             # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
             object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
           )
           links[:space] = space_path
         end
-      else
+      elsif !object.app.nil?
         links[:run_job] = new_app_job_path(
           # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
           object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
