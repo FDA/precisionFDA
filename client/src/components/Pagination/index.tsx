@@ -145,7 +145,7 @@ export const Pagination = ({
             <option value="50">50</option>
             <option value="100">100</option>
           </StyledPerPageSelect>
-          Per Page
+          Per Page of {totalCount} Total Items
         </PerPage>
       )}
       <ButtonSolidBlue
