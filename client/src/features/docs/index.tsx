@@ -28,6 +28,7 @@ import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
 import { TutorialMarkdown } from './tutorials/TutorialMarkdown'
+import { Assets } from "./pages/Assets";
 
 const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
@@ -123,6 +124,14 @@ const Docs = () => {
             data-turbolinks="false"
           >
             Creating Apps
+          </NavItem>
+          <NavItem
+              activeClassName='active'
+              $active={isActiveLink('/docs/assets', pathname)}
+              to="/docs/assets"
+              data-turbolinks="false"
+          >
+            Assets
           </NavItem>
           <NavItem
             activeClassName='active'
@@ -257,6 +266,9 @@ const Docs = () => {
             </Route>
             <Route exact path="/docs/creating-apps">
               <CreatingApps />
+            </Route>
+            <Route exact path="/docs/assets">
+              <Assets />
             </Route>
             <Route exact path="/docs/workstations">
               <Workstations />

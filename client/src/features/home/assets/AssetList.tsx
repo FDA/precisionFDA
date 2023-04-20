@@ -72,7 +72,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
             <ButtonSolidBlue
               as="a"
               data-turbolinks="false"
-              href="/assets/new"
+              href="/docs/assets"
               data-testid="home-assets-create-link"
             >
               <QuestionIcon height={13} /> How to create assets
