@@ -274,10 +274,6 @@ class ChallengesController < ApplicationController
   end
 
   def edit_page
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # Refresh state of resource files, if needed
-    # User.sync_challenge_bot_files!(@context)
-
     @resources_grid = initialize_grid(@challenge.challenge_resources,
                                       name: "resources",
                                       order: "challenge_resources.created_at",

@@ -11,6 +11,20 @@ export class AssetRepository extends EntityRepository<Asset> {
     )
   }
 
+  async findAssetWithDxid(dxid: string): Promise<Asset | null> {
+    return await this.findOne(
+      { dxid },
+      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
+    )
+  }
+
+  async findAllAssetsWithDxid(dxid: string): Promise<Asset[]> {
+    return await this.find(
+      { dxid },
+      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
+    )
+  }
+
   // Find assets uploaded or owned by a user that are pending
   // transition to closed state from the platform
   async findUnclosedAssets(userId: number): Promise<Asset[]> {
