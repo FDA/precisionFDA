@@ -53,6 +53,7 @@ const UsersList = React.lazy(() => import('./features/admin/users'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
 const ToS = React.lazy(() => import('./pages/ToS'))
+const Security = React.lazy(() => import('./pages/Security'))
 
 const root = () => {
   const authModal = useModal()
@@ -128,6 +129,9 @@ const root = () => {
                 </Route>
                 <Route exact path="/terms">
                   <ToS />
+                </Route>
+                <Route exact path="/security">
+                  <Security />
                 </Route>
                 <Route exact path="/admin/users">
                   <UsersList />
