@@ -9,9 +9,6 @@ module Api
     include Sortable
     include Scopes
 
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # before_action :sync_assets, only: %i(index)
-
     DOWNLOAD_ACTION = "download".freeze
     PUBLISH_ACTION = "publish".freeze
     DELETE_ACTION = "delete".freeze
@@ -113,8 +110,6 @@ module Api
     # rubocop:disable Metrics/MethodLength
     def show
       find_asset
-      # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-      # sync_assets
       load_relations(@asset)
       comments_data(@asset)
       load_licenses(@asset)
@@ -238,12 +233,6 @@ module Api
                pagination: page_dict,
              )
     end
-
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # Refresh state of assets, if needed
-    # def sync_assets
-    #   User.sync_assets!(@context)
-    # end
 
     def asset_params
       params.require(:asset).permit(:description, :title, :id)

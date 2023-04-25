@@ -1,5 +1,4 @@
 class FilePublisher
-  include FilesSyncing
   include Scopes
 
   def self.by_context(context)
