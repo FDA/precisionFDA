@@ -7,7 +7,7 @@ module Naming
     # @param username [String] Base name.
     # @return [String] Unused username.
     def find_unused_username(username)
-      api = DNAnexusAPI.new(session["token"])
+      api = DNAnexusAPI.new(RequestContext.instance.token)
       UnusedUsernameGenerator.new(api).call(username)
     end
 
@@ -15,7 +15,7 @@ module Naming
     # @param username [String] Base name.
     # @return [String] Unused org handle.
     def find_unused_orgname(username)
-      service = DIContainer.resolve("orgs.unused_orgname_generator")
+      service = UnusedOrgnameGenerator.new(DNAnexusAPI.new(RequestContext.instance.token))
       service.call(username)
     end
   end

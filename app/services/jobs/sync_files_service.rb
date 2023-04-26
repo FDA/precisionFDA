@@ -25,7 +25,7 @@ module Jobs
     end
 
     def process(job_dxid)
-      api = DIContainer.resolve("https_apps_client")
+      api = HttpsAppsClient.new
       response[:data] << api.job_sync_files(job_dxid)
     rescue HttpsAppsClient::Error => e
       response[:errors] << e.message

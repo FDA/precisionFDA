@@ -112,7 +112,7 @@ module Api
       end
 
       def api
-        @api ||= DNAnexusAPI.new(session["token"])
+        @api ||= DNAnexusAPI.new(RequestContext.instance.token)
       end
 
       def can_change_membership?

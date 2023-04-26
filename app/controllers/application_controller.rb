@@ -375,4 +375,26 @@ class ApplicationController < ActionController::Base
   def session_id
     session.id&.private_id
   end
+
+  def https_apps_client
+    @https_apps_client ||= HttpsAppsClient.new
+  end
+
+  def synchronizer
+    updater = SyncService::Comparisons::ComparisonUpdater
+    filter = SyncService::Comparisons::ComparisonsFilter
+    api = DNAnexusAPI.new(RequestContext.instance.token)
+
+    state_processor = SyncService::Comparisons::StateProcessor.new(api)
+    comparison_processor = SyncService::Comparisons::ComparisonProcessor.new(
+      state_processor,
+      updater,
+    )
+
+    SyncService::Comparisons::Synchronizer.new(
+      api,
+      filter,
+      comparison_processor,
+    )
+  end
 end

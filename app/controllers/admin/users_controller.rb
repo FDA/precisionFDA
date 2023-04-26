@@ -286,10 +286,5 @@ module Admin
     def user_org_admin?(user)
       current_user.id == user.org.admin_id
     end
-
-    # TODO(samuel) ask about better way to implement this
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
   end
 end
