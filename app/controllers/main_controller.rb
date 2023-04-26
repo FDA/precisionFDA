@@ -66,7 +66,17 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           end
         end
 
-        login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
+        api_with_user_token = DNAnexusAPI.new(RequestContext.instance.token)
+
+        login_tasks_processor = LoginTasksProcessor.new(
+          OrgService::LeaveOrgProcess.new(
+            api_with_user_token,
+            DNAnexusAPI.new(ADMIN_TOKEN),
+            DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
+            UserRemovalPolicy,
+            UnusedOrgnameGenerator.new(api_with_user_token),
+          ),
+        )
         login_tasks_processor.call(@context.user, @context.api)
       else
         @tutorials = [

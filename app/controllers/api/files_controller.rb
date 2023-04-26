@@ -260,7 +260,6 @@ module Api
       comparison = if @file.parent_type == "Comparison"
         @file.parent.slice(:id, :user_id, :scope, :state)
       else
-        synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
         synchronizer.sync_comparisons!(@context.user)
         @file.comparisons.accessible_by(@context).includes(:taggings)
       end

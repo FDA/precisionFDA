@@ -5,10 +5,10 @@ services:
       context: ../
       dockerfile: docker/images/isolation.Dockerfile
       args:
-        - RUBY_IMAGE_TAG=2.7.5
+        - RUBY_IMAGE_TAG=3.2.2
         - COFFEE_MAJOR_NODE_VERSION=19
     environment:
-      - BUNDLER_VERSION=2.3.7
+      - BUNDLER_VERSION=2.4.10
       - RAILS_LOG_TO_STDOUT=1
       - LOG_REQUESTS=1
       - NO_FIPS=1
@@ -87,7 +87,7 @@ services:
       - 32800:3306
 
   redis:
-    image: redis:5.0
+    image: redis:6.2.11
     ports:
       - 6379:6379
 

@@ -112,7 +112,7 @@ class JobsController < ApplicationController
     end
 
     unless @job.terminal?
-      api = @job.https? ? DIContainer.resolve("https_apps_client") : DNAnexusAPI.new(session["token"])
+      api = @job.https? ? HttpsAppsClient.new : DNAnexusAPI.new(RequestContext.instance.token)
       api.job_terminate(@job.dxid)
     end
 

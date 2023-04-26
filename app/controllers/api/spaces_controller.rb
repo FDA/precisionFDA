@@ -20,9 +20,13 @@ module Api
                     workflows
                   )
 
+    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
+    # before_action :sync_files, only: %i(files)
+
     def https_apps_client
       DIContainer.resolve("https_apps_client")
     end
+
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
@@ -273,7 +277,7 @@ module Api
     end
 
     def api
-      @api ||= DNAnexusAPI.new(session["token"])
+      @api ||= DNAnexusAPI.new(RequestContext.instance.token)
     end
 
     def space_types

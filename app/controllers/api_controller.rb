@@ -758,7 +758,7 @@ class ApiController < ApplicationController
       parent = Job.find_by!(dxid: params[:parent_id])
     end
 
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(RequestContext.instance.token)
     file_dxid = api.file_new(params[:name], project)["id"]
 
     file = UserFile.create!(
@@ -1515,13 +1515,13 @@ class ApiController < ApplicationController
 
   def validate_get_upload_url
     size = unsafe_params[:size]
-    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Fixnum)
+    fail "Parameter 'size' needs to be a Integer" unless size.is_a?(Integer)
 
     md5 = unsafe_params[:md5]
     fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
 
     index = unsafe_params[:index]
-    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Fixnum)
+    fail "Parameter 'index' needs to be a Integer" unless index.is_a?(Integer)
 
     id = unsafe_params[:id]
     if !id.is_a?(String) || id.empty?
@@ -1605,9 +1605,6 @@ class ApiController < ApplicationController
   end
   # rubocop:enable Metrics/MethodLength
 
-  def https_apps_client
-    DIContainer.resolve("https_apps_client")
-  end
   # rubocop:enable Style/SignalException
 
   private

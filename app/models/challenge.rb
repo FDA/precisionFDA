@@ -348,13 +348,13 @@ class Challenge < ApplicationRecord
 
   def send_email_on_open
     email_type_id = NotificationPreference.email_types[:notification_challenge_opened]
-    client = DIContainer.resolve("https_apps_client")
+    client = HttpsAppsClient.new
     client.email_send(email_type_id, { challengeId: id })
   end
 
   def send_email_on_prereg
     email_type_id = NotificationPreference.email_types[:notification_challenge_preregister]
-    client = DIContainer.resolve("https_apps_client")
+    client = HttpsAppsClient.new
     client.email_send(email_type_id, { challengeId: id, scope: scope, name: name })
   end
 

@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "2.7.5"
+ruby "3.2.2"
 
 gem "rails", "= 6.1.7.3"
 
@@ -22,6 +22,8 @@ gem "jbuilder", "~> 2.5"
 
 gem "rails-reverse-proxy"
 
+gem "matrix"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", ">= 1.4.6", require: false
 
@@ -30,6 +32,8 @@ gem "sdoc", ">= 1.0.0", group: :doc
 
 # ActiveModelSerializers brings convention over configuration to your JSON generation.
 gem "active_model_serializers", "~> 0.10.12"
+
+gem "redis", "~> 4.8.1"
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -108,7 +112,7 @@ gem "rack", ">=2.2.6.3"
 
 gem "rubyzip", "=1.3.0"
 
-gem "sidekiq", "~> 6.4"
+gem "sidekiq", ">= 7.0.8"
 
 gem "whenever", require: false
 

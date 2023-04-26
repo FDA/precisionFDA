@@ -1,7 +1,7 @@
 # Note: This dockerfile should be built from Ruby root directory
 # `docker build -f docker/images/test.Dockerfile .`
 
-FROM ruby:2.7.5
+FROM ruby:3.2.2
 RUN apt-get update
 RUN echo 'mysql-server mysql-server/root_password password password' | debconf-set-selections
 RUN echo 'mysql-server mysql-server/root_password_again password password' | debconf-set-selections
