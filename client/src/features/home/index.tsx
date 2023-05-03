@@ -32,7 +32,7 @@ import { toTitleCase } from './utils'
 import { WorkflowList } from './workflows/WorkflowList'
 import { WorkflowShow } from './workflows/WorkflowShow'
 import { useAuthUser } from '../auth/useAuthUser'
-import { UserLayout } from '../../views/layouts/UserLayout'
+import { UserLayout } from '../../layouts/UserLayout'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useToastWSHandler } from '../../hooks/useToastWSHandler'
 

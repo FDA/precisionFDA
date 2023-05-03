@@ -73,10 +73,10 @@ export const CLI = () => {
 
         <p>
           Visit the{' '}
-          <a data-turbolinks="false" href="/assets/new">
-            Create Assets
+          <a data-turbolinks="false" href="/home/assets">
+             Assets
           </a>{' '}
-          page and click on Generate Authorization Key button to generate a key
+          page and click on Generate CLI Key button to generate a key
           that you will need when using the CLI.
         </p>
 
@@ -143,7 +143,6 @@ export const CLI = () => {
         </DocsTip>
 
         <h2 id="uploading-assets">Uploading Assets</h2>
-
         <p>
           To upload an asset to precisionFDA, prepare a folder path of the asset
           contents and a readme file, and run the following command with the
@@ -178,7 +177,7 @@ export const CLI = () => {
         </p>
         <DocsTip>
           <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
-          <strong>NOTE:</strong>Filenames are not unique. There might be several files matching the same name in the target location.<br />
+          <strong>NOTE:</strong> Filenames are not unique. There might be several files matching the same name in the target location.<br />
           In that case you will be offered a list of files matching the name to choose from.
         </DocsTip>
         <p>
@@ -306,7 +305,6 @@ export const CLI = () => {
           To remove folders from My Home or a Space, you simply need the unique id
           for the folder which is a positive integer.
           Only empty folders are allowed to be removed - an error is raised otherwise.
-          {/*You can force deletion of non-empty directory with -force flag.*/}
         </p>
         <strong>Please be cautious. This is a permanent destructive operation and cannot be undone.</strong>
         <p>
@@ -314,12 +312,6 @@ export const CLI = () => {
           <br />
           <code>./pfda rmdir FOLDER_ID -key KEY</code>
         </p>
-
-        {/*<p>*/}
-        {/*  Force remove non-empty directory*/}
-        {/*  <br />*/}
-        {/*  <code>./pfda rmdir FOLDER_ID -force -key KEY</code>*/}
-        {/*</p>*/}
 
         <p>
           Remove multiple folders
@@ -490,6 +482,22 @@ export const CLI = () => {
           <code>./pfda describe-workflow WORKFLOW_ID -key KEY </code>
         </p>
 
+        <hr/>
+        <h2 id="changelog">pFDA CLI Changelog</h2>
+        <br/>
+        <p>Version 2.3 (03/08/2023):New features: mkdir, rm, rmdir, head, tail</p>
+        <p>Version 2.2.1 (12/20/2022): ls output improvements, added -overwrite flag for download.</p>
+        <p>Version 2.2 (12/07/2022): New features: ls, list-space, describe-app, describe-workflow.</p>
+        <p>Version 2.1.2 (8/03/2022): Fixed windows asset upload.</p>
+        <p>Version 2.1.1 (7/18/2022): Improvements to asset upload.</p>
+        <p>Version 2.1 (2/22/2022): Added download feature, upload to space, -cmd flag is now optional.</p>
+        <p>Version 2.0.1 (8/26/2021): Fix an issue uploading very large files.</p>
+        <p>Version 2.0.0 (6/21/2018): TLS 1.2 and FIPS 140-2 support.</p>
+        <p>Version 1.0.4 (1/5/2016): Reduced memory usage of each thread.</p>
+        <p>Version 1.0.3 (12/14/2015): The uploader can now be used for both assets and files.</p>
+        <p>Version 1.0.2 (12/3/2015): Multi-threaded uploading, for faster uploading of large assets.</p>
+
+
       </DocBody>
       <RightSide>
         <PageMap>
@@ -531,6 +539,9 @@ export const CLI = () => {
           </li>
           <li>
             <a href="#describe-workflow" data-turbolinks="false">Describing Workflow</a>
+          </li>
+          <li>
+            <a href="#changelog" data-turbolinks="false">Changelog</a>
           </li>
         </PageMap>
       </RightSide>

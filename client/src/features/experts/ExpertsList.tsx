@@ -24,8 +24,8 @@ import {
   Title,
 } from '../../components/Public/styles'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
-import PublicLayout from '../../views/layouts/PublicLayout'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { expertsYearsListRequest } from './api'
 import { ExpertsCondensedList } from './ExpertsCondensedList/ExpertsCondensedList'

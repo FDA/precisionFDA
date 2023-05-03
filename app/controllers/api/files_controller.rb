@@ -12,8 +12,6 @@ module Api
     before_action :find_file, :can_edit?, only: %i(update)
     before_action :find_user_file, only: %i(show)
     before_action :can_copy_to_scope?, only: %i(copy)
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # before_action :sync_files, only: %i(index)
 
     DOWNLOAD_ACTION = "download".freeze
     OPEN_ACTION = "open".freeze
@@ -256,16 +254,12 @@ module Api
     #   notes, answers, comments, discussions, comparisons.
     # rubocop:disable Metrics/MethodLength
     def show
-      # Refresh state of file, if needed
-      # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-      # refresh_file(@file, @context)
       load_licenses(@file)
 
       # TODO: move common data to common_concern.rb
       comparison = if @file.parent_type == "Comparison"
         @file.parent.slice(:id, :user_id, :scope, :state)
       else
-        synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
         synchronizer.sync_comparisons!(@context.user)
         @file.comparisons.accessible_by(@context).includes(:taggings)
       end
@@ -379,8 +373,6 @@ module Api
     # GET /api/files/download
     # Responds with a link to download a file.
     def download
-      # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-      # file = UserFile.exist_refresh_state(@context, params[:uid])
       file = UserFile.accessible_found_by(@context, params[:uid])
       verify_nodes_for_protection([file], "download")
 
@@ -655,12 +647,6 @@ module Api
     def folder_service
       @folder_service ||= FolderService.new(@context)
     end
-
-    # Refresh state of files, if needed
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # def sync_files
-    #   User.sync_files!(@context)
-    # end
 
     def init_parent_folder
       @parent_folder_id = unsafe_params[:folder_id]

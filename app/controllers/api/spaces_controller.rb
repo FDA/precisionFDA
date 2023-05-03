@@ -26,6 +26,7 @@ module Api
     def https_apps_client
       DIContainer.resolve("https_apps_client")
     end
+
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
@@ -261,11 +262,6 @@ module Api
       end
     end
 
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # def sync_files
-    #   User.sync_files!(@context)
-    # end
-
     def copy_service
       @copy_service ||= CopyService.new(api: api, user: current_user)
     end
@@ -281,7 +277,7 @@ module Api
     end
 
     def api
-      @api ||= DNAnexusAPI.new(session["token"])
+      @api ||= DNAnexusAPI.new(RequestContext.instance.token)
     end
 
     def space_types

@@ -3,12 +3,15 @@ import { expect } from 'chai'
 import { Asset, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { database } from '../../../src/database'
-import { findFileOrAssetWithUid } from 'shared/src/domain/user-file/user-file.helper'
+import {
+  findFileOrAssetWithUid,
+  findFileOrAssetsWithDxid,
+} from 'shared/src/domain/user-file/user-file.helper'
 
 // TODO: Migrate tests from user-file.helper.spec.ts in api and worker packages here
 
 describe('user-file.helper', () => {
-  context('findFileOrAssetWithUid()', () => {
+  context('findFileOrAsset helpers', () => {
     let em: EntityManager<MySqlDriver>
     let user: User
     let file: UserFile
@@ -27,7 +30,7 @@ describe('user-file.helper', () => {
       await em.flush()
     })
 
-    it('should return a file', async () => {
+    it('findFileOrAssetWithUid should return a file', async () => {
       const result = await findFileOrAssetWithUid(em, file.uid)
       expect(result).to.be.not.null()
       if (result) {
@@ -35,7 +38,7 @@ describe('user-file.helper', () => {
       }
     })
 
-    it('should return an asset', async () => {
+    it('findFileOrAssetWithUid should return an asset', async () => {
       const result = await findFileOrAssetWithUid(em, asset.uid)
       expect(result).to.be.not.null()
       if (result) {
@@ -43,9 +46,28 @@ describe('user-file.helper', () => {
       }
     })
 
-    it('should return null if the uid is neither file or asset', async () => {
+    it('findFileOrAssetWithUid should return null if the uid is neither file or asset', async () => {
       const result = await findFileOrAssetWithUid(em, 'friday-night-uid')
       expect(result).to.be.null()
+    })
+
+    it('findFileOrAssetsWithDxid should return a file', async () => {
+      const result = await findFileOrAssetsWithDxid(em, file.dxid)
+      expect(result).to.be.not.null()
+      expect(result!.length).to.equal(1)
+      expect(result![0].dxid).to.equal(file.dxid)
+    })
+
+    it('findFileOrAssetsWithDxid should return an asset', async () => {
+      const result = await findFileOrAssetsWithDxid(em, asset.dxid)
+      expect(result).to.be.not.null()
+      expect(result!.length).to.equal(1)
+      expect(result![0].dxid).to.equal(asset.dxid)
+    })
+
+    it('findFileOrAssetsWithDxid should return null if the uid is neither file or asset', async () => {
+      const result = await findFileOrAssetsWithDxid(em, 'saturday-night-uid')
+      expect(result).to.deep.equal([])
     })
   })
 })

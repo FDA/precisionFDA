@@ -27,8 +27,7 @@ import {
   SortInput,
 } from '../../../utils/filters'
 import { cleanObject, toArrayFromObject } from '../../../utils/object'
-import { UserLayout } from '../../../views/layouts/UserLayout'
-import { StyledPaginationSection } from '../../home/home.styles'
+import { UserLayout } from '../../../layouts/UserLayout'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
 

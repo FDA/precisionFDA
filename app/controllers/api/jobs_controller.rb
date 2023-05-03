@@ -240,7 +240,7 @@ module Api
 
       redirect_to(job.https_job_external_url) && return if Utils.development_or_test?
 
-      api = DIContainer.resolve("api.auth_user")
+      api = DNAnexusAPI.new(RequestContext.instance.token, DNANEXUS_AUTHSERVER_URI)
       code = api.get_https_job_auth_token(job)
       authorized_job_uri = URI.join(
         job.https_job_external_url,
@@ -485,10 +485,6 @@ module Api
       serialized_workflow.title += " (#{index + 1} of #{batch.size})"
     end
     # rubocop:enable Metrics/MethodLength
-
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
   end
   # rubocop:enable Metrics/ClassLength
 end

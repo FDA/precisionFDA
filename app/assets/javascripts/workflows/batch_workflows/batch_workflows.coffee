@@ -147,7 +147,7 @@ extendBatchInputFilesSearch = () ->
     @fsSortPathDirection(_sortDirection)
   ### SORT ###
   @fsSearchValue = ko.observable(null)
-  @fsSearchFlagsValue = ko.observable('ig')
+  @fsSearchFlagsValue = ko.observable('i')
 
   @fsSetTab = (data, e) =>
     tabId = e.currentTarget.getAttribute('data-id')
@@ -168,7 +168,7 @@ extendBatchInputFilesSearch = () ->
     data.checked(e.target.checked)
   @fsClearSearch = (data, e) =>
     return false if @fsIsLoading()
-    @fsSearchFlagsValue('ig')
+    @fsSearchFlagsValue('i')
     @fsSearchValue(null)
     @fsFiles([])
     @fsSelectedFiles([])
