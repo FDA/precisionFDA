@@ -27,7 +27,7 @@ module SpaceEventService
       )
 
       # DIContainer is not configured inside of Sidekiq's workers.
-      api = nodejs_api_client || DIContainer.resolve("https_apps_client")
+      api = nodejs_api_client || HttpsAppsClient.new
       NotificationSender.call(space_event, api)
     end
     # rubocop:enable Metrics/ParameterLists

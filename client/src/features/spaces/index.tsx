@@ -1,7 +1,7 @@
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import { UserLayout } from '../../views/layouts/UserLayout'
+import { UserLayout } from '../../layouts/UserLayout'
 import { CreateSpace } from './form/CreateSpace'
 import { DuplicateSpace } from './form/DuplicateSpace'
 import { SpaceSettings } from './form/SpaceSettings'

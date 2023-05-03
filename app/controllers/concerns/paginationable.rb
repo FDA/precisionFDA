@@ -56,7 +56,8 @@ module Paginationable
   end
 
   def page_size
-    per_page = params[:per_page].to_i
+    # max 100 per page if per_page param is over 100
+    per_page = [params[:per_page].to_i, 100].min
     per_page.zero? ? PAGE_SIZE : per_page
   end
 end

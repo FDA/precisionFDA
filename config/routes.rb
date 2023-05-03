@@ -120,6 +120,7 @@ Rails.application.routes.draw do
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"
     get "terms" => "main#terms"
+    get "security" => "main#security"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"

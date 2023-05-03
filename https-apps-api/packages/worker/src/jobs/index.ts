@@ -1,13 +1,19 @@
-import { UserOpsCtx, WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getChildLogger } from '../utils'
 import { path } from 'ramda'
-import { database, job as jobDomain } from '@pfda/https-apps-shared'
-import { queue, errors, debug } from '@pfda/https-apps-shared'
+import {
+  database,
+  debug,
+  errors,
+  job as jobDomain,
+  queue,
+  user,
+  userFile,
+} from '@pfda/https-apps-shared'
+import { UserOpsCtx, WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { Job } from 'bull'
 import { log } from '../utils'
 import { userCheckupHandler } from './user-checkup.handler'
-import { syncFileStatesHandler } from './files-state.handler'
 import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
@@ -27,7 +33,7 @@ const handleUserTask = async <TJob extends queue.types.TaskWithAuth> (
   bullJob: Job,
   execute: (ctx: WorkerContext, input: any) => Promise<any>,
 ) => {
-const data = bullJob.data as TJob
+  const data = bullJob.data as TJob
   const requestId = String(bullJob.id)
   const log = getChildLogger(requestId)
   const ctx: WorkerOpsCtx<UserOpsCtx> = {
@@ -50,8 +56,13 @@ export const handler = async (job: Job<queue.types.Task>) => {
   //        const handler = handlerRegistry.get(job.data.type)
   //        handler.invoke(job)
   switch (job.data.type) {
+    // ----------
+    // User Tasks
+    // ----------
     case queue.types.TASK_TYPE.SYNC_FILES_STATE:
-      await syncFileStatesHandler(job)
+      await handleUserTask(job, async (ctx, input) => {
+        return await new userFile.SyncFilesStateOperation(ctx).execute(input)
+      })
       return
     case queue.types.TASK_TYPE.SYNC_JOB_STATUS:
       await jobStatusHandler(job)

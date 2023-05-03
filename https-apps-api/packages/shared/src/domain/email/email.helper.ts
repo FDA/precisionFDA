@@ -88,9 +88,9 @@ const buildIsNotificationEnabled = (
     throw new Error('Invalid entity type - required User or SpaceMembership')
   }
 
-  const userConfig = isNil(user.emailNotificationSettings)
+  const userConfig = isNil(user.notificationPreference)
     ? null
-    : user.emailNotificationSettings.unwrap()
+    : user.notificationPreference.unwrap()
   if (!Object.keys(NOTIFICATION_TYPES).includes(notificationKey)) {
     // notification TYPE does not even exist, we cannot send the email
     return false

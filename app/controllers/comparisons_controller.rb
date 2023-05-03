@@ -17,7 +17,6 @@ class ComparisonsController < ApplicationController
   before_action :redirect_guest, only: %i(index)
 
   def index
-    synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
     synchronizer.sync_comparisons!(@context.user)
     comparisons = Comparison.editable_by(@context).includes(:taggings).order(created_at: :desc)
 
@@ -187,7 +186,6 @@ class ComparisonsController < ApplicationController
     @comparison = Comparison.accessible_by(@context).find(unsafe_params[:id])
 
     if @comparison.state == Comparison::STATE_PENDING
-      synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
       synchronizer.sync_comparisons!(@context.user, [@comparison.id])
 
       @comparison.reload
@@ -365,7 +363,7 @@ class ComparisonsController < ApplicationController
       return
     end
 
-    api = DNAnexusAPI.new(session["token"])
+    api = DNAnexusAPI.new(RequestContext.instance.token)
 
     files_errors = []
     spec_inputs.files.each do |file|

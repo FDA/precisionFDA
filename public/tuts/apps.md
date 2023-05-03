@@ -38,7 +38,7 @@ Through this hands-on tutorial you will:
 
 -   Access a database cluster from an app.
 
-# Download and Install the pfda CLI
+# Download and Install the precisionFDA CLI
 
 The precisionFDA CLI is useful for programmatic uploading and downloading of files from Windows, MacOS, and Linux clients (e.g. your laptop) to and from precisionFDA. Installation and testing for Windows and Linux OS are described below.
 

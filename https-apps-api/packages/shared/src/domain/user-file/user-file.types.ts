@@ -44,6 +44,7 @@ interface IFileOrAsset {
   uid: string
   project: string
   name: string
+  scope: string
   state: string
   fileSize?: number
   user: IdentifiedReference<User>

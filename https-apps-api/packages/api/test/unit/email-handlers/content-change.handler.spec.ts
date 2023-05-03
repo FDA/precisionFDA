@@ -6,7 +6,7 @@ import {
   SpaceMembership,
   SpaceEvent,
   User,
-  Space,
+  Space, NotificationPreference,
 } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
@@ -14,7 +14,6 @@ import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.con
 import { ContentChangedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
 import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
-import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { database } from '@pfda/https-apps-shared'
 import { PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
@@ -81,9 +80,9 @@ describe('content-change.handler', () => {
     it('based on user settings', async () => {
       // the key prefix has to match anotherUsers role in the space
       const settings = { reviewer_comment_activity: true } as const
-      const settingsEntity = new EmailNotification({ user: anotherUser })
+      const settingsEntity = new NotificationPreference(anotherUser)
       settingsEntity.data = settings
-      anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
+      anotherUser.notificationPreference = Reference.create(settingsEntity)
       await em.flush()
 
       const input = { spaceEventId: spaceEventJobAdded.id }
@@ -106,10 +105,10 @@ describe('content-change.handler', () => {
         all_content_added_or_deleted: true,
         admin_content_added_or_deleted: false,
       } as const
-      const settingsEntity = new EmailNotification({ user: anotherUser })
+      const settingsEntity = new NotificationPreference(anotherUser)
       anotherUserMembership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
       settingsEntity.data = settings
-      anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
+      anotherUser.notificationPreference = Reference.create(settingsEntity)
       await em.flush()
 
       const input = { spaceEventId: spaceEventJobAdded.id }

@@ -41,7 +41,7 @@ export class JobFinishedEmailHandler
     const owner = await this.ctx.em.findOneOrFail(
       User,
       { id: this.job.user.id },
-      { populate: ['emailNotificationSettings'] },
+      { populate: ['notificationPreference'] },
     )
 
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
