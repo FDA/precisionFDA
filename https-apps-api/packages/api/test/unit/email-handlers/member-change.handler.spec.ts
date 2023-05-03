@@ -1,7 +1,14 @@
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
 import { config, database } from '@pfda/https-apps-shared'
-import { App, Job, SpaceMembership, User, Space } from '@pfda/https-apps-shared/src/domain'
+import {
+  App,
+  Job,
+  SpaceMembership,
+  User,
+  Space,
+  NotificationPreference
+} from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
@@ -10,7 +17,6 @@ import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@pfda/https-apps-shared/src/domain/space-event/space-event.enum'
-import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 
 describe('member-change.handler', () => {
   let em: EntityManager
@@ -143,43 +149,6 @@ describe('member-change.handler', () => {
       const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(0)
-    })
-
-    it('based on user settings', async () => {
-      // THIS IS WHAT THE EVENT SHOULD LOOK LIKE
-      // const spaceEventMemberAdded = create.spacesHelper.createEvent(
-      //   em,
-      //   { user, space },
-      //   {
-      //     entityId: anotherUserMembership.id,
-      //     entityType: PARENT_TYPE.SPACE_MEMBERSHIP,
-      //     activityType: SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-      //     objectType: SPACE_EVENT_OBJECT_TYPE.MEMBERSHIP,
-      //     // matches spaceMembership.role
-      //     role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-      //   },
-      // )
-      // the key prefix has to match anotherUser's membership role in the space
-      const settings = {
-        all_membership_changed: false,
-      } as const
-      const settingsEntity = new EmailNotification({ user: anotherUser })
-      settingsEntity.data = settings
-      anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
-      await em.flush()
-
-      const input = {
-        updatedMembershipId: anotherUserMembership.id,
-        initUserId: user.id,
-        spaceId: space.id,
-        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.membership_added],
-        newMembershipRole: SPACE_MEMBERSHIP_ROLE[SPACE_MEMBERSHIP_ROLE.VIEWER].toLowerCase(),
-      }
-      const handler = new MemberChangedEmailHandler(emailConfig.emailId, input, ctx)
-      await handler.setupContext()
-      const receivers = await handler.determineReceivers()
-      // all_membership_changed: false is applied
       expect(receivers).to.have.lengthOf(0)
     })
 

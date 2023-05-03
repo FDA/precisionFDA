@@ -376,7 +376,7 @@ class UserFile < Node
   def rename(new_name, new_description)
     return false unless valid?
 
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(RequestContext.instance.token)
     if api.file_rename(dxid, project, new_name)
       update(name: new_name, description: new_description)
     else

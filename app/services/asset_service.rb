@@ -159,13 +159,6 @@ class AssetService
 
   def close(uid)
     https_apps_client.file_close(uid)
-
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # asset = Asset.open.find_by!(user_id: context.user_id, uid: uid)
-    # api.call(asset.dxid, "close")
-    # asset.reload
-    # asset.update!(state: "closing") if asset.open?
-    # asset
   end
 
   # we need to wait until the asset becomes closed

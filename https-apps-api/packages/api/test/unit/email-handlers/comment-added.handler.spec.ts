@@ -1,14 +1,20 @@
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
 import { database } from '@pfda/https-apps-shared'
-import { Job, SpaceMembership, User, Space, Comment } from '@pfda/https-apps-shared/src/domain'
+import {
+  Job,
+  SpaceMembership,
+  User,
+  Space,
+  Comment,
+  NotificationPreference
+} from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
 import { CommentAddedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/templates/handlers'
 import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
-import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 
 describe('member-change.handler', () => {
   let em: EntityManager
@@ -98,9 +104,9 @@ describe('member-change.handler', () => {
           entityId: comment.id,
         },
       )
-      const settingsEntity = new EmailNotification({ user: anotherUser })
+      const settingsEntity = new NotificationPreference(anotherUser)
       settingsEntity.data = { reviewer_comment_activity: true }
-      anotherUser.emailNotificationSettings = Reference.create(settingsEntity)
+      anotherUser.notificationPreference = Reference.create(settingsEntity)
       await em.flush()
 
       const input = { spaceEventId: eventCommentAdded.id }

@@ -12,4 +12,5 @@ export const columnFilters = {
   app_title: 'string',
   launched_by: 'string',
   file_size: 'range',
+  workflow_title: 'string',
 }

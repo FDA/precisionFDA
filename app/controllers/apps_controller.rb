@@ -322,7 +322,6 @@ class AppsController < ApplicationController
 
     # Call JupiterLab service if https app is running
     if @app.https?
-      https_apps_client = DIContainer.resolve("https_apps_client")
       input_info = input_spec_preparer.run(@app, inputs)
 
       fail input_spec_preparer.first_error unless input_spec_preparer.valid?

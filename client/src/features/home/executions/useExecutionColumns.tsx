@@ -79,7 +79,7 @@ export const useExecutionColumns = ({
           },
         {
           Header: 'Workflow',
-          id: 'workflow',
+          id: 'workflow_title',
           accessor: 'workflow_title',
           Filter: DefaultColumnFilter,
           width: colWidths?.workflow_title || 200,

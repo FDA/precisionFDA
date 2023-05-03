@@ -3,6 +3,7 @@ import { Job } from '../job'
 import { User } from '../user'
 import { Folder } from '../user-file/folder.entity'
 import { UserFile } from '../user-file/user-file.entity'
+import { IFileOrAsset } from '../user-file/user-file.types'
 import { Event } from './event.entity'
 
 const EVENT_TYPES = {
@@ -11,6 +12,7 @@ const EVENT_TYPES = {
   JOB_CLOSED: 'Event::JobClosed',
   FOLDER_LOCKED: 'Event::FolderLocked',
   FOLDER_UNLOCKED: 'Event::FolderUnlocked',
+  FILE_ABANDONED: 'Event::FileAbandoned',
   FILE_DELETED: 'Event::FileDeleted',
   FILE_LOCKED: 'Event::FileLocked',
   FILE_UNLOCKED: 'Event::FileUnlocked',
@@ -57,7 +59,7 @@ const createFolderEvent = async (eventType: string, folder: Folder, folderPath: 
 
 const createFileEvent = async (
   eventType: string,
-  file: UserFile,
+  file: IFileOrAsset,
   filePath: string,
   user: User,
 ): Promise<Event> => {

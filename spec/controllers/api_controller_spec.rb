@@ -463,7 +463,7 @@ RSpec.describe ApiController, type: :controller do
         {
           page: 1,
           search_string: "abc",
-          flag: "ig",
+          flag: "i",
           scopes: %w(private),
           order_by_name: "asc",
         }
@@ -485,7 +485,7 @@ RSpec.describe ApiController, type: :controller do
         {
           page: 1,
           search_string: "*",
-          flag: "ig",
+          flag: "i",
           scopes: %w(private),
           order_by_name: "asc",
         }
@@ -512,7 +512,7 @@ RSpec.describe ApiController, type: :controller do
         {
           page: 1,
           search_string: "abc",
-          flag: "ig",
+          flag: "i",
           scopes: %w(private),
           order_by_name: "asc",
         }
@@ -548,7 +548,7 @@ RSpec.describe ApiController, type: :controller do
         {
           page: 1,
           search_string: "fil",
-          flag: "ig",
+          flag: "i",
           scopes: %w(private),
           order_by_name: "desc",
         }
@@ -602,7 +602,7 @@ RSpec.describe ApiController, type: :controller do
           {
             page: 1,
             search_string: "fil",
-            flag: "ig",
+            flag: "i",
             scopes: %w(private),
             order_by_name: "asc",
             uids: nil,
@@ -624,7 +624,7 @@ RSpec.describe ApiController, type: :controller do
           {
             page: 1,
             search_string: "fil",
-            flag: "ig",
+            flag: "i",
             scopes: %w(private),
             order_by_name: "asc",
             uids: true,
@@ -647,7 +647,7 @@ RSpec.describe ApiController, type: :controller do
         {
           page: 1,
           search_string: "fil",
-          flag: "ig",
+          flag: "i",
           scopes: [review_space_uid, verified_space_uid],
           order_by_name: "desc",
         }

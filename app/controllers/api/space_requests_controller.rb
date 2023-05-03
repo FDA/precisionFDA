@@ -1,9 +1,6 @@
 module Api
   # Space requests controller.
   class SpaceRequestsController < ApiController
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
 
     # POST /api/spaces/:id/lock
     def lock

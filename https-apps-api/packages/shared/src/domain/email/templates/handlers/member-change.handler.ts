@@ -115,7 +115,7 @@ export class MemberChangedEmailHandler
     const memberships = await this.ctx.em.find(
       SpaceMembership,
       { spaces: this.space.id, active: true },
-      { populate: ['user.emailNotificationSettings'] },
+      { populate: ['user.notificationPreference'] },
     )
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)

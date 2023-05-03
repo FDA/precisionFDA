@@ -13,6 +13,6 @@ const StyledOutdatedDocs = styled.div`
 
 export const OutdatedDocs = () => {
   return <StyledOutdatedDocs>
-    The content on this page may be outdated. Please refer to the new <Link to="/docs/tutorials">tutorials</Link>.
+    The content on this page may be outdated. Please refer to the new <Link to="/docs/tutorials/apps-workflows">tutorials</Link>.
   </StyledOutdatedDocs>
 }

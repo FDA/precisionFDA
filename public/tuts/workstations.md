@@ -60,7 +60,7 @@ dx-get-timeout
 0 days 23 hours 59 minutes 56 seconds
 ```
 
-## Download and Install the pfda CLI
+## Download and Install the precisionFDA CLI
 
 Under My Home Assets, click on the How to create assets button to find links to the precisionFDA CLI, and the button to generate the temporary authorization key that you'll use with the CLI.
 
@@ -490,7 +490,7 @@ Adjust the remaining time-to-live for the notebook using the Update duration but
 
 ![](https://pfda-production-static-files.s3.amazonaws.com/tuts/workstations-media/image36.png)
 
-## Download and Install the pfda CLI
+## Download and Install the precisionFDA CLI
 
 Under My Home Assets, click on the How to create assets button to find links to the precisionFDA CLI, and the button to generate the temporary authorization key that you'll use with the CLI.
 

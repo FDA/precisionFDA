@@ -2,7 +2,7 @@ class Workflow
   class BooleanInclusionValidator < ActiveModel::EachValidator
     def validate_each(record, attribute, value)
       return if value.in?([false, true])
-      record.errors.add(attribute, :inclusion, message_options(attribute, record))
+      record.errors.add(attribute, :inclusion, **message_options(attribute, record))
     end
 
     private

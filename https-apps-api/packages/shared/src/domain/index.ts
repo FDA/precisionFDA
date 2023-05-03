@@ -19,7 +19,6 @@ import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
 import { Event } from './event/event.entity'
 import { Organization } from './org/org.entity'
-import { EmailNotification } from './email/email-notification.entity'
 import { SpaceEvent } from './space-event/space-event.entity'
 import { Space } from './space/space.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
@@ -48,7 +47,6 @@ const entities = {
   Comparison,
   ComparisonInput,
   DbCluster,
-  EmailNotification,
   Event,
   Expert,
   ExpertAnswer,
