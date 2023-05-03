@@ -8,7 +8,6 @@ import { JobFailedEmailHandler } from '@pfda/https-apps-shared/src/domain/email/
 import { OpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { database } from '@pfda/https-apps-shared'
-import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 
 describe('job-failed.handler', () => {
   let em: EntityManager
