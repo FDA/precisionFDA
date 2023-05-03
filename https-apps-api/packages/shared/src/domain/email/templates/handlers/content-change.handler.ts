@@ -45,7 +45,7 @@ export class ContentChangedEmailHandler
     const memberships = await this.ctx.em.find(
       SpaceMembership,
       { spaces: spaceEvent.space.id, active: true },
-      { populate: ['user.emailNotificationSettings'] },
+      { populate: ['user.notificationPreference'] },
     )
 
     // build determine filter functions
