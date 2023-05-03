@@ -84,15 +84,6 @@ execute "Bundle gems" do
   # environment lazy { ENV.to_hash }
 end
 
-execute "Install bower dependencies" do
-  command %{
-    bower install
-  }
-
-  cwd app_dir
-  user node[:deploy_user]
-end
-
 template ::File.join(app_dir, "config", "database.yml") do
   source "database.erb"
   variables lazy {{

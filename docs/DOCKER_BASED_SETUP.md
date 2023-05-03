@@ -6,6 +6,10 @@ development environment. There are also a few _optional_ sections, that are reco
 
 _Last updated: 25.11.2022_
 
+## Prerequisites
+
+Make sure that you understand this [Makefile](../Makefile)
+
 ## Installing docker and docker-compose
 
 > If you already have docker installed in your system, you can skip this step.
