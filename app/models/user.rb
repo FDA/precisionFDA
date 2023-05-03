@@ -27,7 +27,6 @@
 
 class User < ApplicationRecord
   include Auditor
-  include FilesSyncing
 
   EMAIL_FORMAT = %r{
     \A(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.

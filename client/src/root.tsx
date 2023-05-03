@@ -16,7 +16,7 @@ import { JobRunForm } from './features/home/apps/run/JobRun'
 import { WorkflowRunForm } from './features/home/workflows/run/WorkflowRun'
 import { Loader } from './components/Loader'
 import ExpertsSinglePage from './features/experts/details/index'
-import NoFoundPage from './views/pages/NoFoundPage'
+import NoFoundPage from './pages/NoFoundPage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import queryClient from './utils/queryClient'
 
@@ -39,9 +39,9 @@ const ProposeChallengePage = React.lazy(
 const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
 const CreateNewsItemPage = React.lazy(() => import('./features/news/form/CreateNewsItemPage'))
 const LandingPage = React.lazy(() => import('./features/overview/OverviewPage'))
-const AboutPage = React.lazy(() => import('./views/pages/Landing/AboutPage'))
+const AboutPage = React.lazy(() => import('./pages/AboutPage'))
 const NotificationsPage = React.lazy(
-  () => import('./views/pages/Account/Notifications'),
+  () => import('./pages/Account/Notifications'),
 )
 const ExpertsListPage = React.lazy(
   () => import('./features/experts/ExpertsList'),
@@ -52,7 +52,8 @@ const ChallengeDetailsPage = React.lazy(
 const UsersList = React.lazy(() => import('./features/admin/users'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
-const ToS = React.lazy(() => import('./views/pages/ToS'))
+const ToS = React.lazy(() => import('./pages/ToS'))
+const Security = React.lazy(() => import('./pages/Security'))
 
 const root = () => {
   const authModal = useModal()
@@ -128,6 +129,9 @@ const root = () => {
                 </Route>
                 <Route exact path="/terms">
                   <ToS />
+                </Route>
+                <Route exact path="/security">
+                  <Security />
                 </Route>
                 <Route exact path="/admin/users">
                   <UsersList />

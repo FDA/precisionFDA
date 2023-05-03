@@ -49,9 +49,5 @@ module Api
       all_years = https_apps_client.news_years
       render json: all_years
     end
-
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
   end
 end

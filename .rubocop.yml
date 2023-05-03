@@ -9,7 +9,7 @@ AllCops:
   - 'chef/**/*'
   DisplayCopNames: true
   StyleGuideCopsOnly: false
-  TargetRubyVersion: 2.7.5
+  TargetRubyVersion: 3.2.2
 
 Bundler/OrderedGems:
   Enabled: false

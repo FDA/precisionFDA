@@ -8,6 +8,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                index
                                                about
                                                terms
+                                               security
                                                login
                                                return_from_login
                                                request_access
@@ -24,7 +25,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
-  layout "react", only: %i(about index news terms)
+  layout "react", only: %i(about index news terms security)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -65,7 +66,17 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           end
         end
 
-        login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
+        api_with_user_token = DNAnexusAPI.new(RequestContext.instance.token)
+
+        login_tasks_processor = LoginTasksProcessor.new(
+          OrgService::LeaveOrgProcess.new(
+            api_with_user_token,
+            DNAnexusAPI.new(ADMIN_TOKEN),
+            DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
+            UserRemovalPolicy,
+            UnusedOrgnameGenerator.new(api_with_user_token),
+          ),
+        )
         login_tasks_processor.call(@context.user, @context.api)
       else
         @tutorials = [
@@ -140,6 +151,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def guidelines; end
 
   def terms; end
+
+  def security; end
 
   def presskit # rubocop:todo Metrics/MethodLength
     @images = [
@@ -341,11 +354,16 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def post_login_checks(user, token)
     # User logged in successfully, a good time to run user checkup with the new token
+    # N.B. We need to set RequestContext manually here because when return_from_login
+    #      is called there is no valid session yet
+    RequestContext.begin_request(user.id, user.dxuser, token)
     https_apps_client = HttpsAppsClient.new
     https_apps_client.user_checkup
   rescue StandardError => e
     # Error in requesting a user checkup shouldn't interrupt the login process
     Rails.logger.error("Error requesting user checkup: #{e.message}")
+  ensure
+    RequestContext.end_request
   end
 
   def check_webapp

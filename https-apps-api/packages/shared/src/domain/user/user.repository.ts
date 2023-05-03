@@ -23,7 +23,7 @@ export class UserRepository extends PaginatedEntityRepository<User> {
       {
         id: { $in: userIds },
       },
-      { populate: ['emailNotificationSettings'] },
+      { populate: ['notificationPreference'] },
     )
   }
 

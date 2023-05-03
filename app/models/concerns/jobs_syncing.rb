@@ -32,7 +32,7 @@ module JobsSyncing
       return if job.terminal? || job.https?
 
       user = context.user
-      api = DIContainer.resolve("api.user")
+      api = DNAnexusAPI.new(RequestContext.instance.token)
 
       result = api.system_find_jobs(
         includeSubjobs: false,
@@ -53,7 +53,7 @@ module JobsSyncing
 
       logger.debug("syncing jobs with context #{context.inspect}")
       user = context.user
-      api = DIContainer.resolve("api.user")
+      api = DNAnexusAPI.new(context.token)
 
       # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
       jobs.regular.where(user_id: user.id).
@@ -195,7 +195,7 @@ module JobsSyncing
     # rubocop:enable Metrics/MethodLength
 
     def send_job_email(job_id, email_type_id)
-      client = DIContainer.resolve("https_apps_client")
+      client = HttpsAppsClient.new
       client.email_send(email_type_id, { jobId: job_id })
     end
   end

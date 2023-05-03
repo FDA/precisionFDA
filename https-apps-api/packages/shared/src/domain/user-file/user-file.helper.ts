@@ -375,6 +375,20 @@ const findFileOrAssetWithUid = async (
   return await assetRepo.findAssetWithUid(uid) as IFileOrAsset
 }
 
+const findFileOrAssetsWithDxid = async (
+  em: EntityManager,
+  dxid: string,
+): Promise<IFileOrAsset[]> => {
+  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
+  const res = await userFileRepo.findFilesWithDxid(dxid)
+  if (res.length > 0) {
+    return res as IFileOrAsset[]
+  }
+
+  const assetRepo = em.getRepository(Asset) as AssetRepository
+  return await assetRepo.findAllAssetsWithDxid(dxid) as IFileOrAsset[]
+}
+
 const findUnclosedFilesOrAssets = async (
   em: EntityManager,
   userId: number,
@@ -460,6 +474,7 @@ export {
   filterLeafPaths,
   findFolderForPath,
   findFileOrAssetWithUid,
+  findFileOrAssetsWithDxid,
   findUnclosedFilesOrAssets,
   loadNodes,
   validateEditableBy,

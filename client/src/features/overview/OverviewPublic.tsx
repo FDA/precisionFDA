@@ -14,10 +14,10 @@ import { usePageMeta } from '../../hooks/usePageMeta'
 import NavigationBar, {
   NavigationBarBanner,
   NavigationBarPublicLandingTitle,
-} from '../../views/components/NavigationBar/NavigationBar'
-import SocialMediaButtons from '../../views/components/NavigationBar/SocialMediaButtons'
-import PublicLayout from '../../views/layouts/PublicLayout'
-import { Tagline } from '../../views/pages/Landing/Tagline'
+} from '../../components/NavigationBar/NavigationBar'
+import SocialMediaButtons from '../../components/NavigationBar/SocialMediaButtons'
+import PublicLayout from '../../layouts/PublicLayout'
+import { Tagline } from '../../pages/Tagline'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'

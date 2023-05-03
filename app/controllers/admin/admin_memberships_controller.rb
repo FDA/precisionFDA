@@ -99,7 +99,7 @@ module Admin
 
     # Adding new site admin to all existing Administrator Spaces
     def add_to_admin_spaces(user)
-      api = DNAnexusAPI.new(session["token"])
+      api = DNAnexusAPI.new(RequestContext.instance.token)
 
       Space.admin_spaces.each do |space|
         logger.info("Adding site admin #{user.dxuser} to admin space #{space.id}")
@@ -140,7 +140,7 @@ module Admin
     # Removing site admin from all existing Administrator Spaces
     def remove_from_admin_spaces(user)
       admin_api = DIContainer.resolve("api.admin")
-      user_api = DNAnexusAPI.new(session["token"])
+      user_api = DNAnexusAPI.new(RequestContext.instance.token)
 
       Space.admin_spaces.each do |space|
         logger.info("Removing site admin #{user.dxuser} from admin space #{space.id}")

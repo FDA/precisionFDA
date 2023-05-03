@@ -167,10 +167,10 @@ const defaultConfig = {
       response: {
         isEnabled: true,
         data: {
-          cdmhPortal: 'https://cdmh-portal.precisionfda-dev.dnanexus.com/',
-          cdrBrowser: 'https://smilecdr.precisionfda-dev.dnanexus.com/',
-          cdrAdmin: 'https://smilecdr.precisionfda-dev.dnanexus.com/',
-          connectPortal: 'https://adeptia-portal.precisionfda-dev.dnanexus.com/',
+          cdmhPortal: process.env.CDMH_PORTAL_URL,
+          cdrBrowser: process.env.CDMH_CDR_BROWSER_URL,
+          cdrAdmin: process.env.CDMH_CDR_ADMIN_URL,
+          connectPortal: process.env.CDMH_CONNECT_PORTAL_URL,
         },
       },
     },

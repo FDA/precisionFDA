@@ -84,16 +84,11 @@ describe('TASK: workstation-snapshot', () => {
       key: 'key',
     }
     const userOpsCtx: UserOpsCtx = { em, log, user: userCtx }
-    queueFakes.getRepeatableJobsStub
-
-    await new WorkstationSnapshotOperation(userOpsCtx).enqueue(input)
-    expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
-
-    expect(fakes.notificationService.createNotification.callCount).to.equal(1)
-    expect(fakes.notificationService.createNotification.args[0][0]).to.include({
-      action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
-      severity: SEVERITY.INFO,
+    queueFakes.getJobStub.callsFake((jobId: string) => {
+      return jobId === WorkstationSnapshotOperation.getBullJobId(httpsJobWithAPI.dxid) ? { } : undefined
     })
+
+    await expect(new WorkstationSnapshotOperation(userOpsCtx).enqueue(input)).to.be.rejectedWith(InvalidStateError)
   })
 
   it('works and returns success', async () => {

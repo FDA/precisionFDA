@@ -20,13 +20,6 @@ RSpec.describe IOC::Container do
         allow(DNAnexusAPI).to receive(:new).and_call_original
       end
 
-      describe "api.user" do
-        it "resolves user API" do
-          expect(container.resolve("api.user")).to be_instance_of(DNAnexusAPI)
-          expect(DNAnexusAPI).to have_received(:new).with(token)
-        end
-      end
-
       describe "api.admin" do
         it "resolves admin API" do
           expect(container.resolve("api.admin")).to be_instance_of(DNAnexusAPI)
@@ -44,7 +37,6 @@ RSpec.describe IOC::Container do
 
     describe "Organizations" do
       before do
-        container.stub("api.user", user_api)
         container.stub("api.admin", admin_api)
         container.stub("api.auth", auth_api)
       end
@@ -59,62 +51,6 @@ RSpec.describe IOC::Container do
 
       it "resolves organization dissolve policy" do
         expect(container.resolve("orgs.org_dissolve_policy")).to eq(OrgDissolvePolicy)
-      end
-
-      describe "unused orgname generator construction" do
-        before do
-          allow(UnusedOrgnameGenerator).to receive(:new).and_call_original
-        end
-
-        it "resolves unused orgname generator" do
-          expect(container.resolve("orgs.unused_orgname_generator")).
-            to(be_instance_of(UnusedOrgnameGenerator))
-
-          expect(UnusedOrgnameGenerator).to have_received(:new).with(user_api)
-        end
-      end
-
-      describe("organization leave processor") do
-        let(:user_removal_policy) { "User removal policy" }
-        let(:unused_orgname_generator) { "Unused orgname generator" }
-
-        before do
-          allow(OrgService::LeaveOrgProcess).to receive(:new).and_call_original
-
-          container.stub("orgs.user_removal_policy", user_removal_policy)
-          container.stub("orgs.unused_orgname_generator", unused_orgname_generator)
-        end
-
-        it "resolves organization leave processor" do
-          expect(container.resolve("orgs.org_leave_processor")).
-            to(be_instance_of(OrgService::LeaveOrgProcess))
-
-          expect(OrgService::LeaveOrgProcess).
-            to(have_received(:new).with(
-              user_api,
-              admin_api,
-              auth_api,
-              user_removal_policy,
-              unused_orgname_generator,
-            ))
-        end
-      end
-
-      describe("login tasks processor") do
-        let(:org_leave_processor) { "Organization leave processor" }
-
-        before do
-          allow(LoginTasksProcessor).to receive(:new).and_call_original
-
-          container.stub("orgs.org_leave_processor", org_leave_processor)
-        end
-
-        it "resolves login tasks processor" do
-          expect(container.resolve("orgs.login_tasks_processor")).
-            to(be_instance_of(LoginTasksProcessor))
-
-          expect(LoginTasksProcessor).to have_received(:new).with(org_leave_processor)
-        end
       end
 
       describe "leave organization request creator" do
@@ -200,21 +136,6 @@ RSpec.describe IOC::Container do
 
           expect(OrgService::Provision).to have_received(:new).with(provision_on_platform)
         end
-      end
-    end
-
-    describe "Comparisons" do
-      before do
-        container.stub("api.user", user_api)
-        container.stub("api.admin", admin_api)
-        container.stub("api.auth", auth_api)
-      end
-
-      it "resolves synchronizer" do
-        allow(SyncService::Comparisons::Synchronizer).to receive(:new).and_call_original
-
-        expect(container.resolve("comparisons.sync.synchronizer")).
-          to be_an_instance_of(SyncService::Comparisons::Synchronizer)
       end
     end
   end

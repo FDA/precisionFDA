@@ -1,9 +1,6 @@
 module Api
   # Node requests controller.
   class NodesController < ApiController
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
 
     # POST /api/nodes/lock
     def lock

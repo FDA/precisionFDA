@@ -32,7 +32,7 @@ export class JobFailedEmailHandler
     const owner = await this.ctx.em.findOneOrFail(
       User,
       { id: this.job.user.id },
-      { populate: ['emailNotificationSettings'] },
+      { populate: ['notificationPreference'] },
     )
     // Note(samuel) if different recipients are required for "CostLimitExceeded" and other failures
     // please refactor into separate handler
