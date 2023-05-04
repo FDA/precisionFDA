@@ -97,46 +97,25 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/ginas.log",
-                         "log_group_name": "dev/gsrs/ginas",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/application.log",
-                         "log_group_name": "dev/gsrs/logs",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/access.log",
-                         "log_group_name": "dev/gsrs/access",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/fail-persist.log",
-                         "log_group_name": "dev/gsrs/fail-persist",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/reindex.log",
-                         "log_group_name": "dev/gsrs/reindex",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/fail-transform",
-                         "log_group_name": "dev/gsrs/fail-transform",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/fail-extract.log",
-                         "log_group_name": "dev/gsrs/fail-extract",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
                          "file_path": "/srv/www/precision_fda/current/log/sidekiq.log",
                          "log_group_name": "dev/backend/sidekiq.log",
                          "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/catalina*",
+                         "log_group_name": "dev/gsrs/catalina.",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/localhost.*",
+                         "log_group_name": "dev/gsrs/localhost",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/localhost_access_log.*",
+                         "log_group_name": "dev/gsrs/access",
+                         "log_stream_name": "{instance_id}"
                      }
-
                  ]
              }
          }

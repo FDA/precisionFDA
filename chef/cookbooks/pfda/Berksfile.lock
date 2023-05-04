@@ -14,4 +14,6 @@ GRAPH
   pfda (0.1.0)
     aws (~> 8.4.0)
     nodejs (~> 7.3.2)
+    tomcat (~> 5.0.9)
   seven_zip (4.2.1)
+  tomcat (5.0.9)

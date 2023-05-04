@@ -10,3 +10,4 @@ chef_version "~> 17.10.3" if respond_to?(:chef_version)
 
 depends "aws", "~> 8.4.0"
 depends "nodejs", "~> 7.3.2"
+depends "tomcat", "~> 5.0.9"
