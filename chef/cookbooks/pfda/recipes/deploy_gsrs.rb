@@ -25,7 +25,7 @@ end
 bash "sync ginas indexes" do
   code <<-EOH
   aws s3 sync s3://#{node[:gsrs][:indexes_bucket_name]}#{node[:gsrs][:indexes_bucket_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
-  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/ginas.ix
+  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/ginas.ix/ -R
   EOH
 end
 
@@ -43,7 +43,7 @@ bash "copy gsrs to webapps" do
   --exclude 'frontend/WEB-INF/classes/static/assets/data/config.json' \
   --exclude 'substances/WEB-INF/classes/application.conf' \
   --exclude 'substances/WEB-INF/classes/codeSystem.json'
-  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/webapps
+  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/webapps/ -R
   EOH
 end
 
