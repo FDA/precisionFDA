@@ -464,6 +464,9 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     if verify_captcha_assessment(token, "registration")
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
+    else
+      render "_partials/_error", status: :unprocessable_entity, locals: { message: "Invalid captcha verification. If this issue persists, please contact precisionFDA support." }
+      return
     end
 
     render :request_access
