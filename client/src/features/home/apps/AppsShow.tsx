@@ -7,7 +7,7 @@ import { Link, Redirect, Route, Switch } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import {
   StyledTab,
   StyledTabList,
@@ -270,7 +270,7 @@ export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
             <Redirect to={`${match.url}`} />
           </Route>
           <Route path={`${match.path}/readme`} exact>
-            <Markdown data={app.readme} />
+            <MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>
           </Route>
           <Route path={`${match.path}/jobs`}>
             <AppExecutionsList appUid={appUid} />

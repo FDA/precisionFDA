@@ -1,14 +1,30 @@
-import { Tab, TabList, Tabs } from 'react-tabs'
 import styled from 'styled-components'
-
 import { ButtonSolidBlue } from '../../../components/Button'
 import { PageContainer, PageLeftColumn, PageRightColumn, pagePadding, PageContainerMargin } from '../../../components/Page/styles'
 import { breakPoints } from '../../../styles/theme'
+import { StyledToC } from '../../markdown/Toc'
 
 
 export const CallToActionButton = styled(ButtonSolidBlue)`
   display: block;
   margin-bottom: 0px;
+`
+
+export const ExpertPageRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  
+  ${StyledToC} {
+    display: none;
+  }
+
+  @media(min-width: ${breakPoints.xlarge}px) {
+    flex-direction: row;
+    ${StyledToC} {
+      display: initial;
+    }
+  }
 `
 
 export const StyledPageContainer = styled(PageContainer)`

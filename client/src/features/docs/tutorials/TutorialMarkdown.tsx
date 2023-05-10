@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
-import rehypeHighlight from 'rehype-highlight'
-import rehypeSlug from 'rehype-slug'
-import styled from 'styled-components'
 import 'highlight.js/styles/github.css'
-import { DocBody, DocRow } from '../styles'
-import { breakPoints } from '../../../styles/theme'
+import React, { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeRaw from 'rehype-raw'
+import rehypeSlug from 'rehype-slug'
+import remarkGfm from 'remark-gfm'
+import styled from 'styled-components'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
+import { IToCItem, ToC, setTocFromRef } from '../../markdown/Toc'
+import { DocBody, DocRow } from '../styles'
 
 const StyledMarkdown = styled.div`
   img {
@@ -84,18 +84,9 @@ const Markdown = ({ data, setToc }: any) => {
   const docRef = useRef(null)
   useScrollToHash()
   useEffect(() => {
-    // Remove the first H1 from table of contents list becuase it's the page title.
-    const [, ...rest] = Array.from(
-      docRef?.current?.querySelectorAll('h1, h2, h3, h4, h5, h6'),
-    )
-    setToc(
-      rest.map(h => ({
-        id: h.id,
-        tagName: h.tagName,
-        textContent: h.textContent,
-      })),
-    )
+    setTocFromRef(docRef, setToc)
   }, [])
+
   return (
     <StyledMarkdown ref={docRef}>
       <ReactMarkdown
@@ -109,38 +100,6 @@ const Markdown = ({ data, setToc }: any) => {
   )
 }
 
-export const ToCItem = styled.li<{ level?: number }>`
-  list-style: none;
-  padding-bottom: 8px;
-  ${({ level }) => level && `margin-left: ${level * 16}px;`}
-`
-
-export const ToC = styled.div`
-  .container {
-    font-size: 14px;
-    height: initial;
-    overflow: initial;
-    position: initial;
-
-    @media (min-width: ${breakPoints.large}px) {
-      box-sizing: border-box;
-      max-width: 380px;
-      box-shadow: 0px 2px 8px -4px rgba(0, 0, 0, 0.75);
-      padding: 16px;
-      padding-right: 10px;
-      overflow-y: auto;
-      top: 80px;
-      position: sticky;
-      height: 450px;
-    }
-  }
-`
-
-interface IToCItem {
-  id: string
-  tagName: string
-  textContent: string
-}
 
 export const TutorialMarkdown = ({ fileName }: { fileName: string }) => {
   const { data, isLoading } = useTutorialFileQuery(fileName)
@@ -174,21 +133,7 @@ export const TutorialMarkdown = ({ fileName }: { fileName: string }) => {
       <DocBody>
         <Markdown data={data} setToc={setToc} />
       </DocBody>
-      {toc && (
-        <ToC>
-          <div ref={containerRef} className="container">
-            {toc?.map(i => {
-              return (
-                <a key={i.id} href={`#${i.id}`}>
-                  <ToCItem level={parseInt(i.tagName[1], 10) - 1}>
-                    {i.textContent}
-                  </ToCItem>
-                </a>
-              )
-            })}
-          </div>
-        </ToC>
-      )}
+      {toc && <ToC containerRef={containerRef} items={toc} />}
     </DocRow>
   )
 }
