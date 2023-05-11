@@ -5,7 +5,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   GSRS_DEFAULT_URL = "http://localhost:8080".freeze
   GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
-  GSRS_ENABLED = ENV.fetch("GSRS_ENABLED", 0)
+  GSRS_ENABLED = ENV.fetch("GSRS_ENABLED", false)
   GSRS_HEADER_USER_NAME =
     ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME", "AUTHENTICATION_HEADER_NAME")
   GSRS_HEADER_USER_EMAIL =
@@ -146,7 +146,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
     end
 
-    if GSRS_ENABLED
+    if GSRS_ENABLED == true
       session_key = http_request(
         "#{GSRS_URL}/api/v1/whoami",
         {},
