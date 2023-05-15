@@ -124,7 +124,7 @@ class CommentsController < ApplicationController
     when "File"
       UserFile.find(content_id)
     else
-      Rails::Html::SafeListSanitizer.sanitize(content_type).constantize.find(content_id);
+      Rails::Html::SafeListSanitizer.sanitize(content_type).constantize.find(content_id)
     end
   end
 
