@@ -65,7 +65,6 @@ class CommentsController < ApplicationController
         comment.content_object = item
       end
       comment = Comment.build_from(item, @context.user_id, comment_params[:body]) unless comment
-
       comment = attach_content(comment)
       if comment.save
         move_to_child(comment)
