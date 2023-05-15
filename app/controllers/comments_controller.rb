@@ -123,7 +123,8 @@ class CommentsController < ApplicationController
     when "File"
       UserFile.find(content_id)
     else
-      content_type.constantize.find(content_id)
+      puts "first a little test"
+      content_type.constantize.find(content_id);
     end
   end
 
