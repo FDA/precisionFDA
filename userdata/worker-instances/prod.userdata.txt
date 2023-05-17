@@ -97,46 +97,25 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/ginas.log",
-                         "log_group_name": "production/gsrs/ginas",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/application.log",
-                         "log_group_name": "production/gsrs/logs",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/access.log",
-                         "log_group_name": "production/gsrs/access",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/fail-persist.log",
-                         "log_group_name": "production/gsrs/fail-persist",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/reindex.log",
-                         "log_group_name": "production/gsrs/reindex",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/fail-transform",
-                         "log_group_name": "production/gsrs/fail-transform",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
-                         "file_path": "/home/deploy/gsrs/logs/fail-extract.log",
-                         "log_group_name": "production/gsrs/fail-extract",
-                         "log_stream_name": "{instance_id}"
-                     },
-                     {
                          "file_path": "/srv/www/precision_fda/current/log/sidekiq.log",
                          "log_group_name": "production/backend/sidekiq.log",
                          "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/catalina*",
+                         "log_group_name": "production/gsrs/catalina.",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/localhost.*",
+                         "log_group_name": "production/gsrs/localhost",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/localhost_access_log.*",
+                         "log_group_name": "production/gsrs/access",
+                         "log_stream_name": "{instance_id}"
                      }
-
                  ]
              }
          }

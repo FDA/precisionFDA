@@ -1,4 +1,5 @@
-<% content_for :title do %>Request Access<% end %>
+<% content_for :title do %>Request Access
+<% end %>
 
 <div class="page-header">
   <div class="container">
@@ -13,10 +14,12 @@
             <p class="lead">
               To request access, please leave your information below.
             </p>
-            <p class="lead">If you already have a contributor account, proceed to <strong><%= link_to "Log In", login_path %></strong>.</p>
+            <p class="lead">If you already have a contributor account, proceed to
+              <strong><%= link_to "Log In", login_path %></strong>.</p>
           <% else %>
             <p class="lead text-success">
-              <span class="fa fa-check"></span> Thank you! Your request has been registered. Check your email for additional instructions.
+              <span class="fa fa-check"></span> Thank you! Your request has been registered. Check your email for
+              additional instructions.
             </p>
           <% end %>
         </div>
@@ -28,7 +31,7 @@
 <% if @invitation.new_record? %>
   <div class="container">
     <div class="row">
-      <%= form_for @invitation, url: request_access_path, html: {class: "form form-horizontal"} do |f| %>
+      <%= form_for @invitation, url: request_access_path, html: { class: "form form-horizontal" } do |f| %>
         <% if @invitation.errors.any? %>
           <div class="form-group form-group-lg">
             <div class="alert alert-danger col-md-offset-5 col-md-10">
@@ -92,7 +95,7 @@
         </div>
         <div class="form-group form-group-lg">
           <div class="col-sm-offset-5 col-sm-10">
-            <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required'%>
+            <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
@@ -154,18 +157,28 @@
           </div>
         </div>
 
-        <% unless Utils.development_or_test? %> 
-              <%= recaptcha_v3(action: 'registration') %>
-        <% end %> 
+
+        <% unless Utils.development_or_test? %>
+          <%= recaptcha_v3 inline_script: true, action: 'registration' %>
+          <script type="text/javascript">
+              const form = document.forms.item(0)
+              const hiddenInput = document.getElementById('g-recaptcha-response-data-registration')
+              form.addEventListener('submit', async function (e) {
+                  e.preventDefault();
+                  hiddenInput.value = await window.executeRecaptchaForRegistrationAsync()
+                  form.submit()
+              });
+          </script>
+        <% end %>
 
         <div class="form-group form-group-lg">
-            <div class="col-sm-offset-5 col-sm-10">
-              <button class="btn btn-lg accessible-btn-success">
-                Request Access to precisionFDA
-              </button>
+          <div class="col-sm-offset-5 col-sm-10">
+            <button class="btn btn-lg accessible-btn-success">
+              Request Access to precisionFDA
+            </button>
 
-              &nbsp; or <strong><%= link_to "Log in", login_path %></strong>
-            </div>
+            &nbsp; or <strong><%= link_to "Log in", login_path %></strong>
+          </div>
         </div>
 
         <%= render "_partials/modal_access_request_confirm" %>

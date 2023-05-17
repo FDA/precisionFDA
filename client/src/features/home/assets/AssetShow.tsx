@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { FileIcon } from '../../../components/icons/FileIcon'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { HOME_TABS } from '../../../constants'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
@@ -94,7 +94,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const tabsConfig = [
     {
       header: 'Description',
-      tab: <Markdown data={asset.description} />,
+      tab: <MarkdownStyle><Markdown data={asset.description} /></MarkdownStyle>,
     },
     {
       header: 'Archive Contents',

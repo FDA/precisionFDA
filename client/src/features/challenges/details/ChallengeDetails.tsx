@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import classNames from 'classnames'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { ButtonSolidBlue } from '../../../components/Button/index'
@@ -20,7 +20,6 @@ import { ChallengeSubmissionsTable } from './ChallengeSubmissionsTable'
 import { ChallengeMyEntriesTable } from './ChallengeMyEntriesTable'
 import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import UserContent from '../../../components/UserContent'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Challenge } from '../types'
@@ -28,7 +27,9 @@ import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
 import { getTimeStatus } from '../util'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
 import { ChallengeNotFound } from './ChallengeNotFound'
-import { CallToActionButton, StyledTabs } from './styles'
+import { CallToActionButton, NoInfo, StyledTabs } from './styles'
+import { setTocFromRef, ToC, IToCItem } from '../../markdown/Toc'
+import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 
 export const ChallengeDetails = ({
   challenge,
@@ -49,9 +50,14 @@ export const ChallengeDetails = ({
   page?: string
   user?: any
 }) => {
+  const history = useHistory()
   usePageMeta({ title: `${challenge.name} - precisionFDA Challenge` })
   const [tabIndex, setTabIndex] = useState(-1)
-  const history = useHistory()
+  const docRef = useRef(null)
+  const [toc, setToc] = useState<IToCItem[]>([])
+  useEffect(() => {
+    setTocFromRef(docRef, setToc)
+  }, [docRef, tabIndex])
   
   const handleJoinChallenge = () => {
     if (challenge.is_followed) {
@@ -127,13 +133,10 @@ export const ChallengeDetails = ({
   if (userCanSeePreRegistration) {
     const preRegistrationContent = regions?.preRegistration
     if (preRegistrationContent) {
-      const userContent = new UserContent(preRegistrationContent, isLoggedIn)
-
       tabs.push({
         title: 'PRE-REGISTRATION',
         subroute: '',
-        content: userContent.createDisplayElement(),
-        outline: userContent.createOutlineElement(),
+        content: <AddIdsToHeaders docRef={docRef} content={preRegistrationContent} />,
       })
     }
   }
@@ -141,12 +144,10 @@ export const ChallengeDetails = ({
   if (userCanSeeIntroduction) {
     const introductionContent = regions?.intro
     if (introductionContent) {
-      const userContent = new UserContent(introductionContent, isLoggedIn)
       tabs.push({
         title: 'INTRODUCTION',
         subroute: '',
-        content: userContent.createDisplayElement(),
-        outline: userContent.createOutlineElement(),
+        content: <AddIdsToHeaders docRef={docRef} content={introductionContent} />,
       })
     }
   }
@@ -182,12 +183,10 @@ export const ChallengeDetails = ({
     }`
 
     if (resultsContent) {
-      const userContent = new UserContent(resultsContent, isLoggedIn)
       tabs.push({
         title: 'RESULTS',
         subroute: '/results',
-        content: userContent.createDisplayElement(),
-        outline: userContent.createOutlineElement(),
+        content: <AddIdsToHeaders docRef={docRef} content={resultsContent} />,
       })
     }
   }
@@ -242,9 +241,9 @@ export const ChallengeDetails = ({
       <PageRow>
         <PageMainBody>
           {isNoInfoProvided && (
-            <div>
+            <NoInfo>
               No information about this challenge has been provided yet.
-            </div>
+            </NoInfo>
           )}
           <StyledTabs>
             <Tabs defaultIndex={tabIndex} onSelect={onSelectTab}>
@@ -310,9 +309,8 @@ export const ChallengeDetails = ({
                 </a>
               </RightSideItem>
             )}
-            {currentTab?.outline?.props.anchors.length > 0 && (
-              <RightSideItem>{currentTab.outline}</RightSideItem>
-            )}
+
+            {toc && toc.length > 0 && <RightSideItem><ToC items={toc} /></RightSideItem>}
 
             {challenge.can_edit && (
               <RightSideItem>

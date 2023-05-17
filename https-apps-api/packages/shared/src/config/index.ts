@@ -23,16 +23,14 @@ type Maybe<T> = T | null
 
 const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
   // TODO(samuel) validate that this is not undefined
-  if(envValue) {
+  if (envValue) {
     const value = parseInt(envValue, 10)
     return isNaN(value) ? null : value
   }
   return null
 }
-const parseBooleanFromProcess = (
-  value: string | undefined,
-  defaultValue = false,
-): boolean => value ? value.toLowerCase() === 'true' : defaultValue
+const parseBooleanFromProcess = (value: string | undefined, defaultValue = false): boolean =>
+  value ? value.toLowerCase() === 'true' : defaultValue
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const env = (process.env.NODE_ENV ?? ENVS.LOCAL) as ENVS
@@ -42,17 +40,12 @@ const defaultConfig = {
   api: {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
-    certPath:
-      process.env.NODE_PATH_CERT
-      ?? path.join(__dirname, '../../../../cert.pem'),
-    keyCertPath:
-      process.env.NODE_PATH_KEY_CERT
-      ?? path.join(__dirname, '../../../../key.pem'),
+    certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
+    keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
     url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
-    allowErrorTestingRoutes:
-      process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
+    allowErrorTestingRoutes: process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
     fdaSubnet: {
       allowedIpCidrBlock: {
         ipv4Quadruple: [127, 0, 0, 1],
@@ -70,8 +63,7 @@ const defaultConfig = {
     // it is used for testing, not for default DB connection
     dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
     clientUrl:
-      process.env.NODE_DATABASE_URL
-      ?? 'mysql://root:password@localhost:3306/precision-fda',
+      process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
   },
   validation: {
@@ -91,7 +83,7 @@ const defaultConfig = {
   },
   emails: {
     smtp: {
-      isEnabled: true,
+      saveEmailToFile: false,
       username: process.env.SMTP_USER ?? 'aws-ses-username',
       password: process.env.SMTP_PASSWORD ?? 'aws-ses-password',
       port: process.env.SMTP_PORT ?? 'aws-ses-port',
@@ -133,8 +125,7 @@ const defaultConfig = {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/1 * * * *',
-      staleJobsEmailAfter:
-        process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60 * 60 * 24 * 29, // 29 days
+      staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60 * 60 * 24 * 29, // 29 days
       staleJobsTerminateAfter:
         process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
     },
@@ -154,7 +145,8 @@ const defaultConfig = {
       response: {
         isEnabled: false,
         data: {
-          fdaSsoUrl: 'https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D',
+          fdaSsoUrl:
+            'https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D',
         },
       },
     },
