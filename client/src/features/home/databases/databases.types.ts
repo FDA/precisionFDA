@@ -1,3 +1,4 @@
+import { ServerScope } from "../types";
 
 export enum DatabaseListActions {
   'Create Database' = 'Create Database',
@@ -54,7 +55,8 @@ export interface IDatabase {
   show_license_pending: boolean;
   tags: any[];
   links: Links;
-  scope: string;
+  scope: ServerScope;
+  featured: boolean;
 }
 
 export type MethodType = 'start' | 'stop' | 'terminate'
