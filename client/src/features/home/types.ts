@@ -19,6 +19,7 @@ export interface BaseError {
 export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions'
 export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions' | 'spaces'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
+export type ServerScope = 'public' | 'private' | `space-${string}`
 
 export interface DownloadListResponse {
   id: number;

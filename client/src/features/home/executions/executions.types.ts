@@ -1,3 +1,5 @@
+import { ServerScope } from "../types";
+
 export enum ExecutionActions {
   "Run" = "Run",
   "Run batch" = "Run batch",
@@ -125,7 +127,7 @@ export interface IExecution {
   readme: string
   workflow_series_id: number | string
   version: string
-  scope: string
+  scope: ServerScope
   featured: boolean
   active: boolean
   links: Links
