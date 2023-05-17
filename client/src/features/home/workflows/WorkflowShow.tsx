@@ -8,7 +8,7 @@ import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHe
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import {
   StyledTab,
   StyledTabList,
@@ -242,7 +242,7 @@ export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
             <Redirect to={`${match.url}`} />
           </Route>
           <Route path={`${match.path}/readme`} exact>
-            <Markdown data={workflow.readme} />
+            <MarkdownStyle><Markdown data={workflow.readme} /></MarkdownStyle>
           </Route>
           <Route path={`${match.path}/diagram`} exact>
             <WorkflowsDiagram workflowId={workflow.uid} />
