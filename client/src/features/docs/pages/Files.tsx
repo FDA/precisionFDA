@@ -108,7 +108,7 @@ export const Files = () => {
           uploading with multiple threads and more resilient to transient
           errors. The precisionFDA CLI can be used for both files and app
           assets, and it's available through the{' '}
-          <Link to="/assets/new">Create Assets</Link> page.
+          <Link to="/docs/cli">CLI docs</Link> page.
         </p>
 
         <p>
