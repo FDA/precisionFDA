@@ -381,7 +381,7 @@ class ChallengesController < ApplicationController
 
     return if space_id.nil? ||
               action_name == "update" && @challenge.scope == scope ||
-              Space.groups.editable_by(@context).exists?(ActiveRecord::Base::sanitize_sql(space_id))
+              Space.groups.editable_by(@context).exists?(ActiveRecord::Base.sanitize_sql(space_id))
 
     action_to_render = action_name == "create" ? :new : :edit
 
