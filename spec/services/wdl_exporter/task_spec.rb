@@ -58,7 +58,7 @@ RSpec.describe WdlExporter::Task do
 
   describe "#to_s" do
     it "generates a correct string" do
-      expect(step.to_s).to eq IO.read(Rails.root.join("spec/support/files/task.wdl"))
+      expect(step.to_s).to eq File.read("spec/support/files/task.wdl")
     end
   end
 end
