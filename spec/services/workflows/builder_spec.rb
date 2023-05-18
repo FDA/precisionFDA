@@ -62,7 +62,7 @@ RSpec.describe Workflows::Builder, type: :service do
       end
       let(:presenter_params) do
         {
-          file: IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")),
+          file: File.read("spec/support/files/workflow_import/workflow.cwl"),
           attached_images: docker_images
         }
       end
@@ -95,7 +95,7 @@ RSpec.describe Workflows::Builder, type: :service do
       end
       let(:presenter_params) do
         {
-          file: IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")),
+          file: File.read("spec/support/files/workflow_import/workflow.cwl"),
           attached_images: [docker_image]
         }
       end
