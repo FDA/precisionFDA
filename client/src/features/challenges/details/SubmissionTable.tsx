@@ -1,8 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import React from 'react'
-import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
 import { Modal } from '../../modal'
@@ -10,7 +9,6 @@ import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { Submission } from './submission.types'
 
-const StyledContent = styled.div``
 
 export const NameCell = ({ submission }: { submission: Submission }) => {
   const { isShown, setShowModal } = useModal()
@@ -31,9 +29,9 @@ export const NameCell = ({ submission }: { submission: Submission }) => {
           </ButtonRow>
         }
       >
-        <StyledContent>
+        <MarkdownStyle>
           <Markdown data={submission.desc} />
-        </StyledContent>
+        </MarkdownStyle>
       </Modal>
     </>
   )

@@ -199,7 +199,7 @@ const NotificationsPage = () => {
                 }
               />
               <label htmlFor="newChallenge">
-                Notify me when a new precisionFDA challenge is created.
+                Notify me when a new precisionFDA challenge is opened.
               </label>
             </FieldGroup>
             <FieldGroup>
