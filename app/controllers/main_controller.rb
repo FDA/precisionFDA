@@ -3,6 +3,13 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   include Recaptcha::Adapters::ControllerMethods
   include RecaptchaHelper
 
+  GSRS_DEFAULT_URL = "http://localhost:8080".freeze
+  GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
+  GSRS_ENABLED = ENV.fetch("GSRS_ENABLED", false)
+  GSRS_HEADER_USER_NAME =
+    ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME", "AUTHENTICATION_HEADER_NAME")
+  GSRS_HEADER_USER_EMAIL =
+    ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME_EMAIL", "AUTHENTICATION_HEADER_NAME_EMAIL")
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
                                                index
@@ -137,6 +144,30 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def destroy
     if @context.logged_in?
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
+    end
+
+    if GSRS_ENABLED == true
+      session_key = http_request(
+        "#{GSRS_URL}/api/v1/whoami",
+        {},
+        Net::HTTP::Get::METHOD,
+        {},
+        {
+          GSRS_HEADER_USER_NAME => current_user.username,
+          GSRS_HEADER_USER_EMAIL => current_user.email,
+        },
+        true,
+      )
+
+      request_headers = {}
+      request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
+      http_request(
+        "#{GSRS_URL}/ginas/app/logout",
+        {},
+        Net::HTTP::Get::METHOD,
+        {},
+        request_headers,
+      )
     end
 
     Session.where(key: session_id).delete_all
@@ -433,6 +464,9 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     if verify_captcha_assessment(token, "registration")
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
+    else
+      render "_partials/_error", status: :unprocessable_entity, locals: { message: "Invalid captcha verification. If this issue persists, please contact precisionFDA support." }
+      return
     end
 
     render :request_access
@@ -757,6 +791,75 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       },
     }
     Auditor.perform_audit(data)
+  end
+
+  # rubocop:disable Metrics/ParameterLists
+  def http_request(
+    uri,
+    body = {},
+    method_name = Net::HTTP::Post::METHOD,
+    additional_query = {},
+    additional_headers = {},
+    extract_gsrs_session_key = false
+  )
+
+    query = auth_query.merge(additional_query).to_query
+    uri = URI("#{uri}?#{query}")
+    use_ssl = uri.scheme == "https"
+
+    conn_opts = connection_opts.merge(use_ssl: use_ssl)
+    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if use_ssl
+
+    Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
+      handle_response(
+        http.send_request(
+          method_name,
+          uri.request_uri,
+          body.to_json,
+          headers.merge(additional_headers),
+        ),
+        extract_gsrs_session_key,
+      )
+    end
+  rescue Errno::ECONNREFUSED
+    raise Error, "Can't connect to GSRS service"
+  end
+  # rubocop:enable Metrics/ParameterLists
+
+  # Returns connection options.
+  # @return [Hash] Connection options.
+  def connection_opts
+    @connection_opts ||= { read_timeout: 120 }
+  end
+
+  def auth_query
+    {
+      id: @user&.id,
+      dxuser: @user&.dxuser,
+      accessToken: @token,
+    }.compact_blank
+  end
+
+  # Returns HTTP headers to be sent during every request.
+  # @return [Hash] Headers to be sent.
+  def headers
+    @headers ||= { "Content-Type" => "application/json" }
+  end
+
+  def handle_response(response, extract_gsrs_session_key)
+    if extract_gsrs_session_key
+      response["set-cookie"].scan(/ix.session=(.*?);/)
+    else
+      response.value
+      parsed = JSON.parse(response.body || "")
+      parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    end
+  rescue JSON::ParserError
+    response.body
+  rescue Net::HTTPClientException
+    raise Error, response
+  rescue StandardError
+    raise Error, "Something went wrong"
   end
 end
 # rubocop:enable Style/Documentation

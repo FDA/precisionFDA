@@ -38,6 +38,7 @@ import { FileDescription } from './styles'
 import { Filler } from '../../../../components/Page/styles'
 import { LockIcon } from '../../../../components/icons/LockIcon'
 import { theme } from '../../../../styles/theme'
+import { getScopeMapping } from '../../getScopeMapping'
 
 const FileActions = ({
   scope,
@@ -87,7 +88,7 @@ const FileActions = ({
 }
 
 
-export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpace }) => {
+export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceScope) => void, space?: ISpace }) => {
   const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
@@ -118,7 +119,11 @@ export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpa
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
+  const scope = getScopeMapping(file.scope, file.featured)
   const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  if (emitScope) {
+    emitScope(scope)
+  }
   // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
   // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
   // const spaceId = file.space_id?.split('-')[1]
@@ -172,7 +177,7 @@ export const FileShow = ({ scope, space }: { scope?: ResourceScope, space?: ISpa
                   </Link>
                 ) : (
                   <Link to={`/home/files${scopeParamLink}`}>
-                    {file.location}
+                    {scope === 'featured' ? 'Featured' : file.location}
                   </Link>
                 )}
               </MetadataVal>

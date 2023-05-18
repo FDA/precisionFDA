@@ -1,4 +1,5 @@
 import { ConfigOverride } from '..'
+import path from 'path'
 
 export const config: ConfigOverride = () => ({
   logs: {
@@ -14,7 +15,7 @@ export const config: ConfigOverride = () => ({
   },
   emails: {
     smtp: {
-      isEnabled: false,
+      saveEmailToFile: true,
     },
   },
   redis: {
