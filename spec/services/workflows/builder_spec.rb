@@ -24,7 +24,7 @@ RSpec.describe Workflows::Builder, type: :service do
       [
         Rack::Test::UploadedFile.new(
           "spec/support/files/wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
-          "application/gzip"
+          "application/gzip",
         ),
       ]
     end
@@ -32,7 +32,7 @@ RSpec.describe Workflows::Builder, type: :service do
     let(:presenter_params) do
       {
         file: File.read("spec/support/files/workflow_import/workflow.cwl"),
-        attached_images: docker_images
+        attached_images: docker_images,
       }
     end
 
