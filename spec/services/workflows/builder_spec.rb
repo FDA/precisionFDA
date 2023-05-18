@@ -20,6 +20,22 @@ RSpec.describe Workflows::Builder, type: :service do
   end
 
   describe "#call" do
+    let(:docker_images) do
+      [
+        Rack::Test::UploadedFile.new(
+          "spec/support/files/wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
+          "application/gzip"
+        ),
+      ]
+    end
+
+    let(:presenter_params) do
+      {
+        file: File.read("spec/support/files/workflow_import/workflow.cwl"),
+        attached_images: docker_images
+      }
+    end
+
     context "when a workflow is created through common way" do
       it "sends a request to platform" do
         service_response
@@ -52,20 +68,6 @@ RSpec.describe Workflows::Builder, type: :service do
         end
       end
 
-      let(:docker_images) do
-        [
-          Rack::Test::UploadedFile.new(
-            "spec/support/files/wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
-            "application/gzip"
-          ),
-        ]
-      end
-      let(:presenter_params) do
-        {
-          file: File.read("spec/support/files/workflow_import/workflow.cwl"),
-          attached_images: docker_images
-        }
-      end
       let(:workflow_presenter) { Workflow::CwlPresenter.new(presenter_params, context) }
 
       it "create a workflow" do
@@ -92,12 +94,6 @@ RSpec.describe Workflows::Builder, type: :service do
           "spec/support/files/wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
           "application/gzip"
         )
-      end
-      let(:presenter_params) do
-        {
-          file: File.read("spec/support/files/workflow_import/workflow.cwl"),
-          attached_images: [docker_image]
-        }
       end
       let(:workflow_presenter) { Workflow::CwlPresenter.new(presenter_params, context) }
 
