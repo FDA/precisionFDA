@@ -59,6 +59,8 @@ class AssetService
         "(#{number_to_human_size(MAX_ASSET_SIZE)})"
     end
 
+    asset = nil
+
     Asset.transaction do
       asset = create(
         name: asset_name,
@@ -67,7 +69,9 @@ class AssetService
       )
 
       upload(asset.uid, asset_io)
+    end
 
+    unless asset.nil?
       close(asset.uid)
       asset
     end
