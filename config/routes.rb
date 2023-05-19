@@ -163,6 +163,7 @@ Rails.application.routes.draw do
         constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
       match "/ginas/app/api/v1/substances", to: "ginas#substances", via: %i(put post)
       match "/ginas/*path", to: "ginas#index", via: :all
+      match "/substances/api/v1/substances/*query" => redirect(path: "/ginas/app/api/v1/substances/%{query}"), via: :all
     end
 
     # API

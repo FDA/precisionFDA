@@ -1,5 +1,5 @@
 import { IExecution } from '../executions/executions.types'
-import { ResourceScope } from '../types'
+import { ServerScope } from '../types'
 
 export enum WorkflowActions {
   'Run' = 'Run',
@@ -165,7 +165,7 @@ export interface IWorkflow {
   readme: string;
   workflow_series_id: number;
   version: string;
-  scope: ResourceScope | 'private';
+  scope: ServerScope;
   featured: boolean;
   active: boolean;
   links: Links;
