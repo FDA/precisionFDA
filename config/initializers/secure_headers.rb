@@ -61,6 +61,8 @@ SecureHeaders::Configuration.default do |config|
       'unsafe-inline'
       'unsafe-eval'
       https://drugs.ncats.io
+      https://www.recaptcha.net/recaptcha/
+      https://www.gstatic.com/recaptcha/
     ),
     style_src: %w(
       'self' 'unsafe-inline'
