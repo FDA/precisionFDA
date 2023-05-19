@@ -33,6 +33,7 @@ import { useAssetActions } from './useAssetSelectActions'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { License } from '../licenses/License'
 import { Filler } from '../../../components/Page/styles'
+import { getScopeMapping } from '../getScopeMapping'
 
 const AssetActions = ({
   scope,
@@ -68,7 +69,7 @@ const AssetActions = ({
   )
 }
 
-export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
+export const AssetShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
 
@@ -116,7 +117,12 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
     currentTab && currentTab !== HOME_TABS.PRIVATE
       ? `/${currentTab.toLowerCase()}`
       : ''
+
+  const scope = getScopeMapping(asset.scope, asset.featured)
   const scopeParamLink = `?scope=${scope.toLowerCase()}`
+  if (emitScope) {
+    emitScope(scope)
+  }
 
   return (
     <>
@@ -129,7 +135,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             <Title>
               <FileIcon height={24} />
               &nbsp;
-              {typeof asset?.origin == 'object'
+              {typeof asset?.origin === 'object'
                 ? asset.origin.text
                 : asset.name}
             </Title>
@@ -157,7 +163,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
                   </Link>
                 ) : (
                   <Link to={`/home/assets${scopeParamLink}`}>
-                    {asset.location}
+                    {scope === 'featured' ? 'Featured' : asset.location}
                   </Link>
                 )}
               </MetadataVal>
