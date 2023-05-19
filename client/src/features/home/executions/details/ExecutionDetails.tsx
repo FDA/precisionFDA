@@ -28,16 +28,17 @@ import { fetchExecution } from '../executions.api'
 import { JobState } from '../executions.types'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { FailureMessage, StyledExecutionState } from './styles'
+import { getScopeMapping } from '../../getScopeMapping'
 
 const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
 )
 
 export const ExecutionDetails = ({
-  scope = 'me',
+  emitScope,
   spaceId,
 }: {
-  scope?: ResourceScope
+  emitScope?: (scope: ResourceScope) => void
   spaceId?: string
 }) => {
   const location = useLocation<any>()
@@ -78,6 +79,11 @@ export const ExecutionDetails = ({
       ),
     },
   ] satisfies ITab[]
+  const scope = getScopeMapping(execution.scope, execution.featured)
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  if (emitScope) {
+    emitScope(scope)
+  }
 
   // const tab =
   //   currentTab && currentTab !== HOME_TABS.PRIVATE
@@ -137,17 +143,14 @@ export const ExecutionDetails = ({
                     href={`/spaces/${execution.scope.replace(
                       'space-',
                       '',
-                    )}/jobs`}
+                    )}/executions`}
                     rel="noreferrer"
                   >
                     {execution.location}
                   </a>
                 ) : (
-                  <Link
-                    target="_blank"
-                    to={`/home/executions?scope=${execution.scope}`}
-                  >
-                    {execution.location}
+                  <Link to={`/home/executions${scopeParamLink}`}>
+                    {scope === 'featured' ? 'Featured' : execution.location}
                   </Link>
                 )}
               </MetadataVal>

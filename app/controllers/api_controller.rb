@@ -260,7 +260,7 @@ class ApiController < ApplicationController
     page = params[:page].to_i.positive? ? params[:page] : 1
     files = user_real_files(params, @context).files_conditions
     begin
-      regexp = Regexp.new(params[:search_string], params[:flag])
+      regexp = Regexp.new(Regexp.escape(params[:search_string]), params[:flag])
       direction = params[:order_by_name]
 
       search_result = files.
