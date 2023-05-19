@@ -1,4 +1,4 @@
-import { ResourceScope } from '../types'
+import { ResourceScope, ServerScope } from '../types'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -68,7 +68,7 @@ export interface IApp {
   active: boolean;
   links: Links;
   tags: any[];
-  scope: string;
+  scope: ServerScope;
   forked_from: string;
 }
 
