@@ -37,7 +37,7 @@ const maskAuthHeader = (
   }
   if (path(['authorization'], headers)) {
     const maskedHeaders = { ...headers }
-    maskedHeaders.authorization = '[masked]'
+    delete maskedHeaders.authorization
     return maskedHeaders
   }
   return headers
