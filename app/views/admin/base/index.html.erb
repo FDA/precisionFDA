@@ -38,7 +38,7 @@
         <i class="fa fa-users" aria-hidden="true"></i> Admins
       </a>
       <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
-      <a class="btn btn-default" rel="nofollow" href="<%= sidekiq_web_path %>" target="_blank">
+      <a class="btn btn-default" href="<%= sidekiq_web_path %>" target="_blank" rel="nofollow noopener noreferrer">
         <i class="fa fa-bar-chart" aria-hidden="true"></i> Sidekiq
       </a>
       <a class="btn btn-default" rel="nofollow" href="<%= admin_comparator_settings_path %>">
