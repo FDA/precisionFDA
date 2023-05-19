@@ -24,7 +24,7 @@ end
 
 bash "sync ginas indexes" do
   code <<-EOH
-  aws s3 sync s3://#{node[:gsrs][:indexes_bucket_name]}#{node[:gsrs][:indexes_bucket_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
+  aws s3 sync #{node.run_state.dig("ssm_params", "gsrs", "index_path") || node[:gsrs][:index_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
   chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/ginas.ix/ -R
   EOH
 end
