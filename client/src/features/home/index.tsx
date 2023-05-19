@@ -66,23 +66,30 @@ const Home2 = () => {
   const [persistedScope, setPersistedScope] = useState<ResourceScope>(scopeQuery)
   const { data: counterData } = useQuery(['counters', persistedScope], () => counterRequest(persistedScope))
   const [activeResource] = useActiveResourceFromUrl('myhome')
+  const [isPushed, setIsPushed] = useState<boolean>(false)
 
   useToastWSHandler(user)
   const handleScopeClick = async (newScope: ResourceScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
     if(history.location.pathname === `/home/${activeResource}`) {
       setScopeQuery(newScope)
+      setIsPushed(false)
     } else {
       history.push(`/home/${activeResource}?scope=${newScope}`)
+      setIsPushed(true)
     }
   }
 
   useEffect(() => {
+    if(history.location.pathname !== `/home/${activeResource}`) {
+      setIsPushed(false)
+      return
+    }
     if(scopeQuery) {
       setPersistedScope(scopeQuery)
     }
-  }, [scopeQuery])
-  
+  }, [scopeQuery, isPushed])
+
   const routeScopeParam = `?${ 
     new URLSearchParams({
       scope: persistedScope,
@@ -237,7 +244,7 @@ const Home2 = () => {
               <AppList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/apps/:appUid`}>
-              <AppsShow scope={scopeQuery} />
+              <AppsShow emitScope={setPersistedScope} />
             </Route>
             <Route exact path={`${path}/databases`}>
               <DatabaseList scope={scopeQuery} />
@@ -246,28 +253,28 @@ const Home2 = () => {
               <CreateDatabase scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/databases/:dxid`}>
-              <DatabaseShow scope={scopeQuery} />
+              <DatabaseShow emitScope={setPersistedScope} />
             </Route>
             <Route exact path={`${path}/assets`}>
               <AssetList scope={scopeQuery} />
             </Route>
             <Route exact path={`${path}/assets/:assetUid`}>
-              <AssetShow scope={scopeQuery} />
+              <AssetShow emitScope={setPersistedScope} />
             </Route>
             <Route exact path={`${path}/workflows`}>
               <WorkflowList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/workflows/:workflowUid`}>
-              <WorkflowShow scope={scopeQuery} />
+              <WorkflowShow emitScope={setPersistedScope} />
             </Route>
             <Route path={`${path}/files/:fileId`}>
-              <FileShow scope={scopeQuery} />
+              <FileShow emitScope={setPersistedScope} />
             </Route>
             <Route exact path={`${path}/executions`}>
               <ExecutionList scope={scopeQuery} />
             </Route>
             <Route path={`${path}/executions/:executionUid`}>
-              <ExecutionDetails scope={scopeQuery} />
+              <ExecutionDetails emitScope={setPersistedScope} />
             </Route>
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
             <Route path={`${path}/jobs/:executionUid`} render={(props) => <Redirect to={`${path}/executions/${props.match.params.executionUid}`} />} />

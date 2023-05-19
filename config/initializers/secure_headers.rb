@@ -56,6 +56,14 @@ SecureHeaders::Configuration.default do |config|
       https://www.recaptcha.net/recaptcha/
       https://www.gstatic.com/recaptcha/
     ),
+    script_src_elem: %w(
+      'self'
+      'unsafe-inline'
+      'unsafe-eval'
+      https://drugs.ncats.io
+      https://www.recaptcha.net/recaptcha/
+      https://www.gstatic.com/recaptcha/
+    ),
     style_src: %w(
       'self' 'unsafe-inline'
       https://fonts.googleapis.com
