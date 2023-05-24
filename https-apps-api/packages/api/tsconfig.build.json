@@ -1,12 +1,17 @@
+
+
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
-    "declaration": true
+    "declaration": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false
   },
   "include": ["src/**/*"],
+  "exclude": ["src/test"],
   "references": [
     {
       "path": "../shared/tsconfig.build.json"

@@ -1,0 +1,109 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // To run nodejs tests, make sure you install all the depdendencies:
+        // precision-fda $ cd https-apps-api && yarn
+        {
+            "name": "nodejs-shared Tests",
+            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+            "args": [
+                "--config",
+                "./packages/shared/.mocharc.js",
+                // "-u",
+                // "tdd",
+                "--timeout",
+                "999999",
+                "--recursive",
+                "--colors",
+                "${workspaceFolder}/https-apps-api/packages/shared/test/**/*.spec.ts",
+                // Uncomment the following to run only specific tests
+                // "--grep",
+                // "<PATTERN>",
+            ],
+            "cwd": "${workspaceFolder}/https-apps-api",
+            "env": {
+                "NODE_ENV": "test",
+            },
+            "internalConsoleOptions": "openOnSessionStart",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v18.9.1/bin/node",
+            "type": "node"
+        },
+        // To run nodejs-api tests, stop your nodejs-api docker container
+        {
+            "name": "nodejs-api Tests",
+            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+            "args": [
+                "--config",
+                "./packages/api/.mocharc.js",
+                // "-u",
+                // "tdd",
+                "--timeout",
+                "999999",
+                "--recursive",
+                "--colors",
+                "${workspaceFolder}/https-apps-api/packages/api/test/**/*.spec.ts",
+                // Uncomment the following to run only specific tests
+                // "--grep",
+                // "<PATTERN>",
+            ],
+            "cwd": "${workspaceFolder}/https-apps-api",
+            "env": {
+                "NODE_ENV": "test",
+            },
+            "internalConsoleOptions": "openOnSessionStart",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v18.9.1/bin/node",
+            "type": "node"
+        },
+        {
+            "name": "nodejs-worker Tests",
+            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+            "args": [
+                "--config",
+                "./packages/worker/.mocharc.js",
+                // "-u",
+                // "tdd",
+                "--timeout",
+                "999999",
+                "--recursive",
+                "--colors",
+                "${workspaceFolder}/https-apps-api/packages/worker/test/**/*.spec.ts",
+                // Uncomment the following to run only specific tests
+                // "--grep",
+                // "<PATTERN>",
+            ],
+            "cwd": "${workspaceFolder}/https-apps-api",
+            "env": {
+                "NODE_ENV": "test",
+            },
+            "internalConsoleOptions": "openOnSessionStart",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v18.9.1/bin/node",
+            "type": "node"
+        },
+        // Debugging Go CLI
+        // To do this you need to comment out the import of "crypto/tls/fipsonly" in pfda.go
+        // (but remember not to commit that change!)
+        {
+            "name": "CLI debug",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "cwd": "${workspaceFolder}/go",
+            "program": "go",
+            // Add args to debug different commands
+            // "args": ["--version"]
+            // "args": ["upload-file", "-file", "/tmp/some.file", "--server", "precisionfda-staging.dnanexus.com"]
+        },
+    ]
+}

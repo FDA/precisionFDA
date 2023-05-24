@@ -64,10 +64,9 @@ FileCloseOperationResponse | null
     if (fileOrAsset.state === FILE_STATE_DX.OPEN) {
       log.info({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: File is in open state. Syncing from platform')
 
-      const platformClient = new client.PlatformClient(this.ctx.log)
-      const response = await platformClient.fileClose({
+      const userClient = new client.PlatformClient(accessToken, this.ctx.log)
+      const response = await userClient.fileClose({
         fileDxid: fileOrAsset.dxid,
-        accessToken,
       })
       log.info({ response }, 'FileCloseOperation: Received response from platform')
 
@@ -81,7 +80,7 @@ FileCloseOperationResponse | null
       let bullJob = await queue.findRepeatable(bullJobId)
       if (bullJob && queue.utils.isJobOrphaned(bullJob)) {
         log.info('FileCloseOperation: Existing SyncFilesStateTask is orphaned, removing it')
-        await queue.removeRepeatableJob(bullJob, queue.getStatusQueue())
+        await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
         bullJob = undefined
       }
 
@@ -110,7 +109,7 @@ FileCloseOperationResponse | null
         // we do this update so that the frontend has the correct state immediately after refresh
         // This is not for challege bot files because we still want file sync to invoke it's
         // card image update logic
-        const delay = ms => new Promise(r => setTimeout(r, ms))
+        const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
         const refreshFileState = async () => {
           await delay(500).then(async () => {
             log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
@@ -146,6 +145,7 @@ FileCloseOperationResponse | null
 
     if (fileOrAsset.state in responseMap) {
       return {
+        // @ts-ignore
         message: responseMap[fileOrAsset.state],
       }
     }

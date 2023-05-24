@@ -89,6 +89,7 @@ module.exports = {
   moduleNameMapper: {
     '^.+\\.(css|sass|scss)$': '<rootDir>/src/mocks/fileMock.ts',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|md|html)$': '<rootDir>/src/mocks/fileMock.ts',
+    'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -186,12 +187,14 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   // transform: undefined,
+  transform: {
+    '^.+\\.(ts|tsx|js)?$': ['@swc/jest'],
+  },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  // transformIgnorePatterns: [
-    // "/node_modules/"
-    // "/node_modules/react-markdown"
-  // ],
+  transformIgnorePatterns: [
+    'react-markdown',
+  ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,

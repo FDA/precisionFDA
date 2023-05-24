@@ -44,18 +44,18 @@ export class ChallengeOpenedEmailHandler
     let users: User[]
     if (this.challenge.scope === STATIC_SCOPE.PUBLIC) {
       // all active users
-      users = await userRepo.findActive({ populate: ['emailNotificationSettings'] })
+      users = await userRepo.findActive({ populate: ['notificationPreference'] as never[] })
     } else if (isValidScopeName(this.challenge.scope)) {
       // find space, memberships, inform only those users
       const spaceId = getIdFromScopeName(this.challenge.scope)
       const memberships = await this.ctx.em.find(
         SpaceMembership,
         { spaces: spaceId, active: true },
-        { populate: ['user.emailNotificationSettings'] },
+        { populate: ['user.notificationPreference'] },
       )
       // todo: should filter out active users as well .. probably redundant (if they can be added to space)
       users = memberships.map(
-        (m: SpaceMembership & { user: LoadedReference<User, User> }): User => m.user.unwrap(),
+        (m: SpaceMembership & { user: LoadedReference<User> }): User => m.user.unwrap(),
       )
     } else {
       throw new InternalError(`Scope name ${this.challenge.scope} is not processable`)

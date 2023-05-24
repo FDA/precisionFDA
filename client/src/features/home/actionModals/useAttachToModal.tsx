@@ -2,14 +2,7 @@ import React from 'react'
 import { useModal } from '../../modal/useModal'
 import { AttachToModal } from './AttachToModal'
 
-export enum ATTACHABLE_TYPES {
-  'FILE' = 'FILE',
-  'APP' = 'APP',
-  'DATABASE' = 'DATABASE',
-  'WORKFLOW' = 'WORKFLOW',
-  'JOB' = 'JOB',
-  'ASSET' = 'ASSET',
-}
+export type ATTACHABLE_TYPES = 'FILE' | 'APP' | 'DATABASE' | 'WORKFLOW' | 'JOB' | 'ASSET'
 
 export function useAttachToModal(
   selectedFilesIds: string[] | number[],
@@ -17,7 +10,7 @@ export function useAttachToModal(
 ) {
   const { isShown, setShowModal } = useModal()
 
-  const modalComp = (
+  const modalComp = isShown && (
     <AttachToModal
       isShown={isShown}
       hideAction={() => setShowModal(false)}
@@ -25,6 +18,7 @@ export function useAttachToModal(
       itemsType={type}
     />
   )
+
   return {
     modalComp,
     setShowModal,

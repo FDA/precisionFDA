@@ -1,17 +1,20 @@
 import { errors, utils, ajv, entities } from '@pfda/https-apps-shared'
 
-export const parseUserContextMdw = (ctx: Api.Ctx, next) => {
+export const parseUserContextMdw = (ctx: Api.Ctx, next: any) => {
   // TODO(samuel) proper sanitization in case array is passed into query-string
-  const id = ctx.request.query.id
+  const { id } = ctx.request.query
   ctx.user = {
+    // @ts-ignore
     id: id ? parseInt(id.toString(), 10) : null,
+    // @ts-ignore
     accessToken: ctx.request.query.accessToken?.toString(),
+    // @ts-ignore
     dxuser: ctx.request.query.dxuser?.toString(),
   }
-  if (Number.isNaN(ctx.user.id)) {
+  if (Number.isNaN(ctx.user?.id)) {
     throw new errors.ValidationError('User id was NaN');
   }
-  ctx.log.debug({ userId: ctx.user.id }, 'User context retrieved')
+  ctx.log.debug({ userId: ctx.user?.id }, 'User context retrieved')
   return next()
 }
 
@@ -24,7 +27,7 @@ export const makeValidateUserContextMdw = () => {
   // store to the ctx
   const validatorFn = ajv.compile(utils.schemas.userContextSchema)
 
-  return (ctx: Api.Ctx, next) => {
+  return (ctx: Api.Ctx, next: any) => {
     const isValid = validatorFn(ctx.request.query)
     ctx.validatedQuery = { ...ctx.request.query }
     if (!isValid) {
@@ -47,10 +50,9 @@ export const makeValidateUserContextMdw = () => {
 }
 
 // ! This MDW should be used only after validating user ctx
-export const validateSiteAdminMdw = async (ctx: Api.Ctx, next) => {
-  const userFromDb = await ctx.em.findOneOrFail(entities.User, {
-    id: ctx.user.id,
-  });
+export const validateSiteAdminMdw = async (ctx: Api.Ctx, next: any) => {
+  const { id } = ctx.user as { id: number }
+  const userFromDb = await ctx.em.findOneOrFail(entities.User, { id })
   const isSiteAdmin = await userFromDb.isSiteAdmin();
   if (!isSiteAdmin) {
     throw new errors.UserInvalidPermissionsError(

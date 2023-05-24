@@ -1,25 +1,8 @@
-import styled from "styled-components";
-import { theme } from "../../styles/theme";
+import styled from 'styled-components'
+import { theme } from '../../styles/theme'
 
-export const TransparentButton = styled.button`
-  display: flex;
-  box-shadow: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  &:active {
-    position: relative;
-    top: 1px;
-    outline: none;
-  }
-  &:focus {
-    outline: none;
-  }
-`;
 
 export const DropdownMenu = styled.div`
-  /* padding: 4px 0; */
   text-align: left;
   list-style-type: none;
   background-color: #fff;
@@ -28,19 +11,19 @@ export const DropdownMenu = styled.div`
   outline: none;
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12),
     0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
-`;
+`
 
 export const PopperContainer = styled.div`
   position: relative;
   z-index: 50;
   padding-top: 2px;
   min-height: auto;
-`;
+`
 
 export const DropdownList = styled.div`
   display: flex;
   flex-direction: column;
-`;
+`
 
 export const DropdownItem = styled.div`
   padding: 4px;
@@ -51,4 +34,4 @@ export const DropdownItem = styled.div`
   &:hover {
     color: ${theme.colors.textMediumGrey};
   }
-`;
+`

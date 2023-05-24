@@ -16,6 +16,7 @@ enum FILE_STATE_PFDA {
 }
 
 type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA
+type FOLDER_STATE = FILE_STATE_PFDA.REMOVING | null
 
 enum FILE_ORIGIN_TYPE {
   REGULAR = 0,
@@ -43,6 +44,7 @@ interface IFileOrAsset {
   uid: string
   project: string
   name: string
+  scope: string
   state: string
   fileSize?: number
   user: IdentifiedReference<User>
@@ -60,6 +62,7 @@ interface ITrackable {
 
 export {
   FILE_STATE,
+  FOLDER_STATE,
   FILE_STATE_PFDA,
   FILE_STATE_DX,
   FILE_ORIGIN_TYPE,

@@ -27,11 +27,11 @@ const formatUnknownError = (err: Error) => {
   return payload
 }
 
-export const errorHandlerMdw = async (ctx: Api.Ctx, next) => {
+export const errorHandlerMdw = async (ctx: Api.Ctx, next: any) => {
   try {
     // eslint-disable-next-line @typescript-eslint/return-await
     return await next()
-  } catch (err) {
+  } catch (err: any) {
     if (err instanceof errors.BaseError) {
       // This repeats error logging in Operation failed
       // ctx.log.error({ error: err }, 'Error: Request error handler - known error')

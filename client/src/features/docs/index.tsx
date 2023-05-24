@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import { isActiveLink } from '../../helpers'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
-import PublicLayout from '../../views/layouts/PublicLayout'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../layouts/PublicLayout'
 import { fetchCurrentUser } from '../auth/api'
 import { useAuthUser } from '../auth/useAuthUser'
 import { Apps } from './pages/Apps'
@@ -27,7 +27,8 @@ import { Tracking } from './pages/Tracking'
 import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
-import { Tutorials } from './pages/Tutorials'
+import { TutorialMarkdown } from './tutorials/TutorialMarkdown'
+import { Assets } from "./pages/Assets";
 
 const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
@@ -49,6 +50,24 @@ const Docs = () => {
       />
       <DocsLayout>
         <DocsNav>
+          <DocsTitle>Tutorials</DocsTitle>
+          <NavItem
+            activeClassName='active'
+            $active={isActiveLink('/docs/tutorials/apps-workflows', pathname)}
+            to="/docs/tutorials/apps-workflows"
+            data-turbolinks="false"
+          >
+            Design Patterns for Apps and Workflows
+          </NavItem>
+          <NavItem
+            activeClassName='active'
+            $active={isActiveLink('/docs/tutorials/workstations', pathname)}
+            to="/docs/tutorials/workstations"
+            data-turbolinks="false"
+          >
+            Collaborative Data Science with Interactive Workstations and Databases
+          </NavItem>
+
           <DocsTitle>Guides</DocsTitle>
           <NavItem
             activeClassName='active'
@@ -57,14 +76,6 @@ const Docs = () => {
             data-turbolinks="false"
           >
             Introduction
-          </NavItem>
-          <NavItem
-            activeClassName='active'
-            $active={isActiveLink('/docs/tutorials', pathname)}
-            to="/docs/tutorials"
-            data-turbolinks="false"
-          >
-            Tutorials
           </NavItem>
           <NavItem
             activeClassName='active'
@@ -113,6 +124,14 @@ const Docs = () => {
             data-turbolinks="false"
           >
             Creating Apps
+          </NavItem>
+          <NavItem
+              activeClassName='active'
+              $active={isActiveLink('/docs/assets', pathname)}
+              to="/docs/assets"
+              data-turbolinks="false"
+          >
+            Assets
           </NavItem>
           <NavItem
             activeClassName='active'
@@ -224,8 +243,11 @@ const Docs = () => {
             <Route exact path="/docs/introduction">
               <Intro />
             </Route>
-            <Route exact path="/docs/tutorials">
-              <Tutorials />
+            <Route exact path="/docs/tutorials/apps-workflows">
+              <TutorialMarkdown fileName="apps.md" />
+            </Route>
+            <Route exact path="/docs/tutorials/workstations">
+              <TutorialMarkdown fileName="workstations.md" />
             </Route>
             <Route exact path="/docs/discussions">
               <Discussions />
@@ -244,6 +266,9 @@ const Docs = () => {
             </Route>
             <Route exact path="/docs/creating-apps">
               <CreatingApps />
+            </Route>
+            <Route exact path="/docs/assets">
+              <Assets />
             </Route>
             <Route exact path="/docs/workstations">
               <Workstations />
@@ -266,7 +291,6 @@ const Docs = () => {
             <Route exact path="/docs/cli">
               <CLI />
             </Route>
-
             <Route exact path="/docs/challenge-workbench">
               <ChallengeWorkbench />
             </Route>

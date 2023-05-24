@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { Asset, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
@@ -8,10 +8,10 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
+import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { AbstractSqlDriver } from '@mikro-orm/mysql'
-import { FileCloseParams } from 'shared/src/platform-client/platform-client.params'
-import { SyncFilesStateOperation } from 'shared/src/domain/user-file'
+import { FileCloseParams } from '@pfda/https-apps-shared/src/platform-client/platform-client.params'
+import { SyncFilesStateOperation } from '@pfda/https-apps-shared/src/domain/user-file'
 
 
 describe('PATCH /files/:id/close', () => {
@@ -28,7 +28,7 @@ describe('PATCH /files/:id/close', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
@@ -106,7 +106,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
 
     expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
@@ -145,7 +144,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
 
     expect(fakes.queue.findRepeatableFake.callCount).to.equal(1)
@@ -185,7 +183,6 @@ describe('PATCH /files/:id/close', () => {
     expect(res.statusCode).to.equal(200)
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(file.dxid)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
@@ -248,7 +245,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal('fake-token')
     expect(call.fileDxid).to.equal(asset.dxid)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
@@ -270,7 +266,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal(create.userHelper.getChallengeBotToken())
     expect(call.fileDxid).to.equal(challengeBotFile.dxid)
 
     // To guard for the case where the code checks for the wrong user's file sync task
@@ -299,7 +294,6 @@ describe('PATCH /files/:id/close', () => {
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
     const call = fakes.client.fileCloseFake.getCall(0).args[0] as FileCloseParams
-    expect(call.accessToken).to.equal(create.userHelper.getChallengeBotToken())
     expect(call.fileDxid).to.equal(challengeBotFile.dxid)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)

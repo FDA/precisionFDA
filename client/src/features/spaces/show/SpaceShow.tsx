@@ -24,7 +24,7 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { AppList } from '../../home/apps/AppList'
 import { AppsShow } from '../../home/apps/AppsShow'
 import { ExecutionList } from '../../home/executions/ExecutionList'
-import { JobShow } from '../../home/executions/JobShow'
+import { ExecutionDetails } from '../../home/executions/details/ExecutionDetails'
 import { FileList } from '../../home/files/FileList'
 import { FileShow } from '../../home/files/show/FileShow'
 import {
@@ -53,7 +53,8 @@ import {
   SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo,
   SpaceTypeHeader, TopSpaceHeader,
 } from './styles'
-
+import { ProtectedIcon } from '../ProtectedIcon'
+import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 
 const Spaces2 = ({
   space,
@@ -93,42 +94,42 @@ const Spaces2 = ({
     return <Activation space={space} />
   }
 
+  useToastWSHandler(user)
+
   return (
     <>
       <SpaceHeader>
         <TopSpaceHeader>
           <SpaceMainInfo>
             <SpaceHeaderTitle>{space.name}</SpaceHeaderTitle>
-            <SpaceHeaderDescrip>{space.description}</SpaceHeaderDescrip>
+            <SpaceHeaderDescrip>{space.protected && <ProtectedIcon />}{space.description}</SpaceHeaderDescrip>
           </SpaceMainInfo>
 
           <ButtonRow>
-            <Row>
-              {!spaceActions['Edit Space']?.shouldHide && (
-                <ActionButton
-                  data-testid="edit-space-button"
-                  onClick={() => history.push(`/spaces/${space.id}/edit`)}
-                >
-                  Space Settings
-                </ActionButton>
-              )}
-              {!spaceActions['Duplicate Space']?.shouldHide && (
-                <ActionButton
-                  data-testid="duplicate-space-button"
-                  onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
-                >
-                  Duplicate Space
-                </ActionButton>
-              )}
-              {!spaceActions['Fix Permissions']?.shouldHide && (
-                <ActionButton
-                  data-testid="fix-space-button"
-                  onClick={() => fixSpaceMutation.mutate({ id: space.id })}
-                >
-                  Fix Guest Side Permissions
-                </ActionButton>
-              )}
-            </Row>
+            {!spaceActions['Edit Space']?.shouldHide && (
+              <ActionButton
+                data-testid="edit-space-button"
+                onClick={() => history.push(`/spaces/${space.id}/edit`)}
+              >
+                Space Settings
+              </ActionButton>
+            )}
+            {!spaceActions['Duplicate Space']?.shouldHide && (
+              <ActionButton
+                data-testid="duplicate-space-button"
+                onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
+              >
+                Duplicate Space
+              </ActionButton>
+            )}
+            {!spaceActions['Fix Permissions']?.shouldHide && (
+              <ActionButton
+                data-testid="fix-space-button"
+                onClick={() => fixSpaceMutation.mutate({ id: space.id })}
+              >
+                Fix Guest Side Permissions
+              </ActionButton>
+            )}
           </ButtonRow>
         </TopSpaceHeader>
         <SpaceTypeHeader expandedSidebar={expandedSidebar}>
@@ -234,7 +235,7 @@ const Spaces2 = ({
                 exact
                 path={`/spaces/${space.id}/executions/:executionUid`}
               >
-                <JobShow spaceId={space.id} />
+                <ExecutionDetails spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
                 <MembersList space={space} />

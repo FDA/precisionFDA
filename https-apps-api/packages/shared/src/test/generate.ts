@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
+import crypto from 'crypto'
 import { DateTime } from 'luxon'
-import { entities } from '../domain'
+import { App, entities } from '../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
 import {
@@ -11,7 +12,7 @@ import {
   ENGINES,
 } from '../domain/db-cluster/db-cluster.enum'
 import { STATIC_SCOPE } from '../enums'
-import type { AnyObject } from '../types'
+import type { AnyObject, UserCtx } from '../types'
 import {
   FILE_STATE_DX,
   FILE_STI_TYPE,
@@ -33,6 +34,8 @@ import { SyncDbClusterOperation } from '../domain/db-cluster'
 import { SyncJobOperation } from '../domain/job'
 import { SyncFilesStateOperation } from '../domain/user-file'
 import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
+import { USER_STATE } from '../domain/user/user.entity'
+import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
 
 const chance = new Chance()
 
@@ -40,7 +43,7 @@ const random = {
   firstName: () => chance.first(),
   lastName: () => chance.last(),
   email: () => chance.email(),
-  password: () => chance.string({ length: 20 }),
+  password: () => crypto.randomBytes(64).toString('hex'),
   dxstr: (): string => nanoid(),
   word: () => chance.word(),
   description: () => chance.sentence({ words: 2 }),
@@ -56,6 +59,9 @@ const user = {
     dxuser: `user-${random.dxstr()}`,
     privateFilesProject: `project-${random.dxstr()}`,
     publicFilesProject: `project-${random.dxstr()}`,
+    email: 'test@nexus-mail.com',
+    normalizedEmail: 'normalized@nexus-mail.com',
+    userState: USER_STATE.ENABLED,
     // privateComparisonsProject: `project-${random.dxstr()}`,
     // publicComparisonsProject: `project-${random.dxstr()}`,
   }),
@@ -65,7 +71,7 @@ const app = {
   jupyterAppSpecData: () =>
     JSON.stringify({
       internet_access: true,
-      instance_type: 'baseline-4',
+      instance_type: 'baseline-2',
       output_spec: [],
       input_spec: [
         {
@@ -123,7 +129,7 @@ const app = {
   ttydAppSpecData: () =>
     JSON.stringify({
       internet_access: true,
-      instance_type: 'baseline-4',
+      instance_type: 'baseline-2',
       output_spec: [],
       input_spec: [
         {
@@ -137,16 +143,34 @@ const app = {
         },
       ],
   }),
+  ttydAppInternal: () =>
+    JSON.stringify({
+      ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
+      packages: ['ipython', 'pkg-config'],
+    }),
+  ttydAppWithAPIInternal: () =>
+    JSON.stringify({
+      ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
+      platform_tags: ['pfda_workstation_api:1.0.0'],
+      packages: ['ipython', 'pkg-config'],
+    }),
   regular: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
+      uid: `${dxid}-1`,
       title: 'app-title',
       scope: 'public',
       spec:
-        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-2"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.NORMAL,
+      version: '1',
+      revision: 1,
+      readme: 'readme',
+      internal: JSON.stringify({}),
+      verified: true,
+      devGroup: 'devGroup',
     }
   },
   https: (): Partial<InstanceType<typeof entities.App>> => {
@@ -156,9 +180,10 @@ const app = {
       title: 'https-app-title',
       scope: 'public',
       spec:
-        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-2"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
+      verified: true,
     }
   },
   rshiny: (): Partial<InstanceType<typeof entities.App>> => {
@@ -197,18 +222,30 @@ const app = {
 }
 
 const job = {
-  simple: (): Partial<InstanceType<typeof entities.Job>> => {
+  simple: (app: App): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
     return {
       dxid,
       project: `project-${random.dxstr()}`,
       runData: JSON.stringify({ run_instance_type: 'baseline-8', run_inputs: {}, run_outputs: {} }),
-      describe: JSON.stringify({ id: dxid }),
       state: JOB_STATE.IDLE,
       name: chance.name(),
       scope: 'private',
       uid: `${dxid}-1`,
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+      describe: JSON.stringify({
+        id: dxid,
+        executable: app.dxid,
+        executableName: app.title,
+        runInput: {
+          port: 321,
+        },
+        httpsApp: {
+          dns: {
+            url: `https://${dxid}.internal.dnanexus.cloud/`
+          },
+        },
+      }),
     }
   },
   regular: (): Partial<InstanceType<typeof entities.Job>> => {
@@ -319,6 +356,7 @@ const folder = {
       parentId: 1,
       parentType: PARENT_TYPE.JOB,
       stiType: FILE_STI_TYPE.FOLDER,
+      locked: false
     }
   },
   simpleLocal: (): Partial<InstanceType<typeof entities.Folder>> => {
@@ -331,6 +369,7 @@ const folder = {
       parentId: 1,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.FOLDER,
+      locked: false
     }
   },
 }
@@ -360,7 +399,8 @@ const space = {
     spaceId: null as any,
     hostProject: null as any,
     guestProject: null as any,
-
+    description: 'desc',
+    meta: 'meta',
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
     name: chance.word(),
@@ -458,8 +498,38 @@ const dbCluster = {
   }),
 }
 
+const expert = {
+  simple: (): Partial<InstanceType<typeof entities.Expert>> => {
+    const expertName = chance.name()
+    const fileDxid = `file-${random.dxstr()}-1`
+    return {
+      scope: ExpertScope.PUBLIC,
+      state: ExpertState.OPEN,
+      meta: {
+        _prefname: expertName,
+        _about: `About - ${expertName}`,
+        _blog: `Blog - ${expertName}`,
+        _blog_title: `Blog Title - ${expertName}`,
+        _challenge: `Challenge - ${expertName}`,
+        _image_id: fileDxid,
+      }
+    }
+  },
+}
+
+const news = {
+  create: (): Partial<InstanceType<typeof entities.NewsItem>> => {
+    return {
+      title: chance.sentence(),
+      content: chance.sentence(),
+      link: chance.url(),
+      published: true,
+    }
+  },
+}
+
 const bullQueue = {
-  syncDbClusterStatus: (dbClusterDxid, userContext) => ({
+  syncDbClusterStatus: (dbClusterDxid: string, userContext: UserCtx) => ({
     data: {
       payload: {
         dxid: dbClusterDxid,
@@ -468,13 +538,13 @@ const bullQueue = {
       user: userContext,
     },
   }),
-  syncFilesState: userContext => ({
+  syncFilesState: (userContext: UserCtx) => ({
     data: {
       type: TASK_TYPE.SYNC_FILES_STATE,
       user: userContext,
     },
   }),
-  syncJobStatus: (jobDxid, userContext) => ({
+  syncJobStatus: (jobDxid: string, userContext: UserCtx) => ({
     data: {
       payload: {
         dxid: jobDxid,
@@ -535,6 +605,7 @@ export {
   user,
   job,
   app,
+  comparison,
   userFile,
   folder,
   tag,
@@ -544,9 +615,10 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
-  comparison,
   challenge,
   dbCluster,
+  expert,
+  news,
   bullQueue,
   bullQueueRepeatable,
 }

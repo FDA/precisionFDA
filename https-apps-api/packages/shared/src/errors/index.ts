@@ -44,7 +44,8 @@ export enum ErrorCodes {
   AGGREGATE_ERROR = 'E_AGGREGATE_ERROR',
   MFA_ALREADY_RESET = 'E_MFA_ALREADY_RESET',
   ORG_MEMBERSHIP_ERROR = 'E_ORG_MEMBERSHIP_ERROR',
-  INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR'
+  INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR',
+  WORKSTATION_API_ERROR = 'E_WORKSTATION_API_ERROR',
 }
 
 export class BaseError extends Error {
@@ -125,6 +126,7 @@ export class JobNotFoundError extends NotFoundError {
   constructor(message = 'Error: Job entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.JOB_NOT_FOUND,
+      statusCode: 404,
       ...props,
     })
   }

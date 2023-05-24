@@ -1,11 +1,13 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { entities, user } from '../domain'
+import { AppSeries, entities, Expert, User, user } from '../domain'
 import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
+import { random } from './generate'
+import {STATIC_SCOPE} from "../enums";
 
 const acceptedLicenseHelper = {
   create: (
@@ -27,7 +29,7 @@ const assetHelper = {
   create: (
     em: EntityManager,
     references: {user: InstanceType<typeof entities.User>},
-    data?: Partial<InstanceType<typeof entities.Asset>>
+    data?: Partial<InstanceType<typeof entities.Asset>>,
   ) => {
     const defaults = generate.asset.simple()
     const input = {
@@ -185,7 +187,8 @@ const jobHelper = {
     },
     data?: Partial<InstanceType<typeof entities.Job>>,
   ) => {
-    const defaults = references.app?.isHTTPS() ? generate.job.simple() : generate.job.regular()
+    const isHTTPS = references.app?.isHTTPS()
+    const defaults = isHTTPS ? generate.job.simple(references.app!) : generate.job.regular()
     const input = {
       ...defaults,
       ...data,
@@ -250,9 +253,8 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
-      // todo: remove both
       parentFolder?: InstanceType<typeof entities.Folder>
-      parent?: InstanceType<typeof entities.Job>
+      parent?: InstanceType<typeof entities.UserFile>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
@@ -261,7 +263,17 @@ const filesHelper = {
       ...defaults,
       ...data,
     }
+    if (references.parent) {
+      input.parentId = references.parent.id
+    }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    if (references.parentFolder) {
+      if (!data?.scope || [STATIC_SCOPE.PRIVATE.toString(), STATIC_SCOPE.PUBLIC.toString()].includes(data?.scope)) {
+        file.parentFolder = references.parentFolder
+      } else {
+        file.scopedParentFolder = references.parentFolder
+      }
+    }
     em.persist(file)
     return file
   },
@@ -269,6 +281,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.UserFile>>,
   ) => {
@@ -279,6 +292,9 @@ const filesHelper = {
       parentId: references.user.id,
     }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    if (references.parentFolder) {
+      file.parentFolder = references.parentFolder
+    }
     em.persist(file)
     return file
   },
@@ -337,8 +353,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
-      // todo: remove
-      parent?: InstanceType<typeof entities.Folder>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
@@ -348,6 +363,13 @@ const filesHelper = {
       ...data,
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
+    if (references.parentFolder) {
+      if (!data?.scope || [STATIC_SCOPE.PRIVATE.toString(), STATIC_SCOPE.PUBLIC.toString()].includes(data?.scope)) {
+        folder.parentFolder = references.parentFolder
+      } else {
+        folder.scopedParentFolder = references.parentFolder
+      }
+    }
     em.persist(folder)
     return folder
   },
@@ -355,6 +377,7 @@ const filesHelper = {
     em: EntityManager,
     references: {
       user: InstanceType<typeof entities.User>
+      parentFolder?: InstanceType<typeof entities.Folder>
     },
     data?: Partial<InstanceType<typeof entities.Folder>>,
   ) => {
@@ -364,6 +387,9 @@ const filesHelper = {
       ...data,
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
+    if (references.parentFolder) {
+      folder.parentFolder = references.parentFolder
+    }
     em.persist(folder)
     return folder
   },
@@ -531,6 +557,67 @@ const comparisonHelper = {
     em.persist(comparison)
     return comparison
   },
+  createInput: (
+    em: EntityManager,
+    references: {
+      comparison: InstanceType<typeof entities.Comparison>
+      userFile: InstanceType<typeof entities.UserFile>
+    },
+    data?: Partial<InstanceType<typeof entities.ComparisonInput>>,
+  ) => {
+    const comparisonInput = wrap(new entities.ComparisonInput(
+      references.comparison,
+      references.userFile,
+    )).assign(data, { em })
+    em.persist(comparisonInput)
+    return comparisonInput
+  },
+}
+
+const expertHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Comment>>,
+  ): Expert => {
+    const defaults = generate.expert.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const expert = wrap(new entities.Expert(references.user)).assign(input)
+    em.persist(expert)
+    return expert
+  },
+}
+
+const newsHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.NewsItem>>,
+  ) => {
+    const defaults = generate.news.create()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const news = wrap(new entities.NewsItem(references.user)).assign(input)
+    em.persist(news)
+    return news
+  }
+}
+
+const workflowHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Workflow>>,
+  ) => {
+    const workflow = wrap(new entities.Workflow(references.user)).assign(data, { em })
+    em.persist(workflow)
+    return workflow
+  },
 }
 
 export {
@@ -548,4 +635,7 @@ export {
   challengeResourceHelper,
   comparisonHelper,
   dbClusterHelper,
+  expertHelper,
+  newsHelper,
+  workflowHelper,
 }

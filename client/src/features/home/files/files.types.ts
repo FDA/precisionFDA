@@ -1,3 +1,5 @@
+import { ServerScope } from "../types"
+
 export enum FilesListActions {
   'Track' = 'Track',
   'Open' = 'Open',
@@ -18,7 +20,7 @@ export enum FolderActions {
   'Choose Add Option' = 'Choose Add Option',
 }
 
-export type FileStatus = 'closed' | 'closing' | 'open'
+export type FileStatus = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private'
 export type FileType = 'UserFile' | 'Folder' | 'File'
 export type FileOrigin = 'UserFile'
@@ -65,6 +67,7 @@ export interface IFile {
   'added_by': string,
   'created_at': string,
   'featured': boolean,
+  'scope': ServerScope,
   'space_id': string | null,
   'origin': string | {
     text?: string

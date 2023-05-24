@@ -3,13 +3,13 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
-import { Button, ButtonSolidBlue } from '../../../../components/Button'
-import { TransparentButton } from '../../../../components/Dropdown/styles'
+import { Button, ButtonSolidBlue, TransparentButton } from '../../../../components/Button'
+import { CrossIcon } from '../../../../components/icons/PlusIcon'
+import { SearchIcon } from '../../../../components/icons/SearchIcon'
 import { InputText } from '../../../../components/InputText'
 import { Loader } from '../../../../components/Loader'
-import Icon from '../../../../views/components/Icon'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { ButtonRow, Footer } from '../../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
 import { ATTACHABLE_TYPES } from '../useAttachToModal'
 import {
   LeftBar,
@@ -20,6 +20,14 @@ import {
 } from './styles'
 import { useAttachToMutation } from './useAttachToMutation'
 import { useListNotesQuery } from './useListNotesQuery'
+
+const types = {
+  FILE: 'UserFile',
+  APP: 'App',
+  JOB: 'Job',
+  ASSET: 'Asset',
+  WORKFLOW: 'Workflow',
+} as Record<ATTACHABLE_TYPES, string>
 
 export const AttachToModal = ({
   isShown,
@@ -53,23 +61,18 @@ export const AttachToModal = ({
     }
   }
 
-  const onClickAttachAction = () => {
-    const types = {
-      [ATTACHABLE_TYPES.FILE]: 'UserFile',
-      [ATTACHABLE_TYPES.APP]: 'App',
-      [ATTACHABLE_TYPES.JOB]: 'Job',
-      [ATTACHABLE_TYPES.ASSET]: 'Asset',
-      [ATTACHABLE_TYPES.WORKFLOW]: 'Workflow',
-    } as any
-
-    const it = ids.map((id: string|number) => {
+  const onClickAttachAction = async () => {
+    const it = ids.map((id: string | number) => {
       return {
         id,
         type: types[itemsType],
       }
     })
 
-    mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds]})
+    await mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds]})
+    setSelectedItem({})
+    setCheckedItemIds(new Set())
+    hideAction()
   }
 
   const reg = new RegExp(search, 'i')
@@ -109,16 +112,12 @@ export const AttachToModal = ({
             <span className="__menu-item_title">{note.title}</span>
           </span>
         </div>
-        <span className="__menu-item_chevron">
-          <Icon icon="fa-chevron-right" />
-        </span>
       </li>
     )
   })
 
   return (
     <ModalNext
-      headerText="Attach note to:"
       hide={hideAction}
       isShown={isShown}
       disableClose={false}
@@ -126,63 +125,68 @@ export const AttachToModal = ({
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText="Attach note to:"
+        headerText={`Attach note to ${types[itemsType]}:`}
         hide={hideAction}
       />
-      <StyledAttachToModal >
+      <StyledAttachToModal>
         <LeftBar>
           <SearchInput>
             <InputText
               name="search"
               placeholder="Search..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e: any) => setSearch(e.target.value)}
             />
             <span className="__menu-item_search-icons">
               {search ? (
-                <Icon icon="fa-times" onClick={() => setSearch('')} />
+                <TransparentButton onClick={() => setSearch('')}><CrossIcon height={16} /></TransparentButton>
               ) : (
-                <Icon icon="fa-search" />
+                <SearchIcon height={16} />
               )}
             </span>
           </SearchInput>
-          <div>
-            <ul className="__items-list">
-              {itemsList}
-              {!itemsList.length && (
-                <div className="__menu-item">
-                  <span className="text-muted _no-content">
-                    No results found
-                  </span>
-                  <TransparentButton
-                    className="__menu-item_clear"
-                    onClick={() => setSearch('')}
-                  >
-                    Clear query
-                  </TransparentButton>
-                </div>
-              )}
-            </ul>
-          </div>
+          <ModalScroll>
+            <div>
+              <ul className="__items-list">
+                {itemsList}
+                {!itemsList.length && (
+                  <div className="__menu-item">
+                    <span className="text-muted _no-content">
+                      No results found
+                    </span>
+                    <TransparentButton
+                      className="__menu-item_clear"
+                      onClick={() => setSearch('')}
+                    >
+                      Clear query
+                    </TransparentButton>
+                  </div>
+                )}
+              </ul>
+            </div>
+          </ModalScroll>
         </LeftBar>
         <NoteContainer>
-          <div className="_title">
-            <a data-turbolinks="false" href={selectedItem.path}>
-              {selectedItem.title}
-            </a>
-          </div>
-          <NotesMarkdown data={selectedItem.content} />
-          <div className="_no-content">
-            {!selectedItem.content && 'No content written for this item'}
-          </div>
+          <ModalScroll>
+            <div className="_title">
+              <a data-turbolinks="false" href={selectedItem.path}>
+                {selectedItem.title}
+              </a>
+            </div>
+            <NotesMarkdown data={selectedItem.content} />
+            <div className="_no-content">
+              {!selectedItem.content && 'No content written for this item'}
+            </div>
+          </ModalScroll>
         </NoteContainer>
       </StyledAttachToModal>
       <Footer>
         <ButtonRow>
+          {mutation.isLoading && <Loader />}
           <Button onClick={hideAction}>Cancel</Button>
           <ButtonSolidBlue
             onClick={() => onClickAttachAction()}
-            disabled={!checkedItemIds.size}
+            disabled={!checkedItemIds.size || mutation.isLoading}
           >
             Attach
           </ButtonSolidBlue>

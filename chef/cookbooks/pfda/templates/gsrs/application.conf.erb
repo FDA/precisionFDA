@@ -1,0 +1,154 @@
+include "substances-core.conf"
+server.tomcat.max-threads=2000
+ix.home= "<%= @TOMCAT_PATH %>/ginas.ix"
+#application.host= "http://localhost:8080"
+application.host="<%= @HOST %>/ginas/app"
+spring.application.name="substances"
+logging.file.path=<%= @TOMCAT_PATH %>/logs/substances
+##################################################################
+# SPRING BOOT ACTUATOR SETTINGS FOR MICROSERVICE HEALTH CHECKS  ##
+##################################################################
+# turn off rabbit mq check for now since we don't use it otherwise it will say we are down
+management.health.rabbit.enabled: false
+# PUT YOUR PERSONAL EXTENSIONS AND ADDITIONS HERE
+#debug=true
+spring.main.allow-bean-definition-overriding=true
+#this is how HOCON does default values
+#eureka.client.serviceUrl.defaultZone= "http://localhost:8761/eureka"
+#eureka.client.serviceUrl.defaultZone= ${?EUREKA_SERVER}
+ix.ginas.export.path=<%= @TOMCAT_PATH %>/gsrs_exports
+gsrs.renderers.selected="USP"
+
+#In order to allow the resolve name feature in some servers, a proxy may be needed
+#ix.proxy.enabled=true
+#ix.proxy.name=PROXY_IP
+#ix.proxy.port=PROXY_PORT
+
+## START AUTHENTICATION
+# SSO HTTP proxy authentication settings
+ix.authentication.trustheader=true
+ix.authentication.usernameheader="<%= @GSRS_AUTHENTICATION_HEADER_NAME %>"
+ix.authentication.useremailheader="<%= @GSRS_AUTHENTICATION_HEADER_NAME_EMAIL %>"
+# set this "false" to only allow authenticated users to see the application
+ix.authentication.allownonauthenticated=false
+# set this "true" to allow any user that authenticates to be registered
+# as a user automatically
+ix.authentication.autoregister=true
+#Set this to "true" to allow autoregistered users to be active as well
+ix.authentication.autoregisteractive=true
+## END AUTHENTICATION
+
+#spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
+
+# Oracle Connection
+#spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+#spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+spring.jpa.hibernate.use-new-id-generator-mappings=false
+spring.datasource.driverClassName="org.mariadb.jdbc.Driver"
+spring.datasource.url="<%= @GSRS_DATABASE_URL %>"
+spring.datasource.username=<%= @GSRS_DATABASE_USERNAME %>
+spring.datasource.password=<%= @GSRS_DATABASE_PASSWORD %>
+spring.datasource.hikari.maximum-pool-size= 500 #maximum pool size
+
+# Spring Boot Config
+spring.jpa.hibernate.ddl-auto=none  #### THIS IS VERY IMPORTANT, OTHERWISE Hibernate will WIPE OUT our database
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
+eureka.client.enabled=false
+
+gsrs.entityProcessors +={
+               "entityClassName" = "ix.ginas.models.v1.Substance",
+               "processor" = "gsrs.module.substance.processors.UniqueCodeGenerator",
+               "with"=  {
+                        "codesystem"="BDNUM",
+                       "suffix"="AB",
+                       "length"=9,
+                       "padding"=true
+               }
+        }
+gsrs.entityProcessors +=
+        {
+        "entityClassName" = "ix.ginas.models.v1.Substance",
+        "processor" = "gsrs.module.substance.processors.ApprovalIdProcessor",
+        "parameters" = {
+            "codeSystem" = "FDA UNII"
+        }
+        }
+gsrs.entityProcessors+=
+      {
+           "entityClassName":"ix.ginas.models.v1.Substance",
+           "processor":"gsrs.module.substance.processors.CodeProcessor",
+           "with":{
+               "class":"gsrs.module.substance.datasource.DefaultCodeSystemUrlGenerator",
+               "json":{
+                  "filename": "codeSystem.json"
+               }
+           }
+      }
+#gsrs.indexers.list += {
+#     "indexer" = "fda.gsrs.substance.indexers.SubstanceApplicationIndexValueMaker"
+#  }
+#gsrs.indexers.list += {
+#     "indexer" = "fda.gsrs.substance.indexers.SubstanceProductIndexValueMaker"
+#  }
+ix.ginas.export.factories.substances = ${ix.ginas.export.factories.substances}[
+#        "fda.gsrs.substance.exporters.FDANameExporterFactory",
+#        "fda.gsrs.substance.exporters.FDACodeExporterFactory",
+#        "fda.gsrs.substance.exporters.SPLValidatorXMLExporterFactory",
+#        "fda.gsrs.substance.exporters.ExcelSubstanceRelatedApplicationsExporterFactory",
+#        "fda.gsrs.substance.exporters.ExcelSubstanceRelatedProductsExporterFactory",
+#        "fda.gsrs.substance.exporters.SRSLegacyDictionaryExporterFactory"
+]
+# ix.ginas.approvalIdGenerator.generatorClass=ix.ginas.utils.UNIIGenerator
+# gsrs.validators.substances +=
+#     {
+#         "validatorClass" = "fda.gsrs.substance.validators.BdNumModificationValidator",
+#         "newObjClass" = "ix.ginas.models.v1.Substance"
+#     }
+gsrs.validators.substances +=
+    {
+        "validatorClass" = "ix.ginas.utils.validation.validators.CodeUniquenessValidator",
+                           "newObjClass" = "ix.ginas.models.v1.Substance",
+        "configClass" = "SubstanceValidatorConfig",
+        "parameters"= {"singletonCodeSystems" =["CAS", "PUBCHEM", "DRUG BANK", "EPA CompTox", "RS_ITEM_NUM", "STARI", "INN", "NCI_THESAURUS", "WIKIPEDIA", "EVMPD", "RXCUI", "ECHA (EC/EINECS)", "FDA ORPHAN DRUG", "EU-Orphan Drug", "NSC", "NCBI TAXONOMY", "ITIS", "ALANWOOD", "EPA PESTICIDE CODE", "CAYMAN", "USDA PLANTS", "PFAF", "MPNS", "GRIN", "DARS", "BIOLOGIC SUBSTANCE CLASSIFICATION CODE", "CERES"]}
+    }
+
+# Standardize substance name entries
+# Inherited from the long-used Name Standardizer bookmarklet
+# Implemented by Mitch Miller
+gsrs.validators.substances += {
+          "validatorClass" = "ix.ginas.utils.validation.validators.StandardNameValidator",
+          "newObjClass" = "ix.ginas.models.v1.Substance",
+          "parameters" = {
+             "warningOnMismatch" = true
+          }
+        }
+gsrs.scheduled-tasks.list+=
+    {
+        "scheduledTaskClass" : "gsrs.module.substance.tasks.ScheduledExportTaskInitializer",
+        "parameters" :
+        {
+            "username":"admin",
+            "cron":"0 9 2 * * ?", #2:09 AM every day
+           #"cron":"0 0/6 * * * ?" #every 6 mins
+            "autorun":false,
+            "name":"Full GSRS export"
+        }
+    }
+admin.panel.download.path="/usr/local/tomcat/"
+
+# NEED THESE for Applications-api and Products-api
+
+#gsrs.microservice.applications.api.baseURL = "http://localhost:8080"
+#gsrs.microservice.applications.api.headers= {
+#                        "auth-username" ="GSRS_QUERY_SERVICE_ACCOUNT",
+#                        "auth-key"="**AUTH_KEY**"
+#}
+#gsrs.microservice.products.api.baseURL = "http://localhost:8080"
+#gsrs.microservice.products.api.headers= {
+#                        "auth-username" ="GSRS_QUERY_SERVICE_ACCOUNT",
+#                        "auth-key"="**AUTH_KEY**""
+#}
+
+#adjust this as needed
+gsrs.sessionSecure=false

@@ -32,19 +32,21 @@ export const DocsContent = styled.main`
 
   p {
     margin-top: 8px;
-  }
-
-  h1 {
-    margin-top: 0.5rem;
-    margin-bottom: 2rem;
-    font-size: 32px;
-    color: #333333;
-  }
-  h2 {
     margin-bottom: 8px;
   }
 
-  code {
+  h1 {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-size: 32px;
+    color: #333333;
+  }
+  h2, h3, h4 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  code.inline {
     padding: 2px 4px;
     font-size: 90%;
     color: #c7254e;

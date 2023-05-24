@@ -12,7 +12,7 @@ export const makeValidateFdaSubnetMdw = () => {
     maskSize,
   } = config.api.fdaSubnet.allowedIpCidrBlock
   const cidrMaskPrefix = ipv4QuadrupleToBooleanArray(cidrIpv4Quadruple).slice(0, maskSize)
-  return async (ctx: Api.Ctx, next) => {
+  return async (ctx: Api.Ctx, next: any) => {
     // Header added by Nginx
     const ipv4Header = ctx.get(config.api.fdaSubnet.nginxIpHeader)
     ctx.log.debug({ ipv4Header }, `Processing nginx header ${config.api.fdaSubnet.nginxIpHeader} with value "${ipv4Header}"`)

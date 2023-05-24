@@ -26,6 +26,7 @@ module Api
     def https_apps_client
       DIContainer.resolve("https_apps_client")
     end
+
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
@@ -51,6 +52,11 @@ module Api
 
       space = space_form.persist!(api, current_user)
 
+      if create_space_params[:protected]
+        space.tag_list = "Protected"
+        space.save
+      end
+
       render json: space, adapter: :json
     end
 
@@ -58,7 +64,7 @@ module Api
     # Returns editable spaces list. Used only for Copy to space dropdown for now.
     def editable_spaces
       spaces = Space.editable_by(@context).order(:name, :space_type).map do |space|
-        { scope: space.uid, title: space.title }
+        { scope: space.uid, title: space.title, protected: space.protected }
       end
 
       render json: spaces
@@ -106,6 +112,10 @@ module Api
       space = Space.undeleted.find(params[:id])
 
       head(:forbidden) && return unless space.updatable_by?(current_user)
+
+      if params.key?(:protected) && params[:protected] != space[:protected]
+        raise ApiError, "Parameter protected cannot be changed!"
+      end
 
       space_edit_params = update_space_params.merge(
         current_user: current_user,
@@ -191,11 +201,21 @@ module Api
       raise ApiError, e.message
     end
 
-    # used by CLI to list spaces available to user without any excess data
+    # used by CLI by list-spaces command - listing available to user without any excess data
     # allows to use flags like locked or unactivated to list those spaces.
     def cli
       spaces = SpaceService::SpacesFilter.call_for_cli(@context.user, params)
       render json: spaces, :root => false, each_serializer: CliSpaceSerializer
+    end
+
+    # GET /api/spaces/:id/selectable_spaces
+    # gets all selectable spaces for given space
+    # @return spaces [Space] Array of Space objects that can be selected for job
+    def selectable_spaces
+      spaces = https_apps_client.selectable_spaces(params[:id])
+      render json: spaces
+    rescue HttpsAppsClient::Error => e
+      response[:errors] << e.message
     end
 
     private
@@ -242,11 +262,6 @@ module Api
       end
     end
 
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # def sync_files
-    #   User.sync_files!(@context)
-    # end
-
     def copy_service
       @copy_service ||= CopyService.new(api: api, user: current_user)
     end
@@ -258,11 +273,11 @@ module Api
 
       return if @items.all? { |item| item.accessible_by?(@context) }
 
-      raise ApiError, "Unaccessable items are detected"
+      raise ApiError, "Unaccessible items are detected"
     end
 
     def api
-      @api ||= DIContainer.resolve("api.user")
+      @api ||= DNAnexusAPI.new(RequestContext.instance.token)
     end
 
     def space_types
@@ -345,7 +360,7 @@ module Api
     def create_space_params
       params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
                                     :space_type, :cts, :sponsor_org_handle, :source_space_id,
-                                    :sponsor_lead_dxuser, :restrict_to_template)
+                                    :sponsor_lead_dxuser, :restrict_to_template, :protected)
     end
   end
   # rubocop:enable Metrics/ClassLength

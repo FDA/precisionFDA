@@ -6,12 +6,11 @@ import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
 import { InputText } from '../../../../components/InputText'
-import { Modal } from '../../../modal'
-import { ButtonRow, StyledForm } from '../../../modal/styles'
+import { ButtonRow, Footer, StyledForm } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { editAssetRequest } from '../assets.api'
 import { IAsset } from '../assets.types'
-
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 
 const EditAssetInfoForm = ({
   asset,
@@ -28,15 +27,19 @@ const EditAssetInfoForm = ({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      name: typeof asset?.origin == 'object' ? asset.origin.text?.trim() : asset.name.trim(),
+      name:
+        typeof asset?.origin == 'object'
+          ? asset.origin.text?.trim()
+          : asset.name.trim(),
     },
   })
 
   const editMutation = useMutation({
     mutationKey: ['edit-asset-info'],
-    mutationFn: (payload: { name: string; uid: string }) => editAssetRequest(payload),
-    onSuccess: (res) => {
-      if(res?.message.type === 'error') {
+    mutationFn: (payload: { name: string; uid: string }) =>
+      editAssetRequest(payload),
+    onSuccess: res => {
+      if (res?.message.type === 'error') {
         toast.error(`API Error: ${res?.message.text}`)
       } else {
         queryClient.invalidateQueries(['assets'])
@@ -55,26 +58,42 @@ const EditAssetInfoForm = ({
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup>
-        <label>Asset Name</label>
-        <InputText
-          label="Asset Name"
-          {...register('name', { required: 'Name is required.' })}
-          placeholder="Edit name..."
-          disabled={editMutation.isLoading}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
-      </FieldGroup>
-      <ButtonRow>
-        <Button type="button" onClick={handleClose} disabled={editMutation.isLoading}>Cancel</Button>
-        <ButtonSolidBlue type="submit" disabled={editMutation.isLoading}>Edit</ButtonSolidBlue>
-      </ButtonRow>
-    </StyledForm>
+    <>
+      <StyledForm id="edit-asset-form" onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          <label>Asset Name</label>
+          <InputText
+            label="Asset Name"
+            {...register('name', { required: 'Name is required.' })}
+            placeholder="Edit name..."
+            disabled={editMutation.isLoading}
+          />
+          <ErrorMessage
+            errors={errors}
+            name="name"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
+        </FieldGroup>
+      </StyledForm>
+      <Footer>
+        <ButtonRow>
+          <Button
+            type="button"
+            onClick={handleClose}
+            disabled={editMutation.isLoading}
+          >
+            Cancel
+          </Button>
+          <ButtonSolidBlue
+            type="submit"
+            form="edit-asset-form"
+            disabled={editMutation.isLoading}
+          >
+            Edit
+          </ButtonSolidBlue>
+        </ButtonRow>
+      </Footer>
+    </>
   )
 }
 
@@ -83,15 +102,19 @@ export const useEditAssetModal = (selectedItem: IAsset) => {
   const selected = useMemo(() => selectedItem, [isShown])
   const handleClose = () => setShowModal(false)
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-asset-edit"
-      headerText="Edit asset info"
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Edit asset info"
+        hide={() => setShowModal(false)}
+      />
       <EditAssetInfoForm asset={selected} handleClose={handleClose} />
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

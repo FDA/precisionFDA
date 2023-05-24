@@ -49,7 +49,7 @@ module Api
             eager_load(:app, user: :org, analysis: :workflow).
             includes(:taggings).
             search_by_tags(params.dig(:filters, :tags)).
-            order(order_from_params).page(page_from_params).per(page_size)
+            order(order_params).page(page_from_params).per(page_size)
           jobs.each { |job| job.current_user = @context.user }
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
@@ -124,7 +124,8 @@ module Api
     def workflow
       workflow = Workflow.find_by(uid: unsafe_params[:id])
       analyses = workflow.analyses.
-        eager_load(:jobs, :workflow, :batch_items)
+        eager_load(:jobs, :workflow, :batch_items).
+        order({ created_at: Sortable::DIRECTION_DESC })
 
       presenter = Presenters::WorkflowExecutionsPresenter.
         new(analyses, @context, unsafe_params).call
@@ -233,9 +234,13 @@ module Api
       raise ApiError, "You have no permissions to access this job" unless job
 
       redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
+
+      # Update the API key in the background
+      refresh_api_key_internal(job, background: true)
+
       redirect_to(job.https_job_external_url) && return if Utils.development_or_test?
 
-      api = DIContainer.resolve("api.auth_user")
+      api = DNAnexusAPI.new(RequestContext.instance.token, DNANEXUS_AUTHSERVER_URI)
       code = api.get_https_job_auth_token(job)
       authorized_job_uri = URI.join(
         job.https_job_external_url,
@@ -246,7 +251,66 @@ module Api
       redirect_to authorized_job_uri.to_s
     end
 
+    # PATCH /api/jobs/:id/refresh_api_key
+    # Refresh the pFDA CLI API key in the workstation
+    # The :id used should be the job's dxid
+    def refresh_api_key
+      job = Job.accessible_by(@context).find_by(dxid: params[:id])
+      raise ApiError, "You have no permissions to access this job" unless job
+
+      response = refresh_api_key_internal(job, background: false)
+      render json: response
+    rescue StandardError => e
+      raise ApiError, e.message
+    end
+
+    def refresh_api_key_internal(job, background: false)
+      api = DIContainer.resolve("api.auth_user")
+      code = api.get_https_job_auth_token(job)
+      key = generate_auth_key
+
+      return https_apps_client.workstation_set_api_key(job.dxid, code, key) unless background
+
+      context = RequestContext.instance.dup
+      # rubocop:disable Style/BlockDelimiters
+      Thread.start {
+        begin
+          RequestContext.begin_request(context.user_id, context.username, context.token)
+          https_apps_client.workstation_set_api_key(job.dxid, code, key)
+        ensure
+          RequestContext.end_request
+        end
+      }
+      # rubocop:enable Style/BlockDelimiters
+    end
+
+    # PATCH /api/jobs/:id/snapshot
+    # Ask the workstation to create a snapshot
+    #
+    # Note: The :id used above should be the job's dxid
+    def snapshot
+      job = Job.accessible_by(@context).find_by(dxid: params[:id])
+      raise ApiError, "You have no permissions to access this job" unless job
+
+      api = DIContainer.resolve("api.auth_user")
+      auth_code = api.get_https_job_auth_token(job)
+      api_key = generate_auth_key
+
+      response = https_apps_client.workstation_snapshot(
+        params[:id],
+        auth_code,
+        api_key,
+        params[:name],
+        params[:terminate],
+      )
+      render json: response
+    rescue StandardError => e
+      raise ApiError, e.message
+    end
+
+    # PATCH /api/jobs/:id/sync_files
     # Trigger files sync from a running workstation
+    # The :id used should be the job's dxid
     def sync_files
       service = Jobs::SyncFilesService.call(params[:id], @context)
       raise ApiError, service.message unless service.success?
@@ -255,6 +319,15 @@ module Api
     end
 
     private
+
+    # Default to reverse chronological order unless overriden by params
+    def order_params
+      if params[:order_by]
+        order_from_params
+      else
+        { created_at: Sortable::DIRECTION_DESC }
+      end
+    end
 
     # A common method for apps list json rendering.
     # Added a virtual attribute `current_user` - to use in serializer

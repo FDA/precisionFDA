@@ -7,6 +7,7 @@ class CliSpaceSerializer < ApplicationSerializer
     :type,
     :role,
     :side,
+    :protected,
   )
 
   attribute :space_type, key: :type
@@ -18,6 +19,12 @@ class CliSpaceSerializer < ApplicationSerializer
   # @return [String] Formatted time.
   def created_at
     formatted_time(object.created_at)
+  end
+
+  def space_type
+    return object.space_type if object.space_type != "private_type"
+
+    "private"
   end
 
   # Returns formatted updated_at time.

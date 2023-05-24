@@ -16,11 +16,12 @@ import {
   FILE_STI_TYPE,
   PARENT_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { SyncJobOperation } from '@pfda/https-apps-shared/src/domain/job'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SyncJobOperation } from '@pfda/https-apps-shared/src/domain/job'
 import { errorsFactory } from '../utils/errors-factory'
+import { NOTIFICATION_ACTION, SEVERITY } from '@pfda/https-apps-shared/src/enums'
 
 describe('SyncJobOperation BullJobId', () => {
   it('creates correct bullJob ids', async () => {
@@ -40,7 +41,7 @@ const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SYNC_JOB_STATUS,
@@ -58,7 +59,7 @@ describe('TASK: sync_job_status', () => {
     // probably not needed
     // await emptyDefaultQueue()
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     app = create.appHelper.createHTTPS(em, { user })
@@ -94,6 +95,9 @@ describe('TASK: sync_job_status', () => {
       { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
     )
     expect(fakes.client.jobDescribeFake.calledOnce).to.be.true()
+
+    // Check no notification
+    expect(fakes.notificationService.createNotification.callCount).to.equal(0)
   })
 
   it('does not call the platform API stub (db job state is terminated)', async () => {
@@ -110,6 +114,9 @@ describe('TASK: sync_job_status', () => {
     expect(fakes.client.jobDescribeFake.notCalled).to.be.true()
     expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
     expect(fakes.queue.createSyncWorkstationFilesTask.notCalled).to.be.true()
+
+    // Check no notification
+    expect(fakes.notificationService.createNotification.callCount).to.equal(0)
   })
 
   it('does not change our DB, local and remote state are the same', async () => {
@@ -172,6 +179,14 @@ describe('TASK: sync_job_status', () => {
 
     // Check workstation sync job is queued
     expect(fakes.queue.createSyncWorkstationFilesTask.calledOnce).to.be.true()
+
+    // Check notification
+    expect(fakes.notificationService.createNotification.callCount).to.equal(1)
+    const notificationArg = fakes.notificationService.createNotification.args[0][0]
+    expect(notificationArg.action).to.equal(NOTIFICATION_ACTION.JOB_TERMINATED)
+    expect(notificationArg.severity).to.equal(SEVERITY.INFO)
+    expect(notificationArg.meta.linkTitle).to.equal('View Execution')
+    expect(notificationArg.meta.linkUrl).to.include(job.uid)
   })
 
   it('sends a warning email to user if job is failed', async () => {
@@ -195,6 +210,14 @@ describe('TASK: sync_job_status', () => {
     expect(email).to.have.property('to', user.email)
     expect(email).to.have.property('subject', `Execution "${job.name}" failed`)
     expect(userCtx).to.have.property('id', user.id)
+
+    // Check notification
+    expect(fakes.notificationService.createNotification.callCount).to.equal(1)
+    const notificationArg = fakes.notificationService.createNotification.args[0][0]
+    expect(notificationArg.action).to.equal(NOTIFICATION_ACTION.JOB_FAILED)
+    expect(notificationArg.severity).to.equal(SEVERITY.ERROR)
+    expect(notificationArg.meta.linkTitle).to.equal('View Execution')
+    expect(notificationArg.meta.linkUrl).to.include(job.uid)
   })
 
   context('stale job', () => {
@@ -323,8 +346,8 @@ describe('TASK: sync_job_status', () => {
         project: job.project,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
-        parentFolderId: null,
-        scopedParentFolderId: null,
+        parentFolder: null,
+        scopedParentFolder: null,
         description: null,
         fileSize: FILES_DESC_RES.results[0].describe.size,
         name: FILES_DESC_RES.results[0].describe.name,

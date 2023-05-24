@@ -12,8 +12,14 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
-import { HintText, Row, StyledForm } from './styles'
-import { getSpaceTypeOptions, SPACE_TYPE_HINT, validationSchema } from './helpers'
+import { HintText, Row, CheckboxLabel, StyledForm } from './styles'
+import {
+  getSpaceTypeOptions,
+  SPACE_TYPE_HINT,
+  validationSchema,
+} from './helpers'
+import { Checkbox } from '../../../components/Checkbox'
+import { useConfirm } from '../../modal/useConfirm'
 
 interface SpaceCreateForm {
   space_type: ISpace['type']
@@ -25,11 +31,16 @@ interface SpaceCreateForm {
   sponsor_lead_dxuser: string | null
   review_lead_dxuser: string | null
   cts: string | null
+  protected: boolean | null
 }
 
-
 export interface ISpaceForm {
-  mutation: UseMutationResult<CreateSpaceResponse, unknown, CreateSpacePayload, unknown>
+  mutation: UseMutationResult<
+    CreateSpaceResponse,
+    unknown,
+    CreateSpacePayload,
+    unknown
+  >
   defaultValues?: Partial<SpaceCreateForm>
   isDuplicate?: boolean
 }
@@ -40,7 +51,6 @@ export const SpaceForm = ({
   isDuplicate = false,
 }: ISpaceForm) => {
   const user = useAuthUser()
-
   const isGovUser = user?.isGovUser || false
   const isAdmin = user?.isAdmin || false
   const isReviewAdmin = user?.review_space_admin || false
@@ -65,17 +75,25 @@ export const SpaceForm = ({
       review_lead_dxuser: '',
       sponsor_lead_dxuser: '',
       cts: null,
+      protected: null,
       ...defaultValues,
     },
   })
 
   useEffect(() => {
     const stype = watch().space_type
-    if (stype === 'private_type' || stype === 'government' || stype === 'administrator') {
-      setValue('host_lead_dxuser', null)
-      setValue('sponsor_lead_dxuser', null)
+    if (
+      stype === 'private_type' ||
+      stype === 'government' ||
+      stype === 'administrator'
+    ) {
       setValue('cts', null)
-      clearErrors(['host_lead_dxuser', 'sponsor_lead_dxuser', 'guest_lead_dxuser', 'cts'])
+      clearErrors([
+        'host_lead_dxuser',
+        'sponsor_lead_dxuser',
+        'guest_lead_dxuser',
+        'cts',
+      ])
     }
   }, [watch().space_type])
 
@@ -105,12 +123,29 @@ export const SpaceForm = ({
     mutation.mutateAsync(vals)
   }
 
+  const handleProtectedSelection = (event: any) => {
+    setValue('protected', event.target.checked)
+  }
+
   const isSubmitting = mutation.isLoading
 
-  const options = getSpaceTypeOptions({ isAdmin, isGovUser, isReviewAdmin, isDuplicate })
+  const options = getSpaceTypeOptions({
+    isAdmin,
+    isGovUser,
+    isReviewAdmin,
+    isDuplicate,
+  })
+
+  const {
+    open: openConfirmation,
+    Confirm: ConfirmSubmit,
+  } = useConfirm(
+    handleSubmit(onSubmit),
+    <div><b>The space you are about to create will be protected.</b><p>Are you sure you would like to continue?</p></div>,
+  )
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
+    <StyledForm>
       <FieldGroup label="Space type">
         <Controller
           name="space_type"
@@ -164,7 +199,6 @@ export const SpaceForm = ({
         <>
           <FieldGroup label="Host Lead" required>
             <InputText
-              label="Host Lead"
               {...register('host_lead_dxuser')}
               disabled={isSubmitting}
             />
@@ -176,7 +210,6 @@ export const SpaceForm = ({
           </FieldGroup>
           <FieldGroup label="Guest Lead" required>
             <InputText
-              label="Guest Lead"
               {...register('guest_lead_dxuser')}
               disabled={isSubmitting}
             />
@@ -193,7 +226,6 @@ export const SpaceForm = ({
         <>
           <FieldGroup label="Reviewer Lead" required>
             <InputText
-              label="Reviewer Lead"
               {...register('review_lead_dxuser')}
               disabled={isSubmitting}
             />
@@ -206,7 +238,6 @@ export const SpaceForm = ({
 
           <FieldGroup label="Sponsor Lead" required>
             <InputText
-              label="Sponsor Lead"
               {...register('sponsor_lead_dxuser')}
               disabled={isSubmitting}
             />
@@ -219,7 +250,6 @@ export const SpaceForm = ({
 
           <FieldGroup label="Center Tracking System #">
             <InputText
-              label="CTS"
               {...register('cts')}
               disabled={isSubmitting}
             />
@@ -241,15 +271,38 @@ export const SpaceForm = ({
         </>
       )}
 
+      {(watch().space_type === 'review' || watch().space_type === 'groups') && (
+        <FieldGroup>
+          <CheckboxLabel>
+            <Checkbox
+              {...register('protected')}
+              disabled={isSubmitting}
+              onChange={handleProtectedSelection}
+            />
+            Space Protection
+          </CheckboxLabel>
+          <HintText>
+            When enabled the space will be subject to the following restrictions:
+            <ul>
+              <li>Data in this space cannot be copied to My Home or Private Spaces, nor downloaded, except by a lead of the space.</li>
+              <li>Data in this space can only be copied to Spaces that also have protection enabled, and the copying user must be a lead member of both the source and destination spaces.</li>
+              <li>Space protection cannot be disabled for a Space or be turned off by any member, not even the leads.</li>
+            </ul>
+          </HintText>
+        </FieldGroup>
+      )}
+
       <Row>
         <ButtonSolidBlue
           disabled={Object.keys(errors).length > 0 || isSubmitting}
-          type="submit"
+          type="button"
+          onClick={getValues().protected ? openConfirmation: handleSubmit(onSubmit)}
         >
-          Save
+          Create Space
         </ButtonSolidBlue>
         {isSubmitting && <Loader />}
       </Row>
+      <ConfirmSubmit />
     </StyledForm>
   )
 }

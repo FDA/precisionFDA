@@ -9,13 +9,10 @@ AllCops:
   - 'chef/**/*'
   DisplayCopNames: true
   StyleGuideCopsOnly: false
-  TargetRubyVersion: 2.7.5
+  TargetRubyVersion: 3.2.2
 
 Bundler/OrderedGems:
   Enabled: false
-
-Gemspec/DateAssignment:
-  Enabled: true
 
 Gemspec/RequireMFA:
   Enabled: true
@@ -341,6 +338,9 @@ Metrics/BlockLength:
 
 Metrics/BlockNesting:
   Max: 3
+
+Metrics/ClassLength:
+  Max: 300
 
 Metrics/CyclomaticComplexity:
   Enabled: false

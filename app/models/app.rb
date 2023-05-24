@@ -56,7 +56,7 @@ class App < ApplicationRecord
   attr_accessor :current_user
 
   store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
-  store :internal, accessors: [ :ordered_assets, :packages, :code ], coder: JSON
+  store :internal, accessors: [ :ordered_assets, :packages, :code, :platform_tags ], coder: JSON
 
   acts_as_commentable
 
@@ -206,4 +206,18 @@ class App < ApplicationRecord
   end
 
   delegate :name, to: :app_series
+
+  # Workstation API support
+
+  def find_workstation_api_tag
+    internal["platform_tags"]&.select { |input| input.starts_with?("pfda_workstation_api") }&.first
+  end
+
+  def has_workstation_api
+    find_workstation_api_tag.present?
+  end
+
+  def workstation_api_version
+    return find_workstation_api_tag.split(":").last if has_workstation_api
+  end
 end

@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { colors } from '../../styles/theme'
 import { useNewsListQuery } from '../news/useNewsListQuery'
-import ExternalLink from '../../views/components/Controls/ExternalLink'
+import ExternalLink from '../../components/Controls/ExternalLink'
 
 
 export const StyledCondensedList = styled.div`
@@ -63,7 +63,7 @@ export const ExpertMeta = styled.div`
 `
 
 export const OverviewNewsList = ({ pick }: { pick?: number }) => {
-  const { data, isLoading } = useNewsListQuery({})
+  const { data, isLoading } = useNewsListQuery({ orderBy: 'isPublication' })
   if (isLoading) return <Loader displayInline />
   const newsList = pick ? data?.news_items?.slice(0, pick) : data?.news_items
 
@@ -73,7 +73,7 @@ export const OverviewNewsList = ({ pick }: { pick?: number }) => {
         <NewsItem key={n.id}>
           <Name>{n.title}</Name>
           <Info>
-            <div>{format(new Date(n.created_at), 'MMM dd, yyyy')}</div>
+            <div>{format(new Date(n.createdAt), 'MMM dd, yyyy')}</div>
             <ExternalLink to={n.link}>View &#x2192;</ExternalLink>
           </Info>
         </NewsItem>

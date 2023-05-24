@@ -59,6 +59,8 @@ class AssetService
         "(#{number_to_human_size(MAX_ASSET_SIZE)})"
     end
 
+    asset = nil
+
     Asset.transaction do
       asset = create(
         name: asset_name,
@@ -67,7 +69,9 @@ class AssetService
       )
 
       upload(asset.uid, asset_io)
+    end
 
+    unless asset.nil?
       close(asset.uid)
       asset
     end
@@ -159,13 +163,6 @@ class AssetService
 
   def close(uid)
     https_apps_client.file_close(uid)
-
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # asset = Asset.open.find_by!(user_id: context.user_id, uid: uid)
-    # api.call(asset.dxid, "close")
-    # asset.reload
-    # asset.update!(state: "closing") if asset.open?
-    # asset
   end
 
   # we need to wait until the asset becomes closed
@@ -237,7 +234,7 @@ class AssetService
   end
 
   def https_apps_client
-    @https_apps_client ||= HttpsAppsClient.new(context.token, User.find(context.user_id))
+    @https_apps_client ||= HttpsAppsClient.new
   end
 
   attr_reader :context

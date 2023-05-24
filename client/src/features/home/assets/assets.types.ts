@@ -1,3 +1,4 @@
+import { ServerScope } from "../types";
 import { FileStatus } from "../files/files.types";
 
 export enum AppActions {
@@ -83,6 +84,7 @@ export interface IAsset {
   } | string,
   explorers: number;
   featured: boolean;
+  scope: ServerScope;
   active: boolean;
   links: Links;
   tags: any[];

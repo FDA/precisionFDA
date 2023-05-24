@@ -59,8 +59,9 @@ export const ChallengeDescription = styled.p`
   color: ${theme.colors.textWhite};
   margin-top: ${theme.padding.contentMargin};
 `
-
-
+export const NoInfo = styled.div`
+  margin-bottom: 24px;
+`
 
 export const ChallengeStateLabel = styled.span<{timeStatus: TimeStatus}>`
   ${commonStyles.sectionHeading};

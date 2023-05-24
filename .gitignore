@@ -55,6 +55,7 @@ yarn-error.log
 
 # Ignore IDE files
 .idea/
+*.iml
 
 # Ignore application configuration
 /config/application.yml
@@ -90,3 +91,6 @@ vendor/cache
 # Commented out, as docker-compose symlink expected
 # More on the topic in the docs
 docker/docker-compose.yml
+
+# Bower components
+vendor/assets/bower_components/

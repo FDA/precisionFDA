@@ -8,22 +8,21 @@ import { InfoCircleIcon } from '../../components/icons/InfoCircleIcon'
 import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
 import { theme } from '../../styles/theme'
-import { generateKeyRequest } from './api'
-import { Modal } from '../modal'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
+import { generateKeyRequest } from './api'
 
-
-const StyledBody = styled.div`
-  padding: 12px;
-`
 const StyledButtonRow = styled.div`
   display: flex;
   justify-content: space-between;
+  padding: 12px 24px;
 `
 const InfoRow = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 16px;
+  padding: 12px 24px;
+  padding-bottom: 0;
 `
 
 const ExpirationInfo = styled.div`
@@ -36,7 +35,7 @@ const ExpirationInfo = styled.div`
 `
 
 const StyledInput = styled.textarea`
-  margin: 0 0 16px 0;
+  margin: 0;
   padding: 8px;
   flex: 1 0 auto;
   font-family: ${theme.monofontFamily};
@@ -45,6 +44,10 @@ const StyledInput = styled.textarea`
   resize: none;
   box-sizing: border-box;
   font-size: 12.5px;
+`
+const ContentWrapper = styled.div`
+  padding: 12px 24px;
+  padding-bottom: 0;
 `
 
 const KeyLoader = styled.div`
@@ -61,36 +64,52 @@ const KeyLoader = styled.div`
   padding: 8px;
 `
 
-const GenerateKey = ({
-  handleClose,
-}: {
-  handleClose: () => void
-}) => {
+const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
   const { data, isLoading } = useQuery({
     queryKey: ['generate-key'],
     queryFn: generateKeyRequest,
     staleTime: 60000,
   })
-  
+
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  
+
   const copyToClipboard = () => {
     const val = inputRef.current?.value
-    if(val) {
+    if (val) {
       toast.success('The key has been copied into your clipboard.')
       navigator.clipboard.writeText(val)
     }
   }
 
   return (
-    <StyledBody>
-      {isLoading ? <KeyLoader><Loader /></KeyLoader> : <StyledInput ref={inputRef} disabled value={data?.Key} />}
-      <InfoRow><ExpirationInfo><InfoCircleIcon height={15} />This key will expire in 24 hours</ExpirationInfo><Link target="_blank" to="/docs/cli">CLI Documentation</Link></InfoRow>
+    <>
+      <ModalScroll>
+        <ContentWrapper>
+          {isLoading ? (
+            <KeyLoader>
+              <Loader />
+            </KeyLoader>
+          ) : (
+            <StyledInput ref={inputRef} disabled value={data?.Key} />
+          )}
+        </ContentWrapper>
+      </ModalScroll>
+      <InfoRow>
+        <ExpirationInfo>
+          <InfoCircleIcon height={15} />
+          This key will expire in 24 hours
+        </ExpirationInfo>
+        <Link target="_blank" to="/docs/cli">
+          CLI Documentation
+        </Link>
+      </InfoRow>
       <StyledButtonRow>
-        <ButtonSolidBlue onClick={copyToClipboard}>Copy to Clipboard</ButtonSolidBlue>
+        <ButtonSolidBlue onClick={copyToClipboard}>
+          Copy to Clipboard
+        </ButtonSolidBlue>
         <ButtonSolidBlue onClick={handleClose}>Close</ButtonSolidBlue>
       </StyledButtonRow>
-    </StyledBody>
+    </>
   )
 }
 
@@ -99,15 +118,18 @@ export const useGenerateKeyModal = () => {
   const handleClose = () => setShowModal(false)
 
   const modalComp = (
-    <Modal
+    <ModalNext
       id="generate-key"
       data-testid="generate-key"
-      headerText="CLI Authentication Key"
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
+      <ModalHeaderTop
+        headerText="CLI Authentication Key"
+        hide={() => setShowModal(false)}
+      />
       <GenerateKey handleClose={handleClose} />
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

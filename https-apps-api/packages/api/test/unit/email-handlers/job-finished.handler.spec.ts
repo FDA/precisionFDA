@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
-import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
+import { App, Job, NotificationPreference, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { EMAIL_CONFIG } from '@pfda/https-apps-shared/src/domain/email/email.config'
@@ -8,7 +8,6 @@ import { JobFinishedEmailHandler } from '@pfda/https-apps-shared/src/domain/emai
 import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { defaultLogger } from '@pfda/https-apps-shared/src/logger'
 import { database } from '@pfda/https-apps-shared'
-import { EmailNotification } from '@pfda/https-apps-shared/src/domain/email'
 
 describe('job-finished.handler', () => {
   let em: EntityManager
@@ -22,7 +21,7 @@ describe('job-finished.handler', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
@@ -35,7 +34,7 @@ describe('job-finished.handler', () => {
     await em.flush()
 
     ctx = {
-      em: database.orm().em.fork(true),
+      em: database.orm().em.fork(),
       log: defaultLogger,
       user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
     }
@@ -61,9 +60,9 @@ describe('job-finished.handler', () => {
     })
 
     it('applies owners notification settings', async () => {
-      const settingsEntity = new EmailNotification({ user })
+      const settingsEntity = new NotificationPreference(user)
       settingsEntity.data = { private_job_finished: false }
-      user.emailNotificationSettings = Reference.create(settingsEntity)
+      user.notificationPreference = Reference.create(settingsEntity)
       await em.flush()
       const input = { jobId: job.id }
       const handler = new JobFinishedEmailHandler(config.emailId, input, ctx)

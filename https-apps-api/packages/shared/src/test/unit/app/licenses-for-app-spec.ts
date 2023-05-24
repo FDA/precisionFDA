@@ -5,8 +5,8 @@ import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
 import P from 'pino'
 import { entities, license, User } from '../../../domain'
-import { PARENT_TYPE } from 'shared/src/domain/user-file/user-file.enum'
-import { UidInput } from 'shared/src/types'
+import { PARENT_TYPE } from '../../../domain/user-file/user-file.types'
+import { UidInput } from '@pfda/https-apps-shared/src/types'
 
 describe('licenses for app\'s assets tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -16,7 +16,7 @@ describe('licenses for app\'s assets tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -59,7 +59,7 @@ describe('licenses for app\'s assets tests', () => {
     await em.flush()
 
     const op = new license.LicensesForAppOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -73,7 +73,7 @@ describe('licenses for app\'s assets tests', () => {
 
   it('fail for incorrect app id', async () => {
     const op = new license.LicensesForAppOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -81,7 +81,7 @@ describe('licenses for app\'s assets tests', () => {
     try {
       await op.execute({ uid: 'bullshit' })
       expect.fail('Operation is expected to fail')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to.equal('App not found ({ uid: \'bullshit\' })')
     }
   })
@@ -95,7 +95,7 @@ describe('licenses for app\'s assets tests', () => {
     await em.flush()
 
     const op = new license.LicensesForAppOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

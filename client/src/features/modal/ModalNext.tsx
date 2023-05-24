@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { PropsWithChildren } from 'react'
 import ReactDOM from 'react-dom'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { useKeyPress } from '../../hooks/useKeyPress'
@@ -14,11 +14,11 @@ import {
 export const ModalHeaderTop = ({
   hide,
   headerText,
-  disableClose,
+  disableClose = false,
 }: {
-  hide: () => void
-  headerText: string
-  disableClose: boolean
+  hide?: () => void
+  headerText?: string
+  disableClose?: boolean
 }) => {
   return (
     <HeaderTop>
@@ -41,18 +41,20 @@ export const ModalHeaderTop = ({
 export interface ModalNextProps {
   hide: () => void
   isShown: boolean
-  headerText: string
+  headerText?: string
   blur?: boolean
   disableClose?: boolean
+  id: string
 }
-const ModalComponent: FC<ModalNextProps> = ({
-  headerText,
-  hide,
-  children,
-  blur = false,
-  disableClose = false,
-  ...rest
-}) => {
+const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
+  const {
+    headerText,
+    hide,
+    children,
+    blur = false,
+    disableClose = false,
+    ...rest
+  } = props
   useKeyPress('Escape', () => hide())
   return (
     <>
@@ -64,13 +66,14 @@ const ModalComponent: FC<ModalNextProps> = ({
         role="dialog"
         {...rest}
       >
-        <StyledModal>{children}</StyledModal>
+        <StyledModal>
+          {children}
+        </StyledModal>
       </Wrapper>
     </>
   )
 }
 // eslint-disable-next-line react/destructuring-assignment
-export const ModalNext: FC<ModalNextProps> = props =>
-  props.isShown
-    ? ReactDOM.createPortal(<ModalComponent {...props} />, document.body)
-    : null
+export const ModalNext = ({ children, ...rest }: PropsWithChildren<ModalNextProps>) => rest.isShown
+  ? ReactDOM.createPortal(<ModalComponent {...rest}>{children}</ModalComponent>, document.body)
+  : null

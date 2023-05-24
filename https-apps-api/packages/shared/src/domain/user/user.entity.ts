@@ -12,9 +12,8 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { config } from '../../config'
-import { SpaceMembership } from '..'
+import { NewsItem, NotificationPreference, SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
-import { EmailNotification } from '../email'
 import { Job } from '../job/job.entity'
 import { Organization } from '../org'
 import { ExpertQuestion } from '../expert-question/expert-question.entity'
@@ -23,8 +22,6 @@ import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { ADMIN_GROUP_ROLES } from '../admin-group'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { UserRepository } from './user.repository'
-
-
 export enum USER_STATE {
   ENABLED = 0,
   LOCKED = 1,
@@ -86,10 +83,6 @@ export class User extends BaseEntity {
   @Property({ nullable: true })
   schemaVersion?: number
 
-  // TODO(samuel) refactor this into foreign key
-  @Property()
-  orgId: number
-
   @Property()
   firstName: string
 
@@ -140,11 +133,11 @@ export class User extends BaseEntity {
   organization!: IdentifiedReference<Organization>
 
   @OneToOne({
-    entity: () => EmailNotification,
+    entity: () => NotificationPreference,
     mappedBy: 'user',
     nullable: true,
     })
-  emailNotificationSettings: IdentifiedReference<EmailNotification>;
+  notificationPreference: IdentifiedReference<NotificationPreference>;
 
   [EntityRepositoryType]?: UserRepository
 
@@ -168,12 +161,17 @@ export class User extends BaseEntity {
     })
   adminMemberships = new Collection<AdminMembership>(this)
 
+  @OneToMany({
+    entity: () => NewsItem,
+    mappedBy: 'user',
+    })
+  newsItems = new Collection<NewsItem>(this)
 
-  constructor(org: Organization, emailNotificationSettings?: EmailNotification, expert?: Expert) {
+  constructor(org: Organization, notificationPreference?: NotificationPreference, expert?: Expert) {
     super()
     this.organization = Reference.create(org)
-    if (emailNotificationSettings) {
-      this.emailNotificationSettings = Reference.create(emailNotificationSettings)
+    if (notificationPreference) {
+      this.notificationPreference = Reference.create(notificationPreference)
     }
     if (expert) {
       this.expert = Reference.create(expert)
@@ -217,9 +215,7 @@ export class User extends BaseEntity {
           role: adminGroup,
         },
       },
-      populate: {
-        adminGroup: true,
-      },
+      populate: ['adminGroup'],
     })
 
     return siteAdminGroupMemberships.length > 0

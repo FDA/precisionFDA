@@ -29,6 +29,11 @@ export const StyledPagination = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: 5px;
+  font-size: 12px;
+
+  input, select, button {
+    font-size: 12px;
+  }
 `
 
 export const ItemsOf = styled.div`
@@ -140,7 +145,7 @@ export const Pagination = ({
             <option value="50">50</option>
             <option value="100">100</option>
           </StyledPerPageSelect>
-          Per Page
+          Per Page of {totalCount} Total Items
         </PerPage>
       )}
       <ButtonSolidBlue

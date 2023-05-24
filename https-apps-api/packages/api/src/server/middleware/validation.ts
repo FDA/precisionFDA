@@ -27,9 +27,10 @@ export const makeSchemaValidationMdw = (schema: SchemaWithSource, sanitizeInput?
 
   const sanitizeInputFn = sanitizeInput || (fields => fields)
 
-  return (ctx: Api.Ctx, next) => {
+  return (ctx: Api.Ctx, next: any) => {
     const results: AnyObject = {}
     Object.entries(validatorFunctions).forEach(([key, validationFn]) => {
+      // @ts-ignore
       results[key] = validationFn(ctx.request[key])
       // fixme: just a proof of concept
       if (key === 'query') {
@@ -98,7 +99,7 @@ function bindCtxArgument<SchemaT>(schema: SchemaT, ctx: Api.Ctx): SchemaT {
 // TODO(samuel) investigate how applying middleware can deep-merge ctx type definitions
 export const makeValidationMiddleware = <SchemaT extends any>(
   schema: SchemaT
-) => (ctx: Api.Ctx, next) => {
+) => (ctx: Api.Ctx, next: any) => {
   const { errors: caughtErrors } = utils.aggregateError.aggregateSchemaErrors(bindCtxArgument(schema, ctx))
   if (caughtErrors.length > 0) {
     throw utils.aggregateError.formatAggregatedError(

@@ -11,7 +11,7 @@ export const HOME_DATABASE_MYSQL_INSTANCE_VERSIONS = {
 
 export const HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS = {
   V_11_16: '11.16',
-  V_12_19: '12.19',
+  V_12_9: '12.9',
 }
 
 export const HOME_DATABASE_INSTANCE_CLASSES = [
@@ -124,8 +124,8 @@ export const versionsOptions = (engine: DatabaseEngineType | null, dxInstanceCla
           isDisabled: checkDisabledVersions(engine, dxInstanceClass),
         },
         {
-          value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_12_19,
-          label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_12_19,
+          value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_12_9,
+          label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_12_9,
           isDisabled: checkDisabledVersions(engine, dxInstanceClass),
         },
       ]

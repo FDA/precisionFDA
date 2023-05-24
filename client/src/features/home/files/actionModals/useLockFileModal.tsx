@@ -10,7 +10,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../../../utils/formatting'
+import { itemsCountString, pluralize } from '../../../../utils/formatting'
 import { lockFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 
@@ -79,13 +79,13 @@ export const useLockFileModal = ({
     // mutationKey: ['lock-files'],
     mutationFn: (ids: string[]) => lockFilesRequest(ids),
     onError: () => {
-      toast.error(`Error: Locking ${numberOfFilesToLock} files or folders.`)
+      toast.error(`Error: Locking ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize('folder', numberOfFilesToLock ?? 1)}.`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])
       queryClient.invalidateQueries(['counters'])
       setShowModal(false)
-      toast.success(`Locked ${numberOfFilesToLock} files or folders.`)
+      toast.success(`Locked ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize('folder', numberOfFilesToLock ?? 1)}.`)
       onSuccess()
     },
   })
@@ -94,7 +94,7 @@ export const useLockFileModal = ({
     mutation.mutateAsync(memoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       id="modal-files-lock"
       data-testid="modal-files-lock"

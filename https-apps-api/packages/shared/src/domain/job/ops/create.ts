@@ -15,8 +15,9 @@ import {
 import { createSyncJobStatusTask } from '../../../queue'
 import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject, UserOpsCtx } from '../../../types'
-import { UserFile } from '../..'
+import { Space, SpaceMembership, UserFile } from '../..'
 import { config } from '../../../config'
+import { getIdFromScopeName, getProjectDxid } from "../../space/space.helper";
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -29,7 +30,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     this.input = input
     this.jobInput = input.input ?? {}
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
     // whitelist https public apps
@@ -68,9 +69,25 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       this.inputFiles.push(file)
     }
 
-    this.projectId = userHelper.getProjectToRunApp(user)
+
+    if (input.scope === 'private') {
+      this.projectId = userHelper.getProjectToRunApp(user)
+    } else {
+      let spaceId = getIdFromScopeName(input.scope)
+      const space = await em.findOne(Space, {id: spaceId})
+      const membership = await em.findOne(SpaceMembership, {spaces: spaceId, user: user})
+      if (space == null || membership == null){
+        throw new errors.PermissionError("Unable to execute the app in selected context.",{
+          statusCode: 401
+        })
+      }
+      this.projectId = getProjectDxid(space, membership)
+    }
+
     this.instance =
-      this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
+    // @ts-ignore
+    this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
+        // @ts-ignore
         ? allowedInstanceTypes[this.input.instanceType]
         : DEFAULT_INSTANCE_TYPE
 
@@ -85,6 +102,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     await em.begin()
     let job: Job
     try {
+      // @ts-ignore
       job = repo.create({
         user: em.getReference(User, this.ctx.user.id),
         app: em.getReference(App, app.id),
@@ -96,11 +114,11 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         describe: JSON.stringify({}),
         scope: input.scope,
         entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-        runData: {
+        runData: JSON.stringify({
           run_instance_type: this.instance,
           run_inputs: runInputDb,
           run_outputs: {},
-        },
+        }),
         provenance: {},
         appSeriesId: app.appSeriesId,
         uid: `${newJobClientRes.id}-1`,
@@ -143,7 +161,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
   private getInputFieldNames(app: App): string[] {
     const inputSpec = this.getAppInputSpec(app)
     const inputSpecFieldNames = inputSpec.map(spec => spec.name)
-    const mandatorySpecFields = inputSpec.filter(spec => spec.optional === false)
+    const mandatorySpecFields = inputSpec.filter(spec => !spec.optional)
     const inputFieldNames = Object.keys(this.jobInput)
     // these are set in endpoint payload
     const presentInputFields = intersection(inputFieldNames, inputSpecFieldNames)
@@ -224,7 +242,6 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // shared payload here
     const payload: client.JobCreateParams = {
       project: this.projectId,
-      accessToken: this.ctx.user.accessToken,
       appId: app.dxid,
       systemRequirements: {
         '*': {

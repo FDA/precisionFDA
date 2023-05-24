@@ -16,7 +16,7 @@ export interface RunJobRequest {
   id: string // application id
   name: string // name of the job
   instance_type: string
-  space_id: string
+  scope: string
   inputs: {
     [key: string]: string | number | boolean,
   };
@@ -50,13 +50,12 @@ export async function fetchApp(uid: string): Promise<{ app: IApp, meta: any}> {
   return res
 }
 
-export async function fetchSelectableSpaces(uid: string): Promise<ISpace[]> {
-  return axios.get(`/api/apps/${uid}/selectable_spaces`).then(r => r.data)
+export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {
+  return axios.get(`/api/spaces/${id}/selectable_spaces`).then(r => r.data)
 }
 
 export async function fetchLicensesOnApp(uid: string): Promise<License[]> {
-  const res = await (await fetch(`/api/apps/${uid}/licenses_to_accept`)).json()
-  return res
+  return axios.get(`/api/apps/${uid}/licenses_to_accept`).then(r => r.data)
 }
 
 export async function fetchUserComputeInstances(): Promise<ComputeInstance[]> {

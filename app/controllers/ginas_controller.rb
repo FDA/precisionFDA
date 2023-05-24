@@ -2,7 +2,7 @@
 class GinasController < ApplicationController
   include ReverseProxy::Controller
 
-  GSRS_DEFAULT_URL = "http://localhost:9000".freeze
+  GSRS_DEFAULT_URL = "http://localhost:8080".freeze
   GSRS_HEADER_USER_NAME =
     ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME", "AUTHENTICATION_HEADER_NAME")
   GSRS_HEADER_USER_EMAIL =

@@ -1,5 +1,5 @@
 # App serializer.
-class AppSerializer < ApplicationSerializer
+class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLength
   attributes(
     :id,
     :uid,
@@ -12,9 +12,12 @@ class AppSerializer < ApplicationSerializer
     :created_at,
     :created_at_date_time,
     :updated_at,
+    :platform_tags,
+    :workstation_api_version,
     :location,
     :readme,
     :scope,
+    :forked_from,
     :revision,
     :app_series_id,
     :run_by_you,
@@ -30,6 +33,7 @@ class AppSerializer < ApplicationSerializer
   attribute :latest_revision, key: :latest_revision
   attribute :scope_id, key: :scope
   delegate :updated_at, to: :object
+  delegate :workstation_api_version, to: :object
 
   def scope_id
     object.scope
@@ -106,7 +110,8 @@ class AppSerializer < ApplicationSerializer
       # GET track single app
       links[:track] = track_path(id: object.uid)
       # GET /apps/:id/fork - fork a single app
-      links[:fork] = fork_app_path(object)
+      links[:fork] = fork_app_path(object) unless object.https?
+      links[:forked_from] = "/home/apps/#{object.forked_from}" if object.forked_from
       # POST export a single app to a docker container
       links[:export] = export_app_path(object)
       # GET cwl_export a single app to a cwl file

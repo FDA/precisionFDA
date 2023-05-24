@@ -31,7 +31,7 @@ const StyledLocked = styled.div<{ isLocked: boolean }>`
 `
 
 const isIncompleteFile = (state: IFile['state']) =>
-  state === 'open' || state === 'closing'
+  state === 'open' || state === 'closing' || state === 'removing'
 
 export const useFilesColumns = ({
   isAdmin = false,
@@ -94,7 +94,7 @@ export const useFilesColumns = ({
                       onClick={() => onFolderClick(node.id.toString())}
                     >
                       <FolderIcon height={14} />
-                      {node.locked && <LockIcon height={12} />}
+                      {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
                       {value}
                     </StyledNameCell>
                   )}
@@ -177,6 +177,7 @@ export const useFilesColumns = ({
         {
           Header: 'Created',
           accessor: 'created_at_date_time',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.created_at_date_time || 200,
         },

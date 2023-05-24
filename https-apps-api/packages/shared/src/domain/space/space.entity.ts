@@ -1,7 +1,7 @@
 import { Collection, Entity, EntityRepositoryType, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
-import { SPACE_TYPE, SPACE_STATE } from './space.enum'
+import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
 
@@ -39,6 +39,9 @@ export class Space extends BaseEntity {
 
   @Property()
   meta: string
+
+  @Property()
+  protected: boolean
 
   @ManyToMany(() => SpaceMembership, 'spaces', {
     pivotTable: 'space_memberships_spaces',

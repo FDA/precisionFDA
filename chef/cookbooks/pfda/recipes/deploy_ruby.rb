@@ -84,11 +84,21 @@ execute "Bundle gems" do
   # environment lazy { ENV.to_hash }
 end
 
+execute "Install bower dependencies" do
+  command %{
+    bower install
+  }
+
+  cwd app_dir
+  user node[:deploy_user]
+end
+
 template ::File.join(app_dir, "config", "database.yml") do
   source "database.erb"
   variables lazy {{
     rails_env: ENV.fetch("RAILS_ENV", "development"),
     config: node.run_state["ssm_params"]["app"]["database_config"] || {},
+    dbpool: node.run_state["ssm_params"]["app"]["environment"]["DB_POOL"] || 20,
     sslca: node[:mysql_rds_sslca_path],
   }}
   user node[:deploy_user]

@@ -11,16 +11,18 @@ import { maskAuthHeader } from '../utils/logging'
 import { OrgMembershipError } from '../errors'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import {
-  BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
+  CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
   FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams,
+  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams,
+  UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams, FileRemoveParams
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
   FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
   FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
-  WorkflowDescribeResponse, AppDescribeResponse
+  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse,
 } from './platform-client.responses'
+import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -33,17 +35,11 @@ export enum PlatformErrors {
 const defaultLog = getLogger('platform-client-logger')
 
 class PlatformClient {
-  // accessToken: string
+  accessToken: string
   log: Logger
 
-  // TODO: (PFDA-3847) Remove BaseParams and inject accessToken on creation of PlatformClient
-  // constructor(accessToken: string, logger?: Logger) {
-  //   this.accessToken = accessToken
-  //   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  //   this.log = logger ?? defaultLog
-  // }
-
-  constructor(logger?: Logger) {
+  constructor(accessToken: string, logger?: Logger) {
+    this.accessToken = accessToken
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     this.log = logger ?? defaultLog
   }
@@ -58,7 +54,6 @@ class PlatformClient {
       method: 'POST',
       data: { ...omit(['accessToken', 'appId'], params) },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -69,7 +64,6 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -83,19 +77,11 @@ class PlatformClient {
         name: params.newName,
       },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
-    try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
-  async removeFolderRec(params: RemoveFolderParams): Promise<ClassIdResponse> {
+  async folderRemove(params: RemoveFolderParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/removeFolder`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -104,7 +90,6 @@ class PlatformClient {
         recurse: true,
       },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -115,7 +100,6 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -124,6 +108,23 @@ class PlatformClient {
   // ----------------------
   //    F I L E S
   // ----------------------
+
+  /**
+   * Removes nodes specified by their ids. Works recursively and
+   * therefore contents of folders is removed as well.
+   *
+   * @param params ids of nodes that should be removed
+   * @returns
+   */
+  async fileRemove(params: FileRemoveParams): Promise<FileRemoveResponse> {
+    const url = `${config.platform.apiUrl}/${params.projectId}/removeObjects`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { objects: params.ids },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
 
   /**
    * Removes user from provided organization. Also revokes access to projects & apps associated with org.
@@ -137,7 +138,6 @@ class PlatformClient {
       // Need empty payload to pass platform validation
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -157,7 +157,6 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -193,7 +192,6 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -204,7 +202,7 @@ class PlatformClient {
    * the /system/findDataObjects call is very inefficient and can take a long time
    */
   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping: Starting) => this.fileStatesPaginated(params, nextMapping))
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping) => this.fileStatesPaginated(params, nextMapping))
   }
 
   private async filesListPaginated(
@@ -229,6 +227,8 @@ class PlatformClient {
       data.describe = {
         fields: {
           name: true,
+          created: true,
+          modified: true,
           size: true,
           state: true,
         },
@@ -241,13 +241,12 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping: Starting) => this.filesListPaginated(params, nextMapping))
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping) => this.filesListPaginated(params, nextMapping))
   }
 
   /**
@@ -266,7 +265,6 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -281,7 +279,6 @@ class PlatformClient {
       method: 'POST',
       data: { fields: { folders: true } },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -296,16 +293,8 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
-    try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async filesMoveToFolder(params: MoveFilesParams): Promise<ClassIdResponse> {
@@ -319,7 +308,6 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -337,7 +325,6 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
 
     return await this.sendRequest(options, url)
@@ -349,7 +336,6 @@ class PlatformClient {
       method: 'POST',
       data: { ...omit(['accessToken'], params) },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
 
     return await this.sendRequest(options, url)
@@ -361,7 +347,6 @@ class PlatformClient {
       method: 'POST',
       data: { ...omit(['accessToken', 'dxid'], params) },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
 
     return await this.sendRequest(options, url)
@@ -377,7 +362,6 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -392,7 +376,6 @@ class PlatformClient {
       method: 'POST',
       data: params.data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -407,7 +390,6 @@ class PlatformClient {
       method: 'POST',
       data: params.data,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -419,10 +401,10 @@ class PlatformClient {
       method: 'POST',
       data: params.data,
       url,
-      headers: this.setupHeaders(params.headers.accessToken),
     }
 
     try {
+      options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
@@ -442,10 +424,10 @@ class PlatformClient {
       method: 'POST',
       data: params.data,
       url,
-      headers: this.setupHeaders(params.headers.accessToken),
     }
 
     try {
+      options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
@@ -470,7 +452,7 @@ class PlatformClient {
  * @param {Space} space - used for project name, can be overriden by name param.
  * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
  */
-  async projectCreate(params): Promise<ClassIdResponse> {
+  async projectCreate(params: any): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/project/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -479,7 +461,6 @@ class PlatformClient {
         billTo: params.admin.user.getEntity().organization.getEntity().getDxOrg(),
       },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -491,7 +472,7 @@ class PlatformClient {
    *  @param {string} level - Permission level.
    *  @return [don't know yet]
   */
-  async projectInvite(params): Promise<{ id: string, state: string }> {
+  async projectInvite(params: any): Promise<{ id: string, state: string }> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/invite`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -503,18 +484,16 @@ class PlatformClient {
         suppressAllNotifications: true,
       },
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
 
-  async projectDescribe(params): Promise<any> {
+  async projectDescribe(params: any): Promise<any> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: params.body,
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -529,9 +508,7 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
-
     return await this.sendRequest(options, url)
   }
 
@@ -541,9 +518,7 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
-
     return await this.sendRequest(options, url)
   }
 
@@ -564,7 +539,6 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       url,
-      headers: this.setupHeaders(params.accessToken),
     }
     return await this.sendRequest(options, url)
   }
@@ -603,6 +577,7 @@ class PlatformClient {
 
   private async sendRequest(options: AxiosRequestConfig, url: string) {
     try {
+      options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
@@ -628,8 +603,8 @@ class PlatformClient {
     )
   }
 
-  private setupHeaders(accessToken: string): AnyObject {
-    return { authorization: `Bearer ${accessToken}` }
+  private setupHeaders(): AnyObject {
+    return { authorization: `Bearer ${this.accessToken}` }
   }
 
   private handleFailed(
@@ -691,6 +666,8 @@ class PlatformClient {
 
 export {
   PlatformClient,
+  IPlatformAuthClient,
+  PlatformAuthClient,
   JobDescribeResponse,
   JobCreateResponse,
   ListFilesResponse,

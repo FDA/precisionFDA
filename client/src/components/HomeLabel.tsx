@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import React from 'react'
 import styled from 'styled-components'
 import { colors } from '../styles/theme'
-import Icon from '../views/components/Icon'
+import Icon from './icons/FaIcon'
 
 const StyledHomeLabel = styled.span`
   font-size: 14px;

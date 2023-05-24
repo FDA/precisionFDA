@@ -6,11 +6,16 @@ import { ErrorMessage } from '@hookform/error-message'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
 import { InputText } from '../../../../components/InputText'
-import { Modal } from '../../../modal'
-import { ButtonRow, StyledForm } from '../../../modal/styles'
+import {
+  ButtonRow,
+  Footer,
+  StyledForm,
+  StyledModalScroll,
+} from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { editFileRequest } from '../files.api'
 import { IFile } from '../files.types'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 
 const EditFileInfoForm = ({
   file,
@@ -41,7 +46,7 @@ const EditFileInfoForm = ({
       fileId: string
     }) => editFileRequest(payload),
     onSuccess: res => {
-      if(res?.message?.type === 'error') {
+      if (res?.message?.type === 'error') {
         toast.error(`API Error: ${res.message.text}`)
       } else {
         queryClient.invalidateQueries(['files'])
@@ -56,7 +61,7 @@ const EditFileInfoForm = ({
   })
 
   const onSubmit = (vals: any) => {
-    editFileMutation.mutateAsync({
+    return editFileMutation.mutateAsync({
       name: vals.name,
       description: vals.description,
       fileId: file.uid,
@@ -64,40 +69,50 @@ const EditFileInfoForm = ({
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup>
-        <label>File Name</label>
-        <InputText
-          label="File Name"
-          {...register('name', { required: 'Name is required.' })}
-          placeholder="Enter name..."
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
-      </FieldGroup>
-      <FieldGroup>
-        <label>Description</label>
-        <InputText
-          label="Description"
-          {...register('description')}
-          placeholder="Enter description..."
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="description"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
-      </FieldGroup>
-      <ButtonRow>
-        <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-        <ButtonSolidBlue type="submit" disabled={isSubmitting}>Edit</ButtonSolidBlue>
-      </ButtonRow>
-    </StyledForm>
+    <>
+      <StyledModalScroll>
+        <StyledForm id="edit-file-form" onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <label>File Name</label>
+            <InputText
+              label="File Name"
+              {...register('name', { required: 'Name is required.' })}
+              placeholder="Enter name..."
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              errors={errors}
+              name="name"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Description</label>
+            <InputText
+              label="Description"
+              {...register('description')}
+              placeholder="Enter description..."
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              errors={errors}
+              name="description"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
+        </StyledForm>
+      </StyledModalScroll>
+      <Footer>
+        <ButtonRow>
+          <Button type="button" onClick={handleClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <ButtonSolidBlue type="submit" form="edit-file-form" disabled={isSubmitting}>
+            Edit
+          </ButtonSolidBlue>
+        </ButtonRow>
+      </Footer>
+    </>
   )
 }
 
@@ -107,15 +122,16 @@ export const useEditFileModal = (selectedItem: IFile) => {
   const handleClose = () => {
     setShowModal(false)
   }
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-files-edit"
       headerText="Edit file info"
       isShown={isShown}
       hide={handleClose}
     >
+      <ModalHeaderTop headerText="Edit file info" hide={handleClose} />
       <EditFileInfoForm file={selected} handleClose={handleClose} />
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

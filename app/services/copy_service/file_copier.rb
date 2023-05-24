@@ -68,7 +68,7 @@ class CopyService
     # @param folder_id [Integer] A folder ID.
     # @return [Hash] Folder attributes.
     def check_and_assign_folder(scope, folder_id)
-      return {} unless folder_id
+      return {} if folder_id.blank?
 
       folder = Folder.find(folder_id)
 

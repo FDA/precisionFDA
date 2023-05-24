@@ -10,7 +10,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString } from '../../../../utils/formatting'
+import { itemsCountString, pluralize } from '../../../../utils/formatting'
 import { LockUnlockActionType, fetchFilesDownloadList, lockUnlockFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
 
@@ -91,7 +91,7 @@ export const useLockUnlockFileModal = ({
     },
     onSuccess: () => {
       setShowModal(false)
-      toast.success(`${ActionTypeName[type]}ed ${numberOfFiles} files or folders.`)
+      toast.success(`${ActionTypeName[type]}ed ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)} or ${pluralize('folder', numberOfFiles ?? 1)}.`)
       if(onSuccess) onSuccess()
     },
   })
@@ -100,7 +100,7 @@ export const useLockUnlockFileModal = ({
     mutation.mutateAsync(memoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       id="modal-files-delete"
       data-testid="modal-files-delete"

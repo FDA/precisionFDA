@@ -344,7 +344,7 @@ class SubmissionsController < ApplicationController
 
     return if files.empty?
 
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(RequestContext.instance.token)
 
     api.project_invite(
       @context.user.private_files_project,

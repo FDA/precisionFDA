@@ -112,7 +112,7 @@ module Api
       end
 
       def api
-        @api ||= DIContainer.resolve("api.user")
+        @api ||= DNAnexusAPI.new(RequestContext.instance.token)
       end
 
       def can_change_membership?

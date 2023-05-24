@@ -3,11 +3,19 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   include Recaptcha::Adapters::ControllerMethods
   include RecaptchaHelper
 
+  GSRS_DEFAULT_URL = "http://localhost:8080".freeze
+  GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
+  GSRS_ENABLED = ENV.fetch("GSRS_ENABLED", false)
+  GSRS_HEADER_USER_NAME =
+    ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME", "AUTHENTICATION_HEADER_NAME")
+  GSRS_HEADER_USER_EMAIL =
+    ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME_EMAIL", "AUTHENTICATION_HEADER_NAME_EMAIL")
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
                                                index
                                                about
                                                terms
+                                               security
                                                login
                                                return_from_login
                                                request_access
@@ -24,7 +32,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
-  layout "react", only: %i(about index news terms)
+  layout "react", only: %i(about index news terms security)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -38,8 +46,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     @challenges = Challenge.all.order(start_at: :desc)
 
     @experts = Expert.public.order(created_at: :desc).limit(10) # TODO: filter by published ones only
-
-    @news_items = NewsItem.published.positioned
 
     @meta_appathon = MetaAppathon.active
     if @meta_appathon.present?
@@ -67,7 +73,17 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           end
         end
 
-        login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
+        api_with_user_token = DNAnexusAPI.new(RequestContext.instance.token)
+
+        login_tasks_processor = LoginTasksProcessor.new(
+          OrgService::LeaveOrgProcess.new(
+            api_with_user_token,
+            DNAnexusAPI.new(ADMIN_TOKEN),
+            DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI),
+            UserRemovalPolicy,
+            UnusedOrgnameGenerator.new(api_with_user_token),
+          ),
+        )
         login_tasks_processor.call(@context.user, @context.api)
       else
         @tutorials = [
@@ -130,6 +146,30 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
     end
 
+    if GSRS_ENABLED == true
+      session_key = http_request(
+        "#{GSRS_URL}/api/v1/whoami",
+        {},
+        Net::HTTP::Get::METHOD,
+        {},
+        {
+          GSRS_HEADER_USER_NAME => current_user.username,
+          GSRS_HEADER_USER_EMAIL => current_user.email,
+        },
+        true,
+      )
+
+      request_headers = {}
+      request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
+      http_request(
+        "#{GSRS_URL}/ginas/app/logout",
+        {},
+        Net::HTTP::Get::METHOD,
+        {},
+        request_headers,
+      )
+    end
+
     Session.where(key: session_id).delete_all
     DIContainer.shutdown
     reset_session
@@ -143,9 +183,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def terms; end
 
-  def news
-    @news_items = NewsItem.positioned.published
-  end
+  def security; end
 
   def presskit # rubocop:todo Metrics/MethodLength
     @images = [
@@ -332,7 +370,11 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       if Session.limit_reached?(user)
         flash[:error] = "You have reached a limit for login. You can use only #{SESSIONS_LIMIT} active sessions."
       else
-        redirect_url = params[:redirect_uri].presence || redirect_url
+        redirect_uri_value = params[:redirect_uri]
+        if redirect_uri_value.presence && Utils.valid_redirect_url?(redirect_uri_value)
+          redirect_url = redirect_uri_value
+        end
+
         Session.where(key: session_id).delete_all
         reset_session
         save_session(user.id, username, token, expiration_time, user.org_id)
@@ -347,11 +389,16 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def post_login_checks(user, token)
     # User logged in successfully, a good time to run user checkup with the new token
-    https_apps_client = HttpsAppsClient.new(token, user)
+    # N.B. We need to set RequestContext manually here because when return_from_login
+    #      is called there is no valid session yet
+    RequestContext.begin_request(user.id, user.dxuser, token)
+    https_apps_client = HttpsAppsClient.new
     https_apps_client.user_checkup
   rescue StandardError => e
     # Error in requesting a user checkup shouldn't interrupt the login process
     Rails.logger.error("Error requesting user checkup: #{e.message}")
+  ensure
+    RequestContext.end_request
   end
 
   def check_webapp
@@ -421,6 +468,9 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
     if verify_captcha_assessment(token, "registration")
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
+    else
+      render "_partials/_error", status: :unprocessable_entity, locals: { message: "Invalid captcha verification. If this issue persists, please contact precisionFDA support." }
+      return
     end
 
     render :request_access
@@ -656,6 +706,14 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     redirect_back(fallback_location: _space_path(space))
   end
 
+  # prints info about the usage of db connections in the pool
+  def db_stats
+    pool_stats = ActiveRecord::Base.connection_pool.stat
+
+    pool_stats[:pool_size_from_config] = Rails.configuration.database_configuration[Rails.env]["pool"]
+    render json: pool_stats
+  end
+
   private
 
   def oauth2_redirect_url
@@ -737,6 +795,75 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       },
     }
     Auditor.perform_audit(data)
+  end
+
+  # rubocop:disable Metrics/ParameterLists
+  def http_request(
+    uri,
+    body = {},
+    method_name = Net::HTTP::Post::METHOD,
+    additional_query = {},
+    additional_headers = {},
+    extract_gsrs_session_key = false
+  )
+
+    query = auth_query.merge(additional_query).to_query
+    uri = URI("#{uri}?#{query}")
+    use_ssl = uri.scheme == "https"
+
+    conn_opts = connection_opts.merge(use_ssl: use_ssl)
+    conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if use_ssl
+
+    Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
+      handle_response(
+        http.send_request(
+          method_name,
+          uri.request_uri,
+          body.to_json,
+          headers.merge(additional_headers),
+        ),
+        extract_gsrs_session_key,
+      )
+    end
+  rescue Errno::ECONNREFUSED
+    raise Error, "Can't connect to GSRS service"
+  end
+  # rubocop:enable Metrics/ParameterLists
+
+  # Returns connection options.
+  # @return [Hash] Connection options.
+  def connection_opts
+    @connection_opts ||= { read_timeout: 120 }
+  end
+
+  def auth_query
+    {
+      id: @user&.id,
+      dxuser: @user&.dxuser,
+      accessToken: @token,
+    }.compact_blank
+  end
+
+  # Returns HTTP headers to be sent during every request.
+  # @return [Hash] Headers to be sent.
+  def headers
+    @headers ||= { "Content-Type" => "application/json" }
+  end
+
+  def handle_response(response, extract_gsrs_session_key)
+    if extract_gsrs_session_key
+      response["set-cookie"].scan(/ix.session=(.*?);/)
+    else
+      response.value
+      parsed = JSON.parse(response.body || "")
+      parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    end
+  rescue JSON::ParserError
+    response.body
+  rescue Net::HTTPClientException
+    raise Error, response
+  rescue StandardError
+    raise Error, "Something went wrong"
   end
 end
 # rubocop:enable Style/Documentation

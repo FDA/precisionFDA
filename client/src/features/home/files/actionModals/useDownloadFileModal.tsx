@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useMemo } from 'react'
+import styled from 'styled-components'
 import { Button } from '../../../../components/Button'
 import { DownloadIcon } from '../../../../components/icons/DownloadIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
@@ -9,10 +10,15 @@ import {
   StyledAction,
   StyledNameWithoutLink,
 } from '../../../../components/ResourceTable'
-import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
 import { itemsCountString } from '../../../../utils/formatting'
 import { IFile } from '../files.types'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
+
+const StyledResourceTable = styled(ResourceTable)`
+  padding-left: 12px;
+`
 
 export const useDownloadFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
@@ -25,16 +31,23 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-files-download"
       headerText={`Download ${itemsCountString('file', momoSelected.length)}?`}
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
-      footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}
     >
-      <ResourceTable
-        rows={momoSelected.map((s, i) => ({
+      <ModalHeaderTop
+        headerText={`Download ${itemsCountString(
+          'file',
+          momoSelected.length,
+        )}?`}
+        hide={() => setShowModal(false)}
+      />
+      <ModalScroll>
+        <StyledResourceTable
+          rows={momoSelected.map((s, i) => ({
             name: (
               <StyledNameWithoutLink key={`${i}-name`}>
                 <VerticalCenter>
@@ -53,8 +66,14 @@ export const useDownloadFileModal = (selectedFiles: IFile[]) => {
               </StyledAction>
             ),
           }))}
-      />
-    </Modal>
+        />
+      </ModalScroll>
+      <Footer>
+        <ButtonRow>
+          <Button onClick={() => setShowModal(false)}>Cancel</Button>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

@@ -267,6 +267,6 @@ class FolderService # rubocop:disable Metrics/ClassLength
   end
 
   def nodejs_api_client
-    @nodejs_api_client ||= HttpsAppsClient.new(context.token, context.user)
+    @nodejs_api_client ||= HttpsAppsClient.new
   end
 end

@@ -263,12 +263,12 @@ class AppsController < ApplicationController
 
     @app = App.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
-    if @app.nil?
+    if @app.nil? || @app.https?
       flash[:error] = I18n.t("app_fork_forbidden")
       redirect_to apps_path && return
     end
 
-    attrs = %i(dxid name title version revision readme spec internal release entity_type)
+    attrs = %i(dxid name title version revision readme spec internal release entity_type uid)
     js(
       app: @app.slice(*attrs),
       ubuntu_releases: UBUNTU_RELEASES,
@@ -320,9 +320,11 @@ class AppsController < ApplicationController
       fail "Asset licenses must be accepted"
     end
 
+    # can be 'space-{ID}' or 'private'
+    scope = unsafe_params[:scope]
+
     # Call JupiterLab service if https app is running
     if @app.https?
-      https_apps_client = DIContainer.resolve("https_apps_client")
       input_info = input_spec_preparer.run(@app, inputs)
 
       fail input_spec_preparer.first_error unless input_spec_preparer.valid?
@@ -334,7 +336,7 @@ class AppsController < ApplicationController
             name: name,
             instanceType: run_instance_type,
             jobLimit: job_limit,
-            scope: Scopes::SCOPE_PRIVATE,
+            scope: scope,
             input: input_info.run_inputs,
           )
         rescue HttpsAppsClient::Error => e
@@ -346,7 +348,7 @@ class AppsController < ApplicationController
       render(json: { id: job.uid }) && return
     end
 
-    space_id = unsafe_params[:space_id]
+    space_id = Space.scope_id(scope) if Space.valid_scope?(scope)
 
     fail "Invalid space_id" if space_id && !@app.can_run_in_space?(@context.user, space_id)
 
@@ -365,14 +367,19 @@ class AppsController < ApplicationController
       project = @context.user.private_files_project
     end
 
-    job = job_creator(project).create(
-      app: @app,
-      name: name,
-      input_info: input_info,
-      run_instance_type: run_instance_type,
-      job_limit: job_limit,
-      scope: space&.uid,
-    )
+    job =
+      begin
+        job_creator(project).create(
+          app: @app,
+          name: name,
+          input_info: input_info,
+          run_instance_type: run_instance_type,
+          job_limit: job_limit,
+          scope: space&.uid,
+        )
+      rescue DXClient::Errors::DXClientError => e
+        fail e.message
+      end
 
     SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space&.review?
     # rubocop:enable Style/SignalException

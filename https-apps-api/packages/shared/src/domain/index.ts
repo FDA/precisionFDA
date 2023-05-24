@@ -1,4 +1,5 @@
 import { App } from './app/app.entity'
+import { AppSeries } from './app-series'
 import { Workflow } from './workflow/workflow.entity'
 import { Comment } from './comment/comment.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
@@ -13,11 +14,11 @@ import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
 import { Node } from './user-file/node.entity'
+import { Notification } from './notification/notification.entity'
 import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
 import { Event } from './event/event.entity'
 import { Organization } from './org/org.entity'
-import { EmailNotification } from './email/email-notification.entity'
 import { SpaceEvent } from './space-event/space-event.entity'
 import { Space } from './space/space.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
@@ -27,28 +28,36 @@ import { AdminGroup } from './admin-group/admin-group.entity'
 import { AdminMembership } from './admin-membership/admin-membership.entity'
 import { ChallengeResource } from './challenge/challenge-resource.entity'
 import { Comparison } from './comparison/comparison.entity'
+import { NewsItem } from './news-item/news-item.entity'
+import { ComparisonInput } from './comparison-input/comparison-input.entity'
+import { NotificationPreference } from './notification-preference/notification-preference.entity'
+import { Session } from './session'
 
 const entities = {
   AcceptedLicense,
   AdminGroup,
   AdminMembership,
   App,
+  AppSeries,
   Workflow,
   Asset,
   Challenge,
   ChallengeResource,
   Comment,
   Comparison,
+  ComparisonInput,
   DbCluster,
-  EmailNotification,
   Event,
   Expert,
   ExpertAnswer,
   ExpertQuestion,
+  Notification,
+  NotificationPreference,
   Folder,
   Job,
   License,
   LicensedItem,
+  NewsItem,
   Node,
   Organization,
   Space,
@@ -58,6 +67,7 @@ const entities = {
   Tagging,
   User,
   UserFile,
+  Session,
 }
 
 export * as acceptedLicense from './accepted-license'
@@ -74,6 +84,8 @@ export * as job from './job'
 
 export * as license from './license'
 
+export * as notification from './notification'
+
 export * as user from './user'
 
 export * as tag from './tag'
@@ -87,6 +99,8 @@ export * as event from './event'
 export * as org from './org'
 
 export * as email from './email'
+
+export * as newsItem from './news-item'
 
 export * as comment from './comment'
 
@@ -105,20 +119,26 @@ export {
   AdminGroup,
   AdminMembership,
   App,
+  AppSeries,
   Workflow,
   Asset,
   Challenge,
   ChallengeResource,
   Comment,
   Comparison,
+  ComparisonInput,
   DbCluster,
+  Event,
   Expert,
   ExpertAnswer,
   ExpertQuestion,
+  Notification,
+  NotificationPreference,
   Folder,
   Job,
   License,
   LicensedItem,
+  NewsItem,
   Node,
   Organization,
   Space,
@@ -128,4 +148,5 @@ export {
   Tagging,
   User,
   UserFile,
+  Session,
 }

@@ -3,8 +3,8 @@ en:
     messages:
       format: has invalid format
       match: "does not match %{match_object} state"
-      non_empty_string: "Slot '%{name}': Each slot %{attribute}' must be a nonempty string."
-      array_of_hashes: "Slot '#{name}': Each slot %{attribute}' must be an array of hashes."
+      non_empty_string: "Slot '%{name}': Each slot %{attribute} must be a nonempty string."
+      array_of_hashes: "Slot '#{name}': Each slot %{attribute} must be an array of hashes."
   activemodel:
     errors:
       models:

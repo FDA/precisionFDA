@@ -23,6 +23,7 @@ class ApiController < ApplicationController
                   list_related
                   describe
                   search_assets
+                  cli_latest_version
                 )
   # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :require_api_login_or_guest,
@@ -259,7 +260,7 @@ class ApiController < ApplicationController
     page = params[:page].to_i.positive? ? params[:page] : 1
     files = user_real_files(params, @context).files_conditions
     begin
-      regexp = Regexp.new(params[:search_string], params[:flag])
+      regexp = Regexp.new(Regexp.escape(params[:search_string]), params[:flag])
       direction = params[:order_by_name]
 
       search_result = files.
@@ -312,8 +313,6 @@ class ApiController < ApplicationController
   # path (string): file_path of the file
   #
   def list_files
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # User.sync_files!(@context)
     files = user_real_files(params, @context)
 
     if unsafe_params[:limit] && unsafe_params[:offset]
@@ -541,16 +540,14 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_assets
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # Refresh state of assets, if needed
-    # User.sync_assets!(@context)
-
     ids = unsafe_params[:ids]
     assets = if unsafe_params[:editable]
       Asset.closed.editable_by(@context).accessible_by_private
     else
       Asset.closed.accessible_by(@context)
     end
+
+    assets = assets.limit(unsafe_params[:limit]) if unsafe_params[:limit]
 
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
@@ -620,6 +617,8 @@ class ApiController < ApplicationController
     tag_context = unsafe_params[:tag_context] # Optional
 
     taggable = item_from_uid(taggable_uid)
+
+    verify_nodes_for_protection([taggable], "set tags") if taggable.is_a?(UserFile)
 
     can_edit = false
     if Space.valid_scope?(taggable_uid)
@@ -759,7 +758,7 @@ class ApiController < ApplicationController
       parent = Job.find_by!(dxid: params[:parent_id])
     end
 
-    api = DIContainer.resolve("api.user")
+    api = DNAnexusAPI.new(RequestContext.instance.token)
     file_dxid = api.file_new(params[:name], project)["id"]
 
     file = UserFile.create!(
@@ -868,13 +867,6 @@ class ApiController < ApplicationController
       fail "Challenge resource cannot be modified by current user."
     end
 
-    # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-    # Refresh state of file, if needed
-    # if file.state != "closed"
-    #   User.sync_challenge_bot_files!(@context)
-    #   file.reload
-    # end
-
     if file.state != "closed"
       render json: {
         error: "Files can only be downloaded if they are in the 'closed' state",
@@ -901,18 +893,6 @@ class ApiController < ApplicationController
 
     # Allow assets as well, thought not currently exposed in the UI
     file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
-
-    # Refresh state of file, if needed
-    # if file.state != "closed"
-    #   if file.parent_type == "Asset"
-    #     User.sync_asset!(@context, file.id)
-    #   elsif file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-    #     User.sync_challenge_file!(file.id)
-    #   else
-    #     User.sync_file!(@context, file.id)
-    #   end
-    #   file.reload
-    # end
 
     if file.state != "closed"
       error = "Files can only be downloaded if they are in the 'closed' state"
@@ -991,32 +971,6 @@ class ApiController < ApplicationController
     id = unsafe_params[:id]
     result = https_apps_client.file_close(id)
     render json: result
-
-    # id = unsafe_params[:id]
-    # fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
-
-    # file = UserFile.where(parent_type: "User").find_by_uid!(id)
-    # token = @context.token
-    # if file.user_id != @context.user_id
-    #   have_access = file.created_by_challenge_bot? && current_user.site_or_challenge_admin?
-    #   raise "The current user does not have access to the file." unless have_access
-
-    #   token = CHALLENGE_BOT_TOKEN
-    # end
-
-    # if file.state == "open"
-    #   DNAnexusAPI.new(token).call(file.dxid, "close")
-    #   UserFile.transaction do
-    #     # Must recheck inside the transaction
-    #     file.reload
-    #     if file.state == "open"
-    #       file.state = "closing"
-    #       file.save!
-    #     end
-    #   end
-    # end
-
-    # render json: {}
   end
 
   # Inputs:
@@ -1030,16 +984,6 @@ class ApiController < ApplicationController
     id = unsafe_params[:id]
     result = https_apps_client.file_close(id)
     render json: result
-
-    # asset_uid = unsafe_params[:id]
-
-    # if !asset_uid.is_a?(String) || asset_uid.empty?
-    #   fail "id needs to be a non-empty String"
-    # end
-
-    # AssetService.close(@context, uid: asset_uid)
-
-    # render json: {}
   end
 
   # Inputs
@@ -1102,28 +1046,30 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # prefix (string, required): the prefix to search for
+  # keyword (string, required): the keyword to search for
   #
   # Outputs:
   #
-  # uids (array:string): the matching asset uids
+  # the matching assets
   #
   def search_assets
-    prefix = unsafe_params[:prefix]
+    keyword = unsafe_params[:keyword]
 
-    if !prefix.is_a?(String) || prefix.size < 3
-      fail "Prefix should be a String of at least 3 characters"
+    fail "Prefix should be a String of at least 3 characters" if !keyword.is_a?(String) || keyword.size < 2
+
+    ids = Asset.closed.
+      accessible_by(@context).
+      with_search_keyword(keyword).
+      select(:uid).
+      distinct
+
+    assets = Asset.where(uid: ids).limit(unsafe_params[:limit])
+
+    result = assets.order(:name).map do |asset|
+      map_basic_asset(asset)
     end
 
-    assets = Asset.closed.
-      accessible_by(@context).
-      order(:name).
-      with_search_keyword(prefix).
-      select(:uid).
-      distinct.
-      limit(ASSETS_SEARCH_LIMIT)
-
-    render json: { uids: assets.map(&:uid) }
+    render json: result
   end
 
   # Use this to add multiple items of the same type to a note
@@ -1521,7 +1467,38 @@ class ApiController < ApplicationController
     render json: items, root: "items", adapter: :json, meta: { messages: messages }
   end
 
+  def cli_latest_version
+    res = https_apps_client.cli_latest_version
+    render json: res, adapter: :json
+  end
+
   protected
+
+  # Verifies that if nodes collection contains items that belong to Protected
+  # space current user has lead role in that space. Otherwise raises error for specified action.
+  # @param nodes [Array] array of nodes
+  # @param action action that the user is trying to perform (used for error message - delete, update)
+  def verify_nodes_for_protection(nodes, action)
+    nodes.each do |node|
+      next if verify_scope_for_protection(node.scope)
+
+      raise ApiError, "Only leads can #{action} files in Protected spaces."
+    end
+  end
+
+  # Verifies if given scope is Protected space and if it is the user
+  # must have lead role in that space
+  # @param scope scope id
+  # @return true if processing can continue, false if error has to be raised
+  def verify_scope_for_protection(scope)
+    return true unless scope.start_with?("space-")
+
+    space = Space.from_scope(scope)
+
+    return true unless space.protected
+
+    !space.leads.where(user_id: @context.user.id).empty?
+  end
 
   def check_scope!
     scopes = params[:scopes]
@@ -1538,13 +1515,13 @@ class ApiController < ApplicationController
 
   def validate_get_upload_url
     size = unsafe_params[:size]
-    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Fixnum)
+    fail "Parameter 'size' needs to be a Integer" unless size.is_a?(Integer)
 
     md5 = unsafe_params[:md5]
     fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
 
     index = unsafe_params[:index]
-    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Fixnum)
+    fail "Parameter 'index' needs to be a Integer" unless index.is_a?(Integer)
 
     id = unsafe_params[:id]
     if !id.is_a?(String) || id.empty?
@@ -1628,8 +1605,16 @@ class ApiController < ApplicationController
   end
   # rubocop:enable Metrics/MethodLength
 
-  def https_apps_client
-    DIContainer.resolve("https_apps_client")
-  end
   # rubocop:enable Style/SignalException
+
+  private
+
+  def map_basic_asset(object)
+    {
+      id: object.id,
+      uid: object.uid,
+      fa_class: view_context.fa_class(object),
+      title: object.prefix,
+    }
+  end
 end
