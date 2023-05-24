@@ -6,19 +6,47 @@ module Api
     skip_before_action :require_api_login
 
     def index
-      page = params[:page].presence || 1
-      year = params[:year] =~ /\A\d+\Z/ ? params[:year].to_i : nil
-
-      news_items = NewsItem.published.order(created_at: :desc).page(page)
-      news_items = news_items.where(Arel.sql("YEAR(created_at) = #{year}")) if year
-
+      params.permit!
+      news_items = https_apps_client.news_list(params)
       render json: news_items,
-             meta: pagination_dict(news_items),
              adapter: :json
     end
 
+    def all
+      params.permit!
+      news_items = https_apps_client.news_all(params)
+      render json: news_items
+    end
+
+    def show
+      params.permit(:id)
+      news_item = https_apps_client.news_show(params[:id])
+      render json: news_item
+    end
+
+    def delete
+      params.permit(:id)
+      news_item = https_apps_client.news_delete(params[:id])
+      render json: news_item
+    end
+
+    def create
+      params.permit!
+      https_apps_client.news_create(params[:news_item])
+    end
+
+    def edit
+      params.permit!
+      https_apps_client.news_edit(params[:id], params[:news_item])
+    end
+
+    def positions
+      params.permit!
+      https_apps_client.news_positions(params)
+    end
+
     def years
-      all_years = NewsItem.published.order(created_at: :desc).pluck(:created_at).map(&:year).uniq
+      all_years = https_apps_client.news_years
       render json: all_years
     end
   end

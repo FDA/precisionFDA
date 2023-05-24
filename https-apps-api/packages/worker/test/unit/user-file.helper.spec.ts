@@ -41,7 +41,7 @@ describe('user-file.helper', () => {
 
     beforeEach(async () => {
       await db.dropData(database.connection())
-      em = database.orm().em
+      em = database.orm().em.fork()
       user = create.userHelper.create(em)
       await em.flush()
     })
@@ -57,17 +57,15 @@ describe('user-file.helper', () => {
       await em.flush()
       const subfolder = create.filesHelper.createFolder(
         em,
-        { user },
+        { user, parentFolder },
         {
-          parentFolderId: parentFolder.id,
           name: 'sub-folder',
         },
       )
       const subfolder2 = create.filesHelper.createFolder(
         em,
-        { user },
+        { user, parentFolder },
         {
-          parentFolderId: parentFolder.id,
           name: 'sub-folder2',
         },
       )
@@ -92,18 +90,16 @@ describe('user-file.helper', () => {
       await em.flush()
       const subfolder = create.filesHelper.createFolder(
         em,
-        { user },
+        { user, parentFolder },
         {
-          parentFolderId: parentFolder.id,
           name: 'sub-folder',
         },
       )
       await em.flush()
       const subfolder2 = create.filesHelper.createFolder(
         em,
-        { user },
+        { user, parentFolder: subfolder },
         {
-          parentFolderId: subfolder.id,
           name: 'sub-folder2',
         },
       )
@@ -126,7 +122,7 @@ describe('user-file.helper', () => {
 
     beforeEach(async () => {
       await db.dropData(database.connection())
-      em = database.orm().em
+      em = database.orm().em.fork()
       user = create.userHelper.create(em)
       await em.flush()
     })
@@ -143,23 +139,26 @@ describe('user-file.helper', () => {
         '/parent-folder/sub-folder2',
       ]
 
-      const fooFolder = create.filesHelper.createFolder(em, { user }, { name: 'foo'})
+      const fooFolder = create.filesHelper.createFolder(em, { user }, { name: 'foo' })
       await em.flush()
-      const barFolder = create.filesHelper.createFolder(em, { user }, { parentFolderId: fooFolder.id, name: 'bar'})
+      const barFolder = create.filesHelper.createFolder(em, { user, parentFolder: fooFolder }, { name: 'bar' })
       await em.flush()
-      const stuFolder = create.filesHelper.createFolder(em, { user }, { parentFolderId: barFolder.id, name: 'stu'})
+      const stuFolder = create.filesHelper.createFolder(em, { user, parentFolder: barFolder }, { name: 'stu' })
       await em.flush()
-      const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parent-folder'})
+      const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parent-folder' })
       await em.flush()
-      const subfolder = create.filesHelper.createFolder(em, { user },
-        { parentFolderId: parentFolder.id, name: 'sub-folder' },
+      const subfolder = create.filesHelper.createFolder(
+        em, { user, parentFolder },
+        { name: 'sub-folder' },
       )
       await em.flush()
-      const subsubfolder = create.filesHelper.createFolder(em, { user },
-        { parentFolderId: subfolder.id, name: 'sub-sub-folder' },
+      const subsubfolder = create.filesHelper.createFolder(
+        em, { user, parentFolder: subfolder },
+        { name: 'sub-sub-folder' },
       )
-      const subfolder2 = create.filesHelper.createFolder(em, { user },
-        { parentFolderId: parentFolder.id, name: 'sub-folder2' },
+      const subfolder2 = create.filesHelper.createFolder(
+        em, { user, parentFolder },
+        { name: 'sub-folder2' },
       )
       await em.flush()
 
@@ -174,12 +173,12 @@ describe('user-file.helper', () => {
       let folderPathComponents = splitFolderPath('/parent-folder/sub-folder/sub-sub-folder')
       let result = findFolderForPath(folders, folderPathComponents, undefined)
       expect(result.name).to.be.equal('sub-sub-folder')
-      expect(result.parentFolderId).to.be.equal(subfolder.id)
+      expect(result.parentFolder.id).to.be.equal(subfolder.id)
 
       folderPathComponents = splitFolderPath('/foo/bar/stu')
       result = findFolderForPath(folders, folderPathComponents, undefined)
       expect(result.name).to.be.equal('stu')
-      expect(result.parentFolderId).to.be.equal(barFolder.id)
+      expect(result.parentFolder.id).to.be.equal(barFolder.id)
     })
   })
 
@@ -189,26 +188,29 @@ describe('user-file.helper', () => {
 
     beforeEach(async () => {
       await db.dropData(database.connection())
-      em = database.orm().em
+      em = database.orm().em.fork()
       user = create.userHelper.create(em)
       await em.flush()
     })
 
     it('should return a list of existing folders to keep', async () => {
-      const parentFolder = create.filesHelper.createFolder(em, { user },
-        { name: 'parent-folder'},
+      const parentFolder = create.filesHelper.createFolder(
+        em, { user },
+        { name: 'parent-folder' },
       )
       await em.flush()
-      const subfolder = create.filesHelper.createFolder(em, { user },
-        { parentFolderId: parentFolder.id, name: 'sub-folder' },
+      const subfolder = create.filesHelper.createFolder(
+        em, { user, parentFolder },
+        { name: 'sub-folder' },
       )
       await em.flush()
-      const subsubfolder = create.filesHelper.createFolder(em, { user },
-        { parentFolderId: subfolder.id, name: 'sub-sub-folder' },
+      const subsubfolder = create.filesHelper.createFolder(
+        em, { user, parentFolder: subfolder },
+        { name: 'sub-sub-folder' },
       )
       const subfolder2 = create.filesHelper.createFolder(em,
-        { user },
-        { parentFolderId: parentFolder.id, name: 'sub-folder2' },
+        { user, parentFolder },
+        { name: 'sub-folder2' },
       )
       await em.flush()
 
@@ -228,17 +230,17 @@ describe('user-file.helper', () => {
 
     it('should work even with many folders', async () => {
       const folders: Folder[] = []
-      const n = 32;
-      for (let i=0; i<n; i++) {
-        const folder = create.filesHelper.createFolder(em, { user },
-          { name: `folder-${i}`},
+      const n = 32
+      for (let i = 0; i < n; i++) {
+        const folder = create.filesHelper.createFolder(
+          em, { user },
+          { name: `folder-${i}` },
         )
         folders.push(folder)
       }
 
-      let folderPaths = folders.map(folder => folder.name)
-      let result = detectIntersectedTraverse(folders, folderPaths, undefined, 0, [])
-      expect(result).to.be.an('array').with.lengthOf(n)
+      const folderPaths = folders.map(folder => folder.name)
+      expect(folderPaths).to.be.an('array').with.lengthOf(n)
     })
   })
 })

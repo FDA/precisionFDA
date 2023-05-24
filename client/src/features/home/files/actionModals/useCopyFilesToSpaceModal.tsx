@@ -1,14 +1,17 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
+import styled from 'styled-components'
 import { useImmer } from 'use-immer'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryParam } from 'use-query-params'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
-import { Modal } from '../../../modal'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll, StyledModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
+import { addData } from '../../../spaces/spaces.api'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
-import { addData } from '../../../spaces/spaces.api'
-import { useQueryParam } from 'use-query-params'
+
 
 interface CustomDataNode extends DataNode {
   uid?: string
@@ -37,7 +40,12 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   ])
   const { mutateAsync, isLoading } = useMutation({
     mutationKey: ['copy-files-to-space-add'],
-    mutationFn: () => addData({ spaceId: spaceId || '', folderId: folderId || '', uids: selectedFiles }),
+    mutationFn: () =>
+      addData({
+        spaceId: spaceId || '',
+        folderId: folderId || '',
+        uids: selectedFiles,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])
       setShowModal(false)
@@ -45,7 +53,9 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   })
 
   const onFileCheck = (checkedKeys: string[]) => {
-    const uids = checkedKeys.map(c => findById(treeData, c).uid).filter(i => typeof i ==='string') as string[]
+    const uids = checkedKeys
+      .map(c => findById(treeData, c).uid)
+      .filter(i => typeof i === 'string') as string[]
     setSelectedFiles(uids)
   }
 
@@ -73,16 +83,29 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
     })
   }
 
-
-
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-files-add-to-space"
       headerText="Add Files To Space"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
-        <>
+    >
+      <ModalHeaderTop
+        headerText="Add Files To Space"
+        hide={() => setShowModal(false)}
+      />
+      <StyledModalScroll>
+        <FileTree
+          onExpand={() => {}}
+          loadData={loadData}
+          checkable
+          selectable={false}
+          treeData={treeData}
+          onCheck={onFileCheck as any}
+        />
+      </StyledModalScroll>
+      <Footer>
+        <ButtonRow>
           <Button
             type="button"
             onClick={() => setShowModal(false)}
@@ -97,18 +120,9 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
           >
             Add
           </ButtonSolidBlue>
-        </>
-      }
-    >
-      <FileTree
-        onExpand={() => {}}
-        loadData={loadData}
-        checkable
-        selectable={false}
-        treeData={treeData}
-        onCheck={onFileCheck as any}
-      />
-    </Modal>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

@@ -48,7 +48,6 @@ module SpaceService
         create_site_admin_invitations_to_space(space, site_admins) if space.administrator?
       end
 
-      send_invitation_emails_to_site_admins(space, site_admins) if space.administrator?
       send_emails(space) unless space.private_type?
 
       space
@@ -70,8 +69,8 @@ module SpaceService
         # rubocop:disable Layout/LineLength
         Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
                           " with admin membership #{admin_membership.id}")
-        SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
-        NotificationsMailer.space_activated_email(space, admin_membership).deliver_later!
+        new_membership = SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
+        NotificationsMailer.space_activated_email(space, new_membership).deliver_later!
         # rubocop:enable Layout/LineLength
       end
     end
@@ -87,9 +86,11 @@ module SpaceService
 
       admin_membership = space.space_memberships.find_by(user: host_lead)
 
-      site_admins.each do |site_admin|
-        membership = space.space_memberships.active.where(user_id: site_admin.id).first
-        SpaceEventService.call(space.id, admin_membership.user_id, admin_membership, membership, :membership_added)
+      fork do
+        site_admins.each do |site_admin|
+          membership = space.space_memberships.active.where(user_id: site_admin.id).first
+          SpaceEventService.call(space.id, admin_membership.user_id, admin_membership, membership, :membership_added)
+        end
       end
     end
 
@@ -135,6 +136,7 @@ module SpaceService
         space_type: space_form.space_type,
         cts: space_form.cts,
         restrict_to_template: space_form.restrict_to_template,
+        protected: space_form.protected,
       )
     end
 
@@ -257,6 +259,7 @@ module SpaceService
         state: shared_space.state,
         host_dxorg: shared_space.host_dxorg,
         restrict_to_template: space_form.restrict_to_template,
+        protected: space_form.protected,
       )
 
       project_dxid = api.project_new(

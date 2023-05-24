@@ -28,7 +28,7 @@ describe('syncFilesInFolder operation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     job = create.jobHelper.create(em, { user })
     await em.flush()
@@ -62,10 +62,9 @@ describe('syncFilesInFolder operation', () => {
     const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
+      { user, parentFolder: folder },
       {
         name: 'b',
-        parentFolderId: folder.id,
         project,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
@@ -74,11 +73,10 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
         name: 'c',
         project,
-        parentFolderId: subfolder.id,
         dxid: firstFileDxid,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
@@ -111,10 +109,9 @@ describe('syncFilesInFolder operation', () => {
     const createdFileDesc = FILES_DESC_RES.results[1].describe
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
+      { user, parentFolder: folder },
       {
         name: 'b',
-        parentFolderId: folder.id,
         project,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
@@ -123,10 +120,9 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
         name: 'c',
-        parentFolderId: subfolder.id,
         project,
         dxid: firstFileDxid,
         parentId: job.id,
@@ -157,10 +153,9 @@ describe('syncFilesInFolder operation', () => {
     const createdFileDesc = FILES_DESC_RES.results[1].describe
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
+      { user, parentFolder: folder },
       {
         name: 'b',
-        parentFolderId: folder.id,
         project,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
@@ -169,10 +164,9 @@ describe('syncFilesInFolder operation', () => {
     await em.flush()
     const file = create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
         name: 'c',
-        parentFolderId: subfolder.id,
         project,
         dxid: firstFileDxid,
         parentId: job.id,
@@ -196,7 +190,7 @@ describe('syncFilesInFolder operation', () => {
     const res = await op.execute(input)
     expect(res.folderPath).to.equal('/a/b')
     expect(res.files.map(f => f.dxid)).to.have.members([createdFileDesc.id, file.dxid])
-    expect(res.files.map(f => f.parentFolderId)).to.have.members([subfolder.id, subfolder.id])
+    expect(res.files.map(f => f.parentFolder.id)).to.have.members([subfolder.id, subfolder.id])
     expect(fakes.client.filesListFake.calledOnce).to.be.true()
     expect(fakes.client.filesDescFake.notCalled).to.be.true()
   })
@@ -205,16 +199,15 @@ describe('syncFilesInFolder operation', () => {
     const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { name: 'b', project, parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { name: 'b', project },
     )
     await em.flush()
     create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
         name: 'c',
-        parentFolderId: subfolder.id,
         project,
         dxid: firstFileDxid,
         parentId: job.id,
@@ -237,17 +230,16 @@ describe('syncFilesInFolder operation', () => {
     const firstFileDxid = FILES_LIST_RES_ROOT[0].id
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { name: 'b', project, parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { name: 'b', project },
     )
     await em.flush()
     const file = create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
         name: 'c',
         project,
-        parentFolderId: subfolder.id,
         dxid: firstFileDxid,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
@@ -255,7 +247,7 @@ describe('syncFilesInFolder operation', () => {
     )
     await em.flush()
     const op = new userFile.SyncFilesInFolderOperation({
-      em: database.orm().em.fork(true),
+      em: database.orm().em.fork(),
       log,
       user: userCtx,
     })
@@ -279,7 +271,7 @@ describe('syncFilesInFolder operation', () => {
     const files = await em.find(UserFile, {}, { filters: ['userfile'] })
     expect(files).to.be.an('array').with.lengthOf(1)
     expect(files[0]).to.have.property('name', 'new-name')
-    expect(files[0]).to.have.property('parentFolderId', subfolder.id)
+    expect(files[0].parentFolder).to.have.property('id', subfolder.id)
   })
 
   it('deletes existing file and creates another', async () => {
@@ -287,8 +279,8 @@ describe('syncFilesInFolder operation', () => {
     const secondFileDxid = FILES_LIST_RES_ROOT[1].id
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { name: 'b', project, parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { name: 'b', project },
     )
     await em.flush()
     create.filesHelper.create(
@@ -296,7 +288,6 @@ describe('syncFilesInFolder operation', () => {
       { user },
       {
         name: 'c',
-        parentFolderId: subfolder.id,
         project,
         dxid: firstFileDxid,
         parentId: job.id,
@@ -378,7 +369,6 @@ describe('syncFilesInFolder operation', () => {
         name: 'a',
         project,
         dxid: firstFileDxid,
-        parentFolderId: folder.id,
         parentId: user.id,
         parentType: PARENT_TYPE.USER,
       },

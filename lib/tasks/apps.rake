@@ -1,10 +1,17 @@
 # rubocop:disable Metrics/BlockLength
 # rubocop:disable Metrics/MethodLength
-namespace :apps do
-  INSTANCE_TYPES = {
-    "baseline-4" => "mem1_ssd1_v2_x4",
-  }.freeze
 
+# For converting platform instance types to pFDA's internal name
+# which will later be mapped to the equivalent fedramp instance
+DX_INSTANCE_TYPES = {
+  "baseline-2" => "mem1_ssd1_v2_x2",
+  "baseline-4" => "mem1_ssd1_v2_x4",
+  "baseline-8" => "mem1_ssd1_v2_x8",
+  "baseline-16" => "mem1_ssd1_v2_x16",
+  "baseline-36" => "mem1_ssd1_v2_x36",
+}.freeze
+
+namespace :apps do
   def run(app_name)
     api = DNAnexusAPI.for_admin
 
@@ -15,6 +22,7 @@ namespace :apps do
     puts "Found the app with dxid #{app_dxid} on the Platform"
 
     app_info = api.app_describe(app_dxid)
+    applet_info = api.app_describe(app_info["applet"])
 
     created_by = User.find_by(dxuser: app_info["createdBy"].sub(/^user-/, "")) ||
                  ENV["CREATED_BY"].present? && User.find_by(dxuser: ENV["CREATED_BY"]) ||
@@ -39,7 +47,7 @@ namespace :apps do
       end
 
       instance_type = app_info.dig("runSpec", "systemRequirements").values.first["instanceType"]
-      baseline = INSTANCE_TYPES.invert[instance_type] || "baseline-4"
+      baseline = Job::INSTANCE_TYPES.invert[instance_type] || DX_INSTANCE_TYPES.invert[instance_type] || "baseline-2"
 
       internet_access = app_info.dig("access", "network").first == "*"
       release = app_info.dig("runSpec", "release")
@@ -108,6 +116,7 @@ namespace :apps do
         internet_access: internet_access,
         instance_type: baseline,
         ordered_assets: assets.map(&:uid),
+        platform_tags: applet_info["tags"],
         packages: packages,
         code: nil,
         assets: assets,

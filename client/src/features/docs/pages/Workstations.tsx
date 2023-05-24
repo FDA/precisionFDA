@@ -1,5 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
+import { Link } from 'react-router-dom'
+
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
 import { OutdatedDocs } from '../common'
 import runningworkstation from '../images/running_workstation.png'
@@ -114,31 +116,29 @@ export const Workstations = () => {
         <p>
           Workstations have full access to your private files in your
           precisionFDA cloud environment. You can interact with these files
-          using <code>dx</code> commands:
+          using <code>pFDA CLI</code> commands.
         </p>
-        <pre>dx ls dx download dx upload</pre>
         <p>
-          <code>dx ls</code> will show all files on your private precisionFDA
+          <code>./pfda ls</code> will show all files on your private precisionFDA
           area.
         </p>
         <p>
-          <code>dx download {'<$filename>'}</code> will download a file from
-          precisionFDA to the local worker. You may use an asterisk to indicate
-          multiple files.
+          <code>./pfda download {'<$file-id>'}</code> will download a file from
+          precisionFDA to the local worker. You may also use filename instead but it might not be unique.
         </p>
         <p>
-          <code>dx upload {'<$filename>'}</code> will upload a file from the
-          local worker to your precisionFDA private area. You may upload
-          multiple files using an asterisk.
+          <code>./pfda upload-file {'<$filename>'}</code> will upload a file from the
+          local worker to your precisionFDA private area.
         </p>
+
         <p>
-          <i>
-            NOTE: your files will not appear on precisionFDA until file syncing
-            occurs, which happens either by clicking the "Sync Now" button on
-            the Execution detail page, or automatically upon termination of the
-            Workstation execution.
-          </i>
+          To learn more about pFDA CLI capabilities,
+          please check our dedicated {' '}
+          <Link to="cli">
+            CLI docs
+          </Link>{' '} page.
         </p>
+
 
         <h2 id="workstation-snapshots">Creating snapshots on Workstations</h2>
 
@@ -156,9 +156,11 @@ export const Workstations = () => {
           instance and all files will be placed in the locations where they were
           located when the snapshot was created.
         </p>
-        <p>To take a snapshot in the TTYD Workstation, run the command:</p>
         <p>
-          <code>dx-create-snapshot</code>
+          To take a snapshot in the TTYD Workstation, navigate to the execution
+          page and click on the "Snapshot" button. You'll be given a default name
+          that you can override, and an option to terminate the workstation once
+          the snapshot has been created.
         </p>
         <p>
           To take a snapshot with the JupyterLab Workstation, click on the

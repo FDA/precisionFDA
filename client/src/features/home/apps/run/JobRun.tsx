@@ -15,9 +15,8 @@ import { InputText } from '../../../../components/InputText'
 import { EmptyTable } from '../../../../components/Table/styles'
 import { IUser } from '../../../../types/user'
 import { getSpaceIdFromScope } from '../../../../utils'
-import DefaultLayout from '../../../../views/layouts/DefaultLayout'
+import DefaultLayout from '../../../../layouts/DefaultLayout'
 import { useAuthUser } from '../../../auth/useAuthUser'
-import { ISpace, SPACE_TYPES } from '../../../spaces/spaces.types'
 import { fetchFile } from '../../files/files.api'
 import { IFile } from '../../files/files.types'
 import {
@@ -30,7 +29,6 @@ import { HomeLoader, NotFound, Title } from '../../show.styles'
 import {
   fetchApp,
   fetchLicensesOnApp,
-  fetchSelectableSpaces,
   fetchUserComputeInstances,
   runJob,
   RunJobRequest,
@@ -42,7 +40,7 @@ import {
   InputSpec,
   INPUT_TYPES_CLASSES,
   JobRunData,
-  ListedFile,
+  ListedFile, SelectType,
 } from '../apps.types'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
@@ -60,24 +58,7 @@ import {
   TopboxItem,
   WrapSelect,
 } from './styles'
-
-const getTitle = (space: ISpace): string => {
-  if (space.type === SPACE_TYPES.REVIEW) {
-    return space.spaceId
-      ? `${space.name} (Private Review)`
-      : `${space.name} (Shared Review)`
-  }
-  if (space.type === SPACE_TYPES.VERIFICATION) {
-    return `${space.name} (Verification)`
-  }
-  if (space.type === SPACE_TYPES.GROUPS) {
-    return `${space.name} (Group)`
-  }
-  if (space.type === SPACE_TYPES.PRIVATE_TYPE) {
-    return `${space.name} (Private)`
-  }
-  return space.name
-}
+import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 
 const convertToListedFile = (file: IFile): ListedFile =>
   ({
@@ -112,6 +93,7 @@ const prepareDefaultValues = (
     jobName: app ? app.name : '',
     jobLimit: user ? user.job_limit: 0,
     instanceType: defaultInstance,
+    scope: {label: "Private", value: "private"} as SelectType,
     inputs: {},
   }
   inputSpecs.forEach(inputSpec => {
@@ -173,7 +155,7 @@ const prepareValidations = (
       ),
     instanceType: Yup.object().nullable().required('Instance type is required'),
     inputs: Yup.object().shape(inputs),
-    spaceScope: spaceValidations,
+    scope: spaceValidations,
   }
 
   return Yup.object().shape(validationObject)
@@ -207,7 +189,10 @@ const createRequestObject = (
   const inputs: { [key: string]: string | number | boolean | undefined } = {}
 
   Object.keys(vals.inputs).forEach(key => {
-    inputs[key] = getValue(key, vals.inputs[key], inputSpecs)
+    const value = vals.inputs[key]
+    if (value) {
+      inputs[key] = getValue(key, value, inputSpecs)
+    }
   })
 
   return {
@@ -215,7 +200,7 @@ const createRequestObject = (
     name: vals.jobName,
     job_limit: vals.jobLimit,
     instance_type: vals.instanceType?.value,
-    space_id: vals.spaceScope?.value,
+    scope: vals.scope?.value,
     inputs,
   } as RunJobRequest
 }
@@ -231,23 +216,6 @@ const getLicensesToAccept = (
     license => !acceptedIds.includes(license.id.toString()),
   )
   return remainingLicenses
-}
-
-const fetchAndConvertSelectableSpaces = async (
-  appUid: string,
-): Promise<
-  {
-    isDisabled: boolean
-    label: string
-    value: string
-  }[]
-> => {
-  const spaces: ISpace[] = await fetchSelectableSpaces(appUid)
-  return spaces.map(space => ({
-    isDisabled: false,
-    label: getTitle(space),
-    value: space.id,
-  }))
 }
 
 const fetchLicensesOnFiles = (jobData: JobRunData): Promise<License[]> => {
@@ -285,9 +253,19 @@ const JobRun = ({
   const defaultValues = prepareDefaultValues(app, inputSpecs, user, meta, computeInstances, defaultFiles)
   const validationSchema = prepareValidations(inputSpecs, user, app.scope)
 
+  const { data: selectableContexts } = useQuery(
+      ['selectable-contexts', app.scope],
+      () => fetchAndConvertSelectableContexts(app.entity_type),
+      {
+        onError: () => {
+          toast.error('Error loading contexts')
+        },
+      },
+  )
+
   const { data: selectableSpaces } = useQuery(
-    ['selectable-spaces', app.uid],
-    () => fetchAndConvertSelectableSpaces(app.uid),
+    ['selectable-spaces', app.scope],
+    () => fetchAndConvertSelectableSpaces(app.scope),
     {
       onError: () => {
         toast.error('Error loading spaces')
@@ -311,17 +289,16 @@ const JobRun = ({
     defaultValues,
   })
 
-  
-
   const runJobMutation = useMutation({
     mutationFn: (payload: RunJobRequest) => runJob(payload),
     onSuccess: res => {
       if (res?.id) {
-        const spaceId = getValues().spaceScope?.value
-        if (spaceId) {
-          history.push(`/spaces/${spaceId}/executions/${res?.id}`)
-        } else {
+        const scope = getValues().scope?.value
+        if (scope === 'private') {
           history.push(`/home/jobs/${res?.id}`)
+        } else {
+          const spaceId = scope.replace("space-", "")
+          history.push(`/spaces/${spaceId}/executions/${res?.id}`)
         }
       } else if (res?.error) {
         toast.error(res.error.message)
@@ -337,21 +314,22 @@ const JobRun = ({
   const onSubmit = async () => {
     const valid = await trigger()
     if (valid) {
-      const r = await Promise.all([
-        fetchLicensesOnApp(app.uid),
-        fetchLicensesOnFiles(getValues()),
-      ])
+      try {
+        const r = await Promise.all([
+          fetchLicensesOnApp(app.uid),
+          fetchLicensesOnFiles(getValues()),
+        ])
 
-      const acceptedLicenses = await fetchAcceptedLicenses()
-      const licensesToAccept = getLicensesToAccept(
-        r.flat(),
-        acceptedLicenses,
-      )
-      if (licensesToAccept.length > 0) {
-        setLicensesAndShow(licensesToAccept, acceptedLicenses)
-      } else {
-        const req = createRequestObject(getValues(), app, inputSpecs)
-        await runJobMutation.mutateAsync(req)
+        const acceptedLicenses = await fetchAcceptedLicenses()
+        const licensesToAccept = getLicensesToAccept(r.flat(), acceptedLicenses)
+        if (licensesToAccept.length > 0) {
+          setLicensesAndShow(licensesToAccept, acceptedLicenses)
+        } else {
+          const req = createRequestObject(getValues(), app, inputSpecs)
+          await runJobMutation.mutateAsync(req)
+        }
+      } catch (e) {
+        toast.error('Failed to run app')
       }
     }
   }
@@ -413,11 +391,41 @@ const JobRun = ({
                   <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                 </FieldGroup>
               </StyledRow>
+              {app.entity_type === "https" && (
+                  <WrapSelect>
+                    <FieldGroup label="Context" required>
+                      <Controller
+                          name="scope"
+                          control={control}
+                          render={({ field }) => (
+                              <Select
+                                  options={selectableContexts}
+                                  placeholder="Choose..."
+                                  onChange={value => {
+                                    field.onChange(value)
+                                    field.onBlur()
+                                  }}
+                                  isClearable
+                                  isSearchable
+                                  onBlur={field.onBlur}
+                                  value={field.value}
+                                  isDisabled={isSubmitting}
+                              />
+                          )}
+                      />
+                      <ErrorMessageForField
+                          errors={errors}
+                          fieldName="scope"
+                      />
+                    </FieldGroup>
+                  </WrapSelect>
+              )
+              }
               {app.scope && app.scope.startsWith('space-') && (
                 <WrapSelect>
                   <FieldGroup label="Space scope" required>
                     <Controller
-                      name="spaceScope"
+                      name="scope"
                       control={control}
                       render={({ field }) => (
                         <Select
@@ -437,7 +445,7 @@ const JobRun = ({
                     />
                     <ErrorMessageForField
                       errors={errors}
-                      fieldName="spaceScope"
+                      fieldName="scope"
                     />
                   </FieldGroup>
                 </WrapSelect>
@@ -499,7 +507,6 @@ const JobRun = ({
           </Section>
         </AppsConfiguration>
         <ButtonSolidBlue
-          // disabled={Object.keys(errors).length > 0 || isSubmitting}
           disabled={isSubmitting}
           type="button"
           form="submitJobForm"

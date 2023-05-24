@@ -8,6 +8,8 @@ import { SPACE_TYPE } from '../space.enum'
 import { spaceActionPolicy } from '../space.action-policy'
 import { getOppositeOrgDxid, getOrgDxid, getProjectDxid, isAcceptedBy, setOrgDxid, setProjectDxid } from '../space.helper'
 import { errors } from '../../..'
+import { NotificationService } from '../../notification/services/notification.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 
 type SpaceAcceptInput = { spaceId: number }
 
@@ -20,7 +22,7 @@ void
   private em: EntityManager
 
   async run(input: SpaceAcceptInput): Promise<void> {
-    this.platformClient = new PlatformClient(this.ctx.log)
+    this.platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     this.em = this.ctx.em
 
     const userId = this.ctx.user.id
@@ -77,6 +79,18 @@ void
     })
     await this.em.flush()
 
+    const notificationService = new NotificationService(this.em)
+    const leads = space.spaceMemberships.getItems().filter(sm => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
+
+    // send notification to all leads
+    leads.forEach(lead => {
+      notificationService.createNotification({
+        message: `Space ${space.name} has been activated`,
+        severity: SEVERITY.INFO,
+        action: NOTIFICATION_ACTION.SPACE_ACTIVATED,
+        userId: lead.user.id,
+      })
+    })
     // TODO: notification email still on ruby side, missing template in node
   }
 
@@ -108,6 +122,7 @@ void
     }
     await this.handleSpaceAccept(space, admin)
     // accept as regular space + some extra logic for review space type
+    // @ts-ignore
     const newSpace = this.em.create(Space, {
       name: space.name,
       description: space.description,
@@ -115,13 +130,13 @@ void
       meta: space.meta,
       state: space.state,
       spaceId: space.id,
+      protected: space.protected,
     })
     await this.em.persistAndFlush(newSpace)
 
     const newProjectRes = await this.platformClient.projectCreate({
       name: `precisionfda-${newSpace.uid}-${SPACE_MEMBERSHIP_SIDE[admin.side]}-PRIVATE`,
       admin,
-      accessToken: this.ctx.user.accessToken,
     })
 
     const contributeOrg = getOrgDxid(space, admin)
@@ -132,7 +147,6 @@ void
       projectDxid: newProjectRes.id,
       invitee: contributeOrg,
       level: 'CONTRIBUTE',
-      accessToken: this.ctx.user.accessToken,
     })
 
     newSpace.spaceMemberships.add(admin)
@@ -142,7 +156,6 @@ void
     const newProjectRes = await this.platformClient.projectCreate({
       space,
       admin,
-      accessToken: this.ctx.user.accessToken,
     })
 
     const contributeOrg = getOrgDxid(space, admin)
@@ -153,14 +166,12 @@ void
       projectDxid: newProjectRes.id,
       invitee: contributeOrg,
       level: 'CONTRIBUTE',
-      accessToken: this.ctx.user.accessToken,
     })
 
     await this.platformClient.projectInvite({
       projectDxid: newProjectRes.id,
       invitee: oppositeOrg,
       level: 'CONTRIBUTE',
-      accessToken: this.ctx.user.accessToken,
     })
     // previously there was a call to project invite review_app_developers_org as well. Trying spaces without it.
 

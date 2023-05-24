@@ -23,7 +23,7 @@ export class UserRepository extends PaginatedEntityRepository<User> {
       {
         id: { $in: userIds },
       },
-      { populate: ['emailNotificationSettings'] },
+      { populate: ['notificationPreference'] },
     )
   }
 
@@ -101,9 +101,6 @@ export class UserRepository extends PaginatedEntityRepository<User> {
     })
 
     return Promise.allSettled(users.map(user => client.userResetMfa({
-      headers: {
-        accessToken: config.platform.adminUserAccessToken,
-      },
       dxid: `user-${userCtx.dxuser}`,
       data: {
         user_id: user.dxuser,
@@ -122,9 +119,6 @@ export class UserRepository extends PaginatedEntityRepository<User> {
       },
     })
     return Promise.allSettled(users.map(user => client.userUnlock({
-      headers: {
-        accessToken: config.platform.adminUserAccessToken,
-      },
       dxid: `user-${userCtx.dxuser}`,
       data: {
         user_id: user.dxuser,

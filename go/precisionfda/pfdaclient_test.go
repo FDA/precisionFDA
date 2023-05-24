@@ -53,7 +53,7 @@ func TestUploadFile(t *testing.T) {
 	defer server.Close()	// Close the server when test finishes
 
 	pfdaclient := NewPFDAClient(server.URL)
-	pfdaclient.UploadFile("./README.md", "", "")
+	pfdaclient.UploadFile("./README.md", "", "", true)
 }
 
 func TestUploadFileToSpace(t *testing.T) {

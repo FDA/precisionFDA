@@ -82,23 +82,12 @@ module Api
       render_apps_list(apps, page_meta)
     end
 
-    # GET /api/apps/:appId/selectable_spaces
-    # gets all selectable spaces for given App
-    # @return spaces [Space] Array of Space objects that can be selected for job
-    def selectable_spaces
-      app_id = unsafe_params[:app_id]
-      spaces = https_apps_client.selectable_spaces(app_id)
-      render json: spaces
-    rescue HttpsAppsClient::Error => e
-      response[:errors] << e.message
-    end
-
     # GET /api/apps/:appId/licenses_to_accept
-    # gets licenses to be accepted and licenses already accepted
+    # gets licenses to be accepted
     # @return object containing two arrays (licenses_to_accept and accepted_licenses)
     def licenses_to_accept
       app_id = unsafe_params[:app_id]
-      licenses = https_apps_client.licenses_to_accept(app_id)
+      licenses = https_apps_client.app_licenses_to_accept(app_id)
       render json: licenses
     rescue HttpsAppsClient::Error => e
       response[:errors] << e.message
@@ -255,21 +244,17 @@ module Api
 
     def import
       if presenter.valid?
-        app, asset = nil
+        asset = DockerImporter.import(
+          context: @context,
+          attached_image: unsafe_params[:attached_image],
+          docker_image: presenter.docker_image,
+        )
 
-        ActiveRecord::Base.transaction do
-          asset = DockerImporter.import(
-            context: @context,
-            attached_image: unsafe_params[:attached_image],
-            docker_image: presenter.docker_image,
-          )
+        presenter.asset = asset
 
-          presenter.asset = asset
+        opts = unsafe_params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
 
-          opts = unsafe_params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
-
-          app = create_app(opts)
-        end
+        app = create_app(opts)
 
         render json: { id: app.uid, asset_uid: asset.try(:uid) }
       else

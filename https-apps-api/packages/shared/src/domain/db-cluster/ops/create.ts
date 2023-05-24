@@ -17,7 +17,7 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
     this.input = input
     this.em = this.ctx.em
 
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const user = await this.em.findOne(User, { id: this.ctx.user.id })
 
@@ -28,7 +28,6 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
       = await platformClient.dbClusterDescribe({
         dxid: newDbClusterRes.id,
         project: input.project,
-        accessToken: this.ctx.user.accessToken,
       })
 
     const dbCluster: DbCluster = await this.persistDbCluster(describeDbClusterRes)
@@ -40,7 +39,6 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
 
   private buildCreateApiCall(): client.DbClusterCreateParams {
     const payload: client.DbClusterCreateParams = {
-      accessToken: this.ctx.user.accessToken,
       ...omit(['scope', 'description'], this.input),
     }
     return payload
@@ -52,16 +50,19 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
       dxid: describeDbClusterRes.id,
       uid: `${describeDbClusterRes.id}-1`,
       name: describeDbClusterRes.name,
+      // @ts-ignore
       status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
       project: describeDbClusterRes.project,
       dxInstanceClass: describeDbClusterRes.dxInstanceClass,
+      // @ts-ignore
       engine: ENGINE[invertObj(ENGINES)[describeDbClusterRes.engine]],
       engineVersion: describeDbClusterRes.engineVersion,
       host: describeDbClusterRes.endpoint,
       port: describeDbClusterRes.port,
       scope: this.input.scope,
       description: this.input.description,
-      statusAsOf: new Date(describeDbClusterRes.statusAsOf),
+      // @ts-ignore
+      statusAsOf: describeDbClusterRes.statusAsOf ? new Date(describeDbClusterRes.statusAsOf) : null,
     })
 
     await this.em.persistAndFlush(dbCluster)

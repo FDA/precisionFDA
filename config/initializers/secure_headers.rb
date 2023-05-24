@@ -14,6 +14,11 @@ SecureHeaders::Configuration.default do |config|
     child_src: %w('self' https://www.youtube.com blob:),
     connect_src: %w(
       'self'
+      wss://localhost:*
+      wss://precisionfda-dev.dnanexus.com
+      wss://precisionfda-staging.dnanexus.com
+      wss://precisionfda-staging.dnanexus.com
+      wss://precision.fda.gov
       https://dnanexus-platform-upload-prod.s3.amazonaws.com
       https://dnanexus-platform-upload-prod.s3-fips.us-east-1.amazonaws.com
       https://dnanexus-platform-upload-stg.s3.amazonaws.com
@@ -48,6 +53,14 @@ SecureHeaders::Configuration.default do |config|
       https://www.youtube.com
       https://s.ytimg.com
       https://dnanexus.github.io
+      https://www.recaptcha.net/recaptcha/
+      https://www.gstatic.com/recaptcha/
+    ),
+    script_src_elem: %w(
+      'self'
+      'unsafe-inline'
+      'unsafe-eval'
+      https://drugs.ncats.io
       https://www.recaptcha.net/recaptcha/
       https://www.gstatic.com/recaptcha/
     ),

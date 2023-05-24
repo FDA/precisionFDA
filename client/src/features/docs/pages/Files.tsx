@@ -108,7 +108,7 @@ export const Files = () => {
           uploading with multiple threads and more resilient to transient
           errors. The precisionFDA CLI can be used for both files and app
           assets, and it's available through the{' '}
-          <Link to="/assets/new">Create Assets</Link> page.
+          <Link to="/docs/cli">CLI docs</Link> page.
         </p>
 
         <p>
@@ -124,7 +124,7 @@ export const Files = () => {
           <strong>KEY</strong>. For your security, the key is valid for 24h.
         </p>
         <p>
-          Run <code>./pfda upload-file --key KEY --file /path/to/file</code>.
+          Run <code className="inline">./pfda upload-file --key KEY --file /path/to/file</code>.
           This command will upload the file to precisionFDA.
         </p>
         <DocsTip>

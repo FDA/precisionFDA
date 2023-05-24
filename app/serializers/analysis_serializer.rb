@@ -89,7 +89,8 @@ class AnalysisSerializer < ApplicationSerializer
   def jobs
     object.jobs.map do |job|
       job.current_user = logged_user
-      JobSerializer.new(job).serializable_hash
+      # JobSerializer.new(job).serializable_hash
+      SimpleJobSerializer.new(job).serializable_hash
     end
   end
 

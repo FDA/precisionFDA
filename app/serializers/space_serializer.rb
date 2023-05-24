@@ -15,6 +15,7 @@ class SpaceSerializer < ApplicationSerializer
     :counters,
     :links,
     :updatable,
+    :protected,
   )
 
   attribute :space_type, key: :type

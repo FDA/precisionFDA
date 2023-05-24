@@ -9,11 +9,11 @@ Rails.application.routes.draw do
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   #   by wrapping everything into a scope.
   scope(format: false) do
+    get "/admin/news" => "main#news"
+    get "/admin/news/:id/edit" => "main#news"
+
     namespace(:admin) do
       root "dashboard#index"
-
-      resources :news_items, path: "news"
-      post "news/positions" => "news_items#positions"
 
       resources :activity_reports, only: [:index] do
         collection do
@@ -120,11 +120,14 @@ Rails.application.routes.draw do
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"
     get "terms" => "main#terms"
+    get "security" => "main#security"
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
+
+    get "db_stats" => "main#db_stats", constraints: AdminConstraint.new
     post "/spaces/:id/copy_to_cooperative",
          to: "main#copy_to_cooperative",
          as: :copy_to_cooperative_space
@@ -160,6 +163,7 @@ Rails.application.routes.draw do
         constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
       match "/ginas/app/api/v1/substances", to: "ginas#substances", via: %i(put post)
       match "/ginas/*path", to: "ginas#index", via: :all
+      match "/substances/api/v1/substances/*query" => redirect(path: "/ginas/app/api/v1/substances/%{query}"), via: :all
     end
 
     # API
@@ -195,9 +199,15 @@ Rails.application.routes.draw do
         get :cdmh, on: :collection
       end
 
-      resources :news_items, path: "news", only: %i(index show) do
-        get :years, on: :collection
-      end
+      # News
+      get "news" => "news_items#index"
+      get "news/all" => "news_items#all"
+      post "news" => "news_items#create"
+      get "news/years" => "news_items#years"
+      post "news/positions" => "news_items#positions"
+      put "news/:id" => "news_items#edit"
+      get "news/:id" => "news_items#show"
+      delete "news/:id" => "news_items#delete"
 
       resources :challenges, only: %i(index show create update) do
         get :years, on: :collection
@@ -228,7 +238,6 @@ Rails.application.routes.draw do
       resources :apps do
         get :describe, on: :member, to: "apps#describe"
         get :jobs, on: :member, to: "jobs#app"
-        get :selectable_spaces
         get :licenses_to_accept
 
         collection do
@@ -247,6 +256,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :notifications do
+        member do
+          put :update
+        end
+      end
+
       resources :spaces, only: %i(index show create update) do
         collection do
           get :cli
@@ -257,6 +272,7 @@ Rails.application.routes.draw do
         member do
           get :jobs
           get :members
+          get :selectable_spaces
           put :tags
           post :accept
           post :add_data
@@ -331,12 +347,15 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
-          get :cli # for CLI usage TODO: bring up better name :)
+          get :cli
 
           post :copy
+          post :bulk_download
+          post :cli_node_search
           post :download_list
           post :create_folder
           post :remove
+          post :cli_remove
           post :move
 
           put :feature, to: "files#invert_feature"
@@ -345,6 +364,8 @@ Rails.application.routes.draw do
 
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
+        patch :refresh_api_key, on: :member
+        patch :snapshot, on: :member
         patch :sync_files, on: :member
 
         collection do
@@ -362,6 +383,7 @@ Rails.application.routes.draw do
         get :diagram, on: :member, to: "workflows#diagram"
         get :jobs, on: :member, to: "jobs#workflow"
         get :describe, on: :member, to: "workflows#describe"
+        get :licenses_to_accept
 
         collection do
           get :featured
@@ -451,6 +473,7 @@ Rails.application.routes.draw do
       post "set_tags"
       post "assign_app"
       get "list_licenses"
+      get "cli_latest_version"
       post "list_licenses_for_files"
     end
     # end API

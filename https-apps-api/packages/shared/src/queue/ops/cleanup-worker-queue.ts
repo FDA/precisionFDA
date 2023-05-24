@@ -6,9 +6,11 @@ import { isStateTerminal } from "../../domain/job/job.helper"
 import { isNil } from 'ramda'
 import { TASK_TYPE } from '../task.input'
 import { SyncJobOperation } from "../../domain/job"
+import { clearFailedJobs } from "../queue.utils"
+import { Logger } from "pino"
 
 // Clean up the bull queue
-const cleanupWorkerQueue = async (em, log): Promise<any> => {
+export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => {
   const now = Date.now()
 
   // Cleanup sync_job_status tasks whose job has already been terminated
@@ -16,8 +18,8 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
   // This also cleans up job sync tasks created before we assigned unique IDs
   //
   log.info('CleanupWorkerQueueOperation: Cleaning up status queue')
-  const statusQueue = queue.getStatusQueue()
-  const repeatableJobs = await statusQueue.getRepeatableJobs()
+  const mainQueue = queue.getMainQueue()
+  const repeatableJobs = await mainQueue.getRepeatableJobs()
 
   const jobRepo = em.getRepository(Job)
   const removedRepeatableJobs: any[] = []
@@ -40,7 +42,7 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
           key: job.key,
           hoursSinceNext,
         })
-        statusQueue.removeRepeatableByKey(job.key)
+        mainQueue.removeRepeatableByKey(job.key)
       }
       else if (isStateTerminal(jobFromDb.state)) {
         // Removing job sync if the job has terminated
@@ -54,7 +56,7 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
           key: job.key,
           hoursSinceNext,
         })
-        statusQueue.removeRepeatableByKey(job.key)
+        mainQueue.removeRepeatableByKey(job.key)
       }
     }
     else {
@@ -70,12 +72,12 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
       // The above is to inspect how often we get jobs whose 'next'
       // property in the past, after we have cleaned up the junk from existing queue
       // Leaving the above for the sake of studying the queue state in staging and production
-      // statusQueue.removeRepeatableByKey(job.key)
+      // mainQueue.removeRepeatableByKey(job.key)
     }
   }
   log.info({ removedRepeatableJobs }, 'CleanupWorkerQueueOperation: Removed orphaned repeatable jobs')
 
-  const failedStatusJobs = await clearFailedJobs(statusQueue, log)
+  const failedStatusJobs = await clearFailedJobs(mainQueue, log)
 
   // Cleanup file sync queue
   //
@@ -107,7 +109,7 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
 }
 
 // state: Any valid bull queue state like 'failed' or 'completed'
-const clearJobs = async (q, state, log): Promise<any> => {
+const clearJobs = async (q: any, state: any, log: any): Promise<any> => {
   const jobs = await q.getJobs(state)
   const count = jobs.length
   if (count > 0) {
@@ -121,30 +123,15 @@ const clearJobs = async (q, state, log): Promise<any> => {
   return jobs
 }
 
-const clearFailedJobs = async (q, log): Promise<any> => {
-  return clearJobs(q, 'failed', log)
-}
-
-const clearCompletedJobs = async (q, log): Promise<any> => {
+const clearCompletedJobs = async (q: any, log: any): Promise<any> => {
   return clearJobs(q, 'completed', log)
 }
 
 
-// For direct invocation by the api
-export class CleanupWorkerQueueOperation extends BaseOperation<
-  OpsCtx,
-  undefined,
-  boolean
-> {
-  async run() {
-    return await cleanupWorkerQueue(this.ctx.em, this.ctx.log)
-  }
-}
-
 // For use in the worker
 // TODO - insert this into the maintanence queue on startup just like
 //        checking db clusters status
-export class CleanupWorkerQueueWorkerOperation extends WorkerBaseOperation<
+export class CleanupWorkerQueueOperation extends BaseOperation<
   OpsCtx,
   undefined,
   boolean

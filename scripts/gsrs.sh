@@ -31,7 +31,7 @@ DUMP_BUCKET="gsrs-database-dumps"
 # gsrs-indexes-dev
 # gsrs-indexes-staging
 # gsrs-indexes-production
-GSRS_INDEXES_BUCKET="gsrs-indexes-staging"
+GSRS_INDEXES_BUCKET="gsrs-indexes-dev"
 
 # If OLD_DB_HOST is not set, the new database will still receive the database
 # dump but user roles will not be transferred
@@ -54,7 +54,7 @@ NEW_DB_PASS="INSERT_PASSWORD"
 
 ROLES_TRIGGER=$(cat <<-EOF
 delimiter //
-CREATE TRIGGER ix_core_userprof_update_roles BEFORE INSERT ON ix_core_userprof
+CREATE TRIGGER ix_core_userprof_update_roles BEFORE UPDATE ON ix_core_userprof
 FOR EACH ROW
 BEGIN
   IF NEW.roles_json IS NULL THEN
@@ -66,7 +66,27 @@ EOF
 )
 
 GINAS_CONF=$(cat <<-EOF
-include "ginas.conf"
+include "substances-core.conf"
+
+application.host="http://localhost:8080"
+ix.home="ginas.ix"
+
+spring.application.name="substances"
+
+gsrs.sessions.sessionSecure=false
+management.health.rabbit.enabled: false
+server.port=8080
+server.tomcat.max-threads=2000
+ix.ginas.approvalIdGenerator.generatorClass="ix.ginas.utils.UNIIGenerator"
+spring.main.allow-bean-definition-overriding=true
+eureka.client.enabled=false
+gsrs.renderers.selected="USP"
+
+
+spring.jpa.hibernate.ddl-auto=none  #### THIS IS VERY IMPORTANT, OTHERWISE Hibernate will WIPE OUT our database
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
+eureka.client.enabled=false
 
 ## START AUTHENTICATION
 # SSO HTTP proxy authentication settings - right now this is only used by FDA
@@ -85,22 +105,125 @@ ix.authentication.autoregister=true
 ix.authentication.autoregisteractive=true
 ## END AUTHENTICATION
 
+gsrs.entityProcessors +={
+               "entityClassName" = "ix.ginas.models.v1.Substance",
+               "processor" = "gsrs.module.substance.processors.UniqueCodeGenerator",
+               "with"=  {
+                        "codesystem"="BDNUM",
+                       "suffix"="AB",
+                       "length"=9,
+                       "padding"=true
+               }
+        }
+gsrs.entityProcessors +=
+        {
+        "entityClassName" = "ix.ginas.models.v1.Substance",
+        "processor" = "gsrs.module.substance.processors.ApprovalIdProcessor",
+        "parameters" = {
+            "codeSystem" = "FDA UNII"
+        }
+        }
+gsrs.entityProcessors+=
+      {
+           "entityClassName":"ix.ginas.models.v1.Substance",
+           "processor":"gsrs.module.substance.processors.CodeProcessor",
+           "with":{
+               "class":"gsrs.module.substance.datasource.DefaultCodeSystemUrlGenerator",
+               "json":{
+                  "filename": "codeSystem.json"
+               }
+           }
+      }
+
+ix.ginas.approvalIdGenerator.generatorClass=ix.ginas.utils.UNIIGenerator
+gsrs.validators.substances +=
+    {
+        "validatorClass" = "fda.gsrs.substance.validators.BdNumModificationValidator",
+        "newObjClass" = "ix.ginas.models.v1.Substance"
+    }
+gsrs.validators.substances +=
+    {
+        "validatorClass" = "ix.ginas.utils.validation.validators.CodeUniquenessValidator",
+                           "newObjClass" = "ix.ginas.models.v1.Substance",
+        "configClass" = "SubstanceValidatorConfig",
+        "parameters"= {"singletonCodeSystems" =["BDNUM", "CAS", "FDA UNII", "PUBCHEM", "DRUG BANK", "EPA CompTox", "RS_ITEM_NUM", "STARI", "INN", "NCI_THESAURUS", "WIKIPEDIA", "EVMPD", "RXCUI", "ECHA (EC/EINECS)", "FDA ORPHAN DRUG", "EU-Orphan Drug", "NSC", "NCBI TAXONOMY", "ITIS", "ALANWOOD", "EPA PESTICIDE CODE", "CAYMAN", "USDA PLANTS", "PFAF", "MPNS", "GRIN", "DARS", "BIOLOGIC SUBSTANCE CLASSIFICATION CODE", "CERES"]}
+    }
+
+# Standardize substance name entries
+# Inherited from the long-used Name Standardizer bookmarklet
+# Implemented by Mitch Miller
+gsrs.validators.substances += {
+          "validatorClass" = "ix.ginas.utils.validation.validators.StandardNameValidator",
+          "newObjClass" = "ix.ginas.models.v1.Substance",
+          "parameters" = {
+             "warningOnMismatch" = true
+          }
+        }
+gsrs.scheduled-tasks.list+=
+    {
+        "scheduledTaskClass" : "gsrs.module.substance.tasks.ScheduledExportTaskInitializer",
+        "parameters" :
+        {
+            "username":"admin",
+            "cron":"0 9 2 * * ?", #2:09 AM every day
+           #"cron":"0 0/6 * * * ?" #every 6 mins
+            "autorun":false,
+            "name":"Full GSRS export"
+        }
+    }
 ## START MySQL
-db.default.driver="com.mysql.jdbc.Driver"
-db.default.url="jdbc:mysql://$NEW_DB_HOST:$NEW_DB_PORT/$NEW_DB_NAME"
-db.default.user="$NEW_DB_USER"
-db.default.password="$NEW_DB_PASS"
-## END MySQL
+#spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+spring.jpa.hibernate.use-new-id-generator-mappings=false
+spring.datasource.driverClassName="org.mariadb.jdbc.Driver"
+spring.datasource.url="jdbc:mariadb://$NEW_DB_HOST:$NEW_DB_PORT/$NEW_DB_NAME"
+spring.datasource.username="$NEW_DB_USER"
+spring.datasource.password="$NEW_DB_PASS"
+spring.datasource.hikari.maximum-pool-size= 500 #maximum pool size
+spring.datasource.maximumPoolSize=500
 EOF
 )
 
-GSRS_BRANCH="precisionFDA_PROD"
-GSRS_URL="https://github.com/dnanexus/gsrs-play-dist.git"
-GSRS_PORT=9001
-GSRS_PATH=./gsrs-play-dist
+CODE_SYSTEM=$(cat <<-EOF
+[
+    {"codeSystem":"JMPR-PESTICIDE RESIDUE","url":"http://www.codexalimentarius.net/pestres/data/pesticides/details.html?id=$CODE$"},
+    {"codeSystem":"CODEX ALIMENTARIUS (GSFA)","url":"http://www.fao.org/gsfaonline/additives/details.html?id=$CODE$"},
+    {"codeSystem":"Food Contact Substance Notif, (FCN No.)","url":"http://www.accessdata.fda.gov/scripts/fcn/fcnDetailNavigation.cfm?rpt=fcslisting&id=$CODE$"},
+    {"codeSystem":"JECFA EVALUATION","url":"http://apps.who.int/food-additives-contaminants-jecfa-database/chemical.aspx?chemINS=$CODE$"},
+    {"codeSystem":"IUPHAR","url":"http://www.guidetopharmacology.org/GRAC/LigandDisplayForward?ligandId=$CODE$"},
+    {"codeSystem":"ALANWOOD","url":"http://www.alanwood.net/pesticides/$CODE$"},
+    {"codeSystem":"MERCK INDEX","url":"https://www-rsc-org.fda.idm.oclc.org/Merck-Index/monograph/$CODE$"},
+    {"codeSystem":"INN","url":"https://extranet.who.int/soinn/mod/page/view.php?id=137&inn_n=$CODE$"},
+    {"codeSystem":"GRIN","url":"https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=$CODE$"},
+    {"codeSystem":"DEA NO.","url":"http://forendex.southernforensic.org/index.php/detail/index/$CODE$"},
+    {"codeSystem":"DRUG BANK","url":"http://www.drugbank.ca/drugs/$CODE$"},
+    {"codeSystem":"PHAROS","url":"https://pharos.nih.gov/idg/targets/$CODE$"},
+    {"codeSystem":"PFAF","url":"http://www.pfaf.org/user/Plant.aspx?LatinName=$CODE$"},
+    {"codeSystem":"CAS","url":"https://chem.nlm.nih.gov/chemidplus/rn/$CODE$"},
+    {"codeSystem":"ChEMBL","url":"https://www.ebi.ac.uk/chembl/compound/inspect/$CODE$"},
+    {"codeSystem":"NDF-RT","url":"https://nciterms.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=VA_NDFRT&code=$CODE$"},
+    {"codeSystem":"RXCUI","url":"https://rxnav.nlm.nih.gov/REST/rxcui/$CODE$/allProperties.xml?prop=all"},
+    {"codeSystem":"WHO-ATC","url":"http://www.whocc.no/atc_ddd_index/?code=$CODE$&showdescription=yes"},
+    {"codeSystem":"CLINICAL_TRIALS.GOV","url":"https://clinicaltrials.gov/ct2/show/$CODE$"},
+    {"codeSystem":"ITIS","url":"https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=$CODE$"},
+    {"codeSystem":"NCBI TAXONOMY","url":"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=$CODE$"},
+    {"codeSystem":"USDA PLANTS","url":"https://plants.sc.egov.usda.gov/home/plantProfile?symbol=$CODE$"},
+    {"codeSystem":"PUBCHEM","url":"https://pubchem.ncbi.nlm.nih.gov/compound/$CODE$"},
+    {"codeSystem":"CFR","url":"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfCFR/CFRSearch.cfm?fr=$CODE$"},
+    {"codeSystem":"NCI_THESAURUS","url":"https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=$CODE$"},
+    {"codeSystem":"MESH","url":"https://www.ncbi.nlm.nih.gov/mesh/$CODE$"},
+    {"codeSystem":"UNIPROT","url":"http://www.uniprot.org/uniprot/$CODE$"},
+    {"codeSystem":"USP-RS ITEM","url":"https://store.usp.org/product/$CODE$"}
+]
+EOF
+)
+
+GSRS_BRANCH="main"
+GSRS_URL="https://github.com/ncats/gsrs3-main-deployment.git"
+GSRS_PORT=8080
+GSRS_PATH=./gsrs3-main-deployment
 
 install_deps() {
-  sudo apt -y install jq
+  sudo snap install jq
 }
 
 # Search the last created dump on S3.
@@ -116,38 +239,42 @@ download_dump() {
 }
 
 restore_dump() {
-  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --execute="CREATE DATABASE $NEW_DB_NAME;"
-  zcat $1 | mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS $NEW_DB_NAME
+  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED --execute="CREATE DATABASE $NEW_DB_NAME;"
+  zcat $1 | mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME
 }
 
 dump_users_and_roles() {
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --skip-tz-utc --no-create-info --extended-insert=FALSE --set-gtid-purged=OFF $OLD_DB_NAME ix_core_principal \
             --where="ID > 10000" > ix_core_principal.sql
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --skip-triggers --skip-tz-utc --no-create-info --extended-insert=FALSE --set-gtid-purged=OFF $OLD_DB_NAME ix_core_userprof \
             --where="ID > 10000" > ix_core_userprof.sql
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --add-drop-table --skip-tz-utc --set-gtid-purged=OFF $OLD_DB_NAME \
             ix_core_group_principal > ix_core_group_principal.sql
   mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
+            --ssl-mode=DISABLED  --column-statistics=0 \
             --add-drop-table --skip-tz-utc --set-gtid-purged=OFF $OLD_DB_NAME ix_core_group > ix_core_group.sql
 }
 
 # this will fail if the dump has anyone else rather than admin.
 restore_users_and_roles() {
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_principal.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_principal.sql
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_userprof.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_userprof.sql
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_group.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_group.sql
   mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS $NEW_DB_NAME < ix_core_group_principal.sql
+        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME < ix_core_group_principal.sql
 }
 
 create_roles_trigger() {
-  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS $NEW_DB_NAME \
+  mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME \
         -e "$ROLES_TRIGGER"
 }
 
@@ -156,17 +283,21 @@ run_gsrs() {
     git clone --depth 1 -b $GSRS_BRANCH $GSRS_URL $GSRS_PATH
   fi
 
-  cd $GSRS_PATH
-  echo "$GINAS_CONF" > conf/ginas-dev.conf
-  chmod +x bin/ginas
+  cd $GSRS_PATH/substances
+  echo "$GINAS_CONF" > src/main/resources/application.conf
+  echo "$CODE_SYSTEM" > src/main/resources/codeSystem.json
+  sed -i '' "/\<\/configuration/ i \\
+  \                    <jvmArguments>-Xmx25400m-Xms12000m</jvmArguments>\\
+  " pom.xml
+
+  chmod +x mvnw
   # N.B. need 32GB heap for GSRS jobs can be VERY memory intensive (16GB might be ok but 8GB fails)
-  bin/ginas -J-Xmx32G -Dconfig.file=conf/ginas-dev.conf -Dhttp.port=$GSRS_PORT \
-            -Djava.awt.headless=true -Dpidfile.path=/dev/null > gsrs.out 2>&1 &
+  ./mvnw clean spring-boot:run -DskipTests > gsrs.out 2>&1 &
   cd -
 
   echo "Wait until GSRS runs.."
   while true ; do
-    if curl localhost:$GSRS_PORT/ginas/app/api/v1/whoami > /dev/null 2>&1  ; then
+    if curl localhost:$GSRS_PORT/api/v1/whoami > /dev/null 2>&1  ; then
       break
     fi
     sleep 2
@@ -175,7 +306,7 @@ run_gsrs() {
 
 shutdown_gsrs() {
   kill `ps -eaf | \
-        grep 'gsrs-play-dist' | \
+        grep 'substances' | \
         grep -v grep | \
         awk '{print $2}'` \
   > /dev/null 2>&1 \
@@ -187,7 +318,7 @@ run_job() {
   echo $1
 
   local job=$(
-    curl -s localhost:$GSRS_PORT/ginas/app/api/v1/scheduledjobs -H "AUTHENTICATION_HEADER_NAME: admin" |
+    curl -s localhost:$GSRS_PORT/api/v1/scheduledjobs -H "AUTHENTICATION_HEADER_NAME: admin" |
     jq ".content[] | select(.description==\"$1\")"
   )
 
@@ -224,14 +355,14 @@ run_job() {
 }
 
 upload_indexes() {
-  if [[ -d "$GSRS_PATH/ginas.ix" ]]; then
+  if [[ -d "$GSRS_PATH/substances/ginas.ix" ]]; then
     aws s3 rm s3://$GSRS_INDEXES_BUCKET/ginas.ix --recursive
-    aws s3 cp $GSRS_PATH/ginas.ix s3://$GSRS_INDEXES_BUCKET/ginas.ix --recursive
+    aws s3 cp $GSRS_PATH/substances/ginas.ix s3://$GSRS_INDEXES_BUCKET/ginas.ix --recursive
   fi
 }
 
 cleanup() {
-  rm -rf $GSRS_PATH/ginas.ix # remove gsrs
+  rm -rf $GSRS_PATH/substances/ginas.ix # remove gsrs
   rm -f $1 # remove dump archive
   rm -f ix_core_group.sql ix_core_group_principal.sql ix_core_principal.sql ix_core_userprof.sql
 }
@@ -276,10 +407,13 @@ main() {
   run_gsrs
 
   echo
+  run_job "Regenerate standardized names, force inconsistent standardized names to be regenerated"
+  sleep 10
+  echo
   run_job "Regenerate structure properties collection for all chemicals in the database"
   sleep 10
   echo
-  run_job "Resave all backups of type ix.ginas.models.v1.Substance to the database backups."
+  run_job "Re-backup all Substance entities"
   sleep 10
   echo
   run_job "Reindex all core entities from backup tables"

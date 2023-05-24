@@ -16,9 +16,9 @@ import {
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { colors, fontWeight } from '../../styles/theme'
 import { IUser } from '../../types/user'
-import GuestRestrictedLink from '../../views/components/Controls/GuestRestrictedLink'
-import NavigationBar from '../../views/components/NavigationBar/NavigationBar'
-import PublicLayout from '../../views/layouts/PublicLayout'
+import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'
@@ -32,6 +32,7 @@ import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import {
   CommunityParticipants,
   ExpertSection,
+  Hr,
   InfoRow,
   PFDATeamSection,
 } from './styles'
@@ -259,8 +260,10 @@ export const OverviewAuthed = () => {
             <RightSideItem>
               <SectionTitle>Latest News</SectionTitle>
               <OverviewNewsList pick={3} />
-              <hr />
+              <Hr />
               <Link to="/news">View All News</Link>
+              <Hr />
+              <Link to="/news?type=publication">View All Publications</Link>
             </RightSideItem>
           </RightSide>
         </PageRow>

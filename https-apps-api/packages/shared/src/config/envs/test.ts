@@ -1,4 +1,5 @@
 import { ConfigOverride } from '..'
+import path from 'path'
 
 export const config: ConfigOverride = () => ({
   logs: {
@@ -9,12 +10,12 @@ export const config: ConfigOverride = () => ({
     dbName: process.env.DATABASE_TEST_NAME ?? 'precisionfda-test',
     clientUrl:
       process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:3306/precisionfda-test',
+    // Enable debug mode to inspect SQL queries
     // debug: true,
-    debug: false,
   },
   emails: {
     smtp: {
-      isEnabled: false,
+      saveEmailToFile: true,
     },
   },
   redis: {

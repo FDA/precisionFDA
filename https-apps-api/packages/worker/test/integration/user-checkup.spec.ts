@@ -1,5 +1,5 @@
 /* eslint-disable no-undefined */
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
@@ -8,10 +8,10 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
+import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 const createUserCheckupTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.USER_CHECKUP,
     user,
@@ -27,7 +27,7 @@ describe('TASK: user-checkup', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })

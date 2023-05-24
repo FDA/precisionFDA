@@ -72,6 +72,12 @@ export const WrapSelect = styled.div`
   max-width: 500px;
   font-size: 14px;
 `
+
+export const StyledLine = styled.div`
+  display: flex;
+  flex-direction: row;
+`
+
 export const StyledBackLink = styled(BackLink)`
   margin-bottom: 32px;
 `

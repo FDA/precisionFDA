@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE} from './user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
 import { Asset } from '.'
 
 
@@ -16,7 +16,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         // stiType: { $ne: FILE_STI_TYPE.FOLDER },
         // since we merged old projects (with uploaded files) this condition no longer makes sense
         // parentType: PARENT_TYPE.JOB,
-        parentFolderId: input.folderId,
+        parentFolder: input.folderId,
         entityType: FILE_ORIGIN_TYPE.HTTPS,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
@@ -40,7 +40,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
 
   async findFilesInFolders(input: { folderIds: number[] }): Promise<UserFile[]> {
     return await this.find(
-      { parentFolderId: { $in: input.folderIds } },
+      { parentFolder: { $in: input.folderIds } },
       { filters: ['userfile'], populate: ['taggings.tag'] },
     )
   }
@@ -50,7 +50,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
       { uid },
       {
         filters: ['userfile'],
-        populate: populate || ['user', 'taggings.tag'],
+        populate: populate as never[] || ['user', 'taggings.tag'] as never[],
       },
     )
   }

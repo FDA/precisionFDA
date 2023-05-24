@@ -30,7 +30,7 @@ router.patch(
     })
     await new email.EmailProcessOperation(pickOpsCtx(ctx)).execute({
       input: {
-        initUserId: ctx.user.id,
+        initUserId: ctx.user!.id,
         spaceId: ctx.params.id,
         activityType: spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE.space_locked],
       },
@@ -51,7 +51,7 @@ router.patch(
 
     await new email.EmailProcessOperation(pickOpsCtx(ctx)).execute({
       input: {
-        initUserId: ctx.user.id,
+        initUserId: ctx.user!.id,
         spaceId: ctx.params.id,
         activityType: spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE.space_unlocked],
       },
@@ -76,7 +76,7 @@ router.patch(
       entities.SpaceMembership,
       {
         spaces: ctx.params.id as any,
-        user: ctx.user.id
+        user: ctx.user!.id
       }, {}
     )
 
@@ -87,14 +87,13 @@ router.patch(
       throw new errors.PermissionError("Operation not permitted.")
     }
 
-    const platformClient = new client.PlatformClient(ctx.log)
+    const platformClient = new client.PlatformClient(ctx.user!.accessToken, ctx.log)
     if (membership.side === spaceMembership.types.SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.
         const res = await platformClient.projectDescribe({
           projectDxid: spaceToFix.hostProject,
           body: {},
-          accessToken: ctx.user.accessToken,
         })
       } catch (err) {
         throw new errors.PermissionError("Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.")
@@ -110,7 +109,6 @@ router.patch(
             "permissions": true
           },
         },
-        accessToken: ctx.user.accessToken,
       })
 
       if (spaceToFix.guestDxOrg in res.permissions) {
@@ -121,13 +119,24 @@ router.patch(
         projectDxid: spaceToFix.hostProject,
         invitee: spaceToFix.guestDxOrg,
         level: 'CONTRIBUTE',
-        accessToken: ctx.user.accessToken,
       })
 
       ctx.log.info({ response }, "Guest organization invited to host project.")
     }
 
     ctx.status = 204
+  },
+)
+
+router.get(
+  '/:id/selectable-spaces',
+
+  async ctx => {
+    const res = await new space.SelectableSpacesOperation(pickOpsCtx(ctx))
+      .execute(parseInt(ctx.params.id))
+
+    ctx.body = res
+    ctx.status = 200
   },
 )
 

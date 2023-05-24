@@ -1,6 +1,5 @@
 import {
   Collection,
-  Entity,
   Filter,
   IdentifiedReference,
   ManyToOne,
@@ -8,6 +7,9 @@ import {
   ManyToMany,
   Property,
   Reference,
+  EntityRepository,
+  EntityRepositoryType,
+  Entity,
 } from '@mikro-orm/core'
 import { Tagging, User } from '..'
 import { AssetRepository } from './asset.repository'
@@ -31,6 +33,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   description?: string
 
   @Property()
+  //@ts-ignore IFileOrAsset introduced state as string
   state: FILE_STATE
 
   @Property()
@@ -57,7 +60,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   parentFolderId?: number
 
   @Property()
-  scopedParentFolderId?: number
+  scopedParentFolderId?: Node
 
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>
@@ -77,6 +80,8 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
     // Challenge resources are always files, see create_challenge_resource in api_controller.rb
     return false
   }
+
+  [EntityRepositoryType]?: AssetRepository
 }
 
 export {

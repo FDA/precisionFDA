@@ -12,9 +12,8 @@ import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
 import { MutationErrors } from '../../../types/utils'
-import { Modal } from '../../modal'
-import { Content } from '../../modal/styles'
 import { Challenge } from '../types'
+import { ChallengeCreateUpdateModal } from './ChallengeCreateUpdateModal'
 import { createValidationSchema, editValidationSchema } from './common'
 import { GuestLeadUserSelect } from './GuestLeadUserSelect'
 import { HostLeadUserSelect } from './HostLeadUserSelect'
@@ -59,6 +58,17 @@ const Row = styled.div`
   gap: 16px;
 `
 
+function getBase64(file?: File, callback?: (a: string | null) => void) {
+  if (file) {
+    const reader = new FileReader()
+    reader.addEventListener(
+      'load',
+      () => callback && callback(reader.result as string),
+    )
+    reader.readAsDataURL(file)
+  }
+}
+
 export const ChallengeForm = ({
   challenge,
   defaultValues = {},
@@ -74,6 +84,7 @@ export const ChallengeForm = ({
   isSaving?: boolean
   mutationErrors?: MutationErrors
 }) => {
+  const [base64Image, setBase64Image] = React.useState<string | null>(null)
   const isEditMode = !!challenge
   const ended = isEditMode
     ? new Date().getTime() > new Date(challenge.end_at).getTime()
@@ -113,7 +124,8 @@ export const ChallengeForm = ({
 
   useEffect(() => {
     if (img?.[0] != null) {
-      onImageSelection && onImageSelection(img[0])
+      if (onImageSelection) onImageSelection(img[0])
+      getBase64(img?.[0], setBase64Image)
     }
   }, [watch().cardImage])
 
@@ -162,28 +174,29 @@ export const ChallengeForm = ({
 
           <FieldGroup>
             <label>Challenge image (required):</label>
-            {isEditMode ? (
+            {(base64Image || challenge?.card_image_url) && (
               <img
                 width={300}
-                src={challenge.card_image_url || undefined}
+                src={base64Image || challenge?.card_image_url || undefined}
                 alt="challenge card"
               />
-            ) : (
-              <>
-                <InputText
-                  label="cardImage"
-                  type="file"
-                  accept="image/*"
-                  {...register('cardImage')}
-                  disabled={isSubmitting || isEditMode}
-                />
-                <ErrorMessage
-                  errors={errors}
-                  name="cardImage"
-                  render={({ message }) => <InputError>{message}</InputError>}
-                />
-              </>
             )}
+
+            <>
+              <InputText
+                label="cardImage"
+                type="file"
+                accept="image/*"
+                {...register('cardImage')}
+                disabled={isSubmitting}
+              />
+              <ErrorMessage
+                errors={errors}
+                name="cardImage"
+                render={({ message }) => <InputError>{message}</InputError>}
+              />
+            </>
+
             {/* disabled changing image for edit mode */}
           </FieldGroup>
 
@@ -192,7 +205,7 @@ export const ChallengeForm = ({
             <Controller
               name="scope"
               control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, onBlur, value }}) => (
                 <ScopeFieldSelect
                   challengeId={challenge?.id.toString() || undefined}
                   isSubmitting={isSubmitting}
@@ -214,7 +227,7 @@ export const ChallengeForm = ({
             <Controller
               name="app_owner_id"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <ScoringAppUserSelect
                   isSubmitting={isSubmitting}
                   onChange={onChange}
@@ -265,7 +278,7 @@ export const ChallengeForm = ({
             <Controller
               name="host_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <HostLeadUserSelect
                   isDisabled={isEditMode || isSubmitting}
                   onChange={onChange}
@@ -286,7 +299,7 @@ export const ChallengeForm = ({
             <Controller
               name="guest_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <GuestLeadUserSelect
                   onChange={onChange}
                   onBlur={onBlur}
@@ -307,7 +320,7 @@ export const ChallengeForm = ({
             <Controller
               name="status"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <StatusSelect
                   isEditing={isEditMode}
                   isSubmitting={isSubmitting}
@@ -340,7 +353,7 @@ export const ChallengeForm = ({
           </FieldGroup>
           <Row>
             <ButtonSolidBlue
-              disabled={Object.keys(errors).length > 0 || isSubmitting}
+              disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
             >
               Submit
@@ -349,19 +362,7 @@ export const ChallengeForm = ({
           </Row>
         </StyledForm>
       </div>
-      <Modal
-        isShown={isSaving}
-        hide={() => null}
-        headerText={
-          isEditMode ? 'Updating challenge' : 'Creating new challenge'
-        }
-        disableClose
-      >
-        <Content>
-          The challenge is being {isEditMode ? 'updated' : 'created'}, please
-          wait until this message disappears.
-        </Content>
-      </Modal>
+      <ChallengeCreateUpdateModal isEditMode={isEditMode} isSaving={isSaving} />
     </>
   )
 }

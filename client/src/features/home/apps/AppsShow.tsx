@@ -7,7 +7,7 @@ import { Link, Redirect, Route, Switch } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import {
   StyledTab,
   StyledTabList,
@@ -43,8 +43,9 @@ import { IChallenge } from '../../../types/challenge'
 import { getBackPath } from '../../../utils/getBackPath'
 import { Location } from '../../../types/utils'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
+import { getScopeMapping } from '../getScopeMapping'
 
-const renderOptions = (app: IApp, scopeParamLink: string) => {
+const renderOptions = (app: IApp, scope: ResourceScope) => {
   const columns = [
     {
       header: 'location',
@@ -70,6 +71,16 @@ const renderOptions = (app: IApp, scopeParamLink: string) => {
     },
   ]
 
+  if (app.links.forked_from) {
+    columns.push({
+      header: 'Forked from',
+      value: 'forked_from',
+      link: app.links.forked_from,
+    })
+  }
+
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+
   const list = columns.map((e: any) => (
     <MetadataItem key={e.header}>
       <MetadataKey>{e.header}</MetadataKey>
@@ -78,7 +89,7 @@ const renderOptions = (app: IApp, scopeParamLink: string) => {
         <MetadataVal>
           <Link to={`/home/apps${scopeParamLink}`}>
             {/* @ts-ignore */}
-            {app[e.value]}
+            {scope === 'featured' ? 'Featured' : app[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
@@ -101,11 +112,11 @@ const renderOptions = (app: IApp, scopeParamLink: string) => {
 
 const DetailActionsDropdown = (
   { app, comparatorLinks, challenges }:
-  { app: IApp, comparatorLinks: {[key: string]: string}, challenges?: IChallenge[] }) => {
+    { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[] }) => {
   const actions = useAppSelectionActions({
     scope: app.location === 'Private' ? 'me' : app.location,
     selectedItems: [app],
-    resetSelected: () => {},
+    resetSelected: () => { },
     resourceKeys: ['app', app.uid],
     comparatorLinks,
     challenges,
@@ -118,7 +129,6 @@ const DetailActionsDropdown = (
         data-turbolinks="false"
         isLinkDisabled={!app.links.run_job}
         conditionType='all'
-        asReactLink
       >
         <>
           Run App&nbsp;
@@ -161,7 +171,7 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const AppsShow = ({ emitScope, spaceId }: { emitScope?: (scope: ResourceScope) => void, spaceId?: string }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
@@ -181,12 +191,16 @@ export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
         <div>Sorry, this app does not exist or is not accessible by you.</div>
       </NotFound>
     )
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const scope = getScopeMapping(app.scope, app.featured)
+  if (emitScope) {
+    emitScope(scope)
+  }
+
   const appTitle = app.title ? app.title : app.name
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'apps', spaceId) }>
+      <StyledBackLink linkTo={getBackPath(location, 'apps', spaceId)}>
         Back to Apps
       </StyledBackLink>
       <Topbox>
@@ -207,13 +221,13 @@ export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
               )}
               {meta.assigned_challenges.length
                 ? meta.assigned_challenges.map((item: any) => (
-                    <HomeLabel
-                      type="warning"
-                      icon="fa-trophy"
-                      value={item.name}
-                      key={item.id}
-                    />
-                  ))
+                  <HomeLabel
+                    type="warning"
+                    icon="fa-trophy"
+                    value={item.name}
+                    key={item.id}
+                  />
+                ))
                 : null}
             </Title>
 
@@ -227,14 +241,14 @@ export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
             <StyledRight>
               {app &&
                 <DetailActionsDropdown app={app}
-                                       comparatorLinks={meta.links?.comparators ?? []}
-                                       challenges={meta.challenges} />
+                  comparatorLinks={meta.links?.comparators ?? []}
+                  challenges={meta.challenges} />
               }
             </StyledRight>
           </HeaderRight>
         </Header>
-        
-        {renderOptions(app, scopeParamLink)}
+
+        {renderOptions(app, scope)}
         <MetadataSection>
           {app.tags.length > 0 && (
             <StyledTags>
@@ -263,7 +277,7 @@ export const AppsShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
             <Redirect to={`${match.url}`} />
           </Route>
           <Route path={`${match.path}/readme`} exact>
-            <Markdown data={app.readme} />
+            <MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>
           </Route>
           <Route path={`${match.path}/jobs`}>
             <AppExecutionsList appUid={appUid} />

@@ -1,5 +1,0 @@
-title: "sortable"
-description: "The simplest, most elegant way to sort a table."
-source: "coffee/*.coffee"
-examples: "**/*.md"
-assets: "{js/*.js,css/*.css,docs/welcome/index.html}"

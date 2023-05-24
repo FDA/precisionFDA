@@ -25,7 +25,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
   receiversSides: any
 
   // to take away the following?
-  spaceMembership: SpaceMembership & { user: LoadedReference<User, User> } & { space: LoadedReference<Space, Space> }
+  spaceMembership: SpaceMembership & { user: LoadedReference<User> } & { space: LoadedReference<Space> }
   spaceMembershipSide: any
   receiverMembershipSide: any
 
@@ -54,7 +54,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     const spaceMemberships = await this.ctx.em.find(
       SpaceMembership,
       { spaces: this.space.id, active: true },
-      { populate: ['user.emailNotificationSettings'] },
+      { populate: ['user.notificationPreference'] },
     )
 
     const spaceMembership: any = spaceMemberships.filter(memberShip => {
@@ -73,7 +73,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
     const memberships = await this.ctx.em.find(
       SpaceMembership,
       { spaces: this.space.id, active: true },
-      { populate: ['user.emailNotificationSettings'] },
+      { populate: ['user.notificationPreference'] },
     )
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)

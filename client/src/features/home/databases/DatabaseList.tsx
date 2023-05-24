@@ -4,11 +4,13 @@ import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { SyncIcon } from '../../../components/icons/SyncIcon'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { Refresh } from '../../../components/Page/styles'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
@@ -16,9 +18,7 @@ import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
   ActionsRow,
   QuickActions,
-  StyledHomeTable,
-  StyledPaginationSection,
-  StyledRight,
+  StyledHomeTable, StyledRight,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
@@ -96,7 +96,7 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
             <ButtonSolidBlue
               data-testid="home-databases-create-link"
               as={Link}
-              to={`/home/databases/create`}
+              to="/home/databases/create"
             >
               <PlusIcon height={12} /> Create Database
             </ButtonSolidBlue>
@@ -136,23 +136,21 @@ export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <StyledPaginationSection>
+      <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.current_page!}
-          totalCount={data?.meta?.pagination?.total_count!}
-          totalPages={data?.meta?.pagination?.total_pages!}
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.dbclusters?.length,
-            data?.meta?.pagination?.total_pages,
-          )}
-          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-          isNextData={data?.meta?.pagination?.next_page! !== null}
-          setPage={setPageParam}
-          onPerPageSelect={setPerPageParam}
+          isHidden={false}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
-      </StyledPaginationSection>
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
+
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit Database Info']?.modal}
@@ -224,7 +222,7 @@ export const DatabaseListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={scope as any}
+        shouldResetFilters={[scope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no databases here.</EmptyTable>}

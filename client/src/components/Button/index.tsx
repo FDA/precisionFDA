@@ -1,9 +1,8 @@
-import React from 'react'
 import styled, { css } from 'styled-components'
 import { fontWeight, theme } from '../../styles/theme'
 
 export interface IButton {
-  active?: "warning" | "danger" | "success" | boolean
+  active?: 'warning' | 'danger' | 'success' | boolean
   disabled?: boolean
   role?: string
   hide?: boolean
@@ -42,21 +41,21 @@ export const Button = styled.button<IButton>`
     let borderColorHover = theme.colors.lightBlue
     let backgroundColorHover = theme.colors.subtleBlue
 
-    if (role === "warning") {
+    if (role === 'warning') {
       // TODO: the colours are not based on mockups and are not final
       textColor = theme.colors.primaryYellow
       borderColor = theme.colors.darkYellow
       borderColorHover = theme.colors.primaryYellow
       backgroundColorHover = theme.colors.lightYellow
     }
-    else if (role === "danger") {
+    else if (role === 'danger') {
       // TODO: the colours are not based on mockups and are not final
       textColor = theme.colors.primaryRed
       borderColor = theme.colors.darkRed
       borderColorHover = theme.colors.primaryRed
       backgroundColorHover = 'white'
     }
-    else if (role === "success") {
+    else if (role === 'success') {
       // TODO: the colours are not based on mockups and are not final
       textColor = theme.colors.primaryGreen
       borderColor = theme.colors.darkGreen
@@ -208,4 +207,21 @@ export const ToggleButton = styled(Button)<IButton>`
     color: ${theme.colors.textWhite};
     background-color: ${theme.colors.primaryBlue};
   `}
+`
+
+export const TransparentButton = styled.button`
+  display: flex;
+  box-shadow: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  &:active {
+    position: relative;
+    top: 1px;
+    outline: none;
+  }
+  &:focus {
+    outline: none;
+  }
 `

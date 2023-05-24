@@ -4,7 +4,7 @@ import { IUser } from '../../types/user'
 
 export function useAuthUserQuery() {
   return useQuery(['auth-user'], {
-    queryFn: () => axios.get('/api/user').then(r => r.data as { user: IUser }),
+    queryFn: () => axios.get('/api/user').then(r => r.data as { user: IUser, meta: any }),
     staleTime: Infinity,
     cacheTime: Infinity,
     retry: 1,
@@ -16,5 +16,5 @@ export function useAuthUser(): IUser | undefined {
   const user: Partial<IUser> = {}
   user.isGovUser = data?.user?.email?.includes('fda.hhs.gov') || false
   user.isAdmin = data?.user?.can_administer_site || false
-  return data?.user === undefined ? undefined : ({ ...data.user, ...user })
+  return data?.user === undefined ? undefined : ({ ...data.user, ...user, session_id: data?.meta.session_id })
 }

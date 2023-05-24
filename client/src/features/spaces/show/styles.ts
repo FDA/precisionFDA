@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components'
 import { Button } from '../../../components/Button'
+import { Svg } from '../../../components/icons/Svg'
 import { colors, fontSize, fontWeight } from '../../../styles/theme'
 
 const marginBottom = css`
@@ -20,6 +21,10 @@ export const SpaceHeaderDescrip = styled.div`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;  
   overflow: hidden;
+
+  ${Svg} {
+    margin-right: 8px;
+  }
 `
 
 export const SpaceHeaderTitle = styled.div`
@@ -50,6 +55,7 @@ export const ButtonRow = styled.div`
   gap: 8px;
   justify-content: flex-end;
   height: 32px;
+  flex-wrap: wrap;
   ${marginBottom}
 `
 export const Tabs = styled.div`

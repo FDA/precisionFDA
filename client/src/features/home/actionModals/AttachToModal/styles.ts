@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Svg } from '../../../../components/icons/Svg'
 import { Markdown } from '../../../../components/Markdown'
 import { colors } from '../../../../styles/theme'
 
@@ -7,20 +8,28 @@ export const NotesMarkdown = styled(Markdown)`
 `
 
 export const SearchInput = styled.div`
-  padding: 16px 0;
-  padding-right: 16px;
+  padding: 16px 8px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+
+  ${Svg} {
+    padding-left: 8px;
+    color: #777;
+  }
 `
 
 export const LeftBar = styled.div`
-  width: 300px;
+  min-width: 350px;
+  max-width: 350px;
   overflow-y: auto;
-  padding: 16px;
   padding-right: 0;
 `
 
 export const NoteContainer = styled.div`
-  padding: 6px 12px;
-  width: 700px;
+  padding-left: 12px;
+  margin-right: 6px;
+  min-width: 500px;
   overflow-y: auto;
   border-left: 1px solid #ddd;
 
@@ -46,11 +55,10 @@ export const StyledAttachToModal = styled.div`
   }
 
   .__menu-item {
-    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
 
     &:hover &_chevron {
       color: #8198BC;

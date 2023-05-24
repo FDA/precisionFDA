@@ -22,7 +22,7 @@ describe('POST /dbclusters/create', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
     dxid = `dbcluster-${generate.random.dxstr()}`
@@ -60,7 +60,9 @@ describe('POST /dbclusters/create', () => {
       engine: DB_CLUSTER_ENGINE[invertObj(ENGINES)[describeCallRes.engine]],
       engineVersion: describeCallRes.engineVersion,
       dxInstanceClass: describeCallRes.dxInstanceClass,
-      user: user.id,
+    })
+    expect(body.user).to.include({
+      id: user.id,
     })
   })
 
@@ -83,7 +85,6 @@ describe('POST /dbclusters/create', () => {
     expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
 
     expect(fakeCreateCallArgs).to.deep.equal({
-      accessToken: userQueryData.accessToken,
       name: createInput.name,
       project: createInput.project,
       engine: createInput.engine,
@@ -93,7 +94,6 @@ describe('POST /dbclusters/create', () => {
     })
 
     expect(fakeDescribeCallArgs).to.deep.equal({
-      accessToken: userQueryData.accessToken,
       dxid: dxid,
       project: createInput.project,
     })

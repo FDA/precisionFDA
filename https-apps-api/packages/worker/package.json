@@ -12,15 +12,16 @@
     "npm": "^8.19.1"
   },
   "scripts": {
+    "dev": "wds --esbuild -w ./src/index.ts",
     "build": "npm run clean && npm run compile",
     "compile": "tsc -b tsconfig.build.json",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "uninstall": "rm -rf ./node_modules"
   },
   "dependencies": {
-    "@mikro-orm/core": "^4.5.9",
-    "@mikro-orm/mysql": "^4.5.9",
-    "@mikro-orm/reflection": "^4.5.9",
+    "@mikro-orm/core": "^5.6.3",
+    "@mikro-orm/mysql": "^5.6.3",
+    "@mikro-orm/reflection": "^5.6.3",
     "@pfda/https-apps-shared": "^1.0.0",
     "bull": "^4.8.5",
     "nanoid": "^3.1.31",
@@ -33,15 +34,17 @@
     "@types/chance": "^1.1.0",
     "@types/dirty-chai": "^2.0.2",
     "@types/luxon": "^1.26.5",
+    "@types/pino": "^7.0.5",
     "@types/mocha": "^8.2.3",
     "@types/ramda": "^0.27.32",
     "@types/sinon": "^9.0.8",
+    "@types/pino": "^7.0.5",
     "bull-repl": "^0.26.3",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chance": "^1.1.7",
     "dirty-chai": "^2.0.1",
-    "luxon": "^1.27.0",
+    "luxon": "^1.28.1",
     "mocha": "^8.4.0",
     "sinon": "^9.2.1"
   }

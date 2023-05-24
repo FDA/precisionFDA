@@ -1,3 +1,5 @@
+import { ServerScope } from "../types";
+
 export enum ExecutionActions {
   "Run" = "Run",
   "Run batch" = "Run batch",
@@ -98,40 +100,42 @@ export interface Job {
 }
 
 export interface IExecution {
-  id: string;
-  state: JobState;
-  uid: string;
-  name: string;
-  title: string;
-  added_by: string;
-  app_revision: string;
-  app_uid: string;
-  app_title: string;
-  run_input_data: Array<any>;
-  run_output_data: Array<any>;
-  failure_message?: string;
-  failure_reason?: string;
-  created_at: string;
-  created_at_date_time: string;
-  energy_consumption: string;
-  duration: string;
-  instance_type: string;
-  launched_by: string;
-  launched_on: string;
-  location: string;
-  revision: number;
-  readme: string;
-  workflow_series_id: number | string;
-  version: string;
-  scope: string;
-  featured: boolean;
-  active: boolean;
-  links: Links;
-  jobs?: Job[];
-  logged_dxuser: string;
-  tags: any[];
-  workflow_uid?: string;
-  workflow_title?: string;
+  id: string
+  state: JobState
+  uid: string
+  dxid: string
+  name: string
+  title: string
+  added_by: string
+  app_revision: string
+  app_uid: string
+  app_title: string
+  workstation_api_version: string | null
+  run_input_data: Array<any>
+  run_output_data: Array<any>
+  failure_message?: string
+  failure_reason?: string
+  created_at: string
+  created_at_date_time: string
+  energy_consumption: string
+  duration: string
+  instance_type: string
+  launched_by: string
+  launched_on: string
+  location: string
+  revision: number
+  readme: string
+  workflow_series_id: number | string
+  version: string
+  scope: ServerScope
+  featured: boolean
+  active: boolean
+  links: Links
+  jobs?: Job[]
+  logged_dxuser: string
+  tags: any[]
+  workflow_uid?: string
+  workflow_title?: string
 }
 
 // IExeuction's uid attribute can have the following prefixes

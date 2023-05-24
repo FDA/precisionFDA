@@ -25,7 +25,7 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
       populate: ['user'],
     })
     nonTerminatedDbClusters.forEach(async (nonTerminatedDbCluster) => {
-      const dbSyncOperation = await queue.getStatusQueue().getJob(SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid))
+      const dbSyncOperation = await queue.getMainQueue().getJob(SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid))
       if (!dbSyncOperation) {
         this.ctx.log.warn(
           { 
@@ -46,6 +46,7 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
           uid: dbcluster.uid,
           name: dbcluster.name,
           dxuser: dbcluster.user.getEntity().dxuser,
+          // @ts-ignore
           status: STATUSES[invertObj(STATUS)[dbcluster.status]],
           dxInstanceClass: dbcluster.dxInstanceClass,
           duration: dbcluster.elapsedTimeSinceCreationString(),

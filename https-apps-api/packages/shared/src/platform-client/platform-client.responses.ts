@@ -1,5 +1,6 @@
 import { AnyObject } from '../types'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
+import { JOB_STATE } from '../domain/job/job.enum'
 
 type DbClusterDescribeResponse = {
   id: string
@@ -13,7 +14,7 @@ type DbClusterDescribeResponse = {
   engineVersion: string
   status: string
   endpoint?: string
-  port?: number
+  port?: string
   statusAsOf?: number
   failureReason?: string
 } & AnyObject
@@ -56,6 +57,8 @@ type FileStateResult = {
   describe?: {
     name: string
     size: number
+    created: number
+    modified: number
     state: FILE_STATE_DX
   }
 }
@@ -69,6 +72,10 @@ type DescribeDataObjectsResponse = {
     statusCode: number
   }>
 }
+
+type FileRemoveResponse = {
+  id: string
+} & AnyObject
 
 type FileDescribeResponse = {
   id: string
@@ -129,7 +136,7 @@ type WorkflowDescribeResponse = {
 
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
-  state: string
+  state: JOB_STATE
   project: string
   billTo: string
   httpsApp: {
@@ -164,6 +171,7 @@ export {
   FindSpaceMembersReponse,
   PlatformMember,
   UserInviteToOrgResponse,
+  FileRemoveResponse,
   UserRemoveFromOrgResponse,
   AppDescribeResponse,
   WorkflowDescribeResponse,

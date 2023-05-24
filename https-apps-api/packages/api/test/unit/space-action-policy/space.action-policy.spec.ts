@@ -2,11 +2,11 @@ import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { database } from '@pfda/https-apps-shared'
 import { Space, SpaceMembership, User } from '@pfda/https-apps-shared/src/domain'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { spaceActionPolicy } from '@pfda/https-apps-shared/src/domain/space/space.action-policy'
-import { SPACE_STATE, SPACE_TYPE } from 'shared/src/domain/space/space.enum'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from 'shared/src/domain/space-membership/space-membership.enum'
-import { random } from 'shared/src/test/generate'
+import { SPACE_STATE, SPACE_TYPE } from '@pfda/https-apps-shared/src/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
+import { random } from '@pfda/https-apps-shared/src/test/generate'
 
 
 describe('Space.action-policy ', () => {
@@ -28,13 +28,13 @@ describe('Space.action-policy ', () => {
 	beforeEach(async () => {
 		await db.dropData(database.connection())
 		// create DB mocks
-		em = database.orm().em
+		em = database.orm().em.fork() as EntityManager
 		em.clear()
 		rsaUser = create.userHelper.createRSA(em)
 		user = create.userHelper.create(em)
 		groupSpace = create.spacesHelper.create(em, generate.space.group())
 		reviewSpace = create.spacesHelper.create(em)
-		lockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
+		lockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
 		create.spacesHelper.addMember(em, { user, space: reviewSpace })
 		guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 		hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })

@@ -11,9 +11,19 @@ class NodeCopyWorker < ApplicationWorker
     def notify_user(job)
       scope = job["args"].first
       context = build_context(job)
+      RequestContext.begin_request(context.user_id, context.user, context.token)
 
       subject = "An error occurred during the copying to scope '#{scope}'"
       message = "#{subject}: #{job['error_message']}"
+
+      notification = {
+        action: "NODES_COPIED",
+        message: message,
+        severity: "INFO",
+        userId: context.user_id,
+      }
+      https_apps_client.send_notification(notification)
+      RequestContext.end_request
 
       Rails.logger.error(message)
 
@@ -51,8 +61,18 @@ class NodeCopyWorker < ApplicationWorker
   # @param session_auth_params [Hash] User session auth params.
   def perform(scope, nodes_ids, session_auth_params)
     @context = Context.build(session_auth_params)
+    RequestContext.begin_request(@context.user_id, @context.user, @context.token)
     nodes = Node.where(id: nodes_ids)
     copies = copy_service.copy(nodes, scope)
+
+    notification = {
+      action: "NODES_COPIED",
+      message: "Files copied successfully",
+      severity: "INFO",
+      userId: @context.user_id,
+    }
+    https_apps_client.send_notification(notification)
+    RequestContext.end_request
     notify_user(copies, scope)
   end
 
@@ -68,10 +88,14 @@ class NodeCopyWorker < ApplicationWorker
       @context.user.email,
       copies,
       scope,
-    ).deliver_now
+    ).deliver_later
   end
 
   def copy_service
     @copy_service ||= CopyService::NodeCopier.new(api: @context.api, user: @context.user)
+  end
+
+  def https_apps_client
+    HttpsAppsClient.new
   end
 end

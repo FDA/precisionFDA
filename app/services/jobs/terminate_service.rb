@@ -29,7 +29,7 @@ module Jobs
       job = Job.where(user_id: context.user_id).find_by!(uid: uid)
       raise JobInTerminalStateError, job.dxid if job.terminal?
 
-      api = job.https? ? DIContainer.resolve("https_apps_client") : DIContainer.resolve("api.user")
+      api = job.https? ? HttpsAppsClient.new : DNAnexusAPI.new(RequestContext.instance.token)
 
       response[:data] << api.job_terminate(job.dxid)
     rescue ActiveRecord::RecordNotFound, JobInTerminalStateError, HttpsAppsClient::Error => e

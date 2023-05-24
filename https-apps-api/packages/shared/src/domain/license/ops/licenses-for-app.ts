@@ -21,9 +21,8 @@ License[]> {
     const currentApp: App = await em.findOneOrFail(entities.App, { uid: input.uid })
     await currentApp.assets.init()
 
-    const licensePromises = await Promise.all(
-      currentApp.assets.getItems().map(asset => licensedItemRepo.getLicenses(asset.id)),
-    )
+    const licensePromises = await Promise.all(currentApp.assets.getItems()
+      .map(asset => licensedItemRepo.getLicenses(asset.id)))
     const licenses = (await Promise.all(licensePromises)).flat()
 
     // we don't want duplicates

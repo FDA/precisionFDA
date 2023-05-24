@@ -42,7 +42,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
     mutation.mutateAsync(dxids)
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-dbcluster-delete"
       headerText={`${method} ${momoSelected.length} items(s)`}

@@ -30,18 +30,19 @@
         <li class="list-group-item">
           <p class="list-group-item-heading lead">Step 3 <strong class="text-regular">Download the precisionFDA CLI</strong></p>
           <p>
-            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.2.1.tar.gz">
+            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.3.tar.gz">
               <span class="fa fa-download"></span> Linux
             </a>
-            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.2.1.tar.gz">
+            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.3.tar.gz">
               <span class="fa fa-download"></span> Mac OS X
             </a>
-            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.2.1.zip">
+            <a class="btn btn-primary btn-lg" href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.3.zip">
               <span class="fa fa-download"></span> Windows
             </a>
           </p>
           <p>Note: On Linux and Mac OS, after unzipping the downloaded file, you may need to run the following command to make the binary executable: <code>chmod +x pfda</code>.</p>
-          <p>Version 2.2.1 (12/20/2022): ls output improvements, optional --overwrite flag for download.</p>
+          <p>Version 2.3 (02/08/2023): added support of multiple files/folders upload and download.</p>
+          <p>Version 2.2.1 (12/20/2022): ls output improvements, added --overwrite flag for download.</p>
           <p>Version 2.2 (12/07/2022): New features: ls, list-space, describe-app, describe-workflow.</p>
           <p>Version 2.1.2 (8/03/2022): Fixed windows asset upload.</p>
           <p>Version 2.1.1 (7/18/2022): Improvements to asset upload.</p>
@@ -54,7 +55,7 @@
         </li>
         <li class="list-group-item">
           <p class="list-group-item-heading lead">Step 4 <strong class="text-regular">Get your Authorization Key</strong></p>
-          <p><a href="<%= tokify_path %>" data-method="post" class="btn btn-primary btn-lg" target="_blank">
+          <p><a href="<%= tokify_path %>" data-method="post" class="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">
             <span class="fa fa-key"></span> Generate Authorization Key
           </a></p>
           <p class="pfda-help-block pfda-help-warning">

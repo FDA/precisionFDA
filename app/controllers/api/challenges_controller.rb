@@ -208,9 +208,5 @@ module Api
         challenges
       end
     end
-
-    def https_apps_client
-      DIContainer.resolve("https_apps_client")
-    end
   end
 end

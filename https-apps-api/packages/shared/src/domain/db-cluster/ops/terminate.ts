@@ -9,7 +9,7 @@ import { DxIdInput, UserOpsCtx } from '../../../types'
 export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput, DbCluster> {
   async run(input: DxIdInput): Promise<DbCluster> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     const dbCluster = await em.findOne(DbCluster, { dxid: input.dxid })
 
     if (!dbCluster) {
@@ -25,7 +25,6 @@ export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdI
 
     const apiResult = await platformClient.dbClusterAction({
       dxid: dbCluster.dxid,
-      accessToken: this.ctx.user.accessToken,
     }, 'terminate')
 
     this.ctx.log.info(
@@ -36,9 +35,9 @@ export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdI
     const describeResult = await platformClient.dbClusterDescribe({
       dxid: dbCluster.dxid,
       project: dbCluster.project,
-      accessToken: this.ctx.user.accessToken,
     })
 
+    // @ts-ignore
     dbCluster.status = STATUS[invertObj(STATUSES)[describeResult.status]]
     await em.fork().persistAndFlush(dbCluster)
 

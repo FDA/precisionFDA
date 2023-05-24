@@ -7,8 +7,8 @@ import { mocksReset, fakes } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from 'shared/src/domain/space-membership/space-membership.enum'
-import { SPACE_STATE } from 'shared/src/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
+import { SPACE_STATE } from '@pfda/https-apps-shared/src/domain/space/space.enum'
 
 describe('PATCH /spaces/:id/lock', () => {
 	let em: EntityManager
@@ -25,12 +25,12 @@ describe('PATCH /spaces/:id/lock', () => {
 	beforeEach(async () => {
 		await db.dropData(database.connection())
 		// create DB mocks
-		em = database.orm().em
+		em = database.orm().em.fork() as EntityManager
 		em.clear()
 		notPermittedUser = create.userHelper.create(em)
 		user = create.userHelper.createRSA(em)
 		space = create.spacesHelper.create(em)
-		alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
+		alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
 		guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 		hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
@@ -64,7 +64,7 @@ describe('PATCH /spaces/:id/lock', () => {
 		expect(fakes.queue.createEmailSendTaskFake.calledTwice).to.be.true()
 		em.clear()
 		const lockedSpace = await em.getRepository(Space).findOneOrFail({ id: space.id })
-		expect(lockedSpace.state).to.be.equal(SPACE_STATE.STATE_LOCKED)
+		expect(lockedSpace.state).to.be.equal(SPACE_STATE.LOCKED)
 	})
 
 	context('error states', () => {
@@ -85,7 +85,7 @@ describe('PATCH /spaces/:id/lock', () => {
 		})
 
 		it('does not allow to lock space (space already locked) and returns 403', async () => {
-			alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
+			alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
 			create.spacesHelper.addMember(em, { user, space: alreadyLockedSpace })
 			await em.flush()
 

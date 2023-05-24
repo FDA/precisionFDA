@@ -15,7 +15,7 @@ describe('ChallengeRepository tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     user = create.userHelper.create(em)
     botUser = create.userHelper.createChallengeBot(em)
     // log = getLogger()

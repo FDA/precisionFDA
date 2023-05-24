@@ -1,11 +1,12 @@
 # Job serializer.
-class JobSerializer < ApplicationSerializer
+class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLength
   include ActionView::Helpers
   include ApplicationHelper
 
   attributes(
     :id,
     :uid,
+    :dxid,
     :state,
     :name,
     :app_title,
@@ -14,6 +15,8 @@ class JobSerializer < ApplicationSerializer
     :app_active,
     :workflow_title,
     :workflow_uid,
+    :platform_tags,
+    :workstation_api_version,
     :run_input_data,
     :run_output_data,
     :run_data_updates,
@@ -135,6 +138,14 @@ class JobSerializer < ApplicationSerializer
     end
   end
 
+  def platform_tags
+    object.app&.platform_tags
+  end
+
+  def workstation_api_version
+    object.app&.workstation_api_version
+  end
+
   # Returns an instance_type of the app.
   # @return [String] instance_type.
   def instance_type
@@ -210,14 +221,14 @@ class JobSerializer < ApplicationSerializer
 
       # this job's app single run
       if object.in_space?
-        unless member_viewer?
+        unless member_viewer? && !object.app.nil?
           links[:run_job] = new_app_job_path(
             # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
             object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
           )
           links[:space] = space_path
         end
-      else
+      elsif !object.app.nil?
         links[:run_job] = new_app_job_path(
           # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
           object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,

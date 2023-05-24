@@ -7,7 +7,7 @@ import { queue, job, dbCluster } from '../../..'
 import { isJobOrphaned } from '../../../queue/queue.utils'
 
 
-const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log): Promise<void> => {
+const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log: any): Promise<void> => {
   const bullJobId = SyncFilesStateOperation.getBullJobId(user.dxuser)
   const bullJob = await queue.findRepeatable(bullJobId)
   if (!bullJob) {
@@ -22,7 +22,7 @@ const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log): Promis
       bullJob,
     }, 'CheckUserJobsOperation: FilesStateSyncTask found, but it is orphaned. '
        + 'Removing and recreating it')
-    await queue.removeRepeatableJob(bullJob, queue.getStatusQueue())
+    await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
     await queue.createSyncFilesStateTask(user)
   } else {
     log.info({

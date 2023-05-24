@@ -1,10 +1,5 @@
 import { AnyObject } from '../types'
 
-// TODO(samuel) refactor this so that headers aren't mixed with URL params
-type BaseParams = {
-  accessToken: string
-}
-
 type Starting = {
   project: string
   id: string
@@ -15,10 +10,10 @@ interface IPaginatedParams {
   starting?: Starting
 }
 
-type JobDescribeParams = BaseParams & { jobId: string }
-type JobTerminateParams = BaseParams & { jobId: string }
+type JobDescribeParams = { jobId: string }
+type JobTerminateParams = { jobId: string }
 
-type JobCreateParams = BaseParams & {
+type JobCreateParams = {
   appId: string
   project: string
   name?: string
@@ -34,62 +29,67 @@ type JobCreateParams = BaseParams & {
   }
 }
 
-type ListFilesParams = BaseParams & IPaginatedParams & {
+type FileRemoveParams = {
+  projectId: string
+  ids: string[]
+}
+
+type ListFilesParams = IPaginatedParams & {
   project: string
   folder?: string
   includeDescProps?: boolean
 }
 
-type FileCloseParams = BaseParams & {
+type FileCloseParams = {
   fileDxid: string
 }
 
-type FileDescribeParams = BaseParams & {
+type FileDescribeParams = {
   fileDxid: string
   projectDxid: string
 }
 
-type FileDownloadLinkParams = BaseParams & {
+type FileDownloadLinkParams = {
   fileDxid: string
   filename: string
   project: string
   duration: number // in seconds
 }
 
-type FileStatesParams = BaseParams & {
+type FileStatesParams = {
   fileDxids: string[]
   projectDxid: string
 }
 
-type DescribeFilesParams = BaseParams & {
+type DescribeFilesParams = {
   fileIds: string[]
 }
 
-type DescribeFoldersParams = BaseParams & {
+type DescribeFoldersParams = {
   projectId: string
 }
 
-type RenameFolderParams = BaseParams & {
+type RenameFolderParams = {
   folderPath: string
   newName: string
   projectId: string
 }
 
-type RemoveFolderParams = BaseParams & {
+type RemoveFolderParams = {
   folderPath: string
   projectId: string
 }
 
-type CreateFolderParams = BaseParams & {
+type CreateFolderParams = {
   folderPath: string
   projectId: string
 }
 
-type FindSpaceMembersParams = BaseParams & {
+type FindSpaceMembersParams = {
   spaceOrg: string
 }
 
-type UserInviteToOrgParams = BaseParams & {
+type UserInviteToOrgParams = {
   orgDxId: string
   data: {
     invitee: string
@@ -100,7 +100,7 @@ type UserInviteToOrgParams = BaseParams & {
     suppressEmailNotification?: boolean
   }
 }
-type UserRemoveFromOrgParams = BaseParams & {
+type UserRemoveFromOrgParams = {
   orgDxId: string
   data: {
     user: string
@@ -109,13 +109,13 @@ type UserRemoveFromOrgParams = BaseParams & {
   }
 }
 
-type MoveFilesParams = BaseParams & {
+type MoveFilesParams = {
   destinationFolderPath: string
   fileIds: string[]
   projectId: string
 }
 
-type DbClusterCreateParams = BaseParams & {
+type DbClusterCreateParams = {
   name: string
   project: string
   engine: string
@@ -124,19 +124,18 @@ type DbClusterCreateParams = BaseParams & {
   adminPassword: string
 }
 
-type DbClusterDescribeParams = BaseParams & {
+type DbClusterDescribeParams = {
   dxid: string
   project?: string
 }
 
-type DbClusterActionParams = BaseParams & { dxid: string }
+type DbClusterActionParams = { dxid: string }
 
-type DescribeDataObjectsParams = BaseParams & {
+type DescribeDataObjectsParams = {
   objects: Array<string | Record<string, string>>
 }
 
 type UserResetMfaParams = {
-  headers: BaseParams
   dxid: string
   data: {
     user_id: string
@@ -145,7 +144,6 @@ type UserResetMfaParams = {
 }
 
 type UserUnlockParams = {
-  headers: BaseParams
   dxid: string
   data: {
     user_id: string
@@ -153,17 +151,16 @@ type UserUnlockParams = {
   }
 }
 
-type AppDescribeParams = BaseParams & {
+type AppDescribeParams = {
   dxid: string
   data: {}
 }
-type WorkflowDescribeParams = BaseParams & {
+type WorkflowDescribeParams = {
   dxid: string
   data: {}
 }
 
 export {
-  BaseParams,
   Starting,
   IPaginatedParams,
   FileCloseParams,
@@ -176,6 +173,7 @@ export {
   JobTerminateParams,
   CreateFolderParams,
   DescribeFoldersParams,
+  FileRemoveParams,
   MoveFilesParams,
   DbClusterActionParams,
   DbClusterDescribeParams,

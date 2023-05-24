@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { App, Folder, Job, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -23,7 +23,7 @@ describe('PATCH /folders/:id/rename', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
@@ -32,7 +32,7 @@ describe('PATCH /folders/:id/rename', () => {
     folder = create.filesHelper.createFolder(
       em,
       { user },
-      { name: 'a', project: user.privateFilesProject, parentId: job.id },
+      { name: 'a', project: user.privateFilesProject, parentId: job.id, locked: false },
     )
     await em.flush()
     mocksReset()
@@ -59,7 +59,7 @@ describe('PATCH /folders/:id/rename', () => {
       parentId: job.id,
       parentType: 'Job',
       uid: null,
-      parentFolderId: null,
+      parentFolder: null,
       scopedParentFolderId: null,
       description: null,
       state: null,
@@ -72,8 +72,8 @@ describe('PATCH /folders/:id/rename', () => {
   it('handles subfolders too', async () => {
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { project: folder.project, name: 'c', parentFolderId: folder.id },
+      { user,  parentFolder: folder, },
+      { project: folder.project, name: 'c', locked: false },
     )
     await em.flush()
     const { body } = await supertest(getServer())
@@ -85,7 +85,7 @@ describe('PATCH /folders/:id/rename', () => {
       .expect(200)
     expect(body).to.have.property('id', subfolder.id)
     expect(body).to.have.property('name', 'd')
-    expect(body).to.have.property('parentFolderId', folder.id)
+    expect(body).to.have.property('parentFolder', folder.id)
   })
 
   context('error states', () => {

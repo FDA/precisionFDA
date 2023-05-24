@@ -10,9 +10,9 @@ module FilesConcern
     states = params[:states]
 
     files = if params[:editable]
-      UserFile.real_files.editable_by(context).accessible_by_private
+      UserFile.real_files.not_removing.editable_by(context).accessible_by_private
     else
-      UserFile.real_files.accessible_by(context)
+      UserFile.real_files.not_removing.accessible_by(context)
     end
 
     if scopes.present?
@@ -44,16 +44,4 @@ module FilesConcern
     when "space" then "Files"
     end
   end
-
-  # => Replaced by SyncFilesStateOperation, remove when proven to work reliably
-  # def refresh_file(file, context)
-  #   return unless file.state != "closed"
-
-  #   if file.challenge_file?
-  #     User.sync_challenge_file!(file.id)
-  #   else
-  #     User.sync_file!(context, file.id)
-  #   end
-  #   file.reload
-  # end
 end

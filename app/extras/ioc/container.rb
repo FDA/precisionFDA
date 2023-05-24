@@ -22,21 +22,13 @@ module IOC
     def configure # rubocop:todo Metrics/MethodLength
       container = self
 
-      register("docker_exporter") do
-        DockerExporter.new(
-          container.resolve("api.user"),
-          Rails.application.routes.url_helpers,
-        )
-      end
-
-      register("https_apps_client") { HttpsAppsClient.new(config[:token], config[:user]) }
+      register("https_apps_client") { HttpsAppsClient.new }
 
       namespace "api" do
-        register("user", memoize: true) { DNAnexusAPI.new(config[:token]) }
         register("admin", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN) }
         register("challenge_bot", memoize: true) { DNAnexusAPI.new(CHALLENGE_BOT_TOKEN) }
         register("auth", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI) }
-        register("auth_user", memoize: true) do
+        register("auth_user") do
           DNAnexusAPI.new(config[:token], DNANEXUS_AUTHSERVER_URI)
         end
       end
@@ -45,24 +37,6 @@ module IOC
         register("user_removal_policy") { UserRemovalPolicy }
         register("member_removal_policy") { MemberRemovalPolicy }
         register("org_dissolve_policy") { OrgDissolvePolicy }
-
-        register("unused_orgname_generator") do
-          UnusedOrgnameGenerator.new(container.resolve("api.user"))
-        end
-
-        register("org_leave_processor") do
-          OrgService::LeaveOrgProcess.new(
-            container.resolve("api.user"),
-            container.resolve("api.admin"),
-            container.resolve("api.auth"),
-            resolve("user_removal_policy"),
-            resolve("unused_orgname_generator"),
-          )
-        end
-
-        register("login_tasks_processor") do
-          LoginTasksProcessor.new(resolve("org_leave_processor"))
-        end
 
         register("leave_org_request_creator") do
           OrgService::LeaveOrgRequest.new(resolve("user_removal_policy"))
@@ -91,35 +65,6 @@ module IOC
           OrgService::ProvisionAdminOrgMember.new(
             container.resolve("api.admin"),
           )
-        end
-      end
-
-      namespace("comparisons") do
-        namespace "sync" do
-          register("updater") { SyncService::Comparisons::ComparisonUpdater }
-
-          register("filter") { SyncService::Comparisons::ComparisonsFilter }
-
-          register("state_processor") do
-            SyncService::Comparisons::StateProcessor.new(
-              container.resolve("api.user"),
-            )
-          end
-
-          register("comparison_processor") do
-            SyncService::Comparisons::ComparisonProcessor.new(
-              resolve("state_processor"),
-              resolve("updater"),
-            )
-          end
-
-          register("synchronizer") do
-            SyncService::Comparisons::Synchronizer.new(
-              container.resolve("api.user"),
-              resolve("filter"),
-              resolve("comparison_processor"),
-            )
-          end
         end
       end
     end

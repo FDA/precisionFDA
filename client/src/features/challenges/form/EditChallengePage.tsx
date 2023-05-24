@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { AxiosError } from 'axios'
-import React from 'react'
+import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
@@ -9,13 +9,13 @@ import { NotAllowedPage } from '../../../components/NotAllowed'
 import { PageTitle } from '../../../components/Page/styles'
 import { MutationErrors } from '../../../types/utils'
 import { dateToInput } from '../../../utils/datetime'
-import NavigationBar from '../../../views/components/NavigationBar/NavigationBar'
-import { UserLayout } from '../../../views/layouts/UserLayout'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledBackLink } from '../../home/home.styles'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
-import { editChallengeRequest } from './api'
+import { createChallengeCardImage, editChallengeRequest, getChallengeImageLink } from './api'
 import { ChallengeForm } from './ChallengeForm'
 import { subtitle, title } from './common'
 
@@ -39,6 +39,8 @@ const EditChallengePage = () => {
   const queryClient = useQueryClient()
   const { challengeId } = useParams<{ challengeId: string }>()
   const { data, isLoading } = useChallengeDetailsQuery(challengeId, true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [imgUid, setImageUid] = useState('')
 
   const mutation = useMutation({
     mutationKey: ['edit-challenge'],
@@ -54,6 +56,21 @@ const EditChallengePage = () => {
     },
   })
 
+  const imageMutation = useMutation({
+    mutationFn: (v: any) => createChallengeCardImage(v),
+    onError: () => setIsSaving(false),
+    mutationKey: ['create-challenge-image'],
+  })
+
+  const linkMutation = useMutation({
+    mutationFn: (fileUid: string) => getChallengeImageLink(fileUid),
+  })
+
+  const handleImageSelection = async (img: File) => {
+    const result = await imageMutation.mutateAsync(img)
+    setImageUid(result)
+  }
+
   const mutationErrors = formatMutationErrors(
     mutation.error instanceof AxiosError
       ? mutation.error.response?.data
@@ -61,6 +78,12 @@ const EditChallengePage = () => {
   )
 
   const handleSubmit = async (v: any) => {
+    setIsSaving(true)
+    let link
+    if(imgUid) {
+      link = await linkMutation.mutateAsync(imgUid)
+    }
+    
     await mutation.mutateAsync({
       name: v.name,
       description: v.description,
@@ -70,7 +93,7 @@ const EditChallengePage = () => {
       end_at: v.end_at,
       status: v.status?.value,
       card_image_id: v.card_image_id,
-      card_image_url: v.card_image_url,
+      card_image_url: link?.url || v.card_image_url,
       pre_registration_url: v.pre_registration_url,
     })
   }
@@ -124,6 +147,8 @@ const EditChallengePage = () => {
               challenge={data?.challenge}
               onSubmit={handleSubmit}
               mutationErrors={mutationErrors}
+              onImageSelection={handleImageSelection}
+              isSaving={isSaving}
             />
           </StyledPageContent>
         </StyledPageCenter>

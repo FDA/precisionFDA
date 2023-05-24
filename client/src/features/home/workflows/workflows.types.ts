@@ -1,5 +1,5 @@
-import { IExecution } from "../executions/executions.types";
-import { ResourceScope } from "../types";
+import { IExecution } from '../executions/executions.types'
+import { ServerScope } from '../types'
 
 export enum WorkflowActions {
   'Run' = 'Run',
@@ -74,6 +74,25 @@ export interface Links2 {
   comments: string;
   edit_tags: string;
 }
+
+export interface Value {
+  id: string
+  name: string
+}
+
+export interface InputOutput {
+  class: string;
+  default_workflow_value: 'input value'
+  label: string
+  name: string
+  choices: []
+  optional: boolean;
+  parent_slot: string;
+  requiredRunInput: boolean;
+  stageName: string
+  values: Value
+}
+
 export interface Stage {
   name: string;
   prev_slot?: any;
@@ -81,11 +100,12 @@ export interface Stage {
   slotId: string;
   app_dxid: string;
   app_uid: string;
-  inputs: any[];
-  outputs: any[];
+  inputs: InputOutput[];
+  outputs: InputOutput[];
   instanceType: string;
   stageIndex: number;
 }
+
 export interface InputSpec {
   stages: Stage[];
 }
@@ -145,7 +165,7 @@ export interface IWorkflow {
   readme: string;
   workflow_series_id: number;
   version: string;
-  scope: ResourceScope | 'private';
+  scope: ServerScope;
   featured: boolean;
   active: boolean;
   links: Links;
