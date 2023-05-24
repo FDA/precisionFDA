@@ -16,7 +16,7 @@ export interface RunJobRequest {
   id: string // application id
   name: string // name of the job
   instance_type: string
-  space_id: string
+  scope: string
   inputs: {
     [key: string]: string | number | boolean,
   };
