@@ -292,7 +292,7 @@
         <div class="panel-body">
           <% @output_files.each do |file| %>
             <div>
-              <a href="<%= file[:url] %>" target="_blank"><%= file[:name] %></a>
+              <a href="<%= file[:url] %>" target="_blank" rel="noopener noreferrer"><%= file[:name] %></a>
             </div>
           <% end %>
         </div>
