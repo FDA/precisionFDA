@@ -24,7 +24,7 @@ end
 
 bash "sync ginas indexes" do
   code <<-EOH
-  aws s3 sync s3://#{node[:gsrs][:indexes_bucket_name]}#{node[:gsrs][:indexes_bucket_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
+  aws s3 sync #{node.run_state.dig("ssm_params", "gsrs", "index_path") || node[:gsrs][:index_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
   chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/ginas.ix/ -R
   EOH
 end
@@ -59,6 +59,9 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/a
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_grop]
   mode 0644
+  variables(
+    :HOST => lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
+  )
 end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/codeSystem.json" do
@@ -80,6 +83,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
     :GSRS_DATABASE_URL => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_URL") },
     :GSRS_DATABASE_USERNAME => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_USERNAME") },
     :GSRS_DATABASE_PASSWORD => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_PASSWORD") },
+    :HOST => lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
   )
 end
 
