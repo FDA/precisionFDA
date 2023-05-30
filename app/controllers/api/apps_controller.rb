@@ -244,21 +244,17 @@ module Api
 
     def import
       if presenter.valid?
-        app, asset = nil
+        asset = DockerImporter.import(
+          context: @context,
+          attached_image: unsafe_params[:attached_image],
+          docker_image: presenter.docker_image,
+        )
 
-        ActiveRecord::Base.transaction do
-          asset = DockerImporter.import(
-            context: @context,
-            attached_image: unsafe_params[:attached_image],
-            docker_image: presenter.docker_image,
-          )
+        presenter.asset = asset
 
-          presenter.asset = asset
+        opts = unsafe_params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
 
-          opts = unsafe_params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
-
-          app = create_app(opts)
-        end
+        app = create_app(opts)
 
         render json: { id: app.uid, asset_uid: asset.try(:uid) }
       else

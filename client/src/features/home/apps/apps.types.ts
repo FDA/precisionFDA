@@ -144,7 +144,7 @@ export interface SelectType {
 export interface JobRunData {
   jobName: string;
   jobLimit: number;
-  spaceScope?: SelectType | null;
+  scope?: SelectType | null;
   instanceType?: ComputeInstance | null;
   inputs: {
     [key: string]: string | boolean | number | ListedFile | undefined,

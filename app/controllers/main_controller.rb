@@ -370,7 +370,11 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       if Session.limit_reached?(user)
         flash[:error] = "You have reached a limit for login. You can use only #{SESSIONS_LIMIT} active sessions."
       else
-        redirect_url = params[:redirect_uri].presence || redirect_url
+        redirect_uri_value = params[:redirect_uri]
+        if redirect_uri_value.presence && Utils.valid_redirect_url?(redirect_uri_value)
+          redirect_url = redirect_uri_value
+        end
+
         Session.where(key: session_id).delete_all
         reset_session
         save_session(user.id, username, token, expiration_time, user.org_id)
