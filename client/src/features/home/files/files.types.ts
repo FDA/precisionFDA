@@ -1,3 +1,5 @@
+import { ServerScope } from "../types"
+
 export enum FilesListActions {
   'Track' = 'Track',
   'Open' = 'Open',
@@ -65,6 +67,7 @@ export interface IFile {
   'added_by': string,
   'created_at': string,
   'featured': boolean,
+  'scope': ServerScope,
   'space_id': string | null,
   'origin': string | {
     text?: string

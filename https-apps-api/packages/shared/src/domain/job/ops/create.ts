@@ -15,8 +15,9 @@ import {
 import { createSyncJobStatusTask } from '../../../queue'
 import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject, UserOpsCtx } from '../../../types'
-import { UserFile } from '../..'
+import { Space, SpaceMembership, UserFile } from '../..'
 import { config } from '../../../config'
+import { getIdFromScopeName, getProjectDxid } from "../../space/space.helper";
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -68,7 +69,21 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       this.inputFiles.push(file)
     }
 
-    this.projectId = userHelper.getProjectToRunApp(user)
+
+    if (input.scope === 'private') {
+      this.projectId = userHelper.getProjectToRunApp(user)
+    } else {
+      let spaceId = getIdFromScopeName(input.scope)
+      const space = await em.findOne(Space, {id: spaceId})
+      const membership = await em.findOne(SpaceMembership, {spaces: spaceId, user: user})
+      if (space == null || membership == null){
+        throw new errors.PermissionError("Unable to execute the app in selected context.",{
+          statusCode: 401
+        })
+      }
+      this.projectId = getProjectDxid(space, membership)
+    }
+
     this.instance =
     // @ts-ignore
     this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
@@ -146,7 +161,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
   private getInputFieldNames(app: App): string[] {
     const inputSpec = this.getAppInputSpec(app)
     const inputSpecFieldNames = inputSpec.map(spec => spec.name)
-    const mandatorySpecFields = inputSpec.filter(spec => spec.optional === false)
+    const mandatorySpecFields = inputSpec.filter(spec => !spec.optional)
     const inputFieldNames = Object.keys(this.jobInput)
     // these are set in endpoint payload
     const presentInputFields = intersection(inputFieldNames, inputSpecFieldNames)
