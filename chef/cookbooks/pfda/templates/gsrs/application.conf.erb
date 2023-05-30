@@ -2,7 +2,7 @@ include "substances-core.conf"
 server.tomcat.max-threads=2000
 ix.home= "<%= @TOMCAT_PATH %>/ginas.ix"
 #application.host= "http://localhost:8080"
-application.host="http://localhost:8080"
+application.host="<%= @HOST %>/ginas/app"
 spring.application.name="substances"
 logging.file.path=<%= @TOMCAT_PATH %>/logs/substances
 ##################################################################

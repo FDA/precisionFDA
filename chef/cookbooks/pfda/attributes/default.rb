@@ -15,8 +15,7 @@ default[:gsrs][:tomcat_memory_max] = "12G"
 default[:gsrs][:tomcat_start] = true
 default[:gsrs][:repo_url] = "https://github.com/dnanexus/gsrs-play-dist.git"
 default[:gsrs][:revision] = "gsrs_PROD"
-default[:gsrs][:indexes_bucket_name] = "gsrs-indexes-#{node.environment}"
-default[:gsrs][:indexes_bucket_path] = "/ginas.ix/"
+default[:gsrs][:index_path] = "s3://gsrs-indexes-#{node.environment}/ginas.ix/"
 
 default[:deploy_user] = deploy_user
 default[:deploy_user_group] = deploy_user

@@ -320,6 +320,9 @@ class AppsController < ApplicationController
       fail "Asset licenses must be accepted"
     end
 
+    # can be 'space-{ID}' or 'private'
+    scope = unsafe_params[:scope]
+
     # Call JupiterLab service if https app is running
     if @app.https?
       input_info = input_spec_preparer.run(@app, inputs)
@@ -333,7 +336,7 @@ class AppsController < ApplicationController
             name: name,
             instanceType: run_instance_type,
             jobLimit: job_limit,
-            scope: Scopes::SCOPE_PRIVATE,
+            scope: scope,
             input: input_info.run_inputs,
           )
         rescue HttpsAppsClient::Error => e
@@ -345,7 +348,7 @@ class AppsController < ApplicationController
       render(json: { id: job.uid }) && return
     end
 
-    space_id = unsafe_params[:space_id]
+    space_id = Space.scope_id(scope) if Space.valid_scope?(scope)
 
     fail "Invalid space_id" if space_id && !@app.can_run_in_space?(@context.user, space_id)
 
