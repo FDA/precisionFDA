@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { NotAllowedPage } from '../../components/NotAllowed'
-import { useAuthUserQuery } from '../../features/auth/useAuthUser'
+import { useAuthUserQuery } from '../../features/auth/api'
 
 const StyledLayoutLoader = styled.div`
   display: flex;
