@@ -114,7 +114,7 @@ module Api
         space = Space.find(params[:space_id])
         meta[:scope] = "space-#{space.id} (#{space.name})"
       else
-        meta[:scope] = params[:public_scope] ? "Public" : "My Home"
+        meta[:scope] = params[:public_scope] ? "Public" : "My Home (Private)"
       end
 
       if params[:folder_id]

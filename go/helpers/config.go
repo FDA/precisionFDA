@@ -6,12 +6,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 var ConfigPath = filepath.Join(getUserHomeDir(), ".pfda_config")
 
 type jsonConfig struct {
 	Key string `json:key`
+	Server string `json:server`
+	Scope  string `json:scope`
 }
 
 func CreateConfig() *jsonConfig {
@@ -60,6 +64,21 @@ func SaveConfig(config *jsonConfig) {
 	} else {
 		fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", ConfigPath)
 	}
+}
+
+func (c *jsonConfig) GetSpaceId() string {
+	parts := strings.Split(c.Scope, "-")
+	// scope is private/public
+	if len(parts) != 2 {
+		return ""
+	}
+	// only can be space-{id} now
+	_, err := strconv.Atoi(parts[1])
+	if (err) != nil {
+		fmt.Println("Error while parsing space-id", err)
+		return ""
+	}
+	return parts[1]
 }
 
 func getUserHomeDir() string {

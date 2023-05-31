@@ -40,7 +40,7 @@ router.post(
 )
 
 router.get('/version/latest', async ctx => {
-  ctx.body = {'version': '2.3'}
+  ctx.body = {'version': '2.4'}
   ctx.status = 200
 })
 
