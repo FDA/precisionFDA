@@ -56,7 +56,7 @@ type InputFlags struct {
 	FlagAdministrator bool
 	FlagGovernment    bool
 	FlagParents       bool
-	FlagForce         bool
+	FlagPublic		  bool
 	FlagLines         int
 }
 
@@ -90,7 +90,7 @@ func (f *InputFlags) Reset() {
 	f.FlagAdministrator = false
 	f.FlagGovernment = false
 	f.FlagParents = false
-	f.FlagForce = false
+	f.FlagPublic = false
 	f.FlagLines = 10
 }
 
@@ -129,7 +129,7 @@ func TestPositionalCmdInWrongPlace(t *testing.T) {
 	defer func() { os.Args = oldArgs }()
 
 	var funcWasCalled = false
-	invokeDownloadFile = func(client precisionfda.IPFDAClient, fileID *string, outputFilePath *string, overwriteFile *string) error {
+	invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, public bool, recursive bool, outputFilePath *string, overwriteFile *string) error {
 		funcWasCalled = true
 		return nil
 	}
@@ -350,7 +350,7 @@ func TestInvokeDownloadFile(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, recursive bool, outputFilePath *string, overwriteFile *string) error {
+	invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, public bool, recursive bool, outputFilePath *string, overwriteFile *string) error {
 		funcWasCalled = true
 		input.Args = args
 		input.FolderID = folderID
@@ -674,10 +674,9 @@ func TestInvokeRmdir(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string, force bool) error {
+	invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string) error {
 		funcWasCalled = true
 		input.Args = args
-		input.FlagForce = force
 		return nil
 	}
 
@@ -690,7 +689,7 @@ func TestInvokeRmdir(t *testing.T) {
 	reset()
 
 	// Case: mkdir with multiple args
-	os.Args = []string{"pfda", "rmdir", "123", "333", "-force", "--key", "AUTH_KEY"}
+	os.Args = []string{"pfda", "rmdir", "123", "333", "--key", "AUTH_KEY"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -711,10 +710,9 @@ func TestInvokeRm(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeRm = func(client precisionfda.IPFDAClient, args *[]string,folderID *string, spaceID *string, force bool) error {
+	invokeRm = func(client precisionfda.IPFDAClient, args *[]string,folderID *string, spaceID *string) error {
 		funcWasCalled = true
 		input.Args = args
-		input.FlagForce = force
 		return nil
 	}
 
@@ -727,7 +725,7 @@ func TestInvokeRm(t *testing.T) {
 	reset()
 
 	// Case: mkdir with multiple args
-	os.Args = []string{"pfda", "rm", "123*", "333", "-force", "--key", "AUTH_KEY"}
+	os.Args = []string{"pfda", "rm", "123*", "333", "--key", "AUTH_KEY"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
