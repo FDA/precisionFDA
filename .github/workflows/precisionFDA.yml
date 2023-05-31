@@ -119,7 +119,6 @@ jobs:
           bower install --allow-root
           cp config/database.ci.yml config/database.yml
           bundle exec rake db:setup
-          mkdir app/assets/packs
           touch app/assets/packs/bundle.js
           touch app/assets/packs/bundle.css
 
