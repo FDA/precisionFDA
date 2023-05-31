@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.3
+// Version 2.4
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 24 // default 16.8MB (min. 5MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.3
+PFDA COMMAND LINE TOOL v2.4
 ****************************
 
 To upload a file:
@@ -67,6 +67,9 @@ To print content of a file:
 
 To print first 10 lines of a file:
    pfda head <FILE_ID> [-key <KEY>]
+
+To get current space id (on workstation):
+   pfda get-space-id [-key <KEY>]
 
 To print version info and exit :
    pfda -version
@@ -126,6 +129,13 @@ var invokeUploadFile = func(client precisionfda.IPFDAClient, inputFilePath *stri
 	return client.UploadFile(*inputFilePath, *folderID, *spaceID, true)
 }
 
+var invokeUploadStdinFile = func(client precisionfda.IPFDAClient, fileName *string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
+	client.SetChunkSize(*inputChunkSize)
+	client.SetNumRoutines(*inputNumRoutines)
+	return client.UploadStdin(*fileName, *folderID, *spaceID, true)
+
+}
+
 var invokeUploadMultipleFiles = func(client precisionfda.IPFDAClient, filePaths *[]string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
 	client.SetChunkSize(*inputChunkSize)
 	client.SetNumRoutines(*inputNumRoutines)
@@ -143,7 +153,6 @@ var invokeUploadAsset = func(client precisionfda.IPFDAClient, assetFolderPath *s
 	client.SetNumRoutines(*inputNumRoutines)
 	return client.UploadAsset(*assetFolderPath, *assetName, *readmeFilePath)
 }
-
 
 var invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, public bool, recursive bool, outputFilePath *string, overwriteFile *string) error {
 	return client.Download(*args, *folderID, *spaceID, public, recursive, *outputFilePath, *overwriteFile)
@@ -165,13 +174,12 @@ var invokeMkdir = func(client precisionfda.IPFDAClient, names *[]string, folderI
 	return client.Mkdir(*names, *folderID, *spaceID, parents)
 }
 
-var invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string, force bool) error {
-	return client.Rmdir(*args, force)
-	// check first param name in client.
+var invokeRmdir = func(client precisionfda.IPFDAClient, args *[]string) error {
+	return client.Rmdir(*args)
 }
 
-var invokeRm = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string, force bool) error {
-	return client.Rm(*args, *folderID, *spaceID, force)
+var invokeRm = func(client precisionfda.IPFDAClient, args *[]string, folderID *string, spaceID *string) error {
+	return client.Rm(*args, *folderID, *spaceID)
 }
 
 var invokeHead = func(client precisionfda.IPFDAClient, arg *string, lines int) error {
@@ -207,7 +215,7 @@ func mainInternal() int {
 	jsonInput := flag.String("json-payload", "", "JSON payload for specified API call (if any).")
 	inputFilePath := flag.String("file", "", "Path to file for 'upload-file'")
 	assetFolderPath := flag.String("root", "", "Path to root folder for 'upload-asset'")
-	assetName := flag.String("name", "", "Name of uploaded asset file. Must end with '.tar' or '.tar.gz'.")
+	fileName := flag.String("name", "", "Name of uploaded file.")
 	readmeFilePath := flag.String("readme", "", "Readme file for uploaded asset. Must end with '.txt' or '.md'.")
 	fileID := flag.String("file-id", "", "File ID of the file to be downloaded")
 	appID := flag.String("app-id", "", "App ID of the app to be described")
@@ -230,7 +238,8 @@ func mainInternal() int {
 	flagJson := flag.Bool("json", false, "[optional] Present result as JSON")
 	flagFilesOnly := flag.Bool("files", false, "[optional] Only present files")
 	flagFoldersOnly := flag.Bool("folders", false, "[optional] Only present folders")
-	flagPublic := flag.Bool("public", false, "[optional] Only present public files")
+	flagPublic := flag.Bool("public", false, "[optional] Only present public scope")
+	flagMe := flag.Bool("me", false, "[optional] Only present private scope")
 	flagLocked := flag.Bool("locked", false, "[optional] Only present locked spaces")
 	flagUnactivated := flag.Bool("unactivated", false, "[optional] Only present unactivated spaces")
 	flagProtected := flag.Bool("protected", false, "[optional] Only present protected spaces")
@@ -242,8 +251,6 @@ func mainInternal() int {
 	flagOverwriteFile := flag.String("overwrite", "", "[optional] Preselect overwrite option what to do with already existing file.")
 	flagRecursive := flag.Bool("recursive", false, "[optional] Recurse into a directory.")
 	flagRecursiveShort := flag.Bool("r", false, "[optional] Recurse into a directory.")
-	flagForce := flag.Bool("force", false, "[optional] Force removal of files.")
-	flagForceShort := flag.Bool("f", false, "[optional] Force removal of files.")
 	flagParents := flag.Bool("parents", false, "[optional] No error if existing, make parent directories as needed")
 	flagParentsShort := flag.Bool("p", false, "[optional] No error if existing, make parent directories as needed")
 	flagLines := flag.Int("lines", 10, "[optional] Number of lines to print, default 10")
@@ -267,17 +274,25 @@ func mainInternal() int {
 		if *command == "" {
 			*command = positionalCmd
 		} else {
-			fmt.Println("Error: both positional command and -cmd option specified. Please remove one or the other")
-			return 1
+			return helpers.InputError("Error input >>> both positional command and -cmd option specified. Please remove one or the other")
 		}
+	}
+
+	// always check if config != nil
+	config, configErr := helpers.GetConfig()
+	if configErr != nil && !os.IsNotExist(configErr) {
+		fmt.Println("Error >>> ", configErr)
 	}
 
 	if *server != "" && *server != defaultURL {
 		pfdaclient = precisionfda.NewPFDAClient(*server)
 	} else {
-		pfdaclient = precisionfda.NewPFDAClient(defaultURL)
+		if config != nil && config.Server != "" {
+			pfdaclient = precisionfda.NewPFDAClient(config.Server)
+		} else {
+			pfdaclient = precisionfda.NewPFDAClient(defaultURL)
+		}
 	}
-
 	pfdaclient.Platform = OsArch
 
 	b, err := strconv.ParseBool(*skipVerify)
@@ -302,31 +317,33 @@ func mainInternal() int {
 	if *pfda_version {
 		printInfo(pfdaclient)
 		// if only -version without any command , exit
-		if *command == "" {
-			checkLatestVersion(pfdaclient)
-			return 0
-		}
+		checkLatestVersion(pfdaclient)
+		return 0
 	}
 
-	// PFDA-4194 - removed -force flags, but kept the logic for now
-	force := *flagForce || *flagForceShort
-	force = false // forcing false value
 	recursive := *flagRecursive || *flagRecursiveShort
 	parents := *flagParents || *flagParentsShort
 	help := *flagHelp || *flagHelpShort
 
-	if *authKey == "" && !help {
+	if !help && *command != "" {
 
-		config, err := helpers.GetConfig()
-		if err != nil {
-			helpers.PrintError(err)
-			return 1
+		if config == nil {
+			if *authKey == "" {
+				return helpers.InputError("Missing authorization key >>> Could not find config file and no key was provided with the command.")
+			}
+			pfdaclient.AuthKey = *authKey
+		} else {
+			if *authKey == "" {
+				pfdaclient.AuthKey = config.Key
+			} else {
+				pfdaclient.AuthKey = *authKey
+			}
+			if *spaceID == "" {
+				if !*flagMe && !*flagPublic {
+					*spaceID = config.GetSpaceId()
+				}
+			}
 		}
-
-		pfdaclient.AuthKey = config.Key
-	} else {
-		// '-key' provided, set AuthKey
-		pfdaclient.AuthKey = *authKey
 	}
 
 	switch *command {
@@ -344,12 +361,12 @@ func mainInternal() int {
 			return helpers.InputError(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory.", *assetFolderPath))
 		}
 
-		if *assetName == "" {
+		if *fileName == "" {
 			return helpers.InputError("Asset name (ending with .tar or .tar.gz) is required. Provide it as [-name <ASSET_NAME>].")
 		}
 
-		if !strings.HasSuffix(*assetName, ".tar") && !strings.HasSuffix(*assetName, ".tar.gz") {
-			return helpers.InputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *assetName))
+		if !strings.HasSuffix(*fileName, ".tar") && !strings.HasSuffix(*fileName, ".tar.gz") {
+			return helpers.InputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *fileName))
 		}
 
 		if *readmeFilePath == "" {
@@ -361,7 +378,7 @@ func mainInternal() int {
 			return helpers.InputError(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory.", *readmeFilePath))
 		}
 
-		err = invokeUploadAsset(pfdaclient, assetFolderPath, assetName, readmeFilePath, inputChunkSize, inputNumRoutines)
+		err = invokeUploadAsset(pfdaclient, assetFolderPath, fileName, readmeFilePath, inputChunkSize, inputNumRoutines)
 		if err != nil {
 			helpers.PrintError(err)
 			return 1
@@ -372,13 +389,42 @@ func mainInternal() int {
 			return helpers.PrintUploadFileHelp()
 		}
 
-		if *inputFilePath == "" && len(args) == 0 {
-			return helpers.InputError("Path for upload is required. Please provide it as an argument or via flag as [-file <FILE_PATH>].")
+		stdinData := false
+		stdinFile := os.Stdin
+
+		fi, _ := os.Stdin.Stat()
+		if (fi.Mode() & os.ModeCharDevice) == 0 {
+			stdinData = true
 		}
 
 		// if -file flag used, override args.
 		if *inputFilePath != "" {
 			args = []string{*inputFilePath}
+		}
+
+		if len(args) == 0 && stdinData {
+			if *fileName == "" {
+				return helpers.InputError("Filename for stdin input is required. Provide it as [-name <FILE_NAME>]")
+			}
+			err := invokeUploadStdinFile(pfdaclient, fileName, folderID, spaceID, inputChunkSize, inputNumRoutines)
+			if err != nil {
+				helpers.PrintError(err)
+				return 1
+			}
+			defer stdinFile.Close()
+			break
+		}
+
+		if len(args) != 0 && stdinData {
+			return helpers.InputError("Cannot combine multiple file sources. Use either args or stdin.")
+		}
+
+		if len(args) == 0 {
+			return helpers.InputError("Path for upload is required. Please provide it as an argument or stdin.")
+		}
+
+		if *fileName != "" {
+			fmt.Println(">> Filename flag ignored for upload")
 		}
 
 		// uploading more than one file/folder
@@ -548,7 +594,7 @@ func mainInternal() int {
 			return helpers.PrintRmdirHelp()
 		}
 
-		err := invokeRmdir(pfdaclient, &args, force)
+		err := invokeRmdir(pfdaclient, &args)
 		if err != nil {
 			helpers.PrintError(err)
 			return 1
@@ -559,7 +605,7 @@ func mainInternal() int {
 			return helpers.PrintRmHelp()
 		}
 
-		err := invokeRm(pfdaclient, &args, folderID, spaceID, force)
+		err := invokeRm(pfdaclient, &args, folderID, spaceID)
 		if err != nil {
 			helpers.PrintError(err)
 			return 1
@@ -585,26 +631,34 @@ func mainInternal() int {
 			return 1
 		}
 
+	case "get-space-id":
+		if help {
+			return helpers.PrintGetSpaceIdHelp()
+		}
 
-	// TEMPORARILY REMOVED FROM CLI v2.3
-	//case "refresh-key":
-	//	// add option for auto-refresh later
-	//	newToken, err := invokeRefreshToken(pfdaclient, false)
-	//	if err != nil {
-	//		// do not print the error as there is too much info for regular user. Most likely 401 - token already expired.
-	//		fmt.Printf("There was an error during key refresh action. Please provide new Key from pFDA website.\n")
-	//		return 1
-	//	}
-	//
-	//	config, err := helpers.GetConfig()
-	//	if err != nil {
-	//		fmt.Printf("Could not save authorization key in config file '%s': %s\n", helpers.ConfigPath, err.Error())
-	//		return 1
-	//	}
-	//
-	//	config.Key = newToken
-	//	helpers.SaveConfig(config)
-	//	return 0
+		if config == nil || config.GetSpaceId() == "" {
+			// error while getting config or spaceID not set
+			fmt.Println("No space detected.")
+			return 1
+		}
+		fmt.Println(config.GetSpaceId())
+
+	case "refresh-key":
+		// add option for auto-refresh later
+		newToken, err := invokeRefreshToken(pfdaclient, false)
+		if err != nil {
+			fmt.Printf("There was an error during key refresh action. Please provide new Key from pFDA website.\n")
+			return 1
+		}
+
+		if configErr != nil {
+			fmt.Printf("Could not save authorization key in config file '%s': %s\n", helpers.ConfigPath, err.Error())
+			return 1
+		}
+
+		config.Key = newToken
+		helpers.SaveConfig(config)
+		return 0
 
 	case "api":
 		if *apiRoute == "" {
@@ -629,24 +683,15 @@ func mainInternal() int {
 
 	default:
 		// Invalid, non-empty command
-		fmt.Printf("Command '%s' not found. Must be one of \n'upload-file' \n'upload-asset' \n'download' \n'ls' \n'list-spaces' \n'describe-app' \n'describe-workflow'\n", *command)
+		fmt.Printf("Command '%s' not found. Must be one of \n'cat' \n'describe-app' \n'describe-workflow' \n'download' \n'get-space-id' \n'head \n'list-spaces' \n'ls' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n", *command)
 		return 1
 	}
 
 	// Write configuration and save key
 	if *authKey != "" {
-		config, err := helpers.GetConfig()
-
-		if err != nil {
-			if os.IsNotExist(err) {
-				config = helpers.CreateConfig()
-			} else {
-				fmt.Printf("You will need to submit authorization key in the command line in the next operation.\n")
-				// exit gracefully, without panic
-				return 0
-			}
+		if configErr != nil && os.IsNotExist(configErr) {
+			config = helpers.CreateConfig()
 		}
-
 		config.Key = *authKey
 		helpers.SaveConfig(config)
 	}

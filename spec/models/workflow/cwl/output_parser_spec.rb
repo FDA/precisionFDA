@@ -8,7 +8,7 @@ RSpec.describe Workflow::Cwl::OutputParser, type: :model do
 
   let(:user) { create(:user) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
-  let(:raw) { IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
+  let(:raw) { File.read("spec/support/files/workflow_import/workflow.cwl") }
   let(:cwl_parser) { Workflow::Cwl::Parser.new(raw, context) }
   let(:step_parser) { cwl_parser.steps_objects.first }
   let(:parser) { step_parser.output_objects.second }

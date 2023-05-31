@@ -40,7 +40,7 @@ import {
   InputSpec,
   INPUT_TYPES_CLASSES,
   JobRunData,
-  ListedFile,
+  ListedFile, SelectType,
 } from '../apps.types'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
@@ -58,7 +58,7 @@ import {
   TopboxItem,
   WrapSelect,
 } from './styles'
-import { fetchAndConvertSelectableSpaces } from './job-run-helper'
+import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 
 const convertToListedFile = (file: IFile): ListedFile =>
   ({
@@ -93,6 +93,7 @@ const prepareDefaultValues = (
     jobName: app ? app.name : '',
     jobLimit: user ? user.job_limit: 0,
     instanceType: defaultInstance,
+    scope: {label: "Private", value: "private"} as SelectType,
     inputs: {},
   }
   inputSpecs.forEach(inputSpec => {
@@ -154,7 +155,7 @@ const prepareValidations = (
       ),
     instanceType: Yup.object().nullable().required('Instance type is required'),
     inputs: Yup.object().shape(inputs),
-    spaceScope: spaceValidations,
+    scope: spaceValidations,
   }
 
   return Yup.object().shape(validationObject)
@@ -199,7 +200,7 @@ const createRequestObject = (
     name: vals.jobName,
     job_limit: vals.jobLimit,
     instance_type: vals.instanceType?.value,
-    space_id: vals.spaceScope?.value,
+    scope: vals.scope?.value,
     inputs,
   } as RunJobRequest
 }
@@ -252,6 +253,16 @@ const JobRun = ({
   const defaultValues = prepareDefaultValues(app, inputSpecs, user, meta, computeInstances, defaultFiles)
   const validationSchema = prepareValidations(inputSpecs, user, app.scope)
 
+  const { data: selectableContexts } = useQuery(
+      ['selectable-contexts', app.scope],
+      () => fetchAndConvertSelectableContexts(app.entity_type),
+      {
+        onError: () => {
+          toast.error('Error loading contexts')
+        },
+      },
+  )
+
   const { data: selectableSpaces } = useQuery(
     ['selectable-spaces', app.scope],
     () => fetchAndConvertSelectableSpaces(app.scope),
@@ -282,11 +293,12 @@ const JobRun = ({
     mutationFn: (payload: RunJobRequest) => runJob(payload),
     onSuccess: res => {
       if (res?.id) {
-        const spaceId = getValues().spaceScope?.value
-        if (spaceId) {
-          history.push(`/spaces/${spaceId}/executions/${res?.id}`)
-        } else {
+        const scope = getValues().scope?.value
+        if (scope === 'private') {
           history.push(`/home/jobs/${res?.id}`)
+        } else {
+          const spaceId = scope.replace("space-", "")
+          history.push(`/spaces/${spaceId}/executions/${res?.id}`)
         }
       } else if (res?.error) {
         toast.error(res.error.message)
@@ -379,11 +391,41 @@ const JobRun = ({
                   <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                 </FieldGroup>
               </StyledRow>
+              {app.entity_type === "https" && (
+                  <WrapSelect>
+                    <FieldGroup label="Context" required>
+                      <Controller
+                          name="scope"
+                          control={control}
+                          render={({ field }) => (
+                              <Select
+                                  options={selectableContexts}
+                                  placeholder="Choose..."
+                                  onChange={value => {
+                                    field.onChange(value)
+                                    field.onBlur()
+                                  }}
+                                  isClearable
+                                  isSearchable
+                                  onBlur={field.onBlur}
+                                  value={field.value}
+                                  isDisabled={isSubmitting}
+                              />
+                          )}
+                      />
+                      <ErrorMessageForField
+                          errors={errors}
+                          fieldName="scope"
+                      />
+                    </FieldGroup>
+                  </WrapSelect>
+              )
+              }
               {app.scope && app.scope.startsWith('space-') && (
                 <WrapSelect>
                   <FieldGroup label="Space scope" required>
                     <Controller
-                      name="spaceScope"
+                      name="scope"
                       control={control}
                       render={({ field }) => (
                         <Select
@@ -403,7 +445,7 @@ const JobRun = ({
                     />
                     <ErrorMessageForField
                       errors={errors}
-                      fieldName="spaceScope"
+                      fieldName="scope"
                     />
                   </FieldGroup>
                 </WrapSelect>
