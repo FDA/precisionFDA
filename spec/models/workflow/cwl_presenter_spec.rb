@@ -7,7 +7,7 @@ RSpec.describe Workflow::CwlPresenter, type: :model do
 
   context "when input data is cwl file" do
     let(:raw) do
-      { file: IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
+      { file: File.read("spec/support/files/workflow_import/workflow.cwl") }
     end
     let(:stages) { presenter.send(:cwl_stages_object) }
     let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }

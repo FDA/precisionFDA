@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe App::CwlParser do
-  let(:cwl_file_content) { IO.read(Rails.root.join("spec", "support", "files", "docker_pull.cwl")) }
+  let(:cwl_file_content) { File.read("spec/support/files/docker_pull.cwl") }
   let(:asset) do
     instance_double(Asset, uid: "app-1-1", file_paths: ["/work/repo_image_0.1.0.tar.gz"])
   end
