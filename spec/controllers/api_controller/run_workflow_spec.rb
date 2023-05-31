@@ -167,6 +167,9 @@ RSpec.describe ApiController, type: :controller do
         },
       "singleContext": true,
       "project": workflow.project,
+      "timeoutPolicyByExecutable": {
+        app.dxid => { "*" => { "days" => 5 } },
+      },
     }
   end
 

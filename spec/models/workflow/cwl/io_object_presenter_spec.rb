@@ -8,7 +8,7 @@ RSpec.describe Workflow::Cwl::IOObjectPresenter, type: :model do
 
   let(:user) { create(:user) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
-  let(:workflow_cwl) { IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
+  let(:workflow_cwl) { File.read("spec/support/files/workflow_import/workflow.cwl") }
   let(:steps_json) { YAML.safe_load(workflow_cwl)["steps"] }
   let(:step_json) { steps_json.slice("app-776-second-step-1") }
   let(:stages_presenter) { Workflow::Cwl::StagesPresenter.new(steps_json, context) }
