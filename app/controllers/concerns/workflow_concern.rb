@@ -125,10 +125,16 @@ module WorkflowConcern
       end
     end
 
+    timeout_policy = {}
+    workflow.stages_apps.each do |app|
+      timeout_policy[app.dxid] = { "*" => { "days" => 5 } }
+    end
+
     project = workflow.project
     workflow_params = {
       name: analysis_name,
       singleContext: true,
+      timeoutPolicyByExecutable: timeout_policy,
     }
 
     api = DNAnexusAPI.new(@context.token)

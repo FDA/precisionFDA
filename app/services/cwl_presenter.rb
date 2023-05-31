@@ -19,7 +19,7 @@ class CwlPresenter
 
   def initialize(cwl_string)
     @cwl_string = cwl_string.strip
-    cwl_hash = YAML.load(cwl_string)
+    cwl_hash = YAML.safe_load(cwl_string)
     @cwl_data = cwl_hash.is_a?(Hash) ? cwl_hash : {}
   end
 
