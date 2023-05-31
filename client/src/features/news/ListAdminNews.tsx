@@ -15,7 +15,7 @@ import { BackLink } from '../../components/Page/PageBackLink'
 import { PageContainerMargin } from '../../components/Page/styles'
 import ExternalLink from '../../components/Controls/ExternalLink'
 import { UserLayout } from '../../layouts/UserLayout'
-import { useAuthUserQuery } from '../auth/useAuthUser'
+import { useAuthUserQuery } from '../auth/api'
 import { NewsItem } from './types'
 import { useNewsAdminAllRequest } from './useNewsListQuery'
 
