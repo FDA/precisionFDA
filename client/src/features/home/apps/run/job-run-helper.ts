@@ -36,7 +36,7 @@ const fetchAndConvertSelectableSpaces = async (
     return spaces.map(space => ({
       isDisabled: false,
       label: getTitle(space),
-      value: space.id,
+      value: `space-${space.id}`,
     }))
   }
   return []
@@ -48,11 +48,11 @@ const fetchAndConvertSelectableContexts = async (entity_type: string): Promise<
       value: string
     }[]
 > => {
-    if (entity_type === "https") {
-        let spaces: EditableSpace[] = await fetchEditableSpacesList()
+    if (entity_type === 'https') {
+        const spaces: EditableSpace[] = await fetchEditableSpacesList()
         const options = spaces.map(s => ({
-            label: s.title + " - " + s.scope,
-            value: s.scope
+            label: `${s.title} - ${s.scope}`,
+            value: s.scope,
         }))
 
         return [{label: 'Private', value: 'private'}, ...options]
