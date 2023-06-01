@@ -13,6 +13,7 @@ import { StyledRefresh } from './details/styles'
 import { syncFilesRequest, workstationRefreshAPIKeyRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionActions } from './useExecutionSelectActions'
+import { useAuthUser } from "../../auth/useAuthUser";
 
 export const ExecutionActionsRow = ({
   scope,
@@ -26,6 +27,7 @@ export const ExecutionActionsRow = ({
   isFetching: boolean
 }) => {
   const queryCache = useQueryClient()
+  const user = useAuthUser()
 
   const syncFiles = useMutation({
     mutationKey: ['sync-files'],
@@ -60,6 +62,14 @@ export const ExecutionActionsRow = ({
     }
   }
 
+  const onOpenWorkstationClick = () => {
+    if (execution.launched_by === user?.full_name) {
+      window.open(execution.links.open_external,'_blank','noopener,noreferrer')
+    } else {
+      toast.error(`This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution.`)
+    }
+  }
+
   return (
     <>
       {['terminated', 'failed', 'done'].includes(execution.state) ? null : (
@@ -68,14 +78,9 @@ export const ExecutionActionsRow = ({
         </StyledRefresh>
       )}
       {execution.links.open_external && (
-        <ButtonSolidBlue
-          as="a"
-          target="_blank"
-          data-turbolinks="false"
-          href={execution.links.open_external}
-        >
-          Open Workstation
-        </ButtonSolidBlue>
+          <ButtonSolidBlue onClick={onOpenWorkstationClick}>
+            Open Workstation
+          </ButtonSolidBlue>
       )}
       {hasWorkstationAPI && execution.links.open_external && (
         <ButtonSolidBlue onClick={() => actions['Snapshot'].func()}>Snapshot</ButtonSolidBlue>

@@ -22,4 +22,13 @@ module Utils
       sleep(delay) if item != collection.last
     end
   end
+
+  # Checks if the url is a valid path
+  # @param redirect_url The url
+  def valid_redirect_url?(redirect_url)
+    path_regex = %r{^[\/?#]\w+}
+    matched = path_regex.match(redirect_url)
+
+    matched.presence
+  end
 end

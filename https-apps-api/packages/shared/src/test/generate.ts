@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
+import crypto from 'crypto'
 import { DateTime } from 'luxon'
 import { App, entities } from '../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
@@ -42,7 +43,7 @@ const random = {
   firstName: () => chance.first(),
   lastName: () => chance.last(),
   email: () => chance.email(),
-  password: () => chance.string({ length: 20 }),
+  password: () => crypto.randomBytes(64).toString('hex'),
   dxstr: (): string => nanoid(),
   word: () => chance.word(),
   description: () => chance.sentence({ words: 2 }),
@@ -398,7 +399,7 @@ const space = {
     spaceId: null as any,
     hostProject: null as any,
     guestProject: null as any,
-    description: 'desc', 
+    description: 'desc',
     meta: 'meta',
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({

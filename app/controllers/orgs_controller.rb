@@ -1,6 +1,5 @@
 class OrgsController < ApplicationController
   include ErrorProcessable
-  skip_before_action :verify_authenticity_token
 
   def update
     org = current_user.org
