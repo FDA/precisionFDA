@@ -7,7 +7,7 @@ import { pluralize } from '../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
-import { useAuthUserQuery } from './useAuthUser'
+import { useAuthUserQuery } from './api'
 import {
   onLogInWithSSO,
   useSiteSettingsSsoButtonQuery,

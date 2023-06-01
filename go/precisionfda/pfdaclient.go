@@ -1,6 +1,7 @@
 package precisionfda
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"dnanexus.com/precision-fda-cli/helpers"
@@ -8,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/url"
@@ -31,7 +31,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.3 "
+const userAgent = "precisionFDA CLI/2.4 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 67MB (min. 5MB)
 const minRoutines = 1
@@ -50,7 +50,9 @@ const https = "https://"
 type IPFDAClient interface {
 	CallAPI(route string, data string, outputFile string) error
 	UploadAsset(rootFolderPath string, name string, readmeFilePath string) error
+	Upload(file io.ReadCloser, path string, folderID string, spaceID string, size int64, withProgressBar bool) error
 	UploadFile(path string, folderID string, spaceID string, withProgressBar bool) error
+	UploadStdin(fileName string, folderID string, spaceID string, withProgressBar bool) error
 	UploadFolder(folderPath string, folderID string, spaceID string) error
 	UploadMultipleFiles(paths []string, folderID string, spaceID string) error
 	DownloadFile(arg string, outputFilePath string, overwrite string) error
@@ -59,20 +61,19 @@ type IPFDAClient interface {
 	ListSpaces(flags map[string]bool) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
 	Mkdir(names []string, folderID string, spaceID string, parents bool) error
-	Rmdir(args []string, force bool) error
-	Rm(args []string, folderID string, spaceID string, force bool) error
+	Rmdir(args []string) error
+	Rm(args []string, folderID string, spaceID string) error
 	Head(arg string, lines int) error
 
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
-
 	SetChunkSize(chunkSize int)
 	SetNumRoutines(numRoutines int)
 }
 
 type PFDAClient struct {
 	BaseURL         string
-	Platform		string
+	Platform        string
 	NumRoutines     int
 	ChunkSize       int
 	MinRoutines     int
@@ -260,7 +261,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	}
 
 	// Read in the readme all at once
-	readmeBuf, err := ioutil.ReadFile(readmeFilePath)
+	readmeBuf, err := os.ReadFile(readmeFilePath)
 	if err != nil {
 		return err
 	}
@@ -344,6 +345,44 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 // If folderID is not empty, the file will be uploaded to the specified folder
 // If spaceID is empty, the file will be uploaded to the user's home
 func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, withProgressBar bool) error {
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	size := info.Size()
+	if size > maxFileSize {
+		return fmt.Errorf(">> Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, size, maxFileSize)
+	}
+
+	if size == 0 {
+		return fmt.Errorf(">> Size of file '%s' is 0. Uploading an empty file is not allowed.", path)
+	}
+
+	err = c.Upload(&*file, path, folderID, spaceID, size, withProgressBar)
+	c.HandleError(err)
+
+	return nil
+}
+
+func (c *PFDAClient) UploadStdin(fileName string, folderID string, spaceID string, withProgressBar bool) error {
+	// we do not know the size, stdin is buffered stream of data
+	size := int64(1)
+	// stdin has to be wrapped in those - otherwise not working as expected with linux piping
+	stdin := io.NopCloser(bufio.NewReader(os.Stdin))
+	err := c.Upload(stdin, fileName, folderID, spaceID, size, withProgressBar)
+	c.HandleError(err)
+	return nil
+}
+
+func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, spaceID string, size int64, withProgressBar bool) error {
 	createURL := c.BaseURL + "/api/create_file"
 	closeURL := c.BaseURL + "/api/close_file"
 
@@ -363,6 +402,7 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 		parentType = "Job"
 		parentId = dxJobId
 	}
+
 	jsonData, err := json.Marshal(jsonCreateFilePayload{
 		Name:       filepath.Base(path),
 		Desc:       "",
@@ -373,26 +413,6 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 	})
 	if err != nil {
 		return err
-	}
-
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	info, err := f.Stat()
-	if err != nil {
-		return err
-	}
-
-	size := info.Size()
-
-	if size > maxFileSize {
-		return fmt.Errorf(">> Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, size, maxFileSize)
-	}
-
-	if size == 0 {
-		return fmt.Errorf(">> Size of file '%s' is 0. Uploading an empty file is not allowed.", path)
 	}
 
 	fileID, err := c.createFileID(createURL, jsonData)
@@ -407,7 +427,7 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 	}
 
 	wg := c.initWaitGroup(fileID, chunkPool, &size, withProgressBar)
-	c.readAndChunk(f, chunkPool, &size)
+	c.readAndChunk(file, chunkPool, &size)
 
 	close(chunkPool)
 	wg.Wait()
@@ -821,7 +841,7 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 	return nil
 }
 
-func (c *PFDAClient) Rmdir(args []string, force bool) error {
+func (c *PFDAClient) Rmdir(args []string) error {
 
 	c.ContinueOnError = len(args) > 1
 
@@ -848,7 +868,7 @@ func (c *PFDAClient) Rmdir(args []string, force bool) error {
 			continue
 		}
 
-		if response[0].Children == 0 || force {
+		if response[0].Children == 0 {
 			err := c.RemoveDir(arg)
 			c.HandleError(err)
 		} else {
@@ -859,7 +879,7 @@ func (c *PFDAClient) Rmdir(args []string, force bool) error {
 	return nil
 }
 
-func (c *PFDAClient) Rm(args []string, folderID string, spaceID string, force bool) error {
+func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 
 	c.ContinueOnError = len(args) > 1
 
@@ -886,54 +906,44 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string, force bo
 			return err
 		}
 
-		if force && len(response) > 0 {
-			// force delete - do not ask just delete all
-			uids := make([]string, 0)
-			for _, file := range response {
-				uids = append(uids, file.Uid)
-			}
-			err := c.RemoveFile(uids)
-			c.HandleError(err)
-		} else {
-			toBeDeletedCount := len(response)
+		toBeDeletedCount := len(response)
+		if toBeDeletedCount > 1 {
 			// given arg matches more files, let user select one and delete it
-			if toBeDeletedCount > 1 {
-				if !helpers.ContainsWildcard(arg) {
-					result := pickFile(response, "Multiple files found matching the given name, select which to delete")
-					err := c.RemoveFile([]string{result})
-					c.HandleError(err)
-					// arg processed, continue to next
-					continue
+			if !helpers.ContainsWildcard(arg) {
+				result := pickFile(response, "Multiple files found matching the given name, select which to delete")
+				err := c.RemoveFile([]string{result})
+				c.HandleError(err)
+				// arg processed, continue to next
+				continue
+			}
+			// wildcard used, user wants to match more files, just inform about the count.
+			agree := yesNo(fmt.Sprintf("%d files match the given arg \"%s\", are you sure you want to continue?", toBeDeletedCount, arg))
+			if agree {
+				uids := make([]string, 0)
+				for _, file := range response {
+					uids = append(uids, file.Uid)
 				}
-				// wildcard used, user wants to match more files, just inform about the count.
-				agree := yesNo(fmt.Sprintf("%d files match the given arg \"%s\", are you sure you want to continue?", toBeDeletedCount, arg))
-				if agree {
-					uids := make([]string, 0)
-					for _, file := range response {
-						uids = append(uids, file.Uid)
-					}
-					err := c.RemoveFile(uids)
-					c.HandleError(err)
-					// arg processed, continue to next
-					continue
-				}
+				err := c.RemoveFile(uids)
+				c.HandleError(err)
+				// arg processed, continue to next
+				continue
+			}
 
-				fmt.Println(">> Delete aborted")
-				// arg processed, continue to next
-				continue
-			}
-			if toBeDeletedCount == 0 {
-				fmt.Println(">> Target file not found or inaccessible")
-				// arg processed, continue to next
-				continue
-			}
-			// single file matches the name, delete it
-			err := c.RemoveFile([]string{response[0].Uid})
-			c.HandleError(err)
+			fmt.Println(">> Delete aborted")
 			// arg processed, continue to next
 			continue
-
 		}
+		if toBeDeletedCount == 0 {
+			fmt.Println(">> Target file not found or inaccessible")
+			// arg processed, continue to next
+			continue
+		}
+		// single file matches the name, delete it
+		err = c.RemoveFile([]string{response[0].Uid})
+		c.HandleError(err)
+		// arg processed, continue to next
+		continue
+
 	}
 	return nil
 }
@@ -965,8 +975,8 @@ func (c *PFDAClient) GetLatestVersion() (string, error) {
 
 	_, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
-			return "", err
-		}
+		return "", err
+	}
 
 	var resultJSON map[string]interface{}
 	err = json.Unmarshal(body, &resultJSON) // do this just to ensure the json is valid
@@ -1050,7 +1060,6 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 	return newFolderID, nil
 }
 
-// add lines option.
 func (c *PFDAClient) Head(arg string, lines int) error {
 
 	if !helpers.IsFileId(arg) {
@@ -1201,7 +1210,7 @@ func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte
 	helpers.CheckErr(err)
 	defer resp.Body.Close()
 	status = resp.Status
-	body, _ = ioutil.ReadAll(resp.Body)
+	body, _ = io.ReadAll(resp.Body)
 
 	if !strings.HasPrefix(status, "2") {
 		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
@@ -1221,7 +1230,7 @@ func (c *PFDAClient) makeRequestWithHeadersFail(requestType string, url string, 
 	defer resp.Body.Close()
 
 	status = resp.Status
-	body, _ = ioutil.ReadAll(resp.Body)
+	body, _ = io.ReadAll(resp.Body)
 
 	if !strings.HasPrefix(status, "2") {
 		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
@@ -1287,7 +1296,7 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 }
 
 func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
-	req.Header.Set("User-Agent", userAgent + "(" + c.Platform + ")")
+	req.Header.Set("User-Agent", userAgent+"("+c.Platform+")")
 	req.Header.Set("Authorization", "Key "+c.AuthKey)
 	req.Header.Set("Content-Type", "application/json")
 }
