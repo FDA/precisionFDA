@@ -249,8 +249,9 @@ const WorkflowRun = (
     mutationFn: (payload: RunWorkflowRequest) => runWorkflow(payload),
     onSuccess: (res) => {
       if (res?.id) {
-        const spaceId = getValues().spaceScope?.value
-        if (spaceId) {
+        const spaceScope = getValues().spaceScope?.value
+        if (spaceScope) {
+          const spaceId = spaceScope.replace('space-', '')
           history.push(`/spaces/${spaceId}/executions`)
         } else {
           history.push(`/home/workflows/${workflow.uid}/jobs`)
