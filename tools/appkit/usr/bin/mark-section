@@ -1,0 +1,2 @@
+#!/bin/bash
+echo -n "Error while ${@} (please refer to the job log for more information)." | jq -R -s '{error: {type: "AppError", message: .}}' > /home/dnanexus/job_error.json
