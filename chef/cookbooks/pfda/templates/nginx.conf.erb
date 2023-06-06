@@ -12,7 +12,8 @@ events {
 
 http {
   gzip on;
-  gzip_types text/plain text/html text/css application/xml application/json application/javascript;
+  gzip_comp_level 4;
+  gzip_types text/plain text/html text/css application/xml application/json application/javascript image/svg+xml image/bmp font/eot font/otf font/ttf;
   gzip_proxied no-cache no-store private expired auth;
   server_tokens off;
   client_max_body_size 50M;
