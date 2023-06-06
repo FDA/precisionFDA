@@ -76,3 +76,10 @@ execute "run the worker" do
   command "pm2 startOrReload ./pm2-worker.json"
   environment lazy { ENV.to_hash }
 end
+
+execute "setup systemd unit" do
+  cwd https_apps_dir
+  user 'root'
+  command "pm2 startup -u #{node[:deploy_user]} --hp /home/#{node[:deploy_user]}"
+  environment lazy { ENV.to_hash }
+end
