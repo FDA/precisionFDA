@@ -42,7 +42,7 @@ module.exports = ({ urlLoaderOptions }) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        test: /\.(png|jpg)$/,
+        test: /\.(png|jpg|svg)$/,
         exclude: /node_modules/,
         loader: 'url-loader',
         options: urlLoaderOptions || {
