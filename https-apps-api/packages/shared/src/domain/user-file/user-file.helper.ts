@@ -12,7 +12,8 @@ import { FolderRepository } from './folder.repository'
 import { nodeQueryFilter, uidListInput } from './user-file.input'
 import { UserFileRepository } from './user-file.repository'
 import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
-import { nodeModuleNameResolver } from 'typescript'
+import { PermissionError } from '../../errors'
+import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 
 const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
   if (node instanceof Folder) {
@@ -338,7 +339,7 @@ const belongsToSpace = (spaces: Collection<Space>, spaceId: number): boolean => 
   return false
 }
 
-const validateEditableBy = async (node: Node, currentUser: User) => {
+const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser: User) => {
   if (node.locked) {
     throw new Error('Locked items cannot be removed.')
   }
@@ -349,16 +350,22 @@ const validateEditableBy = async (node: Node, currentUser: User) => {
   }
   if (isValidScopeName(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
-    for (const membership of currentUser.spaceMemberships) {
-      if ([SPACE_MEMBERSHIP_ROLE.ADMIN,
-        SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-        SPACE_MEMBERSHIP_ROLE.LEAD]
-        .includes(membership.role) && belongsToSpace(membership.spaces, spaceId)) {
-        return
-      }
+    const space = await em.findOne(
+      entities.Space,
+      {
+        id: spaceId,
+        state: SPACE_STATE.ACTIVE,
+        spaceMemberships: {
+          user: {
+            id: currentUser.id
+          },
+          role: CAN_EDIT_ROLES
+        }
+      })
+    if (!space) {
+      throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
     }
   }
-  throw new Error(`You have no permissions to remove '${node.name}'.`)
 }
 
 const findFileOrAssetWithUid = async (
