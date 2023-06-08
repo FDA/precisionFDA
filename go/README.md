@@ -1,8 +1,8 @@
 # precisionFDA CLI
 
-##### Written using [fork of Go that uses BoringCrypto](https://github.com/golang/go/tree/dev.boringcrypto)
+##### Written using Go
 
-BoringCrypto fork of Go is used because of [FIPS 140-2 compliance](https://boringssl.googlesource.com/boringssl/+/master/crypto/fipsmodule/FIPS.md). Currently using go1.16.7b7 (N.B. the tag name derived <GoVersion>b<BoringCryptoVersion>)
+As of Go 1.18 the BoringCrypto fork has been merged with the main branch. BoringCrypto is used because of [FIPS 140-2 compliance](https://boringssl.googlesource.com/boringssl/+/master/crypto/fipsmodule/FIPS.md).
 
 Latest releases of boringcrypto are available [here](https://go.googlesource.com/go/+/dev.boringcrypto/misc/boring/RELEASES)
 
@@ -134,14 +134,31 @@ https://csrc.nist.gov/Projects/Cryptographic-Module-Validation-Program/Certifica
 
 The package is configured by itself solely by importing it, the relevant code is here: https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/fipsonly/fipsonly.go
 
-To test for FIPS compliance we can use goversion (https://pkg.go.dev/rsc.io/goversion/version)
-
-```go install rsc.io/goversion@latest
-$GOPATH/bin/goversion -crypto go/dist/pfda*
-```
+To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda` and ensure that crypto/internal/boring/sig.FIPSOnly.* is present.
 
 
 # Version History
+
+### 2.3 (2023-03-27)
+- improved syntax of commands 
+- added support for multiple files/folders to upload-file and download commands.
+- New feature - mkdir; create new folders in any location
+- New feature - rmdir; delete folders from any location
+- New feature - rm; delete files from any location
+- New feature - head, cat; print content of a file
+
+
+### 2.2.1 (2022-12-20)
+
+- improved output of ls command
+- added `-overwrite` flag for download command
+
+### 2.2 (2022-12-07)
+
+- New feature - ls; list files from private home or a space
+- New feature - list-spaces; list all available spaces
+- New feature - describe-app; describe-workflow; describe the entity
+- Added new `-help` flag for all commands with examples and brief instructions
 
 ### 2.1.2 (2022-08-03)
 
@@ -156,9 +173,9 @@ $GOPATH/bin/goversion -crypto go/dist/pfda*
 ### 2.1 (2022-02-22)
 
 - The CLI can now download files from private home or a space
-- When uploading files, add the --space-id option to specify a space
-- Specifying --folder-id will allow files to be uploaded to a specific folder
-- --version flag now prints FIPS only mode confirmation
+- When uploading files, add the -space-id option to specify a space
+- Specifying -folder-id will allow files to be uploaded to a specific folder
+- -version flag now prints FIPS only mode confirmation
 
 ### 2.0.1 (2021-08-26)
 

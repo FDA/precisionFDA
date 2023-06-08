@@ -1,11 +1,12 @@
 package precisionfda
 
 import (
-	"dnanexus.com/precision-fda-cli/precisionfda/test"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"dnanexus.com/precision-fda-cli/precisionfda/test"
 )
 
 func TestNewPFDAClient(t *testing.T) {
@@ -52,7 +53,7 @@ func TestUploadFile(t *testing.T) {
 	defer server.Close()	// Close the server when test finishes
 
 	pfdaclient := NewPFDAClient(server.URL)
-	pfdaclient.UploadFile("./README.md", "", "")
+	pfdaclient.UploadFile("./README.md", "", "", true)
 }
 
 func TestUploadFileToSpace(t *testing.T) {

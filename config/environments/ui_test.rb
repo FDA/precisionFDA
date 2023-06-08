@@ -15,7 +15,7 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
 
   # Compress JavaScripts and CSS.
-  config.assets.js_compressor = Uglifier.new(harmony: true)
+  config.assets.js_compressor = :terser
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
   config.assets.compile = true
@@ -25,7 +25,7 @@ Rails.application.configure do
   config.assets.debug = false
   config.assets.digest = true
 
-  config.action_mailer.delivery_method = :test
+  config.action_mailer.delivery_method = :file
   config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
   config.action_mailer.default_options = { from: "test@pfda" }
 

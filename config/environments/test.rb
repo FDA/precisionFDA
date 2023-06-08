@@ -32,12 +32,19 @@ Rails.application.configure do
   # Store uploaded files on the local file system in a temporary directory
   config.active_storage.service = :test
 
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_HOST"),
+    port: ENV.fetch("SMTP_PORT"),
+    user_name: ENV.fetch("SMTP_USER"),
+    password: ENV.fetch("SMTP_PASSWORD"),
+  }
+
   config.action_mailer.perform_caching = false
 
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
-  config.action_mailer.delivery_method = :test
+  config.action_mailer.delivery_method = :file
   config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
   config.action_mailer.default_options = { from: "test@pfda" }
 

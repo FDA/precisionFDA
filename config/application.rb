@@ -32,6 +32,8 @@ module PrecisionFda
 
     config.sass.preferred_syntax = :sass
 
+    config.assets.precompile << "next_application.js"
+
     config.middleware.use Rack::PermanentRedirect
 
     config.middleware.insert 0,
