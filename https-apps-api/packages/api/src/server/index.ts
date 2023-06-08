@@ -4,6 +4,7 @@ import fs from 'fs'
 import { config } from '@pfda/https-apps-shared'
 import { log } from '../logger'
 import { createApp } from './app'
+import { setupWSServer } from './middleware/notifications'
 
 export type KoaCallback = ReturnType<ReturnType<typeof createApp>['callback']>
 
@@ -11,10 +12,18 @@ export type KoaCallback = ReturnType<ReturnType<typeof createApp>['callback']>
 // it is considered a subtype of T
 // we can consider using the strict null checks option
 let server: null | http.Server = null
+let wss: any = null
 
 export const getServer = () => server
 
 export function createServer(callback: KoaCallback) {
+  const startWSServer = async (): Promise<void> => {
+      if (server !== null) {
+        wss = await setupWSServer(server)
+        log.info('WebSocket server initialized')
+      }
+  }
+
   const startHttpServer = async (): Promise<void> => {
     await new Promise(resolve => {
       const startedServer = http
@@ -47,6 +56,10 @@ export function createServer(callback: KoaCallback) {
   }
 
   const stopServer = async (): Promise<void> => {
+    await wss?.close(() => {
+      log.info('WebSocket server closed')
+    }) 
+
     if (server?.listening) {
       await new Promise(done => server!.close(done))
     }
@@ -56,6 +69,7 @@ export function createServer(callback: KoaCallback) {
   return {
     startHttpsServer,
     startHttpServer,
-    stopServer
+    startWSServer,
+    stopServer,
   }
 }

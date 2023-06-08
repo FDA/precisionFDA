@@ -186,7 +186,7 @@ SyncFolderFilesOutput
       })
       await em.flush()
     }
-
+    em.clear()
     // final result
     const files = await fileRepo.findProjectFilesInSubfolder({
       project: input.projectDxid,

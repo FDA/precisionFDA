@@ -7,6 +7,7 @@ import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
 import { random } from './generate'
+import {STATIC_SCOPE} from "../enums";
 
 const acceptedLicenseHelper = {
   create: (
@@ -186,7 +187,8 @@ const jobHelper = {
     },
     data?: Partial<InstanceType<typeof entities.Job>>,
   ) => {
-    const defaults = references.app?.isHTTPS() ? generate.job.simple() : generate.job.regular()
+    const isHTTPS = references.app?.isHTTPS()
+    const defaults = isHTTPS ? generate.job.simple(references.app!) : generate.job.regular()
     const input = {
       ...defaults,
       ...data,
@@ -266,7 +268,11 @@ const filesHelper = {
     }
     const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
     if (references.parentFolder) {
-      file.parentFolder = references.parentFolder
+      if (!data?.scope || [STATIC_SCOPE.PRIVATE.toString(), STATIC_SCOPE.PUBLIC.toString()].includes(data?.scope)) {
+        file.parentFolder = references.parentFolder
+      } else {
+        file.scopedParentFolder = references.parentFolder
+      }
     }
     em.persist(file)
     return file
@@ -358,7 +364,11 @@ const filesHelper = {
     }
     const folder = wrap(new entities.Folder(references.user)).assign(input)
     if (references.parentFolder) {
-      folder.parentFolder = references.parentFolder
+      if (!data?.scope || [STATIC_SCOPE.PRIVATE.toString(), STATIC_SCOPE.PUBLIC.toString()].includes(data?.scope)) {
+        folder.parentFolder = references.parentFolder
+      } else {
+        folder.scopedParentFolder = references.parentFolder
+      }
     }
     em.persist(folder)
     return folder
@@ -547,6 +557,21 @@ const comparisonHelper = {
     em.persist(comparison)
     return comparison
   },
+  createInput: (
+    em: EntityManager,
+    references: {
+      comparison: InstanceType<typeof entities.Comparison>
+      userFile: InstanceType<typeof entities.UserFile>
+    },
+    data?: Partial<InstanceType<typeof entities.ComparisonInput>>,
+  ) => {
+    const comparisonInput = wrap(new entities.ComparisonInput(
+      references.comparison,
+      references.userFile,
+    )).assign(data, { em })
+    em.persist(comparisonInput)
+    return comparisonInput
+  },
 }
 
 const expertHelper = {
@@ -564,6 +589,23 @@ const expertHelper = {
     em.persist(expert)
     return expert
   },
+}
+
+const newsHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.NewsItem>>,
+  ) => {
+    const defaults = generate.news.create()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const news = wrap(new entities.NewsItem(references.user)).assign(input)
+    em.persist(news)
+    return news
+  }
 }
 
 const workflowHelper = {
@@ -594,5 +636,6 @@ export {
   comparisonHelper,
   dbClusterHelper,
   expertHelper,
+  newsHelper,
   workflowHelper,
 }

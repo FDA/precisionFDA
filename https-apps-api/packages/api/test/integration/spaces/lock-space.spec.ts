@@ -30,7 +30,7 @@ describe('PATCH /spaces/:id/lock', () => {
 		notPermittedUser = create.userHelper.create(em)
 		user = create.userHelper.createRSA(em)
 		space = create.spacesHelper.create(em)
-		alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
+		alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
 		guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 		hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
@@ -64,7 +64,7 @@ describe('PATCH /spaces/:id/lock', () => {
 		expect(fakes.queue.createEmailSendTaskFake.calledTwice).to.be.true()
 		em.clear()
 		const lockedSpace = await em.getRepository(Space).findOneOrFail({ id: space.id })
-		expect(lockedSpace.state).to.be.equal(SPACE_STATE.STATE_LOCKED)
+		expect(lockedSpace.state).to.be.equal(SPACE_STATE.LOCKED)
 	})
 
 	context('error states', () => {
@@ -85,7 +85,7 @@ describe('PATCH /spaces/:id/lock', () => {
 		})
 
 		it('does not allow to lock space (space already locked) and returns 403', async () => {
-			alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.STATE_LOCKED })
+			alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
 			create.spacesHelper.addMember(em, { user, space: alreadyLockedSpace })
 			await em.flush()
 

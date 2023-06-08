@@ -1,6 +1,6 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityRepository } from '@mikro-orm/mysql'
-import { UserFile } from '..'
+import { Folder, UserFile } from '..'
 import { FILE_STI_TYPE } from '../user-file/user-file.types'
 import { Tagging } from './tagging.entity'
 
@@ -21,6 +21,10 @@ type FindMultipleInput = {
 }
 
 export class TaggingRepository extends EntityRepository<Tagging> {
+  async findForTaggableId(taggableId: number): Promise<Tagging[]> {
+    return await this.find({ taggableId }, { populate: ['tag'] })
+  }
+
   async findForFile(input: FindInput): Promise<Tagging | null> {
     return await this.findOne({
       userFile: this.em.getReference(UserFile, input.fileId),
@@ -44,7 +48,7 @@ export class TaggingRepository extends EntityRepository<Tagging> {
     const fileTagging = new Tagging()
     const taggableRef =
       input.nodeType === FILE_STI_TYPE.FOLDER
-        ? { folder: this.em.getReference(UserFile, input.fileId) }
+        ? { folder: this.em.getReference(Folder, input.fileId) }
         : { userFile: this.em.getReference(UserFile, input.fileId) }
     wrap(fileTagging).assign(
       {

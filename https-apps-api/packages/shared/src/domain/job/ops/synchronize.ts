@@ -2,11 +2,11 @@ import { wrap } from '@mikro-orm/core'
 import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
-import { JOB_DB_ENTITY_TYPE } from '../job.enum'
 import {
   buildIsOverMaxDuration,
   isStateActive,
   isStateTerminal,
+  sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
 import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
@@ -29,7 +29,49 @@ import { buildEmailTemplate } from '../../email/email.helper'
 import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
 import { EmailSendOperation } from '../../email'
-import { JobFailedEmailHandler } from '../../email/templates/handlers'
+import { NotificationService } from '../../notification/services/notification.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { getServiceFactory } from '../../../services/service-factory'
+
+/**
+ * Checks job status if notifications should be triggered.
+ */
+const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteState: JOB_STATE) => {
+  const notificationService = getServiceFactory().getNotificationService(em)
+  const meta = {
+    linkTitle: 'View Execution',
+    linkUrl: `/home/executions/${job.uid}`,
+  }
+
+  if (job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING) {
+    await notificationService.createNotification({
+      message: `Job ${job.name} is running`,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.JOB_RUNNING,
+      userId,
+      meta,
+    })
+  }
+  if (job.state !== JOB_STATE.TERMINATED && remoteState === JOB_STATE.TERMINATED) {
+    await notificationService.createNotification({
+      message: `Job ${job.name} has terminated`,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.JOB_TERMINATED,
+      userId,
+      meta,
+    })
+  }
+  if (remoteState === JOB_STATE.FAILED) {
+    await notificationService.createNotification({
+      message: `Job ${job.name} has failed`,
+      severity: SEVERITY.ERROR,
+      action: NOTIFICATION_ACTION.JOB_FAILED,
+      userId,
+      meta,
+    })
+  }
+}
 
 // N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
 //      In the future we'd need to rename this to something more specific
@@ -169,7 +211,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
             failureReason: platformJobData.failureReason,
             failureMessage: platformJobData.failureMessage,
           }, 'SyncJobOperation: Detected failed job')
-          await this.sendJobFailedEmails()
+          await sendJobFailedEmails(job.id.toString(), this.ctx)
         }
       }
 
@@ -180,6 +222,8 @@ export class SyncJobOperation extends WorkerBaseOperation<
       // Queue file sync task, so that the syncing is not blocked
       createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
     }
+
+    await checkJobStatusForNotifications(em, this.ctx.user.id, job, remoteState)
 
     this.ctx.log.info({
       jobId: input.dxid,
@@ -196,7 +240,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     await em.flush()
 
     // Note(samuel) email has to be sent after em. flush, otherwise failureReason won't be propagated in database
-    // Alternative - pass failure reason and other 
+    // Alternative - pass failure reason and other
     if (remoteState === JOB_STATE.FAILED) {
       this.ctx.log.info({
         failureCounts: platformJobData.failureCounts,
@@ -205,7 +249,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       }, 'SyncJobOperation: Detected failed job')
 
       try {
-        await this.sendJobFailedEmails()
+        await sendJobFailedEmails(this.job.id.toString(), this.ctx)
       } catch (e) {
         this.ctx.log.error({ job: updatedJob }, 'SyncJobOperation: Failed to send emails')
       }
@@ -235,34 +279,6 @@ export class SyncJobOperation extends WorkerBaseOperation<
       bullJobId: jobId,
     }, 'SyncJobOperation: Sending termination warning email to user')
     await createSendEmailTask(email, this.ctx.user, jobId)
-  }
-
-  private async sendJobFailedEmails(): Promise<void> {
-    const handler = new JobFailedEmailHandler(
-      EMAIL_TYPES.jobFailed,
-      { jobId: this.job.id },
-      this.ctx,
-    )
-    await handler.setupContext()
-
-    const receivers = await handler.determineReceivers()
-    const emails = await Promise.all(
-      receivers.map(async receiver => {
-        const template = await handler.template(receiver)
-        return template
-      }),
-    )
-
-    return Promise.all(emails.map(async email => {
-      this.ctx.log.info({
-        jobId: this.job.id,
-        jobDxid: this.job.dxid,
-        user: this.user.dxuser,
-        recipient: email.to,
-      }, 'SyncJobOperation: Sending failed job email to user')
-
-      await createSendEmailTask(email, this.ctx.user)
-    })) as any
   }
 
   private removeTerminationEmailJob() {

@@ -1,15 +1,8 @@
 import { wrap } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/mysql'
+import { PaginationParams } from '../../types/common';
 import { Expert, ExpertScope } from './expert.entity'
 import { serializeExpert } from './expert.serializer';
-
-
-// todo(samuel): Extract PaginationParams to a common interface file
-// note: similar in job.repository.ts
-interface PaginationParams {
-  page: number
-  limit: number
-}
 
 interface ExpertFindPaginatedParams extends PaginationParams {
   year?: number

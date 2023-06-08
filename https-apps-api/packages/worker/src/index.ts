@@ -1,6 +1,12 @@
 import { database, queue } from '@pfda/https-apps-shared'
 import { setupHandlers } from './queues'
 import { log } from './utils'
+import { writeHeapSnapshot } from 'v8'
+
+process.on('SIGUSR2', () => {
+  const fileName = writeHeapSnapshot()
+  log.info(`Created heap dump file: ${fileName}`)
+})
 
 const handleFatalError = (err: Error): void => {
   process.removeAllListeners('uncaughtException')

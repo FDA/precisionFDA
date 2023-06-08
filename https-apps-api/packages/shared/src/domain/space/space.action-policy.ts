@@ -13,7 +13,7 @@ class SpaceActionPolicy {
     const isRSA = await user.isReviewSpaceAdmin()
 
     return space
-      && space.state === SPACE_STATE.STATE_ACTIVE
+      && space.state === SPACE_STATE.ACTIVE
       && (!space.isConfidential() && space.type === SPACE_TYPE.REVIEW)
       && isRSA
   }
@@ -22,7 +22,7 @@ class SpaceActionPolicy {
     const isRSA = await user.isReviewSpaceAdmin()
 
     return space
-      && space.state === SPACE_STATE.STATE_LOCKED
+      && space.state === SPACE_STATE.LOCKED
       && (!space.isConfidential() && space.type === SPACE_TYPE.REVIEW)
       && isRSA
   }

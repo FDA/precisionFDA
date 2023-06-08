@@ -1,15 +1,16 @@
 import {
-  Collection,
   Entity,
   Enum,
+  IdentifiedReference,
   ManyToOne,
-  OneToMany,
   PrimaryKey,
-  Property
+  Property,
+  Collection,
+  OneToMany,
 } from '@mikro-orm/core'
-import {BaseEntity} from '../../database/base-entity'
-import {FILE_STI_TYPE} from './user-file.types'
-
+import { BaseEntity } from '../../database/base-entity'
+import { User } from '../user/user.entity'
+import {FILE_STATE, FILE_STI_TYPE, FOLDER_STATE} from './user-file.types'
 
 @Entity({
   abstract: true,
@@ -30,6 +31,9 @@ export class Node extends BaseEntity {
 
   @Property()
   name: string
+
+  @Property()
+  state: FILE_STATE | FOLDER_STATE
 
   @Property()
   locked: boolean
@@ -67,5 +71,6 @@ export class Node extends BaseEntity {
     return this.stiType === FILE_STI_TYPE.FOLDER
   }
 
-  // todo: more
+  @ManyToOne(() => User)
+  user!: IdentifiedReference<User>
 }

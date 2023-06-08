@@ -31,6 +31,7 @@ export const config: ConfigOverride = () => ({
   platform: {
     apiUrl: 'https://api.dnanexus.com',
     authApiUrl: 'https://auth.dnanexus.com',
+    challengeBotUser: 'challenge.bot',
     orgEveryoneHandle: 'precisionfda',
   },
   redis: {

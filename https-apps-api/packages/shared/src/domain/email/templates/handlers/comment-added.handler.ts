@@ -100,7 +100,7 @@ export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> impleme
     const memberships = await this.ctx.em.find(
       SpaceMembership,
       { spaces: this.spaceEvent.space.id, active: true },
-      { populate: ['user.emailNotificationSettings'] },
+      { populate: ['user.notificationPreference'] },
     )
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)

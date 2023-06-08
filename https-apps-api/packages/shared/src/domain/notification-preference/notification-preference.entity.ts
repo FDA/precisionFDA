@@ -1,16 +1,14 @@
-/* eslint-disable max-classes-per-file */
 import {
   Entity,
-  IdentifiedReference,
-  JsonType,
-  OneToOne,
   PrimaryKey,
   Property,
   Reference,
+  IdentifiedReference, JsonType, OneToOne,
 } from '@mikro-orm/core'
-import { isNil } from 'ramda'
-import { User } from '..'
-import { NOTIFICATION_TYPES } from './email.config'
+import { User } from '../user/user.entity'
+import { BaseEntity } from '../../database/base-entity'
+import { NOTIFICATION_TYPES } from '../email/email.config'
+import { isNil} from 'ramda'
 
 class NotificationType extends JsonType {
   convertToJSValue(value: string | null): typeof NOTIFICATION_TYPES | null {
@@ -20,21 +18,21 @@ class NotificationType extends JsonType {
 
     return JSON.parse(value)
   }
-  // todo: make sure db conversion works well too
 }
 
 @Entity({ tableName: 'notification_preferences' })
-export class EmailNotification {
+export class NotificationPreference {
+
   @PrimaryKey()
   id: number
-
-  @OneToOne({ fieldName: 'user_id', entity: () => User })
-  user!: IdentifiedReference<User>
 
   @Property({ type: NotificationType })
   data: typeof NOTIFICATION_TYPES
 
-  constructor({ user }: { user: User }) {
+  @OneToOne({ entity: () => User, serializedName: 'userId' })
+  user!: IdentifiedReference<User>
+
+  constructor(user: User) {
     this.user = Reference.create(user)
   }
 }

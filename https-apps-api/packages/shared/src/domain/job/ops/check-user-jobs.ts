@@ -31,7 +31,7 @@ const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any)
       bullJob,
     }, 'CheckUserJobsOperation: Status sync task found, but it is orphaned. '
        + 'Removing and recreating it')
-    await queue.removeRepeatableJob(bullJob, queue.getStatusQueue())
+    await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
     await queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else {
     log.info({

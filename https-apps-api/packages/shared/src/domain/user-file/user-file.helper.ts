@@ -1,12 +1,19 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
+import { Collection } from '@mikro-orm/core'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { User, Node, UserFile, Asset, entities } from '..'
+import { User, Node, UserFile, Asset, entities, Space } from '..'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
+import { getIdFromScopeName, isValidScopeName } from '../space/space.helper'
+import { STATIC_SCOPE } from '../../enums'
 import { AssetRepository } from './asset.repository'
 import { Folder } from './folder.entity'
 import { FolderRepository } from './folder.repository'
 import { nodeQueryFilter, uidListInput } from './user-file.input'
 import { UserFileRepository } from './user-file.repository'
 import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
+import { PermissionError } from '../../errors'
+import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 
 const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
   if (node instanceof Folder) {
@@ -80,7 +87,6 @@ const getParentFolders = async (
   return folderTree
 }
 
-
 /**
  * Construct a folder's absolute paths (relative to Files root folder) from local database rows.
  * This is done recursively starting from the end node and stepping up the tree reaching the root
@@ -151,11 +157,10 @@ const getFolderPath = (folders: Folder[], current: Folder): string => {
   return `/${chain.join('/')}`
 }
 
-
 const createNameAndParentIdFilter = (
   folderName: string,
   parent: Folder | undefined,
-) => (f: Folder ): boolean => {
+) => (f: Folder): boolean => {
   const sameName = f.name === folderName
   if (isNil(parent)) {
     return sameName && isNil(f.parentFolder)
@@ -266,6 +271,103 @@ const findFolderForPath = (
   return currentFolder
 }
 
+const getNodePath = async (em: SqlEntityManager, node: Node, folders: string[] | undefined = []): Promise<string> => {
+  folders.unshift(node.name)
+  const parentFolderNode = getParentFolder(node)
+  if (!parentFolderNode) {
+    // we have reached root, compose the path and return it
+    return `/${folders.join("/")}`
+  }
+  const folderRepo = em.getRepository(Folder)
+  const parentFolder = await folderRepo.findOne({ id: parentFolderNode.id })
+  return getNodePath(em, parentFolder as Node, folders)
+}
+
+/**
+ * Returns parentFolder if scope is private, public or null, otherwise it returns scopedParentFolder
+ * @param node
+ */
+export const getParentFolder = (node: Node) => {
+  if ([STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)) {
+    return node.parentFolder
+  }
+  return node.scopedParentFolder
+}
+
+const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Promise<void> => {
+  if (node.scope && node.scope.startsWith('space')) {
+    const spaceId = getIdFromScopeName(node.scope)
+    const space = await em.findOneOrFail(Space, { id: spaceId })
+    if (space.type === SPACE_TYPE.VERIFICATION && space.state === SPACE_STATE.LOCKED) {
+      throw new Error(`You have no permissions to remove ${node.name} as`
+        + ' it is part of Locked Verification space.')
+    }
+  }
+}
+
+/**
+ * Validates for Protected Spaces. If node is in protected space then
+ * given userId needs to be in a lead role otherwise error is thrown.
+ *
+ * @param em EntityManager instance
+ * @param action action that is to be performed on the node (for possible validation error message)
+ * @param userId current user
+ * @param node node that is being verified
+ */
+const validateProtectedSpaces = async (em: SqlEntityManager, action: string, userId: number, node: Node) => {
+  if (isValidScopeName(node.scope)) {
+    const spaceId = getIdFromScopeName(node.scope)
+    const space = await em.findOneOrFail(Space, spaceId, { populate: ['spaceMemberships', 'spaceMemberships.user'] })
+    if (space.protected) {
+      const leadMemberships = space.spaceMemberships.getItems().find(
+        membership =>
+          membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
+      )
+      if (!leadMemberships) {
+        throw new Error(`You have no permissions to ${action} from a Protected Space`)
+      }
+    }
+  }
+}
+
+const belongsToSpace = (spaces: Collection<Space>, spaceId: number): boolean => {
+  for (const space of spaces) {
+    if (space.id === spaceId) {
+      return true
+    }
+  }
+  return false
+}
+
+const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser: User) => {
+  if (node.locked) {
+    throw new Error('Locked items cannot be removed.')
+  }
+  if (node.scope === STATIC_SCOPE.PUBLIC
+    || node.user.id === currentUser.id
+    || await currentUser.isSiteAdmin()) {
+    return
+  }
+  if (isValidScopeName(node.scope)) {
+    const spaceId = getIdFromScopeName(node.scope)
+    const space = await em.findOne(
+      entities.Space,
+      {
+        id: spaceId,
+        state: SPACE_STATE.ACTIVE,
+        spaceMemberships: {
+          user: {
+            id: currentUser.id
+          },
+          role: CAN_EDIT_ROLES
+        }
+      })
+    if (!space) {
+      throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
+    }
+  }
+}
+
 const findFileOrAssetWithUid = async (
   em: EntityManager,
   uid: string,
@@ -273,11 +375,25 @@ const findFileOrAssetWithUid = async (
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
   if (file) {
-    return file
+    return file as IFileOrAsset
   }
 
   const assetRepo = em.getRepository(Asset) as AssetRepository
-  return await assetRepo.findAssetWithUid(uid)
+  return await assetRepo.findAssetWithUid(uid) as IFileOrAsset
+}
+
+const findFileOrAssetsWithDxid = async (
+  em: EntityManager,
+  dxid: string,
+): Promise<IFileOrAsset[]> => {
+  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
+  const res = await userFileRepo.findFilesWithDxid(dxid)
+  if (res.length > 0) {
+    return res as IFileOrAsset[]
+  }
+
+  const assetRepo = em.getRepository(Asset) as AssetRepository
+  return await assetRepo.findAllAssetsWithDxid(dxid) as IFileOrAsset[]
 }
 
 const findUnclosedFilesOrAssets = async (
@@ -287,8 +403,8 @@ const findUnclosedFilesOrAssets = async (
   let results: IFileOrAsset[] = []
   const userFileRepo = em.getRepository(UserFile)
   const assetRepo = em.getRepository(Asset)
-  results = results.concat(await userFileRepo.findUnclosedFiles(userId))
-  results = results.concat(await assetRepo.findUnclosedAssets(userId))
+  results = results.concat(await userFileRepo.findUnclosedFiles(userId) as IFileOrAsset[])
+  results = results.concat(await assetRepo.findUnclosedAssets(userId) as IFileOrAsset[])
   return results
 }
 
@@ -330,7 +446,7 @@ const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter)
       },
     ],
   })
-  await em.populate(nodes, ['parentFolder'])
+  await em.populate(nodes, ['parentFolder', 'scopedParentFolder'])
   const wholeTree: Node[] = []
   for (const node of nodes) {
     if (node.stiType === FILE_STI_TYPE.FOLDER) {
@@ -341,8 +457,8 @@ const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter)
   }
   // ensure uniqueness
   const unique = [...new Map(wholeTree.map(item => [item.id, item])).values()]
-  // sort all nodes by id, leafs first
-  unique.sort((a, b) => b.id - a.id)
+  // sort all nodes, folders last
+  unique.sort((a, b) => (a.isFolder && b.isFolder)? 0 : b.isFolder? -1 : 1)
   return unique
 }
 
@@ -356,13 +472,19 @@ export {
   getPathsToBuild,
   getPathsToKeep,
   filterDuplicities,
+  collectChildren,
   getFolderPath,
   childrenTraverse,
+  getNodePath,
   getParentFolders,
   getStiEnumTypeFromInstance,
   filterLeafPaths,
   findFolderForPath,
   findFileOrAssetWithUid,
+  findFileOrAssetsWithDxid,
   findUnclosedFilesOrAssets,
   loadNodes,
+  validateEditableBy,
+  validateProtectedSpaces,
+  validateVerificationSpace,
 }

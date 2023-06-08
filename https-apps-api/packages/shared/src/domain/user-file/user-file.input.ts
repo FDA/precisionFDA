@@ -26,6 +26,21 @@ type RenameFolderInput = {
   newName: string
 }
 
+type RemoveNodesInput = {
+  ids: number[]
+  async: boolean
+}
+
+const removeNodesSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    ids: { type: 'array' },
+    async: { type: 'boolean' },
+  },
+  required: ['ids'],
+  additionalProperties: false,
+}
+
 const renameFolderSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -34,6 +49,8 @@ const renameFolderSchema: JSONSchema7 = {
   required: ['newName'],
   additionalProperties: false,
 }
+
+// TODO could be replaced with IdsInput
 type uidListInput = {
   ids: number[]
 }
@@ -71,4 +88,16 @@ type CLINodeSearchInput = {
   folderId?: number
 }
 
-export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput, nodeQueryFilter, CLINodeSearchSchema, CLINodeSearchInput }
+export {
+  SyncFoldersInput,
+  SyncFilesInFolderInput,
+  RenameFolderInput,
+  RemoveNodesInput,
+  renameFolderSchema,
+  uidListSchema,
+  uidListInput,
+  removeNodesSchema,
+  nodeQueryFilter,
+  CLINodeSearchSchema,
+  CLINodeSearchInput
+}

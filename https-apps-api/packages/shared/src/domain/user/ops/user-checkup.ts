@@ -22,7 +22,7 @@ const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log: any): P
       bullJob,
     }, 'CheckUserJobsOperation: FilesStateSyncTask found, but it is orphaned. '
        + 'Removing and recreating it')
-    await queue.removeRepeatableJob(bullJob, queue.getStatusQueue())
+    await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
     await queue.createSyncFilesStateTask(user)
   } else {
     log.info({

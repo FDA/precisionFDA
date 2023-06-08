@@ -16,17 +16,21 @@ import { SyncFilesStateOperation } from '../domain/user-file'
 import * as utils from './queue.utils'
 import * as types from './task.input'
 
-let statusQueue: Bull.Queue
+let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
 let emailsQueue: Bull.Queue
 let maintenanceQueue: Bull.Queue
 
-const getStatusQueue = (): Bull.Queue => statusQueue
+const getMainQueue = (): Bull.Queue => mainQueue
 const getFileSyncQueue = (): Bull.Queue => fileSyncQueue
 const getEmailsQueue = (): Bull.Queue => emailsQueue
 const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
-const getQueues = (): Bull.Queue[] => [statusQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
+const getQueues = (): Bull.Queue[] => [mainQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
+
+const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformation[]> => {
+  return await utils.clearOrphanedRepeatableJobs(q)
+}
 
 // set up the queues
 const createQueues = async (): Promise<void> => {
@@ -41,7 +45,7 @@ const createQueues = async (): Promise<void> => {
     redisOptions.connectTimeout = config.redis.connectTimeout
   }
 
-  statusQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
+  mainQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
     redis: redisOptions,
     defaultJobOptions: {
       // if set to false, it will eventually eat up space in the redis instance
@@ -80,14 +84,14 @@ const createQueues = async (): Promise<void> => {
       priority: 10,
     },
   })
-  await statusQueue.isReady()
+  await mainQueue.isReady()
   await fileSyncQueue.isReady()
   await emailsQueue.isReady()
   await maintenanceQueue.isReady()
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
-  const removedJobs = await utils.clearOrphanedRepeatableJobs(statusQueue)
+  const removedJobs = clearOrphanedRepeatableJobs(mainQueue)
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
@@ -109,7 +113,7 @@ const initMaintenanceQueue = async () => {
 
 const disconnectQueues = async (): Promise<void> => {
   log.info('Disconnecting queues')
-  await statusQueue.close(true)
+  await mainQueue.close(true)
   await fileSyncQueue.close(true)
   await emailsQueue.close(true)
   await maintenanceQueue.close(true)
@@ -154,13 +158,13 @@ const addToQueue = async <T extends types.Task>(
 //             up repeatable jobs
 // TODO: dig deeper into bull queue's implementation to verify the above
 const removeRepeatable = async (job: Job) => {
-  if (typeof statusQueue === 'undefined') {
+  if (typeof mainQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
   log.info({ jobId: job.id }, 'trying to remove repeatable job id')
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
-  await statusQueue.removeJobs(`${prefix}:${id}:*`)
+  await mainQueue.removeJobs(`${prefix}:${id}:*`)
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
@@ -168,12 +172,12 @@ const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
     { jobId: job.id, cron: job.cron },
     'removeRepeatableJob: trying to remove repeatable job',
   )
-  // await statusQueue.removeRepeatableByKey(job.key)
+  // await mainQueue.removeRepeatableByKey(job.key)
   await queue.removeRepeatable({ jobId: job.id, cron: job.cron })
 }
 
 const findRepeatable = async (bullJobId: string) => {
-  const repeatableJobs = await statusQueue.getRepeatableJobs()
+  const repeatableJobs = await mainQueue.getRepeatableJobs()
   const result = repeatableJobs.find(j => j.id === bullJobId)
   return result
 }
@@ -199,7 +203,7 @@ const createSyncFilesStateTask = async (
     jobId: SyncFilesStateOperation.getBullJobId(user.dxuser),
     repeat: { cron: config.workerJobs.syncFiles.repeatPattern },
   }
-  return await addToQueue(task, statusQueue, options)
+  return await addToQueue(task, mainQueue, options)
 }
 
 const createSyncJobStatusTask = async (
@@ -224,7 +228,7 @@ const createSyncJobStatusTask = async (
     jobId: SyncJobOperation.getBullJobId(data.dxid),
     repeat: { cron: config.workerJobs.syncJob.repeatPattern },
   }
-  return await addToQueue(wrapped, statusQueue, options)
+  return await addToQueue(wrapped, mainQueue, options)
 }
 
 const createSyncWorkstationFilesTask = async (
@@ -311,6 +315,18 @@ const createSyncSpacesPermissionsTask = async (
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
+const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) => {
+  const wrapped = {
+    type: types.TASK_TYPE.REMOVE_NODES as const,
+    payload: ids,
+    user,
+  }
+  const options: JobOptions = {
+    jobId: `${wrapped.type}.${user.dxuser}-${new Date().valueOf().toString()}`,
+  }
+  return await addToQueue(wrapped, fileSyncQueue, options)
+}
+
 const createDbClusterSyncTask = async (
   data: types.SyncDbClusterJob['payload'],
   user: UserCtx,
@@ -326,7 +342,7 @@ const createDbClusterSyncTask = async (
     repeat: { cron: config.workerJobs.syncDbClusters.repeatPattern },
   }
 
-  return await addToQueue(wrapped, statusQueue, options)
+  return await addToQueue(wrapped, mainQueue, options)
 }
 
 const createUserCheckupTask = async (data: types.BasicUserJob) => {
@@ -360,6 +376,31 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
   return await addToQueue(data, maintenanceQueue, options)
 }
 
+// Queue adding helpers
+//
+const addToQueueEnsureUnique = async <T extends types.Task>(
+  q: Queue,
+  task: T,
+  jobId: string | undefined,
+) => {
+  // If jobId is provided, there should not be multiple items with this jobId in the queue
+  if (jobId) {
+    // Do not allow a second job to be added to the queue
+    const existingJob = await q.getJob(jobId)
+    if (existingJob) {
+      let errorMessage = existingJob.hasOwnProperty('getState')
+        ? await utils.getJobStatusMessageWithElapsedTime(existingJob, task.type)
+        : `Job with id ${jobId} already exists in queue`
+      throw new InvalidStateError(errorMessage)
+    }
+  }
+
+  const options: JobOptions = {
+    jobId,
+  }
+  return await addToQueue(task, q, options)
+}
+
 export * as debug from './queue.debug'
 
 export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
@@ -377,7 +418,8 @@ export {
   createCheckUserJobsTask,
   createTestMaxMemoryTask,
   createQueues,
-  getStatusQueue,
+  getMainQueue,
+  createRemoveNodesJobTask,
   getFileSyncQueue,
   getEmailsQueue,
   getMaintenanceQueue,
@@ -388,4 +430,6 @@ export {
   removeRepeatable,
   removeRepeatableJob,
   findRepeatable,
+  addToQueueEnsureUnique,
+  clearOrphanedRepeatableJobs,
 }

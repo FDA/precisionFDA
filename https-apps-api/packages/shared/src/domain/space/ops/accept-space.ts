@@ -8,6 +8,8 @@ import { SPACE_TYPE } from '../space.enum'
 import { spaceActionPolicy } from '../space.action-policy'
 import { getOppositeOrgDxid, getOrgDxid, getProjectDxid, isAcceptedBy, setOrgDxid, setProjectDxid } from '../space.helper'
 import { errors } from '../../..'
+import { NotificationService } from '../../notification/services/notification.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 
 type SpaceAcceptInput = { spaceId: number }
 
@@ -77,6 +79,18 @@ void
     })
     await this.em.flush()
 
+    const notificationService = new NotificationService(this.em)
+    const leads = space.spaceMemberships.getItems().filter(sm => sm.role === SPACE_MEMBERSHIP_ROLE.LEAD)
+
+    // send notification to all leads
+    leads.forEach(lead => {
+      notificationService.createNotification({
+        message: `Space ${space.name} has been activated`,
+        severity: SEVERITY.INFO,
+        action: NOTIFICATION_ACTION.SPACE_ACTIVATED,
+        userId: lead.user.id,
+      })
+    })
     // TODO: notification email still on ruby side, missing template in node
   }
 

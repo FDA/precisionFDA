@@ -12,7 +12,7 @@ import {
 import { Tagging, User } from '..'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE, ITrackable } from './user-file.types'
+import { FOLDER_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE, ITrackable } from './user-file.types'
 
 @Entity({ tableName: 'nodes', customRepository: () => FolderRepository })
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
@@ -24,7 +24,7 @@ export class Folder extends Node implements ITrackable {
   description?: string
 
   @Property()
-  state: FILE_STATE
+  state: FOLDER_STATE
 
   @Property()
   entityType: FILE_ORIGIN_TYPE
@@ -90,4 +90,5 @@ export class Folder extends Node implements ITrackable {
     super()
     this.user = Reference.create(user)
   }
+
 }

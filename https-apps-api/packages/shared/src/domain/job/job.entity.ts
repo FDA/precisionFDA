@@ -193,4 +193,21 @@ export class Job extends BaseEntity {
 
   @Property({ persist: false, serializedName: 'failure_message' })
   failureMessage: string
+
+  getHttpsAppUrl(): string | null {
+    if (!this.isHTTPS()) {
+      return null
+    }
+
+    const parsedDescribe = JSON.parse(this.describe)
+    const port: string = parsedDescribe.runInput?.port || '443'
+    let url: string = parsedDescribe.httpsApp?.dns?.url
+    if (!url) {
+      return null
+    }
+
+    url = url.endsWith('/') ? url.slice(0, -1) : url
+    // return port === '443' ? url : `${url}:${port}`
+    return `${url}:${port}`
+  }
 }

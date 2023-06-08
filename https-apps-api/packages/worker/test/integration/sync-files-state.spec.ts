@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable max-len */
 import { EntityManager } from '@mikro-orm/mysql'
-import { database, queue, errors, client } from '@pfda/https-apps-shared'
+import { database, queue } from '@pfda/https-apps-shared'
 import { User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
@@ -16,7 +16,7 @@ import { Asset, SyncFilesStateOperation } from '@pfda/https-apps-shared/src/doma
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { FileStatesParams } from '@pfda/https-apps-shared/src/platform-client/platform-client.params'
 import R from 'ramda'
-import { findFileOrAssetWithUid } from '@pfda/https-apps-shared/src/domain/user-file/user-file.helper'
+import { findFileOrAssetsWithDxid, findFileOrAssetWithUid } from '@pfda/https-apps-shared/src/domain/user-file/user-file.helper'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { errorsFactory } from '../utils/errors-factory'
 
@@ -32,7 +32,7 @@ describe('SyncFilesStateOperation static methods', () => {
 // Adding the task directly to the queue instead of using queue.createSyncFilesStateTask
 // as that function adds a repeatble job and won't be run during the test
 const createSyncFilesStateTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getStatusQueue()
+  const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed
   await defaultTestQueue.add({
     type: queue.types.TASK_TYPE.SYNC_FILES_STATE,
@@ -210,6 +210,57 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     }
 
     expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.false()
+  })
+
+  it('removes abandoned file uploads', async () => {
+    const user1Abandoned: string[] = [
+      files[0].dxid, // user1
+      files[3].dxid, // user1
+      assets[1].dxid, // user1
+    ]
+    const user2Abandoned: string[] = [
+      files[5].dxid, // user2
+      assets[4].dxid, // user2
+    ]
+    const abandonedFileDxids = user1Abandoned.concat(user2Abandoned)
+
+    fakes.client.fileStatesFake.callsFake((params: FileStatesParams) => {
+      return params.fileDxids
+        .filter(fileDxid => !abandonedFileDxids.includes(fileDxid))
+        .map(fileDxid => {
+          return {
+            id: fileDxid,
+            describe: {
+              size: FILE_SIZE,
+              state: FILE_STATE_DX.OPEN,
+            },
+          }
+        }
+      )
+    })
+
+    // Check that abandoned files are all removed
+
+    // User 1
+    await createSyncFilesStateTask(user1Ctx)
+    const fileRepo = em.getRepository(UserFile)
+    expect((await findFileOrAssetsWithDxid(em, user1Abandoned[0]))).have.length(0)
+    expect((await findFileOrAssetsWithDxid(em, user1Abandoned[1]))).have.length(0)
+    expect((await findFileOrAssetsWithDxid(em, user1Abandoned[2]))).have.length(0)
+    expect((await findFileOrAssetsWithDxid(em, user2Abandoned[0]))[0].dxid).to.equal(files[5].dxid)
+    expect((await findFileOrAssetsWithDxid(em, user2Abandoned[1]))[0].dxid).to.equal(assets[4].dxid)
+
+    // User 2
+    await createSyncFilesStateTask(user2Ctx)
+    expect((await findFileOrAssetsWithDxid(em, user2Abandoned[0]))).have.length(0)
+    expect((await findFileOrAssetsWithDxid(em, user2Abandoned[1]))).have.length(0)
+
+    // // Check that non-abandoned files are not removed
+    const nonAbandonedFileDxids = R.difference(files.map(x => x.dxid), abandonedFileDxids)
+    for (const dxid of nonAbandonedFileDxids) {
+      const filesInDb = await fileRepo.findFilesWithDxid(dxid)
+      expect(await filesInDb.map(x => x.dxid)).to.deep.equal([dxid])
+    }
   })
 
   it('does not call platform if user does not exist', async () => {

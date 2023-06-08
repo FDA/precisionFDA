@@ -1,1 +1,1 @@
-export { Expert } from "./expert.entity";
+export { Expert } from './expert.entity'

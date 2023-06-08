@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
+import crypto from 'crypto'
 import { DateTime } from 'luxon'
-import { entities } from '../domain'
+import { App, entities } from '../domain'
 import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
 import {
@@ -42,7 +43,7 @@ const random = {
   firstName: () => chance.first(),
   lastName: () => chance.last(),
   email: () => chance.email(),
-  password: () => chance.string({ length: 20 }),
+  password: () => crypto.randomBytes(64).toString('hex'),
   dxstr: (): string => nanoid(),
   word: () => chance.word(),
   description: () => chance.sentence({ words: 2 }),
@@ -70,7 +71,7 @@ const app = {
   jupyterAppSpecData: () =>
     JSON.stringify({
       internet_access: true,
-      instance_type: 'baseline-4',
+      instance_type: 'baseline-2',
       output_spec: [],
       input_spec: [
         {
@@ -128,7 +129,7 @@ const app = {
   ttydAppSpecData: () =>
     JSON.stringify({
       internet_access: true,
-      instance_type: 'baseline-4',
+      instance_type: 'baseline-2',
       output_spec: [],
       input_spec: [
         {
@@ -142,6 +143,17 @@ const app = {
         },
       ],
   }),
+  ttydAppInternal: () =>
+    JSON.stringify({
+      ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
+      packages: ['ipython', 'pkg-config'],
+    }),
+  ttydAppWithAPIInternal: () =>
+    JSON.stringify({
+      ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
+      platform_tags: ['pfda_workstation_api:1.0.0'],
+      packages: ['ipython', 'pkg-config'],
+    }),
   regular: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
@@ -150,13 +162,13 @@ const app = {
       title: 'app-title',
       scope: 'public',
       spec:
-        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-2"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.NORMAL,
       version: '1',
       revision: 1,
       readme: 'readme',
-      internal: 'internal',
+      internal: JSON.stringify({}),
       verified: true,
       devGroup: 'devGroup',
     }
@@ -168,7 +180,7 @@ const app = {
       title: 'https-app-title',
       scope: 'public',
       spec:
-        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-2"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
       verified: true,
@@ -210,18 +222,30 @@ const app = {
 }
 
 const job = {
-  simple: (): Partial<InstanceType<typeof entities.Job>> => {
+  simple: (app: App): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
     return {
       dxid,
       project: `project-${random.dxstr()}`,
       runData: JSON.stringify({ run_instance_type: 'baseline-8', run_inputs: {}, run_outputs: {} }),
-      describe: JSON.stringify({ id: dxid }),
       state: JOB_STATE.IDLE,
       name: chance.name(),
       scope: 'private',
       uid: `${dxid}-1`,
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+      describe: JSON.stringify({
+        id: dxid,
+        executable: app.dxid,
+        executableName: app.title,
+        runInput: {
+          port: 321,
+        },
+        httpsApp: {
+          dns: {
+            url: `https://${dxid}.internal.dnanexus.cloud/`
+          },
+        },
+      }),
     }
   },
   regular: (): Partial<InstanceType<typeof entities.Job>> => {
@@ -375,7 +399,7 @@ const space = {
     spaceId: null as any,
     hostProject: null as any,
     guestProject: null as any,
-    description: 'desc', 
+    description: 'desc',
     meta: 'meta',
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
@@ -493,6 +517,17 @@ const expert = {
   },
 }
 
+const news = {
+  create: (): Partial<InstanceType<typeof entities.NewsItem>> => {
+    return {
+      title: chance.sentence(),
+      content: chance.sentence(),
+      link: chance.url(),
+      published: true,
+    }
+  },
+}
+
 const bullQueue = {
   syncDbClusterStatus: (dbClusterDxid: string, userContext: UserCtx) => ({
     data: {
@@ -570,6 +605,7 @@ export {
   user,
   job,
   app,
+  comparison,
   userFile,
   folder,
   tag,
@@ -579,10 +615,10 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
-  comparison,
   challenge,
   dbCluster,
   expert,
+  news,
   bullQueue,
   bullQueueRepeatable,
 }

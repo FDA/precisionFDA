@@ -12,15 +12,17 @@ import { OrgMembershipError } from '../errors'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import {
   CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
-  FileCloseParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams, FileDescribeParams,
+  FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
+  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams,
+  UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams, FileRemoveParams
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
   FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
   FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
-  WorkflowDescribeResponse, AppDescribeResponse
+  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse,
 } from './platform-client.responses'
+import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -79,7 +81,7 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
-  async removeFolderRec(params: RemoveFolderParams): Promise<ClassIdResponse> {
+  async folderRemove(params: RemoveFolderParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/removeFolder`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -106,6 +108,23 @@ class PlatformClient {
   // ----------------------
   //    F I L E S
   // ----------------------
+
+  /**
+   * Removes nodes specified by their ids. Works recursively and
+   * therefore contents of folders is removed as well.
+   *
+   * @param params ids of nodes that should be removed
+   * @returns
+   */
+  async fileRemove(params: FileRemoveParams): Promise<FileRemoveResponse> {
+    const url = `${config.platform.apiUrl}/${params.projectId}/removeObjects`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { objects: params.ids },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
 
   /**
    * Removes user from provided organization. Also revokes access to projects & apps associated with org.
@@ -647,6 +666,8 @@ class PlatformClient {
 
 export {
   PlatformClient,
+  IPlatformAuthClient,
+  PlatformAuthClient,
   JobDescribeResponse,
   JobCreateResponse,
   ListFilesResponse,

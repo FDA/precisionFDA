@@ -24,5 +24,16 @@ module.exports = {
     'new-cap': 0,
     'id-length': 0,
     'allow-parens': 0,
+    'max-len': [
+      "error",
+      {
+        "code": 130,
+        "tabWidth": 2,
+        "ignoreComments": true,
+        "ignoreUrls": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }
+    ]
   },
 }

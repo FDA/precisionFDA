@@ -4,7 +4,7 @@ import { BaseOperation } from '../../../utils'
 import { UserOpsCtx } from '../../../types'
 import { spaceActionPolicy } from '../space.action-policy'
 import { SPACE_STATE } from '../space.enum'
-import { PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../space-event/space-event.enum'
+import { ENTITY_TYPE, PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../space-event/space-event.enum'
 import { errors } from '../../..'
 
 type SpaceUnlockInput = { spaceId: number }
@@ -44,9 +44,9 @@ void
     if (canBeUnlockedByCurrentUser) {
       try {
         await this.em.begin()
-        space.state = SPACE_STATE.STATE_ACTIVE
+        space.state = SPACE_STATE.ACTIVE
         confidentialSpaces.forEach(cs => {
-          cs.state = SPACE_STATE.STATE_ACTIVE
+          cs.state = SPACE_STATE.ACTIVE
         })
 
         const membership = await this.ctx.em.findOne(
@@ -58,7 +58,7 @@ void
           space,
           user,
           entityId: input.spaceId,
-          entityType: PARENT_TYPE.SPACE,
+          entityType: ENTITY_TYPE.SPACE,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.space_unlocked,
           objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
           // @ts-ignore

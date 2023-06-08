@@ -1,5 +1,9 @@
 import { DateTime, Duration, Interval } from 'luxon'
+import { createSendEmailTask } from '../../queue'
+import { UserOpsCtx, WorkerOpsCtx } from '../../types'
 import { config } from '../../config'
+import { EMAIL_TYPES } from '../email/email.config'
+import { JobFailedEmailHandler } from '../email/templates/handlers'
 import { Job } from './job.entity'
 import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
 
@@ -64,9 +68,37 @@ const formatDuration = (duration: number): string => {
   return result
 }
 
+const sendJobFailedEmails = async (jobId:string, ctx: WorkerOpsCtx<UserOpsCtx>): Promise<void> => {
+  const handler = new JobFailedEmailHandler(
+    EMAIL_TYPES.jobFailed,
+    { jobId},
+    ctx,
+  )
+  await handler.setupContext()
+
+  const receivers = await handler.determineReceivers()
+  const emails = await Promise.all(
+    receivers.map(async receiver => {
+      const template = await handler.template(receiver)
+      return template
+    }),
+  )
+
+  return Promise.all(emails.map(async email => {
+    ctx.log.info({
+      jobId,
+      user: ctx.user.dxuser,
+      recipient: email.to,
+    }, 'Sending failed job email to user')
+
+    await createSendEmailTask(email, ctx.user)
+  })) as any
+}
+
 export {
   shouldSyncStatus,
   isStateTerminal,
+  sendJobFailedEmails,
   buildIsOverMaxDuration,
   isStateActive,
   isJobPrivate,
