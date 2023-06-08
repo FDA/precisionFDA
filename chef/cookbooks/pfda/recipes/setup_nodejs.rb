@@ -1,4 +1,4 @@
-include_recipe("nodejs::nodejs_from_binary")
+include_recipe("nodejs")
 
 # Install Yarn and pm2 globally.
 npm_package "yarn"
