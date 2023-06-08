@@ -61,6 +61,7 @@ services:
       - NODE_DATABASE_NAME=precision-fda
       - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
       - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+      - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
     volumes:
       - type: bind
         source: ../https-apps-api/packages
@@ -81,6 +82,7 @@ services:
       - NODE_DATABASE_NAME=precision-fda
       - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
       - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+      - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
     volumes:
       - type: bind
         source: ../https-apps-api/packages

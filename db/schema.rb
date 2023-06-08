@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_17_154951) do
+ActiveRecord::Schema.define(version: 2023_04_10_200330) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -100,7 +100,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
   end
 
   create_table "apps", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "dxid"
+    t.string "dxid", collation: "utf8_bin"
     t.string "version"
     t.integer "revision"
     t.string "title"
@@ -113,12 +113,13 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.datetime "updated_at", null: false
     t.integer "app_series_id"
     t.boolean "verified", default: false, null: false
-    t.string "uid"
+    t.string "uid", collation: "utf8_bin"
     t.string "dev_group"
     t.string "release", null: false
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.boolean "deleted", default: false, null: false
+    t.string "forked_from"
     t.index ["app_series_id"], name: "index_apps_on_app_series_id"
     t.index ["deleted"], name: "index_apps_on_deleted"
     t.index ["dxid"], name: "index_apps_on_dxid"
@@ -243,7 +244,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
   end
 
   create_table "dbclusters", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "dxid", null: false
+    t.string "dxid", collation: "utf8_bin"
     t.string "name", null: false
     t.integer "status", null: false
     t.string "scope", null: false
@@ -256,7 +257,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.string "port"
     t.string "description"
     t.datetime "status_as_of"
-    t.string "uid", null: false
+    t.string "uid", collation: "utf8_bin"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
@@ -388,7 +389,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
   end
 
   create_table "jobs", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "dxid"
+    t.string "dxid", collation: "utf8_bin"
     t.integer "app_id"
     t.string "project"
     t.text "run_data"
@@ -402,7 +403,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.integer "app_series_id"
     t.string "scope"
     t.integer "analysis_id"
-    t.string "uid"
+    t.string "uid", collation: "utf8_bin"
     t.integer "local_folder_id"
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
@@ -463,11 +464,12 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.boolean "published"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_publication", default: false
     t.index ["position"], name: "position_news_items_idx"
   end
 
   create_table "nodes", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "dxid"
+    t.string "dxid", collation: "utf8_bin"
     t.string "project"
     t.string "name"
     t.string "state"
@@ -482,9 +484,11 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.integer "parent_folder_id"
     t.string "sti_type"
     t.integer "scoped_parent_folder_id"
-    t.string "uid"
+    t.string "uid", collation: "utf8_bin"
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
+    t.boolean "locked", default: false
+    t.index ["dxid", "sti_type"], name: "index_nodes_on_dxid_and_sti_type"
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
     t.index ["state"], name: "index_nodes_on_state"
@@ -508,6 +512,18 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.integer "user_id"
     t.text "data"
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
+  end
+
+  create_table "notifications", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.string "action", null: false
+    t.string "message", limit: 4096
+    t.string "severity", null: false
+    t.integer "user_id"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "meta", limit: 4096
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "org_action_requests", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -667,6 +683,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.integer "sponsor_org_id"
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
+    t.boolean "protected", default: false
   end
 
   create_table "submissions", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -868,7 +885,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
   create_table "workflows", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "title"
     t.string "name"
-    t.string "dxid"
+    t.string "dxid", collation: "utf8_bin"
     t.integer "user_id"
     t.text "readme"
     t.string "edit_version"
@@ -879,7 +896,7 @@ ActiveRecord::Schema.define(version: 2022_03_17_154951) do
     t.integer "workflow_series_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "uid"
+    t.string "uid", collation: "utf8_bin"
     t.string "project"
     t.boolean "featured", default: false
     t.boolean "deleted", default: false, null: false

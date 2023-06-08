@@ -56,7 +56,7 @@ You can skip any section if you have already installed the dependencies.
     * `cp config/database.sample.yml config/database.yml`
 
 * Create environment config file
-    * `cp .env.sample .env`
+    * `cp .env.example .env`
 
 * Ask Dev team for additional parameters to add into `.env` file
 

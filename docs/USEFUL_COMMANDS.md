@@ -55,3 +55,7 @@ docker compose exec -it db bash
 mysql -uroot -p
 # You should be able to find the password depending on your configuration
 ```
+
+## TODO - missing
+
+mention remaining rake tasks in this doc

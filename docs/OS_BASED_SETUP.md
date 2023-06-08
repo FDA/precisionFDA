@@ -20,7 +20,7 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
     * `\curl -sSL https://get.rvm.io | bash -s stable`
 
 * Install ruby
-    * `rvm install 2.7.5`
+    * `rvm install 3.2.2`
 
 * Move to project's root directory
     * `cd <wherever you've clonned project>`
@@ -46,6 +46,17 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
 
 * Install the other required gems
     * `bundle install`
+
+## Installation of bower dependencies
+
+* Install [nvm](https://github.com/nvm-sh/nvm) according to [steps](https://github.com/nvm-sh/nvm)
+* Install latest `node` version
+
+    ```
+    nvm install node
+    ```
+* `npm i -g bower`
+* `bower install` - in the project directory
 
 ## Configure
 

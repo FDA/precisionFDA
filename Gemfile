@@ -1,15 +1,15 @@
 source "https://rubygems.org"
 
-ruby "2.7.5"
+ruby "3.2.2"
 
-gem "rails", "= 6.1.6.1"
+gem "rails", "= 6.1.7.3"
 
-gem "rails-html-sanitizer", "~> 1.4.3"
+gem "rails-html-sanitizer", "~> 1.4.4"
 
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 6.0"
-# Use Uglifier as compressor for JavaScript assets
-gem "uglifier"
+# Use Terser as compressor for JavaScript assets
+gem "terser", "~> 1.1"
 # Use CoffeeScript for .coffee assets and views
 gem "coffee-rails", "~> 5.0"
 
@@ -22,6 +22,8 @@ gem "jbuilder", "~> 2.5"
 
 gem "rails-reverse-proxy"
 
+gem "matrix"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", ">= 1.4.6", require: false
 
@@ -30,6 +32,8 @@ gem "sdoc", ">= 1.0.0", group: :doc
 
 # ActiveModelSerializers brings convention over configuration to your JSON generation.
 gem "active_model_serializers", "~> 0.10.12"
+
+gem "redis", "~> 4.8.1"
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -98,13 +102,17 @@ gem "prawn"
 gem "aws-sdk-sns"
 gem "execjs"
 gem "parallel"
-gem "therubyracer"
 
 gem "dry-container"
+gem "dry-configurable"
+
+gem "nokogiri", ">=1.13.10"
+
+gem "rack", ">=2.2.6.3"
 
 gem "rubyzip", "=1.3.0"
 
-gem "sidekiq", "~> 6.4"
+gem "sidekiq", ">= 7.0.8"
 
 gem "whenever", require: false
 
@@ -165,5 +173,5 @@ end
 
 group :production, :staging, :dev do
   gem "exception_notification", "~> 4.4"
-  gem "puma", "~> 5.6", ">= 5.6.4"
+  gem "puma", "~> 6.2", ">= 6.2.2"
 end
