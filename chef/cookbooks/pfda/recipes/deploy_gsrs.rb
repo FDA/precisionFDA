@@ -1,87 +1,102 @@
-include_recipe('::configure_ssh')
-
-deploy_user = node[:deploy_user]
-gsrs_port = node[:gsrs][:port]
-gsrs_path = node[:gsrs][:app_dir]
-gsrs_pfda_conf = File.join(gsrs_path, "conf/ginas-pfda.conf")
-gsrs_run_script = File.join(gsrs_path, "start_gsrs.sh")
-gsrs_indexes_bucket = node[:gsrs][:indexes_bucket]
-
-ruby_block "set envs" do
-  block do
-    node.run_state.dig("ssm_params", "app", "environment").each do |name, val|
-      ENV[name] = val
-    end
-
-    ENV["HOME"] = "/home/#{deploy_user}"
-    ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
-    ENV["AWS_ACCESS_KEY_ID"] = node.run_state.dig("ssm_params", "gsrs", "aws_access_key_id")
-    ENV["AWS_SECRET_ACCESS_KEY"] = node.run_state.dig("ssm_params", "gsrs", "aws_secret_access_key")
+node[:gsrs][:packages].each do |p|
+  package p do
+    action :install
   end
 end
 
-# TODO: remove GSRS dist folder from the base AMI.
-execute "Remove old GSRS distribution directory" do
-  command "rm -rf #{gsrs_path}"
+tomcat_install "gsrs" do
+  symlink_path node[:gsrs][:tomcat_path]
+  version node[:gsrs][:tomcat_version]
+  tomcat_user node[:gsrs][:tomcat_user]
+  tomcat_group node[:gsrs][:tomcat_group]
+  exclude_docs true
+  exclude_examples true
+  exclude_manager true
+  exclude_hostmanager true
 end
 
-git gsrs_path do
+template "#{node[:gsrs][:tomcat_path]}/conf/context.xml" do
+  source "gsrs/context.xml"
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_grop]
+  mode 0600
+end
+
+bash "sync ginas indexes" do
+  code <<-EOH
+  aws s3 sync #{node.run_state.dig("ssm_params", "gsrs", "index_path") || node[:gsrs][:index_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
+  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/ginas.ix/ -R
+  EOH
+end
+
+git "#{node[:gsrs][:tomcat_path]}/repo" do
   repository node[:gsrs][:repo_url]
   revision lazy { node.run_state.dig("ssm_params", "gsrs", "revision") || node[:gsrs][:revision] }
-  ssh_wrapper node[:ssh_wrapper_path]
   depth 1
-  user deploy_user
-  group deploy_user
 end
 
-execute "Stop G-SRS" do
-  command %{
-    kill `ps -eaf | \
-          grep 'java -Duser.dir=#{gsrs_path}' | \
-          grep -v grep | \
-          awk '{print $2}'` \
-    > /dev/null 2>&1 \
-    || true
-  }
+bash "copy gsrs to webapps" do
+  code <<-EOH
+  rsync -a #{node[:gsrs][:tomcat_path]}/repo/ #{node[:gsrs][:tomcat_path]}/webapps \
+  --exclude '.git' \
+  --exclude 'ROOT/WEB-INF/classes/application.yml' \
+  --exclude 'frontend/WEB-INF/classes/static/assets/data/config.json' \
+  --exclude 'substances/WEB-INF/classes/application.conf' \
+  --exclude 'substances/WEB-INF/classes/codeSystem.json'
+  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/webapps/ -R
+  EOH
 end
 
-template gsrs_pfda_conf do
-  source "ginas-pfda.conf.erb"
-  owner deploy_user
-  group deploy_user
-  variables lazy { ENV.to_hash }
+template "#{node[:gsrs][:tomcat_path]}/webapps/ROOT/WEB-INF/classes/application.yml" do
+  source "gsrs/application.yml.erb"
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_grop]
+  mode 0644
 end
 
-template gsrs_run_script do
-  source "start_gsrs.sh.erb"
-  owner deploy_user
-  group deploy_user
+template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/assets/data/config.json" do
+  source "gsrs/config.json.erb"
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_grop]
+  mode 0644
   variables(
-    gsrs_path: gsrs_path,
-    gsrs_pfda_conf: gsrs_pfda_conf,
-    gsrs_port: gsrs_port,
-    java_opts: "-J-Xmx8G",
+    :HOST => lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
   )
-  mode 0755
 end
 
-execute "Change mode of the ginas binary" do
-  cwd gsrs_path
-  user deploy_user
-  command "chmod 755 bin/ginas"
+template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/codeSystem.json" do
+  source "gsrs/codeSystem.json.erb"
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_grop]
+  mode 0644
 end
 
-execute "Copy ginas indexes" do
-  cwd gsrs_path
-  user deploy_user
-  command "aws s3 cp s3://#{gsrs_indexes_bucket}/ginas.ix/ ginas.ix --recursive"
-  environment ENV.to_hash
+template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/application.conf" do
+  source "gsrs/application.conf.erb"
+  mode 0644
+  owner node[:gsrs][:tomcat_user]
+  group node[:gsrs][:tomcat_grop]
+  variables(
+    :TOMCAT_PATH => node[:gsrs][:tomcat_path],
+    :GSRS_AUTHENTICATION_HEADER_NAME => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_AUTHENTICATION_HEADER_NAME") },
+    :GSRS_AUTHENTICATION_HEADER_NAME_EMAIL => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_AUTHENTICATION_HEADER_NAME_EMAIL") },
+    :GSRS_DATABASE_URL => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_URL") },
+    :GSRS_DATABASE_USERNAME => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_USERNAME") },
+    :GSRS_DATABASE_PASSWORD => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_PASSWORD") },
+    :HOST => lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
+  )
 end
 
-poise_service "gsrs" do
-  directory gsrs_path
-  user deploy_user
-  provider :systemd
-  command gsrs_run_script
-  environment lazy { ENV.to_hash }
+if node[:gsrs][:tomcat_start]
+  tomcat_service "gsrs" do
+    action :start
+    service_name "gsrs"
+    install_path node[:gsrs][:tomcat_path]
+    tomcat_user node[:gsrs][:tomcat_user]
+    tomcat_group node[:gsrs][:tomcat_group]
+    env_vars [
+               { "CATALINA_PID" => node[:gsrs][:tomcat_path] + "/bin/tomcat.pid" },
+               { "CATALINA_OPTS" => "-Xms" + node[:gsrs][:tomcat_memory_min] + " -Xmx" + node[:gsrs][:tomcat_memory_max] },
+             ]
+  end
 end

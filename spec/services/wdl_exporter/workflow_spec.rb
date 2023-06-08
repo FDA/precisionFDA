@@ -110,7 +110,7 @@ RSpec.describe WdlExporter::Workflow do
 
   describe "#to_s" do
     it "generates a correct string" do
-      expect(wdl_workflow.to_s).to eq IO.read(Rails.root.join("spec/support/files/workflow.wdl"))
+      expect(wdl_workflow.to_s).to eq File.read("spec/support/files/workflow.wdl")
     end
   end
 

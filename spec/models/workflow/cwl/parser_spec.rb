@@ -8,7 +8,7 @@ RSpec.describe Workflow::Cwl::Parser, type: :model do
 
   let(:user) { create(:user) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
-  let(:raw) { IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
+  let(:raw) { File.read("spec/support/files/workflow_import/workflow.cwl") }
   let(:parser) { described_class.new(raw, context) }
   let(:locale_scope) { "activemodel.errors.models.workflow/cwl/parser.attributes" }
   let(:locale_options) { { scope: locale_scope } }

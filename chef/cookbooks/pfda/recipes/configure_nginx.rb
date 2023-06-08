@@ -13,12 +13,16 @@ file "/etc/nginx/ssl/pfda.key" do
   only_if { node.run_state["ssm_params"]["app"]["enable_ssl"] }
 end
 
-template "/usr/local/conf/nginx.conf" do
+template "/etc/nginx/nginx.conf" do
   source "nginx.conf.erb"
   variables lazy { {
     app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0],
     unii_host: node.run_state["ssm_params"]["app"]["environment"]["UNII_HOST"]
   } }
+end
+
+template "/etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf" do
+  source "json_analytics_log_format_for_prometheus.conf.erb"
 end
 
 template "/usr/local/conf/modsecurity.conf" do

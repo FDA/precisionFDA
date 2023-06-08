@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe App::WdlPresenter::CodeGenerator do
-  let(:wdl) { IO.read(Rails.root.join("spec/support/files/task.wdl")) }
+  let(:wdl) { File.read("spec/support/files/task.wdl") }
 
   let(:workflow_name) { "single_task" }
   let(:app_name) { "app_a" }

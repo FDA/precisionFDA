@@ -9,9 +9,9 @@
 
   },
   "dependencies": {
-    "application": "~> 5.2.0",
-    "aws": "~> 8.4.0",
-    "nodejs": "~> 7.3.2"
+    "aws": "~> 9.0",
+    "nodejs": "~> 10.1",
+    "tomcat": "~> 5.0"
   },
   "providing": {
 
@@ -25,7 +25,7 @@
   "privacy": false,
   "chef_versions": [
     [
-      "~> 16.0"
+      ">= 17.10", "< 18.3"
     ]
   ],
   "ohai_versions": [

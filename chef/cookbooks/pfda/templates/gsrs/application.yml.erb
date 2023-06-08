@@ -1,0 +1,161 @@
+gsrs:
+  gateway:
+    server:
+      addHeaders:
+        # these are for the FDA GSRS server to be able to respond to the KASA SSG4M GSRS instance
+        - "Access-Control-Allow-Origin: *"
+        - "Access-Control-Allow-Methods: POST, GET, PUT, PATCH, DELETE, OPTIONS"
+        - "Access-Control-Allow-Headers: auth-key, auth-username, auth-password, auth-token, Content-Type, Content-Range, Content-Disposition, Content-Description"
+      redirectPatterns:
+        # fixes for improper redirects on single tomcat instance
+        - "[/][a-z|A-Z]*/api/v1/: /ginas/app/api/v1/"
+eureka:
+  client:
+    registerWithEureka: false
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+
+spring:
+  application:
+    name: gateway
+
+debug: true
+
+zuul:
+  #this sets sensitiveHeaders to empty list so cookies and auth headers are passed through both ways
+  sensitiveHeaders:
+  routes:
+    ui:
+      path: /ginas/app/beta/**
+      url: http://localhost:8080/frontend/ginas/app/beta
+      serviceId: frontend
+    ginas_app:
+      path: /ginas/app/**
+      url: http://localhost:8080
+      serviceId: ginas_app_route
+    applications_core:
+      path: /api/v1/applications/**
+      url: http://localhost:8080/applications/api/v1/applications
+      serviceId: applications_core
+    applications_core_alt:
+      path: /api/v1/applications(**)/**
+      url: http://localhost:8080/applications/api/v1/applications
+      serviceId: applications_core_alt
+    applications_all:
+      path: /api/v1/applicationsall/**
+      url: http://localhost:8080/applications/api/v1/applicationsall
+      serviceId: applications_all
+    applications_all_alt:
+      path: /api/v1/applicationsall(**)/**
+      url: http://localhost:8080/applications/api/v1/applicationsall
+      serviceId: applications_all_alt
+    applications_darrts:
+      path: /api/v1/applicationsdarrts/**
+      url: http://localhost:8080/applications/api/v1/applicationsdarrts
+      serviceId: applications_darrts
+    applications_darrts_alt:
+      path: /api/v1/applicationsdarrts(**)/**
+      url: http://localhost:8080/applications/api/v1/applicationsdarrts
+      serviceId: applications_darrts_alt
+    applications_searchcount:
+      path: /api/v1/searchcounts/**
+      url: http://localhost:8080/applications/api/v1/searchcounts
+      serviceId: applications_searchcount
+    applications_searchcount_alt:
+      path: /api/v1/searchcounts(**)/**
+      url: http://localhost:8080/applications/api/v1/searchcounts
+      serviceId: applications_searchcount
+    products_core:
+      path: /api/v1/products/**
+      url: http://localhost:8080/products/api/v1/products
+      serviceId: products_core
+    products_core_alt:
+      path: /api/v1/products(**)/**
+      url: http://localhost:8080/products/api/v1/products
+      serviceId: products_core
+    products_all:
+      path: /api/v1/productsall/**
+      url: http://localhost:8080/products/api/v1/productsall
+      serviceId: products_all
+    products_all_alt:
+      path: /api/v1/productsall(**)/**
+      url: http://localhost:8080/products/api/v1/productsall
+      serviceId: products_all
+    products_elist:
+      path: /api/v1/productselist/**
+      url: http://localhost:8080/products/api/v1/productselist
+      serviceId: products_elist
+    products_elist_alt:
+      path: /api/v1/productselist(**)/**
+      url: http://localhost:8080/products/api/v1/productselist
+      serviceId: products_elist
+    impurities:
+      path: /api/v1/impurities/**
+      url: http://localhost:8080/impurities/api/v1/impurities
+      serviceId: impurities
+    impurities_alt:
+      path: /api/v1/impurities(**)/**
+      url: http://localhost:8080/impurities/api/v1/impurities
+      serviceId: impurities
+    adverseeventpt:
+      path: /api/v1/adverseeventpt/**
+      url: http://localhost:8080/adverse-events/api/v1/adverseeventpt
+      serviceId: adverseeventpt
+    adverseeventpt_alt:
+      path: /api/v1/adverseeventpt(**)/**
+      url: http://localhost:8080/adverse-events/api/v1/adverseeventpt
+      serviceId: adverseeventpt
+    adverseeventdme:
+      path: /api/v1/adverseeventdme/**
+      url: http://localhost:8080/adverse-events/api/v1/adverseeventdme
+      serviceId: adverseeventdme
+    adverseeventdme_alt:
+      path: /api/v1/adverseeventdme(**)/**
+      url: http://localhost:8080/adverse-events/api/v1/adverseeventdme
+      serviceId: adverseeventdme
+    adverseeventcvm:
+      path: /api/v1/adverseeventcvm/**
+      url: http://localhost:8080/adverse-events/api/v1/adverseeventcvm
+      serviceId: adverseeventcvm
+    adverseeventcvm_alt:
+      path: /api/v1/adverseeventcvm(**)/**
+      url: http://localhost:8080/adverse-events/api/v1/adverseeventcvm
+      serviceId: adverseeventcvm
+    clinical_trials_us:
+      path: /api/v1/clinicaltrialsus/**
+      url: http://localhost:8080/clinical-trials/api/v1/clinicaltrialsus
+      serviceId: clinical_trials_us
+    clinical_trials_us_alt:
+      path: /api/v1/clinicaltrialsus(**)/**
+      url: http://localhost:8080/clinical-trials/api/v1/clinicaltrialsus
+      serviceId: clinical_trials_us
+    clinical_trials_europe:
+      path: /api/v1/clinicaltrialseurope/**
+      url: http://localhost:8080/clinical-trials/api/v1/clinicaltrialseurope
+      serviceId: clinical_trials_europe
+    clinical_trials_europe_alt:
+      path: /api/v1/clinicaltrialseurope(**)/**
+      url: http://localhost:8080/clinical-trials/api/v1/clinicaltrialseurope
+      serviceId: clinical_trials_europe
+    legacy:
+      path: /**
+      url: http://localhost:8080/substances
+      serviceId: substances
+  ignored-patterns:
+      - "/actuator/health"
+
+ribbon:
+  eureka:
+    enabled: false
+
+management.endpoints.web.exposure.include: 'routes,filters'
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+
+eureka.client.enabled:  false
+
+zuul.host.socket-timeout-millis: 300000

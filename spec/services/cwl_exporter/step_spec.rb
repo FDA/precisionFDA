@@ -33,7 +33,7 @@ RSpec.describe CwlExporter::Step do
   end
 
   let(:expected_output) do
-    IO.read(Rails.root.join("spec/support/files/step.cwl"))
+    File.read("spec/support/files/step.cwl")
   end
 
   let(:app) do
@@ -42,7 +42,7 @@ RSpec.describe CwlExporter::Step do
       dxid: "app-1",
       input_spec: input,
       output_spec: output,
-      code: IO.read(Rails.root.join("spec/support/files/app_script.sh")),
+      code: File.read("spec/support/files/app_script.sh"),
       app_series: build(:app_series, name: "app_a")
     )
   end

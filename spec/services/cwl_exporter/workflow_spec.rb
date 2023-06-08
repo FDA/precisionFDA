@@ -105,7 +105,7 @@ RSpec.describe CwlExporter::Workflow do
 
   describe "#to_s" do
     it "generates a correct string" do
-      expect(cwl_workflow.to_s).to eq IO.read(Rails.root.join("spec/support/files/workflow.cwl"))
+      expect(cwl_workflow.to_s).to eq File.read("spec/support/files/workflow.cwl")
     end
   end
 

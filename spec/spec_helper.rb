@@ -21,6 +21,12 @@ RSpec.configure do |config|
   # we always want to run tests in test configuration
   # if developer does set env tests delete whole dev database
   ENV["RAILS_ENV"] = "test"
+  ENV["HTTPS_APPS_API_URL"] = "https://localhost:3001"
+  ENV["SMTP_HOST"] = "host"
+  ENV["SMTP_PORT"] = "1"
+  ENV["SMTP_USER"] = "user"
+  ENV["SMTP_PASSWORD"] = "password"
+  ENV["SMTP_FROM_ADDRESS"] = "from@address.com"
 
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true

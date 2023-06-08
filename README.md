@@ -1,7 +1,8 @@
 # PrecisionFDA
 
-PrecisionFDA is a community platform for NGS assay evaluation and
-regulatory science exploration, accessible at https://precision.fda.gov/
+PrecisionFDA is a community platform for NGS assay evaluation and regulatory science exploration, accessible at https://precision.fda.gov/.
+
+It is implemented on top DNANexus API and from platform perspective it's considered 3rd party application.
 
 ## Webapp
 

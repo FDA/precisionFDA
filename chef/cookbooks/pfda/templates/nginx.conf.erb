@@ -1,7 +1,7 @@
 user www-data;
 worker_processes auto;
 pid /var/run/nginx.pid;
-error_log  <%= node[:nginx][:log_dir] %>/nginx_error.log debug;
+error_log <%= node[:nginx][:log_dir] %>/nginx_error.log warn;
 load_module modules/ngx_http_modsecurity_module.so;
 
 events {
@@ -11,6 +11,10 @@ events {
 }
 
 http {
+  gzip on;
+  gzip_comp_level 4;
+  gzip_types text/plain text/html text/css application/xml application/json application/javascript image/svg+xml image/bmp font/eot font/otf font/ttf;
+  gzip_proxied no-cache no-store private expired auth;
   server_tokens off;
   client_max_body_size 50M;
   keepalive_timeout 65;
@@ -19,29 +23,30 @@ http {
   tcp_nopush on;
   tcp_nodelay on;
   map $uri $apicall {
-        default $binary_remote_addr;
-        ~list_app_revisions "";
-        ~get_app_spec "";
-        ~activity_reports "";
-        ~get_upload_url "";
-        ~create_file "";
-        ~close_file "";
-        ~participants "";
+    default $binary_remote_addr;
+    ~list_app_revisions "";
+    ~get_app_spec "";
+    ~activity_reports "";
+    ~get_upload_url "";
+    ~create_file "";
+    ~close_file "";
+    ~participants "";
   }
   #limit_req_zone $apicall zone=pfdazone:10m rate=5r/s;
 
   server {
-   listen 80 default_server;
-   listen [::]:80 default_server;
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-   server_name _;
+    server_name _;
 
-   return 301 https://$host$request_uri;
+    return 301 https://$host$request_uri;
   }
 
+  include /etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf;
   server {
     server_name <%= @app_domain %>;
-    access_log <%= node[:nginx][:log_dir] %>/<%= @app_domain %>-ssl.access.log;
+    access_log <%= node[:nginx][:log_dir] %>/<%= @app_domain %>-ssl.access.log json_analytics;
 
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
@@ -68,12 +73,19 @@ http {
       <%= render 'proxy_settings.conf.erb' %>
     }
 
-     error_page 500 502 503 504 /500.html;
-     client_max_body_size 4G;
-     keepalive_timeout 10;
+    location /ws {
+      proxy_pass https://localhost:3001;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+    }
 
-     client_body_timeout 5s;
-     client_header_timeout 5s;
+    error_page 500 502 503 504 /500.html;
+    client_max_body_size 4G;
+    keepalive_timeout 10;
+
+    client_body_timeout 5s;
+    client_header_timeout 5s;
 
     add_header X-Request-ID $request_id;
   }

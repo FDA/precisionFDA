@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe App::WdlPresenter do
   describe "#build" do
-    let(:wdl_text) { IO.read(Rails.root.join("spec/support/files/task.wdl")) }
+    let(:wdl_text) { File.read("spec/support/files/task.wdl") }
 
     subject(:presenter) { described_class.new(wdl_text) }
 
