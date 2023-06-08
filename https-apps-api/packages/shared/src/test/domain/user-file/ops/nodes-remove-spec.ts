@@ -1,12 +1,14 @@
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 import pino from 'pino'
 import { expect } from 'chai'
 import { create, db } from '../../..'
-import { User, UserFile, Node, Event, userFile } from '../../../../domain'
+import { Event, Node, User, UserFile, userFile } from '../../../../domain'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { EVENT_TYPES } from 'shared/src/domain/event/event.helper'
-import {STATIC_SCOPE} from "../../../../enums";
-import {isValidScopeName} from "../../../../domain/space/space.helper";
+import { STATIC_SCOPE } from '../../../../enums'
+import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
+import { RemoveNodesInput } from '../../../../domain/user-file/user-file.input'
+import { isValidScopeName } from '../../../../domain/space/space.helper'
 
 describe('remove nodes tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -167,6 +169,49 @@ describe('remove nodes tests', () => {
     em.clear()
 
     await assertResults('space-1')
+  })
+
+  it('test remove nodes - remove file created by a different user from a space', async () => {
+    const space = create.spacesHelper.create(em, {name: 'test-space'})
+    const user2 = create.userHelper.create(em, {dxuser: 'testuser'})
+    await em.flush()
+    create.spacesHelper.addMember(em, {user, space})
+    const file = create.filesHelper.create(em, {user: user2}, {name: 'test-file.txt', scope: `space-${space.id}`})
+    await em.flush()
+
+    const op = new userFile.NodesRemoveOperation({
+      em: database.orm().em.fork() as SqlEntityManager,
+      log,
+      user: userCtx,
+    })
+
+    await op.execute({ ids: [file.id] } as RemoveNodesInput)
+
+    const loadedFile = await em.findOne(Node, {id: file.id})
+    expect(loadedFile).to.be.null()
+  })
+
+  it('test remove nodes - fail to remove file from space with VIEWER role', async () => {
+    const space = create.spacesHelper.create(em, {name: 'test-space'})
+    const user2 = create.userHelper.create(em, {dxuser: 'testuser'})
+    await em.flush()
+    create.spacesHelper.addMember(em, {user, space}, {role: SPACE_MEMBERSHIP_ROLE.VIEWER})
+    const file = create.filesHelper.create(em, {user: user2}, {name: 'test-file.txt', scope: `space-${space.id}`})
+    await em.flush()
+
+    const op = new userFile.NodesRemoveOperation({
+      em: database.orm().em.fork() as SqlEntityManager,
+      log,
+      user: userCtx,
+    })
+
+    try {
+      await op.execute({ ids: [file.id] } as RemoveNodesInput)
+      expect.fail('Operation is expected to fail.')
+    } catch (error: any) {
+      expect(error.message).to
+        .equal(`You have no permissions to remove '${file.name}'.`)
+    }
   })
 
 })
