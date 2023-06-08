@@ -39,7 +39,7 @@ number
       const userRepo = em.getRepository(User)
       const user = await userRepo.findOneOrFail(this.ctx.user.id)
 
-      await validateEditableBy(folderToRemove, user)
+      await validateEditableBy(em, folderToRemove, user)
       await validateVerificationSpace(em, folderToRemove)
 
       const folderPath = await getNodePath(em, folderToRemove)
