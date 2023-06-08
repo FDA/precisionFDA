@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { theme } from '../../styles/theme'
 import ExternalLink from '../Controls/ExternalLink'
 
-import fdaLogo from '../../assets/logo-fda-2016.png'
+import fdaLogo from '../../assets/logo-fda.svg'
 import { TwitterIcon } from '../icons/TwitterIcon'
 import { EnvelopeIcon } from '../icons/EnvelopeIcon'
 import { LinkedInIcon } from '../icons/LinkedInIcon'

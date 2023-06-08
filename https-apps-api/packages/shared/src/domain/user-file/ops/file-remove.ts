@@ -51,7 +51,7 @@ number
     await em.begin()
     try {
       await validateComparisons(em, fileToRemove)
-      await validateEditableBy(fileToRemove, user)
+      await validateEditableBy(em, fileToRemove, user)
       await validateVerificationSpace(em, fileToRemove)
       await validateProtectedSpaces(em, 'remove', this.ctx.user.id, fileToRemove)
 
@@ -72,7 +72,7 @@ number
       )
       em.persist(fileEvent)
 
-      if (lastNode === true) {
+      if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
         await this.client.fileRemove({
           projectId: fileToRemove.project,
