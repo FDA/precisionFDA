@@ -1,6 +1,6 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.enum'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]
@@ -34,5 +34,41 @@ const renameFolderSchema: JSONSchema7 = {
   required: ['newName'],
   additionalProperties: false,
 }
+type uidListInput = {
+  ids: number[]
+}
 
-export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema }
+type nodeQueryFilter = {
+  locked?: boolean
+}
+
+const uidListSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    ids: { type: 'array' },
+  },
+  required: ['ids'],
+  additionalProperties: false,
+}
+
+const CLINodeSearchSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    arg: { type: 'string' },
+    spaceId: { type: ['number' , 'null']},
+    folderId: { type: ['number' , 'null']},
+    type: {type: 'string' }
+
+  },
+  required: ['arg', 'type'],
+  additionalProperties: false,
+}
+
+type CLINodeSearchInput = {
+  arg: string,
+  type: string,
+  spaceId?: number,
+  folderId?: number
+}
+
+export { SyncFoldersInput, SyncFilesInFolderInput, RenameFolderInput, renameFolderSchema, uidListSchema, uidListInput, nodeQueryFilter, CLINodeSearchSchema, CLINodeSearchInput }

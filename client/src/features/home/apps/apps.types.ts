@@ -1,18 +1,18 @@
-import { ResourceScope } from "../types";
+import { ResourceScope, ServerScope } from '../types'
 
 export enum AppActions {
-  "Run" = "Run",
-  "Run batch" = "Run batch",
-  "Track" = "Track",
-  "Edit" = "Edit",
-  "Fork" = "Fork",
-  "Export to" = "Export to",
-  "Make public" = "Make public",
-  "Feature" = "Feature",
-  "Unfeature" = "Unfeature",
-  "Delete" = "Delete",
-  "Copy to space" = "Copy to space",
-  "Attach to..." = "Attach to...",
+  'Run' = 'Run',
+  'Run batch' = 'Run batch',
+  'Track' = 'Track',
+  'Edit' = 'Edit',
+  'Fork' = 'Fork',
+  'Export to' = 'Export to',
+  'Make public' = 'Make public',
+  'Feature' = 'Feature',
+  'Unfeature' = 'Unfeature',
+  'Delete' = 'Delete',
+  'Copy to space' = 'Copy to space',
+  'Attach to...' = 'Attach to...',
 }
 
 export enum AppsListActions {
@@ -25,6 +25,7 @@ export interface Links {
   jobs: string;
   track: string;
   fork: string;
+  forked_from: string;
   export: string;
   cwl_export: string;
   wdl_export: string;
@@ -57,6 +58,7 @@ export interface IApp {
   location: ResourceScope | 'Private';
   readme: string;
   revision: number;
+  latest_revision: boolean;
   app_series_id: number;
   run_by_you: string;
   job_count: number;
@@ -66,5 +68,93 @@ export interface IApp {
   active: boolean;
   links: Links;
   tags: any[];
+  scope: ServerScope;
+  forked_from: string;
 }
 
+export interface InputSpec {
+  class: string;
+  help: string;
+  label: string;
+  name: string;
+  optional: boolean;
+  default: string | boolean;
+  choices: [];
+}
+
+export interface FileUser {
+  dxuser: string;
+  full_name: string;
+}
+
+export interface FileOrg {
+  handle: string;
+  name: string;
+}
+export interface ListedFile {
+  id: number;
+  uid: string;
+  className: string;
+  fa_class: string
+  scope: string;
+  path: string;
+  owned: boolean;
+  editable: boolean;
+  accesible: boolean;
+  file_path: string;
+  parent_folder_name: string;
+  public: boolean;
+  private: boolean;
+  in_space: boolean;
+  space_private: boolean,
+  space_public: boolean
+  title: string;
+  description: string;
+  state: string;
+  file_size: number;
+  license: License;
+  user_licence: UserLicense;
+  user: FileUser;
+  org: FileOrg;
+}
+
+export interface ListedFiles {
+  objects: ListedFile[];
+}
+
+export interface AcceptedLicense {
+  id: number,
+  license: number, // ID of actual license that is accepted
+  message: string,
+  state: string,
+  user: number, // ID of the user
+}
+
+export interface ComputeInstance {
+  value: string;
+  label: string;
+}
+
+export interface SelectType {
+  isDisabled: boolean,
+  label: string,
+  value: string,
+}
+
+export interface JobRunData {
+  jobName: string;
+  jobLimit: number;
+  scope?: SelectType | null;
+  instanceType?: ComputeInstance | null;
+  inputs: {
+    [key: string]: string | boolean | number | ListedFile | undefined,
+  };
+}
+
+export const INPUT_TYPES_CLASSES = {
+  FILE: 'file',
+  STRING: 'string',
+  INT: 'int',
+  FLOAT: 'float',
+  BOOLEAN: 'boolean',
+} 

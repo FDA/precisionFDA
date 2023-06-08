@@ -40,4 +40,20 @@ export class SpaceMembership extends BaseEntity {
       this.spaces.add(space)
     }
   }
+
+  isHost() {
+    return this.side === SPACE_MEMBERSHIP_SIDE.HOST
+  }
+
+  isGuest() {
+    return this.side === SPACE_MEMBERSHIP_SIDE.GUEST
+  }
+
+  isAdminOrLead() {
+    return [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(this.role)
+  }
+
+  isContributor() {
+    return this.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR
+  }
 }

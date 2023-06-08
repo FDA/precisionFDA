@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 import {
   Redirect,
   Route,
@@ -23,7 +24,7 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { AppList } from '../../home/apps/AppList'
 import { AppsShow } from '../../home/apps/AppsShow'
 import { ExecutionList } from '../../home/executions/ExecutionList'
-import { JobShow } from '../../home/executions/JobShow'
+import { ExecutionDetails } from '../../home/executions/details/ExecutionDetails'
 import { FileList } from '../../home/files/FileList'
 import { FileShow } from '../../home/files/show/FileShow'
 import {
@@ -39,7 +40,7 @@ import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { WorkflowList } from '../../home/workflows/WorkflowList'
 import { WorkflowShow } from '../../home/workflows/WorkflowShow'
 import { MembersList } from '../members/MembersList'
-import { spaceRequest } from '../spaces.api'
+import { spaceRequest, fixGuestPermissions } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { Activation } from './SpaceActivation'
@@ -52,9 +53,10 @@ import {
   SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo,
   SpaceTypeHeader, TopSpaceHeader,
 } from './styles'
+import { ProtectedIcon } from '../ProtectedIcon'
+import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 
-
-export const Spaces2 = ({
+const Spaces2 = ({
   space,
   isLoading,
 }: {
@@ -71,6 +73,19 @@ export const Spaces2 = ({
   const spaceActions = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
 
+  const fixSpaceMutation = useMutation({
+    mutationKey: ['fix-guest-permissions'],
+    mutationFn: (payload: {
+      id: string
+    }) => fixGuestPermissions(payload),
+    onSuccess: () => {
+      toast.success('Permissions for guest side successfully updated.')
+    },
+    onError: (e:any) => {
+        toast.error(e.response.data.error.message)
+    },
+  })
+
   if (user?.is_guest) {
     return <GuestNotAllowed />
   }
@@ -79,34 +94,42 @@ export const Spaces2 = ({
     return <Activation space={space} />
   }
 
+  useToastWSHandler(user)
+
   return (
     <>
       <SpaceHeader>
         <TopSpaceHeader>
           <SpaceMainInfo>
             <SpaceHeaderTitle>{space.name}</SpaceHeaderTitle>
-            <SpaceHeaderDescrip>{space.description}</SpaceHeaderDescrip>
+            <SpaceHeaderDescrip>{space.protected && <ProtectedIcon />}{space.description}</SpaceHeaderDescrip>
           </SpaceMainInfo>
 
           <ButtonRow>
-            <Row>
-              {!spaceActions['Edit Space']?.shouldHide && (
-                <ActionButton
-                  data-testid="edit-space-button"
-                  onClick={() => history.push(`/spaces/${space.id}/edit`)}
-                >
-                  Space Settings
-                </ActionButton>
-              )}
-              {!spaceActions['Duplicate Space']?.shouldHide && (
-                <ActionButton
-                  data-testid="duplicate-space-button"
-                  onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
-                >
-                  Duplicate Space
-                </ActionButton>
-              )}
-            </Row>
+            {!spaceActions['Edit Space']?.shouldHide && (
+              <ActionButton
+                data-testid="edit-space-button"
+                onClick={() => history.push(`/spaces/${space.id}/edit`)}
+              >
+                Space Settings
+              </ActionButton>
+            )}
+            {!spaceActions['Duplicate Space']?.shouldHide && (
+              <ActionButton
+                data-testid="duplicate-space-button"
+                onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
+              >
+                Duplicate Space
+              </ActionButton>
+            )}
+            {!spaceActions['Fix Permissions']?.shouldHide && (
+              <ActionButton
+                data-testid="fix-space-button"
+                onClick={() => fixSpaceMutation.mutate({ id: space.id })}
+              >
+                Fix Guest Side Permissions
+              </ActionButton>
+            )}
           </ButtonRow>
         </TopSpaceHeader>
         <SpaceTypeHeader expandedSidebar={expandedSidebar}>
@@ -191,7 +214,7 @@ export const Spaces2 = ({
                 />
               </Route>
               <Route exact path={`/spaces/${space.id}/files/:fileId`}>
-                <FileShow spaceId={space.id} />
+                <FileShow space={space} />
               </Route>
               <Route exact path={`/spaces/${space.id}/apps`}>
                 <AppList spaceId={space.id} />
@@ -212,7 +235,7 @@ export const Spaces2 = ({
                 exact
                 path={`/spaces/${space.id}/executions/:executionUid`}
               >
-                <JobShow spaceId={space.id} />
+                <ExecutionDetails spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
                 <MembersList space={space} />
@@ -263,3 +286,5 @@ export const SpaceShow = () => {
 
   return <Spaces2 space={s} isLoading={isLoading} />
 }
+
+export default SpaceShow

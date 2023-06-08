@@ -1,7 +1,9 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
+import { theme } from '../../styles/theme'
 
 export const StyledInput = styled.input`
+    font-family: ${theme.fontFamily};
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -37,3 +39,5 @@ export const StyledInput = styled.input`
 export const InputText = React.forwardRef((props: any, ref) => (
   <StyledInput ref={ref} type="text" {...props} />
 ))
+
+InputText.displayName = 'InputText'

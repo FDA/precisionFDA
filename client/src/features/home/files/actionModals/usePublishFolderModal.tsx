@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FileIcon } from '../../../../components/icons/FileIcon'
@@ -29,7 +29,7 @@ const PublishFolder = ({
       scope,
     ), {
       onError: () => {toast.error('Error: Fetching download list.')},
-    }
+    },
   )
   if (status === 'loading') return <div>Loading...</div>
 
@@ -38,7 +38,7 @@ const PublishFolder = ({
       rows={data.map(s => {
         return {
           name: (
-            <StyledName href={s.viewURL} target="_blank">
+            <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
               <VerticalCenter>
                 <FileIcon />
               </VerticalCenter>
@@ -61,26 +61,27 @@ export const usePublishFolderModal = (
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selectedFiles, [isShown])
   const mutation = useMutation({
+    mutationKey: ['publish-files'],
     mutationFn: (ids: string[]) => deleteFilesRequest(ids),
     onSuccess: () => {
-      queryClient.invalidateQueries('files')
+      queryClient.invalidateQueries(['files'])
       resetSelected()
       setShowModal(false)
       toast.success('Success: Publishing file.')
     },
     onError: () => {
       toast.error('Error: Publishing file.')
-    }
+    },
   })
 
   const handleSubmit = () => {
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-publish-folder"
-      headerText={`Publish folder`}
+      headerText="Publish folder"
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={

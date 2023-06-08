@@ -34,8 +34,16 @@ export class UserRepository extends PaginatedEntityRepository<User> {
     )
   }
 
-  findAdminUser() {
-    return this.findOneOrFail({ dxuser: config.platform.adminUser })
+  findDxuser(dxuser: string): Promise<User> {
+    return this.findOneOrFail({ dxuser })
+  }
+
+  findAdminUser(): Promise<User> {
+    return this.findDxuser(config.platform.adminUser)
+  }
+
+  findChallengeBotUser(): Promise<User> {
+    return this.findDxuser(config.platform.challengeBotUser)
   }
 
   bulkUpdateSetTotalLimit(
@@ -84,6 +92,7 @@ export class UserRepository extends PaginatedEntityRepository<User> {
     return this.em.getConnection().execute(knexQuery)
   }
 
+  // TODO - Refactor business logic to service layer instead of using repository
   async bulkUpdateReset2fa(ids: number[], client: PlatformClient, userCtx: UserCtx) {
     const users = await this.em.find(User, {
       id: {
@@ -92,9 +101,6 @@ export class UserRepository extends PaginatedEntityRepository<User> {
     })
 
     return Promise.allSettled(users.map(user => client.userResetMfa({
-      headers: {
-        accessToken: config.platform.adminUserAccessToken,
-      },
       dxid: `user-${userCtx.dxuser}`,
       data: {
         user_id: user.dxuser,
@@ -113,9 +119,6 @@ export class UserRepository extends PaginatedEntityRepository<User> {
       },
     })
     return Promise.allSettled(users.map(user => client.userUnlock({
-      headers: {
-        accessToken: config.platform.adminUserAccessToken,
-      },
       dxid: `user-${userCtx.dxuser}`,
       data: {
         user_id: user.dxuser,

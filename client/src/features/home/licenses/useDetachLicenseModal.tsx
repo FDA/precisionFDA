@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Modal } from '../../modal'
@@ -23,25 +23,28 @@ export function useDetachLicenseModal<
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
 
-  const editFileMutation = useMutation({
-    mutationFn: (payload: { licenseId: string, dxid: string }) => detachLicenseRequest(payload),
-    onSuccess: (res: any) => {
-      onSuccess && onSuccess(res)
-      handleClose()
-      toast.success('Success: Detaching license.')
-    },
-    onError: () => {toast.error('Error: Detaching license.')}
-  })
   const handleClose = () => {
     setShowModal(false)
   }
+
+  const editFileMutation = useMutation({
+    mutationKey: ['detach-license', resource],
+    mutationFn: (payload: { licenseId: string, dxid: string }) => detachLicenseRequest(payload),
+    onSuccess: (res: any) => {
+      if(onSuccess) onSuccess(res)
+      handleClose()
+      toast.success('Success: Detaching license.')
+    },
+    onError: () => {toast.error('Error: Detaching license.')},
+  })
+
   const onSubmit = () => {
     if(selected?.file_license?.id && selectedId) {
       editFileMutation.mutateAsync({ licenseId: selected.file_license.id, dxid: selectedId })
     }
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-detach-license-confirmation"
       headerText="Detach License"

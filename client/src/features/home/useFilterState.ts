@@ -1,4 +1,4 @@
-import debounce from "lodash/debounce"
+import debounce from 'lodash/debounce'
 import { useCallback, useState } from 'react'
 import { DelimitedNumericArrayParam, QueryParamConfig, StringParam, useQueryParams, withDefault } from 'use-query-params'
 import { defaultFilterValues } from '../../hooks/useFilterParams'
@@ -24,7 +24,7 @@ function fileSizeParamMap(fileSize?: [number | null, number | null]) {
   
 }
 
-const KEYS = ['name', 'tags', 'featured', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by', 'type']
+const KEYS = ['name', 'tags', 'featured', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by', 'type', 'guest_lead', 'host_lead', 'workflow_title']
 function getObjectKeys<T>(a: string[]) {
   const o = {} as any
   a.forEach(k => o[k] = undefined)
@@ -65,7 +65,7 @@ export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs,
 
   const debouncedSetFilterQuery = debounce(v => {
     v.file_size = fileSizeParamMap(v.file_size)
-    setFilterParam(v)
+    setFilterParam(v, 'replaceIn')
     if(onSetFilter) onSetFilter(v)
   }, 500)
 

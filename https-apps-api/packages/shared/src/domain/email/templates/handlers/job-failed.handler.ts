@@ -31,7 +31,7 @@ export class JobFailedEmailHandler
     // Notify only owner in all cases - regardless whether job is private, or runs in space
     const owner = await this.ctx.em.findOneOrFail(
       User,
-      { id: this.ctx.user.id },
+      { id: this.job.user.id },
       { populate: ['emailNotificationSettings'] },
     )
     // Note(samuel) if different recipients are required for "CostLimitExceeded" and other failures

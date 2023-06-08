@@ -1,7 +1,7 @@
 import { pick } from 'ramda'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { OBJECT_TYPES, useAttachToModal } from '../actionModals/useAttachToModal'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -10,6 +10,7 @@ import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
 import { useTerminateModal } from './useTerminateModal'
+import { useSnapshotModal } from './useSnapshotModal'
 
 export enum ExecutionAction {
   'View Logs' = 'View Logs',
@@ -17,6 +18,7 @@ export enum ExecutionAction {
   'Track' = 'Track',
   'Copy to space' = 'Copy to space',
   'Feature' = 'Feature',
+  'Snapshot' = 'Snapshot',
   'Unfeature' = 'Unfeature',
   'Make Public' = 'Make Public',
   'Attach to...' = 'Attach to...',
@@ -64,7 +66,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), OBJECT_TYPES.JOB)
+  } = useAttachToModal(selected.map(s => s.id), 'JOB')
 
   const {
     modalComp: terminateoModal,
@@ -72,7 +74,16 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     isShown: isShownTerminateModal,
   } = useTerminateModal({ selected })
 
-  const attachLicenseMutation = useMutation({ mutationFn: async (id: string) => { } })
+  const {
+    modalComp: snapshotModal,
+    setShowModal: setSnapshotModal,
+    isShown: isSnapshotModal,
+  } = useSnapshotModal({ selected: selected[0] })
+
+  const attachLicenseMutation = useMutation({
+    mutationKey: ['attach-license'],
+    mutationFn: async (id: string) => { }
+  })
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const links = selected[0]?.links
@@ -126,9 +137,17 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     'Attach to...': {
       type: 'modal',
       func: () => setAttachToModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links?.attach_to),
+      isDisabled: selected.length === 0 || selected.length > 1,
       modal: attachToModal,
       showModal: isShownAttachToModal,
+    },
+    'Snapshot': {
+      type: 'modal',
+      func: () => setSnapshotModal(true),
+      isDisabled: selected.length !== 1 || selected.some(e => !e.links?.open_external),
+      shouldHide: selected.some(e => !e.workstation_api_version),
+      modal: snapshotModal,
+      showModal: isSnapshotModal,
     },
     'Comments': {
       type: 'link',

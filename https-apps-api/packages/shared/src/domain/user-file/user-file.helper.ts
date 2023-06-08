@@ -1,8 +1,12 @@
+import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { User, Node, UserFile } from '..'
+import { User, Node, UserFile, Asset, entities } from '..'
+import { AssetRepository } from './asset.repository'
 import { Folder } from './folder.entity'
 import { FolderRepository } from './folder.repository'
-import { FILE_STI_TYPE } from './user-file.enum'
+import { nodeQueryFilter, uidListInput } from './user-file.input'
+import { UserFileRepository } from './user-file.repository'
+import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
 
 const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
   if (node instanceof Folder) {
@@ -18,14 +22,10 @@ const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
 const splitFolderPath = (pathStr: string) => pathStr.split('/').slice(1)
 
 // Find the set of paths on dx platform that is not on local
-const getPathsToBuild = (remote: string[], local: string[]): string[] => {
-  return difference(remote, local)
-}
+const getPathsToBuild = (remote: string[], local: string[]): string[] => difference(remote, local)
 
 // Find the set of paths that exists on both dx platform and pFDA db
-const getPathsToKeep = (remote: string[], local: string[]): string[] => {
-  return intersection(local, remote)
-}
+const getPathsToKeep = (remote: string[], local: string[]): string[] => intersection(local, remote)
 
 const filterDuplicities = uniqBy((fol: Folder) => fol.id)
 
@@ -54,28 +54,31 @@ const childrenTraverse = async (
 
 /**
  * Traverses up in the hierarchy and returns all folders up to the root.
- * 
+ *
  * @param folder Folder whose parents we need
- * @param repo 
+ * @param repo
  * @returns all folders above given folder
  */
-const getParentFolders = async(
-  folder: Folder,
-  repo: FolderRepository,): Promise<Folder[]> => {
-    const folderTree: Folder[] = new Array
-    if (folder.parentFolderId) {
-      let currentFolder: Folder | null = folder
-      while (currentFolder != null && currentFolder.parentFolderId) {
-        currentFolder = await repo.findOne(currentFolder.parentFolderId)
-        if (currentFolder != null) {
+const getParentFolders = async (
+  folder: Folder): Promise<Folder[]> => {
+  const folderTree: Folder[] = []
+  if (folder.parentFolder) {
+    let currentFolder: Folder | null = folder
+    while (currentFolder?.parentFolder) {
+      try {
+        currentFolder = currentFolder.parentFolder as Folder
+        // currentFolder = await repo.findOne(currentFolder.parentFolder.id)
+        if (currentFolder !== null) {
           folderTree.push(currentFolder)
         }
+      } catch (error) {
+        throw error
       }
-      return folderTree
-    } else {
-      return folderTree
     }
+    return folderTree
   }
+  return folderTree
+}
 
 
 /**
@@ -88,13 +91,13 @@ const getParentFolders = async(
  */
 const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): string[] => {
   acc.unshift(current.name)
-  if (!current.parentFolderId) {
+  if (!current.parentFolder) {
     // Folder without parentFolderId, should be the root folder.
     // Unless orphaned folders are possible (unverified claim)
     return acc
   }
   // fixme: be careful if parent is properly initialized -> so it has the id
-  const parent = folders.find(folder => folder.id === current.parentFolderId)
+  const parent = folders.find(folder => folder.id === current.parentFolder.id)
   if (parent && parent.id === current.id) {
     throw new Error('parent folder equals current, error in data')
   }
@@ -113,9 +116,9 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
  */
 const folderPathsFromFolders = (folders: Folder[]): string[] => {
   const folderPaths = folders.map(folder => {
-      const chain = folderTraverse(folders, folder, [])
-      return `/${chain.join('/')}`
-    })
+    const chain = folderTraverse(folders, folder, [])
+    return `/${chain.join('/')}`
+  })
     .sort((a, b) => a.localeCompare(b))
   // todo: back to array for easier comparison?
   return folderPaths
@@ -148,34 +151,16 @@ const getFolderPath = (folders: Folder[], current: Folder): string => {
   return `/${chain.join('/')}`
 }
 
-/**
- * Returns a filter function that checks if an element of pathStr at index currentId
- * @param parentId id of the parent node
- * @param pathStr list of path string
- * @param currentIdx index of pathStr that we should check against
- *  TODO: Wouldn't it be cleaner if we just pass in pathStr[currentIdx] ?
- */
-const compareWithParentId = (
-  parentId: number | undefined | null,
-  pathStr: string[],
-  currentIdx: number,
-) => (f: Folder): boolean => {
-  const sameName = f.name === pathStr[currentIdx]
-  if (isNil(parentId)) {
-    return sameName && isNil(f.parentFolderId)
-  }
-  return sameName && f.parentFolderId === parentId
-}
 
 const createNameAndParentIdFilter = (
   folderName: string,
   parent: Folder | undefined,
-) => (f: Folder): boolean => {
+) => (f: Folder ): boolean => {
   const sameName = f.name === folderName
   if (isNil(parent)) {
-    return sameName && isNil(f.parentFolderId)
+    return sameName && isNil(f.parentFolder)
   }
-  return sameName && f.parentFolderId === parent.id
+  return sameName && f.parentFolder && f.parentFolder.id === parent.id
 }
 
 /**
@@ -211,7 +196,9 @@ const createFoldersTraverse = (
   }
   const newFolder = new Folder(user)
   newFolder.name = pathStr[currentIdx]
-  newFolder.parentFolderId = !isNil(parent) ? parent.id : undefined
+  if (!isNil(parent)) {
+    newFolder.parentFolder = parent
+  }
   result.push(newFolder)
   createFoldersTraverse(folders, pathStr, user, newFolder, currentIdx + 1, result)
   return result
@@ -248,12 +235,12 @@ const detectIntersectedTraverse = (
 // TODO: Remove detectIntersectedTraverse if the following replacement works in all cases, but not before veriying
 /**
  * findFolderForPath
- * 
+ *
  * This is a recursive function to find the Folder object pertaining to the path described by folderPathComponents
  * It expects a path split of the target folder, /foo/bar/stu -> ['foo', 'bar', 'stu']
  * On first recursion it looks for the Folder with name 'foo', followed by Folder with name 'bar' whose parent is 'foo'
  * and so forth until the last path component ('stu') is processed
- * 
+ *
  * @param folders list of all available Folders database objects, as the source of lookup
  * @param folderPathComponents folder path components of the folder
  * @param parent parent folder, for first invocation this should be undefined
@@ -262,8 +249,8 @@ const detectIntersectedTraverse = (
 const findFolderForPath = (
   folders: Folder[],
   folderPathComponents: string[],
-  parent: Folder | undefined
-): Folder | undefined  => {
+  parent: Folder | undefined,
+): Folder | undefined => {
   const folderName = folderPathComponents[0]
 
   const currentFolder = folders.find(createNameAndParentIdFilter(folderName, parent))
@@ -275,9 +262,88 @@ const findFolderForPath = (
     folderPathComponents.shift()
     return findFolderForPath(folders, folderPathComponents, currentFolder)
   }
-  else {
-    return currentFolder
+
+  return currentFolder
+}
+
+const findFileOrAssetWithUid = async (
+  em: EntityManager,
+  uid: string,
+): Promise<IFileOrAsset | null> => {
+  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
+  const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
+  if (file) {
+    return file
   }
+
+  const assetRepo = em.getRepository(Asset) as AssetRepository
+  return await assetRepo.findAssetWithUid(uid)
+}
+
+const findUnclosedFilesOrAssets = async (
+  em: EntityManager,
+  userId: number,
+): Promise<IFileOrAsset[]> => {
+  let results: IFileOrAsset[] = []
+  const userFileRepo = em.getRepository(UserFile)
+  const assetRepo = em.getRepository(Asset)
+  results = results.concat(await userFileRepo.findUnclosedFiles(userId))
+  results = results.concat(await assetRepo.findUnclosedAssets(userId))
+  return results
+}
+
+
+/**
+ * Method recursively collects all children of given node if it's a folder.
+ */
+const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlEntityManager) => {
+  await parentFolder.children.init()
+  for (const childrenNode of parentFolder.children) {
+    if (childrenNode.stiType === FILE_STI_TYPE.FOLDER) {
+      await collectChildren(childrenNode as Folder, wholeTree, em)
+    } else {
+      wholeTree.push(childrenNode)
+    }
+  }
+  wholeTree.push(parentFolder)
+}
+
+/**
+ * Loads the whole tree that is filtered by parameters and returns
+ * it sorted with leaves first
+ *
+ * @param em
+ * @param input
+ * @param filters
+ * @returns
+ */
+const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter) => {
+  const nodes: Node[] = await em.find(entities.Node, {
+    $or: [
+      {
+        id: { $in: input.ids },
+        ...filters,
+      },
+      {
+        scopedParentFolderId: { $in: input.ids },
+        ...filters,
+      },
+    ],
+  })
+  await em.populate(nodes, ['parentFolder'])
+  const wholeTree: Node[] = []
+  for (const node of nodes) {
+    if (node.stiType === FILE_STI_TYPE.FOLDER) {
+      await collectChildren(node as Folder, wholeTree, em)
+    } else {
+      wholeTree.push(node)
+    }
+  }
+  // ensure uniqueness
+  const unique = [...new Map(wholeTree.map(item => [item.id, item])).values()]
+  // sort all nodes by id, leafs first
+  unique.sort((a, b) => b.id - a.id)
+  return unique
 }
 
 
@@ -296,4 +362,7 @@ export {
   getStiEnumTypeFromInstance,
   filterLeafPaths,
   findFolderForPath,
+  findFileOrAssetWithUid,
+  findUnclosedFilesOrAssets,
+  loadNodes,
 }

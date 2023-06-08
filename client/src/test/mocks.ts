@@ -1,11 +1,10 @@
 import { IExecution, Job } from "../features/home/executions/executions.types"
-import { JobState } from "../types/job"
 
 export const createMockJob = (id: number, uid: string): Job => {
   return {
     id: id,
     uid: uid,
-    state: JobState.Running,
+    state: 'running',
     name: `name for ${id}`,
     app_title: "",
     app_revision: 1,
@@ -54,11 +53,13 @@ export const createMockExecution = (id: string, uid: string): IExecution => {
   return {
     id: id,
     uid: uid,
-    state: JobState.Running,
+    app_uid: 'app-12345',
+    state: 'running',
     name: `Execution name ${uid}`,
     title: `Execution title ${uid}`,
     added_by: "user",
     app_revision: "1",
+    workstation_api_version: null,
     run_input_data: [],
     run_output_data: [],
     created_at: "",

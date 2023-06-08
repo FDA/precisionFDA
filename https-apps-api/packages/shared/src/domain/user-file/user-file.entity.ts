@@ -10,21 +10,26 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { User, Tagging } from '..'
+import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_ORIGIN_TYPE, PARENT_TYPE, FILE_STI_TYPE } from './user-file.enum'
+import {
+  FILE_STATE,
+  FILE_ORIGIN_TYPE,
+  PARENT_TYPE,
+  FILE_STI_TYPE,
+  ITrackable,
+  IFileOrAsset,
+} from './user-file.types'
 import { UserFileRepository } from './user-file.repository'
 
 @Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
 @Entity({ tableName: 'nodes', customRepository: () => UserFileRepository })
-export class UserFile extends Node {
+class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
   dxid: string
 
   @Property()
   project: string
-
-  @Property()
-  name: string
 
   @Property()
   description?: string
@@ -34,12 +39,6 @@ export class UserFile extends Node {
 
   @Property()
   entityType: FILE_ORIGIN_TYPE
-
-  @Property({ unique: true })
-  uid: string
-
-  @Property()
-  scope: string
 
   @Property({ type: 'bigint' })
   fileSize?: number
@@ -52,7 +51,7 @@ export class UserFile extends Node {
   @Property()
   parentType: PARENT_TYPE
 
-  @Property({ fieldName: 'parent_folder_id' })
+  @Property()
   parentFolderId?: number
 
   @Property()
@@ -66,9 +65,20 @@ export class UserFile extends Node {
   @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this);
 
+  @OneToMany({ entity: () => ChallengeResource, mappedBy: 'userFile', orphanRemoval: true })
+  challengeResources = new Collection<ChallengeResource>(this);
+
   [EntityRepositoryType]?: UserFileRepository
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
   }
+
+  isCreatedByChallengeBot(): boolean {
+    return this.challengeResources.length > 0 || this.user.getEntity().isChallengeBot()
+  }
+}
+
+export {
+  UserFile,
 }

@@ -1,75 +1,67 @@
-import PropTypes from 'prop-types'
-import React, { useEffect } from 'react'
-import { QueryClient, QueryClientProvider } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
-import { Provider } from 'react-redux'
-import { Redirect, Route, Router, Switch } from 'react-router-dom'
+/* eslint-disable react/jsx-fragments */
+import React from 'react'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { Route, Router, Switch } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
+import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
 import 'react-toastify/dist/ReactToastify.css'
-import { PushReplaceHistory, QueryParamProvider } from 'use-query-params'
-import { NEW_SPACE_PAGE_ACTIONS } from './constants'
+import { QueryParamProvider } from 'use-query-params'
 import { AuthModal } from './features/auth/AuthModal'
-import { Home2 } from './features/home'
-import { FileShow } from './features/home/files/show/FileShow'
 import { useModal } from './features/modal/useModal'
-import { Spaces } from './features/spaces'
-import { SpaceShow } from './features/spaces/show/SpaceShow'
-import { Spaces2List } from './features/spaces/SpacesList'
 import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
-import ErrorWrapper from './views/components/ErrorWrapper'
-import { NotificationsPage } from './views/pages/Account/Notifications'
-import { UsersList } from './features/admin/users'
-import OldChallengeDetailsPage from './views/pages/Challenges/ChallengeDetailsPage'
-import ChallengeProposePage from './views/pages/Challenges/ChallengeProposePage'
-import ChallengesListPage from './views/pages/Challenges/ChallengesListPage'
-import ExpertsListPage from './views/pages/Experts/ExpertsListPage'
-import { ExpertsSinglePage } from './views/pages/Experts/ExpertsSinglePage'
-import HomePage from './views/pages/Home'
-import AboutPage from './views/pages/Landing/AboutPage'
-import LandingPage from './views/pages/Landing/LandingPage'
-import NewsListPage from './views/pages/News/NewsListPage'
-import NoFoundPage from './views/pages/NoFoundPage'
-import NewSpacePage from './views/pages/Spaces/NewSpacePage'
-import SpacePage from './views/pages/Spaces/SpacePage'
-import SpacesListPage from './views/pages/Spaces/SpacesListPage'
-import { ChallengeDetailsPage } from './features/challenges/details/ChallengeDetails'
-import { ToS } from './views/pages/ToS'
-import { ChallengesList } from './features/challenges/list/ChallengesList'
-import { EditChallengePage } from './features/challenges/form/EditChallenge'
-import { CreateChallengePage } from './features/challenges/form/CreateChallenge'
+import { Header } from './components/Header'
+import { JobRunForm } from './features/home/apps/run/JobRun'
+import { WorkflowRunForm } from './features/home/workflows/run/WorkflowRun'
+import { Loader } from './components/Loader'
+import ExpertsSinglePage from './features/experts/details/index'
+import NoFoundPage from './pages/NoFoundPage'
+import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
+import queryClient from './utils/queryClient'
 
-const queryClient = ({ onAuthFailure }: { onAuthFailure: () => void }) =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        // We disable refetching on focus as it can extend the session without user input
-        refetchOnWindowFocus: false,
-        onSuccess: (res: any) => {
-          // Catch if cookie expired
-          // if(process.env.NODE_ENV !== 'development') {
-          if (res?.failure === 'Authentication failure') {
-            onAuthFailure()
-          }
-          // }
-        },
-      },
-    },
-  })
 
-// NOTE(samuel) this happens when window.location.pathname and 
-const possiblyMismatchedRoutes = [
-  '/admin/users'
-]
+const Home2 = React.lazy(() => import('./features/home'))
+const Docs = React.lazy(() => import('./features/docs'))
+const ChallengesList = React.lazy(
+  () => import('./features/challenges/list/ChallengesList'),
+)
+const Spaces = React.lazy(() => import('./features/spaces'))
+const CreateChallengePage = React.lazy(
+  () => import('./features/challenges/form/CreateChallengePage'),
+)
+const EditChallengePage = React.lazy(
+  () => import('./features/challenges/form/EditChallengePage'),
+)
+const ProposeChallengePage = React.lazy(
+  () => import('./features/challenges/form/ProposeChallengePage'),
+)
+const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
+const CreateNewsItemPage = React.lazy(() => import('./features/news/form/CreateNewsItemPage'))
+const LandingPage = React.lazy(() => import('./features/overview/OverviewPage'))
+const AboutPage = React.lazy(() => import('./pages/AboutPage'))
+const NotificationsPage = React.lazy(
+  () => import('./pages/Account/Notifications'),
+)
+const ExpertsListPage = React.lazy(
+  () => import('./features/experts/ExpertsList'),
+)
+const ChallengeDetailsPage = React.lazy(
+  () => import('./features/challenges/details/ChallengeDetails'),
+)
+const UsersList = React.lazy(() => import('./features/admin/users'))
+const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
+const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
+const ToS = React.lazy(() => import('./pages/ToS'))
+const Security = React.lazy(() => import('./pages/Security'))
 
-  
-const root = ({ store }: any) => {
+const root = () => {
   const authModal = useModal()
+  const expiringSessionModal = useModal()
   toast.configure()
 
   return (
-    <Provider store={store}>
+    <React.Fragment>
       <GlobalStyle />
       <QueryClientProvider
         client={queryClient({
@@ -77,69 +69,33 @@ const root = ({ store }: any) => {
         })}
       >
         <Router history={history}>
-          <QueryParamProvider
-            ReactRouterRoute={Route}
-            history={history as unknown as PushReplaceHistory}
-            location={history.location as unknown as Location}
-          >
-            {/* <SessionExpiration authModal={authModal} /> */}
-            <ErrorWrapper>
+          <Header />
+          <React.Suspense fallback={<Loader />}>
+            <QueryParamProvider adapter={ReactRouter5Adapter}>
               <Switch>
-                { // TODO(samuel) temporary hotfix for incorrect routing, remove when admin dashboard gets implemented in react
-                  (function () {
-                    const isRouteMismatched = possiblyMismatchedRoutes.includes(window.location.pathname)
-                    // TODO(samuel) for some reason history.location is not overwritten sometimes
-                    if (isRouteMismatched) {
-                      return <Redirect exact from='/' to={window.location.pathname} />
-                    }
-
-                  })()
-                }
                 <Route exact path="/">
                   <LandingPage />
                 </Route>
                 <Route exact path="/about">
                   <AboutPage />
                 </Route>
-                <Route exact path="/files/:fileId">
-                  <FileShow />
+                <Route path="/docs">
+                  <Docs />
                 </Route>
                 <Route path="/home">
                   <Home2 />
                 </Route>
-                <Redirect exact from="/home-old" to="/home-old/files" />
-                <Route
-                  path="/home-old/:page/:tab?"
-                  render={(props: any) => <HomePage {...props} />}
-                />
                 <Route path="/account/notifications">
                   <NotificationsPage />
                 </Route>
                 <Route path="/spaces">
                   <Spaces />
                 </Route>
-
-                <Route exact path="/spaces-old/new">
-                  <NewSpacePage />
+                <Route exact path="/apps/:appUid/jobs/new">
+                  <JobRunForm />
                 </Route>
-                <Route exact path="/spaces-old/duplicate/:spaceId">
-                  <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.DUPLICATE} />
-                </Route>
-                <Route exact path="/spaces-old/edit/:spaceId">
-                  <NewSpacePage action={NEW_SPACE_PAGE_ACTIONS.EDIT} />
-                </Route>
-                <Redirect
-                  exact
-                  from="/spaces-old/:spaceId"
-                  to="/spaces-old/:spaceId/files"
-                />
-                <Route
-                  path="/spaces-old/:spaceId/:page"
-                  render={props => <SpacePage {...props} />}
-                />
-
-                <Route exact path="/challenges-old">
-                  <ChallengesListPage />
+                <Route exact path="/workflows/:workflowUid/analyses/new">
+                  <WorkflowRunForm />
                 </Route>
                 <Route exact path="/challenges">
                   <ChallengesList />
@@ -151,22 +107,14 @@ const root = ({ store }: any) => {
                   <EditChallengePage />
                 </Route>
                 <Route exact path="/challenges/propose">
-                  <ChallengeProposePage />
+                  <ProposeChallengePage />
                 </Route>
                 <Route path="/challenges/:challengeId/:page">
                   <ChallengeDetailsPage />
                 </Route>
-                <Route
-                  path="/challenges-old/:challengeId/:page"
-                  render={props => <OldChallengeDetailsPage {...props} />}
-                />
                 <Route path="/challenges/:challengeId">
                   <ChallengeDetailsPage />
                 </Route>
-                <Route
-                  path="/challenges-old/:challengeId"
-                  render={props => <OldChallengeDetailsPage {...props} />}
-                />
                 <Route exact path="/news">
                   <NewsListPage />
                 </Route>
@@ -182,33 +130,41 @@ const root = ({ store }: any) => {
                 <Route exact path="/terms">
                   <ToS />
                 </Route>
+                <Route exact path="/security">
+                  <Security />
+                </Route>
                 <Route exact path="/admin/users">
                   <UsersList />
+                </Route>
+                <Route exact path="/admin/news">
+                  <ListAdminNews />
+                </Route>
+                <Route exact path="/admin/news/create">
+                  <CreateNewsItemPage />
+                </Route>
+                <Route exact path="/admin/news/:id/edit">
+                  <EditNewsItemPage />
                 </Route>
                 <Route path="*">
                   <NoFoundPage />
                 </Route>
               </Switch>
-            </ErrorWrapper>
-          </QueryParamProvider>
+            </QueryParamProvider>
+          </React.Suspense>
+          <StyledToastContainer
+            position="top-right"
+            transition={Slide}
+            hideProgressBar
+            pauseOnHover
+          />
         </Router>
         <AuthModal {...authModal} />
-        <StyledToastContainer
-          position="top-right"
-          transition={Slide}
-          hideProgressBar
-          pauseOnHover
-        />
-        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+        <ExpiringSessionModal modal={expiringSessionModal} />
       </QueryClientProvider>
-    </Provider>
+    </React.Fragment>
   )
 }
 
 root.displayName = 'Root'
-
-root.propTypes = {
-  store: PropTypes.object.isRequired,
-}
 
 export default root

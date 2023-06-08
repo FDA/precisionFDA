@@ -1,6 +1,6 @@
 import { ConfigOverride } from '..'
 
-export const config: ConfigOverride = {
+export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-dev',
   api: {
     railsHost: process.env.HOST,
@@ -8,6 +8,14 @@ export const config: ConfigOverride = {
   logs: {
     pretty: false,
     level: 'debug',
+  },
+  devFlags: {
+    middleware: {
+      skipUserMiddlewareForDebugRoutes: true,
+    },
+    fda: {
+      skipFdaSubnetIpCheck: true,
+    },
   },
   workerJobs: {
     syncJob: {
@@ -18,14 +26,19 @@ export const config: ConfigOverride = {
     queues: {
       default: { name: 'https-apps-worker-queue-dev' },
       emails: { name: 'https-apps-worker-emails-queue-dev' },
+      maintenance: {
+        onInit: {
+          shouldAddCheckNonterminatedClusters: false,
+        },
+      },
     },
   },
   redis: {
     isSecure: false,
   },
   emails: {
-    salesforce: {
+    smtp: {
       isEnabled: false,
     },
   },
-}
+})

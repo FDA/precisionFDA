@@ -4,7 +4,12 @@ import { config } from '../config'
 const getLogger = (name = 'pino-logger-name'): pino.Logger =>
   pino({
     name,
-    prettyPrint: config.logs.pretty ? { translateTime: true } : false,
+    transport: config.logs.pretty ? {
+      target: 'pino-pretty',
+      options: {
+        translateTime: true,
+      }
+    } : undefined,
     level: config.logs.level,
     // todo: serializers
     serializers: {

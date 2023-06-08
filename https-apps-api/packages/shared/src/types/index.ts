@@ -45,10 +45,25 @@ type DxIdInput = {
   dxid: string
 }
 
+type UidInput = {
+  uid: string
+}
+
 type IdInput = {
   id: number
 }
 
 type WorkerOpsCtx<Ctx extends OpsCtx> = Ctx & { job: Job}
 
-export type { DeepPartial, AnyObject, UserCtx, OpsCtx, UserOpsCtx, Maybe, DxIdInput, IdInput, WorkerOpsCtx }
+export type {
+  DeepPartial,
+  AnyObject,
+  UserCtx,
+  OpsCtx,
+  UserOpsCtx,
+  Maybe,
+  DxIdInput,
+  UidInput,
+  IdInput,
+  WorkerOpsCtx,
+}

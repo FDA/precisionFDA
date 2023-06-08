@@ -1,17 +1,19 @@
 import { omit } from 'ramda'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
@@ -20,7 +22,6 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppsColumns } from './useAppsColumns'
 import { useAppSelectionActions } from './useAppSelectionActions'
-import { useAuthUser } from '../../auth/useAuthUser'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -94,6 +95,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
               <ButtonSolidBlue
                 as="a"
                 href="/apps/new"
+                data-turbolinks="false"
                 data-testid="home-apps-create-button"
               >
                 <PlusIcon height={12} /> Create App
@@ -149,23 +151,21 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <StyledPaginationSection>
-        <Pagination
-          page={data?.meta?.pagination?.current_page}
-          totalCount={data?.meta?.pagination?.total_count}
-          totalPages={data?.meta?.pagination?.total_pages}
-          perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.apps?.length,
-            data?.meta?.pagination?.total_pages,
-            )}
+
+        <ContentFooter>
+          <Pagination
+            page={data?.meta?.pagination?.current_page}
+            totalCount={data?.meta?.pagination?.total_count}
+            totalPages={data?.meta?.pagination?.total_pages}
+            perPage={perPageParam}
+            isHidden={false}
             isPreviousData={data?.meta?.pagination?.prev_page !== null}
             isNextData={data?.meta?.pagination?.next_page !== null}
-            setPage={setPageParam}
-            onPerPageSelect={setPerPageParam}
-        />
-      </StyledPaginationSection>
+            setPage={p => setPageParam(p, 'replaceIn')}
+            onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+          />
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
@@ -255,7 +255,7 @@ export const AppsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={scope as any}
+        shouldResetFilters={[scope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no apps here.</EmptyTable>}

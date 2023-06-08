@@ -1,5 +1,4 @@
 /* globals module __dirname */
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path')
@@ -9,6 +8,8 @@ const webpack = require('webpack')
 const { merge } = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+
+require('events').EventEmitter.defaultMaxListeners = 20
 
 const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
@@ -66,13 +67,16 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     client: {
       overlay: false,
     },
-    static: './dist',
+    static: ['./dist', path.join(__dirname, '../public')],
     historyApiFallback: true, // See https://stackoverflow.com/questions/56573363/react-router-v4-nested-routes-not-work-with-webpack-dev-server
     host: '0.0.0.0', // See https://github.com/webpack/webpack-dev-server/issues/547
     port: 4000,
-    https: {
-      key: fs.readFileSync(path.resolve('../key.pem')),
-      cert: fs.readFileSync(path.resolve('../cert.pem')),
+    server: {
+      type: 'https',
+      options: {
+        key: fs.readFileSync(path.resolve('../key.pem')),
+        cert: fs.readFileSync(path.resolve('../cert.pem')),
+      },
     },
     proxy: {
       '/logout': {
@@ -91,14 +95,18 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      '/pdfs': {
+        target: TARGET,
+        secure: false,
+      },
       '/assets': {
         target: TARGET,
         secure: false,
       },
-      '/admin': {
-        target: TARGET,
-        secure: false,
-      },
+      // '/admin': {
+      //   target: TARGET,
+      //   secure: false,
+      // },
       '/discussions': {
         target: TARGET,
         secure: false,
@@ -135,7 +143,19 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/docs': {
+      '/publish': {
+        target: TARGET,
+        secure: false,
+      },
+      '/experts/*/edit': {
+        target: TARGET,
+        secure: false,
+      },
+      '/experts/*/qa': {
+        target: TARGET,
+        secure: false,
+      },
+      '/challenges/*/editor/*': {
         target: TARGET,
         secure: false,
       },

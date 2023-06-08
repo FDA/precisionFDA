@@ -1,14 +1,14 @@
 /* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLocation, useParams } from 'react-router'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import {
   StyledTab,
   StyledTabList,
@@ -42,6 +42,7 @@ import { fetchWorkflow } from './workflows.api'
 import { IWorkflow } from './workflows.types'
 import WorkflowsDiagram from './WorkflowsDiagram'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
+import { getScopeMapping } from '../getScopeMapping'
 
 interface IColumn {
   header: string
@@ -50,7 +51,7 @@ interface IColumn {
   dataTestId: string
 }
 
-const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
+const renderOptions = (workflow: IWorkflow, scope: ResourceScope) => {
   const columns: IColumn[] = [
     {
       header: 'location',
@@ -81,6 +82,8 @@ const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
     },
   ]
 
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+
   const list = columns.map(e => (
     <MetadataItem key={e.header}>
       <MetadataKey>{e.header}</MetadataKey>
@@ -88,7 +91,7 @@ const renderOptions = (workflow: IWorkflow, scopeParamLink: string) => {
       {e.header === 'location' && !e.link ? (
         <MetadataVal>
           <Link to={`/home/workflows${scopeParamLink}`} data-testid={e.dataTestId}>
-            {workflow[e.value]}
+            {scope === 'featured' ? 'Featured' : workflow[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
@@ -116,7 +119,9 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   return (
     <>
       <CloudResourcesHeaderButton
+        data-turbolinks="false"
         href={`${workflow.links.show}/analyses/new`}
+        isLinkDisabled={!workflow.links.run_workflow}
         data-testid='workflow-show-actions-run'
         conditionType='all'
       >
@@ -126,7 +131,9 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         </>
       </CloudResourcesHeaderButton>
       <CloudResourcesHeaderButton
+        data-turbolinks="false"
         href={workflow.links.batch_run_workflow}
+        isLinkDisabled={!workflow.links.batch_run_workflow}
         data-testid='workflow-show-actions-run-batch'
         conditionType='all'
       >
@@ -155,7 +162,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const WorkflowShow = ({ emitScope, spaceId }: { emitScope?: (scope: ResourceScope) => void, spaceId?: string }) => {
   const match = useRouteMatch()
   const location: Location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
@@ -177,7 +184,11 @@ export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
       </NotFound>
     )
 
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const scope = getScopeMapping(workflow.scope, workflow.featured)
+  if (emitScope) {
+    emitScope(scope)
+  }
+
   const workflowTitle = workflow.title ? workflow.title : workflow.name
 
   return (
@@ -205,7 +216,7 @@ export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
           </HeaderRight>
         </Header>
 
-        {renderOptions(workflow, scopeParamLink)}
+        {renderOptions(workflow, scope)}
         <MetadataSection>
           {workflow.tags.length > 0 && (
             <StyledTags>
@@ -238,10 +249,10 @@ export const WorkflowShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceI
             <Redirect to={`${match.url}`} />
           </Route>
           <Route path={`${match.path}/readme`} exact>
-            <Markdown data={workflow.readme} />
+            <MarkdownStyle><Markdown data={workflow.readme} /></MarkdownStyle>
           </Route>
           <Route path={`${match.path}/diagram`} exact>
-            <WorkflowsDiagram uid={workflow.uid} />
+            <WorkflowsDiagram workflowId={workflow.uid} />
           </Route>
           <Route path={`${match.path}/jobs`} exact>
             <WorkflowExecutionsList uid={workflowUid} />

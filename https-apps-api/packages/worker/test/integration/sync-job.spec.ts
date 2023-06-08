@@ -15,7 +15,7 @@ import {
 import {
   FILE_STI_TYPE,
   PARENT_TYPE,
-} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
 import { SqlEntityManager } from '@mikro-orm/mysql'
@@ -58,7 +58,7 @@ describe('TASK: sync_job_status', () => {
     // probably not needed
     // await emptyDefaultQueue()
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     app = create.appHelper.createHTTPS(em, { user })
@@ -142,7 +142,7 @@ describe('TASK: sync_job_status', () => {
     // no folders created in the job
     fakes.client.foldersListFake.returns({ ...FOLDERS_LIST_RES, folders: [] })
     // no files created in the job
-    fakes.client.filesListFake.returns({ results: [], next: null })
+    fakes.client.filesListFake.returns([])
     await em.flush()
     await createSyncJobTask(
       { dxid: job.dxid },
@@ -249,15 +249,11 @@ describe('TASK: sync_job_status', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // first client.filesList() for all the files
-      fakes.client.filesListFake.onCall(0).returns({
-        results: FILES_LIST_RES_ROOT.results.slice(0, 2),
-        next: null,
-      })
+      fakes.client.filesListFake.onCall(0).returns(
+        FILES_LIST_RES_ROOT.results.slice(0, 2),
+      )
       // second client.filesList() for snapshots subfolder
-      fakes.client.filesListFake.onCall(1).returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.onCall(1).returns([])
       fakes.client.filesDescFake.returns({
         results: FILES_DESC_RES.results.slice(0, 2),
       })
@@ -304,11 +300,9 @@ describe('TASK: sync_job_status', () => {
       // return only first entry so it is easier to test
       // @ts-expect-error Fix - ts says that array has smaller length
       const firstFileDxid = FILES_LIST_RES_ROOT.results[5].id
-      fakes.client.filesListFake.returns({
+      fakes.client.filesListFake.returns(
       // @ts-expect-error Fix - ts says that array has smaller length
-        results: [FILES_LIST_RES_ROOT.results[5]],
-        next: null,
-      })
+        [FILES_LIST_RES_ROOT.results[5]])
       fakes.client.filesDescFake.returns({
         results: [FILES_DESC_RES.results[5]],
       })
@@ -329,8 +323,8 @@ describe('TASK: sync_job_status', () => {
         project: job.project,
         parentId: job.id,
         parentType: PARENT_TYPE.JOB,
-        parentFolderId: null,
-        scopedParentFolderId: null,
+        parentFolder: null,
+        scopedParentFolder: null,
         description: null,
         fileSize: FILES_DESC_RES.results[0].describe.size,
         name: FILES_DESC_RES.results[0].describe.name,
@@ -352,17 +346,13 @@ describe('TASK: sync_job_status', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // all the files
-      fakes.client.filesListFake.onCall(0).returns({
+      fakes.client.filesListFake.onCall(0).returns(
         // @ts-expect-error FILE_TYPE enum does not exist
-        results: [FILES_LIST_RES_ROOT.results[0], FILES_LIST_RES_ROOT.results[5]],
-        next: null,
-      })
+        [FILES_LIST_RES_ROOT.results[0], FILES_LIST_RES_ROOT.results[5]])
       // snapshot files
-      fakes.client.filesListFake.onCall(1).returns({
+      fakes.client.filesListFake.onCall(1).returns(
         // @ts-expect-error FILE_TYPE enum does not exist
-        results: [FILES_LIST_RES_ROOT.results[5]],
-        next: null,
-      })
+        [FILES_LIST_RES_ROOT.results[5]])
       fakes.client.filesDescFake.returns({
         results: [FILES_DESC_RES.results[0], FILES_DESC_RES.results[5]],
       })
@@ -425,15 +415,9 @@ describe('TASK: sync_job_status', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // first client.filesList() for all the files
-      fakes.client.filesListFake.onCall(0).returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.onCall(0).returns([])
       // second client.filesList() for snapshots subfolder
-      fakes.client.filesListFake.onCall(1).returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.onCall(1).returns([])
       fakes.client.filesDescFake.returns({
         results: [],
       })

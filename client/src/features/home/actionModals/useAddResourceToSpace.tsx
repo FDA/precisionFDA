@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import { UseMutationResult, useQuery } from 'react-query'
+import { UseMutationResult, useQuery } from '@tanstack/react-query'
 import { Column } from 'react-table'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -9,15 +9,18 @@ import { Loader } from '../../../components/Loader'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { getSelectedObjectsFromIndexes } from '../../../utils/object'
-import { Modal } from '../../modal'
-import { ButtonRow } from '../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { IApp } from '../apps/apps.types'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
 const StyledName = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`
+const StyledLoader = styled.div`
+  padding: 12px;
 `
 
 type ResourceTypes = 'apps' | 'workflows'
@@ -72,7 +75,7 @@ const ResourceTable = ({
   const columns = useMemo(() => col, [col])
   const d = useMemo(() => data, [data])
 
-  if (isLoading) return <div>Loading....</div>
+  if (isLoading) return <StyledLoader>Loading....</StyledLoader>
 
   return (
     <Table<IApp>
@@ -98,7 +101,7 @@ export function useAddResourceToModal({
 }: {
   spaceId: string
   resource: ResourceTypes
-  mutation: UseMutationResult<
+  mutation?: UseMutationResult<
     any,
     unknown,
     {
@@ -114,38 +117,45 @@ export function useAddResourceToModal({
 
   const handleSubmit = (e: any) => {
     e.preventDefault()
-    if (selectedUids) {
+    if (mutation && selectedUids) {
       mutation.mutateAsync({ spaceId, uids: selectedUids }).then(onSuccess)
     }
   }
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
+      id="add-resource-to-space"
       data-testid={`modal-${resource}-add-resource`}
-      headerText={`Add ${resource} to space`}
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Add ${resource} to space`}
+        hide={() => setShowModal(false)}
+      />
+      <ModalScroll>
+        <ResourceTable resource={resource} setSelectedUids={setSelectedUids} />
+      </ModalScroll>
+      <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader height={14} />}
+          {mutation?.isLoading && <Loader height={14} />}
           <Button
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation?.isLoading}
           >
             Cancel
           </Button>
           <ButtonSolidBlue
             type="submit"
             onClick={handleSubmit}
-            disabled={!selectedUids || mutation.isLoading}
+            disabled={!selectedUids || mutation?.isLoading}
           >
             Add to Space
           </ButtonSolidBlue>
         </ButtonRow>
-      }
-    >
-      <ResourceTable resource={resource} setSelectedUids={setSelectedUids} />
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

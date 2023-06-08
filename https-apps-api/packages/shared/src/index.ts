@@ -14,7 +14,22 @@ export { getLogger } from './logger'
 
 export { database } from './database'
 
-export { entities, job, app, user, space, userFile, email, dbCluster, adminGroup } from './domain'
+export {
+  entities,
+  acceptedLicense,
+  job,
+  app,
+  user,
+  space,
+  challenge,
+  spaceMembership,
+  userFile,
+  license,
+  email,
+  dbCluster,
+  adminGroup,
+  spaceEvent,
+} from './domain'
 
 export * as utils from './utils'
 

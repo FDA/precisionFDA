@@ -1,5 +1,6 @@
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
+import { parse } from 'query-string'
 import { useParams } from 'react-router'
 import { Link, useLocation } from 'react-router-dom'
 import Dropdown from '../../../../components/Dropdown'
@@ -9,6 +10,7 @@ import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../../components/Tags'
 import { Location } from '../../../../types/utils'
 import { getBackPath } from '../../../../utils/getBackPath'
+import { ISpace } from '../../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../../ActionDropdownContent'
 import { StyledBackLink } from '../../home.styles'
 import { License } from '../../licenses/License'
@@ -18,6 +20,7 @@ import {
   HeaderLeft,
   HeaderRight,
   HomeLoader,
+  LockedRow,
   MetadataItem,
   MetadataKey,
   MetadataRow,
@@ -32,22 +35,28 @@ import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
+import { Filler } from '../../../../components/Page/styles'
+import { LockIcon } from '../../../../components/icons/LockIcon'
+import { theme } from '../../../../styles/theme'
+import { getScopeMapping } from '../../getScopeMapping'
 
 const FileActions = ({
   scope,
-  spaceId,
+  space,
   file,
+  folderId,
 }: {
   scope?: ResourceScope
-  spaceId?: string
+  space?: ISpace
   file: IFile
+  folderId?: string
 }) => {
   const actions = useFilesSelectActions({
     scope,
-    spaceId,
-    fileId: file.id,
+    space,
     selectedItems: [file],
     resourceKeys: ['file', file.uid],
+    folderId,
   })
   return (
     <>
@@ -66,23 +75,28 @@ const FileActions = ({
       {actions['Delete']?.modal}
       {actions['Organize']?.modal}
       {actions['Copy to space']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Lock']?.modal}
+      {actions['Unlock']?.modal}
     </>
   )
 }
 
 
-export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceScope) => void, space?: ISpace }) => {
   const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
   const file = data?.files
   const meta = data?.meta
-  const backPath = getBackPath(location, 'files', spaceId)
+  const backPath = getBackPath(location, 'files', space?.id)
+  const params = parse(location?.state?.fromSearch)
+  const folderId = params?.folder_id as string | undefined
 
   if (status === 'loading') {
     return  <HomeLoader />
@@ -105,7 +119,11 @@ export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
+  const scope = getScopeMapping(file.scope, file.featured)
   const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  if (emitScope) {
+    emitScope(scope)
+  }
   // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
   // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
   // const spaceId = file.space_id?.split('-')[1]
@@ -119,7 +137,7 @@ export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
         <Header>
           <HeaderLeft>
             <Title>
-              <FileIcon height={24} />
+              <FileIcon height={22} />
               &nbsp;{file.name}
               {file.show_license_pending && (
                 <HomeLabel
@@ -133,14 +151,19 @@ export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
             </Title>
           </HeaderLeft>
           <HeaderRight>
-            <FileActions scope={scope} spaceId={spaceId} file={file} />
+            <FileActions scope={scope} space={space} file={file} folderId={folderId} />
           </HeaderRight>
         </Header>
 
         <FileDescription>
+          {file.locked && <LockedRow>
+            <LockIcon height={14} color={theme.colors.darkYellow} />
+            File is locked
+          </LockedRow>
+          }
           {file.description
             ? file.description
-            : 'This file has no description.'}
+            : 'No description provided.'}
         </FileDescription>
 
         <MetadataSection>
@@ -154,7 +177,7 @@ export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
                   </Link>
                 ) : (
                   <Link to={`/home/files${scopeParamLink}`}>
-                    {file.location}
+                    {scope === 'featured' ? 'Featured' : file.location}
                   </Link>
                 )}
               </MetadataVal>
@@ -218,7 +241,7 @@ export const FileShow = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: 
         </MetadataSection>
       </Topbox>
 
-      <div className="pfda-padded-t40" />
+      <Filler size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )

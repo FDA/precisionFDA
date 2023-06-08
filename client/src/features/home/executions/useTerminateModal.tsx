@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidRed } from '../../../components/Button'
@@ -27,6 +27,7 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
+    mutationKey: ['terminate-job'],
     mutationFn: terminateJobsRequest,
     onError: () => {
       toast.error(`Error: terminating execution`)
@@ -36,7 +37,7 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
         return
       }
-      queryClient.invalidateQueries('jobs')
+      queryClient.invalidateQueries(['jobs'])
       queryClient.invalidateQueries(['execution', selected[0].uid])
       setShowModal(false)
       toast.success(`Success: ${res?.message?.text}`)
@@ -47,7 +48,7 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
     mutation.mutateAsync(memoSelected.map(x => x.uid))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid={`modal-execution-terminate`}
       headerText={`Terminate selected execution?`}

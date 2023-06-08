@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup, InputError } from '../../../../components/form/styles'
@@ -34,15 +34,17 @@ const EditFolderInfoForm = ({
   })
 
   const mutation = useMutation({
+    mutationKey: ['edit-folder'],
     mutationFn: async (payload: { name: string; folderId: string }) => editFolderRequest(payload),
     onSuccess: (res) => {
       if(res?.error?.type) {
-        setError('name', {message: res.error.message, type: 'validate'})
+        // parsing the error from backend to human-readable message
+        setError('name', {message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate'})
         return
       }
-      queryClient.invalidateQueries('files')
+      queryClient.invalidateQueries(['files'])
       handleClose()
-      toast.success('Success: Editing folder info.')
+      toast.success('Folder info changed.')
     },
     onError: () => {
       toast.error('Error: Editing folder info.')
@@ -82,7 +84,7 @@ export const useEditFolderModal = (selectedItem: IFile) => {
   const selected = useMemo(() => selectedItem, [isShown])
   const handleClose = () => setShowModal(false)
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid="modal-folder-edit"
       headerText="Edit folder info"

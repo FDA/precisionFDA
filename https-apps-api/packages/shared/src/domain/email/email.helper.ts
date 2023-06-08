@@ -106,6 +106,7 @@ const buildIsNotificationEnabled = (
     return defaultValue
   }
   // const dbValues = notificationsConfig.data
+  // @ts-ignore
   const settingValue: Maybe<boolean> = userConfig.data[notificationKey]
   if (isNil(settingValue)) {
     log.debug(

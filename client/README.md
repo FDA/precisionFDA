@@ -32,3 +32,9 @@ To start developing:
 5. login
 6. The redirect address is incorrect and needs to be manually change in the URL from `https://localhost/return_from_login?code=`, `https://localhost:4000/return_from_login?code=`
 7. The next redirect is incorrect and needs to be manually changed in the URL from `https://localhost/`, `https://localhost:4000/`
+
+# Testing
+- run all tests with `yarn test`
+- Jest
+- Testing Library for React
+- MSW for mocking fetch. Mocks are defined in ./src/mocks/handlers.ts

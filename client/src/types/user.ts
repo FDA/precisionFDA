@@ -64,7 +64,9 @@ export interface IUser {
   full_name: string
   gravatar_url: string
   is_guest: boolean
+  job_limit: number
   last_name: string
   links: any
   handle: string
+  session_id: string
 }

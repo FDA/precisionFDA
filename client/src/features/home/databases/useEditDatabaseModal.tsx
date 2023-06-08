@@ -1,16 +1,16 @@
 import { ErrorMessage } from '@hookform/error-message'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
-import { Modal } from '../../modal'
-import { ButtonRow, StyledForm } from '../../modal/styles'
+import { ButtonRow, Footer, ModalScroll, StyledForm } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { editDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
 const EditDatabaseInfoForm = ({
   db,
@@ -34,13 +34,12 @@ const EditDatabaseInfoForm = ({
   })
 
   const editFileMutation = useMutation({
-    mutationFn: (payload: {
-      name: string
-      description: string
-    }) => editDatabaseRequest(payload, db.dxid),
+    mutationKey: ['edit-database'],
+    mutationFn: (payload: { name: string; description: string }) =>
+      editDatabaseRequest(payload, db.dxid),
     onSuccess: res => {
       queryClient.invalidateQueries(['dbcluster', db.dxid])
-      queryClient.invalidateQueries('dbclusters')
+      queryClient.invalidateQueries(['dbclusters'])
       handleClose()
       toast.success('Success: Editing database info')
     },
@@ -57,40 +56,54 @@ const EditDatabaseInfoForm = ({
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup>
-        <label>Database Name</label>
-        <InputText
-          label="Database Name"
-          {...register('name', { required: 'Name is required.' })}
-          placeholder="Enter name..."
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
-      </FieldGroup>
-      <FieldGroup>
-        <label>Description</label>
-        <InputText
-          label="Description"
-          {...register('description')}
-          placeholder="Enter description..."
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="description"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
-      </FieldGroup>
-      <ButtonRow>
-        <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-        <ButtonSolidBlue type="submit" disabled={isSubmitting}>Edit</ButtonSolidBlue>
-      </ButtonRow>
-    </StyledForm>
+    <>
+      <ModalScroll>
+        <StyledForm id="edit-database-form" onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <label>Database Name</label>
+            <InputText
+              label="Database Name"
+              {...register('name', { required: 'Name is required.' })}
+              placeholder="Enter name..."
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              errors={errors}
+              name="name"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Description</label>
+            <InputText
+              label="Description"
+              {...register('description')}
+              placeholder="Enter description..."
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              errors={errors}
+              name="description"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
+        </StyledForm>
+      </ModalScroll>
+      <Footer>
+        <ButtonRow>
+          <Button type="button" onClick={handleClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <ButtonSolidBlue
+            type="submit"
+            form="edit-database-form"
+            disabled={isSubmitting}
+          >
+            Edit
+          </ButtonSolidBlue>
+        </ButtonRow>
+      </Footer>
+    </>
   )
 }
 
@@ -100,15 +113,19 @@ export const useEditDatabaseModal = (selectedItem: IDatabase) => {
   const handleClose = () => {
     setShowModal(false)
   }
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-dbclusters-edit"
-      headerText="Edit database info"
       isShown={isShown}
       hide={handleClose}
     >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Edit database info"
+        hide={() => setShowModal(false)}
+      />
       <EditDatabaseInfoForm db={selected} handleClose={handleClose} />
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

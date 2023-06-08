@@ -1,8 +1,8 @@
 import React from 'react'
+import styled from 'styled-components'
 import classnames from 'classnames'
 import { License as ILicense } from './types'
-import styled from 'styled-components'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 
 
 const StyledTitle = styled.div`
@@ -23,9 +23,9 @@ export const License = ({ license, className, link }: { license: ILicense, class
   return (
     <StyledLicense className={classes}>
       <StyledTitle>
-        <a href={link} target='_blank' rel='noopener noreferrer'>{license?.title}</a>
+        <a data-turbolinks="false" href={link} target='_blank' rel='noopener noreferrer'>{license?.title}</a>
       </StyledTitle>
-      <Markdown data={license?.content} />
+      <MarkdownStyle><Markdown data={license?.content} /></MarkdownStyle>
     </StyledLicense>
   )
 }

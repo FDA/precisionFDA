@@ -56,12 +56,15 @@ declare global {
       em: EntityManager
       user?: UserCtx
       validatedQuery: AnyObject
+      // @ts-ignore
     } & (ConfigT['pagination']['enabled'] extends true ? {
       pagination: {
         page: number
         perPage: number
+        // @ts-ignore
         orderBy: ConfigT['pagination']['sortColumn']
         orderDir: OrderDir
+        // @ts-ignore
         filters: Partial<MapValuesToReturnType<MapValuesToReturnType<MapValueObjectByKey<'parser', ConfigT['pagination']['filterSchema']>>>>
       }
     } : {})

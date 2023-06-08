@@ -7,19 +7,21 @@ import { UserOpsCtx } from '../../../types'
 import { PlatformClient } from '../../../platform-client'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { FindSpaceMembersReponse, PlatformMember } from '../../../platform-client/platform-client.responses'
+import { UserInviteToOrgParams, UserRemoveFromOrgParams } from '../../../platform-client/platform-client.params'
 
 type SyncSpacesPermissionsInput = {}
 
 
 export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
-UserOpsCtx,
-SyncSpacesPermissionsInput,
-void
+  UserOpsCtx,
+  SyncSpacesPermissionsInput,
+  void
 > {
   protected client: PlatformClient
+  protected membership: SpaceMembership
 
   async run(input: SyncSpacesPermissionsInput): Promise<void> {
-    this.client = new PlatformClient(this.ctx.log)
+    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     const userId = this.ctx.user.id
     const em = this.ctx.em
     const spaceRepo = em.getRepository(Space)
@@ -37,26 +39,23 @@ void
     })
 
     for (const space of spaces) {
-      let myMembership: SpaceMembership | null = null
-      // eslint-disable-next-line no-await-in-loop
       const memberships = await space.spaceMemberships.loadItems()
       for (const member of memberships) {
-        // eslint-disable-next-line no-await-in-loop
         await member.user.load()
-        if (!myMembership && member.user.id === userId) {
-          myMembership = member
+        if (!this.membership && member.user.id === userId) {
+          this.membership = member
         }
       }
-      if (myMembership) {
+      if (this.membership) {
         this.ctx.log.warn(
           {},
           'SyncSpacesPermissionsOperation: CHECKING space_id: %d, type: %s, side: %s on behalf of %s',
-          space.id, SPACE_TYPE[space.type], SPACE_MEMBERSHIP_SIDE[myMembership.side], this.ctx.user.dxuser,
+          space.id, SPACE_TYPE[space.type], SPACE_MEMBERSHIP_SIDE[this.membership.side], this.ctx.user.dxuser,
         )
       } else {
         this.ctx.log.warn(
           {},
-          'Triggering user membership was not found for space_id: %s, SKIPPING CHECK',
+          'Triggering user membership was not found for space_id: %s, SKIPPING CHECK', space.id,
         )
         continue
       }
@@ -68,69 +67,161 @@ void
       )
 
       // hostOrg (if any and user is part of it)
-      if (myMembership.side === SPACE_MEMBERSHIP_SIDE.HOST && space.hostDxOrg) {
+      if (this.membership.side === SPACE_MEMBERSHIP_SIDE.HOST && space.hostDxOrg) {
         try {
-          // eslint-disable-next-line no-await-in-loop
           const hostOrgMembers: FindSpaceMembersReponse = await this.client.findSpaceMembers({
             spaceOrg: space.hostDxOrg,
-            accessToken: this.ctx.user.accessToken,
           })
-          this.validateRoles(host_members, hostOrgMembers.results, space)
+          await this.checkPermissions(host_members, hostOrgMembers.results, space)
         } catch (err) {
-          this.ctx.log.info({ error: err })
+          this.ctx.log.warn({ error: err })
         }
       }
 
       // guestOrg (if any and user is part of it)
-      if (myMembership.side === SPACE_MEMBERSHIP_SIDE.GUEST && space.guestDxOrg) {
+      if (this.membership.side === SPACE_MEMBERSHIP_SIDE.GUEST && space.guestDxOrg) {
         try {
-          // eslint-disable-next-line no-await-in-loop
           const guestOrgMembers: FindSpaceMembersReponse = await this.client.findSpaceMembers({
             spaceOrg: space.guestDxOrg,
-            accessToken: this.ctx.user.accessToken,
           })
-          this.validateRoles(guest_members, guestOrgMembers.results, space)
+          await this.checkPermissions(guest_members, guestOrgMembers.results, space)
         } catch (err) {
-          this.ctx.log.info({ error: err })
+          this.ctx.log.warn({ error: err })
         }
       }
     }
   }
 
-  validateRoles(pfdaMembers: SpaceMembership[], platformMembers: PlatformMember[], space: Space): void {
+  async checkPermissions(pfdaMembers: SpaceMembership[], platformMembers: PlatformMember[], space: Space) {
     if (pfdaMembers.length !== platformMembers.length) {
       const side: string = pfdaMembers.length > platformMembers.length ? 'PFDA' : 'PLATFORM'
       this.ctx.log.warn(
-        { pfdaMembers, platformMembers, space: space.id },
+        { pfdaMembers: pfdaMembers.map(m => ({ user: m.user.getEntity().dxuser, role: SPACE_MEMBERSHIP_ROLE[m.role] })), platformMembers, space: space.id },
         'SyncSpacesPermissionsOperation: MEMBERS MISMATCH - %s has more members, PFDA: %d, PLATFORM: %d',
         side, pfdaMembers.length, platformMembers.length,
       )
+      await this.fixPermissions(pfdaMembers, platformMembers, space)
     } else {
       for (const member of pfdaMembers) {
-        this.validateUserRole(member, platformMembers, space)
+        await this.validateUserRole(member, platformMembers, space)
       }
     }
   }
 
-  validateUserRole(pfdaMembership: SpaceMembership, platformMembers: PlatformMember[], space: Space): void {
+  async fixPermissions(pfdaMembers: SpaceMembership[], platformMembers: PlatformMember[], space: Space): Promise<void> {
+    // fixing Platform to match pFDA state
+    this.ctx.log.warn(
+      {},
+      'SyncSpacesPermissionsOperation: Trying to fix space_id: %d platform members.',
+      space.id,
+    )
+    // add all missing members from pFDA to Platform
+    for (const pfdaMember of pfdaMembers) {
+      const foundPlatformMember = platformMembers.find(m => m.id === `user-${pfdaMember.user.getEntity().dxuser}`)
+      if (!foundPlatformMember) {
+        await this.addPlatformPermissions(pfdaMember, space)
+      }
+    }
+    // remove all users from platform that does not have pFDA membership
+    // DISABLED FOR NOW.
+    // for (const platformMember of platformMembers) {
+    //   const foundPfdaMember = pfdaMembers.find(m => `user-${m.user.getEntity().dxuser}` === platformMember.id)
+    //   if (!foundPfdaMember) {
+    //     await this.removePlatformPermissions(platformMember, space)
+    //   }
+    // }
+  }
+
+ /**
+   * TO BE REFACTORED
+   * ----
+   * TODO(Jiri) refactor outside of ops into a platform permission service.
+   * TODO(Jiri) refactor to return the platform response - to be able to react to failed requests.
+   */
+  async addPlatformPermissions(pfdaMembership: SpaceMembership, space: Space): Promise<void> {
+    const pfdaUserHandle = pfdaMembership.user.getEntity().dxuser
+    const invitee = `user-${pfdaUserHandle}`
+    let data: any = {
+      invitee,
+      level: pfdaMembership.isAdminOrLead() ? 'ADMIN' : 'MEMBER',
+      suppressEmailNotification: true, // do not notify user
+    }
+
+    if (!pfdaMembership.isAdminOrLead()) {
+      data = {
+        ...{
+          projectsAccess: pfdaMembership.isContributor() ? 'CONTRIBUTE' : 'VIEW',
+          allowBillableActivities: false,
+          appAccess: pfdaMembership.isContributor(),
+        },
+        ...data,
+      }
+    }
+
+    const params: UserInviteToOrgParams = {
+      orgDxId: this.membership.side === SPACE_MEMBERSHIP_SIDE.GUEST ? space.guestDxOrg : space.hostDxOrg,
+      data,
+    }
+    const response = await this.client.inviteUserToOrganization(params)
+    if (response.id !== null && response.state === 'accepted') {
+      this.ctx.log.warn(
+        {},
+        'SyncSpacesPermissionsOperation: Successfully added missing member %s to organization %s on the platform.',
+        invitee, params.orgDxId,
+      )
+    } else {
+      this.ctx.log.warn(
+        { response },
+        'SyncSpacesPermissionsOperation: There was an error adding missing member %s to organization %s on the platform.',
+        invitee, params.orgDxId,
+      )
+    }
+  }
+
+  /**
+   * TO BE REFACTORED
+   * ----
+   * TODO(Jiri) refactor outside of ops into a platform permission service.
+   * TODO(Jiri) refactor to return the platform response - to be able to react to failed requests.
+   */
+  async removePlatformPermissions(platformMember: PlatformMember, space: Space): Promise<void> {
+    const params: UserRemoveFromOrgParams = {
+      orgDxId: this.membership.side === SPACE_MEMBERSHIP_SIDE.GUEST ? space.guestDxOrg : space.hostDxOrg,
+      data: {
+        user: platformMember.id,
+      },
+    }
+    const response = await this.client.removeUserFromOrganization(params)
+    if (response.id !== null) {
+      this.ctx.log.warn(
+        {},
+        'SyncSpacesPermissionsOperation: Successfully removed platform member %s from organization %s on the platform.',
+        platformMember.id, params.orgDxId,
+      )
+    }
+  }
+
+  async validateUserRole(pfdaMembership: SpaceMembership, platformMembers: PlatformMember[], space: Space): Promise<void> {
     const pfdaUserHandle = pfdaMembership.user.getEntity().dxuser
     const platformMember = platformMembers.find(m => m.id === `user-${pfdaUserHandle}`)
 
     // check for admin & leads
     if (pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.ADMIN || pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.LEAD) {
       if (platformMember && (platformMember.projectAccess !== 'ADMINISTER' || platformMember.level !== 'ADMIN')) {
+        // never seen this in the logs - probably is not happening at all.
         this.logWrongPermissions(platformMember, pfdaMembership, space)
-      }
-      else if (!platformMember) {
+      } else if (!platformMember) {
         this.logMissingPermissions(pfdaMembership, platformMembers, space)
+        await this.addPlatformPermissions(pfdaMembership, space)
       }
       // check for other roles
     } else if (pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR || pfdaMembership.role === SPACE_MEMBERSHIP_ROLE.VIEWER) {
       if (platformMember && platformMember.level !== 'MEMBER') {
+        // never seen this in the logs - probably is not happening at all.
         this.logWrongPermissions(platformMember, pfdaMembership, space)
-      }
-      else if (!platformMember) {
+      } else if (!platformMember) {
         this.logMissingPermissions(pfdaMembership, platformMembers, space)
+        await this.addPlatformPermissions(pfdaMembership, space)
       }
     }
   }

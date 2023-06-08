@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 
@@ -19,12 +19,16 @@ export const StyledBackButton = styled.button`
   ${backStyles}
 `
 
-export const BackLink: FC<{ linkTo: string, onClick?: (e: any) => void}> = ({ linkTo, children, onClick, ...rest }) => {
+const StyledText = styled.div`
+  min-width: fit-content;
+`
+
+export const BackLink = ({ linkTo, children, onClick, ...rest }: { children: ReactNode, linkTo: string, onClick?: (e: any) => void}) => {
   if(onClick) return <StyledBackButton {...rest} onClick={onClick}><ArrowLeftIcon />&nbsp;{children}</StyledBackButton>
   return (
     <StyledBackLink {...rest} to={linkTo}>
       <ArrowLeftIcon />&nbsp;
-      {children}
+      <StyledText>{children}</StyledText>
     </StyledBackLink>
   )
 }

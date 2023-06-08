@@ -1,5 +1,5 @@
 /* eslint-disable multiline-ternary */
-import { errors, queue, user, utils, client } from '@pfda/https-apps-shared'
+import { errors, queue, user, utils, client, config } from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { defaultMiddlewares } from '../server/middleware'
@@ -10,7 +10,7 @@ import { enumValidator, makeCloudGovBulkUserUpdateMiddlewareSchema, numericBodyV
 
 
 // Routes with /admin prefix
-const router = new Router<DefaultState, PaginationCtxT>()
+const router = new Router<DefaultState, Api.Ctx>()
 
 router.use(defaultMiddlewares)
 // TODO(samuel) - implement redirect on client side - logic from Ruby
@@ -18,8 +18,8 @@ router.use(validateSiteAdminMdw)
 
 router.get(
   '/checkStaleJobs',
-  async ctx => {
-    const res = await queue.createCheckStaleJobsTask(ctx.user)
+  async (ctx: any) => {
+    const res = await queue.createCheckStaleJobsTask(ctx.user!)
     ctx.body = res
     ctx.status = 200
   },
@@ -45,12 +45,24 @@ const filterSchema = {
   jobLimit: utils.filters.NUMERIC_RANGE_FILTER,
 }
 
-type PaginationCtxT = Api.Ctx<{pagination: {
-  enabled: true
-  paginatedEntity: user.User
-  sortColumn: typeof listUserSortableColumns[number]
-  filterSchema: typeof filterSchema
-}}>
+interface ISetTotalLimitParams {
+  ids: number[]
+  totalLimit: number
+}
+
+interface ISetJobLimitParams {
+  ids: number[]
+  jobLimit: number
+}
+
+interface IIdListParams {
+  ids: number[]
+}
+
+interface IResourceTypeParams {
+  ids: number[]
+  resource: Resource
+}
 
 router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableColumns[number]>({
   sort: {
@@ -61,9 +73,10 @@ router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableCo
     defaultPerPage: 50,
   },
   filter: {
+    // @ts-ignore
     schema: filterSchema,
   },
-}), async (ctx: PaginationCtxT) => {
+}), async (ctx: any) => {
   const { pagination } = ctx
   const { orderBy, filters } = pagination
   const res = orderBy === 'totalLimit' || orderBy === 'jobLimit' || Boolean(filters.totalLimit) || Boolean(filters.jobLimit)
@@ -78,6 +91,7 @@ router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableCo
               type: 'json' as const,
               // TODO(samuel) solve this camelCase vs snake_case issue
               sqlColumn: 'cloud_resource_settings',
+              // @ts-ignore
               path: [{
                 totalLimit: 'total_limit',
                 jobLimit: 'job_limit',
@@ -93,6 +107,7 @@ router.get('/users', makePaginationParseMdw<user.User, typeof listUserSortableCo
         } as any
         // Note(samuel) added 'as any' because of poor type resolution of conditionals
       })(),
+      // @ts-ignore
       filters: utils.filters.buildFiltersWithColumnNodes<user.User, typeof filterSchema>(filters, {
         totalLimit: {
           sqlColumn: 'cloud_resource_settings' as any,
@@ -124,11 +139,8 @@ router.put(
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
     totalLimit: numericBodyValidator,
   })),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-    totalLimit: number
-  }>) => {
-    const { ids, totalLimit } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids, totalLimit } = ctx.request.body as ISetTotalLimitParams
     await ctx.em.getRepository(user.User).bulkUpdateSetTotalLimit(ids, totalLimit)
     ctx.body = 'updated'
   },
@@ -139,11 +151,8 @@ router.put(
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
     jobLimit: numericBodyValidator,
   })),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-    jobLimit: number
-  }>) => {
-    const { ids, jobLimit } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids, jobLimit } = ctx.request.body as ISetJobLimitParams
     await ctx.em.getRepository(user.User).bulkUpdateSetJobLimit(ids, jobLimit)
     ctx.body = 'updated'
   },
@@ -152,11 +161,10 @@ router.put(
 router.post(
   '/users/reset2fa',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema()),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-  }>) => {
-    const { ids } = ctx.request.body
-    const results = await ctx.em.getRepository(user.User).bulkUpdateReset2fa(ids, new client.PlatformClient(ctx.log), ctx.user)
+  async (ctx: Api.Ctx) => {
+    const { ids } = ctx.request.body as IIdListParams
+    const adminUserClient = new client.PlatformClient(config.platform.adminUserAccessToken, ctx.log)
+    const results = await ctx.em.getRepository(user.User).bulkUpdateReset2fa(ids, adminUserClient, ctx.user!)
     ctx.body = results
   },
 )
@@ -164,11 +172,10 @@ router.post(
 router.post(
   '/users/unlock',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema()),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-  }>) => {
-    const { ids } = ctx.request.body
-    const results = await ctx.em.getRepository(user.User).bulkUpdateUnlock(ids, new client.PlatformClient(ctx.log), ctx.user)
+  async (ctx: Api.Ctx) => {
+    const { ids } = ctx.request.body as IIdListParams
+    const adminUserClient = new client.PlatformClient(config.platform.adminUserAccessToken, ctx.log)
+    const results = await ctx.em.getRepository(user.User).bulkUpdateUnlock(ids, adminUserClient, ctx.user!)
     ctx.status = results.some(({ result }) => result.status === 'unhandledError')
       ? 400
       : 200
@@ -179,19 +186,16 @@ router.post(
 router.put(
   '/users/activate',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
-    ids: (value: number[], _: string, ctx: Api.Ctx<{}, {
-      ids: number[]
-    }>) => {
-      const currentUserId = ctx.user.id
+    // @ts-ignore
+    ids: (value: number[], _: string, ctx: Api.Ctx<{}, {ids: number[]}>) => {
+      const currentUserId = ctx.user!.id
       if (value.includes(currentUserId)) {
         throw new errors.ValidationError('Cannot activate self')
       }
     },
   })),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-  }>) => {
-    const { ids } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids } = ctx.request.body as IIdListParams
     await ctx.em.getRepository(user.User).bulkActivate(ids)
     ctx.body = 'updated'
   },
@@ -200,19 +204,18 @@ router.put(
 router.put(
   '/users/deactivate',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
+    // @ts-ignore
     ids: (value: number[], _: string, ctx: Api.Ctx<{}, {
       ids: number[]
     }>) => {
-      const currentUserId = ctx.user.id
+      const currentUserId = ctx.user!.id
       if (value.includes(currentUserId)) {
         throw new errors.ValidationError('Cannot deactivate self')
       }
     },
   })),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-  }>) => {
-    const { ids } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids } = ctx.request.body as IIdListParams
     await ctx.em.getRepository(user.User).bulkDeactivate(ids)
     ctx.body = 'updated'
   },
@@ -225,11 +228,8 @@ router.put(
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
     resource: enumValidator<Resource>(user.RESOURCE_TYPES as any as Resource[]),
   })),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-    resource: Resource
-  }>) => {
-    const { ids, resource } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids, resource } = ctx.request.body as IResourceTypeParams
     await ctx.em.getRepository(user.User).bulkEnableResourceType(ids, resource)
     ctx.body = 'updated'
   },
@@ -238,10 +238,8 @@ router.put(
 router.put(
   '/users/enableAllResourceTypes',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({})),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-  }>) => {
-    const { ids } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids } = ctx.request.body as IResourceTypeParams
     await ctx.em.getRepository(user.User).bulkEnableAll(ids)
     ctx.body = 'updated'
   },
@@ -252,11 +250,8 @@ router.put(
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({
     resource: enumValidator<Resource>(user.RESOURCE_TYPES as any as Resource[]),
   })),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-    resource: Resource
-  }>) => {
-    const { ids, resource } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids, resource } = ctx.request.body as IResourceTypeParams
     await ctx.em.getRepository(user.User).bulkDisableResourceType(ids, resource)
     ctx.body = 'updated'
   },
@@ -265,10 +260,8 @@ router.put(
 router.put(
   '/users/disableAllResourceTypes',
   makeValidationMiddleware(makeCloudGovBulkUserUpdateMiddlewareSchema({})),
-  async (ctx: Api.Ctx<{}, {
-    ids: number[]
-  }>) => {
-    const { ids } = ctx.request.body
+  async (ctx: Api.Ctx) => {
+    const { ids } = ctx.request.body as IIdListParams
     await ctx.em.getRepository(user.User).bulkDisableAll(ids)
     ctx.body = 'updated'
   },

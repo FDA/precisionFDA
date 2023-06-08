@@ -36,7 +36,7 @@ export class MemberChangedEmailHandler
   space: Space
   user: User
   updatedMembership: SpaceMembership & {
-    user: LoadedReference<User, User>
+    user: LoadedReference<User>
   }
 
   async setupContext(): Promise<void> {

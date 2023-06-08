@@ -17,9 +17,16 @@ import {
   StyledChallengeDetailsBanner,
 } from './styles'
 import { getChallengeTimeRemaining, getTimeStatus } from '../util'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { IUser } from '../../../types/user'
 
-
-export const ChallengeDetailsBanner = ({ challenge }: { challenge: Challenge }) => {
+export const ChallengeDetailsBanner = ({
+  challenge,
+  user,
+}: {
+  challenge: Challenge,
+  user?: IUser
+}) => {
   const timeStatus = getTimeStatus(challenge.start_at, challenge.end_at)
   let stateLabel = 'Previous precisionFDA Challenge'
   switch (timeStatus) {
@@ -39,50 +46,55 @@ export const ChallengeDetailsBanner = ({ challenge }: { challenge: Challenge }) 
   const userTimeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone
 
   return (
-    <StyledChallengeDetailsBanner>
-      <LeftColumn>
-        <div>
-          <Link to={{ pathname: '/challenges' }} className="backToChallenges">
-            &larr; Back to All Challenges
-          </Link>
-          <div style={{ marginTop: '20px' }}>
-            <ChallengeStateLabel timeStatus={timeStatus}>
-              {stateLabel}
-            </ChallengeStateLabel>
-          </div>
-          <ChallengeName>{challenge.name}</ChallengeName>
-          <ChallengeDescription>{challenge.description}</ChallengeDescription>
-        </div>
-        <ChallengeDateArea>
+    <NavigationBar user={user}>
+      <StyledChallengeDetailsBanner>
+        <LeftColumn>
           <div>
-            <ChallengeDateLabel>Starts</ChallengeDateLabel>
-            <ChallengeDate timeStatus={timeStatus}>
-              {format(challenge.start_at, 'MM/dd/yyyy HH:mm:ss z', {
-                timeZone: userTimeZone,
-                locale: enUS,
-              })}
-            </ChallengeDate>
+            <Link to={{ pathname: '/challenges' }} className="backToChallenges">
+              &larr; Back to All Challenges
+            </Link>
+            <div style={{ marginTop: '20px' }}>
+              <ChallengeStateLabel timeStatus={timeStatus}>
+                {stateLabel}
+              </ChallengeStateLabel>
+            </div>
+            <ChallengeName>{challenge.name}</ChallengeName>
+            <ChallengeDescription>{challenge.description}</ChallengeDescription>
           </div>
-          <div>
-            <ChallengeDateLabel>Ends</ChallengeDateLabel>
-            <ChallengeDate timeStatus={timeStatus}>
-              {format(challenge.end_at, 'MM/dd/yyyy HH:mm:ss z', {
-                timeZone: userTimeZone,
-                locale: enUS,
+          <ChallengeDateArea>
+            <div>
+              <ChallengeDateLabel>Starts</ChallengeDateLabel>
+              <ChallengeDate timeStatus={timeStatus}>
+                {format(challenge.start_at, 'MM/dd/yyyy HH:mm:ss z', {
+                  timeZone: userTimeZone,
+                  locale: enUS,
+                })}
+              </ChallengeDate>
+            </div>
+            <div>
+              <ChallengeDateLabel>Ends</ChallengeDateLabel>
+              <ChallengeDate timeStatus={timeStatus}>
+                {format(challenge.end_at, 'MM/dd/yyyy HH:mm:ss z', {
+                  timeZone: userTimeZone,
+                  locale: enUS,
+                })}
+              </ChallengeDate>
+            </div>
+            <ChallengeDateRemaining>
+              {getChallengeTimeRemaining({
+                start_at: challenge.start_at,
+                end_at: challenge.end_at,
               })}
-            </ChallengeDate>
-          </div>
-          <ChallengeDateRemaining>
-            {getChallengeTimeRemaining({ start_at: challenge.start_at, end_at: challenge.end_at })}
-          </ChallengeDateRemaining>
-        </ChallengeDateArea>
-      </LeftColumn>
-      <RightColumn>
-        <ChallengeThumbnail
-          src={challenge.card_image_url}
-          alt={`${challenge.name} thumbnail`}
-        />
-      </RightColumn>
-    </StyledChallengeDetailsBanner>
+            </ChallengeDateRemaining>
+          </ChallengeDateArea>
+        </LeftColumn>
+        <RightColumn>
+          <ChallengeThumbnail
+            src={challenge.card_image_url}
+            alt={`${challenge.name} thumbnail`}
+          />
+        </RightColumn>
+      </StyledChallengeDetailsBanner>
+    </NavigationBar>
   )
 }

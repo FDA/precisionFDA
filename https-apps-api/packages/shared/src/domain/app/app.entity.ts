@@ -8,10 +8,12 @@ import {
   Collection,
   OneToMany,
   Enum,
+  ManyToMany,
   EntityRepositoryType,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { Job } from '../job/job.entity'
+import { Asset } from '../user-file'
 import { User } from '../user/user.entity'
 import { ENTITY_TYPE } from './app.enum'
 import { AppRepository } from './app.repository'
@@ -68,8 +70,14 @@ export class App extends BaseEntity {
   @OneToMany({ entity: () => Job, mappedBy: 'app' })
   jobs = new Collection<Job>(this)
 
+  @ManyToMany(() => Asset, 'apps', {
+    pivotTable: 'apps_assets',
+    owner: true,
+    inverseJoinColumn: 'asset_id'})
+  assets = new Collection<Asset>(this)
+
   @Enum()
-  entityType: ENTITY_TYPE;
+  entityType: ENTITY_TYPE
 
   isRegular() {
     return this.entityType === ENTITY_TYPE.NORMAL

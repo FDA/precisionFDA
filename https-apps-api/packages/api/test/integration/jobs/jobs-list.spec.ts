@@ -61,7 +61,7 @@ describe.skip('GET /jobs', () => {
     Object.keys(jobsCount).forEach(key => {
       let count = jobsCount[key]
       for (let i=0; i<count; i++) {
-        const user = (i % 2) ? user1 : user2,
+        const user = (i % 2) ? user1 : user2
         const job = create.jobHelper.create(em, { user: user, app: app }, {
           state: JOB_STATE.DONE,
           scope: getScope(i),

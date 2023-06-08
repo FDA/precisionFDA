@@ -7,13 +7,13 @@ import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
 import { User } from '../../user/user.entity'
 
 export class FolderDeleteOperation extends BaseOperation<
-  UserOpsCtx,
-  IdInput,
-  number
+UserOpsCtx,
+IdInput,
+number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.log)
+    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     // Todo(samuel) - performance optimization - execute read operations before transaction start
     await em.begin()
@@ -25,17 +25,20 @@ export class FolderDeleteOperation extends BaseOperation<
       if (!existingFolder) {
         throw new errors.FolderNotFoundError()
       }
-
       // subfolders include "existingFolder"
       const foldersInProject = await repo.findForSynchronization({
         userId: this.ctx.user.id,
-        projectDxid: existingFolder.project,
+        projectDxid: existingFolder.project!,
       })
       const folderSubtree = await childrenTraverse(existingFolder, repo, [])
       const folderPath = getFolderPath(foldersInProject, existingFolder)
       const filesToRemove = await userFileRepo.findFilesInFolders({
         folderIds: folderSubtree.map(f => f.id),
       })
+      const checkForLockedFiles = filesToRemove.filter(file => file.locked)
+      if (checkForLockedFiles.length) {
+        throw new errors.PermissionError(`Unable to remove, folder ${existingFolder.name} contains locked files`)
+      }
       const totalNodesCnt = folderSubtree.length + filesToRemove.length
       if (totalNodesCnt >= 10000) {
         this.ctx.log.warn(
@@ -44,12 +47,11 @@ export class FolderDeleteOperation extends BaseOperation<
         )
       }
       await platformClient.removeFolderRec({
-        projectId: existingFolder.project,
+        projectId: existingFolder.project!,
         folderPath,
-        accessToken: this.ctx.user.accessToken,
       })
       userFileRepo.removeFilesWithTags(filesToRemove)
-      
+
       const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
       for (const folder of folderSubtree) {
         const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folder, folderPath, currentUser)

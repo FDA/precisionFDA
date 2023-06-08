@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { FileIcon } from '../../../components/icons/FileIcon'
-import { Markdown } from '../../../components/Markdown'
+import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { HOME_TABS } from '../../../constants'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
@@ -32,6 +32,8 @@ import { IAsset } from './assets.types'
 import { useAssetActions } from './useAssetSelectActions'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { License } from '../licenses/License'
+import { Filler } from '../../../components/Page/styles'
+import { getScopeMapping } from '../getScopeMapping'
 
 const AssetActions = ({
   scope,
@@ -67,7 +69,7 @@ const AssetActions = ({
   )
 }
 
-export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
+export const AssetShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
   const [currentTab, setCurrentTab] = useState<any>('')
 
@@ -93,7 +95,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
   const tabsConfig = [
     {
       header: 'Description',
-      tab: <Markdown data={asset.description} />,
+      tab: <MarkdownStyle><Markdown data={asset.description} /></MarkdownStyle>,
     },
     {
       header: 'Archive Contents',
@@ -115,7 +117,12 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
     currentTab && currentTab !== HOME_TABS.PRIVATE
       ? `/${currentTab.toLowerCase()}`
       : ''
+
+  const scope = getScopeMapping(asset.scope, asset.featured)
   const scopeParamLink = `?scope=${scope.toLowerCase()}`
+  if (emitScope) {
+    emitScope(scope)
+  }
 
   return (
     <>
@@ -128,7 +135,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
             <Title>
               <FileIcon height={24} />
               &nbsp;
-              {typeof asset?.origin == 'object'
+              {typeof asset?.origin === 'object'
                 ? asset.origin.text
                 : asset.name}
             </Title>
@@ -156,7 +163,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
                   </Link>
                 ) : (
                   <Link to={`/home/assets${scopeParamLink}`}>
-                    {asset.location}
+                    {scope === 'featured' ? 'Featured' : asset.location}
                   </Link>
                 )}
               </MetadataVal>
@@ -204,7 +211,7 @@ export const AssetShow = ({ scope = 'me' }: { scope?: ResourceScope }) => {
         </MetadataSection>
       </Topbox>
 
-      <div className="pfda-padded-t40" />
+      <Filler size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
@@ -24,6 +24,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
   const momoSelected = useMemo(() => selected, [isShown])
   const dxids = momoSelected.map(s => s.dxid)
   const mutation = useMutation({
+    mutationKey: ['database-method'],
     mutationFn: (ids: string[]) => databaseMethodRequest(method, ids),
     onError: () => {
       queryClient.invalidateQueries(['dbclusters'])
@@ -31,7 +32,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['dbclusters'])
-      onSuccess && onSuccess()
+      if(onSuccess) onSuccess()
       setShowModal(false)
       toast.success(`Success: ${method} database`)
     },
@@ -41,9 +42,9 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
     mutation.mutateAsync(dxids)
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
-      data-testid={`modal-dbcluster-delete`}
+      data-testid="modal-dbcluster-delete"
       headerText={`${method} ${momoSelected.length} items(s)`}
       isShown={isShown}
       hide={() => setShowModal(false)}

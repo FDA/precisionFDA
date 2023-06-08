@@ -1,22 +1,33 @@
 // TODO(samuel) fix
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import axios from 'axios'
 import React, { useMemo } from 'react'
-import styled from 'styled-components'
 import { CellProps, Column } from 'react-table'
-import { withDefault, StringParam } from 'use-query-params'
-import DefaultLayout from '../../../views/layouts/DefaultLayout'
-import Table from '../../../components/Table/Table'
-import { DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter } from '../../../components/Table/filters'
-import { EmptyTable } from '../../../components/Table/styles'
-import { requestOpts } from '../../../utils/api'
-import { cleanObject, toArrayFromObject } from '../../../utils/object'
-import { FilterT, PaginationInput, prepareListFetch, SortInput } from '../../../utils/filters'
-import { MetaT, useList } from '../../../hooks/useList'
-import { colors } from '../../../styles/theme'
-import { hidePagination, Pagination } from '../../../components/Pagination'
-import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
+import styled from 'styled-components'
+import { StringParam, withDefault } from 'use-query-params'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UserIcon'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { hidePagination, Pagination } from '../../../components/Pagination'
+import {
+  DefaultColumnFilter,
+  NumberRangeColumnFilter,
+  SelectColumnFilter,
+} from '../../../components/Table/filters'
+import { EmptyTable, ReactTableStyles } from '../../../components/Table/styles'
+import Table from '../../../components/Table/Table'
+import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
+import { MetaT, useList } from '../../../hooks/useList'
+import { usePageMeta } from '../../../hooks/usePageMeta'
+import {
+  FilterT,
+  PaginationInput,
+  prepareListFetch,
+  SortInput,
+} from '../../../utils/filters'
+import { cleanObject, toArrayFromObject } from '../../../utils/object'
+import { UserLayout } from '../../../layouts/UserLayout'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
 
@@ -32,7 +43,7 @@ const USERS_TABLE_KEYS = [
   'jobLimit' as const,
 ]
 
-type UserTableCols= (typeof USERS_TABLE_KEYS)[number]
+type UserTableCols = (typeof USERS_TABLE_KEYS)[number]
 
 type UserFilter = FilterT<UserTableCols>
 type UserSortInput = SortInput<UserTableCols>
@@ -43,9 +54,10 @@ export const fetchUsers = async (
   order: Partial<UserSortInput>,
 ) => {
   const query = prepareListFetch(filters, pagination, order)
-  const paramQ = `?${  new URLSearchParams(cleanObject(query) as any).toString()}`
-  const res = await fetch(`/admin/users/${paramQ}`, requestOpts)
-  return res.json() as any as AdminUserListType
+  const paramQ = `?${new URLSearchParams(cleanObject(query) as any).toString()}`
+  return axios
+    .get(`/admin/users_list/${paramQ}`)
+    .then(r => r.data as AdminUserListType)
 }
 
 export const StyledLinkCell = styled.a`
@@ -59,115 +71,165 @@ export const Title = styled.div`
   font-size: 24px;
   font-weight: bold;
   align-items: center;
-  color: #52698f;
   margin: 16px 0;
   gap: 8px;
 `
 
-export const Topbox = styled.div`
-  background: ${colors.subtleBlue};
+export const TopLeft = styled.div`
   display: flex;
   align-items: baseline;
-  padding-left: 20px;
+  gap: 8px;
 `
 
-const ContentWrapper = styled.div`
-  margin: 0 20px;
+export const Topbox = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+  gap: 16px;
 `
 
-export const getAdminUserColumns = (colWidths: any) =>  [
-  {
-    Header: 'Username',
-    accessor: 'dxuser',
-    Filter: DefaultColumnFilter,
-    width: colWidths?.dxuser ?? 198,
-    Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
-        {value}
-      </StyledLinkCell>
-    ),
-  },
-  {
-    Header: 'Email ID',
-    accessor: 'email',
-    Filter: DefaultColumnFilter,
-    width: colWidths?.email ?? 300,
-    Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
-        {value}
-      </StyledLinkCell>
-    ),
-  },
-  {
-    Header: 'Login Date',
-    accessor: 'lastLogin',
-    Filter: DefaultColumnFilter,
-    width: colWidths?.lastLogin ?? 300,
-    Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => {
-      const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-      return (
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
-        {value && new Date(value).toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-          hour12: true,
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric',
-        })}
-      </StyledLinkCell>
-      )
+const StyledTable = styled.div`
+  overflow-x: auto;
+  overflow-y: auto;
+  flex-grow: 1;
+  height: 0;
+
+  ${ReactTableStyles} {
+    margin-inline: auto;
+    width: min(100% - 32px, 100%);
+    font-size: 14px;
+    .table {
+      border-left: 1px solid #d5d5d5;
+      .tr {
+        height: 56px;
+        .td {
+          position: relative;
+          padding: 10px;
+          height: auto;
+          justify-content: flex-start;
+          align-items: flex-start;
+        }
+      }
+    }
+  }
+`
+
+export const getAdminUserColumns = (colWidths: any) =>
+  [
+    {
+      Header: 'Username',
+      accessor: 'dxuser',
+      Filter: DefaultColumnFilter,
+      width: colWidths?.dxuser ?? 198,
+      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
+        <StyledLinkCell
+          data-turbolinks="false"
+          href={`/users/${row.original.dxuser}`}
+        >
+          {value}
+        </StyledLinkCell>
+      ),
     },
-  },
-  {
-    Header: 'Status',
-    accessor: 'userState',
-    Filter: SelectColumnFilter,
-    options: [
-      { label: 'Active', value: 0 },
-      { label: 'Locked', value: 1 },
-      { label: 'Deactivated', value: 2 },
-    ],
-    width: colWidths?.lastLogin ?? 300,
-    Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
-        {value.toUpperCase()}
-      </StyledLinkCell>
-    ),
-  },
-  {
-    Header: 'Total Limit',
-    id: 'totalLimit',
-    accessor: 'cloudResourceSettings.total_limit',
-    Filter: NumberRangeColumnFilter,
-    filterPlaceholderFrom: 'Min $',
-    filterPlaceholderTo: 'Max $',
-    width: colWidths?.lastLogin ?? 300,
-    Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
-        {`$${value}`}
-      </StyledLinkCell>
-    ),
-  },
-  {
-    Header: 'Job Limit',
-    id: 'jobLimit',
-    accessor: 'cloudResourceSettings.job_limit',
-    Filter: NumberRangeColumnFilter,
-    width: colWidths?.lastLogin ?? 300,
-    filterPlaceholderFrom: 'Min $',
-    filterPlaceholderTo: 'Max $',
-    Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (  
-      <StyledLinkCell href={`/users/${row.original.dxuser}`}>
-        {`$${value}`}
-      </StyledLinkCell>
-    ),
-  },
-] as any as Column<User>[]
+    {
+      Header: 'Email ID',
+      accessor: 'email',
+      Filter: DefaultColumnFilter,
+      width: colWidths?.email ?? 300,
+      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
+        <StyledLinkCell
+          data-turbolinks="false"
+          href={`/users/${row.original.dxuser}`}
+        >
+          {value}
+        </StyledLinkCell>
+      ),
+    },
+    {
+      Header: 'Login Date',
+      accessor: 'lastLogin',
+      Filter: DefaultColumnFilter,
+      width: colWidths?.lastLogin ?? 300,
+      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => {
+        const userTimeZone = new Intl.DateTimeFormat().resolvedOptions()
+          .timeZone
+        return (
+          <StyledLinkCell
+            data-turbolinks="false"
+            href={`/users/${row.original.dxuser}`}
+          >
+            {value &&
+              new Date(value).toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour12: true,
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+              })}
+          </StyledLinkCell>
+        )
+      },
+    },
+    {
+      Header: 'Status',
+      accessor: 'userState',
+      Filter: SelectColumnFilter,
+      options: [
+        { label: 'Active', value: 0 },
+        { label: 'Locked', value: 1 },
+        { label: 'Deactivated', value: 2 },
+      ],
+      width: colWidths?.lastLogin ?? 300,
+      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
+        <StyledLinkCell
+          data-turbolinks="false"
+          href={`/users/${row.original.dxuser}`}
+        >
+          {value.toUpperCase()}
+        </StyledLinkCell>
+      ),
+    },
+    {
+      Header: 'Total Limit',
+      id: 'totalLimit',
+      accessor: 'cloudResourceSettings.total_limit',
+      Filter: NumberRangeColumnFilter,
+      filterPlaceholderFrom: 'Min $',
+      filterPlaceholderTo: 'Max $',
+      width: colWidths?.lastLogin ?? 300,
+      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
+        <StyledLinkCell
+          data-turbolinks="false"
+          href={`/users/${row.original.dxuser}`}
+        >
+          {`$${value}`}
+        </StyledLinkCell>
+      ),
+    },
+    {
+      Header: 'Job Limit',
+      id: 'jobLimit',
+      accessor: 'cloudResourceSettings.job_limit',
+      Filter: NumberRangeColumnFilter,
+      width: colWidths?.lastLogin ?? 300,
+      filterPlaceholderFrom: 'Min $',
+      filterPlaceholderTo: 'Max $',
+      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
+        <StyledLinkCell
+          data-turbolinks="false"
+          href={`/users/${row.original.dxuser}`}
+        >
+          {`$${value}`}
+        </StyledLinkCell>
+      ),
+    },
+  ] as any as Column<User>[]
 
-
-export const UsersList = () => {
+const UsersList = () => {
+  usePageMeta({ title: 'precisionFDA Admin - Users' })
   const {
     sortBy,
     setSortBy,
@@ -193,32 +255,31 @@ export const UsersList = () => {
     },
     defaultPerPage: 50,
   })
-  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage('users')
+  const { colWidths, saveColumnResizeWidth } =
+    useColumnWidthLocalStorage('users')
   const columns = useMemo(() => getAdminUserColumns(colWidths), [colWidths])
   const { data } = query
   if (query.error) {
-    return (
-      <div>
-        {JSON.stringify(query.error)}
-      </div>
-    )
+    return <div>{JSON.stringify(query.error)}</div>
   }
   const filters = toArrayFromObject(filterQuery)
   return (
-    <DefaultLayout>
+    <UserLayout>
       <Topbox>
-        <UsersIcon height={20} />
-        <Title>
-          Users
-        </Title>
-      </Topbox>
-      <ContentWrapper>
+        <TopLeft>
+          <UsersIcon height={20} />
+          <Title>User Management</Title>
+        </TopLeft>
         <UsersListActionRow
-          selectedUsers={data?.users.filter((user) => selectedIndexes?.[user.id]) ?? []}
+          selectedUsers={
+            data?.users.filter(user => selectedIndexes?.[user.id]) ?? []
+          }
           refetchUsers={query.refetch}
         />
-        <h4 className="infoframe-title">Users Search</h4>
-        <Table<User> 
+      </Topbox>
+
+      <StyledTable>
+        <Table<User>
           name="admin_users"
           columns={columns}
           hiddenColumns={[]}
@@ -235,17 +296,15 @@ export const UsersList = () => {
           manualFilters
           filters={filters}
           setFilters={setSearchFilter}
-          emptyComponent={
-            <EmptyTable>
-              No users found
-            </EmptyTable>
-          }
+          emptyComponent={<EmptyTable>No users found</EmptyTable>}
           isColsResizable
           saveColumnResizeWidth={saveColumnResizeWidth}
           // TODO(samuel) fix - getRowId in table component not correctly typed
-          getRowId={(user) => (user as any).id}
-          shouldAllowScrollbar
+          getRowId={user => (user as any).id}
         />
+      </StyledTable>
+
+      <ContentFooter>
         <Pagination
           page={data?.meta?.pagination?.currentPage!}
           totalCount={data?.meta?.pagination?.totalCount!}
@@ -262,7 +321,10 @@ export const UsersList = () => {
           onPerPageSelect={setPerPageParam as any}
           showListCount
         />
-      </ContentWrapper>
-    </DefaultLayout>
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
+    </UserLayout>
   )
 }
+
+export default UsersList

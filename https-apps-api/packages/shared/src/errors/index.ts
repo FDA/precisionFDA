@@ -38,12 +38,13 @@ export enum ErrorCodes {
   EMAIL_VALIDATION = 'E_EMAIL_VALIDATION',
   EMAIL_PAYLOAD_NOT_FOUND = 'E_EMAIL_PAYLOAD_NOT_FOUND',
   EXTERNAL_SERVICE_ERROR = 'E_EXTERNAL_SERVICE_FAILED',
-  SALESFORCE_SERVICE_ERROR = 'E_SALESFORCE_SERVICE_FAILED',
+  AWS_SES_SERVICE_ERROR = 'E_AWS_SES_SERVICE_FAILED',
   DB_CLUSTER_NOT_FOUND = 'E_DB_CLUSTER_NOT_FOUND',
   DB_CLUSTER_STATUS_MISMATCH = 'E_DB_CLUSTER_STATUS_MISMATCH',
   AGGREGATE_ERROR = 'E_AGGREGATE_ERROR',
   MFA_ALREADY_RESET = 'E_MFA_ALREADY_RESET',
   ORG_MEMBERSHIP_ERROR = 'E_ORG_MEMBERSHIP_ERROR',
+  INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR'
 }
 
 export class BaseError extends Error {
@@ -148,8 +149,17 @@ export class DbClusterStatusMismatchError extends BaseError {
   }
 }
 
+export class FileNotFoundError extends NotFoundError {
+  constructor(message = 'Error: File not found', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.USER_FILE_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
 export class FolderNotFoundError extends NotFoundError {
-  constructor(message = 'Error: Folder entity not found', props: MaybeBaseErrorProps = {}) {
+  constructor(message = 'Error: Folder not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.FOLDER_NOT_FOUND,
       ...props,
@@ -208,7 +218,7 @@ export class ServiceError extends BaseError {
 export class MfaAlreadyResetError extends BaseError {
   constructor(
     message = 'MFA is already reset or not yet configured for the user',
-    props: MaybeBaseErrorProps = {}
+    props: MaybeBaseErrorProps = {},
   ) {
     super(message, {
       code: ErrorCodes.MFA_ALREADY_RESET,
@@ -221,12 +231,26 @@ export class MfaAlreadyResetError extends BaseError {
 export class OrgMembershipError extends BaseError {
   constructor(
     message = 'Permission denied, must be a user of the org.',
-    props: MaybeBaseErrorProps = {}
+    props: MaybeBaseErrorProps = {},
   ) {
     super(message, {
       code: ErrorCodes.ORG_MEMBERSHIP_ERROR,
       statusCode: 400,
       ...props,
+    })
+  }
+}
+
+export class InvalidIpHeaderError extends BaseError {
+  constructor(
+    message = 'Invalid IP Address',
+    props: {
+      validationError?: ValidationError
+    } = {},
+  ) {
+    super(message, {
+      code: ErrorCodes.INVALID_IP_HEADER_ERROR,
+      validationError: props?.validationError,
     })
   }
 }

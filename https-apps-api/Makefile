@@ -29,10 +29,25 @@ run-worker-dev-dist:
 
 # run app locally starting from worker API
 run-dev:
-	$(bin)ts-node -r tsconfig-paths/register --files ./packages/api/src/index.ts
+	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
+	NODE_PATH_KEY_CERT=../key.pem \
+	NODE_PATH_CERT=../cert.pem \
+	NODE_DATABASE_URL=mysql://root:password@0.0.0.0:32800/precision-fda \
+	$(bin)ts-node-dev --transpile-only -r tsconfig-paths/register --files ./packages/api/src/index.ts
+
+run-dev-local:
+	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
+	NODE_PATH_KEY_CERT=../../../key.pem \
+	NODE_PATH_CERT=../../../cert.pem \
+	NODE_DATABASE_URL=mysql://root:password@0.0.0.0:32800/precision-fda \
+	yarn workspace @pfda/https-apps-api dev
 
 run-worker-dev:
-	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/index.ts
+	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
+	NODE_PATH_KEY_CERT=../../../key.pem \
+	NODE_PATH_CERT=../../../cert.pem \
+	NODE_DATABASE_URL=mysql://root:password@0.0.0.0:32800/precision-fda \
+	$(bin)ts-node-dev -r tsconfig-paths/register --files ./packages/worker/src/index.ts
 
 test-worker-task:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
@@ -54,6 +69,10 @@ run-prettier:
 
 run-worker-repl:
 	$(bin)bull-repl
+
+test-shared:
+	NODE_ENV=test $(bin)mocha --config ./packages/shared/.mocharc.js \
+	--recursive "./packages/shared/test/**/*.spec.ts"
 
 test-api:
 	NODE_ENV=test $(bin)mocha --config ./packages/api/.mocharc.js \

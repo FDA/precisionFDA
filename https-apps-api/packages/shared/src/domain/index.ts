@@ -1,10 +1,15 @@
 import { App } from './app/app.entity'
+import { AppSeries } from './app-series'
+import { Workflow } from './workflow/workflow.entity'
 import { Comment } from './comment/comment.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
 import { Expert } from './expert/expert.entity'
 import { ExpertQuestion } from './expert-question/expert-question.entity'
 import { ExpertAnswer } from './expert-answer/expert-answer.entity'
 import { Job } from './job/job.entity'
+import { AcceptedLicense } from './accepted-license/accepted-license.entity'
+import { LicensedItem } from './licensed-item/licensed-item.entity'
+import { License } from './license/license.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
@@ -21,22 +26,31 @@ import { Asset } from './user-file/asset.entity'
 import { Challenge } from './challenge/challenge.entity'
 import { AdminGroup } from './admin-group/admin-group.entity'
 import { AdminMembership } from './admin-membership/admin-membership.entity'
+import { ChallengeResource } from './challenge/challenge-resource.entity'
+import { Comparison } from './comparison/comparison.entity'
 
 const entities = {
+  AcceptedLicense,
   AdminGroup,
   AdminMembership,
   App,
+  AppSeries,
+  Workflow,
   Asset,
   Challenge,
+  ChallengeResource,
   Comment,
+  Comparison,
   DbCluster,
   EmailNotification,
+  Event,
   Expert,
   ExpertAnswer,
   ExpertQuestion,
   Folder,
   Job,
-  Event,
+  License,
+  LicensedItem,
   Node,
   Organization,
   Space,
@@ -48,11 +62,19 @@ const entities = {
   UserFile,
 }
 
+export * as acceptedLicense from './accepted-license'
+
 export * as adminGroup from './admin-group'
+
+export * as spaceEvent from './space-event'
 
 export * as app from './app'
 
+export * as workflow from './workflow'
+
 export * as job from './job'
+
+export * as license from './license'
 
 export * as user from './user'
 
@@ -74,20 +96,32 @@ export * as dbCluster from './db-cluster'
 
 export * as space from './space'
 
+export * as spaceMembership from './space-membership'
+
+export * as challenge from './challenge'
+
+
 export {
   entities,
+  AcceptedLicense,
   AdminGroup,
   AdminMembership,
   App,
+  AppSeries,
+  Workflow,
   Asset,
   Challenge,
+  ChallengeResource,
   Comment,
+  Comparison,
   DbCluster,
   Expert,
   ExpertAnswer,
   ExpertQuestion,
   Folder,
   Job,
+  License,
+  LicensedItem,
   Node,
   Organization,
   Space,

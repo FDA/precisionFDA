@@ -1,29 +1,31 @@
+import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
-import { StringParam, useQueryParam } from 'use-query-params'
+import useWebSocket from 'react-use-websocket'
+import { useQueryParam } from 'use-query-params'
 import {
   BreadcrumbDivider,
   BreadcrumbLabel,
-  StyledBreadcrumbs
+  StyledBreadcrumbs,
 } from '../../../components/Breadcrumb'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
-  ActionsRow,
-  LoadingList,
-  QuickActions,
+  ActionsRow, QuickActions,
   StyledHomeTable,
-  StyledPaginationSection
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
@@ -39,16 +41,15 @@ type ListType = { files: IFile[]; meta: IMeta }
 export const FileList = ({ scope, space, showFolderActions = false }: { scope?: ResourceScope, space?: ISpace, showFolderActions?: boolean }) => {
   const { path } = useRouteMatch()
   const location = useLocation()
+  const queryCache = useQueryClient()
   
-  const [folderIdParam, setFolderIdParam] = useQueryParam(
+  const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>(
     'folder_id',
-    StringParam,
   )
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
   const history = useHistory()
-  const onRowClick = (id: string) => history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
 
   const {
     setPerPageParam,
@@ -74,12 +75,34 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     },
   })
 
+  const onRowClick = (id: string) => {
+    history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
+  }
+
+  const { lastJsonMessage } = useWebSocket(getNodeWsUrl(), 
+  { share: true, reconnectInterval: DEFAULT_RECONNECT_INTERVAL, 
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS, shouldReconnect: () => true })
+
+  useEffect(() => {
+    if (lastJsonMessage != null) {
+      const notification = JSON.parse(JSON.stringify(lastJsonMessage))
+      if (['NODES_REMOVED', 'NODES_COPIED'].includes(notification.action)) {
+        queryCache.invalidateQueries(['files'])
+        queryCache.invalidateQueries(['counters'])
+      }
+    }
+  }, [lastJsonMessage])
+
   const { status, data, error } = query
 
-  const onFolderClick = async (folderId: string) => {
+  const onFolderClick = (folderId: string) => {
     resetSelected()
-    setFolderIdParam(folderId, 'pushIn')
-    setPageParam(1, 'replaceIn')
+    const search = new URLSearchParams(cleanObject({
+      folder_id: folderId,
+      scope: scope as string,
+      per_page: perPageParam.toString(),
+    })).toString()
+    history.push({ search })
   }
 
   // If the component is rendering for the first time, skip setting folderIdParam
@@ -101,11 +124,12 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const actions = useFilesSelectActions({
     scope,
     space,
-    fileId: folderIdParam!,
+    folderId: folderIdParam,
     selectedItems: selectedObjects,
     resetSelected,
     resourceKeys: ['files'],
   })
+  
   delete actions['Comments']
   delete actions['Request license approval']
   if(scope) {
@@ -165,7 +189,6 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         </ActionsRow>
         <ActionsRow>
           {breadcrumbs(path, data?.meta?.path, scope)}
-          {status === 'loading' && <LoadingList>Loading...</LoadingList>}
         </ActionsRow>
       </div>
 
@@ -184,25 +207,23 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        shouldResetFilters={[folderIdParam, scope]}
       />
       
-      <StyledPaginationSection>
+      <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.current_page!}
-          totalCount={data?.meta?.pagination?.total_count!}
-          totalPages={data?.meta?.pagination?.total_pages!}
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.files?.length,
-            data?.meta?.pagination?.total_pages,
-            )}
-            isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-            isNextData={data?.meta?.pagination?.next_page! !== null}
-            setPage={setPageParam}
-            onPerPageSelect={setPerPageParam}
-          />
-      </StyledPaginationSection>
+          isHidden={false}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+        />
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
 
       {listActions['Add Folder']?.modal}
       {listActions['Add Files']?.modal}
@@ -221,6 +242,8 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Lock']?.modal}
+      {actions['Unlock']?.modal}
     </ErrorBoundary>
   )
 }
@@ -267,7 +290,9 @@ export const FilesListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  shouldResetFilters = [],
 }: {
+  shouldResetFilters?: any[]
   isAdmin: boolean
   filters: IFilter[]
   files?: IFile[]
@@ -331,7 +356,7 @@ export const FilesListTable = ({
         sortByPreference={sortBy}
         manualFilters
         filters={filters}
-        shouldResetFilters={scope as any}
+        shouldResetFilters={shouldResetFilters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no files here.</EmptyTable>}
         isColsResizable

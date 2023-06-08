@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useMemo } from 'react'
+import styled from 'styled-components'
 import { Button } from '../../../../components/Button'
 import { DownloadIcon } from '../../../../components/icons/DownloadIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
@@ -9,12 +10,17 @@ import {
   StyledAction,
   StyledName,
 } from '../../../../components/ResourceTable'
-import { Modal } from '../../../modal'
-import { useModal } from '../../../modal/useModal'
 import { itemsCountString } from '../../../../utils/formatting'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
+import { useModal } from '../../../modal/useModal'
 import { IAsset } from '../assets.types'
 
-export function useDownloadAssetsModal(selectedFiles: IAsset[]){
+const StyledAssetsList = styled.div`
+  padding-left: 16px;
+`
+
+export function useDownloadAssetsModal(selectedFiles: IAsset[]) {
   const { isShown, setShowModal } = useModal()
   const handleDownloadClick = (item: IAsset) => {
     if (item.links.download) {
@@ -25,36 +31,56 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]){
 
   const memoSelected = useMemo(() => selectedFiles, [isShown])
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-assets-download"
-      headerText={`Download ${itemsCountString('asset', memoSelected.length)}?`}
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
-      footer={<Button onClick={() => setShowModal(false)}>Cancel</Button>}
     >
-      <ResourceTable
-        rows={memoSelected.map((s, i) => ({
-            name: (
-              <StyledName key={`${i}-name`} href={s.links.show} target="_blank">
-                <VerticalCenter>
-                  <FileIcon />
-                </VerticalCenter>
-                {s.name}
-              </StyledName>
-            ),
-            action: (
-              <StyledAction
-                key={`${i}-action`}
-                onClick={() => handleDownloadClick(s)}
-              >
-                <DownloadIcon />
-                Download
-              </StyledAction>
-            ),
-          }))}
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Download ${itemsCountString(
+          'asset',
+          memoSelected.length,
+        )}?`}
+        hide={() => setShowModal(false)}
       />
-    </Modal>
+      <ModalScroll>
+        <StyledAssetsList>
+          <ResourceTable
+            rows={memoSelected.map((s, i) => ({
+              name: (
+                <StyledName
+                  key={`${i}-name`}
+                  data-turbolinks="false"
+                  href={s.links.show}
+                  target="_blank"
+                >
+                  <VerticalCenter>
+                    <FileIcon />
+                  </VerticalCenter>
+                  {s.name}
+                </StyledName>
+              ),
+              action: (
+                <StyledAction
+                  key={`${i}-action`}
+                  onClick={() => handleDownloadClick(s)}
+                >
+                  <DownloadIcon />
+                  Download
+                </StyledAction>
+              ),
+            }))}
+          />
+        </StyledAssetsList>
+      </ModalScroll>
+      <Footer>
+        <ButtonRow>
+          <Button onClick={() => setShowModal(false)}>Cancel</Button>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

@@ -40,7 +40,7 @@ export class JobFinishedEmailHandler
     // JOB IS PRIVATE
     const owner = await this.ctx.em.findOneOrFail(
       User,
-      { id: this.ctx.user.id },
+      { id: this.job.user.id },
       { populate: ['emailNotificationSettings'] },
     )
 

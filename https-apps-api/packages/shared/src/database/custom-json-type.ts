@@ -10,7 +10,7 @@ import { JsonType } from '@mikro-orm/core'
 // @Property({ type: WorkaroundJsonType })
 export class WorkaroundJsonType extends JsonType {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  convertToJSValue(value, platform) {
+  convertToJSValue(value: any, platform: any) {
     if (typeof value === 'string') {
       return JSON.parse(value);
     }

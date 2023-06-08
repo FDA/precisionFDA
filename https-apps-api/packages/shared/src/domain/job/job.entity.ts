@@ -4,11 +4,11 @@ import {
   Filter,
   IdentifiedReference,
   JsonType,
-  OnInit,
   ManyToOne,
   PrimaryKey,
   Property,
   Reference,
+  OnLoad,
 } from '@mikro-orm/core'
 import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
@@ -177,7 +177,7 @@ export class Job extends BaseEntity {
 
   // TODO(samuel) standardize or refactor this
   // TODO(samuel) investigate mikro-orm docs if this is the optimal way to load entities
-  @OnInit()
+  @OnLoad()
   initDescribeFields() { this.parseJobDescribe() }
 
   // Properties extracted from job describe

@@ -16,12 +16,19 @@ export const LeftColumn = styled.div`
 `
 
 export const RightColumn = styled.div`
-  padding: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
   min-width: 320px;
   flex: 1 1 auto;
+  padding: 32px 16px;
+`
+
+export const ChallengeThumbnail = styled.img`
+  height: 180px;
+  object-fit: contain;
+  overflow: hidden;
+  box-shadow: 0px 0px 16px #000;
 `
 
 export const StyledChallengeDetailsBanner = styled(PageContainer)`
@@ -33,6 +40,10 @@ export const StyledChallengeDetailsBanner = styled(PageContainer)`
 
   @media (min-width: ${breakPoints.medium}px) {
     flex-direction: row;
+
+    ${RightColumn} {
+      padding: 0 16px;
+    }
   }
 `
 
@@ -48,13 +59,8 @@ export const ChallengeDescription = styled.p`
   color: ${theme.colors.textWhite};
   margin-top: ${theme.padding.contentMargin};
 `
-
-export const ChallengeThumbnail = styled.img`
-  width: ${theme.sizing.thumbnailWidth};
-  height: ${theme.sizing.thumbnailHeight};
-  object-fit: contain;
-  overflow: hidden;
-  box-shadow: 0px 0px 16px #000;
+export const NoInfo = styled.div`
+  margin-bottom: 24px;
 `
 
 export const ChallengeStateLabel = styled.span<{timeStatus: TimeStatus}>`
@@ -175,4 +181,53 @@ export const CallToActionButton = styled(ButtonSolidBlue)`
   display: block;
   width: 100%;
   margin-bottom: 0px;
+`
+
+export const StyledChallengeSubmissionsTable = styled.div`
+  overflow-x: auto;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    border: none;
+
+    thead {
+      border: 2px solid #d8d8d8;
+      border-right: none;
+      border-left: none;
+    }
+
+    thead tr {
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      border-right: 0;
+    }
+
+    tbody tr {
+      border-bottom: 2px solid #dddddd;
+      border-right: 0;
+    }
+
+    tbody tr:nth-of-type(even) {
+      background-color: #f3f3f3;
+    }
+
+    tbody tr:last-of-type {
+    }
+
+    tbody tr.active-row {
+      font-weight: bold;
+    }
+
+    .state-cell {
+      padding: 0;
+    }
+  }
 `

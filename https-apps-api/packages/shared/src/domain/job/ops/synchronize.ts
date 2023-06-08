@@ -82,7 +82,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // todo: check users ownership -> we should have a helper for it
     this.job = job
     this.user = user
-    this.client = new PlatformClient(this.ctx.log)
+    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Processing job')
 
     if (!shouldSyncStatus(job)) {
@@ -96,7 +96,6 @@ export class SyncJobOperation extends WorkerBaseOperation<
     try {
       platformJobData = await this.client.jobDescribe({
         jobId: input.dxid,
-        accessToken: this.ctx.user.accessToken,
       })
     } catch (err) {
       if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {

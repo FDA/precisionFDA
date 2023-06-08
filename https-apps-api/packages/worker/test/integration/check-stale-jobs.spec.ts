@@ -30,7 +30,7 @@ describe('TASK: check-stale-jobs', () => {
     // probably not needed
     // await emptyDefaultQueue()
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.createAdmin(em)
     app = create.appHelper.createHTTPS(em, { user })

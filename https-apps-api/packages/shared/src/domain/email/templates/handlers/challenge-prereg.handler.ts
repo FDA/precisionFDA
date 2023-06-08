@@ -51,7 +51,7 @@ export class ChallengePreregEmailHandler
     let users: User[]
     if (this.validatedInput.scope === STATIC_SCOPE.PUBLIC) {
       // all active users
-      users = await userRepo.findActive({ populate: ['emailNotificationSettings'] })
+      users = await userRepo.findActive({ populate: ['emailNotificationSettings'] as never[] })
     } else if (isValidScopeName(this.validatedInput.scope)) {
       // find space, memberships, inform only those users
       const spaceId = getIdFromScopeName(this.validatedInput.scope)
@@ -62,7 +62,7 @@ export class ChallengePreregEmailHandler
       )
       // todo: should filter out active users as well .. probably redundant (if they can be added to space)
       users = memberships.map(
-        (m: SpaceMembership & { user: LoadedReference<User, User> }): User => m.user.unwrap(),
+        (m: SpaceMembership & { user: LoadedReference<User> }): User => m.user.unwrap(),
       )
     } else {
       throw new InternalError(`Scope name ${this.validatedInput.scope} is not processable`)

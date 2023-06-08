@@ -1,5 +1,5 @@
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
@@ -26,20 +26,21 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { ResourceScope } from '../types'
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
+import { ResourceScope } from '../types'
+import { getScopeMapping } from '../getScopeMapping'
 
-const renderOptions = (db: IDatabase) => (
+const renderOptions = (db: IDatabase, scope: ResourceScope) => (
   <MetadataSection>
     <MetadataRow>
       <MetadataItem>
         <MetadataKey>Location</MetadataKey>
         <MetadataVal>
           {db.location && (
-            <Link target="_blank" to="/home/databases">
-              {db.location}
+            <Link target="_blank" to={`/home/databases?scope=${scope?.toLowerCase()}`}>
+              {scope === 'featured' ? 'Featured' : db.location}
             </Link>
           )}
         </MetadataVal>
@@ -129,7 +130,7 @@ const DetailActionsDropdown = ({
   )
 }
 
-export const DatabaseShow = ({ scope }: { scope: ResourceScope }) => {
+export const DatabaseShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
   const { dxid } = useParams<{ dxid: string }>()
   const { data, status, isLoading, refetch, isFetching } = useQuery(
     ['dbclusters', dxid],
@@ -149,6 +150,11 @@ export const DatabaseShow = ({ scope }: { scope: ResourceScope }) => {
         </div>
       </NotFound>
     )
+
+  const scope = getScopeMapping(db.scope, db.featured)
+  if (emitScope) {
+    emitScope(scope)
+  }
 
   return (
     <>
@@ -177,7 +183,7 @@ export const DatabaseShow = ({ scope }: { scope: ResourceScope }) => {
           </HeaderRight>
         </Header>
 
-        {renderOptions(db)}
+        {renderOptions(db, scope)}
         <MetadataSection>
           {db.tags.length > 0 && (
             <StyledTags>

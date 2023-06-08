@@ -1,12 +1,13 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Key } from 'rc-tree/lib/interface'
 import React, { useMemo, useState } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { useImmer } from 'use-immer'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { displayPayloadMessage } from '../../../../utils/api'
-import { Modal } from '../../../modal'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { ResourceScope } from '../../types'
 import { fetchFolderChildren, moveFilesRequest } from '../files.api'
@@ -31,7 +32,7 @@ const OrganizeFiles = ({
   onSelect,
 }: {
   scope?: ResourceScope
-  spaceId?: string,
+  spaceId?: string
   onSelect: (folerId: Key[]) => void
 }) => {
   const [treeData, setTreeData] = useImmer<any>([
@@ -42,7 +43,11 @@ const OrganizeFiles = ({
     <FileTree
       onExpand={d => {}}
       loadData={async node => {
-        const { nodes } = await fetchFolderChildren(scope === 'me' ? 'private' : 'public', spaceId, node.key.toString())
+        const { nodes } = await fetchFolderChildren(
+          scope === 'me' ? 'private' : 'public',
+          spaceId,
+          node.key.toString(),
+        )
         const children = nodes
           .filter((e: any) => e.type === 'Folder')
           .map((d: any) => ({
@@ -83,12 +88,13 @@ export const useOrganizeFileModal = ({
   const { isShown, setShowModal } = useModal()
   const selectedIds = selected.map(f => f.id)
   const mutation = useMutation({
+    mutationKey: ['movie-files'],
     mutationFn: (target: string) =>
       moveFilesRequest(selectedIds, target, scope, spaceId),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries('files')
+    onSuccess: res => {
+      queryClient.invalidateQueries(['files'])
       setShowModal(false)
-      if(onSuccess) onSuccess()
+      if (onSuccess) onSuccess()
       displayPayloadMessage(res)
     },
     onError: () => {
@@ -108,33 +114,48 @@ export const useOrganizeFileModal = ({
     }
   }
 
-  const modalComp = (
-    <Modal
-      data-testid="modal-files-organize"
-      headerText={`Move ${momoSelected.length} items(s)`}
-      isShown={isShown}
+  const modalComp = isShown && (
+    <ModalNext
       hide={() => setShowModal(false)}
-      footer={
-        <>
-          <Button type="button" onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
+      isShown={isShown}
+      disableClose={false}
+      data-testid="modal-files-organize"
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Move ${momoSelected.length} items(s)`}
+        hide={() => setShowModal(false)}
+      />
+      <ModalScroll>
+        <StyledForm as="div">
+          <OrganizeFiles
+            spaceId={spaceId}
+            scope={scope}
+            onSelect={s => {
+              handleSelect(s[0]?.toString())
+            }}
+          />
+        </StyledForm>
+      </ModalScroll>
+      <Footer>
+        <ButtonRow>
+          <Button
+            type="button"
+            onClick={() => setShowModal(false)}
+            disabled={mutation.isLoading}
+          >
             Cancel
           </Button>
-          <ButtonSolidBlue type="submit" onClick={handleSubmit} disabled={mutation.isLoading || !selectedTarget}>
+          <ButtonSolidBlue
+            type="submit"
+            onClick={handleSubmit}
+            disabled={mutation.isLoading || !selectedTarget}
+          >
             Move
           </ButtonSolidBlue>
-        </>
-      }
-    >
-      <StyledForm as="div">
-        <OrganizeFiles
-          spaceId={spaceId}
-          scope={scope}
-          onSelect={s => {
-            handleSelect(s[0]?.toString())
-          }}
-        />
-      </StyledForm>
-    </Modal>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

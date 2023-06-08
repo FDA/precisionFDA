@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Prompt } from 'react-router'
 import styled from 'styled-components'
@@ -12,9 +12,8 @@ import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
 import { MutationErrors } from '../../../types/utils'
-import { Modal } from '../../modal'
-import { Content } from '../../modal/styles'
 import { Challenge } from '../types'
+import { ChallengeCreateUpdateModal } from './ChallengeCreateUpdateModal'
 import { createValidationSchema, editValidationSchema } from './common'
 import { GuestLeadUserSelect } from './GuestLeadUserSelect'
 import { HostLeadUserSelect } from './HostLeadUserSelect'
@@ -59,19 +58,33 @@ const Row = styled.div`
   gap: 16px;
 `
 
+function getBase64(file?: File, callback?: (a: string | null) => void) {
+  if (file) {
+    const reader = new FileReader()
+    reader.addEventListener(
+      'load',
+      () => callback && callback(reader.result as string),
+    )
+    reader.readAsDataURL(file)
+  }
+}
+
 export const ChallengeForm = ({
   challenge,
   defaultValues = {},
   onSubmit,
-  isSavingChallenge = false,
+  onImageSelection,
+  isSaving = false,
   mutationErrors,
 }: {
   challenge?: Challenge
   defaultValues?: any
   onSubmit: (a: any) => Promise<any>
-  isSavingChallenge?: boolean
+  onImageSelection?: (img: File) => Promise<any>
+  isSaving?: boolean
   mutationErrors?: MutationErrors
 }) => {
+  const [base64Image, setBase64Image] = React.useState<string | null>(null)
   const isEditMode = !!challenge
   const ended = isEditMode
     ? new Date().getTime() > new Date(challenge.end_at).getTime()
@@ -82,6 +95,7 @@ export const ChallengeForm = ({
     register,
     handleSubmit,
     setError,
+    watch,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<CreateChallengeForm>({
     mode: 'onBlur',
@@ -105,6 +119,15 @@ export const ChallengeForm = ({
       ...defaultValues,
     },
   })
+
+  const img = watch().cardImage
+
+  useEffect(() => {
+    if (img?.[0] != null) {
+      if (onImageSelection) onImageSelection(img[0])
+      getBase64(img?.[0], setBase64Image)
+    }
+  }, [watch().cardImage])
 
   useMutationErrorEffect(setError, mutationErrors)
 
@@ -147,6 +170,34 @@ export const ChallengeForm = ({
               name="description"
               render={({ message }) => <InputError>{message}</InputError>}
             />
+          </FieldGroup>
+
+          <FieldGroup>
+            <label>Challenge image (required):</label>
+            {(base64Image || challenge?.card_image_url) && (
+              <img
+                width={300}
+                src={base64Image || challenge?.card_image_url || undefined}
+                alt="challenge card"
+              />
+            )}
+
+            <>
+              <InputText
+                label="cardImage"
+                type="file"
+                accept="image/*"
+                {...register('cardImage')}
+                disabled={isSubmitting}
+              />
+              <ErrorMessage
+                errors={errors}
+                name="cardImage"
+                render={({ message }) => <InputError>{message}</InputError>}
+              />
+            </>
+
+            {/* disabled changing image for edit mode */}
           </FieldGroup>
 
           <FieldGroup>
@@ -265,33 +316,6 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Challenge image (required):</label>
-            {isEditMode ? (
-              <img
-                width={300}
-                src={challenge.card_image_url || undefined}
-                alt="challenge card"
-              />
-            ) : (
-              <>
-                <InputText
-                  label="cardImage"
-                  type="file"
-                  accept="image/*"
-                  {...register('cardImage')}
-                  disabled={isSubmitting || isEditMode}
-                />
-                <ErrorMessage
-                  errors={errors}
-                  name="cardImage"
-                  render={({ message }) => <InputError>{message}</InputError>}
-                />
-              </>
-            )}
-            {/* disabled changing image for edit mode */}
-          </FieldGroup>
-
-          <FieldGroup>
             <label>Status (required):</label>
             <Controller
               name="status"
@@ -329,7 +353,7 @@ export const ChallengeForm = ({
           </FieldGroup>
           <Row>
             <ButtonSolidBlue
-              disabled={Object.keys(errors).length > 0 || isSubmitting}
+              disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
             >
               Submit
@@ -338,19 +362,7 @@ export const ChallengeForm = ({
           </Row>
         </StyledForm>
       </div>
-      <Modal
-        isShown={isSavingChallenge}
-        hide={() => null}
-        headerText={
-          isEditMode ? 'Updating challenge' : 'Creating new challenge'
-        }
-        disableClose
-      >
-        <Content>
-          The challenge is being {isEditMode ? 'updated' : 'created'}, please
-          wait until this message disappears
-        </Content>
-      </Modal>
+      <ChallengeCreateUpdateModal isEditMode={isEditMode} isSaving={isSaving} />
     </>
   )
 }

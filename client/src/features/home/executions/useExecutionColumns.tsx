@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLocation, useRouteMatch } from 'react-router'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
@@ -12,9 +12,10 @@ import {
   SelectColumnFilter,
 } from '../../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { getSpaceIdFromScope } from '../../../utils'
 import { StyledLinkCell } from '../home.styles'
 import { KeyVal } from '../types'
-import { getBasePath, getSpaceIdFromScope } from '../utils'
+import { getBasePath } from '../utils'
 import { IExecution } from './executions.types'
 
 export const useExecutionColumns = ({
@@ -49,7 +50,7 @@ export const useExecutionColumns = ({
               return <div>{props.row.original.state}</div>
 
           },
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
         },
         {
           Header: 'Execution Name',
@@ -74,11 +75,11 @@ export const useExecutionColumns = ({
                 </StyledLinkCell>
               )
             },
-            ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {},
+            ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {}),
           },
         {
           Header: 'Workflow',
-          id: 'workflow',
+          id: 'workflow_title',
           accessor: 'workflow_title',
           Filter: DefaultColumnFilter,
           width: colWidths?.workflow_title || 200,
@@ -94,7 +95,7 @@ export const useExecutionColumns = ({
               </StyledLinkCell>
             )
           },
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-workflow-title` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-workflow-title` } : {}),
         },
         {
           Header: 'Featured',
@@ -110,7 +111,7 @@ export const useExecutionColumns = ({
               <FeaturedToggle disabled={!isAdmin} resource="jobs" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['jobs'])} />
             </div>
           ),
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-featured` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-featured` } : {}),
         },
         {
           Header: 'App Title',
@@ -130,7 +131,7 @@ export const useExecutionColumns = ({
               </StyledLinkCell>
             )
           },
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-app-title` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-app-title` } : {}),
         },
         {
           Header: 'Launched By',
@@ -138,9 +139,9 @@ export const useExecutionColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.launched_by || 200,
           Cell: props => (
-            <a href={props.row.original.links.user ?? '#'}>{props.value}</a>
+            <a data-turbolinks="false" href={props.row.original.links.user ?? '#'}>{props.value}</a>
           ),
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {}),
         },
         {
           Header: 'Location',
@@ -153,7 +154,7 @@ export const useExecutionColumns = ({
               {props.value}
             </StyledLinkCell>
           ),
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-location` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-location` } : {}),
         },
         {
           Header: 'Instance Type',
@@ -168,7 +169,7 @@ export const useExecutionColumns = ({
             ) : (
               <>{props.row.original.instance_type}</>
             ),
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {}),
         },
         {
           Header: 'Duration',
@@ -185,7 +186,7 @@ export const useExecutionColumns = ({
               return <>{props.row.original.duration}</>
 
           },
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {}),
         },
         {
           Header: 'Cost',
@@ -203,7 +204,7 @@ export const useExecutionColumns = ({
               return <>{props.row.original.energy_consumption}</>
 
           },
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {}),
         },
         {
           Header: 'Launched On',
@@ -211,7 +212,7 @@ export const useExecutionColumns = ({
           disableFilters: true,
           width: colWidths?.launched_on || 198,
           Cell: props => props.row.original.launched_on === null ? props.row.original.created_at_date_time : props.row.original.launched_on,
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {}),
         },
         {
           Header: 'Tags',
@@ -226,7 +227,7 @@ export const useExecutionColumns = ({
                 ))}
               </StyledTags>
             ),
-          ...filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {},
+          ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {}),
         },
       ] as Column<IExecution>[],
     [location.search],

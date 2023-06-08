@@ -1,14 +1,14 @@
+import { useMutation } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { checkStatus, getApiRequestOpts } from '../../../utils/api'
-import { Modal } from '../../modal'
-import { ButtonRow } from '../../modal/styles'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { APIResource } from '../types'
 import { RequestResponse } from './useFeatureMutation'
@@ -53,7 +53,7 @@ const EditTagsForm = ({
   resource: APIResource
   uid: string
   tags: string[]
-  onSuccess?: (res:any) =>void
+  onSuccess?: (res: any) => void
   setShowModal?: (show: boolean) => void
 }) => {
   const { register, handleSubmit } = useForm<FormInputs>({
@@ -63,10 +63,11 @@ const EditTagsForm = ({
   })
 
   const mutation = useMutation({
+    mutationKey: ['edit-resource-tags', resource],
     mutationFn: (tags: string) => editTagsRequest({ uid, tags }),
-    onSuccess: (res) => {
-      if(onSuccess) onSuccess(res)
-      if(setShowModal) setShowModal(false)
+    onSuccess: res => {
+      if (onSuccess) onSuccess(res)
+      if (setShowModal) setShowModal(false)
       toast.success(`Success: ${resource} editing tags`)
     },
     onError: () => {
@@ -79,56 +80,77 @@ const EditTagsForm = ({
   }
 
   return (
-    <StyledForm onSubmit={(e) => {
-        e.stopPropagation()
-        handleSubmit(onSubmit)(e)
-      }}>
-      <StyledSubtext>Tags are public to the community</StyledSubtext>
-      <FieldGroup>
-        <label>Tags (comma-separated)</label>
-        <InputText {...register('tags')} disabled={mutation.isLoading} />
-      </FieldGroup>
-      <ButtonRow>
-        <Button type="button" onClick={() => setShowModal && setShowModal(false)} disabled={mutation.isLoading}>
-          Cancel
-        </Button>
-        <ButtonSolidBlue type="submit" disabled={mutation.isLoading}>
-          Edit Tags
-        </ButtonSolidBlue>
-      </ButtonRow>
-    </StyledForm>
+    <>
+      <StyledForm
+        id="edit-tag-form"
+        onSubmit={e => {
+          e.stopPropagation()
+          handleSubmit(onSubmit)(e)
+        }}
+      >
+        <StyledSubtext>Tags are public to the community</StyledSubtext>
+        <FieldGroup>
+          <label>Tags (comma-separated)</label>
+          <InputText {...register('tags')} disabled={mutation.isLoading} />
+        </FieldGroup>
+      </StyledForm>
+      <Footer>
+        <ButtonRow>
+          <Button
+            type="button"
+            onClick={() => setShowModal && setShowModal(false)}
+            disabled={mutation.isLoading}
+          >
+            Cancel
+          </Button>
+          <ButtonSolidBlue
+            type="submit"
+            form="edit-tag-form"
+            disabled={mutation.isLoading}
+          >
+            Edit Tags
+          </ButtonSolidBlue>
+        </ButtonRow>
+      </Footer>
+    </>
   )
 }
 
-export function useEditTagsModal<T extends { uid: string; name: string, tags: string[] }>({
+export function useEditTagsModal<
+  T extends { uid: string; name: string; tags: string[] },
+>({
   resource,
   selected,
   onSuccess,
 }: {
   resource: APIResource
   selected: T
-  onSuccess?: (res:any) => void
+  onSuccess?: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid={`modal-${resource}-edit-tags`}
-      headerText={`Edit tags for ${mSelected?.name}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
-      {selected && (
-      <EditTagsForm
-        resource={resource}
-        onSuccess={onSuccess}
-        uid={selected.uid}
-        setShowModal={setShowModal}
-        tags={selected.tags}
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Edit tags for ${mSelected?.name}`}
+        hide={() => setShowModal(false)}
       />
+      {selected && (
+        <EditTagsForm
+          resource={resource}
+          onSuccess={onSuccess}
+          uid={selected.uid}
+          setShowModal={setShowModal}
+          tags={selected.tags}
+        />
       )}
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
 import { App, Folder, Job, Tag, User, UserFile } from '@pfda/https-apps-shared/src/domain'
-import { PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
+import { PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
@@ -19,7 +19,7 @@ describe('POST /folders/recreate', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { privateFilesProject: generate.random.dxstr() })
     // app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
@@ -75,10 +75,9 @@ describe('POST /folders/recreate', () => {
     await em.flush()
     const localSubfolder = create.filesHelper.createLocalOnlyFolder(
       em,
-      { user },
+      { user, parentFolder: localFolder },
       {
         parentId: user.id,
-        parentFolderId: localFolder.id,
       },
     )
     await em.flush()

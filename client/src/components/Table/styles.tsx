@@ -37,6 +37,7 @@ export const StyledRowActionComponent = styled.div`
 type ReactTableStylesProps = {
   shouldFillWidth?: boolean
   shouldAllowScrollbar?: boolean
+  stickyHeaders?: boolean
 }
 export const ReactTableStyles = styled.div<ReactTableStylesProps>`
   .sort {
@@ -81,10 +82,10 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
     }
   }
 
-  .tableWrap {
+  /* .tableWrap {
     overflow-x: scroll;
     overflow-y: hidden;
-  }
+  } */
 
   .table {
     .thead {
@@ -162,7 +163,14 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
 
     &.sticky {
       .thead{
-        ${({ shouldFillWidth }) => !shouldFillWidth && 'width: fit-content;'} 
+        ${({ shouldFillWidth }) => !shouldFillWidth && 'width: fit-content;'}
+          position: sticky;
+          background-color: white;
+          top: 0px;
+          z-index: 2;
+        &.filters {
+          top: 43px;
+        }
       }
 
       .tbody {

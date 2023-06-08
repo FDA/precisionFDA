@@ -121,7 +121,7 @@ Sync workstation files
 `curl -sk --request PATCH "https://localhost:3001/jobs/$JOB_ID/syncFiles?$USER_CONTEXT"`
 
 Send email
-`curl -sk --request PATCH "https://localhost:3001/email/$EMAIL_ID/?$USER_CONTEXT"`
+`curl -sk --request POST "https://localhost:3001/emails/$EMAIL_ID/send?$USER_CONTEXT"`
 
 Start user checkup task
 `curl -sk "https://localhost:3001/account/checkup?$USER_CONTEXT" | python -m json.tool`
@@ -133,3 +133,10 @@ Debug jobs in bull queue
 `curl -sk "https://localhost:3001/debug/queue?$USER_CONTEXT" | python -m json.tool`
 
 `curl -sk "https://localhost:3001/debug/queue/job/$BULLJOB_ID?$USER_CONTEXT" | python -m json.tool`
+
+
+Cleanup bull queue. If redis is filled up due to failed email jobs, try cleaning up the queue to remove these dead entries
+This command returns a list of the removed jobs.
+
+`curl -sk "https://localhost:3001/debug/queue/cleanup?$USER_CONTEXT" | python -m json.tool`
+

@@ -1,44 +1,39 @@
 {
   "name": "@pfda/https-apps-api",
   "version": "1.0.0",
-  "main": "dist/index",
-  "types": "dist/index",
   "files": [
     "dist"
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=12.22.10",
-    "npm": "^6.14.0"
+    "node": ">=18.9.1",
+    "npm": "^8.19.1"
   },
   "scripts": {
+    "dev": "wds --esbuild -w ./src/index.ts",
     "build": "npm run clean && npm run compile",
     "compile": "tsc -b tsconfig.build.json",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "uninstall": "rm -rf ./node_modules"
   },
   "dependencies": {
-    "@mikro-orm/core": "^4.5.9",
-    "@mikro-orm/mysql": "^4.5.9",
-    "@mikro-orm/reflection": "^4.5.9",
+    "@mikro-orm/core": "^5.6.3",
+    "@mikro-orm/mysql": "^5.6.3",
+    "@mikro-orm/reflection": "^5.6.3",
     "@pfda/https-apps-shared": "^1.0.0",
     "ajv": "^6.12.6",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^9.4.0",
-    "luxon": "^1.25.0",
+    "luxon": "^1.28.1",
     "nanoid": "^3.1.31",
-    "pino": "^6.7.0",
-    "pino-pretty": "^4.3.0",
-    "ramda": "^0.27.1",
-    "@types/pino": "^6.3.2"
+    "pino": "^8.9.0",
+    "pino-pretty": "^9.1.1",
+    "ramda": "^0.27.1"
   },
   "devDependencies": {
-    "@strv/eslint-config-node": "^2.2.2",
-    "@strv/eslint-config-typescript": "^2.3.0",
-    "@types/json-schema": "^7.0.6",
-    "@types/koa": "^2.11.5",
-    "@types/koa-bodyparser": "^4.3.0",
+    "@strv/eslint-config-node": "^3.2.0",
+    "@strv/eslint-config-typescript": "^3.2.0",
     "@types/chai": "^4.2.14",
     "@types/chai-as-promised": "^7.1.3",
     "@types/chance": "^1.1.0",
@@ -49,6 +44,7 @@
     "@types/koa-router": "^7.4.1",
     "@types/luxon": "^1.25.0",
     "@types/mocha": "^8.2.3",
+    "@types/pino": "^7.0.5",
     "@types/pino-http": "^5.0.5",
     "@types/ramda": "^0.27.28",
     "@types/sinon": "^9.0.8",
@@ -57,11 +53,18 @@
     "chai-as-promised": "^7.1.1",
     "chance": "^1.1.7",
     "dirty-chai": "^2.0.1",
+    "esbuild": "^0.17.5",
     "eslint": "^6.0.0",
     "mocha": "^8.4.0",
     "node-hmr": "^1.3.1",
     "prettier": "^2.1.2",
     "sinon": "^9.2.1",
-    "supertest": "^5.0.0"
+    "supertest": "^5.0.0",
+    "wds": "^0.13.2"
+  },
+  "overrides": {
+    "wds": {
+      "esbuild": "^0.17.5"
+    }
   }
 }

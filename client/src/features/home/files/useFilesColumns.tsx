@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
 import ReactTooltip from 'react-tooltip'
+import styled from 'styled-components'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import { AreaChartIcon } from '../../../components/icons/AreaChartIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
@@ -19,9 +20,18 @@ import { colors } from '../../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home.styles'
 import { KeyVal } from '../types'
 import { IFile } from './files.types'
+import { LockIcon } from '../../../components/icons/LockIcon'
 
-const markIncompleteFile = (file: IFile) =>
-  file.state === 'open' || file.state === 'closing'
+const StyledLocked = styled.div<{ isLocked: boolean }>`
+  flex: 1 0 auto;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+`
+
+const isIncompleteFile = (state: IFile['state']) =>
+  state === 'open' || state === 'closing' || state === 'removing'
 
 export const useFilesColumns = ({
   isAdmin = false,
@@ -45,45 +55,63 @@ export const useFilesColumns = ({
           accessor: 'name',
           Filter: DefaultColumnFilter,
           width: colWidths?.name || 400,
-          Cell: ({ cell, value }) => (
-            // eslint-disable-next-line react/jsx-no-useless-fragment
-            <>
-              {cell.row.original.type === 'UserFile' || cell.row.original.type === 'File' ? (
-                <>
-                  <StyledNameCell
-                    data-tip
-                    data-for={`fileNameTooltip${cell.row.original.uid}`}
-                    color={
-                      markIncompleteFile(cell.row.original)
-                        ? colors.stateLabelGrey
-                        : colors.primaryBlue
-                    }
-                    onClick={() => onFileClick(cell.row.original.uid)}
-                  >
-                    <FileIcon height={14} />
-                    {value}
-                  </StyledNameCell>
-                  {markIncompleteFile(cell.row.original) && (
-                    <ReactTooltip
-                      id={`fileNameTooltip${cell.row.original.uid}`}
-                      place="top"
-                      effect="solid"
+          styles: { display: 'relative' },
+          Cell: ({ cell, value }) => {
+            const node = cell.row.original
+            return (
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                <StyledLocked isLocked={node.locked}>
+                  {node.type === 'UserFile' || node.type === 'File' ? (
+                    <>
+                      <StyledNameCell
+                        data-tip
+                        data-for={`fileNameTooltip${node.uid}`}
+                        color={
+                          isIncompleteFile(node.state)
+                            ? colors.stateLabelGrey
+                            : colors.primaryBlue
+                        }
+                        onClick={() => onFileClick(node.uid)}
+                      >
+                        <FileIcon height={14} />
+                        {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
+
+                        {value}
+                      </StyledNameCell>
+                      {isIncompleteFile(node.state) && (
+                        <ReactTooltip
+                          id={`fileNameTooltip${node.uid}`}
+                          place="top"
+                          effect="solid"
+                        >
+                          File is in {node.state} state.
+                        </ReactTooltip>
+                      )}
+                    </>
+                  ) : (
+                    <StyledNameCell
+                      onClick={() => onFolderClick(node.id.toString())}
                     >
-                      File is in {cell.row.original.state} state.
-                    </ReactTooltip>
+                      <FolderIcon height={14} />
+                      {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
+                      {value}
+                    </StyledNameCell>
                   )}
-                </>
-              ) : (
-                <StyledNameCell
-                  onClick={() => onFolderClick(cell.row.original.id.toString())}
-                >
-                  <FolderIcon height={14} />
-                  {value}
-                </StyledNameCell>
-              )}
-            </>
-          ),
+                </StyledLocked>
+              </>
+            )
+          },
         },
+        // {
+        //   Header: 'Locked',
+        //   id: 'locked',
+        //   accessor: 'locked',
+        //   disableFilters: true,
+        //   disableSortBy: true,
+        //   width: 30,
+        //   Cell: ({ row, value }) => row.original.locked && (<LockIcon />),
+        // },
         {
           Header: 'Location',
           accessor: 'location',
@@ -130,7 +158,12 @@ export const useFilesColumns = ({
           Filter: DefaultColumnFilter,
           width: colWidths?.added_by || 198,
           Cell: ({ cell, value }) => (
-            <a href={cell.row.original.links.user || ''}>{value}</a>
+            <a
+              data-turbolinks="false"
+              href={cell.row.original.links.user || ''}
+            >
+              {value}
+            </a>
           ),
         },
         {
@@ -138,12 +171,13 @@ export const useFilesColumns = ({
           accessor: 'file_size',
           Filter: NumberRangeColumnFilter,
           width: colWidths?.file_size || 160,
-          filterPlaceholderFrom: `Min(Kb)`,
-          filterPlaceholderTo: `Max(Kb)`,
+          filterPlaceholderFrom: 'min(kb)',
+          filterPlaceholderTo: 'max(kb)',
         },
         {
           Header: 'Created',
           accessor: 'created_at_date_time',
+          sortDescFirst: true,
           disableFilters: true,
           width: colWidths?.created_at_date_time || 200,
         },
@@ -154,44 +188,43 @@ export const useFilesColumns = ({
           disableSortBy: true,
           width: colWidths?.origin || 240,
           Cell: ({ value, row }) => (
-              <>
-                {typeof value === 'object' &&
-                  row.original.links.origin_object?.origin_type ===
-                    'Job' && (
-                    <StyledLinkCell
-                      to={
-                        `/home/executions/${row.original.links.origin_object?.origin_uid}` ||
-                        '#'
-                      }
-                    >
-                      <TaskIcon height={14} />
-                      {value.text}
-                    </StyledLinkCell>
-                  )}
-                {typeof value === 'object' &&
-                  row.original.links.origin_object?.origin_type ===
-                    'Comparison' && (
-                    <StyledLinkCell to={`/home${value.href}` || '#'}>
-                      <AreaChartIcon height={16} />
-                      {value.text}
-                    </StyledLinkCell>
-                  )}
-                {typeof value === 'object' &&
-                  row.original.links.origin_object?.origin_type ===
-                    'UserFile' && (
-                    <StyledLinkCell
-                      to={
-                        `/home/files/${row.original.links.origin_object?.origin_uid}` ||
-                        '#'
-                      }
-                    >
-                      <FileIcon height={16} />
-                      {value.text}
-                    </StyledLinkCell>
-                  )}
-                {typeof value === 'string' && value}
-              </>
-            ),
+            <>
+              {typeof value === 'object' &&
+                row.original.links.origin_object?.origin_type === 'Job' && (
+                  <StyledLinkCell
+                    to={
+                      `/home/executions/${row.original.links.origin_object?.origin_uid}` ||
+                      '#'
+                    }
+                  >
+                    <TaskIcon height={14} />
+                    {value.text}
+                  </StyledLinkCell>
+                )}
+              {typeof value === 'object' &&
+                row.original.links.origin_object?.origin_type ===
+                  'Comparison' && (
+                  <StyledLinkCell to={`/home${value.href}` || '#'}>
+                    <AreaChartIcon height={16} />
+                    {value.text}
+                  </StyledLinkCell>
+                )}
+              {typeof value === 'object' &&
+                row.original.links.origin_object?.origin_type ===
+                  'UserFile' && (
+                  <StyledLinkCell
+                    to={
+                      `/home/files/${row.original.links.origin_object?.origin_uid}` ||
+                      '#'
+                    }
+                  >
+                    <FileIcon height={16} />
+                    {value.text}
+                  </StyledLinkCell>
+                )}
+              {typeof value === 'string' && value}
+            </>
+          ),
         },
         {
           Header: 'State',
@@ -206,12 +239,12 @@ export const useFilesColumns = ({
           disableSortBy: true,
           width: colWidths?.tags || 500,
           Cell: ({ value }) => (
-              <StyledTags>
-                {value.map(tag => (
-                  <StyledTagItem key={tag}>{tag}</StyledTagItem>
-                ))}
-              </StyledTags>
-            ),
+            <StyledTags>
+              {value.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+              ))}
+            </StyledTags>
+          ),
         },
       ] as Column<IFile>[],
     [location.search],

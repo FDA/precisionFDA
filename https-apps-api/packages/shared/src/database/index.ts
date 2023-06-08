@@ -16,6 +16,9 @@ const start = async (): Promise<void> => {
       // dbName: config.database.dbName,
       clientUrl: config.database.clientUrl,
       debug: config.database.debug,
+      // v5 introduced strict checking. Having this enabled would mean a lot
+      // of work, but we need to eventually reach this property to be true
+      validateRequired: false,
       // useful for mysql datetime type https://mikro-orm.io/docs/configuration#forcing-utc-timezone
       // this way, created timestamps do not depend on developer's timezone
       // useful for testing database, for example

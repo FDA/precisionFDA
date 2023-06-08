@@ -22,77 +22,68 @@ const DBCLUSTER_DESC_RES = {
   statusAsOf: 1638475661489,
 } as const
 
-const FILES_LIST_RES_ROOT = {
-  results: [
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+const FILES_LIST_RES_ROOT = [
+  {
+    project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    id: 'file-Fyzv0V00f24kgVbb3zBj1Bg9',
+    describe: {
       id: 'file-Fyzv0V00f24kgVbb3zBj1Bg9',
-      describe: {
-        id: 'file-Fyzv0V00f24kgVbb3zBj1Bg9',
-        name: 'a',
-        size: 0,
-      },
+      name: 'a',
+      size: 0,
     },
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  },
+  {
+    project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    id: 'file-Fyzqyg80f24v2BJ93yq7yF4j',
+    describe: {
       id: 'file-Fyzqyg80f24v2BJ93yq7yF4j',
-      describe: {
-        id: 'file-Fyzqyg80f24v2BJ93yq7yF4j',
-        name: 'b',
-        size: 0,
-      },
+      name: 'b',
+      size: 0,
     },
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  },
+  {
+    project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    id: 'file-Fyzqyg00f24f3qf940Pj7pfx',
+    describe: {
       id: 'file-Fyzqyg00f24f3qf940Pj7pfx',
-      describe: {
-        id: 'file-Fyzqyg00f24f3qf940Pj7pfx',
-        name: 'c',
-        size: 0,
-      },
+      name: 'c',
+      size: 0,
     },
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+  },
+  {
+    project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    id: 'file-Fyz77k80f24j1JB6332YgXKY',
+    describe: {
       id: 'file-Fyz77k80f24j1JB6332YgXKY',
-      describe: {
-        id: 'file-Fyz77k80f24j1JB6332YgXKY',
-        name: 'd',
-        size: 0,
-      },
+      name: 'd',
+      size: 0,
     },
-  ],
-  next: null,
-} as const
+  },
+] as const
 
-const FILES_LIST_RES_SNAPSHOT = {
-  results: [
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+const FILES_LIST_RES_SNAPSHOT = [
+  {
+    project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    id: 'file-Fyz76Q80f24p444q33Fg7ggz',
+    describe: {
       id: 'file-Fyz76Q80f24p444q33Fg7ggz',
-      describe: {
-        id: 'file-Fyz76Q80f24p444q33Fg7ggz',
-        name: 'snapshot',
-        size: 0,
-      },
+      name: 'snapshot',
+      size: 0,
     },
-  ],
-  next: null,
-} as const
+  },
+] as const
 
-const FILES_LIST_RES_TEST_FOLDER = {
-  results: [
-    {
-      project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+const FILES_LIST_RES_TEST_FOLDER = [
+  {
+    project: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
+    id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
+    describe: {
       id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
-      describe: {
-        id: 'file-Fyz76vj0f24xqYQ01vB7KZJY',
-        name: 'test-file',
-        size: 0,
-      },
+      name: 'test-file',
+      size: 0,
     },
-  ],
-  next: null,
-} as const
+  },
+] as const
 
 const FOLDERS_LIST_RES = {
   id: 'project-FyxxYYj0f24VYQXy4QjPG2bB',
@@ -113,7 +104,7 @@ const FILES_DESC_RES = {
   results: [
     {
       describe: {
-        id: FILES_LIST_RES_ROOT.results[0].id,
+        id: FILES_LIST_RES_ROOT[0].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -132,7 +123,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_ROOT.results[1].id,
+        id: FILES_LIST_RES_ROOT[1].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -151,7 +142,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_ROOT.results[2].id,
+        id: FILES_LIST_RES_ROOT[2].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -170,7 +161,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_ROOT.results[3].id,
+        id: FILES_LIST_RES_ROOT[3].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -189,7 +180,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_TEST_FOLDER.results[0].id,
+        id: FILES_LIST_RES_TEST_FOLDER[0].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -208,7 +199,7 @@ const FILES_DESC_RES = {
     },
     {
       describe: {
-        id: FILES_LIST_RES_SNAPSHOT.results[0].id,
+        id: FILES_LIST_RES_SNAPSHOT[0].id,
         project: 'project-foo',
         class: 'file',
         sponsored: false,
@@ -228,6 +219,32 @@ const FILES_DESC_RES = {
   ],
 } as const
 
+const FIND_MEMBERS_RES = {
+  results: [
+    {
+      id: 'user-harry.potter',
+      level: 'ADMIN',
+      projectAccess: 'ADMINISTER',
+      appAccess: true,
+      allowBillableActivities: true,
+    },
+    {
+      id: 'user-mmaltcev3',
+      level: 'MEMBER',
+      projectAccess: 'CONTRIBUTE',
+      appAccess: true,
+      allowBillableActivities: false,
+    },
+    {
+      id: 'user-randall.ebert',
+      level: 'ADMIN',
+      projectAccess: 'ADMINISTER',
+      appAccess: true,
+      allowBillableActivities: true,
+    },
+  ],
+}
+
 export {
   DBCLUSTER_DESC_RES,
   FILES_LIST_RES_ROOT,
@@ -237,5 +254,6 @@ export {
   FOLDERS_LIST_RES_MEDIUM,
   FOLDERS_LIST_RES_LARGE,
   FILES_LIST_RES_TEST_FOLDER,
+  FIND_MEMBERS_RES,
 }
 

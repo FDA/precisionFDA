@@ -32,7 +32,7 @@ type AggregatedErrorEntry = {
   path: JsonPath
 }
 
-const resolveSchemaEffectsVisitor = <SchemaT extends any>(schema: SchemaT, caughtErrors: AggregatedErrorEntry[], path: Array<string | number>) => {
+const resolveSchemaEffectsVisitor = <SchemaT extends any>(schema: SchemaT, caughtErrors: AggregatedErrorEntry[], path: Array<string | number>): any => {
   if (typeof schema === 'function') {
     try {
       return schema()

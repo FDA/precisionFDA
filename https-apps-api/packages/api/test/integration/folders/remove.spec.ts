@@ -19,7 +19,7 @@ describe('DELETE /folders/:id', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
@@ -28,7 +28,7 @@ describe('DELETE /folders/:id', () => {
     folder = create.filesHelper.createFolder(
       em,
       { user },
-      { name: 'a', project: user.privateFilesProject, parentId: job.id },
+      { name: 'a', project: user.privateFilesProject, parentId: job.id, locked: false },
     )
     await em.flush()
     mocksReset()
@@ -58,8 +58,8 @@ describe('DELETE /folders/:id', () => {
   it('removes subfolder', async () => {
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { project: folder.project, name: 'b', parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { project: folder.project, name: 'b', locked: false },
     )
     await em.flush()
     await supertest(getServer())
@@ -79,25 +79,23 @@ describe('DELETE /folders/:id', () => {
   it('removes subfolder and file in it', async () => {
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { project: folder.project, name: 'b', parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { project: folder.project, name: 'b' },
     )
     const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
     await em.flush()
     const folderFile = create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: folder },
       {
-        project: folder.project,
-        parentFolderId: folder.id,
+        project: folder.project, locked: false
       },
     )
     const subfolderFile = create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
-        project: folder.project,
-        parentFolderId: subfolder.id,
+        project: folder.project, locked: false
       },
     )
     create.tagsHelper.createTagging(
@@ -140,25 +138,23 @@ describe('DELETE /folders/:id', () => {
   it('removes subtree also with files', async () => {
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user },
-      { project: folder.project, name: 'b', parentFolderId: folder.id },
+      { user, parentFolder: folder },
+      { project: folder.project, name: 'b', locked: false },
     )
     const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
     await em.flush()
     const folderFile = create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: folder },
       {
         project: folder.project,
-        parentFolderId: folder.id,
       },
     )
     const subfolderFile = create.filesHelper.create(
       em,
-      { user },
+      { user, parentFolder: subfolder },
       {
-        project: folder.project,
-        parentFolderId: subfolder.id,
+        project: folder.project, locked: false
       },
     )
     create.tagsHelper.createTagging(

@@ -1,87 +1,37 @@
-import { format } from 'date-fns'
 import queryString from 'query-string'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
-import styled, { css } from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
+import { PageContainerMargin } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
   ButtonRow,
-  Container,
-  Content,
-  ItemBody,
   ItemButton,
-  NewsList,
-  NewsLoaderWrapper,
   PageFilterTitle,
+  PageList,
+  PageLoaderWrapper,
   PageMainBody,
   PageRow,
   RightList,
   RightSide,
   RightSideItem,
   SectionTitle,
-  Title,
 } from '../../../components/Public/styles'
+import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParams } from '../../../hooks/usePaginationState'
-import { colors } from '../../../styles/theme'
-import NavigationBar from '../../../views/components/NavigationBar/NavigationBar'
-import PublicLayout from '../../../views/layouts/PublicLayout'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { challengesYearsListRequest } from '../api'
-import { DateArea, ViewDetailsButton } from '../styles'
-import { TimeStatus } from '../types'
-import { getChallengeTimeRemaining, getTimeStatus } from '../util'
+import { getTimeStatusName, renderEmpty } from '../util'
+import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
 
-export const ChallengeListItem = styled.div`
-  display: flex;
-  gap: 32px;
-`
 
-const statusCss = css`
-  display: block;
-  position: absolute;
-  padding: 2px 4px;
-  color: white;
-  font-weight: bold;
-  font-size: 12px;
-`
-export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
-  min-width: 200px;
-  max-width: 200px;
-
-  ${props => {
-    if (props.timeStatus === 'current')
-      return css`
-        &:before {
-          ${statusCss}
-          background: ${colors.highlightGreen};
-          content: 'OPEN';
-        }
-      `
-    if (props.timeStatus === 'upcoming')
-      return css`
-        &:before {
-          ${statusCss}
-          background: ${colors.darkYellow};
-          content: 'UPCOMING';
-        }
-      `
-    if (props.timeStatus === 'ended')
-      return css`
-        &:before {
-          ${statusCss}
-          background: ${colors.darkGreyOnGrey};
-          content: 'ENDED';
-        }
-      `
-    return null
-  }}
-`
-
-export const ChallengesList = () => {
+const ChallengesList = () => {
+  usePageMeta({ title: 'Challenges - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
@@ -92,42 +42,16 @@ export const ChallengesList = () => {
   const { data, isLoading, isFetched } = useChallengesListQuery({
     year,
     time_status,
-    pagination,
+    page: pagination.pageParam,
+    perPage: pagination.perPageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(
-    'challenges-years',
-    () => challengesYearsListRequest(),
-    {
-      onError: err => {
-        console.log(err)
-      },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['challenges-years'], () => challengesYearsListRequest(), {
+    onError: err => {
+      console.log(err)
     },
-  )
+  })
 
-  const renderEmpty = () => {
-    switch (time_status) {
-      case 'current':
-      case 'upcoming':
-        return `There are no ${time_status} challenges on precisionFDA at the moment.  Check back regularly or subscribe to the mailing list to be informed of new community challenges.`
-      case 'ended':
-        return 'No ended challenges.'
-      default:
-        return 'No challenges found.'
-    }
-  }
 
-  const getTimeStatusName = (ts: TimeStatus) => {
-    switch (ts) {
-      case 'current':
-        return 'Currently Open'
-      case 'upcoming':
-        return 'Upcoming'
-      case 'ended':
-        return 'Ended'
-      default:
-        return null
-    }
-  }
 
   return (
     <PublicLayout>
@@ -136,12 +60,12 @@ export const ChallengesList = () => {
         subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."
         user={user}
       />
-      <Container>
+      <PageContainerMargin>
         <PageRow>
           {isLoading ? (
-            <NewsLoaderWrapper>
+            <PageLoaderWrapper>
               <Loader />
-            </NewsLoaderWrapper>
+            </PageLoaderWrapper>
           ) : (
             <PageMainBody>
               {time_status && (
@@ -150,47 +74,17 @@ export const ChallengesList = () => {
                 </PageFilterTitle>
               )}
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
-              <NewsList>
-                {data?.challenges.length === 0 && renderEmpty()}
+              <PageList>
+                {data?.challenges.length === 0 && renderEmpty(time_status)}
                 {data?.challenges?.map(n => (
-                  <ChallengeListItem key={n.id}>
-                    <ItemImage timeStatus={getTimeStatus(n.start_at, n.end_at)}>
-                      <img width="100%" src={n.card_image_url} alt="sf" />
-                    </ItemImage>
-                    <ItemBody>
-                      <Title>{n.name}</Title>
-                      <DateArea>
-                        <span className="challenge-date-label">Starts</span>
-                        <span className="challenge-date">
-                          {format(n.start_at, 'MM/dd/yyyy')}
-                        </span>
-                        <span>&rarr;</span>
-                        <span className="challenge-date-label">Ends</span>
-                        <span className="challenge-date">
-                          {format(n.end_at, 'MM/dd/yyyy')}{' '}
-                        </span>
-                        <div className="challenge-date-remaining">
-                          {getChallengeTimeRemaining({
-                            start_at: n.start_at,
-                            end_at: n.end_at,
-                          })}
-                        </div>
-                      </DateArea>
-                      <Content>{n.description}</Content>
-                      <div>
-                        <ViewDetailsButton as={Link} to={`/challenges/${n.id}`}>
-                          View Details &rarr;
-                        </ViewDetailsButton>
-                      </div>
-                    </ItemBody>
-                  </ChallengeListItem>
+                  <ChallengeListItem key={n.id} challenge={n} />
                 ))}
                 <Pagination
                   showPerPage={false}
                   page={data?.meta?.current_page}
                   totalCount={data?.meta?.total_count}
                   totalPages={data?.meta?.total_pages}
-                  hide={hidePagination(
+                  isHidden={hidePagination(
                     isFetched,
                     data?.challenges?.length,
                     data?.meta?.total_pages,
@@ -200,14 +94,14 @@ export const ChallengesList = () => {
                   setPage={pagination.setPageParam}
                   onPerPageSelect={pagination.setPerPageParam}
                 />
-              </NewsList>
+              </PageList>
             </PageMainBody>
           )}
           <RightSide>
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as={Link} to="/challenges/create">
+                  <ButtonSolidBlue as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
                   </ButtonSolidBlue>
                 </ButtonRow>
@@ -216,10 +110,11 @@ export const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Filter Challenges</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!time_status}>
+                <ItemButton as={Link} to="/challenges" selected={!time_status} data-turbolinks="false">
                   All
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=current"
                   selected={time_status === 'current'}
@@ -227,6 +122,7 @@ export const ChallengesList = () => {
                   Currently Open
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=upcoming"
                   selected={time_status === 'upcoming'}
@@ -234,6 +130,7 @@ export const ChallengesList = () => {
                   Upcoming
                 </ItemButton>
                 <ItemButton
+                  data-turbolinks="false"
                   as={Link}
                   to="/challenges?time_status=ended"
                   selected={time_status === 'ended'}
@@ -245,7 +142,7 @@ export const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Previous Challenges</SectionTitle>
               <RightList>
-                <ItemButton as={Link} to="/challenges" selected={!year}>
+                <ItemButton as={Link} to="/challenges" selected={!year} data-turbolinks="false">
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
@@ -253,6 +150,7 @@ export const ChallengesList = () => {
                     ?.map(y => y.toString())
                     .map(y => (
                       <ItemButton
+                        data-turbolinks="false"
                         as={Link}
                         to={`/challenges?year=${y}`}
                         key={y}
@@ -266,7 +164,7 @@ export const ChallengesList = () => {
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Other Challenges</SectionTitle>
-              <a href="/challenges/app-a-thon-in-a-box">
+              <a href="/challenges/app-a-thon-in-a-box" data-turbolinks="false">
                 App-a-thon in a Box &rarr;
               </a>
             </RightSideItem>
@@ -277,11 +175,13 @@ export const ChallengesList = () => {
                 any combination of the above that you would like to put in front
                 of the precisionFDA expert community.
               </div>
-              <Link to="/challenges/propose">Propose a Challenge &rarr;</Link>
+              <Link data-turbolinks="false" to="/challenges/propose">Propose a Challenge &rarr;</Link>
             </RightSideItem>
           </RightSide>
         </PageRow>
-      </Container>
+      </PageContainerMargin>
     </PublicLayout>
   )
 }
+
+export default ChallengesList

@@ -2,22 +2,20 @@ import { differenceWith } from 'ramda'
 import { BaseOperation } from '../../../utils'
 import { Folder } from '../folder.entity'
 import { SyncFoldersInput } from '../user-file.input'
-import {
-  getPathsToBuild,
+import { getPathsToBuild,
   folderPathsFromFolders,
   parseFoldersFromClient,
   splitFolderPath,
   createFoldersTraverse,
   detectIntersectedTraverse,
   getPathsToKeep,
-  filterDuplicities
-} from '../user-file.helper'
+  filterDuplicities,
+  getFolderPath, getParentFolders } from '../user-file.helper'
 import { User, UserFile } from '../..'
 import { errors } from '../../..'
-import { FILE_ORIGIN_TYPE } from '../user-file.enum'
+import { FILE_ORIGIN_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
-import { getFolderPath, getParentFolders } from '../user-file.helper'
 
 // todo: maybe another operation type for "can be called from another operation"
 
@@ -26,9 +24,9 @@ import { getFolderPath, getParentFolders } from '../user-file.helper'
 // Contents of newly created folders (those that exist on dx platform but not pfda) are not synchronized
 // by this operation, but it would remove files contained within deleted folders on the pfda side
 export class SyncFoldersOperation extends BaseOperation<
-  UserOpsCtx,
-  SyncFoldersInput,
-  Folder[]
+UserOpsCtx,
+SyncFoldersInput,
+Folder[]
 > {
   async run(input: SyncFoldersInput): Promise<Folder[]> {
     const em = this.ctx.em
@@ -73,8 +71,7 @@ export class SyncFoldersOperation extends BaseOperation<
           scope: input.scope,
           project: input.projectDxid,
           entityType: FILE_ORIGIN_TYPE.HTTPS,
-        }),
-      )
+        }))
       newFolders = newFolders.concat(res)
       // has to be done like this, otherwise child folders
       // do not have how to detect which one is their parent
@@ -82,11 +79,11 @@ export class SyncFoldersOperation extends BaseOperation<
       // eslint-disable-next-line no-await-in-loop
       await em.persist(res)
       await em.flush()
-      const createdFolder = res[0];
-      const parentFolders = await getParentFolders(createdFolder, repo)
+      const createdFolder = res[0]
+      const parentFolders = await getParentFolders(createdFolder)
       const folderPath = getFolderPath(parentFolders, createdFolder)
-      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_CREATED, createdFolder, folderPath, user);
-      await em.persist(folderEvent);
+      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_CREATED, createdFolder, folderPath, user)
+      await em.persist(folderEvent)
       await em.flush()
 
       this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'SyncFoldersOperation: Created new folders with names')
@@ -143,34 +140,34 @@ export class SyncFoldersOperation extends BaseOperation<
     this.ctx.log.info({
       localFolderPathsCount: newAndExistingLocalFolderPaths.length,
       remoteFolderPathsCount: remoteFolderPaths.length,
-      foldersToDelete: foldersToDelete.map(folder => folder?.name)
+      foldersToDelete: foldersToDelete.map(folder => folder?.name),
     }, 'SyncFoldersOperation: Folders to delete')
 
     // First delete the files records contained within the folders
     // Avoid doing any database queries inside the Promise.all
     // call as this can lead to a DriverException when there are too many Promises
     let filesToDelete: UserFile[] = []
-    for (let folder of foldersToDelete) {
+    for (const folder of foldersToDelete) {
       // Find files to delete in each folder
       const files = await em.find(
         UserFile,
-        { parentFolderId: folder.id },
+        { parentFolder: folder.id },
         { populate: ['taggings.tag'] },
       )
       filesToDelete = filesToDelete.concat(files)
     }
     this.ctx.log.info({
-      filesToDelete: filesToDelete,
+      filesToDelete,
     }, 'SyncFoldersOperation: Files to delete')
     em.getRepository(UserFile).removeFilesWithTags(filesToDelete)
 
     // Then delete the folders themselves
     for (const folderToDelete of foldersToDelete) {
       repo.removeWithTags(folderToDelete)
-      const parentFolders = await getParentFolders(folderToDelete, repo)
+      const parentFolders = await getParentFolders(folderToDelete)
       const folderPath = getFolderPath(parentFolders, folderToDelete)
-      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folderToDelete, folderPath, user);
-      await em.persist(folderEvent);
+      const folderEvent = await createFolderEvent(EVENT_TYPES.FOLDER_DELETED, folderToDelete, folderPath, user)
+      await em.persist(folderEvent)
     }
     await em.flush()
 

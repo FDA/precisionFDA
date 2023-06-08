@@ -1,17 +1,17 @@
-import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
-import { PFDALogoLight } from '../../views/components/NavigationBar/PFDALogo'
+import { PFDALogoLight } from '../NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
 
-const bpSmall = `@media(min-width: 850px)`
-const bpMedium = `@media(min-width: 1045px)`
-const bpLarge = `@media(min-width: 1200px)`
-const bpSuper = `@media(min-width: 1340px)`
+const bpSmall = '@media(min-width: 850px)'
+const bpMedium = '@media(min-width: 1045px)'
+const bpLarge = '@media(min-width: 1200px)'
+const bpSuper = '@media(min-width: 1340px)'
 
 export const StyledHeaderLogo = styled(PFDALogoLight)`
   box-sizing: border-box;
   padding: 4px 0;
+  min-width: 143.98px;
 `
 
 export const LogoWrap = styled.div`
@@ -48,13 +48,12 @@ export const HeaderItem = styled.div<{ active?: boolean }>`
         background-color: ${theme.colors.mediumDarkBlue};
         color: ${theme.colors.textWhite};
       `
-    } else {
-      return css`
-        &:hover {
-          color: ${theme.colors.lightBlue};
-        }
-      `
-    }
+    } 
+    return css`
+      &:hover {
+        color: ${theme.colors.lightBlue};
+      }
+    `
   }}
 
   ${bpMedium} {
@@ -74,7 +73,7 @@ export const HeaderItemText = styled.div`
   display: none;
 `
 
-export const StyledUsername = styled(HeaderItem)`
+export const StyledHeaderDropItem = styled(HeaderItem)`
   display: none;
 
   &:hover {
@@ -94,14 +93,13 @@ export const IconWrap = styled.div`
   align-items: center;
 `
 
-export const AvatarMenuItem = styled(MenuItem)`
+export const DropdownMenuItem = styled(MenuItem)`
   ${HeaderItemText} {
     ${Svg} {
       margin-left: 5px;
       margin-bottom: 1px;
     }
   }
-
 `
 
 export const HeaderSpacer = styled.div`
@@ -132,10 +130,6 @@ const linkCss = css`
   &:hover {
     background-color: ${theme.colors.textLightGrey};
   }
-`
-
-export const StyledLinkReactRoute = styled(Link)`
-  ${linkCss}
 `
 
 export const StyledLink = styled.a`
@@ -198,7 +192,7 @@ export const StyledHeader = styled.header`
       padding: 8px 6px;
     }
 
-    ${StyledUsername} {
+    ${StyledHeaderDropItem} {
       display: flex;
       padding-left: 5px;
     }

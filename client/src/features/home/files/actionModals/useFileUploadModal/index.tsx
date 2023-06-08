@@ -2,16 +2,14 @@
 /* eslint-disable dot-notation */
 import { all, any } from 'ramda'
 import React, { useEffect, useState } from 'react'
-import Dropzone from 'react-dropzone'
-import { useQueryClient } from 'react-query'
+import { useDropzone } from 'react-dropzone'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
-import { Button, ButtonSolidBlue } from '../../../../../components/Button'
-import { TransparentButton } from '../../../../../components/Dropdown/styles'
+import { Button, ButtonSolidBlue, TransparentButton } from '../../../../../components/Button'
 import { InputError } from '../../../../../components/form/styles'
 import { TrashIcon } from '../../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../../utils'
-import { Modal } from '../../../../modal'
 import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
 import { useConditionalModal } from '../../../../modal/useModal'
 import { ResourceScope } from '../../../types'
@@ -21,7 +19,6 @@ import {
   FILE_STATUS,
   IUploadInfo,
   MAX_UPLOADABLE_FILES,
-  MAX_UPLOADABLE_FILE_SIZE,
 } from './constants'
 import { multiFileUpload } from './multiFileUpload'
 import {
@@ -31,6 +28,7 @@ import {
   SubTitle,
   UploadFilesTable,
 } from './styles'
+import { ModalHeaderTop, ModalNext } from '../../../../modal/ModalNext'
 
 const idGenerator = createSequenceGenerator()
 
@@ -80,13 +78,37 @@ export const useFileUploadModal = ({
   const exceedsMax = filesMeta.length > MAX_UPLOADABLE_FILES
   const noneSelected = filesMeta.length === 0
 
+  const { getRootProps, getInputProps } = useDropzone({
+    disabled: uploadInProgress,
+    onDropAccepted: accepted => {
+      const uniqBlob: any[] = []
+      const fil: any[] = []
+      accepted.forEach((file: any) => {
+        const f = file
+        if (isUniqFile(blobs, f)) {
+          f.generatedId = idGenerator.next().value
+          uniqBlob.push(f)
+          fil.push({
+            id: f.generatedId,
+            name: f.name,
+            size: f.size,
+            status: FILE_STATUS['added'],
+            uploadedSize: 0,
+          })
+        }
+      })
+      setFilesMeta([...filesMeta, ...fil])
+      setBlobs([...blobs, ...uniqBlob])
+    },
+  })
+
   useEffect(() => {
     if (uploadFinished) {
       toast.success(
         `Success: uploaded ${itemsCountString('file', filesMeta.length)}`,
       )
-      queryCache.invalidateQueries('files')
-      queryCache.invalidateQueries('counters')
+      queryCache.invalidateQueries(['files'])
+      queryCache.invalidateQueries(['counters'])
       if (spaceId) queryCache.invalidateQueries(['space', spaceId.toString()])
     }
   }, [uploadFinished])
@@ -134,53 +156,55 @@ export const useFileUploadModal = ({
     }
   }
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid="modal-files-upload"
-      headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}
-      isShown={isShown}
-      hide={() => handleClose()}
-      title="Modal dialog to upload files"
-      header={
-        <StyledDropSection>
+      isShown={Boolean(isShown)}
+      hide={handleClose}
+    >
+      <ModalHeaderTop
+        headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}
+        hide={handleClose}
+      />
+      <StyledDropSection>
+        <div {...getRootProps()}>
+          <input {...getInputProps()} />
           <ButtonSolidBlue disabled={uploadInProgress}>
-            <Dropzone
-              noDrag
-              disabled={uploadInProgress}
-              maxSize={MAX_UPLOADABLE_FILE_SIZE}
-              onDropAccepted={accepted => {
-                const uniqBlob: any[] = []
-                const fil: any[] = []
-                accepted.forEach((file: any) => {
-                  const f = file
-                  if (isUniqFile(blobs, f)) {
-                    f.generatedId = idGenerator.next().value
-                    uniqBlob.push(f)
-                    fil.push({
-                      id: f.generatedId,
-                      name: f.name,
-                      size: f.size,
-                      status: FILE_STATUS['added'],
-                      uploadedSize: 0,
-                    })
-                  }
-                })
-                setFilesMeta([...filesMeta, ...fil])
-                setBlobs([...blobs, ...uniqBlob])
-              }}
-            >
-              {({ getRootProps, getInputProps }) => (
-                <div {...getRootProps()} className="upload-modal__dropzone">
-                  <input {...getInputProps()} />
-                </div>
-              )}
-            </Dropzone>
-            <span>Browse files for upload...</span>
+            Browse files for upload...
           </ButtonSolidBlue>
-          <SubTitle>You can upload up to 20 files at a time</SubTitle>
-        </StyledDropSection>
-      }
-      footer={
+        </div>
+        <SubTitle>You can upload up to 20 files at a time</SubTitle>
+      </StyledDropSection>
+      <ModalScroll>
+        {filesMeta.length > 0 && (
+          <UploadFilesTable>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <Status>Status</Status>
+                <Remove>Remove</Remove>
+              </tr>
+            </thead>
+            <tbody>
+              {filesMeta.map(f => (
+                <tr key={f.id}>
+                  <td>{f.name}</td>
+                  <Status>{f.status}</Status>
+                  <Remove>
+                    <TransparentButton
+                      disabled={uploadInProgress}
+                      onClick={() => handleRemoveFile(f.id)}
+                    >
+                      <TrashIcon height={16} />
+                    </TransparentButton>
+                  </Remove>
+                </tr>
+              ))}
+            </tbody>
+          </UploadFilesTable>
+        )}
+      </ModalScroll>
+      <Footer>
         <ButtonRow>
           <div>{filesMeta.length} Files Selected</div>
           {exceedsMax && (
@@ -206,36 +230,8 @@ export const useFileUploadModal = ({
             </ButtonSolidBlue>
           )}
         </ButtonRow>
-      }
-    >
-      {filesMeta.length > 0 && (
-        <UploadFilesTable>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <Status>Status</Status>
-              <Remove>Remove</Remove>
-            </tr>
-          </thead>
-          <tbody>
-            {filesMeta.map(f => (
-              <tr key={f.id}>
-                <td>{f.name}</td>
-                <Status>{f.status}</Status>
-                <Remove>
-                  <TransparentButton
-                    disabled={uploadInProgress}
-                    onClick={() => handleRemoveFile(f.id)}
-                  >
-                    <TrashIcon height={16} />
-                  </TransparentButton>
-                </Remove>
-              </tr>
-            ))}
-          </tbody>
-        </UploadFilesTable>
-      )}
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
 
   return {

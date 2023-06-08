@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue, ButtonSolidRed } from '../../../components/Button'
 import { checkStatus, getApiRequestOpts } from '../../../utils/api'
@@ -88,6 +88,7 @@ export function useComparatorModal<
 }) {
   const { isShown, setShowModal } = useModal()
   const mutation = useMutation({
+    mutationKey: ['comparator-action'],
     mutationFn: async ({ actionType, dxid }: ComparatorActionRequest) => {
       return comparatorActionRequest(actionType, dxid)
     },
@@ -108,7 +109,7 @@ export function useComparatorModal<
           }
         })
       } else {
-        onSuccess && onSuccess()
+        if(onSuccess) onSuccess()
         setShowModal(false)
         toast.success(`Success: ${comparatorActionText(actionType)} request`)
       }
@@ -160,7 +161,7 @@ export function useComparatorModal<
   }
 
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid={`modal-comparator-${actionType}`}
       headerText={`Attention!`}

@@ -6,6 +6,7 @@ export const makeCloudGovBulkUserUpdateMiddlewareSchema = <
 >(bodyFieldConfig?: ConfigT) => ({
   body: (ctx: Api.Ctx<{}, Partial<Record<'id' | keyof ConfigT, any>>>) => {
     const requiredProperties = ['ids'].concat(Object.keys(bodyFieldConfig ?? {}))
+    // @ts-ignore
     const { missingKeys, extraKeys } = validation.validators.getKeysDifferenceFromObject(ctx.request.body, requiredProperties)
     if (missingKeys.length > 0) {
       throw new errors.ValidationError(`Missing required properties from request body: ${
@@ -17,15 +18,18 @@ export const makeCloudGovBulkUserUpdateMiddlewareSchema = <
         JSON.stringify(extraKeys)
       }`)
     }
+    // @ts-ignore
     if (ctx.request.body.ids.length === 0) {
       throw new errors.ValidationError('No ids specified')
     }
-    const invalidInputIds = ctx.request.body.ids.filter(id => !validation.validators.validateNonNegativeInteger(id))
+    // @ts-ignore
+    const invalidInputIds = ctx.request.body.ids.filter((id: any) => !validation.validators.validateNonNegativeInteger(id))
     if (invalidInputIds.length > 0) {
       throw new errors.ValidationError(`Invalid input ids in request body: ${
         JSON.stringify(invalidInputIds)
       }, expected positive integer`)
     }
+    // @ts-ignore
     Object.entries(bodyFieldConfig ?? {}).forEach(([key, validator]) => validator(ctx.request.body[key], `ctx.request.body.${key}`, ctx))
   },
 })

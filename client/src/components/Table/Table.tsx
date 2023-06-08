@@ -46,7 +46,7 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   hiddenColumns?: string[]
   loading?: boolean
   loadingComponent?: any
-  shouldResetFilters?: boolean
+  shouldResetFilters?: any[]
   emptyComponent?: React.ReactNode
   context?: object
   showTableTools?: boolean
@@ -173,10 +173,10 @@ export default function Table<T extends object>(
   }, [sortBy])
 
   // TODO: find a better way to reset filters when scope changes
-  const reset = useMemo(() => shouldResetFilters, [shouldResetFilters])
+  const reset = useMemo(() => shouldResetFilters, shouldResetFilters)
   useMountedLayoutEffect(() => {
-    if(reset) setAllFilters([])
-  }, [reset])
+    if(reset && reset.length > 0) setAllFilters([])
+  }, reset)
 
   useMountedLayoutEffect(() => {
     if(typeof setFilters === 'function') setFilters(state.filters)
@@ -203,7 +203,7 @@ export default function Table<T extends object>(
   }, [columnResizing])
 
   return (
-    <StyledTable>
+    <StyledTable data-testid="pfda-table">
       <ReactTableStyles shouldFillWidth={fillWidth} shouldAllowScrollbar={shouldAllowScrollbar}>
         <div className="tableWrap">
           <div {...getTableProps()} className="table sticky">
@@ -239,7 +239,7 @@ export default function Table<T extends object>(
             </div>
 
             {isFilterable && (
-              <div className="thead">
+              <div className="thead filters">
                 {visibleColumns.map((column, i) => (
                   // eslint-disable-next-line react/jsx-key
                   <div {...column.getHeaderProps()} className="th">

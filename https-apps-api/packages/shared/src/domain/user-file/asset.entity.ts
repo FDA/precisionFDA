@@ -1,18 +1,25 @@
 import {
   Collection,
-  Entity,
+  Filter,
   IdentifiedReference,
   ManyToOne,
   OneToMany,
+  ManyToMany,
   Property,
   Reference,
+  EntityRepository,
+  EntityRepositoryType,
+  Entity,
 } from '@mikro-orm/core'
 import { Tagging, User } from '..'
+import { AssetRepository } from './asset.repository'
+import { App } from '../app'
 import { Node } from './node.entity'
-import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE } from './user-file.enum'
+import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE, IFileOrAsset, FILE_STI_TYPE, ITrackable } from './user-file.types'
 
-@Entity({ tableName: 'nodes' })
-export class Asset extends Node {
+@Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
+@Entity({ tableName: 'nodes', customRepository: () => AssetRepository })
+class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
   dxid: string
 
@@ -52,7 +59,7 @@ export class Asset extends Node {
   parentFolderId?: number
 
   @Property()
-  scopedParentFolderId?: number
+  scopedParentFolderId?: Node
 
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>
@@ -60,8 +67,22 @@ export class Asset extends Node {
   @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
+  @ManyToMany(() => App, app => app.assets)
+  apps = new Collection<App>(this)
+
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
   }
+
+  isCreatedByChallengeBot(): boolean {
+    // Challenge resources are always files, see create_challenge_resource in api_controller.rb
+    return false
+  }
+
+  [EntityRepositoryType]?: AssetRepository
+}
+
+export {
+  Asset,
 }

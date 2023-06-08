@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
 import { DateTime } from 'luxon'
@@ -10,13 +11,13 @@ import {
   ENGINES,
 } from '../domain/db-cluster/db-cluster.enum'
 import { STATIC_SCOPE } from '../enums'
-import type { AnyObject } from '../types'
+import type { AnyObject, UserCtx } from '../types'
 import {
   FILE_STATE_DX,
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-} from '../domain/user-file/user-file.enum'
+} from '../domain/user-file/user-file.types'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
@@ -30,6 +31,10 @@ import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
 import { TASK_TYPE } from '../queue/task.input'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
 import { SyncJobOperation } from '../domain/job'
+import { SyncFilesStateOperation } from '../domain/user-file'
+import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
+import { USER_STATE } from '../domain/user/user.entity'
+import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
 
 const chance = new Chance()
 
@@ -53,6 +58,9 @@ const user = {
     dxuser: `user-${random.dxstr()}`,
     privateFilesProject: `project-${random.dxstr()}`,
     publicFilesProject: `project-${random.dxstr()}`,
+    email: 'test@nexus-mail.com',
+    normalizedEmail: 'normalized@nexus-mail.com',
+    userState: USER_STATE.ENABLED,
     // privateComparisonsProject: `project-${random.dxstr()}`,
     // publicComparisonsProject: `project-${random.dxstr()}`,
   }),
@@ -138,12 +146,19 @@ const app = {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
+      uid: `${dxid}-1`,
       title: 'app-title',
       scope: 'public',
       spec:
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.NORMAL,
+      version: '1',
+      revision: 1,
+      readme: 'readme',
+      internal: 'internal',
+      verified: true,
+      devGroup: 'devGroup',
     }
   },
   https: (): Partial<InstanceType<typeof entities.App>> => {
@@ -156,6 +171,7 @@ const app = {
         '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
+      verified: true,
     }
   },
   rshiny: (): Partial<InstanceType<typeof entities.App>> => {
@@ -254,6 +270,36 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
+  simpleJobOutput: (jobId: number, customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      state: FILE_STATE_DX.CLOSED,
+      parentType: PARENT_TYPE.JOB,
+      parentId: jobId,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
+  simpleComparisonOutput: (comparisonId: number, customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+    const dxid = customDxid ?? `file-${random.dxstr()}`
+    return {
+      dxid,
+      uid: `${dxid}-1`,
+      project: `project-${random.dxstr()}`,
+      name: chance.name(),
+      scope: 'private',
+      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      state: FILE_STATE_DX.CLOSED,
+      parentType: PARENT_TYPE.COMPARISON,
+      parentId: comparisonId,
+      stiType: FILE_STI_TYPE.USERFILE,
+    }
+  },
 }
 
 const asset = {
@@ -286,6 +332,7 @@ const folder = {
       parentId: 1,
       parentType: PARENT_TYPE.JOB,
       stiType: FILE_STI_TYPE.FOLDER,
+      locked: false
     }
   },
   simpleLocal: (): Partial<InstanceType<typeof entities.Folder>> => {
@@ -298,6 +345,7 @@ const folder = {
       parentId: 1,
       parentType: PARENT_TYPE.USER,
       stiType: FILE_STI_TYPE.FOLDER,
+      locked: false
     }
   },
 }
@@ -322,12 +370,24 @@ const space = {
     name: chance.word(),
     state: 1, // ACTIVE,
     type: 1, // review type
+    guestDxOrg: `org-pfda..space_guest_${random.dxstr()}`,
+    hostDxOrg: `org-pfda..space_host_${random.dxstr()}`,
+    spaceId: null as any,
+    hostProject: null as any,
+    guestProject: null as any,
+    description: 'desc', 
+    meta: 'meta',
   }),
   group: (): Partial<InstanceType<typeof entities.Space>> => ({
     name: chance.word(),
     state: 1,
     type: 0, // GROUP type
+    spaceId: null as any,
+    hostProject: null as any,
+    guestProject: null as any,
   }),
+  // represents space on platform
+  projectId: () => `project-j47b1k3z8Jqqv001213v312j1`
 }
 
 const spaceMembership = {
@@ -375,6 +435,14 @@ const comment = {
   }),
 }
 
+const comparison = {
+  simple: (): Partial<InstanceType<typeof entities.Comparison>> => ({
+    name: 'Test Comparison',
+    description: chance.sentence(),
+    state: COMPARISON_STATE.DONE,
+  }),
+}
+
 const dbCluster = {
   simple: (): Partial<InstanceType<typeof entities.DbCluster>> => {
     const dxid = `dbcluster-${random.dxstr()}`
@@ -401,22 +469,32 @@ const dbCluster = {
     scope: STATIC_SCOPE.PRIVATE,
     dxInstanceClass: 'db_std1_x2',
     engine: ENGINES.MYSQL,
-    engineVersion: '5.7.12',
+    engineVersion: '5.7.mysql_aurora.2.07.8',
     adminPassword: random.password(),
   }),
 }
 
+const expert = {
+  simple: (): Partial<InstanceType<typeof entities.Expert>> => {
+    const expertName = chance.name()
+    const fileDxid = `file-${random.dxstr()}-1`
+    return {
+      scope: ExpertScope.PUBLIC,
+      state: ExpertState.OPEN,
+      meta: {
+        _prefname: expertName,
+        _about: `About - ${expertName}`,
+        _blog: `Blog - ${expertName}`,
+        _blog_title: `Blog Title - ${expertName}`,
+        _challenge: `Challenge - ${expertName}`,
+        _image_id: fileDxid,
+      }
+    }
+  },
+}
+
 const bullQueue = {
-  syncJobStatus: (jobDxid, userContext) => ({
-    data: {
-      payload: {
-        dxid: jobDxid,
-      },
-      type: TASK_TYPE.SYNC_JOB_STATUS,
-      user: userContext,
-    },
-  }),
-  syncDbClusterStatus: (dbClusterDxid, userContext) => ({
+  syncDbClusterStatus: (dbClusterDxid: string, userContext: UserCtx) => ({
     data: {
       payload: {
         dxid: dbClusterDxid,
@@ -425,10 +503,25 @@ const bullQueue = {
       user: userContext,
     },
   }),
+  syncFilesState: (userContext: UserCtx) => ({
+    data: {
+      type: TASK_TYPE.SYNC_FILES_STATE,
+      user: userContext,
+    },
+  }),
+  syncJobStatus: (jobDxid: string, userContext: UserCtx) => ({
+    data: {
+      payload: {
+        dxid: jobDxid,
+      },
+      type: TASK_TYPE.SYNC_JOB_STATUS,
+      user: userContext,
+    },
+  }),
 }
 
 const bullQueueRepeatable = {
-  syncDbClusterStatus: dbClusterDxid => ({
+  syncDbClusterStatus: (dbClusterDxid: string) => ({
     key: `__default__:${SyncDbClusterOperation.getBullJobId(dbClusterDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: SyncDbClusterOperation.getBullJobId(dbClusterDxid),
@@ -438,7 +531,17 @@ const bullQueueRepeatable = {
     every: null,
     next: Date.now() + (60 * 1000),
   }),
-  syncJobStatus: jobDxid => ({
+  syncFilesState: (dxuser: string) => ({
+    key: `__default__:${SyncFilesStateOperation.getBullJobId(dxuser)}:::*/2 * * * *`,
+    name: '__default__',
+    id: SyncFilesStateOperation.getBullJobId(dxuser),
+    endDate: null,
+    tz: null,
+    cron: '*/2 * * * *',
+    every: null,
+    next: Date.now() + (60 * 1000),
+  }),
+  syncJobStatus: (jobDxid: string) => ({
     key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: SyncJobOperation.getBullJobId(jobDxid),
@@ -476,8 +579,10 @@ export {
   spaceMembership,
   spaceEvent,
   comment,
+  comparison,
   challenge,
   dbCluster,
+  expert,
   bullQueue,
   bullQueueRepeatable,
 }

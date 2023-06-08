@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`ArchiveContents matches snapshot 1`] = `
-<div
-  className="home-archive-contents-list--empty home-archive-contents-list"
->
-  No archive contents
-</div>
-`;

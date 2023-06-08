@@ -20,14 +20,14 @@ import {
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
-import { fakes as localFakes } from '../utils/mocks'
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 
-const insertFoldersToDb = async (em, user, job: Job, folderCount: number, fileCountPerFolder: number) => {
+const insertFoldersToDb = async (em, user, job: Job, folderCount: number) => {
   const folders = []
-  for (let i=0; i<folderCount; i++) {
-    const folder = create.filesHelper.createFolder(em, { user },
+  for (let i = 0; i < folderCount; i++) {
+    const folder = create.filesHelper.createFolder(
+      em, { user },
       { name: `folder-${i}`, parentId: job.id, project: job.project },
     )
     folders.push(folder)
@@ -55,7 +55,7 @@ describe('TASK: sync_workstation_files', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { email: generate.random.email() })
     app = create.appHelper.createHTTPS(em, { user })
@@ -67,7 +67,8 @@ describe('TASK: sync_workstation_files', () => {
   // Migrated from sync-job-spec.ts
   context('files sync', () => {
     it('calls listFolders, listFiles, describeFiles with payload', async () => {
-      const job = create.jobHelper.create(em,
+      const job = create.jobHelper.create(
+        em,
         { user, app },
         { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
@@ -85,7 +86,7 @@ describe('TASK: sync_workstation_files', () => {
         if (args?.folder === '/test-folder') {
           return FILES_LIST_RES_TEST_FOLDER
         }
-        return { results: [], next: null }
+        return []
       })
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -112,19 +113,18 @@ describe('TASK: sync_workstation_files', () => {
       const tag = create.tagsHelper.create(prepareEm, { name: 'HTTPS File' })
       const rootFile = create.filesHelper.create(
         prepareEm,
-        { user },
+        { user, parentFolder: null },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
           state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
-          parentFolderId: null,
           // weird error with update
           // parent: wrap(job).toReference(),
           parentId: job.id,
           parentType: PARENT_TYPE.JOB,
-          dxid: FILES_LIST_RES_ROOT.results[0].id,
+          dxid: FILES_LIST_RES_ROOT[0].id,
           project: job.project,
-          uid: `${FILES_LIST_RES_ROOT.results[0].id}-1`,
+          uid: `${FILES_LIST_RES_ROOT[0].id}-1`,
           fileSize: FILES_DESC_RES.results[0].describe.size,
           name: FILES_DESC_RES.results[0].describe.name,
         },
@@ -145,9 +145,9 @@ describe('TASK: sync_workstation_files', () => {
       // custom stub return function based on folderPath
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -165,7 +165,7 @@ describe('TASK: sync_workstation_files', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // return only first entry so it is easier to test
-      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT[0].id
       // first client.filesList() for all the files
       fakes.client.foldersListFake.onCall(0).returns({
         id: FOLDERS_LIST_RES.id,
@@ -173,9 +173,9 @@ describe('TASK: sync_workstation_files', () => {
       })
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -186,7 +186,7 @@ describe('TASK: sync_workstation_files', () => {
       // // converted to JSON to remove user reference
       const resultFile = wrap(filesInDb[0]).toJSON()
       expect(resultFile).to.have.property('dxid', firstFileDxid)
-      expect(resultFile).to.have.property('parentFolderId', null)
+      expect(resultFile).to.have.property('parentFolder', null)
       expect(resultFile).to.have.property('parentId', job.id)
       expect(resultFile).to.have.property('parentType', PARENT_TYPE.JOB)
       expect(resultFile).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
@@ -210,7 +210,7 @@ describe('TASK: sync_workstation_files', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // return only first entry so it is easier to test
-      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT[0].id
       // first client.filesList() for all the files
       fakes.client.foldersListFake.onCall(0).returns({
         id: FOLDERS_LIST_RES.id,
@@ -219,9 +219,9 @@ describe('TASK: sync_workstation_files', () => {
       // nothing in root
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/subfolder') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -235,7 +235,7 @@ describe('TASK: sync_workstation_files', () => {
       const resultFile = wrap(filesInDb[0]).toJSON()
       const resultFolder = wrap(foldersInDb[0]).toJSON()
       expect(resultFile).to.have.property('dxid', firstFileDxid)
-      expect(resultFile).to.have.property('parentFolderId', resultFolder.id)
+      expect(resultFile.parentFolder).to.equal(resultFolder.id)
       expect(resultFile).to.have.property('parentId', job.id)
       expect(resultFile).to.have.property('parentType', PARENT_TYPE.JOB)
       expect(resultFile).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
@@ -243,12 +243,8 @@ describe('TASK: sync_workstation_files', () => {
 
       const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
       expect(taggingsInDb).to.be.an('array').with.lengthOf(2)
-      const fileTagging = wrap(
-        taggingsInDb.find(tagging => tagging.taggableId === resultFile.id),
-      ).toJSON()
-      const folderTagging = wrap(
-        taggingsInDb.find(tagging => tagging.taggableId === resultFolder.id),
-      ).toJSON()
+      const fileTagging = wrap(taggingsInDb.find(tagging => tagging.taggableId === resultFile.id)).toJSON()
+      const folderTagging = wrap(taggingsInDb.find(tagging => tagging.taggableId === resultFolder.id)).toJSON()
       expect(fileTagging).to.exist()
       expect(folderTagging).to.exist()
       expect(fileTagging).to.have.property('tag')
@@ -271,9 +267,9 @@ describe('TASK: sync_workstation_files', () => {
       // custom stub return function based on folderPath
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/.Notebook_snapshots') {
-          return { results: [FILES_LIST_RES_SNAPSHOT.results[0]], next: null }
+          return [FILES_LIST_RES_SNAPSHOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -286,7 +282,7 @@ describe('TASK: sync_workstation_files', () => {
       const snapshotsFolder = foldersInDb.find(f => f.name === '.Notebook_snapshots')
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
       expect(filesInDb[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
-      expect(filesInDb[0].parentFolderId).to.be.equal(snapshotsFolder.id)
+      expect(filesInDb[0].parentFolder.id).to.be.equal(snapshotsFolder.id)
       const taggings = await em.find(Tagging, {}, { populate: ['tag'] })
       expect(taggings).to.be.an('array').with.lengthOf(4)
       expect(taggings.map(t => t.taggableId)).to.have.members([
@@ -306,16 +302,16 @@ describe('TASK: sync_workstation_files', () => {
         { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
-      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT[0].id
       const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
       const firstFile = create.filesHelper.create(
         em,
+        // { user, parentFolder: null },
         { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
           state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
-          parentFolderId: null,
           parentId: job.id,
           parentType: PARENT_TYPE.JOB,
           dxid: firstFileDxid,
@@ -337,9 +333,9 @@ describe('TASK: sync_workstation_files', () => {
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/test-folder') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
 
       await createSyncWorkstationFilesTask(
@@ -355,7 +351,7 @@ describe('TASK: sync_workstation_files', () => {
       // // converted to JSON to remove user reference
       const resultFile = wrap(filesInDb[0]).toJSON()
       expect(resultFile).to.have.property('dxid', firstFileDxid)
-      expect(resultFile).to.have.property('parentFolderId', subfolder.id)
+      expect(resultFile.parentFolder).to.equal(subfolder.id)
       // tagging also correctly recreated
       const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
       // one file, two folders
@@ -373,16 +369,16 @@ describe('TASK: sync_workstation_files', () => {
         { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
-      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT[0].id
       const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
       const firstFile = create.filesHelper.create(
         em,
-        { user },
+        // { user, parentFolder: null },
+        { user},
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
           state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
-          parentFolderId: null,
           // weird error with update
           // parent: wrap(job).toReference(),
           parentId: job.id,
@@ -411,10 +407,7 @@ describe('TASK: sync_workstation_files', () => {
         folders: ['/'],
       })
       // nothing in root
-      fakes.client.filesListFake.returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.returns([])
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
@@ -438,16 +431,16 @@ describe('TASK: sync_workstation_files', () => {
         { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.privateFilesProject },
       )
       await em.flush()
-      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT[0].id
       const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
       const firstFile = create.filesHelper.create(
         em,
-        { user },
+        // { user, parentFolder: null },
+        { user},
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
           state: FILE_STATE_DX.CLOSED,
           stiType: FILE_STI_TYPE.USERFILE,
-          parentFolderId: null,
           parentId: job.id,
           parentType: PARENT_TYPE.JOB,
           dxid: firstFileDxid,
@@ -473,21 +466,18 @@ describe('TASK: sync_workstation_files', () => {
       })
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/') {
-          return {
-            results: [
-              {
-                ...FILES_LIST_RES_ROOT.results[0],
-                describe: {
-                  id: FILES_LIST_RES_ROOT.results[0].id,
-                  name: 'new-name',
-                  size: 0,
-                },
+          return [
+            {
+              ...FILES_LIST_RES_ROOT[0],
+              describe: {
+                id: FILES_LIST_RES_ROOT[0].id,
+                name: 'new-name',
+                size: 0,
               },
-            ],
-            next: null,
-          }
+            },
+          ]
         }
-        return { results: [], next: null }
+        return []
       })
 
       await createSyncWorkstationFilesTask(
@@ -521,10 +511,7 @@ describe('TASK: sync_workstation_files', () => {
         folders: ['/'],
       })
       // nothing in root
-      fakes.client.filesListFake.returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.returns([])
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
@@ -557,8 +544,8 @@ describe('TASK: sync_workstation_files', () => {
       await em.flush()
       const file = create.filesHelper.create(
         em,
-        { user },
-        { name: 'c', parentFolderId: folder.id, parentId: job.id, project: job.project },
+        { user, parentFolder: folder.id },
+        { name: 'c', parentId: job.id, project: job.project },
       )
       create.tagsHelper.createTagging(
         em,
@@ -578,10 +565,7 @@ describe('TASK: sync_workstation_files', () => {
         folders: ['/'],
       })
       // nothing in root
-      fakes.client.filesListFake.returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.returns([])
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
@@ -600,7 +584,8 @@ describe('TASK: sync_workstation_files', () => {
 
     // See PFDA-2715 for why
     it('handles more than 32 remote folders', async () => {
-      const job = create.jobHelper.create(em, { user, app },
+      const job = create.jobHelper.create(
+        em, { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       await em.flush()
@@ -608,10 +593,7 @@ describe('TASK: sync_workstation_files', () => {
       // Create a mock terminated job, with 33 folders and no files within the folders
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       fakes.client.foldersListFake.onCall(0).returns(FOLDERS_LIST_RES_LARGE)
-      fakes.client.filesListFake.returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.returns([])
 
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -623,7 +605,7 @@ describe('TASK: sync_workstation_files', () => {
       const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
       expect(filesInDb).to.be.an('array').with.lengthOf(0)
       expect(foldersInDb).to.be.an('array').with.lengthOf(33)
-      expect(foldersInDb.map((f: Folder) => f.name).slice(0,5)).to.have.ordered.members([
+      expect(foldersInDb.map((f: Folder) => f.name).slice(0, 5)).to.have.ordered.members([
         'folder-0',
         'folder-1',
         'folder-10',
@@ -634,7 +616,8 @@ describe('TASK: sync_workstation_files', () => {
 
     // Skipping this for now because it exceeds the timeout for a unit test
     it.skip('handles deletion of more than 10000 folders', async () => {
-      const job = create.jobHelper.create(em, { user, app },
+      const job = create.jobHelper.create(
+        em, { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       await em.flush()
@@ -643,10 +626,7 @@ describe('TASK: sync_workstation_files', () => {
 
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       fakes.client.foldersListFake.onCall(0).returns(FOLDERS_LIST_RES)
-      fakes.client.filesListFake.returns({
-        results: [],
-        next: null,
-      })
+      fakes.client.filesListFake.returns([])
 
       await createSyncWorkstationFilesTask(
         { dxid: job.dxid },
@@ -670,17 +650,20 @@ describe('TASK: sync_workstation_files', () => {
     //   3. User terminates workstation and files are synchronized
     //
     it.skip('handles simultaneous creation of the same folder name in both platform and pFDA', async () => {
-      const job = create.jobHelper.create(em, { user, app },
+      const job = create.jobHelper.create(
+        em, { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
       await em.flush()
-      const folder = create.filesHelper.createFolder(em, { user },
+      const folder = create.filesHelper.createFolder(
+        em, { user },
         { name: 'foobar', parentId: job.id, project: job.project },
       )
       await em.flush()
-      const file = create.filesHelper.create(em, { user },
-        { name: 'stu', parentFolderId: folder.id, parentId: job.id, project: job.project },
+      const file = create.filesHelper.create(
+        em, { user, parentFolder: folder.id },
+        { name: 'stu', parentId: job.id, project: job.project },
       )
       create.tagsHelper.createTagging(em, { tag }, {
         userFile: file,
@@ -695,9 +678,9 @@ describe('TASK: sync_workstation_files', () => {
       })
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/foobar') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
 
       await createSyncWorkstationFilesTask(
@@ -717,7 +700,8 @@ describe('TASK: sync_workstation_files', () => {
     })
 
     it('handles simultaneous files and folder insertion and deletion', async () => {
-      const job = create.jobHelper.create(em, { user, app },
+      const job = create.jobHelper.create(
+        em, { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       await em.flush()
@@ -726,9 +710,9 @@ describe('TASK: sync_workstation_files', () => {
       fakes.client.foldersListFake.returns(FOLDERS_LIST_RES_MEDIUM)
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/foo/bar/stu') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
 
       // Do the first sync and create the list of folders with no files inside
@@ -745,15 +729,15 @@ describe('TASK: sync_workstation_files', () => {
 
       // Do the second sync after user has deleted two folders /foo/bar and /foo/bar/stu (and its contents)
       // but added file additions to /foo
-      const platformFolders = Object.assign({}, FOLDERS_LIST_RES_MEDIUM)
+      const platformFolders = { ...FOLDERS_LIST_RES_MEDIUM }
       // User deletes two folder via the workstation
       platformFolders.folders = platformFolders.folders.slice(0, -2)
       fakes.client.foldersListFake.returns(platformFolders)
       fakes.client.filesListFake.callsFake(args => {
         if (args?.folder === '/foo') {
-          return { results: [FILES_LIST_RES_ROOT.results[0]], next: null }
+          return [FILES_LIST_RES_ROOT[0]]
         }
-        return { results: [], next: null }
+        return []
       })
 
       await createSyncWorkstationFilesTask(

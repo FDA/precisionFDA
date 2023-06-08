@@ -1,7 +1,8 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { UserFile } from './user-file.entity'
-import { FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.enum'
+import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
 import { Asset } from '.'
+
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   async findProjectFilesInSubfolder(input: {
@@ -15,7 +16,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         // stiType: { $ne: FILE_STI_TYPE.FOLDER },
         // since we merged old projects (with uploaded files) this condition no longer makes sense
         // parentType: PARENT_TYPE.JOB,
-        parentFolderId: input.folderId,
+        parentFolder: input.folderId,
         entityType: FILE_ORIGIN_TYPE.HTTPS,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
@@ -39,7 +40,36 @@ export class UserFileRepository extends EntityRepository<UserFile> {
 
   async findFilesInFolders(input: { folderIds: number[] }): Promise<UserFile[]> {
     return await this.find(
-      { parentFolderId: { $in: input.folderIds } },
+      { parentFolder: { $in: input.folderIds } },
+      { filters: ['userfile'], populate: ['taggings.tag'] },
+    )
+  }
+
+  async findFileWithUid(uid: string, populate?: string[]): Promise<UserFile | null> {
+    return await this.findOne(
+      { uid },
+      {
+        filters: ['userfile'],
+        populate: populate as never[] || ['user', 'taggings.tag'] as never[],
+      },
+    )
+  }
+
+  async findFilesWithDxid(dxid: string): Promise<UserFile[]> {
+    return await this.find(
+      { dxid },
+      { filters: ['userfile'], populate: ['user', 'taggings.tag'] },
+    )
+  }
+
+  // Find files uploaded or owned by a user that are pending
+  // transition to closed state from the platform
+  async findUnclosedFiles(userId: number): Promise<UserFile[]> {
+    return await this.find(
+      {
+        userId,
+        state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
+      },
       { filters: ['userfile'], populate: ['taggings.tag'] },
     )
   }

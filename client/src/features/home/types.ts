@@ -19,6 +19,7 @@ export interface BaseError {
 export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions'
 export type APIResource = 'files' | 'folders' | 'apps' | 'workflows' | 'assets' | 'dbclusters' | 'jobs' | 'app-executions' | 'workflow-executions' | 'spaces'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
+export type ServerScope = 'public' | 'private' | `space-${string}`
 
 export interface DownloadListResponse {
   id: number;
@@ -91,6 +92,28 @@ export interface IFilter {
 export interface SortBy {
   order_by: string,
   order_dir: string
+}
+
+export enum SEVERITY {
+  ERROR = 'ERROR',
+  WARN = 'WARN',
+  INFO = 'INFO',
+}
+
+export type NotificationMeta = {
+  linkTitle?: string,
+  linkUrl?: string,
+}
+
+export type Notification = {
+  id: number,
+  type: string,
+  message: string,
+  severity: SEVERITY,
+  meta?: NotificationMeta,
+  createdAt: Date,
+  updatedAt: Date,
+  deliveredAt: Date,
 }
 
 export type KeyVal = { [key: string]: number | string | boolean }

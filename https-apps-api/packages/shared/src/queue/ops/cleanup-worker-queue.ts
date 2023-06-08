@@ -6,9 +6,11 @@ import { isStateTerminal } from "../../domain/job/job.helper"
 import { isNil } from 'ramda'
 import { TASK_TYPE } from '../task.input'
 import { SyncJobOperation } from "../../domain/job"
+import { clearFailedJobs } from "../queue.utils"
+import { Logger } from "pino"
 
 // Clean up the bull queue
-const cleanupWorkerQueue = async (em, log): Promise<any> => {
+export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => {
   const now = Date.now()
 
   // Cleanup sync_job_status tasks whose job has already been terminated
@@ -107,7 +109,7 @@ const cleanupWorkerQueue = async (em, log): Promise<any> => {
 }
 
 // state: Any valid bull queue state like 'failed' or 'completed'
-const clearJobs = async (q, state, log): Promise<any> => {
+const clearJobs = async (q: any, state: any, log: any): Promise<any> => {
   const jobs = await q.getJobs(state)
   const count = jobs.length
   if (count > 0) {
@@ -121,30 +123,15 @@ const clearJobs = async (q, state, log): Promise<any> => {
   return jobs
 }
 
-const clearFailedJobs = async (q, log): Promise<any> => {
-  return clearJobs(q, 'failed', log)
-}
-
-const clearCompletedJobs = async (q, log): Promise<any> => {
+const clearCompletedJobs = async (q: any, log: any): Promise<any> => {
   return clearJobs(q, 'completed', log)
 }
 
 
-// For direct invocation by the api
-export class CleanupWorkerQueueOperation extends BaseOperation<
-  OpsCtx,
-  undefined,
-  boolean
-> {
-  async run() {
-    return await cleanupWorkerQueue(this.ctx.em, this.ctx.log)
-  }
-}
-
 // For use in the worker
 // TODO - insert this into the maintanence queue on startup just like
 //        checking db clusters status
-export class CleanupWorkerQueueWorkerOperation extends WorkerBaseOperation<
+export class CleanupWorkerQueueOperation extends BaseOperation<
   OpsCtx,
   undefined,
   boolean

@@ -1,9 +1,13 @@
 import { ConfigOverride } from '..'
+import { parseIpv4Cidr } from '../../validation/parsers'
 
-export const config: ConfigOverride = {
+export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-stg',
   api: {
     railsHost: process.env.HOST,
+    fdaSubnet: {
+      allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
+    },
   },
   logs: {
     pretty: false,
@@ -19,6 +23,11 @@ export const config: ConfigOverride = {
       default: { name: 'https-apps-worker-queue-stg' },
       fileSync: { name: 'https-apps-worker-fileSync-queue-stg' },
       emails: { name: 'https-apps-worker-emails-queue-stg' },
+      maintenance: {
+        onInit: {
+          shouldAddCheckNonterminatedClusters: true,
+        },
+      },
     },
   },
   platform: {
@@ -27,5 +36,11 @@ export const config: ConfigOverride = {
   redis: {
     isSecure: true,
   },
-  shouldAddCheckNonterminatedClustersOnInit: true
-}
+  siteSettings: {
+    ssoButton: {
+      response: {
+        isEnabled: true,
+      },
+    },
+  },
+})

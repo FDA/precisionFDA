@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
@@ -24,6 +24,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
+    mutationKey: ['delete-resource', resource],
     mutationFn: request,
     onError: () => {
       toast.error(`Error: Deleting ${resource}`)
@@ -45,7 +46,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = (
+  const modalComp = isShown && (
     <Modal
       data-testid={`modal-${resource}-delete`}
       headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}

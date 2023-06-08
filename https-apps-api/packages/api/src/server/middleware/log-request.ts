@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import { utils } from '@pfda/https-apps-shared'
 import { log } from '../../logger'
 
-export const logRequestMdw = async (ctx: Api.Ctx, next) => {
+export const logRequestMdw = async (ctx: Api.Ctx, next: any) => {
   // TODO(samuel) - validate this change with Zai
   const id = nanoid()
   const logger = log.child({ requestId: id })

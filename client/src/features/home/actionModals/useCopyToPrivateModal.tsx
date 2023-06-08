@@ -1,22 +1,20 @@
 import React, { useMemo } from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { ResourceTable } from '../../../components/ResourceTable'
-import { Modal } from '../../modal'
-import { ButtonRow, ModalScroll } from '../../modal/styles'
+import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { APIResource, ResourceScope } from '../types'
 import { itemsCountString } from '../../../utils/formatting'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
   min-width: 300px;
 `
-
-
 
 export function useCopyToPrivateModal<T extends { id: string; name: string }>({
   resource,
@@ -34,6 +32,7 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
+    mutationKey: ['copy-to-private', resource],
     mutationFn: request,
     onError: () => {
       toast.error(`Error: Copying to private ${resource}`)
@@ -41,11 +40,15 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
     onSuccess: (res: any) => {
       if (res?.meta?.messages[0].type === 'error') {
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
-        return
       } else {
-        onSuccess && onSuccess(res)
+        if (onSuccess) onSuccess(res)
         setShowModal(false)
-        toast.success(`Success: Copy to private ${itemsCountString(resource, momoSelected.length)}`)
+        toast.success(
+          `Success: Copy to private ${itemsCountString(
+            resource,
+            momoSelected.length,
+          )}`,
+        )
       }
     },
   })
@@ -54,22 +57,20 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = (
-    <Modal
+  const modalComp = isShown && (
+    <ModalNext
       data-testid={`modal-${resource}-copy-to-private`}
-      headerText={`Copy to private ${itemsCountString(resource, momoSelected.length)}?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
-        <ButtonRow>
-          {mutation.isLoading && <Loader />}
-          <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
-            Copy
-          </ButtonSolidBlue>
-        </ButtonRow>
-      }
     >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Copy to private ${itemsCountString(
+          resource,
+          momoSelected.length,
+        )}?`}
+        hide={() => setShowModal(false)}
+      />
       <ModalScroll>
         <StyledResourceTable
           rows={selected.map(s => {
@@ -79,7 +80,16 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
           })}
         />
       </ModalScroll>
-    </Modal>
+      <Footer>
+        <ButtonRow>
+          {mutation.isLoading && <Loader />}
+          <Button onClick={() => setShowModal(false)}>Cancel</Button>
+          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+            Copy
+          </ButtonSolidBlue>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

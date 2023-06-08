@@ -3,14 +3,18 @@ import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { KeyIcon } from '../../../components/icons/KeyIcon'
 import { QuestionIcon } from '../../../components/icons/QuestionIcon'
-import { hidePagination, Pagination } from '../../../components/Pagination'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { useGenerateKeyModal } from '../../auth/useGenerateKeyModal'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable, StyledPaginationSection } from '../home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
@@ -49,13 +53,14 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
       scope: scope || undefined,
     },
   })
-  const { status, data, error, isFetching } = query
+  const { status, data, error } = query
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
     data?.assets,
   )
   const actions = useAssetActions({ scope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
+  const generateCLIKeyAction = useGenerateKeyModal()
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -66,10 +71,14 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
           <QuickActions>
             <ButtonSolidBlue
               as="a"
-              href="/assets/new"
+              data-turbolinks="false"
+              href="/docs/assets"
               data-testid="home-assets-create-link"
             >
-              <QuestionIcon /> How to create assets
+              <QuestionIcon height={13} /> How to create assets
+            </ButtonSolidBlue>
+            <ButtonSolidBlue onClick={() => generateCLIKeyAction.setShowModal(true)}>
+              <KeyIcon height={13} />Generate CLI Key
             </ButtonSolidBlue>
           </QuickActions>
           <Dropdown
@@ -111,23 +120,22 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <StyledPaginationSection>
+
+      <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.current_page!}
-          totalCount={data?.meta?.pagination?.total_count!}
-          totalPages={data?.meta?.pagination?.total_pages!}
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.assets?.length,
-            data?.meta?.pagination?.total_pages,
-          )}
-          isPreviousData={data?.meta?.pagination?.prev_page! !== null}
-          isNextData={data?.meta?.pagination?.next_page! !== null}
-          setPage={setPageParam}
-          onPerPageSelect={setPerPageParam}
+          isHidden={false}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
-      </StyledPaginationSection>
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
+
       {actions['Delete']?.modal}
       {actions['Download']?.modal}
       {actions['Attach to...']?.modal}
@@ -136,6 +144,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Rename']?.modal}
+      {generateCLIKeyAction?.modalComp}
     </>
   )
 }
@@ -207,7 +216,7 @@ export const AssetsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={scope as any}
+        shouldResetFilters={[scope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no assets here.</EmptyTable>}

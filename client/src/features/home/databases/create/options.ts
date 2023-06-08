@@ -1,18 +1,17 @@
-export const HOME_DATABASE_ENGINE_TYPES = {
-  'MySQL': 'aurora-mysql',
-  'PostgreSQL': 'aurora-postgresql',
-}
+export type DatabaseEngineType =
+  | 'aurora-mysql'
+  | 'aurora-postgresql'
+
+// NOTE(samuel): you can find configuration of dbcluster instance versions in nucleus repo
+// nucleus/commons/@dnanexus/dx-dbcluster-instance-types/aws_rds_instance_types.json
 
 export const HOME_DATABASE_MYSQL_INSTANCE_VERSIONS = {
-  V_5_7_12: '5.7.12',
+  V_5_7_12: '5.7.mysql_aurora.2.07.8',
 }
 
 export const HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS = {
-  V_9_6_16: '9.6.16',
-  V_9_6_17: '9.6.17',
-  V_9_6_18: '9.6.18',
-  V_9_6_19: '9.6.19',
-  V_10_14: '10.14',
+  V_11_16: '11.16',
+  V_12_9: '12.9',
 }
 
 export const HOME_DATABASE_INSTANCE_CLASSES = [
@@ -24,6 +23,7 @@ export const HOME_DATABASE_INSTANCE_CLASSES = [
   'db_mem1_x32',
   'db_mem1_x48',
   'db_mem1_x64',
+  'db_mem1_x96',
 ]
 
 export const HOME_DATABASE_INSTANCES = {
@@ -35,6 +35,7 @@ export const HOME_DATABASE_INSTANCES = {
   DB_MEM1_X32: 'db_mem1_x32',
   DB_MEM1_X48: 'db_mem1_x48',
   DB_MEM1_X64: 'db_mem1_x64',
+  DB_MEM1_X96: 'db_mem1_x96',
 }
 
 export const HOME_DATABASE_LABELS = {
@@ -46,6 +47,7 @@ export const HOME_DATABASE_LABELS = {
   'db_mem1_x32': 'DB Mem 1 x 32',
   'db_mem1_x48': 'DB Mem 1 x 48',
   'db_mem1_x64': 'DB Mem 1 x 64',
+  'db_mem1_x96': 'DB Mem 1 x 96',
   'aurora-mysql': 'MySQL',
   'aurora-postgresql': 'PostgreSQL',
   'available': 'Available',
@@ -57,7 +59,7 @@ export const HOME_DATABASE_LABELS = {
   'terminating': 'Terminating',
 }
 
-const checkDisabledInstances = (engine: string) => { return !engine }
+const checkDisabledInstances = (engine: string) => !engine
 
 export const instancesOptions = (engine?: string) => engine ? [
   {
@@ -100,53 +102,42 @@ export const instancesOptions = (engine?: string) => engine ? [
     label: HOME_DATABASE_LABELS['db_mem1_x64'],
     isDisabled: checkDisabledInstances(engine),
   },
+  {
+    value: HOME_DATABASE_INSTANCES.DB_MEM1_X96,
+    label: HOME_DATABASE_LABELS['db_mem1_x96'],
+    isDisabled: checkDisabledInstances(engine),
+  },
 ] : []
 
-const hideMysqlVersions = (engine: string) => { return engine === HOME_DATABASE_ENGINE_TYPES['PostgreSQL'] }
-const hidePgVersions = (engine: string) => { return engine === HOME_DATABASE_ENGINE_TYPES['MySQL'] }
+const checkDisabledVersions = (engine: string, dxInstanceClass: string) => !(dxInstanceClass && engine)
 
-const restrictedPgInstances = [
-  HOME_DATABASE_INSTANCES.DB_STD1_X2,
-  HOME_DATABASE_INSTANCES.DB_MEM1_X2,
-  HOME_DATABASE_INSTANCES.DB_MEM1_X4,
-  HOME_DATABASE_INSTANCES.DB_MEM1_X8,
-  HOME_DATABASE_INSTANCES.DB_MEM1_X16,
-  HOME_DATABASE_INSTANCES.DB_MEM1_X48,
-]
-
-const hidePgVersionsForSomeInstances = (dxInstanceClass: string) => { return restrictedPgInstances.includes(dxInstanceClass) }
-const checkDisabledVersions = (engine: string, dxInstanceClass: string) => { return !(dxInstanceClass && engine) }
-
-export const versionsOptions = (engine?: string, dxInstanceClass?: string) => engine && dxInstanceClass ? [
-  {
-    value: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
-    label: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hideMysqlVersions(engine),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_16,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine) || hidePgVersionsForSomeInstances(dxInstanceClass),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_17,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_17,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine) || hidePgVersionsForSomeInstances(dxInstanceClass),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_18,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_18,
-    hide: hidePgVersions(engine) || hidePgVersionsForSomeInstances(dxInstanceClass),
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine) || hidePgVersionsForSomeInstances(dxInstanceClass),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_9_6_19,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine) || hidePgVersionsForSomeInstances(dxInstanceClass),
-  },
-  {
-    value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14,
-    label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_10_14,
-    isDisabled: checkDisabledVersions(engine, dxInstanceClass) || hidePgVersions(engine),
-  },
-]: []
+export const versionsOptions = (engine: DatabaseEngineType | null, dxInstanceClass?: string) => {
+  if (!dxInstanceClass) {
+    return []
+  }
+  switch (engine) {
+    case 'aurora-postgresql':
+      return [
+        {
+          value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_11_16,
+          label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_11_16,
+          isDisabled: checkDisabledVersions(engine, dxInstanceClass),
+        },
+        {
+          value: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_12_9,
+          label: HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS.V_12_9,
+          isDisabled: checkDisabledVersions(engine, dxInstanceClass),
+        },
+      ]
+    case 'aurora-mysql':
+      return [
+        {
+          value: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
+          label: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
+          isDisabled: checkDisabledVersions(engine, dxInstanceClass),
+        },
+      ]
+    default:
+      return []
+  }
+}

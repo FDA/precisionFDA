@@ -87,8 +87,9 @@ module.exports = {
 
   // A map from regular expressions to module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    '^.+\\.(css|sass|scss)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|md|html)$': 'identity-obj-proxy',
+    '^.+\\.(css|sass|scss)$': '<rootDir>/src/mocks/fileMock.ts',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|md|html)$': '<rootDir>/src/mocks/fileMock.ts',
+    'react-markdown': '<rootDir>/node_modules/react-markdown/react-markdown.min.js',
  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -136,18 +137,24 @@ module.exports = {
   // setupFiles: [],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  setupFilesAfterEnv: ['jest-enzyme'],
+  setupFilesAfterEnv: ['./jest.setup.js'],
 
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   // snapshotSerializers: [],
 
-  // The test environment that will be used for testing
-  testEnvironment: 'enzyme',
-
   // Options that will be passed to the testEnvironment
-  testEnvironmentOptions: {
-    enzymeAdapter: 'react16',
-  },
+  // testEnvironmentOptions: {
+  //   enzymeAdapter: 'react16',
+  // },
+    
+  // The test environment that will be used for testing
+  testEnvironment: 'jest-environment-jsdom',
+
+  moduleDirectories: [
+    'node_modules',
+    './src/utils',
+    __dirname,
+  ],
 
   // Adds a location field to test results
   // testLocationInResults: false,
@@ -180,12 +187,14 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   // transform: undefined,
+  transform: {
+    '^.+\\.(ts|tsx|js)?$': ['@swc/jest'],
+  },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  // transformIgnorePatterns: [
-    // "/node_modules/"
-    // "/node_modules/react-markdown"
-  // ],
+  transformIgnorePatterns: [
+    'react-markdown',
+  ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,

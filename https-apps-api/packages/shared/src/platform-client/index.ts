@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
 import { isNil, omit } from 'ramda'
@@ -8,10 +9,18 @@ import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 import { OrgMembershipError } from '../errors'
-import { BaseParams, CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, FindSpaceMembersParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, ListFilesParams, MoveFilesParams, RemoveFolderParams, RenameFolderParams, UserResetMfaParams, UserUnlockParams } from './platform-client.params'
-import { JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, ListFilesResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
- DescribeFilesResponse, FindSpaceMembersReponse } from './platform-client.responses'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import {
+  CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
+  FileCloseParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
+  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams, UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams, FileDescribeParams,
+} from './platform-client.params'
+import {
+  JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
+  FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
+  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
+  WorkflowDescribeResponse, AppDescribeResponse
+} from './platform-client.responses'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -24,11 +33,18 @@ export enum PlatformErrors {
 const defaultLog = getLogger('platform-client-logger')
 
 class PlatformClient {
+  accessToken: string
   log: Logger
-  constructor(logger?: Logger) {
+
+  constructor(accessToken: string, logger?: Logger) {
+    this.accessToken = accessToken
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     this.log = logger ?? defaultLog
   }
+
+  // ---------------
+  //    J O B S
+  // ---------------
 
   async jobCreate(params: JobCreateParams): Promise<JobCreateResponse> {
     const url = `${config.platform.apiUrl}/${params.appId}/run`
@@ -36,16 +52,8 @@ class PlatformClient {
       method: 'POST',
       data: { ...omit(['accessToken', 'appId'], params) },
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async jobTerminate(params: JobTerminateParams): Promise<JobTerminateResponse> {
@@ -54,16 +62,8 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async renameFolder(params: RenameFolderParams): Promise<ClassIdResponse> {
@@ -75,16 +75,8 @@ class PlatformClient {
         name: params.newName,
       },
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async removeFolderRec(params: RemoveFolderParams): Promise<ClassIdResponse> {
@@ -96,16 +88,8 @@ class PlatformClient {
         recurse: true,
       },
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async jobDescribe(params: JobDescribeParams): Promise<JobDescribeResponse> {
@@ -114,57 +98,161 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
-  async findSpaceMembers(params: FindSpaceMembersParams): Promise<FindSpaceMembersReponse> {
-    const url = `${config.platform.apiUrl}/${params.spaceOrg}/findMembers`
+
+  // ----------------------
+  //    F I L E S
+  // ----------------------
+
+  /**
+   * Removes user from provided organization. Also revokes access to projects & apps associated with org.
+   * API: /file-xxxx/close
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-close
+   */
+  async fileClose(params: FileCloseParams): Promise<FileCloseResponse> {
+    const url = `${config.platform.apiUrl}/${params.fileDxid}/close`
     const options: AxiosRequestConfig = {
       method: 'POST',
+      // Need empty payload to pass platform validation
       data: {},
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
-  async filesListPaginated(params: ListFilesParams): Promise<ListFilesResponse> {
-    let nextMapping: ListFilesParams['starting']
-    const results: ListFilesResponse['results'] = []
-    // use reduce?
-    const paginateSeq = async (): Promise<void> => {
-      do {
-        // eslint-disable-next-line no-await-in-loop
-        const res = await this.filesList({ ...params, starting: nextMapping })
-        if (!isNil(res.next)) {
-          // eslint-disable-next-line require-atomic-updates
-          nextMapping = { id: res.next.id, project: res.next.project }
-        } else {
-          // eslint-disable-next-line require-atomic-updates
-          nextMapping = undefined
-        }
-        results.push(...res.results)
-      } while (!isNil(nextMapping))
+  /**
+   * Describe a single file's attributes
+   * API: /file-xxxx/describe
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
+   */
+  async fileDescribe(params: FileDescribeParams): Promise<FileDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.fileDxid}/describe`
+    const data: AnyObject = {
+      project: params.projectDxid,
+      defaultFields: true,
     }
-    await paginateSeq()
-    return { results }
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+    }
+    return await this.sendRequest(options, url)
   }
+
+  async fileStatesPaginated(
+    params: FileStatesParams,
+    starting: Starting | undefined,
+  ): Promise<FileStatesResponse> {
+    const data: AnyObject = {
+      class: 'file',
+      limit: config.platform.findDataObjectsQueryLimit,
+      id: params.fileDxids,
+      scope: {
+        project: params.projectDxid,
+        recurse: true,
+      },
+      describe: {
+        fields: {
+          name: true,
+          size: true,
+          state: true,
+        },
+      },
+    }
+    if (!isNil(starting)) {
+      data.starting = starting
+    }
+
+    // Documentation for platform API /system/findDataObjects
+    // https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
+    const url = `${config.platform.apiUrl}/system/findDataObjects`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Given a list of fileDxids, query platform the the current file states
+   * This is designed to only query files within the same dx project, because without the project hint
+   * the /system/findDataObjects call is very inefficient and can take a long time
+   */
+  async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping) => this.fileStatesPaginated(params, nextMapping))
+  }
+
+  private async filesListPaginated(
+    params: ListFilesParams,
+    starting: Starting | undefined,
+  ): Promise<ListFilesResponse> {
+    const data: AnyObject = {
+      class: 'file',
+      limit: config.platform.findDataObjectsQueryLimit,
+    }
+    if (!isNil(starting)) {
+      data.starting = starting
+    }
+
+    const scope = {
+      project: params.project,
+      folder: params.folder ?? '/',
+      recurse: false,
+    }
+    data.scope = scope
+    if (!isNil(params.includeDescProps)) {
+      data.describe = {
+        fields: {
+          name: true,
+          created: true,
+          modified: true,
+          size: true,
+          state: true,
+        },
+      }
+    }
+    // Documentation for platform API /system/findDataObjects
+    // https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
+    const url = `${config.platform.apiUrl}/system/findDataObjects`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping) => this.filesListPaginated(params, nextMapping))
+  }
+
+  /**
+   * Creates a download link for the file
+   * API: /file-xxxx/download
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-download
+   */
+  async fileDownloadLink(params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
+    const url = `${config.platform.apiUrl}/${params.fileDxid}/download`
+    const data = {
+      ...omit(['fileDxid'], params),
+      preauthenticated: true,
+    }
+
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  // ----------------------
+  //    F O L D E R S
+  // ----------------------
 
   async foldersList(params: DescribeFoldersParams): Promise<DescribeFoldersResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/describe`
@@ -172,16 +260,8 @@ class PlatformClient {
       method: 'POST',
       data: { fields: { folders: true } },
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async folderCreate(params: CreateFolderParams): Promise<ClassIdResponse> {
@@ -194,16 +274,8 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async filesMoveToFolder(params: MoveFilesParams): Promise<ClassIdResponse> {
@@ -217,17 +289,13 @@ class PlatformClient {
       method: 'POST',
       data,
       url,
-      headers: this.setupHeaders(params),
     }
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
+
+  // -----------------------
+  //    D B C L U S T E R
+  // -----------------------
 
   async dbClusterAction(
     params: DbClusterActionParams,
@@ -238,17 +306,9 @@ class PlatformClient {
       method: 'POST',
       data: {},
       url,
-      headers: this.setupHeaders(params),
     }
 
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async dbClusterCreate(params: DbClusterCreateParams): Promise<ClassIdResponse> {
@@ -257,17 +317,9 @@ class PlatformClient {
       method: 'POST',
       data: { ...omit(['accessToken'], params) },
       url,
-      headers: this.setupHeaders(params),
     }
 
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
   async dbClusterDescribe(params: DbClusterDescribeParams): Promise<DbClusterDescribeResponse> {
@@ -276,29 +328,64 @@ class PlatformClient {
       method: 'POST',
       data: { ...omit(['accessToken', 'dxid'], params) },
       url,
-      headers: this.setupHeaders(params),
     }
 
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
+    return await this.sendRequest(options, url)
   }
 
+  // ---------------
+  //    U S E R S
+  // ---------------
+
+  async findSpaceMembers(params: FindSpaceMembersParams): Promise<FindSpaceMembersReponse> {
+    const url = `${config.platform.apiUrl}/${params.spaceOrg}/findMembers`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Invites user to provided organization.
+   * @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+   */
+  async inviteUserToOrganization(params: UserInviteToOrgParams): Promise<UserInviteToOrgResponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/invite`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Removes user from provided organization. Also revokes access to projects & apps associated with org.
+   * @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+   */
+  async removeUserFromOrganization(params: UserRemoveFromOrgParams): Promise<UserRemoveFromOrgResponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxId}/removeMember`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  // TODO - Refactor auth API into a separate class
   async userResetMfa(params: UserResetMfaParams) {
     const url = `${config.platform.authApiUrl}/${params.dxid}/resetUserMFA`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: params.data,
       url,
-      headers: this.setupHeaders(params.headers),
     }
 
     try {
+      options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
@@ -318,10 +405,10 @@ class PlatformClient {
       method: 'POST',
       data: params.data,
       url,
-      headers: this.setupHeaders(params.headers),
     }
 
     try {
+      options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
@@ -335,37 +422,143 @@ class PlatformClient {
     }
   }
 
-  private async filesList(params: ListFilesParams): Promise<ListFilesResponse> {
-    const data: AnyObject = {
-      class: 'file',
-      limit: config.platform.findDataObjectsQueryLimit,
-      starting: params.starting,
-    }
-    const scope = {
-      project: params.project,
-      folder: params.folder ?? '/',
-      recurse: false,
-    }
-    data.scope = scope
-    if (!isNil(params.includeDescProps)) {
-      data.describe = {
-        fields: {
-          name: true,
-          size: true,
-          state: true,
-        },
-      }
-    }
-    // Documentation for platform API /system/findDataObjects
-    // https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
-    const url = `${config.platform.apiUrl}/system/findDataObjects`
+  // ---------------------
+  //    P R O J E C T S
+  // ---------------------
+
+  /**
+ * Creates a new project
+ * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
+ * @param {string} name - OPTIONAL - overrides new project name.
+ * @param {Space} space - used for project name, can be overriden by name param.
+ * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
+ */
+  async projectCreate(params: any): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/project/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data,
+      data: {
+        name: params.name ?? `precisionfda-${params.space.uid}-${SPACE_MEMBERSHIP_SIDE[params.admin.side]}`,
+        billTo: params.admin.user.getEntity().organization.getEntity().getDxOrg(),
+      },
       url,
-      headers: this.setupHeaders(params),
     }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Invite org or user in project.
+   *  @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-invite
+   *  @param {string} invitee - OrgDxID, UserID or user's email.
+   *  @param {string} level - Permission level.
+   *  @return [don't know yet]
+  */
+  async projectInvite(params: any): Promise<{ id: string, state: string }> {
+    const url = `${config.platform.apiUrl}/${params.projectDxid}/invite`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        invitee: params.invitee,
+        level: params.level,
+        // might add to params later for optional configuration
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async projectDescribe(params: any): Promise<any> {
+    const url = `${config.platform.apiUrl}/${params.projectDxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.body,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  // ---------------------
+  //    ENTITY-DESCRIBE
+  // ---------------------
+
+  async appDescribe(params: AppDescribeParams): Promise<AppDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async workflowDescribe(params: WorkflowDescribeParams): Promise<WorkflowDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+
+  // -----------------
+  //    S Y S T E M
+  // -----------------
+
+  /**
+   * Describe data objects
+   * @see https://documentation.dnanexus.com/developer/api/system-methods#api-method-system-describedataobjects
+   * @param {any[]} objects
+   * @param {any} classDescribeOptions
+   * For param details look at platform API page
+   */
+  async describeDataObjects(params: DescribeDataObjectsParams): Promise<DescribeDataObjectsResponse> {
+    const url = `${config.platform.apiUrl}/system/describeDataObjects`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+
+  // ---------------
+  //    U T I L S
+  // ---------------
+
+  /**
+   * Utility method for iterating through paginated queries and aggregating all results
+   * @param requestFunc Function that calls the platform request, remember to insert the new
+   *                    starting params to the reqeust
+   * @returns Results of the aggregated request
+   */
+  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(requestFunc: (starting: Starting | undefined) => Promise<TResponse>): Promise<T[]> {
+    let nextMapping: Starting | undefined
+    const results: T[] = []
+    const paginateSeq = async (): Promise<void> => {
+      do {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await requestFunc(nextMapping)
+        if (!isNil(res.next)) {
+          // eslint-disable-next-line require-atomic-updates
+          nextMapping = { id: res.next.id, project: res.next.project }
+        } else {
+          // eslint-disable-next-line require-atomic-updates
+          nextMapping = undefined
+        }
+        results.push(...res.results)
+      } while (!isNil(nextMapping))
+    }
+    await paginateSeq()
+    return results
+  }
+
+  private async sendRequest(options: AxiosRequestConfig, url: string) {
     try {
+      options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
       const res = await axios.request(options)
       return res.data
@@ -379,17 +572,20 @@ class PlatformClient {
     const sanitized = maskAuthHeader(options.headers)
     this.log.info(
       { requestOptions: { ...options, headers: sanitized }, url },
-      'Running DNANexus API request',
+      'PlatformClient: Running DNANexus API request',
     )
   }
 
   private logClientFailed(options: AxiosRequestConfig): void {
     const sanitized = {}
-    this.log.warn({ requestOptions: { ...options, headers: sanitized } }, 'Error: Failed request options')
+    this.log.warn(
+      { requestOptions: { ...options, headers: sanitized } },
+      'PlatformClient Error: Failed request options',
+    )
   }
 
-  private setupHeaders(params: BaseParams): AnyObject {
-    return { authorization: `Bearer ${params.accessToken}` }
+  private setupHeaders(): AnyObject {
+    return { authorization: `Bearer ${this.accessToken}` }
   }
 
   private handleFailed(
@@ -455,7 +651,6 @@ export {
   JobCreateResponse,
   ListFilesResponse,
   ClassIdResponse,
-  DescribeFilesResponse,
   JobCreateParams,
   DescribeFoldersResponse,
   DbClusterCreateParams,

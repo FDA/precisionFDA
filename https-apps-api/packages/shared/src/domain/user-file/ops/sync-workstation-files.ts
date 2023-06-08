@@ -8,7 +8,7 @@ import { Job } from "../../job"
 import { Tag } from "../../tag/tag.entity"
 import { Folder } from "../folder.entity"
 import { assignTags } from "../user-file-tags"
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from "../user-file.enum"
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from "../user-file.types"
 import { SyncFilesInFolderOperation, SyncFolderFilesOutput } from "./sync-folder-files"
 import { SyncFoldersOperation } from "./sync-folders"
 
@@ -28,7 +28,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
     const job = await jobRepo.findOne({ dxid: input.dxid })
-    const client = new PlatformClient(this.ctx.log)
+    const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     if (!job) {
       this.ctx.log.warn({ input }, 'Job does not exist')
       await removeRepeatable(this.ctx.job)
@@ -39,7 +39,6 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
 
     const projectDesc = await client.foldersList({
       projectId: job.project,
-      accessToken: this.ctx.user.accessToken,
     })
     const syncFoldersOp = new SyncFoldersOperation({
       log: this.ctx.log,
@@ -64,7 +63,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     const fileDeletesSeq = async (): Promise<void> => {
       for (const folder of folderPathsToCheck) {
         // !!!
-        const syncFilesEm = this.ctx.em.fork(true)
+        const syncFilesEm = this.ctx.em.fork()
         const syncFilesInFolderOp = new SyncFilesInFolderOperation({
           log: this.ctx.log,
           // operations run in parallel, they should have their own DB context
@@ -90,7 +89,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     const fileAddsSeq = async (): Promise<void> => {
       for (const folder of folderPathsToCheck) {
         // !!!
-        const syncFilesEm = this.ctx.em.fork(true)
+        const syncFilesEm = this.ctx.em.fork()
         const syncFilesInFolderOp = new SyncFilesInFolderOperation({
           log: this.ctx.log,
           // operations run in parallel, they should have their own DB context

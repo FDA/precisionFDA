@@ -20,6 +20,9 @@
     "noEmit": true,
     "jsx": "react",
     "typeRoots" : ["node_modules/@types", "src/types"],
+    "paths": {
+      "test-utils": ["./src/utils/test-utils"]
+    },
   },
   "include": [
     "src"

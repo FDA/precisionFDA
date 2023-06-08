@@ -1,19 +1,19 @@
 /* eslint-disable no-undefined */
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
+import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 const createUserCheckupTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getStatusQueue()
   await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
-    payload: undefined,
+    type: queue.types.TASK_TYPE.USER_CHECKUP,
     user,
   })
 }
@@ -27,7 +27,7 @@ describe('TASK: user-checkup', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })
@@ -41,10 +41,6 @@ describe('TASK: user-checkup', () => {
   })
 
   it('processes a queue task - calls the queue handlers', async () => {
-    // await queue.createUserCheckupTask({
-    //   type: queue.types.TASK_TYPE.USER_CHECKUP,
-    //   user: userContext,
-    // })
     await createUserCheckupTask(userContext)
     expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
   })
@@ -114,5 +110,64 @@ describe('TASK: user-checkup', () => {
     expect(payload1).to.have.property('dxid', job1.dxid)
     const [payload2] = fakes.queue.createSyncJobStatusTaskFake.getCall(1).args
     expect(payload2).to.have.property('dxid', job3.dxid)
+  })
+
+  it('does not add SyncFilesStateTask if user has no open files', async () => {
+    const params = {
+      parentId: user.id,
+      parentType: PARENT_TYPE.USER,
+      state: FILE_STATE_DX.CLOSED,
+    }
+    create.filesHelper.create(em, { user }, { name: 'file1', ...params })
+    create.filesHelper.create(em, { user }, { name: 'file2', ...params })
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+
+    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
+  })
+
+  it('adds SyncFilesStateTask if user has an open file', async () => {
+    const params = {
+      parentId: user.id,
+      parentType: PARENT_TYPE.USER,
+      state: FILE_STATE_DX.OPEN,
+    }
+    create.filesHelper.create(em, { user }, { name: 'file1', ...params })
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+
+    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
+  })
+
+  it('adds SyncFilesStateTask if user has an open asset', async () => {
+    const params = {
+      parentId: user.id,
+      parentType: PARENT_TYPE.USER,
+      state: FILE_STATE_DX.OPEN,
+    }
+    create.filesHelper.create(em, { user }, { name: 'asset1', ...params })
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+
+    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
+  })
+
+  it('does not add SyncFilesStateTask if a task already exists', async () => {
+    const params = {
+      parentId: user.id,
+      parentType: PARENT_TYPE.USER,
+      state: FILE_STATE_DX.OPEN,
+    }
+    create.filesHelper.create(em, { user }, { name: 'file1', ...params })
+    await em.flush()
+
+    fakes.queue.findRepeatableFake.callsFake(() => generate.bullQueueRepeatable.syncFilesState(user.dxuser))
+
+    await createUserCheckupTask(userContext)
+
+    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
   })
 })

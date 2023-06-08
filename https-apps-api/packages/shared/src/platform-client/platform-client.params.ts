@@ -1,14 +1,19 @@
 import { AnyObject } from '../types'
 
-// TODO(samuel) refactor this so that headers aren't mixed with URL params
-type BaseParams = {
-  accessToken: string
+type Starting = {
+  project: string
+  id: string
 }
 
-type JobDescribeParams = BaseParams & { jobId: string }
-type JobTerminateParams = BaseParams & { jobId: string }
+interface IPaginatedParams {
+  // the API uses it as a starting point when doing pagination
+  starting?: Starting
+}
 
-type JobCreateParams = BaseParams & {
+type JobDescribeParams = { jobId: string }
+type JobTerminateParams = { jobId: string }
+
+type JobCreateParams = {
   appId: string
   project: string
   name?: string
@@ -24,52 +29,88 @@ type JobCreateParams = BaseParams & {
   }
 }
 
-type ListFilesParams = BaseParams & {
+type ListFilesParams = IPaginatedParams & {
   project: string
   folder?: string
   includeDescProps?: boolean
-  // the API uses it as a starting point when doing pagination
-  starting?: {
-    project: string
-    id: string
-  }
 }
 
-type DescribeFilesParams = BaseParams & {
+type FileCloseParams = {
+  fileDxid: string
+}
+
+type FileDescribeParams = {
+  fileDxid: string
+  projectDxid: string
+}
+
+type FileDownloadLinkParams = {
+  fileDxid: string
+  filename: string
+  project: string
+  duration: number // in seconds
+}
+
+type FileStatesParams = {
+  fileDxids: string[]
+  projectDxid: string
+}
+
+type DescribeFilesParams = {
   fileIds: string[]
 }
 
-type DescribeFoldersParams = BaseParams & {
+type DescribeFoldersParams = {
   projectId: string
 }
 
-type RenameFolderParams = BaseParams & {
+type RenameFolderParams = {
   folderPath: string
   newName: string
   projectId: string
 }
 
-type RemoveFolderParams = BaseParams & {
+type RemoveFolderParams = {
   folderPath: string
   projectId: string
 }
 
-type CreateFolderParams = BaseParams & {
+type CreateFolderParams = {
   folderPath: string
   projectId: string
 }
 
-type FindSpaceMembersParams = BaseParams & {
+type FindSpaceMembersParams = {
   spaceOrg: string
 }
 
-type MoveFilesParams = BaseParams & {
+type UserInviteToOrgParams = {
+  orgDxId: string
+  data: {
+    invitee: string
+    level: 'MEMBER' | 'ADMIN'
+    projectAccess?: 'ADMINISTER' | 'CONTRIBUTE' | 'UPLOAD' | 'VIEW' | 'NONE'
+    allowBillableActivities?: boolean
+    appAccess?: boolean
+    suppressEmailNotification?: boolean
+  }
+}
+type UserRemoveFromOrgParams = {
+  orgDxId: string
+  data: {
+    user: string
+    revokeProjectPermissions?: boolean
+    revokeAppsPermissions?: boolean
+  }
+}
+
+type MoveFilesParams = {
   destinationFolderPath: string
   fileIds: string[]
   projectId: string
 }
 
-type DbClusterCreateParams = BaseParams & {
+type DbClusterCreateParams = {
   name: string
   project: string
   engine: string
@@ -78,15 +119,18 @@ type DbClusterCreateParams = BaseParams & {
   adminPassword: string
 }
 
-type DbClusterDescribeParams = BaseParams & {
+type DbClusterDescribeParams = {
   dxid: string
   project?: string
 }
 
-type DbClusterActionParams = BaseParams & { dxid: string }
+type DbClusterActionParams = { dxid: string }
+
+type DescribeDataObjectsParams = {
+  objects: Array<string | Record<string, string>>
+}
 
 type UserResetMfaParams = {
-  headers: BaseParams
   dxid: string
   data: {
     user_id: string
@@ -95,7 +139,6 @@ type UserResetMfaParams = {
 }
 
 type UserUnlockParams = {
-  headers: BaseParams
   dxid: string
   data: {
     user_id: string
@@ -103,8 +146,23 @@ type UserUnlockParams = {
   }
 }
 
+type AppDescribeParams = {
+  dxid: string
+  data: {}
+}
+type WorkflowDescribeParams = {
+  dxid: string
+  data: {}
+}
+
 export {
-  BaseParams,
+  Starting,
+  IPaginatedParams,
+  FileCloseParams,
+  FileDescribeParams,
+  FileDownloadLinkParams,
+  FileStatesParams,
+  ListFilesParams,
   JobDescribeParams,
   JobCreateParams,
   JobTerminateParams,
@@ -116,9 +174,13 @@ export {
   DbClusterCreateParams,
   DescribeFilesParams,
   FindSpaceMembersParams,
+  UserInviteToOrgParams,
+  UserRemoveFromOrgParams,
   RemoveFolderParams,
   RenameFolderParams,
-  ListFilesParams,
+  DescribeDataObjectsParams,
   UserResetMfaParams,
-  UserUnlockParams
+  UserUnlockParams,
+  AppDescribeParams,
+  WorkflowDescribeParams,
 }

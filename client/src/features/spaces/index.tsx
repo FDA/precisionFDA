@@ -1,21 +1,23 @@
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import { UserLayout } from '../../views/layouts/UserLayout'
+import { usePageMeta } from '../../hooks/usePageMeta'
+import { UserLayout } from '../../layouts/UserLayout'
 import { CreateSpace } from './form/CreateSpace'
 import { DuplicateSpace } from './form/DuplicateSpace'
 import { SpaceSettings } from './form/SpaceSettings'
 import { SpaceShow } from './show/SpaceShow'
-import { Spaces2List } from './SpacesList'
+import SpacesList from './SpacesList'
 
 
-export const Spaces = () => {
+const Spaces = () => {
+  usePageMeta({ title: 'Spaces - precisionFDA' })
   const { path } = useRouteMatch()
 
   return (
     <UserLayout>
       <Switch>
         <Route exact path={`${path}`}>
-          <Spaces2List />
+          <SpacesList />
         </Route>
         <Route exact path={`${path}/:spaceId/edit`}>
           <SpaceSettings />
@@ -33,3 +35,5 @@ export const Spaces = () => {
     </UserLayout>
   )
 }
+
+export default Spaces

@@ -1,20 +1,13 @@
-import axios from 'axios'
-import { useQuery } from 'react-query'
 import { IUser } from '../../types/user'
+import { useAuthUserQuery } from './api'
 
-export function useAuthUserQuery() {
-  return useQuery(['auth-user'], {
-    queryFn: () => axios.get<{ user: IUser }>('/api/user').then(r => r.data),
-    staleTime: Infinity,
-    cacheTime: Infinity,
-    retry: 1,
-  })
-}
 
 export function useAuthUser(): IUser | undefined {
   const { data } = useAuthUserQuery()
   const user: Partial<IUser> = {}
-  user.isGovUser = data?.user?.email?.includes('fda.hhs.gov') || false
+
+  const emailDomain = data?.user?.email?.split('@').pop()
+  user.isGovUser = emailDomain === 'fda.hhs.gov'
   user.isAdmin = data?.user?.can_administer_site || false
-  return data?.user === undefined ? undefined : ({ ...data.user, ...user })
+  return data?.user === undefined ? undefined : ({ ...data.user, ...user, session_id: data?.meta.session_id })
 }

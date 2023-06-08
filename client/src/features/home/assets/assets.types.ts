@@ -1,3 +1,6 @@
+import { ServerScope } from "../types";
+import { FileStatus } from "../files/files.types";
+
 export enum AppActions {
   "Run" = "Run",
   "Run batch" = "Run batch",
@@ -55,6 +58,7 @@ export interface IAsset {
   uid: string;
   dxid: string;
   entity_type: string;
+  state: FileStatus
   file_size: string;
   file_license: FileLicense,
   show_license_pending: boolean,
@@ -80,6 +84,7 @@ export interface IAsset {
   } | string,
   explorers: number;
   featured: boolean;
+  scope: ServerScope;
   active: boolean;
   links: Links;
   tags: any[];
