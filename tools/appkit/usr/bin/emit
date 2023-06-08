@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -e -o pipefail
+
+if [[ "$#" != 2 ]]
+then
+  echo 'Usage: emit <output_field_name> <value>' 1>&2
+  echo '       (2 arguments expected; '"$#"' given)' 1>&2
+  exit 1
+fi
+
+if ! test -e /tmp/.tmp.fields
+then
+  dx describe $DX_JOB_ID --json | jq -r .app >/tmp/.tmp.appid
+  dx describe $(< /tmp/.tmp.appid) --json | jq '[.outputSpec | .[] | {(.name): .class}] | add' >/tmp/.tmp.fields
+fi
+
+jq -r --arg out "$1" '.[$out]' < /tmp/.tmp.fields >/tmp/.tmp.class
+
+if [[ "$(< /tmp/.tmp.class)" == "" || "$(< /tmp/.tmp.class)" == "null" ]]
+then
+  echo "Emit: Invalid output field '$1'" 1>&2
+  exit 1
+fi
+
+rm -f /tmp/.temp_job_error.json
+if test -e /home/dnanexus/job_error.json
+then
+  mv /home/dnanexus/job_error.json /tmp/.temp_job_error.json
+fi
+
+if [[ "$(< /tmp/.tmp.class)" == "file" ]]
+then
+  mark-section "uploading local file '$2' as output field '$1'"
+  dx upload --no-progress --brief "$2" >/tmp/.tmp.uploaded_file_id
+  value="$(< /tmp/.tmp.uploaded_file_id)"
+else
+  value="$2"
+fi
+
+mark-section "setting output field '$1'"
+dx-jobutil-add-output --class "$(< /tmp/.tmp.class)" -o /home/dnanexus/job_output.json "$1" "$value"
+
+if test -e /tmp/.temp_job_error.json
+then
+  mv -f /tmp/.temp_job_error.json /home/dnanexus/job_error.json
+else
+  rm -f /home/dnanexus/job_error.json
+fi
+
