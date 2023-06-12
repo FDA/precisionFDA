@@ -36,12 +36,12 @@ module FilesConcern
 
   def determine_scope_name(scope)
     scope = "space" if Space.valid_scope?(scope)
-
-    case scope
-    when "private" then "My files"
-    when "public" then "Explore"
-    when "featured" then "Featured"
-    when "space" then "Files"
-    end
+    scope_names = {
+      "private" => "My files",
+      "public" => "Everyone",
+      "featured" => "Featured",
+      "space" => "Files",
+    }
+    scope_names[scope]
   end
 end

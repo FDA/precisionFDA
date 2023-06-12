@@ -10,21 +10,16 @@ export interface FetchFilesQuery {
   meta: IMeta
 }
 
-
-
-export async function fetchFiles(
-  filters: IFilter[],
-  params: Params,
-): Promise<FetchFilesQuery> {
+export async function fetchFiles(filters: IFilter[], params: Params): Promise<FetchFilesQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${  new URLSearchParams(query as {}).toString()}`
+  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
   const scopeQ = formatScopeQ(params.scope)
 
   const res = await fetch(`/api/files${scopeQ}${paramQ}`).then(checkStatus)
   return res.json()
 }
 
-export async function fetchFile(uid: string): Promise<{ files: IFile, meta: any }> {
+export async function fetchFile(uid: string): Promise<{ files: IFile; meta: any }> {
   const res = await fetch(`/api/files/${uid}`).then(checkStatus)
   return res.json()
 }
@@ -35,9 +30,23 @@ export async function fetchTrack(fileId: number) {
 }
 
 export async function fetchFilesDownloadList(ids: string[], scope?: string) {
-  return axios.post('/api/files/download_list', {
-    task: 'delete', ids, scope,
-  }).then(r => r.data as DownloadListResponse[])
+  return axios
+    .post('/api/files/download_list', {
+      task: 'delete',
+      ids,
+      scope,
+    })
+    .then(r => r.data as DownloadListResponse[])
+}
+
+export async function fetchFilesListLockingRequest(ids: string[], scope?: string, task?: string) {
+  return axios
+    .post('/api/files/download_list', {
+      task,
+      ids,
+      scope,
+    })
+    .then(r => r.data as DownloadListResponse[])
 }
 
 export async function deleteFilesRequest(ids: string[]) {
@@ -50,8 +59,18 @@ export async function lockUnlockFilesRequest(ids: string[], type: LockUnlockActi
   return axios.post(`/api/nodes/${type}`, { ids }).then(r => r.data)
 }
 
-export async function addFolderRequest({ name }: { name: string }, parentFolderId?: string, spaceId?: string, scope?: ResourceScope) {
-  const data = cleanObject({ name, parent_folder_id: parentFolderId ?? null, public: scope === 'everybody' ? 'true' : null, space_id: spaceId ?? undefined })
+export async function addFolderRequest(
+  { name }: { name: string },
+  parentFolderId?: string,
+  spaceId?: string,
+  scope?: ResourceScope,
+) {
+  const data = cleanObject({
+    name,
+    parent_folder_id: parentFolderId ?? null,
+    public: scope === 'everybody' ? 'true' : null,
+    space_id: spaceId ?? null,
+  })
   const res = await fetch('/api/files/create_folder', {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify(data),
@@ -59,7 +78,7 @@ export async function addFolderRequest({ name }: { name: string }, parentFolderI
   return res.json()
 }
 
-export async function featureFileRequest({ ids, uids, featured }: { ids: string[], uids: string[], featured: boolean }) {
+export async function featureFileRequest({ ids, uids, featured }: { ids: string[]; uids: string[]; featured: boolean }) {
   const res = await fetch('/api/files/feature', {
     ...getApiRequestOpts('PUT'),
     body: JSON.stringify({ item_ids: [...ids, ...uids], featured }),
@@ -72,19 +91,21 @@ export async function copyFilesRequest(scope: string, ids: string[]) {
   return axios.post('/api/files/copy', { item_ids, scope }).then(r => r.data)
 }
 
-export async function editFileRequest({ name, description, fileId }: { name: string, description: string, fileId: string }) {
+export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {
   const res = await fetch(`/api/files/${fileId}`, {
     ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ file: { name, description }}),
+    body: JSON.stringify({ file: { name, description } }),
   }).then(checkStatus)
   return res.json()
 }
 
-export async function editFolderRequest({ name, folderId }: { name: string, folderId?: string }) {
-  const res = await (await fetch('/api/folders/rename_folder', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ name, folder_id: folderId ?? null }),
-  })).json()
+export async function editFolderRequest({ name, folderId }: { name: string; folderId?: string }) {
+  const res = await (
+    await fetch('/api/folders/rename_folder', {
+      ...getApiRequestOpts('POST'),
+      body: JSON.stringify({ name, folder_id: folderId ?? null }),
+    })
+  ).json()
   return res
 }
 
@@ -97,7 +118,7 @@ export async function uploadFilesRequest(blobs: any[]) {
 }
 
 export interface FetchFolderChildrenResponse {
-  nodes: IFile[];
+  nodes: IFile[]
 }
 
 export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string, folderId?: string) => {
