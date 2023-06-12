@@ -19,6 +19,8 @@ module Api
     DELETE_ACTION = "delete".freeze
     COPY_ACTION = "copy".freeze
     COPY_TO_PRIVATE_ACTION = "copy_to_private".freeze
+    LOCK_ACTION = "lock".freeze
+    UNLOCK_ACTION = "unlock".freeze
 
     ORDER_FIELDS = {
       "created_at" => "created_at",
@@ -334,9 +336,28 @@ module Api
              }
     end
 
+    # used in POST /api/files/download_list
+    # Filtering nodes for locking and unlocking.
+    def process_nodes(task)
+      nodes = Node.editable_by(@context).where(id: params[:ids])
+      files = nodes.flat_map { |node| node.is_a?(Folder) ? node.all_children : node }
+      files.select! { |file| file.scope == params[:scope] }
+
+      case task
+      when LOCK_ACTION
+        files.reject!(&:locked?)
+      when UNLOCK_ACTION
+        files.select!(&:locked?)
+      else
+        raise ApiError, "Parameter 'task' is not defined!"
+      end
+
+      files
+    end
     # POST /api/files/download_list
     # Responds with the files list.
     # This only works for Spaces now.
+    # rubocop:disable Metrics/MethodLength
     def download_list
       task = params[:task]
       files = []
@@ -345,6 +366,8 @@ module Api
       when DOWNLOAD_ACTION, OPEN_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
         nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
+      when LOCK_ACTION, UNLOCK_ACTION
+        process_nodes(task)
       when PUBLISH_ACTION
         nodes = Node.editable_by(@context).
           where(id: params[:ids]).
@@ -370,7 +393,7 @@ module Api
              scope_name: params[:scope] || SCOPE_PRIVATE,
              action_name: task
     end
-
+    # rubocop:enable Metrics/MethodLength
     # GET /api/files/download
     # Responds with a link to download a file.
     def download
