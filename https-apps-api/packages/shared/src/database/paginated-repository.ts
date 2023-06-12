@@ -96,7 +96,7 @@ export abstract class PaginatedEntityRepository<T extends BaseEntity> extends En
       qb.orderBy({ [resolveColumnNode(orderBy)]: orderDir })
     }
     const entities = await qb.getResult()
-    const count: any = await qb.count('id').execute('run', true)
+    const count: any = await qb.clone().count('id').execute('run', true)
     const totalCount = count[0].count as number
     return this.transformPaginatedResponse(entities, totalCount, page, perPage)
   }
