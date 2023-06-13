@@ -121,6 +121,7 @@ export interface IExecution {
   duration: string
   instance_type: string
   launched_by: string
+  launched_by_dxuser: string
   launched_on: string
   location: string
   revision: number

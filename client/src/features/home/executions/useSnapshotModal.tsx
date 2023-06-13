@@ -131,7 +131,9 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
       queryClient.invalidateQueries(['jobs'])
       queryClient.invalidateQueries(['execution', selected.uid])
       setShowModal(false)
-      toast.success('Creating snapshot. The snapshot file will appear in My Home shortly after its completion.')
+      const isSpaceScope = selected.scope.startsWith('space')
+      const scopeString = isSpaceScope ? 'the Space' : 'My Home'
+      toast.success(`Creating snapshot. The snapshot file will appear in ${scopeString} shortly after its completion.`)
     },
   })
 

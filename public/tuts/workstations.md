@@ -871,7 +871,7 @@ Docker stop
 
 dx-create-snapshot
 
-dx ls -al *snapshot
+pfda ls -files | grep snapshot
 ```
 
 ### Terminate the Workstation
