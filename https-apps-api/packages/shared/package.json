@@ -29,14 +29,14 @@
     "@types/mjml": "^4.7.0",
     "@types/nodemailer": "^6.4.7",
     "@types/ramda": "^0.27.28",
-    "chance": "^1.1.7",
-    "eslint": "^8.33.0",
-    "json-schema": "^0.4.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
+    "chance": "^1.1.7",
     "dirty-chai": "^2.0.1",
-    "prettier": "^2.1.2",
+    "eslint": "^8.33.0",
+    "json-schema": "^0.4.0",
     "mocha": "^8.4.0",
+    "prettier": "^2.1.2",
     "sinon": "^9.2.3"
   },
   "dependencies": {
@@ -45,7 +45,6 @@
     "@mikro-orm/reflection": "^5.6.3",
     "@types/bull": "^3.15.9",
     "@types/pino": "^7.0.5",
-    "pino-pretty": "^9.1.1",
     "@types/ramda": "^0.27.28",
     "@types/tough-cookie": "^4.0.2",
     "ajv": "^8.0.5",
@@ -54,6 +53,7 @@
     "bull": "^4.8.5",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
+    "compare-versions": "^6.0.0-rc.1",
     "dirty-chai": "^2.0.1",
     "dotenv": "^8.2.0",
     "luxon": "^1.28.1",
@@ -62,8 +62,9 @@
     "nodemailer": "^6.7.7",
     "p-limit": "^3.1.0",
     "pino": "^8.9.0",
-    "redis": "^4.3.1",
+    "pino-pretty": "^9.1.1",
     "ramda": "^0.27.1",
+    "redis": "^4.3.1",
     "tough-cookie": "^4.1.2"
   }
 }

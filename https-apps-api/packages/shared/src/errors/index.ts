@@ -45,6 +45,7 @@ export enum ErrorCodes {
   MFA_ALREADY_RESET = 'E_MFA_ALREADY_RESET',
   ORG_MEMBERSHIP_ERROR = 'E_ORG_MEMBERSHIP_ERROR',
   INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR',
+  INCOMPATIBLE_VERSION_ERROR = 'E_INCOMPATIBLE_VERSION',
   WORKSTATION_API_ERROR = 'E_WORKSTATION_API_ERROR',
 }
 
@@ -96,6 +97,19 @@ export class ValidationError extends BaseError {
   ) {
     super(message, {
       code: ErrorCodes.VALIDATION,
+      statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class IncompatibleVersionError extends BaseError {
+  constructor(
+    message = 'Error: Incompatible version',
+    props: MaybeBaseErrorProps & { validationErrors?: any } = {},
+  ) {
+    super(message, {
+      code: ErrorCodes.INCOMPATIBLE_VERSION_ERROR,
       statusCode: 400,
       ...props,
     })

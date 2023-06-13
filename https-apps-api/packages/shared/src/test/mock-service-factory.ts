@@ -38,6 +38,7 @@ class MockServiceFactory extends ServiceFactory {
     oauthAccess: sinon.stub(),
     alive: sinon.stub(),
     setAPIKey: sinon.stub(),
+    setPFDAConfig: sinon.stub(),
     snapshot: sinon.stub(),
     reset: () => {
       this.workstationClient.oauthAccess.callsFake(() => {})
@@ -48,6 +49,9 @@ class MockServiceFactory extends ServiceFactory {
 
       this.workstationClient.setAPIKey.callsFake(() => ({ result: 'success' }))
       this.workstationClient.setAPIKey.resetHistory()
+
+      this.workstationClient.setPFDAConfig.callsFake(() => ({ result: 'success' }))
+      this.workstationClient.setPFDAConfig.resetHistory()
 
       this.workstationClient.snapshot.callsFake(() => ({ result: 'success' }))
       this.workstationClient.snapshot.resetHistory()
