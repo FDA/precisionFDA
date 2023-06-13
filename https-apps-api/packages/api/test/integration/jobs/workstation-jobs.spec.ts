@@ -9,14 +9,19 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { TASK_TYPE } from 'shared/src/queue/task.input'
-import { WorkstationSnapshotOperation } from 'shared/src/domain/job'
+import { TASK_TYPE } from '@pfda/https-apps-shared/src/queue/task.input'
+import { WorkstationSnapshotOperation } from '@pfda/https-apps-shared/src/domain/job'
+import { Space } from '@pfda/https-apps-shared/src/domain'
 
 describe('PATCH /jobs/:id/setAPIKey', () => {
   let em: EntityManager
   let user: User
-  let app: App
-  let job: Job
+  let app_v1_0: App
+  let app_v1_1: App
+  let job_v1_0: Job
+  let job_v1_1: Job
+  let space: Space
+  let job_in_space: Job
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -24,16 +29,30 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.RUNNING })
+    app_v1_0 = create.appHelper.createHTTPS(em, { user }, {
+      spec: generate.app.ttydAppSpecData(),
+      internal: generate.app.ttydAppInternalWithAPI('1.0.0')
+    })
+    app_v1_1 = create.appHelper.createHTTPS(em, { user },{
+      spec: generate.app.ttydAppSpecData(),
+      internal: generate.app.ttydAppInternalWithAPI('1.1.0')
+    })
+    job_v1_0 = create.jobHelper.create(em, { user, app: app_v1_0 }, { scope: 'private', state: JOB_STATE.RUNNING })
+    job_v1_1 = create.jobHelper.create(em, { user, app: app_v1_1 }, { scope: 'private', state: JOB_STATE.RUNNING })
 
+    space = create.spacesHelper.create(em, generate.space.group())
+		create.spacesHelper.addMember(em, { user, space: space })
+    await em.flush()
+
+    // Space needs id before we assign its scope to job
+    job_in_space = create.jobHelper.create(em, { user, app: app_v1_1 }, { scope: space.scope, state: JOB_STATE.RUNNING })
     await em.flush()
     mocksReset()
   })
 
-  it('works', async () => {
+  it('works for v1.0.0', async () => {
     const response = await supertest(getServer())
-      .patch(`/jobs/${job.dxid}/setAPIKey`)
+      .patch(`/jobs/${job_v1_0.dxid}/setAPIKey`)
       .query({ ...getDefaultQueryData(user) })
       .send({ key: 'hello world', code: 'code from auth server' })
 
@@ -46,9 +65,46 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     expect(fakes.workstationClient.setAPIKey.getCall(0).args[0]).to.equal('hello world')
   })
 
+  it('works for v1.1.0 without space', async () => {
+    const response = await supertest(getServer())
+      .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({ key: 'hello world', code: 'code from auth server' })
+
+    expect(response.statusCode).to.equal(200)
+    expect(response.body).to.be.deep.equal({ 'result': 'success' })
+    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal(
+      ['code from auth server']
+    )
+    expect(fakes.workstationClient.setPFDAConfig.calledOnce).to.be.true()
+    expect(fakes.workstationClient.setPFDAConfig.getCall(0).args[0]).to.deep.equal({
+      Key: 'hello world',
+      Server: 'localhost:3000',
+    })
+  })
+
+  it('works with space job', async () => {
+    const response = await supertest(getServer())
+      .patch(`/jobs/${job_in_space.dxid}/setAPIKey`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({ key: 'hello world', code: 'code from auth server' })
+
+    expect(response.statusCode).to.equal(200)
+    expect(response.body).to.be.deep.equal({ 'result': 'success' })
+    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal(
+      ['code from auth server']
+    )
+    expect(fakes.workstationClient.setPFDAConfig.calledOnce).to.be.true()
+    expect(fakes.workstationClient.setPFDAConfig.getCall(0).args[0]).to.deep.equal({
+      Key: 'hello world',
+      Server: 'localhost:3000',
+      Scope: `space-${space.id}`,
+    })
+  })
+
   it('doesnt call the platform API if api key is empty', async () => {
     const response = await supertest(getServer())
-      .patch(`/jobs/${job.dxid}/setAPIKey`)
+      .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .query({ ...getDefaultQueryData(user) })
       .send({})
 
@@ -57,10 +113,10 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('does not call workstation API if the job is already finished', async () => {
-    job.state = JOB_STATE.TERMINATED
+    job_v1_1.state = JOB_STATE.TERMINATED
     await em.flush()
     const response = await supertest(getServer())
-      .patch(`/jobs/${job.dxid}/setAPIKey`)
+      .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .query({ ...getDefaultQueryData(user) })
       .send({ key: 'hello world', code: 'code from auth server' })
 
@@ -80,10 +136,10 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('throws error when the job type is NOT HTTPS', async () => {
-    job.entityType = ENTITY_TYPE.NORMAL
+    job_v1_1.entityType = ENTITY_TYPE.NORMAL
     await em.flush()
     const response = await supertest(getServer())
-      .patch(`/jobs/${job.dxid}/setAPIKey`)
+      .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .query({ ...getDefaultQueryData(user) })
       .send({ key: 'hello world', code: 'code from auth server' })
 
@@ -107,7 +163,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, {
       spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppWithAPIInternal()
+      internal: generate.app.ttydAppInternalWithAPI('1.1.0'),
     })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.RUNNING })
 

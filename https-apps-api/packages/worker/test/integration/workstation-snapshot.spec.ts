@@ -31,9 +31,13 @@ describe('TASK: workstation-snapshot', () => {
   let httpsApp: App
   let httpsJob: Job
 
-  // HTTPS app / job that has workstation API
+  // HTTPS app / job that has workstation API v1.0
   let httpsAppWithAPI: App
   let httpsJobWithAPI: Job
+
+  // HTTPS app / job that has workstation API v1.1
+  let httpsAppWithAPI_v1_1: App
+  let httpsJobWithAPI_v1_1: Job
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -51,9 +55,15 @@ describe('TASK: workstation-snapshot', () => {
 
     httpsAppWithAPI = create.appHelper.createHTTPS(em, { user }, {
       spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppWithAPIInternal(),
+      internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
     })
     httpsJobWithAPI = create.jobHelper.create(em, { user, app: httpsAppWithAPI }, { scope: 'private', state: JOB_STATE.RUNNING })
+
+    httpsAppWithAPI_v1_1 = create.appHelper.createHTTPS(em, { user }, {
+      spec: generate.app.ttydAppSpecData(),
+      internal: generate.app.ttydAppInternalWithAPI('1.1.0'),
+    })
+    httpsJobWithAPI_v1_1 = create.jobHelper.create(em, { user, app: httpsAppWithAPI_v1_1 }, { scope: 'private', state: JOB_STATE.RUNNING })
 
     await em.flush()
     mocksReset()

@@ -91,6 +91,9 @@ const createQueues = async (): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
+  // TODO - doing 'await clearOrphanedRepeatableJobs' will cause nodejs-api tests to fail
+  //        by exceeding timeout on GitHub but it works fine locally.
+  //        Find a better solution at some point.
   const removedJobs = clearOrphanedRepeatableJobs(mainQueue)
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }

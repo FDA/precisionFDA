@@ -148,10 +148,10 @@ const app = {
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
       packages: ['ipython', 'pkg-config'],
     }),
-  ttydAppWithAPIInternal: () =>
+  ttydAppInternalWithAPI: (version: string) =>
     JSON.stringify({
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
-      platform_tags: ['pfda_workstation_api:1.0.0'],
+      platform_tags: [`pfda_workstation_api:${version}`],
       packages: ['ipython', 'pkg-config'],
     }),
   regular: (): Partial<InstanceType<typeof entities.App>> => {

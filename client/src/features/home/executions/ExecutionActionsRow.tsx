@@ -49,6 +49,7 @@ export const ExecutionActionsRow = ({
     resourceKeys: ['execution', execution.uid],
   })
   const hasWorkstationAPI = execution.workstation_api_version !== null
+  const isJobOwner = user?.dxuser === execution.launched_by_dxuser
 
   const onSyncFilesClick = () => {
     if (execution.state === 'running') {
@@ -77,15 +78,15 @@ export const ExecutionActionsRow = ({
           <SyncIcon />
         </StyledRefresh>
       )}
-      {execution.links.open_external && (
+      {isJobOwner && execution.links.open_external && (
           <ButtonSolidBlue onClick={onOpenWorkstationClick}>
             Open Workstation
           </ButtonSolidBlue>
       )}
-      {hasWorkstationAPI && execution.links.open_external && (
+      {isJobOwner && hasWorkstationAPI && execution.links.open_external && (
         <ButtonSolidBlue onClick={() => actions['Snapshot'].func()}>Snapshot</ButtonSolidBlue>
       )}
-      {execution.links.sync_files && (
+      {isJobOwner && execution.links.sync_files && (
         <ButtonSolidBlue onClick={onSyncFilesClick}>Sync Files</ButtonSolidBlue>
       )}
       <Link to={`/apps/${execution.links.app?.replace('/apps/', '')}/jobs/new`}>
