@@ -36,3 +36,6 @@ default["nodejs"]["binary"]["checksum"] = "33ecf5f39618f4beb90a9be98880325cb4f06
 default["nodejs"]["prefix"] = "/usr/local/nodejs-binary-#{default["nodejs"]["version"]}" # The location to install global items.
 default["nodejs"]["bin_path"] = "/usr/local/nodejs-binary/bin/"
 default["nodejs"]["worker"]["instances"] = 2
+
+default["qualys"]["version"] = "5.0.2.4"
+default["qualys"]["activate"] = true
