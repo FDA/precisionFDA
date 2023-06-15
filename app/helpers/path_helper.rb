@@ -136,11 +136,11 @@ module PathHelper
       end
     when "workflow"
       return workflow_analyses_path(item) if request.referer =~ /analyses/
-      concat_path(item)
+      pathify_comments(item)
     when "expert", "expert-question", "meta-appathon", "appathon", "comparison", "answer"
       pathify(item)
     when "file", "folder", "app", "job", "asset"
-      concat_path(item)
+      pathify_comments(item)
     else
       raise "Unknown class #{item.klass}"
     end
