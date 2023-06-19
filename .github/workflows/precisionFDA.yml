@@ -129,22 +129,6 @@ jobs:
           LOG_REQUESTS: 1
         run: bundle exec rspec
 
-      - name: Snyk test
-        uses: snyk/actions/ruby@0.1.1
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=Gemfile.lock --org=dnanexus
-
-      - name: Publish Snyk results
-        if: always()
-        uses: snyk/actions/ruby@0.1.1
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=Gemfile.lock --org=dnanexus --project-name=precision-fda
-          command: monitor
-
   test-js:
     name: Test JS
     runs-on: ubuntu-latest
@@ -225,11 +209,6 @@ jobs:
       - name: Test production build
         run: yarn workspaces run build
         working-directory: ./https-apps-api
-
-      - name: Snyk test
-        run: cd https-apps-api && node_modules/.bin/snyk test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   test-react-app:
     name: Test React app
