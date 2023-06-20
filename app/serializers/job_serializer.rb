@@ -31,6 +31,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :scope,
     :location,
     :launched_by,
+    :launched_by_dxuser,
     :launched_on,
     :featured,
     :links,
@@ -111,6 +112,12 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
   # @return [String] User full_name.
   def launched_by
     added_by_fullname
+  end
+
+  # Returns the dxuser who has created this Job.
+  # @return [String] dxuser
+  def launched_by_dxuser
+    added_by
   end
 
   # Writer for formatted launched_on time.
