@@ -76,15 +76,15 @@ describe('POST /apps/:id/run', () => {
         run_outputs: {},
       }),
     )
-    expect(jobInDb).to.have.property(
-      'provenance',
-      JSON.stringify({
+    var provenance = jobInDb?.provenance
+    expect(provenance).to.deep.equal(
+      {
         [generate.job.jobId()]: {
           app_dxid: app.dxid,
           app_id: app.id,
           inputs: {},
         },
-      }),
+      },
     )
   })
 
@@ -129,8 +129,8 @@ describe('POST /apps/:id/run', () => {
       .send(input)
       .expect(201)
     const jobInDb = await em.findOne(Job, { id: body.id })
-    const provenance = JSON.parse((jobInDb?.provenance as unknown) as string)
-    expect(provenance).to.be.deep.equal({
+    var provenanceInDb = jobInDb?.provenance
+    expect(provenanceInDb).to.be.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: app.dxid,
         app_id: app.id,
@@ -240,8 +240,8 @@ describe('POST /apps/:id/run', () => {
       })
     const jobInDb = await em.findOne(Job, { id: body.id })
     expect(jobInDb).to.have.property('provenance')
-    const provenance = JSON.parse((jobInDb?.provenance as unknown) as string)
-    expect(provenance).to.be.deep.equal({
+    var provenanceInDb = jobInDb?.provenance
+    expect(provenanceInDb).to.be.deep.equal({
       [generate.job.jobId()]: {
         app_dxid: rshinyApp.dxid,
         app_id: rshinyApp.id,

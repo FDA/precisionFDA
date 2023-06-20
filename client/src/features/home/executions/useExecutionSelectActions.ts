@@ -1,4 +1,4 @@
-import { pick } from 'ramda'
+import { omit, pick } from 'ramda'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
@@ -31,6 +31,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user ? user.admin : false
+  const isJobOwner = user?.dxuser === selected[0]?.launched_by_dxuser
 
   const featureMutation = useFeatureMutation({ resource: 'jobs', onSuccess: () => {
     queryClient.invalidateQueries(resourceKeys)
@@ -160,12 +161,25 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.launched_by !== user?.full_name) || (selected.length !== 1),
+      shouldHide: (!isAdmin && isJobOwner) || (selected.length !== 1),
     },
   }
 
   if(scope === 'spaces') {
-    actions = pick(['Terminate', 'Copy to space', 'Attach to...'], actions)
+    if (isJobOwner) {
+      actions = omit([
+        'Make Public',
+        'Feature',
+        'Unfeature',
+      ], actions)
+    } else {
+      // If the user is not the owner of the job in a space, they cannot connect
+      // to the workstation or perform other actions where ownership is needed
+      actions = pick([
+        'Copy to space',
+        'Attach to...',
+      ], actions)
+    }
   }
 
   return actions

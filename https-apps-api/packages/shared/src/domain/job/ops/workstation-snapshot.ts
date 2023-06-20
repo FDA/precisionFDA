@@ -9,6 +9,7 @@ import { TASK_TYPE } from '../../../queue/task.input'
 import { createSyncWorkstationFilesTask } from '../../../queue'
 import { JOB_STATE } from '../job.enum'
 import { getServiceFactory } from '../../../services/service-factory'
+import { compareVersions } from 'compare-versions'
 
 
 export interface WorkstationSnapshotOperationParams {
@@ -73,16 +74,22 @@ any
         'WorkstationSnapshotOperation: Received snapshot response',
       )
 
+      const apiVersion = job.app?.getEntity().workstationAPIVersion
       if (res.result === 'success') {
-        try {
-          // Snapshot is created, now we should invoke workstation sync for the file to appear in My Home
-          await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
-        } catch (err) {
-          log.info({ err },
-            // Most likely a sync file operation already queued up or processing,
-            // either because user invoked Snapshot twice quickly or they had clicked Sync Files
-            'WorkstationSnapshotOperation: Unable to queue SyncWorkstationFiles',
-          )
+        // For workstations running API prior to v1.1, the snapshot tool still relies on dx CLI
+        // and so we need to sync the snapshot over
+        const usesDXSnapshotTool = apiVersion ? compareVersions(apiVersion, '1.1') < 0 : false
+        if (usesDXSnapshotTool) {
+          try {
+            // Snapshot is created, now we should invoke workstation sync for the file to appear in My Home
+            await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
+          } catch (err) {
+            log.info({ err },
+              // Most likely a sync file operation already queued up or processing,
+              // either because user invoked Snapshot twice quickly or they had clicked Sync Files
+              'WorkstationSnapshotOperation: Unable to queue SyncWorkstationFiles',
+            )
+          }
         }
 
         const message = input.terminate

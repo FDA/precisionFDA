@@ -17,6 +17,7 @@ import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
 import { formatDuration, isStateActive, isStateTerminal } from './job.helper'
+import { getIdFromScopeName, isValidScopeName } from '../space/space.helper'
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
@@ -132,6 +133,18 @@ export class Job extends BaseEntity {
 
   isTerminal(): boolean {
     return isStateTerminal(this.state)
+  }
+
+  isSpaceScope(): boolean {
+    return isValidScopeName(this.scope)
+  }
+
+  getSpaceId(): number | undefined {
+    try {
+      return getIdFromScopeName(this.scope)
+    } catch {
+      return undefined
+    }
   }
 
   // Calculated as the time during which the job stayed in running state
