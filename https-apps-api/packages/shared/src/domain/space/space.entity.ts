@@ -54,6 +54,11 @@ export class Space extends BaseEntity {
     return getScopeFromSpaceId(this.id)
   }
 
+  @Property({ persist: false })
+  get scope(): string {
+    return `space-${this.id}`
+  }
+
   isConfidential(): boolean {
     return this.spaceId !== null
   }

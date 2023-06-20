@@ -1,23 +1,31 @@
 /* eslint-disable max-len */
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import { compareVersions } from 'compare-versions'
 import type { Logger } from 'pino'
 import { CookieJar } from 'tough-cookie'
 import { errors } from '..'
 import { maskAuthHeader } from '../utils/logging'
 import { getLogger } from '../logger'
-import { Job } from '../domain/job/job.entity'
 
 
-type SnapshotParams = {
+export type SnapshotParams = {
   name?: string
   terminate: boolean
 }
 
+export type CLIConfigParams = {
+  Key: string
+  Server?: string
+  Scope?: string
+}
+
 interface IWorkstationClient {
+  apiVersion: string
   oauthAccess(authToken: string): Promise<void>
   alive(): Promise<boolean>
   snapshot(params: SnapshotParams): Promise<any>
   setAPIKey(key: string): Promise<void>
+  setPFDAConfig(params: CLIConfigParams): Promise<void>
 }
 
 
@@ -43,6 +51,8 @@ class WorkstationClient implements IWorkstationClient {
   // hostname of the workstation derived from job describe
   private readonly host: string
   private readonly workstationUrl: string
+  // apiVersion if undefined is assumed to be the latest
+  public apiVersion: string
 
   cookie: string
 
@@ -120,9 +130,9 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 
-  // Alive check
-  // returns { 'result': 'success' }
-  //
+  /**
+   * Alive check for workstation API
+   */
   async alive(): Promise<boolean> {
     this.validateCookie()
 
@@ -139,8 +149,11 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 
-  // Create a wokrstation snapshot
-  //
+  /**
+   * Create a wokrstation snapshot
+   *
+   * Available on workstation_api v1.0 or above
+  */
   async snapshot(params: SnapshotParams): Promise<any> {
     this.validateCookie()
 
@@ -154,8 +167,11 @@ class WorkstationClient implements IWorkstationClient {
     return await this.sendRequest(options)
   }
 
-  // Set the pFDA CLI key
-  //
+  /**
+   * Set the pFDA CLI key
+   *
+   * Available on workstation_api v1.0 or above
+   */
   async setAPIKey(key: string): Promise<void> {
     this.validateCookie()
 
@@ -169,9 +185,31 @@ class WorkstationClient implements IWorkstationClient {
     return await this.sendRequest(options)
   }
 
-  protected async sendRequest(options: AxiosRequestConfig, returnFullResponse?: boolean) {
-    this.log.info({ options }, 'WorkstationClient: sendRequest start')
+  /**
+   * Set the pFDA Config
+   *
+   * Available on workstation_api v1.1 or above
+   */
+  async setPFDAConfig(params: CLIConfigParams): Promise<void> {
+    if (this.apiVersion && compareVersions(this.apiVersion, '1.1') < 0) {
+      const message = `Error: Cannot use /api/setPFDAConfig because job's api version (${this.apiVersion}) is less than 1.1`
+      this.log.error(message)
+      throw new errors.IncompatibleVersionError(message)
+    }
 
+    this.validateCookie()
+
+    const url = `${this.baseUrl}/setPFDAConfig`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      headers: this.setupHeaders(),
+      data: JSON.stringify(params),
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  protected async sendRequest(options: AxiosRequestConfig, returnFullResponse?: boolean) {
     returnFullResponse = returnFullResponse ?? false
     try {
       this.logClientRequest(options)
@@ -197,12 +235,16 @@ class WorkstationClient implements IWorkstationClient {
     }
   }
 
+  protected maskRequestData(data: any): void {
+    return (data && data.Key) ? {...data, 'Key': '[masked]'} : data
+  }
+
   protected logClientRequest(options: AxiosRequestConfig): void {
-    this.log.info({ options }, 'WorkstationClient: logClientRequest')
     const sanitized = maskAuthHeader(options.headers)
+    const data = this.maskRequestData(options.data)
     this.log.info(
       {
-        requestOptions: { ...options, headers: sanitized },
+        requestOptions: { ...options, headers: sanitized, data },
         url: options.url,
       },
       'WorkstationClient: Running Workstation request',
@@ -211,9 +253,10 @@ class WorkstationClient implements IWorkstationClient {
 
   protected logClientFailed(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
+    const data = this.maskRequestData(options.data)
     this.log.warn(
       {
-        requestOptions: { ...options, headers: sanitized },
+        requestOptions: { ...options, headers: sanitized, data },
         url: options.url,
       },
       'WorkstationClient: Error request failed',
