@@ -36,7 +36,7 @@ describe('app.entity tests', () => {
 
     httpsAppWithAPI = create.appHelper.createHTTPS(em, { user }, {
       spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppWithAPIInternal(),
+      internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
     })
     httpsJobWithAPI = create.jobHelper.create(em, { user, app: httpsAppWithAPI }, { scope: 'private', state: JOB_STATE.RUNNING })
 

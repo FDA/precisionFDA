@@ -4,7 +4,7 @@ ix.home= "<%= @TOMCAT_PATH %>/ginas.ix"
 #application.host= "http://localhost:8080"
 application.host="<%= @HOST %>/ginas/app"
 spring.application.name="substances"
-logging.file.path=<%= @TOMCAT_PATH %>/logs/substances
+logging.file.path="<%= @TOMCAT_PATH %>/logs/substances"
 ##################################################################
 # SPRING BOOT ACTUATOR SETTINGS FOR MICROSERVICE HEALTH CHECKS  ##
 ##################################################################
@@ -16,7 +16,7 @@ spring.main.allow-bean-definition-overriding=true
 #this is how HOCON does default values
 #eureka.client.serviceUrl.defaultZone= "http://localhost:8761/eureka"
 #eureka.client.serviceUrl.defaultZone= ${?EUREKA_SERVER}
-ix.ginas.export.path=<%= @TOMCAT_PATH %>/gsrs_exports
+ix.ginas.export.path="<%= @TOMCAT_PATH %>/gsrs_exports"
 gsrs.renderers.selected="USP"
 
 #In order to allow the resolve name feature in some servers, a proxy may be needed
@@ -46,8 +46,8 @@ ix.authentication.autoregisteractive=true
 spring.jpa.hibernate.use-new-id-generator-mappings=false
 spring.datasource.driverClassName="org.mariadb.jdbc.Driver"
 spring.datasource.url="<%= @GSRS_DATABASE_URL %>"
-spring.datasource.username=<%= @GSRS_DATABASE_USERNAME %>
-spring.datasource.password=<%= @GSRS_DATABASE_PASSWORD %>
+spring.datasource.username="<%= @GSRS_DATABASE_USERNAME %>"
+spring.datasource.password="<%= @GSRS_DATABASE_PASSWORD %>"
 spring.datasource.hikari.maximum-pool-size= 500 #maximum pool size
 
 # Spring Boot Config

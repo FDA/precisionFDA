@@ -8,6 +8,10 @@ import { Job } from '.'
 import { JOB_STATE } from './job.enum'
 import { getServiceFactory } from '../../services/service-factory'
 import { IWorkstationClient } from '../../workstation-client'
+import { CLIConfigParams } from '../../workstation-client/workstation-client'
+import { compareVersions } from 'compare-versions'
+import { config } from '../..'
+import { omit } from 'ramda'
 
 
 // Service handling communicating with workstation API
@@ -32,7 +36,7 @@ class WorkstationService {
     }
 
     const jobRepo = this.ctx.em.getRepository(Job)
-    const job = await jobRepo.findOne({ dxid: jobDxid })
+    const job = await jobRepo.findOne({ dxid: jobDxid }, { populate: ['app'] })
     if (!job) {
       throw new errors.JobNotFoundError()
     }
@@ -72,6 +76,10 @@ class WorkstationService {
     // this.ctx.log.info(`WorkstationService: got authToken ${this.authToken}, calling oauth`)
 
     this.client = getServiceFactory().getWorkstationClient(this.jobUrl, this.axiosInstance)
+    const apiVersion = this.job.app?.getEntity().workstationAPIVersion
+    if (apiVersion) {
+      this.client.apiVersion = apiVersion
+    }
     await this.client.oauthAccess(this.authToken)
   }
 
@@ -97,8 +105,27 @@ class WorkstationService {
   async setAPIKey(key: string): Promise<void> {
     this.checkRunningWorkstation()
     this.checkValidSession()
-    this.ctx.log.info('WorkstationService: setAPIKey')
-    return await this.client.setAPIKey(key)
+    if (compareVersions(this.client.apiVersion, '1.1') < 0) {
+      this.ctx.log.info('WorkstationService: setAPIKey')
+      return await this.client.setAPIKey(key)
+      }
+    else {
+      const pfdaConfig: CLIConfigParams = {
+        Key: key,
+      }
+      if (config.api.railsHost) {
+        const hostUrl = new URL(config.api.railsHost)
+        pfdaConfig.Server = hostUrl.port ? `${hostUrl.hostname}:${hostUrl.port}` : hostUrl.hostname
+      }
+      if (this.job.isSpaceScope()) {
+        pfdaConfig.Scope = this.job.scope
+      }
+
+      this.ctx.log.info({
+        ...omit(['Key'], pfdaConfig),
+      }, 'WorkstationService: setPFDAConfig')
+      return await this.client.setPFDAConfig(pfdaConfig)
+    }
   }
 
   async snapshot(key: string, name: string, terminate: boolean): Promise<any> {
