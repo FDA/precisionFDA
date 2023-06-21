@@ -252,10 +252,10 @@ export const useSpacesColumns = ({
           Cell: ({ row }) => (
             <SpaceTableCounterCell>
               <SpaceTableCounterItem>
-                <FileIcon /> {row.original?.counters.apps}
+                <FileIcon /> {row.original?.counters.files}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
-                <CubeIcon height={14} /> {row.original?.counters.files}
+                <CubeIcon height={14} /> {row.original?.counters.apps}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <BoltIcon /> {row.original?.counters.jobs}
