@@ -10,12 +10,11 @@ default[:gsrs][:tomcat_path] = "/opt/gsrs"
 default[:gsrs][:tomcat_version] = "10.0.8"
 default[:gsrs][:tomcat_user] = "gsrs"
 default[:gsrs][:tomcat_group] = "gsrs"
-default[:gsrs][:tomcat_memory_min] = "4G"
-default[:gsrs][:tomcat_memory_max] = "12G"
-default[:gsrs][:tomcat_start] = true
+default[:gsrs][:index_path] = "s3://gsrs-indexes-#{node.environment}/ginas.ix/"
 default[:gsrs][:repo_url] = "https://github.com/dnanexus/gsrs-play-dist.git"
 default[:gsrs][:revision] = "gsrs_PROD"
-default[:gsrs][:index_path] = "s3://gsrs-indexes-#{node.environment}/ginas.ix/"
+default[:gsrs][:tomcat_start] = true
+default[:gsrs][:catalina_opts] = "-Xms4G -Xmx12G"
 
 default[:deploy_user] = deploy_user
 default[:deploy_user_group] = deploy_user

@@ -87,16 +87,17 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
   )
 end
 
-if node[:gsrs][:tomcat_start]
-  tomcat_service "gsrs" do
-    action :start
-    service_name "gsrs"
-    install_path node[:gsrs][:tomcat_path]
-    tomcat_user node[:gsrs][:tomcat_user]
-    tomcat_group node[:gsrs][:tomcat_group]
-    env_vars [
-               { "CATALINA_PID" => node[:gsrs][:tomcat_path] + "/bin/tomcat.pid" },
-               { "CATALINA_OPTS" => "-Xms" + node[:gsrs][:tomcat_memory_min] + " -Xmx" + node[:gsrs][:tomcat_memory_max] },
-             ]
-  end
+tomcat_service "gsrs" do
+  action :start
+  service_name "gsrs"
+  install_path node[:gsrs][:tomcat_path]
+  tomcat_user node[:gsrs][:tomcat_user]
+  tomcat_group node[:gsrs][:tomcat_group]
+  env_vars lazy {
+    [
+      { "CATALINA_PID" => "#{node[:gsrs][:tomcat_path]}/bin/tomcat.pid" },
+      { "CATALINA_OPTS" => node.run_state.dig("ssm_params", "gsrs", "catalina_opts") || node[:gsrs][:catalina_opts] }
+    ]
+  }
+  only_if { node.run_state.dig("ssm_params", "app", "environment", "GSRS_ENABLED") == "1" && node[:gsrs][:tomcat_start] }
 end
