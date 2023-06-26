@@ -176,8 +176,12 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
       actions = pick([
+        'View Logs',
+        'Track',
         'Copy to space',
         'Attach to...',
+        'Comments',
+        'Edit tags',
       ], actions)
     }
   }
