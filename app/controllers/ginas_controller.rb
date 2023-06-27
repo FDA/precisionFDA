@@ -78,7 +78,10 @@ class GinasController < ApplicationController
   private
 
   def beta_redirect
-    redirect_to request.fullpath.sub("/ginas/app", "/ginas/app/beta")
+    modified_path = request.fullpath.sub("/ginas/app", "/ginas/app/beta")
+    safe_modified_path = CGI.escape(modified_path)
+
+    redirect_to safe_modified_path
   end
 
   def beta_redirectable?
