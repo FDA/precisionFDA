@@ -1536,7 +1536,7 @@ class ApiController < ApplicationController
       fail "Asset name needs to be a non-empty String"
     end
 
-    if !name.match(/\w+\.tar(\.gz)?$/)
+    if !name.match(/\A.*\.tar(\.gz)?\z/)
       fail "Asset name should end with .tar or .tar.gz"
     end
 
