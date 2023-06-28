@@ -116,7 +116,7 @@ const getUsername = (user: any) => {
 export const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
-  const siteSettings = useSiteSettingsQuery()
+  const siteSettings = useSiteSettingsQuery(!!user)
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
     useState(false)
 
