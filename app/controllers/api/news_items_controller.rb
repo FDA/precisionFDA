@@ -6,15 +6,13 @@ module Api
     skip_before_action :require_api_login
 
     def index
-      params.permit!
-      news_items = https_apps_client.news_list(params)
+      news_items = https_apps_client.news_list(unsafe_params)
       render json: news_items,
              adapter: :json
     end
 
     def all
-      params.permit!
-      news_items = https_apps_client.news_all(params)
+      news_items = https_apps_client.news_all(unsafe_params)
       render json: news_items
     end
 
@@ -31,17 +29,17 @@ module Api
     end
 
     def create
-      params.permit!
+      params.permit(:news_item)
       https_apps_client.news_create(params[:news_item])
     end
 
     def edit
-      params.permit!
+      params.permit(:id, :news_item)
       https_apps_client.news_edit(params[:id], params[:news_item])
     end
 
     def positions
-      params.permit!
+      params.permit(:news_items)
       https_apps_client.news_positions(params)
     end
 
