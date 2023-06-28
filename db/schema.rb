@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_10_200330) do
+ActiveRecord::Schema.define(version: 2023_04_27_080106) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -838,6 +838,7 @@ ActiveRecord::Schema.define(version: 2023_04_10_200330) do
     t.integer "expiration"
     t.string "disable_message"
     t.text "cloud_resource_settings"
+    t.datetime "last_data_checkup"
     t.index ["dxuser"], name: "index_users_on_dxuser", unique: true
     t.index ["normalized_email"], name: "index_users_on_normalized_email"
     t.index ["org_id"], name: "index_users_on_org_id"

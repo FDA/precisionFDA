@@ -21,7 +21,7 @@ import * as overrides from './envs'
 
 type Maybe<T> = T | null
 
-const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
+export const parseIntFromProcess = (envValue: string | undefined): Maybe<number> => {
   // TODO(samuel) validate that this is not undefined
   if (envValue) {
     const value = parseInt(envValue, 10)
@@ -64,6 +64,11 @@ const defaultConfig = {
     dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
     clientUrl:
       process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
+    debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
+  },
+  databaseReplica: {
+    dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
+    clientUrl: process.env.NODE_DATABASE_REPLICA_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
   },
   validation: {
@@ -111,7 +116,8 @@ const defaultConfig = {
       maintenance: {
         name: 'https-apps-worker-maintenance-queue',
         onInit: {
-          shouldAddCheckNonterminatedClusters: false,
+          checkNonterminatedClusters: false,
+          adminDataConsistencyReport: false,
         },
       },
     },
@@ -125,12 +131,19 @@ const defaultConfig = {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/1 * * * *',
-      staleJobsEmailAfter: process.env.NODE_STALE_JOBS_EMAIL_AFTER ?? 60 * 60 * 24 * 29, // 29 days
+      staleJobsEmailAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
       staleJobsTerminateAfter:
-        process.env.NODE_STALE_JOBS_TERMINATE_AFTER ?? MAX_JOB_DURATION_MINUTES,
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_MINUTES,
     },
     nonTerminatedDbClusters: {
-      repeatPattern: '0 6 * * *',
+      repeatPattern: '0 6 * * *', // Once a day at 6am
+    },
+    adminDataConsistencyReport: {
+      repeatPattern: process.env.NODE_ADMIN_DATA_REPORT_REPEAT ?? '0 1 * * 0', // Once a week on Sunday at 1am
+    },
+    userDataConsistencyReport: {
+      repeatSeconds: parseIntFromProcess(process.env.USER_DATA_CONSISTENCY_REPORT_REPEAT) ?? 604800, // At least one week between checks
     },
   },
   // TODO(samuel) apply "satisfies" operator

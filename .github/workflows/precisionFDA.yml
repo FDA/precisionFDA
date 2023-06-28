@@ -196,6 +196,7 @@ jobs:
           sudo apt-get install -y cmake libssl-dev
           cp config/database.ci.yml config/database.yml
           bundle exec rake db:setup
+          bundle exec rake user:generate_test_users
       - name: Install Deps
         run: make install
         working-directory: ./https-apps-api

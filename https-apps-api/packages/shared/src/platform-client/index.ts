@@ -12,15 +12,16 @@ import { OrgMembershipError } from '../errors'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import {
   CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
-  FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, FindSpaceMembersParams, ListFilesParams, MoveFilesParams,
+  FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, OrgFindMembersParams, ListFilesParams, MoveFilesParams,
   JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams,
-  UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams, FileRemoveParams
+  UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams,
+  FileRemoveParams, UserDescribeParams, OrgDescribeParams,
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
   FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
-  FindSpaceMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
-  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse,
+  OrgFindMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
+  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse, UserDescribeResponse, OrgDescribeResponse,
 } from './platform-client.responses'
 import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
@@ -353,14 +354,36 @@ class PlatformClient {
   }
 
   // ---------------
-  //    U S E R S
+  //    O R G S
   // ---------------
 
-  async findSpaceMembers(params: FindSpaceMembersParams): Promise<FindSpaceMembersReponse> {
-    const url = `${config.platform.apiUrl}/${params.spaceOrg}/findMembers`
+  /**
+   * Describe the org
+   * API: /org-xxxx/describe
+   * See https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-describe
+   */
+  async orgDescribe(params: OrgDescribeParams): Promise<OrgDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: {},
+      data: { ...omit(['dxid'], params) },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Find members of the org
+   * API: /org-xxxx/findMembers
+   * See https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-findmembers
+   * 
+   * Note that we're currently not handling the pagination aspect of this call, so >1000 members is an issue
+   */
+  async orgFindMembers(params: OrgFindMembersParams): Promise<OrgFindMembersReponse> {
+    const url = `${config.platform.apiUrl}/${params.orgDxid}/findMembers`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['orgDxid'], params) },
       url,
     }
     return await this.sendRequest(options, url)
@@ -389,6 +412,26 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: params.data,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  // ---------------
+  //    U S E R S
+  // ---------------
+
+  /**
+   * Describe the user
+   * API: /user-xxxx/describe
+   * See https://documentation.dnanexus.com/developer/api/users#api-method-user-xxxx-describe
+   */
+
+  async userDescribe(params: UserDescribeParams): Promise<UserDescribeResponse> {
+    const url = `${config.platform.apiUrl}/${params.dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['dxid'], params) },
       url,
     }
     return await this.sendRequest(options, url)

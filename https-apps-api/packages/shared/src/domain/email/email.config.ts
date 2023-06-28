@@ -275,6 +275,8 @@ enum EMAIL_TYPES {
   staleJobsReport = 9,
   nonTerminatedDbClusters = 10,
   jobFailed = 11,
+  adminDataConsistencyReport = 12,
+  userDataConsistencyReport = 13,
 }
 
 type EmailConfigItem = {
