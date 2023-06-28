@@ -10,8 +10,7 @@ module Ginas
     end
 
     def create_and_upload_file(request)
-      data = JSON.parse(CGI.unescape(request.raw_post))
-
+      data = JSON.parse(request.raw_post)
       substance_type = data["substanceClass"]&.titleize
       substance_data = data["names"].first
       substance_uuid = substance_data&.fetch("uuid", nil)
