@@ -16,8 +16,10 @@ import { FOLDER_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE, ITrackable 
 
 @Entity({ tableName: 'nodes', customRepository: () => FolderRepository })
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
+@Filter({ name: 'https', cond: { entityType: FILE_ORIGIN_TYPE.HTTPS } })
+@Filter({ name: 'pfdaonly', cond: { project: null } })
 export class Folder extends Node implements ITrackable {
-  @Property()
+  @Property({ nullable: true })
   project?: string
 
   @Property()
@@ -62,10 +64,19 @@ export class Folder extends Node implements ITrackable {
   @Property()
   parentType: PARENT_TYPE
 
+  @Property()
+  parentFolderId?: number
+
+  @Property()
+  scopedParentFolderId?: number
+
   // todo: micro-orm can do single table inheritance
 
   @OneToMany(() => Tagging, tagging => tagging.folder, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
+
+  @Property()
+  userId: number
 
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>;
@@ -82,6 +93,14 @@ export class Folder extends Node implements ITrackable {
       // intended usage of deprecated property
       return this.nonScopedChildren;
     }
+  }
+
+  // PFDA-only folder, which is sometimes referred to as 'local' folder or 'core' folder by Omar
+  // are the initial implementation of folder on pFDA that does not have a counterpart on platform.
+  // All of its children are stored at the root of the dx project instead of inside the correct
+  // platform folder.
+  isPFDAOnly(): boolean {
+    return this.project === undefined
   }
 
   [EntityRepositoryType]?: FolderRepository

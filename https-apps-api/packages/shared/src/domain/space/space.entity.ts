@@ -1,6 +1,7 @@
 import { Collection, Entity, EntityRepositoryType, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
-import { SpaceMembership } from '..'
+import { SpaceMembership, User } from '..'
 import { BaseEntity } from '../../database/base-entity'
+import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
@@ -72,4 +73,21 @@ export class Space extends BaseEntity {
   }
 
   [EntityRepositoryType]?: SpaceRepository
+
+  async findLeadBySide(side: SPACE_MEMBERSHIP_SIDE): Promise<User | undefined> {
+    await this.spaceMemberships.init()
+    const result = this.spaceMemberships.getItems().find(x => {
+      return x.isLead() && x.side === side
+    })
+    await result?.user.load()
+    return result?.user.getEntity()
+  }
+
+  async findHostLead(): Promise<User | undefined> {
+    return await this.findLeadBySide(SPACE_MEMBERSHIP_SIDE.HOST)
+  }
+
+  async findGuestLead(): Promise<User | undefined> {
+    return await this.findLeadBySide(SPACE_MEMBERSHIP_SIDE.GUEST)
+  }
 }

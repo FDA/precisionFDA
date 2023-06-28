@@ -35,6 +35,16 @@ export class JobRepository extends EntityRepository<Job> {
     return [jobs, count]
   }
 
+  async findAllRunningJobs(): Promise<Job[]> {
+    return await this.find({
+      $or: [
+        { state: JOB_STATE.IDLE },
+        { state: JOB_STATE.RUNNING },
+        { state: JOB_STATE.TERMINATING },
+      ]
+    })
+  }
+
   async findRunningJobsByUser(input: { userId: number }): Promise<Job[]> {
     return await this.find({
       $or: [

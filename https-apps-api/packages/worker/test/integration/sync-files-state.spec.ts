@@ -6,6 +6,7 @@ import { User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import {
   FILE_STATE,
   FILE_STATE_DX,
@@ -35,7 +36,7 @@ const createSyncFilesStateTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed
   await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.SYNC_FILES_STATE,
+    type: SyncFilesStateOperation.getTaskType(),
     user,
   })
 }
@@ -110,6 +111,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
     // reset fakes
     mocksReset()
+    queueMocksReset()
     localMocksReset()
   })
 

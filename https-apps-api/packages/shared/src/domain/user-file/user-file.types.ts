@@ -47,6 +47,8 @@ interface IFileOrAsset {
   scope: string
   state: string
   fileSize?: number
+  entityType: FILE_ORIGIN_TYPE
+  createdAt: Date
   user: IdentifiedReference<User>
   isFile: boolean
   isAsset: boolean

@@ -32,7 +32,7 @@ export const config: ConfigOverride = () => ({
       },
       maintenance: {
         onInit: {
-          shouldAddCheckNonterminatedClusters: false,
+          checkNonterminatedClusters: false,
         },
       },
     },

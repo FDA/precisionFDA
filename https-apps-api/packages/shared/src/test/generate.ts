@@ -57,13 +57,14 @@ const user = {
     firstName: random.firstName(),
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
-    privateFilesProject: `project-${random.dxstr()}`,
-    publicFilesProject: `project-${random.dxstr()}`,
     email: 'test@nexus-mail.com',
     normalizedEmail: 'normalized@nexus-mail.com',
     userState: USER_STATE.ENABLED,
-    // privateComparisonsProject: `project-${random.dxstr()}`,
-    // publicComparisonsProject: `project-${random.dxstr()}`,
+    lastDataCheckup: new Date(),
+    privateFilesProject: `project-${random.dxstr()}`,
+    publicFilesProject: `project-${random.dxstr()}`,
+    privateComparisonsProject: `project-${random.dxstr()}`,
+    publicComparisonsProject: `project-${random.dxstr()}`,
   }),
 }
 

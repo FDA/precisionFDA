@@ -85,8 +85,8 @@ type CreateFolderParams = {
   projectId: string
 }
 
-type FindSpaceMembersParams = {
-  spaceOrg: string
+type OrgFindMembersParams = {
+  orgDxid: string
 }
 
 type UserInviteToOrgParams = {
@@ -135,6 +135,18 @@ type DescribeDataObjectsParams = {
   objects: Array<string | Record<string, string>>
 }
 
+export type OrgDescribeParams = {
+  dxid: string
+  defaultFields?: boolean
+  fields?: any
+}
+
+type UserDescribeParams = {
+  dxid: string
+  defaultFields?: boolean
+  fields?: any
+}
+
 type UserResetMfaParams = {
   dxid: string
   data: {
@@ -179,12 +191,13 @@ export {
   DbClusterDescribeParams,
   DbClusterCreateParams,
   DescribeFilesParams,
-  FindSpaceMembersParams,
+  OrgFindMembersParams,
   UserInviteToOrgParams,
   UserRemoveFromOrgParams,
   RemoveFolderParams,
   RenameFolderParams,
   DescribeDataObjectsParams,
+  UserDescribeParams,
   UserResetMfaParams,
   UserUnlockParams,
   AppDescribeParams,

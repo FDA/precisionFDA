@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { AppSeries, entities, Expert, User, user } from '../domain'
+import { AppSeries, entities, Expert, Organization, User, user } from '../domain'
 import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
@@ -71,13 +71,25 @@ const licenceHelper = {
   }
 }
 
-const userHelper = {
-  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
+const orgHelper = {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.Organization>>) => {
     const org = wrap(new entities.Organization()).assign({
-      handle: `org-${generate.random.dxstr()}`,
+      handle: `${generate.random.dxstr()}`,
       name: generate.random.chance.name(),
     })
     em.persist(org)
+    return org
+  },
+}
+
+const userHelper = {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
+    const org = orgHelper.create(em)
+    em.persist(org)
+    return userHelper.createUsingOrg(em, org, data)
+  },
+
+  createUsingOrg: (em: EntityManager, org: Organization, data?: Partial<InstanceType<typeof entities.User>>) => {
     const defaults = generate.user.simple()
     const input = {
       ...defaults,
@@ -249,6 +261,7 @@ const appHelper = {
 }
 
 const filesHelper = {
+  // TODO: Rename 'create' because it is unclear that it would by default create an HTTPS file
   create: (
     em: EntityManager,
     references: {
@@ -622,6 +635,7 @@ const workflowHelper = {
 
 export {
   assetHelper,
+  orgHelper,
   userHelper,
   jobHelper,
   appHelper,

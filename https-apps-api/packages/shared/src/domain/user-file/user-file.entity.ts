@@ -19,11 +19,21 @@ import {
   FILE_STI_TYPE,
   ITrackable,
   IFileOrAsset,
+  FILE_STATE_DX,
+  FILE_STATE_PFDA,
 } from './user-file.types'
 import { UserFileRepository } from './user-file.repository'
 
-@Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
 @Entity({ tableName: 'nodes', customRepository: () => UserFileRepository })
+@Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
+@Filter({ name: 'https', cond: { entityType: FILE_ORIGIN_TYPE.HTTPS } })
+@Filter({ name: 'local', cond: { entityType: FILE_ORIGIN_TYPE.REGULAR } })
+@Filter({ name: 'unclosed', cond: { $or: [
+  { 'state': FILE_STATE_DX.OPEN },
+  { 'state': FILE_STATE_DX.CLOSING },
+  { 'state': FILE_STATE_DX.ABANDONED },
+  { 'state': FILE_STATE_PFDA.REMOVING },
+]}})
 class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
   dxid: string

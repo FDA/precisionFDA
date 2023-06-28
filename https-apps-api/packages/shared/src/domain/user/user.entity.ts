@@ -77,8 +77,14 @@ export class User extends BaseEntity {
   @Property({ nullable: true })
   privateFilesProject?: string
 
-  @Property()
+  @Property({ nullable: true })
   publicFilesProject: string
+
+  @Property({ nullable: true })
+  privateComparisonsProject?: string
+
+  @Property({ nullable: true })
+  publicComparisonsProject: string
 
   @Property({ nullable: true })
   schemaVersion?: number
@@ -101,6 +107,9 @@ export class User extends BaseEntity {
 
   @Property({ nullable: true })
   lastLogin?: Date
+
+  @Property({ nullable: true })
+  lastDataCheckup?: Date
 
   @Enum({ type: () => USER_STATE,
     serializer: (value: USER_STATE) => {
@@ -184,6 +193,11 @@ export class User extends BaseEntity {
   }
 
   @Property({ persist: false })
+  get dxid(): string {
+    return `user-${this.dxuser}`
+  }
+
+  @Property({ persist: false })
   get spaceUids(): string[] {
     const spaceUids: string[] = []
     Array.from(this.spaceMemberships).forEach(spaceMembership => {
@@ -231,5 +245,9 @@ export class User extends BaseEntity {
 
   async isChallengeAdmin(): Promise<boolean> {
     return await this.isMemberOfAdminGroup(ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN)
+  }
+
+  billTo(): string {
+    return this.organization.getEntity().getDxOrg()
   }
 }
