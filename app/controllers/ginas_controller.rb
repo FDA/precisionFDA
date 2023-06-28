@@ -62,8 +62,8 @@ class GinasController < ApplicationController
 
     begin
       file = substance_creator.create_and_upload_file(request)
-    rescue StandardError
-      msg = "Can't create a substance file for #{current_user.full_name}"
+    rescue StandardError => e
+      msg = "Can't create a substance file for #{current_user.dxuser}, encountered: #{e}"
       logger.error msg
       render(plain: msg, status: :unprocessable_entity) && return
     end
