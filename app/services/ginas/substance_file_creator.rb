@@ -28,8 +28,6 @@ module Ginas
       file.tag_list.add(GSRS_TAG, substance_type)
       file.save
 
-      move_file_to_folder(file, "#{substance_name}_#{substance_uuid}")
-
       file
     end
 
