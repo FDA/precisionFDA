@@ -367,7 +367,7 @@ module Api
         nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when LOCK_ACTION, UNLOCK_ACTION
-        process_nodes(task)
+        files = process_nodes(task)
       when PUBLISH_ACTION
         nodes = Node.editable_by(@context).
           where(id: params[:ids]).

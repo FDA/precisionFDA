@@ -54,7 +54,7 @@ const LockUnlockFiles = ({
   if (!data?.length) return <div>{`You have selected items that cannot be ${type}ed.`}</div>
   return (
     <ResourceTable
-      rows={data!.map(s => ({
+      rows={data.map(s => ({
         name: (
           <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
             <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
