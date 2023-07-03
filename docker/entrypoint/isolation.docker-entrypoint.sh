@@ -15,10 +15,6 @@ if [[ ! $SKIP_RUBY_DEPS_SETUP || $SKIP_RUBY_DEPS_SETUP = 0 ]]; then
   bundle check || bundle install
 fi
 
-if [[ ! $SKIP_BOWER_DEPS_SETUP || $SKIP_BOWER_DEPS_SETUP = 0 ]]; then
-  bower install --allow-root
-fi
-
 if [[ ! $SKIP_DB_SETUP || $SKIP_DB_SETUP = 0 ]]; then
   # Runs setup if database does not exist, or runs migrations if it does
   bundle exec rake db:prepare
