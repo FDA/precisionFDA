@@ -220,13 +220,13 @@ const Spaces2 = ({
                 <AppList spaceId={space.id} />
               </Route>
               <Route path={`/spaces/${space.id}/apps/:appUid`}>
-                <AppsShow spaceId={space.id} />
+                <AppsShow />
               </Route>
               <Route exact path={`/spaces/${space.id}/workflows`}>
                 <WorkflowList spaceId={space.id} />
               </Route>
               <Route path={`/spaces/${space.id}/workflows/:workflowUid`}>
-                <WorkflowShow spaceId={space.id} />
+                <WorkflowShow />
               </Route>
               <Route exact path={`/spaces/${space.id}/executions`}>
                 <ExecutionList spaceId={space.id} />

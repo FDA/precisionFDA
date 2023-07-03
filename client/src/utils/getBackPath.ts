@@ -1,19 +1,22 @@
 import { Location } from '../types/utils'
+import { ResourceScope } from '../features/home/types'
 
 export type LocationResource = 'files' | 'apps' | 'workflows' | 'executions' | 'members'
 
-const backLocations = ['home', 'spaces']
-
-export function getBackPath(location: Location, resourceLocation?: LocationResource, spaceId?: string) {
-  const { pathname, state } = location
-  const backLocation = backLocations.find(loca => pathname.includes(loca))
-  const back = backLocation === 'spaces' ? `spaces/${spaceId}` : 'home'
+export function getBackPath(
+  location: Location,
+  resourceLocation?: LocationResource,
+  scope: ResourceScope = 'me',
+) {
+  const { state } = location
   const fromSearch = location?.state?.fromSearch ?? ''
   let backPath = ''
   if(state?.from) {
+    // access from a space, or switching scope
     backPath = `${location?.state?.from}${fromSearch}`
   } else {
-    backPath = `/${back}/${resourceLocation ?? ''}`
+    const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+    backPath = `/home/${resourceLocation ?? ''}${scopeParamLink}`
   }
 
   return backPath
