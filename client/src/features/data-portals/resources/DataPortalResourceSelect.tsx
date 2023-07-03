@@ -1,0 +1,77 @@
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+import React from 'react'
+import { useParams } from 'react-router'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
+import { Button, TransparentButton } from '../../../components/Button'
+import { Loader } from '../../../components/Loader'
+import { NoContent } from '../../../components/Public/styles'
+import { theme } from '../../../styles/theme'
+import ResourcesSelect from './ResourcesSelect'
+
+const StyledRefresh = styled.span`
+  color: ${theme.colors.primaryBlue};
+  text-decoration: none;
+  &:hover {
+    color: #4297df;
+  }
+`
+
+interface DataPortalResource {
+  dataPortals: number
+  id: number
+  meta: null | any
+  url: null | any
+  user: number
+  userFile: number
+}
+
+// TODO: Extract API calls to api.ts
+const listDataPortalResourcesRequest = (id: string) =>
+  axios
+    .get(`/api/data_portals/${id}/resources`)
+    .then(r => r.data.resources as DataPortalResource[])
+
+const useListDataPortalResourcesQuery = (id: string) =>
+  useQuery({
+    queryKey: ['resources-list-portal'],
+    queryFn: () => listDataPortalResourcesRequest(id),
+  })
+
+const DataPortalResourceSelect = ({
+  onSelect,
+}: {
+  onSelect: (url: string) => void
+}) => {
+  const { portalId } = useParams<{
+    portalId: string
+  }>()
+  const { data, status, refetch } = useListDataPortalResourcesQuery(portalId)
+
+  if (status === 'loading') return <Loader />
+
+  return (
+    <>
+      {data?.length === 0 && (
+        <NoContent>
+          <p>This Data Portal has no resources</p>
+          <TransparentButton onClick={() => refetch()}>
+            <StyledRefresh>Refresh</StyledRefresh>
+          </TransparentButton>
+          <Button
+            type="button"
+            as={Link}
+            to={`/data-portals/${portalId}/resources`}
+            target="__blank"
+          >
+            Upload Resources
+          </Button>
+        </NoContent>
+      )}
+      <ResourcesSelect list={data || []} onChange={onSelect} />
+    </>
+  )
+}
+
+export default DataPortalResourceSelect

@@ -171,7 +171,7 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ emitScope, spaceId }: { emitScope?: (scope: ResourceScope) => void, spaceId?: string }) => {
+export const AppsShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
@@ -200,7 +200,7 @@ export const AppsShow = ({ emitScope, spaceId }: { emitScope?: (scope: ResourceS
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'apps', spaceId)}>
+      <StyledBackLink linkTo={getBackPath(location, 'apps', scope)}>
         Back to Apps
       </StyledBackLink>
       <Topbox>

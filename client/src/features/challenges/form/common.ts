@@ -5,7 +5,7 @@ export const subtitle = 'Advancing regulatory standards for bioinformatics, RWD,
 
 
 export const createValidationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
+  name: Yup.string().required('Name is required').max(150, 'Name cannot be longer than 150 characters'),
   scope: Yup.object()
     .shape({
       value: Yup.string(),
@@ -63,7 +63,7 @@ export const editValidationSchema = Yup.object().shape({
     .typeError('Invalid Date')
     .nullable()
     .required('End Date is required'),
-  name: Yup.string().required('Name is required'),
+  name: Yup.string().required('Name is required').max(150, 'Name cannot be longer than 150 characters'),
   scope: Yup.object()
     .shape({
       value: Yup.string(),

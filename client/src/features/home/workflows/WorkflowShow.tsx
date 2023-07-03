@@ -162,7 +162,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ emitScope, spaceId }: { emitScope?: (scope: ResourceScope) => void, spaceId?: string }) => {
+export const WorkflowShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
   const match = useRouteMatch()
   const location: Location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
@@ -193,7 +193,7 @@ export const WorkflowShow = ({ emitScope, spaceId }: { emitScope?: (scope: Resou
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'workflows', spaceId)} data-testid="workflow-show-back-link">
+      <StyledBackLink linkTo={getBackPath(location, 'workflows', scope)} data-testid="workflow-show-back-link">
         Back to Workflows
       </StyledBackLink>
       <Topbox>

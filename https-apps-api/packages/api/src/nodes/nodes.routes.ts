@@ -1,7 +1,10 @@
-import {DefaultState} from 'koa'
+import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { userFile } from '@pfda/https-apps-shared'
-import { RemoveNodesInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
+import {
+  IdsInput,
+  RemoveNodesInput,
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
@@ -17,9 +20,8 @@ router.post(
     body: userFile.inputs.uidListSchema,
   }),
   async ctx => {
-    // @ts-ignore TODO fix
-    const ids = ctx.request.body.ids as number[]
-    await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ids})
+    const { ids } = ctx.request.body as IdsInput
+    await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ ids })
     ctx.status = 204
   },
 )
@@ -30,9 +32,8 @@ router.post(
     body: userFile.inputs.uidListSchema,
   }),
   async ctx => {
-    //@ts-ignore TODO fix
-    const ids = ctx.request.body.ids as number[]
-    await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ids})
+    const { ids } = ctx.request.body as IdsInput
+    await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
     ctx.status = 204
   },
 )

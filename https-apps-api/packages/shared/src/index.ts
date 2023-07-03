@@ -17,6 +17,7 @@ export { database } from './database'
 export {
   entities,
   acceptedLicense,
+  dataPortal,
   job,
   app,
   user,

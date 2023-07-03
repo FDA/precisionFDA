@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-
 import { SUPPORT_EMAIL } from '../../constants'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
@@ -40,6 +39,7 @@ import {
   StyledOnClickModalDiv,
 } from './styles'
 import { CDMHNames, useSiteSettingsQuery } from './useSiteSettingsQuery'
+import { DataPortalIcon } from '../icons/DataPortalIcon'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -116,13 +116,14 @@ const getUsername = (user: any) => {
 export const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
-  const siteSettings = useSiteSettingsQuery()
+    const siteSettings = useSiteSettingsQuery(!!user)
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
     useState(false)
 
   const userCanAdministerSite = user?.can_administer_site
   const userIsGuest = user?.is_guest
   const isSpacesPath = pathname.startsWith('/spaces')
+  const isDataPortalsPath = pathname.startsWith('/data-portals')
 
   const handleLogout = async () => {
     await logout().then(() => {
@@ -140,8 +141,8 @@ export const Header: React.FC = () => {
 
   if (!user) return null
 
-  const showGSRSLink = !isSpacesPath && !userIsGuest
-  const showCDMHLink = !isSpacesPath && !!siteSettings?.data?.isEnabled
+  const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
+  const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.isEnabled
 
   return (
     <>
@@ -152,20 +153,20 @@ export const Header: React.FC = () => {
           </LogoWrap>
           <HeaderLeft>
             <Link
-              to={isSpacesPath ? '/home' : '/'}
-              title={isSpacesPath ? 'Back Home' : 'Overview'}
+              to={isSpacesPath || isDataPortalsPath ? '/home' : '/'}
+              title={isSpacesPath || isDataPortalsPath ? 'Back Home' : 'Overview'}
               data-turbolinks="false"
             >
               <MenuItem active={isActiveLink('/')}>
                 <IconWrap>
-                  <HomeIcon height={16} />
+                  {isSpacesPath || isDataPortalsPath ? <FortIcon height={16} /> : <HomeIcon height={16} />}
                 </IconWrap>
                 <HeaderItemText>
-                  {isSpacesPath ? 'Back Home' : 'Overview'}
+                  {isSpacesPath || isDataPortalsPath ? 'Back Home' : 'Overview'}
                 </HeaderItemText>
               </MenuItem>
             </Link>
-            {!isSpacesPath && (
+            {!isSpacesPath && !isDataPortalsPath && (
               <>
                 <a
                   data-turbolinks="false"
@@ -282,6 +283,15 @@ export const Header: React.FC = () => {
                 )}
               </Dropdown>
             )}
+
+            <Link to="/data-portals" title="Data Portals">
+              <MenuItem active={isActiveLink('/data-portals')}>
+                <IconWrap>
+                  <DataPortalIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>Data Portals</HeaderItemText>
+              </MenuItem>
+            </Link>
           </HeaderLeft>
           <HeaderRight>
             <a

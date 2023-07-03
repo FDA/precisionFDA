@@ -20,6 +20,7 @@ export const GuestLeadUserSelect = ({
   onChange,
 }: {
   value: {label: string, value: string} | null
+  defaultInputValue: {label: string, value: string} | null
   onBlur: () => void
   isDisabled: boolean
   onChange: (v:any) => void

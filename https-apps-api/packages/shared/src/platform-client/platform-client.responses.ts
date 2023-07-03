@@ -82,6 +82,14 @@ type FileDescribeResponse = {
   name: string
   state: string
   size?: number
+  folder?: string
+  class: string
+  types: string[]
+  tags: string[]
+  created: number
+  modified: number
+  hidden: boolean
+  createdBy: any
   // add more here
   // See output of https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
 }
@@ -94,8 +102,37 @@ type PlatformMember = {
   appAccess: boolean
 }
 
-type FindSpaceMembersReponse = {
+type OrgFindMembersReponse = {
   results: PlatformMember[]
+}
+
+export type OrgDescribeResponse = {
+  id: string
+  class: string
+  handle: string
+  name: string
+  admins?: string[]
+  // The rest of the keys are only present if the requesting user is the same as the user being described AND a full scope token is supplied.
+  // See https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-describe
+  level?: string
+  allowBillableActivities?: boolean
+  projectAccess?: string
+  appAccess?: boolean
+  estSpendingLimitLeft?: number | null
+  phiFeaturesEnabled?: boolean
+}
+
+type UserDescribeResponse = {
+  id: string
+  class?: string
+  first?: string
+  middle?: string
+  last?: string
+  handle?: string
+  // The rest of the keys are only present if the requesting user is the same as the user being described AND a full scope token is supplied.
+  // See https://documentation.dnanexus.com/developer/api/users#api-method-user-xxxx-describe
+  email?: string
+  billTo?: string
 }
 
 type UserInviteToOrgResponse = {
@@ -168,8 +205,9 @@ export {
   DescribeFoldersResponse,
   DbClusterDescribeResponse,
   DescribeDataObjectsResponse,
-  FindSpaceMembersReponse,
+  OrgFindMembersReponse,
   PlatformMember,
+  UserDescribeResponse,
   UserInviteToOrgResponse,
   FileRemoveResponse,
   UserRemoveFromOrgResponse,

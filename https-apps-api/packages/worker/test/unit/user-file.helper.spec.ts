@@ -3,7 +3,12 @@ import { expect } from 'chai'
 import { Folder, User } from '@pfda/https-apps-shared/src/domain'
 import { userFile, database } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import { splitFolderPath, detectIntersectedTraverse, findFolderForPath } from 'shared/src/domain/user-file/user-file.helper'
+import {
+  splitFolderPath,
+  detectIntersectedTraverse,
+  findFolderForPath,
+  validateNodeOwnership,
+} from 'shared/src/domain/user-file/user-file.helper'
 
 describe('user-file.helper', () => {
   context('parseFoldersFromClient()', () => {
@@ -141,28 +146,47 @@ describe('user-file.helper', () => {
 
       const fooFolder = create.filesHelper.createFolder(em, { user }, { name: 'foo' })
       await em.flush()
-      const barFolder = create.filesHelper.createFolder(em, { user, parentFolder: fooFolder }, { name: 'bar' })
+      const barFolder = create.filesHelper.createFolder(
+        em,
+        { user, parentFolder: fooFolder },
+        { name: 'bar' },
+      )
       await em.flush()
-      const stuFolder = create.filesHelper.createFolder(em, { user, parentFolder: barFolder }, { name: 'stu' })
+      const stuFolder = create.filesHelper.createFolder(
+        em,
+        { user, parentFolder: barFolder },
+        { name: 'stu' },
+      )
       await em.flush()
       const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parent-folder' })
       await em.flush()
       const subfolder = create.filesHelper.createFolder(
-        em, { user, parentFolder },
+        em,
+        { user, parentFolder },
         { name: 'sub-folder' },
       )
       await em.flush()
       const subsubfolder = create.filesHelper.createFolder(
-        em, { user, parentFolder: subfolder },
+        em,
+        { user, parentFolder: subfolder },
         { name: 'sub-sub-folder' },
       )
       const subfolder2 = create.filesHelper.createFolder(
-        em, { user, parentFolder },
+        em,
+        { user, parentFolder },
         { name: 'sub-folder2' },
       )
       await em.flush()
 
-      const folders = [fooFolder, barFolder, stuFolder, parentFolder, subfolder, subsubfolder, subfolder2]
+      const folders = [
+        fooFolder,
+        barFolder,
+        stuFolder,
+        parentFolder,
+        subfolder,
+        subsubfolder,
+        subfolder2,
+      ]
 
       folderPaths.forEach((folderPath: string) => {
         const folderPathComponents = splitFolderPath(folderPath)
@@ -194,21 +218,21 @@ describe('user-file.helper', () => {
     })
 
     it('should return a list of existing folders to keep', async () => {
-      const parentFolder = create.filesHelper.createFolder(
-        em, { user },
-        { name: 'parent-folder' },
-      )
+      const parentFolder = create.filesHelper.createFolder(em, { user }, { name: 'parent-folder' })
       await em.flush()
       const subfolder = create.filesHelper.createFolder(
-        em, { user, parentFolder },
+        em,
+        { user, parentFolder },
         { name: 'sub-folder' },
       )
       await em.flush()
       const subsubfolder = create.filesHelper.createFolder(
-        em, { user, parentFolder: subfolder },
+        em,
+        { user, parentFolder: subfolder },
         { name: 'sub-sub-folder' },
       )
-      const subfolder2 = create.filesHelper.createFolder(em,
+      const subfolder2 = create.filesHelper.createFolder(
+        em,
         { user, parentFolder },
         { name: 'sub-folder2' },
       )
@@ -232,15 +256,47 @@ describe('user-file.helper', () => {
       const folders: Folder[] = []
       const n = 32
       for (let i = 0; i < n; i++) {
-        const folder = create.filesHelper.createFolder(
-          em, { user },
-          { name: `folder-${i}` },
-        )
+        const folder = create.filesHelper.createFolder(em, { user }, { name: `folder-${i}` })
         folders.push(folder)
       }
 
       const folderPaths = folders.map(folder => folder.name)
       expect(folderPaths).to.be.an('array').with.lengthOf(n)
+    })
+
+    context('validateNodeOwnership()', async () => {
+      let em: EntityManager<MySqlDriver>
+      let user: User
+
+      beforeEach(async () => {
+        await db.dropData(database.connection())
+        em = database.orm().em.fork()
+        user = create.userHelper.create(em)
+        await em.flush()
+      })
+      it('should not throw an error if node is public', async () => {
+        const parentFolder = create.filesHelper.createFolder(
+          em,
+          { user },
+          { name: 'parent-folder', scope: 'everybody' },
+        )
+        await em.flush()
+        it('should not throw an error if node is public', async () => {
+          await expect(validateNodeOwnership(parentFolder, user)).to.be.fulfilled
+        })
+
+        it('should throw an error if current user has no permissions to lock the node', async () => {
+          const node = {
+            scope: 'space-3',
+            user: { id: 'another-user-id' },
+            name: 'node-name',
+          }
+
+          await expect(validateNodeOwnership(parentFolder, user)).to.be.rejectedWith(
+            `You have no permissions to lock '${parentFolder.name}'.`,
+          )
+        })
+      })
     })
   })
 })

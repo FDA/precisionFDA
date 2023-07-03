@@ -3,7 +3,7 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { database } from '../../../src/database'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import { FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { FILE_ORIGIN_TYPE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { Folder, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 
 describe('UserFileRepository tests', () => {
@@ -29,7 +29,7 @@ describe('UserFileRepository tests', () => {
     folders.push(create.filesHelper.createFolder(
       em,
       { user: user1 },
-      { name: 'user1_folder1' },
+      { name: 'user1_folder1', entityType: FILE_ORIGIN_TYPE.HTTPS },
     ))
     folders.push(create.filesHelper.createFolder(
       em,
@@ -45,23 +45,24 @@ describe('UserFileRepository tests', () => {
     folders.push(create.filesHelper.createFolder(
       em,
       { user: user2 },
-      { name: 'user2_folder2' },
+      { name: 'user2_folder2', entityType: FILE_ORIGIN_TYPE.HTTPS },
     ))
     await em.flush()
 
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file1', parentType: PARENT_TYPE.USER, parentId: user1.id }))
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file2', parentType: PARENT_TYPE.USER, parentId: user1.id }))
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file3', parentType: PARENT_TYPE.USER, parentId: user1.id }))
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file4', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolder: folders[0] }))
-    files.push(create.filesHelper.create(em, { user: user1 }, { name: 'user1_file5', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolder: folders[1] }))
+    files.push(create.filesHelper.createUploaded(em, { user: user1 }, { name: 'user1_file1', parentType: PARENT_TYPE.USER, parentId: user1.id, entityType: FILE_ORIGIN_TYPE.HTTPS }))
+    files.push(create.filesHelper.createUploaded(em, { user: user1 }, { name: 'user1_file2', parentType: PARENT_TYPE.USER, parentId: user1.id, entityType: FILE_ORIGIN_TYPE.HTTPS }))
+    files.push(create.filesHelper.createUploaded(em, { user: user1 }, { name: 'user1_file3', parentType: PARENT_TYPE.USER, parentId: user1.id }))
+    files.push(create.filesHelper.createUploaded(em, { user: user1 }, { name: 'user1_file4', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolder: folders[0], entityType: FILE_ORIGIN_TYPE.HTTPS }))
+    files.push(create.filesHelper.createUploaded(em, { user: user1 }, { name: 'user1_file5', parentType: PARENT_TYPE.USER, parentId: user1.id, parentFolder: folders[1] }))
 
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file1', parentType: PARENT_TYPE.USER, parentId: user2.id }))
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file2', parentType: PARENT_TYPE.USER, parentId: user2.id }))
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file3', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolder: folders[2] }))
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file4', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolder: folders[3] }))
-    files.push(create.filesHelper.create(em, { user: user2 }, { name: 'user2_file5', parentType: PARENT_TYPE.USER, parentId: user2.id }))
+    files.push(create.filesHelper.createUploaded(em, { user: user2 }, { name: 'user2_file1', parentType: PARENT_TYPE.USER, parentId: user2.id }))
+    files.push(create.filesHelper.createUploaded(em, { user: user2 }, { name: 'user2_file2', parentType: PARENT_TYPE.USER, parentId: user2.id, entityType: FILE_ORIGIN_TYPE.HTTPS }))
+    files.push(create.filesHelper.createUploaded(em, { user: user2 }, { name: 'user2_file3', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolder: folders[2] }))
+    files.push(create.filesHelper.createUploaded(em, { user: user2 }, { name: 'user2_file4', parentType: PARENT_TYPE.USER, parentId: user2.id, parentFolder: folders[3], entityType: FILE_ORIGIN_TYPE.HTTPS }))
+    files.push(create.filesHelper.createUploaded(em, { user: user2 }, { name: 'user2_file5', parentType: PARENT_TYPE.USER, parentId: user2.id }))
+
     // Copy of the above file
-    files.push(create.filesHelper.create(em, { user: user2 }, {
+    files.push(create.filesHelper.createUploaded(em, { user: user2 }, {
       name: 'user2_file5_copy',
       dxid: files[9].dxid,
       uid: `${files[9].dxid}-2`,
@@ -93,6 +94,30 @@ describe('UserFileRepository tests', () => {
     expect(result).to.have.length(2)
     expect(result[0].name).to.equal('user2_file5')
     expect(result[1].name).to.equal('user2_file5_copy')
+  })
+
+  it('findHTTPSFilesForUser', async () => {
+    const repo = em.getRepository(UserFile)
+    const results = await repo.findHTTPSFilesForUser(user1.id)
+    const uids = results.map(x => x.uid)
+    expect(uids).to.deep.equal([
+      files[0].uid,
+      files[1].uid,
+      files[3].uid,
+    ])
+  })
+
+  it('findAllHTTPSFiles', async () => {
+    const repo = em.getRepository(UserFile)
+    const results = await repo.findAllHTTPSFiles()
+    const uids = results.map(x => x.uid)
+    expect(uids).to.deep.equal([
+      files[0].uid,
+      files[1].uid,
+      files[3].uid,
+      files[6].uid,
+      files[8].uid,
+    ])
   })
 
   it('findUnclosedFiles', async () => {

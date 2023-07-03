@@ -13,3 +13,5 @@ export * as filters from './filters'
 export * as aggregateError from './aggregate-error'
 
 export * as generics from './generics'
+
+export * as format from './format'

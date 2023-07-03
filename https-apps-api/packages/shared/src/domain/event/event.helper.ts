@@ -16,6 +16,7 @@ const EVENT_TYPES = {
   FILE_DELETED: 'Event::FileDeleted',
   FILE_LOCKED: 'Event::FileLocked',
   FILE_UNLOCKED: 'Event::FileUnlocked',
+  FILE_CREATED: 'Event::FileCreated',
 }
 
 const createJobClosed = async (user: User, job: Job): Promise<Event> => {

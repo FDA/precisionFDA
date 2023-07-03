@@ -197,7 +197,8 @@ void> {
       await queue.removeRepeatable(this.ctx.job)
     } else {
       this.log.info({
-        openFiles: openFiles.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
+        dxuser: user.dxuser,
+        openFiles: openFiles.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid, createdAt: f.createdAt })),
       }, 'SyncFilesStateOperation: Completed with open files remaining',
       )
     }

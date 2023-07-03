@@ -8,7 +8,8 @@ export const CDMHNames = {
   connectPortal: 'Connect Portal',
 } as Record<CDMHKey, string>
 
-export const useSiteSettingsQuery = () => useQuery({
+export const useSiteSettingsQuery = (fireRequest: boolean) => useQuery({
   queryKey: ['site-settings'],
   queryFn: siteSettingsRequest,
+  enabled: fireRequest,
 })

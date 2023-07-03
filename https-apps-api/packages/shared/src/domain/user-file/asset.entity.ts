@@ -60,7 +60,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   parentFolderId?: number
 
   @Property()
-  scopedParentFolderId?: Node
+  scopedParentFolderId?: number
 
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>
