@@ -113,7 +113,7 @@ docker compose exec \
     -e PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
     -e PFDA_USER_ORG_HANDLE=floranteorg \
     -e PFDA_USER_DXUSER=fdelacruz \
-    web bundle exec rake {db:setup,db:migrate,user:generate_test_users}
+    web bundle exec rake {db:setup,db:migrate,db:generate_mock_data,user:generate_test_users}
 # ! Don't forget to add respective flags before running this command
 # For instance, dev with "arm64v8"
 # docker compose 
@@ -124,7 +124,7 @@ docker compose exec \
 #     -e PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
 #     -e PFDA_USER_ORG_HANDLE=floranteorg \
 #     -e PFDA_USER_DXUSER=fdelacruz \
-#     web bundle exec rake {db:setup,db:migrate,user:generate_test_users}
+#     web bundle exec rake {db:setup,db:migrate,db:generate_mock_data,user:generate_test_users}
 ```
 
 ## Running application
