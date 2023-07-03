@@ -11,7 +11,7 @@ import {
   ManyToMany,
   EntityRepositoryType,
 } from '@mikro-orm/core'
-import { getLogger } from '@pfda/https-apps-shared'
+import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'
 import { Job } from '../job/job.entity'
 import { Asset } from '../user-file'

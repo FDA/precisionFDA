@@ -2,6 +2,7 @@ import { App } from './app/app.entity'
 import { AppSeries } from './app-series'
 import { Workflow } from './workflow/workflow.entity'
 import { Comment } from './comment/comment.entity'
+import { DataPortal } from './data-portal/data-portal.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
 import { Expert } from './expert/expert.entity'
 import { ExpertQuestion } from './expert-question/expert-question.entity'
@@ -32,6 +33,7 @@ import { NewsItem } from './news-item/news-item.entity'
 import { ComparisonInput } from './comparison-input/comparison-input.entity'
 import { NotificationPreference } from './notification-preference/notification-preference.entity'
 import { Session } from './session'
+import { Resource } from './resource/resource.entity'
 
 const entities = {
   AcceptedLicense,
@@ -39,6 +41,7 @@ const entities = {
   AdminMembership,
   App,
   AppSeries,
+  DataPortal,
   Workflow,
   Asset,
   Challenge,
@@ -63,6 +66,7 @@ const entities = {
   Space,
   SpaceEvent,
   SpaceMembership,
+  Resource,
   Tag,
   Tagging,
   User,
@@ -112,6 +116,10 @@ export * as spaceMembership from './space-membership'
 
 export * as challenge from './challenge'
 
+export * as dataPortal from './data-portal'
+
+export * as resource from './resource'
+
 
 export {
   entities,
@@ -120,6 +128,7 @@ export {
   AdminMembership,
   App,
   AppSeries,
+  DataPortal,
   Workflow,
   Asset,
   Challenge,
@@ -144,6 +153,7 @@ export {
   Space,
   SpaceEvent,
   SpaceMembership,
+  Resource,
   Tag,
   Tagging,
   User,

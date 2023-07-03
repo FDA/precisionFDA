@@ -6,7 +6,7 @@ import { SPACE_TYPE } from '../space.enum'
 import { UserOpsCtx } from '../../../types'
 import { PlatformClient } from '../../../platform-client'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
-import { FindSpaceMembersReponse, PlatformMember } from '../../../platform-client/platform-client.responses'
+import { OrgFindMembersReponse, PlatformMember } from '../../../platform-client/platform-client.responses'
 import { UserInviteToOrgParams, UserRemoveFromOrgParams } from '../../../platform-client/platform-client.params'
 
 type SyncSpacesPermissionsInput = {}
@@ -69,8 +69,8 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
       // hostOrg (if any and user is part of it)
       if (this.membership.side === SPACE_MEMBERSHIP_SIDE.HOST && space.hostDxOrg) {
         try {
-          const hostOrgMembers: FindSpaceMembersReponse = await this.client.findSpaceMembers({
-            spaceOrg: space.hostDxOrg,
+          const hostOrgMembers: OrgFindMembersReponse = await this.client.orgFindMembers({
+            orgDxid: space.hostDxOrg,
           })
           await this.checkPermissions(host_members, hostOrgMembers.results, space)
         } catch (err) {
@@ -81,8 +81,8 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
       // guestOrg (if any and user is part of it)
       if (this.membership.side === SPACE_MEMBERSHIP_SIDE.GUEST && space.guestDxOrg) {
         try {
-          const guestOrgMembers: FindSpaceMembersReponse = await this.client.findSpaceMembers({
-            spaceOrg: space.guestDxOrg,
+          const guestOrgMembers: OrgFindMembersReponse = await this.client.orgFindMembers({
+            orgDxid: space.guestDxOrg,
           })
           await this.checkPermissions(guest_members, guestOrgMembers.results, space)
         } catch (err) {

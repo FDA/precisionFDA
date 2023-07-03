@@ -58,7 +58,7 @@ describe('TASK: permissions-synchronize', () => {
     create.spacesHelper.addMember(em, { user: user3, space }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
     await em.flush()
     await createSyncSpacesPermissionsTask(userContext)
-    expect(fakes.client.findSpaceMembersFake.calledOnce).to.be.true()
+    expect(fakes.client.orgFindMembersFake.calledOnce).to.be.true()
     expect(fakes.client.inviteUserToOrganizationFake.notCalled).to.be.true()
     expect(fakes.client.removeUserFromOrganizationFake.notCalled).to.be.true()
   })
@@ -73,7 +73,7 @@ describe('TASK: permissions-synchronize', () => {
 
     await em.flush()
     await createSyncSpacesPermissionsTask(userContext)
-    expect(fakes.client.findSpaceMembersFake.calledOnce).to.be.true()
+    expect(fakes.client.orgFindMembersFake.calledOnce).to.be.true()
     expect(fakes.client.inviteUserToOrganizationFake.calledOnce).to.be.true()
     expect(fakes.client.removeUserFromOrganizationFake.notCalled).to.be.true()
 
@@ -87,7 +87,7 @@ describe('TASK: permissions-synchronize', () => {
 
     await em.flush()
     await createSyncSpacesPermissionsTask(userContext)
-    expect(fakes.client.findSpaceMembersFake.calledOnce).to.be.true()
+    expect(fakes.client.orgFindMembersFake.calledOnce).to.be.true()
     expect(fakes.client.inviteUserToOrganizationFake.notCalled).to.be.true()
     expect(fakes.client.removeUserFromOrganizationFake.notCalled).to.be.true()
 

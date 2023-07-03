@@ -6182,14 +6182,6 @@ slide@^1.1.5:
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
   integrity sha512-NwrtjCg+lZoqhFU8fOwl4ay2ei8PaqCBOUV3/ektPY9trO1yQ1oXEfmHAhKArUVUr/hOHvy5f6AdP17dCM0zMw==
 
-snyk@^1.1064.0:
-  version "1.1153.0"
-  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.1153.0.tgz#17964d0164ca2d609b9bcc9d6b78f917c7516cb8"
-  integrity sha512-C+hAjrx0vGXkmGISb5TJx77XKRcqN6QjIHKQ+mAEr1nzAqJ/6r66NnEpsBObIj+lffud1Vd66q8arkR3iciwoQ==
-  dependencies:
-    "@sentry/node" "^7.36.0"
-    global-agent "^3.0.0"
-
 sonic-boom@^2.1.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/sonic-boom/-/sonic-boom-2.8.0.tgz#c1def62a77425090e6ad7516aad8eb402e047611"

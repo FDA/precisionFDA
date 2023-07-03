@@ -28,7 +28,9 @@ export enum TASK_TYPE {
   REMOVE_NODES = 'remove_nodes',
   OTHER_TASK = 'other',
   // TODO - Standardize on DOMAIN_ACTION naming scheme
-  WORKSTATION_SNAPSHOT = 'workstation_snapshot'
+  WORKSTATION_SNAPSHOT = 'workstation_snapshot',
+  ADMIN_DATA_CONSISTENCY_REPORT = 'admin_data_consistency_report',
+  USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
 }
 
 // will be used in the sub-handler
@@ -78,16 +80,27 @@ export type SyncSpacesPermissionsJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_SPACES_PERMISSIONS
 }
 
-export type DebugMaxMemory = {
-  type: TASK_TYPE.DEBUG_MAX_MEMORY
-};
-
 // TODO - Consider renaming *Jobs to *Task, because Job already conflates with platform job and bull job
 export type WorkstationSnapshotTask = TaskWithAuth & {
   type: TASK_TYPE.WORKSTATION_SNAPSHOT
   payload: WorkstationSnapshotOperationParams
 }
 
+// ---------------------
+// Admin and Debug tasks
+// ---------------------
+
+export type AdminDataConsistencyReportTask = {
+  type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT
+}
+
+export type UserDataConsistencyReportTask = {
+  type: TASK_TYPE.USER_DATA_CONSISTENCY_REPORT
+}
+
+export type DebugMaxMemory = {
+  type: TASK_TYPE.DEBUG_MAX_MEMORY
+}
 
 export type Task =
   | BasicUserJob
@@ -99,6 +112,8 @@ export type Task =
   | SyncFileStatesJob
   | SyncSpacesPermissionsJob
   | SyncWorkstationFiles
-  | DebugMaxMemory
   | RemoveNodesJob
   | WorkstationSnapshotTask
+  | AdminDataConsistencyReportTask
+  | UserDataConsistencyReportTask
+  | DebugMaxMemory

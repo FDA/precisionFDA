@@ -1,6 +1,6 @@
 /* eslint-disable no-undefined */
 import { EntityManager } from '@mikro-orm/mysql'
-import { database, queue } from '@pfda/https-apps-shared'
+import { config, database, queue } from '@pfda/https-apps-shared'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
@@ -8,7 +8,7 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 
 const createUserCheckupTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
@@ -21,6 +21,7 @@ const createUserCheckupTask = async (user: UserCtx) => {
 describe('TASK: user-checkup', () => {
   let em: EntityManager
   let user: User
+  let adminUser: User
   let userContext: UserCtx
   let regularApp: App
   let httpsApp: App
@@ -29,7 +30,8 @@ describe('TASK: user-checkup', () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager
     em.clear()
-    user = create.userHelper.createAdmin(em)
+    user = create.userHelper.create(em)
+    adminUser = create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })
     httpsApp = create.appHelper.createHTTPS(em, { user })
     await em.flush()
@@ -42,7 +44,17 @@ describe('TASK: user-checkup', () => {
 
   it('processes a queue task - calls the queue handlers', async () => {
     await createUserCheckupTask(userContext)
-    expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
+    // expect UserCheckupOperation to be queued but not UserDataConsistencyReportOperation
+    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
+  })
+
+  it("queues UserDataConsistencyReportOperation if it hasn't been run before", async () => {
+    user.lastDataCheckup = null
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+    // expect both UserCheckupOperation and UserDataConsistencyReportOperation to be queued
+    expect(queueFakes.addToQueueStub.callCount).to.equal(2)
   })
 
   it('adds job sync tasks for HTTPS apps but not regular apps to the queue', async () => {
@@ -169,5 +181,31 @@ describe('TASK: user-checkup', () => {
     await createUserCheckupTask(userContext)
 
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
+  })
+
+  it('queues UserDataConsistencyReport if last checkup is null', async () => {
+    user.lastDataCheckup = null
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+    expect(queueFakes.addToQueueStub.callCount).to.equal(2)
+  })
+
+  it('queues UserDataConsistencyReport if last checkup is over the limit', async () => {
+    const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
+    user.lastDataCheckup = new Date((new Date()).getTime() + repeat * 1000 + 1)
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
+  })
+
+  it('does not queue UserDataConsistencyReport if last checkup is under the limit', async () => {
+    const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
+    user.lastDataCheckup = new Date((new Date()).getTime() + repeat * 1000 - 1)
+    await em.flush()
+
+    await createUserCheckupTask(userContext)
+    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
   })
 })

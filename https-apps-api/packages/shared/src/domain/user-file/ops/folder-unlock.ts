@@ -1,28 +1,24 @@
 import { Folder } from '../..'
-import { BaseOperation } from '../../../utils/base-operation'
+import { BaseOperation } from '../../../utils'
 import { errors } from '../../..'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
-import { User } from '../../user/user.entity'
+import { User } from '../../user'
+import { getNodePath } from '../user-file.helper'
 
-class FolderUnlockOperation extends BaseOperation<
-UserOpsCtx,
-IdInput,
-void
-> {
+class FolderUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
   async run(input: IdInput): Promise<void> {
     const em = this.ctx.em
-
+    const userRepo = em.getRepository(User)
+    const user = await userRepo.findOneOrFail(this.ctx.user.id)
+    const repo = em.getRepository(Folder)
+    const folderToUnlock = await repo.findOne(input.id)
+    if (!folderToUnlock) {
+      throw new errors.FolderNotFoundError()
+    }
     try {
       await em.begin()
-      const repo = em.getRepository(Folder)
-      const folderToUnlock = await repo.findOne(input.id)
-      if (!folderToUnlock) {
-        throw new errors.FolderNotFoundError()
-      }
-      const userRepo = em.getRepository(User)
-      const user = await userRepo.findOneOrFail(this.ctx.user.id)
-      const folderPath = `/${folderToUnlock.name}`
+      const folderPath = await getNodePath(em, folderToUnlock)
       const folderEvent = await createFolderEvent(
         EVENT_TYPES.FOLDER_UNLOCKED,
         folderToUnlock,

@@ -70,7 +70,30 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         userId,
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
-      { filters: ['userfile'], populate: ['taggings.tag'] },
+      {
+        filters: ['userfile'],
+        populate: ['taggings.tag', 'user'],
+      },
+    )
+  }
+
+  async findAllHTTPSFiles(): Promise<UserFile[]> {
+    return await this.find(
+      { },
+      {
+        filters: ['userfile', 'https'],
+        populate: ['taggings.tag', 'user'],
+      },
+    )
+  }
+
+  async findHTTPSFilesForUser(userId: number): Promise<UserFile[]> {
+    return await this.find(
+      { userId },
+      {
+        filters: ['userfile', 'https'],
+        populate: ['taggings.tag', 'user'],
+      },
     )
   }
 

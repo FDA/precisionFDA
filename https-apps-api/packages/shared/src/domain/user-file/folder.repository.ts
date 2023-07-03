@@ -1,8 +1,11 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { Folder } from './folder.entity'
 
-type FindForSynchronization = {
+type FindForUser = {
   userId: number
+}
+
+type FindForSynchronization = FindForUser & {
   projectDxid: string
 }
 
@@ -31,6 +34,40 @@ export class FolderRepository extends EntityRepository<Folder> {
     return await this.find(
       { user: this.getReference(userId), project: projectDxid },
       { filters: ['folder'], orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
+    )
+  }
+
+  // Find all folders for a particular user
+  async findForUser({ userId }: FindForUser): Promise<Folder[]> {
+    return await this.find(
+      { user: this.getReference(userId) },
+      { filters: ['folder'], orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
+    )
+  }
+
+  async findAllHTTPSFolders(): Promise<Folder[]> {
+    return await this.findAll(
+      { filters: ['folder', 'https'], populate: ['user', 'taggings.tag'] },
+    )
+  }
+
+  async findAllHTTPSFoldersForUser({ userId }: FindForUser): Promise<Folder[]> {
+    return await this.find(
+      { userId },
+      { filters: ['folder', 'https'], orderBy: { id: 'ASC' }, populate: ['taggings.tag'] },
+    )
+  }
+
+  async findAllPFDAOnlyFolders(): Promise<Folder[]> {
+    return await this.findAll(
+      { filters: ['folder', 'pfdaonly'], populate: ['user', 'taggings.tag'] },
+    )
+  }
+
+  async findPFDAOnlyFoldersForUser({ userId }: FindForUser): Promise<Folder[]> {
+    return await this.find(
+      { userId },
+      { filters: ['folder', 'pfdaonly'], populate: ['taggings.tag'] },
     )
   }
 

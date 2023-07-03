@@ -11,9 +11,8 @@ import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
 import { itemsCountString, pluralize } from '../../../../utils/formatting'
-import { LockUnlockActionType, fetchFilesDownloadList, lockUnlockFilesRequest } from '../files.api'
+import { LockUnlockActionType, lockUnlockFilesRequest, fetchFilesListLockingRequest } from '../files.api'
 import { IFile } from '../files.types'
-
 
 const StyledPath = styled.div`
   min-width: 150px;
@@ -32,17 +31,19 @@ const LockUnlockFiles = ({
 }: {
   selected: IFile[]
   scope?: string
-  type: LockUnlockActionType,
+  type: LockUnlockActionType
   setNumberOfFiles: (n: number) => void
 }) => {
   const { data, status } = useQuery({
     queryKey: ['download_list', type, selected],
-    queryFn: () => fetchFilesDownloadList(
-      selected.map(s => s.id),
-      scope,
-    ),
+    queryFn: () =>
+      fetchFilesListLockingRequest(
+        selected.map(s => s.id),
+        scope,
+        type,
+      ),
     keepPreviousData: false,
-    onSuccess: (res) => {
+    onSuccess: res => {
       setNumberOfFiles(res.length)
     },
     onError: () => {
@@ -50,14 +51,13 @@ const LockUnlockFiles = ({
     },
   })
   if (status === 'loading') return <div>Loading...</div>
+  if (!data?.length) return <div>{`You have selected items that cannot be ${type}ed.`}</div>
   return (
     <ResourceTable
-      rows={data!.map(s => ({
+      rows={data.map(s => ({
         name: (
           <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
-            <VerticalCenter>
-              {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-            </VerticalCenter>
+            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
             {s.name}
           </StyledName>
         ),
@@ -76,7 +76,7 @@ export const useLockUnlockFileModal = ({
   selected: IFile[]
   onSuccess?: () => void
   scope?: string
-  spaceId?: string,
+  spaceId?: string
   type: LockUnlockActionType
 }) => {
   const { isShown, setShowModal } = useModal()
@@ -91,8 +91,13 @@ export const useLockUnlockFileModal = ({
     },
     onSuccess: () => {
       setShowModal(false)
-      toast.success(`${ActionTypeName[type]}ed ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)} or ${pluralize('folder', numberOfFiles ?? 1)}.`)
-      if(onSuccess) onSuccess()
+      toast.success(
+        `${ActionTypeName[type]}ed ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)} or ${pluralize(
+          'folder',
+          numberOfFiles ?? 1,
+        )}.`,
+      )
+      if (onSuccess) onSuccess()
     },
   })
 
@@ -110,10 +115,7 @@ export const useLockUnlockFileModal = ({
       footer={
         <>
           {mutation.isLoading && <Loader />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
             Cancel
           </Button>
           <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
@@ -125,6 +127,7 @@ export const useLockUnlockFileModal = ({
       <LockUnlockFiles selected={memoSelected} type={type} scope={scope} setNumberOfFiles={setNumberOfFiles} />
     </Modal>
   )
+
   return {
     modalComp,
     setShowModal,

@@ -3,8 +3,10 @@ import { BaseOperation } from '../../../utils/base-operation'
 import { UserCtx, UserOpsCtx } from '../../../types'
 import { SyncFilesStateOperation } from '../../user-file'
 import { findUnclosedFilesOrAssets } from '../../user-file/user-file.helper'
-import { queue, job, dbCluster } from '../../..'
+import { queue, job, dbCluster, user } from '../../..'
 import { isJobOrphaned } from '../../../queue/queue.utils'
+import { UserDataConsistencyReportOperation } from './user-data-consistency-report'
+import { User } from '../..'
 
 
 const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log: any): Promise<void> => {
@@ -44,10 +46,28 @@ void
     const log = this.ctx.log
     const userCtx = this.ctx.user
 
+    const user = await em.getRepository(User).findDxuser(userCtx.dxuser)
+    if (!user) {
+      log.error({
+        id: userCtx.id,
+        dxuser: userCtx.dxuser,
+      }, 'UserCheckupOperation: User not found')
+      return
+    }
+
     log.info({
       id: userCtx.id,
       dxuser: userCtx.dxuser,
     }, 'UserCheckupOperation: Starting user checkup')
+
+    log.info({
+      lastDataCheckup: user.lastDataCheckup,
+      now: new Date(),
+    }, 'UserCheckupOperation: Checking if user needs ')
+    const doFullCheckup = UserDataConsistencyReportOperation.doesUserNeedFullCheckup(user)
+    if (doFullCheckup) {
+      UserDataConsistencyReportOperation.enqueue(userCtx)
+    }
 
     // If a user has open (unclosed) files in the pFDA database, and no
     // sync task is queued up

@@ -1,0 +1,51 @@
+# Must be sourced
+
+set -e -o pipefail
+umask 022
+
+mark-section "preparing environment"
+hostname localhost
+#if ! type -P java >/dev/null 2>&1
+#then
+#  if ! apt-get install --yes --no-install-recommends openjdk-7-jre-headless >& /tmp/.openjdk-7-jre-headless.log
+#  then
+#    echo >&2 "While preparing the environment, there was an error trying to install some Ubuntu packages."
+#    echo >&2 "This is sometimes due to a transient network error that may go away if you retry running the job."
+#    echo >&2 "The full log is below:"
+#    echo >&2 " "
+#    cat /tmp/openjdk-7-jre-headless.log 1>&2
+#    exit 1
+#  fi
+#fi
+
+mark-section "downloading assets"
+dx describe $DX_JOB_ID --json | jq -r .app >/tmp/.tmp.appid
+dx describe $(< /tmp/.tmp.appid) --json | jq -r '.details.ordered_assets | .[]' > /tmp/.tmp.assets
+for asset_id in $(< /tmp/.tmp.assets)
+do
+  mark-section "fetching asset $asset_id"
+  dx describe "$asset_id" --json | jq -r .name > /tmp/.tmp.asset_name
+  mark-section "fetching asset $(< /tmp/.tmp.asset_name)"
+  echo "Fetching asset $(< /tmp/.tmp.asset_name) ($asset_id)" 1>&2
+  if [[ "$(< /tmp/.tmp.asset_name)" == *.gz ]]; then
+    dx cat "$asset_id" | tar -z -x --no-same-owner --no-same-permissions -C / -f -
+  else
+    dx cat "$asset_id" | tar -x --no-same-owner --no-same-permissions -C / -f -
+  fi
+done
+
+mark-section "preparing environment"
+mkdir -p /work/
+cd /work
+HOME=/work
+cp -f /home/dnanexus/job_input.json /work/job_input.json
+dx-reprint-bash-vars > /tmp/.bash_vars
+source /tmp/.bash_vars
+rm /tmp/.bash_vars
+
+mark-section "downloading inputs"
+dx-download-all-inputs --parallel
+rm -f /work/job_input.json
+
+mark-section "running the shell script"
+set -x

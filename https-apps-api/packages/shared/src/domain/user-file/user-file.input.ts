@@ -50,8 +50,7 @@ const renameFolderSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
-// TODO could be replaced with IdsInput
-type uidListInput = {
+type IdsInput = {
   ids: number[]
 }
 
@@ -72,19 +71,18 @@ const CLINodeSearchSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     arg: { type: 'string' },
-    spaceId: { type: ['number' , 'null']},
-    folderId: { type: ['number' , 'null']},
-    type: {type: 'string' }
-
+    spaceId: { type: ['number', 'null'] },
+    folderId: { type: ['number', 'null'] },
+    type: { type: 'string' },
   },
   required: ['arg', 'type'],
   additionalProperties: false,
 }
 
 type CLINodeSearchInput = {
-  arg: string,
-  type: string,
-  spaceId?: number,
+  arg: string
+  type: string
+  spaceId?: number
   folderId?: number
 }
 
@@ -95,9 +93,9 @@ export {
   RemoveNodesInput,
   renameFolderSchema,
   uidListSchema,
-  uidListInput,
+  IdsInput,
   removeNodesSchema,
   nodeQueryFilter,
   CLINodeSearchSchema,
-  CLINodeSearchInput
+  CLINodeSearchInput,
 }

@@ -1,7 +1,7 @@
 import { Logger } from 'pino'
 import Bull, { Job, JobInformation, Queue } from 'bull'
 import { removeRepeatableJob } from '.'
-import { formatDuration } from '../domain/job/job.helper'
+import { formatDuration } from '../utils/format'
 
 
 const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string> => {

@@ -9,7 +9,7 @@ import {
   Filter,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { formatDuration } from '../job/job.helper'
+import { formatDuration } from '../../utils/format'
 import { User } from '../user/user.entity'
 import { STATUS, ENGINE } from './db-cluster.enum'
 

@@ -37,7 +37,7 @@ export const Button = styled.button<IButton>`
 
   ${({ role, disabled, active }) => { 
     let textColor = theme.colors.primaryBlue
-    let borderColor = 'rgb(218, 239, 251);'
+    let borderColor = theme.colors.lightBlue
     let borderColorHover = theme.colors.lightBlue
     let backgroundColorHover = theme.colors.subtleBlue
 

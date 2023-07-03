@@ -1,54 +1,42 @@
-import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Connection, MikroORM } from '@mikro-orm/core'
 import { config } from '..'
-import { defaultLogger as log } from '../logger'
-import { entities } from '../domain'
-import { BaseEntity } from './base-entity'
+import { DatabaseService, IDatabaseService } from './database.service'
 
-let orm: MikroORM | null
+let db: IDatabaseService | null
+let dbReplica: IDatabaseService | null
 
-const start = async (): Promise<void> => {
-  try {
-    orm = await MikroORM.init({
-      metadataProvider: TsMorphMetadataProvider,
-      entities: [BaseEntity, ...Object.values(entities)],
-      type: 'mysql',
-      // dbName: config.database.dbName,
-      clientUrl: config.database.clientUrl,
-      debug: config.database.debug,
-      // v5 introduced strict checking. Having this enabled would mean a lot
-      // of work, but we need to eventually reach this property to be true
-      validateRequired: false,
-      // useful for mysql datetime type https://mikro-orm.io/docs/configuration#forcing-utc-timezone
-      // this way, created timestamps do not depend on developer's timezone
-      // useful for testing database, for example
-      forceUtcTimezone: true,
-    })
-    log.debug('Database: connection')
-    await orm.em.getConnection().execute('SELECT 1+1 as foo;')
-  } catch (err) {
-    log.error({ err }, 'Database connection failed')
-    // not suitable here, but good for tests
-    // throw new errors.InternalError('Database connection failed')
-    throw err
+const createDatabaseService = (): IDatabaseService => {
+  db = new DatabaseService(config.database.clientUrl, config.database.debug)
+  return db
+}
+
+const createDatabaseReplicaService = (): IDatabaseService => {
+  dbReplica = new DatabaseService(config.databaseReplica.clientUrl, config.databaseReplica.debug)
+  return dbReplica
+}
+
+const start = async(): Promise<void> => {
+  if (!db) {
+    db = createDatabaseService()
+  }
+  await db.start()
+}
+
+const stop = async(): Promise<void> => {
+  if (db) {
+    db.stop()
+  }
+  if (dbReplica) {
+    dbReplica.stop()
   }
 }
 
-const stop = async (): Promise<void> => {
-  try {
-    if (orm && (await orm.isConnected())) {
-      await orm.close()
-    }
-    log.debug('Database: connection stopped')
-  } catch (err) {
-    log.error({ err }, 'Database connection: stop failed')
-    throw err
-  }
-}
-
+// TODO: In the future this will be created and injected by DI, but for now
+//       keeping the exported functions as-is because the refactor touches many files
 export const database = {
-  start,
-  stop,
-  orm: (): MikroORM => orm!,
-  connection: (): Connection => orm!.em.getConnection(),
+  start: start,
+  stop: stop,
+  orm: (): MikroORM => db!.getOrm()!,
+  connection: (): Connection => db!.getOrm()!.em.getConnection(),
+  createDatabaseReplicaService,
 }

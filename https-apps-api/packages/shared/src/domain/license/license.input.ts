@@ -8,7 +8,6 @@ const filesSchema: JSONSchema7 = {
       type: 'array',
       items: {
         type: 'number',
-        maxLength: config.validation.maxStrLen,
       },
     },
   },
