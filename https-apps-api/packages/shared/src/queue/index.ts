@@ -9,12 +9,13 @@ import { defaultLogger as log } from '../logger'
 import { config } from '../config'
 import { InvalidStateError } from '../errors'
 import { SyncJobOperation } from '../domain/job'
-import { formatDuration } from '../domain/job/job.helper'
+import { formatDuration } from '../utils/format'
 import { EmailSendOperation } from '../domain/email'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
 import { SyncFilesStateOperation } from '../domain/user-file'
 import * as utils from './queue.utils'
 import * as types from './task.input'
+import { AdminDataConsistencyReportOperation } from '../debug/ops/admin-data-consistency-report'
 
 let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
@@ -100,7 +101,7 @@ const createQueues = async (): Promise<void> => {
 
 const initMaintenanceQueue = async () => {
   log.info({}, 'Initializing maintenance queue')
-  if (config.workerJobs.queues.maintenance.onInit.shouldAddCheckNonterminatedClusters) {
+  if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
     const checkNonTerminatedDbclustersTask = {
       type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
     }
@@ -111,6 +112,10 @@ const initMaintenanceQueue = async () => {
       },
       jobId: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
     })
+  }
+
+  if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
+    await AdminDataConsistencyReportOperation.enqueue()
   }
 }
 
@@ -381,6 +386,11 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
 
 // Queue adding helpers
 //
+
+// addToQueueEnsureUnique adds a non-repeatable job to the queue but does not
+//    allow a duplicate job with the same bull jobId to be added
+//    repeatable jobs should not use this function
+// TODO: The queue methods should be cleaned up and a lot of code could be consolidated
 const addToQueueEnsureUnique = async <T extends types.Task>(
   q: Queue,
   task: T,
@@ -433,6 +443,7 @@ export {
   removeRepeatable,
   removeRepeatableJob,
   findRepeatable,
+  addToQueue,
   addToQueueEnsureUnique,
   clearOrphanedRepeatableJobs,
 }

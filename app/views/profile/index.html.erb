@@ -1,4 +1,5 @@
 <% content_for :title do %>Profile<% end %>
+<% require 'cgi' %>
 
 <div class="page-header">
   <div class="media">
@@ -40,7 +41,7 @@
 
     </div><%= link_to(content_tag(:span, "", class: "fa fa-fw fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
     <div class="btn-group">
-      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-default') %>
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{CGI.escapeHTML(DNANEXUS_PLATFORM_URI)}profile/#{CGI.escapeHTML(@user.dxuser)}/changePassword?client_id=precision_fda_gov", class: 'btn btn-default') %>
       <a href="#" class="btn btn-default" data-bind="click: contacts.showForm">
         <i class="fa fa-fw fa-pencil"></i>&nbsp;Update Contact Information
       </a>

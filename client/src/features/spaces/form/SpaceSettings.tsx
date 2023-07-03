@@ -298,14 +298,12 @@ export const SpaceSettings = () => {
   }
 
   return (
-    <>
-      <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
-      <StyledPageCenter>
-        <StyledPageContent>
-          <PageTitle>Space Settings</PageTitle>
-          <SpaceSettingsForm space={data.space} />
-        </StyledPageContent>
-      </StyledPageCenter>
-    </>
+    <StyledPageCenter>
+      <StyledPageContent>
+        <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
+        <PageTitle>Space Settings</PageTitle>
+        <SpaceSettingsForm space={data.space} />
+      </StyledPageContent>
+    </StyledPageCenter>
   )
 }

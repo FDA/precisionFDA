@@ -92,7 +92,7 @@ export const ExecutionDetails = ({
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'executions', spaceId)}>
+      <StyledBackLink linkTo={getBackPath(location, 'executions', scope)}>
         Back to Executions
       </StyledBackLink>
       <Topbox>

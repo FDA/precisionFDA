@@ -17,12 +17,12 @@ export const ModalHeaderTop = ({
   disableClose = false,
 }: {
   hide?: () => void
-  headerText?: string
+  headerText?: JSX.Element | React.ReactNode | string | number
   disableClose?: boolean
 }) => {
   return (
     <HeaderTop>
-      <HeaderText>{headerText}</HeaderText>
+      {typeof headerText === 'function' ? headerText() : <HeaderText>{headerText}</HeaderText>}
       {!disableClose && (
         <CloseButton
           data-testid="modal-close-button"
@@ -75,5 +75,5 @@ const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
 }
 // eslint-disable-next-line react/destructuring-assignment
 export const ModalNext = ({ children, ...rest }: PropsWithChildren<ModalNextProps>) => rest.isShown
-  ? ReactDOM.createPortal(<ModalComponent {...rest}>{children}</ModalComponent>, document.body)
+  ? ReactDOM.createPortal(<ModalComponent {...rest}>{children}</ModalComponent>, document.body, rest.id)
   : null

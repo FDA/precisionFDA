@@ -5,12 +5,11 @@ import {
   ManyToOne,
   PrimaryKey,
   Property,
-  Collection,
-  OneToMany,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
+import { formatDuration } from '../../utils/format'
 import { User } from '../user/user.entity'
-import {FILE_STATE, FILE_STI_TYPE, FOLDER_STATE} from './user-file.types'
+import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE } from './user-file.types'
 
 @Entity({
   abstract: true,
@@ -47,8 +46,17 @@ export class Node extends BaseEntity {
   @Property()
   createdAt: Date
 
+  @Property()
+  project?: string
+
+  @Property()
+  parentFolderId?: number
+
   @ManyToOne(() => Node)
   parentFolder: Node
+
+  @Property()
+  scopedParentFolderId?: number
 
   @ManyToOne(() => Node)
   scopedParentFolder?: Node
@@ -73,4 +81,12 @@ export class Node extends BaseEntity {
 
   @ManyToOne(() => User)
   user!: IdentifiedReference<User>
+
+  elapsedTimeSinceCreation(): number {
+    return new Date().getTime() - this.createdAt.getTime()
+  }
+
+  elapsedTimeSinceCreationString(): string {
+    return formatDuration(this.elapsedTimeSinceCreation())
+  }
 }

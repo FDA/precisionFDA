@@ -1,7 +1,7 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
 import { Collection } from '@mikro-orm/core'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { User, Node, UserFile, Asset, entities, Space } from '..'
+import { Asset, entities, Node, Space, User, UserFile } from '..'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { getIdFromScopeName, isValidScopeName } from '../space/space.helper'
@@ -9,7 +9,7 @@ import { STATIC_SCOPE } from '../../enums'
 import { AssetRepository } from './asset.repository'
 import { Folder } from './folder.entity'
 import { FolderRepository } from './folder.repository'
-import { nodeQueryFilter, uidListInput } from './user-file.input'
+import { IdsInput, nodeQueryFilter } from './user-file.input'
 import { UserFileRepository } from './user-file.repository'
 import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
 import { PermissionError } from '../../errors'
@@ -39,11 +39,9 @@ const filterDuplicities = uniqBy((fol: Folder) => fol.id)
 /**
  * Prepares folder paths that are fetched from the API.
  * Removes the root folder and sorts alphabetically
- * @param response DescribeFoldersResponse
  */
 const parseFoldersFromClient = (paths: string[]): string[] => {
-  const folders = paths.filter((entry: string) => entry !== '/').sort((a, b) => a.localeCompare(b))
-  return folders
+  return paths.filter((entry: string) => entry !== '/').sort((a, b) => a.localeCompare(b))
 }
 
 const childrenTraverse = async (
@@ -63,11 +61,9 @@ const childrenTraverse = async (
  * Traverses up in the hierarchy and returns all folders up to the root.
  *
  * @param folder Folder whose parents we need
- * @param repo
  * @returns all folders above given folder
  */
-const getParentFolders = async (
-  folder: Folder): Promise<Folder[]> => {
+const getParentFolders = async (folder: Folder): Promise<Folder[]> => {
   const folderTree: Folder[] = []
   if (folder.parentFolder) {
     let currentFolder: Folder | null = folder
@@ -121,13 +117,13 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
  * @param folders Folder[]
  */
 const folderPathsFromFolders = (folders: Folder[]): string[] => {
-  const folderPaths = folders.map(folder => {
-    const chain = folderTraverse(folders, folder, [])
-    return `/${chain.join('/')}`
-  })
-    .sort((a, b) => a.localeCompare(b))
   // todo: back to array for easier comparison?
-  return folderPaths
+  return folders
+    .map(folder => {
+      const chain = folderTraverse(folders, folder, [])
+      return `/${chain.join('/')}`
+    })
+    .sort((a, b) => a.localeCompare(b))
 }
 
 const filterLeafPaths = (folderPaths: string[]): string[] => {
@@ -157,16 +153,15 @@ const getFolderPath = (folders: Folder[], current: Folder): string => {
   return `/${chain.join('/')}`
 }
 
-const createNameAndParentIdFilter = (
-  folderName: string,
-  parent: Folder | undefined,
-) => (f: Folder): boolean => {
-  const sameName = f.name === folderName
-  if (isNil(parent)) {
-    return sameName && isNil(f.parentFolder)
+const createNameAndParentIdFilter =
+  (folderName: string, parent: Folder | undefined) =>
+  (f: Folder): boolean => {
+    const sameName = f.name === folderName
+    if (isNil(parent)) {
+      return sameName && isNil(f.parentFolder)
+    }
+    return sameName && f.parentFolder && f.parentFolder.id === parent.id
   }
-  return sameName && f.parentFolder && f.parentFolder.id === parent.id
-}
 
 /**
  * Recursively finds folders specified in 'pathStr' that are not found in 'folders'
@@ -193,7 +188,9 @@ const createFoldersTraverse = (
     // todo: log or throw error
     console.log('parent is not yet persisted! Might not create subfolders properly', parent.name)
   }
-  const current = folders.concat(result).find(createNameAndParentIdFilter(pathStr[currentIdx], parent))
+  const current = folders
+    .concat(result)
+    .find(createNameAndParentIdFilter(pathStr[currentIdx], parent))
   if (current) {
     // The folder path at pathStr[currentIdx] corresponds with an existing or already created Folder
     createFoldersTraverse(folders, pathStr, user, current, currentIdx + 1, result)
@@ -271,12 +268,16 @@ const findFolderForPath = (
   return currentFolder
 }
 
-const getNodePath = async (em: SqlEntityManager, node: Node, folders: string[] | undefined = []): Promise<string> => {
+const getNodePath = async (
+  em: SqlEntityManager,
+  node: Node,
+  folders: string[] | undefined = [],
+): Promise<string> => {
   folders.unshift(node.name)
   const parentFolderNode = getParentFolder(node)
   if (!parentFolderNode) {
     // we have reached root, compose the path and return it
-    return `/${folders.join("/")}`
+    return `/${folders.join('/')}`
   }
   const folderRepo = em.getRepository(Folder)
   const parentFolder = await folderRepo.findOne({ id: parentFolderNode.id })
@@ -288,7 +289,9 @@ const getNodePath = async (em: SqlEntityManager, node: Node, folders: string[] |
  * @param node
  */
 export const getParentFolder = (node: Node) => {
-  if ([STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)) {
+  if (
+    [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
+  ) {
     return node.parentFolder
   }
   return node.scopedParentFolder
@@ -299,8 +302,10 @@ const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Prom
     const spaceId = getIdFromScopeName(node.scope)
     const space = await em.findOneOrFail(Space, { id: spaceId })
     if (space.type === SPACE_TYPE.VERIFICATION && space.state === SPACE_STATE.LOCKED) {
-      throw new Error(`You have no permissions to remove ${node.name} as`
-        + ' it is part of Locked Verification space.')
+      throw new Error(
+        `You have no permissions to remove ${node.name} as` +
+          ' it is part of Locked Verification space.',
+      )
     }
   }
 }
@@ -314,15 +319,24 @@ const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Prom
  * @param userId current user
  * @param node node that is being verified
  */
-const validateProtectedSpaces = async (em: SqlEntityManager, action: string, userId: number, node: Node) => {
+const validateProtectedSpaces = async (
+  em: SqlEntityManager,
+  action: string,
+  userId: number,
+  node: Node,
+) => {
   if (isValidScopeName(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
-    const space = await em.findOneOrFail(Space, spaceId, { populate: ['spaceMemberships', 'spaceMemberships.user'] })
+    const space = await em.findOneOrFail(Space, spaceId, {
+      populate: ['spaceMemberships', 'spaceMemberships.user'],
+    })
     if (space.protected) {
-      const leadMemberships = space.spaceMemberships.getItems().find(
-        membership =>
-          membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
-      )
+      const leadMemberships = space.spaceMemberships
+        .getItems()
+        .find(
+          membership =>
+            membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
+        )
       if (!leadMemberships) {
         throw new Error(`You have no permissions to ${action} from a Protected Space`)
       }
@@ -343,27 +357,52 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
   if (node.locked) {
     throw new Error('Locked items cannot be removed.')
   }
-  if (node.scope === STATIC_SCOPE.PUBLIC
-    || node.user.id === currentUser.id
-    || await currentUser.isSiteAdmin()) {
+  if (
+    node.scope === STATIC_SCOPE.PUBLIC ||
+    node.user.id === currentUser.id ||
+    (await currentUser.isSiteAdmin())
+  ) {
     return
   }
   if (isValidScopeName(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
-    const space = await em.findOne(
-      entities.Space,
-      {
-        id: spaceId,
-        state: SPACE_STATE.ACTIVE,
-        spaceMemberships: {
-          user: {
-            id: currentUser.id
-          },
-          role: CAN_EDIT_ROLES
-        }
-      })
+    const space = await em.findOne(entities.Space, {
+      id: spaceId,
+      state: SPACE_STATE.ACTIVE,
+      spaceMemberships: {
+        user: {
+          id: currentUser.id,
+        },
+        role: CAN_EDIT_ROLES,
+      },
+    })
     if (!space) {
       throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
+    }
+  }
+}
+
+const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUser: User) => {
+  for (const node of nodes) {
+    if (isValidScopeName(node.scope)) {
+      const spaceId = getIdFromScopeName(node.scope)
+      const space = await em.findOneOrFail(Space, spaceId, {
+        populate: ['spaceMemberships', 'spaceMemberships.user'],
+      })
+      const leadMemberships = space.spaceMemberships
+        .getItems()
+        .find(
+          membership =>
+            membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === currentUser.id,
+        )
+      if (leadMemberships) {
+        return nodes
+      }
+      if (!leadMemberships) {
+        throw new Error(`You have no permissions to lock or unlock '${node.name}'.`)
+      }
+    } else {
+      return nodes.filter(node => node.user.id === currentUser.id)
     }
   }
 }
@@ -379,7 +418,7 @@ const findFileOrAssetWithUid = async (
   }
 
   const assetRepo = em.getRepository(Asset) as AssetRepository
-  return await assetRepo.findAssetWithUid(uid) as IFileOrAsset
+  return (await assetRepo.findAssetWithUid(uid)) as IFileOrAsset
 }
 
 const findFileOrAssetsWithDxid = async (
@@ -393,7 +432,7 @@ const findFileOrAssetsWithDxid = async (
   }
 
   const assetRepo = em.getRepository(Asset) as AssetRepository
-  return await assetRepo.findAllAssetsWithDxid(dxid) as IFileOrAsset[]
+  return (await assetRepo.findAllAssetsWithDxid(dxid)) as IFileOrAsset[]
 }
 
 const findUnclosedFilesOrAssets = async (
@@ -403,11 +442,10 @@ const findUnclosedFilesOrAssets = async (
   let results: IFileOrAsset[] = []
   const userFileRepo = em.getRepository(UserFile)
   const assetRepo = em.getRepository(Asset)
-  results = results.concat(await userFileRepo.findUnclosedFiles(userId) as IFileOrAsset[])
-  results = results.concat(await assetRepo.findUnclosedAssets(userId) as IFileOrAsset[])
+  results = results.concat((await userFileRepo.findUnclosedFiles(userId)) as IFileOrAsset[])
+  results = results.concat((await assetRepo.findUnclosedAssets(userId)) as IFileOrAsset[])
   return results
 }
-
 
 /**
  * Method recursively collects all children of given node if it's a folder.
@@ -433,7 +471,7 @@ const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlE
  * @param filters
  * @returns
  */
-const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter) => {
+const loadNodes = async (em: any, input: IdsInput, filters: nodeQueryFilter) => {
   const nodes: Node[] = await em.find(entities.Node, {
     $or: [
       {
@@ -458,10 +496,9 @@ const loadNodes = async (em: any, input: uidListInput, filters: nodeQueryFilter)
   // ensure uniqueness
   const unique = [...new Map(wholeTree.map(item => [item.id, item])).values()]
   // sort all nodes, folders last
-  unique.sort((a, b) => (a.isFolder && b.isFolder)? 0 : b.isFolder? -1 : 1)
+  unique.sort((a, b) => (a.isFolder && b.isFolder ? 0 : b.isFolder ? -1 : 1))
   return unique
 }
-
 
 export {
   parseFoldersFromClient,
@@ -487,4 +524,5 @@ export {
   validateEditableBy,
   validateProtectedSpaces,
   validateVerificationSpace,
+  filterNodesByUser,
 }

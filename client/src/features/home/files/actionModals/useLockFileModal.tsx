@@ -13,6 +13,7 @@ import { useModal } from '../../../modal/useModal'
 import { itemsCountString, pluralize } from '../../../../utils/formatting'
 import { lockFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
+import { DownloadListResponse } from '../../types'
 
 const StyledPath = styled.div`
   min-width: 150px;
@@ -25,7 +26,7 @@ const LockFiles = ({
 }: {
   selected: IFile[]
   scope: string
-  setNumberOfFilesToLock: (n: number) => void
+  setNumberOfFilesToLock: (n: DownloadListResponse[]) => void
 }) => {
   const { data, status } = useQuery(
     ['download_list', selected],
@@ -35,8 +36,8 @@ const LockFiles = ({
         scope,
       ),
     {
-      onSuccess: (res) => {
-        setNumberOfFilesToLock(res.length)
+      onSuccess: res => {
+        setNumberOfFilesToLock(res)
       },
       onError: () => {
         toast.error('Error: Fetching download list.')
@@ -49,9 +50,7 @@ const LockFiles = ({
       rows={data!.map(s => ({
         name: (
           <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
-            <VerticalCenter>
-              {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-            </VerticalCenter>
+            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
             {s.name}
           </StyledName>
         ),
@@ -61,15 +60,7 @@ const LockFiles = ({
   )
 }
 
-export const useLockFileModal = ({
-  selected,
-  onSuccess,
-  scope,
-}: {
-  selected: IFile[]
-  onSuccess: () => void
-  scope: string
-}) => {
+export const useLockFileModal = ({ selected, onSuccess, scope }: { selected: IFile[]; onSuccess: () => void; scope: string }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
@@ -79,13 +70,23 @@ export const useLockFileModal = ({
     // mutationKey: ['lock-files'],
     mutationFn: (ids: string[]) => lockFilesRequest(ids),
     onError: () => {
-      toast.error(`Error: Locking ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize('folder', numberOfFilesToLock ?? 1)}.`)
+      toast.error(
+        `Error: Locking ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize(
+          'folder',
+          numberOfFilesToLock ?? 1,
+        )}.`,
+      )
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['files'])
       queryClient.invalidateQueries(['counters'])
       setShowModal(false)
-      toast.success(`Locked ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize('folder', numberOfFilesToLock ?? 1)}.`)
+      toast.success(
+        `Locked ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize(
+          'folder',
+          numberOfFilesToLock ?? 1,
+        )}.`,
+      )
       onSuccess()
     },
   })
@@ -104,10 +105,7 @@ export const useLockFileModal = ({
       footer={
         <>
           {mutation.isLoading && <Loader />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
             Cancel
           </Button>
           <ButtonSolidRed onClick={handleSubmit} disabled={mutation.isLoading}>

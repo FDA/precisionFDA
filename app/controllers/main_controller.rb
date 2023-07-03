@@ -383,8 +383,16 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       end
 
       distribute_results user, token
-      redirect_to redirect_url
+      redirect_to safe_redirect_url(redirect_url)
     end
+  end
+
+  def safe_redirect_url(url)
+    uri = Addressable::URI.parse(url)
+    uri.scheme = "https" unless uri.scheme.in?(%w(http https))
+    uri.to_s
+  rescue Addressable::URI::InvalidURIError
+    root_url
   end
 
   def post_login_checks(user, token)

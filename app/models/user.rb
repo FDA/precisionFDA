@@ -17,6 +17,7 @@
 #  email                       :string(255)
 #  normalized_email            :string(255)
 #  last_login                  :datetime
+#  last_data_checkup           :datetime
 #  extras                      :text(65535)
 #  time_zone                   :string(255)
 #  review_app_developers_org   :string(255)      default("")

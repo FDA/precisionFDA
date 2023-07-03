@@ -11,7 +11,11 @@ import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
-import { createChallengeCardImage, createChallengeRequest, getChallengeImageLink } from './api'
+import {
+  createChallengeCardImage,
+  createChallengeRequest,
+  getChallengeImageLink,
+} from './api'
 import { ChallengeForm } from './ChallengeForm'
 import { subtitle, title } from './common'
 
@@ -50,7 +54,7 @@ const CreateChallengePage = () => {
   )
 
   const imageMutation = useMutation({
-    mutationFn: (v: any) => createChallengeCardImage(v),
+    mutationFn: (v: File) => createChallengeCardImage(v),
     onError: () => setIsSaving(false),
     mutationKey: ['create-challenge-image'],
   })
@@ -86,7 +90,13 @@ const CreateChallengePage = () => {
   return (
     <UserLayout>
       <NavigationBar title={title} subtitle={subtitle} user={user} />
-      <BackLinkMargin linkTo="/challenges">Back to Challenges</BackLinkMargin>
+      <StyledPageCenter>
+        <StyledPageContent>
+          <BackLinkMargin linkTo="/challenges">
+            Back to Challenges
+          </BackLinkMargin>
+        </StyledPageContent>
+      </StyledPageCenter>
       {user?.can_create_challenges ? (
         <StyledPageCenter>
           <StyledPageContent>

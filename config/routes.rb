@@ -2,6 +2,7 @@ require "sidekiq/web"
 Sidekiq::Web.app_url = "/"
 
 Rails.application.routes.draw do
+  get "data_portals/index"
   mount Sidekiq::Web => "/admin/sidekiq", constraints: AdminConstraint.new
 
   default_url_options Rails.configuration.action_mailer.default_url_options
@@ -126,7 +127,6 @@ Rails.application.routes.draw do
     get "guidelines" => "main#guidelines"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
-
     get "db_stats" => "main#db_stats", constraints: AdminConstraint.new
     post "/spaces/:id/copy_to_cooperative",
          to: "main#copy_to_cooperative",
@@ -145,6 +145,8 @@ Rails.application.routes.draw do
     get "/home/*all", to: "home#index"
     get "docs" => "docs#index"
     get "/docs/*all", to: "docs#index"
+    get "data-portals" => "main#about"
+    get "/data-portals/*all" => "main#about"
 
     # Old My Home
     # TODO: remove old code once new My Home is stable for release or two,
@@ -219,6 +221,14 @@ Rails.application.routes.draw do
 
         post :save_editor_page, on: :member
         post :propose, on: :collection
+      end
+
+      resources :data_portals, only: %i(index show create update) do
+        post :resources, on: :member, to: "data_portals#create_resource"
+        get :resources, on: :member, to: "data_portals#list_resources"
+        post :card_image, on: :member
+        delete "/resources/:resource_id" => "data_portals#remove_resource", as: :delete_resource_route
+        post "/resources/:resource_id" => "data_portals#create_resource_link", as: :create_resource_link
       end
 
       resources :submissions, only: %i(index) do

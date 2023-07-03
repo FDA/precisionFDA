@@ -4,9 +4,9 @@ require:
 
 AllCops:
   Exclude:
-  - 'db/schema.rb'
-  - 'vendor/**/*'
-  - 'chef/**/*'
+    - "db/schema.rb"
+    - "vendor/**/*"
+    - "chef/**/*"
   DisplayCopNames: true
   StyleGuideCopsOnly: false
   TargetRubyVersion: 3.2.2
@@ -23,29 +23,29 @@ Layout/AssignmentIndentation:
 Layout/BlockAlignment:
   EnforcedStyleAlignWith: either
   SupportedStylesAlignWith:
-  - either
-  - start_of_block
-  - start_of_line
+    - either
+    - start_of_block
+    - start_of_line
 
 Layout/CaseIndentation:
   EnforcedStyle: end
   SupportedStyles:
-  - case
-  - end
+    - case
+    - end
   IndentOneStep: false
   IndentationWidth:
 
 Layout/DefEndAlignment:
   EnforcedStyleAlignWith: start_of_line
   SupportedStylesAlignWith:
-  - start_of_line
-  - def
+    - start_of_line
+    - def
 
 Layout/DotPosition:
   EnforcedStyle: trailing
   SupportedStyles:
-  - leading
-  - trailing
+    - leading
+    - trailing
 
 Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: false
@@ -53,29 +53,29 @@ Layout/EmptyLineBetweenDefs:
 Layout/EmptyLinesAroundBlockBody:
   EnforcedStyle: no_empty_lines
   SupportedStyles:
-  - empty_lines
-  - no_empty_lines
+    - empty_lines
+    - no_empty_lines
 
 Layout/EmptyLinesAroundClassBody:
   EnforcedStyle: no_empty_lines
   SupportedStyles:
-  - empty_lines
-  - empty_lines_except_namespace
-  - no_empty_lines
+    - empty_lines
+    - empty_lines_except_namespace
+    - no_empty_lines
 
 Layout/EmptyLinesAroundModuleBody:
   EnforcedStyle: no_empty_lines
   SupportedStyles:
-  - empty_lines
-  - empty_lines_except_namespace
-  - no_empty_lines
+    - empty_lines
+    - empty_lines_except_namespace
+    - no_empty_lines
 
 Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
   SupportedStylesAlignWith:
-  - keyword
-  - variable
-  - start_of_line
+    - keyword
+    - variable
+    - start_of_line
 
 Layout/ExtraSpacing:
   AllowForAlignment: true
@@ -84,25 +84,25 @@ Layout/ExtraSpacing:
 Layout/FirstArgumentIndentation:
   EnforcedStyle: consistent
   SupportedStyles:
-  - consistent
-  - special_for_inner_method_call
-  - special_for_inner_method_call_in_parentheses
+    - consistent
+    - special_for_inner_method_call
+    - special_for_inner_method_call_in_parentheses
   IndentationWidth:
 
 Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
   SupportedStyles:
-  - special_inside_parentheses
-  - consistent
-  - align_brackets
+    - special_inside_parentheses
+    - consistent
+    - align_brackets
   IndentationWidth:
 
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
   SupportedStyles:
-  - special_inside_parentheses
-  - consistent
-  - align_braces
+    - special_inside_parentheses
+    - consistent
+    - align_braces
   IndentationWidth:
 
 Layout/HashAlignment:
@@ -110,16 +110,16 @@ Layout/HashAlignment:
   EnforcedColonStyle: key
   EnforcedLastArgumentHashStyle: ignore_implicit
   SupportedLastArgumentHashStyles:
-  - always_inspect
-  - always_ignore
-  - ignore_implicit
-  - ignore_explicit
+    - always_inspect
+    - always_ignore
+    - ignore_implicit
+    - ignore_explicit
 
 Layout/IndentationConsistency:
   EnforcedStyle: normal
   SupportedStyles:
-  - normal
-  - rails
+    - normal
+    - rails
 
 Layout/IndentationWidth:
   Width: 2
@@ -132,66 +132,66 @@ Layout/LineLength:
   AllowHeredoc: true
   AllowURI: true
   URISchemes:
-  - http
-  - https
+    - http
+    - https
   IgnoreCopDirectives: false
-  IgnoredPatterns:
-  - '\A\s*(remote_)?test(_\w+)?\s.*(do|->)(\s|\Z)'
+  AllowedPatterns:
+    - '\A\s*(remote_)?test(_\w+)?\s.*(do|->)(\s|\Z)'
 
 Layout/MultilineArrayBraceLayout:
   EnforcedStyle: symmetrical
   SupportedStyles:
-  - symmetrical
-  - new_line
-  - same_line
+    - symmetrical
+    - new_line
+    - same_line
 
 Layout/MultilineHashBraceLayout:
   EnforcedStyle: symmetrical
   SupportedStyles:
-  - symmetrical
-  - new_line
-  - same_line
+    - symmetrical
+    - new_line
+    - same_line
 
 Layout/MultilineMethodCallBraceLayout:
   EnforcedStyle: symmetrical
   SupportedStyles:
-  - symmetrical
-  - new_line
-  - same_line
+    - symmetrical
+    - new_line
+    - same_line
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
   SupportedStyles:
-  - aligned
-  - indented
-  - indented_relative_to_receiver
+    - aligned
+    - indented
+    - indented_relative_to_receiver
   IndentationWidth: 2
 
 Layout/MultilineMethodDefinitionBraceLayout:
   EnforcedStyle: symmetrical
   SupportedStyles:
-  - symmetrical
-  - new_line
-  - same_line
+    - symmetrical
+    - new_line
+    - same_line
 
 Layout/ParameterAlignment:
   EnforcedStyle: with_fixed_indentation
   SupportedStyles:
-  - with_first_parameter
-  - with_fixed_indentation
+    - with_first_parameter
+    - with_fixed_indentation
   IndentationWidth:
 
 Layout/SpaceAroundBlockParameters:
   EnforcedStyleInsidePipes: no_space
   SupportedStylesInsidePipes:
-  - space
-  - no_space
+    - space
+    - no_space
 
 Layout/SpaceAroundEqualsInParameterDefault:
   EnforcedStyle: space
   SupportedStyles:
-  - space
-  - no_space
+    - space
+    - no_space
 
 Layout/SpaceAroundOperators:
   AllowForAlignment: true
@@ -200,8 +200,8 @@ Layout/SpaceBeforeBlockBraces:
   EnforcedStyle: space
   EnforcedStyleForEmptyBraces: space
   SupportedStyles:
-  - space
-  - no_space
+    - space
+    - no_space
 
 Layout/SpaceBeforeBrackets:
   Enabled: true
@@ -212,8 +212,8 @@ Layout/SpaceBeforeFirstArg:
 Layout/SpaceInsideBlockBraces:
   EnforcedStyle: space
   SupportedStyles:
-  - space
-  - no_space
+    - space
+    - no_space
   EnforcedStyleForEmptyBraces: no_space
   SpaceBeforeBlockParameters: true
 
@@ -221,9 +221,9 @@ Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: space
   EnforcedStyleForEmptyBraces: no_space
   SupportedStyles:
-  - space
-  - no_space
-  - compact
+    - space
+    - no_space
+    - compact
 
 Layout/SpaceInsideReferenceBrackets:
   EnforcedStyle: no_space
@@ -232,14 +232,14 @@ Layout/SpaceInsideReferenceBrackets:
 Layout/SpaceInsideStringInterpolation:
   EnforcedStyle: no_space
   SupportedStyles:
-  - space
-  - no_space
+    - space
+    - no_space
 
 Layout/TrailingEmptyLines:
   EnforcedStyle: final_newline
   SupportedStyles:
-  - final_newline
-  - final_blank_line
+    - final_newline
+    - final_blank_line
 
 Lint/AmbiguousAssignment:
   Enabled: true
@@ -274,8 +274,8 @@ Lint/IncompatibleIoSelectWithFiberScheduler:
 Lint/InheritException:
   EnforcedStyle: runtime_error
   SupportedStyles:
-  - runtime_error
-  - standard_error
+    - runtime_error
+    - standard_error
 
 Lint/LambdaWithoutLiteralBlock:
   Enabled: true
@@ -332,9 +332,9 @@ Metrics/AbcSize:
 
 Metrics/BlockLength:
   Exclude:
-    - 'spec/**/*.rb'
-    - 'config/routes.rb'
-    - 'config/environments/*.rb'
+    - "spec/**/*.rb"
+    - "config/routes.rb"
+    - "config/environments/*.rb"
 
 Metrics/BlockNesting:
   Max: 3
@@ -364,32 +364,32 @@ Naming/FileName:
 Naming/MethodName:
   EnforcedStyle: snake_case
   SupportedStyles:
-  - snake_case
-  - camelCase
+    - snake_case
+    - camelCase
 
 Naming/PredicateName:
   NamePrefix:
-  - is_
+    - is_
   ForbiddenPrefixes:
-  - is_
+    - is_
   AllowedMethods:
-  - is_a?
+    - is_a?
   Exclude:
-  - 'spec/**/*'
+    - "spec/**/*"
 
 Naming/VariableName:
   EnforcedStyle: snake_case
   SupportedStyles:
-  - snake_case
-  - camelCase
+    - snake_case
+    - camelCase
 
 Rails/ActionFilter:
   EnforcedStyle: action
   SupportedStyles:
-  - action
-  - filter
+    - action
+    - filter
   Include:
-  - app/controllers/**/*.rb
+    - app/controllers/**/*.rb
 
 Rails/ActiveRecordCallbacksOrder:
   Enabled: true
@@ -406,49 +406,49 @@ Rails/AttributeDefaultBlockValue:
 Rails/Date:
   EnforcedStyle: flexible
   SupportedStyles:
-  - strict
-  - flexible
+    - strict
+    - flexible
 
 Rails/DynamicFindBy:
   Whitelist:
-  - find_by_sql
+    - find_by_sql
 
 Rails/EagerEvaluationLogMessage:
   Enabled: true
 
 Rails/Exit:
   Include:
-  - app/**/*.rb
-  - config/**/*.rb
-  - lib/**/*.rb
+    - app/**/*.rb
+    - config/**/*.rb
+    - lib/**/*.rb
   Exclude:
-  - 'lib/**/*.rake'
+    - "lib/**/*.rake"
 
 Rails/ExpandedDateRange:
   Enabled: true
 
 Rails/FindBy:
   Include:
-  - app/models/**/*.rb
+    - app/models/**/*.rb
 
 Rails/FindById:
   Enabled: true
 
 Rails/FindEach:
   Include:
-  - app/models/**/*.rb
+    - app/models/**/*.rb
 
 Rails/HasAndBelongsToMany:
   Include:
-  - app/models/**/*.rb
+    - app/models/**/*.rb
 
 Rails/HasManyOrHasOneDependent:
   Enabled: false
 
 Rails/HttpPositionalArguments:
   Include:
-  - spec/**/*
-  - test/**/*
+    - spec/**/*
+    - test/**/*
 
 Rails/I18nLocaleAssignment:
   Enabled: true
@@ -470,14 +470,14 @@ Rails/NegateInclude:
 
 Rails/NotNullColumn:
   Include:
-  - db/migrate/*.rb
+    - db/migrate/*.rb
 
 Rails/Output:
   Include:
-  - app/**/*.rb
-  - config/**/*.rb
-  - db/**/*.rb
-  - lib/**/*.rb
+    - app/**/*.rb
+    - config/**/*.rb
+    - db/**/*.rb
+    - lib/**/*.rb
 
 Rails/Pluck:
   Enabled: true
@@ -487,7 +487,7 @@ Rails/PluckInWhere:
 
 Rails/ReadWriteAttribute:
   Include:
-  - app/models/**/*.rb
+    - app/models/**/*.rb
 
 Rails/RedundantTravelBack:
   Enabled: true
@@ -501,15 +501,15 @@ Rails/RenderPlainText:
 Rails/RequestReferer:
   EnforcedStyle: referer
   SupportedStyles:
-  - referer
-  - referrer
+    - referer
+    - referrer
 
 Rails/SafeNavigation:
   ConvertTry: false
 
 Rails/ScopeArgs:
   Include:
-  - app/models/**/*.rb
+    - app/models/**/*.rb
 
 Rails/ShortI18n:
   Enabled: true
@@ -520,8 +520,8 @@ Rails/SquishedSQLHeredocs:
 Rails/TimeZone:
   EnforcedStyle: flexible
   SupportedStyles:
-  - strict
-  - flexible
+    - strict
+    - flexible
 
 Rails/TimeZoneAssignment:
   Enabled: true
@@ -529,8 +529,8 @@ Rails/TimeZoneAssignment:
 Rails/UniqBeforePluck:
   EnforcedStyle: conservative
   SupportedStyles:
-  - conservative
-  - aggressive
+    - conservative
+    - aggressive
 
 Rails/UnknownEnv:
   Environments:
@@ -546,7 +546,7 @@ Rails/UnusedIgnoredColumns:
 
 Rails/Validation:
   Include:
-  - app/models/**/*.rb
+    - app/models/**/*.rb
 
 Rails/WhereEquals:
   Enabled: true
@@ -587,14 +587,14 @@ Security/IoMethods:
 Style/Alias:
   EnforcedStyle: prefer_alias_method
   SupportedStyles:
-  - prefer_alias
-  - prefer_alias_method
+    - prefer_alias
+    - prefer_alias_method
 
 Style/AndOr:
   EnforcedStyle: always
   SupportedStyles:
-  - always
-  - conditionals
+    - always
+    - conditionals
 
 Style/ArgumentsForwarding:
   Enabled: true
@@ -602,47 +602,47 @@ Style/ArgumentsForwarding:
 Style/BarePercentLiterals:
   EnforcedStyle: bare_percent
   SupportedStyles:
-  - percent_q
-  - bare_percent
+    - percent_q
+    - bare_percent
 
 Style/BlockDelimiters:
   EnforcedStyle: line_count_based
   SupportedStyles:
-  - line_count_based
-  - semantic
-  - braces_for_chaining
+    - line_count_based
+    - semantic
+    - braces_for_chaining
   ProceduralMethods:
-  - benchmark
-  - bm
-  - bmbm
-  - create
-  - each_with_object
-  - measure
-  - new
-  - realtime
-  - tap
-  - with_object
+    - benchmark
+    - bm
+    - bmbm
+    - create
+    - each_with_object
+    - measure
+    - new
+    - realtime
+    - tap
+    - with_object
   FunctionalMethods:
-  - let
-  - let!
-  - subject
-  - watch
-  IgnoredMethods:
-  - lambda
-  - proc
-  - it
+    - let
+    - let!
+    - subject
+    - watch
+  AllowedMethods:
+    - lambda
+    - proc
+    - it
 
 Style/ClassAndModuleChildren:
   EnforcedStyle: nested
   SupportedStyles:
-  - nested
-  - compact
+    - nested
+    - compact
 
 Style/ClassCheck:
   EnforcedStyle: is_a?
   SupportedStyles:
-  - is_a?
-  - kind_of?
+    - is_a?
+    - kind_of?
 
 Style/CollectionCompact:
   Enabled: true
@@ -650,29 +650,29 @@ Style/CollectionCompact:
 Style/CommandLiteral:
   EnforcedStyle: backticks
   SupportedStyles:
-  - backticks
-  - percent_x
-  - mixed
+    - backticks
+    - percent_x
+    - mixed
   AllowInnerBackticks: false
 
 Style/CommentAnnotation:
   Keywords:
-  - TODO
-  - FIXME
-  - OPTIMIZE
-  - HACK
-  - REVIEW
+    - TODO
+    - FIXME
+    - OPTIMIZE
+    - HACK
+    - REVIEW
 
 Style/ConditionalAssignment:
   EnforcedStyle: assign_to_condition
   SupportedStyles:
-  - assign_to_condition
-  - assign_inside_condition
+    - assign_to_condition
+    - assign_inside_condition
   SingleLineConditionsOnly: true
 
 Style/Documentation:
   Exclude:
-    - 'db/**/*'
+    - "db/**/*"
 
 Style/DocumentDynamicEvalDefinition:
   Enabled: true
@@ -680,9 +680,9 @@ Style/DocumentDynamicEvalDefinition:
 Style/EmptyElse:
   EnforcedStyle: both
   SupportedStyles:
-  - empty
-  - nil
-  - both
+    - empty
+    - nil
+    - both
 
 Style/EndlessMethod:
   Enabled: true
@@ -690,15 +690,15 @@ Style/EndlessMethod:
 Style/For:
   EnforcedStyle: each
   SupportedStyles:
-  - for
-  - each
+    - for
+    - each
 
 Style/FormatString:
   EnforcedStyle: format
   SupportedStyles:
-  - format
-  - sprintf
-  - percent
+    - format
+    - sprintf
+    - percent
 
 Style/FrozenStringLiteralComment:
   Details: >-
@@ -725,10 +725,10 @@ Style/HashExcept:
 Style/HashSyntax:
   EnforcedStyle: ruby19
   SupportedStyles:
-  - ruby19
-  - hash_rockets
-  - no_mixed_keys
-  - ruby19_no_mixed_keys
+    - ruby19
+    - hash_rockets
+    - no_mixed_keys
+    - ruby19_no_mixed_keys
   UseHashRocketsWithSymbolValues: false
   PreferHashRocketsForNonAlnumEndingSymbols: false
 
@@ -747,15 +747,15 @@ Style/InPatternThen:
 Style/LambdaCall:
   EnforcedStyle: call
   SupportedStyles:
-  - call
-  - braces
+    - call
+    - braces
 
 Style/MethodDefParentheses:
   EnforcedStyle: require_parentheses
   SupportedStyles:
-  - require_parentheses
-  - require_no_parentheses
-  - require_no_parentheses_except_multiline
+    - require_parentheses
+    - require_no_parentheses
+    - require_no_parentheses_except_multiline
 
 Style/ModuleFunction:
   EnforcedStyle: extend_self
@@ -770,8 +770,8 @@ Style/Next:
   EnforcedStyle: skip_modifier_ifs
   MinBodyLength: 3
   SupportedStyles:
-  - skip_modifier_ifs
-  - always
+    - skip_modifier_ifs
+    - always
 
 Style/NilLambda:
   Enabled: true
@@ -788,8 +788,8 @@ Style/NumberedParametersLimit:
 Style/NumericLiteralPrefix:
   EnforcedOctalStyle: zero_only
   SupportedOctalStyles:
-  - zero_with_o
-  - zero_only
+    - zero_with_o
+    - zero_only
 
 Style/OpenStructUse:
   Enabled: true
@@ -799,27 +799,27 @@ Style/ParenthesesAroundCondition:
 
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
-    '%': '()'
-    '%i': '()'
-    '%q': '()'
-    '%Q': '()'
-    '%r': '{}'
-    '%s': '()'
-    '%w': '()'
-    '%W': '()'
-    '%x': '()'
+    "%": "()"
+    "%i": "()"
+    "%q": "()"
+    "%Q": "()"
+    "%r": "{}"
+    "%s": "()"
+    "%w": "()"
+    "%W": "()"
+    "%x": "()"
 
 Style/PercentQLiterals:
   EnforcedStyle: lower_case_q
   SupportedStyles:
-  - lower_case_q
-  - upper_case_q
+    - lower_case_q
+    - upper_case_q
 
 Style/PreferredHashMethods:
   EnforcedStyle: short
   SupportedStyles:
-  - short
-  - verbose
+    - short
+    - verbose
 
 Style/QuotedSymbols:
   Enabled: true
@@ -827,8 +827,8 @@ Style/QuotedSymbols:
 Style/RaiseArgs:
   EnforcedStyle: exploded
   SupportedStyles:
-  - compact
-  - exploded
+    - compact
+    - exploded
 
 Style/RedundantReturn:
   AllowMultipleReturnValues: false
@@ -836,9 +836,9 @@ Style/RedundantReturn:
 Style/RegexpLiteral:
   EnforcedStyle: mixed
   SupportedStyles:
-  - slashes
-  - percent_r
-  - mixed
+    - slashes
+    - percent_r
+    - mixed
   AllowInnerSlashes: false
 
 Style/RedundantArgument:
@@ -859,14 +859,14 @@ Style/SingleLineMethods:
 Style/SpecialGlobalVars:
   EnforcedStyle: use_english_names
   SupportedStyles:
-  - use_perl_names
-  - use_english_names
+    - use_perl_names
+    - use_english_names
 
 Style/StabbyLambdaParentheses:
   EnforcedStyle: require_parentheses
   SupportedStyles:
-  - require_parentheses
-  - require_no_parentheses
+    - require_parentheses
+    - require_no_parentheses
 
 Style/StringChars:
   Enabled: true
@@ -880,22 +880,22 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: single_quotes
   SupportedStyles:
-  - single_quotes
-  - double_quotes
+    - single_quotes
+    - double_quotes
 
 Style/SwapValues:
   Enabled: true
 
 Style/SymbolProc:
-  IgnoredMethods:
-  - respond_to
-  - define_method
+  AllowedMethods:
+    - respond_to
+    - define_method
 
 Style/TernaryParentheses:
   EnforcedStyle: require_no_parentheses
   SupportedStyles:
-  - require_parentheses
-  - require_no_parentheses
+    - require_parentheses
+    - require_no_parentheses
   AllowSafeAssignment: true
 
 Style/TrailingCommaInArrayLiteral:
@@ -913,28 +913,28 @@ Style/TrivialAccessors:
   AllowDSLWriters: false
   IgnoreClassMethods: false
   AllowedMethods:
-  - to_ary
-  - to_a
-  - to_c
-  - to_enum
-  - to_h
-  - to_hash
-  - to_i
-  - to_int
-  - to_io
-  - to_open
-  - to_path
-  - to_proc
-  - to_r
-  - to_regexp
-  - to_str
-  - to_s
-  - to_sym
+    - to_ary
+    - to_a
+    - to_c
+    - to_enum
+    - to_h
+    - to_hash
+    - to_i
+    - to_int
+    - to_io
+    - to_open
+    - to_path
+    - to_proc
+    - to_r
+    - to_regexp
+    - to_str
+    - to_s
+    - to_sym
 
 Style/WordArray:
   EnforcedStyle: percent
   SupportedStyles:
-  - percent
-  - brackets
+    - percent
+    - brackets
   MinSize: 0
-  WordRegex: !ruby/regexp /\A[\p{Word}\n\t]+\z/
+  WordRegex: "\\A[\\p{Word}\\n\\t]+\\z"

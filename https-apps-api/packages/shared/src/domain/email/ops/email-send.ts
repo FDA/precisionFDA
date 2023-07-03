@@ -4,6 +4,8 @@ import { getBullJobIdForEmailOperation } from '../email.helper'
 import { EMAIL_TYPES } from '../email.config'
 import { OpsCtx } from '../../../types'
 import { getServiceFactory } from '../../../services/service-factory'
+import { ENVS } from '../../../enums'
+import { config } from '../../../config'
 
 export class EmailSendOperation extends WorkerBaseOperation<
   OpsCtx,
@@ -17,6 +19,10 @@ export class EmailSendOperation extends WorkerBaseOperation<
   async run(input: SendEmailJob['payload']): Promise<boolean> {
     const emailService = getServiceFactory().getEmailService()
     try {
+      if (config.env !== ENVS.PRODUCTION) {
+        input.subject = `[${config.env}] ${input.subject}`
+      }
+
       await emailService.sendEmail(input)
       return true
     } catch (err) {

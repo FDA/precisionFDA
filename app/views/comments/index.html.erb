@@ -1,9 +1,10 @@
 <% content_for :title do %>Comments for <%= @item.klass %>: <%= @item.title %><% end %>
+<% require 'cgi' %>
 
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-comments-o"></span> Comments for <%= @item.klass %>:
-    <%= link_to @item.title, @item_path %>
+    <%= link_to @item.title, CGI.escapeHTML(@item_path) %>
   </div>
 </div>
 

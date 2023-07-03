@@ -10,3 +10,5 @@ export {
 export { AuthSessionOperation } from './ops/auth.session'
 
 export { UserCheckupOperation } from './ops/user-checkup'
+
+export { UserDataConsistencyReportOperation } from './ops/user-data-consistency-report'
