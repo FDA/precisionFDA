@@ -9,8 +9,8 @@ export const compactScrollBar = css`
     border-radius: 4px;
   }
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
   }
   ::-webkit-scrollbar-thumb {
     background: #97a0af;

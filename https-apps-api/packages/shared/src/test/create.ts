@@ -1,13 +1,40 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
 import { config } from '../config'
-import { AppSeries, entities, Expert, Organization, User, user } from '../domain'
+import { entities, Expert } from '../domain'
 import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
-import { random } from './generate'
-import {STATIC_SCOPE} from "../enums";
+import { STATIC_SCOPE } from '../enums'
+
+const dataPortalsHelper = {
+  create:(
+    em: EntityManager,
+    references: {
+      space: InstanceType<typeof entities.Space>
+    },
+    data?: Partial<InstanceType<typeof entities.DataPortal>>,
+  ) => {
+    const dataPortal = wrap(new entities.DataPortal(references.space)).assign(data, { em })
+    em.persist(dataPortal)
+    return dataPortal
+  },
+  addResource: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof entities.User>,
+      dataPortal: InstanceType<typeof entities.DataPortal>
+    },
+    name: string, dxid: string,
+  ) => {
+    const userFile = filesHelper.create(em, { user: references.user }, {name: name, uid: `${dxid}-1`} )
+    const resource = new entities.Resource(references.user, userFile)
+    resource.dataPortal = references.dataPortal
+    em.persist(resource)
+    return resource
+  }
+}
 
 const acceptedLicenseHelper = {
   create: (
@@ -635,6 +662,7 @@ const workflowHelper = {
 
 export {
   assetHelper,
+  dataPortalsHelper,
   orgHelper,
   userHelper,
   jobHelper,

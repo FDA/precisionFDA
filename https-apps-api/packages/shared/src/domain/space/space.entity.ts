@@ -39,10 +39,16 @@ export class Space extends BaseEntity {
   spaceId: number
 
   @Property()
-  meta: string
+  sponsorOrgId: number
 
   @Property()
-  protected: boolean
+  meta?: string
+
+  @Property()
+  restrictToTemplate?: boolean
+
+  @Property()
+  protected?: boolean
 
   @ManyToMany(() => SpaceMembership, 'spaces', {
     pivotTable: 'space_memberships_spaces',

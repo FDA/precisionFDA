@@ -40,6 +40,12 @@ type ListFilesParams = IPaginatedParams & {
   includeDescProps?: boolean
 }
 
+type FileCreateParams = {
+  name: string
+  description: string
+  project: string
+}
+
 type FileCloseParams = {
   fileDxid: string
 }
@@ -179,6 +185,7 @@ export {
   FileDescribeParams,
   FileDownloadLinkParams,
   FileStatesParams,
+  FileCreateParams,
   ListFilesParams,
   JobDescribeParams,
   JobCreateParams,

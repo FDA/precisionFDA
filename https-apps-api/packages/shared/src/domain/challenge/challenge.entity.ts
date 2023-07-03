@@ -4,12 +4,11 @@ import {
   IdentifiedReference,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryKey,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User, UserFile } from '..'
+import { User } from '..'
 import { BaseEntity } from '../../database/base-entity'
 import { ChallengeResource } from './challenge-resource.entity'
 import { CHALLENGE_STATUS } from './challenge.enum'
