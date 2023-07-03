@@ -40,8 +40,10 @@ const fakes = {
     dbClusterCreateFake: sinon.stub(),
     dbClusterDescribeFake: sinon.stub(),
     projectCreateFake: sinon.stub(),
+    projectDescribeFake: sinon.stub(),
     projectInviteFake: sinon.stub(),
-    findSpaceMembersFake: sinon.stub(),
+    userDescribeFake: sinon.stub(),
+    orgFindMembersFake: sinon.stub(),
     inviteUserToOrganizationFake: sinon.stub(),
     removeUserFromOrganizationFake: sinon.stub(),
   },
@@ -76,6 +78,9 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.jobDescribeFake.callsFake(() => ({ result: 'yep' }))
   fakes.client.jobCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
+  fakes.client.fileDescribeFake.callsFake((input: { fileDxid: string, projectDxid: string }) => (
+    { id: input.fileDxid, project: input.projectDxid }
+  ))
   fakes.client.fileCloseFake.callsFake((params: FileCloseParams) => ({ id: params.fileDxid }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderRemoveFake.callsFake(() => ({ id: generate.job.jobId() }))
@@ -85,7 +90,7 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.filesListFake.callsFake(() => FILES_LIST_RES_ROOT)
   fakes.client.filesDescFake.callsFake(() => FILES_DESC_RES)
   fakes.client.foldersListFake.callsFake(() => FOLDERS_LIST_RES)
-  fakes.client.findSpaceMembersFake.callsFake(() => FIND_MEMBERS_RES)
+  fakes.client.orgFindMembersFake.callsFake(() => FIND_MEMBERS_RES)
 
   fakes.client.dbClusterActionFake.callsFake(() => ({
     id: generate.dbCluster.simple().dxid,
@@ -95,7 +100,9 @@ const mocksSetDefaultBehaviour = () => {
   }))
   fakes.client.dbClusterDescribeFake.callsFake(() => DBCLUSTER_DESC_RES)
   fakes.client.projectCreateFake.callsFake(() => ({ id: generate.space.projectId() }))
+  fakes.client.projectDescribeFake.callsFake(() => ({}))
   fakes.client.projectInviteFake.callsFake(() => ({ id: 'huh', state: 'accepted' })) //fix id
+  fakes.client.userDescribeFake.callsFake(() => ({}))
 
   fakes.bull.addFake.callsFake(() => { })
   fakes.bull.getJobFake.callsFake(() => undefined)
@@ -119,12 +126,14 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
   sandbox.replace(client.PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
   sandbox.replace(client.PlatformClient.prototype, 'projectInvite', fakes.client.projectInviteFake)
+  sandbox.replace(client.PlatformClient.prototype, 'projectDescribe', fakes.client.projectDescribeFake)
   sandbox.replace(client.PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
-  sandbox.replace(client.PlatformClient.prototype, 'findSpaceMembers', fakes.client.findSpaceMembersFake)
+  sandbox.replace(client.PlatformClient.prototype, 'orgFindMembers', fakes.client.orgFindMembersFake)
   sandbox.replace(client.PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
   sandbox.replace(client.PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
   sandbox.replace(client.PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
   sandbox.replace(client.PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
+  sandbox.replace(client.PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
 
   sandbox.replace(
     client.PlatformClient.prototype,
@@ -184,11 +193,13 @@ const mocksReset = () => {
   fakes.client.dbClusterCreateFake.reset()
   fakes.client.dbClusterDescribeFake.reset()
   fakes.client.projectCreateFake.reset()
+  fakes.client.projectDescribeFake.reset()
   fakes.client.projectInviteFake.reset()
-  fakes.client.findSpaceMembersFake.reset()
+  fakes.client.orgFindMembersFake.reset()
   fakes.client.inviteUserToOrganizationFake.reset()
   fakes.client.removeUserFromOrganizationFake.reset()
   fakes.client.fileRemoveFake.reset()
+  fakes.client.userDescribeFake.reset()
 
   fakes.queue.findRepeatableFake.reset()
 

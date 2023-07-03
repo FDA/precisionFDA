@@ -7,6 +7,7 @@ cp config/database.sample.yml config/database.yml
 service mysql start
 
 bundle exec rake db:setup
+bundle exec rake db:generate_mock_data
 bundle exec rake user:generate_test_users
 bundle exec thin --ssl -d start
 

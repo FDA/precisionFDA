@@ -25,7 +25,7 @@ module Api
         includes(:user).
         search_by_tags(params.dig(:filters, :tags)).
         order(order_from_params).
-        page(page_from_params)
+        page(page_from_params).per(page_size)
 
       dbclusters = DbClusters::Filter.call(dbclusters, params[:filters])
 
@@ -97,17 +97,17 @@ module Api
       params.require(:db_cluster).permit(:name, :description)
     end
 
-    def order_from_params(default_order = "created")
+    def order_from_params(default_order = "created_at")
       if %w(status engine instance).include?(params[:order_by])
         query = DbCluster.order_by_enum_query(
-          ORDER_FIELDS[params[:order_by]],
+          ORDER_FIELDS[params[:order_by] || default_order],
           order_direction(params[:order_dir]),
           params[:order_by] == "instance" ? DbCluster::DX_INSTANCE_CLASSES.invert : nil,
         )
         return Arel.sql(query)
       end
 
-      super
+      super(default_order)
     end
 
     def render_error(exception)

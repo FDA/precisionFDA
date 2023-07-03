@@ -151,3 +151,12 @@ export const ItemButton = styled.button<{ selected?: boolean }>`
     }
   `}
 `
+
+export const NoContent = styled.div`
+  display: flex;
+  height: 50%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+`

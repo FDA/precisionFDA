@@ -41,7 +41,7 @@ const createDbClustersTable = (dbclustersInfo: ReportDbClusterInfo[]) => {
 }
 
 /**
- * This was meant to be an email for admins. Not used at the moment
+ * Report non-terminated db clusters to admins.
  */
 export const reportNonTerminatedDbClustersTemplate = (data: ReportNonTerminatedDbClustersTemplateInput): string => `
   ${header}

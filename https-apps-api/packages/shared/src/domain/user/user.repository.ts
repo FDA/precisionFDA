@@ -35,7 +35,10 @@ export class UserRepository extends PaginatedEntityRepository<User> {
   }
 
   findDxuser(dxuser: string): Promise<User> {
-    return this.findOneOrFail({ dxuser })
+    return this.findOneOrFail(
+      { dxuser },
+      { populate: ['organization'] },
+    )
   }
 
   findAdminUser(): Promise<User> {
@@ -278,4 +281,3 @@ export class UserRepository extends PaginatedEntityRepository<User> {
     return this.em.getConnection().execute(knexQuery)
   }
 }
-

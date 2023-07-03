@@ -94,7 +94,6 @@ export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceSco
   const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
   const file = data?.files
   const meta = data?.meta
-  const backPath = getBackPath(location, 'files', space?.id)
   const params = parse(location?.state?.fromSearch)
   const folderId = params?.folder_id as string | undefined
 
@@ -121,6 +120,7 @@ export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceSco
   ] as ITab[]
   const scope = getScopeMapping(file.scope, file.featured)
   const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const backPath = getBackPath(location, 'files', scope)
   if (emitScope) {
     emitScope(scope)
   }

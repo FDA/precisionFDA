@@ -13,7 +13,6 @@ import {
 import { UserOpsCtx, WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
 import { Job } from 'bull'
 import { log } from '../utils'
-import { userCheckupHandler } from './user-checkup.handler'
 import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
@@ -44,7 +43,6 @@ const handleUserTask = async <TJob extends queue.types.TaskWithAuth> (
   }
   await execute(ctx, data.payload)
 }
-
 
 export const handler = async (job: Job<queue.types.Task>) => {
   if (typeof path(['data', 'type'], job) === 'undefined') {
@@ -95,12 +93,32 @@ export const handler = async (job: Job<queue.types.Task>) => {
     case queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS:
       await syncSpacesPermissionsHandler(job as any)
       return
+
+    // -----------------------
+    // Checkup and Debug Tasks
+    // -----------------------
     case queue.types.TASK_TYPE.USER_CHECKUP:
-      await userCheckupHandler(job)
-      return
+      // This is a composite job, consisting of various checks that we can do
+      // to a user's account. This should be triggered when user logs in with means
+      // we have a new platform accessToken to work with
+      return await handleUserTask(job, async (ctx, input) => {
+        return await new user.UserCheckupOperation(ctx).execute()
+      })
+    case queue.types.TASK_TYPE.USER_DATA_CONSISTENCY_REPORT:
+      return await handleUserTask(job, async (ctx, input) => {
+        return await new user.UserDataConsistencyReportOperation(ctx).execute()
+      })
     case queue.types.TASK_TYPE.CHECK_USER_JOBS:
       await checkUserJobsHandler(job)
       return
+
+    // -----------
+    // Admin Tasks
+    // -----------
+    case queue.types.TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT:
+      return await handleUserTask(job, async (ctx, input) => {
+        return await new debug.AdminDataConsistencyReportOperation(ctx).execute()
+      })
     case queue.types.TASK_TYPE.DEBUG_MAX_MEMORY:
       await debug.testHeapMemoryAllocationError()
       return

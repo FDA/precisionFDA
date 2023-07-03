@@ -19,10 +19,20 @@ import ExpertsSinglePage from './features/experts/details/index'
 import NoFoundPage from './pages/NoFoundPage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import queryClient from './utils/queryClient'
-
+import EditDataPortalPage from './features/data-portals/form/EditDataPortalPage'
 
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
+const DataPortalsList = React.lazy(
+  () => import('./features/data-portals/list/DataPortalsList'))
+const CreateDataPortalPage = React.lazy(
+  () => import('./features/data-portals/form/CreateDataPortalPage'))
+const DataPortalResourcesPage = React.lazy(
+  () => import('./features/data-portals/resources/DataPortalResourcesPage'))
+const DataPortalDetailsPage = React.lazy(
+  () => import('./features/data-portals/details/DataPortalDetails'))
+const DataPortalContentEditPage = React.lazy(
+  () => import('./features/data-portals/form/DataPortalContentEditPage'))
 const ChallengesList = React.lazy(
   () => import('./features/challenges/list/ChallengesList'),
 )
@@ -144,6 +154,24 @@ const root = () => {
                 </Route>
                 <Route exact path="/admin/news/:id/edit">
                   <EditNewsItemPage />
+                </Route>
+                <Route exact path="/data-portals">
+                  <DataPortalsList />
+                </Route>
+                <Route exact path="/data-portals/create">
+                  <CreateDataPortalPage />
+                </Route>
+                <Route exact path="/data-portals/:portalId">
+                  <DataPortalDetailsPage />
+                </Route>
+                <Route exact path="/data-portals/:portalId/resources">
+                  <DataPortalResourcesPage />
+                </Route>
+                <Route exact path="/data-portals/:portalId/content">
+                  <DataPortalContentEditPage />
+                </Route>
+                <Route exact path="/data-portals/:portalId/edit">
+                  <EditDataPortalPage />
                 </Route>
                 <Route path="*">
                   <NoFoundPage />

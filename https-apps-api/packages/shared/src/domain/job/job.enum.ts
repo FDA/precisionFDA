@@ -1,10 +1,10 @@
 enum JOB_STATE {
-  DONE = 'done',
+  DONE = 'done', // Only for regular apps
   FAILED = 'failed',
   IDLE = 'idle',
   RUNNING = 'running',
-  TERMINATED = 'terminated',
-  TERMINATING = 'terminating',
+  TERMINATED = 'terminated', // Only for HTTPS apps
+  TERMINATING = 'terminating', // Only for HTTPS apps
 }
 
 enum JOB_DB_ENTITY_TYPE {

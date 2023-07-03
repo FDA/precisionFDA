@@ -20,7 +20,6 @@
     "@types/node": "^18.11.18",
     "@types/ws": "^8.5.4",
     "nodemon": "^2.0.19",
-    "snyk": "^1.1064.0",
     "ts-node": "^10",
     "ts-node-dev": "^2",
     "tsconfig-paths": "^3.9.0"

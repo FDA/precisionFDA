@@ -48,6 +48,8 @@ export interface IUser {
   can_administer_site: boolean
   review_space_admin: boolean
   can_create_challenges: boolean
+
+  can_create_data_portals: boolean
   can_see_spaces: boolean
   counters: {
     files: number,

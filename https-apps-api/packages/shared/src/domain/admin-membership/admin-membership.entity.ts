@@ -2,7 +2,7 @@
 
 import { Entity, ManyToOne, IdentifiedReference, Reference, Unique } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '..'
+import { User } from '../user'
 import { AdminGroup } from '../admin-group/admin-group.entity'
 
 @Entity({ tableName: 'admin_memberships' })

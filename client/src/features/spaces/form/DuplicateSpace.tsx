@@ -41,25 +41,23 @@ export const DuplicateSpace = () => {
   }
 
   return (
-    <>
-      <BackLinkMargin linkTo={`/spaces/${spaceId}`}>Back to Space</BackLinkMargin>
-      <StyledPageCenter>
-        <StyledPageContent>
-          <PageTitle>Duplicate Space</PageTitle>
-          <SpaceForm
-            mutation={mutation}
-            defaultValues={{
-              space_type: data.space.type,
-              name: `${data.space.name} (copy)`,
-              description: data.space.description,
-              review_lead_dxuser: data.space.host_lead.dxuser,
-              sponsor_lead_dxuser: data.space.guest_lead.dxuser,
-              cts: data.space.cts,
-            }}
-            isDuplicate
-          />
-        </StyledPageContent>
-      </StyledPageCenter>
-    </>
+    <StyledPageCenter>
+      <StyledPageContent>
+        <BackLinkMargin linkTo={`/spaces/${spaceId}`}>Back to Space</BackLinkMargin>
+        <PageTitle>Duplicate Space</PageTitle>
+        <SpaceForm
+          mutation={mutation}
+          defaultValues={{
+            space_type: data.space.type,
+            name: `${data.space.name} (copy)`,
+            description: data.space.description,
+            review_lead_dxuser: data.space.host_lead.dxuser,
+            sponsor_lead_dxuser: data.space.guest_lead.dxuser,
+            cts: data.space.cts,
+          }}
+          isDuplicate
+        />
+      </StyledPageContent>
+    </StyledPageCenter>
   )
 }
