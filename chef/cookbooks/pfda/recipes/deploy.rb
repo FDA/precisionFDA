@@ -15,6 +15,8 @@ template "/etc/logrotate.d/#{node["app"]["shortname"]}" do
   group "root"
   mode 0644
   variables(
-    log_dirs: ["#{node['rails_app_dir']}/log"]
+    log_dirs: ["#{node['rails_app_dir']}/log", "/home/#{node[:deploy_user]}/.pm2/logs"],
+    period: lazy {node.run_state.dig("ssm_params", "logrotate", "period") || node[:logrotate][:period]},
+    retention: lazy {node.run_state.dig("ssm_params", "logrotate", "retention") || node[:logrotate][:retention]}
   )
 end

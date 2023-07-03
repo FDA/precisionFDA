@@ -12,6 +12,16 @@ cat <<EOF > /tmp/config.json
              "files": {
                  "collect_list": [
                      {
+                         "file_path": "/var/log/nginx/precision.fda.gov-ssl.access.log",
+                         "log_group_name": "dev/nginx/access",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/var/log/nginx/nginx_error.log",
+                         "log_group_name": "dev/nginx/error",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
                          "file_path": "/var/log/install.log",
                          "log_group_name": "dev-chef-install-log",
                          "log_stream_name": "{instance_id}"
