@@ -69,6 +69,7 @@ const Spaces2 = ({
     'expandedSpacesSidebar',
     true,
   )
+  useToastWSHandler(user)
   const { path } = useRouteMatch()
   const spaceActions = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
@@ -94,7 +95,6 @@ const Spaces2 = ({
     return <Activation space={space} />
   }
 
-  useToastWSHandler(user)
 
   return (
     <>

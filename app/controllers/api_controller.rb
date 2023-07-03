@@ -7,6 +7,10 @@ class ApiController < ApplicationController
   include ApiExceptionHandler
   include CloudResourcesConcern
 
+  rescue_from HttpsAppsClient::Error do |exception|
+    render status: :service_unavailable, json: { error: { message: exception.message, statusCode: 503 } }
+  end
+
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
   # rubocop:todo Rails/LexicallyScopedActionFilter

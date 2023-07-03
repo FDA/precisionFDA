@@ -11,11 +11,35 @@ import { maskAuthHeader } from '../utils/logging'
 import { OrgMembershipError } from '../errors'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import {
-  CreateFolderParams, DbClusterActionParams, DbClusterCreateParams, DbClusterDescribeParams, DescribeFoldersParams, DescribeDataObjectsParams,
-  FileCloseParams, FileDescribeParams, FileDownloadLinkParams, FileStatesParams, OrgFindMembersParams, ListFilesParams, MoveFilesParams,
-  JobCreateParams, JobDescribeParams, JobTerminateParams, RemoveFolderParams, RenameFolderParams, UserInviteToOrgParams, UserRemoveFromOrgParams,
-  UserResetMfaParams, UserUnlockParams, Starting, WorkflowDescribeParams, AppDescribeParams,
-  FileRemoveParams, UserDescribeParams, OrgDescribeParams,
+  CreateFolderParams,
+  DbClusterActionParams,
+  DbClusterCreateParams,
+  DbClusterDescribeParams,
+  DescribeFoldersParams,
+  DescribeDataObjectsParams,
+  FileCloseParams,
+  FileDescribeParams,
+  FileDownloadLinkParams,
+  FileStatesParams,
+  OrgFindMembersParams,
+  ListFilesParams,
+  MoveFilesParams,
+  JobCreateParams,
+  JobDescribeParams,
+  JobTerminateParams,
+  RemoveFolderParams,
+  RenameFolderParams,
+  UserInviteToOrgParams,
+  UserRemoveFromOrgParams,
+  UserResetMfaParams,
+  UserUnlockParams,
+  Starting,
+  WorkflowDescribeParams,
+  AppDescribeParams,
+  FileRemoveParams,
+  UserDescribeParams,
+  OrgDescribeParams,
+  FileCreateParams,
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
@@ -109,6 +133,22 @@ class PlatformClient {
   // ----------------------
   //    F I L E S
   // ----------------------
+
+  /**
+   * Creates a new file object.
+   * API: /file/new
+   * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-new
+   * @param params name and description of the file
+   */
+  async fileCreate(params: FileCreateParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/file/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
 
   /**
    * Removes nodes specified by their ids. Works recursively and
@@ -376,7 +416,7 @@ class PlatformClient {
    * Find members of the org
    * API: /org-xxxx/findMembers
    * See https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-findmembers
-   * 
+   *
    * Note that we're currently not handling the pagination aspect of this call, so >1000 members is an issue
    */
   async orgFindMembers(params: OrgFindMembersParams): Promise<OrgFindMembersReponse> {
@@ -541,9 +581,57 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
+  // -------------
+  //    O R G S
+  // -------------
+
+  /**
+   * Creates a new non-billable organization.
+   * @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-new
+   * @param {string} handle - A case-insensitively unique handle for the org.
+   * @param {string} name - A descriptive name for the organization.
+   * @return ID of the newly created organization ("org-" + handle)
+   */
+  async createOrg(handle: string, name: string): Promise<any> {
+    const url = `${config.platform.apiUrl}/org/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        handle,
+        name,
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async updateBillingInformation(orgDxid:string, billingInfo: any): Promise<any> {
+    const billingConfirmation = process.env['BILLING_CONFIRMATION']
+    if (billingConfirmation) {
+      billingInfo['autoConfirm'] = billingConfirmation
+    }
+    const url = `${config.platform.apiUrl}/${orgDxid}/updateBillingInformation`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: billingInfo,
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
   // ---------------------
   //    ENTITY-DESCRIBE
   // ---------------------
+
+  async objectDescribe(dxid: string): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${dxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
 
   async appDescribe(params: AppDescribeParams): Promise<AppDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/describe`

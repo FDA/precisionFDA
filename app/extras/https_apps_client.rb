@@ -4,6 +4,97 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
+  # Create resource for data portal
+  # @param opts data about resource
+  def data_portal_create_resource(portal_id, opts)
+    request(
+      "/data-portals/#{portal_id}/resources",
+      opts,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # List resources for data portal
+  def data_portal_list_resources(portal_id)
+    request(
+      "/data-portals/#{portal_id}/resources",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Create resource link for resource
+  # @param portal_id id of the portal
+  # @param resource_id id of the resource
+  def data_portal_create_resource_link(portal_id, resource_id)
+    request(
+      "/data-portals/#{portal_id}/resources/#{resource_id}",
+      {},
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Remove resource from data portal
+  # @param portal_id id of the portal
+  # @param resource_id id of the resource
+  def data_portal_remove_resource(portal_id, resource_id)
+    request(
+      "/data-portals/#{portal_id}/resources/#{resource_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  # Save a data portal
+  # @param opts data portal data
+  def data_portal_save(opts)
+    request(
+      "/data-portals",
+      opts,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Creates new data portal card image with empty content.
+  # @param portal_id id of the portal
+  # @param opts data about card image
+  def data_portal_card_image_create(portal_id, opts)
+    request(
+      "/data-portals/#{portal_id}/card-image",
+      opts,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  # Update a data portal
+  # @param opts data portal data
+  def data_portal_update(opts)
+    request(
+      "/data-portals/#{opts[:id]}",
+      opts,
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
+  # Gets list of available data portals
+  def data_portals_list
+    request(
+      "/data-portals",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Get data portal identified by id
+  # @param id data portal identifier
+  def data_portals_get(id)
+    request(
+      "/data-portals/#{id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # User checkup
   # To be run whenever user logs in to make sure sync tasks are
   # healthy and to check the general health of the user account
@@ -647,8 +738,8 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
   rescue JSON::ParserError
     response.body
-  rescue Net::HTTPClientException
-    raise Error, response
+  rescue Net::HTTPClientException => e
+    raise e
   rescue StandardError
     raise Error, "Something went wrong"
   end

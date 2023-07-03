@@ -34,5 +34,5 @@ export const BackLink = ({ linkTo, children, onClick, ...rest }: { children: Rea
 }
 
 export const BackLinkMargin = styled(BackLink)`
-  margin: 16px;
+  margin: 16px 0;
 `

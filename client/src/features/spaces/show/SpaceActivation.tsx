@@ -98,7 +98,7 @@ export function Activation({ space }: { space: ISpace }) {
     },
   })
   const acceptClickHandler = () => {
-    acceptSpaceMutation.mutateAsync({ id: space.id })
+    return acceptSpaceMutation.mutateAsync({ id: space.id })
   }
 
   const { name, description, created_at, id, type, host_lead, guest_lead } =
