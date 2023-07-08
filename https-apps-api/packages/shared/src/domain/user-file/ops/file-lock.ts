@@ -4,7 +4,6 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { BaseOperation } from '../../../utils'
 import { getNodePath } from '../user-file.helper'
-import { errors } from '@pfda/https-apps-shared'
 
 class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
   async run(input: IdInput): Promise<void> {
