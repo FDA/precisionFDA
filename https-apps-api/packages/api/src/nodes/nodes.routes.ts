@@ -21,8 +21,13 @@ router.post(
   }),
   async ctx => {
     const { ids } = ctx.request.body as IdsInput
-    await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ ids })
-    ctx.status = 204
+    if (ids.length > 20) {
+      await new userFile.RequestNodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
+      ctx.status = 204
+    } else {
+      await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ ids })
+      ctx.status = 204
+    }
   },
 )
 
@@ -33,8 +38,13 @@ router.post(
   }),
   async ctx => {
     const { ids } = ctx.request.body as IdsInput
-    await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
-    ctx.status = 204
+    if (ids.length > 20) {
+      await new userFile.RequestNodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
+      ctx.status = 204
+    } else {
+      await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
+      ctx.status = 204
+    }
   },
 )
 
@@ -48,8 +58,7 @@ router.delete(
       await new userFile.StartRemoveNodesJob(pickOpsCtx(ctx)).execute({ ids })
       ctx.status = 204
     } else {
-      const res = await new userFile.NodesRemoveOperation(pickOpsCtx(ctx)).execute({ ids, async })
-      ctx.body = res
+      ctx.body = await new userFile.NodesRemoveOperation(pickOpsCtx(ctx)).execute({ ids, async })
       ctx.status = 200
     }
   },

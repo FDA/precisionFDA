@@ -26,7 +26,11 @@ describe('lock/unlock folder tests', () => {
   })
 
   it('test remove folder', async () => {
-    const folder1 = create.filesHelper.createFolder(em, { user }, { name: 'folder1', locked: false })
+    const folder1 = create.filesHelper.createFolder(
+      em,
+      { user },
+      { name: 'folder1', locked: false },
+    )
     await em.flush()
 
     const op = new userFile.FolderLockOperation({
@@ -42,7 +46,11 @@ describe('lock/unlock folder tests', () => {
     expect(loadedFolder1?.locked).to.equal(true)
   })
   it('test mixed folders - lock operation', async () => {
-    const folder1 = create.filesHelper.createFolder(em, { user }, { name: 'folder1', locked: false })
+    const folder1 = create.filesHelper.createFolder(
+      em,
+      { user },
+      { name: 'folder1', locked: false },
+    )
     const folder2 = create.filesHelper.createFolder(em, { user }, { name: 'folder2', locked: true })
     await em.flush()
 
@@ -61,7 +69,11 @@ describe('lock/unlock folder tests', () => {
     expect(loadedFolder2?.locked).to.equal(true)
   })
   it('test mixed folders - unlock operation', async () => {
-    const folder1 = create.filesHelper.createFolder(em, { user }, { name: 'folder1', locked: false })
+    const folder1 = create.filesHelper.createFolder(
+      em,
+      { user },
+      { name: 'folder1', locked: false },
+    )
     const folder2 = create.filesHelper.createFolder(em, { user }, { name: 'folder2', locked: true })
     await em.flush()
 
@@ -78,5 +90,27 @@ describe('lock/unlock folder tests', () => {
     expect(loadedFolder1?.locked).to.equal(false)
     const loadedFolder2 = await em.findOne(Folder, { id: folder2.id })
     expect(loadedFolder2?.locked).to.equal(false)
+  })
+  it('should work even with many folders', async () => {
+    const folders: Folder[] = []
+    const n = 500
+    for (let i = 0; i < n; i++) {
+      const folder = create.filesHelper.createFolder(em, { user }, { name: `folder-${i}` })
+      folders.push(folder)
+    }
+    await em.flush()
+
+    const op = new userFile.FolderLockOperation({
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
+      log,
+      user: userCtx,
+    })
+
+    for (const folder of folders) {
+      await op.execute({ id: folder.id })
+    }
+    em.clear()
+    const loadedFirstFile = await em.findOne(Folder, { id: n })
+    expect(loadedFirstFile?.locked).to.equal(true)
   })
 })

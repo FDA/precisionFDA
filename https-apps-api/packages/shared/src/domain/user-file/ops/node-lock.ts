@@ -3,15 +3,27 @@ import { BaseOperation } from '../../../utils'
 import { Node } from '../node.entity'
 import { IdsInput } from '../user-file.input'
 import { FILE_STI_TYPE } from '../user-file.types'
-import { errors } from '../../..'
+import { errors, getLogger } from '../../..'
 import { UserOpsCtx } from '../../../types'
 import { filterNodesByUser, loadNodes } from '../user-file.helper'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import { NotificationService } from '../../notification'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+
+const rollbackLockingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
+  getLogger().error(`Rolling back locking state for ${nodes.length} nodes`)
+  nodes.forEach(node => {
+    node.locked = false
+  })
+  await em.flush()
+}
 
 class NodesLockOperation extends BaseOperation<UserOpsCtx, IdsInput, void> {
   async run(input: IdsInput): Promise<void> {
     this.ctx.log.info(input.ids, 'NodesLockOperation: Locking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: false })
+    const notificationService = new NotificationService(em)
     const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
     const filteredNodes = await filterNodesByUser(em, nodes, currentUser)
     let lockedFilesCount = 0
@@ -39,6 +51,13 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, IdsInput, void> {
           'NodesLockOperation: Locked total objects',
         )
       } catch (err) {
+        await notificationService.createNotification({
+          message: 'Error locking files and folders.',
+          severity: SEVERITY.ERROR,
+          action: NOTIFICATION_ACTION.NODES_LOCKED,
+          userId: this.ctx.user.id,
+        })
+        await rollbackLockingState(em, nodes)
         throw err
       }
     }
