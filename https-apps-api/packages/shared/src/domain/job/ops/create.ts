@@ -18,6 +18,7 @@ import { AnyObject, UserOpsCtx } from '../../../types'
 import { Space, SpaceMembership, UserFile } from '../..'
 import { config } from '../../../config'
 import { getIdFromScopeName, getProjectDxid } from "../../space/space.helper";
+import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from "../../../config/constants";
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -232,10 +233,13 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     return initValue
   }
 
-  // Let the worker terminate the job first, then platform if still running - to avoid race conditions
+  // Let the worker terminate the job first, then let platform do it (with 5 minutes delay)
   private computeTimeoutPolicyForPlatformInMinutes(): number {
-    // value in config is usually in seconds, platform needs days|hours|minutes
-    return Math.ceil(Number(config.workerJobs.syncJob.staleJobsTerminateAfter) / 60) + 5;
+    // value in config is in seconds, platform needs days|hours|minutes
+    const platformTimeoutInMinutes = Math.ceil(Number(config.workerJobs.syncJob.staleJobsTerminateAfter) / 60) + 5
+    const maxPlatformAllowedTimeoutInMinutes =  Math.ceil(MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS / 60)
+
+    return Math.min(platformTimeoutInMinutes, maxPlatformAllowedTimeoutInMinutes)
   }
 
   private buildClientApiCall(app: App): client.JobCreateParams {
