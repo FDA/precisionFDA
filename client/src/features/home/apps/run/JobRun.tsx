@@ -93,7 +93,7 @@ const prepareDefaultValues = (
     jobName: app ? app.name : '',
     jobLimit: user ? user.job_limit: 0,
     instanceType: defaultInstance,
-    scope: {label: "Private", value: "private"} as SelectType,
+    scope: { label: 'Private', value: 'private' } as SelectType,
     inputs: {},
   }
   inputSpecs.forEach(inputSpec => {
@@ -187,12 +187,10 @@ const createRequestObject = (
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
   const inputs: { [key: string]: string | number | boolean | undefined } = {}
-
+  
   Object.keys(vals.inputs).forEach(key => {
     const value = vals.inputs[key]
-    if (value) {
-      inputs[key] = getValue(key, value, inputSpecs)
-    }
+    inputs[key] = getValue(key, value, inputSpecs)
   })
 
   return {
