@@ -25,7 +25,7 @@ export const WorkflowSpecTable = ({ title, config }: { title: string, config: an
     const title = spec.label.length ? spec.label : spec.name
 
     let defaultValue
-    if (spec.default_workflow_value && spec.default_workflow_value !== null) {
+    if (spec.default_workflow_value !== null && spec.default_workflow_value !== undefined) {
       defaultValue = spec.default_workflow_value.toString()
     }
 
