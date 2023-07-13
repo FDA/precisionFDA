@@ -4,7 +4,6 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { BaseOperation } from '../../../utils'
 import { getNodePath } from '../user-file.helper'
-import { errors } from '@pfda/https-apps-shared'
 
 class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
   async run(input: IdInput): Promise<void> {
@@ -17,6 +16,9 @@ class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
     try {
       await em.begin()
       const filePath = await getNodePath(em, fileToUnlock)
+
+      fileToUnlock.locked = false
+      await em.persistAndFlush(fileToUnlock)
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_UNLOCKED,
         fileToUnlock,
@@ -24,8 +26,7 @@ class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
         currentUser,
       )
       em.persist(fileEvent)
-      fileToUnlock.locked = false
-      await em.persistAndFlush(fileToUnlock)
+
       await em.commit()
       this.ctx.log.info({ fileName: fileToUnlock.name }, 'Unlocked file')
     } catch (err) {

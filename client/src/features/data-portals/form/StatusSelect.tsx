@@ -4,12 +4,12 @@ import Select from 'react-select'
 export const StatusSelect = ({
   value,
   onBlur,
-  isSubmitting,
+  isDisabled,
   onChange,
 }: {
   value: { label: string; value: string } | null
   onBlur: () => void
-  isSubmitting: boolean
+  isDisabled: boolean
   onChange: (v: any) => void
 }) => {
   const statusOptions = ['open', 'closed']
@@ -26,7 +26,7 @@ export const StatusSelect = ({
       isSearchable
       onBlur={onBlur}
       value={value}
-      isDisabled={isSubmitting}
+      isDisabled={isDisabled}
     />
   )
 }

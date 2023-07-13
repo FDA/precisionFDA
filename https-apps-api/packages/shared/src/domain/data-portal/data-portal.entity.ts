@@ -7,7 +7,7 @@ import {
   Property, Reference,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { STATUS } from './data-portal.enum'
+import { DATA_PORTAL_STATUS } from './data-portal.enum'
 import { Space } from '../space'
 import { Resource } from '../resource'
 
@@ -35,8 +35,11 @@ class DataPortal extends BaseEntity {
   @Property()
   sortOrder: number
 
+  @Property()
+  default: boolean
+
   @Enum()
-  status: STATUS
+  status: DATA_PORTAL_STATUS
 
   @ManyToOne(() => Space)
   space!: IdentifiedReference<Space>

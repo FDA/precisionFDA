@@ -21,6 +21,7 @@ import { useAuthUser } from '../../auth/useAuthUser'
 
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { theme } from '../../../styles/theme'
+import { canEditSettings as canEditSettingsCheck, canEditContent as canEditContentCheck } from '../utils'
 
 const StyledPageRow = styled.div`
   display: flex;
@@ -31,8 +32,8 @@ const StyledPageRow = styled.div`
   position: initial;
 
   ${RightSide} {
-      order: 0;
-    }
+    order: 0;
+  }
 
   ${StyledCard} {
     flex-direction: row;
@@ -42,7 +43,7 @@ const StyledPageRow = styled.div`
   ${CardDetails} {
     max-width: unset;
   }
-  
+
   @media (min-width: ${theme.breakPoints.large}px) {
     flex-direction: row-reverse;
     gap: 64px;
@@ -60,15 +61,12 @@ const StyledPageRow = styled.div`
       top: 32px;
       height: 100%;
     }
-
   }
 
   ${RightSideItem} {
     border-bottom-width: 0;
     padding-bottom: 16px;
   }
-
-
 `
 const StyledInnerHTML = styled.div`
   border-radius: 2px;
@@ -80,7 +78,17 @@ const StyledInnerHTML = styled.div`
   font-size: 15px;
 `
 
-export const DataPortalDetails = ({ portal, canUserEdit = false }: { portal: DataPortal, canUserEdit: boolean }) => {
+export const DataPortalDetails = ({
+  portal,
+  canViewResources = true,
+  canEditSettings = false,
+  canEditContent = false,
+}: {
+  portal: DataPortal
+  canViewResources: boolean
+  canEditSettings: boolean
+  canEditContent: boolean
+}) => {
   return (
     <PageContainerMargin>
       <StyledPageRow>
@@ -88,30 +96,48 @@ export const DataPortalDetails = ({ portal, canUserEdit = false }: { portal: Dat
           {!portal.content && (
             <NoContent>
               <AlertText>This Data Portal has no content</AlertText>
-              {canUserEdit && <Button as={Link} type="button" to={`/data-portals/${portal.id}/content`}>Add some here</Button>}
+              {canEditContent && (
+                <Button
+                  as={Link}
+                  type="button"
+                  to={`/data-portals/${portal.id}/content`}
+                >
+                  Add some here
+                </Button>
+              )}
             </NoContent>
           )}
-          <StyledInnerHTML dangerouslySetInnerHTML={{ __html: portal.content }} />
+          <StyledInnerHTML
+            dangerouslySetInnerHTML={{ __html: portal.content }}
+          />
         </PageMainBody>
         <RightSide>
           <RightSideItem>
             <DataPortalCard portal={portal} />
           </RightSideItem>
-          {canUserEdit && (
+          {canEditSettings && (
             <RightSideItem>
               <RightList>
                 <ListItem as={Link} to={`/data-portals/${portal.id}/edit`}>
                   <span className="fa fa-cog fa-fw" /> Portal Settings
                 </ListItem>
-                <ListItem to={`/data-portals/${portal.id}/content`}>
-                  <span className="fa fa-file-code-o fa-fw" /> Edit Content
-                </ListItem>
-                <ListItem to={`/data-portals/${portal.id}/resources`}>
-                  <span className="fa fa-file-code-o fa-fw" /> Resources
-                </ListItem>
               </RightList>
             </RightSideItem>
           )}
+          <RightSideItem>
+            <RightList>
+              {canViewResources && (
+                <ListItem as={Link} to={`/data-portals/${portal.id}/resources`}>
+                  <span className="fa fa-file-code-o fa-fw" /> Resources
+                </ListItem>
+              )}
+              {canEditContent && (
+                <ListItem to={`/data-portals/${portal.id}/content`}>
+                  <span className="fa fa-file-code-o fa-fw" /> Edit Content
+                </ListItem>
+              )}
+            </RightList>
+          </RightSideItem>
         </RightSide>
       </StyledPageRow>
     </PageContainerMargin>
@@ -124,25 +150,29 @@ const DataPortalDetailsPage = () => {
     portalId: string
     page?: string
   }>()
-  const { data, isLoading, isFetched } = useDataPortalByIdQuery(portalId)
-  const canUserEdit = user?.isAdmin
+  const { data, isLoading, error } = useDataPortalByIdQuery(portalId)
 
-  if (isFetched && !data) {
+  if (!isLoading && !data && error) {
     return (
       <UserLayout>
-        <DataPortalNotFound />
+        <DataPortalNotFound message={error?.response?.data?.error?.message} />
       </UserLayout>
     )
   }
 
   return (
     <UserLayout>
-      {isLoading ? (
+      {isLoading || !data ? (
         <PageContainerMargin>
           <Loader />
         </PageContainerMargin>
       ) : (
-        <DataPortalDetails portal={data!} canUserEdit={canUserEdit} />
+        <DataPortalDetails
+          portal={data}
+          canViewResources
+          canEditContent={canEditContentCheck(user?.dxuser, data.members)}
+          canEditSettings={canEditSettingsCheck(user?.dxuser, data.members)}
+        />
       )}
     </UserLayout>
   )

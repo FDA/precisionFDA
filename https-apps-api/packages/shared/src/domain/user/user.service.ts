@@ -1,39 +1,51 @@
-import { Logger } from 'pino'
 import axios, { AxiosInstance } from 'axios'
-import * as errors from '../../errors'
-import { UserCtx } from '../../types'
-import { PlatformClient, IPlatformAuthClient } from '../../platform-client'
+import { UserOpsCtx } from '../../types'
+import { IPlatformAuthClient } from '../../platform-client'
 import { getServiceFactory } from '../../services/service-factory'
+import { getLogger } from '../../logger'
+import { entities } from '../index'
 
+const logger = getLogger('user.service')
 
 interface IUserService {
   newAuthToken(redirectUri: string): Promise<string>
+  listActiveUserNames: () => Promise<string[]>
+  listGovernmentUserNames: () => Promise<string[]>
 }
 
 class UserService implements IUserService {
-  private readonly log: Logger
-  private readonly ctx: UserCtx
+  private readonly ctx: UserOpsCtx
   private readonly axiosInstance: AxiosInstance
-  private readonly client: PlatformClient
   readonly authClient: IPlatformAuthClient
 
-  constructor(userCtx: UserCtx, log: Logger, axiosInstance?: AxiosInstance) {
-    this.ctx = userCtx
-    this.log = log
+  constructor(ctx: UserOpsCtx, axiosInstance?: AxiosInstance) {
+    this.ctx = ctx
     this.axiosInstance = axiosInstance ?? axios.create()
-    this.authClient = getServiceFactory().getPlatformAuthClient(userCtx.accessToken, log, this.axiosInstance)
+    this.authClient = getServiceFactory().getPlatformAuthClient(ctx.user.accessToken, logger, this.axiosInstance)
   }
 
   async newAuthToken(redirectUri: string): Promise<string> {
-    this.log.info({
-      id: this.ctx.id,
-      dxuser: this.ctx.dxuser,
+    logger.info({
+      id: this.ctx.user.id,
+      dxuser: this.ctx.user.dxuser,
       redirectUri,
     }, 'UserService: Requesting user auth token')
 
     const response = await this.authClient.newAuthToken(redirectUri)
-    this.log.info(`newAuthToken response: ${response.authorization_code}`)
+    logger.info(`newAuthToken response: ${response.authorization_code}`)
     return response.authorization_code
+  }
+
+  async listActiveUserNames(): Promise<string[]> {
+    logger.info('UserService: getting list of active user names')
+    const result = await this.ctx.em.find(entities.User, { userState: 0})
+    return result.map(user => user.dxuser)
+  }
+
+  async listGovernmentUserNames(): Promise<string[]> {
+    logger.info('UserService: getting list of government user names')
+    const result = await this.ctx.em.find(entities.User, {$and: [{userState: 0}, {email: {$like: '%fda.hhs.gov'}}]})
+    return result.map(user => user.dxuser)
   }
 
   // TODO - Refactor calls like ResetMFA here

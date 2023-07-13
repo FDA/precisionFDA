@@ -38,6 +38,7 @@ const CreateDataPortalPage = () => {
     return mutation.mutateAsync({
       name: v.name,
       description: v.description,
+      default: v.default,
       app_owner_id: v.app_owner_id?.value,
       status: v.status?.value,
       host_lead_dxuser: v.host_lead_dxuser?.value,

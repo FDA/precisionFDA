@@ -115,10 +115,13 @@ export async function fetchHostLeads(): Promise<[]> {
   return axios.get('/api/challenges/host_lead_users').then(r => r.data)
 }
 
+export async function fetchActiveUsers(): Promise<[]> {
+  return axios.get('/api/users/active').then(r => r.data)
+}
+
 export async function fetchGuestLeads(): Promise<[]> {
   return axios.get('/api/challenges/guest_lead_users').then(r => r.data)
 }
-
 
 export async function fetchChallengeScopes(challengeId: string | undefined): Promise<[]> {
   const res = await backendCall('/api/challenges/scopes_for_select', 'GET', { id: challengeId })

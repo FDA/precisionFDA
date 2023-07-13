@@ -7,7 +7,7 @@ module Api
     before_action :check_admin, only: %i(update)
 
     def show
-      render json: current_user, meta: meta, adapter: :json
+      render json: current_user, meta:, adapter: :json
     end
 
     def update
@@ -29,6 +29,16 @@ module Api
       render json: resources
     end
 
+    def active
+      active_users = https_apps_client.active_users
+      render json: active_users
+    end
+
+    def government
+      government_users = https_apps_client.government_users
+      render json: government_users
+    end
+
     private
 
     def meta
@@ -44,7 +54,7 @@ module Api
         meta[:links][:accessible_workflows] = api_list_workflows_path
         meta[:links][:accessible_files] = api_list_files_path
         meta[:links][:challenge_new] = new_challenge_path if current_user.can_create_challenges?
-      end.merge({ session_id: session_id })
+      end.merge({ session_id: })
     end
 
     def update_user_params

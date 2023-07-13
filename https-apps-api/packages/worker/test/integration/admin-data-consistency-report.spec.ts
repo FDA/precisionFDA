@@ -9,7 +9,7 @@ import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { create, db, generate } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EntityManager } from '@mikro-orm/mysql'
 import { FILE_ORIGIN_TYPE, FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
 import { JOB_STATE } from 'shared/src/domain/job/job.enum'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from 'shared/src/domain/space-membership/space-membership.enum'
@@ -19,9 +19,8 @@ const log = getLogger()
 
 // Very basic tests for now to make sure this queues and runs
 describe('TASK: AdminDataConsistencyReportOperation', () => {
-  let em: SqlEntityManager
+  let em: EntityManager
   let adminUser: User
-  let adminContext: UserCtx
   let user: User
   let app: App
   let fakeNodes: Node[]
@@ -32,7 +31,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = <EntityManager>database.orm().em.fork()
     em.clear()
     adminUser = create.userHelper.createAdmin(em)
     user = create.userHelper.create(em)
@@ -76,13 +75,12 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     create.spacesHelper.addMember(em, {user: guest, space: normalSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
 
     await em.flush()
-    adminContext = { id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'fake-token' }
     mocksReset()
     queueMocksReset()
   })
 
   it('enqueues correctly', async () => {
-    debug.AdminDataConsistencyReportOperation.enqueue()
+    await debug.AdminDataConsistencyReportOperation.enqueue()
     expect(queueFakes.addToQueueStub.callCount).to.equal(1)
   })
 
@@ -97,7 +95,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     const output = await op.checkRunningJobs()
     expect(output).to.have.length(2)
     expect(output[0].userDxid).to.be.equal(user.dxid)
-    expect(output[0].userDxid).to.be.equal(user.dxid)
+    expect(output[1].userDxid).to.be.equal(user.dxid)
   })
 
   it('checkInconsistentNodes', async () => {

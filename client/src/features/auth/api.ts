@@ -5,7 +5,9 @@ import { backendCall } from '../../utils/api'
 
 export function useAuthUserQuery() {
   return useQuery(['auth-user'], {
-    queryFn: () => axios.get('/api/user').then(r => r.data as { user: IUser, meta: any }),
+    queryFn: () => axios.get('/api/user').then(r => {
+      return r.data as { user: IUser, meta: any }
+    }),
     staleTime: Infinity,
     cacheTime: Infinity,
     retry: 1,

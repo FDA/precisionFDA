@@ -9,16 +9,18 @@ import React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
+import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLink } from '../../../components/Page/PageBackLink'
+import { NoContent } from '../../../components/Public/styles'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { CreateResource } from '../../resources/CreateResource'
 import { StyledPageCenter } from '../../spaces/form/styles'
-import { NoContent } from '../../../components/Public/styles'
 import { AlertText } from '../details/DataPortalNotFound'
-import { NotAllowedPage } from '../../../components/NotAllowed'
-import { useAuthUser } from '../../auth/useAuthUser'
+import { useDataPortalByIdQuery } from '../queries'
+import { canEditResources } from '../utils'
 
 const StyledPageContent = styled.div`
   margin-top: 32px;
@@ -111,6 +113,8 @@ const DataPortalResourcesPage = () => {
   const { portalId } = useParams<{
     portalId: string
   }>()
+  const { data: portal, status: portalStatus } =
+    useDataPortalByIdQuery(portalId)
   const { data, status } = useListDataPortalResourcesQuery(portalId)
 
   const mutation = useResourceRemoveMutation({
@@ -134,8 +138,8 @@ const DataPortalResourcesPage = () => {
     queryClient.invalidateQueries(['resources-list-portal'])
   }
 
-  if (status === 'loading') return <Loader />
-
+  if (status === 'loading' || portalStatus === 'loading') return <Loader />
+  const canEdit = canEditResources(user?.dxuser, portal?.members)
   return (
     <UserLayout>
       <StyledPageCenter>
@@ -145,9 +149,11 @@ const DataPortalResourcesPage = () => {
               Back to Data Portal
             </BackLink>
 
-            {user?.isAdmin && <CreateResource pid={portalId} onSuccess={handleSuccess} />}
+            {canEdit && (
+              <CreateResource pid={portalId} onSuccess={handleSuccess} />
+            )}
           </TopRow>
-          {user?.isAdmin ? (
+          {portal ? (
             <>
               {data?.length === 0 && (
                 <NoContent>
@@ -160,9 +166,11 @@ const DataPortalResourcesPage = () => {
                     <StyledResourceItem key={re.id}>
                       <ImageContainer>
                         <img src={re.url} alt="resource item" />
-                        <Remove onClick={() => handleRemove(re.id)}>
-                          <CrossIcon height={12} />
-                        </Remove>
+                        {canEdit && (
+                          <Remove onClick={() => handleRemove(re.id)}>
+                            <CrossIcon height={12} />
+                          </Remove>
+                        )}
                       </ImageContainer>
                     </StyledResourceItem>
                   )
