@@ -6,7 +6,7 @@
  *
  *
  */
-.PFDAEditorTheme__ltr {
+ .PFDAEditorTheme__ltr {
   text-align: left;
 }
 .PFDAEditorTheme__rtl {
@@ -122,14 +122,14 @@
   max-width: 100%;
   overflow-y: scroll;
   table-layout: fixed;
-  min-width: calc(100% - 25px);
+  width: calc(100% - 25px);
   margin: 30px 0;
 }
 .PFDAEditorTheme__tableSelected {
   outline: 2px solid rgb(60, 132, 244);
 }
 .PFDAEditorTheme__tableCell {
-  border: 1px solid #bbb !important;
+  border: 1px solid #bbb;
   min-width: 75px;
   vertical-align: top;
   text-align: start;

@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { colors } from "../../styles/theme";
+import { colors, theme } from "../../styles/theme";
 
 export const FieldGroup = styled.div`
   display: flex;
@@ -55,4 +55,21 @@ export const Divider = styled.div`
   box-sizing: border-box;
   width: 100%;
   border-bottom: 1.5px solid #d9d9d9;
+`
+
+export const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  gap: 2px;
+  font-size: 14px;
+  line-height: 32px;
+  letter-spacing: 0;
+  color: ${colors.textDarkGrey};
+`
+
+export const CheckboxTip = styled.span`
+  margin-left: 4px;
+  font-size: 12px;
+  color: ${theme.colors.textMediumGrey};
 `

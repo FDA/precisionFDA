@@ -3,26 +3,27 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { PlatformClient } from '../../../platform-client'
 import { getHandle } from '../org.utils'
 import { ClientErrorProps } from '../../../errors'
-import {BILLING_INFO} from "../../../config/consts";
+import { BILLING_INFO } from '../../../config/consts'
 
 const logger = getLogger('org.service')
 
 export interface IOrgService {
-
   create: (dxid: string, billable?: boolean) => Promise<string>
-
 }
 
 /**
  * Org service should be initialized with admin access token (config.platform.adminUserAccessToken)
  */
 export class OrgService implements IOrgService {
-
   private em: SqlEntityManager
   private adminPlatformClient: PlatformClient
   private userPlatformClient: PlatformClient
 
-  constructor(em: SqlEntityManager, adminPlatformClient: PlatformClient, userPlatformClient: PlatformClient) {
+  constructor(
+    em: SqlEntityManager,
+    adminPlatformClient: PlatformClient,
+    userPlatformClient: PlatformClient,
+  ) {
     this.em = em
     this.adminPlatformClient = adminPlatformClient
     this.userPlatformClient = userPlatformClient
@@ -55,5 +56,4 @@ export class OrgService implements IOrgService {
 
     return orgDxid
   }
-
 }

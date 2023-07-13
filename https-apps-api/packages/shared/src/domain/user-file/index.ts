@@ -34,18 +34,15 @@ export { SyncFilesStateOperation } from './ops/sync-files-state'
 
 export { SyncFoldersOperation } from './ops/sync-folders'
 
-export {
-  SyncFilesInFolderOperation,
-  SyncFolderFilesOutput,
-} from './ops/sync-folder-files'
+export { SyncFilesInFolderOperation, SyncFolderFilesOutput } from './ops/sync-folder-files'
 
 export { FolderRecreateOperation } from './ops/folder-recreate'
 
 export { WorkstationSyncFilesOperation } from './ops/sync-workstation-files'
 
-export { NodesLockOperation } from './ops/lock-node'
+export { NodesLockOperation } from './ops/node-lock'
 
-export { NodesUnlockOperation } from './ops/unlock-node'
+export { NodesUnlockOperation } from './ops/node-unlock'
 
 export { FolderUnlockOperation } from './ops/folder-unlock'
 
@@ -54,3 +51,7 @@ export { FolderLockOperation } from './ops/folder-lock'
 export { FileLockOperation } from './ops/file-lock'
 
 export { FileUnlockOperation } from './ops/file-unlock'
+
+export { RequestNodesLockOperation } from './ops/start-lock-nodes-job'
+
+export { RequestNodesUnlockOperation } from './ops/start-unlock-nodes-job'

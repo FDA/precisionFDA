@@ -142,7 +142,7 @@ export const ChallengeForm = ({
       <div>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FieldGroup>
-            <label>Name (required):</label>
+            <label>Name (required)</label>
             <InputText
               label="Name"
               placeholder="Name of the challenge"
@@ -157,7 +157,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Description:</label>
+            <label>Description</label>
             <InputText
               type="textarea"
               label="Description"
@@ -173,7 +173,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Challenge image (required):</label>
+            <label>Challenge image (required)</label>
             {(base64Image || challenge?.card_image_url) && (
               <img
                 width={300}
@@ -201,7 +201,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Scope (required):</label>
+            <label>Scope (required)</label>
             <Controller
               name="scope"
               control={control}
@@ -223,7 +223,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Scoring App User (required):</label>
+            <label>Scoring App User (required)</label>
             <Controller
               name="app_owner_id"
               control={control}
@@ -244,7 +244,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Start at (required):</label>
+            <label>Start at (required)</label>
             <StyledDateInput
               type="datetime-local"
               label="Start at"
@@ -259,7 +259,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>End at (required):</label>
+            <label>End at (required)</label>
             <StyledDateInput
               type="datetime-local"
               label="End at"
@@ -274,7 +274,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Host Lead User (required):</label>
+            <label>Host Lead User (required)</label>
             <Controller
               name="host_lead_dxuser"
               control={control}
@@ -295,7 +295,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Guest Lead User (required):</label>
+            <label>Guest Lead User (required)</label>
             <Controller
               name="guest_lead_dxuser"
               control={control}
@@ -316,7 +316,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Status (required):</label>
+            <label>Status (required)</label>
             <Controller
               name="status"
               control={control}
@@ -338,7 +338,7 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Preregistration Link:</label>
+            <label>Preregistration Link</label>
             <InputText
               label="pre_registration_url"
               placeholder="URL for challenge pre-registration"

@@ -1,10 +1,7 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { userFile } from '@pfda/https-apps-shared'
-import {
-  IdsInput,
-  RemoveNodesInput,
-} from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
+import { NodesInput } from '@pfda/https-apps-shared/src/domain/user-file/user-file.input'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
@@ -17,39 +14,48 @@ router.use(defaultMiddlewares)
 router.post(
   '/lock',
   makeSchemaValidationMdw({
-    body: userFile.inputs.uidListSchema,
+    body: userFile.inputs.nodesSchema,
   }),
   async ctx => {
-    const { ids } = ctx.request.body as IdsInput
-    await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ ids })
-    ctx.status = 204
+    const { ids, async } = ctx.request.body as NodesInput
+    if (async) {
+      await new userFile.RequestNodesLockOperation(pickOpsCtx(ctx)).execute({ ids })
+      ctx.status = 204
+    } else {
+      await new userFile.NodesLockOperation(pickOpsCtx(ctx)).execute({ ids, async })
+      ctx.status = 204
+    }
   },
 )
 
 router.post(
   '/unlock',
   makeSchemaValidationMdw({
-    body: userFile.inputs.uidListSchema,
+    body: userFile.inputs.nodesSchema,
   }),
   async ctx => {
-    const { ids } = ctx.request.body as IdsInput
-    await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
-    ctx.status = 204
+    const { ids, async } = ctx.request.body as NodesInput
+    if (async) {
+      await new userFile.RequestNodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids })
+      ctx.status = 204
+    } else {
+      await new userFile.NodesUnlockOperation(pickOpsCtx(ctx)).execute({ ids, async })
+      ctx.status = 204
+    }
   },
 )
 
 router.delete(
   '/remove',
-  makeSchemaValidationMdw({ body: userFile.inputs.removeNodesSchema }),
+  makeSchemaValidationMdw({ body: userFile.inputs.nodesSchema }),
 
   async ctx => {
-    const { ids, async } = ctx.request.body as RemoveNodesInput
+    const { ids, async } = ctx.request.body as NodesInput
     if (async) {
       await new userFile.StartRemoveNodesJob(pickOpsCtx(ctx)).execute({ ids })
       ctx.status = 204
     } else {
-      const res = await new userFile.NodesRemoveOperation(pickOpsCtx(ctx)).execute({ ids, async })
-      ctx.body = res
+      ctx.body = await new userFile.NodesRemoveOperation(pickOpsCtx(ctx)).execute({ ids, async })
       ctx.status = 200
     }
   },

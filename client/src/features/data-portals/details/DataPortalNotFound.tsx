@@ -9,6 +9,7 @@ export const Warning = styled.div`
   display: flex;
   gap: 16px;
   align-items: flex-end;
+  width: fit-content;
 `
 export const AlertText = styled.div`
   font-size: 18px;
@@ -21,6 +22,7 @@ export const ActionText = styled.div`
 export const Col = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 32px;
   margin: 64px 0;
   height: 100%;
@@ -33,7 +35,7 @@ export const Content = styled.div`
   height: 100%;
 `
 
-export function DataPortalNotFound() {
+export function DataPortalNotFound({ message }: { message: string }) {
   return (
     <PageContainerMargin>
       <Content>
@@ -46,6 +48,7 @@ export function DataPortalNotFound() {
               </BackLink>
             </div>
           </Warning>
+          {message}
         </Col>
       </Content>
     </PageContainerMargin>

@@ -37,7 +37,6 @@ import DraggableBlockPlugin from './plugins/DraggableBlockPlugin'
 import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin'
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin'
 import ImagesPlugin from './plugins/ImagesPlugin'
-import InlineImagePlugin from './plugins/InlineImagePlugin'
 import LinkPlugin from './plugins/LinkPlugin'
 import ListMaxIndentLevelPlugin from './plugins/ListMaxIndentLevelPlugin'
 import { MaxLengthPlugin } from './plugins/MaxLengthPlugin'
@@ -170,7 +169,6 @@ export default function Editor(): JSX.Element {
           <FloatingTextFormatToolbarPlugin />
         </NewTablePlugin>
         <ImagesPlugin />
-        <InlineImagePlugin />
         <LinkPlugin />
         {!isEditable && <LexicalClickableLinkPlugin />}
         <HorizontalRulePlugin />

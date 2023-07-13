@@ -11,8 +11,10 @@ module SpaceEventService
           activityType: event.activity_type,
           newMembershipRole: event.entity.role,
         })
-      rescue HttpsAppsClient::Error => e
-        raise e unless e.code == HttpsAppsClient::Error::SPACE_NOT_FOUND_ERROR_CODE
+      rescue Net::HTTPClientException => e
+        response = JSON.parse(e.response.body)
+        error_code = response.dig("error", "code")
+        raise e unless error_code == HttpsAppsClient::Error::SPACE_NOT_FOUND_ERROR_CODE
 
         {}
       end

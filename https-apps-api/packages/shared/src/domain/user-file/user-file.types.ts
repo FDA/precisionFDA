@@ -1,9 +1,9 @@
-import { IdentifiedReference } from "@mikro-orm/core"
-import { User } from "../user/user.entity"
+import { IdentifiedReference } from '@mikro-orm/core'
+import { User } from '../user/user.entity'
 
 // File state from the platform
 enum FILE_STATE_DX {
-  ABANDONED = 'abandoned',  // See PFDA-685
+  ABANDONED = 'abandoned', // See PFDA-685
   CLOSING = 'closing',
   CLOSED = 'closed',
   OPEN = 'open',
@@ -13,6 +13,8 @@ enum FILE_STATE_PFDA {
   // pFDA internal state, used for files that are being copied by a worker.
   COPYING = 'copying',
   REMOVING = 'removing',
+  UNLOCKING = 'unlocking',
+  LOCKING = 'locking',
 }
 
 type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA

@@ -28,7 +28,9 @@ export function LexiContext({ children, editorState }: any): JSX.Element {
     namespace: 'PFDA',
     nodes: [...PlaygroundNodes],
     onError: (error: Error) => {
-      throw error
+      // throw error
+      console.error(error);
+      
     },
     theme: PlaygroundEditorTheme,
     editorState,

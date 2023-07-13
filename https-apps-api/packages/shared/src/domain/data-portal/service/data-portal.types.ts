@@ -1,4 +1,4 @@
-import { STATUS } from '../data-portal.enum'
+import {DATA_PORTAL_MEMBER_ROLE, DATA_PORTAL_STATUS } from '../data-portal.enum'
 
 class CreateResourceResponse {
   id: number
@@ -8,12 +8,16 @@ class FileParam {
   name: string
   description: string
 }
+
+class DataPortalMemberParam {
+  dxuser: string
+  role: DATA_PORTAL_MEMBER_ROLE
+}
 class DataPortalParam {
   id: number
   name: string
   description: string
   content: string
-
   editorState: string
   hostLeadDxuser: string
   guestLeadDxuser: string
@@ -22,7 +26,9 @@ class DataPortalParam {
   cardImageUrl: string
   spaceId: number
   sortOrder: number
-  status: STATUS
+  default: boolean
+  status: DATA_PORTAL_STATUS
+  members: DataPortalMemberParam[]
 }
 
-export { DataPortalParam, FileParam, CreateResourceResponse }
+export { DataPortalParam, FileParam, DataPortalMemberParam, CreateResourceResponse }

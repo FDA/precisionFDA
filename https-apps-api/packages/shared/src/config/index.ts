@@ -15,7 +15,7 @@ import { ENVS } from '../enums'
 // eslint-disable-next-line import/first
 import { DeepPartial } from '../types'
 // eslint-disable-next-line import/first
-import { MAX_JOB_DURATION_MINUTES } from './constants'
+import { MAX_JOB_DURATION_SECONDS } from './constants'
 // eslint-disable-next-line import/first
 import * as overrides from './envs'
 
@@ -74,7 +74,7 @@ const defaultConfig = {
   validation: {
     maxStrLen: 255,
     maxIdStrLen: 64,
-    maxJobDurationMinutes: MAX_JOB_DURATION_MINUTES,
+    maxJobDurationMinutes: Math.ceil(MAX_JOB_DURATION_SECONDS / 60),
   },
   platform: {
     apiUrl: 'https://stagingapi.dnanexus.com',
@@ -131,10 +131,8 @@ const defaultConfig = {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/1 * * * *',
-      staleJobsEmailAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
-      staleJobsTerminateAfter:
-        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_MINUTES,
+      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
+      staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_SECONDS,
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *', // Once a day at 6am

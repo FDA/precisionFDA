@@ -145,8 +145,8 @@ Rails.application.routes.draw do
     get "/home/*all", to: "home#index"
     get "docs" => "docs#index"
     get "/docs/*all", to: "docs#index"
-    get "data-portals" => "main#about"
-    get "/data-portals/*all" => "main#about"
+    get "data-portals" => "main#data_portals"
+    get "/data-portals/*all" => "main#data_portals"
 
     # Old My Home
     # TODO: remove old code once new My Home is stable for release or two,
@@ -177,7 +177,10 @@ Rails.application.routes.draw do
         get :cloud_resources
       end
 
-      resources :users, only: %i(update)
+      resources :users, only: %i(update) do
+        get :active, on: :collection, to: "users#active"
+        get :government, on: :collection, to: "users#government"
+      end
 
       namespace "activity_reports" do
         get "total"

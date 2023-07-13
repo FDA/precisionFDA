@@ -24,7 +24,7 @@ module Api
     end
 
     def index
-      portals = https_apps_client.data_portals_list
+      portals = https_apps_client.data_portals_list(params[:default])
 
       converted_portals = []
       portals[:data_portals].each do |portal|
@@ -105,6 +105,7 @@ module Api
       end
       portal_data[:content] = data_portal_params[:content] unless data_portal_params[:content].nil?
       portal_data[:editorState] = data_portal_params[:editor_state] unless data_portal_params[:editor_state].nil?
+      portal_data[:default] = data_portal_params[:default] unless data_portal_params[:default].nil?
 
       portal = https_apps_client.data_portal_update(portal_data)
       render json: convert_json_keys_to_snake_case(portal),
@@ -135,6 +136,7 @@ module Api
           :name,
           :description,
           :status,
+          :default,
           :card_image_uid,
           :host_lead_dxuser,
           :guest_lead_dxuser,

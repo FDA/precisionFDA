@@ -26,12 +26,12 @@ type RenameFolderInput = {
   newName: string
 }
 
-type RemoveNodesInput = {
+type NodesInput = {
   ids: number[]
   async: boolean
 }
 
-const removeNodesSchema: JSONSchema7 = {
+const nodesSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     ids: { type: 'array' },
@@ -90,11 +90,11 @@ export {
   SyncFoldersInput,
   SyncFilesInFolderInput,
   RenameFolderInput,
-  RemoveNodesInput,
+  NodesInput,
   renameFolderSchema,
   uidListSchema,
   IdsInput,
-  removeNodesSchema,
+  nodesSchema,
   nodeQueryFilter,
   CLINodeSearchSchema,
   CLINodeSearchInput,

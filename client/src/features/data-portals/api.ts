@@ -8,6 +8,14 @@ export interface DataPortalListResponse {
   meta: Pagination
 }
 
+export async function fetchGovUsers(): Promise<[]> {
+  return axios.get('/api/users/government').then(r => r.data)
+}
+
+export async function fetchActiveUsers(): Promise<[]> {
+  return axios.get('/api/users/active').then(r => r.data)
+}
+
 export async function dataPortalsListRequest() {
   return axios.get('/api/data_portals').then(res => res.data.data_portals as DataPortal[])
 }

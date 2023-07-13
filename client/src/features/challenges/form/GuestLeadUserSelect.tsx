@@ -4,7 +4,9 @@ import Select from 'react-select'
 import { fetchGuestLeads } from './api'
 
 const useFetchGuestLeadUsersQuery = () =>
-  useQuery(['guest-lead-users'], fetchGuestLeads, {
+  useQuery({
+    queryKey: ['guest-lead-users'],
+    queryFn: fetchGuestLeads,
     select(data) {
       return data?.map(s => ({
         label: s,
@@ -20,7 +22,6 @@ export const GuestLeadUserSelect = ({
   onChange,
 }: {
   value: {label: string, value: string} | null
-  defaultInputValue: {label: string, value: string} | null
   onBlur: () => void
   isDisabled: boolean
   onChange: (v:any) => void

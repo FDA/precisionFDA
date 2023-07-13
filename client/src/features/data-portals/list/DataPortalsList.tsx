@@ -32,6 +32,7 @@ export const PageMainBody = styled.div`
   flex-direction: column;
   flex-grow: 1;
   max-width: 700px;
+  /* padding-bottom: 64px; */
 `
 
 const DataPortalsList = () => {

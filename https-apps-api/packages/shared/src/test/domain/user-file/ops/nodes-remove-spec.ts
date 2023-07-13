@@ -7,7 +7,7 @@ import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { EVENT_TYPES } from 'shared/src/domain/event/event.helper'
 import { STATIC_SCOPE } from '../../../../enums'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
-import { RemoveNodesInput } from '../../../../domain/user-file/user-file.input'
+import { NodesInput } from '../../../../domain/user-file/user-file.input'
 import { isValidScopeName } from '../../../../domain/space/space.helper'
 
 describe('remove nodes tests', () => {
@@ -17,7 +17,7 @@ describe('remove nodes tests', () => {
   let userCtx: types.UserCtx
   const ids: number[] = []
 
-  const createFileStructure = async(scope: string) => {
+  const createFileStructure = async (scope: string) => {
     // structure:
     // file1 - dxid1
     // folder1
@@ -29,7 +29,7 @@ describe('remove nodes tests', () => {
 
     if (isValidScopeName(scope)) {
       const space = create.spacesHelper.create(em, { name: 'space-name-1' })
-      create.spacesHelper.addMember(em, {user, space})
+      create.spacesHelper.addMember(em, { user, space })
     }
 
     const file1 = create.filesHelper.create(em, { user }, { name: 'file1', dxid: 'dxid1', scope })
@@ -57,7 +57,11 @@ describe('remove nodes tests', () => {
       { name: 'file4', dxid: 'dxid2', uid: 'file-dxid2-2', scope },
     )
     // this one shares dxid with file2 and should ensure that file on platform is not deleted
-    create.filesHelper.create(em, { user }, { name: 'file5', dxid: 'dxid2', uid: 'file-dxid2-3', scope})
+    create.filesHelper.create(
+      em,
+      { user },
+      { name: 'file5', dxid: 'dxid2', uid: 'file-dxid2-3', scope },
+    )
     await em.flush()
 
     // intentionally in shuffled order
@@ -87,28 +91,31 @@ describe('remove nodes tests', () => {
     expect(event2.type).to.equal(EVENT_TYPES.FILE_DELETED)
     expect(event2.param1).to.equal('/folder1/file2')
     expect(event2.param2).to.equal('dxid2')
-    expect(event2.data).to
-      .equal(`{"id":3,"scope":"${scope}","name":"file2","path":"/folder1/file2"}`)
+    expect(event2.data).to.equal(
+      `{"id":3,"scope":"${scope}","name":"file2","path":"/folder1/file2"}`,
+    )
 
     const event3 = await em.findOneOrFail(Event, 3)
     expect(event3.type).to.equal(EVENT_TYPES.FILE_DELETED)
     expect(event3.param1).to.equal('/folder1/nested--folder1/file3')
     expect(event3.param2).to.equal('dxid3')
-    expect(event3.data).to.equal(`{"id":5,"scope":"${scope}","name":"`
-      + 'file3","path":"/folder1/nested--folder1/file3"}')
+    expect(event3.data).to.equal(
+      `{"id":5,"scope":"${scope}","name":"` + 'file3","path":"/folder1/nested--folder1/file3"}',
+    )
 
     const event4 = await em.findOneOrFail(Event, 4)
     expect(event4.type).to.equal(EVENT_TYPES.FILE_DELETED)
     expect(event4.param1).to.equal('/file4')
     expect(event4.param2).to.equal('dxid2')
-    expect(event4.data).to
-      .equal(`{"id":6,"scope":"${scope}","name":"file4","path":"/file4"}`)
+    expect(event4.data).to.equal(`{"id":6,"scope":"${scope}","name":"file4","path":"/file4"}`)
 
     const event5 = await em.findOneOrFail(Event, 5)
     expect(event5.type).to.equal(EVENT_TYPES.FOLDER_DELETED)
     expect(event5.param1).to.equal('/folder1/nested--folder1')
     expect(event5.param2).to.equal(null)
-    expect(event5.data).to.equal(`{"id":4,"scope":"${scope}","name":"nested--folder1","path":"/folder1/nested--folder1"}`)
+    expect(event5.data).to.equal(
+      `{"id":4,"scope":"${scope}","name":"nested--folder1","path":"/folder1/nested--folder1"}`,
+    )
 
     const event6 = await em.findOneOrFail(Event, 6)
     expect(event6.type).to.equal(EVENT_TYPES.FOLDER_DELETED)
@@ -172,11 +179,15 @@ describe('remove nodes tests', () => {
   })
 
   it('test remove nodes - remove file created by a different user from a space', async () => {
-    const space = create.spacesHelper.create(em, {name: 'test-space'})
-    const user2 = create.userHelper.create(em, {dxuser: 'testuser'})
+    const space = create.spacesHelper.create(em, { name: 'test-space' })
+    const user2 = create.userHelper.create(em, { dxuser: 'testuser' })
     await em.flush()
-    create.spacesHelper.addMember(em, {user, space})
-    const file = create.filesHelper.create(em, {user: user2}, {name: 'test-file.txt', scope: `space-${space.id}`})
+    create.spacesHelper.addMember(em, { user, space })
+    const file = create.filesHelper.create(
+      em,
+      { user: user2 },
+      { name: 'test-file.txt', scope: `space-${space.id}` },
+    )
     await em.flush()
 
     const op = new userFile.NodesRemoveOperation({
@@ -185,18 +196,22 @@ describe('remove nodes tests', () => {
       user: userCtx,
     })
 
-    await op.execute({ ids: [file.id] } as RemoveNodesInput)
+    await op.execute({ ids: [file.id] } as NodesInput)
 
-    const loadedFile = await em.findOne(Node, {id: file.id})
+    const loadedFile = await em.findOne(Node, { id: file.id })
     expect(loadedFile).to.be.null()
   })
 
   it('test remove nodes - fail to remove file from space with VIEWER role', async () => {
-    const space = create.spacesHelper.create(em, {name: 'test-space'})
-    const user2 = create.userHelper.create(em, {dxuser: 'testuser'})
+    const space = create.spacesHelper.create(em, { name: 'test-space' })
+    const user2 = create.userHelper.create(em, { dxuser: 'testuser' })
     await em.flush()
-    create.spacesHelper.addMember(em, {user, space}, {role: SPACE_MEMBERSHIP_ROLE.VIEWER})
-    const file = create.filesHelper.create(em, {user: user2}, {name: 'test-file.txt', scope: `space-${space.id}`})
+    create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.VIEWER })
+    const file = create.filesHelper.create(
+      em,
+      { user: user2 },
+      { name: 'test-file.txt', scope: `space-${space.id}` },
+    )
     await em.flush()
 
     const op = new userFile.NodesRemoveOperation({
@@ -206,12 +221,10 @@ describe('remove nodes tests', () => {
     })
 
     try {
-      await op.execute({ ids: [file.id] } as RemoveNodesInput)
+      await op.execute({ ids: [file.id] } as NodesInput)
       expect.fail('Operation is expected to fail.')
     } catch (error: any) {
-      expect(error.message).to
-        .equal(`You have no permissions to remove '${file.name}'.`)
+      expect(error.message).to.equal(`You have no permissions to remove '${file.name}'.`)
     }
   })
-
 })

@@ -62,6 +62,7 @@ export interface IFile {
   'size': string,
   'type': FileType,
   'locked': boolean,
+  'locking': boolean,
   'state': FileStatus,
   'location': FileLocation,
   'added_by': string,

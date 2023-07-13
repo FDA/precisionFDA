@@ -3,7 +3,6 @@ import { EmailProcessInput, getEmailConfig, EmailTemplate } from '../email.confi
 import { createSendEmailTask } from '../../../queue'
 import { UserOpsCtx } from '../../../types'
 import { DNANEXUS_INVALID_EMAIL } from '../../../config/consts'
-import { getServiceFactory } from '../../../services/service-factory'
 
 export class EmailProcessOperation extends BaseOperation<UserOpsCtx, EmailProcessInput, boolean> {
   input: EmailProcessInput

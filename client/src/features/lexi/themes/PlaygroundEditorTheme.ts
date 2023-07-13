@@ -6,9 +6,9 @@
  *
  */
 
-import type { EditorThemeClasses } from 'lexical'
+import type {EditorThemeClasses} from 'lexical';
 
-import './PlaygroundEditorTheme.css'
+import './PlaygroundEditorTheme.css';
 
 const theme: EditorThemeClasses = {
   blockCursor: 'PFDAEditorTheme__blockCursor',
@@ -61,7 +61,6 @@ const theme: EditorThemeClasses = {
   },
   image: 'editor-image',
   indent: 'PFDAEditorTheme__indent',
-  inlineImage: 'inline-editor-image',
   link: 'PFDAEditorTheme__link',
   list: {
     listitem: 'PFDAEditorTheme__listItem',
@@ -110,6 +109,6 @@ const theme: EditorThemeClasses = {
     underline: 'PFDAEditorTheme__textUnderline',
     underlineStrikethrough: 'PFDAEditorTheme__textUnderlineStrikethrough',
   },
-}
+};
 
-export default theme
+export default theme;

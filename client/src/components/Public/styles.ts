@@ -40,6 +40,8 @@ export const Content = styled.div`
 `
 
 export const RightSideItem = styled.div`
+  display: flex;
+  flex-direction: column;
   font-size: 14px;
   line-height: 20px;
   color: ${colors.textMediumGrey};

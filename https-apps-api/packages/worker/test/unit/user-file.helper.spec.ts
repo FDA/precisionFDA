@@ -7,7 +7,6 @@ import {
   splitFolderPath,
   detectIntersectedTraverse,
   findFolderForPath,
-  validateNodeOwnership,
 } from 'shared/src/domain/user-file/user-file.helper'
 
 describe('user-file.helper', () => {
@@ -259,44 +258,8 @@ describe('user-file.helper', () => {
         const folder = create.filesHelper.createFolder(em, { user }, { name: `folder-${i}` })
         folders.push(folder)
       }
-
       const folderPaths = folders.map(folder => folder.name)
       expect(folderPaths).to.be.an('array').with.lengthOf(n)
-    })
-
-    context('validateNodeOwnership()', async () => {
-      let em: EntityManager<MySqlDriver>
-      let user: User
-
-      beforeEach(async () => {
-        await db.dropData(database.connection())
-        em = database.orm().em.fork()
-        user = create.userHelper.create(em)
-        await em.flush()
-      })
-      it('should not throw an error if node is public', async () => {
-        const parentFolder = create.filesHelper.createFolder(
-          em,
-          { user },
-          { name: 'parent-folder', scope: 'everybody' },
-        )
-        await em.flush()
-        it('should not throw an error if node is public', async () => {
-          await expect(validateNodeOwnership(parentFolder, user)).to.be.fulfilled
-        })
-
-        it('should throw an error if current user has no permissions to lock the node', async () => {
-          const node = {
-            scope: 'space-3',
-            user: { id: 'another-user-id' },
-            name: 'node-name',
-          }
-
-          await expect(validateNodeOwnership(parentFolder, user)).to.be.rejectedWith(
-            `You have no permissions to lock '${parentFolder.name}'.`,
-          )
-        })
-      })
     })
   })
 })
