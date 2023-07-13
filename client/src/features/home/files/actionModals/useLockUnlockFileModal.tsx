@@ -8,11 +8,19 @@ import { FolderIcon } from '../../../../components/icons/FolderIcon'
 import { Loader } from '../../../../components/Loader'
 import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
-import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
 import { itemsCountString, pluralize } from '../../../../utils/formatting'
-import { LockUnlockActionType, lockUnlockFilesRequest, fetchFilesListLockingRequest } from '../files.api'
+import { LockUnlockActionType, lockUnlockFilesRequest, fetchFilesDownloadList, fetchFilesListLockingRequest } from '../files.api'
 import { IFile } from '../files.types'
+import { Footer, ModalScroll } from '../../../modal/styles'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+
+const StyledResourceTable = styled(ResourceTable)`
+  padding-left: 12px;
+`
+const Spacing = styled.div`
+  padding: 12px;
+`
 
 const StyledPath = styled.div`
   min-width: 150px;
@@ -50,10 +58,10 @@ const LockUnlockFiles = ({
       toast.error('Error: Fetching download list.')
     },
   })
-  if (status === 'loading') return <div>Loading...</div>
-  if (!data?.length) return <div>{`You have selected items that cannot be ${type}ed.`}</div>
+  if (status === 'loading') return <Spacing>Loading...</Spacing>
+  if (!data?.length) return <Spacing>{`You have selected items that cannot be ${type}ed.`}</Spacing>
   return (
-    <ResourceTable
+    <StyledResourceTable
       rows={data.map(s => ({
         name: (
           <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
@@ -106,26 +114,30 @@ export const useLockUnlockFileModal = ({
   }
 
   const modalComp = isShown && (
-    <Modal
-      id="modal-files-delete"
-      data-testid="modal-files-delete"
-      headerText={`${ActionTypeName[type]} ${numberOfFiles ? itemsCountString('item', numberOfFiles) : '...'}`}
+    <ModalNext
+      id="modal-files-lock-unlock"
+      data-testid="modal-files-lock-unlock"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
-        <>
-          {mutation.isLoading && <Loader />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
-            Cancel
-          </Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
-            {ActionTypeName[type]}
-          </ButtonSolidBlue>
-        </>
-      }
     >
-      <LockUnlockFiles selected={memoSelected} type={type} scope={scope} setNumberOfFiles={setNumberOfFiles} />
-    </Modal>
+      <ModalHeaderTop
+        headerText={`${ActionTypeName[type]} ${numberOfFiles ? itemsCountString('item', numberOfFiles) : '...'}`}
+        hide={() => setShowModal(false)}
+      />
+
+      <ModalScroll>
+        <LockUnlockFiles selected={memoSelected} type={type} scope={scope} setNumberOfFiles={setNumberOfFiles} />
+      </ModalScroll>
+      <Footer>
+        {mutation.isLoading && <Loader />}
+        <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
+          Cancel
+        </Button>
+        <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+          {ActionTypeName[type]}
+        </ButtonSolidBlue>
+      </Footer>
+    </ModalNext>
   )
 
   return {

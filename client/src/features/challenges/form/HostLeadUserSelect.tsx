@@ -4,7 +4,9 @@ import Select from 'react-select'
 import { fetchHostLeads } from './api'
 
 const useFetchHostLeadUsersQuery = () =>
-  useQuery(['host-lead-users'], fetchHostLeads, {
+  useQuery({
+    queryKey: ['host-lead-users'],
+    queryFn: fetchHostLeads,
     select(data) {
       return data?.map(s => ({
         label: s,

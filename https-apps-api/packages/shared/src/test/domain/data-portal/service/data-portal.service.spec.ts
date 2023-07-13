@@ -9,7 +9,10 @@ import { ClassIdResponse, PlatformClient } from '../../../../platform-client'
 import { FileCreateParams, FileDownloadLinkParams } from '../../../../platform-client/platform-client.params'
 import { FileDownloadLinkResponse } from '../../../../platform-client/platform-client.responses'
 import { expect } from 'chai'
-import { STATUS } from '../../../../domain/data-portal/data-portal.enum'
+import {
+  DATA_PORTAL_MEMBER_ROLE,
+  DATA_PORTAL_STATUS
+} from '../../../../domain/data-portal/data-portal.enum'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE
@@ -61,7 +64,7 @@ describe('data portal service tests', () => {
   }
 
   const createPortal = async(spaceName: string, hostLeadDxUser: string, guestLeadDxUser: string,
-                             portalName: string, description: string, status: STATUS,
+                             portalName: string, description: string, status: DATA_PORTAL_STATUS,
                              sortOrder: number, cardImageId: string, cardImageUrl: string): Promise<DataPortal> => {
     const space = create.spacesHelper.create(em, {name: spaceName})
     await em.flush()
@@ -100,7 +103,7 @@ describe('data portal service tests', () => {
       name: 'test-data-portal',
       description: 'description',
       sortOrder: 1,
-      status: STATUS.OPEN,
+      status: DATA_PORTAL_STATUS.OPEN,
       spaceId: space.id,
     } as DataPortalParam
     const portal = await dataPortalService.create(input, siteAdmin.id)
@@ -110,7 +113,7 @@ describe('data portal service tests', () => {
     expect(loadedDataPortal.name).eq('test-data-portal')
     expect(loadedDataPortal.description).eq('description')
     expect(loadedDataPortal.sortOrder).eq(1)
-    expect(loadedDataPortal.status).eq(STATUS.OPEN)
+    expect(loadedDataPortal.status).eq(DATA_PORTAL_STATUS.OPEN)
     expect(loadedDataPortal.space.id).eq(space.id)
   })
 
@@ -124,7 +127,7 @@ describe('data portal service tests', () => {
       name: 'test-data-portal',
       description: 'description',
       sortOrder: 1,
-      status: STATUS.OPEN,
+      status: DATA_PORTAL_STATUS.OPEN,
       spaceId: space.id,
     } as DataPortalParam
 
@@ -161,7 +164,7 @@ describe('data portal service tests', () => {
     const portal = create.dataPortalsHelper.create(em, { space }, {
       name: 'test-data-portal',
       description: 'description',
-      status: STATUS.OPEN,
+      status: DATA_PORTAL_STATUS.OPEN,
       sortOrder: 1,
       cardImageId: 'testUid',
       cardImageUrl: 'testUrl',
@@ -173,7 +176,7 @@ describe('data portal service tests', () => {
       id: portal.id,
       name: 'name-updated',
       description: 'description-updated',
-      status: STATUS.CLOSED,
+      status: DATA_PORTAL_STATUS.CLOSED,
       sortOrder: 2,
       cardImageUid: cardImageFile.uid,
       content: 'content-update',
@@ -247,7 +250,7 @@ describe('data portal service tests', () => {
 
   it('test get data portal', async () => {
     const portal = await createPortal('space-name', 'host-lead', 'guest-lead',
-      'test-data-portal', 'description', STATUS.OPEN, 1, 'testUid', 'testUrl')
+      'test-data-portal', 'description', DATA_PORTAL_STATUS.OPEN, 1, 'testUid', 'testUrl')
     create.spacesHelper.addMember(em, {user, space: portal.space.getEntity()}, {role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.HOST})
 
     await em.flush()
@@ -255,12 +258,22 @@ describe('data portal service tests', () => {
     const result = await dataPortalService.get(portal.id, user.id)
     expect(result.name).eq('test-data-portal')
     expect(result.description).eq('description')
-    expect(result.status).eq(STATUS.OPEN)
+    expect(result.status).eq(DATA_PORTAL_STATUS.OPEN)
     expect(result.sortOrder).eq(1)
     expect(result.cardImageUid).eq('testUid')
     expect(result.cardImageUrl).eq('testUrl')
     expect(result.hostLeadDxuser).eq('host-lead')
     expect(result.guestLeadDxuser).eq('guest-lead')
+
+    expect(result.members.length).eq(4)
+    expect(result.members[0].dxuser).eq('host-lead')
+    expect(result.members[0].role).eq(DATA_PORTAL_MEMBER_ROLE.LEAD)
+    expect(result.members[1].dxuser).eq('guest-lead')
+    expect(result.members[1].role).eq(DATA_PORTAL_MEMBER_ROLE.LEAD)
+    expect(result.members[2].dxuser.startsWith('user-')).eq(true)
+    expect(result.members[2].role).eq(DATA_PORTAL_MEMBER_ROLE.CONTRIBUTOR)
+    expect(result.members[3].dxuser.startsWith('user-')).eq(true)
+    expect(result.members[3].role).eq(DATA_PORTAL_MEMBER_ROLE.VIEWER)
   })
 
   it('test get data portal - fail with lack of privileges', async () => {
@@ -286,9 +299,9 @@ describe('data portal service tests', () => {
 
   it('test list data portal', async () => {
     await createPortal('space-name_1', 'host-lead_1', 'guest-lead_1',
-      'test-data-portal_1', 'description_1', STATUS.OPEN, 2, 'testUid_1', 'testUrl_1')
+      'test-data-portal_1', 'description_1', DATA_PORTAL_STATUS.OPEN, 2, 'testUid_1', 'testUrl_1')
     await createPortal('space-name_2', 'host-lead_2', 'guest-lead_2',
-      'test-data-portal_2', 'description_2', STATUS.CLOSED, 1, 'testUid_2', 'testUrl_2')
+      'test-data-portal_2', 'description_2', DATA_PORTAL_STATUS.CLOSED, 1, 'testUid_2', 'testUrl_2')
 
     const result = await dataPortalService.list(user.id)
 
@@ -297,7 +310,7 @@ describe('data portal service tests', () => {
     expect(result.data_portals[0].description).eq('description_2')
     expect(result.data_portals[0].hostLeadDxuser).eq('host-lead_2')
     expect(result.data_portals[0].guestLeadDxuser).eq('guest-lead_2')
-    expect(result.data_portals[0].status).eq(STATUS.CLOSED)
+    expect(result.data_portals[0].status).eq(DATA_PORTAL_STATUS.CLOSED)
     expect(result.data_portals[0].sortOrder).eq(1)
     expect(result.data_portals[0].cardImageUrl).eq('testUrl_2')
 
@@ -305,7 +318,7 @@ describe('data portal service tests', () => {
     expect(result.data_portals[1].description).eq('description_1')
     expect(result.data_portals[1].hostLeadDxuser).eq('host-lead_1')
     expect(result.data_portals[1].guestLeadDxuser).eq('guest-lead_1')
-    expect(result.data_portals[1].status).eq(STATUS.OPEN)
+    expect(result.data_portals[1].status).eq(DATA_PORTAL_STATUS.OPEN)
     expect(result.data_portals[1].sortOrder).eq(2)
     expect(result.data_portals[1].cardImageUrl).eq('testUrl_1')
   })
@@ -331,6 +344,39 @@ describe('data portal service tests', () => {
 
     result = await dataPortalService.list(nocoiner.id)
     expect(result.data_portals.length).eq(0)
+  })
+
+  it('test list data portal - filter by default', async() => {
+    const siteAdmin = await create.userHelper.createSiteAdmin(em)
+    const space = await create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
+    await em.flush()
+    await create.spacesHelper.addMember(em, { space, user }, {role: SPACE_MEMBERSHIP_ROLE.VIEWER })
+    await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-default', default: true })
+    await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-non-default', default: false })
+    await em.flush()
+
+    let result = await dataPortalService.list(user.id)
+    expect(result.data_portals.length).eq(2)
+
+    result = await dataPortalService.list(siteAdmin.id, true)
+    expect(result.data_portals.length).eq(1)
+
+    result = await dataPortalService.list(user.id, true)
+    expect(result.data_portals.length).eq(1)
+  })
+
+  it('test update data portal and make sure only one is default', async () => {
+    const siteAdmin = await create.userHelper.createSiteAdmin(em)
+    const space = await create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
+    await em.flush()
+    await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-default', default: true })
+    const dataPortal2 = await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-non-default', default: false })
+    await em.flush()
+
+    await dataPortalService.update({ id: dataPortal2.id, default: true } as DataPortalParam, siteAdmin.id)
+
+    const result = await dataPortalService.list(siteAdmin.id, true)
+    expect(result.data_portals.length).eq(1)
   })
 
   it('test create data portal card image', async () => {
@@ -470,6 +516,6 @@ describe('data portal service tests', () => {
     const result = await dataPortalService.createResourceLink(resource.id)
     expect(result).eq('testingURL')
     const loadedResource = await em.findOneOrFail(entities.Resource, {id: resource.id})
-    expect(result).eq('testingURL')
+    expect(loadedResource.url).eq('testingURL')
   })
 })

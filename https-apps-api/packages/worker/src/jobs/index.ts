@@ -22,13 +22,14 @@ import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclu
 import { syncSpacesPermissionsHandler } from './sync-spaces-permissions.handler'
 import { checkUserJobsHandler } from './check-user-jobs.handler'
 import { removeNodesHandler } from './remove-nodes.handler'
-
+import { lockNodesHandler } from './lock-nodes.handler'
+import { unlockNodesHandler } from './unlock-nodes.handler'
 
 type WorkerContext = WorkerOpsCtx<UserOpsCtx>
 
 // A replacement for writing individual handler functions that differ only by
 // the line creating and executing the Operation
-const handleUserTask = async <TJob extends queue.types.TaskWithAuth> (
+const handleUserTask = async <TJob extends queue.types.TaskWithAuth>(
   bullJob: Job,
   execute: (ctx: WorkerContext, input: any) => Promise<any>,
 ) => {
@@ -121,6 +122,12 @@ export const handler = async (job: Job<queue.types.Task>) => {
       })
     case queue.types.TASK_TYPE.DEBUG_MAX_MEMORY:
       await debug.testHeapMemoryAllocationError()
+      return
+    case queue.types.TASK_TYPE.LOCK_NODES:
+      await lockNodesHandler(job)
+      return
+    case queue.types.TASK_TYPE.UNLOCK_NODES:
+      await unlockNodesHandler(job)
       return
     default:
       log.warn({ jobData: job.data }, 'Trying to handle unsupported task')

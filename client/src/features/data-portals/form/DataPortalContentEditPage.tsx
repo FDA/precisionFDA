@@ -15,11 +15,13 @@ import { useDataPortalByIdQuery } from '../queries'
 import { DataPortal } from '../types'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { canEditContent } from '../utils'
 
 const ContentEditButtonRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 16px;
+  padding: 0 12px;
 `
 
 const SubmitRow = styled.div`
@@ -38,7 +40,7 @@ const TopBar = ({ portalId, data }: { portalId: string | number, data: DataPorta
     onSuccess: async () => {
       await queryClient.invalidateQueries(['data-portals', portalId.toString()])
       history.push(`/data-portals/${portalId}`)
-      toast.success('Data Portal contend updated')
+      toast.success('Data Portal content updated')
     },
   })
   const [editor] = useLexicalComposerContext()
@@ -69,7 +71,9 @@ export default function DataPortalContentEditPage(): JSX.Element {
   }>()
   const { data, isLoading } = useDataPortalByIdQuery(portalId)
   if(isLoading) return <Loader />
-  if(!user?.isAdmin) return <NotAllowedPage />
+  if(!canEditContent(user?.dxuser, data?.members)) {
+    return <NotAllowedPage />
+  }
   
   return (
     <LexiContext editorState={data?.editorState}>

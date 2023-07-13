@@ -406,7 +406,6 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
     }
   }
 }
-
 const findFileOrAssetWithUid = async (
   em: EntityManager,
   uid: string,
@@ -500,6 +499,25 @@ const loadNodes = async (em: any, input: IdsInput, filters: nodeQueryFilter) => 
   return unique
 }
 
+const getPluralizedTerm = (itemCount: number, itemName: string): string => {
+  if (itemCount === 1) {
+    return `${itemCount.toString()} ${itemName}`
+  }
+  return `${itemCount.toString()} ${itemName}s`
+}
+
+const getSuccessMessage = (filesCount: number, foldersCount: number, message: string) => {
+  if (foldersCount > 0 && filesCount === 0) {
+    return `${message} ${getPluralizedTerm(foldersCount, 'folder')}`
+  } else if (filesCount > 0 && foldersCount === 0) {
+    return `${message} ${getPluralizedTerm(filesCount, 'file')}`
+  }
+  return (
+    `${message} ${getPluralizedTerm(filesCount, 'file')} and ` +
+    `${getPluralizedTerm(foldersCount, 'folder')}`
+  )
+}
+
 export {
   parseFoldersFromClient,
   folderPathsFromFolders,
@@ -525,4 +543,5 @@ export {
   validateProtectedSpaces,
   validateVerificationSpace,
   filterNodesByUser,
+  getSuccessMessage,
 }

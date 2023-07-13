@@ -12,7 +12,6 @@ type TaskWithMaybeAuth = {
   user: UserCtx | undefined
 }
 
-
 export enum TASK_TYPE {
   SYNC_FILES_STATE = 'sync_files_state',
   SYNC_JOB_STATUS = 'sync_job_status',
@@ -29,13 +28,15 @@ export enum TASK_TYPE {
   OTHER_TASK = 'other',
   // TODO - Standardize on DOMAIN_ACTION naming scheme
   WORKSTATION_SNAPSHOT = 'workstation_snapshot',
+  LOCK_NODES = 'lock_nodes',
+  UNLOCK_NODES = 'unlock_nodes',
   ADMIN_DATA_CONSISTENCY_REPORT = 'admin_data_consistency_report',
   USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
 }
 
 // will be used in the sub-handler
 export type BasicUserJob = TaskWithAuth & {
-  type: (TASK_TYPE.USER_CHECKUP | TASK_TYPE.CHECK_USER_JOBS)
+  type: TASK_TYPE.USER_CHECKUP | TASK_TYPE.CHECK_USER_JOBS
 }
 
 export type CheckStatusJob = TaskWithAuth & {
@@ -86,6 +87,15 @@ export type WorkstationSnapshotTask = TaskWithAuth & {
   payload: WorkstationSnapshotOperationParams
 }
 
+export type LockNodesJob = TaskWithAuth & {
+  type: TASK_TYPE.LOCK_NODES
+  payload: number[]
+}
+
+export type UnlockNodesJob = TaskWithAuth & {
+  type: TASK_TYPE.UNLOCK_NODES
+  payload: number[]
+}
 // ---------------------
 // Admin and Debug tasks
 // ---------------------
@@ -114,6 +124,8 @@ export type Task =
   | SyncWorkstationFiles
   | RemoveNodesJob
   | WorkstationSnapshotTask
+  | LockNodesJob
+  | UnlockNodesJob
   | AdminDataConsistencyReportTask
   | UserDataConsistencyReportTask
   | DebugMaxMemory

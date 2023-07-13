@@ -154,7 +154,7 @@ const addToQueue = async <T extends types.Task>(
     'adding a task to queue',
   )
   // TODO(samuel) fix - idk why type resolution doesn't work
-  const job = await queue.add(task, options) as Bull.Job<T>
+  const job = (await queue.add(task, options)) as Bull.Job<T>
   return job
 }
 
@@ -190,16 +190,10 @@ const findRepeatable = async (bullJobId: string) => {
   return result
 }
 
-
 // TASK PRODUCERS
 
-const createSyncFilesStateTask = async (
-  user: UserCtx,
-) => {
-  log.info(
-    { userId: user.id },
-    'Creating SyncFilesStateTask',
-  )
+const createSyncFilesStateTask = async (user: UserCtx) => {
+  log.info({ userId: user.id }, 'Creating SyncFilesStateTask')
 
   const task = {
     type: types.TASK_TYPE.SYNC_FILES_STATE as const,
@@ -214,10 +208,7 @@ const createSyncFilesStateTask = async (
   return await addToQueue(task, mainQueue, options)
 }
 
-const createSyncJobStatusTask = async (
-  data: types.CheckStatusJob['payload'],
-  user: UserCtx,
-) => {
+const createSyncJobStatusTask = async (data: types.CheckStatusJob['payload'], user: UserCtx) => {
   const wrapped = {
     type: types.TASK_TYPE.SYNC_JOB_STATUS as const,
     payload: data,
@@ -280,15 +271,19 @@ const createSendEmailTask = async (
     payload: data,
     user,
   }
-  const options: JobOptions = taskId ? {
-    jobId: taskId,
-    // The following is important for emails that should not be repeated
-    removeOnComplete: false,
-    removeOnFail: true,
-  } : {
-    jobId: EmailSendOperation.getBullJobId(data.emailType),
-  }
-  const handlePayloadFn = (payload: types.SendEmailJob['payload']): types.SendEmailJob['payload'] => ({
+  const options: JobOptions = taskId
+    ? {
+        jobId: taskId,
+        // The following is important for emails that should not be repeated
+        removeOnComplete: false,
+        removeOnFail: true,
+      }
+    : {
+        jobId: EmailSendOperation.getBullJobId(data.emailType),
+      }
+  const handlePayloadFn = (
+    payload: types.SendEmailJob['payload'],
+  ): types.SendEmailJob['payload'] => ({
     ...payload,
     body: '[too-long]',
   })
@@ -299,9 +294,7 @@ const removeFromEmailQueue = (jobId: string) => {
   emailsQueue.removeJobs(jobId)
 }
 
-const createCheckStaleJobsTask = async (
-  user: UserCtx,
-) => {
+const createCheckStaleJobsTask = async (user: UserCtx) => {
   const wrapped = {
     type: types.TASK_TYPE.CHECK_STALE_JOBS as const,
     payload: undefined as any,
@@ -311,9 +304,7 @@ const createCheckStaleJobsTask = async (
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
-const createSyncSpacesPermissionsTask = async (
-  user: UserCtx,
-) => {
+const createSyncSpacesPermissionsTask = async (user: UserCtx) => {
   const wrapped = {
     type: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
     payload: undefined as any,
@@ -330,15 +321,34 @@ const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) => {
     user,
   }
   const options: JobOptions = {
-    jobId: `${wrapped.type}.${user.dxuser}-${new Date().valueOf().toString()}`,
+    jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+  }
+  return await addToQueue(wrapped, fileSyncQueue, options)
+}
+const createLockNodesJobTask = async (ids: number[], user: UserCtx) => {
+  const wrapped = {
+    type: types.TASK_TYPE.LOCK_NODES as const,
+    payload: ids,
+    user,
+  }
+  const options: JobOptions = {
+    jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+  }
+  return await addToQueue(wrapped, fileSyncQueue, options)
+}
+const createUnlockNodesJobTask = async (ids: number[], user: UserCtx) => {
+  const wrapped = {
+    type: types.TASK_TYPE.UNLOCK_NODES as const,
+    payload: ids,
+    user,
+  }
+  const options: JobOptions = {
+    jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
   }
   return await addToQueue(wrapped, fileSyncQueue, options)
 }
 
-const createDbClusterSyncTask = async (
-  data: types.SyncDbClusterJob['payload'],
-  user: UserCtx,
-) => {
+const createDbClusterSyncTask = async (data: types.SyncDbClusterJob['payload'], user: UserCtx) => {
   const wrapped = {
     type: types.TASK_TYPE.SYNC_DBCLUSTER_STATUS as const,
     payload: data,
@@ -446,4 +456,6 @@ export {
   addToQueue,
   addToQueueEnsureUnique,
   clearOrphanedRepeatableJobs,
+  createLockNodesJobTask,
+  createUnlockNodesJobTask,
 }
