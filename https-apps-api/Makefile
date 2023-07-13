@@ -43,6 +43,13 @@ run-dev-local:
 	NODE_DATABASE_URL=mysql://root:password@0.0.0.0:32800/precision-fda \
 	yarn workspace @pfda/https-apps-api dev
 
+run-dev-local:
+	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
+	NODE_PATH_KEY_CERT=../../../key.pem \
+	NODE_PATH_CERT=../../../cert.pem \
+	NODE_DATABASE_URL=mysql://root:password@0.0.0.0:32800/precision-fda \
+	yarn workspace @pfda/https-apps-api dev
+
 run-worker-dev:
 	NODE_REDIS_URL=redis://0.0.0.0:6379/0 \
 	NODE_PATH_KEY_CERT=../../../key.pem \
