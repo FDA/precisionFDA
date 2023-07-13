@@ -4,63 +4,49 @@ export const title = 'Data Portals'
 export const subtitle = 'Customized presentation of instructions, tools, data, reports, and dashboards, for members of Portal Spaces.'
 
 export const createValidationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
+  name: Yup.string().required('Name is required').min(2).max(256),
+  description: Yup.string().min(2).max(256),
   scope: Yup.object()
     .shape({
       value: Yup.string(),
     })
-    .nullable()
     .required('Scope is required'),
   app_owner_id: Yup.object()
     .shape({
       value: Yup.string(),
     })
-    .nullable()
-    .required('Scoring App User is required'),
+    .required('App User is required'),
   host_lead_dxuser: Yup.object()
     .shape({
       value: Yup.string(),
-    })
-    .nullable()
-    .required('Host Lead User is required'),
+    }).nullable().required('Data Portal Team Lead User is required'),
   guest_lead_dxuser: Yup.object()
     .shape({
       value: Yup.string(),
-    })
-    .nullable()
-    .required('Guest Lead User is required'),
+    }).nullable().required('Second Team Lead User is required'),
   status: Yup.object()
     .shape({
       value: Yup.string(),
-    })
-    .nullable()
-    .required('Status is required'),
+    }).nullable().required('Status is required'),
   card_image_uid: Yup.string().nullable().optional(),
+  card_image_file: Yup.mixed().test('presence', 'Image file is required', (value: FileList) => {
+    if(value?.length > 0) {
+      return true
+    }
+    return false
+  }),
 })
 
 export const editValidationSchema = Yup.object().shape({
-  start_at: Yup.date()
-    .nullable()
-    .typeError('Invalid Date')
-    .required('Start date is required'),
-  end_at: Yup.date()
-    .min(Yup.ref('start_at'), 'End date cannot be before start date')
-    .typeError('Invalid Date')
-    .nullable()
-    .required('End Date is required'),
-  name: Yup.string().required('Name is required'),
+  name: Yup.string().required('Name is required').min(2).max(256),
+  description: Yup.string().min(2).max(256),
+  sort_order: Yup.number().nullable().min(0).required('Sort order is required'),
   scope: Yup.object()
     .shape({
       value: Yup.string(),
     })
     .nullable()
     .required('Scope is required'),
-  app_owner_id: Yup.object()
-    .shape({
-      value: Yup.string(),
-    })
-    .nullable()
-    .required('Scoring App User is required'),
   status: Yup.object()
     .shape({
       value: Yup.string(),

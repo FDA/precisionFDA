@@ -1,12 +1,23 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Select from 'react-select'
-import { fetchGuestLeads } from './api'
+import { fetchActiveUsers, fetchGovUsers } from '../api'
 
-const useFetchGuestLeadUsersQuery = () =>
+const useFetchGovUsersQuery = () =>
   useQuery({
-    queryKey: ['guest-lead-users'],
-    queryFn: fetchGuestLeads,
+    queryKey: ['gov-users'],
+    queryFn: fetchGovUsers,
+    select(data) {
+      return data?.map(s => ({
+        label: s,
+        value: s,
+      }))
+    },
+  })
+const useFetchActiveUsersQuery = () =>
+  useQuery({
+    queryKey: ['gov-users'],
+    queryFn: fetchActiveUsers,
     select(data) {
       return data?.map(s => ({
         label: s,
@@ -15,7 +26,7 @@ const useFetchGuestLeadUsersQuery = () =>
     },
   })
 
-export const GuestLeadUserSelect = ({
+export const UsersSelect = ({
   value,
   onBlur,
   isDisabled,
@@ -26,10 +37,10 @@ export const GuestLeadUserSelect = ({
   isDisabled: boolean
   onChange: (v:any) => void
 }) => {
-  const { data: guestLeadUserOptions, isLoading } = useFetchGuestLeadUsersQuery()
+  const { data, isLoading } = useFetchActiveUsersQuery()
   return (
     <Select
-      options={guestLeadUserOptions}
+      options={data}
       placeholder="Choose..."
       onChange={onChange}
       isClearable

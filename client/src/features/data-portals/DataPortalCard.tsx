@@ -18,6 +18,7 @@ export const StyledCard = styled.div`
     align-self: center;
     border-radius: 12px;
     width: 220px;
+    max-width: 220px;
     height: 220px;
     object-fit: cover;
   }

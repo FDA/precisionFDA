@@ -1,3 +1,10 @@
+import { SpaceMembership } from '../spaces/spaces.types'
+
+export interface DataPortalMember {
+  dxuser: string
+  role: SpaceMembership['role']
+}
+
 export interface DataPortal {
   id: number
   name: string
@@ -7,8 +14,9 @@ export interface DataPortal {
   cardImageUrl: string
   status: 'open' | string
   spaceId: number
-  hostLeadDxUser: string
-  guestLeadDxUser: string
+  hostLeadDxuser: string
+  guestLeadDxuser: string
   content: string | null
   editorState: string
+  members: DataPortalMember[]
 }

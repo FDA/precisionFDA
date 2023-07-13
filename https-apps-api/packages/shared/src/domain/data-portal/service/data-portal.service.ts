@@ -1,4 +1,9 @@
-import { CreateResourceResponse, DataPortalParam, FileParam } from './data-portal.types'
+import {
+  CreateResourceResponse,
+  DataPortalMemberParam,
+  DataPortalParam,
+  FileParam
+} from './data-portal.types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { DataPortal } from '../data-portal.entity'
 import { PlatformClient } from '../../../platform-client'
@@ -11,16 +16,16 @@ import { entities, errors } from '@pfda/https-apps-shared'
 import { getLogger } from '../../../logger'
 import { User } from '../../user'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { ADMIN_GROUP_ROLES } from '../../admin-group'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
+import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 
 const logger = getLogger('data-portals.service')
 
 export interface IDataPortalService {
   create: (input: DataPortalParam, userId: number) => Promise<DataPortalParam>
   update: (input: DataPortalParam, userId: number) => Promise<DataPortalParam>
-  list: (userId: number) => Promise<any>
+  list: (userId: number, defaultParam?: boolean) => Promise<any>
   get: (dataPortalId: number, userId: number) => Promise<DataPortalParam>
   createCardImage: (input: FileParam, dataPortalId: number, userId: number) => Promise<string>
   createResource: (input: FileParam, dataPortalId: number, userId: number) => Promise<CreateResourceResponse>
@@ -82,6 +87,7 @@ export class DataPortalService implements IDataPortalService {
     await this.em.persistAndFlush(dataPortal)
     return { id: resource.id, fileUid: userFile.uid }
   }
+
   removeResource = async (id: number, userId: number) => {
     logger.info(`DataPortalService: removing resource: ${id}`)
     const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['organization']})
@@ -157,17 +163,10 @@ export class DataPortalService implements IDataPortalService {
     return userFile.uid
   }
 
-  // TODO: Use user.isSiteAdmin() instead
   private hasSiteAdminRole = async(userId: number): Promise<boolean> => {
     logger.info(`DataPortalService: verifying site admin role for id ${userId}`)
     const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['adminMemberships', 'adminMemberships.adminGroup']})
-    let verified = false
-    user.adminMemberships.getItems().forEach((membership) => {
-      if (membership.adminGroup.getEntity().role === ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN) {
-        verified = true
-      }
-    })
-    return verified
+    return user.isSiteAdmin()
   }
 
   // TODO: Refactor as method in DataPortal entity object
@@ -221,23 +220,35 @@ export class DataPortalService implements IDataPortalService {
     }
     const space = await this.em.findOneOrFail(entities.Space, {id: input.spaceId}, {populate: ['spaceMemberships.user']})
 
+    await this.processDefault(input.default)
+
     const dataPortal = new DataPortal(space)
     dataPortal.name = input.name
     dataPortal.description = input.description
     dataPortal.sortOrder = input.sortOrder
     dataPortal.status = input.status
     dataPortal.content = input.content
+    dataPortal.default = input.default
 
     await this.em.persistAndFlush(dataPortal)
     return this.map(dataPortal)
+  }
+
+  private async processDefault(defaultParam: boolean) {
+    if (defaultParam) {
+      // make sure we un-default all others
+      const portals = await this.em.find(entities.DataPortal, {default: true})
+      for (const p of portals) {
+        p.default = false
+      }
+    }
   }
 
   update = async (input: DataPortalParam, userId: number): Promise<DataPortalParam> => {
     logger.info('DataPortalService: updating data portal', input, userId)
     const portal = await this.em.findOneOrFail(entities.DataPortal, {id: input.id}, {populate: ['space.spaceMemberships.user']})
 
-    const keys = Object.keys(input)
-    if (!(keys.length === 1 && input.hasOwnProperty('cardImageUid') && await this.hasSiteAdminRole(userId))) {
+    if (!await this.hasSiteAdminRole(userId)) {
       if (input.content) {
         if (!(await this.isPortalAdmin(portal, userId) || await this.isPortalLead(portal, userId))) {
           throw new errors.PermissionError('Only portal admins and leads can update portal content')
@@ -249,7 +260,9 @@ export class DataPortalService implements IDataPortalService {
       }
     }
 
-    const propertiesToUpdate = ['name', 'description', 'status', 'sortOrder', 'content', 'editorState'];
+    await this.processDefault(input.default)
+
+    const propertiesToUpdate = ['name', 'description', 'status', 'sortOrder', 'content', 'editorState', 'default'];
 
     for (const property of propertiesToUpdate) {
       if (input.hasOwnProperty(property)) {
@@ -269,20 +282,27 @@ export class DataPortalService implements IDataPortalService {
     return this.map(portal, true)
   }
 
-  list = async(userId: number): Promise<any> => {
+  list = async(userId: number, defaultParam?: boolean): Promise<any> => {
     logger.info('DataPortalService: getting data portals for user', userId)
     let portals
 
     if (await this.hasSiteAdminRole(userId)) {
-      portals = await this.em.find(entities.DataPortal, {}, {
+      portals = await this.em.find(entities.DataPortal, {...(defaultParam && {default: defaultParam})}, {
         populate: ['space.spaceMemberships.user'],
         orderBy: {sortOrder: QueryOrder.ASC}
       })
     } else {
       portals = await this.em.find(entities.DataPortal,
-        {space: {
-            spaceMemberships: { user: userId }
-          }},
+        {
+          $and: [
+            {
+              space: {
+                spaceMemberships: {user: userId}
+              }
+            },
+            {...(defaultParam && {default: defaultParam})}
+          ]
+        },
         {
           populate: ['space.spaceMemberships.user'],
           orderBy: {sortOrder: QueryOrder.ASC}
@@ -308,7 +328,22 @@ export class DataPortalService implements IDataPortalService {
     throw new errors.NotFoundError(`DataPortal with id ${id} was not found`)
   }
 
-  private map = (portal: DataPortal, includeContent?: boolean): DataPortalParam => {
+  private getRole(role: SPACE_MEMBERSHIP_ROLE): DATA_PORTAL_MEMBER_ROLE {
+    switch (role) {
+      case SPACE_MEMBERSHIP_ROLE.ADMIN:
+        return DATA_PORTAL_MEMBER_ROLE.ADMIN
+      case SPACE_MEMBERSHIP_ROLE.LEAD:
+        return DATA_PORTAL_MEMBER_ROLE.LEAD
+      case SPACE_MEMBERSHIP_ROLE.VIEWER:
+        return DATA_PORTAL_MEMBER_ROLE.VIEWER
+      case SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR:
+        return DATA_PORTAL_MEMBER_ROLE.CONTRIBUTOR
+      default:
+        throw new errors.InternalError(`Unknown role ${role}`)
+    }
+  }
+
+  private map = (portal: DataPortal, deepMapping?: boolean): DataPortalParam => {
     const param = new DataPortalParam()
     param.id = portal.id
     param.name = portal.name
@@ -318,9 +353,19 @@ export class DataPortalService implements IDataPortalService {
     param.cardImageUrl = portal.cardImageUrl
     param.status = portal.status
     param.spaceId = portal.space.id
-    if (includeContent) {
+    param.default = portal.default
+
+    if (deepMapping) {
       param.content = portal.content
       param.editorState = portal.editorState
+
+      param.members = []
+      portal.space.getEntity().spaceMemberships.getItems().forEach(sm => {
+        const member = new DataPortalMemberParam()
+        member.dxuser = sm.user.getEntity().dxuser
+        member.role = this.getRole(sm.role)
+        param.members.push(member)
+      })
     }
 
     portal.space.getEntity().spaceMemberships.getItems().forEach(sm => {

@@ -25,6 +25,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['react', 'react-hooks', '@typescript-eslint', 'prettier'],
+  ignorePatterns: ['/src/features/lexi/**/*'],
   rules: {
     'no-shadow': 'off',
     'dot-notation': 'off',
