@@ -4,4 +4,4 @@ export { DataPortalParam, FileParam } from './service/data-portal.types'
 
 export { DataPortalService } from './service/data-portal.service'
 
-export { STATUS } from './data-portal.enum'
+export { DATA_PORTAL_STATUS } from './data-portal.enum'

@@ -12,6 +12,7 @@ import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { editDataPortalRequest } from '../api'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalForm } from './DataPortalForm'
+import { canEditSettings } from '../utils'
 
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
@@ -44,13 +45,15 @@ const EditDataPortalPage = () => {
       description: v.description,
       app_owner_id: v.app_owner_id?.value,
       status: v.status?.value,
+      default: v.default,
       host_lead_dxuser: v.host_lead_dxuser?.value,
       guest_lead_dxuser: v.guest_lead_dxuser?.value,
       image: v.card_image_file[0],
+      sort_order: v.sort_order,
     })
   }
 
-  if (!portal && isLoading) {
+  if (isLoading || !portal) {
     return <Loader />
   }
 
@@ -64,27 +67,29 @@ const EditDataPortalPage = () => {
         </BackLinkMargin>
       </StyledPageContent>
       </StyledPageCenter>
-      {user?.isAdmin ? (
+      {canEditSettings(user?.dxuser, portal.members) ? (
         <StyledPageCenter>
           <StyledPageContent>
             <PageTitle>Edit Data Portal</PageTitle>
             <DataPortalForm
+              isEditMode
               onSubmit={handleSubmit}
               defaultValues={{
-                name: portal?.name,
-                description: portal?.description,
-                card_image_uid: portal?.cardImageUid,
-                card_image_url: portal?.cardImageUrl,
+                name: portal.name,
+                description: portal.description,
+                default: portal.default,
+                card_image_uid: portal.cardImageUid,
+                card_image_url: portal.cardImageUrl,
                 host_lead_dxuser: {
-                  label: portal?.hostLeadDxuser,
-                  value: portal?.hostLeadDxuser,
+                  label: portal.hostLeadDxuser,
+                  value: portal.hostLeadDxuser,
                 },
                 guest_lead_dxuser: {
-                  label: portal?.guestLeadDxuser,
-                  value: portal?.guestLeadDxuser,
+                  label: portal.guestLeadDxuser,
+                  value: portal.guestLeadDxuser,
                 },
-                sort_order: portal?.sortOrder,
-                status: { label: portal?.status, value: portal?.status },
+                sort_order: portal.sortOrder,
+                status: { label: portal.status, value: portal.status },
               }}
             />
           </StyledPageContent>
