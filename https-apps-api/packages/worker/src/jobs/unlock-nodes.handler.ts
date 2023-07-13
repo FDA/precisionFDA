@@ -18,7 +18,7 @@ export const unlockNodesHandler = async (bullJob: Job) => {
   }
 
   try {
-    await new userFile.NodesUnlockOperation(ctx).execute({ ids })
+    await new userFile.NodesUnlockOperation(ctx).execute({ ids, async: true })
   } catch (error) {
     await job.sendJobFailedEmails(bullJob.id.toString(), ctx)
   }

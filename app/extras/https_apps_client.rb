@@ -359,9 +359,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   def nodes_lock(ids)
     request(
       "/nodes/lock",
-      {
-        ids: ids,
-      },
+      { ids: ids, async: true }, # rubocop:disable Style/HashSyntax
       Net::HTTP::Post::METHOD,
     )
   end
@@ -381,9 +379,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   def nodes_unlock(ids)
     request(
       "/nodes/unlock",
-      {
-        ids: ids,
-      },
+      { ids: ids, async: true }, # rubocop:disable Style/HashSyntax
       Net::HTTP::Post::METHOD,
     )
   end

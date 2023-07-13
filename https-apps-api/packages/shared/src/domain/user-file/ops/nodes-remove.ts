@@ -2,12 +2,12 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { BaseOperation } from '../../../utils/base-operation'
 import { UserOpsCtx } from '../../../types'
 import { Node } from '../node.entity'
-import { RemoveNodesInput } from '../user-file.input'
+import { NodesInput } from '../user-file.input'
 import { userFile } from '../..'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { getLogger } from '../../../logger'
-import { loadNodes } from '../user-file.helper'
+import { getSuccessMessage, loadNodes } from '../user-file.helper'
 import { NotificationService } from '../../notification/services/notification.service'
 
 const rollbackRemovingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
@@ -22,30 +22,12 @@ const rollbackRemovingState = async (em: SqlEntityManager, nodes: Node[]): Promi
   await em.flush()
 }
 
-const getPluralizedTerm = (itemCount: number, itemName: string): string => {
-  if (itemCount === 1) {
-    return `${itemCount.toString()} ${itemName}`
-  }
-  return `${itemCount.toString()} ${itemName}s`
-}
-
-const getSuccessMessage = (filesCount: number, foldersCount: number) => {
-  const message = 'Successfully deleted'
-  if (foldersCount > 0 && filesCount === 0) {
-    return `${message} ${getPluralizedTerm(foldersCount, 'folder')}`
-  } else if (filesCount > 0 && foldersCount === 0) {
-    return `${message} ${getPluralizedTerm(filesCount, 'file')}`
-  }
-  return `${message} ${getPluralizedTerm(filesCount, 'file')} and `
-    + `${getPluralizedTerm(foldersCount, 'folder')}`
-}
-
 /**
  * Operation removes all files and folders specified by id in input. Operation traverses
  * also through children.
  */
-class NodesRemoveOperation extends BaseOperation<UserOpsCtx, RemoveNodesInput, number> {
-  async run(input: RemoveNodesInput): Promise<number> {
+class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number> {
+  async run(input: NodesInput): Promise<number> {
     getLogger().info(input.ids, 'Removing ids')
     const em = this.ctx.em.fork()
     const nodes: Node[] = await loadNodes(em, { ids: input.ids }, {})
@@ -70,7 +52,11 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, RemoveNodesInput, n
 
       if (input.async) {
         await notificationService.createNotification({
-          message: getSuccessMessage(removedFilesCount, removedFoldersCount),
+          message: getSuccessMessage(
+            removedFilesCount,
+            removedFoldersCount,
+            'Successfully deleted',
+          ),
           severity: SEVERITY.INFO,
           action: NOTIFICATION_ACTION.NODES_REMOVED,
           userId: this.ctx.user.id,
