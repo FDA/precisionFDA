@@ -63,7 +63,7 @@ void
     log.info({
       lastDataCheckup: user.lastDataCheckup,
       now: new Date(),
-    }, 'UserCheckupOperation: Checking if user needs ')
+    }, 'UserCheckupOperation: Checking if user needs a UserDataConsistencyReport')
     const doFullCheckup = UserDataConsistencyReportOperation.doesUserNeedFullCheckup(user)
     if (doFullCheckup) {
       UserDataConsistencyReportOperation.enqueue(userCtx)
