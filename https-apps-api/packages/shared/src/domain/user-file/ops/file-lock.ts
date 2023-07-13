@@ -4,7 +4,6 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { BaseOperation } from '../../../utils'
 import { getNodePath } from '../user-file.helper'
-import { errors } from '@pfda/https-apps-shared'
 
 class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
   async run(input: IdInput): Promise<void> {
@@ -17,6 +16,8 @@ class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
     try {
       await em.begin()
       const filePath = await getNodePath(em, fileToLock)
+      fileToLock.locked = true
+      await em.persistAndFlush(fileToLock)
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_LOCKED,
         fileToLock,
@@ -24,8 +25,7 @@ class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
         currentUser,
       )
       em.persist(fileEvent)
-      fileToLock.locked = true
-      await em.persistAndFlush(fileToLock)
+
       await em.commit()
       this.ctx.log.info({ fileName: fileToLock.name }, 'Locked file')
     } catch (err) {

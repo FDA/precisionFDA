@@ -4,6 +4,24 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
+  # Gets active users' usernames
+  def active_users
+    request(
+      "/users/active",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Gets government users' usernames
+  def government_users
+    request(
+      "/users/government",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # Create resource for data portal
   # @param opts data about resource
   def data_portal_create_resource(portal_id, opts)
@@ -77,11 +95,12 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   # Gets list of available data portals
-  def data_portals_list
+  def data_portals_list(default)
     request(
       "/data-portals",
       {},
       Net::HTTP::Get::METHOD,
+      default ? { default: } : {},
     )
   end
 
@@ -359,9 +378,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   def nodes_lock(ids)
     request(
       "/nodes/lock",
-      {
-        ids: ids,
-      },
+      { ids: ids, async: true }, # rubocop:disable Style/HashSyntax
       Net::HTTP::Post::METHOD,
     )
   end
@@ -381,9 +398,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   def nodes_unlock(ids)
     request(
       "/nodes/unlock",
-      {
-        ids: ids,
-      },
+      { ids: ids, async: true }, # rubocop:disable Style/HashSyntax
       Net::HTTP::Post::METHOD,
     )
   end

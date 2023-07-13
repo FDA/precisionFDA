@@ -12,6 +12,7 @@
 #  card_image_id        :string(255)
 #  sort_order           :integer
 #  status               :string(255)
+#  default              :boolean
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
 class DataPortal < ApplicationRecord

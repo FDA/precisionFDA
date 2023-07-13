@@ -32,7 +32,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
-  layout "react", only: %i(about index news terms security)
+  layout "react", only: %i(about index news terms security data_portals)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -178,6 +178,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   def about; end
+
+  def data_portals; end
 
   def guidelines; end
 

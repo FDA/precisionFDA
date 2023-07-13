@@ -65,6 +65,6 @@
     "pino-pretty": "^9.1.1",
     "ramda": "^0.27.1",
     "redis": "^4.3.1",
-    "tough-cookie": "^4.1.2"
+    "tough-cookie": "^4.1.3"
   }
 }

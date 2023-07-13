@@ -110,7 +110,8 @@ router.get(
   async ctx => {
     const userClient = new client.PlatformClient(ctx.user?.accessToken!, ctx.log)
     const dataPortalService = new dataPortal.DataPortalService(ctx.em, userClient)
-    const res = await dataPortalService.list(ctx.user!.id)
+    const defaultParam = ctx.query.default === 'true'
+    const res = await dataPortalService.list(ctx.user!.id, defaultParam)
     ctx.body = res
     ctx.status = 200
   },

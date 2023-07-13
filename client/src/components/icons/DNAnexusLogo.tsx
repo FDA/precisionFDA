@@ -22,7 +22,7 @@ export const DNAnexusLogo = ({ width, height = 16 }: { width?: number, height?: 
   </Svg>
 )
 
-const StyledLogo = styled.div<{ opacity: boolean }>`
+const StyledLogo = styled.div<{ isOpacity?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -31,7 +31,7 @@ const StyledLogo = styled.div<{ opacity: boolean }>`
   width: fit-content;
   margin-top: -3px;
   
-  ${({ opacity }) => opacity && css`
+  ${({ isOpacity }) => isOpacity && css`
     transition: opacity 0.2s linear 0.2s;
     opacity: 0.3;
     &:hover {
@@ -45,10 +45,10 @@ const Lite = styled.div`
   font-size: 12px;
 `
 
-export const HoverDNAnexusLogo = (props: any) => (
-  <StyledLogo opacity={props.opacity} as="a" href="https://www.dnanexus.com/" target="_blank" rel="noreferrer">
+export const HoverDNAnexusLogo = ({ opacity, ...rest }: { opacity?: boolean, width?: number, height?: number }) => (
+  <StyledLogo isOpacity={opacity} as="a" href="https://www.dnanexus.com/" target="_blank" rel="noreferrer">
     <Lite>Powered by</Lite>
-    <DNAnexusLogo {...props} />
+    <DNAnexusLogo {...rest} />
   </StyledLogo>
 )
 
