@@ -16,7 +16,7 @@ import { User } from '../user'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { JobRepository } from './job.repository'
 import { Provenance } from './job.input'
-import { getIdFromScopeName, isValidScopeName } from '../space/space.helper'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { formatDuration } from '../../utils/format'
 
@@ -137,7 +137,7 @@ export class Job extends BaseEntity {
   }
 
   isSpaceScope(): boolean {
-    return isValidScopeName(this.scope)
+    return scopeContainsId(this.scope)
   }
 
   getSpaceId(): number | undefined {

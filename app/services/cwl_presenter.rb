@@ -2,7 +2,8 @@ class CwlPresenter
   extend ActiveModel::Translation
   include ActiveModel::Validations
 
-  VALID_TYPES = %w(string long File boolean double int)
+  VALID_TYPES = %w(string long File boolean double int).freeze
+  # VALID_TYPES = %w(string long File boolean double int array)
 
   validates :id,
     format: {

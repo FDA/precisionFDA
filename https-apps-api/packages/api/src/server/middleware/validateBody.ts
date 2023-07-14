@@ -32,7 +32,7 @@ export function validateParamsMiddleware(schema: z.Schema) {
     try {
       const parsedParmas = await schema.parseAsync(params);
       ctx.validatedParams = parsedParmas;
-    } catch (error) {
+    } catch (error: any) {
       ctx.log.warn(
         {
           url: ctx.request.url,
