@@ -5,6 +5,7 @@ import { database } from '../../../src/database'
 import { Asset, User } from '../../../src/domain'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { FILE_STATE_DX } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '../../../src/enums'
 
 describe('AssetRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -80,5 +81,39 @@ describe('AssetRepository tests', () => {
     expect(result).to.have.length(1)
     resultUids = result.map(x => x.uid)
     expect(resultUids).to.deep.equal([assets[5].uid])
+  })
+
+  it('findAccessibleByUser', async () => {
+    // prepare assets for user1 - should appear in results
+    // in public scope - yes
+    assets[0].scope = STATIC_SCOPE.PUBLIC.toString()
+    // in private scope for user1 - yes
+    assets[1].scope = STATIC_SCOPE.PRIVATE.toString()
+    // in private scope for different user - no
+    assets[5].scope = STATIC_SCOPE.PRIVATE.toString()
+    // in space the user has membership - yes
+    const space1 = create.spacesHelper.create(em, {name: 'space1'})
+    create.spacesHelper.addMember(em, {space: space1, user: user1})
+    await em.flush()
+    assets[2].scope = space1.uid
+    // in space that the user has no membership - no
+    const space2 = create.spacesHelper.create(em, {name: 'space2'})
+    create.spacesHelper.addMember(em, {space: space2, user: user2})
+    await em.flush()
+    assets[3].scope = space2.uid
+    await em.flush()
+
+    // get ids for all assets (test filtering)
+    const uids = assets.map(asset => asset.uid)
+    const repo = em.getRepository(Asset)
+    let result = await repo.findAccessibleByUser(user1.id, uids)
+
+    expect(result.length).to.equal(4)
+    const publicAsset = result.filter(asset => asset.scope === STATIC_SCOPE.PUBLIC.toString())[0]
+    expect(publicAsset.name).to.equal('user1_asset1')
+    const privateAssets = result.filter(asset => asset.scope === STATIC_SCOPE.PRIVATE.toString())
+    expect(privateAssets.length).to.equal(2)
+    const spaceAsset = result.filter(asset => asset.scope === 'space-1')[0]
+    expect(spaceAsset.name).to.equal('user1_asset3')
   })
 })

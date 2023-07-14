@@ -51,7 +51,7 @@ export class NotificationService implements INotificationService {
    * Returns notifications for current user that have empty deliveredAt flag.
    */
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
-    logger.info(`NotificationService: getting unread notifications for user id: {userId}`)
+    logger.info(`NotificationService: getting unread notifications for user id: ${userId}`)
     const unread = await this.em.find(Notification, { user: userId, deliveredAt: null })
     return unread
   }

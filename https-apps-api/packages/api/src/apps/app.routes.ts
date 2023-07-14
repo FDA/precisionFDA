@@ -4,7 +4,7 @@ import {
   job as jobDomain,
   utils,
   entities,
-  client, license as licenseDomain } from '@pfda/https-apps-shared'
+  client, app as appDomain, license as licenseDomain } from '@pfda/https-apps-shared'
 import { RunAppInput } from '@pfda/https-apps-shared/src/domain/job/job.input'
 import { App } from '@pfda/https-apps-shared/src/domain'
 import {
@@ -13,11 +13,29 @@ import {
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
+import { AppInput } from '@pfda/https-apps-shared/src/domain/app/app.input'
+import { makeValidateUserContextMdw } from '../server/middleware/user-context'
 
 // Routes with /apps prefix
 const router = new Router<DefaultState, Api.Ctx>()
 
 router.use(defaultMiddlewares)
+router.use(makeValidateUserContextMdw())
+
+router.post(
+  '/',
+  makeSchemaValidationMdw({
+    body: appDomain.inputs.saveAppSchema,
+  }),
+  async (ctx: Api.Ctx) => {
+    const body = ctx.request.body as AppInput
+    const platformClient = new client.PlatformClient(ctx.user!.accessToken)
+    const appService = new appDomain.AppService(ctx.em, platformClient)
+    const res = await appService.create(body, ctx.user!.id)
+    ctx.body = res
+    ctx.status = 200
+  },
+)
 
 router.get(
   '/:appDxId/licenses-to-accept',
@@ -80,8 +98,6 @@ router.get(
 )
 
 function constructResponse(platformAppData: AppDescribeResponse, app: App) {
-  const specObject = JSON.parse(app.spec)
-
   const result = {
     ...platformAppData,
     dxid: platformAppData.id,
@@ -92,8 +108,8 @@ function constructResponse(platformAppData: AppDescribeResponse, app: App) {
     'created-at': app.createdAt,
     'updated-at': app.updatedAt,
     'added-by': app.user.getProperty('dxuser'),
-    'internet-access': specObject.internet_access,
-    'instance-type': specObject.instance_type,
+    'internet-access': app.spec.internet_access,
+    'instance-type': app.spec.instance_type,
   }
 
   return result

@@ -4,7 +4,7 @@ import { difference, intersection, isNil, uniqBy } from 'ramda'
 import { Asset, entities, Node, Space, User, UserFile } from '..'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
-import { getIdFromScopeName, isValidScopeName } from '../space/space.helper'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { STATIC_SCOPE } from '../../enums'
 import { AssetRepository } from './asset.repository'
 import { Folder } from './folder.entity'
@@ -319,13 +319,8 @@ const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Prom
  * @param userId current user
  * @param node node that is being verified
  */
-const validateProtectedSpaces = async (
-  em: SqlEntityManager,
-  action: string,
-  userId: number,
-  node: Node,
-) => {
-  if (isValidScopeName(node.scope)) {
+const validateProtectedSpaces = async (em: SqlEntityManager, action: string, userId: number, node: Node) => {
+  if (scopeContainsId(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
     const space = await em.findOneOrFail(Space, spaceId, {
       populate: ['spaceMemberships', 'spaceMemberships.user'],
@@ -364,7 +359,7 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
   ) {
     return
   }
-  if (isValidScopeName(node.scope)) {
+  if (scopeContainsId(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
     const space = await em.findOne(entities.Space, {
       id: spaceId,
@@ -384,7 +379,7 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
 
 const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUser: User) => {
   for (const node of nodes) {
-    if (isValidScopeName(node.scope)) {
+    if (scopeContainsId(node.scope)) {
       const spaceId = getIdFromScopeName(node.scope)
       const space = await em.findOneOrFail(Space, spaceId, {
         populate: ['spaceMemberships', 'spaceMemberships.user'],

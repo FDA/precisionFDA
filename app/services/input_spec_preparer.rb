@@ -11,6 +11,27 @@ class InputSpecPreparer
     @errors = []
   end
 
+  def validate_file(key, uid, accessible_scopes)
+    unless uid.is_a?(String)
+      add_error "#{key}: input file value is not a string"
+      return
+    end
+    file = UserFile.real_files.accessible_by(@context).find_by(uid:)
+    unless file
+      add_error "#{key}: input file is not accessible or does not exist"
+      return
+    end
+
+    if accessible_scopes&.exclude?(file.scope)
+      add_error "#{key}: input file is not accessible to this space"
+      return
+    end
+
+    add_error "#{key}: input file's license must be accepted" unless file.license.blank? || file.licensed_by?(@context)
+
+    file
+  end
+
   def run(app, inputs, accessible_scopes = nil)
     @errors = []
     input_info = InputInfo.new
@@ -43,24 +64,16 @@ class InputSpecPreparer
 
       case klass
       when "file"
-        unless value.is_a?(String)
-          add_error "#{key}: input file value is not a string"
-          next
-        end
-        file = UserFile.real_files.accessible_by(@context).find_by_uid(value)
-        unless file
-          add_error "#{key}: input file is not accessible or does not exist"
-          next
-        end
-
-        if accessible_scopes && !accessible_scopes.include?(file.scope)
-          add_error "#{key}: input file is not accessible to this space"
-          next
-        end
-
-        add_error "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-        dxvalue = {"$dnanexus_link" => file.dxid}
+        file = validate_file(key, value, accessible_scopes)
+        dxvalue = { "$dnanexus_link" => file.dxid }
         input_info.push_file(file)
+      when "array:file"
+        dxvalue = []
+        value.each do |uid|
+          file = validate_file(key, uid, accessible_scopes)
+          dxvalue << { "$dnanexus_link" => file.dxid }
+          input_info.push_file(file)
+        end
       when "int"
         add_error "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
         value = value.to_i

@@ -4,6 +4,7 @@ import { App, Job, User } from 'shared/src/domain'
 import { database, } from '@pfda/https-apps-shared'
 import { create, db, generate } from 'shared/src/test'
 import { JOB_STATE } from 'shared/src/domain/job/job.enum'
+import { Internal } from '../../../src/domain/app/app.entity'
 
 describe('app.entity tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -59,20 +60,14 @@ describe('app.entity tests', () => {
     expect(httpsAppWithAPI.workstationAPITag).to.equal('pfda_workstation_api:1.0.0')
     expect(httpsAppWithAPI.workstationAPIVersion).to.equal('1.0.0')
 
-    httpsAppWithAPI.internal = JSON.stringify({
+    httpsAppWithAPI.internal = {
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
       platform_tags: ['pfda_workstation_api:3.2.1'],
       packages: ['ipython', 'pkg-config'],
-    })
+    } as Internal
     await em.fork().flush()
     expect(httpsAppWithAPI.workstationAPITag).to.equal('pfda_workstation_api:3.2.1')
     expect(httpsAppWithAPI.workstationAPIVersion).to.equal('3.2.1')
-  })
-
-  it('workstationAPITag returns undefined with malformed internal', async () => {
-    httpsAppWithAPI.internal = JSON.stringify('not a JSON')
-    await em.fork().flush()
-    expect(httpsAppWithAPI.workstationAPIVersion).to.equal(null)
   })
 
   it('workstationAPITag / hasWorkstationAPI / workstationAPIVersion does not work with HTTPS app with no workstation API', async () => {
