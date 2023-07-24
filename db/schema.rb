@@ -259,15 +259,6 @@ ActiveRecord::Schema.define(version: 2023_07_13_082632) do
     t.index ["space_id"], name: "fk_rails_59bf9507a5"
   end
 
-  create_table "data_portals_resources", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.bigint "data_portal_id"
-    t.bigint "resource_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["data_portal_id"], name: "index_data_portals_resources_on_data_portal_id"
-    t.index ["resource_id"], name: "index_data_portals_resources_on_resource_id"
-  end
-
   create_table "dbclusters", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "dxid", collation: "utf8_bin"
     t.string "name", null: false
