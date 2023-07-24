@@ -26,6 +26,7 @@ class FolderUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
         user,
       )
       folderToUnlock.locked = false
+      folderToUnlock.state = null
       await em.persistAndFlush(folderEvent)
       await em.commit()
       this.ctx.log.info({ folderName: folderToUnlock.name }, 'Unlocked folder')

@@ -26,6 +26,7 @@ class FolderLockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
         user,
       )
       folderToLock.locked = true
+      folderToLock.state = null
       await em.persistAndFlush(folderEvent)
       await em.commit()
       this.ctx.log.info({ folderName: folderToLock.name }, 'Locked folder')
