@@ -222,10 +222,10 @@ export class ClientRequestError extends BaseError {
 }
 
 export class ServiceError extends BaseError {
-  constructor(message: string, props: ClientErrorProps) {
+  constructor(message: string, props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.EXTERNAL_SERVICE_ERROR,
-      statusCode: 400,
+      statusCode: 400, // TODO shouldn't this be HTTP 500?
       ...props,
     })
   }

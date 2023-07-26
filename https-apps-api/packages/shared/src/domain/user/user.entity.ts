@@ -29,7 +29,7 @@ export enum USER_STATE {
 }
 
 export const RESOURCE_TYPES = [
-  // Compute instancess
+  // Compute instances
   'baseline-2',
   'baseline-4',
   'baseline-8',
@@ -204,6 +204,10 @@ export class User extends BaseEntity {
       Array.from(spaceMembership.spaces).forEach(space => spaceUids.push(`space-${space.id}`))
     })
     return spaceUids
+  }
+
+  username(): string {
+    return this.dxuser
   }
 
   isMemberOfSpace(spaceUid: string): boolean {

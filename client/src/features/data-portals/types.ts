@@ -9,6 +9,7 @@ export interface DataPortal {
   id: number
   name: string
   description: string
+  default: boolean
   sortOrder: number
   cardImageUid: string
   cardImageUrl: string

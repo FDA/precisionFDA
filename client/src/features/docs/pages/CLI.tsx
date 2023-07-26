@@ -41,7 +41,7 @@ export const CLI = () => {
 
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.4.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.4.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -50,7 +50,7 @@ export const CLI = () => {
             </ButtonSolidBlue>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.4.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.4.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -59,7 +59,7 @@ export const CLI = () => {
             </ButtonSolidBlue>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.4.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.4.1.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -485,6 +485,7 @@ export const CLI = () => {
         <hr/>
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
+        <p>Version 2.4.1 (07/20/2023): Fixed folder id manipulation</p>
         <p>Version 2.4 (05/25/2023): New features: get-space-id, upload-file stdin input</p>
         <p>Version 2.3 (03/08/2023): New features: mkdir, rm, rmdir, head, tail</p>
         <p>Version 2.2.1 (12/20/2022): ls output improvements, added -overwrite flag for download.</p>

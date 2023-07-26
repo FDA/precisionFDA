@@ -21,7 +21,7 @@ import {
   ChallengeOpenedTemplateInput,
 } from '../mjml/challenge-opened.template'
 import { InternalError } from '../../../../errors'
-import { getIdFromScopeName, isValidScopeName } from '../../../space/space.helper'
+import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
 
 export class ChallengeOpenedEmailHandler
   extends BaseTemplate<ChallengeOpened>
@@ -45,7 +45,7 @@ export class ChallengeOpenedEmailHandler
     if (this.challenge.scope === STATIC_SCOPE.PUBLIC) {
       // all active users
       users = await userRepo.findActive({ populate: ['notificationPreference'] as never[] })
-    } else if (isValidScopeName(this.challenge.scope)) {
+    } else if (scopeContainsId(this.challenge.scope)) {
       // find space, memberships, inform only those users
       const spaceId = getIdFromScopeName(this.challenge.scope)
       const memberships = await this.ctx.em.find(

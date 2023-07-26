@@ -2,7 +2,7 @@ import { User, userFile } from '../..'
 import { BaseOperation } from '../../../utils'
 import { Node } from '../node.entity'
 import { NodesInput } from '../user-file.input'
-import { FILE_STI_TYPE } from '../user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { errors, getLogger } from '../../..'
 import { UserOpsCtx } from '../../../types'
 import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
@@ -14,6 +14,7 @@ const rollbackLockingState = async (em: SqlEntityManager, nodes: Node[]): Promis
   getLogger().error(`Rolling back locking state for ${nodes.length} nodes`)
   nodes.forEach(node => {
     node.locked = false
+    node.state = FILE_STATE_DX.CLOSED
   })
   await em.flush()
 }

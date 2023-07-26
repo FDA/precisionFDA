@@ -16,7 +16,6 @@ module Api
 
     skip_before_action :require_api_login, only: %i(everybody featured)
     before_action :require_api_login_or_guest, only: %i(everybody featured describe)
-    before_action :validate_app, only: :create
     before_action :can_copy_to_scope?, only: %i(copy)
     before_action :user_notes_objects, only: %i(index spaces everybody)
 
@@ -232,14 +231,10 @@ module Api
     # id (string, only on success): the id of the created app, if success
     # failure (string, only on failure): a message that can be shown to the user due to failure
     def create
-      app = create_app(unsafe_params)
-
-      render json: { id: app.uid }
-    rescue DXClient::Errors::ChargesMismatchError, DXClient::Errors::DXClientError => e
-      render json: { error: { message: e.message } }, status: :unprocessable_entity
-    rescue StandardError => e
-      logger.error([e.message, e.backtrace.join("\n")].join("\n"))
-      render json: { error: { message: I18n.t("error_default") } }, status: :unprocessable_entity
+      app_uid = https_apps_client.app_save(unsafe_params)
+      render json: { id: app_uid }
+    rescue Net::HTTPClientException => e
+      render status: e.response.code, json: e.response.body
     end
 
     def import

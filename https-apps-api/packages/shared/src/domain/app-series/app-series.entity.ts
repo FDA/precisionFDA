@@ -15,34 +15,36 @@ export class AppSeries extends BaseEntity {
   id: number
 
   @Property()
-  dxid: string
+  dxid?: string
 
   @Property()
-  name: string
+  name?: string
 
   @Property()
-  latestRevisionAppId: number
+  latestRevisionAppId?: number
 
   @Property()
-  latestVersionAppId: number
+  latestVersionAppId?: number
 
   @Property()
-  scope: string
+  scope?: string
 
   @Property()
   verified: boolean
 
   @Property()
-  featured: boolean
+  featured?: boolean
 
   @Property()
   deleted: boolean
 
   @ManyToOne({ entity: () => User, serializedName: 'userId' })
-  user!: IdentifiedReference<User>
+  user?: IdentifiedReference<User>
 
-  constructor(user: User) {
+  constructor(user?: User) {
     super()
-    this.user = Reference.create(user)
+    if (user) {
+      this.user = Reference.create(user)
+    }
   }
 }

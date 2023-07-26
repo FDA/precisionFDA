@@ -117,8 +117,14 @@ module JobsSyncing
         output_file_ids = []
         output_file_cache = []
         output.each_key do |key|
-          # TODO: handle arrays later
-          raise if output[key].is_a?(Array)
+          if output[key].is_a?(Array)
+            output[key].each do |file_item|
+              if file_item.is_a?(Hash)
+                output_file_id = file_item["$dnanexus_link"]
+                output_file_ids << output_file_id
+              end
+            end
+          end
           next unless output[key].is_a?(Hash)
           raise unless output[key].key?("$dnanexus_link")
 

@@ -34,6 +34,20 @@ class Job::IOCollection::Input
     UserFile.find_by(uid: value)
   end
 
+  def files?
+    klass == "array:file"
+  end
+
+  def files
+    return nil unless files?
+
+    file_values = []
+    value.each do |value_item|
+      file_values << UserFile.find_by(uid: value_item)
+    end
+    file_values
+  end
+
   private
 
   attr_reader :spec, :options

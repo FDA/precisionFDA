@@ -125,6 +125,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Save an app.
+  # @param opts app data.
+  def app_save(opts)
+    request(
+      "/apps",
+      opts,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   # Run an app.
   # @param app_dxid [String] App dxid.
   # @param opts [Hash] Request body options.

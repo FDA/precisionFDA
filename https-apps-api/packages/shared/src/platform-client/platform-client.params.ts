@@ -1,4 +1,5 @@
 import { AnyObject } from '../types'
+import { PlatformSpec} from '../domain/app/app.input'
 
 type Starting = {
   project: string
@@ -12,6 +13,48 @@ interface IPaginatedParams {
 
 type JobDescribeParams = { jobId: string }
 type JobTerminateParams = { jobId: string }
+
+type PackageMapping = {
+  name: string,
+  packageManager?: string,
+  version?: string,
+  stages?: string[],
+}
+
+type RunSpec = {
+  code: string,
+  interpreter: string,
+  systemRequirements: any,
+  distribution: string,
+  release: string,
+  execDepends: PackageMapping[],
+}
+
+type AppletCreateParams = {
+  project?: string,
+  name?: string,
+  title?: string,
+  inputSpec: PlatformSpec[],
+  outputSpec: PlatformSpec[],
+  runSpec: RunSpec,
+  dxapi: string,
+  access: any,
+}
+
+type AppCreateParams = {
+  applet: string, // deprecated field!
+  name?: string,
+  title?: string,
+  summary?: string,
+  description?: string,
+  version: string,
+  resources?: string[], // deprecated field!
+  details?: any,
+  openSource?: boolean,
+  billTo?: string,
+  access?: any,
+
+}
 
 type JobCreateParams = {
   appId: string
@@ -137,6 +180,10 @@ type DbClusterDescribeParams = {
 
 type DbClusterActionParams = { dxid: string }
 
+type ObjectsParams = {
+  objects: string[]
+}
+
 type DescribeDataObjectsParams = {
   objects: Array<string | Record<string, string>>
 }
@@ -179,6 +226,10 @@ type WorkflowDescribeParams = {
 }
 
 export {
+  AppletCreateParams,
+  AppCreateParams,
+  ObjectsParams,
+  PackageMapping,
   Starting,
   IPaginatedParams,
   FileCloseParams,

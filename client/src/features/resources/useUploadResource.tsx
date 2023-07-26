@@ -8,15 +8,11 @@ import {
   createResourceLinkRequest,
   useCreateResourceMutation,
 } from './useCreateResource'
+import { getExt, isImageFromExt } from './util'
+import { FileIcon } from '../../components/icons/FileIcon'
+import { FileThumb } from './styles'
+import { FileWithPreview } from './types'
 
-type FileWithPreview = {
-  rid: string
-  file: File
-  preview: string
-  originalName: string
-  customName: string
-  uploadStatus: 'pending' | 'uploading' | 'uploaded' | 'linking'
-}
 
 // Convert file to base64
 const toBase64 = (file: File) =>
@@ -64,14 +60,15 @@ export const useUploadResource = ({
     if (files) {
       const fileWithPreviewArray: FileWithPreview[] = []
       for (let i = 0; i < files.length; i++) {
+        const { name } = files[i]
         // eslint-disable-next-line no-await-in-loop
         const preview = await toBase64(files[i])
         fileWithPreviewArray.push({
           rid: crypto.randomUUID(),
           file: files[i],
           preview,
-          originalName: files[i].name,
-          customName: files[i].name,
+          originalName: name,
+          customName: name,
           uploadStatus: 'pending',
         })
       }
@@ -149,10 +146,16 @@ export const Item = ({
   index,
   removeItemByIndex,
   handleNameChange,
-}: any) => {
+}: {
+  file: FileWithPreview,
+  disabled: boolean
+  index: string | number
+  removeItemByIndex: any
+  handleNameChange: any
+}) => {
   return (
     <FileRow key={file.rid}>
-      <Image src={file.preview} alt={file.name} width="100" />
+      {isImageFromExt(getExt(file.originalName)) ? <Image src={file.preview} alt="resource item" width="100" /> : <FileThumb><FileIcon height={80} /><div className="ext">{getExt(file.originalName)}</div></FileThumb>}
       <Info>
         <Status>
           <b>Upload Status:</b> {file.uploadStatus}

@@ -9,7 +9,7 @@ import {
   OneToMany,
   Enum,
   ManyToMany,
-  EntityRepositoryType,
+  EntityRepositoryType, JsonType,
 } from '@mikro-orm/core'
 import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'
@@ -18,9 +18,40 @@ import { Asset } from '../user-file'
 import { User } from '../user/user.entity'
 import { ENTITY_TYPE } from './app.enum'
 import { AppRepository } from './app.repository'
-
+import { Spec } from './app.input'
+import { isNil } from 'ramda'
 
 const logger = getLogger('app.entity')
+
+export class AppSpec extends JsonType {
+  input_spec: Spec[]
+  output_spec: Spec[]
+  internet_access: boolean
+  instance_type: string
+
+  convertToJSValue(value: string | null) {
+    if (isNil(value)) {
+      return value
+    }
+
+    return JSON.parse(value)
+  }
+}
+
+export class Internal extends JsonType {
+  ordered_assets?: string[]
+  packages: string[]
+  code: string
+  platform_tags?: string[]
+
+  convertToJSValue(value: string | null) {
+    if (isNil(value)) {
+      return value
+    }
+
+    return JSON.parse(value)
+  }
+}
 
 @Entity({ tableName: 'apps', customRepository: () => AppRepository })
 export class App extends BaseEntity {
@@ -43,13 +74,13 @@ export class App extends BaseEntity {
   readme: string
 
   @Property()
-  scope: string
+  scope?: string
 
-  @Property()
-  spec: string
+  @Property({ type: AppSpec })
+  spec: AppSpec
 
-  @Property()
-  internal: string
+  @Property({ type: Internal })
+  internal: Internal
 
   @Property()
   verified: boolean
@@ -62,6 +93,9 @@ export class App extends BaseEntity {
 
   @Property()
   release: string
+
+  @Property()
+  forkedFrom: string | null
 
   // foreign keys -> not yet mapped
   @Property()
@@ -100,9 +134,9 @@ export class App extends BaseEntity {
     }
 
     try {
-      const parsedInternal = JSON.parse(this.internal)
-      if (parsedInternal.platform_tags) {
-        return parsedInternal.platform_tags.find((x: string) => x.startsWith('pfda_workstation_api'))
+      if (this.internal.platform_tags) {
+        const workstationApi = this.internal.platform_tags.find((x: string) => x.startsWith('pfda_workstation_api'))
+        return workstationApi ? workstationApi : null
       }
     } catch (err) {
       logger.error('Unable to parse workstation API tag', {

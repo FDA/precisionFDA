@@ -36,6 +36,7 @@ import { SyncFilesStateOperation } from '../domain/user-file'
 import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 import { USER_STATE } from '../domain/user/user.entity'
 import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
+import { AppSpec, Internal } from '../domain/app/app.entity'
 
 const chance = new Chance()
 
@@ -69,69 +70,70 @@ const user = {
 }
 
 const app = {
-  jupyterAppSpecData: () =>
-    JSON.stringify({
+    jupyterAppSpecData: () => {
+    return {
       internet_access: true,
       instance_type: 'baseline-2',
-      output_spec: [],
-      input_spec: [
-        {
-          name: 'duration',
-          class: 'int',
-          default: 240,
-          label: 'Duration',
-          help:
-            '(Optional) Initial duration of the JupyterLab interactive environment in minutes. Ignored when cmd argument is specified.',
-          optional: true,
-        },
-        {
-          name: 'imagename',
-          class: 'string',
-          label: 'Image name',
-          help:
-            '(Optional) Name of a Docker image, available in a Docker registry (e.g. DockerHub, Quay.io),',
-          optional: true,
-        },
-        {
-          name: 'snapshot',
-          class: 'file',
-          label: 'Snapshot',
-          help: '(Optional) Snapshot of the JupyterLab Docker environment.',
-          optional: true,
-          patterns: ['*.tar.gz', '*.tar'],
-        },
-        {
-          name: 'in',
-          class: 'array:file',
-          label: 'Input files',
-          help: '(Optional) Input files. If cmd is not provided this option is ignored.',
-          optional: true,
-        },
-        {
-          name: 'cmd',
-          class: 'string',
-          label: 'Command line',
-          help:
-            '(Optional) Command to execute in the JupyterLab environment. View the app Readme for details.',
-          optional: true,
-        },
-        {
-          name: 'feature',
-          class: 'string',
-          default: 'PYTHON_R',
-          label: 'Feature',
-          help:
-            'Additional features needed in the JupyterLab environment. See Readme for more information. When a Docker environment snapshot is provided this choice is ignored.',
-          optional: true,
-          choices: ['PYTHON_R', 'ML_IP'],
-        },
-      ],
-    }),
-  ttydAppSpecData: () =>
-    JSON.stringify({
+      input_spec:
+        [
+          {
+            name: 'duration',
+            class: 'int',
+            default: 240,
+            label: 'Duration',
+            help:
+              '(Optional) Initial duration of the JupyterLab interactive environment in minutes. Ignored when cmd argument is specified.',
+            optional: true,
+          },
+          {
+            name: 'imagename',
+            class: 'string',
+            label: 'Image name',
+            help:
+              '(Optional) Name of a Docker image, available in a Docker registry (e.g. DockerHub, Quay.io),',
+            optional: true,
+          },
+          {
+            name: 'snapshot',
+            class: 'file',
+            label: 'Snapshot',
+            help: '(Optional) Snapshot of the JupyterLab Docker environment.',
+            optional: true,
+            patterns: ['*.tar.gz', '*.tar'],
+          },
+          {
+            name: 'in',
+            class: 'array:file',
+            label: 'Input files',
+            help: '(Optional) Input files. If cmd is not provided this option is ignored.',
+            optional: true,
+          },
+          {
+            name: 'cmd',
+            class: 'string',
+            label: 'Command line',
+            help:
+              '(Optional) Command to execute in the JupyterLab environment. View the app Readme for details.',
+            optional: true,
+          },
+          {
+            name: 'feature',
+            class: 'string',
+            default: 'PYTHON_R',
+            label: 'Feature',
+            help:
+              'Additional features needed in the JupyterLab environment. See Readme for more information. When a Docker environment snapshot is provided this choice is ignored.',
+            optional: true,
+            choices: ['PYTHON_R', 'ML_IP'],
+          },
+        ],
+    } as AppSpec
+  },
+  ttydAppSpecData: () => {
+    return {
       internet_access: true,
       instance_type: 'baseline-2',
-      output_spec: [],
+      // output_spec: [],
       input_spec: [
         {
           name: 'port',
@@ -143,18 +145,21 @@ const app = {
           choices: [443, 8081, 8080],
         },
       ],
-  }),
-  ttydAppInternal: () =>
-    JSON.stringify({
+    } as AppSpec
+  },
+  ttydAppInternal: () => {
+    return {
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
       packages: ['ipython', 'pkg-config'],
-    }),
-  ttydAppInternalWithAPI: (version: string) =>
-    JSON.stringify({
+    } as Internal
+  },
+  ttydAppInternalWithAPI: (version: string) => {
+    return {
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
       platform_tags: [`pfda_workstation_api:${version}`],
       packages: ['ipython', 'pkg-config'],
-    }),
+    } as Internal
+  },
   regular: (): Partial<InstanceType<typeof entities.App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
@@ -195,8 +200,21 @@ const app = {
       scope: 'public',
       entityType: ENTITY_TYPE.HTTPS,
       release: 'default-release-value',
-      spec:
-        '{"input_spec":[{"name":"app_gz","class":"file","label":"Gzip archive of Shiny app containing R script(s)","help":"","optional":false,"patterns":["*.tar.gz"]}],"output_spec":[],"internet_access":true,"instance_type":"baseline-4"}',
+      spec: {
+        input_spec: [
+          {
+            name: 'app_gz',
+            class: 'file',
+            label: 'Gzip archive of Shiny app containing R script(s)',
+            help: '',
+            optional: false,
+            patterns: ['*.tar.gz'],
+          }
+        ],
+        output_spec: [],
+        internet_access: true,
+        instance_type: 'baseline-4'
+      }
     }
   },
   runAppInput: (): AnyObject => ({
