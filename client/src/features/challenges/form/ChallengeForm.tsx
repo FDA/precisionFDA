@@ -97,6 +97,7 @@ export const ChallengeForm = ({
     setError,
     watch,
     formState: { errors, isSubmitting, dirtyFields },
+    trigger,
   } = useForm<CreateChallengeForm>({
     mode: 'onBlur',
     resolver: yupResolver(
@@ -324,7 +325,10 @@ export const ChallengeForm = ({
                 <StatusSelect
                   isEditing={isEditMode}
                   isSubmitting={isSubmitting}
-                  onChange={onChange}
+                  onChange={(e) => {
+                    onChange(e)
+                    trigger()
+                  }}
                   onBlur={onBlur}
                   value={value}
                 />
