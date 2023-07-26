@@ -1,7 +1,7 @@
 import React from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Loader } from '../../../components/Loader'
+import { Button } from '../../../components/Button'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import {
   ListItem,
@@ -11,17 +11,12 @@ import {
   RightSide,
   RightSideItem,
 } from '../../../components/Public/styles'
-import { UserLayout } from '../../../layouts/UserLayout'
 import { CardDetails, DataPortalCard, StyledCard } from '../DataPortalCard'
-import { useDataPortalByIdQuery } from '../queries'
 import { DataPortal } from '../types'
-import { AlertText, DataPortalNotFound } from './DataPortalNotFound'
-import { Button } from '../../../components/Button'
-import { useAuthUser } from '../../auth/useAuthUser'
+import { AlertText } from './DataPortalNotFound'
 
-import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { theme } from '../../../styles/theme'
-import { canEditSettings as canEditSettingsCheck, canEditContent as canEditContentCheck } from '../utils'
+import '../../lexi/themes/PlaygroundEditorTheme.css'
 
 const StyledPageRow = styled.div`
   display: flex;
@@ -47,6 +42,10 @@ const StyledPageRow = styled.div`
   @media (min-width: ${theme.breakPoints.large}px) {
     flex-direction: row-reverse;
     gap: 64px;
+
+    ${CardDetails} {
+      align-self: flex-start;
+    }
 
     ${StyledCard} {
       flex-direction: column;
@@ -83,11 +82,13 @@ export const DataPortalDetails = ({
   canViewResources = true,
   canEditSettings = false,
   canEditContent = false,
+  canListPortals = false,
 }: {
   portal: DataPortal
   canViewResources: boolean
   canEditSettings: boolean
   canEditContent: boolean
+  canListPortals?: boolean
 }) => {
   return (
     <PageContainerMargin>
@@ -108,12 +109,15 @@ export const DataPortalDetails = ({
             </NoContent>
           )}
           <StyledInnerHTML
-            dangerouslySetInnerHTML={{ __html: portal.content }}
+            dangerouslySetInnerHTML={{ __html: portal.content ?? '' }}
           />
         </PageMainBody>
         <RightSide>
           <RightSideItem>
-            <DataPortalCard portal={portal} />
+            <DataPortalCard
+              portal={portal}
+              canViewSpaceLink={canEditSettings}
+            />
           </RightSideItem>
           {canEditSettings && (
             <RightSideItem>
@@ -136,6 +140,11 @@ export const DataPortalDetails = ({
                   <span className="fa fa-file-code-o fa-fw" /> Edit Content
                 </ListItem>
               )}
+              {canListPortals && (
+                <ListItem to="/data-portals">
+                  <span className="fa fa-file-code-o fa-fw" /> List All Portals
+                </ListItem>
+              )}
             </RightList>
           </RightSideItem>
         </RightSide>
@@ -143,39 +152,3 @@ export const DataPortalDetails = ({
     </PageContainerMargin>
   )
 }
-
-const DataPortalDetailsPage = () => {
-  const user = useAuthUser()
-  const { portalId } = useParams<{
-    portalId: string
-    page?: string
-  }>()
-  const { data, isLoading, error } = useDataPortalByIdQuery(portalId)
-
-  if (!isLoading && !data && error) {
-    return (
-      <UserLayout>
-        <DataPortalNotFound message={error?.response?.data?.error?.message} />
-      </UserLayout>
-    )
-  }
-
-  return (
-    <UserLayout>
-      {isLoading || !data ? (
-        <PageContainerMargin>
-          <Loader />
-        </PageContainerMargin>
-      ) : (
-        <DataPortalDetails
-          portal={data}
-          canViewResources
-          canEditContent={canEditContentCheck(user?.dxuser, data.members)}
-          canEditSettings={canEditSettingsCheck(user?.dxuser, data.members)}
-        />
-      )}
-    </UserLayout>
-  )
-}
-
-export default DataPortalDetailsPage

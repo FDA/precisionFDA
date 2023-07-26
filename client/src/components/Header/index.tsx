@@ -40,6 +40,7 @@ import {
 } from './styles'
 import { CDMHNames, useSiteSettingsQuery } from './useSiteSettingsQuery'
 import { DataPortalIcon } from '../icons/DataPortalIcon'
+import { useMainDataPortal } from '../../features/data-portals/queries'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -47,6 +48,29 @@ type UserMenuProps = {
   userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
+}
+
+const DataPortalsLink = ({ isActiveLink, isSiteAdmin = false }: { isActiveLink: (l: string) => boolean, isSiteAdmin?: boolean }) => {
+  const { data } = useMainDataPortal()
+  let link = '/data-portals/main'
+
+  const comp = (to: string) => (
+    <Link to={to} title="Data Portals">
+      <MenuItem active={isActiveLink('/data-portals')}>
+        <IconWrap>
+          <DataPortalIcon height={18} />
+        </IconWrap>
+        <HeaderItemText>DAaaS</HeaderItemText>
+      </MenuItem>
+    </Link>
+  )
+
+  if(!data && isSiteAdmin) {
+    link = '/data-portals'
+    return comp(link)
+  }
+  if(!data) return null
+  return comp(link)
 }
 
 export const UserMenu = ({
@@ -284,14 +308,7 @@ export const Header: React.FC = () => {
               </Dropdown>
             )}
 
-            <Link to="/data-portals" title="Data Portals">
-              <MenuItem active={isActiveLink('/data-portals')}>
-                <IconWrap>
-                  <DataPortalIcon height={16} />
-                </IconWrap>
-                <HeaderItemText>Data Portals</HeaderItemText>
-              </MenuItem>
-            </Link>
+            <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} />
           </HeaderLeft>
           <HeaderRight>
             <a

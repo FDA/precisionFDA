@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import styled, { css } from 'styled-components'
 import { TransparentButton } from '../../../components/Button'
+import { getExt, isImageFromExt } from '../../resources/util'
 
 const StyledResourceItem = styled.div`
   max-width: 100px;
@@ -40,7 +41,7 @@ const ResourcesSelect = ({
 
   return (
     <ResourceList>
-      {list?.map(re => {
+      {list?.filter((f) => isImageFromExt(getExt(f.url))).map(re => {
         return (
           <StyledResourceItem key={re.id}>
             <Item

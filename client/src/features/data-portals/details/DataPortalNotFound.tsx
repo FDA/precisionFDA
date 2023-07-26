@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { BackLink } from '../../../components/Page/PageBackLink'
 import { PageContainerMargin } from '../../../components/Page/styles'
 
 export const Warning = styled.div`
@@ -14,7 +13,6 @@ export const Warning = styled.div`
 export const AlertText = styled.div`
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
 `
 export const ActionText = styled.div`
   font-size: 14px;
@@ -43,9 +41,6 @@ export function DataPortalNotFound({ message }: { message: string }) {
           <Warning>
             <div>
               <AlertText>Data Portal Not Found</AlertText>
-              <BackLink linkTo="/data-portals">
-                View other data portals
-              </BackLink>
             </div>
           </Warning>
           {message}
