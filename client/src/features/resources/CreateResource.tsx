@@ -12,6 +12,10 @@ const FormModalHeader = styled.label`
   display: flex;
   align-items: center;
   gap: 8px;
+
+  input[type="file"] {
+    display: none;
+  }
 `
 const NoFiles = styled.div`
   padding: 12px 24px;
@@ -59,7 +63,6 @@ export const ResourceForm = ({
               <input
                 hidden
                 type="file"
-                accept="image/*"
                 multiple
                 onChange={handleFileChange}
                 />

@@ -4,6 +4,7 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { BaseOperation } from '../../../utils'
 import { getNodePath } from '../user-file.helper'
+import { FILE_STATE_DX } from "../user-file.types";
 
 class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
   async run(input: IdInput): Promise<void> {
@@ -18,6 +19,7 @@ class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
       const filePath = await getNodePath(em, fileToUnlock)
 
       fileToUnlock.locked = false
+      fileToUnlock.state = FILE_STATE_DX.CLOSED
       await em.persistAndFlush(fileToUnlock)
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_UNLOCKED,

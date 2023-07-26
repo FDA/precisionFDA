@@ -151,8 +151,21 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
   }
 
   private getAppInputSpec(app: App): AppInputSpecItem[] {
-    const appSpec = app.spec
-    const inputSpec: AppInputSpecItem[] = prop('input_spec', JSON.parse(appSpec))
+    const inputSpec: AppInputSpecItem[] = app.spec.input_spec.map(
+      inputSpec => {
+        const appInputSpec: AppInputSpecItem = {
+        name: inputSpec.name,
+        // @ts-ignore
+        class: inputSpec.class,
+        // @ts-ignore
+        default: inputSpec.default,
+        label: inputSpec.label,
+        help: inputSpec.help,
+        optional: inputSpec.optional,
+      }
+      return appInputSpec
+      }
+    )
     if (!inputSpec || !Array.isArray(inputSpec)) {
       throw new errors.InternalError('Input spec is not set or it is not an array')
     }

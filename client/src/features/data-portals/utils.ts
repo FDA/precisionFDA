@@ -1,7 +1,7 @@
 import { SpaceMembership } from '../spaces/spaces.types'
 import { DataPortal } from './types'
 
-function isUserInMemberRole(user?: string, members?: DataPortal['members'], allowedRoles?: SpaceMembership['role'][]) {
+export function isUserInMemberRole(user?: string, members?: DataPortal['members'], allowedRoles?: SpaceMembership['role'][]) {
   if(!user || !members || !allowedRoles) return false
   const cm = members.find((m) => m.dxuser === user)
   if(!cm) return false
@@ -9,7 +9,7 @@ function isUserInMemberRole(user?: string, members?: DataPortal['members'], allo
   return false
 }
 
-const allowedEditSettingsRoles: SpaceMembership['role'][] = ['admin', 'lead']
+const allowedEditSettingsRoles: SpaceMembership['role'][] = ['lead']
 export function canEditSettings(user?: string, members?: DataPortal['members']) {
   return isUserInMemberRole(user, members, allowedEditSettingsRoles)
 }

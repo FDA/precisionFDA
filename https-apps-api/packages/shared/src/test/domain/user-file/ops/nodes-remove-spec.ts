@@ -6,9 +6,9 @@ import { Event, Node, User, UserFile, userFile } from '../../../../domain'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { EVENT_TYPES } from 'shared/src/domain/event/event.helper'
 import { STATIC_SCOPE } from '../../../../enums'
+import { scopeContainsId } from '../../../../domain/space/space.helper'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
 import { NodesInput } from '../../../../domain/user-file/user-file.input'
-import { isValidScopeName } from '../../../../domain/space/space.helper'
 
 describe('remove nodes tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -27,7 +27,7 @@ describe('remove nodes tests', () => {
     //     file4 - dxid2
     // file5 - dxid2
 
-    if (isValidScopeName(scope)) {
+    if (scopeContainsId(scope)) {
       const space = create.spacesHelper.create(em, { name: 'space-name-1' })
       create.spacesHelper.addMember(em, { user, space })
     }

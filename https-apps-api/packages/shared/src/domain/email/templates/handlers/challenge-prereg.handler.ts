@@ -21,7 +21,7 @@ import {
   ChallengePreregTemplateInput,
 } from '../mjml/challenge-preregister.template'
 import { InternalError } from '../../../../errors'
-import { getIdFromScopeName, isValidScopeName } from '../../../space/space.helper'
+import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
 
 export class ChallengePreregEmailHandler
   extends BaseTemplate<ChallengeCreated>
@@ -52,7 +52,7 @@ export class ChallengePreregEmailHandler
     if (this.validatedInput.scope === STATIC_SCOPE.PUBLIC) {
       // all active users
       users = await userRepo.findActive({ populate: ['notificationPreference'] as never[] })
-    } else if (isValidScopeName(this.validatedInput.scope)) {
+    } else if (scopeContainsId(this.validatedInput.scope)) {
       // find space, memberships, inform only those users
       const spaceId = getIdFromScopeName(this.validatedInput.scope)
       const memberships = await this.ctx.em.find(

@@ -24,7 +24,6 @@ describe('canEditSettings', () => {
   })
 
   it('returns true if currentUser has an allowed role', () => {
-    expect(canEditSettings(admin, members)).toBe(true)
     expect(canEditSettings(lead, members)).toBe(true)
   })
 })

@@ -9,8 +9,7 @@ export const StyledCard = styled.div`
   flex-direction: column;
   background-color: white;
   border: 1px solid #b6c8d2;
-  padding: 8px;
-  padding-top: 16px;
+  padding: 12px;
   border-radius: 12px;
 
   img {
@@ -44,7 +43,7 @@ const CardDesc = styled.div`
   margin-bottom: 12px;
 `
 
-export const DataPortalCard = ({ portal }: { portal: DataPortal }) => {
+export const DataPortalCard = ({ portal, canViewSpaceLink = false }: { portal: DataPortal, canViewSpaceLink: boolean }) => {
   return (
     <StyledCard>
       <img src={portal.cardImageUrl} alt="Portal Cover" />
@@ -52,9 +51,11 @@ export const DataPortalCard = ({ portal }: { portal: DataPortal }) => {
       <CardDetails>
         <CardName>{portal.name}</CardName>
         <CardDesc>{portal.description}</CardDesc>
-        <Button as={Link} to={`/spaces/${portal.spaceId}`}>
-          Go to Portal Space
-        </Button>
+        {canViewSpaceLink && (
+          <Button as={Link} to={`/spaces/${portal.spaceId}`}>
+            Go to Portal Space
+          </Button>
+        )}
       </CardDetails>
     </StyledCard>
   )
