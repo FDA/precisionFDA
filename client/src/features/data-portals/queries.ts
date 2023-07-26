@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { dataPortalByIdRequest, dataPortalsListRequest } from './api'
+import { dataPortalByIdRequest, dataPortalsListRequest, fetchMainDataPortal } from './api'
 
 export const useDataPortalListQuery = () => useQuery({
   queryKey: ['data-portals-list'],
@@ -9,4 +9,9 @@ export const useDataPortalListQuery = () => useQuery({
 export const useDataPortalByIdQuery = (id: string) => useQuery({
   queryKey: ['data-portals', id],
   queryFn: () => dataPortalByIdRequest(id),
+})
+
+export const useMainDataPortal = () => useQuery({
+  queryKey: ['data-portals-main'],
+  queryFn: () => fetchMainDataPortal(),
 })

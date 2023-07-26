@@ -8,34 +8,11 @@ export const DataPortalIcon = ({
   width?: number
   height?: number
 }) => (
-  <Svg
-    aria-hidden="true"
-    focusable="false"
-    role="img"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 45 45"
-    height={height}
-    width={width}
-  >
-    <rect
-      width="42"
-      height="42"
-      x="1.5"
-      y="1.5"
-      stroke="currentColor"
-      strokeWidth="3"
-      rx="2.5"
-      fill="none"
-    />
-    <path stroke="currentColor" strokeWidth="3" d="M0 13.5h45" />
-    <circle cx="7.5" cy="7.5" r="2.5" fill="currentColor" />
-    <circle cx="13.5" cy="7.5" r="2.5" fill="currentColor" />
-    <circle cx="19.5" cy="7.5" r="2.5" fill="currentColor" />
-    <path
-      fill="currentColor"
-      fillRule="evenodd"
-      d="m22.2 21.1-4.8 2.2 4.8 2.1 4.6-2.1-4.6-2.2Zm9.4 1.3a2 2 0 0 0-.6-.4l-8-3.8a2 2 0 0 0-1.6 0L13.2 22a2 2 0 0 0-1.2 2.2l.2 10.3a2 2 0 0 0 1.2 1.8l8 3.7a2 2 0 0 0 1.7 0l8-3.7a2 2 0 0 0 1.1-1.8V24a2 2 0 0 0-.6-1.5Zm-7.4 13.8v-7.4l5-2.4V34l-5 2.3Zm-4-7.3v7.3l-5-2.3-.1-7.4 5.1 2.4Z"
-      clipRule="evenodd"
-    />
+  <Svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 52 52" height={height} width={width}>
+    <circle cx="10.5" cy="38.5" r="4.5" fill="currentColor"/>
+    <circle cx="38.5" cy="10.5" r="4.5" fill="currentColor"/>
+    <path fill="currentColor" fillRule="evenodd" d="M32.5 13h-19a13.5 13.5 0 0 0-9.16 23.42c.34-1 .9-1.88 1.64-2.6A10.5 10.5 0 0 1 13.5 16l21.53.01a6.52 6.52 0 0 1-2.53-3Zm8.79 3.37A10.5 10.5 0 0 1 38.5 37H16.83a6.52 6.52 0 0 1 0 3H38.5a13.5 13.5 0 0 0 5.4-25.88 6.53 6.53 0 0 1-2.61 2.25Z" clipRule="evenodd"/>
+    <path fill="currentColor" fillRule="evenodd" d="M37 38.5V16.83a6.52 6.52 0 0 0 3 0V38.5a13.5 13.5 0 0 1-25.88 5.4 6.53 6.53 0 0 0 2.25-2.61A10.5 10.5 0 0 0 37 38.5Zm-21-3.47V13.5a10.5 10.5 0 0 1 17.83-7.52 6.5 6.5 0 0 1 2.59-1.64A13.5 13.5 0 0 0 13 13.5v19a6.52 6.52 0 0 1 3 2.53Z" clipRule="evenodd"/>
+    <path fill="currentColor" d="M18 26h4v8h-4zm6-4h4v12h-4zm6-4h4v16h-4z"/>
   </Svg>
 )

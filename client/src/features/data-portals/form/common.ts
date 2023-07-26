@@ -40,7 +40,7 @@ export const createValidationSchema = Yup.object().shape({
 export const editValidationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required').min(2).max(256),
   description: Yup.string().min(2).max(256),
-  sort_order: Yup.number().nullable().min(0).required('Sort order is required'),
+  sort_order: Yup.number().nullable().min(0),
   scope: Yup.object()
     .shape({
       value: Yup.string(),

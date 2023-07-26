@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-// import { ViewDetailsButton } from '../../challenges/styles'
 import { DataPortal } from '../types'
 
 const StyledDataPortalListItem = styled.div`
@@ -65,14 +64,16 @@ const Content = styled.p`
 
 export const DataPortalListItem = ({
   dataPortal,
+  isMain = false,
 }: {
   dataPortal: DataPortal
+  isMain?: boolean
 }) => (
-  <StyledDataPortalListItem as={Link} to={`/data-portals/${dataPortal.id}`}>
+  <StyledDataPortalListItem as={Link} to={`/data-portals/${isMain ? 'main' : dataPortal.id}`}>
     <PortalImage>
       <img
         width="100%"
-        src={dataPortal.card_image_url}
+        src={dataPortal.cardImageUrl}
         alt="data portal thumbnail"
       />
     </PortalImage>

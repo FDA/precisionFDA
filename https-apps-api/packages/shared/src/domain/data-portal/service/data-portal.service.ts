@@ -27,6 +27,7 @@ export interface IDataPortalService {
   update: (input: DataPortalParam, userId: number) => Promise<DataPortalParam>
   list: (userId: number, defaultParam?: boolean) => Promise<any>
   get: (dataPortalId: number, userId: number) => Promise<DataPortalParam>
+  getDefault: (userId: number) => Promise<DataPortalParam>
   createCardImage: (input: FileParam, dataPortalId: number, userId: number) => Promise<string>
   createResource: (input: FileParam, dataPortalId: number, userId: number) => Promise<CreateResourceResponse>
   createResourceLink: (id: number) => Promise<string>
@@ -45,6 +46,19 @@ export class DataPortalService implements IDataPortalService {
   constructor(em: SqlEntityManager, userPlatformClient: PlatformClient) {
     this.em = em
     this.userPlatformClient = userPlatformClient
+  }
+
+  checkUserHasDataPortal = async (userId: number) => {
+    try {
+      // check whether there is a membership in at least one portal
+      let  count = await this.em.count(entities.DataPortal,
+        { space: { spaceMemberships: { user: userId } } }
+      )
+      return count > 0;
+
+    } catch (error) {
+      return false
+    }
   }
 
   listResources = async (dataPortalId: number, userId: number): Promise<any> => {
@@ -326,6 +340,26 @@ export class DataPortalService implements IDataPortalService {
     }
 
     throw new errors.NotFoundError(`DataPortal with id ${id} was not found`)
+  }
+
+  getDefault = async(userId: number): Promise<DataPortalParam> => {
+    const userFromDb = await this.em.findOneOrFail(entities.User, { id: userId })
+    const isSiteAdmin = await userFromDb.isSiteAdmin();
+
+    logger.info('DataPortalService: get default data portal detail')
+    const portal = await this.em.findOne(entities.DataPortal, { default: true }, {populate: ['space.spaceMemberships.user']})
+    if (portal) {
+      if (isSiteAdmin) {
+        return this.map(portal, true)
+      }
+      const canView = await this.checkUserHasDataPortal(userId)
+      if(canView) {
+        return this.map(portal, true)
+      }
+      throw new errors.PermissionError('Only users with Data Portal access can view this portal')
+    }
+
+    throw new errors.NotFoundError(`Default DataPortal was not found`)
   }
 
   private getRole(role: SPACE_MEMBERSHIP_ROLE): DATA_PORTAL_MEMBER_ROLE {

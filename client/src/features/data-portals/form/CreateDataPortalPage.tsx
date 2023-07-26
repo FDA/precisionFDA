@@ -21,7 +21,7 @@ const CreateDataPortalPage = () => {
     onSuccess: res => {
       if (!res?.error) {
         queryClient.invalidateQueries(['data-portal-list'])
-        history.push('/data-portals')
+        history.push(`/data-portals/${res.id}`)
         toast.success('Data Portal created')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)
@@ -60,7 +60,7 @@ const CreateDataPortalPage = () => {
         <StyledPageCenter>
           <StyledPageContent>
             <PageTitle>Create a Data Portal</PageTitle>
-            <DataPortalForm onSubmit={handleSubmit} />
+            <DataPortalForm onSubmit={handleSubmit} canEditMainDataPortal />
           </StyledPageContent>
         </StyledPageCenter>
       ) : (

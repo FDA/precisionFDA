@@ -9,6 +9,7 @@ import { Loader } from '../../../components/Loader'
 import { NoContent } from '../../../components/Public/styles'
 import { theme } from '../../../styles/theme'
 import ResourcesSelect from './ResourcesSelect'
+import { ModalScroll } from '../../modal/styles'
 
 const StyledRefresh = styled.span`
   color: ${theme.colors.primaryBlue};
@@ -52,7 +53,7 @@ const DataPortalResourceSelect = ({
   if (status === 'loading') return <Loader />
 
   return (
-    <>
+    <ModalScroll>
       {data?.length === 0 && (
         <NoContent>
           <p>This Data Portal has no resources</p>
@@ -70,7 +71,7 @@ const DataPortalResourceSelect = ({
         </NoContent>
       )}
       <ResourcesSelect list={data || []} onChange={onSelect} />
-    </>
+    </ModalScroll>
   )
 }
 

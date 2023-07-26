@@ -6,34 +6,29 @@ import { Controller, useForm } from 'react-hook-form'
 import { Prompt } from 'react-router'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { CheckboxLabel, CheckboxTip, InputError } from '../../../components/form/styles'
-import { FieldGroup } from '../../../components/form/FieldGroup'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
-import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
-import { MutationErrors } from '../../../types/utils'
-import { DataPortal } from '../types'
-import { createValidationSchema, editValidationSchema } from './common'
+import { IndeterminateCheckbox } from '../../../components/Table/IndeterminateCheckbox'
+import { FieldGroup } from '../../../components/form/FieldGroup'
+import { CheckboxLabel, CheckboxTip, InputError } from '../../../components/form/styles'
+import { SavingModal } from './SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
-import { IndeterminateCheckbox } from '../../../components/Table/IndeterminateCheckbox'
-import { SavingModal } from './SavingModal'
+import { createValidationSchema, editValidationSchema } from './common'
 
 type SelectItem = { label: string; value: string }
 
-interface CreateDataPortalForm {
+export interface CreateDataPortalForm {
   name: string
   description: string
   default: boolean
-  scope: SelectItem
-  app_owner_id: string
-  host_lead_dxuser: SelectItem
-  guest_lead_dxuser: SelectItem
-  status: SelectItem
+  host_lead_dxuser: SelectItem | null
+  guest_lead_dxuser: SelectItem | null
+  status: SelectItem | null
   sort_order: number
-  card_image_uid: string
+  card_image_uid: string | null
   card_image_url: string
-  card_image_file: File[]
+  card_image_file: File[] | null
 }
 
 const StyledForm = styled.form`
@@ -73,21 +68,21 @@ function getBase64(file?: File, callback?: (a: string | null) => void) {
 }
 
 export const DataPortalForm = ({
-  dataPortal,
   defaultValues,
   onSubmit,
   onImageSelection,
   isSaving = false,
   isEditMode = false,
+  canEditMainDataPortal = false,
   mutationErrors,
 }: {
-  dataPortal?: DataPortal
   defaultValues?: CreateDataPortalForm
   onSubmit: (a: any) => Promise<any>
   onImageSelection?: (img: File) => Promise<any>
   isSaving?: boolean
   isEditMode?: boolean
-  mutationErrors?: MutationErrors
+  canEditMainDataPortal?: boolean
+  mutationErrors?: { response: { data: { error: any }} }
 }) => {
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
 
@@ -112,7 +107,7 @@ export const DataPortalForm = ({
       sort_order: 0,
       card_image_file: null,
       card_image_uid: null,
-      status: null,
+      status: { label: 'open', value: 'open' },
     },
   })
 
@@ -124,7 +119,17 @@ export const DataPortalForm = ({
     }
   }, [watch().card_image_file])
 
-  useMutationErrorEffect(setError, mutationErrors)
+  useEffect(() => {
+    if (mutationErrors?.response?.data?.error) {
+      setError('root.serverError', {
+        type: mutationErrors.response.data.error.statusCode,
+        message: mutationErrors.response.data.error.message,
+      })
+    }
+  }, [mutationErrors])
+
+  const submitErrors = { ...errors }
+  delete submitErrors['root']
 
   return (
     <>
@@ -164,10 +169,10 @@ export const DataPortalForm = ({
             />
           </FieldGroup>
           <FieldGroup label="Portal image" required>
-            {base64Image || dataPortal?.card_image_file ? (
+            {base64Image ? (
               <ImageUploadPreview
                 width={300}
-                src={base64Image || dataPortal?.card_image_file || undefined}
+                src={base64Image || undefined}
                 alt="portal img"
               />
             ) : (
@@ -197,11 +202,11 @@ export const DataPortalForm = ({
 
             {/* disabled changing image for edit mode */}
           </FieldGroup>
-          <FieldGroup label="Data Portal Lead User" required>
+          <FieldGroup label="First Lead User" required>
             <Controller
               name="host_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <UsersSelect
                   isDisabled={isEditMode || isSubmitting}
                   onChange={onChange}
@@ -220,7 +225,7 @@ export const DataPortalForm = ({
             <Controller
               name="guest_lead_dxuser"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <UsersSelect
                   onChange={onChange}
                   onBlur={onBlur}
@@ -239,7 +244,7 @@ export const DataPortalForm = ({
             <Controller
               name="status"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <StatusSelect
                   isDisabled={isSubmitting}
                   onChange={onChange}
@@ -254,54 +259,58 @@ export const DataPortalForm = ({
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
-          <Row>
-            <FieldGroup label="Sort order">
-              <InputText
-                type="number"
-                step="1"
-                min="0"
-                label="Sort Order"
-                placeholder="What is the portal's sort order?"
-                {...register('sort_order')}
-                disabled={isSubmitting || watch().default === true}
-              />
-              <ErrorMessage
-                errors={errors}
-                name="sort_order"
-                render={({ message }) => <InputError>{message}</InputError>}
-              />
-            </FieldGroup>
-            <FieldGroup>
-              <CheckboxLabel>
-                <Controller
-                  data-tip
-                  data-for="default"
-                  name="default"
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <IndeterminateCheckbox
-                        checked={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                      />
-                    )
-                  }}
+          {canEditMainDataPortal && (
+            <Row>
+              <FieldGroup label="Sort order">
+                <InputText
+                  type="number"
+                  step="1"
+                  min="0"
+                  label="Sort Order"
+                  placeholder="What is the portal's sort order?"
+                  {...register('sort_order')}
+                  disabled={isSubmitting || watch().default === true}
                 />
-                Default
-              </CheckboxLabel>
-              <CheckboxTip>
-                Enabling will make this Data Portal the default for users
-              </CheckboxTip>
-            </FieldGroup>
+                <ErrorMessage
+                  errors={errors}
+                  name="sort_order"
+                  render={({ message }) => <InputError>{message}</InputError>}
+                />
+              </FieldGroup>
+              <FieldGroup>
+                <CheckboxLabel>
+                  <Controller
+                    data-tip
+                    data-for="default"
+                    name="default"
+                    control={control}
+                    render={({ field }) => {
+                      return (
+                        <IndeterminateCheckbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                      )
+                    }}
+                  />
+                  Default
+                </CheckboxLabel>
+                <CheckboxTip>
+                  Enabling will make this Data Portal the default for users
+                </CheckboxTip>
+              </FieldGroup>
+            </Row>
+          )}
+          <Row>
+            <ErrorMessage
+              errors={errors}
+              name="root.serverError"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
           </Row>
           <Row>
-            <ButtonSolidBlue
-              disabled={
-                Object.keys(errors).length > 0 || isSubmitting || isSaving
-              }
-              type="submit"
-            >
+            <ButtonSolidBlue disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
               Submit
             </ButtonSolidBlue>
             {isSubmitting && <Loader />}

@@ -7,11 +7,14 @@ import {
 import axios from 'axios'
 import React from 'react'
 import { useParams } from 'react-router'
+import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { NoContent } from '../../../components/Public/styles'
+import { BookIcon } from '../../../components/icons/BookIcon'
+import { FileIcon } from '../../../components/icons/FileIcon'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
@@ -21,6 +24,8 @@ import { StyledPageCenter } from '../../spaces/form/styles'
 import { AlertText } from '../details/DataPortalNotFound'
 import { useDataPortalByIdQuery } from '../queries'
 import { canEditResources } from '../utils'
+import { getExt, isImageFromExt } from '../../resources/util'
+import { FileThumb } from '../../resources/styles'
 
 const StyledPageContent = styled.div`
   margin-top: 32px;
@@ -63,6 +68,24 @@ const Remove = styled.div`
   cursor: pointer;
   border-radius: 10px;
 `
+const Copy = styled.div`
+  position: absolute;
+  top: -10px;
+  right: 15px;
+  color: white;
+  background: ${theme.colors.darkGreen};
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 10px;
+`
+
+
+
+
 
 interface DataPortalResource {
   dataPortals: number
@@ -70,7 +93,7 @@ interface DataPortalResource {
   meta: null | any
   url: null | any
   user: number
-  userFile: number
+  user_file: number
 }
 
 interface RemovePayload {
@@ -134,6 +157,11 @@ const DataPortalResourcesPage = () => {
     return undefined
   }
 
+  const handleCopy = async (link: string) => {
+    await navigator.clipboard.writeText(link)
+    toast.success('Copied resource link to your clipboard')
+  }
+
   const handleSuccess = () => {
     queryClient.invalidateQueries(['resources-list-portal'])
   }
@@ -165,12 +193,15 @@ const DataPortalResourcesPage = () => {
                   return (
                     <StyledResourceItem key={re.id}>
                       <ImageContainer>
-                        <img src={re.url} alt="resource item" />
+                        {isImageFromExt(getExt(re.url)) ? <img src={re.url} alt="resource item" /> : <FileThumb><FileIcon height={80} /><div className="ext">{getExt(re.url)}</div></FileThumb>}
                         {canEdit && (
                           <Remove onClick={() => handleRemove(re.id)}>
                             <CrossIcon height={12} />
                           </Remove>
                         )}
+                          <Copy onClick={() => handleCopy(re.url)}>
+                            <BookIcon height={12} />
+                          </Copy>
                       </ImageContainer>
                     </StyledResourceItem>
                   )
