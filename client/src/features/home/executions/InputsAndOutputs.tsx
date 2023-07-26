@@ -46,6 +46,7 @@ const StyledTable = styled.div`
   }
 `
 
+
 const Table = ({ title, config }: { title: string; config: any[] }) => {
   const list = config.map((e, i) => {
     const classes = classNames({
@@ -53,17 +54,26 @@ const Table = ({ title, config }: { title: string; config: any[] }) => {
       even: !(i % 2),
     })
 
-    return (
-      <Fragment key={i}>
-        <div className={classNames(classes, 'type')}>{e.label}</div>
-        {e.link ? (
-          <Link to={e.link} className={classes}>
+    const item = () => {
+      switch (e.type) {
+        case 'file':
+          return <Link to={e.link} className={classes}>
             {String(e.value)}
           </Link>
-        ) : (
-          <div className={classes}>{String(e.value)}</div>
-        )}
-      </Fragment>
+        case 'array:file':
+          return <div>{e.value.map((name:any, index: any) => <Link to={e.link[index]} className={classes}>
+            {String(name)}
+          </Link>)}</div>
+        default:
+          return <div className={classes}>{String(e.value)}</div>
+      }
+    }
+
+    return (
+        <Fragment key={i}>
+          <div className={classNames(classes, 'type')}>{e.label}</div>
+          { item() }
+        </Fragment>
     )
   })
 
@@ -91,9 +101,14 @@ export const InputsAndOutputs = ({
         value = e.file_name
         link = `/home/files/${e.file_uid}`
       }
+      if (e.class === 'array:file') {
+        value = e.file_names
+        link = e.file_uids.map(uid => `/home/files/${uid}`)
+      }
 
       return {
         label: e.label || e.name,
+        type: e.class,
         link,
         value,
       }
@@ -105,8 +120,8 @@ export const InputsAndOutputs = ({
 
   return (
     <StyledInputsAndOutputs>
-      {<Table title="inputs" config={inputConfig} />}
-      {<Table title="outputs" config={outputConfig} />}
+      <Table title="inputs" config={inputConfig} />
+      <Table title="outputs" config={outputConfig} />
     </StyledInputsAndOutputs>
   )
 }

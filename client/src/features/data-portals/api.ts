@@ -24,6 +24,10 @@ export async function dataPortalByIdRequest(id: string) {
   return axios.get(`/api/data_portals/${id}`).then(res => res.data as DataPortal)
 }
 
+export async function fetchMainDataPortal() {
+  return axios.get('/api/data_portals/default').then(res => res.data as DataPortal)
+}
+
 export async function createDataPortalImage(file: File, portalId: number) {
   const response = await axios.post(`/api/data_portals/${portalId}/card_image`, { name: file.name })
   const fileUid = response.data
@@ -33,28 +37,39 @@ export async function createDataPortalImage(file: File, portalId: number) {
 }
 
 export interface CreateDataPortalRequest {
-  content?: string
-  editor_state?: string
-  image?: string
+  card_image_uid: string
+  name: string
+  description?: string
+  status: string
+  host_lead_dxuser: string
+  guest_lead_dxuser: string
+}
+export interface EditDataPortalRequest {
+  name?: string
+  description?: string
   card_image_uid?: string
+  image?: File
+  status?: string
+  sort_order?: number
+  default?: boolean
 }
 
-export async function updateDataPortalRequest(payload: CreateDataPortalRequest, id: number | string) {
+export async function updateDataPortalRequest(payload: CreateDataPortalRequest | EditDataPortalRequest, id: number | string) {
   return axios.patch(`/api/data_portals/${id}`, payload).then(res => res.data as DataPortal)
 }
 
-export async function editDataPortalRequest({ image, ...payload }: any, id: number) {
+export async function editDataPortalRequest({ image, ...payload }: EditDataPortalRequest, id: number) {
   const body = payload
   if(image) {
     const portalImage = await createDataPortalImage(image, id)
     body.card_image_uid = portalImage
   }
-  await updateDataPortalRequest(body, id)
+  return updateDataPortalRequest(body, id)
 }
 
 export async function createDataPortalRequest({ image, ...payload }: CreateDataPortalRequest) {
   const portal = await axios.post('/api/data_portals', payload).then(res => res.data as DataPortal)
   const portalImage = await createDataPortalImage(image, portal.id)
-  await updateDataPortalRequest({ card_image_uid: portalImage }, portal.id)
+  return updateDataPortalRequest({ card_image_uid: portalImage }, portal.id)
 }
 

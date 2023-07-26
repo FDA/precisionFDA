@@ -9,10 +9,10 @@ import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
-import { editDataPortalRequest } from '../api'
+import { EditDataPortalRequest, editDataPortalRequest } from '../api'
 import { useDataPortalByIdQuery } from '../queries'
-import { DataPortalForm } from './DataPortalForm'
-import { canEditSettings } from '../utils'
+import { canEditSettings, isUserInMemberRole } from '../utils'
+import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
 
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
@@ -39,18 +39,19 @@ const EditDataPortalPage = () => {
     },
   })
 
-  const handleSubmit = async (v: any) => {
-    return mutation.mutateAsync({
+  const handleSubmit = async (v: CreateDataPortalForm) => {
+    const payload: EditDataPortalRequest = {
       name: v.name,
       description: v.description,
-      app_owner_id: v.app_owner_id?.value,
-      status: v.status?.value,
       default: v.default,
-      host_lead_dxuser: v.host_lead_dxuser?.value,
-      guest_lead_dxuser: v.guest_lead_dxuser?.value,
-      image: v.card_image_file[0],
       sort_order: v.sort_order,
-    })
+    }
+    
+    if(v?.card_image_file && v?.card_image_file[0]) {
+      // eslint-disable-next-line prefer-destructuring
+      payload['image'] = v.card_image_file[0]
+    }
+    return mutation.mutateAsync(payload).catch(() => {})
   }
 
   if (isLoading || !portal) {
@@ -73,6 +74,8 @@ const EditDataPortalPage = () => {
             <PageTitle>Edit Data Portal</PageTitle>
             <DataPortalForm
               isEditMode
+              mutationErrors={mutation.error as any}
+              canEditMainDataPortal={user?.admin && isUserInMemberRole(user?.dxuser, portal?.members, ['lead'])}
               onSubmit={handleSubmit}
               defaultValues={{
                 name: portal.name,
@@ -80,6 +83,7 @@ const EditDataPortalPage = () => {
                 default: portal.default,
                 card_image_uid: portal.cardImageUid,
                 card_image_url: portal.cardImageUrl,
+                card_image_file: null,
                 host_lead_dxuser: {
                   label: portal.hostLeadDxuser,
                   value: portal.hostLeadDxuser,

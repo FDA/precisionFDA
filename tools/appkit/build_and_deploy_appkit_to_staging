@@ -1,0 +1,15 @@
+#!/bin/bash
+# This script script packs and deploys appkit
+# !!! dx cli tools must be installed for this to work
+# User must be logged in as "precisionfda.admin_dev" for the following commands to work
+# Use dx login to log in
+# Project context id might be changed
+echo "creating appkit archive"
+
+tar czf appKit-1.1.tgz ./usr
+
+echo "uploading remote appkit"
+
+dx upload appKit-1.1.tgz --project-context-id project-GVg2Zg80fQb20gg39J507VYx
+
+echo "SUCCESS - appkit created"

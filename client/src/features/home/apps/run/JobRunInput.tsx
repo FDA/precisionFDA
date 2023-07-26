@@ -94,7 +94,7 @@ export const JobRunInput = ({
   register: UseFormRegister<any>
   scope: string
 }) => {
-  if (choices) {
+  if (choices?.length > 0) {
     return (
       <JobRunChoices
         fieldName={fieldName}
@@ -181,7 +181,7 @@ export const JobRunInput = ({
       )
     }
     default: {
-      return <>`ERROR: Unknown type of input class ${type}`</>
+      return (`ERROR: Unknown type of input class ${type}`)
     }
   }
 }

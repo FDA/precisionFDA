@@ -10,6 +10,7 @@ export const config: ConfigOverride = () => ({
     fdaSubnet: {
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
+    appKit: 'project-Bk0j9YQ09Zjky196xkJ4Bzgy:/appkit.tgz',
   },
   logs: {
     pretty: false,

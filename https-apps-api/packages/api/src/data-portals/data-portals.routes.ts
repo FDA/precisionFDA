@@ -118,6 +118,21 @@ router.get(
 )
 
 /**
+ * Get the default Data Portal
+ */
+// TODO add tests for displaying default data portal to user
+router.get(
+  '/default',
+  async ctx => {
+    const userClient = new client.PlatformClient(ctx.user?.accessToken!, ctx.log)
+    const dataPortalService = new dataPortal.DataPortalService(ctx.em, userClient)
+    const res = await dataPortalService.getDefault(ctx.user!.id)
+    ctx.body = res
+    ctx.status = 200
+  },
+)
+
+/**
  * Returns details of the portal (including content).
  */
 router.get(

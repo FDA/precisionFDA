@@ -31,7 +31,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.4 "
+const userAgent = "precisionFDA CLI/2.4.1 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 67MB (min. 5MB)
 const minRoutines = 1
@@ -114,7 +114,7 @@ type jsonID struct {
 	ID string `json:"id"`
 }
 
-type bulkIDs struct {
+type bulkIDsPayload struct {
 	IDs []string `json:"ids"`
 }
 
@@ -146,7 +146,7 @@ type jsonCreateFolderPayload struct {
 	SpaceID        string `json:"space_id,omitempty"`
 }
 
-type rmPayload struct {
+type jsonRmPayload struct {
 	Name           string `json:"name"`
 	ParentFolderID string `json:"parent_folder_id,omitempty"`
 	SpaceID        string `json:"space_id,omitempty"`
@@ -164,7 +164,7 @@ type uploadChunk struct {
 }
 
 // better name needed
-type jsonSpace struct {
+type jsonSpaceResponse struct {
 	Id        int    `json:"id"`
 	Title     string `json:"title"`
 	Role      string `json:"role"`
@@ -175,7 +175,7 @@ type jsonSpace struct {
 }
 
 // better name needed
-type jsonFile struct {
+type jsonFileResponse struct {
 	Id        int    `json:"id"`
 	Uid       string `json:"uid"`
 	Name      string `json:"name"`
@@ -189,14 +189,22 @@ type jsonFile struct {
 	Children int `json:"children,omitempty"`
 }
 
-type jsonMeta struct {
+type jsonMetaResponse struct {
 	Scope string `json:"scope"`
 	Path  string `json:"path"`
 }
 
-type jsonListingPayload struct {
-	Meta  jsonMeta   `json:"meta"`
-	Files []jsonFile `json:"files"`
+type jsonListingResponse struct {
+	Meta  jsonMetaResponse   `json:"meta"`
+	Files []jsonFileResponse `json:"files"`
+}
+
+type jsonCreateFolderResponse struct {
+	Id      int    `json:"id"`
+	Path    string `json:"path"`
+	Message struct {
+		Type string `json:"type"`
+	} `json:"message"`
 }
 
 // Below were migrated from pfda.go:
@@ -669,7 +677,7 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 			return err
 		}
 
-		var children jsonListingPayload
+		var children jsonListingResponse
 		err = json.Unmarshal(body, &children)
 		if err != nil {
 			return err
@@ -754,7 +762,7 @@ func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
 		}
 	}
 
-	var spaces []jsonSpace
+	var spaces []jsonSpaceResponse
 	err = json.Unmarshal(body, &spaces)
 	if err != nil {
 		return err
@@ -801,7 +809,7 @@ func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) 
 		}
 	}
 
-	var response jsonListingPayload
+	var response jsonListingResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return err
@@ -851,13 +859,13 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			continue
 		}
 
-		jsonData, err := json.Marshal(rmPayload{Name: arg, Type: "Folder"})
+		jsonData, err := json.Marshal(jsonRmPayload{Name: arg, Type: "Folder"})
 		if err != nil {
 			return err
 		}
 		_, body, err := c.makeRequestFail("POST", c.BaseURL+"/api/files/cli_node_search", jsonData)
 		c.HandleError(err)
-		var response []jsonFile
+		var response []jsonFileResponse
 
 		err = json.Unmarshal(body, &response)
 		if err != nil {
@@ -891,7 +899,7 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 			continue
 		}
 
-		jsonData, err := json.Marshal(rmPayload{Name: helpers.TransformToSQLWildcards(arg), Type: "UserFile", ParentFolderID: folderID, SpaceID: spaceID})
+		jsonData, err := json.Marshal(jsonRmPayload{Name: helpers.TransformToSQLWildcards(arg), Type: "UserFile", ParentFolderID: folderID, SpaceID: spaceID})
 		if err != nil {
 			return err
 		}
@@ -900,7 +908,7 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 		if err != nil {
 			return err
 		}
-		var response []jsonFile
+		var response []jsonFileResponse
 		err = json.Unmarshal(body, &response)
 		if err != nil {
 			return err
@@ -1046,15 +1054,15 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 		return "", err
 	}
 
-	var resultJSON map[string]interface{}
+	var resultJSON jsonCreateFolderResponse
 	err = json.Unmarshal(body, &resultJSON)
 	if err != nil {
 		return "", err
 	}
 
-	newFolderID := fmt.Sprintf("%g", resultJSON["id"])
-	if resultJSON["message"].(map[string]interface{})["type"] == "error" {
-		return newFolderID, fmt.Errorf(">> Unable to create %s - already exists in target location", name)
+	newFolderID := strconv.Itoa(resultJSON.Id)
+	if resultJSON.Message.Type == "error" {
+		return newFolderID, fmt.Errorf(">> Unable to create folder: %s - already exists in target location", name)
 	}
 
 	return newFolderID, nil
@@ -1106,7 +1114,7 @@ func (c *PFDAClient) Head(arg string, lines int) error {
 
 func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string, overwrite string) {
 	apiURL := fmt.Sprintf("%s/api/files/bulk_download", c.BaseURL)
-	jsonData, _ := json.Marshal(bulkIDs{
+	jsonData, _ := json.Marshal(bulkIDsPayload{
 		IDs: uidsChunk,
 	})
 	_, body, _ := c.makeRequestFail("POST", apiURL, jsonData)
@@ -1319,7 +1327,7 @@ func yesNo(label string) bool {
 }
 
 // Filters out only files to pick from.
-func pickFile(files []jsonFile, label string) string {
+func pickFile(files []jsonFileResponse, label string) string {
 
 	options := make([]string, 0)
 	ids := make([]string, 0)
@@ -1342,7 +1350,7 @@ func pickFile(files []jsonFile, label string) string {
 }
 
 // pass all flags, so we can optimize the table header - if in 'private' do not show added-by
-func printListingResponse(response jsonListingPayload, flags map[string]bool) {
+func printListingResponse(response jsonListingResponse, flags map[string]bool) {
 	if flags["json"] {
 		prettyJSON, _ := json.MarshalIndent(response.Files, "", "    ")
 		fmt.Printf("%s\n", string(prettyJSON))
@@ -1353,7 +1361,7 @@ func printListingResponse(response jsonListingPayload, flags map[string]bool) {
 	}
 }
 
-func printListingSimple(files []jsonFile) {
+func printListingSimple(files []jsonFileResponse) {
 	if len(files) == 0 {
 		return
 	}
@@ -1371,7 +1379,7 @@ func printListingSimple(files []jsonFile) {
 	writer.Flush()
 }
 
-func printListSpacesResponse(spaces []jsonSpace, flags map[string]bool) {
+func printListSpacesResponse(spaces []jsonSpaceResponse, flags map[string]bool) {
 	if flags["json"] {
 		prettyJSON, _ := json.MarshalIndent(spaces, "", "    ")
 		fmt.Printf("%s\n", string(prettyJSON))
@@ -1387,7 +1395,7 @@ func printListSpacesResponse(spaces []jsonSpace, flags map[string]bool) {
 	}
 }
 
-func printListingVerbose(files []jsonFile, meta jsonMeta) {
+func printListingVerbose(files []jsonFileResponse, meta jsonMetaResponse) {
 	if len(files) == 0 {
 		return
 	}

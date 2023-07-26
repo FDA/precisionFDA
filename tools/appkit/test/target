@@ -1,0 +1,22 @@
+#!/bin/bash
+
+all_args=("$@")
+echo "all_args \"${all_args[*]}\""
+first_arg=$1
+second_arg=("${all_args[@]:1}")
+echo "second_arg[0] \"${second_arg[0]}\""
+echo "second_arg[1] \"${second_arg[1]}\""
+
+if [[ $first_arg == array* ]]
+then
+  array_type=${first_arg:6:20}
+  echo "working with array of type $array_type"
+  for item in "${second_arg[@]}"
+  do
+     echo "adding item: $item of type $array_type"
+  done
+else
+  echo "first arg: $first_arg second arg: $second_arg"
+fi
+
+echo "----------------------------------------------------"
