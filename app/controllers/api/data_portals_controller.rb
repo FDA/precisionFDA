@@ -17,21 +17,15 @@ module Api
       }
       portal = https_apps_client.data_portal_save(data_portal)
 
-      render json: convert_json_keys_to_snake_case(portal),
+      render json: portal,
              adapter: :json
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body
     end
 
     def index
-      portals = https_apps_client.data_portals_list(params[:default])
-
-      converted_portals = []
-      portals[:data_portals].each do |portal|
-        converted_portals << convert_json_keys_to_snake_case(portal)
-      end
-
-      render json: { data_portals: converted_portals }
+      data_portals = https_apps_client.data_portals_list(params[:default])
+      render json: data_portals
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body
     end
@@ -108,7 +102,7 @@ module Api
       portal_data[:default] = data_portal_params[:default] unless data_portal_params[:default].nil?
 
       portal = https_apps_client.data_portal_update(portal_data)
-      render json: convert_json_keys_to_snake_case(portal),
+      render json: portal,
              adapter: :json
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body

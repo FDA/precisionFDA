@@ -2,10 +2,11 @@
 
 set -e -o pipefail
 
-if [[ "$#" != 2 ]]
+if [[ "$#" -lt 2 ]]
 then
-  echo 'Usage: emit <output_field_name> <value>' 1>&2
-  echo '       (2 arguments expected; '"$#"' given)' 1>&2
+  echo 'Usage for single value: emit <output_field_name> <value>' 1>&2
+  echo 'Usage for arrays: emit <output_field_name> <value1> <value2>' 1>&2
+  echo '       (at least 2 arguments expected; '"$#"' given)' 1>&2
   exit 1
 fi
 
@@ -17,7 +18,9 @@ fi
 
 jq -r --arg out "$1" '.[$out]' < /tmp/.tmp.fields >/tmp/.tmp.class
 
-if [[ "$(< /tmp/.tmp.class)" == "" || "$(< /tmp/.tmp.class)" == "null" ]]
+field_class="$(< /tmp/.tmp.class)"
+
+if [[ "$field_class" == "" || "$field_class" == "null" ]]
 then
   echo "Emit: Invalid output field '$1'" 1>&2
   exit 1
@@ -29,17 +32,44 @@ then
   mv /home/dnanexus/job_error.json /tmp/.temp_job_error.json
 fi
 
-if [[ "$(< /tmp/.tmp.class)" == "file" ]]
+all_args=("$@")
+second_arg=("${all_args[@]:1}")
+echo "all_args \"${all_args[*]}\""
+echo "second_arg \"${second_arg[*]}\""
+
+echo "submitted field class $field_class"
+if [[ $field_class == array* ]]
 then
-  mark-section "uploading local file '$2' as output field '$1'"
-  dx upload --no-progress --brief "$2" >/tmp/.tmp.uploaded_file_id
-  value="$(< /tmp/.tmp.uploaded_file_id)"
+  is_array=true
+  # strip word array
+  field_class=${field_class:6:20}
 else
-  value="$2"
+  is_array=false
 fi
 
-mark-section "setting output field '$1'"
-dx-jobutil-add-output --class "$(< /tmp/.tmp.class)" -o /home/dnanexus/job_output.json "$1" "$value"
+echo "is_array $is_array"
+echo "resulting field class $field_class"
+
+for item in "${second_arg[@]}"
+do
+  echo "item's value: $item"
+  if [[ "$field_class" == "file" ]]
+  then
+    mark-section "uploading local file '$item' as output field '$1'"
+    dx upload --no-progress --brief "$item" >/tmp/.tmp.uploaded_file_id
+    value="$(< /tmp/.tmp.uploaded_file_id)"
+  else
+    value="$item"
+  fi
+
+  mark-section "setting output field '$1'"
+  if [[ "$is_array" = true ]]
+  then
+    dx-jobutil-add-output --array --class "$field_class" -o /home/dnanexus/job_output.json "$1" "$value"
+  else
+    dx-jobutil-add-output --class "$field_class" -o /home/dnanexus/job_output.json "$1" "$value"
+  fi
+done
 
 if test -e /tmp/.temp_job_error.json
 then

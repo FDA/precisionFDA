@@ -18,7 +18,7 @@ const getIdFromScopeName = (name: string): number => {
 
 const getScopeFromSpaceId = (spaceId: number): string => `space-${spaceId}`
 
-const isValidScopeName = (name: string): boolean => {
+const scopeContainsId = (name: string): boolean => {
   try {
     getIdFromScopeName(name)
     return true
@@ -74,7 +74,7 @@ const isAcceptedBy = (space: Space, confidentialSpaces: Space[], spaceMembership
 }
 
 export {
-  isValidScopeName,
+  scopeContainsId,
   getIdFromScopeName,
   getScopeFromSpaceId,
   getOrgDxid,

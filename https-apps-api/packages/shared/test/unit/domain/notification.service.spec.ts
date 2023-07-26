@@ -8,7 +8,7 @@ import { expect } from 'chai'
 import { PermissionError } from '../../../src/errors'
 import sinon from 'sinon'
 import { createClient } from 'redis'
-import { NOTIFICATIONS_QUEUE } from "../../../src/services/redis.service";
+import { NOTIFICATIONS_QUEUE } from '../../../src/services/redis.service'
 
 describe('Notification service tests', () => {
   let em: EntityManager<MySqlDriver>

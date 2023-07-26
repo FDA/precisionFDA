@@ -37,9 +37,7 @@ import {
   WorkflowDescribeParams,
   AppDescribeParams,
   FileRemoveParams,
-  UserDescribeParams,
-  OrgDescribeParams,
-  FileCreateParams,
+  AppletCreateParams, AppCreateParams, ObjectsParams, FileCreateParams, OrgDescribeParams, UserDescribeParams
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
@@ -67,6 +65,40 @@ class PlatformClient {
     this.accessToken = accessToken
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     this.log = logger ?? defaultLog
+  }
+
+  // ---------------
+  //    A P P S
+  // ---------------
+
+  /**
+   * Creates a new applet object with the given applet specification.
+   * API: /applet/new
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-applet-new
+   */
+  async appletCreate(params: AppletCreateParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/applet/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken'], params) },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Creates an app.
+   * API: /app/new
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-new
+   */
+  async appCreate(params: AppCreateParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/app/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken'], params) },
+      url,
+    }
+    return await this.sendRequest(options, url)
   }
 
   // ---------------
@@ -238,7 +270,7 @@ class PlatformClient {
   }
 
   /**
-   * Given a list of fileDxids, query platform the the current file states
+   * Given a list of fileDxids, query platform the current file states
    * This is designed to only query files within the same dx project, because without the project hint
    * the /system/findDataObjects call is very inefficient and can take a long time
    */
@@ -527,6 +559,24 @@ class PlatformClient {
   // ---------------------
   //    P R O J E C T S
   // ---------------------
+  /**
+   * Removes the specified objects from the data container.
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-removeobjects
+   * @param {string} containerDxid - container dxid
+   * @param {string[]} objects - IDs to be removed from the container
+   * @return [id string ID of the manipulated data container]
+   */
+  async containerRemoveObjects(containerDxid: string, params: ObjectsParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${containerDxid}/removeObjects`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        objects: params.objects
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
 
   /**
  * Creates a new project
