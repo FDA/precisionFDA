@@ -31,7 +31,7 @@ export interface IAppService {
 }
 
 export class AppService implements IAppService {
-  private platformClient: PlatformClient;
+  private platformClient: PlatformClient
   private em: SqlEntityManager
   private assetRepository: AssetRepository
 
@@ -250,6 +250,15 @@ export class AppService implements IAppService {
     }
   }
 
+  private stripChoices = (spec: Spec[]): Spec[] => {
+    return spec.map(s => {
+      if (s.choices && s.choices.length === 0) {
+        delete s.choices
+      }
+      return s
+    })
+  }
+
   private saveAppInDB = async (user: User, platformAppId: string, revision: number, release: string,
                        assets: Asset[], appInput: AppInput, appSeriesId: number) => {
     logger.info('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
@@ -264,8 +273,8 @@ export class AppService implements IAppService {
     app.forkedFrom = appInput.forked_from ?? null
     app.appSeriesId = appSeriesId
     app.spec = {
-      input_spec: appInput.input_spec,
-      output_spec: appInput.output_spec,
+      input_spec: this.stripChoices(appInput.input_spec),
+      output_spec: this.stripChoices(appInput.output_spec),
       internet_access: appInput.internet_access,
       instance_type: appInput.instance_type,
     } as AppSpec
