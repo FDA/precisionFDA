@@ -70,12 +70,13 @@ class FilePublisher
             raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
           end
 
-          file.update!(
+          CopyService::FileCopier.copy_record(
+            file,
+            scope,
+            destination_project,
             state: UserFile::STATE_CLOSED,
-            scope: scope,
-            project: destination_project,
-            scoped_parent_folder_id: nil,
           )
+
           count += 1
 
           if scope =~ /^space-(\d+)$/
@@ -89,13 +90,7 @@ class FilePublisher
               SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, event_type)
             end
           end
-
-          remove_challenge_object(file) if file.challenge_file?
         end
-      end
-
-      if project.present? && !non_challehge_files_dxids.empty?
-        api.call(project, "removeObjects", objects: non_challehge_files_dxids)
       end
     end
     # rubocop:enable Metrics/BlockLength
@@ -126,16 +121,8 @@ class FilePublisher
     end
   end
 
-  def remove_challenge_object(file)
-    result = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(
-      "system",
-      "describeDataObjects",
-      objects: [file.dxid],
-    )["results"][0]
-
-    return if result["describe"].blank?
-
-    api.call(result["describe"]["project"], "removeObjects", objects: [file.dxid])
+  def copy_service
+    @copy_service ||= CopyService.new(api:, user: current_user)
   end
 
   attr_reader :api, :user

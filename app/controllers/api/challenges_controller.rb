@@ -33,6 +33,8 @@ module Api
           )
           @challenge.update_card_image_url!
           render json: @challenge, adapter: :json
+        else
+          render json: @challenge.errors, status: :unprocessable_entity
         end
       end
     end
