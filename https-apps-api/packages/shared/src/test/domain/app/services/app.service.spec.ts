@@ -283,6 +283,34 @@ describe('app service tests', () => {
     expect(appletCreateParams.inputSpec[0]).not.to.have.property('choices')
   })
 
+  it('save app - strip empty choices from input and output spec', async() => {
+    const appService = new AppService(em, platformClient)
+    const appInput: AppInput = getDefaultApp()
+    appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
+    appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
+
+    const appUid = await appService.create(appInput, user.id)
+
+    const loadedApp = await em.findOneOrFail(App, {uid: appUid})
+
+    expect(loadedApp.spec.input_spec[0]).not.to.have.property('choices')
+    expect(loadedApp.spec.output_spec[0]).not.to.have.property('choices')
+  })
+
+  it('save app - preserve choices in input and output spec', async() => {
+    const appService = new AppService(em, platformClient)
+    const appInput: AppInput = getDefaultApp()
+    appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2])]
+    appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [3, 4])]
+
+    const appUid = await appService.create(appInput, user.id)
+
+    const loadedApp = await em.findOneOrFail(App, {uid: appUid})
+
+    expect(loadedApp.spec.input_spec[0].choices).to.deep.equal([1, 2])
+    expect(loadedApp.spec.output_spec[0].choices).to.deep.equal([3, 4])
+  })
+
   it('save app - validate release', async() => {
     const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
