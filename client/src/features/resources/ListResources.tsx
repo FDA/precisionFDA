@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import { TransparentButton } from '../../components/Button'
 import { Loader } from '../../components/Loader'
+import { ResourceThumb } from './ResourceThumb'
 
 const StyledResourceItem = styled.div`
   max-width: 100px;
@@ -42,7 +43,7 @@ const ListResources = ({
         return (
           <StyledResourceItem key={re.id}>
             <Item>
-              <img src={re.url} alt="resource item" />
+              <ResourceThumb url={re.url} />
             </Item>
             <TransparentButton type="button" onClick={() => onRemove(re.id)}>
               Remove
