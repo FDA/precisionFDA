@@ -8,24 +8,24 @@ import axios from 'axios'
 import React from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'react-toastify'
+import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { NoContent } from '../../../components/Public/styles'
 import { BookIcon } from '../../../components/icons/BookIcon'
-import { FileIcon } from '../../../components/icons/FileIcon'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { CreateResource } from '../../resources/CreateResource'
+import { ResourceThumb } from '../../resources/ResourceThumb'
 import { StyledPageCenter } from '../../spaces/form/styles'
 import { AlertText } from '../details/DataPortalNotFound'
 import { useDataPortalByIdQuery } from '../queries'
 import { canEditResources } from '../utils'
-import { getExt, isImageFromExt } from '../../resources/util'
-import { FileThumb } from '../../resources/styles'
+import { getFileNameFromUrl } from '../../resources/util'
 
 const StyledPageContent = styled.div`
   margin-top: 32px;
@@ -39,6 +39,8 @@ const TopRow = styled.div`
   justify-content: space-between;
 `
 const StyledResourceItem = styled.div`
+  display: flex;
+  justify-content: center;
   max-width: 100px;
 
   img {
@@ -83,15 +85,11 @@ const Copy = styled.div`
   border-radius: 10px;
 `
 
-
-
-
-
 interface DataPortalResource {
   dataPortals: number
   id: number
   meta: null | any
-  url: null | any
+  url: null | string
   user: number
   user_file: number
 }
@@ -157,9 +155,11 @@ const DataPortalResourcesPage = () => {
     return undefined
   }
 
-  const handleCopy = async (link: string) => {
-    await navigator.clipboard.writeText(link)
-    toast.success('Copied resource link to your clipboard')
+  const handleCopy = async (link: string | null) => {
+    if (link) {
+      await navigator.clipboard.writeText(link)
+      toast.success('Copied resource link to your clipboard')
+    }
   }
 
   const handleSuccess = () => {
@@ -192,17 +192,28 @@ const DataPortalResourcesPage = () => {
                 {data?.map(re => {
                   return (
                     <StyledResourceItem key={re.id}>
-                      <ImageContainer>
-                        {isImageFromExt(getExt(re.url)) ? <img src={re.url} alt="resource item" /> : <FileThumb><FileIcon height={80} /><div className="ext">{getExt(re.url)}</div></FileThumb>}
+                      <ImageContainer data-tip data-for={`tip-${re.id}`}>
+                        <ResourceThumb url={re.url} />
                         {canEdit && (
                           <Remove onClick={() => handleRemove(re.id)}>
                             <CrossIcon height={12} />
                           </Remove>
                         )}
+                        {re.url && (
                           <Copy onClick={() => handleCopy(re.url)}>
                             <BookIcon height={12} />
                           </Copy>
+                        )}
                       </ImageContainer>
+                      {re.url && (
+                        <ReactTooltip
+                          id={`tip-${re.id}`}
+                          place="top"
+                          effect="solid"
+                        >
+                          {getFileNameFromUrl(re.url)}
+                        </ReactTooltip>
+                      )}
                     </StyledResourceItem>
                   )
                 })}
