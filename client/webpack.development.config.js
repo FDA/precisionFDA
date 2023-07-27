@@ -159,6 +159,10 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      '/jobs': {
+        target: TARGET,
+        secure: false,
+      },
     },
   },
 })
