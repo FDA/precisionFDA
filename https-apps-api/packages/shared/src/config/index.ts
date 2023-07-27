@@ -40,7 +40,7 @@ const defaultConfig = {
   api: {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
-    appKit: 'project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.1.tgz',
+    appKit: 'project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.2.tgz',
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
     url: process.env.NODE_URL ?? 'https://nodejs-api',

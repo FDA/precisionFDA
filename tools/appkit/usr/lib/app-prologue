@@ -39,7 +39,9 @@ mkdir -p /work/
 cd /work
 HOME=/work
 cp -f /home/dnanexus/job_input.json /work/job_input.json
-dx-reprint-bash-vars > /tmp/.bash_vars
+
+dx-print-bash-vars > /tmp/.bash_vars
+
 source /tmp/.bash_vars
 rm /tmp/.bash_vars
 
