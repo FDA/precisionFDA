@@ -16,7 +16,7 @@ const StyledResourceTable = styled(ResourceTable)`
   min-width: 300px;
 `
 
-export function useCopyToPrivateModal<T extends { id: string; name: string }>({
+export function useCopyToPrivateModal<T extends { id: number; name: string }>({
   resource,
   selected,
   scope,
@@ -25,7 +25,7 @@ export function useCopyToPrivateModal<T extends { id: string; name: string }>({
 }: {
   resource: APIResource
   selected: T[]
-  request: (ids: string[]) => Promise<any>
+  request: (ids: number[]) => Promise<any>
   scope?: ResourceScope
   onSuccess?: (res: any) => void
 }) {

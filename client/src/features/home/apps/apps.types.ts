@@ -1,4 +1,5 @@
 import { ResourceScope, ServerScope } from '../types'
+import { IFile } from '../files/files.types'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -91,36 +92,6 @@ export interface FileOrg {
   handle: string;
   name: string;
 }
-export interface ListedFile {
-  id: number;
-  uid: string;
-  className: string;
-  fa_class: string
-  scope: string;
-  path: string;
-  owned: boolean;
-  editable: boolean;
-  accesible: boolean;
-  file_path: string;
-  parent_folder_name: string;
-  public: boolean;
-  private: boolean;
-  in_space: boolean;
-  space_private: boolean,
-  space_public: boolean
-  title: string;
-  description: string;
-  state: string;
-  file_size: number;
-  license: License;
-  user_licence: UserLicense;
-  user: FileUser;
-  org: FileOrg;
-}
-
-export interface ListedFiles {
-  objects: ListedFile[];
-}
 
 export interface AcceptedLicense {
   id: number,
@@ -147,7 +118,7 @@ export interface JobRunData {
   scope?: SelectType | null;
   instanceType?: ComputeInstance | null;
   inputs: {
-    [key: string]: string | boolean | number | ListedFile | undefined,
+    [key: string]: string | boolean | number | IFile | undefined,
   };
 }
 
