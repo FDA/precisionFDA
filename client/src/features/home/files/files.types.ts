@@ -1,4 +1,5 @@
-import { ServerScope } from "../types"
+import { ServerScope } from '../types'
+import { FileOrg, FileUser } from '../apps/apps.types'
 
 export enum FilesListActions {
   'Track' = 'Track',
@@ -20,10 +21,11 @@ export enum FolderActions {
   'Choose Add Option' = 'Choose Add Option',
 }
 
-export type FileStatus = 'closed' | 'closing' | 'open' | 'removing'
+export type FileState = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private'
 export type FileType = 'UserFile' | 'Folder' | 'File'
 export type FileOrigin = 'UserFile'
+export type FileScope = 'public' | 'private' | string
 
 export type OriginType = 'User' | 'Job' | 'Comparison' | 'UserFile'
 export interface FileLinks {
@@ -57,13 +59,13 @@ export interface FileLinks {
 }
 
 export interface IFile {
-  'id': string,
+  'id': number,
   'name': string,
   'size': string,
   'type': FileType,
   'locked': boolean,
   'locking': boolean,
-  'state': FileStatus,
+  'state': FileState,
   'location': FileLocation,
   'added_by': string,
   'created_at': string,
@@ -86,5 +88,11 @@ export interface IFile {
     title: string
     uid: string
   },
-  'show_license_pending': boolean
+  'show_license_pending': boolean,
+  'private': boolean,
+  'public': boolean,
+  'user': FileUser,
+  'org': FileOrg,
+  'file_path': string,
+  'path': string
 }

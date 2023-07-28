@@ -187,6 +187,7 @@ class AppInputModel
                   all_tags_list: false
                 }
               }
+              ignore_challenge_bot: true
             },
             patterns: @patterns
           },

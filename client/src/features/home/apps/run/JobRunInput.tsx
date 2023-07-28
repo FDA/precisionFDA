@@ -1,12 +1,14 @@
 import React from 'react'
 import Select from 'react-select'
 import { Control, Controller, FieldErrors, UseFormRegister } from 'react-hook-form'
-import { INPUT_TYPES_CLASSES, ListedFile } from '../apps.types'
+import { INPUT_TYPES_CLASSES } from '../apps.types'
 import { ButtonBoolean } from '../../../../components/ButtonBoolean'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { InputText } from '../../../../components/InputText'
 import { SelectFileInput } from './SelectFileInput'
 import { FieldInfo } from '../../../../components/form/FieldInfo'
+import { IAccessibleFile } from '../../databases/databases.api'
+import { IFile } from '../../files/files.types'
 
 const JobRunChoices = ({
   fieldName,
@@ -84,7 +86,7 @@ export const JobRunInput = ({
   scope,
 }: {
   fieldName: string
-  defaultValue?: string | boolean | number | ListedFile
+  defaultValue?: string | boolean | number | IFile
   type: string
   helpText?: string
   choices: []
@@ -122,7 +124,7 @@ export const JobRunInput = ({
                 field.onChange(value)
                 field.onBlur()
               }}
-              value={defaultValue as ListedFile}
+              value={defaultValue as IAccessibleFile}
               scope={scope}
             />)
             }
