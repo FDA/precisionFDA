@@ -4,6 +4,7 @@ import { dataPortal } from '@pfda/https-apps-shared'
 const file: JSONSchema7 = {
   type: 'object',
   properties: {
+    id: { type: 'number' },
     name: { type: 'string' },
     description: { type: 'string' },
   },
