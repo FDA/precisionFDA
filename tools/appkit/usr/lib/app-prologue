@@ -40,6 +40,7 @@ cd /work
 HOME=/work
 cp -f /home/dnanexus/job_input.json /work/job_input.json
 
+# https://github.com/dnanexus/dx-toolkit/blob/master/src/python/scripts/dx-print-bash-vars
 dx-print-bash-vars > /tmp/.bash_vars
 
 source /tmp/.bash_vars
