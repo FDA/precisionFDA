@@ -19,28 +19,19 @@ import DefaultLayout from '../../../../layouts/DefaultLayout'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { fetchFile } from '../../files/files.api'
 import { IFile } from '../../files/files.types'
-import {
-  fetchAcceptedLicenses,
-  fetchLicensesForFiles,
-} from '../../licenses/api'
+import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
 import { HomeLoader, NotFound, Title } from '../../show.styles'
-import {
-  fetchApp,
-  fetchLicensesOnApp,
-  fetchUserComputeInstances,
-  runJob,
-  RunJobRequest,
-} from '../apps.api'
+import { fetchApp, fetchLicensesOnApp, fetchUserComputeInstances, runJob, RunJobRequest } from '../apps.api'
 import {
   AcceptedLicense,
   ComputeInstance,
   IApp,
-  InputSpec,
   INPUT_TYPES_CLASSES,
+  InputSpec,
   JobRunData,
-  ListedFile, SelectType,
+  SelectType,
 } from '../apps.types'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
@@ -59,23 +50,24 @@ import {
   WrapSelect,
 } from './styles'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
+import { IAccessibleFile } from '../../databases/databases.api'
 
-const convertToListedFile = (file: IFile): ListedFile =>
+const convertToAccessibleFile = (file: IFile): IAccessibleFile =>
   ({
-    id: parseInt(file.id, 10),
+    id: file.id,
     uid: file.uid,
     title: file.name,
-  } as ListedFile)
+  } as IAccessibleFile)
 
 const getDefaultValue = (
   inputSpec: InputSpec,
   defaultFiles?: IFile[],
-): string | boolean | ListedFile | undefined => {
+): string | boolean | IFile | undefined => {
   if (inputSpec.class === INPUT_TYPES_CLASSES.FILE) {
     const defaultFile = defaultFiles?.find(
       file => file.uid === inputSpec.default,
     )
-    return defaultFile ? convertToListedFile(defaultFile) : undefined
+    return defaultFile ? convertToAccessibleFile(defaultFile) : undefined
   }
   return inputSpec.default
 }
@@ -163,7 +155,7 @@ const prepareValidations = (
 
 const getValue = (
   inputKey: string,
-  value: string | boolean | number | ListedFile | undefined,
+  value: string | boolean | number | IFile | undefined,
   inputSpecs: InputSpec[],
 ): string | number | boolean | undefined => {
   const inputClass = inputSpecs.find(
@@ -176,7 +168,7 @@ const getValue = (
     return parseInt(value as string, 10)
   }
   if (inputClass === INPUT_TYPES_CLASSES.FILE) {
-    return (value as ListedFile)?.uid
+    return (value as IFile)?.uid
   }
   return value as string
 }
@@ -222,7 +214,7 @@ const fetchLicensesOnFiles = (jobData: JobRunData): Promise<License[]> => {
 
   Object.keys(inputs).forEach(key => {
     if (typeof inputs[key] === 'object') {
-      ids.push((inputs[key] as ListedFile).id)
+      ids.push((inputs[key] as IFile).id)
     }
   })
 
@@ -295,7 +287,7 @@ const JobRun = ({
         if (scope === 'private') {
           history.push(`/home/jobs/${res?.id}`)
         } else {
-          const spaceId = scope.replace("space-", "")
+          const spaceId = scope?.replace('space-', '')
           history.push(`/spaces/${spaceId}/executions/${res?.id}`)
         }
       } else if (res?.error) {
@@ -389,7 +381,7 @@ const JobRun = ({
                   <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                 </FieldGroup>
               </StyledRow>
-              {app.entity_type === "https" && (
+              {app.entity_type === 'https' && (
                   <WrapSelect>
                     <FieldGroup label="Context" required>
                       <Controller

@@ -42,6 +42,9 @@ class SelectorModel
           name: 'Files',
           apiEndpoint: 'list_files',
           listedFiles: @listedFiles()
+          apiParams: {
+            ignore_challenge_bot: true
+          },
         }
       ],
       onSave: (selected) =>
