@@ -135,12 +135,12 @@ class FolderService # rubocop:disable Metrics/ClassLength
       raise Error, "You're not allowed to move an HTTPS #{node.klass}." if node.https?
 
       if (node.public? && !context.can_administer_site?) || !node.accessible_by?(context)
-        raise Error, "You have no permissions to move '#{node.name}'."
+        raise Error, "You have no permissions to move node with id '#{node.id}'."
       end
 
       # Verification spaces are deprecated.
       if node.in_locked_verification_space?
-        raise Error, "You have no permissions to move '#{node.name}', " \
+        raise Error, "You have no permissions to move node with id '#{node.id}', " \
                      "as it is part of Locked Verification space."
       end
 
