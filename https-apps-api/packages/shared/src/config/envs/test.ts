@@ -13,6 +13,14 @@ export const config: ConfigOverride = () => ({
     // Enable debug mode to inspect SQL queries
     // debug: true,
   },
+  api: {
+    fdaSubnet: {
+      allowedIpCidrBlock: {
+        ipv4Quadruple: [127, 0, 0, 1],
+        maskSize: 1,
+      },
+    },
+  },
   emails: {
     smtp: {
       saveEmailToFile: true,
@@ -45,7 +53,7 @@ export const config: ConfigOverride = () => ({
   },
   devFlags: {
     fda: {
-      skipFdaSubnetIpCheck: true,
+      skipFdaSubnetIpCheck: false,
     },
   },
 })

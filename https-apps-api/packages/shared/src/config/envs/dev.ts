@@ -1,4 +1,3 @@
-import path from 'path'
 import { ConfigOverride, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
@@ -34,9 +33,7 @@ export const config: ConfigOverride = () => ({
   },
   siteSettings: {
     ssoButton: {
-      response: {
         isEnabled: true,
-      },
     },
   },
   emails: {
