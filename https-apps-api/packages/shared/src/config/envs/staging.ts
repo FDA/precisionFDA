@@ -39,9 +39,7 @@ export const config: ConfigOverride = () => ({
   },
   siteSettings: {
     ssoButton: {
-      response: {
         isEnabled: true,
-      },
     },
   },
 })
