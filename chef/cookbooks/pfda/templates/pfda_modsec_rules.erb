@@ -4,6 +4,9 @@ SecRule REQUEST_URI "@beginsWith /docs" "id:3,ctl:ruleEngine=DetectionOnly"
 SecRule REQUEST_URI "@beginsWith /spaces" "id:4,ctl:ruleEngine=DetectionOnly"
 SecRule REQUEST_URI "@beginsWith /admin" "id:5,ctl:ruleEngine=DetectionOnly"
 
+#Fix for PFDA-4499
+SecRule REQUEST_URI "@beginsWith /ginas/app" "id:6,ctl:ruleEngine=DetectionOnly"
+
 #Fix for session cookie false positive issue (PFDA-1331)
 SecRule REQUEST_URI "@beginsWith /" "phase:1,nolog,pass,id:7,ctl:ruleRemoveTargetById=941100;REQUEST_COOKIES:_precision-fda_session"
 

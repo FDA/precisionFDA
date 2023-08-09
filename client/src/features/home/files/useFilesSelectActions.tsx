@@ -21,7 +21,6 @@ import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate } from './files.api'
 import { IFile } from './files.types'
 import {
-  isActionDisabledBasedOnOwnership,
   isActionDisabledBasedOnProtected,
   isActionDisabledBasedOnRole,
 } from '../../spaces/common'

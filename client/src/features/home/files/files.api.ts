@@ -155,7 +155,7 @@ export async function createFile(name: string, scope: string, folder_id: string 
   return res.json()
 }
 
-export async function copyFilesToPrivate(ids: string[]) {
+export async function copyFilesToPrivate(ids: number[]) {
   const res = await fetch('/api/files/copy', {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids, scope: 'private' }),
