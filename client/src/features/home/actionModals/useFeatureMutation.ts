@@ -13,10 +13,10 @@ export interface RequestResponse {
   meta: Meta[];
 }
 
-async function featureRequest(resource: APIResource, { uids, featured }: { uids: string[], featured: boolean }): Promise<RequestResponse> {
+async function featureRequest(resource: APIResource, { uids, featured }: { uids: (number | string)[], featured: boolean }): Promise<RequestResponse> {
   const res = await fetch(`/api/${resource}/feature`, {
     ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ item_ids: uids, featured: featured || undefined })
+    body: JSON.stringify({ item_ids: uids, featured: featured || undefined }),
   }).then(checkStatus)
   return res.json()
 }
@@ -24,7 +24,7 @@ async function featureRequest(resource: APIResource, { uids, featured }: { uids:
 export const useFeatureMutation = ({ resource, onSuccess }: { resource: APIResource, onSuccess?: (res: any) => void }) => {
   const featureMutation = useMutation({
     mutationKey: ['feature-resource', resource],
-    mutationFn: (payload: { featured: boolean, uids: string[] }) => featureRequest(resource, payload),
+    mutationFn: (payload: { featured: boolean, uids: (number | string)[] }) => featureRequest(resource, payload),
     onSuccess: async (res) => {
       if (res.meta[0].type === 'success') {
         toast.success(`Success: ${res.meta[0].message}`)

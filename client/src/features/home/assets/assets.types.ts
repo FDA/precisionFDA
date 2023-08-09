@@ -1,17 +1,17 @@
-import { ServerScope } from "../types";
-import { FileStatus } from "../files/files.types";
+import { ServerScope } from '../types'
+import { FileState } from '../files/files.types'
 
 export enum AppActions {
-  "Run" = "Run",
-  "Run batch" = "Run batch",
-  "Track" = "Track",
-  "Edit" = "Edit",
-  "Fork" = "Fork",
-  "Export to" = "Export to",
-  "Make public" = "Make public",
-  "Delete" = "Delete",
-  "Copy to space" = "Copy to space",
-  "Attach to..." = "Attach to...",
+  'Run' = 'Run',
+  'Run batch' = 'Run batch',
+  'Track' = 'Track',
+  'Edit' = 'Edit',
+  'Fork' = 'Fork',
+  'Export to' = 'Export to',
+  'Make public' = 'Make public',
+  'Delete' = 'Delete',
+  'Copy to space' = 'Copy to space',
+  'Attach to...' = 'Attach to...',
 }
 
 export enum AppsListActions {
@@ -58,7 +58,7 @@ export interface IAsset {
   uid: string;
   dxid: string;
   entity_type: string;
-  state: FileStatus
+  state: FileState
   file_size: string;
   file_license: FileLicense,
   show_license_pending: boolean,
