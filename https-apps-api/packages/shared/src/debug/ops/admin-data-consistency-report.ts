@@ -10,6 +10,7 @@ import { EMAIL_TYPES, EmailSendInput } from '../../domain/email/email.config'
 import { EmailSendOperation } from '../../domain/email'
 import { createSendEmailTask } from '../../queue'
 import { EntityManager } from '@mikro-orm/mysql'
+import { SPACE_TYPE } from 'shared/src/domain/space/space.enum'
 
 
 export type AdminDataConsistencyReportOutput = {
@@ -185,7 +186,7 @@ AdminDataConsistencyReportOutput
         spacesInfo.push({
           id: space.id,
           name: space.name,
-          spaceType: space.type,
+          spaceType: SPACE_TYPE[space.type],
           spaceId: space.spaceId,
           state: space.state,
           hostDxOrg: space.hostDxOrg,
@@ -238,7 +239,7 @@ AdminDataConsistencyReportOutput
         scope: node.scope,
         state: node.state,
         stiType: node.stiType,
-        errors: 'Error: parent_folder_id and both scoped_parent_folder_id are both set',
+        errors: 'Error: parent_folder_id and scoped_parent_folder_id are both set',
       }
       nodesWithParents.push(nodeInfo)
     }
