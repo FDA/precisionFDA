@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { BaseOperation } from '../../utils/base-operation'
-import { OpsCtx, UserCtx, UserOpsCtx } from '../../types'
+import { OpsCtx, UserCtx } from '../../types'
 import { config, database, queue } from '../..'
 import { Job, Space, User, Folder, Node, UserFile, SpaceMembership } from '../../domain'
 import { AdminDataConsistencyReportTask, TASK_TYPE } from '../../queue/task.input'
@@ -10,7 +10,7 @@ import { EMAIL_TYPES, EmailSendInput } from '../../domain/email/email.config'
 import { EmailSendOperation } from '../../domain/email'
 import { createSendEmailTask } from '../../queue'
 import { EntityManager } from '@mikro-orm/mysql'
-import { SPACE_TYPE } from 'shared/src/domain/space/space.enum'
+import { SPACE_TYPE } from '../../domain/space/space.enum'
 
 
 export type AdminDataConsistencyReportOutput = {
@@ -36,7 +36,7 @@ export type AdminDataConsistencyReportOutput = {
 // Anything that requires the user token will be handle by UserDataConsistencyReportOperation instead
 //
 // Current checks
-//  - Unclosed files and how long they've been 
+//  - Unclosed files and how long they've been
 //  - Unterminated jobs and how long they've been running
 //  - Summary of HTTPS folders
 //  - Summary of PFDA Only (local) folders
@@ -127,7 +127,7 @@ AdminDataConsistencyReportOutput
 
       log.info({ output }, 'AdminDataConsistencyReportOperation: Completed')
 
-      this.sendReportEmail(output)        
+      this.sendReportEmail(output)
     } catch (error) {
       log.error({ error, output }, 'AdminDataConsistencyReportOperation: Error')
     }
@@ -243,7 +243,7 @@ AdminDataConsistencyReportOutput
       }
       nodesWithParents.push(nodeInfo)
     }
-    return nodesWithParents 
+    return nodesWithParents
   }
 
   private async sendReportEmail(output: AdminDataConsistencyReportOutput): Promise<void> {
