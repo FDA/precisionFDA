@@ -166,7 +166,7 @@ export const Header: React.FC = () => {
   if (!user) return null
 
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
-  const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.isEnabled
+  const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
 
   return (
     <>
@@ -286,7 +286,7 @@ export const Header: React.FC = () => {
                 content={
                   <StyledDropMenuLinks>
                     {siteSettings?.data?.cdmh && Object.keys(siteSettings.data.cdmh.data).map((s: CDMHKey) => {
-                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data?.cdmh.data[s]}>{CDMHNames[s]}</StyledLink>
+                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data.cdmh.data[s]}>{CDMHNames[s]}</StyledLink>
                     })}
                   </StyledDropMenuLinks>
                 }
