@@ -7,9 +7,9 @@ module PrecisionFda
     end
 
     def create_user!
-      first_name = ENV.fetch("PFDA_USER_FIRST_NAME", "Alice")
-      last_name = ENV.fetch("PFDA_USER_LAST_NAME", "Black")
-      email = ENV.fetch("PFDA_USER_EMAIL", "alice.black@alice.black.com")
+      first_name = ENV.fetch("PFDA_USER_FIRST_NAME", "Pfda")
+      last_name = ENV.fetch("PFDA_USER_LAST_NAME", "Default")
+      email = ENV.fetch("PFDA_USER_EMAIL", "pfda_default@dnanexus.com")
       dxuser = ENV.fetch("PFDA_USER_DXUSER", "automationtestuser")
       org_handle = ENV.fetch("PFDA_USER_ORG_HANDLE", "automationtestinggmbh")
 
