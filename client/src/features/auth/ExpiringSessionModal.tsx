@@ -9,9 +9,8 @@ import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { useAuthUserQuery } from './api'
 import {
-  onLogInWithSSO,
-  useSiteSettingsSsoButtonQuery,
-} from './useSiteSettingsSsoButtonQuery'
+  onLogInWithSSO, useSiteSettingsQuery,
+} from './useSiteSettingsQuery'
 
 const getSessionExpiredAt = () => {
   const cookie = getCookie('sessionExpiredAt')
@@ -32,7 +31,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   const sessionExpirationApproaching = !sessionExpirationPassed
   const hasExpirationReachedLimit = sessionExpirationApproaching && subSeconds(expiredAt, 59) < currentTime
   const calcDiff = differenceInSeconds(expiredAt, currentTime)
-  const { data: ssoButtonResponse } = useSiteSettingsSsoButtonQuery()
+  const { data: ssoButtonResponse } = useSiteSettingsQuery()
 
   useEffect(() => {
     if (hasExpirationReachedLimit) {

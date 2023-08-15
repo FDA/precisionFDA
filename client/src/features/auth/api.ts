@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import { IUser } from '../../types/user'
 import { backendCall } from '../../utils/api'
+import { SiteSettingsResponse } from './useSiteSettingsQuery'
 
 export function useAuthUserQuery() {
   return useQuery(['auth-user'], {
@@ -25,13 +26,8 @@ export const logout = async (): Promise<any> => {
 
 export type CDMHKey = 'cdmhPortal' | 'cdrBrowser' | 'cdrAdmin' | 'connectPortal'
 
-export interface SiteSettingsResponse {
-  isEnabled: boolean,
-  data: Record<CDMHKey, string>
-}
-
 export async function siteSettingsRequest() {
-  return axios.get('/api/site_settings/cdmh').then(r => r.data as SiteSettingsResponse)
+  return axios.get('/api/site_settings').then(r => r.data as SiteSettingsResponse)
 }
 
 interface GenerateKeyResponse {

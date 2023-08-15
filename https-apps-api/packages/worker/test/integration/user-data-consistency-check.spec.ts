@@ -96,7 +96,7 @@ describe('TASK: UserDataConsistencyReportOperation', () => {
       email: 'hello@world.org',
     }))
 
-    UserDataConsistencyReportOperation.enqueue(user1Ctx)
-    expect(queueFakes.addToQueueStub.callCount).to.equal(0)
+    await UserDataConsistencyReportOperation.enqueue(user1Ctx)
+    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
   })
 })
