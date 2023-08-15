@@ -68,11 +68,11 @@ class CopyService
     # @param folder_id [Integer] A folder ID.
     # @return [Hash] Folder attributes.
     def check_and_assign_folder(scope, folder_id)
-      return {} if folder_id.blank?
+      unless folder_id.nil?
+        folder = Folder.find(folder_id)
 
-      folder = Folder.find(folder_id)
-
-      raise FileCopyError, "Folder '#{folder.name}' doesn't belong to a scope '#{scope}'" if folder.scope != scope
+        raise FileCopyError, "Folder '#{folder.name}' doesn't belong to a scope '#{scope}'" if folder.scope != scope
+      end
 
       folder_column = Folder.scope_column_name(scope)
       opposite_folder_column = Folder.opposite_scope_column_name(scope)

@@ -66,7 +66,7 @@ void
     }, 'UserCheckupOperation: Checking if user needs a UserDataConsistencyReport')
     const doFullCheckup = UserDataConsistencyReportOperation.doesUserNeedFullCheckup(user)
     if (doFullCheckup) {
-      UserDataConsistencyReportOperation.enqueue(userCtx)
+      await UserDataConsistencyReportOperation.enqueue(userCtx)
     }
 
     // If a user has open (unclosed) files in the pFDA database, and no
