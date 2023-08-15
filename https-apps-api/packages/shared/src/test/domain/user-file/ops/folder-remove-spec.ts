@@ -4,11 +4,11 @@ import pino from 'pino'
 import { fakes, mocksReset } from '../../../mocks'
 import { Tag, User, Event, userFile, Folder } from '../../../../domain'
 import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from 'shared/src/test'
+import { create, db } from '../../..'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { SPACE_STATE, SPACE_TYPE } from 'shared/src/domain/space/space.enum'
-import { SPACE_MEMBERSHIP_ROLE } from 'shared/src/domain/space-membership/space-membership.enum'
-import { FILE_ORIGIN_TYPE } from 'shared/src/domain/user-file/user-file.enum'
+import { SPACE_STATE, SPACE_TYPE } from '../../../../domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
+import { FILE_ORIGIN_TYPE } from '../../../../domain/user-file/user-file.types'
 
 describe('remove folder tests', () => {
   let em: EntityManager<MySqlDriver>

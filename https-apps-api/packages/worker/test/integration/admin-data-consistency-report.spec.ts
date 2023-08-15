@@ -10,9 +10,9 @@ import { create, db, generate } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { EntityManager } from '@mikro-orm/mysql'
-import { FILE_ORIGIN_TYPE, FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from 'shared/src/domain/user-file/user-file.types'
-import { JOB_STATE } from 'shared/src/domain/job/job.enum'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from 'shared/src/domain/space-membership/space-membership.enum'
+import { FILE_ORIGIN_TYPE, FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 
 
 const log = getLogger()
@@ -37,8 +37,8 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     user = create.userHelper.create(em)
     await em.flush()
 
-    const filesParams = { 
-      parentId: user.id, 
+    const filesParams = {
+      parentId: user.id,
       parentType: PARENT_TYPE.USER,
       state: FILE_STATE_DX.CLOSED
     }
@@ -59,12 +59,12 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     const host = create.userHelper.create(em)
     const user1 = create.userHelper.create(em)
     const guest = create.userHelper.create(em)
-    
+
     exceedingHostSpace = create.spacesHelper.create(em)
     create.spacesHelper.addMember(em, {user: host, space: exceedingHostSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
     create.spacesHelper.addMember(em, {user: user1, space: exceedingHostSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
     create.spacesHelper.addMember(em, {user: guest, space: exceedingHostSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
-    
+
     exceedingGuestSpace = create.spacesHelper.create(em, generate.space.group())
     create.spacesHelper.addMember(em, {user: host, space: exceedingGuestSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
     create.spacesHelper.addMember(em, {user: guest, space: exceedingGuestSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})

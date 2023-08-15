@@ -6,7 +6,7 @@ import { database } from '../../../src/database'
 import {
   findFileOrAssetWithUid,
   findFileOrAssetsWithDxid,
-} from 'shared/src/domain/user-file/user-file.helper'
+} from '../../../src/domain/user-file/user-file.helper'
 
 // TODO: Migrate tests from user-file.helper.spec.ts in api and worker packages here
 

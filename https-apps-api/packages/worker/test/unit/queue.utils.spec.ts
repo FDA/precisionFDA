@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import { isJobOrphaned } from 'shared/src/queue/queue.utils'
-import { generate } from 'shared/src/test'
+import { isJobOrphaned } from '@pfda/https-apps-shared/src/queue/queue.utils'
+import { generate } from '@pfda/https-apps-shared/src/test'
 
 
 describe('queue.utils', () => {
