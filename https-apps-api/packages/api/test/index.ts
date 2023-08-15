@@ -4,7 +4,7 @@ import dirtyChai from 'dirty-chai'
 import { database, queue } from '@pfda/https-apps-shared'
 import { db, mocks } from '@pfda/https-apps-shared/src/test'
 import { createServer } from '../src/server'
-import { createApp } from 'api/src/server/app'
+import { createApp } from '../src/server/app'
 
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)

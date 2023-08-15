@@ -7,8 +7,8 @@ import { mocksReset, fakes } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from 'shared/src/domain/space-membership/space-membership.enum'
-import { SPACE_STATE } from 'shared/src/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
+import { SPACE_STATE } from '@pfda/https-apps-shared/src/domain/space/space.enum'
 
 describe('PATCH /spaces/:id/unlock', () => {
   let em: EntityManager

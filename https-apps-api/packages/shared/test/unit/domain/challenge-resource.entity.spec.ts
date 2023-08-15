@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { Challenge, ChallengeResource, User } from '@pfda/https-apps-shared/src/domain'
 import { database } from '../../../src/database'
-import { create, db, generate } from 'shared/src/test'
+import { create, db, generate } from '../../../src/test'
 
 describe('ChallengeResource tests', () => {
   let em: EntityManager<MySqlDriver>

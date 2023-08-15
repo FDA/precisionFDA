@@ -3,7 +3,7 @@ import { create, db } from '@pfda/https-apps-shared/src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
-import { FilesInput } from 'shared/src/domain/licence/license.input'
+import { FilesInput } from '../../../domain/license/license.input'
 import { entities, license, User } from '../../../domain'
 
 describe('licenses for files tests', () => {
