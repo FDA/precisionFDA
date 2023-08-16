@@ -6,7 +6,7 @@ import { expect } from 'chai'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { SPACE_MEMBERSHIP_ROLE } from 'shared/src/domain/space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { JobOptions } from 'bull'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 

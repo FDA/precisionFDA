@@ -9,8 +9,8 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import type { BasicUserJob, TASK_TYPE } from '@pfda/https-apps-shared/src/queue/task.input'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { JOB_STATE } from 'shared/src/domain/job/job.enum'
-import { UserCtx } from 'shared/src/types'
+import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { range } from 'ramda'
 
 

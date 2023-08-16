@@ -7,7 +7,7 @@ import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import type { CheckStaleJobsJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JobOptions } from 'bull'
-import { JOB_STATE } from 'shared/src/domain/job/job.enum'
+import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 
 const createCheckStaleJobsTask = async (
   user: CheckStaleJobsJob['user'],
