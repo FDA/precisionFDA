@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import { getBullJobIdForEmailOperation } from 'shared/src/domain/email/email.helper'
-import { EMAIL_TYPES } from 'shared/src/domain/email/email.config'
+import { getBullJobIdForEmailOperation } from '@pfda/https-apps-shared/src/domain/email/email.helper'
+import { EMAIL_TYPES } from '@pfda/https-apps-shared/src/domain/email/email.config'
 
 describe('email.helper', () => {
   context('getBullJobIdForEmailOperation()', () => {

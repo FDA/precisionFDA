@@ -2,12 +2,12 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
 import { SpaceEvent, spaceEvent, User } from '../../../../domain'
-import { create, db } from 'shared/src/test'
+import { create, db } from '../../..'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE }
-  from 'shared/src/domain/space-membership/space-membership.enum'
+  from '../../../../domain/space-membership/space-membership.enum'
 import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }
-  from 'shared/src/domain/space-event/space-event.enum'
+  from '../../../../domain/space-event/space-event.enum'
 
 describe('create space event tests', () => {
   let em: EntityManager<MySqlDriver>
