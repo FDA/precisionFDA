@@ -45,3 +45,6 @@
   last_name: Admin
   email: tvohradnik+cypressadmin@dnanexus.com
   org_handle: cypress.admin
+  admin_roles:
+    - site
+    - space
