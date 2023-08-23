@@ -20,6 +20,7 @@ import { useDebounce } from '../../../../components/Table/useDebounce'
 import { ModalScroll } from '../../../modal/styles'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { IAccessibleFile } from '../../databases/databases.api'
+import { ObjectGroupIcon } from '../../../../components/icons/ObjectGroupIcon'
 
 const SelectableTable = styled.table`
   padding: 0px;
@@ -65,6 +66,8 @@ const StyledFilterSection = styled.div`
 `
 
 const StyledFileDetail = styled.div`
+  display: flex;
+  align-items: center;
   margin-left: 28px;
   color: ${colors.textMediumGrey};
   font-size: 85%;
@@ -101,6 +104,35 @@ export enum DialogType {
   CHECKBOX = 'checkbox'
 }
 
+const FileIconAndLabel = ({ file }: { file: IAccessibleFile }) => {
+    let icon = null
+    let label = 'N/A'
+
+    const { private: isPrivate, public: isPublic, space_private, space_public, in_space } = file
+
+    if (isPrivate) {
+        icon = <LockIcon />
+        label = 'Private'
+    } else if (isPublic) {
+        icon = <GlobeIcon />
+        label = 'Public'
+    } else if (space_private) {
+        icon = <ObjectGroupIcon />
+        label = 'Shared in Space (Confidential)'
+    } else if (space_public) {
+        icon = <ObjectGroupIcon />
+        label = 'Shared in Space (Cooperative)'
+    } else if (in_space) {
+        icon = <ObjectGroupIcon />
+        label = 'Shared in Space'
+    }
+
+    return (<>
+        {icon}
+        {label}
+    </>)
+}
+
 const Row = ({ file, type, viewOnly, 
   radioCallback, checkboxCallback, checked }: 
   {file: IAccessibleFile, type: DialogType, viewOnly: boolean,
@@ -130,12 +162,7 @@ const Row = ({ file, type, viewOnly,
         </StyledName>
 
         <StyledFileDetail>
-          {file.private && <LockIcon />}
-          {file.public && <GlobeIcon />}
-
-          {file.private && 'Private'}
-          {file.public && 'Public'}
-
+          <FileIconAndLabel file={file} />
           <StyledFileDetailItem>{file.file_path}</StyledFileDetailItem>
           <StyledFileDetailItem>{file.user.full_name}</StyledFileDetailItem>
           <StyledFileDetailItem>{file.org.name}</StyledFileDetailItem>
@@ -211,7 +238,7 @@ export const useSelectFileModal = (title: string, type: DialogType, handleSelect
   }
 
   const isMyFile = (file: IAccessibleFile): boolean =>
-    file.user.dxuser === user.dxuser
+    file.user.dxuser === user?.dxuser
 
   const files = (filesData?.objects) ?? []
 

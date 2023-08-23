@@ -36,6 +36,9 @@ export async function fetchDatabaseRequest(dxid: string): Promise<FetchDatabaseR
 
 export interface IAccessibleFile extends IFile {
   title: string
+  space_private: boolean
+  space_public: boolean
+  in_space: boolean
 }
 
 export interface FetchAccessibleFilesResponse {
