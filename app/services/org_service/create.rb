@@ -23,7 +23,7 @@ module OrgService
         auth = DIContainer.resolve("api.auth")
 
         auth.org_update_billing_info(
-          org[:dxorg],
+          dxid,
           BILLING_INFO,
           autoConfirm: BILLING_CONFIRMATION,
         )
