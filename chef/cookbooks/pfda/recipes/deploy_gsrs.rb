@@ -96,7 +96,8 @@ tomcat_service "gsrs" do
   env_vars lazy {
     [
       { "CATALINA_PID" => "#{node[:gsrs][:tomcat_path]}/bin/tomcat.pid" },
-      { "CATALINA_OPTS" => node.run_state.dig("ssm_params", "gsrs", "catalina_opts") || node[:gsrs][:catalina_opts] }
+      { "CATALINA_OPTS" => node.run_state.dig("ssm_params", "gsrs", "catalina_opts") || node[:gsrs][:catalina_opts] },
+      { "JAVA_OPTS" => "-Djdk.util.zip.disableZip64ExtraFieldValidation=true" }
     ]
   }
   only_if { node.run_state.dig("ssm_params", "app", "environment", "GSRS_ENABLED") == "1" && node[:gsrs][:tomcat_start] }
