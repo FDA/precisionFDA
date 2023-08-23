@@ -30,7 +30,7 @@ module SpaceService
         add_leads(space, space_form)
         invite_challenge_bot(space) if @for_challenge
 
-        create_shared_or_private_project(space)
+        create_shared_or_private_project(space, space_form)
 
         if space.review?
           create_reviewer_confidential_space(space, space_form)
@@ -201,7 +201,7 @@ module SpaceService
     # Create a project of a cooperative (shared) review or private_type space.
     # @param [Space]
     #  rubocop:disable Metrics/MethodLength
-    def create_shared_or_private_project(space)
+    def create_shared_or_private_project(space, space_form)
       if ADMIN_USER != user.dxid
         admin_api.org_invite(
           space.host_dxorg,
@@ -216,31 +216,17 @@ module SpaceService
         billTo: user.billto,
       )["id"]
 
-      api.project_invite(
-        project_dxid,
-        space.host_dxorg,
-        DNAnexusAPI::PROJECT_ACCESS_ADMINISTER,
-        suppressEmailNotification: true,
-        suppressAllNotifications: true,
-      )
-
-      if space.shared? || space.groups?
-        api.project_invite(
+      if space.review?
+        # invite host admin to take the billing
+        # host admin will be the ADMIN after accepting the transfer
+        api.project_transfer(
           project_dxid,
-          space.guest_dxorg,
-          DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+          space_form.host_admin.dxid,
           suppressEmailNotification: true,
-          suppressAllNotifications: true,
         )
       end
 
-      api.project_invite(
-        project_dxid,
-        Setting.review_app_developers_org,
-        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
-        suppressEmailNotification: true,
-        suppressAllNotifications: true,
-      )
+      invite_orgs_to_project(space, project_dxid)
 
       space.host_project = project_dxid
       space.save!
@@ -278,12 +264,10 @@ module SpaceService
         suppressAllNotifications: true,
       )
 
-      api.project_invite(
+      api.project_transfer(
         project_dxid,
-        Setting.review_app_developers_org,
-        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+        space_form.host_admin.dxid,
         suppressEmailNotification: true,
-        suppressAllNotifications: true,
       )
 
       duplicate_space(space, space_form.source_space_id)
@@ -299,6 +283,25 @@ module SpaceService
 
       space_copier = CopyService::SpaceCopier.new(api: api, user: user)
       space_copier.copy(space, source_space)
+    end
+
+    def invite_orgs_to_project(space, project_dxid)
+      api.project_invite(
+        project_dxid,
+        space.host_dxorg,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      )
+      return unless space.shared? || space.groups?
+
+      api.project_invite(
+        project_dxid,
+        space.guest_dxorg,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      )
     end
 
     def guest_dx_org(uuid, _space, _space_form)

@@ -10,6 +10,7 @@ import { getDefaultQueryData } from '../../utils/expect-helper'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { SPACE_TYPE } from '@pfda/https-apps-shared/src/domain/space/space.enum'
 import { random } from '@pfda/https-apps-shared/src/test/generate'
+import { PROJECT_DESCRIBE_RES } from '@pfda/https-apps-shared/src/test/mock-responses'
 
 describe('PATCH /spaces/:id/accept', () => {
 	let em: EntityManager
@@ -88,7 +89,8 @@ describe('PATCH /spaces/:id/accept', () => {
 			expect(fakes.client.projectInviteFake.calledTwice).to.be.true()
 		})
 
-		it('adds user to the membership and does not call platform when review space', async () => {
+		it('adds user to the membership and accepts transfer projects when review space', async () => {
+			fakes.client.projectDescribeFake.returns({ id: 'project-abc', pendingTransfer: 'user-mnb' })
 
 			create.spacesHelper.create(em, { spaceId: reviewSpace.id, type: SPACE_TYPE.REVIEW, hostDxOrg: `org-pfda..space_host_${random.dxstr()}`, })
 			await em.flush()
@@ -100,6 +102,8 @@ describe('PATCH /spaces/:id/accept', () => {
 
 			expect(fakes.client.projectInviteFake.notCalled).to.be.true()
 			expect(fakes.client.projectCreateFake.notCalled).to.be.true()
+			expect(fakes.client.projectDescribeFake.calledTwice).to.be.true()
+			expect(fakes.client.projectAcceptTransferFake.calledTwice).to.be.true()
 
 			// needs to clear identity map
 			em.clear()
@@ -109,9 +113,33 @@ describe('PATCH /spaces/:id/accept', () => {
 			)
 
 			expect(privateSpaces[0].spaceMemberships.getItems().length).to.eq(1)
-
 		})
 
+		it('add user to the membership when review old space', async () => {
+			fakes.client.projectDescribeFake.returns(PROJECT_DESCRIBE_RES)
+
+			create.spacesHelper.create(em, { spaceId: reviewSpace.id, type: SPACE_TYPE.REVIEW, hostDxOrg: `org-pfda..space_host_${random.dxstr()}`, })
+			await em.flush()
+
+			const { body } = await supertest(getServer())
+				.patch(`/spaces/${reviewSpace.id}/accept`)
+				.query({ ...getDefaultQueryData(hostLead) })
+				.expect(204)
+
+			expect(fakes.client.projectInviteFake.notCalled).to.be.true()
+			expect(fakes.client.projectCreateFake.notCalled).to.be.true()
+			expect(fakes.client.projectDescribeFake.calledTwice).to.be.true()
+			expect(fakes.client.projectAcceptTransferFake.notCalled).to.be.true()
+
+			// needs to clear identity map
+			em.clear()
+			const privateSpaces = await em.getRepository(Space).find(
+				{ spaceId: reviewSpace.id },
+				{ populate: ['spaceMemberships'] },
+			)
+
+			expect(privateSpaces[0].spaceMemberships.getItems().length).to.eq(1)
+		})
 	})
 
 	context('with guest_lead', () => {
