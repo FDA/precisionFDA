@@ -4,8 +4,10 @@ import { IExecution } from '../executions/executions.types'
 import { IFilter, IMeta } from '../types'
 import { ISpace } from '../../spaces/spaces.types'
 import { formatScopeQ, Params, prepareListFetch } from '../utils'
-import { ComputeInstance, IApp, ListedFiles } from './apps.types'
+import { ComputeInstance, IApp } from './apps.types'
 import { License } from '../licenses/types'
+import { fetchAccessibleFiles, FetchAccessibleFilesResponse } from '../databases/databases.api'
+import { FileScope } from '../files/files.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -32,20 +34,20 @@ export async function runJob(request: RunJobRequest): Promise<RunJobResponse> {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify(request),
   })).json()
-  if(res.failure) throw new Error(res.failure)
+  if (res.failure) throw new Error(res.failure)
   return res
 }
 
 export async function fetchApps(filters: IFilter[], params: Params): Promise<FetchAppsQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = '?' + new URLSearchParams(query as {}).toString()
+  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
   const scopeQ = formatScopeQ(params.scope)
 
   const res = await fetch(`/api/apps${scopeQ}${paramQ}`).then(checkStatus)
   return res.json()
 }
 
-export async function fetchApp(uid: string): Promise<{ app: IApp, meta: any}> {
+export async function fetchApp(uid: string): Promise<{ app: IApp, meta: any }> {
   const res = await (await fetch(`/api/apps/${uid}`)).json()
   return res
 }
@@ -63,31 +65,23 @@ export async function fetchUserComputeInstances(): Promise<ComputeInstance[]> {
   return res
 }
 
-export async function fetchFilteredFiles(searchString: string, scopes: string[]): Promise<ListedFiles> {
-  const res = await fetch('/api/list_files', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      'scopes': scopes,
-      'search_string': searchString,
-      'states': ['closed'], 'describe':
-        { 'include': { 'user': true, 'org': true, 'license': true, 'all_tags_list': false }},
-      'offset': 0, 'limit': 1000,
-    }),
+export async function fetchFilteredFiles(searchString: string, scopes: FileScope[]): Promise<FetchAccessibleFilesResponse> {
+  return fetchAccessibleFiles({
+    scopes,
+    search_string: searchString,
+    states: [ 'closed' ],
+    describe: {
+      include: {
+        user: true,
+        org: true,
+        license: true,
+        all_tags_list: false,
+      },
+    },
+    offset: 0,
+    limit: 1000,
+    ignore_challenge_bot: true,
   })
-  return res.json()
-}
-
-export async function fetchFiles(scopes: string[]): Promise<ListedFiles> {
-  const res = await fetch('/api/list_files', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      'scopes': scopes,
-      'states': ['closed'], 'describe':
-        { 'include': { 'user': true, 'org': true, 'license': true, 'all_tags_list': false }},
-      'offset': 0, 'limit': 1000,
-    }),
-  })
-  return res.json()
 }
 
 export interface FetchAppsExecutionsQuery {
@@ -133,7 +127,7 @@ export async function deleteAppsRequest(ids: string[]): Promise<any> {
   return res.json()
 }
 
-export async function copyAppsToPrivate(ids: string[]) {
+export async function copyAppsToPrivate(ids: number[]) {
   const res = await fetch('/api/apps/copy', {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify({ item_ids: ids, scope: 'private' }),

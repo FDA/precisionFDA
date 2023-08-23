@@ -38,9 +38,9 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
 } from './styles'
-import { CDMHNames, useSiteSettingsQuery } from './useSiteSettingsQuery'
 import { DataPortalIcon } from '../icons/DataPortalIcon'
 import { useMainDataPortal } from '../../features/data-portals/queries'
+import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -140,7 +140,7 @@ const getUsername = (user: any) => {
 export const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
-    const siteSettings = useSiteSettingsQuery(!!user)
+  const siteSettings = useSiteSettingsQuery()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
     useState(false)
 
@@ -166,7 +166,7 @@ export const Header: React.FC = () => {
   if (!user) return null
 
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
-  const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.isEnabled
+  const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
 
   return (
     <>
@@ -285,8 +285,8 @@ export const Header: React.FC = () => {
                 trigger="click"
                 content={
                   <StyledDropMenuLinks>
-                    {siteSettings?.data?.data && Object.keys(siteSettings.data.data).map((s: CDMHKey) => {
-                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data.data[s]}>{CDMHNames[s]}</StyledLink>
+                    {siteSettings?.data?.cdmh && Object.keys(siteSettings.data.cdmh.data).map((s: CDMHKey) => {
+                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data.cdmh.data[s]}>{CDMHNames[s]}</StyledLink>
                     })}
                   </StyledDropMenuLinks>
                 }

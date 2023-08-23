@@ -582,6 +582,7 @@ class PlatformClient {
  * Creates a new project
  * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
  * @param {string} name - OPTIONAL - overrides new project name.
+ * @param {string} billTo - OPTIONAL - overrides new project billTo.
  * @param {Space} space - used for project name, can be overriden by name param.
  * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
  */
@@ -591,7 +592,7 @@ class PlatformClient {
       method: 'POST',
       data: {
         name: params.name ?? `precisionfda-${params.space.uid}-${SPACE_MEMBERSHIP_SIDE[params.admin.side]}`,
-        billTo: params.admin.user.getEntity().organization.getEntity().getDxOrg(),
+        billTo: params.billTo ?? params.admin.user.getEntity().organization.getEntity().getDxOrg(),
       },
       url,
     }
@@ -621,11 +622,36 @@ class PlatformClient {
     return await this.sendRequest(options, url)
   }
 
+  /**
+   * Describes the specified project.
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-describe
+   * @param {string} projectDxid - ProjectDxID.
+   * @param {object} body - OPTIONAL - Inputs.
+   * @return {any}
+  */
   async projectDescribe(params: any): Promise<any> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: params.body,
+      data: params.body ?? {},
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  /**
+   * Accept billing responsibility for the project, possibly on behalf of an org. 
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-accepttransfer
+   * @param {string} billTo - billing account (user or org ID).
+   * @return {any}
+  */
+  async projectAcceptTransfer(params: any): Promise<any> {
+    const url = `${config.platform.apiUrl}/${params.projectDxid}/acceptTransfer`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        billTo: params.billTo,
+      },
       url,
     }
     return await this.sendRequest(options, url)

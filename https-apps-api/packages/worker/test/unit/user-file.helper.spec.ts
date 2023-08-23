@@ -7,7 +7,7 @@ import {
   splitFolderPath,
   detectIntersectedTraverse,
   findFolderForPath,
-} from 'shared/src/domain/user-file/user-file.helper'
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.helper'
 
 describe('user-file.helper', () => {
   context('parseFoldersFromClient()', () => {

@@ -45,7 +45,7 @@ export async function addData({ spaceId, folderId, uids }: { spaceId: string, fo
 export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknown> {
   const res = await fetch(`/api/spaces/${id}/accept`, {
     ...getApiRequestOpts('POST'),
-   })
+  })
   return res.json()
 }
 

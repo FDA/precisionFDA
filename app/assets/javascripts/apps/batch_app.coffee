@@ -144,7 +144,10 @@ class BatchAppNewView
           inputs: {}
         }
         params.instance_type = @instanceType.peek() if @instanceType.peek()?
-        params.space_id = @spaceId.peek() if @spaceId.peek()?
+        if @spaceId.peek()?
+          params.scope = "space-#{@spaceId()}"
+        else
+          params.scope = "private"
 
         params.inputs[batchData.name] = batchFileIds if batchFileIds?
         for inputModel in @otherInputSpec()
@@ -191,7 +194,10 @@ class BatchAppNewView
         inputs: {}
       }
       params.instance_type = @instanceType.peek() if @instanceType.peek()?
-      params.space_id = @spaceId.peek() if @spaceId.peek()?
+      if @spaceId.peek()?
+        params.scope = "space-#{@spaceId()}"
+      else
+        params.scope = "private"
 
       params.inputs[batchData.name] = currentFileId if currentFileId?
 

@@ -2,8 +2,8 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
 import { database, getLogger } from '@pfda/https-apps-shared'
-import { db } from 'shared/src/test'
-import { mocksRestore, mocksSetup } from 'shared/src/test/mocks'
+import { db } from '../src/test'
+import { mocksRestore, mocksSetup } from '../src/test/mocks'
 
 const log = getLogger()
 
