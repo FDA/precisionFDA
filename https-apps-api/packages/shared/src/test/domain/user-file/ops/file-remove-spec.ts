@@ -4,10 +4,10 @@ import pino from 'pino'
 import { fakes, mocksReset } from '../../../mocks'
 import { Tag, User, UserFile, Event, userFile } from '../../../../domain'
 import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from 'shared/src/test'
+import { create, db } from '../../..'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { SPACE_STATE, SPACE_TYPE } from 'shared/src/domain/space/space.enum'
-import { SPACE_MEMBERSHIP_ROLE } from 'shared/src/domain/space-membership/space-membership.enum'
+import { SPACE_STATE, SPACE_TYPE } from '../../../../domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
 
 describe('remove file tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -234,9 +234,9 @@ describe('remove file tests', () => {
       log,
       user: userCtx,
     })
-    
+
     await op.execute({ id: file.id })
-    
+
     // verify file was deleted
     const loadedFile = em.findOne(UserFile, file.id)
     expect(loadedFile).to.be.null

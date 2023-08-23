@@ -325,9 +325,12 @@ class ApiController < ApplicationController
 
     search_string = params[:search_string].presence || ""
 
-    result = files.eager_load(:license, user: :org).
-      where("nodes.name LIKE ?", "%#{search_string}%").
-      order(id: :desc).map do |file|
+    query = files.eager_load(:license, user: :org).
+      where("nodes.name LIKE ?", "%#{search_string}%")
+
+    query = query.where.not("users.dxuser = ?", CHALLENGE_BOT_DX_USER) if unsafe_params[:ignore_challenge_bot]
+
+    result = query.order(id: :desc).map do |file|
       describe_for_api(file, unsafe_params[:describe])
     end.compact
 

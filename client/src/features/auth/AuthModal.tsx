@@ -3,13 +3,11 @@ import { ButtonSolidBlue } from '../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
-import {
-  onLogInWithSSO,
-  useSiteSettingsSsoButtonQuery,
-} from './useSiteSettingsSsoButtonQuery'
+import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
+
 
 export const AuthModal: React.FC<UseModal> = props => {
-  const { data: ssoButtonResponse } = useSiteSettingsSsoButtonQuery()
+  const { data } = useSiteSettingsQuery()
   return (
     <ModalNext
       isShown={props.isShown}
@@ -28,8 +26,8 @@ export const AuthModal: React.FC<UseModal> = props => {
       </Content>
       <Footer>
         <ButtonRow>
-          {ssoButtonResponse?.isEnabled && (
-            <ButtonSolidBlue onClick={() => onLogInWithSSO(ssoButtonResponse)}>
+          {data?.ssoButton.isEnabled && (
+            <ButtonSolidBlue onClick={() => onLogInWithSSO(data)}>
               Log In With SSO
             </ButtonSolidBlue>
           )}

@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import { ButtonGroup } from '../../../../components/Button/ButtonGroup'
-import { ListedFile } from '../apps.types'
 import { Button } from '../../../../components/Button'
 import { DialogType, useSelectFileModal } from '../../files/actionModals/useSelectFileModal'
+import { IAccessibleFile } from '../../databases/databases.api'
 
 export const SelectFileInput = ({ value, onChange, dialogTitle, dialogSubtitle, scope, disabled }:
-  { value?: ListedFile, onChange: (file: ListedFile | undefined) => void, dialogTitle: string, 
+  { value?: IAccessibleFile, onChange: (file: IAccessibleFile | undefined) => void, dialogTitle: string,
     dialogSubtitle?: string, scope?: string, disabled?: boolean }) => {
   const [selectedFile, setSelectedFile] = useState(value)
 
-  const handleSelect = (selectedFiles: ListedFile[]) => {
+  const handleSelect = (selectedFiles: IAccessibleFile[]) => {
     const selected = selectedFiles[0] // we care only about the first one
     onChange(selected)
     setSelectedFile(selected)
