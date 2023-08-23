@@ -19,11 +19,11 @@ import { Loader } from '../../../../components/Loader'
 import { StyledBackLink } from '../../home.styles'
 import { NotFound } from '../../show.styles'
 import { ResourceScope } from '../../types'
-import { createDatabaseRequest, fetchAccessibleFiles } from '../databases.api'
+import { createDatabaseRequest, fetchAccessibleFiles, IAccessibleFile } from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
 
 const useAccessibleFiles = (inputValue: string) => useQuery(['accessible-files', inputValue],
-  () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }), {
+  () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects), {
     onError: (e: Error) => {
       toast.error(`Error: fetching files '${e.message}'`)
     },
@@ -162,7 +162,7 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
     })
   }
 
-  const filesOptions = accessibleFiles.filter((file: any) => file.scope !== 'public')
+  const filesOptions = accessibleFiles.filter((file: IAccessibleFile) => file.scope !== 'public')
     .map(file => ({
       label: file.title,
       value: file.uid,

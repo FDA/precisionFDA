@@ -13,7 +13,8 @@
     "strictPropertyInitialization": false,
     "baseUrl": "./packages",
     "paths": {
-      "@pfda/https-apps-shared": ["shared/src"]
+      "@pfda/https-apps-shared": ["shared/src"],
+      "*": ["node_modules/*"]
     },
   }
 }

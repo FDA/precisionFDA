@@ -3,6 +3,8 @@ module Api
   class DataPortalsController < ApiController
     before_action :require_login_or_guest
 
+    wrap_parameters false
+
     def create
       space = provision_space
 
@@ -118,6 +120,7 @@ module Api
     def file_params
       params.
         permit(
+          :id,
           :name,
           :description,
         )

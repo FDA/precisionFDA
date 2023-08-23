@@ -37,7 +37,7 @@ class PlatformRack < BaseRack
   end
 
   def post_project_new(params)
-    [200, {}, [{ id: "project-#{params["name"]}"}.to_json]]
+    [200, {}, [{ id: "project-#{params["name"]}" }.to_json]]
   end
 
   def post_set_member_access(_params)
@@ -88,6 +88,10 @@ class PlatformRack < BaseRack
     [200, {}, [{ 'user-1': "NONE" }.to_json]]
   end
 
+  def post_project_transfer(params)
+    [200, {}, [{ id: "project-#{params['name']}" }.to_json]]
+  end
+
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
 
@@ -131,6 +135,8 @@ class PlatformRack < BaseRack
         "file_rename"
       when %r{.*\/decreasePermissions}
         "project_decrease_permissions"
+      when %r{.*/transfer}
+        "project_transfer"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end

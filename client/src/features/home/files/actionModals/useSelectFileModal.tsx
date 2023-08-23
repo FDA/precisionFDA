@@ -11,7 +11,6 @@ import { Radio } from '../../../../components/Radio'
 import { Checkbox } from '../../../../components/Checkbox'
 import { colors } from '../../../../styles/theme'
 import { StyledInput } from '../../../../components/InputText'
-import { ListedFile } from '../../apps/apps.types'
 import { LockIcon } from '../../../../components/icons/LockIcon'
 import { GlobeIcon } from '../../../../components/icons/GlobeIcon'
 import { ArrowUpRightFromSquareIcon } from '../../../../components/icons/ArrowUpRightFromSquareIcon'
@@ -20,6 +19,8 @@ import { Loader } from '../../../../components/Loader'
 import { useDebounce } from '../../../../components/Table/useDebounce'
 import { ModalScroll } from '../../../modal/styles'
 import { useAuthUser } from '../../../auth/useAuthUser'
+import { IAccessibleFile } from '../../databases/databases.api'
+import { ObjectGroupIcon } from '../../../../components/icons/ObjectGroupIcon'
 
 const SelectableTable = styled.table`
   padding: 0px;
@@ -65,6 +66,8 @@ const StyledFilterSection = styled.div`
 `
 
 const StyledFileDetail = styled.div`
+  display: flex;
+  align-items: center;
   margin-left: 28px;
   color: ${colors.textMediumGrey};
   font-size: 85%;
@@ -101,11 +104,40 @@ export enum DialogType {
   CHECKBOX = 'checkbox'
 }
 
+const FileIconAndLabel = ({ file }: { file: IAccessibleFile }) => {
+    let icon = null
+    let label = 'N/A'
+
+    const { private: isPrivate, public: isPublic, space_private, space_public, in_space } = file
+
+    if (isPrivate) {
+        icon = <LockIcon />
+        label = 'Private'
+    } else if (isPublic) {
+        icon = <GlobeIcon />
+        label = 'Public'
+    } else if (space_private) {
+        icon = <ObjectGroupIcon />
+        label = 'Shared in Space (Confidential)'
+    } else if (space_public) {
+        icon = <ObjectGroupIcon />
+        label = 'Shared in Space (Cooperative)'
+    } else if (in_space) {
+        icon = <ObjectGroupIcon />
+        label = 'Shared in Space'
+    }
+
+    return (<>
+        {icon}
+        {label}
+    </>)
+}
+
 const Row = ({ file, type, viewOnly, 
   radioCallback, checkboxCallback, checked }: 
-  {file: ListedFile, type: DialogType, viewOnly: boolean, 
-    radioCallback: (file: ListedFile) => void, 
-    checkboxCallback: (checked: boolean, file: ListedFile) => void, checked?: boolean}) => 
+  {file: IAccessibleFile, type: DialogType, viewOnly: boolean,
+    radioCallback: (file: IAccessibleFile) => void,
+    checkboxCallback: (checked: boolean, file: IAccessibleFile) => void, checked?: boolean}) =>
   (
     <StyledRow onClick={() => {
       if (!viewOnly) {
@@ -130,12 +162,7 @@ const Row = ({ file, type, viewOnly,
         </StyledName>
 
         <StyledFileDetail>
-          {file.private && <LockIcon />}
-          {file.public && <GlobeIcon />}
-
-          {file.private && 'Private'}
-          {file.public && 'Public'}
-
+          <FileIconAndLabel file={file} />
           <StyledFileDetailItem>{file.file_path}</StyledFileDetailItem>
           <StyledFileDetailItem>{file.user.full_name}</StyledFileDetailItem>
           <StyledFileDetailItem>{file.org.name}</StyledFileDetailItem>
@@ -154,11 +181,11 @@ const Row = ({ file, type, viewOnly,
  * 
  * @returns list of selected files
  */
-export const useSelectFileModal = (title: string, type: DialogType, handleSelect: (files: ListedFile[]) => void, 
+export const useSelectFileModal = (title: string, type: DialogType, handleSelect: (files: IAccessibleFile[]) => void,
   subtitle?: string, scope?: string) => {
 
   const user = useAuthUser()
-  const listedFiles: ListedFile[] = []
+  const listedFiles: IAccessibleFile[] = []
   const { isShown, setShowModal } = useModal()
   const [selectedFiles, setSelectedFiles] = useState(listedFiles)
   const [filter, setFilter] = useState('')
@@ -170,21 +197,21 @@ export const useSelectFileModal = (title: string, type: DialogType, handleSelect
     return fetchFilteredFiles(searchText, scopes)
   })
 
-  const radioCallback = (file: ListedFile) => {
+  const radioCallback = (file: IAccessibleFile) => {
     setSelectedFiles([file])
   }
 
-  const addFile = (file: ListedFile) => {
+  const addFile = (file: IAccessibleFile) => {
     setSelectedFiles(prev => [...prev, file])
   }
 
-  const removeFile = (file: ListedFile) => {
+  const removeFile = (file: IAccessibleFile) => {
     setSelectedFiles(prev => 
       [...prev.filter(item => file.id !== item.id)],
     )
   }
 
-  const checkboxCallback = (checked: boolean, file: ListedFile) => {
+  const checkboxCallback = (checked: boolean, file: IAccessibleFile) => {
     if (checked) {
       addFile(file)
     } else {
@@ -210,8 +237,8 @@ export const useSelectFileModal = (title: string, type: DialogType, handleSelect
     setShowModal(false)
   }
 
-  const isMyFile = (file: ListedFile): boolean => 
-    file.user.dxuser === user.dxuser
+  const isMyFile = (file: IAccessibleFile): boolean =>
+    file.user.dxuser === user?.dxuser
 
   const files = (filesData?.objects) ?? []
 
@@ -251,9 +278,9 @@ export const useSelectFileModal = (title: string, type: DialogType, handleSelect
           {(loadingFilesStatus === 'success') &&
             <ModalScroll><SelectableTable>
               <tbody>
-                {files.filter((file: ListedFile) =>
+                {files.filter((file: IAccessibleFile) =>
                   ((showOnlyMyFiles) ? isMyFile(file) && showOnlyMyFiles : true))
-                  .map((file: ListedFile) =>
+                  .map((file: IAccessibleFile) =>
                     <Row file={file} type={type} viewOnly={false} key={file.id}
                       radioCallback={radioCallback} checkboxCallback={checkboxCallback}
                       checked={selectedFiles.some(selected => file.id === selected.id)} />,

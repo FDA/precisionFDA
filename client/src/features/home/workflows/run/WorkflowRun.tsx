@@ -8,7 +8,13 @@ import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Select from 'react-select'
 import DefaultLayout from '../../../../layouts/DefaultLayout'
-import { fetchLicensesOnWorkflow, fetchWorkflow, runWorkflow, RunWorkflowInput, RunWorkflowRequest } from '../workflows.api'
+import {
+  fetchLicensesOnWorkflow,
+  fetchWorkflow,
+  runWorkflow,
+  RunWorkflowInput,
+  RunWorkflowRequest,
+} from '../workflows.api'
 import { InputOutput, IWorkflow, Stage } from '../workflows.types'
 import { InputText } from '../../../../components/InputText'
 import { InputError } from '../../../../components/form/styles'
@@ -17,26 +23,37 @@ import { CubeIcon } from '../../../../components/icons/CubeIcon'
 import { ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup } from '../../../../components/form/FieldGroup'
 import { JobRunInput } from '../../apps/run/JobRunInput'
-import { AcceptedLicense, InputSpec, INPUT_TYPES_CLASSES, ListedFile, SelectType } from '../../apps/apps.types'
-import { Section, SectionHeader, SectionBody, StyledLine, TopboxItem, StyledForm, Topbox, StyledBackLink, WrapSelect } from '../../apps/run/styles'
-import { StyledStageHeader, WorkflowConfiguration, StyledAnalysisName } from './styles'
+import { AcceptedLicense, INPUT_TYPES_CLASSES, InputSpec, SelectType } from '../../apps/apps.types'
+import {
+  Section,
+  SectionBody,
+  SectionHeader,
+  StyledBackLink,
+  StyledForm,
+  StyledLine,
+  Topbox,
+  TopboxItem,
+  WrapSelect,
+} from '../../apps/run/styles'
+import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
 import { GearIcon } from '../../../../components/icons/GearIcon'
 import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
-import { IFile } from '../../files/files.types'
 import { fetchFile } from '../../files/files.api'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { getSpaceIdFromScope } from '../../../../utils'
 import { IUser } from '../../../../types/user'
 import { fetchAndConvertSelectableSpaces } from '../../apps/run/job-run-helper'
+import { IAccessibleFile } from '../../databases/databases.api'
+import { IFile } from '../../files/files.types'
 
 interface WorkflowRunData {
   analysisName: string;
   jobLimit: number;
   spaceScope?: SelectType | null;
   inputs: {
-    [key: string]: string | boolean | ListedFile | undefined,
+    [key: string]: string | boolean | IAccessibleFile | undefined,
   };
 }
 
@@ -51,21 +68,22 @@ const ErrorMessageForField = ({ errors, fieldName }:
 const getLabel = (input: InputOutput) =>
   input.label ? input.label : input.name
 
-const convertToListedFile = (file: IFile): ListedFile => {
+const convertToAccessibleFile = (file: IFile): IAccessibleFile => {
   return {
-    id: parseInt(file.id, 10),
+    id: file.id,
     uid: file.uid,
     title: file.name,
-  } as ListedFile
+  } as IAccessibleFile
 }
 
-const getDefaultValue = (input: InputOutput, defaultFiles?: IFile[]): string | boolean | ListedFile | undefined => {
+const getDefaultValue = (input: InputOutput, defaultFiles?: IFile[]): string | boolean | IAccessibleFile | undefined => {
   const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
   if (input.class === INPUT_TYPES_CLASSES.FILE) {
     const defaultFile = defaultFiles?.find(file => file.uid === defaultValue)
-    return (defaultFile) ? convertToListedFile(defaultFile) : undefined
+    return (defaultFile) ? convertToAccessibleFile(defaultFile) : undefined
   }
-    return defaultValue
+
+  return defaultValue
 }
 
 const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[], defaultFiles?: IFile[]): WorkflowRunData => {
@@ -94,7 +112,7 @@ const fetchLicensesOnFiles = (jobData: WorkflowRunData): Promise<License[]> => {
   const { inputs } = jobData
   Object.keys(inputs).forEach(key => {
     if (typeof inputs[key] === 'object') {
-      ids.push((inputs[key] as ListedFile).id)
+      ids.push((inputs[key] as IAccessibleFile).id)
     }
   })
   if (ids.length > 0) {
@@ -193,7 +211,7 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
     const value = vals.inputs[key]
     const input: RunWorkflowInput = {
       input_name: key.replace('#', '.'),
-      input_value: (typeof value === 'object') ? (value as ListedFile).uid : value,
+      input_value: (typeof value === 'object') ? (value as IAccessibleFile).uid : value,
       class: classes.get(key) ?? '',
     }
     inputs.push(input)
