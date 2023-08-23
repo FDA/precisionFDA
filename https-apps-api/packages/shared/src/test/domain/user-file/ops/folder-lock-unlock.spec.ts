@@ -4,7 +4,7 @@ import pino from 'pino'
 import { mocksReset } from '../../../mocks'
 import { User, userFile, Folder } from '../../../../domain'
 import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from 'shared/src/test'
+import { create, db } from '../../..'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 
 describe('lock/unlock folder tests', () => {

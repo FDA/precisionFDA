@@ -2,7 +2,7 @@
 import { BaseOperation } from '../../../utils/base-operation'
 import { UserCtx, UserOpsCtx } from '../../../types'
 import { PlatformClient } from '../../../platform-client'
-import { Folder, Node, UserFile } from '../../user-file'
+import {  Folder, Node, UserFile } from '../../user-file'
 import { User } from '../..'
 import { Task, TASK_TYPE } from '../../../queue/task.input'
 import { config, database, queue } from '@pfda/https-apps-shared'
@@ -15,7 +15,7 @@ import { createSendEmailTask } from '../../../queue'
 import { userDataConsistencyReportTemplate } from '../../email/templates/mjml/user-data-consistency-report.template'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { wrap } from '@mikro-orm/core'
-
+import { SPACE_TYPE } from '../../space/space.enum'
 
 export type UserDataConsistencyReportOutput = {
   user?: {
@@ -154,7 +154,7 @@ UserDataConsistencyReportOutput
         const correctBillTo = (projectDescribe.billTo === user.billTo())
         return {
           status: correctBillTo ? `billTo is correct (${projectDescribe.billTo})`
-                   : `Error: Project billTo (${projectDescribe.billTo}) does not match user's org ${user.billTo()}`,
+                   : `Error: Project billTo (${projectDescribe.billTo}) does not match user's org (${user.billTo()})`,
           projectDescribe,
         }
       }
@@ -197,48 +197,49 @@ UserDataConsistencyReportOutput
 
         const hasInvalidFolderState = (node.parentFolderId && node.scopedParentFolderId)
         if (hasInvalidFolderState) {
-          errors.push('Error: parent_folder_id and both scoped_parent_folder_id are both set')
+          errors.push('Error: parent_folder_id and scoped_parent_folder_id are both set')
         }
-
         if (node.isFolder) {
+          // Check if files in https folder have the wrong location
           if (node.project) {
             // If node.project is set for a folder, it means it should exist on platform
             // make sure all the files inside it have the right prefix
             const folder = await folderRepo.findOne({ id: node.id })
             if (folder) {
-              const children = folder?.children
+              const children = await folder.children.loadItems()
               for (const child of children) {
                 if (child.isFile && child.dxid) {
                   const response = await client.fileDescribe({ fileDxid: child.dxid, projectDxid: child.project! })
                     .catch((error) => error.props.clientResponse)
-                  const nodePath = await getNodePath(em, child.parentFolder)
+                  // child must be belong to parentFolder or scopedParentFolder
+                  const parentFolder = child.parentFolder ?? child.scopedParentFolder
+                  const nodePath = parentFolder ? await getNodePath(em, parentFolder) : '/'
                   if (response?.folder !== nodePath) {
-                    errors.push(`Error: File ${child.dxid} location on platform ${response?.folder} does not match location on pFDA ${nodePath}. Folder id = ${folder.id}`)
+                    errors.push(`Error: File ${child.dxid} location on platform ${response?.folder} does not match location on pFDA ${nodePath}. Folder id = ${node.id}`)
                   } else if (response.error) {
                     errors.push(`Error: ${response.error.message}`)
-                  } else {
-                    errors.push(`Error: something went wrong when checking file ${node.project}:/${child.dxid} on platform. Response: ${JSON.stringify(response)}`)
                   }
                 }
               }
             }
           } else {
-            errors.push(`Error: folder does not exist on platform or is missing project (${node.project})`)
+            errors.push(`Error: folder does not exist on platform or is missing project`)
           }
         } else if (node.isFile || node.isAsset) {
           if (node.project && node.dxid) {
+            // File exists on platform, check if its parent path is the same
+
+            const parentFolder = node.parentFolder ?? node.scopedParentFolder
+            // skip checking nodes in https folder
+            if (parentFolder && parentFolder.project) continue
+
             const response = await client.fileDescribe({ fileDxid: node.dxid, projectDxid: node.project })
               .catch((error) => error.props.clientResponse)
-            if (response?.id === node.dxid) {
-              // File exists on platform, check if its parent path is the same
-              const nodePath = node.parentFolder ? await getNodePath(em, node.parentFolder) : '/'
-              if (response.folder !== nodePath) {
-                errors.push(`Error: File ${node.dxid} location on platform ${response.folder} does not match location on pFDA ${nodePath}. Folder id: ${node.id}. File type: ${node.stiType}`)
-              }
+            const nodePath = parentFolder ? await getNodePath(em, parentFolder) : '/'
+            if (response.folder !== nodePath) {
+              errors.push(`Error: File ${node.dxid} location on platform ${response.folder} does not match location on pFDA ${nodePath}. File type: ${node.stiType}`)
             } else if (response.error) {
               errors.push(`Error: ${response.error.message}`)
-            } else {
-              errors.push(`Error: something went wrong when checking file ${node.project}:/${node.dxid} on platform. Response: ${JSON.stringify(response)}`)
             }
           } else {
             errors.push(`Error: node does not exist on platform or is missing project (${node.project}) / dxid (${node.dxid})`)
@@ -271,7 +272,8 @@ UserDataConsistencyReportOutput
 
 
       // Check the billTo of any Spaces to which the user is a lead
-      //
+      // Review spaces for the fix on billTo
+      // Private spaces for the legacy org conversion
       const spacesInfo: any[] = []
 
       await user.spaceMemberships.init()
@@ -280,29 +282,35 @@ UserDataConsistencyReportOutput
         if (membership.isLead()) {
           await membership.spaces.init()
           for (const space of membership.spaces) {
+            const isCheckedSpace = [SPACE_TYPE.REVIEW, SPACE_TYPE.PRIVATE_TYPE].includes(space.type)
+            if (!isCheckedSpace) continue
+
             const errors: string[] = []
-            const membershipSide = (membership.side === SPACE_MEMBERSHIP_SIDE.HOST) ? 'host' : 'guest'
-            const spaceOrg = space[`${membershipSide}DxOrg`]
+            const isHostSide = membership.side === SPACE_MEMBERSHIP_SIDE.HOST
+            const membershipSide = isHostSide ? 'host' : 'guest'
             const projectDxid = space[`${membershipSide}Project`]
-            const projectInfo =  await generateProjectInfo(projectDxid)
-            if (typeof projectInfo === 'object' && projectInfo.status.startsWith('Error')) {
-              errors.push(projectInfo.status)
+            const spaceType = SPACE_TYPE[space.type]
+            let projectInfo: any = {}
+
+            if (projectDxid) {
+              projectInfo = await client.projectDescribe({ projectDxid, body: {} })
+              if (projectInfo.billTo !== user.billTo()) {
+                errors.push(`Error: [space-${space.id} (type: ${spaceType})] Project billTo (${projectInfo.billTo}) does not match ${membershipSide} lead's org (${user.billTo()})`)
+              }
+            } else {
+              // Host project is always required
+              // Guest project maybe missing when guest lead has not activated yet
+              if (isHostSide) {
+                errors.push(`Error: [space-${space.id} (type: ${spaceType})] Host Project is missing`)
+              }
             }
-
-            // Double check admin list from platform
-            const orgDescribe = await client.orgDescribe({ dxid: spaceOrg })
-            const userInAdminList = orgDescribe.admins && orgDescribe.admins.find(x => x === user.dxid)
-            if (!userInAdminList) errors.push(`Error: user is not in platform's admin list - ${orgDescribe.admins}`)
-
-            const members = await client.orgFindMembers({ orgDxid: spaceOrg })
-            const userMembershipOnPlatform = members.results.filter(x => x.id === user.dxid)
 
             const hostLead = await space.findHostLead()
             const guestLead = await space.findGuestLead()
             if (errors.length) {
               spacesInfo.push({
                 id: space.id,
-                spaceType: space.type,
+                spaceType: spaceType,
                 state: space.state,
                 spaceId: space.spaceId,
                 hostDxOrg: space.hostDxOrg,
@@ -311,7 +319,6 @@ UserDataConsistencyReportOutput
                 guestLead: guestLead?.dxuser,
                 side: membership.side ? 'Guest' : 'Host',
                 projectInfo,
-                userMembershipOnPlatform,
                 status: errors.join('\n')
               })
             }

@@ -57,6 +57,26 @@ module DXClient
         call(project_dxid, "decreasePermissions", user_dxid => level)
       end
 
+      # Invite another account to take over the billing for the project.
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-transfer
+      # @param project_dxid [String] Project to transfer.
+      # @param invitee [String] UserID or user's email.
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def project_transfer(project_dxid, invitee, opts = {})
+        call(project_dxid, "transfer", opts.merge(invitee: invitee))
+      end
+
+      # Accept billing responsibility for the project, possibly on behalf of an org.
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-accepttransfer
+      # @param project_dxid [String] Project to accept transfer.
+      # @param bill_to [String] billing account (user or org ID).
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def project_accept_transfer(project_dxid, bill_to, opts = {})
+        call(project_dxid, "acceptTransfer", opts.merge(billTo: bill_to))
+      end
+
       # Destroys project.
       # @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-destroy
       # @param project_dxid [String] Project to destroy.

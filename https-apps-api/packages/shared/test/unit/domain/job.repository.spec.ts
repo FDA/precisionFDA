@@ -1,9 +1,9 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { App, Job, User } from 'shared/src/domain'
+import { App, Job, User } from '../../../src/domain'
 import { database, } from '@pfda/https-apps-shared'
-import { create, db, generate } from 'shared/src/test'
-import { JOB_STATE } from 'shared/src/domain/job/job.enum'
+import { create, db, generate } from '../../../src/test'
+import { JOB_STATE } from '../../../src/domain/job/job.enum'
 
 describe('Job repository tests', () => {
   let em: EntityManager<MySqlDriver>

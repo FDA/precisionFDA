@@ -249,6 +249,43 @@ const FIND_MEMBERS_RES = {
   ],
 }
 
+const PROJECT_DESCRIBE_RES = {
+	id: 'project-GX0gzy00j073fJ5Xkqky1zkX',
+	name: 'precisionfda-space-14-HOST',
+	class: 'project',
+	created: 1686208504000,
+	modified: 1686208615076,
+	billTo: 'org-pfda..miyagi.ryota',
+	cloudAccount: 'cloudaccount-dnanexus',
+	level: 'ADMINISTER',
+	dataUsage: 0,
+	sponsoredDataUsage: 0,
+	remoteDataUsage: 0,
+	region: 'aws:us-east-1',
+	summary: '',
+	description: '',
+	protected: false,
+	restricted: false,
+	downloadRestricted: false,
+	databaseUIViewOnly: false,
+	containsPHI: false,
+	createdBy: {
+		user: 'user-zeus.choi'
+	},
+	version: 0,
+	archivedDataUsage: 0,
+	previewViewerRestricted: false,
+	externalUploadRestricted: false,
+	displayDataProtectionNotice: false,
+	pendingTransfer: null,
+	tags: [],
+	defaultInstanceType: 'mem2_hdd2_x2',
+	totalSponsoredEgressBytes: 0,
+	consumedSponsoredEgressBytes: 0,
+	atSpendingLimit: false,
+	provider: {},
+}
+
 export {
   DBCLUSTER_DESC_RES,
   FILES_LIST_RES_ROOT,
@@ -260,5 +297,6 @@ export {
   FOLDERS_LIST_RES_LARGE,
   FILES_LIST_RES_TEST_FOLDER,
   FIND_MEMBERS_RES,
+  PROJECT_DESCRIBE_RES,
 }
 

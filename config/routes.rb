@@ -200,8 +200,7 @@ Rails.application.routes.draw do
       end
 
       resources :site_settings do
-        get :sso_button, on: :collection
-        get :cdmh, on: :collection
+        get :index, on: :collection
       end
 
       # News

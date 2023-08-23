@@ -681,27 +681,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   # ┌─────────────────────────┐
   # │                         │
-  # │ site-settings endpoints │
+  # │ site-settings endpoint  │
   # │                         │
   # └─────────────────────────┘
 
-  def site_settings_sso_button(incoming_ip = nil)
+  def site_settings(incoming_ip = nil)
     request_headers = {}
     request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
     request(
-      "/site-settings/ssoButton",
-      {},
-      Net::HTTP::Get::METHOD,
-      {},
-      request_headers,
-    )
-  end
-
-  def site_settings_cdmh(incoming_ip = nil)
-    request_headers = {}
-    request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
-    request(
-      "/site-settings/cdmh",
+      "/site-settings",
       {},
       Net::HTTP::Get::METHOD,
       {},

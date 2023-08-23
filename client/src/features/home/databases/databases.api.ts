@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
-import { IFile } from '../files/files.types'
+import { FileScope, FileState, IFile } from '../files/files.types'
 import { IFilter, IMeta } from '../types'
 import { formatScopeQ, Params, prepareListFetch } from '../utils'
 import { IDatabase, MethodType } from './databases.types'
@@ -30,23 +30,34 @@ export async function fetchDatabaseRequest(dxid: string): Promise<FetchDatabaseR
   const res = await fetch(`/api/dbclusters/${dxid}`, {
     ...requestOpts,
   })
-  
+
   return res.json()
 }
 
-interface IAccessibleFiles extends IFile {
+export interface IAccessibleFile extends IFile {
   title: string
+  space_private: boolean
+  space_public: boolean
+  in_space: boolean
+}
+
+export interface FetchAccessibleFilesResponse {
+  count: number
+  objects: IAccessibleFile[]
 }
 
 interface FetchAccessibleFilesRequest {
   search_string?: string
   limit?: number
   offset?: number
-  scope?: 'public' | 'private'
+  scopes?: FileScope[]
+  states?: FileState[]
+  describe?: object
+  ignore_challenge_bot?: boolean
 }
 
 export async function fetchAccessibleFiles(body: FetchAccessibleFilesRequest) {
-  return axios.post('/api/list_files', body).then(r => r.data.objects as IAccessibleFiles[])
+  return axios.post<FetchAccessibleFilesResponse>('/api/list_files', body).then(r => r.data)
 }
 
 export interface CreateDatabasePayload {
@@ -73,9 +84,9 @@ export interface CreateDatabaseResponse {
 }
 
 export async function createDatabaseRequest(payload: CreateDatabasePayload): Promise<CreateDatabaseResponse> {
-  const res = await fetch(`/api/dbclusters/`, {
+  const res = await fetch('/api/dbclusters/', {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ db_cluster: payload })
+    body: JSON.stringify({ db_cluster: payload }),
   })
   return res.json()
 }
@@ -88,15 +99,15 @@ export interface EditDatabasePayload {
 export async function editDatabaseRequest(payload: EditDatabasePayload, dxid: string) {
   const res = await (await fetch(`/api/dbclusters/${dxid}`, {
     ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ ...payload })
+    body: JSON.stringify({ ...payload }),
   })).json()
   return res
 }
 
 export async function copyDatabasesRequest(scope: string, ids: string[]) {
-  const res = await fetch(`/api/dbclusters/copy`, {
+  const res = await fetch('/api/dbclusters/copy', {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope })
+    body: JSON.stringify({ item_ids: ids, scope }),
   }).then(checkStatus)
   return res.json()
 }

@@ -12,7 +12,7 @@ import {
   STATUS as DB_CLUSTER_STATUS,
 } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { SyncDbClusterOperation } from 'shared/src/domain/db-cluster'
+import { SyncDbClusterOperation } from '@pfda/https-apps-shared/src/domain/db-cluster'
 
 
 const createUserCheckupTask = async (

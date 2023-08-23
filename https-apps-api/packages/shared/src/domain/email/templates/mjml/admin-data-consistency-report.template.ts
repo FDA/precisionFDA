@@ -1,4 +1,4 @@
-import { AdminDataConsistencyReportOutput } from 'shared/src/debug/ops/admin-data-consistency-report'
+import { AdminDataConsistencyReportOutput } from '../../../../debug'
 import { EmailTemplateInput } from '../../email.config'
 import { header, footer } from './common'
 
@@ -22,7 +22,7 @@ const createSection = (title: string, count: number | undefined, content: any[])
 }
 
 /**
- * Report various data consistency 
+ * Report various data consistency
  */
 export const adminDataConsistencyReportTemplate = (data: AdminDataConsistencyReportTemplateInput): string => `
   ${header}

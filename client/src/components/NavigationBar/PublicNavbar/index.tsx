@@ -6,7 +6,7 @@ import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
 import { theme } from '../../../styles/theme'
 import { PageContainerMargin } from '../../Page/styles'
 import { Button, ButtonSolidBlue } from '../../Button/index'
-import { onLogInWithSSO, useSiteSettingsSsoButtonQuery } from '../../../features/auth/useSiteSettingsSsoButtonQuery'
+import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 
 type StyledPublicNavbarProps = {
   isSticky?: boolean
@@ -160,7 +160,7 @@ type Props = {
 
 const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
   const [sticky, setSticky] = useState(false)
-  const { data: ssoButtonResponse } = useSiteSettingsSsoButtonQuery()
+  const { data } = useSiteSettingsQuery()
   // Set up the sticky header
   useEffect(() => {
     const header = document.getElementById('pfda-navbar')
@@ -254,8 +254,8 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
       <PublicNavbarRightButtons isSticky={sticky}>
         <Button onClick={onRequestAccess}>Request Access</Button>
         <ButtonSolidBlue onClick={onLogIn}>Log In</ButtonSolidBlue>
-        {ssoButtonResponse?.isEnabled && (
-          <ButtonSolidBlue onClick={() => onLogInWithSSO(ssoButtonResponse)}>
+        {data?.ssoButton.isEnabled && (
+          <ButtonSolidBlue onClick={() => onLogInWithSSO(data)}>
             Log In With SSO
           </ButtonSolidBlue>
         )}

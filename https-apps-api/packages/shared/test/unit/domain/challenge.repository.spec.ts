@@ -4,7 +4,7 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { Challenge, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { database } from '@pfda/https-apps-shared'
-import { create, db } from 'shared/src/test'
+import { create, db } from '../../../src/test'
 
 describe('ChallengeRepository tests', () => {
   let em: EntityManager<MySqlDriver>

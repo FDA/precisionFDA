@@ -92,9 +92,13 @@ export function Activation({ space }: { space: ISpace }) {
   const acceptSpaceMutation = useMutation({
     mutationKey: ['accept-space'],
     mutationFn: acceptSpaceRequest,
-    onSuccess: () => {
-      queryCache.invalidateQueries(['space', space.id.toString()])
-      toast.success('Successfully activated space')
+    onSuccess: (res: any) => {
+      if (res.error) {
+        toast.error('Error: Service is unavailable. Please try again later.')
+      } else {
+        queryCache.invalidateQueries(['space', space.id.toString()])
+        toast.success('Successfully activated space.')
+      }
     },
   })
   const acceptClickHandler = () => {

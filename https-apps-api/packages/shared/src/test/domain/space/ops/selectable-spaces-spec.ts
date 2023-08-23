@@ -3,7 +3,7 @@ import { create, db } from '@pfda/https-apps-shared/src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { expect } from 'chai'
 import P from 'pino'
-import { space, User } from 'shared/src/domain'
+import { space, User } from '../../../../domain'
 
 describe('selectable spaces tests', () => {
   let em: EntityManager<MySqlDriver>
