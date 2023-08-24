@@ -44,6 +44,7 @@ const fakes = {
     projectInviteFake: sinon.stub(),
     userDescribeFake: sinon.stub(),
     orgFindMembersFake: sinon.stub(),
+    projectAcceptTransferFake: sinon.stub(),
     inviteUserToOrganizationFake: sinon.stub(),
     removeUserFromOrganizationFake: sinon.stub(),
   },
@@ -103,6 +104,7 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.projectDescribeFake.callsFake(() => ({}))
   fakes.client.projectInviteFake.callsFake(() => ({ id: 'huh', state: 'accepted' })) //fix id
   fakes.client.userDescribeFake.callsFake(() => ({}))
+  fakes.client.projectAcceptTransferFake.callsFake(() => ({ id: 'project-abc' }))
 
   fakes.bull.addFake.callsFake(() => { })
   fakes.bull.getJobFake.callsFake(() => undefined)
@@ -129,6 +131,7 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'projectDescribe', fakes.client.projectDescribeFake)
   sandbox.replace(client.PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
   sandbox.replace(client.PlatformClient.prototype, 'orgFindMembers', fakes.client.orgFindMembersFake)
+  sandbox.replace(client.PlatformClient.prototype, 'projectAcceptTransfer', fakes.client.projectAcceptTransferFake)
   sandbox.replace(client.PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
   sandbox.replace(client.PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
   sandbox.replace(client.PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
@@ -196,6 +199,7 @@ const mocksReset = () => {
   fakes.client.projectDescribeFake.reset()
   fakes.client.projectInviteFake.reset()
   fakes.client.orgFindMembersFake.reset()
+  fakes.client.projectAcceptTransferFake.reset()
   fakes.client.inviteUserToOrganizationFake.reset()
   fakes.client.removeUserFromOrganizationFake.reset()
   fakes.client.fileRemoveFake.reset()

@@ -5,7 +5,7 @@ import { database, getLogger, types } from '../../..'
 import { PARENT_TYPE } from '../../../domain/user-file/user-file.types'
 import { create, db } from '../..'
 import { entities, license, User } from '../../../domain'
-import { UidInput } from 'shared/src/types'
+import { UidInput } from '../../../types'
 
 describe('licenses for workflow tests', () => {
   let em: EntityManager<MySqlDriver>

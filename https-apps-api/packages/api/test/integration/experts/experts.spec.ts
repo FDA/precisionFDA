@@ -7,7 +7,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
 import { getDefaultQueryData } from '../../utils/expect-helper'
-import { ExpertScope, ExpertState } from 'shared/src/domain/expert/expert.entity'
+import { ExpertScope, ExpertState } from '@pfda/https-apps-shared/src/domain/expert/expert.entity'
 
 describe('/experts', () => {
   let em: EntityManager

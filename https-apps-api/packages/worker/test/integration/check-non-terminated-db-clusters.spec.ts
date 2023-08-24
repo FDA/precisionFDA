@@ -8,9 +8,9 @@ import {
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
-import { TASK_TYPE } from 'shared/src/queue/task.input'
+import { TASK_TYPE } from '@pfda/https-apps-shared/src/queue/task.input'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { EMAIL_TYPES } from 'shared/src/domain/email/email.config'
+import { EMAIL_TYPES } from '@pfda/https-apps-shared/src/domain/email/email.config'
 
 
 
