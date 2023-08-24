@@ -241,6 +241,22 @@ RSpec.describe Api::SpacesController, type: :controller do
         end
       end
 
+      context "with share space" do
+        it "transfers to host admin" do
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}#{cooperative_space.host_project}/transfer",
+            ).
+            with(
+              body: {
+                invitee: host_lead.dxid,
+                suppressEmailNotification: true,
+              },
+            )
+        end
+      end
+
       context "with confidential space" do
         it "creates a new project" do
           expect(WebMock).
@@ -253,34 +269,16 @@ RSpec.describe Api::SpacesController, type: :controller do
             )
         end
 
-        it "invites host contributor" do
+        it "transfers to host" do
           expect(WebMock).
             to have_requested(
               :post,
-              "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/invite",
+              "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/transfer",
             ).
             with(
               body: {
-                invitee: confidential_space.host_dxorg,
-                level: "CONTRIBUTE",
+                invitee: host_lead.dxid,
                 suppressEmailNotification: true,
-                suppressAllNotifications: true,
-              },
-            )
-        end
-
-        it "invites a developer contributor" do
-          expect(WebMock).
-            to have_requested(
-              :post,
-              "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/invite",
-            ).
-            with(
-              body: {
-                invitee: Setting.review_app_developers_org,
-                level: "CONTRIBUTE",
-                suppressEmailNotification: true,
-                suppressAllNotifications: true,
               },
             )
         end

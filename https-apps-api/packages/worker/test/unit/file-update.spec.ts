@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { userFile, database, getLogger } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { Asset, User, UserFile } from 'shared/src/domain'
+import { Asset, User, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { FILE_STATE_DX } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 

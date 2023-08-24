@@ -114,7 +114,14 @@ void
 
   async handleReviewSpaceAccept(space: Space, confidentialSpaces: Space[], admin: SpaceMembership) {
     if (admin.side === SPACE_MEMBERSHIP_SIDE.HOST) {
-      confidentialSpaces.filter((cs: Space) => cs.hostDxOrg !== null)[0]?.spaceMemberships.add(admin)
+      await this.handleHostProjectAcceptTransfer(space, admin)
+
+      const confidentialSpace = confidentialSpaces.filter((cs: Space) => cs.hostDxOrg !== null)[0]
+      if (confidentialSpace) {
+        confidentialSpace.spaceMemberships.add(admin)
+        await this.handleHostProjectAcceptTransfer(confidentialSpace, admin)
+      }
+
       return
     }
     if (getProjectDxid(space, admin) !== null) {
@@ -150,6 +157,19 @@ void
     })
 
     newSpace.spaceMemberships.add(admin)
+  }
+
+  private async handleHostProjectAcceptTransfer(space: Space, admin: SpaceMembership) {
+    const project = await this.platformClient.projectDescribe({
+      projectDxid: space.hostProject,
+      body: {fields: {pendingTransfer: true}}
+    })
+    if (project.pendingTransfer) {
+      await this.platformClient.projectAcceptTransfer({
+        projectDxid: space.hostProject,
+        billTo: `org-pfda..${admin.user.getProperty('organization').getProperty('handle')}`,
+      })
+    }
   }
 
   private async handleSpaceAccept(space: Space, admin: SpaceMembership) {

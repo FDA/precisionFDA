@@ -3,9 +3,8 @@ import { MySqlDriver } from '@mikro-orm/mysql'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import pino from 'pino'
 import { expect } from 'chai'
-import { Tag, Tagging, tagging, UserFile } from 'shared/src/domain'
-import { User } from 'shared/src/domain/user/user.entity'
-import { create, db } from 'shared/src/test'
+import { Tag, Tagging, tagging, UserFile, User } from '../../../../domain'
+import { create, db } from '../../..'
 
 /**
  * Two files and two tags connected through Tagging.
