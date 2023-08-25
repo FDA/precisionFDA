@@ -13,8 +13,6 @@ enum FILE_STATE_PFDA {
   // pFDA internal state, used for files that are being copied by a worker.
   COPYING = 'copying',
   REMOVING = 'removing',
-  UNLOCKING = 'unlocking',
-  LOCKING = 'locking',
 }
 
 type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA

@@ -14,7 +14,7 @@ import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE } from './user-file.types'
 @Entity({
   abstract: true,
   discriminatorColumn: 'stiType',
-  discriminatorMap: {UserFile: 'UserFile', Folder: 'Folder', Asset: 'Asset'},
+  discriminatorMap: { UserFile: 'UserFile', Folder: 'Folder', Asset: 'Asset' },
   tableName: 'nodes',
 })
 export class Node extends BaseEntity {
@@ -25,7 +25,7 @@ export class Node extends BaseEntity {
   @Property()
   dxid?: string
 
-  @Property({unique: true})
+  @Property({ unique: true })
   uid: string
 
   @Property()
@@ -61,20 +61,20 @@ export class Node extends BaseEntity {
   @ManyToOne(() => Node)
   scopedParentFolder?: Node
 
-  @Enum({fieldName: 'sti_type'})
+  @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
 
-  @Property({persist: false})
+  @Property({ persist: false })
   get isAsset(): boolean {
     return this.stiType === FILE_STI_TYPE.ASSET
   }
 
-  @Property({persist: false})
+  @Property({ persist: false })
   get isFile(): boolean {
     return this.stiType === FILE_STI_TYPE.USERFILE
   }
 
-  @Property({persist: false})
+  @Property({ persist: false })
   get isFolder(): boolean {
     return this.stiType === FILE_STI_TYPE.FOLDER
   }

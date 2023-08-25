@@ -400,6 +400,8 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
       return nodes.filter(node => node.user.id === currentUser.id)
     }
   }
+
+  return nodes
 }
 const findFileOrAssetWithUid = async (
   em: EntityManager,
