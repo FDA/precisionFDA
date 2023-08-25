@@ -340,7 +340,7 @@ module Api
     # Filtering nodes for locking and unlocking.
     def process_nodes(task)
       nodes = Node.editable_by(@context).where(id: params[:ids])
-      files = nodes.flat_map { |node| node.is_a?(Folder) ? node.all_children : node }
+      files = nodes.flat_map { |node| node.is_a?(Folder) ? node.all_files : node }
       files.select! { |file| file.scope == params[:scope] }
 
       case task

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_07_13_082632) do
+ActiveRecord::Schema.define(version: 2023_08_24_141018) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -751,6 +751,10 @@ ActiveRecord::Schema.define(version: 2023_07_13_082632) do
     t.string "name", collation: "utf8_bin"
     t.integer "taggings_count", default: 0
     t.index ["name"], name: "index_tags_on_name", unique: true
+  end
+
+  create_table "tmp_locked_folder_nodes_backup", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.integer "id", default: 0, null: false
   end
 
   create_table "truth_challenge_results", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
