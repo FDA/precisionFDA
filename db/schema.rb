@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_10_200330) do
+ActiveRecord::Schema.define(version: 2023_07_13_082632) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -241,6 +241,22 @@ ActiveRecord::Schema.define(version: 2023_04_10_200330) do
     t.string "name"
     t.string "dial_code"
     t.index ["name"], name: "index_countries_on_name", unique: true
+  end
+
+  create_table "data_portals", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.text "content"
+    t.text "editor_state"
+    t.string "card_image_url"
+    t.string "card_image_id"
+    t.integer "sort_order"
+    t.string "status"
+    t.integer "space_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.boolean "default", default: false
+    t.index ["space_id"], name: "fk_rails_59bf9507a5"
   end
 
   create_table "dbclusters", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -595,6 +611,19 @@ ActiveRecord::Schema.define(version: 2023_04_10_200330) do
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
+  create_table "resources", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "user_file_id"
+    t.integer "parent_id"
+    t.string "parent_type"
+    t.string "url"
+    t.text "meta"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_file_id"], name: "fk_rails_32ef3811c9"
+    t.index ["user_id"], name: "fk_rails_250ed64e61"
+  end
+
   create_table "saved_queries", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "grid_name"
@@ -838,6 +867,7 @@ ActiveRecord::Schema.define(version: 2023_04_10_200330) do
     t.integer "expiration"
     t.string "disable_message"
     t.text "cloud_resource_settings"
+    t.datetime "last_data_checkup"
     t.index ["dxuser"], name: "index_users_on_dxuser", unique: true
     t.index ["normalized_email"], name: "index_users_on_normalized_email"
     t.index ["org_id"], name: "index_users_on_org_id"
@@ -931,6 +961,7 @@ ActiveRecord::Schema.define(version: 2023_04_10_200330) do
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
   add_foreign_key "comparisons", "users"
+  add_foreign_key "data_portals", "spaces"
   add_foreign_key "dbclusters", "users"
   add_foreign_key "discussions", "notes"
   add_foreign_key "discussions", "users"
@@ -960,6 +991,8 @@ ActiveRecord::Schema.define(version: 2023_04_10_200330) do
   add_foreign_key "profiles", "countries"
   add_foreign_key "profiles", "countries", column: "phone_country_id", on_delete: :nullify
   add_foreign_key "profiles", "users"
+  add_foreign_key "resources", "nodes", column: "user_file_id"
+  add_foreign_key "resources", "users"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"

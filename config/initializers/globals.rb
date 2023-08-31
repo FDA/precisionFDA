@@ -4,7 +4,7 @@ if Rails.env.production?
   DNANEXUS_AUTHSERVER_URI = "https://auth.dnanexus.com/".freeze
   DNANEXUS_APISERVER_URI = "https://api.dnanexus.com/".freeze
   DNANEXUS_PLATFORM_URI = "https://platform.dnanexus.com/".freeze
-  APPKIT_TGZ = "project-Bk0j9YQ09Zjky196xkJ4Bzgy:/appkit.tgz".freeze
+  APPKIT_TGZ = "project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.2.tgz".freeze
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4".freeze
   CONSISTENCY_DISCUSSION_ID = 1
   TRUTH_DISCUSSION_ID = 6
@@ -19,7 +19,7 @@ else # these values are for staging, dev, development and test environments
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/".freeze
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/".freeze
   DNANEXUS_PLATFORM_URI = "https://staging.dnanexus.com/".freeze
-  APPKIT_TGZ = "project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz".freeze
+  APPKIT_TGZ = "project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.2.tgz".freeze
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4".freeze
   CONSISTENCY_DISCUSSION_ID = 1
   TRUTH_DISCUSSION_ID = 4 # TODO: Update this to the discussion id of challenge

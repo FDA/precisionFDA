@@ -42,13 +42,10 @@ module.exports = ({ urlLoaderOptions }) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        test: /\.(png|jpg|svg)$/,
-        exclude: /node_modules/,
-        loader: 'url-loader',
-        options: urlLoaderOptions || {
-          limit: 2000,
-          outputPath: '',
-          publicPath: '/assets/',
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+        generator: {
+           filename: '[name][ext]',
         },
       },
     ],

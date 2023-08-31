@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-
 import { SUPPORT_EMAIL } from '../../constants'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
@@ -39,7 +38,9 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
 } from './styles'
-import { CDMHNames, useSiteSettingsQuery } from './useSiteSettingsQuery'
+import { DataPortalIcon } from '../icons/DataPortalIcon'
+import { useMainDataPortal } from '../../features/data-portals/queries'
+import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -47,6 +48,29 @@ type UserMenuProps = {
   userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
+}
+
+const DataPortalsLink = ({ isActiveLink, isSiteAdmin = false }: { isActiveLink: (l: string) => boolean, isSiteAdmin?: boolean }) => {
+  const { data } = useMainDataPortal()
+  let link = '/data-portals/main'
+
+  const comp = (to: string) => (
+    <Link to={to} title="Data Portals">
+      <MenuItem active={isActiveLink('/data-portals')}>
+        <IconWrap>
+          <DataPortalIcon height={18} />
+        </IconWrap>
+        <HeaderItemText>DAaaS</HeaderItemText>
+      </MenuItem>
+    </Link>
+  )
+
+  if(!data && isSiteAdmin) {
+    link = '/data-portals'
+    return comp(link)
+  }
+  if(!data) return null
+  return comp(link)
 }
 
 export const UserMenu = ({
@@ -123,6 +147,7 @@ export const Header: React.FC = () => {
   const userCanAdministerSite = user?.can_administer_site
   const userIsGuest = user?.is_guest
   const isSpacesPath = pathname.startsWith('/spaces')
+  const isDataPortalsPath = pathname.startsWith('/data-portals')
 
   const handleLogout = async () => {
     await logout().then(() => {
@@ -140,8 +165,8 @@ export const Header: React.FC = () => {
 
   if (!user) return null
 
-  const showGSRSLink = !isSpacesPath && !userIsGuest
-  const showCDMHLink = !isSpacesPath && !!siteSettings?.data?.isEnabled
+  const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
+  const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
 
   return (
     <>
@@ -152,20 +177,20 @@ export const Header: React.FC = () => {
           </LogoWrap>
           <HeaderLeft>
             <Link
-              to={isSpacesPath ? '/home' : '/'}
-              title={isSpacesPath ? 'Back Home' : 'Overview'}
+              to={isSpacesPath || isDataPortalsPath ? '/home' : '/'}
+              title={isSpacesPath || isDataPortalsPath ? 'Back Home' : 'Overview'}
               data-turbolinks="false"
             >
               <MenuItem active={isActiveLink('/')}>
                 <IconWrap>
-                  <HomeIcon height={16} />
+                  {isSpacesPath || isDataPortalsPath ? <FortIcon height={16} /> : <HomeIcon height={16} />}
                 </IconWrap>
                 <HeaderItemText>
-                  {isSpacesPath ? 'Back Home' : 'Overview'}
+                  {isSpacesPath || isDataPortalsPath ? 'Back Home' : 'Overview'}
                 </HeaderItemText>
               </MenuItem>
             </Link>
-            {!isSpacesPath && (
+            {!isSpacesPath && !isDataPortalsPath && (
               <>
                 <a
                   data-turbolinks="false"
@@ -260,8 +285,8 @@ export const Header: React.FC = () => {
                 trigger="click"
                 content={
                   <StyledDropMenuLinks>
-                    {siteSettings?.data?.data && Object.keys(siteSettings.data.data).map((s: CDMHKey) => {
-                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data.data[s]}>{CDMHNames[s]}</StyledLink>
+                    {siteSettings?.data?.cdmh && Object.keys(siteSettings.data.cdmh.data).map((s: CDMHKey) => {
+                      return <StyledLink key={s} target="_blank" rel="noreferrer" href={siteSettings.data.cdmh.data[s]}>{CDMHNames[s]}</StyledLink>
                     })}
                   </StyledDropMenuLinks>
                 }
@@ -282,6 +307,8 @@ export const Header: React.FC = () => {
                 )}
               </Dropdown>
             )}
+
+            <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} />
           </HeaderLeft>
           <HeaderRight>
             <a
