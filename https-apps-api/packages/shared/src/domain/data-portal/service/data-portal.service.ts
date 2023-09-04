@@ -62,7 +62,7 @@ export class DataPortalService implements IDataPortalService {
   checkUserHasDataPortal = async (userId: number) => {
     try {
       // check whether there is a membership in at least one portal
-      let  count = await this.em.count(entities.DataPortal,
+      let count = await this.em.count(entities.DataPortal,
         { space: { spaceMemberships: { user: userId } } }
       )
       return count > 0;
@@ -121,15 +121,9 @@ export class DataPortalService implements IDataPortalService {
       throw new errors.PermissionError(`Only roles ${this.editRolesText} can remove resources`)
     }
 
-    try {
-      await this.em.begin()
-      await this.em.removeAndFlush(resource)
-      await this.fileRemoveOperation?.run({id: resource.userFile.id})
-      await this.em.commit()
-    } catch (error) {
-      await this.em.rollback()
-      throw new errors.ServiceError('Failed to remove resource')
-    }
+    // TODO fix transaction work
+    await this.em.removeAndFlush(resource)
+    await this.fileRemoveOperation?.run({id: resource.userFile.id})
   }
 
   private getUserFileUrl = async(uid: string): Promise<string> => {
