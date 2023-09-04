@@ -12,7 +12,7 @@ import { UserFileRepository } from '../../user-file/user-file.repository'
 import { QueryOrder } from '@mikro-orm/core'
 import { FILE_STATE_DX } from '../../user-file/user-file.types'
 import { Resource } from '../../resource'
-import { entities, errors } from '@pfda/https-apps-shared'
+import { entities, errors, userFile as userFileDomain } from '@pfda/https-apps-shared'
 import { getLogger } from '../../../logger'
 import { User } from '../../user'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
@@ -39,13 +39,24 @@ export class DataPortalService implements IDataPortalService {
 
   private em: SqlEntityManager
   private userPlatformClient: PlatformClient
+  private fileRemoveOperation?: userFileDomain.FileRemoveOperation
 
   private editRolesText = ['ADMIN', 'LEAD', 'CONTRIBUTOR']
-  private viewRoles = [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD, SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, SPACE_MEMBERSHIP_ROLE.VIEWER]
+  private viewRoles = [
+    SPACE_MEMBERSHIP_ROLE.ADMIN,
+    SPACE_MEMBERSHIP_ROLE.LEAD,
+    SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
+    SPACE_MEMBERSHIP_ROLE.VIEWER
+  ]
 
-  constructor(em: SqlEntityManager, userPlatformClient: PlatformClient) {
+  constructor(
+    em: SqlEntityManager,
+    userPlatformClient: PlatformClient,
+    fileRemoveOperation?: userFileDomain.FileRemoveOperation
+  ) {
     this.em = em
     this.userPlatformClient = userPlatformClient
+    this.fileRemoveOperation = fileRemoveOperation
   }
 
   checkUserHasDataPortal = async (userId: number) => {
@@ -104,17 +115,21 @@ export class DataPortalService implements IDataPortalService {
 
   removeResource = async (id: number, userId: number) => {
     logger.info(`DataPortalService: removing resource: ${id}`)
-    const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['organization']})
     const resource = await this.em.findOneOrFail(entities.Resource, {id: id})
     const dataPortal = await this.em.findOneOrFail(entities.DataPortal, {id: resource.dataPortal.id}, {populate: ['space.spaceMemberships.user', 'space']})
     if (! await this.hasRoles(dataPortal, CAN_EDIT_ROLES, userId)) {
       throw new errors.PermissionError(`Only roles ${this.editRolesText} can remove resources`)
     }
 
-    const userFile = await this.em.findOneOrFail(entities.UserFile, {id: resource.userFile.id})
-    await this.createFileEvent(userFile, user, EVENT_TYPES.FILE_DELETED)
-    await this.em.remove(resource.userFile)
-    await this.em.removeAndFlush(resource)
+    try {
+      await this.em.begin()
+      await this.em.removeAndFlush(resource)
+      await this.fileRemoveOperation?.run({id: resource.userFile.id})
+      await this.em.commit()
+    } catch (error) {
+      await this.em.rollback()
+      throw new errors.ServiceError('Failed to remove resource')
+    }
   }
 
   private getUserFileUrl = async(uid: string): Promise<string> => {
