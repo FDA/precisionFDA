@@ -1,9 +1,10 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { dataPortal, client } from '@pfda/https-apps-shared'
+import { dataPortal, client, userFile } from '@pfda/https-apps-shared'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { defaultMiddlewares } from '../server/middleware'
 import { file, dataPortalCreate, dataPortalUpdate } from './data-portals.schemas'
+import { UserOpsCtx } from '@pfda/https-apps-shared/src/types'
 
 // Routes with /data-portals prefix
 const router = new Router<DefaultState, Api.Ctx>()
@@ -33,7 +34,8 @@ router.delete(
   '/:portalId/resources/:resourceId',
   async ctx => {
     const userClient = new client.PlatformClient(ctx.user?.accessToken!, ctx.log)
-    const dataPortalService = new dataPortal.DataPortalService(ctx.em, userClient)
+    const fileRemoveOperation = new userFile.FileRemoveOperation(ctx as UserOpsCtx)
+    const dataPortalService = new dataPortal.DataPortalService(ctx.em, userClient, fileRemoveOperation)
     const res = await dataPortalService.removeResource(parseInt(ctx.params.resourceId), ctx.user!.id)
     ctx.body = res
     ctx.status = 200
