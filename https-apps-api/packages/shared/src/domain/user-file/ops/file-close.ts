@@ -3,14 +3,13 @@ import { UserFile } from '../..'
 import { User } from '../../user/user.entity'
 import { client, config, errors, queue } from '../../..'
 import { BaseOperation } from '../../../utils/base-operation'
-import { UserCtx, UserOpsCtx } from '../../../types'
+import { UidInput, UserCtx, UserOpsCtx } from '../../../types'
 import { UserRepository } from '../../user/user.repository'
 import { FILE_STATE_DX, FILE_STATE_PFDA } from '../user-file.types'
 import { createSyncFilesStateTask } from '../../../queue'
 import { findFileOrAssetWithUid } from '../user-file.helper'
 import { SyncFilesStateOperation } from './sync-files-state'
 import { FileUpdateOperation } from './file-update'
-import { CloseFileInput } from '../user-file.input'
 
 
 const responseMap = {
@@ -26,18 +25,17 @@ type FileCloseOperationResponse = {
 
 // FileCloseOperation closes an open File or Asset
 class FileCloseOperation extends BaseOperation<
-UserOpsCtx,
-CloseFileInput,
-FileCloseOperationResponse | null
+  UserOpsCtx,
+  UidInput,
+  FileCloseOperationResponse | null
 > {
-  async run(input: CloseFileInput): Promise<FileCloseOperationResponse | null> {
-    console.log(`AAA input: ${JSON.stringify(input)}`)
+  async run(input: UidInput): Promise<FileCloseOperationResponse | null> {
     const log = this.ctx.log
     const em = this.ctx.em
-    const fileOrAsset = await findFileOrAssetWithUid(em, input.id)
+    const fileOrAsset = await findFileOrAssetWithUid(em, input.uid)
     if (!fileOrAsset) {
-      log.error(`FileCloseOperation: File or asset with uid ${input.id} not found`)
-      throw new errors.FileNotFoundError(`File or asset with uid ${input.id} not found`)
+      log.error(`FileCloseOperation: File or asset with uid ${input.uid} not found`)
+      throw new errors.FileNotFoundError(`File or asset with uid ${input.uid} not found`)
     }
 
     const userRepo = em.getRepository(User) as UserRepository
@@ -117,51 +115,24 @@ FileCloseOperationResponse | null
             log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
             await new FileUpdateOperation(this.ctx).execute({ uid: fileOrAsset.uid })
 
-            const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.id)
+            const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.uid)
             if (updatedFileOrAsset) {
               if (updatedFileOrAsset.state === FILE_STATE_DX.CLOSED) {
                 log.info({
-                  uid: input.id,
+                  uid: input.uid,
                   state: updatedFileOrAsset.state,
                   size: updatedFileOrAsset.fileSize,
                 }, 'FileCloseOperation: File is now closed after FileUpdateOperation')
               } else {
-                if (input.forceWaitForClose) {
-                  // TODO this is just temporary solution for PFDA-4599, before
-                  //  we implement async closing solution
-                  let numberOfRetries = 0
-                  let updateFinished = false
-                  while (numberOfRetries < 11 && !updateFinished) {
-                    await delay(500).then(async () => {
-                      numberOfRetries++
-                      log.info({
-                        uid: input.id,
-                        state: updatedFileOrAsset.state,
-                        size: updatedFileOrAsset.fileSize,
-                      }, `FileCloseOperation: File is still not closed after FileUpdateOperation, retrying with attempt no ${numberOfRetries}`)
-                      await new FileUpdateOperation(this.ctx).execute({uid: fileOrAsset.uid})
-                      const updatedNode = await findFileOrAssetWithUid(em, input.id)
-                      if (updatedNode?.state === FILE_STATE_DX.CLOSED) {
-                        log.info({
-                          uid: input.id,
-                          state: updatedFileOrAsset.state,
-                          size: updatedFileOrAsset.fileSize,
-                        }, `FileCloseOperation: File was not closed after FileUpdateOperation, retrying finished`)
-                        updateFinished = true
-                      }
-                    })
-                  }
-                } else {
-                  log.info({
-                    uid: input.id,
-                    state: updatedFileOrAsset.state,
-                    size: updatedFileOrAsset.fileSize,
-                  }, 'FileCloseOperation: File is still not closed after FileUpdateOperation')
-                }
+                log.info({
+                  uid: input.uid,
+                  state: updatedFileOrAsset.state,
+                  size: updatedFileOrAsset.fileSize,
+                }, 'FileCloseOperation: File is still not closed after FileUpdateOperation')
               }
             } else {
               log.info({
-                uid: input.id,
+                uid: input.uid,
               }, 'FileCloseOperation: File no longer exists after FileUpdateOperation?? What?!')
             }
           })

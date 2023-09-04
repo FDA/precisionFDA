@@ -362,10 +362,10 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   # Close an uploaded file or asset
   # @param file_uid [String] uid of the file or asset
-  def file_close(file_uid, ops = {})
+  def file_close(file_uid)
     request(
       "/files/#{file_uid}/close",
-      ops,
+      {},
       Net::HTTP::Patch::METHOD,
     )
   end
