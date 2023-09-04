@@ -10,11 +10,6 @@ type SyncFoldersInput = {
   scope: string
 }
 
-export type CloseFileInput = {
-  id: string,
-  forceWaitForClose?: boolean
-}
-
 type SyncFilesInFolderInput = {
   folderId: number | null
   projectDxid: string
@@ -103,5 +98,4 @@ export {
   nodeQueryFilter,
   CLINodeSearchSchema,
   CLINodeSearchInput,
-  CloseFileInput,
 }
