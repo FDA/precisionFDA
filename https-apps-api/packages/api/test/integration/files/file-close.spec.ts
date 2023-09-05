@@ -99,6 +99,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
+      .send({ id: file.uid })
       .query({ ...getDefaultQueryData(user) })
 
     // console.log(res)
@@ -139,6 +140,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
+      .send({ id: file.uid })
       .query({ ...getDefaultQueryData(user) })
       .expect(200)
 
@@ -178,6 +180,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
+      .send({ id: file.uid })
       .query({ ...getDefaultQueryData(user) })
 
     expect(res.statusCode).to.equal(200)
@@ -197,6 +200,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
+      .send({ id: file.uid })
       .query({ ...getDefaultQueryData(user1) })
       .expect(200)
 
@@ -215,6 +219,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
+      .send({ id: file.uid })
       .query({ ...getDefaultQueryData(user1) })
       .expect(200)
 
@@ -238,6 +243,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${asset.uid}/close`)
+      .send({ id: asset.uid })
       .query({ ...getDefaultQueryData(user) })
 
     // console.log(res)
@@ -261,6 +267,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${challengeBotFile.uid}/close`)
+      .send({ id: challengeBotFile.uid })
       .query({ ...getDefaultQueryData(siteAdmin) })
       .expect(200)
 
@@ -289,6 +296,7 @@ describe('PATCH /files/:id/close', () => {
 
     const res = await supertest(getServer())
       .patch(`/files/${challengeBotFile.uid}/close`)
+      .send({ id: challengeBotFile.uid })
       .query({ ...getDefaultQueryData(challengeAdmin) })
       .expect(200)
 
@@ -311,6 +319,7 @@ describe('PATCH /files/:id/close', () => {
 
     await supertest(getServer())
       .patch(`/files/${challengeBotFile.uid}/close`)
+      .send({ id: challengeBotFile.uid })
       .query({ ...getDefaultQueryData(user1) })
       .expect(403)
   })
@@ -318,6 +327,7 @@ describe('PATCH /files/:id/close', () => {
   it("returns 403 if user2 tries to close another user's file", async () => {
     const res = await supertest(getServer())
       .patch(`/files/${files[0].uid}/close`)
+      .send({ id: files[0].uid })
       .query({ ...getDefaultQueryData(user2) })
       .expect(403)
 
@@ -330,6 +340,7 @@ describe('PATCH /files/:id/close', () => {
     const fileUid = 'file-no-such-file-1'
     const res = await supertest(getServer())
       .patch(`/files/${fileUid}/close`)
+      .send({ id: fileUid })
       .query({ ...getDefaultQueryData(user2) })
       .expect(404)
 

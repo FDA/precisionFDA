@@ -52,7 +52,7 @@ export class DataPortalService implements IDataPortalService {
   constructor(
     em: SqlEntityManager,
     userPlatformClient: PlatformClient,
-    fileRemoveOperation?: userFileDomain.FileRemoveOperation
+    fileRemoveOperation?: userFileDomain.FileRemoveOperation,
   ) {
     this.em = em
     this.userPlatformClient = userPlatformClient
