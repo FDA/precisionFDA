@@ -190,7 +190,6 @@ export class AppService implements IAppService {
    */
   private createApplet = async (user: User, appInput: AppInput, release: string): Promise<string> => {
     logger.info('AppService: creating applet in platform', user, appInput, release)
-    // if (config)
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
       inputSpec: this.remapPfdaSpecToPlatformSpec(appInput.input_spec),
@@ -203,6 +202,7 @@ export class AppService implements IAppService {
           '*': { instanceType: allowedInstanceTypes[appInput.instance_type] }
         },
         distribution: 'Ubuntu',
+        version: "0",
         release,
         execDepends: appInput.packages.map(pckg => {
           return {name: pckg} as PackageMapping

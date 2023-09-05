@@ -1,8 +1,7 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { create, db } from '@pfda/https-apps-shared/src/test'
-import { database, entities, getLogger, types } from '@pfda/https-apps-shared'
-import P from 'pino'
-import { DataPortal, User } from '../../../../domain'
+import { database, entities } from '@pfda/https-apps-shared'
+import { DataPortal, User, Event } from '../../../../domain'
 import { DataPortalService } from '../../../../domain/data-portal/service/data-portal.service'
 import { DataPortalParam, FileParam } from '../../../../domain/data-portal/service/data-portal.types'
 import { ClassIdResponse, PlatformClient } from '../../../../platform-client'
@@ -20,12 +19,12 @@ import {
 import { FILE_STATE_DX } from '../../../../domain/user-file/user-file.types'
 import { EVENT_TYPES } from '../../../../domain/event/event.helper'
 import * as generate from '../../../generate'
+import { FileRemoveOperation } from '../../../../domain/user-file'
+import { IdInput } from '../../../../types'
 
 describe('data portal service tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let log: P.Logger
-  let userCtx: types.UserCtx
   let userClient: PlatformClient
   let dataPortalService: DataPortalService
 
@@ -33,9 +32,7 @@ describe('data portal service tests', () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork()
     user = create.userHelper.create(em)
-    log = getLogger()
     await em.flush()
-    userCtx = {...user, accessToken: 'foo'}
 
     userClient = {
       async fileDownloadLink(params: FileDownloadLinkParams): Promise<FileDownloadLinkResponse> {
@@ -51,16 +48,16 @@ describe('data portal service tests', () => {
 
   const createPortalAndAddMember = async (portalName: string, role: SPACE_MEMBERSHIP_ROLE): Promise<any> => {
     const space = create.spacesHelper.create(em, {name: portalName})
-    const user = create.userHelper.create(em, {dxuser: generate.random.chance.name()})
+    const internalUser = create.userHelper.create(em, {dxuser: generate.random.chance.name()})
     await em.flush()
 
     const portal = create.dataPortalsHelper.create(em, { space }, { name: portalName })
     await em.flush()
-    create.spacesHelper.addMember(em, {user, space}, {
+    create.spacesHelper.addMember(em, {user: internalUser, space}, {
       role: role,
       side: SPACE_MEMBERSHIP_SIDE.HOST
     })
-    return {userId: user.id, portalId: portal.id}
+    return {userId: internalUser.id, portalId: portal.id}
   }
 
   const createPortal = async(spaceName: string, hostLeadDxUser: string, guestLeadDxUser: string,
@@ -223,7 +220,12 @@ describe('data portal service tests', () => {
     const portal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
     create.spacesHelper.addMember(em, {user: admin, space}, {role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST})
     create.spacesHelper.addMember(em, {user: lead, space}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {user: ordinary, space}, {role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST})
+    create.spacesHelper.addMember(em, {
+        user: ordinary,
+        space
+      },
+      {role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST},
+    )
     await em.flush()
 
     await dataPortalService.update({
@@ -251,7 +253,12 @@ describe('data portal service tests', () => {
   it('test get data portal', async () => {
     const portal = await createPortal('space-name', 'host-lead', 'guest-lead',
       'test-data-portal', 'description', DATA_PORTAL_STATUS.OPEN, 1, 'testUid', 'testUrl')
-    create.spacesHelper.addMember(em, {user, space: portal.space.getEntity()}, {role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.HOST})
+    create.spacesHelper.addMember(em, {
+        user,
+        space: portal.space.getEntity()
+      },
+      {role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.HOST},
+    )
 
     await em.flush()
 
@@ -380,11 +387,11 @@ describe('data portal service tests', () => {
   })
 
   it('test create data portal card image', async () => {
-    const user = await create.userHelper.createChallengeBot(em)
+    const challengeUser = await create.userHelper.createChallengeBot(em)
     const space = await create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
     const dataPortal = await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
     await em.flush()
-    const result = await dataPortalService.createCardImage({name: 'test-card.jpg', description: 'description'}, dataPortal.id, user.id)
+    const result = await dataPortalService.createCardImage({name: 'test-card.jpg', description: 'description'}, dataPortal.id, challengeUser.id)
     const file = await em.findOneOrFail(entities.UserFile, {name: 'test-card.jpg'})
 
     expect(result).eq('file-dxid-1')
@@ -437,9 +444,30 @@ describe('data portal service tests', () => {
   })
 
   it('test remove data portal resource', async () => {
+    let fileRemoveOperationParam: IdInput
+    const fileRemoveOperation = {
+      async run(input): Promise<number> {
+        const fileToDelete = await em.findOne(entities.UserFile, {id: input.id})
+        if (fileToDelete) {
+          const fileDeleteEvent = new Event()
+          fileDeleteEvent.type = EVENT_TYPES.FILE_DELETED
+          fileDeleteEvent.dxuser = user.dxuser
+          fileDeleteEvent.param1 = fileToDelete.name
+          fileDeleteEvent.param2 = fileToDelete.dxid
+
+          await em.persistAndFlush(fileDeleteEvent)
+          await em.removeAndFlush(fileToDelete)
+        }
+
+        fileRemoveOperationParam = input
+        return input.id
+      }
+    } as FileRemoveOperation
+    dataPortalService = new DataPortalService(em, userClient, fileRemoveOperation)
+
     const loadedDataPortal = await createAndLoadPortal()
     await dataPortalService.removeResource(loadedDataPortal.resources.getItems()[0].id, user.id)
-    em.clear()
+    await em.clear()
 
     // load portal and verify that resource was removed
     const loadedDataPortalAfterRemoval = await em.findOneOrFail(entities.DataPortal, {id: loadedDataPortal.id}, {populate: ['space', 'resources.userFile']})
