@@ -25,9 +25,9 @@ type FileCloseOperationResponse = {
 
 // FileCloseOperation closes an open File or Asset
 class FileCloseOperation extends BaseOperation<
-UserOpsCtx,
-UidInput,
-FileCloseOperationResponse | null
+  UserOpsCtx,
+  UidInput,
+  FileCloseOperationResponse | null
 > {
   async run(input: UidInput): Promise<FileCloseOperationResponse | null> {
     const log = this.ctx.log
