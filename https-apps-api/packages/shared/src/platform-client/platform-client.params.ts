@@ -28,6 +28,7 @@ type RunSpec = {
   distribution: string,
   release: string,
   execDepends: PackageMapping[],
+  version?: string,
 }
 
 type AppletCreateParams = {

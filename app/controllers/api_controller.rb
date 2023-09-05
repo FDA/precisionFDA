@@ -976,7 +976,7 @@ class ApiController < ApplicationController
   #
   def close_file
     id = unsafe_params[:id]
-    result = https_apps_client.file_close(id)
+    result = https_apps_client.file_close(id, unsafe_params)
     render json: result
   end
 
