@@ -22,7 +22,7 @@ module Api
       # Moves files and/or folders from one folder to another.
       def move
         target_folder = @space.folders.find_by(id: params[:target_id]) if params[:target_id]
-        nodes = @space.nodes.files_and_folders.where(id: params[:node_ids])
+        nodes = @space.nodes.files_folders_assets.where(id: params[:node_ids])
 
         result = folder_service.move(
           nodes,
