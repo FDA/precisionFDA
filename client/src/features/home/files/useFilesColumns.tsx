@@ -62,7 +62,7 @@ export const useFilesColumns = ({
               // eslint-disable-next-line react/jsx-no-useless-fragment
               <>
                 <StyledLocked isLocked={node.locked}>
-                  {node.type === 'UserFile' || node.type === 'File' ? (
+                  {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
                     <>
                       <StyledNameCell
                         data-tip
