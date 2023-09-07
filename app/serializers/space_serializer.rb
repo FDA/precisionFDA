@@ -133,7 +133,7 @@ class SpaceSerializer < ApplicationSerializer
   # Returns files count.
   # @return [Integer] Files count.
   def files_count
-    object.files.count
+    object.files.count + object.assets.count
   end
 
   # Returns jobs count.
