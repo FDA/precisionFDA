@@ -600,7 +600,7 @@ module Api
 
       if find_user_space
         folder_id = params[:folder_id]
-        nodes = @space.nodes.files_and_folders.
+        nodes = @space.nodes.files_folders_assets.
           where(scoped_parent_folder_id: folder_id).
           where(state: [nil, "closing", "closed", "open"]).
           includes(:taggings).eager_load(user: :org).

@@ -48,7 +48,7 @@ class Node < ApplicationRecord
 
   attr_accessor :current_user
 
-  scope :files_and_folders, -> { where(sti_type: %w(Folder UserFile)) }
+  scope :files_folders_assets, -> { where(sti_type: %w(Folder UserFile Asset)) } # used only in spaces
   scope :files, -> { where(sti_type: %w(UserFile)) }
   scope :folders, -> { where(sti_type: %w(Folder)) }
 
