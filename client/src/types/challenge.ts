@@ -1,4 +1,4 @@
-import { IListItem } from "./listItem";
+import { IListItem } from './listItem'
 
 
 interface Regions {

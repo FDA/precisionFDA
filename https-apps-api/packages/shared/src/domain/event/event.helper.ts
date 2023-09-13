@@ -80,6 +80,7 @@ const createFileEvent = async (
   file: IFileOrAsset,
   filePath: string,
   user: User,
+  param3?: string,
 ): Promise<Event> => {
   const event = new Event()
   const organization = user.organization.isInitialized()
@@ -97,6 +98,7 @@ const createFileEvent = async (
     dxuser: user.dxuser,
     param1: filePath,
     param2: file.dxid,
+    param3,
     data,
   })
   return event

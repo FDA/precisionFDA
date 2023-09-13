@@ -52,7 +52,11 @@ const random = {
 }
 
 // generators fill in random data, usually without foreign keys
-
+const note = {
+  simple: (): Partial<InstanceType<typeof entities.Note>> => ({
+    title: random.word(),
+  }),
+}
 const user = {
   simple: (): Partial<InstanceType<typeof entities.User>> => ({
     firstName: random.firstName(),
@@ -629,6 +633,7 @@ export {
   folder,
   tag,
   tagging,
+  note,
   asset,
   space,
   spaceMembership,

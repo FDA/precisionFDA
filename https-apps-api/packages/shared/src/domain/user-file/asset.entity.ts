@@ -45,7 +45,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
   scope: string
 
-  @Property({ type: 'bigint' })
+  @Property({ type: 'numeric' })
   fileSize?: number
 
   // unused FK references

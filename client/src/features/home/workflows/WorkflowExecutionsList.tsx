@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
+import { useQueryClient } from '@tanstack/react-query'
+import useWebSocket from 'react-use-websocket'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
@@ -14,7 +16,7 @@ import { useExecutionColumns } from '../executions/useExecutionColumns'
 import {
   StyledHomeTable,
 } from '../home.styles'
-import { IFilter, IMeta, KeyVal } from '../types'
+import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification } from '../types'
 import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from '../useFilterState'
 import { useListQuery } from '../useListQuery'
@@ -22,6 +24,7 @@ import { useOrderByState } from '../../../hooks/useOrderByState'
 import { fetchWorkflowExecutions } from './workflows.api'
 import { usePaginationParams } from '../../../hooks/usePaginationState'
 import { toArrayFromObject } from '../../../utils/object'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 
 const ExecutionsPagination = styled.div`
   padding-left: 12px;
@@ -36,6 +39,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
   const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
+  const queryCache = useQueryClient()
 
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
@@ -55,6 +59,25 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
     setPerPageParam(perPage, 'pushIn')
   }
   const { status, data, error } = query
+
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    if (notification == null) {
+      return
+    }
+  if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
+      NOTIFICATION_ACTION.JOB_RUNNING,
+      NOTIFICATION_ACTION.JOB_DONE,
+      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
+      queryCache.invalidateQueries([resource])
+    }
+  }, [notification])
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 

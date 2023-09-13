@@ -128,7 +128,6 @@ module Api
       find_workflow
       comments_data(@workflow)
       revisions_data
-      jobs_sync
       analyses = workflow_analyses(@workflow, :desc)
       @workflow.current_user = current_user
 

@@ -17,8 +17,8 @@ import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject, UserOpsCtx } from '../../../types'
 import { Space, SpaceMembership, UserFile } from '../..'
 import { config } from '../../../config'
-import { getIdFromScopeName, getProjectDxid } from "../../space/space.helper";
-import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from "../../../config/constants";
+import { getIdFromScopeName, getProjectDxid } from '../../space/space.helper'
+import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '../../../config/constants'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput

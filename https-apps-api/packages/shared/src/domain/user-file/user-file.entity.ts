@@ -51,7 +51,7 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
   entityType: FILE_ORIGIN_TYPE
 
-  @Property({ type: 'bigint' })
+  @Property({ type: 'numeric' })
   fileSize?: number
 
   // unused FK references

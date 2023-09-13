@@ -253,7 +253,7 @@ describe('TASK: sync_job_status', () => {
       expect(email).to.have.property('to', user.email)
       expect(email).to.have.property(
         'subject',
-        `precisionFDA Workstation ${job.name} will terminate in 24 hours`,
+        `Job ${job.name} will terminate in 24 hours`,
       )
       expect(userCtx).to.have.property('id', user.id)
       // not called - the interval for email is shorter

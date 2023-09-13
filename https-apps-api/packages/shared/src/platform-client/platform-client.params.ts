@@ -57,6 +57,14 @@ type AppCreateParams = {
 
 }
 
+type JobFindParams = {
+  id: string[] // job dxid
+  project?: string // ID of the project context, or the project in which the job was launched
+
+  includeSubjobs?: boolean,
+  describe: boolean,
+}
+
 type JobCreateParams = {
   appId: string
   project: string
@@ -244,6 +252,7 @@ export {
   JobTerminateParams,
   CreateFolderParams,
   DescribeFoldersParams,
+  JobFindParams,
   FileRemoveParams,
   MoveFilesParams,
   DbClusterActionParams,

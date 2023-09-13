@@ -4,7 +4,7 @@
 /* eslint-disable multiline-ternary */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import Bull, { Job, JobInformation, JobOptions, Queue, QueueOptions } from 'bull'
-import { AnyObject, UserCtx } from '../types'
+import { UserCtx } from '../types'
 import { defaultLogger as log } from '../logger'
 import { config } from '../config'
 import { InvalidStateError } from '../errors'
@@ -16,6 +16,7 @@ import { SyncFilesStateOperation } from '../domain/user-file'
 import * as utils from './queue.utils'
 import * as types from './task.input'
 import { AdminDataConsistencyReportOperation } from '../debug/ops/admin-data-consistency-report'
+import { CheckStatusJob, SyncWorkstationFiles } from './task.input'
 
 let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
@@ -99,35 +100,6 @@ const createQueues = async (): Promise<void> => {
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
-const initMaintenanceQueue = async () => {
-  log.info({}, 'Initializing maintenance queue')
-  if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
-    const checkNonTerminatedDbclustersTask = {
-      type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
-    }
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    await addToQueue(checkNonTerminatedDbclustersTask, maintenanceQueue, {
-      repeat: {
-        cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
-      },
-      jobId: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
-    })
-  }
-
-  if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
-    await AdminDataConsistencyReportOperation.enqueue()
-  }
-}
-
-const disconnectQueues = async (): Promise<void> => {
-  log.info('Disconnecting queues')
-  await mainQueue.close(true)
-  await fileSyncQueue.close(true)
-  await emailsQueue.close(true)
-  await maintenanceQueue.close(true)
-  log.info('Queues disconnected')
-}
-
 const addToQueue = async <T extends types.Task>(
   task: T,
   queue: Bull.Queue,
@@ -158,6 +130,39 @@ const addToQueue = async <T extends types.Task>(
   return job
 }
 
+const initMaintenanceQueue = async () => {
+  log.info({}, 'Initializing maintenance queue')
+  if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
+    await addToQueue({ type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const }, maintenanceQueue, {
+      repeat: {
+        cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
+      },
+      jobId: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
+    })
+  }
+
+  await addToQueue({type: types.TASK_TYPE.CHECK_CHALLENGE_JOBS as const}, maintenanceQueue, {
+    repeat: {
+      cron: config.workerJobs.checkChallengeJobs.repeatPattern,
+    },
+    jobId: types.TASK_TYPE.CHECK_CHALLENGE_JOBS
+  })
+
+  if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
+    await AdminDataConsistencyReportOperation.enqueue()
+  }
+}
+
+const disconnectQueues = async (): Promise<void> => {
+  log.info('Disconnecting queues')
+  await mainQueue.close(true)
+  await fileSyncQueue.close(true)
+  await emailsQueue.close(true)
+  await maintenanceQueue.close(true)
+  log.info('Queues disconnected')
+}
+
+
 // removeRepeatable and removeRepeatableJob explanation:
 //     removeRepeatable calls calls queue.removeJobs, removing the job task
 //     removeRepeatableJob calls queue.removeRepeatable, removing the entity with 'cron'
@@ -165,14 +170,14 @@ const addToQueue = async <T extends types.Task>(
 //             when a sync task such as SyncJobOperation finishes, it may be the most correct way of cleaning
 //             up repeatable jobs
 // TODO: dig deeper into bull queue's implementation to verify the above
-const removeRepeatable = async (job: Job) => {
+const removeRepeatable = async (job: Job, queue?: Queue) => {
   if (typeof mainQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
   log.info({ jobId: job.id }, 'trying to remove repeatable job id')
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
-  await mainQueue.removeJobs(`${prefix}:${id}:*`)
+  await (queue || mainQueue).removeJobs(`${prefix}:${id}:*`)
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
@@ -230,18 +235,12 @@ const createSyncJobStatusTask = async (data: types.CheckStatusJob['payload'], us
   return await addToQueue(wrapped, mainQueue, options)
 }
 
-const createSyncWorkstationFilesTask = async (
-  data: types.CheckStatusJob['payload'],
-  user: UserCtx,
+const createSyncTask = async <T extends types.Task> (
+  task: T,
+  queue: Bull.Queue,
+  dxid: string,
 ) => {
-  const jobType = types.TASK_TYPE.SYNC_WORKSTATION_FILES as const
-  const wrapped = {
-    type: jobType,
-    payload: data,
-    user,
-  }
-
-  const jobId = `${jobType}.${data.dxid}`
+  const jobId = `${task.type}.${dxid}`
   const existingJob = await fileSyncQueue.getJob(jobId)
   if (existingJob !== null) {
     // Do not allow a second file sync job to be added to the queue
@@ -256,7 +255,31 @@ const createSyncWorkstationFilesTask = async (
   const options: JobOptions = {
     jobId,
   }
-  return await addToQueue(wrapped, fileSyncQueue, options)
+  return await addToQueue(task, queue, options)
+}
+
+const createSyncOutputsTask = async (
+  data: types.CheckStatusJob['payload'],
+  user: UserCtx,
+) => {
+  const wrapped: CheckStatusJob = {
+    type: types.TASK_TYPE.SYNC_JOB_OUTPUTS,
+    payload: data,
+    user,
+  }
+  await createSyncTask(wrapped, fileSyncQueue, data.dxid)
+}
+
+const createSyncWorkstationFilesTask = async (
+  data: types.CheckStatusJob['payload'],
+  user: UserCtx,
+) => {
+  const wrapped: SyncWorkstationFiles = {
+    type: types.TASK_TYPE.SYNC_WORKSTATION_FILES,
+    payload: data,
+    user,
+  }
+  await createSyncTask(wrapped, fileSyncQueue, data.dxid)
 }
 
 // Specifying a taskId will prevent multiple emails of that
@@ -437,6 +460,7 @@ export {
   createCheckStaleJobsTask,
   createSyncSpacesPermissionsTask,
   createDbClusterSyncTask,
+  createSyncOutputsTask,
   createUserCheckupTask,
   createCheckUserJobsTask,
   createTestMaxMemoryTask,

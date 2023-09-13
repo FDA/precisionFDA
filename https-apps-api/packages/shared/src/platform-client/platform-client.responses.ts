@@ -155,6 +155,10 @@ type JobCreateResponse = {
   id: string
 }
 
+type FindJobsResponse = {
+  results: JobDescribeResponse[]
+}
+
 type JobTerminateResponse = JobCreateResponse
 
 type ClassIdResponse = {
@@ -171,8 +175,27 @@ type WorkflowDescribeResponse = {
   id: string
 }
 
+type DnanexusLink = {
+  $dnanexus_link: string
+}
+
+type JobOutput = {
+  [key: string]: PlatformJobType
+}
+
+type PlatformJobType = string[]
+  | number[]
+  | boolean[]
+  | DnanexusLink
+  | string
+  | number
+  | boolean
+  | DnanexusLink[]
+
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
+  id: string
+  name: string
   state: JOB_STATE
   project: string
   billTo: string
@@ -184,7 +207,10 @@ type JobDescribeResponse = {
       url?: string
     }
   }
-  failureCπount?: any
+  describe: {
+    output: JobOutput
+  }
+  failureCount?: any
   failureReason?: string
   failureMessage?: string
 } & AnyObject
@@ -209,8 +235,12 @@ export {
   PlatformMember,
   UserDescribeResponse,
   UserInviteToOrgResponse,
+  FindJobsResponse,
   FileRemoveResponse,
   UserRemoveFromOrgResponse,
   AppDescribeResponse,
   WorkflowDescribeResponse,
+  DnanexusLink,
+  JobOutput,
+  PlatformJobType,
 }
