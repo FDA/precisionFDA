@@ -53,8 +53,6 @@ class AppsController < ApplicationController
       where(jobs: { user_id: @context.user_id }).
       map { |series| series.latest_accessible(@context) }.compact
 
-    Job.sync_jobs!(@context)
-
     jobs = if @app.present?
       @app.app_series.jobs.origin.editable_by(@context).order(created_at: :desc)
     else
@@ -137,8 +135,6 @@ class AppsController < ApplicationController
         order(id: :desc).
         page(unsafe_params[:comments_page])
     end
-
-    Job.sync_jobs!(@context)
 
     jobs = @app.app_series.jobs.editable_by(@context).includes(:taggings).order(created_at: :desc)
     @jobs_grid = jobs_grid(jobs)
@@ -383,6 +379,9 @@ class AppsController < ApplicationController
 
     SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space&.review?
     # rubocop:enable Style/SignalException
+
+    # starts job status syncing
+    https_apps_client.job_sync(job.dxid)
 
     render json: { id: job.uid }
   end

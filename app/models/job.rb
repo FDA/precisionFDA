@@ -29,7 +29,6 @@ class Job < ApplicationRecord
   include CommonPermissions
   include Featured
   include InternalUid
-  include JobsSyncing
   include ObjectLocation
   include Scopes
   include TagsContainer

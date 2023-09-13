@@ -3,6 +3,7 @@ enum JOB_STATE {
   FAILED = 'failed',
   IDLE = 'idle',
   RUNNING = 'running',
+  RUNNABLE = 'runnable',
   TERMINATED = 'terminated', // Only for HTTPS apps
   TERMINATING = 'terminating', // Only for HTTPS apps
 }

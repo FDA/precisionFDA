@@ -15,6 +15,7 @@ import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
 import { Node } from './user-file/node.entity'
+import { Note } from './note/note.entity'
 import { Notification } from './notification/notification.entity'
 import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
@@ -55,6 +56,7 @@ const entities = {
   ExpertAnswer,
   ExpertQuestion,
   Notification,
+  Note,
   NotificationPreference,
   Folder,
   Job,
@@ -104,6 +106,8 @@ export * as org from './org'
 
 export * as email from './email'
 
+export * as note from './note'
+
 export * as newsItem from './news-item'
 
 export * as comment from './comment'
@@ -142,6 +146,7 @@ export {
   ExpertAnswer,
   ExpertQuestion,
   Notification,
+  Note,
   NotificationPreference,
   Folder,
   Job,

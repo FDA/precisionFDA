@@ -33,7 +33,7 @@ export const config: ConfigOverride = () => ({
   },
   siteSettings: {
     ssoButton: {
-        isEnabled: true,
+      isEnabled: true,
     },
   },
   emails: {

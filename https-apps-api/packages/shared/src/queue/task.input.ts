@@ -2,21 +2,27 @@ import { EmailSendInput } from '../domain/email/email.config'
 import { WorkstationSnapshotOperationParams } from '../domain/job/ops/workstation-snapshot'
 import { UserCtx } from '../types'
 
-export type TaskWithAuth = {
+export type Task = {
+  type: TASK_TYPE
+}
+
+export type TaskWithAuth = Task & {
   user: UserCtx
   // payload type is more strictly defined below depending on task
   payload?: any
 }
 
-type TaskWithMaybeAuth = {
+type TaskWithMaybeAuth = Task & {
   user: UserCtx | undefined
 }
 
 export enum TASK_TYPE {
   SYNC_FILES_STATE = 'sync_files_state',
   SYNC_JOB_STATUS = 'sync_job_status',
+  SYNC_JOB_OUTPUTS = 'sync_job_outputs',
   SYNC_WORKSTATION_FILES = 'sync_workstation_files',
   SEND_EMAIL = 'send_email',
+  CHECK_CHALLENGE_JOBS = 'check_challenge_jobs',
   CHECK_STALE_JOBS = 'check_stale_jobs',
   CHECK_USER_JOBS = 'check_user_jobs',
   CHECK_NON_TERMINATED_DBCLUSTERS = 'check_non_terminated_dbclusters',
@@ -40,7 +46,7 @@ export type BasicUserJob = TaskWithAuth & {
 }
 
 export type CheckStatusJob = TaskWithAuth & {
-  type: TASK_TYPE.SYNC_JOB_STATUS
+  type: TASK_TYPE.SYNC_JOB_STATUS | TASK_TYPE.SYNC_JOB_OUTPUTS
   payload: { dxid: string }
 }
 
@@ -72,8 +78,12 @@ export type SyncWorkstationFiles = TaskWithAuth & {
   type: TASK_TYPE.SYNC_WORKSTATION_FILES
 }
 
+export type SyncOutputFiles = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_JOB_OUTPUTS
+}
+
 // NOTE(samuel) - task running without user context
-export type CheckNonTerminatedDbClustersJob = {
+export type CheckNonTerminatedDbClustersJob = Task & {
   type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS
 }
 
@@ -100,32 +110,14 @@ export type UnlockNodesJob = TaskWithAuth & {
 // Admin and Debug tasks
 // ---------------------
 
-export type AdminDataConsistencyReportTask = {
+export type AdminDataConsistencyReportTask = Task & {
   type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT
 }
 
-export type UserDataConsistencyReportTask = {
+export type UserDataConsistencyReportTask = Task & {
   type: TASK_TYPE.USER_DATA_CONSISTENCY_REPORT
 }
 
-export type DebugMaxMemory = {
+export type DebugMaxMemory = Task & {
   type: TASK_TYPE.DEBUG_MAX_MEMORY
 }
-
-export type Task =
-  | BasicUserJob
-  | CheckStatusJob
-  | SendEmailJob
-  | CheckStaleJobsJob
-  | CheckNonTerminatedDbClustersJob
-  | SyncDbClusterJob
-  | SyncFileStatesJob
-  | SyncSpacesPermissionsJob
-  | SyncWorkstationFiles
-  | RemoveNodesJob
-  | WorkstationSnapshotTask
-  | LockNodesJob
-  | UnlockNodesJob
-  | AdminDataConsistencyReportTask
-  | UserDataConsistencyReportTask
-  | DebugMaxMemory

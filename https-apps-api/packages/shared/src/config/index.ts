@@ -131,12 +131,15 @@ const defaultConfig = {
     syncJob: {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
-      repeatPattern: '*/1 * * * *',
+      repeatPattern: '*/15 * * * * *', // Every 15 seconds
       staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
       staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_SECONDS,
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *', // Once a day at 6am
+    },
+    checkChallengeJobs: {
+      repeatPattern: '*/5 * * * *', // Every 5 minutes
     },
     adminDataConsistencyReport: {
       repeatPattern: process.env.NODE_ADMIN_DATA_REPORT_REPEAT ?? '0 1 * * 0', // Once a week on Sunday at 1am

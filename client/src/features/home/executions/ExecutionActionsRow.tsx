@@ -9,11 +9,11 @@ import { SyncIcon } from '../../../components/icons/SyncIcon'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsButton } from '../show.styles'
 import { ResourceScope } from '../types'
-import { StyledRefresh } from './details/styles'
-import { syncFilesRequest, workstationRefreshAPIKeyRequest } from './executions.api'
+import { StyledRefresh, StyledStatusText } from './details/styles'
+import { syncFilesRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionActions } from './useExecutionSelectActions'
-import { useAuthUser } from "../../auth/useAuthUser";
+import { useAuthUser } from '../../auth/useAuthUser'
 
 export const ExecutionActionsRow = ({
   scope,
@@ -28,6 +28,7 @@ export const ExecutionActionsRow = ({
 }) => {
   const queryCache = useQueryClient()
   const user = useAuthUser()
+  const terminalStates = ['terminated', 'failed', 'done']
 
   const syncFiles = useMutation({
     mutationKey: ['sync-files'],
@@ -71,10 +72,25 @@ export const ExecutionActionsRow = ({
     }
   }
 
+  const getStatusText = () => {
+    switch (execution.state) {
+      case 'idle':
+      case 'runnable':
+        return (<StyledStatusText>Job is starting...</StyledStatusText>)
+      case 'running':
+        return (<StyledStatusText>Job is running...</StyledStatusText>)
+      case 'terminating':
+        return (<StyledStatusText>Job is terminating...</StyledStatusText>)
+      default:
+        return null
+    }
+  }
+
   return (
     <>
-      {['terminated', 'failed', 'done'].includes(execution.state) ? null : (
-        <StyledRefresh spin={isFetching} onClick={() => refetch()}>
+      {terminalStates.includes(execution.state) ? null : (
+        <StyledRefresh spin title="Page will automatically refresh when the job has launched" onClick={() => refetch()}>
+            {getStatusText()}
           <SyncIcon />
         </StyledRefresh>
       )}

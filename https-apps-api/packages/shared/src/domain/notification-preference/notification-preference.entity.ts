@@ -6,7 +6,6 @@ import {
   IdentifiedReference, JsonType, OneToOne,
 } from '@mikro-orm/core'
 import { User } from '../user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
 import { NOTIFICATION_TYPES } from '../email/email.config'
 import { isNil} from 'ramda'
 

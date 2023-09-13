@@ -20,16 +20,6 @@ module WorkflowConcern
       select(:title, :id, :uid, :dxid, :revision)
   end
 
-  # Proceed with workflow jobs sync
-  def jobs_sync
-    if @workflow.in_space?
-      Job.sync_jobs!(@context, @workflow.jobs, @workflow.project)
-      @space = @workflow.space_object
-    else
-      Job.sync_jobs!(@context)
-    end
-  end
-
   def collect_inputs(batch)
     case batch[:class]
     when "string"
@@ -204,8 +194,10 @@ module WorkflowConcern
         job = Job.create!(opts)
         job.input_file_ids = input_file_ids
         job.save!
+        https_apps_client.job_sync(job.dxid)
       end
     end
+
     analysis_dxid
   end
 
