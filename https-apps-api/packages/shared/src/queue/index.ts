@@ -296,14 +296,15 @@ const createSendEmailTask = async (
   }
   const options: JobOptions = taskId
     ? {
-        jobId: taskId,
-        // The following is important for emails that should not be repeated
-        removeOnComplete: false,
-        removeOnFail: true,
-      }
+      jobId: taskId,
+      // The following is important for emails that should not be repeated
+      // TODO(PFDA-4435) - use time utils for age for better readability
+      removeOnComplete: { age: 86400, count: 100 },
+      removeOnFail: { age: 604800, count: 500 },
+    }
     : {
-        jobId: EmailSendOperation.getBullJobId(data.emailType),
-      }
+      jobId: EmailSendOperation.getBullJobId(data.emailType),
+    }
   const handlePayloadFn = (
     payload: types.SendEmailJob['payload'],
   ): types.SendEmailJob['payload'] => ({
