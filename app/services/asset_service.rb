@@ -72,7 +72,7 @@ class AssetService
     end
 
     unless asset.nil?
-      close(asset.uid)
+      close(asset.uid, { id: asset.uid })
       asset
     end
   end
@@ -161,8 +161,8 @@ class AssetService
     asset
   end
 
-  def close(uid)
-    https_apps_client.file_close(uid)
+  def close(uid, ops)
+    https_apps_client.file_close(uid, ops)
   end
 
   # we need to wait until the asset becomes closed
