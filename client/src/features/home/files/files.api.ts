@@ -39,7 +39,7 @@ export async function fetchFilesDownloadList(ids: string[], scope?: string) {
     .then(r => r.data as DownloadListResponse[])
 }
 
-export async function fetchFilesListLockingRequest(ids: string[], scope?: string, task?: string) {
+export async function fetchFilesListLockingRequest(ids: number[], scope?: string, task?: string) {
   return axios
     .post('/api/files/download_list', {
       task,
@@ -55,7 +55,7 @@ export async function deleteFilesRequest(ids: string[]) {
 
 export type LockUnlockActionType = 'lock' | 'unlock'
 
-export async function lockUnlockFilesRequest(ids: string[], type: LockUnlockActionType) {
+export async function lockUnlockFilesRequest(ids: number[], type: LockUnlockActionType) {
   return axios.post(`/api/nodes/${type}`, { ids }).then(r => r.data)
 }
 
