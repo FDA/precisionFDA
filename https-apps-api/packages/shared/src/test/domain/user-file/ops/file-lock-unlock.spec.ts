@@ -45,7 +45,7 @@ describe('lock/unlock file tests', () => {
       user: userCtx,
     })
 
-    await op.execute({ id: secondFile.id })
+    await op.execute([{ id: secondFile.id }])
     em.clear()
     const loadedFirstFile = await em.findOneOrFail(UserFile, { id: firstFile.id })
     expect(loadedFirstFile.locked).to.not.equal(true)
@@ -74,8 +74,8 @@ describe('lock/unlock file tests', () => {
       user: userCtx,
     })
 
-    await op.execute({ id: secondFile.id })
-    await op.execute({ id: firstFile.id })
+    await op.execute([{ id: secondFile.id }])
+    await op.execute([{ id: firstFile.id }])
     em.clear()
     const loadedFirstFile = await em.findOneOrFail(UserFile, { id: firstFile.id })
     expect(loadedFirstFile.locked).to.equal(true)
