@@ -50,7 +50,8 @@ export const ListSection = styled.div`
 
 const MainDataPortalItem = () => {
   const { data, isLoading } = useMainDataPortal()
-  if (isLoading || !data) return <div>A main Data Portal has not been selected.</div>
+
+  if (isLoading || !data) return <Loader />
   return <DataPortalListItem dataPortal={data} isMain />
 }
 
