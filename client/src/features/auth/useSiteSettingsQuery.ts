@@ -19,6 +19,9 @@ export interface SiteSettingsResponse {
             fdaSsoUrl: string
         },
     },
+    dataPortals: {
+        isEnabled: boolean,
+    },
 }
 
 export const onLogInWithSSO = (siteSettings: SiteSettingsResponse) => {

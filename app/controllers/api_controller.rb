@@ -987,9 +987,10 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
+    #TODO: Deprecate this when moving to node, use classic close_file route instead.
     # This API is still used by the CLI
     id = unsafe_params[:id]
-    result = https_apps_client.file_close(id)
+    result = https_apps_client.file_close(id, unsafe_params)
     render json: result
   end
 
