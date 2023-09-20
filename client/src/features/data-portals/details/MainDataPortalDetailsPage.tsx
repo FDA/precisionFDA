@@ -26,7 +26,7 @@ const MainDataPortalDetailsPage = () => {
 
   return (
     <UserLayout>
-      {isLoading || !data ? (
+      {isLoading || !data || !user ? (
         <PageContainerMargin>
           <Loader />
         </PageContainerMargin>
