@@ -361,11 +361,11 @@ export class DataPortalService implements IDataPortalService {
     const portal = await this.em.findOne(entities.DataPortal, { default: true }, {populate: ['space.spaceMemberships.user']})
     if (portal) {
       if (isSiteAdmin) {
-        this.map(portal, true)
+        return this.map(portal, true)
       }
       const canView = await this.checkUserHasDataPortal(userId)
       if (canView) {
-        this.map(portal, true)
+        return this.map(portal, true)
       }
       throw new errors.PermissionError('Only users with Data Portal access can view this portal')
     }
