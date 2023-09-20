@@ -308,7 +308,7 @@ export const Header: React.FC = () => {
               </Dropdown>
             )}
 
-            <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} />
+            {siteSettings?.data?.dataPortals.isEnabled && <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} />}
           </HeaderLeft>
           <HeaderRight>
             <a

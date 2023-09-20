@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-fragments */
 import React from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Route, Router, Switch } from 'react-router-dom'
+import { Redirect, Route, Router, Switch } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
 import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
 import 'react-toastify/dist/ReactToastify.css'
@@ -148,6 +148,7 @@ const root = () => {
                 <Route path="/data-portals">
                   <DataPortalRoutes />
                 </Route>
+                <Redirect from="/daaas" to="/data-portals/main"/>
                 <Route path="*">
                   <NoFoundPage />
                 </Route>
