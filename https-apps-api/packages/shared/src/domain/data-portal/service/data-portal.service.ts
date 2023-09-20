@@ -36,6 +36,7 @@ export interface IDataPortalService {
 }
 
 export class DataPortalService implements IDataPortalService {
+  private DATA_PORTAL_DEFAULTS_KEY = 'dataPortalDefaults'
 
   private em: SqlEntityManager
   private userPlatformClient: PlatformClient
@@ -46,9 +47,9 @@ export class DataPortalService implements IDataPortalService {
     SPACE_MEMBERSHIP_ROLE.ADMIN,
     SPACE_MEMBERSHIP_ROLE.LEAD,
     SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-    SPACE_MEMBERSHIP_ROLE.VIEWER
+    SPACE_MEMBERSHIP_ROLE.VIEWER,
   ]
-
+    
   constructor(
     em: SqlEntityManager,
     userPlatformClient: PlatformClient,
@@ -65,7 +66,7 @@ export class DataPortalService implements IDataPortalService {
       let count = await this.em.count(entities.DataPortal,
         { space: { spaceMemberships: { user: userId } } }
       )
-      return count > 0;
+      return count > 0
 
     } catch (error) {
       return false
@@ -285,12 +286,12 @@ export class DataPortalService implements IDataPortalService {
 
     await this.processDefault(input.default)
 
-    const propertiesToUpdate = ['name', 'description', 'status', 'sortOrder', 'content', 'editorState', 'default'];
+    const propertiesToUpdate = ['name', 'description', 'status', 'sortOrder', 'content', 'editorState', 'default']
 
     for (const property of propertiesToUpdate) {
       if (input.hasOwnProperty(property)) {
         // @ts-ignore
-        portal[property] = input[property];
+        portal[property] = input[property]
       }
     }
 
@@ -351,9 +352,10 @@ export class DataPortalService implements IDataPortalService {
     throw new errors.NotFoundError(`DataPortal with id ${id} was not found`)
   }
 
+  // TODO this is called frequently for site-settings, consider caching
   getDefault = async(userId: number): Promise<DataPortalParam> => {
     const userFromDb = await this.em.findOneOrFail(entities.User, { id: userId })
-    const isSiteAdmin = await userFromDb.isSiteAdmin();
+    const isSiteAdmin = await userFromDb.isSiteAdmin()
 
     logger.info('DataPortalService: get default data portal detail')
     const portal = await this.em.findOne(entities.DataPortal, { default: true }, {populate: ['space.spaceMemberships.user']})
@@ -362,13 +364,13 @@ export class DataPortalService implements IDataPortalService {
         return this.map(portal, true)
       }
       const canView = await this.checkUserHasDataPortal(userId)
-      if(canView) {
+      if (canView) {
         return this.map(portal, true)
       }
       throw new errors.PermissionError('Only users with Data Portal access can view this portal')
     }
 
-    throw new errors.NotFoundError(`Default DataPortal was not found`)
+    throw new errors.NotFoundError('Default DataPortal was not found')
   }
 
   private getRole(role: SPACE_MEMBERSHIP_ROLE): DATA_PORTAL_MEMBER_ROLE {
