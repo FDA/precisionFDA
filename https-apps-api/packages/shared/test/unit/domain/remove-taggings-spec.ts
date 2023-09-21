@@ -3,8 +3,8 @@ import { MySqlDriver } from '@mikro-orm/mysql'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import pino from 'pino'
 import { expect } from 'chai'
-import { Tag, Tagging, tagging, UserFile, User } from '../../../../domain'
-import { create, db } from '../../..'
+import { Tag, Tagging, tagging, UserFile, User } from '../../../src/domain'
+import { create, db } from '../../../src/test'
 
 /**
  * Two files and two tags connected through Tagging.
@@ -26,7 +26,7 @@ describe('remove taggings tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()

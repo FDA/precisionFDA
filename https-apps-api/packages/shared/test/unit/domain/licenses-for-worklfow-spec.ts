@@ -1,11 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
-import { database, getLogger, types } from '../../..'
-import { PARENT_TYPE } from '../../../domain/user-file/user-file.types'
-import { create, db } from '../..'
-import { entities, license, User } from '../../../domain'
-import { UidInput } from '../../../types'
+import { database, getLogger, types } from '@pfda/https-apps-shared'
+import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
+import { create, db } from '../../../src/test'
+import { entities, license, User } from '../../../src/domain'
+import { UidInput } from '../../../src/types'
 
 describe('licenses for workflow tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -15,7 +15,7 @@ describe('licenses for workflow tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -71,7 +71,7 @@ describe('licenses for workflow tests', () => {
     await em.flush()
 
     const op = new license.LicensesForWorkflowOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

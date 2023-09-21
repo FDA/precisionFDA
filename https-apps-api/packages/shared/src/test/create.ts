@@ -116,7 +116,7 @@ const userHelper = {
     return userHelper.createUsingOrg(em, org, data)
   },
 
-  createUsingOrg: (em: EntityManager, org: Organization, data?: Partial<InstanceType<typeof entities.User>>) => {
+  createUsingOrg: (em: EntityManager, org: entities.Organization, data?: Partial<InstanceType<typeof entities.User>>) => {
     const defaults = generate.user.simple()
     const input = {
       ...defaults,

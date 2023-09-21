@@ -1,10 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { create, db } from '@pfda/https-apps-shared/src/test'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
-import { FilesInput } from '../../../domain/license/license.input'
-import { entities, license, User } from '../../../domain'
+import { FilesInput } from '../../../src/domain/license/license.input'
+import { entities, license, User } from '../../../src/domain'
+import P from 'pino'
 
 describe('licenses for files tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -14,7 +15,7 @@ describe('licenses for files tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -48,7 +49,7 @@ describe('licenses for files tests', () => {
     await em.flush()
 
     const op = new license.LicensesForFilesOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

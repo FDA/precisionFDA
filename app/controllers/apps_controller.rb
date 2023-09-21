@@ -303,6 +303,7 @@ class AppsController < ApplicationController
     fail "Job limit exceeds maximum user setting - #{current_user.job_limit}" if job_limit > current_user.job_limit
 
     run_instance_type = unsafe_params[:instance_type]
+    output_folder_path = unsafe_params[:output_folder_path]
 
     fail I18n.t("app_instance_type_forbidden") unless current_user.resources.include?(run_instance_type)
 
@@ -372,6 +373,7 @@ class AppsController < ApplicationController
           run_instance_type: run_instance_type,
           job_limit: job_limit,
           scope: space&.uid,
+          output_folder_path:,
         )
       rescue DXClient::Errors::DXClientError => e
         fail e.message

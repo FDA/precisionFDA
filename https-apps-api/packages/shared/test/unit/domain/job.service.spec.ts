@@ -1,23 +1,24 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { User, UserFile, Event, Notification, Folder } from '../../../src/domain'
 import { expect } from 'chai'
-import { User, UserFile, Event, Notification } from '../../../src/domain'
 import { database } from '@pfda/https-apps-shared'
-import { create, db } from '../../../src/test'
-import { JobService } from '../../../src/domain/job'
+import { create, db } from '@pfda/https-apps-shared/src/test'
+import { JobService } from '@pfda/https-apps-shared/src/domain/job'
 import { PlatformClient } from '../../../src/platform-client'
 import {
   FileStatesParams,
-  JobFindParams
+  JobFindParams,
 } from '../../../src/platform-client/platform-client.params'
 import {
   FileStateResult,
   FindJobsResponse,
   JobDescribeResponse,
-  JobOutput
+  JobOutput,
 } from '../../../src/platform-client/platform-client.responses'
 import { FILE_STATE_DX, PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '../../../src/enums'
 import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
+import { RunData } from '../../../src/domain/job/job.entity'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -31,7 +32,7 @@ describe('Job service tests', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
-    user = create.userHelper.create(em, {id: userId})
+    user = create.userHelper.create(em, { id: userId })
     await em.flush()
   })
 
@@ -86,28 +87,28 @@ describe('Job service tests', () => {
             state: FILE_STATE_DX.CLOSED,
           },
         },
-        {
-          id: file2Dxid,
-          project: '',
-          describe: {
-            name: 'file2',
-            size: 200,
-            created: 1,
-            modified: 1,
-            state: FILE_STATE_DX.CLOSED,
+          {
+            id: file2Dxid,
+            project: '',
+            describe: {
+              name: 'file2',
+              size: 200,
+              created: 1,
+              modified: 1,
+              state: FILE_STATE_DX.CLOSED,
+            },
           },
-        },
-        {
-          id: file3Dxid,
-          project: '',
-          describe: {
-            name: 'file3',
-            size: 300,
-            created: 1,
-            modified: 1,
-            state: FILE_STATE_DX.CLOSED,
-          },
-        }]
+          {
+            id: file3Dxid,
+            project: '',
+            describe: {
+              name: 'file3',
+              size: 300,
+              created: 1,
+              modified: 1,
+              state: FILE_STATE_DX.CLOSED,
+            },
+          }]
       },
     } as PlatformClient
   }
@@ -120,13 +121,13 @@ describe('Job service tests', () => {
         expect(params.project).contains('project-')
 
         return {
-          results: []
+          results: [],
         } as FindJobsResponse
       },
     } as PlatformClient
   }
 
-  it('Test Job Outputs sync - error when incorrect number of results returned', async() => {
+  it('Test Job Outputs sync - error when incorrect number of results returned', async () => {
     const platformClient = getPlatformClientWithEmptyResults()
     jobService = new JobService(em, platformClient)
     const job = create.jobHelper.create(em, { user }, {})
@@ -135,10 +136,10 @@ describe('Job service tests', () => {
     await expect(jobService.syncOutputs(job.dxid, user.id)).to.be.rejectedWith(`Incorrect number of results for job ${job.dxid}`)
   })
 
-  it('Test Job Outputs sync - sync job with all types of outputs', async() => {
+  it('Test Job Outputs sync - sync job with all types of outputs', async () => {
     const platformClient = getPlatformClientWithComplexResults()
     jobService = new JobService(em, platformClient)
-    const job = create.jobHelper.create(em, { user }, {})
+    const job = create.jobHelper.create(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
 
     await jobService.syncOutputs(job.dxid, user.id)
@@ -176,8 +177,7 @@ describe('Job service tests', () => {
     expect(file3?.scope).to.equal(STATIC_SCOPE.PRIVATE.toString())
     expect(file3?.uid).to.equal(`${file3?.dxid}-1`)
 
-    const runDataObject = JSON.parse(job.runData)
-    expect(runDataObject).to.deep.equal({
+    expect(job.runData).to.deep.equal({
       run_instance_type: 'baseline-8',
       run_inputs: {},
       run_outputs: {
@@ -221,12 +221,20 @@ describe('Job service tests', () => {
     expect(notification.severity).to.equal(SEVERITY.INFO)
   })
 
-  it('Test Job Outputs sync - sync job outputs in a space', async() => {
+  it('Test Job Outputs sync - sync job outputs in a space', async () => {
     const space = create.spacesHelper.create(em, { name: 'space-name' })
-    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder-name' })
     await em.flush()
-    create.spacesHelper.addMember(em, {space, user})
-    const job = create.jobHelper.create(em, { user }, { scope: `space-${space.id}`, localFolderId: folder.id})
+    const folder = create.filesHelper.createFolder(em, { user }, {
+      name: 'folder-name',
+      scope: `space-${space.id}`,
+    })
+    await em.flush()
+    create.spacesHelper.addMember(em, { space, user })
+    const job = create.jobHelper.create(
+      em,
+      { user },
+      { scope: `space-${space.id}`, runData: { output_folder_path: folder.name } as RunData },
+    )
     await em.flush()
 
     const platformClient = getPlatformClientWithComplexResults()
@@ -241,7 +249,64 @@ describe('Job service tests', () => {
     expect(filesCreated[2].scopedParentFolderId).to.equal(folder.id)
   })
 
-  it('Test Job Outputs sync - job dxid null', async () => {
+  it('Test Job Outputs sync - sync job outputs in a space and create new folder', async () => {
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
+    await em.flush()
+    create.spacesHelper.addMember(em, { space, user })
+    const job = create.jobHelper.create(
+      em,
+      { user },
+      { scope: `space-${space.id}`, runData: { output_folder_path: '/test-folder' } as RunData },
+    )
+    await em.flush()
+
+    const platformClient = getPlatformClientWithComplexResults()
+    jobService = new JobService(em, platformClient)
+
+    await jobService.syncOutputs(job.dxid, user.id)
+
+    const filesCreated = await em.find(UserFile, {})
+    expect(filesCreated.length).to.equal(3)
+    expect(filesCreated[0].scope).to.equal('space-1')
+    expect(filesCreated[1].scope).to.equal('space-1')
+    expect(filesCreated[2].scope).to.equal('space-1')
+
+    const outputFolder = await em.findOneOrFail(Folder, { name: 'test-folder' })
+    expect(outputFolder.scope).to.equal('space-1')
+  })
+
+  it('Test Job Outputs sync - create files in output folder specified by path', async () => {
+    await em.flush()
+    const platformClient = getPlatformClientWithComplexResults()
+    jobService = new JobService(em, platformClient)
+    const job = create.jobHelper.create(
+      em,
+      { user },
+      { runData: { output_folder_path: 'folder1/folder2/folder3' } as RunData },
+    )
+    await em.flush()
+
+    await jobService.syncOutputs(job.dxid, user.id)
+    const filesCreated = await em.find(UserFile, {})
+    expect(filesCreated.length).to.equal(3)
+
+    const folder1 = await em.findOneOrFail(Folder, { name: 'folder1' })
+    const folder2 = await em.findOneOrFail(Folder, { name: 'folder2', parentFolderId: folder1.id })
+    const folder3 = await em.findOneOrFail(Folder, { name: 'folder3', parentFolderId: folder2.id })
+
+    expect(folder1.parentType).to.equal(PARENT_TYPE.JOB)
+    expect(folder1.parentId).to.equal(job.id)
+    expect(folder2.parentType).to.equal(PARENT_TYPE.JOB)
+    expect(folder2.parentId).to.equal(job.id)
+    expect(folder3.parentType).to.equal(PARENT_TYPE.JOB)
+    expect(folder3.parentId).to.equal(job.id)
+
+    expect(filesCreated[0].parentFolderId).to.equal(folder3.id)
+    expect(filesCreated[1].parentFolderId).to.equal(folder3.id)
+    expect(filesCreated[2].parentFolderId).to.equal(folder3.id)
+  })
+
+  it('Test Job Outputs sync - job dxid null -> error', async () => {
     jobService = new JobService(em, getPlatformClientWithEmptyResults())
 
     try {
@@ -254,9 +319,9 @@ describe('Job service tests', () => {
     }
   })
 
-  it('Test Job Outputs sync - user id null', async () => {
+  it('Test Job Outputs sync - user id null -> error', async () => {
     jobService = new JobService(em, getPlatformClientWithEmptyResults())
-    const job = create.jobHelper.create(em, { user }, { })
+    const job = create.jobHelper.create(em, { user }, {})
     await em.flush()
 
     try {
@@ -269,7 +334,7 @@ describe('Job service tests', () => {
     }
   })
 
-  it('Test Job Outputs sync - job dxid and user id null', async () => {
+  it('Test Job Outputs sync - job dxid and user id null -> error', async () => {
     jobService = new JobService(em, getPlatformClientWithEmptyResults())
 
     try {
@@ -282,7 +347,7 @@ describe('Job service tests', () => {
     }
   })
 
-  it('Test Job Outputs sync - non existing job dxid', async () => {
+  it('Test Job Outputs sync - non existing job dxid -> error', async () => {
     jobService = new JobService(em, getPlatformClientWithEmptyResults())
 
     try {
@@ -295,9 +360,9 @@ describe('Job service tests', () => {
     }
   })
 
-  it('Test Job Outputs sync - non existing user id', async () => {
+  it('Test Job Outputs sync - non existing user id -> error', async () => {
     jobService = new JobService(em, getPlatformClientWithEmptyResults())
-    const job = create.jobHelper.create(em, { user }, { })
+    const job = create.jobHelper.create(em, { user }, {})
     await em.flush()
 
     try {
@@ -309,5 +374,4 @@ describe('Job service tests', () => {
       expect(error.message).to.equal('User not found ({ id: \'non-existing\' })')
     }
   })
-
 })

@@ -1,11 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { create, db } from '@pfda/https-apps-shared/src/test'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import P from 'pino'
-import { User } from '../../../../domain'
-import { ClassIdResponse, PlatformClient } from '../../../../platform-client'
+import { User } from '../../../src/domain'
+import { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
 import { expect } from 'chai'
-import { OrgService } from '../../../../domain/org/service/org.service'
+import { OrgService } from '../../../src/domain/org/service/org.service'
 
 describe('org service tests', () => {
   let em: EntityManager<MySqlDriver>

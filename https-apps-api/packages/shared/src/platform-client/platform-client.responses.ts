@@ -1,6 +1,7 @@
 import { AnyObject } from '../types'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 import { JOB_STATE } from '../domain/job/job.enum'
+import { DnanexusLink, IOType } from '../types/common'
 
 type DbClusterDescribeResponse = {
   id: string
@@ -175,22 +176,9 @@ type WorkflowDescribeResponse = {
   id: string
 }
 
-type DnanexusLink = {
-  $dnanexus_link: string
-}
-
 type JobOutput = {
-  [key: string]: PlatformJobType
+  [key: string]: IOType
 }
-
-type PlatformJobType = string[]
-  | number[]
-  | boolean[]
-  | DnanexusLink
-  | string
-  | number
-  | boolean
-  | DnanexusLink[]
 
 // just basic types we are interested in at the moment
 type JobDescribeResponse = {
@@ -242,5 +230,4 @@ export {
   WorkflowDescribeResponse,
   DnanexusLink,
   JobOutput,
-  PlatformJobType,
 }

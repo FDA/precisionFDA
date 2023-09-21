@@ -1,14 +1,15 @@
 import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 import pino from 'pino'
 import { expect } from 'chai'
-import { create, db } from '../../..'
-import { Event, Node, User, UserFile, userFile } from '../../../../domain'
+import { create, db } from '../../../src/test'
+import { Event, Node, User, UserFile, userFile } from '../../../src/domain'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { EVENT_TYPES } from '../../../../domain/event/event.helper'
-import { STATIC_SCOPE } from '../../../../enums'
-import { scopeContainsId } from '../../../../domain/space/space.helper'
-import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
-import { NodesInput } from '../../../../domain/user-file/user-file.input'
+import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
+import { STATIC_SCOPE } from '../../../src/enums'
+import { scopeContainsId } from '../../../src/domain/space/space.helper'
+import { SPACE_MEMBERSHIP_ROLE } from '../../../src/domain/space-membership/space-membership.enum'
+import { NodesInput } from '../../../src/domain/user-file/user-file.input'
+import { SCOPE } from '../../../src/types/common'
 
 describe('remove nodes tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -17,7 +18,7 @@ describe('remove nodes tests', () => {
   let userCtx: types.UserCtx
   const ids: number[] = []
 
-  const createFileStructure = async (scope: string) => {
+  const createFileStructure = async (scope: SCOPE) => {
     // structure:
     // file1 - dxid1
     // folder1
@@ -126,7 +127,7 @@ describe('remove nodes tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -134,7 +135,7 @@ describe('remove nodes tests', () => {
   })
 
   it('test remove nodes - private scope', async () => {
-    await createFileStructure(STATIC_SCOPE.PRIVATE.toString())
+    await createFileStructure(STATIC_SCOPE.PRIVATE)
 
     const op = new userFile.NodesRemoveOperation({
       em: database.orm().em.fork(),
@@ -149,10 +150,10 @@ describe('remove nodes tests', () => {
   })
 
   it('test remove nodes - public scope', async () => {
-    await createFileStructure(STATIC_SCOPE.PUBLIC.toString())
+    await createFileStructure(STATIC_SCOPE.PUBLIC)
 
     const op = new userFile.NodesRemoveOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })

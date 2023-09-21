@@ -1,26 +1,26 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { create, db } from '@pfda/https-apps-shared/src/test'
+import { create, db } from '../../../src/test'
 import { database, entities } from '@pfda/https-apps-shared'
-import { DataPortal, User, Event } from '../../../../domain'
-import { DataPortalService } from '../../../../domain/data-portal/service/data-portal.service'
-import { DataPortalParam, FileParam } from '../../../../domain/data-portal/service/data-portal.types'
-import { ClassIdResponse, PlatformClient } from '../../../../platform-client'
-import { FileCreateParams, FileDownloadLinkParams } from '../../../../platform-client/platform-client.params'
-import { FileDownloadLinkResponse } from '../../../../platform-client/platform-client.responses'
+import { DataPortal, User, Event } from '../../../src/domain'
+import { DataPortalService } from '../../../src/domain/data-portal/service/data-portal.service'
+import { DataPortalParam, FileParam } from '../../../src/domain/data-portal/service/data-portal.types'
+import { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
+import { FileCreateParams, FileDownloadLinkParams } from '../../../src/platform-client/platform-client.params'
+import { FileDownloadLinkResponse } from '../../../src/platform-client/platform-client.responses'
 import { expect } from 'chai'
 import {
   DATA_PORTAL_MEMBER_ROLE,
   DATA_PORTAL_STATUS
-} from '../../../../domain/data-portal/data-portal.enum'
+} from '../../../src/domain/data-portal/data-portal.enum'
 import {
   SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE
-} from '../../../../domain/space-membership/space-membership.enum'
-import { FILE_STATE_DX } from '../../../../domain/user-file/user-file.types'
-import { EVENT_TYPES } from '../../../../domain/event/event.helper'
-import * as generate from '../../../generate'
-import { FileRemoveOperation } from '../../../../domain/user-file'
-import { IdInput } from '../../../../types'
+  SPACE_MEMBERSHIP_SIDE,
+} from '../../../src/domain/space-membership/space-membership.enum'
+import { FILE_STATE_DX } from '../../../src/domain/user-file/user-file.types'
+import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
+import * as generate from '../../../src/test/generate'
+import { FileRemoveOperation } from '../../../src/domain/user-file'
+import { IdInput } from '../../../src/types'
 
 describe('data portal service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -461,13 +461,13 @@ describe('data portal service tests', () => {
 
         fileRemoveOperationParam = input
         return input.id
-      }
+      },
     } as FileRemoveOperation
     dataPortalService = new DataPortalService(em, userClient, fileRemoveOperation)
 
     const loadedDataPortal = await createAndLoadPortal()
     await dataPortalService.removeResource(loadedDataPortal.resources.getItems()[0].id, user.id)
-    await em.clear()
+    em.clear()
 
     // load portal and verify that resource was removed
     const loadedDataPortalAfterRemoval = await em.findOneOrFail(entities.DataPortal, {id: loadedDataPortal.id}, {populate: ['space', 'resources.userFile']})

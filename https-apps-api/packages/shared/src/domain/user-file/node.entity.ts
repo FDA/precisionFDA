@@ -10,6 +10,7 @@ import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
 import { User } from '../user/user.entity'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE } from './user-file.types'
+import { SCOPE } from '../../types/common'
 
 @Entity({
   abstract: true,
@@ -41,7 +42,7 @@ export class Node extends BaseEntity {
   userId: number
 
   @Property()
-  scope: string
+  scope: SCOPE
 
   @Property()
   createdAt: Date

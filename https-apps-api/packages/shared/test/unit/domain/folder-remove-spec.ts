@@ -1,14 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { fakes, mocksReset } from '../../../mocks'
-import { Tag, User, Event, userFile, Folder } from '../../../../domain'
-import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from '../../..'
+import { fakes, mocksReset } from '../../../src/test/mocks'
+import { Tag, User, Event, userFile, Folder } from '../../../src/domain'
+import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { SPACE_STATE, SPACE_TYPE } from '../../../../domain/space/space.enum'
-import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
-import { FILE_ORIGIN_TYPE } from '../../../../domain/user-file/user-file.types'
+import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '../../../src/domain/space-membership/space-membership.enum'
+import { FILE_ORIGIN_TYPE } from '../../../src/domain/user-file/user-file.types'
 
 describe('remove folder tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -18,7 +18,7 @@ describe('remove folder tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -74,7 +74,7 @@ describe('remove folder tests', () => {
     await em.flush()
 
     const op = new userFile.FolderRemoveOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -103,7 +103,7 @@ describe('remove folder tests', () => {
     await em.flush()
 
     const op = new userFile.FolderRemoveOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -111,7 +111,7 @@ describe('remove folder tests', () => {
     try {
       await op.execute({ id: folder1.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to
         .equal(`Cannot remove folder ${folder1.name}`
         + 'with children. Remove children first.')
@@ -143,7 +143,7 @@ describe('remove folder tests', () => {
     try {
       await op.execute({ id: folderToDelete.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to
         .equal(`You have no permissions to remove ${folderToDelete.name} as`
           + ' it is part of Locked Verification space.')
@@ -168,7 +168,7 @@ describe('remove folder tests', () => {
     await em.flush()
 
     const op = new userFile.FolderRemoveOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
     })
@@ -176,7 +176,7 @@ describe('remove folder tests', () => {
     try {
       await op.execute({ id: folderToDelete.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to
         .equal(`You have no permissions to remove '${folderToDelete.name}'.`)
     }

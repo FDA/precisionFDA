@@ -33,7 +33,7 @@ import {
   StyledLine,
   Topbox,
   TopboxItem,
-  WrapSelect,
+  WrapSingleField,
 } from '../../apps/run/styles'
 import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
 import { GearIcon } from '../../../../components/icons/GearIcon'
@@ -351,7 +351,7 @@ const WorkflowRun = (
                 </FieldGroup>
               </StyledLine>
               {workflow.scope && workflow.scope.startsWith('space-') && (
-                <WrapSelect>
+                <WrapSingleField>
                   <FieldGroup label="Space scope" required>
                     <Controller
                       name="spaceScope"
@@ -377,7 +377,7 @@ const WorkflowRun = (
                       fieldName="spaceScope"
                     />
                   </FieldGroup>
-                </WrapSelect>
+                </WrapSingleField>
               )}
             </SectionBody>
           </Section>

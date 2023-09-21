@@ -4,7 +4,10 @@ import { nanoid } from 'nanoid'
 import crypto from 'crypto'
 import { DateTime } from 'luxon'
 import { App, entities } from '../domain'
-import { JOB_STATE, JOB_DB_ENTITY_TYPE } from '../domain/job/job.enum'
+import {
+  JOB_STATE,
+  JOB_DB_ENTITY_TYPE,
+} from '../domain/job/job.enum'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
 import {
   STATUS as DB_CLUSTER_STATUS,
@@ -37,6 +40,7 @@ import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 import { USER_STATE } from '../domain/user/user.entity'
 import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
 import { AppSpec, Internal } from '../domain/app/app.entity'
+import { RunData } from '../domain/job/job.entity'
 
 const chance = new Chance()
 
@@ -247,10 +251,14 @@ const app = {
 const job = {
   simple: (app: App): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
+    const runData: RunData = new RunData()
+    runData.run_instance_type = 'baseline-8'
+    runData.run_inputs = {}
+    runData.run_outputs = {}
     return {
       dxid,
       project: `project-${random.dxstr()}`,
-      runData: JSON.stringify({ run_instance_type: 'baseline-8', run_inputs: {}, run_outputs: {} }),
+      runData,
       state: JOB_STATE.IDLE,
       name: chance.name(),
       scope: 'private',
@@ -273,10 +281,14 @@ const job = {
   },
   regular: (): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
+    const runData: RunData = new RunData()
+    runData.run_instance_type = 'baseline-8'
+    runData.run_inputs = {}
+    runData.run_outputs = {}
     return {
       dxid,
       project: `project-${random.dxstr()}`,
-      runData: JSON.stringify({ run_instance_type: 'baseline-8', run_inputs: {}, run_outputs: {} }),
+      runData,
       describe: JSON.stringify({ id: dxid }),
       state: JOB_STATE.IDLE,
       name: chance.name(),
