@@ -1,11 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { create, db } from '@pfda/https-apps-shared/src/test'
+import { create, db } from '../../../src/test'
 import { database, getLogger } from '@pfda/https-apps-shared'
 import { expect } from 'chai'
 import P from 'pino'
-import { User } from '@pfda/https-apps-shared/src/domain'
-import { UserService } from '@pfda/https-apps-shared/src/domain/user'
-import { UserCtx, UserOpsCtx } from '../../../types'
+import { User } from '../../../src/domain'
+import { UserService } from '../../../src/domain/user'
+import { UserCtx, UserOpsCtx } from '../../../src/types'
 
 describe('user service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -16,7 +16,7 @@ describe('user service tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()

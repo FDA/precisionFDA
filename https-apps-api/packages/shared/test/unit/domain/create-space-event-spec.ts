@@ -1,15 +1,15 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { Space, SpaceEvent, spaceEvent, User } from '../../../../domain'
-import { create, db } from '../../..'
+import { Space, SpaceEvent, spaceEvent, User } from '../../../src/domain'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE }
-  from '../../../../domain/space-membership/space-membership.enum'
+  from '../../../src/domain/space-membership/space-membership.enum'
 import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }
-  from '../../../../domain/space-event/space-event.enum'
-import { InputEntityUnion } from '../../../../domain/space-event/space-event.input'
-import { ENTITY_TYPE } from '../../../../domain/space-event/space-event.enum'
+  from '../../../src/domain/space-event/space-event.enum'
+import { ENTITY_TYPE } from '../../../src/domain/space-event/space-event.enum'
+import { InputEntityUnion } from '../../../src/utils/object-utils'
 
 describe('create space event tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -20,7 +20,7 @@ describe('create space event tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()

@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useHistory, useParams } from 'react-router'
@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import { ButtonSolidBlue } from '../../../../components/Button'
+import styled from 'styled-components'
+import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup } from '../../../../components/form/FieldGroup'
 import { CubeIcon } from '../../../../components/icons/CubeIcon'
 import { QuestionIcon } from '../../../../components/icons/QuestionIcon'
@@ -18,14 +19,14 @@ import { getSpaceIdFromScope } from '../../../../utils'
 import DefaultLayout from '../../../../layouts/DefaultLayout'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { fetchFile } from '../../files/files.api'
-import { IFile } from '../../files/files.types'
+import { FileTreeNode, IFile, TreeOnSelectInfo } from '../../files/files.types'
 import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
 import { HomeLoader, NotFound, Title } from '../../show.styles'
 import { fetchApp, fetchLicensesOnApp, fetchUserComputeInstances, runJob, RunJobRequest } from '../apps.api'
 import {
-  AcceptedLicense,
+  AcceptedLicense, AppMeta,
   ComputeInstance,
   IApp,
   INPUT_TYPES_CLASSES,
@@ -36,21 +37,30 @@ import {
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
 import {
-  AppsConfiguration,
+  AppsConfiguration, InputTextRightMargin,
   Section,
   SectionBody,
   SectionHeader,
   StyledBackLink,
   StyledForm,
-  StyledJobName,
+  StyledJobName, StyledLabel,
   StyledRow,
   TipsRow,
   Topbox,
   TopboxItem,
-  WrapSelect,
+  WrapSingleField,
 } from './styles'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 import { IAccessibleFile } from '../../databases/databases.api'
+import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
+
+export const StyledInputText = styled(InputText)`
+  width: 30%;
+`
+
+export const DisabledLabel = styled(StyledLabel)`
+  color: lightgrey;
+`
 
 const convertToAccessibleFile = (file: IFile): IAccessibleFile =>
   ({
@@ -74,9 +84,8 @@ const getDefaultValue = (
 
 const prepareDefaultValues = (
   app: IApp,
-  inputSpecs: InputSpec[],
+  meta: AppMeta,
   user: IUser,
-  meta: any,
   computeInstances: ComputeInstance[],
   defaultFiles?: IFile[],
 ): JobRunData => {
@@ -88,7 +97,7 @@ const prepareDefaultValues = (
     scope: { label: 'Private', value: 'private' } as SelectType,
     inputs: {},
   }
-  inputSpecs.forEach(inputSpec => {
+  meta.spec.input_spec.forEach(inputSpec => {
     if (inputSpec.default !== undefined) {
       if (inputSpec.class === INPUT_TYPES_CLASSES.FILE) {
         defaultValues.inputs[inputSpec.name] = getDefaultValue(
@@ -107,12 +116,12 @@ const getLabel = (inputSpec: InputSpec) =>
   inputSpec.label ? inputSpec.label : inputSpec.name
 
 const prepareValidations = (
-  inputSpecs: InputSpec[],
+  meta: AppMeta,
   user: IUser,
   scope?: string,
 ) => {
   const inputs: any = {}
-  inputSpecs
+  meta.spec.input_spec
     .filter(inputSpec => !inputSpec.optional)
     .forEach(inputSpec => {
       if (inputSpec.class === INPUT_TYPES_CLASSES.BOOLEAN) {
@@ -176,13 +185,14 @@ const getValue = (
 const createRequestObject = (
   vals: JobRunData,
   app: IApp,
-  inputSpecs: InputSpec[],
+  meta: AppMeta,
+  outputFolder: string,
 ): RunJobRequest => {
   const inputs: { [key: string]: string | number | boolean | undefined } = {}
   
   Object.keys(vals.inputs).forEach(key => {
     const value = vals.inputs[key]
-    inputs[key] = getValue(key, value, inputSpecs)
+    inputs[key] = getValue(key, value, meta.spec.input_spec)
   })
 
   return {
@@ -191,6 +201,7 @@ const createRequestObject = (
     job_limit: vals.jobLimit,
     instance_type: vals.instanceType?.value,
     scope: vals.scope?.value,
+    output_folder_path: outputFolder,
     inputs,
   } as RunJobRequest
 }
@@ -224,24 +235,51 @@ const fetchLicensesOnFiles = (jobData: JobRunData): Promise<License[]> => {
   return Promise.resolve([])
 }
 
+const buildPath = (node: FileTreeNode): string => {
+  if (!node || node.title === '/') {
+    return ''
+  }
+
+  if (!node.parent) {
+    return node.title
+  }
+
+  const parentPath = buildPath(node.parent)
+  return `${parentPath}/${node.title}`
+}
+
 const JobRun = ({
   app,
-  inputSpecs,
-  user,
   meta,
+  user,
   computeInstances,
   defaultFiles,
 }: {
   app: IApp
-  inputSpecs: InputSpec[]
+  meta: AppMeta
   user: IUser
-  meta: any
   computeInstances: ComputeInstance[]
   defaultFiles?: IFile[]
 }) => {
   const history = useHistory()
-  const defaultValues = prepareDefaultValues(app, inputSpecs, user, meta, computeInstances, defaultFiles)
-  const validationSchema = prepareValidations(inputSpecs, user, app.scope)
+  const defaultValues = prepareDefaultValues(app, meta, user, computeInstances, defaultFiles)
+  const validationSchema = prepareValidations(meta, user, app.scope)
+  const [outputFolder, setOutputFolder] = useState('')
+
+  const {
+    modalComp: organizeFileModal,
+    setShowModal: setOrganizeFileModal,
+    isShown: isShownOrganizeFileModal,
+  } = useOrganizeFileModal({
+    headerText: 'Select output folder',
+    submitCaption: 'Select folder',
+    scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
+    onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
+      const outputFolderPath = buildPath(info.node)
+      setOutputFolder(outputFolderPath)
+      setOrganizeFileModal(false)
+    },
+  })
 
   const { data: selectableContexts } = useQuery(
       ['selectable-contexts', app.scope],
@@ -263,8 +301,7 @@ const JobRun = ({
     },
   )
 
-  const { modalComp: licensesModal, setLicensesAndShow } =
-    useAcceptLicensesModal()
+  const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
   const {
     control,
@@ -301,6 +338,11 @@ const JobRun = ({
     },
   })
 
+  const hasAppFileOutputs = (): boolean => {
+    const filesOutputClasses = ['file', 'array:file']
+    return meta.spec.output_spec.some(item => filesOutputClasses.includes(item.class))
+  }
+
   const onSubmit = async () => {
     const valid = await trigger()
     if (valid) {
@@ -315,7 +357,7 @@ const JobRun = ({
         if (licensesToAccept.length > 0) {
           setLicensesAndShow(licensesToAccept, acceptedLicenses)
         } else {
-          const req = createRequestObject(getValues(), app, inputSpecs)
+          const req = createRequestObject(getValues(), app, meta, outputFolder)
           await runJobMutation.mutateAsync(req)
         }
       } catch (e) {
@@ -331,6 +373,7 @@ const JobRun = ({
   return (
     <DefaultLayout>
       {licensesModal}
+      {organizeFileModal}
       <Topbox>
         <StyledBackLink linkTo={`/${baseLink}/apps/${app.uid}`}>
           Back to App
@@ -382,7 +425,7 @@ const JobRun = ({
                 </FieldGroup>
               </StyledRow>
               {app.entity_type === 'https' && (
-                  <WrapSelect>
+                  <WrapSingleField>
                     <FieldGroup label="Context" required>
                       <Controller
                           name="scope"
@@ -408,11 +451,11 @@ const JobRun = ({
                           fieldName="scope"
                       />
                     </FieldGroup>
-                  </WrapSelect>
+                  </WrapSingleField>
               )
               }
               {app.scope && app.scope.startsWith('space-') && (
-                <WrapSelect>
+                <WrapSingleField>
                   <FieldGroup label="Space scope" required>
                     <Controller
                       name="scope"
@@ -438,10 +481,10 @@ const JobRun = ({
                       fieldName="scope"
                     />
                   </FieldGroup>
-                </WrapSelect>
+                </WrapSingleField>
               )}
 
-              <WrapSelect>
+              <WrapSingleField>
                 <FieldGroup label="Instance Type" required>
                   <Controller
                     name="instanceType"
@@ -467,13 +510,13 @@ const JobRun = ({
                     fieldName="instanceType"
                   />
                 </FieldGroup>
-              </WrapSelect>
+              </WrapSingleField>
             </SectionBody>
           </Section>
           <Section>
             <SectionHeader>INPUTS</SectionHeader>
             <SectionBody>
-              {inputSpecs.length > 0 ? inputSpecs.map(inputSpec => (
+              {meta.spec.input_spec.length > 0 ? meta.spec.input_spec.map(inputSpec => (
                 <FieldGroup
                   key={inputSpec.name}
                   label={getLabel(inputSpec)}
@@ -495,6 +538,22 @@ const JobRun = ({
               )) : <EmptyTable>App has no inputs.</EmptyTable>}
             </SectionBody>
           </Section>
+          { hasAppFileOutputs() && <Section>
+              <SectionHeader>OUTPUT FOLDER</SectionHeader>
+              <SectionBody>
+                <FieldGroup label="Store outputs in">
+                  <WrapSingleField>
+                    <InputTextRightMargin disabled={isSubmitting} value={outputFolder} onChange={(e: any) => setOutputFolder(e.target.value)} />
+                    <Button type="button" disabled={isSubmitting} onClick={(evt) => {
+                      evt.preventDefault()
+                      setOrganizeFileModal(true)
+                    }}>Choose folder</Button>
+                  </WrapSingleField>
+                </FieldGroup>
+                <StyledLabel>Note: Non existing folders will be created</StyledLabel>
+              </SectionBody>
+            </Section>
+          }
         </AppsConfiguration>
         <ButtonSolidBlue
           disabled={isSubmitting}

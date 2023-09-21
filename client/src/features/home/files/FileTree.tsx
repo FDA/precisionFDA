@@ -1,12 +1,11 @@
 import React from 'react'
-import Tree, { TreeProps } from 'rc-tree'
-import { DataNode } from 'rc-tree/lib/interface'
+import Tree from 'rc-tree'
 import 'rc-tree/assets/index.css'
-
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { FolderOpenIcon } from '../../../components/icons/FolderOpenIcon'
 import { TreeStyles } from './FileList.styles'
 import { FileIcon } from '../../../components/icons/FileIcon'
+import { FileTreeNode } from './files.types'
 
 const Icon = ({
   loading,
@@ -31,8 +30,8 @@ const Icon = ({
   return <IconState height={14} />
 }
 
-export const FileTree = (props: Omit<TreeProps, 'prefixCls'>) => {
-  const treeRef = React.createRef<Tree<DataNode>>()
+export const FileTree = (props: Omit<FileTreeNode, 'prefixCls'>) => {
+  const treeRef = React.createRef<Tree<FileTreeNode>>()
 
   return (
     <TreeStyles>

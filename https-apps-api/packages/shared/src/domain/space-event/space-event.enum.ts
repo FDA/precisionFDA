@@ -17,6 +17,7 @@ enum ENTITY_TYPE {
   SPACE_MEMBERSHIP = 'SpaceMembership',
   TASK = 'Task',
   WORKFLOW = 'Workflow',
+  USER = 'User',
 }
 
 enum SPACE_EVENT_OBJECT_TYPE {

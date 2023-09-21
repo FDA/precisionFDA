@@ -8,7 +8,8 @@ import {
   Note,
   Space, SpaceMembership,
   UserFile,
-  Workflow
+  Workflow,
+  User,
 } from '../domain'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../domain/space-event/space-event.enum'
 import { AppEntityDataProvider } from './providers/app.provider'
@@ -23,6 +24,7 @@ import { SpaceEntityDataProvider } from './providers/space.provider'
 import { NoteEntityDataProvider } from './providers/note.provider'
 import { SpaceMembershipEntityDataProvider } from './providers/space-membership.provider'
 import { EntityDataProvider } from './providers/entity-data.provider'
+import { UserEntityDataProvider } from './providers/user.provider'
 
 interface NameToDbEntityMap {
 
@@ -37,6 +39,7 @@ interface NameToDbEntityMap {
   space: Space,
   workflow: Workflow,
   spaceMembership: SpaceMembership,
+  user: User,
 
 }
 
@@ -65,6 +68,7 @@ const ENTITY_DATA_PROVIDER_MAP: { [ T in EntityType ]: EntityDataProvider<T> } =
   space: new SpaceEntityDataProvider(),
   workflow: new WorkflowEntityDataProvider(),
   spaceMembership: new SpaceMembershipEntityDataProvider(),
+  user: new UserEntityDataProvider(),
 }
 
 const getEntityType = (entity: InputEntityUnion): ENTITY_TYPE => {

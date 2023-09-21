@@ -1,13 +1,13 @@
 import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { fakes, mocksReset } from '../../../mocks'
-import { Tag, User, UserFile, Event, userFile } from '../../../../domain'
-import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from '../../..'
+import { fakes, mocksReset } from '../../../src/test/mocks'
+import { Tag, User, UserFile, Event, userFile } from '../../../src/domain'
+import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { SPACE_STATE, SPACE_TYPE } from '../../../../domain/space/space.enum'
-import { SPACE_MEMBERSHIP_ROLE } from '../../../../domain/space-membership/space-membership.enum'
+import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '../../../src/domain/space-membership/space-membership.enum'
 
 describe('remove file tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -17,7 +17,7 @@ describe('remove file tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
@@ -44,7 +44,7 @@ describe('remove file tests', () => {
     try {
       await op.execute({ id: fileToDelete.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to
         .equal('File fileInComparison cannot be deleted because it participates in'
           + ' one or more comparisons. Please delete all the comparisons first.')
@@ -76,7 +76,7 @@ describe('remove file tests', () => {
     try {
       await op.execute({ id: fileToDelete.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to
         .equal(`You have no permissions to remove ${fileToDelete.name} as`
           + ' it is part of Locked Verification space.')
@@ -214,14 +214,14 @@ describe('remove file tests', () => {
     try {
       await op.execute({ id: file.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to
         .equal('You have no permissions to remove from a Protected Space')
     }
   })
 
   it('test delete file from protected space - success', async () => {
-    const differentUser = create.userHelper.create(em, { firstName: 'First', lastName: 'Last' })
+    create.userHelper.create(em, { firstName: 'First', lastName: 'Last' })
     const space = create.spacesHelper.create(em, { name: 'protected-space', protected: true })
     await em.flush()
     const file = create.filesHelper.create(em, { user }, { scope: `space-${space.id}` })
@@ -255,7 +255,7 @@ describe('remove file tests', () => {
     try {
       await op.execute({ id: file.id })
       expect.fail('Operation is expected to fail.')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to.equal('Locked items cannot be removed.')
     }
   })

@@ -8,6 +8,6 @@ export const constructDxname = (username: string, appName: string, scope?: strin
   if (scope && scopeContainsId(scope)) {
     return `${scope}-${appName}`
   } else {
-    return `-${username}-${appName}`
+    return `${username}-${appName}`
   }
 }

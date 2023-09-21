@@ -1,10 +1,8 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { mocksReset } from '../../../mocks'
-import { User, userFile, Folder } from '../../../../domain'
-import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from '../../..'
+import { User, userFile, Folder } from '../../../src/domain'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 
 describe('lock/unlock folder tests', () => {
@@ -15,14 +13,11 @@ describe('lock/unlock folder tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
-
-    mocksReset()
-    localMocksReset()
   })
   it('test mixed folders - unlock operation', async () => {
     const folder1 = create.filesHelper.createFolder(

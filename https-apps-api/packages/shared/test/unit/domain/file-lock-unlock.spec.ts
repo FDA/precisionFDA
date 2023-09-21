@@ -1,10 +1,10 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { mocksReset } from '../../../mocks'
-import { Folder, User, UserFile, userFile } from '../../../../domain'
-import { mocksReset as localMocksReset } from '../../../../../../worker/test/utils/mocks'
-import { create, db } from '@pfda/https-apps-shared/src/test'
+import { mocksReset } from '../../../src/test/mocks'
+import { User, UserFile, userFile } from '../../../src/domain'
+import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
+import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 
 describe('lock/unlock file tests', () => {
@@ -15,7 +15,7 @@ describe('lock/unlock file tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em as EntityManager<MySqlDriver>
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()

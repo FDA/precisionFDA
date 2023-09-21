@@ -1,26 +1,24 @@
-import type { EntityManager } from '@mikro-orm/core'
-import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getLogger } from '../../logger'
-import { User } from '../user'
-import type { PlatformClient } from '../../platform-client'
+import { PlatformClient } from '../../platform-client'
+import { EntityManager } from '@mikro-orm/core'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
-import { UserFile } from '../user-file'
-import { NotificationService } from '../notification'
+import { NotificationService} from '../notification'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '../../enums'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
-import type {
+import {
   DnanexusLink,
   FileStateResult,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
+import { Job, User, UserFile, Folder, spaceEvent } from '..'
+import type { UserCtx } from '../../types'
 import * as errors from '../../errors'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
-import { spaceEvent } from '..'
-import type { UserCtx } from '../../types'
-import type { UserRepository } from '../user/user.repository'
-import type { JobRepository } from './job.repository'
-import { Job } from './job.entity'
+import { JobRepository } from './job.repository'
+import { UserRepository } from '../user/user.repository'
+import { FolderService } from '../user-file/folder.service'
 
 const logger = getLogger('job.service')
 
@@ -31,13 +29,15 @@ export class JobService implements IJobService {
   private readonly em: EntityManager
   private readonly platformClient: PlatformClient
   private readonly notificationService: NotificationService
-  private readonly jobRepo: JobRepository
-  private readonly userRepo: UserRepository
+  private readonly folderService: FolderService
+  private jobRepo: JobRepository
+  private userRepo: UserRepository
 
   constructor(em: EntityManager, platformClient: PlatformClient) {
     this.em = em
     this.platformClient = platformClient
     this.notificationService = new NotificationService(em as SqlEntityManager)
+    this.folderService = new FolderService(em as SqlEntityManager)
     this.jobRepo = this.em.getRepository(Job)
     this.userRepo = this.em.getRepository(User)
   }
@@ -96,10 +96,21 @@ export class JobService implements IJobService {
     }
   }
 
+  private async getOrCreateOutputFolder(job: Job): Promise<Folder | null> {
+    if (job.runData.output_folder_path) {
+      const folders = await this.folderService.createFoldersOnPath(
+        job.runData.output_folder_path,
+        job.scope,
+        job.user.id,
+        { type: 'job', value: job },
+      )
+      return folders[folders.length - 1]
+    }
+    return null
+  }
+
   private updateJobRunData(job: Job, output: JobOutput) {
-    const runDataObject = JSON.parse(job.runData)
-    runDataObject.run_outputs = output
-    job.runData = JSON.stringify(runDataObject)
+    job.runData.run_outputs = output
     // describe is updated by job's synchronize.ts
     this.em.persist(job)
   }
@@ -121,14 +132,18 @@ export class JobService implements IJobService {
 
   private async getOutputFiles(fileDxids: string[], projectDxid: string, user: User, job: Job): Promise<UserFile[]> {
     const outputFiles: UserFile[] = []
-    const fileStateResults = await this.platformClient.fileStates({
-      fileDxids,
-      projectDxid,
-    })
+    if (fileDxids.length > 0) {
+      const fileStateResults = await this.platformClient.fileStates({
+        fileDxids,
+        projectDxid,
+      })
 
-    for (const fileStateResult of fileStateResults) {
-      const file = this.createFile(user, projectDxid, fileStateResult, job)
-      outputFiles.push(file)
+      const parentFolder = await this.getOrCreateOutputFolder(job)
+
+      for (const fileStateResult of fileStateResults) {
+        const file = this.createFile(user, projectDxid, fileStateResult, job, parentFolder)
+        outputFiles.push(file)
+      }
     }
     return outputFiles
   }
@@ -172,7 +187,7 @@ export class JobService implements IJobService {
     return result
   }
 
-  private createFile(user: User, projectDxId: string, fileStateResult: FileStateResult, job: Job) {
+  private createFile(user: User, projectDxId: string, fileStateResult: FileStateResult, job: Job, parentFolder: Folder | null) {
     if (!fileStateResult.describe) {
       throw new errors.InvalidStateError(`Platform didn't give describe for file id ${fileStateResult.id}`)
     }
@@ -182,14 +197,23 @@ export class JobService implements IJobService {
     file.project = projectDxId!
     file.name = fileStateResult.describe.name
     file.state = FILE_STATE_DX.CLOSED
-    file.scope = job.scope ? job.scope : STATIC_SCOPE.PRIVATE
     file.fileSize = fileStateResult.describe.size
     file.parentId = job.id
     file.parentType = PARENT_TYPE.JOB
-    if (scopeContainsId(file.scope)) {
-      file.scopedParentFolderId = job.localFolderId
-    } else {
-      file.parentFolderId = job.localFolderId
+    file.scope = parentFolder ? parentFolder.scope : job.scope
+
+    if (parentFolder) {
+      if (scopeContainsId(file.scope)) {
+        file.scopedParentFolderId = parentFolder.id
+      } else {
+        file.parentFolderId = parentFolder.id
+      }
+    } else if (job.localFolderId) {
+      if (scopeContainsId(file.scope)) {
+        file.scopedParentFolderId = job.localFolderId
+      } else {
+        file.parentFolderId = job.localFolderId
+      }
     }
     return file
   }

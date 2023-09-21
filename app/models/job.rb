@@ -80,7 +80,7 @@ class Job < ApplicationRecord
   has_one :submission
 
   store :describe, coder: JSON
-  store :run_data, accessors: %i(run_inputs run_outputs run_instance_type), coder: JSON
+  store :run_data, accessors: %i(run_inputs run_outputs run_instance_type output_folder_path), coder: JSON
   store :provenance, coder: JSON
 
   acts_as_commentable

@@ -39,7 +39,6 @@ describe('Notification service tests', () => {
         message: "msg",
         severity: SEVERITY.WARN
       }))
-    // @ts-ignore
     notificationService = new NotificationService(em, redisClient)
     await notificationService.createNotification({
       action: NOTIFICATION_ACTION.NODES_REMOVED,
@@ -72,7 +71,6 @@ describe('Notification service tests', () => {
           linkUrl: 'https://world.xyz',
         },
       }))
-    // @ts-ignore
     notificationService = new NotificationService(em, redisClient)
     await notificationService.createNotification({
       action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,

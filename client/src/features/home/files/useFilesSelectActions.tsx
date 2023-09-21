@@ -1,6 +1,7 @@
 import { pick } from 'ramda'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
+import { toast } from 'react-toastify'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
@@ -11,20 +12,21 @@ import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import { ActionFunctionsType, ResourceScope } from '../types'
+import { ActionFunctionsType, ResourceScope, ServerScope } from '../types'
 import { useDeleteFileModal } from './actionModals/useDeleteFileModal'
 import { useDownloadFileModal } from './actionModals/useDownloadFileModal'
 import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useEditFolderModal } from './actionModals/useEditFolderModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
-import { copyFilesRequest, copyFilesToPrivate } from './files.api'
+import { copyFilesRequest, copyFilesToPrivate, moveFilesRequest } from './files.api'
 import { IFile } from './files.types'
 import {
   isActionDisabledBasedOnProtected,
   isActionDisabledBasedOnRole,
 } from '../../spaces/common'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
+import { displayPayloadMessage } from '../../../utils/api'
 
 export enum FileActions {
   'Track' = 'Track',
@@ -51,7 +53,7 @@ export enum FileActions {
   'Comments' = 'Comments',
 }
 
-const getFileScope = (scope: ResourceScope | undefined, space: ISpace | undefined): string => {
+const getFileScope = (scope: ResourceScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
     switch (scope) {
       case 'me':
@@ -61,7 +63,7 @@ const getFileScope = (scope: ResourceScope | undefined, space: ISpace | undefine
       case 'featured':
         return 'public'
       default:
-        return scope
+        return 'private'
     }
   }
   return `space-${space?.id}`
@@ -96,6 +98,22 @@ export const useFilesSelectActions = ({
     resource: 'files',
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+  const moveFilesMutation = useMutation({
+    mutationKey: ['move-files'],
+    mutationFn: (folderIdParam: number) => {
+      const selectedIds = selected.map(f => f.id)
+      const result = moveFilesRequest(selectedIds, folderIdParam, scope, space?.id)
+      return result
+    },
+    onSuccess: res => {
+      queryClient.invalidateQueries(['files'])
+      displayPayloadMessage(res)
+      if (resetSelected) resetSelected()
+    },
+    onError: () => {
+      toast.error('Error: Moving files')
     },
   })
 
@@ -212,11 +230,13 @@ export const useFilesSelectActions = ({
     setShowModal: setOrganizeFileModal,
     isShown: isShownOrganizeFileModal,
   } = useOrganizeFileModal({
-    selected,
-    scope,
-    spaceId: space?.id,
-    onSuccess: () => {
-      if (resetSelected) resetSelected()
+    headerText: `Move ${selected.length} item${selected.length === 1 ? '' : 's'}`,
+    submitCaption: 'Move',
+    scope: getFileScope(scope, space),
+    onHandleSubmit: (selectedFolderId) => {
+      moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
+          setOrganizeFileModal(false)
+      })
     },
   })
   const {

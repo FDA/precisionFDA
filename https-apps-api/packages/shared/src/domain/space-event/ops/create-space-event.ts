@@ -33,7 +33,7 @@ class CreateSpaceEventOperation extends BaseOperation<UserOpsCtx, SpaceEventInpu
       spaceEvent.objectType = getObjectType(input.entity)
 
       const objectData = getSpaceEventJsonData(input.entity)
-      spaceEvent.data = objectData != null ? objectData : undefined
+      spaceEvent.data = objectData || undefined
 
       await em.persistAndFlush(spaceEvent)
 

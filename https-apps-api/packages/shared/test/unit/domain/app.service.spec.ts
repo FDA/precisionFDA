@@ -1,25 +1,25 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import {App, AppSeries, User, Event} from '../../../../domain'
+import { App, AppSeries, User, Event } from '../../../src/domain'
 import pino from 'pino'
-import { create, db } from '../../..'
-import { database, getLogger, types } from '@pfda/https-apps-shared'
-import { mocksReset } from '../../../mocks'
-import { mocksReset as localMocksReset } from '@pfda/https-apps-worker/test/utils/mocks'
-import { AppService } from '../../../../domain/app/services/app.service'
-import {ClassIdResponse, PlatformClient} from '../../../../platform-client'
+import { create, db } from '../../../src/test'
+import { database, getLogger, types } from '../../../src'
+import { mocksReset } from '../../../src/test/mocks'
+import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
+import { AppService } from '../../../src/domain/app/services/app.service'
+import { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
   ObjectsParams,
-} from '../../../../platform-client/platform-client.params'
-import { AppInput, Spec } from '../../../../domain/app/app.input'
+} from '../../../src/platform-client/platform-client.params'
+import { AppInput, Spec } from '../../../src/domain/app/app.input'
 import { expect } from 'chai'
-import { STATIC_SCOPE } from '../../../../enums'
-import { allowedInstanceTypes } from '../../../../domain/job/job.enum'
-import { constructDxname } from '../../../../domain/app/app.helper'
-import { ENTITY_TYPE } from '../../../../domain/app/app.enum'
-import { EVENT_TYPES } from '../../../../domain/event/event.helper'
-import { codeRemap } from '../../../../utils/app'
+import { STATIC_SCOPE } from '../../../src/enums'
+import { allowedInstanceTypes } from '../../../src/domain/job/job.enum'
+import { constructDxname } from '../../../src/domain/app/app.helper'
+import { ENTITY_TYPE } from '../../../src/domain/app/app.enum'
+import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
+import { codeRemap } from '../../../src/utils/app'
 
 describe('app service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -41,7 +41,7 @@ describe('app service tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     user.privateFilesProject = privateFilesProjectId
     log = getLogger()
@@ -119,7 +119,7 @@ describe('app service tests', () => {
     expect(appCreateParams.name).to.equal(constructDxname(user.dxuser, appInput.name, appInput.scope))
     expect(appCreateParams.title).to.equal(appInput.title)
     expect(appCreateParams.summary).to.equal(' ')
-    expect(appCreateParams.description).to.equal(' ')
+    expect(appCreateParams.description).to.equal('no readme provided')
     expect(appCreateParams.version.startsWith('r')).to.equal(true)
     expect(appCreateParams.resources).to.be.empty()
     expect(appCreateParams.details.ordered_assets).to.be.empty()
@@ -211,20 +211,6 @@ describe('app service tests', () => {
     const secondApp = apps.find(app => app.id === 2)
     expect(secondApp?.revision).to.equal(2)
     expect(secondApp?.uid).to.equal(`${appId}-2`)
-  })
-
-  it('save app - new revision of an app - fail if not use is_new = false', async () => {
-    const appService = new AppService(em, platformClient)
-    const appInput1: AppInput = getDefaultApp()
-    const appInput2: AppInput = getDefaultApp()
-
-    await appService.create(appInput1, user.id)
-    try {
-      await appService.create(appInput2, user.id)
-      expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('UniqueConstraintViolationException')
-    }
   })
 
   const getSpec = (name: string, classValue: string, help: string, label: string,

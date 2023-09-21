@@ -1,12 +1,12 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { create, db } from '@pfda/https-apps-shared/src/test'
-import { database, getLogger, types } from '@pfda/https-apps-shared'
+import { create, db } from '../../../src/test'
+import { database, getLogger, types } from '../../..'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
 import P from 'pino'
-import { entities, license, User } from '../../../domain'
-import { PARENT_TYPE } from '../../../domain/user-file/user-file.types'
-import { UidInput } from '@pfda/https-apps-shared/src/types'
+import { entities, license, User } from '../../../src/domain'
+import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
+import { UidInput } from '../../../src/types'
 
 describe('licenses for app\'s assets tests', () => {
   let em: EntityManager<MySqlDriver>
