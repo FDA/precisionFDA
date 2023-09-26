@@ -44,9 +44,3 @@ class NestedCommentsModel
 
 window.Precision ||= {}
 window.Precision.nestedComments = new NestedCommentsModel()
-
-window.Precision ||= {}
-window.Precision.MENTIONS_CONST = {
-  regex: /(^|[^@\w])@([\w\.\@]+)\b/g
-  replace: '$1<a href="/users/$2" target="_blank">@$2</a>'
-}
