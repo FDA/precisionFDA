@@ -51,7 +51,6 @@
 #= require highcharts/highcharts
 #= require eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min
 #= require jstree
-#= require atwho-js/js/jquery.atwho.min
 #= require jquery.caret.min.js
 #= require bootstrap-select/bootstrap-select.min.js
 #= require bundle.js
