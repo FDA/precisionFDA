@@ -146,6 +146,7 @@ Rails.application.routes.draw do
     get "docs" => "docs#index"
     get "/docs/*all", to: "docs#index"
     get "data-portals" => "main#data_portals"
+    get "DAaaS" => "main#data_portals"
     get "daaas" => "main#data_portals"
     get "/data-portals/*all" => "main#data_portals"
 
