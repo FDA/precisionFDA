@@ -11,20 +11,4 @@ module JobsConcern
 
     @job
   end
-
-  # Refresh state of single job
-  def sync_job!
-    return if @job.terminal?
-
-    if @job.from_submission?
-      Job.sync_challenge_job!(@job.id)
-    else
-      Job.sync_job!(@context, @job.id)
-    end
-  end
-
-  # Refresh state of jobs, if needed
-  def sync_jobs(jobs)
-    Job.sync_jobs!(@context, jobs)
-  end
 end

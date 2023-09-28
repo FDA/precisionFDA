@@ -2,11 +2,13 @@ export * as enums from './job.enum'
 
 export * as inputs from './job.input'
 
-export { sendJobFailedEmails } from './job.helper' 
+export { sendJobFailedEmails } from './job.helper'
 
 export { Job } from './job.entity'
 
 export { WorkstationService } from './workstation.service'
+
+export { JobService } from './job.service'
 
 export { CreateJobOperation } from './ops/create'
 

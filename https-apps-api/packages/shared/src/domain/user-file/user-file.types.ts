@@ -1,5 +1,7 @@
 import { IdentifiedReference } from '@mikro-orm/core'
 import { User } from '../user/user.entity'
+import { SCOPE } from '../../types/common'
+import { Asset, Comparison, Job } from '..'
 
 // File state from the platform
 enum FILE_STATE_DX {
@@ -13,8 +15,6 @@ enum FILE_STATE_PFDA {
   // pFDA internal state, used for files that are being copied by a worker.
   COPYING = 'copying',
   REMOVING = 'removing',
-  UNLOCKING = 'unlocking',
-  LOCKING = 'locking',
 }
 
 type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA
@@ -38,6 +38,8 @@ enum PARENT_TYPE {
   COMPARISON = 'Comparison',
 }
 
+type ParentEntity = User | Job | Asset | Comparison
+
 // IFileOrAsset is for methods that operate on UserFiles and Assets
 // but not all nodes (e.g. not Folders)
 interface IFileOrAsset {
@@ -46,7 +48,7 @@ interface IFileOrAsset {
   uid: string
   project: string
   name: string
-  scope: string
+  scope: SCOPE
   state: string
   fileSize?: number
   entityType: FILE_ORIGIN_TYPE
@@ -71,6 +73,7 @@ export {
   FILE_STATE_DX,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
+  ParentEntity,
   FILE_STI_TYPE,
   IFileOrAsset,
   ITrackable,

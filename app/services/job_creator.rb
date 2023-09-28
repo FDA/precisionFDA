@@ -8,7 +8,7 @@ class JobCreator
   end
 
   def create(app:, name:, input_info:, job_limit: CloudResourceDefaults::JOB_LIMIT,
-    run_instance_type: nil, scope: nil)
+    run_instance_type: nil, scope: nil, output_folder_path: nil)
     dxjob_id = create_dx_job(app, input_info, name, run_instance_type, job_limit)
 
     Job.transaction do
@@ -18,6 +18,7 @@ class JobCreator
         app_id: app.id,
         project: project,
         run_inputs: input_info.run_inputs,
+        output_folder_path:,
         state: Job::STATE_IDLE,
         name: name,
         describe: {},

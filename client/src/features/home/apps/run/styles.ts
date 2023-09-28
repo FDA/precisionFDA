@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components'
+import { InputText } from '../../../../components/InputText'
 import { BackLink } from '../../../../components/Page/PageBackLink'
 
 const pageContainer = css`
@@ -13,6 +14,13 @@ export const TipsRow = styled.div`
   padding: 16px 0;
   color: #777777;
   text-align: left;
+`
+
+export const StyledLabel = styled.div`
+  display: flex;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
 `
 
 export const SectionHeader = styled.div`
@@ -56,6 +64,12 @@ export const TopboxItem = styled.div`
 export const StyledRow = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
+`
+
+export const InputTextRightMargin = styled(InputText)`
+  flex-grow: 1;
+  margin-right: 16px;
 `
 
 export const StyledJobName = styled.div`
@@ -68,9 +82,16 @@ export const StyledForm = styled.form`
   padding-bottom: 64px;
 `
 
-export const WrapSelect = styled.div`
+export const StyledWarning = styled.div`
+    color: darkred;
+    font-size: 14px;
+`
+
+export const WrapSingleField = styled.div`
+  display: flex;
   max-width: 500px;
   font-size: 14px;
+  flex-direction: row;
 `
 
 export const StyledLine = styled.div`

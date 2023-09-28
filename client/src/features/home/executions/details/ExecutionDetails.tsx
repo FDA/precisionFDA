@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
+import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../../components/HomeLabel'
 import { CogsIcon } from '../../../../components/icons/Cogs'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
@@ -21,7 +22,7 @@ import {
   Title,
   Topbox,
 } from '../../show.styles'
-import { ResourceScope } from '../../types'
+import { ResourceScope, Notification, NOTIFICATION_ACTION } from '../../types'
 import { getBasePath } from '../../utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { fetchExecution } from '../executions.api'
@@ -29,6 +30,7 @@ import { JobState } from '../executions.types'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { FailureMessage, StyledExecutionState } from './styles'
 import { getScopeMapping } from '../../getScopeMapping'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../../utils/config'
 
 const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
@@ -43,15 +45,33 @@ export const ExecutionDetails = ({
 }) => {
   const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
-  // const [currentTab, setCurrentTab] = useState<any>('')
 
   const { data, status, refetch, isFetching } = useQuery(
     ['execution', executionUid],
     () => fetchExecution(executionUid),
   )
-  // const { files, meta: ma } = data!
+  const queryCache = useQueryClient()
+
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    if (notification == null) {
+        return
+    }
+    if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
+         NOTIFICATION_ACTION.JOB_RUNNING,
+         NOTIFICATION_ACTION.JOB_DONE,
+         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
+      queryCache.invalidateQueries(['execution'])
+    }
+  }, [notification])
+
   const execution = data?.job
-  const meta = data?.meta
 
   if (status === 'loading') {
     return <HomeLoader />
@@ -84,11 +104,6 @@ export const ExecutionDetails = ({
   if (emitScope) {
     emitScope(scope)
   }
-
-  // const tab =
-  //   currentTab && currentTab !== HOME_TABS.PRIVATE
-  //     ? `/${currentTab.toLowerCase()}`
-  //     : ''
 
   return (
     <>

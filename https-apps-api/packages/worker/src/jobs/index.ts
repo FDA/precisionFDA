@@ -2,6 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getChildLogger } from '../utils'
 import { path } from 'ramda'
 import {
+  client, config,
   database,
   debug,
   errors,
@@ -11,7 +12,7 @@ import {
   userFile,
 } from '@pfda/https-apps-shared'
 import { UserOpsCtx, WorkerOpsCtx } from '@pfda/https-apps-shared/src/types'
-import { Job } from 'bull'
+import { Job} from 'bull'
 import { log } from '../utils'
 import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
@@ -24,6 +25,9 @@ import { checkUserJobsHandler } from './check-user-jobs.handler'
 import { removeNodesHandler } from './remove-nodes.handler'
 import { lockNodesHandler } from './lock-nodes.handler'
 import { unlockNodesHandler } from './unlock-nodes.handler'
+import { SyncOutputsHandler } from './sync-outputs.handler'
+import { CheckChallengeJobsHandler } from './check-challenge-jobs.handler'
+import { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 
 type WorkerContext = WorkerOpsCtx<UserOpsCtx>
 
@@ -46,6 +50,11 @@ const handleUserTask = async <TJob extends queue.types.TaskWithAuth>(
 }
 
 export const handler = async (job: Job<queue.types.Task>) => {
+  const em = database.orm().em.fork()
+  let platformClient
+  let jobService
+  let handler
+
   if (typeof path(['data', 'type'], job) === 'undefined') {
     log.warn({ jobData: job.data }, 'Invalid job.data format')
     throw new errors.WorkerError('Job data does not specify task type', { jobData: job.data })
@@ -62,6 +71,22 @@ export const handler = async (job: Job<queue.types.Task>) => {
       await handleUserTask(job, async (ctx, input) => {
         return await new userFile.SyncFilesStateOperation(ctx).execute(input)
       })
+      return
+    case queue.types.TASK_TYPE.CHECK_CHALLENGE_JOBS:
+      // TODO following will be DI refactored
+      platformClient = new client.PlatformClient(config.platform.challengeBotAccessToken)
+      jobService = new jobDomain.JobService(em, platformClient)
+      handler = new CheckChallengeJobsHandler(em, jobService)
+
+      await handler.handle(job)
+      return
+    case queue.types.TASK_TYPE.SYNC_JOB_OUTPUTS:
+      // TODO following will be DI refactored
+      platformClient = new client.PlatformClient((job as Job<CheckStatusJob>).data.user.accessToken)
+      jobService = new jobDomain.JobService(em, platformClient)
+      handler = new SyncOutputsHandler(em, jobService)
+
+      await handler.handle(job as Job<CheckStatusJob>)
       return
     case queue.types.TASK_TYPE.SYNC_JOB_STATUS:
       await jobStatusHandler(job)

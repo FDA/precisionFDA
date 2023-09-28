@@ -1,77 +1,106 @@
 import { User, userFile } from '../..'
-import { BaseOperation } from '../../../utils'
-import { Node } from '../node.entity'
-import { NodesInput } from '../user-file.input'
-import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
-import { errors, getLogger } from '../../..'
-import { UserOpsCtx } from '../../../types'
-import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
+import { errors } from '../../..'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import type { UserOpsCtx } from '../../../types'
+import { BaseOperation } from '../../../utils'
 import { NotificationService } from '../../notification'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-
-const rollbackLockingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
-  getLogger().error(`Rolling back locking state for ${nodes.length} nodes`)
-  nodes.forEach(node => {
-    node.locked = false
-    node.state = FILE_STATE_DX.CLOSED
-  })
-  await em.flush()
-}
+import type { Node } from '../node.entity'
+import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
+import type { NodesInput } from '../user-file.input'
+import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
+import { FileLockOperation } from './file-lock'
 
 class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
+  private readonly notificationService: NotificationService
+  private readonly fileLockOp: FileLockOperation
+
+  constructor(ctx: UserOpsCtx) {
+    super(ctx)
+
+    this.notificationService = new NotificationService(ctx.em)
+    this.fileLockOp = new userFile.FileLockOperation(ctx)
+  }
+
   async run(input: NodesInput): Promise<void> {
     this.ctx.log.info(input.ids, 'NodesLockOperation: Locking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: false })
-    const notificationService = new NotificationService(em)
-    const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
-    const filteredNodes = await filterNodesByUser(em, nodes, currentUser)
-    let lockedFilesCount = 0
-    let lockedFoldersCount = 0
-    if (filteredNodes?.length) {
-      try {
-        const fileLockOp = new userFile.FileLockOperation(this.ctx)
-        const folderLockOp = new userFile.FolderLockOperation(this.ctx)
-        for (const node of filteredNodes) {
-          if (node.stiType === FILE_STI_TYPE.ASSET) {
-            this.ctx.log.error(`NodesLockOperation: Locking of asset  ${node.uid} is not allowed`)
-            throw new errors.PermissionError(`Locking of asset  ${node.uid} is not allowed`)
-          }
-          if (node.stiType === FILE_STI_TYPE.USERFILE) {
-            await fileLockOp.execute({ id: node.id })
-            lockedFilesCount++
-          } else {
-            await folderLockOp.execute({ id: node.id })
-            lockedFoldersCount++
-          }
-        }
+    const filteredNodes = await this.filterNodes(nodes)
 
-        if (input.async) {
-          await notificationService.createNotification({
-            message: getSuccessMessage(lockedFilesCount, lockedFoldersCount, 'Successfully locked'),
-            severity: SEVERITY.INFO,
-            action: NOTIFICATION_ACTION.NODES_LOCKED,
-            userId: this.ctx.user.id,
-          })
-        }
-
-        this.ctx.log.info(
-          { foldersCount: lockedFoldersCount, filesCount: lockedFilesCount },
-          'NodesLockOperation: Locked total objects',
-        )
-      } catch (err) {
-        this.ctx.log.error(`Error while locking files and folders: ${err}`)
-        await notificationService.createNotification({
-          message: 'Error locking files and folders.',
-          severity: SEVERITY.ERROR,
-          action: NOTIFICATION_ACTION.NODES_LOCKED,
-          userId: this.ctx.user.id,
-        })
-        await rollbackLockingState(em, nodes)
-        throw err
-      }
+    if (!filteredNodes?.length) {
+      return
     }
+
+    try {
+      filteredNodes.forEach(n => this.assertExpectedType(n))
+      await this.fileLockOp.execute(filteredNodes.map(n => ({ id: n.id })))
+
+      if (input.async) {
+        await this.notifyUserSuccess(filteredNodes.length)
+      }
+
+      this.ctx.log.info(
+        { filesCount: filteredNodes.length },
+        'NodesLockOperation: Locked total objects',
+      )
+    } catch (err) {
+      this.ctx.log.error(`Error while locking files: ${err}`)
+      await Promise.all([this.rollbackLockingState(nodes), this.notifyUserError()])
+
+      throw err
+    }
+  }
+
+  private notifyUserError(): Promise<void> {
+    return this.notificationService.createNotification({
+      message: 'Error locking files.',
+      severity: SEVERITY.ERROR,
+      action: NOTIFICATION_ACTION.NODES_LOCKED,
+      userId: this.ctx.user.id,
+    })
+  }
+
+  private notifyUserSuccess(fileCount: number): Promise<void> {
+    return this.notificationService.createNotification({
+      message: getSuccessMessage(fileCount, 0, 'Successfully locked'),
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.NODES_LOCKED,
+      userId: this.ctx.user.id,
+    })
+  }
+
+  private assertExpectedType(node: Node): void {
+    if (node.stiType === FILE_STI_TYPE.USERFILE) {
+      return
+    }
+
+    const errorMsg = `Unsupported node type "${node.stiType}" of node id: ${node.uid}`
+
+    this.ctx.log.error(`NodesLockOperation: ${errorMsg}`)
+    throw new errors.InvalidStateError(errorMsg)
+  }
+
+  private async filterNodes(nodes: Node[]): Promise<Node[]> {
+    const unlockedNodes = nodes.filter(n => !n.locked)
+    const user = await this.ctx.em.findOneOrFail(User, { id: this.ctx.user.id })
+    const nodesByUser = await filterNodesByUser(this.ctx.em, unlockedNodes, user)
+
+    return this.filterNodesByType(nodesByUser)
+  }
+
+  private filterNodesByType(nodes: Node[]) {
+    return nodes.filter(n => n.stiType !== 'Folder')
+  }
+
+  private rollbackLockingState(nodes: Node[]): Promise<void> {
+    nodes.forEach(node => {
+      this.ctx.log.error(`Rolling back locking state for node id: ${node.id}`)
+
+      node.locked = false
+      node.state = FILE_STATE_DX.CLOSED
+    })
+
+    return this.ctx.em.flush()
   }
 }
 

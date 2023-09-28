@@ -132,7 +132,7 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
       if (res?.db_cluster) {
         history.push(`/home/databases/${res?.db_cluster?.dxid}`)
         queryClient.invalidateQueries(['dbclusters'])
-        toast.success('Success: creating database.')
+        toast.success('Database created')
       } else if (res?.error) {
           toast.error(`${res.error.type}: ${res.error.message}`)
         } else {
@@ -140,7 +140,7 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
         }
     },
     onError: () => {
-      toast.error('Error: Adding database.')
+      toast.error('Error while creating the database')
     },
   })
 

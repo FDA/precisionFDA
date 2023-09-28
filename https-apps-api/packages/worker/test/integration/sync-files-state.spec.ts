@@ -53,7 +53,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
   let assets: Asset[]
   let filesAndAssets: IFileOrAsset[]
 
-  const FILE_SIZE = '65535'
+  const FILE_SIZE = 65535
 
   beforeEach(async () => {
     await db.dropData(database.connection())

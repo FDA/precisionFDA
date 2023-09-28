@@ -16,6 +16,7 @@ import { AssetRepository } from './asset.repository'
 import { App } from '../app'
 import { Node } from './node.entity'
 import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE, IFileOrAsset, FILE_STI_TYPE, ITrackable } from './user-file.types'
+import { SCOPE } from '../../types/common'
 
 @Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
 @Entity({ tableName: 'nodes', customRepository: () => AssetRepository })
@@ -43,9 +44,9 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   uid: string
 
   @Property()
-  scope: string
+  scope: SCOPE
 
-  @Property({ type: 'bigint' })
+  @Property({ type: 'numeric' })
   fileSize?: number
 
   // unused FK references

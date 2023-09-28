@@ -37,13 +37,13 @@ import {
   WorkflowDescribeParams,
   AppDescribeParams,
   FileRemoveParams,
-  AppletCreateParams, AppCreateParams, ObjectsParams, FileCreateParams, OrgDescribeParams, UserDescribeParams
+  AppletCreateParams, AppCreateParams, ObjectsParams, FileCreateParams, OrgDescribeParams, UserDescribeParams, JobFindParams
 } from './platform-client.params'
 import {
   JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
   FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
   OrgFindMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
-  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse, UserDescribeResponse, OrgDescribeResponse,
+  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse, UserDescribeResponse, OrgDescribeResponse, FindJobsResponse,
 } from './platform-client.responses'
 import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
@@ -63,7 +63,6 @@ class PlatformClient {
 
   constructor(accessToken: string, logger?: Logger) {
     this.accessToken = accessToken
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     this.log = logger ?? defaultLog
   }
 
@@ -104,6 +103,21 @@ class PlatformClient {
   // ---------------
   //    J O B S
   // ---------------
+
+  /**
+   * Searches for execution (job or analysis) objects.
+   * API: /system/findJobs
+   * @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findjobs
+   */
+  async jobFind(params: JobFindParams) {
+    const url = `${config.platform.apiUrl}/system/findJobs`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: { ...omit(['accessToken'], params) },
+      url,
+    }
+    return await this.sendRequest<FindJobsResponse>(options, url)
+  }
 
   async jobCreate(params: JobCreateParams): Promise<JobCreateResponse> {
     const url = `${config.platform.apiUrl}/${params.appId}/run`
@@ -640,7 +654,7 @@ class PlatformClient {
   }
 
   /**
-   * Accept billing responsibility for the project, possibly on behalf of an org. 
+   * Accept billing responsibility for the project, possibly on behalf of an org.
    * @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-accepttransfer
    * @param {string} billTo - billing account (user or org ID).
    * @return {any}
@@ -782,11 +796,11 @@ class PlatformClient {
     return results
   }
 
-  private async sendRequest(options: AxiosRequestConfig, url: string) {
+  private async sendRequest<T>(options: AxiosRequestConfig, url: string) {
     try {
       options.headers = this.setupHeaders()
       this.logClientRequest(options, url)
-      const res = await axios.request(options)
+      const res = await axios.request<T>(options)
       return res.data
     } catch (err) {
       this.logClientFailed(options)
@@ -817,7 +831,7 @@ class PlatformClient {
   private handleFailed(
     err: any,
     customErrorThrower?: (statusCode: number, errorType: string, errorMessage: string) => void,
-  ): any {
+  ): never {
     // response status code is NOT 2xx
     if (err.response) {
       this.log.error(

@@ -84,7 +84,7 @@ number
         const spaceId = getIdFromScopeName(fileToRemove.scope)
         const eventOp = new spaceEvent.CreateSpaceEventOperation(this.ctx)
         await eventOp.execute({
-          entity: fileToRemove,
+          entity: { type: 'userFile', value: fileToRemove },
           spaceId,
           userId: this.ctx.user.id,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
