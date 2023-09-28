@@ -114,9 +114,7 @@ jobs:
           NO_FIPS: 1
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libssl-dev nodejs
-          npm install -g bower
-          bower install --allow-root
+          sudo apt-get install -y cmake libssl-dev
           cp config/database.ci.yml config/database.yml
           bundle exec rake db:setup
           touch app/assets/packs/bundle.js
