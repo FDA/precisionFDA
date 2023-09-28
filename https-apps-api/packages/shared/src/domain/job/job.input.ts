@@ -3,6 +3,7 @@ import { config } from '../../config'
 import { schemas } from '../../utils'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
+import { SCOPE } from '../../types/common'
 
 
 type DxIdInput = {
@@ -10,7 +11,7 @@ type DxIdInput = {
 }
 
 type RunAppInput = {
-  scope: string
+  scope: SCOPE
   name?: string
   instanceType?: string
   jobLimit: number

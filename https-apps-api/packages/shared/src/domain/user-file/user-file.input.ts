@@ -1,6 +1,7 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
 import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
+import { SCOPE } from '../../types/common'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]
@@ -18,7 +19,7 @@ export type CloseFileInput = {
 type SyncFilesInFolderInput = {
   folderId: number | null
   projectDxid: string
-  scope: string
+  scope: SCOPE
   parentId: number
   parentType: PARENT_TYPE
   entityType: FILE_ORIGIN_TYPE

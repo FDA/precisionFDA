@@ -24,7 +24,7 @@ export const config: ConfigOverride = () => ({
       staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 10, // 10 minutes
     },
     queues: {
-      default: { name: 'https-apps-worker-queue-dev' },
+      default: { name: 'https-apps-worker-queue' },
       emails: { name: 'https-apps-worker-emails-queue-dev' },
       maintenance: {
         onInit: {

@@ -1,4 +1,4 @@
-import { queue, config } from '@pfda/https-apps-shared'
+import { queue } from '@pfda/https-apps-shared'
 import { handler } from '../jobs'
 import { log } from '../utils'
 

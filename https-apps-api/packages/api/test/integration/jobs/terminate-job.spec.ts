@@ -42,6 +42,7 @@ describe('PATCH /jobs/:id/terminate', () => {
       name: job.name,
       scope: job.scope,
       entityType: ENTITY_TYPE.HTTPS,
+      runData: "",
       user: user.id,
       app: app.id,
       terminationEmailSent: false

@@ -20,31 +20,49 @@ template "#{node[:gsrs][:tomcat_path]}/conf/context.xml" do
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_grop]
   mode 0600
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 bash "sync ginas indexes" do
-  code <<-EOH
-  aws s3 sync #{node.run_state.dig("ssm_params", "gsrs", "index_path") || node[:gsrs][:index_path]} #{node[:gsrs][:tomcat_path]}/ginas.ix --delete
-  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/ginas.ix/ -R
-  EOH
+  code <<-BASH
+    aws s3 sync $SOURCE_PATH $DESTINATION_PATH --delete
+    chown $OWNER_USER:$OWNER_GROUP $DESTINATION_PATH/ -R
+  BASH
+  environment(lazy do
+    {
+      SOURCE_PATH: node.run_state.dig("ssm_params", "gsrs", "index_path") || node["gsrs"]["index_path"],
+      DESTINATION_PATH: "#{node['gsrs']['tomcat_path']}/ginas.ix",
+      OWNER_USER: node["gsrs"]["tomcat_user"],
+      OWNER_GROUP: node["gsrs"]["tomcat_group"],
+    }
+  end)
 end
 
 git "#{node[:gsrs][:tomcat_path]}/repo" do
   repository node[:gsrs][:repo_url]
-  revision lazy { node.run_state.dig("ssm_params", "gsrs", "revision") || node[:gsrs][:revision] }
+  revision(lazy { node.run_state.dig("ssm_params", "gsrs", "revision") || node[:gsrs][:revision] })
   depth 1
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 bash "copy gsrs to webapps" do
-  code <<-EOH
-  rsync -a #{node[:gsrs][:tomcat_path]}/repo/ #{node[:gsrs][:tomcat_path]}/webapps \
-  --exclude '.git' \
-  --exclude 'ROOT/WEB-INF/classes/application.yml' \
-  --exclude 'frontend/WEB-INF/classes/static/assets/data/config.json' \
-  --exclude 'substances/WEB-INF/classes/application.conf' \
-  --exclude 'substances/WEB-INF/classes/codeSystem.json'
-  chown #{node[:gsrs][:tomcat_user]}:#{node[:gsrs][:tomcat_group]} #{node[:gsrs][:tomcat_path]}/webapps/ -R
-  EOH
+  code <<-BASH
+    rsync -a $SOURCE_PATH $DESTINATION_PATH \
+    --exclude '.git' \
+    --exclude 'ROOT/WEB-INF/classes/application.yml' \
+    --exclude 'frontend/WEB-INF/classes/static/assets/data/config.json' \
+    --exclude 'substances/WEB-INF/classes/application.conf' \
+    --exclude 'substances/WEB-INF/classes/codeSystem.json'
+    chown $OWNER_USER:$OWNER_GROUP $DESTINATION_PATH/ -R
+  BASH
+  environment(
+    {
+      SOURCE_PATH: "#{node[:gsrs][:tomcat_path]}/repo/",
+      DESTINATION_PATH: "#{node[:gsrs][:tomcat_path]}/webapps",
+      OWNER_USER: node["gsrs"]["tomcat_user"],
+      OWNER_GROUP: node["gsrs"]["tomcat_group"],
+    },
+  )
 end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/ROOT/WEB-INF/classes/application.yml" do
@@ -52,6 +70,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/ROOT/WEB-INF/classes/application.
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_grop]
   mode 0644
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/assets/data/config.json" do
@@ -60,8 +79,9 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/a
   group node[:gsrs][:tomcat_grop]
   mode 0644
   variables(
-    :HOST => lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
+    HOST: lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
   )
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/codeSystem.json" do
@@ -69,6 +89,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/codeSy
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_grop]
   mode 0644
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/application.conf" do
@@ -77,14 +98,15 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_grop]
   variables(
-    :TOMCAT_PATH => node[:gsrs][:tomcat_path],
-    :GSRS_AUTHENTICATION_HEADER_NAME => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_AUTHENTICATION_HEADER_NAME") },
-    :GSRS_AUTHENTICATION_HEADER_NAME_EMAIL => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_AUTHENTICATION_HEADER_NAME_EMAIL") },
-    :GSRS_DATABASE_URL => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_URL") },
-    :GSRS_DATABASE_USERNAME => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_USERNAME") },
-    :GSRS_DATABASE_PASSWORD => lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_PASSWORD") },
-    :HOST => lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
+    TOMCAT_PATH: node[:gsrs][:tomcat_path],
+    GSRS_AUTHENTICATION_HEADER_NAME: lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_AUTHENTICATION_HEADER_NAME") },
+    GSRS_AUTHENTICATION_HEADER_NAME_EMAIL: lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_AUTHENTICATION_HEADER_NAME_EMAIL") },
+    GSRS_DATABASE_URL: lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_URL") },
+    GSRS_DATABASE_USERNAME: lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_USERNAME") },
+    GSRS_DATABASE_PASSWORD: lazy { node.run_state.dig("ssm_params", "app", "environment", "GSRS_DATABASE_PASSWORD") },
+    HOST: lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
   )
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 tomcat_service "gsrs" do
@@ -93,12 +115,12 @@ tomcat_service "gsrs" do
   install_path node[:gsrs][:tomcat_path]
   tomcat_user node[:gsrs][:tomcat_user]
   tomcat_group node[:gsrs][:tomcat_group]
-  env_vars lazy {
+  env_vars(lazy do
     [
-      { "CATALINA_PID" => "#{node[:gsrs][:tomcat_path]}/bin/tomcat.pid" },
-      { "CATALINA_OPTS" => node.run_state.dig("ssm_params", "gsrs", "catalina_opts") || node[:gsrs][:catalina_opts] },
-      { "JAVA_OPTS" => "-Djdk.util.zip.disableZip64ExtraFieldValidation=true" }
+      CATALINA_PID: "#{node[:gsrs][:tomcat_path]}/bin/tomcat.pid",
+      CATALINA_OPTS: node.run_state.dig("ssm_params", "gsrs", "catalina_opts") || node[:gsrs][:catalina_opts],
+      JAVA_OPTS: "-Djdk.util.zip.disableZip64ExtraFieldValidation=true",
     ]
-  }
+  end)
   only_if { node.run_state.dig("ssm_params", "app", "environment", "GSRS_ENABLED") == "1" && node[:gsrs][:tomcat_start] }
 end

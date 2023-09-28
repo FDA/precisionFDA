@@ -73,14 +73,50 @@ export interface IApp {
   forked_from: string;
 }
 
-export interface InputSpec {
+export interface Revision {
+  id: number;
+  revision: number;
+  tag_list: [];
+  title: string;
+  uid: string;
+  version: string;
+}
+
+export interface SpecBase {
   class: string;
   help: string;
   label: string;
   name: string;
   optional: boolean;
+}
+export interface OutputSpec extends SpecBase {
+  requiredRunInput: boolean;
+}
+export interface InputSpec extends SpecBase {
   default: string | boolean;
   choices: [];
+}
+
+export interface AppSpec {
+  instance_type: string;
+  internet_access: boolean;
+  input_spec: InputSpec[];
+  output_spec: OutputSpec[];
+}
+
+export interface AppMeta {
+  answers: [];
+  assigned_challenges: [];
+  challenges: [];
+  comments: [];
+  comparator: boolean;
+  default_comparator: boolean;
+  discussions: [];
+  jobs: [];
+  links: Links;
+  notes: []
+  revisions: Revision[];
+  spec: AppSpec;
 }
 
 export interface FileUser {

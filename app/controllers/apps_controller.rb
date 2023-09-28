@@ -53,8 +53,6 @@ class AppsController < ApplicationController
       where(jobs: { user_id: @context.user_id }).
       map { |series| series.latest_accessible(@context) }.compact
 
-    Job.sync_jobs!(@context)
-
     jobs = if @app.present?
       @app.app_series.jobs.origin.editable_by(@context).order(created_at: :desc)
     else
@@ -137,8 +135,6 @@ class AppsController < ApplicationController
         order(id: :desc).
         page(unsafe_params[:comments_page])
     end
-
-    Job.sync_jobs!(@context)
 
     jobs = @app.app_series.jobs.editable_by(@context).includes(:taggings).order(created_at: :desc)
     @jobs_grid = jobs_grid(jobs)
@@ -307,6 +303,7 @@ class AppsController < ApplicationController
     fail "Job limit exceeds maximum user setting - #{current_user.job_limit}" if job_limit > current_user.job_limit
 
     run_instance_type = unsafe_params[:instance_type]
+    output_folder_path = unsafe_params[:output_folder_path]
 
     fail I18n.t("app_instance_type_forbidden") unless current_user.resources.include?(run_instance_type)
 
@@ -376,6 +373,7 @@ class AppsController < ApplicationController
           run_instance_type: run_instance_type,
           job_limit: job_limit,
           scope: space&.uid,
+          output_folder_path:,
         )
       rescue DXClient::Errors::DXClientError => e
         fail e.message
@@ -383,6 +381,9 @@ class AppsController < ApplicationController
 
     SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space&.review?
     # rubocop:enable Style/SignalException
+
+    # starts job status syncing
+    https_apps_client.job_sync(job.dxid)
 
     render json: { id: job.uid }
   end

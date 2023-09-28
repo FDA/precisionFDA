@@ -58,7 +58,7 @@ const Security = React.lazy(() => import('./pages/Security'))
 const root = () => {
   const authModal = useModal()
   const expiringSessionModal = useModal()
-  toast.configure()
+  toast.configure({ limit: 5 })
 
   return (
     <React.Fragment>

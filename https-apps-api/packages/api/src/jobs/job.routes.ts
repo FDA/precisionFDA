@@ -1,6 +1,6 @@
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { job as jobDomain, utils } from '@pfda/https-apps-shared'
+import { job as jobDomain, utils, queue } from '@pfda/https-apps-shared'
 import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { defaultMiddlewares } from '../server/middleware'
@@ -14,7 +14,6 @@ import {
   workstationAliveBodySchema,
   WorkstationAliveParams,
 } from './job.schemas'
-
 
 // Routes with /jobs prefix
 const router = new Router<DefaultState, Api.Ctx>()
@@ -62,6 +61,15 @@ router.patch(
 )
 
 router.patch(
+  '/:jobDxId/syncJob',
+  makeSchemaValidationMdw({ params: jobDxIdInputSchema }),
+  async ctx => {
+    await queue.createSyncJobStatusTask({ dxid: ctx.params.jobDxId }, ctx.user!)
+    ctx.body = { message: 'Job sync task created' }
+  }
+)
+
+router.patch(
   '/:jobDxId/syncFiles',
   makeSchemaValidationMdw({ params: jobDxIdInputSchema, query: jobSyncFilesQuerySchema }),
   async ctx => {
@@ -77,7 +85,6 @@ router.patch(
   '/:jobDxId/checkAlive',
   makeSchemaValidationMdw({ params: jobDxIdInputSchema, body: workstationAliveBodySchema }),
   async ctx => {
-    // const res = await new jobDomain.WorkstationCheckAliveOperation(pickOpsCtx(ctx)).execute()
     const params = ctx.request.body as WorkstationAliveParams
     const workstationService = await new jobDomain.WorkstationService(pickOpsCtx(ctx), params.code).initWithJob(ctx.params.jobDxId)
     const res = await workstationService.alive()
