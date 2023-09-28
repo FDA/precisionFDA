@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
-import { ToastWithLink } from '../components/Toast'
+import { BasicToast, ToastWithLink } from '../components/Toast'
 import { confirmNotification } from '../features/home/notifications/notifications.api'
 import { Notification, NOTIFICATION_ACTION, SEVERITY } from '../features/home/types'
 import { IUser } from '../types/user'
@@ -48,7 +48,7 @@ export const useToastWSHandler = (user?: IUser) => {
         message: notification.message,
         linkTitle: notification.meta?.linkTitle,
         linkUrl: notification.meta?.linkUrl,
-      }) : notification.message
+      }) : BasicToast(notification.message)
 
       try {
         toastHandlers[notification.severity](toastContent, notificationsConfig)
