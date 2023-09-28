@@ -166,8 +166,6 @@ module Api
       load_relations(@app)
       load_challenges
 
-      Job.sync_jobs!(@context)
-
       render json:
         @app, adapter: :json,
         meta:  {

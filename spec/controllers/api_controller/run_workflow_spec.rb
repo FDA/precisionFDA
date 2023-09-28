@@ -189,6 +189,7 @@ RSpec.describe ApiController, type: :controller do
     before do
       authenticate!(user)
       allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
+      stub_request(:patch, %r{#{ENV['HTTPS_APPS_API_URL']}/jobs/.*}).to_return(status: 200)
     end
 
     it "runs a workflow" do

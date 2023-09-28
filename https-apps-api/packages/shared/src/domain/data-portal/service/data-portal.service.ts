@@ -19,6 +19,7 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
+import { SCOPE } from '../../../types/common'
 
 const logger = getLogger('data-portals.service')
 
@@ -145,7 +146,7 @@ export class DataPortalService implements IDataPortalService {
     return link.url
   }
 
-  private createFile = async(input: FileParam, user: User, projectId: string, scope: string): Promise<UserFile> => {
+  private createFile = async(input: FileParam, user: User, projectId: string, scope: SCOPE): Promise<UserFile> => {
     const response = await this.userPlatformClient.fileCreate({
       name: input.name,
       description: input.description,

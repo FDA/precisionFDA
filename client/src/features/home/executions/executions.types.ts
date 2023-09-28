@@ -65,7 +65,7 @@ export interface Links2 {
   run_job: string;
 }
 
-export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'terminated' | 'terminating'
+export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'runnable' | 'terminated' | 'terminating'
 
 export interface Job {
   id: number;

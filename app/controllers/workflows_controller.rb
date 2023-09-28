@@ -34,7 +34,6 @@ class WorkflowsController < ApplicationController
 
     comments_data(@workflow)
     revisions_data
-    jobs_sync
 
     a = Analysis.arel_table
     batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
@@ -92,11 +91,6 @@ class WorkflowsController < ApplicationController
       end
       js_param[:workflow] = @workflow.slice(:id, :dxid, :uid, :readme, :spec)
     end
-
-    Job.sync_jobs!(@context)
-
-    jobs = Job.includes(:analysis).where(user_id: @context.user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT)
-    jobs.reload.each { |job| Job.sync_job!(@context, job.id) }
 
     if @workflow.present?
       analysis_arel = Analysis.arel_table

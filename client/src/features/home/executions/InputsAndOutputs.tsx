@@ -61,7 +61,7 @@ const Table = ({ title, config }: { title: string; config: any[] }) => {
             {String(e.value)}
           </Link>
         case 'array:file':
-          return <div>{e.value.map((name:any, index: any) => <Link to={e.link[index]} className={classes}>
+          return <div>{e.value.map((name:any, index: any) => <Link key={e.link[index]} to={e.link[index]} className={classes}>
             {String(name)}
           </Link>)}</div>
         default:

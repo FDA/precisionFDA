@@ -1,3 +1,5 @@
+import { TreeProps } from 'rc-tree'
+import { BasicDataNode } from 'rc-tree/es/interface'
 import { ServerScope } from '../types'
 import { FileOrg, FileUser } from '../apps/apps.types'
 
@@ -96,3 +98,8 @@ export interface IFile {
   'file_path': string,
   'path': string
 }
+
+// this is the type of the "node". The BasicDataNode is what the library requires and the two properties before it are the ones we are using - parent (added by you) and title (already existed, but the "any" types hidden the fact, that it does not exist on the default node type).
+export type FileTreeNode = { parent: FileTreeNode, title: string } & BasicDataNode
+// Retrieves the second parameter of the onSelect method from the TreeProps interface with the node type generic. The Required type is needed, because the onSelect property on the TreeProps is defined as optional, but the Parameters type requires simply a function (not function | undefined).
+export type TreeOnSelectInfo = Parameters<Required<TreeProps<FileTreeNode>>['onSelect']>[1]

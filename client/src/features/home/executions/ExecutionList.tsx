@@ -1,7 +1,8 @@
-import { omit } from 'ramda'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
+import { useQueryClient } from '@tanstack/react-query'
+import useWebSocket from 'react-use-websocket'
 import Dropdown from '../../../components/Dropdown'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
@@ -17,7 +18,7 @@ import {
   ActionsRow, StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION, ResourceScope } from '../types'
 import { useList } from '../useList'
 import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
@@ -25,6 +26,7 @@ import { getStateBgColorFromState } from './executions.util'
 import { getSubComponentValue } from './getSubComponentValue'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionActions } from './useExecutionSelectActions'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -55,7 +57,27 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
       scope: scope || undefined,
     },
   })
+  const queryCache = useQueryClient()
   const { status, data, error } = query
+
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    if (notification == null) {
+      return
+    }
+    if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
+      NOTIFICATION_ACTION.JOB_RUNNING,
+      NOTIFICATION_ACTION.JOB_DONE,
+      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
+      queryCache.invalidateQueries(['jobs'])
+    }
+  }, [notification])
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,

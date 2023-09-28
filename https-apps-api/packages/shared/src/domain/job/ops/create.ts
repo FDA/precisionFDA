@@ -3,7 +3,7 @@ import * as client from '../../../platform-client'
 import * as errors from '../../../errors'
 import type { RunAppInput, Provenance } from '../job.input'
 import { BaseOperation } from '../../../utils'
-import { Job } from '../job.entity'
+import { Job, RunData } from '../job.entity'
 import { App } from '../../app'
 import { User, helper as userHelper } from '../../user'
 import {
@@ -17,8 +17,8 @@ import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject, UserOpsCtx } from '../../../types'
 import { Space, SpaceMembership, UserFile } from '../..'
 import { config } from '../../../config'
-import { getIdFromScopeName, getProjectDxid } from "../../space/space.helper";
-import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from "../../../config/constants";
+import { getIdFromScopeName, getProjectDxid } from '../../space/space.helper'
+import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '../../../config/constants'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -102,6 +102,10 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // add all the data to the database
     await em.begin()
     let job: Job
+    const runData = new RunData()
+    runData.run_instance_type = this.instance.toString()
+    runData.run_inputs = runInputDb
+    runData.run_outputs = {}
     try {
       // @ts-ignore
       job = repo.create({
@@ -115,11 +119,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         describe: JSON.stringify({}),
         scope: input.scope,
         entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-        runData: JSON.stringify({
-          run_instance_type: this.instance,
-          run_inputs: runInputDb,
-          run_outputs: {},
-        }),
+        runData,
         provenance: {},
         appSeriesId: app.appSeriesId,
         uid: `${newJobClientRes.id}-1`,

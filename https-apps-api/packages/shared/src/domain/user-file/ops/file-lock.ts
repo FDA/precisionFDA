@@ -1,40 +1,57 @@
-import { UserFile } from '../user-file.entity'
-import { User } from '../../user'
-import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { IdInput, UserOpsCtx } from '../../../types'
+import type { IdInput, UserOpsCtx } from '../../../types'
 import { BaseOperation } from '../../../utils'
+import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
+import { User } from '../../user'
+import { UserFile } from '../user-file.entity'
 import { getNodePath } from '../user-file.helper'
-import { FILE_STATE_DX } from "../user-file.types";
+import { FILE_STATE_DX } from '../user-file.types'
 
-class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
-  async run(input: IdInput): Promise<void> {
-    this.ctx.log.info(input, 'Locking file')
+class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput[], void> {
+  async run(input: IdInput[]): Promise<void> {
+    this.ctx.log.info(input, 'Locking files')
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
-    const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
-    const fileToLock = await userFileRepo.findOneOrFail(input.id)
+    const filesToLock = await userFileRepo.find(input?.map(i => i.id))
     try {
       await em.begin()
-      const filePath = await getNodePath(em, fileToLock)
-      fileToLock.locked = true
-      fileToLock.state = FILE_STATE_DX.CLOSED
 
-      await em.persistAndFlush(fileToLock)
-      const fileEvent = await createFileEvent(
-        EVENT_TYPES.FILE_LOCKED,
-        fileToLock,
-        filePath,
-        currentUser,
-      )
-      em.persist(fileEvent)
+      filesToLock.forEach(f => this.updateFile(f))
+      await em.persistAndFlush(filesToLock)
 
+      await Promise.all(filesToLock.map(f => this.createEvent(f)))
       await em.commit()
-      this.ctx.log.info({ fileName: fileToLock.name }, 'Locked file')
+
+      filesToLock.forEach(f => this.logOperation(f))
     } catch (err) {
       await em.rollback()
       throw err
     }
+  }
+
+  private logOperation(file: UserFile): void {
+    this.ctx.log.info({ fileName: file.name }, 'Locked file')
+  }
+
+  private async createEvent(file: UserFile): Promise<void> {
+    const [user, filePath] = await Promise.all([
+      this.ctx.em.findOneOrFail(User, { id: this.ctx.user.id }),
+      await getNodePath(this.ctx.em, file),
+    ])
+
+    const event = await createFileEvent(
+      EVENT_TYPES.FILE_LOCKED,
+      file,
+      filePath,
+      user,
+    )
+
+    this.ctx.em.persist(event)
+  }
+
+  private updateFile(file: UserFile): void {
+    file.locked = true
+    file.state = FILE_STATE_DX.CLOSED
   }
 }
 

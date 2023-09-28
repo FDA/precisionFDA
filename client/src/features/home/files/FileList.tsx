@@ -28,7 +28,7 @@ import {
   StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope, Notification } from '../types'
 import { useList } from '../useList'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
@@ -79,19 +79,22 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
   }
 
-  const { lastJsonMessage } = useWebSocket(getNodeWsUrl(), 
-  { share: true, reconnectInterval: DEFAULT_RECONNECT_INTERVAL, 
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS, shouldReconnect: () => true })
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
 
   useEffect(() => {
-    if (lastJsonMessage != null) {
-      const notification = JSON.parse(JSON.stringify(lastJsonMessage))
-      if (['NODES_REMOVED', 'NODES_COPIED'].includes(notification.action)) {
-        queryCache.invalidateQueries(['files'])
-        queryCache.invalidateQueries(['counters'])
-      }
+    if (notification == null) {
+      return
     }
-  }, [lastJsonMessage])
+    if (['NODES_REMOVED', 'NODES_COPIED'].includes(notification.action)) {
+      queryCache.invalidateQueries(['files'])
+      queryCache.invalidateQueries(['counters'])
+    }
+  }, [notification])
 
   const { status, data, error } = query
 

@@ -46,8 +46,6 @@ export { NodesUnlockOperation } from './ops/node-unlock'
 
 export { FolderUnlockOperation } from './ops/folder-unlock'
 
-export { FolderLockOperation } from './ops/folder-lock'
-
 export { FileLockOperation } from './ops/file-lock'
 
 export { FileUnlockOperation } from './ops/file-unlock'

@@ -74,7 +74,6 @@ class ChallengesController < ApplicationController
       return
     end
 
-    Job.sync_challenge_jobs!
     @tab = unsafe_params[:tab]
     @submissions = Submission.none
     @my_entries = false
@@ -152,7 +151,6 @@ class ChallengesController < ApplicationController
       return
     end
 
-    Job.sync_challenge_jobs!
     @tab = unsafe_params[:tab]
     @submissions = Submission.none
     @my_entries = false
