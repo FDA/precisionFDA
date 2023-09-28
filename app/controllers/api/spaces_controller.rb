@@ -174,8 +174,6 @@ module Api
 
       jobs = @space.jobs.order(order)
 
-      Job.sync_jobs!(@context, jobs)
-
       render json: jobs, adapter: :json
     end
 

@@ -53,7 +53,6 @@ module Api
           jobs.each { |job| job.current_user = @context.user }
 
           jobs = JobService::JobsFilter.call(jobs, params[:filters])
-          sync_jobs(jobs)
         end
 
         page_dict = pagination_dict(jobs)
@@ -75,7 +74,6 @@ module Api
           search_by_tags(params.dig(:filters, :tags))
 
         jobs = JobService::JobsFilter.call(jobs, params[:filters])
-        sync_jobs(jobs)
 
         render_jobs_list(jobs)
       end
@@ -94,7 +92,6 @@ module Api
         search_by_tags(params.dig(:filters, :tags))
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
-      sync_jobs(jobs)
 
       render_jobs_list(jobs)
     end
@@ -112,7 +109,6 @@ module Api
         search_by_tags(params.dig(:filters, :tags))
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
-      sync_jobs(jobs)
 
       render_jobs_list(jobs)
     end
@@ -172,7 +168,6 @@ module Api
         search_by_tags(params.dig(:filters, :tags))
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
-      sync_jobs(jobs)
 
       render_jobs_list(jobs)
     rescue StandardError => e
@@ -187,7 +182,6 @@ module Api
     # rubocop:disable Metrics/MethodLength
     def show
       find_job
-      sync_job!
       load_relations(@job)
       comments_data(@job)
       @job.current_user = current_user

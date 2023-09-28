@@ -86,11 +86,11 @@ describe('AssetRepository tests', () => {
   it('findAccessibleByUser', async () => {
     // prepare assets for user1 - should appear in results
     // in public scope - yes
-    assets[0].scope = STATIC_SCOPE.PUBLIC.toString()
+    assets[0].scope = STATIC_SCOPE.PUBLIC
     // in private scope for user1 - yes
-    assets[1].scope = STATIC_SCOPE.PRIVATE.toString()
+    assets[1].scope = STATIC_SCOPE.PRIVATE
     // in private scope for different user - no
-    assets[5].scope = STATIC_SCOPE.PRIVATE.toString()
+    assets[5].scope = STATIC_SCOPE.PRIVATE
     // in space the user has membership - yes
     const space1 = create.spacesHelper.create(em, {name: 'space1'})
     create.spacesHelper.addMember(em, {space: space1, user: user1})

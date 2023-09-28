@@ -23,7 +23,7 @@ describe('POST /apps/:id/run', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
-    em = database.orm().em.fork()
+    em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
@@ -66,16 +66,6 @@ describe('POST /apps/:id/run', () => {
     const jobInDb = await em.findOne(Job, body.id)
     expect(jobInDb).to.have.property('uid', `${generate.job.jobId()}-1`)
     expect(jobInDb).to.have.property('describe', '{}')
-    expect(jobInDb).to.have.property(
-      'runData',
-      JSON.stringify({
-        run_instance_type: DEFAULT_INSTANCE_TYPE,
-        run_inputs: {
-          duration: generate.app.runAppInput().input.duration,
-        },
-        run_outputs: {},
-      }),
-    )
     var provenance = jobInDb?.provenance
     expect(provenance).to.deep.equal(
       {

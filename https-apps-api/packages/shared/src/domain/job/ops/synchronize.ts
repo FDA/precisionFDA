@@ -11,10 +11,10 @@ import {
 } from '../job.helper'
 import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
 import {
-  createSendEmailTask,
-  createSyncWorkstationFilesTask,
+  createSendEmailTask, createSyncOutputsTask,
+  createSyncWorkstationFilesTask, getMainQueue,
   removeFromEmailQueue,
-  removeRepeatable
+  removeRepeatable,
 } from '../../../queue'
 import type { Maybe, UserOpsCtx } from '../../../types'
 import { User } from '../..'
@@ -29,7 +29,6 @@ import { buildEmailTemplate } from '../../email/email.helper'
 import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
 import { EmailSendOperation } from '../../email'
-import { NotificationService } from '../../notification/services/notification.service'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getServiceFactory } from '../../../services/service-factory'
@@ -43,39 +42,35 @@ const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: numb
     linkTitle: 'View Execution',
     linkUrl: `/home/executions/${job.uid}`,
   }
+  const sendNotification = async (message: string, severity: SEVERITY, action: NOTIFICATION_ACTION) => {
+    await notificationService.createNotification({message, severity, action, userId, meta})
+  }
 
   if (job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING) {
-    await notificationService.createNotification({
-      message: `Job ${job.name} is running`,
-      severity: SEVERITY.INFO,
-      action: NOTIFICATION_ACTION.JOB_RUNNING,
-      userId,
-      meta,
-    })
+    await sendNotification(`Job ${job.name} is running`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNING)
   }
+
+  if (job.state !== JOB_STATE.RUNNABLE && remoteState === JOB_STATE.RUNNABLE) {
+    await sendNotification(`Job ${job.name} is runnable`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNABLE)
+  }
+
+  if (job.state !== JOB_STATE.DONE && remoteState === JOB_STATE.DONE) {
+    await sendNotification(`Job ${job.name} has finished`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_DONE)
+  }
+
   if (job.state !== JOB_STATE.TERMINATED && remoteState === JOB_STATE.TERMINATED) {
-    await notificationService.createNotification({
-      message: `Job ${job.name} has terminated`,
-      severity: SEVERITY.INFO,
-      action: NOTIFICATION_ACTION.JOB_TERMINATED,
-      userId,
-      meta,
-    })
+    await sendNotification(`Job ${job.name} has terminated`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_TERMINATED)
   }
+
   if (remoteState === JOB_STATE.FAILED) {
-    await notificationService.createNotification({
-      message: `Job ${job.name} has failed`,
-      severity: SEVERITY.ERROR,
-      action: NOTIFICATION_ACTION.JOB_FAILED,
-      userId,
-      meta,
-    })
+    await sendNotification(`Job ${job.name} has failed`, SEVERITY.ERROR, NOTIFICATION_ACTION.JOB_FAILED)
   }
 }
 
-// N.B. SyncJobOperation is only meant for syncing HTTPS/Workstation apps
-//      In the future we'd need to rename this to something more specific
-//      when normal job syncing is also a part of the nodejs-worker
+/**
+ * SyncJobOperation is responsible for synchronizing the job status with the platform.
+ * Works for both https and standalone apps.
+ */
 export class SyncJobOperation extends WorkerBaseOperation<
   UserOpsCtx,
   CheckStatusJob['payload'],
@@ -106,30 +101,21 @@ export class SyncJobOperation extends WorkerBaseOperation<
       return
     }
 
-    // This operation currently only handles HTTPS apps correctly, but when we migrate
-    // job syncing to nodejs we'll relax this condition
-    //
-    if (!job.isHTTPS()) {
-      this.ctx.log.error({ input }, 'SyncJobOperation: Error: Job is not HTTPS app')
-      await removeRepeatable(this.ctx.job)
-      return
-    }
-
     if (!user) {
       this.ctx.log.error({ input }, 'SyncJobOperation: Error: User does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
 
-    // todo: check users ownership -> we should have a helper for it
+    // todo: check user's ownership -> we should have a helper for it
     this.job = job
     this.user = user
     this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.ctx.log.info({ input, job }, 'SyncJobOperation: Job is already finished. Removing task')
-      await removeRepeatable(this.ctx.job)
+      this.ctx.log.info({ input, job }, 'SyncJobOperation: Job is already finished. Removing task from main queue')
+      await removeRepeatable(this.ctx.job, getMainQueue())
       this.removeTerminationEmailJob()
       return
     }
@@ -174,7 +160,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       em.persist(job)
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Job marked as stale, trying to terminate')
+      this.ctx.log.info({ jobId: job.id, jobUid: job.uid }, 'SyncJobOperation: Job marked as stale, trying to terminate')
       const terminateOp = new RequestTerminateJobOperation({
         log: this.ctx.log,
         em: this.ctx.em,
@@ -215,12 +201,11 @@ export class SyncJobOperation extends WorkerBaseOperation<
         }
       }
 
-      // Use the following to invoke sync files within this operation to debug
-      // const syncJobFilesOp = new WorkstationSyncFilesOperation(this.ctx)
-      // await syncJobFilesOp.execute({ dxid: job.dxid })
-
-      // Queue file sync task, so that the syncing is not blocked
-      createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
+      if (job.isHTTPS()) {
+        await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
+      } else {
+        await createSyncOutputsTask({ dxid: job.dxid }, this.ctx.user)
+      }
     }
 
     await checkJobStatusForNotifications(em, this.ctx.user.id, job, remoteState)
@@ -267,7 +252,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.jobTerminationWarning,
       to: this.user.email,
-      subject: `precisionFDA Workstation ${this.job.name} will terminate in 24 hours`,
+      subject: `Job ${this.job.name} will terminate in 24 hours`,
       body,
     }
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)

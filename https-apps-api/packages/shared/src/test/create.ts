@@ -116,7 +116,7 @@ const userHelper = {
     return userHelper.createUsingOrg(em, org, data)
   },
 
-  createUsingOrg: (em: EntityManager, org: Organization, data?: Partial<InstanceType<typeof entities.User>>) => {
+  createUsingOrg: (em: EntityManager, org: entities.Organization, data?: Partial<InstanceType<typeof entities.User>>) => {
     const defaults = generate.user.simple()
     const input = {
       ...defaults,
@@ -579,6 +579,22 @@ const commentHelper = {
   },
 }
 
+const noteHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.Note>>,
+  ) => {
+    const defaults = generate.note.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const note = wrap(new entities.Note(references.user)).assign(input)
+    em.persist(note)
+    return note
+  }
+}
 const comparisonHelper = {
   create: (
     em: EntityManager,
@@ -671,6 +687,7 @@ export {
   filesHelper,
   tagsHelper,
   licenceHelper,
+  noteHelper,
   spacesHelper,
   commentHelper,
   challengeHelper,

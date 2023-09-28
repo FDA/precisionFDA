@@ -19,6 +19,7 @@ export interface RunJobRequest {
   name: string // name of the job
   instance_type: string
   scope: string
+  output_folder_path: string
   inputs: {
     [key: string]: string | number | boolean,
   };

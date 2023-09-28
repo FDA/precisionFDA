@@ -19,8 +19,6 @@ class JobsController < ApplicationController
       return
     end
 
-    sync_job!
-
     @items_from_params = [@job]
     @item_path = pathify(@job)
     @item_comments_path = pathify_comments(@job)
@@ -46,8 +44,6 @@ class JobsController < ApplicationController
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
       return
     end
-
-    sync_job!
 
     uri = URI(DNANEXUS_APISERVER_URI)
     raw_socket = TCPSocket.new(uri.host, uri.port)
@@ -119,15 +115,4 @@ class JobsController < ApplicationController
     redirect_to job_path(@job)
   end
 
-  private
-
-  def sync_job!
-    return if @job.terminal? || @job.https?
-
-    if @job.from_submission?
-      Job.sync_challenge_job!(@job.id)
-    else
-      Job.sync_job!(@context, @job.id)
-    end
-  end
 end

@@ -86,7 +86,6 @@ PFDA_ADMIN_ORG = ENV["PFDA_ADMIN_ORG"]
 
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)
-SYNC_JOBS_LIMIT = ENV.fetch("SYNC_JOBS_LIMIT", 30).to_i
 ORG_MEMBERS_SEARCH_LIMIT = 20
 
 ASSETS_SEARCH_LIMIT = 1000

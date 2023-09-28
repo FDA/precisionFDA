@@ -7,6 +7,10 @@ export const StyledRefresh = styled(Refresh)`
   margin-right: 16px;
 `
 
+export const StyledStatusText = styled.div`
+  margin-right: 16px;
+ `
+
 export const StyledExecutionState = styled.span<{ state: JobState }>`
   padding: 3px 5px;
   border-radius: 3px;

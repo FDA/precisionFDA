@@ -4,6 +4,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
+  # Start sync job
+  # @param job_dxid [String] Job dxid to sync.
+  def job_sync(job_dxid)
+    request(
+      "/jobs/#{job_dxid}/syncJob",
+      { jobDxId: job_dxid },
+      Net::HTTP::Patch::METHOD,
+    )
+  end
+
   # Gets active users' usernames
   def active_users
     request(

@@ -1,7 +1,6 @@
 import {
   Entity,
   IdentifiedReference,
-  JsonType,
   ManyToOne,
   PrimaryKey,
   Property,

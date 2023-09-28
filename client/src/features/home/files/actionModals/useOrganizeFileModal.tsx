@@ -1,18 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Key } from 'rc-tree/lib/interface'
-import React, { useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useImmer } from 'use-immer'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
-import { displayPayloadMessage } from '../../../../utils/api'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
-import { ResourceScope } from '../../types'
-import { fetchFolderChildren, moveFilesRequest } from '../files.api'
-import { IFile } from '../files.types'
+import { ServerScope } from '../../types'
+import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
+import { SPACE_PREFIX } from '../../../../constants'
+import { TreeOnSelectInfo } from '../files.types'
 
 function findById(tree: any[], nodeId: string): any {
   // eslint-disable-next-line no-restricted-syntax
@@ -26,15 +24,21 @@ function findById(tree: any[], nodeId: string): any {
   return false
 }
 
+const getSpaceId = (scope?: ServerScope): string | undefined => {
+  if (scope?.startsWith(SPACE_PREFIX)) {
+    return scope.substring(SPACE_PREFIX.length)
+  }
+  return undefined
+}
+
 const OrganizeFiles = ({
   scope,
-  spaceId,
   onSelect,
 }: {
-  scope?: ResourceScope
-  spaceId?: string
-  onSelect: (folerId: Key[]) => void
+  scope?: ServerScope
+  onSelect: (selectedKeys: Key[], info: TreeOnSelectInfo) => void,
 }) => {
+  const spaceId = getSpaceId(scope)
   const [treeData, setTreeData] = useImmer<any>([
     { key: 'ROOT', title: '/', children: []},
   ])
@@ -44,7 +48,7 @@ const OrganizeFiles = ({
       onExpand={d => {}}
       loadData={async node => {
         const { nodes } = await fetchFolderChildren(
-          scope === 'me' ? 'private' : 'public',
+          scope === 'private' ? 'private' : 'public', // TODO fix this in fetchFolderChildren
           spaceId,
           node.key.toString(),
         )
@@ -54,6 +58,7 @@ const OrganizeFiles = ({
             key: d.id.toString(),
             title: d.name,
             children: [],
+            parent: node,
           }))
 
         setTreeData((draft: any) => {
@@ -74,43 +79,31 @@ const StyledForm = styled.form`
 `
 
 export const useOrganizeFileModal = ({
-  selected,
+  headerText,
+  submitCaption,
   scope,
-  spaceId,
-  onSuccess,
+  onHandleSubmit,
 }: {
-  selected: IFile[]
-  scope?: ResourceScope
-  spaceId?: string
-  onSuccess?: () => void
+  headerText: string
+  submitCaption: string // submit button caption
+  scope?: ServerScope
+  onHandleSubmit?: (folderId: number, info: TreeOnSelectInfo) => void
 }) => {
-  const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
-  const selectedIds = selected.map(f => f.id)
-  const mutation = useMutation({
-    mutationKey: ['movie-files'],
-    mutationFn: (target: string) =>
-      moveFilesRequest(selectedIds, target, scope, spaceId),
-    onSuccess: res => {
-      queryClient.invalidateQueries(['files'])
-      setShowModal(false)
-      if (onSuccess) onSuccess()
-      displayPayloadMessage(res)
-    },
-    onError: () => {
-      toast.error('Error: Moving files')
-    },
-  })
-  const momoSelected = useMemo(() => selected, [isShown])
   const [selectedTarget, setSelectedTarget] = useState<string>()
+  const [selectedTargetInfo, setSelectedTargetInfo] = useState<any>()
+  const [submitEnabled, setSubmitEnabled] = useState(false)
 
-  const handleSelect = (f: string) => {
-    setSelectedTarget(f)
+  const handleSelect = (selectedKey: string, selectedInfo: TreeOnSelectInfo) => {
+    setSelectedTarget(selectedKey)
+    setSelectedTargetInfo(selectedInfo)
+    setSubmitEnabled(true)
   }
 
   const handleSubmit = () => {
-    if (selectedTarget) {
-      mutation.mutateAsync(selectedTarget)
+    if (onHandleSubmit && selectedTarget) {
+      onHandleSubmit(parseInt(selectedTarget, 10), selectedTargetInfo)
+      setSubmitEnabled(false)
     }
   }
 
@@ -123,16 +116,15 @@ export const useOrganizeFileModal = ({
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Move ${momoSelected.length} items(s)`}
+        headerText={headerText}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>
         <StyledForm as="div">
           <OrganizeFiles
-            spaceId={spaceId}
             scope={scope}
-            onSelect={s => {
-              handleSelect(s[0]?.toString())
+            onSelect={(selectedKeys, info) => {
+              handleSelect(selectedKeys[0]?.toString(), info)
             }}
           />
         </StyledForm>
@@ -142,16 +134,15 @@ export const useOrganizeFileModal = ({
           <Button
             type="button"
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
           >
             Cancel
           </Button>
           <ButtonSolidBlue
             type="submit"
             onClick={handleSubmit}
-            disabled={mutation.isLoading || !selectedTarget}
+            disabled={!submitEnabled}
           >
-            Move
+            {submitCaption}
           </ButtonSolidBlue>
         </ButtonRow>
       </Footer>

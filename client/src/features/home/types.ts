@@ -1,6 +1,8 @@
 import { ReactNode } from 'react'
+import { JsonValue } from 'react-use-websocket/src/lib/types'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { IChallenge } from '../../types/challenge'
+
 
 export interface TableSelected<T> {
   selectedItems: T[]
@@ -116,20 +118,38 @@ export enum SEVERITY {
   INFO = 'INFO',
 }
 
+// TODO share the enum with backend
+export enum NOTIFICATION_ACTION {
+    JOB_RUNNING = 'JOB_RUNNING',
+    JOB_RUNNABLE = 'JOB_RUNNABLE',
+    JOB_DONE = 'JOB_DONE',
+    JOB_TERMINATED = 'JOB_TERMINATED',
+    JOB_OUTPUTS_SYNCED = 'JOB_OUTPUTS_SYNCED',
+    JOB_FAILED = 'JOB_FAILED',
+    NODES_REMOVED = 'NODES_REMOVED',
+    NODES_COPIED = 'NODES_COPIED',
+    NODES_LOCKED = 'NODES_LOCKED',
+    NODES_UNLOCKED = 'NODES_UNLOCKED',
+    SPACE_ACTIVATED = 'SPACE_ACTIVATED',
+    WORKSTATION_SNAPSHOT_COMPLETED = 'WORKSTATION_SNAPSHOT_COMPLETED',
+    WORKSTATION_SNAPSHOT_ERROR = 'WORKSTATION_SNAPSHOT_ERROR',
+}
+
 export type NotificationMeta = {
   linkTitle?: string
   linkUrl?: string
 }
 
-export type Notification = {
+export type Notification = JsonValue & {
   id: number
-  type: string
+  action: NOTIFICATION_ACTION
   message: string
   severity: SEVERITY
   meta?: NotificationMeta
-  createdAt: Date
-  updatedAt: Date
-  deliveredAt: Date
+  // TODO currently not being sent from backend
+  // createdAt: Date
+  // updatedAt: Date
+  // deliveredAt: Date
 }
 
 export type KeyVal = { [key: string]: number | string | boolean }

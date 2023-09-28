@@ -39,7 +39,7 @@ export async function fetchFilesDownloadList(ids: string[], scope?: string) {
     .then(r => r.data as DownloadListResponse[])
 }
 
-export async function fetchFilesListLockingRequest(ids: string[], scope?: string, task?: string) {
+export async function fetchFilesListLockingRequest(ids: number[], scope?: string, task?: string) {
   return axios
     .post('/api/files/download_list', {
       task,
@@ -55,7 +55,7 @@ export async function deleteFilesRequest(ids: string[]) {
 
 export type LockUnlockActionType = 'lock' | 'unlock'
 
-export async function lockUnlockFilesRequest(ids: string[], type: LockUnlockActionType) {
+export async function lockUnlockFilesRequest(ids: number[], type: LockUnlockActionType) {
   return axios.post(`/api/nodes/${type}`, { ids }).then(r => r.data)
 }
 
@@ -132,11 +132,11 @@ export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?
   return axios.get(url).then(res => res.data as FetchFolderChildrenResponse)
 }
 
-export const moveFilesRequest = async (nodeIds: string[], targetId: string, scope?: ResourceScope, spaceId?: string) => {
+export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number, scope?: ResourceScope, spaceId?: string) => {
   const url = spaceId ? `/api/spaces/${spaceId}/files/move` : '/api/files/move'
   const body = cleanObject({
     node_ids: nodeIds,
-    target_id: parseInt(targetId, 10) || null,
+    target_id: targetFolderId,
   })
 
   const res = await fetch(url, {

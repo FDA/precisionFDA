@@ -11,7 +11,7 @@ class Job::IOCollection::Output < Job::IOCollection::Input
 
     file_values = []
     value.each do |value_item|
-      file_values << UserFile.find_by(dxid: value_item["$dnanexus_link"], project:) if project
+      file_values << UserFile.find_by(dxid: value_item, project:) if project
     end
     file_values
   end

@@ -6,7 +6,7 @@ export type DatabaseEngineType =
 // nucleus/commons/@dnanexus/dx-dbcluster-instance-types/aws_rds_instance_types.json
 
 export const HOME_DATABASE_MYSQL_INSTANCE_VERSIONS = {
-  V_5_7_12: '5.7.mysql_aurora.2.07.8',
+  V_5_7: '5.7.mysql_aurora.2.07.10',
 }
 
 export const HOME_DATABASE_POSTGRESQL_INSTANCE_VERSIONS = {
@@ -132,8 +132,8 @@ export const versionsOptions = (engine: DatabaseEngineType | null, dxInstanceCla
     case 'aurora-mysql':
       return [
         {
-          value: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
-          label: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7_12,
+          value: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7,
+          label: HOME_DATABASE_MYSQL_INSTANCE_VERSIONS.V_5_7,
           isDisabled: checkDisabledVersions(engine, dxInstanceClass),
         },
       ]
