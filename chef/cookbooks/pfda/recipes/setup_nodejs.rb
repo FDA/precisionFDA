@@ -1,6 +1,5 @@
 include_recipe("nodejs")
 
-# Install Yarn,pm2 and bower globally.
+# Install Yarn and pm2 globally.
 npm_package "yarn"
 npm_package "pm2"
-npm_package "bower"
