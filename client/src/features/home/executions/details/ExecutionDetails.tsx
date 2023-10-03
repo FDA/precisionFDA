@@ -66,7 +66,8 @@ export const ExecutionDetails = ({
     if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
          NOTIFICATION_ACTION.JOB_RUNNING,
          NOTIFICATION_ACTION.JOB_DONE,
-         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
+         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+         NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
       queryCache.invalidateQueries(['execution'])
     }
   }, [notification])

@@ -15,6 +15,7 @@ import {
 // list of notifications that do not show a toast
 const NO_TOAST_NOTIFICATIONS = [
     NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+    NOTIFICATION_ACTION.JOB_RUNNABLE,
 ]
 
 const toastHandlers = {
