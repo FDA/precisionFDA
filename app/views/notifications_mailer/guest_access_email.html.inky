@@ -1,7 +1,4 @@
 <wrapper>
-  <div class="hidden-email-preview">
-    Your precisionFDA browse access granted
-  </div>
   <spacer size="16"></spacer>
   <container class="header">
     <row>
@@ -9,9 +6,6 @@
         <a class="brand" href="<%= HOST %>" title="precisionFDA">
           <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
         </a>
-      </columns>
-      <columns>
-        <p class="header-title text-right">Browse access granted</p>
       </columns>
     </row>
   </container>
