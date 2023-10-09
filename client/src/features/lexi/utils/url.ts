@@ -14,6 +14,12 @@ const SUPPORTED_URL_PROTOCOLS = new Set([
   'tel:',
 ])
 
+export const appendInline = (urlString: string): string => {
+  const url = new URL(urlString)
+  url.searchParams.set("inline", "true")
+  return url.toString()
+}
+
 export function sanitizeUrl(url: string): string {
   try {
     const parsedUrl = new URL(url)
