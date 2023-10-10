@@ -25,7 +25,7 @@ export const useConfirm = (
       isShown={isOpen}
       hide={() => setIsOpen(false)}
     >
-      <ModalHeaderTop />
+      <ModalHeaderTop hide={cancel} />
       <DialogComponent body={body} ok={ok} cancelText="Back" okText="I understand" cancel={cancel} />
     </ModalNext>
   )

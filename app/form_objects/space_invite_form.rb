@@ -81,7 +81,7 @@ class SpaceInviteForm
   def validate_invitees
     errors.add(:invitees, "List of invitees is empty!") if invitees.values.flatten.blank?
 
-    return unless space.government?
+    return unless space.government? || (space.review? && space.restricted_reviewer)
 
     # Check invitees for valid government emails
     # N.B. the invite form allows both email and dxuser entries
@@ -90,7 +90,7 @@ class SpaceInviteForm
 
       errors.add(
         :base,
-        "Invitee #{email} is not a Government user",
+        "Invitee #{email} is not an FDA-associated user",
       )
     end
     invitees[:dxuser].each do |dxuser|
@@ -99,7 +99,7 @@ class SpaceInviteForm
 
       errors.add(
         :base,
-        "Invitee #{dxuser} is not a Government user",
+        "Invitee #{dxuser} is not an FDA-associated user",
       )
     end
   end

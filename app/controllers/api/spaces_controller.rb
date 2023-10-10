@@ -53,9 +53,14 @@ module Api
       space = space_form.persist!(api, current_user)
 
       if create_space_params[:protected]
-        space.tag_list = "Protected"
-        space.save
+        space.tag_list.push("Protected")
       end
+
+      if create_space_params[:restricted_reviewer]
+        space.tag_list.push("FDA-restricted")
+      end
+
+      space.save unless space.tag_list.empty?
 
       render json: space, adapter: :json
     end
@@ -358,7 +363,7 @@ module Api
     def create_space_params
       params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
                                     :space_type, :cts, :sponsor_org_handle, :source_space_id,
-                                    :sponsor_lead_dxuser, :restrict_to_template, :protected)
+                                    :sponsor_lead_dxuser, :restrict_to_template, :protected, :restricted_reviewer)
     end
   end
   # rubocop:enable Metrics/ClassLength

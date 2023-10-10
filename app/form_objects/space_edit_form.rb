@@ -23,9 +23,11 @@ class SpaceEditForm < SpaceForm
 
     check_dxuser_already_in_space(host_lead_dxuser) if host_lead_dxuser != space_host_lead
 
-    return unless host_lead_dxuser == space_guest_lead
+    errors.add(:sponsor_lead_dxuser, "can't be assigned as Reviewer lead") unless host_lead_dxuser != space_guest_lead
 
-    errors.add(:sponsor_lead_dxuser, "can't be assigned as Reviewer lead")
+    return unless space_type == TYPE_REVIEW && restricted_reviewer && host_admin && !host_admin.government_user?
+
+    errors.add(:reviewer_lead_dxuser, "'#{host_lead_dxuser}' is not an FDA-associated user")
   end
 
   # A sponsor lead user validation.
