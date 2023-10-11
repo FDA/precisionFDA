@@ -32,11 +32,17 @@ const DeleteFiles = ({
 }) => {
   const { data, status } = useQuery(
     ['download_list', selected],
-    () =>
-      fetchFilesDownloadList(
-        selected.map(s => s.id),
-        scope,
-      ),
+    () => {
+      // Workaround to use the correct 'scope' param when deleting single file
+      let usedScope = scope;
+      if (selected.length === 1) {
+        usedScope = selected[0].scope
+      }
+      return fetchFilesDownloadList(
+          selected.map(s => s.id),
+          usedScope,
+      )
+    },
     {
       onSuccess: (res) => {
         setNodesToBeDeleted(res)
