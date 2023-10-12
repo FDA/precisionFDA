@@ -9,7 +9,7 @@ export const removeNodesHandler = async (bullJob: Job) => {
 
   const requestId = String(bullJob.id)
   const log = getChildLogger(requestId)
-  
+
   const ctx: WorkerOpsCtx<UserOpsCtx> = {
     em: database.orm().em.fork() as SqlEntityManager,
     log,

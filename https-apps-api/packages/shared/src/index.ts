@@ -32,7 +32,13 @@ export {
   dbCluster,
   adminGroup,
   spaceEvent,
+  spaceReport,
+  provenance,
+  platform,
+  entity,
 } from './domain'
+
+export * from './facade'
 
 export * as utils from './utils'
 
@@ -46,3 +52,5 @@ export * as redis from './services/redis.service'
 export * as validation from './validation'
 
 export { BaseEntity } from './database/base-entity'
+
+export { ArrayUtils, TimeUtils } from './utils'

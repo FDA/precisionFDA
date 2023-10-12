@@ -3,13 +3,13 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  IdentifiedReference,
+  IdentifiedReference, ManyToMany,
   ManyToOne,
   OneToMany,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User, Tagging } from '..'
+import { User, Tagging, Job } from '..'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
 import {
@@ -83,6 +83,13 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
+  }
+
+  @Property({ persist: false })
+  get links() {
+    return {
+      download: `/api/files/${this.uid}/download`,
+    }
   }
 
   isCreatedByChallengeBot(): boolean {

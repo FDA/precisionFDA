@@ -18,7 +18,7 @@ export interface BaseError {
     type: 'error'
   }
 }
-export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions'
+export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions' | 'reports'
 export type APIResource =
   | 'files'
   | 'folders'
@@ -30,6 +30,7 @@ export type APIResource =
   | 'app-executions'
   | 'workflow-executions'
   | 'spaces'
+  | 'space-reports'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
 
@@ -136,6 +137,8 @@ export enum NOTIFICATION_ACTION {
     SPACE_ACTIVATED = 'SPACE_ACTIVATED',
     WORKSTATION_SNAPSHOT_COMPLETED = 'WORKSTATION_SNAPSHOT_COMPLETED',
     WORKSTATION_SNAPSHOT_ERROR = 'WORKSTATION_SNAPSHOT_ERROR',
+    SPACE_REPORT_ERROR = 'SPACE_REPORT_ERROR',
+    SPACE_REPORT_DONE = 'SPACE_REPORT_DONE',
 }
 
 export type NotificationMeta = {
