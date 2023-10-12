@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Helvetica,sans-serif;
+            padding: 60px 0 0 0;
+            margin: 0;
+        }
+
+        .anchor {
+            display: block;
+            position: relative;
+            top: -60px;
+            visibility: hidden;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #343E4D;
+        }
+
+        .header {
+            padding: 10px 16px;
+            background: #343E4D;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .header svg {
+            height: 32px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .item {
+            display: inline-block;
+            max-width: 100%;
+            text-align: center;
+            vertical-align: top;
+            margin-bottom: 30px;
+            color: #343E4D;
+        }
+
+        .canvas-wrapper {
+            overflow: scroll;
+            padding: 10px;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .title {
+            margin-top: 30px;
+        }
+
+        .navbar a {
+            color: #d5d5d5;
+        }
+
+        .navbar-item {
+            position: relative;
+            display: inline-block;
+            margin: 0 15px;
+        }
+
+        .navbar-item a {
+            display: inline-block;
+        }
+
+        .navbar-item .subnav-container {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            max-height: calc(100vh - 60px);
+            overflow-y: scroll;
+            padding-top: 10px;
+        }
+
+        .navbar-item:hover .subnav-container {
+            display: block;
+        }
+
+        .navbar-item .subnav {
+            background: #343E4D;
+            text-align: right;
+            border: 1px solid white;
+        }
+
+        .navbar-item .subnav a {
+            display: block;
+            border-bottom: 1px solid white;
+            padding: 10px 20px;
+            max-width: 250px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+</body>
+</html>

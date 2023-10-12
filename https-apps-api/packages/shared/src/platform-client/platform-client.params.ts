@@ -114,6 +114,13 @@ type FileDownloadLinkParams = {
   duration: number // in seconds
 }
 
+type FileGetUploadUrlParams = {
+  dxid: string
+  size: number
+  md5: string
+  index: number
+}
+
 type FileStatesParams = {
   fileDxids: string[]
   projectDxid: string
@@ -270,4 +277,5 @@ export {
   UserUnlockParams,
   AppDescribeParams,
   WorkflowDescribeParams,
+  FileGetUploadUrlParams,
 }

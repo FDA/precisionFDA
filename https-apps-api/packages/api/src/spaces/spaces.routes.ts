@@ -1,8 +1,21 @@
+import {
+  client,
+  email,
+  entities,
+  errors,
+  space,
+  spaceEvent,
+  spaceMembership,
+  spaceReport,
+  userFile,
+  user,
+} from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { email, space, spaceMembership, spaceEvent, entities, errors, client } from '@pfda/https-apps-shared'
-import { pickOpsCtx } from '../utils/pick-ops-ctx'
+import { SpaceReportCreateFacade } from '../facade/space-report-create.facade'
+import { SpaceReportDeleteFacade } from '../facade/space-report-delete.facade'
 import { defaultMiddlewares } from '../server/middleware'
+import { pickOpsCtx } from '../utils/pick-ops-ctx'
 
 // Routes with /spaces prefix
 const router = new Router<DefaultState, Api.Ctx>()
@@ -76,15 +89,15 @@ router.patch(
       entities.SpaceMembership,
       {
         spaces: ctx.params.id as any,
-        user: ctx.user!.id
-      }, {}
+        user: ctx.user!.id,
+      }, {},
     )
 
     if (spaceToFix == null ||
       membership == null ||
       spaceToFix.type !== space.types.SPACE_TYPE.GROUPS ||
       membership.role !== spaceMembership.types.SPACE_MEMBERSHIP_ROLE.LEAD) {
-      throw new errors.PermissionError("Operation not permitted.")
+      throw new errors.PermissionError('Operation not permitted.')
     }
 
     const platformClient = new client.PlatformClient(ctx.user!.accessToken, ctx.log)
@@ -96,23 +109,23 @@ router.patch(
           body: {},
         })
       } catch (err) {
-        throw new errors.PermissionError("Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.")
+        throw new errors.PermissionError('Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.')
       }
       // if no error, the permissions are correct.
-      throw new errors.PermissionError("Permissions are already corrected for guest side.")
+      throw new errors.PermissionError('Permissions are already corrected for guest side.')
     } else {
       // check project first.
       const res = await platformClient.projectDescribe({
         projectDxid: spaceToFix.hostProject,
         body: {
-          "fields": {
-            "permissions": true
+          'fields': {
+            'permissions': true,
           },
         },
       })
 
       if (spaceToFix.guestDxOrg in res.permissions) {
-        throw new errors.PermissionError("Permissions are already corrected for guest side.")
+        throw new errors.PermissionError('Permissions are already corrected for guest side.')
       }
 
       const response = await platformClient.projectInvite({
@@ -121,7 +134,7 @@ router.patch(
         level: 'CONTRIBUTE',
       })
 
-      ctx.log.info({ response }, "Guest organization invited to host project.")
+      ctx.log.info({ response }, 'Guest organization invited to host project.')
     }
 
     ctx.status = 204
@@ -130,12 +143,62 @@ router.patch(
 
 router.get(
   '/:id/selectable-spaces',
-
   async ctx => {
     const res = await new space.SelectableSpacesOperation(pickOpsCtx(ctx))
       .execute(parseInt(ctx.params.id))
 
     ctx.body = res
+    ctx.status = 200
+  },
+)
+
+router.post(
+  '/:id/report',
+  async ctx => {
+    const opsCtx = pickOpsCtx(ctx)
+
+    const facade = new SpaceReportCreateFacade(opsCtx, spaceReport.SpaceReportService.getInstance(ctx.em.fork()))
+
+    const report = await facade.createSpaceReport(parseInt(ctx.params?.id, 10))
+
+    ctx.body = report?.id
+    ctx.status = 200
+  },
+)
+
+router.get(
+  '/:id/report',
+  async ctx => {
+    const opsCtx = pickOpsCtx(ctx)
+
+    const em = opsCtx.em.fork({ useContext: true })
+    const spaceReportService = spaceReport.SpaceReportService.getInstance(em)
+
+    ctx.body = await spaceReportService.getReportsForSpace(parseInt(ctx.params?.id, 10), em.getReference(user.User, opsCtx.user.id))
+    ctx.status = 200
+  },
+)
+
+router.delete(
+  '/report',
+  async ctx => {
+    const idStrings = Array.isArray(ctx.query.id) ? ctx.query.id : [ctx.query.id]
+    const ids = idStrings.map(i => Number(i))
+
+    if (ids.some(id => Number.isNaN(id))) {
+      throw new errors.InvalidStateError('Invalid ID provided')
+    }
+
+    const em = ctx.em.fork({ useContext: true })
+    const facade = new SpaceReportDeleteFacade(
+      em,
+      spaceReport.SpaceReportService.getInstance(em),
+      new userFile.NodesRemoveOperation(pickOpsCtx({ ...ctx, em })),
+    )
+
+    const opsCtx = pickOpsCtx(ctx)
+
+    ctx.body = await facade.deleteSpaceReports(ids, em.getReference(user.User, opsCtx.user.id))
     ctx.status = 200
   },
 )

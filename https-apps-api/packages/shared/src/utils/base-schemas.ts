@@ -59,11 +59,11 @@ const getDxidInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'id'
 const userContextSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    id: idProp,
-    accessToken: { type: 'string', minLength: 1, maxLength: config.validation.maxStrLen },
-    dxuser: dxidProp,
+    'x-user_id': idProp,
+    'x-accesstoken': { type: 'string', minLength: 1, maxLength: config.validation.maxStrLen },
+    'x-dxuser': dxidProp,
   },
-  required: ['id', 'accessToken', 'dxuser'],
+  required: ['x-user_id', 'x-accesstoken', 'x-dxuser'],
   additionalProperties: true,
 }
 

@@ -57,6 +57,7 @@ class Space < ActiveRecord::Base
   has_many :confidential_spaces, class_name: "Space"
   has_many :space_events
   has_many :space_invitations
+  has_many :space_reports
 
   has_many :comments, as: :commentable
 

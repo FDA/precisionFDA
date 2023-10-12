@@ -114,6 +114,9 @@ const defaultConfig = {
       fileSync: {
         name: 'https-apps-worker-filesSync-queue',
       },
+      spaceReport: {
+        name: 'https-apps-worker-spaceReport-queue',
+      },
       maintenance: {
         name: 'https-apps-worker-maintenance-queue',
         onInit: {
@@ -146,6 +149,9 @@ const defaultConfig = {
     },
     userDataConsistencyReport: {
       repeatSeconds: parseIntFromProcess(process.env.USER_DATA_CONSISTENCY_REPORT_REPEAT) ?? 604800, // At least one week between checks
+    },
+    spaceReport: {
+      partBatchSize: parseIntFromProcess(process.env.NODE_SPACE_REPORT_PART_BATCH_SIZE) ?? 20,
     },
   },
   // TODO(samuel) apply "satisfies" operator

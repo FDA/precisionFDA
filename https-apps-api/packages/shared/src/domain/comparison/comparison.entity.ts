@@ -1,12 +1,14 @@
 import {
+  Collection,
   Entity,
   IdentifiedReference,
+  ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { App, User } from '..'
+import { App, ComparisonInput, User, UserFile } from '..'
 import { BaseEntity } from '../../database/base-entity'
 
 enum COMPARISON_STATE {
@@ -43,6 +45,13 @@ class Comparison extends BaseEntity {
 
   @Property()
   meta?: string
+
+  @ManyToMany({
+    pivotTable: 'comparison_inputs',
+    joinColumn: 'comparison_id',
+    inverseJoinColumn: 'user_file_id',
+  })
+  inputFiles = new Collection<UserFile>(this)
 
   @ManyToOne({ entity: () => App, fieldName: 'app_dxid' })
   app!: IdentifiedReference<App>

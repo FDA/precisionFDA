@@ -1,5 +1,6 @@
 import { App } from './app/app.entity'
 import { AppSeries } from './app-series'
+import { SpaceReport, SpaceReportPart } from './space-report'
 import { Workflow } from './workflow/workflow.entity'
 import { Comment } from './comment/comment.entity'
 import { DataPortal } from './data-portal/data-portal.entity'
@@ -68,6 +69,8 @@ const entities = {
   Space,
   SpaceEvent,
   SpaceMembership,
+  SpaceReport,
+  SpaceReportPart,
   Resource,
   Tag,
   Tagging,
@@ -124,6 +127,13 @@ export * as dataPortal from './data-portal'
 
 export * as resource from './resource'
 
+export * as spaceReport from './space-report'
+
+export * as provenance from './provenance'
+
+export * as platform from './platform'
+
+export * as entity from './entity'
 
 export {
   entities,
@@ -158,6 +168,8 @@ export {
   Space,
   SpaceEvent,
   SpaceMembership,
+  SpaceReport,
+  SpaceReportPart,
   Resource,
   Tag,
   Tagging,

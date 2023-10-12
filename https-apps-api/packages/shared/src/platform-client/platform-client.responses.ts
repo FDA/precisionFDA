@@ -39,6 +39,12 @@ type FileDownloadLinkResponse = {
   expires?: number
 }
 
+interface GetUploadURLResponse {
+  url: string
+  headers: Record<string, string>
+  expires: number
+}
+
 type ListFilesResult = {
   id: string
   project: string
@@ -230,4 +236,5 @@ export {
   WorkflowDescribeResponse,
   DnanexusLink,
   JobOutput,
+  GetUploadURLResponse,
 }
