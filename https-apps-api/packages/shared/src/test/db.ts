@@ -1,5 +1,5 @@
 import { Connection } from '@mikro-orm/core'
-import { config, ENUMS } from '..'
+import { config } from '..'
 
 const tableNamesToOmit = ['ar_internal_metadata', 'schema_migrations']
 
@@ -15,10 +15,6 @@ const generateTruncateStatements = () => `
  * @param connection Connection
  */
 const initDeleteProcedure = async (connection: Connection): Promise<void> => {
-  if (config.env !== ENUMS.ENVS.TEST) {
-    throw new Error('Database truncate cannot run in different config env.')
-  }
-
   const truncateStatementsRes = await connection.execute(generateTruncateStatements())
   const statements: string[] = truncateStatementsRes.map(row => Object.values(row).pop())
   const procedure = `
