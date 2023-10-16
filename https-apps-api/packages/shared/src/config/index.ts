@@ -62,7 +62,7 @@ const defaultConfig = {
   },
   database: {
     // it is used for testing, not for default DB connection
-    dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
+    dbName: process.env.NODE_DATABASE_NAME ?? 'precisionfda-test',
     clientUrl:
       process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
