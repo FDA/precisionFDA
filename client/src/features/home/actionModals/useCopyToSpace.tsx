@@ -39,7 +39,7 @@ const SpacesList = ({
     refetch,
   } = useQuery(['editable_spaces_list'], fetchEditableSpacesList, {
     onError: () => {
-      toast.error('Error: Fetching editable spaces.')
+      toast.error('Error: Fetching editable spaces')
     },
   })
 

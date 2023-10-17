@@ -71,7 +71,7 @@ const EditTagsForm = ({
       toast.success(`Success: ${resource} editing tags`)
     },
     onError: () => {
-      toast.error(`Error: editing ${resource} tags.`)
+      toast.error(`Error: editing ${resource} tags`)
     },
   })
 

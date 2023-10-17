@@ -50,7 +50,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       reset()
       queryClient.invalidateQueries(['space-members'])
       setShowModal(false)
-      toast.success('Success: Adding members.')
+      toast.success('Success: Adding members')
     },
     onError: (e: any) => {
       toast.error(`Error: Adding members. ${e.response.data.errors}`)

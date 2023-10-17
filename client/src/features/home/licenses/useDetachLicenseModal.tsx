@@ -35,7 +35,7 @@ export function useDetachLicenseModal<
       handleClose()
       toast.success('Success: Detaching license.')
     },
-    onError: () => {toast.error('Error: Detaching license.')},
+    onError: () => {toast.error('Error: Detaching license')},
   })
 
   const onSubmit = () => {
