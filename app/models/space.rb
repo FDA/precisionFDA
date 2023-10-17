@@ -548,5 +548,4 @@ class Space < ActiveRecord::Base
 
     user_membership.present? && (unactivated? || active? || locked? && user_membership.host?)
   end
-
 end
