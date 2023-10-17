@@ -60,7 +60,6 @@ class SpaceForm
     return unless space_type == TYPE_REVIEW && restricted_reviewer && host_admin && !host_admin.government_user?
 
     errors.add(:reviewer_lead_user, "'#{host_lead_dxuser}' is not an FDA-associated user")
-
   end
 
   # A guest lead user validation
