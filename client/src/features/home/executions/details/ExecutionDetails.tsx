@@ -31,6 +31,7 @@ import { InputsAndOutputs } from '../InputsAndOutputs'
 import { FailureMessage, StyledExecutionState } from './styles'
 import { getScopeMapping } from '../../getScopeMapping'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../../utils/config'
+import { RESOURCE_LABELS } from '../../../../types/user'
 
 const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
@@ -61,13 +62,13 @@ export const ExecutionDetails = ({
 
   useEffect(() => {
     if (notification == null) {
-        return
+      return
     }
     if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
-         NOTIFICATION_ACTION.JOB_RUNNING,
-         NOTIFICATION_ACTION.JOB_DONE,
-         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-         NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
+      NOTIFICATION_ACTION.JOB_RUNNING,
+      NOTIFICATION_ACTION.JOB_DONE,
+      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+      NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
       queryCache.invalidateQueries(['execution'])
     }
   }, [notification])
@@ -75,7 +76,7 @@ export const ExecutionDetails = ({
   const execution = data?.job
 
   if (status === 'loading') {
-    return <HomeLoader />
+    return <HomeLoader/>
   }
 
   if (!execution || !execution.id)
@@ -116,8 +117,8 @@ export const ExecutionDetails = ({
           <HeaderLeft>
             <div>
               <Title>
-                <CogsIcon height={24} />
-                <ExecutionState state={execution.state} />
+                <CogsIcon height={24}/>
+                <ExecutionState state={execution.state}/>
                 {execution.name}
               </Title>
               {execution?.failure_message && (
@@ -202,7 +203,7 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>Instance Type</MetadataKey>
-              <MetadataVal>{execution.instance_type}</MetadataVal>
+              <MetadataVal>{RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
           <MetadataRow>
@@ -231,8 +232,8 @@ export const ExecutionDetails = ({
         </MetadataSection>
       </Topbox>
 
-      <div className="pfda-padded-t40" />
-      <TabsSwitch tabsConfig={tabsConfig} />
+      <div className="pfda-padded-t40"/>
+      <TabsSwitch tabsConfig={tabsConfig}/>
     </>
   )
 }

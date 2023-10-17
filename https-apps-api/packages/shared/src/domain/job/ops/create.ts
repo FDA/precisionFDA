@@ -84,14 +84,8 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       }
       this.projectId = getProjectDxid(space, membership)
     }
-
-    this.instance =
     // @ts-ignore
-    this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
-        // @ts-ignore
-        ? allowedInstanceTypes[this.input.instanceType]
-        : DEFAULT_INSTANCE_TYPE
-
+    this.instance = allowedInstanceTypes[this.input.instanceType] ?? DEFAULT_INSTANCE_TYPE
     const runInputDb = this.buildJobInput(app)
     const runDxInput = this.buildClientApiCall(app)
     const jobName = input.name ?? app.title
@@ -103,7 +97,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     await em.begin()
     let job: Job
     const runData: RunData = {
-      run_instance_type: this.instance.toString(),
+      run_instance_type: this.input.instanceType,
       run_inputs: runInputDb,
       run_outputs: {},
     }
