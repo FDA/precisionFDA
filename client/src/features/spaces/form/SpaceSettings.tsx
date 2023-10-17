@@ -109,16 +109,16 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       if (res?.space) {
         history.push(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries(['spaces'])
-        toast.success('Success: editing space settings.')
+        toast.success('Success: editing space settings')
       } else if (res?.errors) {
           toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
           setFormError(`Error: ${res.errors.messages.join('\r\n')}`)
         } else {
-          toast.error('Something went wrong!')
+          toast.error('Something went wrong')
         }
     },
     onError: () => {
-      toast.error('Error: Editing space settings.')
+      toast.error('Error: Editing space settings')
     },
   })
 

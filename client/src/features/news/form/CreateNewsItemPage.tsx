@@ -22,7 +22,7 @@ const CreateNewsItemPage = () => {
       toast.success('Created news item')
     },
     onError: () => {
-      toast.error('Error: Adding news item.')
+      toast.error('Error: Adding news item')
     },
   })
 

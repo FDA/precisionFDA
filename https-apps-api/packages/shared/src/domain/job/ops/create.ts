@@ -84,14 +84,8 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       }
       this.projectId = getProjectDxid(space, membership)
     }
-
-    this.instance =
     // @ts-ignore
-    this.input.instanceType && allowedInstanceTypes[this.input.instanceType]
-        // @ts-ignore
-        ? allowedInstanceTypes[this.input.instanceType]
-        : DEFAULT_INSTANCE_TYPE
-
+    this.instance = allowedInstanceTypes[this.input.instanceType] ?? DEFAULT_INSTANCE_TYPE
     const runInputDb = this.buildJobInput(app)
     const runDxInput = this.buildClientApiCall(app)
     const jobName = input.name ?? app.title
@@ -102,10 +96,11 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // add all the data to the database
     await em.begin()
     let job: Job
-    const runData = new RunData()
-    runData.run_instance_type = this.instance.toString()
-    runData.run_inputs = runInputDb
-    runData.run_outputs = {}
+    const runData: RunData = {
+      run_instance_type: this.input.instanceType,
+      run_inputs: runInputDb,
+      run_outputs: {},
+    }
     try {
       // @ts-ignore
       job = repo.create({
@@ -152,19 +147,19 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
 
   private getAppInputSpec(app: App): AppInputSpecItem[] {
     const inputSpec: AppInputSpecItem[] = app.spec.input_spec.map(
-      inputSpec => {
+      spec => {
         const appInputSpec: AppInputSpecItem = {
-        name: inputSpec.name,
-        // @ts-ignore
-        class: inputSpec.class,
-        // @ts-ignore
-        default: inputSpec.default,
-        label: inputSpec.label,
-        help: inputSpec.help,
-        optional: inputSpec.optional,
-      }
-      return appInputSpec
-      }
+          name: spec.name,
+          // @ts-ignore
+          class: spec.class,
+          // @ts-ignore
+          default: spec.default,
+          label: spec.label,
+          help: spec.help,
+          optional: spec.optional,
+        }
+        return appInputSpec
+      },
     )
     if (!inputSpec || !Array.isArray(inputSpec)) {
       throw new errors.InternalError('Input spec is not set or it is not an array')

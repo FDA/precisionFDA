@@ -516,7 +516,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         action: "create",
         record_type: "Access Request",
         record: {
-          message: "Browse access granted for #{@invitation.email} (id #{@invitation.id})",
+          message: "Browse access requested for #{@invitation.email} (id #{@invitation.id})",
         },
       }
       Auditor.perform_audit(auditor_data)

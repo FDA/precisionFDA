@@ -94,10 +94,10 @@ export function Activation({ space }: { space: ISpace }) {
     mutationFn: acceptSpaceRequest,
     onSuccess: (res: any) => {
       if (res.error) {
-        toast.error('Error: Service is unavailable. Please try again later.')
+        toast.error('Error: Service is unavailable. Please try again later')
       } else {
         queryCache.invalidateQueries(['space', space.id.toString()])
-        toast.success('Successfully activated space.')
+        toast.success('Successfully activated space')
       }
     },
   })

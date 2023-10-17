@@ -136,7 +136,7 @@ export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
       } else if (res?.error) {
           toast.error(`${res.error.type}: ${res.error.message}`)
         } else {
-          toast.error('Something went wrong!')
+          toast.error('Something went wrong')
         }
     },
     onError: () => {
