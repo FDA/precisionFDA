@@ -33,7 +33,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
       toast.success('Edited news item')
     },
     onError: () => {
-      toast.error('Error: Adding news item.')
+      toast.error('Error: Adding news item')
     },
   })
 
@@ -47,7 +47,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
       toast.success('Deleted news item')
     },
     onError: () => {
-      toast.error('Error: deleting news item.')
+      toast.error('Error: deleting news item')
     },
   })
 

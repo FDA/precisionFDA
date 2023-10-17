@@ -97,7 +97,7 @@ export const useUploadResource = ({
         setIsLoading(false)
         setSelectedFiles([])
         if (onSuccess) onSuccess()
-        toast.success('All files have been processed.')
+        toast.success('All files have been processed')
       })
       .catch(error => {
         toast.error(`Error processing files: ${error}`)

@@ -34,16 +34,16 @@ const CreateChallengePage = () => {
       if (res?.challenge) {
         queryClient.invalidateQueries(['challenges'])
         history.push('/challenges')
-        toast.success('Challenge created successfully.')
+        toast.success('Challenge has been created')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)
       } else {
-        toast.error('Something went wrong!')
+        toast.error('Error: Something went wrong')
       }
     },
     onError: () => {
       setIsSaving(false)
-      toast.error('Error: Adding challenge.')
+      toast.error('Error: Adding challenge')
     },
   })
 

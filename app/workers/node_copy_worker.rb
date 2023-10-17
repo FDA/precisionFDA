@@ -65,12 +65,21 @@ class NodeCopyWorker < ApplicationWorker
     nodes = Node.where(id: nodes_ids)
     copies = copy_service.copy(nodes, scope)
 
+    if copies.all?(&:copied)
+      message = "Files were successfully copied to the space"
+    elsif copies.any?(&:copied)
+      message = "Some files were successfully copied to the space, while some already exist there"
+    else
+      message = "No files were copied - all already exist in the space"
+    end
+
     notification = {
       action: "NODES_COPIED",
-      message: "Files copied successfully",
+      message: message,
       severity: "INFO",
       userId: @context.user_id,
     }
+
     https_apps_client.send_notification(notification)
     RequestContext.end_request
     notify_user(copies, scope)

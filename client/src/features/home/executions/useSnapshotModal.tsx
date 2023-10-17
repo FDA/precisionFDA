@@ -133,7 +133,7 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
       setShowModal(false)
       const isSpaceScope = selected.scope.startsWith('space')
       const scopeString = isSpaceScope ? 'the Space' : 'My Home'
-      toast.success(`Creating snapshot. The snapshot file will appear in ${scopeString} shortly after its completion.`)
+      toast.success(`Creating snapshot - the snapshot file will appear in ${scopeString} shortly after its completion`)
     },
   })
 

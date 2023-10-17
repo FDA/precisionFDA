@@ -14,7 +14,7 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     mutationKey: ['add-resource-to-space', 'workflows'],
     mutationFn: addDataRequest,
     onError: (e: AxiosError) => {
-      toast.error(`Error adding resource to space. ${e.message}`)
+      toast.error(`Error adding resource to space: ${e.message}`)
     },
   })
 
@@ -23,7 +23,7 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     spaceId,
     resource: 'workflows',
     onSuccess: () => {
-      toast.success('Successfully added workflow resource(s) to space.')
+      toast.success('Successfully added workflow resource(s) to space')
       queryClient.invalidateQueries(['workflows'])
       setShowAddWorkflowModal(false)
     },

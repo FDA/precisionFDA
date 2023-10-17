@@ -76,7 +76,7 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
   const copyToClipboard = () => {
     const val = inputRef.current?.value
     if (val) {
-      toast.success('The key has been copied into your clipboard.')
+      toast.success('The key has been copied into your clipboard')
       navigator.clipboard.writeText(val)
     }
   }

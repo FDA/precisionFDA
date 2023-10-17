@@ -68,7 +68,7 @@ export const ExecutionActionsRow = ({
     if (execution.launched_by === user?.full_name) {
       window.open(execution.links.open_external,'_blank','noopener,noreferrer')
     } else {
-      toast.error(`This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution.`)
+      toast.error(`This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution`)
     }
   }
 

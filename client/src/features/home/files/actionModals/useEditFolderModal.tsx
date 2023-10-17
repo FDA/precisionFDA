@@ -44,10 +44,10 @@ const EditFolderInfoForm = ({
       }
       queryClient.invalidateQueries(['files'])
       handleClose()
-      toast.success('Folder info changed.')
+      toast.success('Folder info changed')
     },
     onError: () => {
-      toast.error('Error: Editing folder info.')
+      toast.error('Error: Editing folder info')
     },
   })
 
