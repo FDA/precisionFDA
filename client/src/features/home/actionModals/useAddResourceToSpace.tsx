@@ -48,7 +48,7 @@ const ResourceTable = ({
     () => fetchResourceListRequest(resource),
     {
       onError: () => {
-        toast.error('Error: Fetching resource data list.')
+        toast.error('Error: Fetching resource data list')
       },
     },
   )

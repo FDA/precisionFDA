@@ -59,15 +59,15 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
     onSuccess: res => {
       if (authUser.dxuser === res.member && res.role === 'disable') {
         history.push('/spaces')
-        toast.success('Disabled yourself from the space.')
+        toast.success('Disabled yourself from the space')
       } else {
         reset()
         queryClient.invalidateQueries(['space-members'])
         setShowModal(false)
         if (['enable','disable'].includes(res.role)){
-          toast.success(`${capitalize(res.role)}d member ${res.member} in the space.`)
+          toast.success(`${capitalize(res.role)}d member ${res.member} in the space`)
         } else {
-          toast.success(`Changed ${res.member} member role to ${res.role}.`)
+          toast.success(`Changed ${res.member} member role to ${res.role}`)
         }
       }
     },
