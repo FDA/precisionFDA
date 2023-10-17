@@ -24,15 +24,15 @@ export const DuplicateSpace = () => {
       if (res?.space) {
         history.push(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries(['spaces'])
-        toast.success('Success: duplicating space.')
+        toast.success('Success: duplicating space')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)
       } else {
-        toast.error('Something went wrong!')
+        toast.error('Something went wrong')
       }
     },
     onError: () => {
-      toast.error('Error: Duplicating space.')
+      toast.error('Error: Duplicating space')
     },
   })
 

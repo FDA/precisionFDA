@@ -1,9 +1,8 @@
 import { ConfigOverride } from '..'
-import path from 'path'
 
 export const config: ConfigOverride = () => ({
   logs: {
-    level: process.env.LOG_LEVEL || 'error',
+    level: process.env.LOG_LEVEL ?? 'error',
   },
   database: {
     // different env var names are used here

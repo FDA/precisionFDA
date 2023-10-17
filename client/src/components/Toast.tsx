@@ -9,17 +9,17 @@ import { CloseAllIcon } from './icons/CloseAllIcon'
 
 const CloseAllWrapper = styled.div`
   margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
 `
 
-const CloseAll = styled.div`
+const CloseAllBasic = styled.div`
   position: relative;
   top: -8px;
 `
 
+const CloseAllWithLink = styled.div`
+  position: relative;
+  top: 0;
+`
 export interface ToastWithLinkProps {
   message: string,
   linkUrl: string,
@@ -34,8 +34,8 @@ export const ToastWithLink = ({ message, linkUrl, linkTitle }: ToastWithLinkProp
           <Link to={linkUrl}>{linkTitle}</Link>
         </div>
         <CloseAllWrapper>
-          <CloseAll data-tip data-for={`toast-tooltip-${message}`} onClick={() => toast.dismiss()}>
-            <CloseAllIcon height={20}/></CloseAll>
+          <CloseAllWithLink data-tip data-for={`toast-tooltip-${message}`} onClick={() => toast.dismiss()}>
+            <CloseAllIcon height={20}/></CloseAllWithLink>
           <ReactTooltip id={`toast-tooltip-${message}`} delayShow={1000} type='dark' effect='solid'>
             <span>Close all notifications</span>
           </ReactTooltip>
@@ -49,8 +49,8 @@ export const BasicToast = (message: string) => {
       <>
         <div>{message}</div>
         <CloseAllWrapper>
-          <CloseAll data-tip data-for={`toast-tooltip-${message}`} onClick={() => toast.dismiss()}>
-            <CloseAllIcon height={20}/></CloseAll>
+          <CloseAllBasic data-tip data-for={`toast-tooltip-${message}`} onClick={() => toast.dismiss()}>
+            <CloseAllIcon height={20}/></CloseAllBasic>
           <ReactTooltip id={`toast-tooltip-${message}`} delayShow={1000} type='dark' effect='solid'>
             <span>Close all notifications</span>
           </ReactTooltip>
