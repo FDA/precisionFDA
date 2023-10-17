@@ -81,6 +81,7 @@ temp/
 
 *.tsbuildinfo
 node_modules/
+https-apps-api/package-lock.json
 
 lerna-debug.log
 

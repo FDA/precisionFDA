@@ -123,6 +123,7 @@ class AppService
         },
         distribution: "Ubuntu",
         release: release,
+        version: "0",
         execDepends: opts[:packages].map { |package| { name: package } },
       },
       dxapi: "1.0.0",

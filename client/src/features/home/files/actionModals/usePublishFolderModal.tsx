@@ -28,7 +28,7 @@ const PublishFolder = ({
       selectedFiles.map(s => s.id),
       scope,
     ), {
-      onError: () => {toast.error('Error: Fetching download list.')},
+      onError: () => {toast.error('Error: Fetching download list')},
     },
   )
   if (status === 'loading') return <div>Loading...</div>
@@ -67,10 +67,10 @@ export const usePublishFolderModal = (
       queryClient.invalidateQueries(['files'])
       resetSelected()
       setShowModal(false)
-      toast.success('Success: Publishing file.')
+      toast.success('File successfully published')
     },
     onError: () => {
-      toast.error('Error: Publishing file.')
+      toast.error('Error: Publishing file')
     },
   })
 
