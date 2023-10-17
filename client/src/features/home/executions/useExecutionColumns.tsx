@@ -86,7 +86,7 @@ export const useExecutionColumns = ({
           width: colWidths?.workflow_title || 200,
           Cell: ({ row, value }) => {
             const spaceId = getSpaceIdFromScope(row.original.scope)
-            if(value === 'N/A') {
+            if (value === 'N/A') {
               return value
             }
             return (
@@ -121,7 +121,7 @@ export const useExecutionColumns = ({
           width: colWidths?.app_title || 200,
           Cell: ({ row, value }) => {
             const spaceId = getSpaceIdFromScope(row.original.scope)
-            if(row.original.jobs) {
+            if (row.original.jobs) {
               return null
             }
 
@@ -168,7 +168,7 @@ export const useExecutionColumns = ({
             props.row.original.jobs ? (
               <></>
             ) : (
-              <>{RESOURCE_LABELS[props.row.original.instance_type]}</>
+              <>{RESOURCE_LABELS[props.row.original.instance_type] ?? props.row.original.instance_type}</>
             ),
           ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {}),
         },
@@ -184,8 +184,7 @@ export const useExecutionColumns = ({
             if (jobs) {
               return <>{jobs[jobs.length - 1].duration}</>
             }
-              return <>{props.row.original.duration}</>
-
+            return <>{props.row.original.duration}</>
           },
           ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-duration` } : {}),
         },
@@ -202,7 +201,7 @@ export const useExecutionColumns = ({
             if (jobs) {
               return <>{jobs[jobs.length - 1].energy_consumption}</>
             }
-              return <>{props.row.original.energy_consumption}</>
+            return <>{props.row.original.energy_consumption}</>
 
           },
           ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {}),
