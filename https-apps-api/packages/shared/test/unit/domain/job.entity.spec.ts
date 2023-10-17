@@ -36,4 +36,18 @@ describe('Job entity tests', () => {
   it('getHttpAppUrl() doesn\t work with regular apps', async () => {
     expect(job.getHttpsAppUrl()).to.be.null()
   })
+
+  it('save and load runData', async () => {
+    const jobToBeSaved = create.jobHelper.create(em, { user, app }, {
+      runData: {
+        run_instance_type: 'base-8',
+        run_inputs: {},
+        run_outputs: {},
+      },
+    })
+    await em.flush()
+
+    const loadedJob = await em.findOneOrFail(Job, { id: jobToBeSaved.id })
+    expect(loadedJob.runData).to.deep.equal(jobToBeSaved.runData)
+  })
 })
