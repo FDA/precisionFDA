@@ -52,13 +52,9 @@ module Api
 
       space = space_form.persist!(api, current_user)
 
-      if create_space_params[:protected]
-        space.tag_list.push("Protected")
-      end
+      space.tag_list.push("Protected") if create_space_params[:protected]
 
-      if create_space_params[:restricted_reviewer]
-        space.tag_list.push("FDA-restricted")
-      end
+      space.tag_list.push("FDA-restricted") if create_space_params[:restricted_reviewer]
 
       space.save unless space.tag_list.empty?
 
