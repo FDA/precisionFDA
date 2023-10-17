@@ -330,11 +330,11 @@ const JobRun = ({
       } else if (res?.error) {
         toast.error(res.error.message)
       } else {
-        toast.error('Something went wrong!')
+        toast.error('Something went wrong')
       }
     },
     onError: () => {
-      toast.error('Error: Running job.')
+      toast.error('Error: Running job')
     },
   })
 

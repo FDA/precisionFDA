@@ -84,7 +84,7 @@ export const useLockUnlockFileModal = ({
     onSuccess: () => {
       setShowModal(false)
       toast.success(
-        `${ActionTypeName[type]}ing ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)}...`,
+        `${ActionTypeName[type]}ing ${numberOfFiles} ${pluralize('file', numberOfFiles ?? 1)}`,
       )
       if (onSuccess) onSuccess()
     },
