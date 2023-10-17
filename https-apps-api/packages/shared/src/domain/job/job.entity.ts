@@ -10,6 +10,7 @@ import {
   Reference,
   OnLoad,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
@@ -20,9 +21,8 @@ import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { formatDuration } from '../../utils/format'
 import { IOType, SCOPE } from '../../types/common'
-import { isNil } from 'ramda'
 
-export class RunData extends JsonType {
+export interface RunData {
   output_folder_path?: string
   run_instance_type: string
   run_inputs: {
@@ -30,14 +30,6 @@ export class RunData extends JsonType {
   }
   run_outputs: {
     [key: string]: IOType
-  }
-
-  convertToJSValue(value: string | null) {
-    if (isNil(value)) {
-      return value
-    }
-
-    return JSON.parse(value)
   }
 }
 
@@ -84,7 +76,7 @@ export class Job extends BaseEntity {
   @Property()
   terminationEmailSent: boolean
 
-  @Property({ type: RunData })
+  @Property({ type: WorkaroundJsonType })
   runData: RunData
 
   @Property({
