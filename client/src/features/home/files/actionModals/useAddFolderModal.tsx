@@ -51,10 +51,10 @@ export const useAddFolderModal = ({
       reset()
       queryClient.invalidateQueries(['files'])
       setShowModal(false)
-      toast.success('Success: Adding folder.')
+      toast.success('Folder has been created')
     },
     onError: () => {
-      toast.error('Error: Adding folder.')
+      toast.error('Error: Adding folder')
     },
   })
 

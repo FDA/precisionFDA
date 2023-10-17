@@ -17,15 +17,15 @@ export const CreateSpace = () => {
       if (res?.space) {
         history.push(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries(['spaces'])
-        toast.success('Success: creating space.')
+        toast.success('Success: creating space')
       } else if (res?.errors) {
         toast.error(`${res.errors[0]}`)
       } else {
-        toast.error('Something went wrong!')
+        toast.error('Something went wrong')
       }
     },
     onError: () => {
-      toast.error('Error: Creating space.')
+      toast.error('Error: Creating space')
     },
   })
 

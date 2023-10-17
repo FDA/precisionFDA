@@ -17,6 +17,7 @@ import { StyledLinkCell } from '../home.styles'
 import { KeyVal } from '../types'
 import { getBasePath } from '../utils'
 import { IExecution } from './executions.types'
+import { RESOURCE_LABELS } from '../../../types/user'
 
 export const useExecutionColumns = ({
   colWidths,
@@ -167,7 +168,7 @@ export const useExecutionColumns = ({
             props.row.original.jobs ? (
               <></>
             ) : (
-              <>{props.row.original.instance_type}</>
+              <>{RESOURCE_LABELS[props.row.original.instance_type]}</>
             ),
           ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-instance-type` } : {}),
         },

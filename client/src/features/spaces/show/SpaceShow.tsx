@@ -80,7 +80,7 @@ const Spaces2 = ({
       id: string
     }) => fixGuestPermissions(payload),
     onSuccess: () => {
-      toast.success('Permissions for guest side successfully updated.')
+      toast.success('Permissions for guest side successfully updated')
     },
     onError: (e:any) => {
         toast.error(e.response.data.error.message)

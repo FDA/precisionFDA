@@ -86,10 +86,10 @@ const ProposeChallengePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['challenges'])
       setSubmissionSuccess(true)
-      toast.success('Your challenge proposal has been received.')
+      toast.success('Your challenge proposal has been received')
     },
     onError: () => {
-      toast.error('Something went wrong submitting your challenge proposal.')
+      toast.error('Something went wrong submitting your challenge proposal')
     },
   })
 

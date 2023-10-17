@@ -45,11 +45,11 @@ const EditAssetInfoForm = ({
         queryClient.invalidateQueries(['assets'])
         queryClient.invalidateQueries(['asset', asset.uid])
         handleClose()
-        toast.success('Success: Editing asset info.')
+        toast.success('Asset info has been updated')
       }
     },
     onError: () => {
-      toast.error('Error: Editing asset info.')
+      toast.error('Error: Editing asset info')
     },
   })
 
