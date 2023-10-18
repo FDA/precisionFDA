@@ -73,7 +73,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
     resetSelected,
   } = useList<ListType>({
     fetchList: async (filters: IFilter[], params: { spaceId: string }) => {
-      const reports = await fetchReports(params)
+      const reports = await fetchReports(params.spaceId)
 
       return {
         reports,

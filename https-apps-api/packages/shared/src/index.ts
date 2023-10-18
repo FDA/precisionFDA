@@ -54,3 +54,5 @@ export * as validation from './validation'
 export { BaseEntity } from './database/base-entity'
 
 export { ArrayUtils, TimeUtils } from './utils'
+
+export * from './config/consts'

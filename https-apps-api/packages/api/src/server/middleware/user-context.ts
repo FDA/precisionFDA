@@ -1,15 +1,15 @@
-import { errors, utils, ajv, entities } from '@pfda/https-apps-shared'
+import { errors, utils, ajv, entities, USER_CONTEXT_HTTP_HEADERS } from '@pfda/https-apps-shared'
 
 export const parseUserContextMdw = (ctx: Api.Ctx, next: any) => {
   // TODO(samuel) proper sanitization in case array is passed into query-string
-  const id  = ctx.request.headers['x-user_id']
+  const id = ctx.request.headers[USER_CONTEXT_HTTP_HEADERS.id]
   ctx.user = {
     // @ts-ignore
     id: id ? parseInt(id.toString(), 10) : null,
     // @ts-ignore
-    accessToken: ctx.request.headers['x-accesstoken'],
+    accessToken: ctx.request.headers[USER_CONTEXT_HTTP_HEADERS.accessToken],
     // @ts-ignore
-    dxuser: ctx.request.headers['x-dxuser'],
+    dxuser: ctx.request.headers[USER_CONTEXT_HTTP_HEADERS.dxUser],
   }
   if (Number.isNaN(ctx.user?.id)) {
     throw new errors.ValidationError('User id was NaN');
@@ -35,9 +35,9 @@ export const makeValidateUserContextMdw = () => {
         {
           url: ctx.request.url,
           input: utils.maskAccessTokenUserCtx({
-            id: Number(ctx.request.headers['x-user_id']),
-            accessToken: ctx.request.headers['x-accesstoken'] as string,
-            dxuser: ctx.request.headers['x-dxuser'] as string,
+            id: Number(ctx.request.headers[USER_CONTEXT_HTTP_HEADERS.id]),
+            accessToken: ctx.request.headers[USER_CONTEXT_HTTP_HEADERS.accessToken] as string,
+            dxuser: ctx.request.headers[USER_CONTEXT_HTTP_HEADERS.dxUser] as string,
           }),
           errors: validatorFn.errors,
         },

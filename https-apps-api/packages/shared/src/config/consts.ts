@@ -25,3 +25,9 @@ export const BILLING_INFO = {
   country: 'USA',
   phone: '(301) 706-1836',
 }
+
+export const USER_CONTEXT_HTTP_HEADERS = {
+  id: 'x-user_id',
+  accessToken: 'x-accesstoken',
+  dxUser: 'x-dxuser',
+}
