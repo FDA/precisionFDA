@@ -5,8 +5,8 @@ export async function createReport(spaceId: number) {
   return axios.post<number>(`/api/spaces/${spaceId}/report`).then(res => res.data)
 }
 
-export async function fetchReports(params: { spaceId: string }) {
-  return axios.get<ISpaceReport[]>(`/api/spaces/${params.spaceId}/report`).then(res => res.data)
+export async function fetchReports(spaceId: string) {
+  return axios.get<ISpaceReport[]>(`/api/spaces/${spaceId}/report`).then(res => res.data)
 }
 
 export async function deleteReports(ids: number[]): Promise<number[]> {

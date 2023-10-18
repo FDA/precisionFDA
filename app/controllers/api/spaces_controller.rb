@@ -233,6 +233,7 @@ module Api
       end
     end
 
+    # DELETE /api/spaces/report
     def delete_reports
       ids = Rack::Utils.parse_query(request.query_string).fetch("id", [])
       response = https_apps_client.delete_space_reports(ids)
