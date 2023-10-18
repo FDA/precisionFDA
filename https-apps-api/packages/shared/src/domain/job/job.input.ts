@@ -13,7 +13,7 @@ type DxIdInput = {
 type RunAppInput = {
   scope: SCOPE
   name?: string
-  instanceType?: string
+  instanceType: string
   jobLimit: number
   input?: {
     snapshot: string
