@@ -5,6 +5,6 @@ import { useAuthUserQuery } from '../../features/auth/api'
 
 export const LoaderWrapper = ({ children }: { children: ReactNode }) => {
   const { isLoading } = useAuthUserQuery()
-  if (isLoading) return <Loader />
+  if (isLoading) return <Loader className='pageloader' />
   return <>{children}</>
 }

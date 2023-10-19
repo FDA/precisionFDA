@@ -1,6 +1,11 @@
 import React from 'react'
 import { Route } from 'react-router'
-import { history, render, screen, waitFor } from '../../../test/test-utils'
+import {
+  history,
+  render,
+  screen,
+  waitFor,
+} from '../../../test/test-utils'
 import { FileList } from '../files/FileList'
 
 describe('My Home / Files', () => {

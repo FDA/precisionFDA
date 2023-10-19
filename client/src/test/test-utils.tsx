@@ -5,19 +5,25 @@ import { render, RenderOptions } from '@testing-library/react'
 import React, { FC, ReactElement } from 'react'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { createMemoryHistory } from 'history'
+import { QueryClientProvider, QueryClient, QueryCache } from '@tanstack/react-query'
 import { Router } from 'react-router-dom'
-import queryClient from '../utils/queryClient'
+import { server } from '../mocks/server'
+import history from '../utils/history'
 
-const history = createMemoryHistory()
+const queryCache = new QueryCache()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: Infinity,
+    },
+  },
+})
 
-const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children }) => (
-  <QueryClientProvider
-    client={queryClient({
-      onAuthFailure: () => console.log('AuthFailure'),
-    })}
-  >
+export const AllTheProviders: FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <QueryClientProvider client={queryClient}>
     <Router history={history}>
       <QueryParamProvider adapter={ReactRouter5Adapter}>
         {children}
@@ -32,4 +38,13 @@ const customRender = (
 ) => render(ui, { wrapper: AllTheProviders, ...options })
 
 export * from '@testing-library/react'
+
+beforeAll(() => server.listen())
+afterEach(() => {
+  server.resetHandlers()
+  queryCache.clear()
+  queryClient.cancelQueries()
+})
+afterAll(() => server.close())
+
 export { customRender as render, history }

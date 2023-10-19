@@ -7,6 +7,7 @@ import { HomeLabel } from '../../../../components/HomeLabel'
 import { CogsIcon } from '../../../../components/icons/Cogs'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../../components/Tags'
+import { RESOURCE_LABELS } from '../../../../types/user'
 import { getBackPath } from '../../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home.styles'
 import {

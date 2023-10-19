@@ -175,7 +175,7 @@ const ResourceDropdownItem = ({ status, onClick, label, isWaiting, onSuccess, on
         {isLoading && (
           <Loader
             height={12}
-            displayInline
+            className='inline'
           />
         )}
         <CheckBoxLabelText>
