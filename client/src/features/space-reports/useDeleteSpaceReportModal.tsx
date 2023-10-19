@@ -43,7 +43,7 @@ export function useDeleteSpaceReportModal({
     onSuccess: (res) => {
       close()
       toast.success(
-        `Success: Deleted ${itemsCountString('report', res?.length ?? 0)}`,
+        `${itemsCountString('report', res?.length ?? 0)} deleted`,
       )
     },
   })

@@ -1,7 +1,7 @@
 import { App } from './app/app.entity'
 import { AppSeries } from './app-series'
 import { SpaceReport, SpaceReportPart } from './space-report'
-import { Workflow } from './workflow/workflow.entity'
+import { Workflow } from './workflow/entity/workflow.entity'
 import { Comment } from './comment/comment.entity'
 import { DataPortal } from './data-portal/data-portal.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'

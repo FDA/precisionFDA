@@ -2,6 +2,7 @@ import { hierarchy, linkVertical, select, tree } from 'd3'
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom'
 import path from 'path'
+import { EntityType } from '../../../entity'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
 
@@ -15,6 +16,7 @@ const assetNames = [
   'asset-icon.svg',
   'comparison-icon.svg',
   'job-icon.svg',
+  'workflow-icon.svg',
 ]
 const assetPromises = assetNames.map(i => fs.readFile(path.join(assetsPath, i), 'utf8'))
 
@@ -28,6 +30,7 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
       assetIcon,
       comparisonIcon,
       jobIcon,
+      workflowIcon,
     ] = await Promise.all(assetPromises)
 
     const nodeTypeToIconMap = {
@@ -37,7 +40,8 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
       asset: assetIcon,
       comparison: comparisonIcon,
       job: jobIcon,
-    }
+      workflow: workflowIcon,
+    } satisfies Record<EntityType, string>
 
     const nodeSize = {
       width: 200,

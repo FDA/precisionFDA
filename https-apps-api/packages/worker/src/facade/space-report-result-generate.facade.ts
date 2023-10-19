@@ -74,6 +74,6 @@ export class SpaceReportResultGenerateFacade {
 
   private getDescription(report: spaceReport.SpaceReport) {
     const generated = new Date(report.createdAt).toLocaleString()
-    return `Report of a Precision FDA space ${report.space.name}, generatad on ${generated}`
+    return `Report of a precisionFDA space ${report.space.name}, generatad on ${generated}`
   }
 }

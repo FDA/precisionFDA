@@ -4,6 +4,7 @@ import { Job } from '../../job'
 import { User } from '../../user'
 import { Asset, UserFile } from '../../user-file'
 import { EntityType } from '..'
+import { Workflow } from '../../workflow'
 
 export const entityTypeToEntityMap = {
   asset: Asset,
@@ -12,4 +13,5 @@ export const entityTypeToEntityMap = {
   file: UserFile,
   user: User,
   app: App,
+  workflow: Workflow,
 } satisfies Record<EntityType, object>

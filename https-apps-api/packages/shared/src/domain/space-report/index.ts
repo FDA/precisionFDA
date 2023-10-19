@@ -1,7 +1,7 @@
 export { SpaceReportService } from './service/space-report.service'
 export { SpaceReportPart } from './entity/space-report-part.entity'
 export { SpaceReport } from './entity/space-report.entity'
-export { SpaceReportPartSourceType } from './model/space-report-part-source.type'
+export { SpaceReportPartSourceType, spaceReportPartSourceTypes } from './model/space-report-part-source.type'
 export { BatchComplete } from './model/batch-complete'
 export { SpaceReportPartResult } from './model/space-report-part-result'
 export { SpaceReportPartSourceEntityUnion } from './model/space-report-part-source-entity-union'

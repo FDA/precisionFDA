@@ -9,13 +9,18 @@ import {
   spaceReport,
   userFile,
   user,
+  utils,
 } from '@pfda/https-apps-shared'
 import { DefaultState } from 'koa'
 import Router from 'koa-router'
 import { SpaceReportCreateFacade } from '../facade/space-report-create.facade'
 import { SpaceReportDeleteFacade } from '../facade/space-report-delete.facade'
 import { defaultMiddlewares } from '../server/middleware'
+import { makeSchemaValidationMdw } from '../server/middleware/validation'
 import { pickOpsCtx } from '../utils/pick-ops-ctx'
+import {
+  deleteSpaceReportQuerySchema,
+} from './spaces.schema'
 
 // Routes with /spaces prefix
 const router = new Router<DefaultState, Api.Ctx>()
@@ -154,6 +159,7 @@ router.get(
 
 router.post(
   '/:id/report',
+  makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }),
   async ctx => {
     const opsCtx = pickOpsCtx(ctx)
 
@@ -168,6 +174,7 @@ router.post(
 
 router.get(
   '/:id/report',
+  makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }),
   async ctx => {
     const opsCtx = pickOpsCtx(ctx)
 
@@ -181,14 +188,8 @@ router.get(
 
 router.delete(
   '/report',
+  makeSchemaValidationMdw({ query: deleteSpaceReportQuerySchema }),
   async ctx => {
-    const idStrings = Array.isArray(ctx.query.id) ? ctx.query.id : [ctx.query.id]
-    const ids = idStrings.map(i => Number(i))
-
-    if (ids.some(id => Number.isNaN(id))) {
-      throw new errors.InvalidStateError('Invalid ID provided')
-    }
-
     const em = ctx.em.fork({ useContext: true })
     const facade = new SpaceReportDeleteFacade(
       em,
@@ -197,6 +198,9 @@ router.delete(
     )
 
     const opsCtx = pickOpsCtx(ctx)
+
+    const idStrings = Array.isArray(ctx.query.id) ? ctx.query.id : [ctx.query.id]
+    const ids = idStrings.map(i => Number(i))
 
     ctx.body = await facade.deleteSpaceReports(ids, em.getReference(user.User, opsCtx.user.id))
     ctx.status = 200

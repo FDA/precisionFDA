@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import * as errors from '../../../errors'
+import { WorkflowService } from '../../workflow/service/workflow.service'
 import { EntityProvenanceFormatType } from '../model/entity-provenance-format.type'
 import { EntityProvenanceResultType } from '../model/entity-provenance-result.type'
 import { EntityProvenanceSourceUnion } from '../model/entity-provenance-source-union'
@@ -39,7 +40,8 @@ export class EntityProvenanceService {
 
   // TODO - Remove with IOC
   static getInstance(em: SqlEntityManager) {
-    const entityProvenanceDataProviderService = new EntityProvenanceDataProviderService(em)
+    const workflowService = new WorkflowService(em)
+    const entityProvenanceDataProviderService = new EntityProvenanceDataProviderService(em, workflowService)
     const entityProvenanceSvgResultTransformerService = new EntityProvenanceSvgResultTransformerService()
 
     return new EntityProvenanceService(
