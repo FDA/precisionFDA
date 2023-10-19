@@ -88,7 +88,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const links = selected[0]?.links
-  console.log('selected: ', selected)
+
   let actions: ActionFunctionsType<ExecutionAction> = {
     'View Logs': {
       type: 'link',
