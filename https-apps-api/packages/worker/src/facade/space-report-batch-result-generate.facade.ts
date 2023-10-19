@@ -1,5 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { app, ArrayUtils, errors, job, provenance, queue, spaceReport, userFile } from '@pfda/https-apps-shared'
+import { app, ArrayUtils, errors, job, provenance, queue, spaceReport, userFile, workflow, entity } from '@pfda/https-apps-shared'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 
 export class SpaceReportBatchResultGenerateFacade {
@@ -23,6 +23,8 @@ export class SpaceReportBatchResultGenerateFacade {
       file: em.getRepository(userFile.UserFile),
       app: em.getRepository(app.App),
       job: em.getRepository(job.Job),
+      asset: em.getRepository(userFile.Asset),
+      workflow: em.getRepository(workflow.Workflow),
     } satisfies Record<spaceReport.SpaceReportPartSourceType, object>
   }
 
@@ -52,7 +54,7 @@ export class SpaceReportBatchResultGenerateFacade {
         .reduce((acc, rp) => {
           acc[rp.sourceType].push(rp)
           return acc
-        }, { file: [], app: [], job: [] })
+        }, { file: [], app: [], job: [], workflow: [], asset: [] })
 
       const types = Object.keys(reportPartSources) as spaceReport.SpaceReportPartSourceType[]
       const batchPromises = types
@@ -103,7 +105,7 @@ export class SpaceReportBatchResultGenerateFacade {
   }
 
   private getResultMetaData(provenanceSource: provenance.EntityProvenanceSourceUnion) {
-    const supportedSources = ['file', 'app', 'job']
+    const supportedSources: entity.EntityType[] = spaceReport.spaceReportPartSourceTypes
 
     if (!supportedSources.includes(provenanceSource.type)) {
       throw new errors.InvalidStateError(`Unsupported space report part type - ${provenanceSource.type}`)

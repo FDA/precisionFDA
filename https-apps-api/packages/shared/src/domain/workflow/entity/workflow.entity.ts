@@ -1,13 +1,7 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-  IdentifiedReference,
-  Reference,
-} from '@mikro-orm/core'
-import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user/user.entity'
+import { Entity, IdentifiedReference, JsonType, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { BaseEntity } from '../../../database/base-entity'
+import { User } from '../../user'
+import { WorkflowSpec } from '../model/workflow-spec'
 
 @Entity({ tableName: 'workflows' })
 export class Workflow extends BaseEntity {
@@ -38,8 +32,8 @@ export class Workflow extends BaseEntity {
   @Property()
   editVersion: number
 
-  @Property()
-  spec: string
+  @Property({ type: JsonType })
+  spec: WorkflowSpec
 
   // TODO: Add missing when needed - there is more in DB
 

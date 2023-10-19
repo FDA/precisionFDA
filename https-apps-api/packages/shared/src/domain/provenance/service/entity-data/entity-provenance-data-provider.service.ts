@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { ArrayUtils } from '../../../../utils'
 import { EntityType } from '../../../entity'
+import { WorkflowService } from '../../../workflow/service/workflow.service'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { AppProvenanceDataService } from './app-provenance-data.service'
@@ -10,11 +11,12 @@ import { EntityProvenanceDataService } from './entity-provenance-data.service'
 import { FileProvenanceDataService } from './file-provenance-data.service'
 import { JobProvenanceDataService } from './job-provenance-data.service'
 import { UserProvenanceDataService } from './user-provenance-data.service'
+import { WorkflowProvenanceDataService } from './workflow-provenance-data.service'
 
 export class EntityProvenanceDataProviderService {
   private readonly ENTITY_TYPE_TO_PARENT_RESOLVER_MAP: { [T in EntityType]: EntityProvenanceDataService<T> }
 
-  constructor(em: SqlEntityManager) {
+  constructor(em: SqlEntityManager, workflowService: WorkflowService) {
     this.ENTITY_TYPE_TO_PARENT_RESOLVER_MAP = {
       file: new FileProvenanceDataService(em),
       job: new JobProvenanceDataService(),
@@ -22,6 +24,7 @@ export class EntityProvenanceDataProviderService {
       comparison: new ComparisonProvenanceDataService(),
       asset: new AssetProvenanceDataService(),
       app: new AppProvenanceDataService(),
+      workflow: new WorkflowProvenanceDataService(workflowService),
     }
   }
 

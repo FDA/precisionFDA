@@ -15,6 +15,8 @@ export class SpaceReportResultService {
   private readonly FILES_HEADER_ID = 'header-files'
   private readonly APPS_HEADER_ID = 'header-apps'
   private readonly JOBS_HEADER_ID = 'header-jobs'
+  private readonly ASSETS_HEADER_ID = 'header-assets'
+  private readonly WORKFLOWS_HEADER_ID = 'header-workflows'
   private readonly REPORT_PART_ID_PREFIX = 'report-part-'
 
   async generateResult(report: SpaceReport) {
@@ -25,7 +27,7 @@ export class SpaceReportResultService {
       .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>((acc, rp) => {
         acc[rp.sourceType].push(rp)
         return acc
-      }, { app: [], file: [], job: [] })
+      }, { app: [], file: [], job: [], asset: [], workflow: [] })
 
     const header = await this.getHeader(reportPartsMap, document)
     document.body.appendChild(header)
@@ -40,6 +42,10 @@ export class SpaceReportResultService {
     reportPartsMap.app.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
     container.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
     reportPartsMap.job.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    container.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
+    reportPartsMap.asset.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    container.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
+    reportPartsMap.workflow.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
 
     document.body.appendChild(container)
 
@@ -102,6 +108,8 @@ export class SpaceReportResultService {
     container.appendChild(this.getNavbarItem('Files', this.FILES_HEADER_ID, items.file, document))
     container.appendChild(this.getNavbarItem('Apps', this.APPS_HEADER_ID, items.app, document))
     container.appendChild(this.getNavbarItem('Executions', this.JOBS_HEADER_ID, items.job, document))
+    container.appendChild(this.getNavbarItem('Assets', this.ASSETS_HEADER_ID, items.asset, document))
+    container.appendChild(this.getNavbarItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document))
 
     return container
   }

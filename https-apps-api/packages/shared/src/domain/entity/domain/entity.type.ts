@@ -1,1 +1,1 @@
-export type EntityType = 'user' | 'job' | 'asset' | 'comparison' | 'file' | 'app'
+export type EntityType = 'user' | 'job' | 'asset' | 'comparison' | 'file' | 'app' | 'workflow'

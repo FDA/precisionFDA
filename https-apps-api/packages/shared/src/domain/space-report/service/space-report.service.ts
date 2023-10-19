@@ -5,7 +5,8 @@ import { App } from '../../app'
 import { Job } from '../../job'
 import { Space } from '../../space'
 import { User } from '../../user'
-import { UserFile } from '../../user-file'
+import { Asset, UserFile } from '../../user-file'
+import { Workflow } from '../../workflow'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
@@ -147,10 +148,14 @@ export class SpaceReportService {
     const spaceFiles = await this.em.find(UserFile, { scope })
     const spaceApps = await this.em.find(App, { scope })
     const spaceJobs = await this.em.find(Job, { scope })
+    const spaceAssets = await this.em.find(Asset, { scope })
+    const spaceWorkflows = await this.em.find(Workflow, { scope })
     const reportPartSources: SpaceReportPartSource[] = [
       ...spaceFiles.map(f => ({ type: 'file' as const, id: f.id })),
       ...spaceApps.map(a => ({ type: 'app' as const, id: a.id })),
       ...spaceJobs.map(j => ({ type: 'job' as const, id: j.id })),
+      ...spaceAssets.map(a => ({ type: 'asset' as const, id: a.id })),
+      ...spaceWorkflows.map(w => ({ type: 'workflow' as const, id: w.id })),
     ]
 
     return this.spaceReportPartService.createReportParts(reportPartSources)

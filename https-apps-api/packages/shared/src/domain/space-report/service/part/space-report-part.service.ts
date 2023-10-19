@@ -6,9 +6,11 @@ import type { SpaceReportPartSource } from '../../model/space-report-part-source
 import type { SpaceReportPartSourceEntity } from '../../model/space-report-part-source-entity'
 import type { SpaceReportPartSourceType } from '../../model/space-report-part-source.type'
 import { SpaceReportPartAppResultMetaProvider } from './space-report-part-app-result-meta.provider'
+import { SpaceReportPartAssetResultMetaProvider } from './space-report-part-asset-result-meta.provider'
 import { SpaceReportPartFileResultMetaProvider } from './space-report-part-file-result-meta.provider'
 import { SpaceReportPartJobResultMetaProvider } from './space-report-part-job-result-meta.provider'
 import type { SpaceReportPartResultMetaProvider } from './space-report-part-result-meta.provider'
+import { SpaceReportPartWorkflowResultMetaProvider } from './space-report-part-workflow-result-meta.provider'
 
 export class SpaceReportPartService {
   private readonly em
@@ -18,6 +20,8 @@ export class SpaceReportPartService {
     job: new SpaceReportPartJobResultMetaProvider(),
     file: new SpaceReportPartFileResultMetaProvider(),
     app: new SpaceReportPartAppResultMetaProvider(),
+    asset: new SpaceReportPartAssetResultMetaProvider(),
+    workflow: new SpaceReportPartWorkflowResultMetaProvider(),
   }
 
   constructor(em: SqlEntityManager) {

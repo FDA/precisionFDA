@@ -36,6 +36,7 @@ export {
   provenance,
   platform,
   entity,
+  workflow,
 } from './domain'
 
 export * from './facade'
