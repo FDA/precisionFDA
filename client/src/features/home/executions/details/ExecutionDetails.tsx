@@ -12,7 +12,7 @@ import { getBackPath } from '../../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home.styles'
 import {
   Header,
-  HeaderLeft,
+  HeaderLeft, HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -136,7 +136,7 @@ export const ExecutionDetails = ({
               />
             )}
           </HeaderLeft>
-          <div>
+          <HeaderRight>
             <ActionsRow>
               <ExecutionActionsRow
                 scope={scope}
@@ -145,7 +145,7 @@ export const ExecutionDetails = ({
                 isFetching={isFetching}
               />
             </ActionsRow>
-          </div>
+          </HeaderRight>
         </Header>
 
         <MetadataSection>
