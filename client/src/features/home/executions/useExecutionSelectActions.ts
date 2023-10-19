@@ -88,7 +88,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const links = selected[0]?.links
-
+  console.log('selected: ', selected)
   let actions: ActionFunctionsType<ExecutionAction> = {
     'View Logs': {
       type: 'link',
@@ -98,7 +98,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     'Terminate': {
       type: 'modal',
       func: () => setTerminateModal(true),
-      isDisabled: selected.length !== 1,
+      isDisabled: selected.length !== 1 || ['terminated', 'failed', 'done'].includes(selected[0].state),
       modal: terminateoModal,
       showModal: isShownTerminateModal,
     },
