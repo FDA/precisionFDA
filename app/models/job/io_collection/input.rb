@@ -42,8 +42,10 @@ class Job::IOCollection::Input
     return nil unless files?
 
     file_values = []
-    value.each do |value_item|
-      file_values << UserFile.find_by(uid: value_item)
+    if value.present?
+      value.each do |value_item|
+        file_values << UserFile.find_by(uid: value_item)
+      end
     end
     file_values
   end

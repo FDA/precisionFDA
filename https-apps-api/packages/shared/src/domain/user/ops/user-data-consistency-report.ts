@@ -199,46 +199,24 @@ UserDataConsistencyReportOutput
         if (hasInvalidFolderState) {
           errors.push('Error: parent_folder_id and scoped_parent_folder_id are both set')
         }
-        if (node.isFolder) {
-          // Check if files in https folder have the wrong location
-          if (node.project) {
-            // If node.project is set for a folder, it means it should exist on platform
-            // make sure all the files inside it have the right prefix
-            const folder = await folderRepo.findOne({ id: node.id })
-            if (folder) {
-              const children = await folder.children.loadItems()
-              for (const child of children) {
-                if (child.isFile && child.dxid) {
-                  const response = await client.fileDescribe({ fileDxid: child.dxid, projectDxid: child.project! })
-                    .catch((error) => error.props.clientResponse)
-                  // child must be belong to parentFolder or scopedParentFolder
-                  const parentFolder = child.parentFolder ?? child.scopedParentFolder
-                  const nodePath = parentFolder ? await getNodePath(em, parentFolder) : '/'
-                  if (response?.folder !== nodePath) {
-                    errors.push(`Error: File ${child.dxid} location on platform ${response?.folder} does not match location on pFDA ${nodePath}. Folder id = ${node.id}`)
-                  } else if (response.error) {
-                    errors.push(`Error: ${response.error.message}`)
-                  }
-                }
-              }
+        if (node.isFolder && node.project) {
+          // If node.project is set for a folder, it is https folder
+          // Check if files in https folder are missing on pFDA
+          const parentKey = node.scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
+          const nodePath = await getNodePath(em, node)
+          const httpsFiles = await client.filesList({ project: node.project, folder: nodePath, includeDescProps: false })
+          for (const file of httpsFiles) {
+            const fileNode = await userFilesRepo.findOne({ dxid: file.id, [parentKey]: node.id })
+            if (!fileNode) {
+              errors.push(`Error: File ${file.describe?.name} (${file.id}) is missing from pFDA`)
             }
-          } else {
-            errors.push(`Error: folder does not exist on platform or is missing project`)
           }
         } else if (node.isFile || node.isAsset) {
           if (node.project && node.dxid) {
-            // File exists on platform, check if its parent path is the same
-
-            const parentFolder = node.parentFolder ?? node.scopedParentFolder
-            // skip checking nodes in https folder
-            if (parentFolder && parentFolder.project) continue
-
+            // Some files have enough data, but they might not exist on the platform
             const response = await client.fileDescribe({ fileDxid: node.dxid, projectDxid: node.project })
               .catch((error) => error.props.clientResponse)
-            const nodePath = parentFolder ? await getNodePath(em, parentFolder) : '/'
-            if (response.folder !== nodePath) {
-              errors.push(`Error: File ${node.dxid} location on platform ${response.folder} does not match location on pFDA ${nodePath}. File type: ${node.stiType}`)
-            } else if (response.error) {
+            if (response.error) {
               errors.push(`Error: ${response.error.message}`)
             }
           } else {
