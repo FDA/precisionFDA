@@ -26,7 +26,7 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } 
 
 const ExecutionsPagination = styled.div`
   padding-left: 12px;
-  padding-top: 32px;
+  padding-top: 16px;
   padding-bottom: 16px;
 `
 

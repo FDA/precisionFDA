@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { checkStatus, getApiRequestOpts } from '../../../utils/api'
-import { IExecution } from '../executions/executions.types'
-import { IFilter, IMeta } from '../types'
 import { ISpace } from '../../spaces/spaces.types'
-import { formatScopeQ, Params, prepareListFetch } from '../utils'
-import { ComputeInstance, IApp } from './apps.types'
-import { License } from '../licenses/types'
-import { fetchAccessibleFiles, FetchAccessibleFilesResponse } from '../databases/databases.api'
+import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import { FetchAccessibleFilesResponse, fetchAccessibleFiles } from '../databases/databases.api'
+import { IExecution } from '../executions/executions.types'
 import { FileScope } from '../files/files.types'
+import { License } from '../licenses/types'
+import { IFilter, IMeta } from '../types'
+import { Params, formatScopeQ, prepareListFetch } from '../utils'
+import { AppSpec, ComputeInstance, FileType, IApp, IOSpec, InputSpec } from './apps.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -30,13 +31,8 @@ interface RunJobResponse {
   error?: Error
 }
 
-export async function runJob(request: RunJobRequest): Promise<RunJobResponse> {
-  const res = await (await fetch('/apps/run', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(request),
-  })).json()
-  if (res.failure) throw new Error(res.failure)
-  return res
+export async function runJob(request: RunJobRequest) {
+  return axios.post<RunJobResponse>('/apps/run', request).then(r => r.data)
 }
 
 export async function fetchApps(filters: IFilter[], params: Params): Promise<FetchAppsQuery> {
@@ -48,11 +44,6 @@ export async function fetchApps(filters: IFilter[], params: Params): Promise<Fet
   return res.json()
 }
 
-export async function fetchApp(uid: string): Promise<{ app: IApp, meta: any }> {
-  const res = await (await fetch(`/api/apps/${uid}`)).json()
-  return res
-}
-
 export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {
   return axios.get(`/api/spaces/${id}/selectable_spaces`).then(r => r.data)
 }
@@ -61,14 +52,14 @@ export async function fetchLicensesOnApp(uid: string): Promise<License[]> {
   return axios.get(`/api/apps/${uid}/licenses_to_accept`).then(r => r.data)
 }
 
-export async function fetchUserComputeInstances(): Promise<ComputeInstance[]> {
-  const res = await (await fetch('/api/apps/user_compute_resources')).json()
-  return res
+export async function fetchUserComputeInstances(){
+  return axios.get<ComputeInstance[]>('/api/apps/user_compute_resources').then(r => r.data)
 }
 
-export async function fetchFilteredFiles(searchString: string, scopes: FileScope[]): Promise<FetchAccessibleFilesResponse> {
+export async function fetchFilteredFiles({ searchString, scopes, uid }: { searchString: string; scopes: FileScope[], uid?: string[] }): Promise<FetchAccessibleFilesResponse> {
   return fetchAccessibleFiles({
     scopes,
+    uid,
     search_string: searchString,
     states: [ 'closed' ],
     describe: {
@@ -101,17 +92,6 @@ export async function fetchAppExecutions(filters: IFilter[], params: FetchAppExe
   return res.json()
 }
 
-// TODO: unused / unfinished
-/*
-export async function createAppRequest(name: string) {
-  const res = await (await fetch(`/api/folders/`, {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ name })
-  })).json()
-  return res
-}
-*/
-
 export async function copyAppsRequest(scope: string, ids: string[]) {
   const res = await fetch('/api/apps/copy', {
     ...getApiRequestOpts('POST'),
@@ -135,4 +115,65 @@ export async function copyAppsToPrivate(ids: number[]) {
   }).then(checkStatus)
 
   return res.json()
+}
+
+
+
+export interface CreateAppPayload {
+  is_new: boolean
+  forked_from: null | string
+  name: string
+  scope: string
+  title: string
+  release: string
+  readme: string
+  input_spec: InputSpec[]
+  output_spec: IOSpec[]
+  internet_access: boolean
+  instance_type: string
+  packages: any[]
+  ordered_assets: string[]
+  code: string
+}
+
+
+export interface CreateAppResponse {
+  id: IApp
+  error?: Error
+}
+
+export interface AppFetchResponse {
+  app: IApp
+  meta: {
+    spec: AppSpec
+    internal: {
+      code: string,
+      packages: any[]
+    }
+    release: string
+    assets: Asset[]
+  }
+}
+
+export async function createEditAppRequest(payload: CreateAppPayload) {
+  return axios.post<CreateAppResponse>('/api/apps', payload).then(r => r.data)
+}
+
+export async function fetchApp(uid: string) {
+  return axios.get(`/api/apps/${uid}`).then(r => r.data as AppFetchResponse)
+}
+
+export interface UploadAppConfigFilePayload {
+  format: FileType
+  file: string
+}
+export interface UploadAppConfigFileResponse {
+  id: string
+  asset_uid: null | string
+}
+
+export async function uploadAppConfigFileRequest(payload: FormData) {
+  return axios.post('/api/apps/import', payload, {
+    headers: { 'Content-Type': 'multipart/form-data' }, 
+  }).then(r => r.data as UploadAppConfigFileResponse)
 }
