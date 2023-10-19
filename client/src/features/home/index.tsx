@@ -35,6 +35,10 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { UserLayout } from '../../layouts/UserLayout'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useToastWSHandler } from '../../hooks/useToastWSHandler'
+import { CreateAppPage } from './apps/form/CreateAppPage'
+import { EditAppPage } from './apps/form/EditAppPage'
+import { ForkAppPage } from './apps/form/ForkAppPage'
+import { RunJobPage } from './apps/run/RunJobPage'
 
 
 interface CounterRequest {
@@ -242,6 +246,18 @@ const Home2 = () => {
             </Route>
             <Route exact path={`${path}/apps`}>
               <AppList scope={scopeQuery} />
+            </Route>
+            <Route exact path={`${path}/apps/create`}>
+              <CreateAppPage scope={scopeQuery} />
+            </Route>
+            <Route exact path={`${path}/apps/:appUid/fork`}>
+              <ForkAppPage scope={scopeQuery} />
+            </Route>
+            <Route exact path={`${path}/apps/:appUid/edit`}>
+              <EditAppPage scope={scopeQuery} />
+            </Route>
+            <Route exact path={`${path}/apps/:appUid/jobs/new`}>
+              <RunJobPage />
             </Route>
             <Route path={`${path}/apps/:appUid`}>
               <AppsShow emitScope={setPersistedScope} />

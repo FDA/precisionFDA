@@ -51,6 +51,9 @@ const GlobalStyle = createGlobalStyle`
     padding: 4px 10px;
     font-family: ${theme.fontFamily};
   }
+  label {
+    margin: 0;
+  }
 `
 
 export const LayoutBody = styled.div`

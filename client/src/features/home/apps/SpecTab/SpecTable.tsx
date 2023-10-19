@@ -1,56 +1,160 @@
-import React from 'react'
+/* eslint-disable eqeqeq */
 import classNames from 'classnames'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
+import { IAccessibleFile } from '../../databases/databases.api'
+import { IOSpec, InputSpec } from '../apps.types'
 
+const StyledDefaultValue = styled.div`
+  a {
+    white-space: nowrap;
+  }
+`
+const StyledSpecName = styled.td`
+  font-weight: bold;
+  font-size: 14px;
+`
 
-export const SpecTable = ({ title, config }: { title: string, config: any}) => {
+const SpecDefault = ({
+  inSpace,
+  value,
+  sClass,
+}: {
+  inSpace: boolean
+  value: boolean | number | string | IAccessibleFile[] | null
+  sClass: IOSpec['class']
+}) => {
+  let defaultValues = null
+  if (sClass === 'array:file') {
+    defaultValues = value && (
+      <StyledDefaultValue>
+        {value.map(f => {
+          return (
+            <div key={f}>
+              <Link to={`/${inSpace ? 'space' : 'home'}/files/${f}`}>{f}</Link>
+            </div>
+          )
+        })}
+      </StyledDefaultValue>
+    )
+  }
+  if (sClass === 'file') {
+    defaultValues = value && (
+      <StyledDefaultValue>
+        <Link to={`/${inSpace ? 'space' : 'home'}/files/${value}`}>
+          {value}
+        </Link>
+      </StyledDefaultValue>
+    )
+  }
+  if (
+    sClass === 'array:string' ||
+    sClass === 'array:float' ||
+    sClass === 'array:int'
+  ) {
+    defaultValues = value && (
+      <StyledDefaultValue>[{value?.map(v => ` ${v}`)} ]</StyledDefaultValue>
+    )
+  }
+  if (sClass === 'boolean') {
+    defaultValues = (
+      <StyledDefaultValue>
+        {value === false ? 'false' : 'true'}
+      </StyledDefaultValue>
+    )
+  }
+  if (sClass === 'string' || sClass === 'float' || sClass === 'int') {
+    defaultValues = value && (
+      <StyledDefaultValue>{value as string}</StyledDefaultValue>
+    )
+  }
+
+  return defaultValues
+}
+
+export const SpecTable = ({
+  title,
+  config,
+}: {
+  title: string
+  config: InputSpec[] | IOSpec[]
+}) => {
   if (!config.length) {
     return (
-      <div className='__table'>
-        <div className='__table_title'>{title}</div>
-        <div className='__table_row'>
-          <div className='__table_row_type'>No fields specified</div>
+      <div className="__table">
+        <div className="__table_title">{title}</div>
+        <div className="__table_row">
+          <div className="__table_row_none">No {title} specified</div>
         </div>
       </div>
     )
   }
 
-  const data = config.map((spec: any, i: number) => {
+  const data = config.map((spec, i) => {
     const classes = classNames({
-      '__table_row': true,
-      '__table_row_even': !(i % 2),
+      __table_row: true,
+      __table_row_even: !(i % 2),
     })
 
-    const choices = spec.choices ? spec.choices.join(', ') : null
-    const title = spec.label?.length ? spec.label : spec.name
-
-    let defaultValue
-    if (spec.default !== undefined) {
-      defaultValue = spec.default.toString()
-    }
+    const choices = spec?.choices
 
     return (
-      <div className={classes} key={i}>
-        <div className='__table_type'>{spec.class}</div>
-        <div className='__table_value'>
-          <span className='__table_value-label'>{title}</span>
-          <span className='__table_value-help'>{spec.help}</span>
-          {defaultValue && <span className='__table_value-default'>{`Default: ${defaultValue}`}</span>}
-          {choices && <span className='__table_value-default'>{`Choices: [${choices}]`}</span>}
+      <div className={classes} key={spec.name}>
+        <div className="__table_type">{spec.class}</div>
+        <div className="__table_value">
+          <table className="__table_value-default">
+            <tbody>
+              <tr>
+                <th> </th>
+                <StyledSpecName>{spec.name}</StyledSpecName>
+              </tr>
+              {spec?.label && (
+                <tr>
+                  <th>Label :</th>
+                  <td>{spec.label}</td>
+                </tr>
+              )}
+              {spec?.help && (
+                <tr>
+                  <th>Help :</th>
+                  <td>{spec.help}</td>
+                </tr>
+              )}
+              {spec?.default != undefined && (
+                <tr>
+                  <th>Default :</th>
+                  <td>
+                    <SpecDefault value={spec.default} sClass={spec.class} />
+                  </td>
+                </tr>
+              )}
+              {spec?.choices && (
+                <tr>
+                  <th>Choices :</th>
+                  <td>
+                    {choices
+                      ? `[ ${choices.map(v => ` ${v}`).toString()} ]`
+                      : ''}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-        {!spec.optional &&
-          <div className='__table_required'>
-            <span className='__table_required-label'>required</span>
+        {!spec.optional && (
+          <div className="__table_required">
+            <span className="__table_required-label">required</span>
           </div>
-        }
+        )}
       </div>
     )
   })
 
   return (
-    <div className='__table'>
-      <div className='__table_title'>{title}</div>
+    <div className="__table">
+      <div className="__table_title">{title}</div>
       {data}
     </div>
   )
 }
-

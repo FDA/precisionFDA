@@ -3,7 +3,6 @@ import { InputText } from '../../../../components/InputText'
 import { BackLink } from '../../../../components/Page/PageBackLink'
 
 const pageContainer = css`
-  margin-inline: auto;
   width: min(100% - 32px, 900px);
 `
 
@@ -53,9 +52,8 @@ export const Topbox = styled.div`
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin: 32px 0;
-
-  ${pageContainer};
+  padding: 16px;
+  ${pageContainer}
 `
 
 export const TopboxItem = styled.div`
@@ -78,8 +76,9 @@ export const StyledJobName = styled.div`
 `
 
 export const StyledForm = styled.form`
-  ${pageContainer};
+  padding: 16px;
   padding-bottom: 64px;
+  ${pageContainer}
 `
 
 export const StyledWarning = styled.div`
