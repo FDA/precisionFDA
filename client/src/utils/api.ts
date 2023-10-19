@@ -103,6 +103,9 @@ export const getAuthenticityToken = () => {
   return CSRFHolder ? CSRFHolder.content : null
 }
 
+/**
+ * @deprecated The method should not be used. Use Axios library instead.
+ */
 export const getApiRequestOpts = (method: string, token: string = getAuthenticityToken()) => {
   const opts: RequestInit = {
     method,

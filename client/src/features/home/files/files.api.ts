@@ -19,9 +19,13 @@ export async function fetchFiles(filters: IFilter[], params: Params): Promise<Fe
   return res.json()
 }
 
-export async function fetchFile(uid: string): Promise<{ files: IFile; meta: any }> {
-  const res = await fetch(`/api/files/${uid}`).then(checkStatus)
-  return res.json()
+export interface FetchFileQuery {
+  files: IFile
+  meta: any
+}
+
+export async function fetchFile(uid: string) {
+  return axios.get<FetchFileQuery>(`/api/files/${uid}`).then(r => r.data)
 }
 
 export async function fetchTrack(fileId: number) {

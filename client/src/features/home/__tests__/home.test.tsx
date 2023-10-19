@@ -12,10 +12,9 @@ describe('My Home', () => {
       </Route>,
     )
 
-    await waitFor(async () => {
+    await waitFor(() => {
       const linkEl = screen.getByTestId('home-files-link')
       expect(linkEl).toHaveClass('active')
-
       const bannerEL = screen.getByTestId('home-banner')
       expect(bannerEL).toHaveTextContent('My Home')
     })

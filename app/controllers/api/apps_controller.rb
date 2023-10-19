@@ -167,23 +167,26 @@ module Api
       load_challenges
 
       render json:
-        @app, adapter: :json,
-        meta:  {
-          spec: @app.spec,
-          revisions: @revisions,
-          jobs: [],
-          assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
-          challenges: @assignable_challenges.select do |ch|
-            ch.accessible_by?(@context) || ch.app_owner == @context.user
-          end,
-          notes: @notes,
-          discussions: @discussions,
-          answers: @answers,
-          comparator: app_added_to_comparators?(@app),
-          default_comparator: show_comparison_app_label?(@context, @app),
-          comments: @comments,
-          links: meta_links(@app).merge(comparator_links),
-        }
+               @app, adapter: :json,
+             meta: {
+               spec: @app.spec,
+               revisions: @revisions,
+               jobs: [],
+               assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
+               challenges: @assignable_challenges.select do |ch|
+                 ch.accessible_by?(@context) || ch.app_owner == @context.user
+               end,
+               notes: @notes,
+               assets: @app.assets,
+               internal: @app.internal,
+               release: @app.release,
+               discussions: @discussions,
+               answers: @answers,
+               comparator: app_added_to_comparators?(@app),
+               default_comparator: show_comparison_app_label?(@context, @app),
+               comments: @comments,
+               links: meta_links(@app).merge(comparator_links),
+             }
     end
 
     # TODO: this route needs to be refactored.

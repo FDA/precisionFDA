@@ -17,7 +17,7 @@ export const StyledTab = styled(NavLink)`
     border: 1px solid #DDDDDD;
     border-bottom: 1px solid #DDDDDD;
     cursor: pointer;
-    margin-left: 10px;
+    margin-left: 4px;
     margin-bottom: -1px;
     border-radius: 3px 3px 0 0;
     font-weight: 400;
@@ -31,5 +31,8 @@ export const StyledTab = styled(NavLink)`
 `
 
 export const StyledTabPanel = styled.div`
-    margin-top: 1rem;
+    padding-top: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 `
