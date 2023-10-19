@@ -32,7 +32,6 @@ import { InputsAndOutputs } from '../InputsAndOutputs'
 import { FailureMessage, StyledExecutionState } from './styles'
 import { getScopeMapping } from '../../getScopeMapping'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../../utils/config'
-import { RESOURCE_LABELS } from '../../../../types/user'
 
 const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
