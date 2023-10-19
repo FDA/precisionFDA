@@ -1,32 +1,30 @@
-FROM ubuntu:18.04 AS base
+FROM tomcat:10.1.10-jdk11
 
-ARG gsrs_branch=precisionFDA_STAGE
+ARG gsrs_branch=gsrs_LOCAL
 ENV GSRS_BRANCH=$gsrs_branch
+ENV GSRS_CONFIG=/usr/local/tomcat/substances/WEB-INF/classes/application.conf
 
-ARG mysql_user=root
-ENV GSRS_CONFIG=conf/ginas-dev.conf
+ENV GSRS_DATABASE_URL=jdbc:mariadb://gsrsdb:3306/ixginas
+ENV GSRS_DATABASE_USERNAME=root
+ENV GSRS_DATABASE_PASSWORD=password
 
-ENV MYSQL_HOST=gsrsdb
-ENV MYSQL_DATABASE=ixginas
-ENV MYSQL_ROOT_PASSWORD=password
+ENV CATALINA_HOME /usr/local/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
+ENV CATALINA_OPTS="-Xms4G -Xmx4G -Djava.net.preferIPv4Stack=true"
+
+RUN mkdir -p "$CATALINA_HOME"
 
 RUN apt-get -qqy update && \
-    apt-get -qqy --no-install-recommends install mysql-client openjdk-8-jdk git
+    apt-get -qqy --no-install-recommends install git nano
 
-RUN cd /srv && \
-    git clone --depth 1 -b $GSRS_BRANCH https://github.com/dnanexus/gsrs-play-dist.git && \
-    cd gsrs-play-dist && \
-    chmod +x bin/ginas
+RUN cd /usr/local/tomcat/webapps && \
+    git clone -b $GSRS_BRANCH https://github.com/dnanexus/gsrs-play-dist.git .
 
-WORKDIR /srv/gsrs-play-dist
+# RUN export CATALINA_OPTS="${CATALINA_OPTS} -Dspring-boot.run.jvmArguments='-Dix.ginas.load.file=/usr/local/tomcat/webapps/substances/WEB-INF/classes/rep18.gsrs'"
+# COPY gsrs/docker/entrypoint/gsrs.entrypoint.sh /tmp/entrypoint.sh
 
-COPY gsrs/ginas-dev.conf /srv/gsrs-play-dist/conf/ginas-dev.conf
-COPY gsrs/docker/entrypoint/gsrs.entrypoint.sh /tmp/entrypoint.sh
+WORKDIR $CATALINA_HOME
 
-# prepare a config file
-RUN sed -i "s/<db_host>/${MYSQL_HOST}/g" $GSRS_CONFIG && \
-    sed -i "s/<db_name>/${MYSQL_DATABASE}/g" $GSRS_CONFIG && \
-    sed -i "s/<db_user>/${mysql_user}/g" $GSRS_CONFIG && \
-    sed -i "s/<db_user_password>/${MYSQL_ROOT_PASSWORD}/g" $GSRS_CONFIG
-
-ENTRYPOINT ["/tmp/entrypoint.sh"]
+EXPOSE 8080
+# ENTRYPOINT ["/tmp/entrypoint.sh"]
+CMD ["catalina.sh", "run"]

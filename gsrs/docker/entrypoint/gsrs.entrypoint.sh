@@ -4,7 +4,7 @@ MYSQL_USER=root
 
 ROLES_TRIGGER=$(cat <<-EOF
 delimiter //
-CREATE TRIGGER ix_core_userprof_update_roles BEFORE INSERT ON ix_core_userprof
+CREATE TRIGGER ix_core_userprof_update_roles BEFORE UPDATE ON ix_core_userprof
 FOR EACH ROW
 BEGIN
   IF NEW.roles_json IS NULL THEN
