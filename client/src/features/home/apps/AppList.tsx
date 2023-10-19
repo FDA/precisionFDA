@@ -1,6 +1,6 @@
 import { omit } from 'ramda'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -93,8 +93,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
           <QuickActions>
             {scope === 'me' && (
               <ButtonSolidBlue
-                as="a"
-                href="/apps/new"
+                as={Link}
+                to="/home/apps/create"
                 data-turbolinks="false"
                 data-testid="home-apps-create-button"
               >

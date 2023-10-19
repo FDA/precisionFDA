@@ -40,6 +40,7 @@ module.exports = {
     'no-redeclare': 'off',
     'no-plusplus': 'off',
     'react/function-component-definition': 'off',
+    'react/destructuring-assignment': 'off',
     'no-prototype-builtins': 'off',
     'arrow-body-style': 'off',
     'import/prefer-default-export': 'off',

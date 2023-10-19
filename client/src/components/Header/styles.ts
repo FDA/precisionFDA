@@ -114,6 +114,9 @@ export const StyledDropMenuLinks = styled.div`
   display: flex;
   flex-direction: column;
   color: ${theme.colors.textDarkGrey};
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 3px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.175);
 `
 
 export const StyledDivider = styled.div`
