@@ -1,5 +1,28 @@
-import styled, { css } from "styled-components";
-import { colors, theme } from "../../styles/theme";
+import styled, { css } from 'styled-components'
+import { colors, theme } from '../../styles/theme'
+
+export const FieldLabel = styled.label`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: ${colors.textDarkGrey};
+`
+
+export const SelectFieldLabel = styled(FieldLabel)`
+  white-space: nowrap;
+  gap: 4px;
+  select {
+    height: 32px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    padding-left: 8px; 
+    padding-right: 8px; 
+  }
+`
 
 export const FieldGroup = styled.div`
   display: flex;
@@ -32,7 +55,7 @@ export const InputSelect = styled.select`
   border: 1px solid #d9d9d9;
   border-radius: 2px;
   padding: 4px 16px 4px 8px;
-  ${inputFocus}
+  ${inputFocus};
   font-size: 12px;
 
   background: url(data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0Ljk1IDEwIj48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2ZmZjt9LmNscy0ye2ZpbGw6IzQ0NDt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPmFycm93czwvdGl0bGU+PHJlY3QgY2xhc3M9ImNscy0xIiB3aWR0aD0iNC45NSIgaGVpZ2h0PSIxMCIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxLjQxIDQuNjcgMi40OCAzLjE4IDMuNTQgNC42NyAxLjQxIDQuNjciLz48cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMy41NCA1LjMzIDIuNDggNi44MiAxLjQxIDUuMzMgMy41NCA1LjMzIi8+PC9zdmc+) no-repeat 95% 50%;

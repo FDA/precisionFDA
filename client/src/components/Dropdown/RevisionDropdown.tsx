@@ -6,6 +6,7 @@ import { CaretIcon } from '../icons/CaretIcon'
 import { HistoryIcon } from '../icons/HistoryIcon'
 import { colors } from '../../styles/theme'
 import { Revision } from '../../features/home/workflows/workflows.types'
+import { compactScrollBar } from '../Page/styles'
 
 const StyledRevisionDropdownButton = styled.button`
   width: fit-content;
@@ -63,6 +64,8 @@ export const StyledLink = styled(Link)`
 `
 
 const Ol = styled.ol`
+  ${compactScrollBar}
+  overflow-y: scroll;
   margin: 0;
   padding: 0;
   list-style: none;

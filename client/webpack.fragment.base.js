@@ -7,6 +7,7 @@ const path = require('path')
 
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const captchaKey = process.env.RECAPTCHA_SITE_KEY
 const isProdOrStage = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
@@ -26,16 +27,21 @@ module.exports = ({ urlLoaderOptions }) => ({
       PROD_OR_STAGE: JSON.stringify(isProdOrStage),
       NODE_ENV: JSON.stringify(process.env.NODE_ENV),
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'node_modules/monaco-editor/min/vs',
+          to: 'monaco-editor/min/vs',
+        },
+      ],
+    }),
   ],
   module: {
     rules: [
       {
         test: /\.s(a|c)ss$/,
         exclude: [/dist/, /.build_cache/],
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-        ],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.css$/,

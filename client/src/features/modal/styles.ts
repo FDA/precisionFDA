@@ -52,8 +52,6 @@ export const HeaderTop = styled.div`
   padding: 0.3rem; 
   border-bottom: 1px solid #e5e5e5;
   padding: 12px 24px;
-  font-size: ${fontSize.h2};
-  font-weight: ${fontWeight.bold};
   color: ${colors.textBlack};
 `
 
@@ -67,6 +65,8 @@ export const Footer = styled.div`
 `
 export const HeaderText = styled.div`
   align-self: center;
+  font-size: ${fontSize.h2};
+  font-weight: ${fontWeight.bold};
   color: #333333;
 `
 export const CloseButton = styled.button`

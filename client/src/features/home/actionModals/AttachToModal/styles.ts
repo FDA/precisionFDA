@@ -44,6 +44,10 @@ export const NoteContainer = styled.div`
   }
 `
 
+export const ModalLoader = styled.div`
+  padding: 32px;
+`
+
 export const StyledAttachToModal = styled.div`
   overflow: hidden;
   display: flex;
