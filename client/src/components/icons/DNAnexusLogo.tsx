@@ -51,4 +51,3 @@ export const HoverDNAnexusLogo = ({ opacity, ...rest }: { opacity?: boolean, wid
     <DNAnexusLogo {...rest} />
   </StyledLogo>
 )
-

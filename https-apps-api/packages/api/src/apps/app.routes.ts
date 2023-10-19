@@ -4,7 +4,8 @@ import {
   job as jobDomain,
   utils,
   entities,
-  client, app as appDomain, license as licenseDomain } from '@pfda/https-apps-shared'
+  app as appDomain,
+  client, license as licenseDomain } from '@pfda/https-apps-shared'
 import { RunAppInput } from '@pfda/https-apps-shared/src/domain/job/job.input'
 import { App } from '@pfda/https-apps-shared/src/domain'
 import {
