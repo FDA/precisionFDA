@@ -6,7 +6,7 @@ import { FetchAccessibleFilesResponse, fetchAccessibleFiles } from '../databases
 import { IExecution } from '../executions/executions.types'
 import { FileScope } from '../files/files.types'
 import { License } from '../licenses/types'
-import { IFilter, IMeta } from '../types'
+import { IFilter, IMeta, ServerScope } from '../types'
 import { Params, formatScopeQ, prepareListFetch } from '../utils'
 import { AppSpec, ComputeInstance, FileType, IApp, IOSpec, InputSpec } from './apps.types'
 
@@ -19,7 +19,7 @@ export interface RunJobRequest {
   id: string // application id
   name: string // name of the job
   instance_type: string
-  scope: string
+  scope: ServerScope
   output_folder_path: string
   inputs: {
     [key: string]: string | number | boolean,
