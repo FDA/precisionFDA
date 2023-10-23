@@ -12,7 +12,8 @@ import { getBackPath } from '../../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home.styles'
 import {
   Header,
-  HeaderLeft, HeaderRight,
+  HeaderLeft,
+  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
