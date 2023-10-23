@@ -62,7 +62,7 @@ export const TopboxItem = styled.div`
 export const StyledRow = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
 `
 
 export const InputTextRightMargin = styled(InputText)`
@@ -73,6 +73,11 @@ export const InputTextRightMargin = styled(InputText)`
 export const StyledJobName = styled.div`
   flex-grow: 1;
   padding-right: 16px;
+`
+
+export const StyledScopeName = styled.div`
+  flex-grow: 1;
+  padding-right: 23px;
 `
 
 export const StyledForm = styled.form`
