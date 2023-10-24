@@ -7,7 +7,7 @@ import { APP_HTTPS_SUBTYPE, APP_TYPE } from '@pfda/https-apps-shared/src/domain/
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { getServer } from '../../../src/server'
 import { mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
+import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /apps', () => {
   let em: EntityManager
@@ -29,7 +29,7 @@ describe.skip('GET /apps', () => {
   it('response shape', async () => {
     const { body } = await supertest(getServer())
       .get('/apps')
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(body).to.be.an('array').with.lengthOf(1)
     expect(stripEntityDates(body[0])).to.deep.equal({
@@ -59,7 +59,7 @@ describe.skip('GET /apps', () => {
 
     const { body } = await supertest(getServer())
       .get('/apps')
-      .query({ ...getDefaultQueryData(anotherUser) })
+      .set(getDefaultHeaderData(anotherUser))
       .expect(200)
     expect(body).to.be.an('array').with.lengthOf(1)
     expect(body[0]).to.have.property('id', anotherApp.id)
