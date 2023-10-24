@@ -216,10 +216,14 @@ export const AppForm = ({
                 <SelectFieldLabel>
                   Ubuntu Release
                   <select {...field}>
-                    <option value="14.04">14.04</option>
                     <option value="16.04">16.04</option>
                     <option value="20.04">20.04</option>
                   </select>
+                  <ErrorMessage
+                    errors={errors}
+                    name="release"
+                    render={({ message }) => <InputError>{message}</InputError>}
+                  />
                 </SelectFieldLabel>
               )}
             />

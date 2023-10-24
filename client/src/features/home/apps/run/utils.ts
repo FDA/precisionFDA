@@ -154,7 +154,7 @@ export const createRequestObject = (
     job_limit: vals.jobLimit,
     output_folder_path: vals.output_folder_path ?? '',
     instance_type: vals.instanceType?.value,
-    scope: app.scope,
+    scope: vals.scope.value,
     inputs,
   } satisfies RunJobRequest
 }
