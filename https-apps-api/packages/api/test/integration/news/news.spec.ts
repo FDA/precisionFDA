@@ -6,7 +6,7 @@ import { User, NewsItem } from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('/news', () => {
   let em: EntityManager
@@ -141,7 +141,7 @@ describe('/news', () => {
   it('GET /news accessed by user1', async () => {
     const { body } = await supertest(getServer())
       .get(`/news`)
-      .query({ ...getDefaultQueryData(user1) })
+      .set(getDefaultHeaderData(user1))
       .expect(200)
 
     const newsItems = body.news_items
@@ -164,7 +164,7 @@ describe('/news', () => {
   it('GET /news/all accessed by site admin', async () => {
     const { body } = await supertest(getServer())
       .get(`/news/all`)
-      .query({ ...getDefaultQueryData(siteAdmin) })
+      .set(getDefaultHeaderData(siteAdmin))
       .expect(200)
 
     const newsItems = body
@@ -177,7 +177,7 @@ describe('/news', () => {
     const data = generate.news.create()
     const { body } = await supertest(getServer())
       .post(`/news`)
-      .query({ ...getDefaultQueryData(siteAdmin) })
+      .set(getDefaultHeaderData(siteAdmin))
       .send(data)
       .expect(201)
     expect(body).to.deep.include(data)
@@ -191,7 +191,7 @@ describe('/news', () => {
     const data = generate.news.create()
     const { body } = await supertest(getServer())
       .post(`/news`)
-      .query({ ...getDefaultQueryData(user1) })
+      .set(getDefaultHeaderData(user1))
       .send(data)
       .expect(403)
   })

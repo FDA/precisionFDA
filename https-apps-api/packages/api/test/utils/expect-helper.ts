@@ -1,3 +1,4 @@
+import { USER_CONTEXT_HTTP_HEADERS } from '@pfda/https-apps-shared'
 import { DateTime } from 'luxon'
 import { omit } from 'ramda'
 import { User } from '@pfda/https-apps-shared/src/domain'
@@ -12,10 +13,10 @@ const stripEntityDates = (entity: BaseEntity): Omit<BaseEntity, 'createdAt' | 'u
   return omit(['createdAt', 'updatedAt'], entity)
 }
 
-const getDefaultQueryData = (user: User) => ({
-  id: user.id,
-  dxuser: user.dxuser,
-  accessToken: 'fake-token',
+const getDefaultHeaderData = (user: User) => ({
+  [USER_CONTEXT_HTTP_HEADERS.id]: user.id,
+  [USER_CONTEXT_HTTP_HEADERS.dxUser]: user.dxuser,
+  [USER_CONTEXT_HTTP_HEADERS.accessToken]: 'fake-token',
 })
 
-export { serializeEntityDates, stripEntityDates, getDefaultQueryData }
+export { serializeEntityDates, stripEntityDates, getDefaultHeaderData }
