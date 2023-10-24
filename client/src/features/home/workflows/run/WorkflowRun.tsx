@@ -184,18 +184,25 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, de
       <StyledStageHeader key={stage.app_uid}><GearIcon height={14} />&nbsp;{stage.name}</StyledStageHeader>
       {stage.inputs.map(input => {
         const inputSpec: InputSpec = app.spec.input_spec.find(input_spec  => input_spec.name === input.name)
-        return <FieldGroup key={input.name} label={getLabel(input)} required={!input.optional}>
-          <JobRunInput
-            fieldName={`inputs[${input.parent_slot}#${input.name}]`}
-            defaultValue={getDefaultValue(input, defaultFiles)}
-            type={input.class}
-            choices={inputSpec.choices}
-            helpText={inputSpec.help}
-            errors={errors}
-            disabled={isSubmitting}
+        return (
+          <Controller
+            key={inputSpec.name}
             control={control}
-            register={register} />
-        </FieldGroup>
+            name={`inputs[${input.parent_slot}#${input.name}]`}
+            render={({ field }) => (
+              <FieldGroup label={getLabel(inputSpec)} required={!inputSpec.optional}>
+                <JobRunInput
+                  field={field}
+                  inputSpec={inputSpec}
+                  errors={errors}
+                  disabled={isSubmitting}
+                  register={register}
+                  scope={app.scope}
+                  />
+              </FieldGroup>
+            )}
+          />
+        )
       },
       )}
     </>}

@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useQuery } from '@tanstack/react-query'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import Select from 'react-select'
@@ -15,8 +15,9 @@ import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileMo
 import { FileTreeNode, TreeOnSelectInfo } from '../../files/files.types'
 import { fetchAcceptedLicenses } from '../../licenses/api'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
+import { ServerScope } from '../../types'
 import { fetchLicensesOnApp, fetchUserComputeInstances } from '../apps.api'
-import { AppSpec, IApp, JobRunForm } from '../apps.types'
+import { AppSpec, IApp, JobRunForm, PricingMap } from '../apps.types'
 import { getDefaultValueFromServer } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { JobRunInput } from './JobRunInput'
@@ -34,8 +35,8 @@ import {
   StyledJobName,
   StyledLabel,
   StyledRow,
+  StyledScopeName,
   TipsRow,
-  WrapSingleField,
 } from './styles'
 import { useRunJobMutation } from './useRunJubMutation'
 import {
@@ -73,8 +74,6 @@ export const RunJobForm = ({
   spec: AppSpec
   userJobLimit: IUser['job_limit']
 }) => {
-  const runJobMutation = useRunJobMutation(app.scope)
-
   const { data: computeInstances, isLoading: computeInstancesLoading } =
     useQuery(['user-compute-instances'], () => fetchUserComputeInstances(), {
       onError: () => {
@@ -154,6 +153,8 @@ export const RunJobForm = ({
     },
   })
 
+  const [maxRuntime, setMaxRuntime] = useState<string>("")
+
   // Update the instanceType field when computeInstanecs list loads
   useEffect(() => {
     if (computeInstances) {
@@ -165,6 +166,26 @@ export const RunJobForm = ({
       )
     }
   }, [computeInstances])
+
+
+  // Calculate maxRuntime for user info when instanceType or jobLimit changes
+  useEffect(() => {
+    const selectedInstance = getValues().instanceType?.value
+    if (selectedInstance) {
+      const costPerHour = PricingMap[selectedInstance as keyof typeof PricingMap] as number;
+      let hoursRuntime = getValues().jobLimit / costPerHour;
+      let remainingMinutes = Math.round((hoursRuntime % 1) * 60);
+      if (remainingMinutes === 60) {
+        hoursRuntime++;
+        remainingMinutes = 0;
+      }
+      setMaxRuntime(`Maximum estimated runtime: ${Math.floor(hoursRuntime)}h${remainingMinutes ? ` ${remainingMinutes}m` : ''}`)
+    }
+  }, [watch().instanceType, watch().jobLimit])
+
+
+
+  const runJobMutation = useRunJobMutation(getValues().scope.value as ServerScope)
 
   const onSubmit = async () => {
     const vals = getValues()
@@ -230,37 +251,67 @@ export const RunJobForm = ({
                 <ErrorMessageForField errors={errors} fieldName="jobLimit" />
               </FieldGroup>
             </StyledRow>
-            {app.entity_type === 'https' && (
-              <WrapSingleField>
-                <FieldGroup label="Context" required>
-                  <Controller
-                    name="scope"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        options={selectableContexts}
-                        placeholder="Choose..."
-                        onChange={value => {
-                          field.onChange(value)
-                          field.onBlur()
-                        }}
-                        isSearchable
-                        onBlur={field.onBlur}
-                        value={field.value}
-                        isDisabled={isSubmitting}
-                      />
-                    )}
-                  />
-                  <ErrorMessageForField errors={errors} fieldName="scope" />
-                </FieldGroup>
-              </WrapSingleField>
-            )}
-            <WrapSingleField>
+            <StyledRow>
+              {app.entity_type === 'https' && (
+                <StyledScopeName>
+                  <FieldGroup label="Context" required>
+                    <Controller
+                      name="scope"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={selectableContexts}
+                          placeholder="Choose..."
+                          onChange={value => {
+                            field.onChange(value)
+                            field.onBlur()
+                          }}
+                          isSearchable
+                          onBlur={field.onBlur}
+                          value={field.value}
+                          isDisabled={isSubmitting}
+                        />
+                      )}
+                    />
+                    <ErrorMessageForField errors={errors} fieldName="scope" />
+                  </FieldGroup>
+                </StyledScopeName>
+              )}
+              {app.scope.startsWith('space-') && (
+                <StyledScopeName>
+                  <FieldGroup label="Space scope" required>
+                    <Controller
+                      name="scope"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={selectableSpaces}
+                          placeholder="Choose..."
+                          onChange={value => {
+                            field.onChange(value)
+                            field.onBlur()
+                          }}
+                          isClearable
+                          isSearchable
+                          onBlur={field.onBlur}
+                          value={field.value}
+                          isDisabled={isSubmitting}
+                        />
+                      )}
+                    />
+                    <ErrorMessageForField
+                      errors={errors}
+                      fieldName="scope"
+                    />
+                  </FieldGroup>
+                </StyledScopeName>
+              )}
               <FieldGroup label="Instance Type" required>
                 <Controller
                   name="instanceType"
                   control={control}
                   render={({ field }) => (
+                   <>
                     <Select
                       defaultValue={field.value}
                       options={computeInstances}
@@ -275,6 +326,8 @@ export const RunJobForm = ({
                       value={field.value}
                       isDisabled={isSubmitting}
                     />
+                  {<small>{maxRuntime}</small>}
+                   </>
                   )}
                 />
                 <ErrorMessageForField
@@ -282,7 +335,7 @@ export const RunJobForm = ({
                   fieldName="instanceType"
                 />
               </FieldGroup>
-            </WrapSingleField>
+            </StyledRow>
           </SectionBody>
         </Section>
         <Section>
