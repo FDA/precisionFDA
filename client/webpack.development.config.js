@@ -115,7 +115,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/workflows': {
+      '/workflows/new': {
+        target: TARGET,
+        secure: false,
+      },
+      '/workflows/*/edit': {
         target: TARGET,
         secure: false,
       },

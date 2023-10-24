@@ -1,13 +1,14 @@
 <div class="section-io">
   <div class="section-io-input">
     <div class="panel-heading clearfix">
-      <div class="btn-group pull-left">
+      <div class="btn-group pull-left" style="font-weight: 600; display: flex; align-items: center; flex-wrap: wrap;">
         <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#build-workflow-modal">
           Add Stage
         </button>
-        <span
+        <div
           class="small pfda-padded-h"
-          data-bind="text: stagesText, css: stagesTextStyle"></span>
+          data-bind="text: stagesText, css: stagesTextStyle"></div>
+        <div>Creating a workflow with app arrays is temporarily unavailable.</div>
       </div>
     </div>
     <div class="wf-loader hidden" data-bind="css: {hidden: !wfIsLoading()}">
