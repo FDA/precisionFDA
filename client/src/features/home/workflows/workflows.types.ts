@@ -168,6 +168,7 @@ export interface IWorkflow {
   scope: ServerScope;
   featured: boolean;
   active: boolean;
+  /** @deprecated create links from client side */
   links: Links;
   jobs?: any;
   logged_dxuser: string;
