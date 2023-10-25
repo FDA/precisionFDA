@@ -8,7 +8,7 @@
 
         body {
             font-family: Helvetica,sans-serif;
-            padding: 60px 0 0 0;
+            padding: 0;
             margin: 0;
         }
 
@@ -33,20 +33,23 @@
             padding: 10px 16px;
             background: #343E4D;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 40px;
-            position: fixed;
+            flex-direction: column;
+            height: auto;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
+            width: min-content;
         }
 
         .header svg {
             height: 32px;
         }
-
+        .container-wrapper {
+            display: flex;
+            justify-content: center;
+            background-color: gray;
+        }
         .container {
+            background-color: white;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
@@ -54,12 +57,21 @@
         }
 
         .item {
-            display: inline-block;
+            display: flex;
+    flex-direction: column;
+    gap: 8px;
             max-width: 100%;
             text-align: center;
             vertical-align: top;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
             color: #343E4D;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #cecece;
+        }
+
+        .item h3, p {
+            margin: 0;
         }
 
         .item-list {
@@ -72,7 +84,7 @@
 
         .canvas-wrapper {
             overflow: auto;
-            padding: 10px;
+            padding: 4px;
             display: inline-block;
             max-width: 100%;
         }
@@ -81,22 +93,24 @@
             margin-top: 30px;
         }
 
+        .navbar {
+            display: flex;
+            flex-direction: column;
+        }
+
         .navbar a {
             color: #d5d5d5;
         }
 
         .navbar-item {
-            position: relative;
-            display: inline-block;
-            margin: 0 15px;
         }
 
         .navbar-item a {
-            display: inline-block;
+            text-decoration: none;
         }
 
         .navbar-item .subnav-container {
-            display: none;
+            /* display: none; */
             position: absolute;
             top: 100%;
             right: 0;
@@ -124,6 +138,11 @@
             text-overflow: ellipsis;
             overflow: hidden;
             text-align: left;
+        }
+        @media print {
+            .noPrint {
+                display:none;
+            }
         }
     </style>
 </head>

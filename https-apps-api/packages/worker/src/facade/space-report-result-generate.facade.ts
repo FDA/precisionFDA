@@ -1,6 +1,8 @@
 import type { EntityManager } from '@mikro-orm/core'
 import { LockMode, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { promises as fs } from 'fs'
+import path from 'path'
 import type { UserFileCreateFacade } from '@pfda/https-apps-shared'
 import { errors, spaceReport, ENUMS, notification } from '@pfda/https-apps-shared'
 
@@ -53,15 +55,18 @@ export class SpaceReportResultGenerateFacade {
 
       const reportResult = await this.spaceReportService.generateResult(report)
 
-      const file = await this.userFileCreateFacade.createFileWithContent({
-        scope: report.space.scope,
-        project: report.space.hostProject,
-        name: this.getName(report),
-        content: reportResult,
-        description: this.getDescription(report),
-      })
+      const filePath = path.join(__dirname, `${this.getName(report)}.html`)
+      await fs.writeFile(filePath, reportResult)
 
-      report.resultFile = Reference.create(file)
+      // const file = await this.userFileCreateFacade.createFileWithContent({
+      //   scope: report.space.scope,
+      //   project: report.space.hostProject,
+      //   name: this.getName(report),
+      //   content: reportResult,
+      //   description: this.getDescription(report),
+      // })
+
+      // report.resultFile = Reference.create(file)
       report.state = 'DONE'
 
       return report
@@ -69,7 +74,7 @@ export class SpaceReportResultGenerateFacade {
   }
 
   private getName(report: spaceReport.SpaceReport) {
-    return `PFDA - Space ${report.space.id} report - ${report.createdAt.toLocaleDateString()}.html`
+    return `PFDA - Space ${report.space.id} report - ${report.createdAt.toISOString()}.html`
   }
 
   private getDescription(report: spaceReport.SpaceReport) {

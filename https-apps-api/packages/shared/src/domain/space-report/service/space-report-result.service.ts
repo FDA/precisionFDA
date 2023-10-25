@@ -116,7 +116,7 @@ export class SpaceReportResultService {
     logo.innerHTML = await logoImage
 
     const container = document.createElement('div')
-    container.classList.add('header')
+    container.classList.add('header', 'noPrint')
     container.appendChild(logo)
     container.appendChild(this.getNavbar(items, document))
 
