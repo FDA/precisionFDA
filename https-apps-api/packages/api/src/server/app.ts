@@ -1,5 +1,7 @@
+import { config } from '@pfda/https-apps-shared'
 import Koa from 'koa'
 import koaBody from 'koa-bodyparser'
+import { startBullBoard } from './bull-board'
 import { errorHandlerMdw } from './middleware/error-handler'
 import { logRequestMdw } from './middleware/log-request'
 import { ormContextMdw } from './middleware/orm-context'
@@ -19,5 +21,8 @@ export function createApp() {
   app.use(router.routes())
   app.use(router.allowedMethods())
 
+  if (config.bullBoardEnabled) {
+    startBullBoard(app)
+  }
   return app
 }

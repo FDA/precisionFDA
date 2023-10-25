@@ -152,20 +152,20 @@ const defaultConfig = {
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator
   siteSettings: {
     ssoButton: {
-        isEnabled: false,
-        data: {
-          fdaSsoUrl:
-            'https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D',
-        },
+      isEnabled: false,
+      data: {
+        fdaSsoUrl:
+          'https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D',
+      },
     },
     cdmh: {
-        isEnabled: true,
-        data: {
-          cdmhPortal: process.env.CDMH_PORTAL_URL,
-          cdrBrowser: process.env.CDMH_CDR_BROWSER_URL,
-          cdrAdmin: process.env.CDMH_CDR_ADMIN_URL,
-          connectPortal: process.env.CDMH_CONNECT_PORTAL_URL,
-        },
+      isEnabled: true,
+      data: {
+        cdmhPortal: process.env.CDMH_PORTAL_URL,
+        cdrBrowser: process.env.CDMH_CDR_BROWSER_URL,
+        cdrAdmin: process.env.CDMH_CDR_ADMIN_URL,
+        connectPortal: process.env.CDMH_CONNECT_PORTAL_URL,
+      },
     },
   },
   recaptcha: {
@@ -181,6 +181,7 @@ const defaultConfig = {
       skipFdaSubnetIpCheck: false,
     },
   },
+  bullBoardEnabled: parseBooleanFromProcess(process.env.NODE_BULL_BOARD_ENABLED) ?? false,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV
