@@ -64,7 +64,7 @@ export const ExpertMeta = styled.div`
 
 export const OverviewNewsList = ({ pick }: { pick?: number }) => {
   const { data, isLoading } = useNewsListQuery({ orderBy: 'isPublication' })
-  if (isLoading) return <Loader displayInline />
+  if (isLoading) return <Loader className="inline" />
   const newsList = pick ? data?.news_items?.slice(0, pick) : data?.news_items
 
   return (

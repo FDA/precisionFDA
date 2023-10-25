@@ -61,17 +61,20 @@ export type ActionType = {
   key?: string
   shouldHide?: boolean
 } & (
-  | {
-      type: 'link'
-      link: Link
-      cloudResourcesConditionType?: CloudResourcesConditionType
-    }
-  | {
-      type: 'modal'
-      func: (arg?: IModal) => void
-      modal?: ReactNode | null
-      showModal?: boolean
-    }
+  {
+    type: 'route'
+    to: string
+  } | 
+  {
+    type: 'link'
+    link: Link
+    cloudResourcesConditionType?: CloudResourcesConditionType
+  } | ({
+    type: 'modal'
+    func: (arg?: IModal) => void
+    modal?: ReactNode | null
+    showModal?: boolean
+  })
 )
 
 export type ActionFunctionsType<KeyT extends string> = {

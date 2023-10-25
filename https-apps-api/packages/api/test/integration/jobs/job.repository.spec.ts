@@ -86,15 +86,15 @@ describe('JobRepository and JobEntity', () => {
     it('findOne finds jobs', async () => {
       const jobRepo = em.getRepository(Job)
       expect(jobRepo).to.not.be.null()
-  
+
       let job = await jobRepo.findOne({ dxid: terminatedJob.dxid })
       expect(job).to.not.be.null()
       expect(job.state).to.be.equal(JOB_STATE.TERMINATED)
-  
+
       job = await jobRepo.findOne({ dxid: runningJob.dxid })
       expect(job).to.not.be.null()
       expect(job.state).to.be.equal(JOB_STATE.RUNNING)
-  
+
       job = await jobRepo.findOne({ dxid: idleJob.dxid })
       expect(job).to.not.be.null()
       expect(job.state).to.be.equal(JOB_STATE.IDLE)
@@ -103,15 +103,15 @@ describe('JobRepository and JobEntity', () => {
     it('findOne throws error if incorrect user', async () => {
       const jobRepo = em.getRepository(Job)
       expect(jobRepo).to.not.be.null()
-  
+
       let job = await jobRepo.findOne({ dxid: terminatedJob.dxid })
       expect(job).to.not.be.null()
       expect(job.state).to.be.equal(JOB_STATE.TERMINATED)
-  
+
       job = await jobRepo.findOne({ dxid: runningJob.dxid })
       expect(job).to.not.be.null()
       expect(job.state).to.be.equal(JOB_STATE.RUNNING)
-  
+
       job = await jobRepo.findOne({ dxid: idleJob.dxid })
       expect(job).to.not.be.null()
       expect(job.state).to.be.equal(JOB_STATE.IDLE)
@@ -120,15 +120,15 @@ describe('JobRepository and JobEntity', () => {
 
   context('JobEntity', () => {
     it('reports state correctly', async () => {
-      const jobRepo = em.getRepository(Job)  
+      const jobRepo = em.getRepository(Job)
       let job = await jobRepo.findOne({ dxid: terminatedJob.dxid })
       expect(job.isActive()).to.equal(false)
       expect(job.isTerminal()).to.equal(true)
-  
+
       job = await jobRepo.findOne({ dxid: runningJob.dxid })
       expect(job.isActive()).to.be.equal(true)
       expect(job.isTerminal()).to.equal(false)
-  
+
       job = await jobRepo.findOne({ dxid: idleJob.dxid })
       expect(job.isActive()).to.equal(true)
       expect(job.isTerminal()).to.equal(false)
@@ -139,7 +139,7 @@ describe('JobRepository and JobEntity', () => {
 
       let job = await jobRepo.findOne({ dxid: terminatedJob.dxid })
       expect(job.runTime()).to.equal(jobStoppedRunning.getTime() - jobStartedRunning.getTime())
-  
+
       job = await jobRepo.findOne({ dxid: runningJob.dxid })
       expect(job.runTime()).to.be.closeTo(new Date().getTime() - jobStartedRunning.getTime(), 100)
     })

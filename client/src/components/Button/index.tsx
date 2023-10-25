@@ -27,7 +27,7 @@ export const Button = styled.button<IButton>`
   padding: 6px 12px;
   font-size: 14px;
   border-radius: 3px;
-  border-color: rgb(218, 239, 251);
+  border-color: rgb(192 217 231);
   background: white;
   color: ${theme.colors.primaryBlue};
 

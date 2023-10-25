@@ -15,7 +15,7 @@ const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
 
 // const TARGET = 'https://precisionfda-dev.dnanexus.com'
-const TARGET = 'https://localhost:3000'
+const TARGET = 'https://0.0.0.0:3000'
 
 const urlLoaderOptions = {
   limit: 2000,
@@ -115,7 +115,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
-      '/workflows': {
+      '/workflows/new': {
+        target: TARGET,
+        secure: false,
+      },
+      '/workflows/*/edit': {
         target: TARGET,
         secure: false,
       },

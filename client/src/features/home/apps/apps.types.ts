@@ -1,5 +1,8 @@
+import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
 import { ResourceScope, ServerScope } from '../types'
+import { CreateAppPayload } from './apps.api'
 import { IFile } from '../files/files.types'
+import { IAccessibleFile } from '../databases/databases.api'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -16,8 +19,41 @@ export enum AppActions {
   'Attach to...' = 'Attach to...',
 }
 
+export enum PricingMap {
+  "baseline-2" = 0.286,
+  "baseline-4" = 0.572,
+  "baseline-8" = 1.144,
+  "baseline-16" = 2.288,
+  "baseline-36" = 5.148,
+  "hidisk-2" = 0.372,
+  "hidisk-4" = 0.744,
+  "hidisk-8" = 1.488,
+  "hidisk-16" = 2.976,
+  "hidisk-36" = 6.696,
+  "himem-2" = 0.474,
+  "himem-4" = 0.948,
+  "himem-8" = 1.896,
+  "himem-16" = 3.792,
+  "himem-32" = 7.584,
+  "gpu-8" = 10.787,
+}
+
 export enum AppsListActions {
   'Create App' = 'Create App',
+}
+
+export interface IOSpec {
+  class: 'string'| 'array:string' | 'file' | 'array:file' | 'int' | 'array:int' | 'float' | 'array:float' | 'boolean'
+  isArray?: boolean
+  help: string
+  label: string
+  name: string
+  optional: boolean
+}
+
+export interface InputSpec extends IOSpec {
+  default: string[] | string | number | null
+  choices: string[] | null
 }
 
 export interface Links {
@@ -82,19 +118,8 @@ export interface Revision {
   version: string;
 }
 
-export interface SpecBase {
-  class: string;
-  help: string;
-  label: string;
-  name: string;
-  optional: boolean;
-}
-export interface OutputSpec extends SpecBase {
+export interface OutputSpec extends IOSpec {
   requiredRunInput: boolean;
-}
-export interface InputSpec extends SpecBase {
-  default: string | boolean;
-  choices: [];
 }
 
 export interface AppSpec {
@@ -143,25 +168,32 @@ export interface ComputeInstance {
 }
 
 export interface SelectType {
-  isDisabled: boolean,
+  isDisabled?: boolean,
   label: string,
   value: string,
 }
 
-export interface JobRunData {
+export type FormInput = string | string[] | boolean | number | number[] | IAccessibleFile | IAccessibleFile[] | undefined
+
+export interface JobRunForm {
+  output_folder_path: string | null;
   jobName: string;
   jobLimit: number;
-  scope?: SelectType | null;
+  scope: SelectType;
   instanceType?: ComputeInstance | null;
   inputs: {
-    [key: string]: string | boolean | number | IFile | undefined,
+    [key: string]: FormInput,
   };
 }
 
-export const INPUT_TYPES_CLASSES = {
-  FILE: 'file',
-  STRING: 'string',
-  INT: 'int',
-  FLOAT: 'float',
-  BOOLEAN: 'boolean',
-} 
+interface InputSpecForm extends Omit<InputSpec, 'choices' | 'default'> {
+  choices: string | null
+  default: null | string | IAccessibleFile[]
+}
+
+export interface CreateAppForm extends Omit<CreateAppPayload, 'ordered_assets' | 'input_spec'> {
+  ordered_assets: Asset[]
+  input_spec: InputSpecForm[]
+}
+
+export type FileType = 'cwl' | 'wdl'

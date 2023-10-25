@@ -1,0 +1,166 @@
+import styled, { css } from 'styled-components'
+import { FieldGroup } from '../../../../components/form/styles'
+import { theme } from '../../../../styles/theme'
+import { PfTab } from '../../../../components/Tabs/PfTab'
+
+
+export const TopFieldGroup = styled(FieldGroup)`
+  flex: 1;
+  max-width: 400px;
+  min-width: 270px;
+` 
+
+export const StyledForm = styled.form`
+  margin: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1360px;
+`
+
+export const SubmitRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`
+
+export const FormSectionTop = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+`
+
+export const Row = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+`
+
+export const TabRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  border-bottom: 1px solid #ddd;
+`
+
+export const TabTitle = styled.div`
+  color: ${theme.colors.primaryBlue};
+  text-transform: uppercase;
+  font-size: 14px;
+`
+
+export const TabDesc = styled.div`
+  color: #8198bc;
+  font-size: 12px;
+  line-height: 1.428571429;
+`
+
+export const StyledPfTab = styled(PfTab)<{ isActive: boolean }>`
+  text-align: left;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2px;
+
+  ${({ isActive }) =>
+    isActive &&
+    css`
+      ${TabTitle} {
+        color: #555;
+      }
+    `}
+`
+
+export const TableStyles = styled.div`
+  display: flex;
+  margin-top: 12px;
+  margin-left: 12px;
+  input[type="checkbox"] {
+    margin: 3px 4px;
+  }
+  table {
+    border-collapse: separate;
+    text-indent: initial;
+    border-spacing: 2px;
+    font-size: 14px;
+    flex: 1;
+    th {
+      text-align: left;
+    }
+    td, th {
+      padding: 1px;
+    }
+  }
+`
+
+export const InputRow = styled.div`
+  max-width: 300px;
+  display: flex;
+`
+
+export const SectionTitleRow = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid;
+  padding: 6px;
+  padding-left: 12px;
+  color: #333333;
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  `
+
+export const StyledInputOutputBox = styled.div`
+  max-width: 1357px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  background-color: #fff;
+  border: 1px solid transparent;
+  border-color: #ddd;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+`
+
+export const SectionTitle = styled.div`
+  font-size: 19px;
+  font-weight: 600;
+  display: flex;
+`
+
+export const FormFields = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`
+
+export const StyledClassTd = styled.td`
+  width: 96px;
+  input {
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+`
+
+export const StyledRemove = styled.div`
+  justify-content: flex-end;
+  display: flex;
+  margin-left: 12px;
+  margin-right: 12px;
+
+  button {
+    padding: 6px;
+  }
+`
+
+export const Help = styled.div`
+  padding: 6px;
+  padding-right: 12px;
+  background-color: #f9f9f9;
+  border-left: 5px solid #e5e5e5;
+  color: #777777;
+  text-align: left;
+  font-size: 13px;
+  width: fit-content;
+`
