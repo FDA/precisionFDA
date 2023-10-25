@@ -8,6 +8,7 @@ module FilesConcern
     # rubocop:disable Style/SignalException
     scopes = params[:scopes]
     states = params[:states]
+    uid = params[:uid]
 
     files = if params[:editable]
       UserFile.real_files.not_removing.editable_by(context).accessible_by_private
@@ -26,6 +27,8 @@ module FilesConcern
       files = files.where(state: params["states"])
     end
     # rubocop:enable Style/SignalException
+
+    files = files.where(uid: uid) if uid.present?
 
     files
   end

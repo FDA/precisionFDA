@@ -1,12 +1,12 @@
 /* eslint-disable no-nested-ternary */
 import { omit } from 'ramda'
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { Link, Redirect, Route, Switch } from 'react-router-dom'
+import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
-import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { HomeLabel } from '../../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import {
   StyledTab,
@@ -14,9 +14,13 @@ import {
   StyledTabPanel,
 } from '../../../components/Tabs'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { IChallenge } from '../../../types/challenge'
+import { Location } from '../../../types/utils'
+import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
+import { getScopeMapping } from '../getScopeMapping'
 import { StyledBackLink, StyledRight } from '../home.styles'
-import { HomeLabel } from '../../../components/HomeLabel'
 import {
   ActionsButton,
   Header,
@@ -35,15 +39,11 @@ import {
 } from '../show.styles'
 import { ResourceScope } from '../types'
 import { AppExecutionsList } from './AppExecutionsList'
-import { fetchApp } from './apps.api'
+import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
-import { SpecTab } from './SpecTab'
-import { IChallenge } from '../../../types/challenge'
-import { getBackPath } from '../../../utils/getBackPath'
-import { Location } from '../../../types/utils'
-import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
-import { getScopeMapping } from '../getScopeMapping'
+import { useFetchAppQuery } from './useFetchAppQuery'
+import { getBaseLink } from './run/utils'
 
 const renderOptions = (app: IApp, scope: ResourceScope) => {
   const columns = [
@@ -111,10 +111,11 @@ const renderOptions = (app: IApp, scope: ResourceScope) => {
 }
 
 const DetailActionsDropdown = (
-  { app, comparatorLinks, challenges }:
-    { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[] }) => {
+  { app, comparatorLinks, challenges, spaceId }:
+    { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
   const actions = useAppSelectionActions({
     scope: app.location === 'Private' ? 'me' : app.location,
+    spaceId,
     selectedItems: [app],
     resetSelected: () => { },
     resourceKeys: ['app', app.uid],
@@ -125,10 +126,10 @@ const DetailActionsDropdown = (
   return (
     <>
       <CloudResourcesHeaderButton
-        href={`/apps/${app.uid}/jobs/new`}
-        data-turbolinks="false"
+        href={`/${getBaseLink(spaceId)}/apps/${app.uid}/jobs/new`}
         isLinkDisabled={!app.links.run_job}
         conditionType='all'
+        asReactLink
       >
         <>
           Run App&nbsp;
@@ -164,6 +165,7 @@ const DetailActionsDropdown = (
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Add to Comparators']?.modal}
       {actions['Remove from Comparators']?.modal}
       {actions['Set this app as comparison default']?.modal}
@@ -171,21 +173,19 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
+export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: (scope: ResourceScope) => void }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
-  const { data, status, isLoading } = useQuery(['app', appUid], () =>
-    fetchApp(appUid),
-  )
+  const { data, isLoading } = useFetchAppQuery(appUid)
 
   const app = data?.app
   const meta = data?.meta
-
+  
   if (isLoading) return <HomeLoader />
-
+  
   if (!app || !meta)
-    return (
+  return (
       <NotFound>
         <h1>App not found</h1>
         <div>Sorry, this app does not exist or is not accessible by you.</div>
@@ -240,7 +240,9 @@ export const AppsShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => 
           <HeaderRight>
             <StyledRight>
               {app &&
-                <DetailActionsDropdown app={app}
+                <DetailActionsDropdown
+                  spaceId={spaceId}
+                  app={app}
                   comparatorLinks={meta.links?.comparators ?? []}
                   challenges={meta.challenges} />
               }

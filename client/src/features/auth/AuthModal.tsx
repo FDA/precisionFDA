@@ -13,6 +13,7 @@ export const AuthModal: React.FC<UseModal> = props => {
       isShown={props.isShown}
       hide={() => props.setShowModal(false)}
       headerText="Session Expired"
+      id='session-expired-modal'
       disableClose
       blur
     >
