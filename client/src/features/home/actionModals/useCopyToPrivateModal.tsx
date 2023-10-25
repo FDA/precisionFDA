@@ -8,7 +8,7 @@ import { ResourceTable } from '../../../components/ResourceTable'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { APIResource, ResourceScope } from '../types'
-import { itemsCountString } from '../../../utils/formatting'
+import { resourceCountString } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
 const StyledResourceTable = styled(ResourceTable)`
@@ -35,7 +35,7 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
     mutationKey: ['copy-to-private', resource],
     mutationFn: request,
     onError: () => {
-      toast.error(`Error: Copying to private ${resource}`)
+      toast.error(`Error: Copying ${resource} to private area`)
     },
     onSuccess: (res: any) => {
       if (res?.meta?.messages[0].type === 'error') {
@@ -44,10 +44,10 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
         if (onSuccess) onSuccess(res)
         setShowModal(false)
         toast.success(
-          `Success: Copy to private ${itemsCountString(
+          `Copied ${resourceCountString(
             resource,
             momoSelected.length,
-          )}`,
+          )} to private area`,
         )
       }
     },
@@ -59,16 +59,17 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
 
   const modalComp = isShown && (
     <ModalNext
+      id={`modal-${resource}-copy-to-private`}
       data-testid={`modal-${resource}-copy-to-private`}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Copy to private ${itemsCountString(
+        headerText={`Copy ${resourceCountString(
           resource,
           momoSelected.length,
-        )}?`}
+        )} to private area?`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>

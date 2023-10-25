@@ -42,4 +42,5 @@ export const config: ConfigOverride = () => ({
       saveEmailToFile: false,
     },
   },
+  bullBoardEnabled: true,
 })

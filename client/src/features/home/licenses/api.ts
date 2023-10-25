@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { checkStatus, getApiRequestOpts, requestOpts } from '../../../utils/api'
 import { AcceptedLicense } from '../apps/apps.types'
 import { License } from './types'
@@ -18,12 +19,8 @@ export async function fetchAcceptedLicenses(): Promise<AcceptedLicense[]> {
   return res.json()
 }
 
-export async function fetchLicensesForFiles(ids: number[]): Promise<License[]> {
-  const res = await fetch('/api/list_licenses_for_files', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ ids }),
-  }).then(checkStatus)
-  return res.json()
+export async function fetchLicensesForFiles(ids: number[]) {
+  return axios.post<License[]>('/api/list_licenses_for_files', { ids }).then(r => r.data )
 }
 
 export async function fetchLicensesList(): Promise<{ licenses: License[]}> {

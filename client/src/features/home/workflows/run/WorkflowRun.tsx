@@ -23,7 +23,7 @@ import { CubeIcon } from '../../../../components/icons/CubeIcon'
 import { ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup } from '../../../../components/form/FieldGroup'
 import { JobRunInput } from '../../apps/run/JobRunInput'
-import { AcceptedLicense, INPUT_TYPES_CLASSES, InputSpec, SelectType } from '../../apps/apps.types'
+import { AcceptedLicense, InputSpec, SelectType } from '../../apps/apps.types'
 import {
   Section,
   SectionBody,
@@ -78,7 +78,7 @@ const convertToAccessibleFile = (file: IFile): IAccessibleFile => {
 
 const getDefaultValue = (input: InputOutput, defaultFiles?: IFile[]): string | boolean | IAccessibleFile | undefined => {
   const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
-  if (input.class === INPUT_TYPES_CLASSES.FILE) {
+  if (input.class === 'file') {
     const defaultFile = defaultFiles?.find(file => file.uid === defaultValue)
     return (defaultFile) ? convertToAccessibleFile(defaultFile) : undefined
   }
@@ -97,7 +97,7 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
     const fieldName = `${input.parent_slot}#${input.name}`
     const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
     if (defaultValue !== undefined) {
-      if (input.class === INPUT_TYPES_CLASSES.FILE) {
+      if (input.class === 'file') {
         defaultValues.inputs[fieldName] = getDefaultValue(input, defaultFiles)
       } else {
         defaultValues.inputs[fieldName] = defaultValue
@@ -136,9 +136,9 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
     .filter(input => !input.optional)
     .forEach(input => {
     const fieldName = `${input.parent_slot}#${input.name}`
-    if (input.class === INPUT_TYPES_CLASSES.BOOLEAN) {
+    if (input.class === 'boolean') {
       inputs[fieldName] = Yup.boolean().nullable().required(`${getLabel(input)} is required`)
-    } else if (input.class === INPUT_TYPES_CLASSES.FILE) {
+    } else if (input.class === 'file') {
       inputs[fieldName] = Yup.object().nullable().required(`${getLabel(input)} is required`)
     } else {
       inputs[fieldName] = Yup.string().nullable().required(`${getLabel(input)} is required`)
@@ -184,18 +184,25 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, de
       <StyledStageHeader key={stage.app_uid}><GearIcon height={14} />&nbsp;{stage.name}</StyledStageHeader>
       {stage.inputs.map(input => {
         const inputSpec: InputSpec = app.spec.input_spec.find(input_spec  => input_spec.name === input.name)
-        return <FieldGroup key={input.name} label={getLabel(input)} required={!input.optional}>
-          <JobRunInput
-            fieldName={`inputs[${input.parent_slot}#${input.name}]`}
-            defaultValue={getDefaultValue(input, defaultFiles)}
-            type={input.class}
-            choices={inputSpec.choices}
-            helpText={inputSpec.help}
-            errors={errors}
-            disabled={isSubmitting}
+        return (
+          <Controller
+            key={inputSpec.name}
             control={control}
-            register={register} />
-        </FieldGroup>
+            name={`inputs[${input.parent_slot}#${input.name}]`}
+            render={({ field }) => (
+              <FieldGroup label={getLabel(inputSpec)} required={!inputSpec.optional}>
+                <JobRunInput
+                  field={field}
+                  inputSpec={inputSpec}
+                  errors={errors}
+                  disabled={isSubmitting}
+                  register={register}
+                  scope={app.scope}
+                  />
+              </FieldGroup>
+            )}
+          />
+        )
       },
       )}
     </>}
@@ -407,7 +414,7 @@ const fetchDefaultFiles = (meta: any): Promise<{ files: IFile, meta: any }[]> =>
   meta.spec.input_spec.stages.forEach((stage: Stage) => {
     if (hasUnfilledInputs(stage)) {
       stage.inputs.forEach(input => {
-        if (input.class === INPUT_TYPES_CLASSES.FILE && input.default_workflow_value) {
+        if (input.class === 'file' && input.default_workflow_value) {
           const promise = fetchFile(input.default_workflow_value as string)
           promises.push(promise)
         }

@@ -58,7 +58,7 @@ export const OverviewPublic = () => {
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
               {expertsData?.experts[0] && (expertsIsLoading ? (
-                <Loader displayInline />
+                <Loader className="inline" />
               ) : expertsData?.experts[0] && <ExpertListItem expert={expertsData.experts[0]} />)}
             </ExpertSection>
 

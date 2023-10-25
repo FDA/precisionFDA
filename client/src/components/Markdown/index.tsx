@@ -63,7 +63,7 @@ export const MarkdownStyle = styled.div`
   }
 `
 
-export const Markdown = ({ docRef, data = '' }: { docRef: Ref<any>, data: string }) => {
+export const Markdown = ({ docRef, data = '' }: { docRef?: Ref<any>, data?: string }) => {
   return (
     <div ref={docRef}>
       <ReactMarkdown
