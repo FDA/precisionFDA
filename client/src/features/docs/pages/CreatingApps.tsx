@@ -97,6 +97,13 @@ export const CreatingApps = () => {
               </td>
             </tr>
             <tr>
+              <td>Array?</td>
+              <td>
+                Whether this input is an array. If so, the user can provide
+                multiple values for this input.
+              </td>
+            </tr>
+            <tr>
               <td>Name</td>
               <td>
                 A machine-readable name for this input (no spaces allowed). The
@@ -169,6 +176,11 @@ export const CreatingApps = () => {
                 <td>integer</td>
               </tr>
               <tr>
+                <td>Array?</td>
+                <td>false</td>
+                <td>false</td>
+              </tr>
+              <tr>
                 <td>Name</td>
                 <td>intervals</td>
                 <td>padding</td>
@@ -232,6 +244,10 @@ export const CreatingApps = () => {
               <tr>
                 <td>Class</td>
                 <td>file</td>
+              </tr>
+              <tr>
+                <td>Array?</td>
+                <td>false</td>
               </tr>
               <tr>
                 <td>Name</td>
@@ -903,7 +919,77 @@ export const CreatingApps = () => {
               </tbody>
             </DocTable>
           </li>
+          <li>
+            Input and output arrays are accessed in an indexed way e.g.
+            <code>$<em>field_name[0]</em></code>. Examples of array usage follow:
+          </li>
         </ul>
+        <DocTable>
+          <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Example script</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>
+              string[] string_output
+              integer[] int_output
+              float[] float_output
+            </td>
+            <td>
+              <code>emit <em>string_output</em> "hello" "world"</code>
+              <br/>
+              <code>emit <em>int_output</em> 11 22 33</code>
+              <br/>
+              <code>emit <em>float_output</em> 10.5 13.1 77.7</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              string[] string_input
+              <br/>
+              string[] string_output
+            </td>
+            <td>
+              <code><em>string_input[0]</em>="$&#123;<em>string_input[0]</em>&#125;""added_to_first_element"</code>
+              <br/>
+              <code><em>string_input[1]</em>="$&#123;<em>string_input[1]</em>&#125;""added_to_second_element"</code>
+              <br/>
+              <code>emit <em>string_output</em> "$&#123;<em>string_input[@]</em>&#125;"</code>
+            </td>
+          </tr>
+          <tr>
+            <td>file[] file_output</td>
+            <td>
+              <code>echo "Test output file 1." &gt; file1.txt</code>
+              <br/>
+              <code>echo "Test output file 2." &gt; file2.txt</code>
+              <br/>
+              <code>emit <em>file_output</em> file1.txt file2.txt</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              file[] file_input
+              <br/>
+              file[] file_output
+            </td>
+            <td>
+              <code>arr=("test1.txt" "test2.txt")</code>
+              <br/>
+              <code>echo `head ./in/file_input/0/test.txt` &gt; test1.txt</code>
+              <br/>
+              <code>echo "added content" &gt;&gt; test1.txt</code>
+              <br/>
+              <code>echo "content" &gt; test2.txt</code>
+              <br/>
+              <code>emit <em>file_output</em> &quot;&#36;&#123;arr&#91;@&#93;&#125;&quot;</code>
+            </td>
+          </tr>
+          </tbody>
+        </DocTable>
         <DocCallout>
           <h4>Example of system-defined variables</h4>
           <p>
