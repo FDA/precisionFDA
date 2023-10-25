@@ -9,5 +9,4 @@ version "0.1.0"
 chef_version ">= 18.0"
 
 depends "aws", "~> 9.0"
-depends "nodejs", "~> 10.1"
 depends "tomcat", "~> 5.0"
