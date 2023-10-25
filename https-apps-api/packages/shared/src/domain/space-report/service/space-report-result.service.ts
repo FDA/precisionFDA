@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom'
 import path from 'path'
@@ -37,15 +40,34 @@ export class SpaceReportResultService {
     container.appendChild(this.getTitle(report, document))
 
     container.appendChild(this.getReportPartTypeHeader('Space Files', this.FILES_HEADER_ID, document))
-    reportPartsMap.file.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    const itemListFiles = document.createElement('div')
+    itemListFiles.classList.add('item-list')
+    container.appendChild(itemListFiles)
+    reportPartsMap.file.forEach(rp => itemListFiles.appendChild(this.getReportPartElement(rp, document)))
+    
     container.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
-    reportPartsMap.app.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    const itemListApps = document.createElement('div')
+    itemListApps.classList.add('item-list')
+    container.appendChild(itemListApps)
+    reportPartsMap.app.forEach(rp => itemListApps.appendChild(this.getReportPartElement(rp, document)))
+    
     container.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
-    reportPartsMap.job.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    const itemListExecutions = document.createElement('div')
+    itemListExecutions.classList.add('item-list')
+    container.appendChild(itemListExecutions)
+    reportPartsMap.job.forEach(rp => itemListExecutions.appendChild(this.getReportPartElement(rp, document)))
+    
     container.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
-    reportPartsMap.asset.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    const itemListAssets = document.createElement('div')
+    itemListAssets.classList.add('item-list')
+    container.appendChild(itemListAssets)
+    reportPartsMap.asset.forEach(rp => itemListAssets.appendChild(this.getReportPartElement(rp, document)))
+    
     container.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
-    reportPartsMap.workflow.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    const itemListWorkflows = document.createElement('div')
+    itemListWorkflows.classList.add('item-list')
+    container.appendChild(itemListWorkflows)
+    reportPartsMap.workflow.forEach(rp => itemListWorkflows.appendChild(this.getReportPartElement(rp, document)))
 
     document.body.appendChild(container)
 
