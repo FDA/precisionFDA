@@ -241,6 +241,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
+      shouldHide: ['private','public'].includes(selected[0]?.scope)
     },
     'Attach to...': {
       type: 'modal',
