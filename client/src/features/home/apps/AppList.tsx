@@ -56,14 +56,14 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
 
   const { status, data, error } = query
 
-  const selectedFileObjects = getSelectedObjectsFromIndexes(
+  const selectedAppObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
     data?.apps,
   )
   const actions = useAppSelectionActions({
     scope,
     spaceId,
-    selectedItems: selectedFileObjects,
+    selectedItems: selectedAppObjects,
     resourceKeys: ['apps'],
     resetSelected,
     comparatorLinks: {},
@@ -169,7 +169,6 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Copy to My Home (private)']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}
