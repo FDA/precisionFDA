@@ -165,6 +165,7 @@ const DetailActionsDropdown = (
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Add to Comparators']?.modal}
       {actions['Remove from Comparators']?.modal}
       {actions['Set this app as comparison default']?.modal}
