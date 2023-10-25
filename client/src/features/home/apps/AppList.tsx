@@ -1,6 +1,6 @@
 import { omit } from 'ramda'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -56,14 +56,14 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
 
   const { status, data, error } = query
 
-  const selectedFileObjects = getSelectedObjectsFromIndexes(
+  const selectedAppObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
     data?.apps,
   )
   const actions = useAppSelectionActions({
     scope,
     spaceId,
-    selectedItems: selectedFileObjects,
+    selectedItems: selectedAppObjects,
     resourceKeys: ['apps'],
     resetSelected,
     comparatorLinks: {},
@@ -93,8 +93,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
           <QuickActions>
             {scope === 'me' && (
               <ButtonSolidBlue
-                as="a"
-                href="/apps/new"
+                as={Link}
+                to="/home/apps/create"
                 data-turbolinks="false"
                 data-testid="home-apps-create-button"
               >
@@ -169,7 +169,6 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Copy to My Home (private)']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}

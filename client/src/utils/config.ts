@@ -8,11 +8,17 @@ import { ToastOptions } from 'react-toastify'
  * @returns WebSocket url
  */
 export const getNodeWsUrl = () => {
-  const { host } = window.location
-  if (host.includes('localhost')) {
-    return 'wss://localhost:3001'
+  if(window?.location) {
+    const { host } = window.location
+    if (host.includes('0.0.0.0')) {
+      return 'wss://0.0.0.0:3001'
+    }
+    if (host.includes('localhost')) {
+      return 'wss://localhost:3001'
+    }
+    return `wss://${host}/ws`
   }
-  return `wss://${host}/ws`
+  return ''
 }
 
 /**
