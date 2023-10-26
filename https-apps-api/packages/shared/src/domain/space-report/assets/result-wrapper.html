@@ -4,6 +4,10 @@
     <style>
       html {
         scroll-behavior: smooth;
+        font-size: 62.5%;
+
+        --black: #343e4d;
+        --link-color: #1f70b5;
       }
 
       body {
@@ -16,7 +20,7 @@
       .anchor {
         display: block;
         position: relative;
-        top: -60px;
+        top: -6rem;
         visibility: hidden;
       }
 
@@ -25,9 +29,9 @@
       }
 
       h2 {
-        margin-top: 30px;
-        padding-top: 30px;
-        border-top: 1px solid #343e4d;
+        margin-top: 3rem;
+        padding-top: 3rem;
+        border-top: 0.1rem solid var(--black);
       }
 
       #container {
@@ -43,12 +47,13 @@
       }
 
       #sidebar {
+        overflow: auto;
         order: 0;
         flex: 0 0 auto;
         align-self: auto;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 1.6rem;
       }
       #main {
         scroll-behavior: smooth;
@@ -56,42 +61,59 @@
         flex: 1 1 auto;
         align-self: auto;
         background-color: #ddd;
+        padding: 1rem;
       }
       #report {
-        padding: 16px;
+        padding: 1.6rem;
         background-color: white;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
       }
 
       #sidebar,
       #main {
-        padding: 10px;
         overflow: auto;
       }
 
       #resizer {
         cursor: ew-resize;
-        background-color: #666;
-        width: 10px;
+        background-color: #b0b0b0;
+        width: 2px;
         height: 100%;
         transition: background-color 0.2s;
         cursor: ew-resize;
       }
+      .sidenav {
+        padding: 1rem;
+        text-wrap: nowrap;
+      }
+      .resizing {
+        background-color: var(--link-color);
+      }
       #resizer:hover {
-        background-color: #555;
+        background-color: var(--link-color);
+      }
+
+      .logo {
+        max-width: 500px;
+        width: 100%;
       }
 
       .item {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 0.8rem;
         max-width: 100%;
         text-align: center;
         vertical-align: top;
-        margin-bottom: 24px;
-        color: #343e4d;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #cecece;
+        margin-bottom: 2.4rem;
+        color: var(--black);
+        padding: 1.2rem;
+        border-radius: 0.6rem;
+        border: 0.1rem solid #cecece;
       }
 
       .item h3,
@@ -103,20 +125,24 @@
         justify-content: center;
         flex-wrap: wrap;
         display: flex;
-        gap: 10px;
-        font-size: 12px;
+        gap: 1rem;
+        font-size: 1.2rem;
       }
 
       .canvas-wrapper {
         overflow: auto;
-        padding: 4px;
+        padding: 0.4rem;
         display: inline-block;
         max-width: 100%;
       }
 
       .title {
-        margin-top: 30px;
+        margin-top: 3rem;
         text-align: center;
+        align-items: center;
+        flex-direction: column;
+        display: flex;
+        align-self: center;
       }
 
       .navbar-item .section-name {
@@ -124,40 +150,45 @@
       }
 
       .navbar-item {
-        min-height: 26px;
+        min-height: 2.6rem;
       }
 
       .navbar-item a {
         text-decoration: none;
-        font-size: 14px;
+        font-size: 1.4rem;
+        color: var(--link-color);
       }
 
       .navbar-item svg {
-        width: 10px;
-        height: 10px;
+        width: 1rem;
+        height: 1rem;
+        color: #434343;
       }
 
       .navbar-item .subnav a {
         display: block;
-        border-bottom: 1px solid white;
-        padding: 7px 0 7px 0;
+        border-bottom: 0.1rem solid white;
+        padding: 0.7rem 0 0.7rem 0;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
         text-align: left;
       }
+      .navbar-item .subnav a:hover {
+        color: green;
+      }
 
       .subnav {
-        max-height: 0; /* Start with a max-height of 0 to hide content */
+        max-height: 0;
         overflow: hidden;
-        transition: max-height 0.3s ease-in-out; /* Transition for smooth effect */
-        margin-top: 8px;
-        padding-left: 24px;
+        transition: max-height 0.3s ease-in-out;
+        margin-top: 0.8rem;
+        padding-left: 2.4rem;
       }
 
       .navbar-item .collapse-icon {
         cursor: pointer;
-        padding: 8px;
+        padding: 0.8rem;
       }
 
       .navbar-item svg {
@@ -175,6 +206,7 @@
         #main {
           background-color: white;
           overflow: visible;
+          padding: 0;
         }
         #sidebar,
         #resizer {
@@ -184,6 +216,60 @@
           display: block;
           overflow: visible;
         }
+      }
+    </style>
+    <style>
+      .node-path {
+        fill: none;
+        stroke: #8198bc;
+      }
+
+      .node a {
+        display: inline-block;
+        padding: 0.5rem;
+        font-size: 1.3rem;
+        white-space: nowrap;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-decoration: none;
+        background-color: #eee;
+        border-radius: 0.3rem;
+        border: 0.1em solid #ccc;
+        color: var(--link-color);
+        font-family: serif;
+      }
+
+      .node svg path {
+        fill: var(--link-color);
+      }
+
+      .node a:hover {
+        color: #4297df;
+      }
+
+      .node a:hover svg path {
+        fill: #4297df;
+      }
+
+      .node .content {
+        text-align: center;
+      }
+
+      .node .content svg {
+        height: 1.8rem;
+        vertical-align: middle;
+        padding-right: 0.5rem;
+      }
+
+      .node .content span {
+        vertical-align: middle;
+      }
+
+      .canvas {
+        display: inline-block;
+        padding: 1.6em 1.6rem;
       }
     </style>
   </head>
@@ -237,8 +323,6 @@
             resizeData.parentElement = resizer.parentElement
             resizeData.maxWidth = resizer.parentElement.clientWidth - resizeData.handleWidth
             resizeData.tracking = true
-
-            console.log('tracking started')
           }
         })
 
@@ -253,6 +337,7 @@
               )
 
               resizeData.resizeTarget.style.width = newWidth + 'px'
+              resizer.classList.add('resizing')
             }
           }, 1),
         )
@@ -260,8 +345,7 @@
         window.addEventListener('mouseup', function (event) {
           if (resizeData.tracking) {
             resizeData.tracking = false
-
-            console.log('tracking stopped')
+            resizer.classList.remove('resizing')
           }
         })
 

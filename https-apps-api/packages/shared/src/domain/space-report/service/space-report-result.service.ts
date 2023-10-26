@@ -39,18 +39,19 @@ export class SpaceReportResultService {
       }, { app: [], file: [], job: [], asset: [], workflow: [] })
 
     const sidebar = await this.getSidebar(reportPartsMap, document)
+    const title = await this.getTitle(spaceReport, document)
     container.appendChild(sidebar)
 
     const resizer = document.createElement('div')
     resizer.setAttribute('id', 'resizer')
     container.appendChild(resizer)
-    
-    const main = document.createElement('div')
+
+    const main = document.createElement('main')
     main.setAttribute('id', 'main')
-    
+
     const report = document.createElement('div')
     report.setAttribute('id', 'report')
-    report.appendChild(this.getTitle(spaceReport, document))
+    report.appendChild(title)
 
     report.appendChild(this.getReportPartTypeHeader('Space Files', this.FILES_HEADER_ID, document))
     const itemListFiles = document.createElement('div')
@@ -126,10 +127,7 @@ export class SpaceReportResultService {
   }
 
   private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
-    // const logo = document.createElement('div')
-    // logo.innerHTML = await logoImage
-
-    const container = document.createElement('div')
+    const container = document.createElement('aside')
     container.setAttribute('id', 'sidebar')
     container.style.width = '300px'
     container.appendChild(this.getToC(items, document))
@@ -139,7 +137,7 @@ export class SpaceReportResultService {
 
   private getToC(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
     const container = document.createElement('div')
-    container.classList.add('sidebar')
+    container.classList.add('sidenav')
 
     container.appendChild(this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document))
     container.appendChild(this.getResourceItem('Apps', this.APPS_HEADER_ID, items.app, document))
@@ -186,19 +184,22 @@ export class SpaceReportResultService {
     return section
   }
 
-  private getTitle(report: SpaceReport, document: Document) {
+  private async getTitle(report: SpaceReport, document: Document) {
     const title = document.createElement('div')
     title.classList.add('title')
+
+    const logo = document.createElement('div')
+    const reportTitle = document.createElement('span')
+    logo.classList.add('logo')
+    logo.innerHTML = await logoImage
+    reportTitle.innerHTML = 'Space Report'
+    reportTitle.classList.add('report-title')
+    logo.appendChild(reportTitle)
+    title.appendChild(logo)
 
     const spaceName = document.createElement('h1')
     spaceName.innerHTML = report.space.name
     title.appendChild(spaceName)
-
-    const spaceDescription = document.createElement('p')
-    const spaceDescriptionText = document.createElement('b')
-    spaceDescriptionText.innerHTML = report.space.description
-    spaceDescription.appendChild(spaceDescriptionText)
-    title.appendChild(spaceDescription)
 
     const reportCreated = document.createElement('p')
     reportCreated.innerHTML = new Date(report.createdAt).toLocaleString()
