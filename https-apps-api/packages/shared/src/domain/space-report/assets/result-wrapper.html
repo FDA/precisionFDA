@@ -6,8 +6,9 @@
         scroll-behavior: smooth;
         font-size: 62.5%;
 
-        --black: #343e4d;
+        --black-color: #343e4d;
         --link-color: #1f70b5;
+        --main-bg-color: #ddd;
       }
 
       body {
@@ -31,7 +32,7 @@
       h2 {
         margin-top: 3rem;
         padding-top: 3rem;
-        border-top: 0.1rem solid var(--black);
+        border-top: 0.1rem solid var(--black-color);
       }
 
       #container {
@@ -60,7 +61,7 @@
         order: 0;
         flex: 1 1 auto;
         align-self: auto;
-        background-color: #ddd;
+        background-color: var(--main-bg-color);
         padding: 1rem;
       }
       #report {
@@ -79,9 +80,10 @@
       }
 
       #resizer {
+        flex: 0 0 auto;
         cursor: ew-resize;
-        background-color: #b0b0b0;
-        width: 2px;
+        background-color: var(--main-bg-color);
+        width: 7px;
         height: 100%;
         transition: background-color 0.2s;
         cursor: ew-resize;
@@ -110,10 +112,10 @@
         text-align: center;
         vertical-align: top;
         margin-bottom: 2.4rem;
-        color: var(--black);
+        color: var(--black-color);
         padding: 1.2rem;
         border-radius: 0.6rem;
-        border: 0.1rem solid #cecece;
+        border: 0.1rem solid var(--black-color);
       }
 
       .item h3,
@@ -162,7 +164,7 @@
       .navbar-item svg {
         width: 1rem;
         height: 1rem;
-        color: #434343;
+        color: var(--black-color);
       }
 
       .navbar-item .subnav a {
