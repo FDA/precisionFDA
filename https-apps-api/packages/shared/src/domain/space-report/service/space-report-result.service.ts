@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/indent */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs/promises'
-import { JSDOM } from 'jsdom'
 import path from 'path'
+import { JSDOM } from 'jsdom'
 import { ArrayUtils } from '../../..'
-import { SpaceReportPart } from '../entity/space-report-part.entity'
-import { SpaceReport } from '../entity/space-report.entity'
-import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
+import type { SpaceReportPart } from '../entity/space-report-part.entity'
+import type { SpaceReport } from '../entity/space-report.entity'
+import type { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 
 // TODO - use import after introducing bundler with nestjs
 const assetsPath = path.join(__dirname, '../../../../src/domain/space-report/assets')
@@ -22,54 +24,66 @@ export class SpaceReportResultService {
   private readonly WORKFLOWS_HEADER_ID = 'header-workflows'
   private readonly REPORT_PART_ID_PREFIX = 'report-part-'
 
-  async generateResult(report: SpaceReport) {
+  async generateResult(spaceReport: SpaceReport) {
     const domContainer = new JSDOM(await html)
     const document = domContainer.window.document
 
-    const reportPartsMap = report.reportParts.getItems()
+    const container = document.createElement('div')
+    container.setAttribute('id', 'container')
+    document.body.appendChild(container)
+
+    const reportPartsMap = spaceReport.reportParts.getItems()
       .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>((acc, rp) => {
         acc[rp.sourceType].push(rp)
         return acc
       }, { app: [], file: [], job: [], asset: [], workflow: [] })
 
-    const header = await this.getHeader(reportPartsMap, document)
-    document.body.appendChild(header)
+    const sidebar = await this.getSidebar(reportPartsMap, document)
+    container.appendChild(sidebar)
 
-    const container = document.createElement('div')
-    container.classList.add('container')
-    container.appendChild(this.getTitle(report, document))
+    const resizer = document.createElement('div')
+    resizer.setAttribute('id', 'resizer')
+    container.appendChild(resizer)
+    
+    const main = document.createElement('div')
+    main.setAttribute('id', 'main')
+    
+    const report = document.createElement('div')
+    report.setAttribute('id', 'report')
+    report.appendChild(this.getTitle(spaceReport, document))
 
-    container.appendChild(this.getReportPartTypeHeader('Space Files', this.FILES_HEADER_ID, document))
+    report.appendChild(this.getReportPartTypeHeader('Space Files', this.FILES_HEADER_ID, document))
     const itemListFiles = document.createElement('div')
     itemListFiles.classList.add('item-list')
-    container.appendChild(itemListFiles)
+    report.appendChild(itemListFiles)
     reportPartsMap.file.forEach(rp => itemListFiles.appendChild(this.getReportPartElement(rp, document)))
-    
-    container.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
+
+    report.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
     const itemListApps = document.createElement('div')
     itemListApps.classList.add('item-list')
-    container.appendChild(itemListApps)
+    report.appendChild(itemListApps)
     reportPartsMap.app.forEach(rp => itemListApps.appendChild(this.getReportPartElement(rp, document)))
-    
-    container.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
+
+    report.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
     const itemListExecutions = document.createElement('div')
     itemListExecutions.classList.add('item-list')
-    container.appendChild(itemListExecutions)
+    report.appendChild(itemListExecutions)
     reportPartsMap.job.forEach(rp => itemListExecutions.appendChild(this.getReportPartElement(rp, document)))
-    
-    container.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
+
+    report.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
     const itemListAssets = document.createElement('div')
     itemListAssets.classList.add('item-list')
-    container.appendChild(itemListAssets)
+    report.appendChild(itemListAssets)
     reportPartsMap.asset.forEach(rp => itemListAssets.appendChild(this.getReportPartElement(rp, document)))
-    
-    container.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
+
+    report.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
     const itemListWorkflows = document.createElement('div')
     itemListWorkflows.classList.add('item-list')
-    container.appendChild(itemListWorkflows)
+    report.appendChild(itemListWorkflows)
     reportPartsMap.workflow.forEach(rp => itemListWorkflows.appendChild(this.getReportPartElement(rp, document)))
 
-    document.body.appendChild(container)
+    main.appendChild(report)
+    container.appendChild(main)
 
     return domContainer.serialize()
   }
@@ -111,48 +125,54 @@ export class SpaceReportResultService {
     return container
   }
 
-  private async getHeader(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
-    const logo = document.createElement('div')
-    logo.innerHTML = await logoImage
+  private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
+    // const logo = document.createElement('div')
+    // logo.innerHTML = await logoImage
 
     const container = document.createElement('div')
-    container.classList.add('header', 'noPrint')
-    container.appendChild(logo)
-    container.appendChild(this.getNavbar(items, document))
+    container.setAttribute('id', 'sidebar')
+    container.style.width = '300px'
+    container.appendChild(this.getToC(items, document))
 
     return container
   }
 
-  private getNavbar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
+  private getToC(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
     const container = document.createElement('div')
-    container.classList.add('navbar')
+    container.classList.add('sidebar')
 
-    container.appendChild(this.getNavbarItem('Files', this.FILES_HEADER_ID, items.file, document))
-    container.appendChild(this.getNavbarItem('Apps', this.APPS_HEADER_ID, items.app, document))
-    container.appendChild(this.getNavbarItem('Executions', this.JOBS_HEADER_ID, items.job, document))
-    container.appendChild(this.getNavbarItem('Assets', this.ASSETS_HEADER_ID, items.asset, document))
-    container.appendChild(this.getNavbarItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document))
+    container.appendChild(this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document))
+    container.appendChild(this.getResourceItem('Apps', this.APPS_HEADER_ID, items.app, document))
+    container.appendChild(this.getResourceItem('Executions', this.JOBS_HEADER_ID, items.job, document))
+    container.appendChild(this.getResourceItem('Assets', this.ASSETS_HEADER_ID, items.asset, document))
+    container.appendChild(this.getResourceItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document))
 
     return container
   }
 
-  private getNavbarItem(title: string, anchor: string, reportParts: SpaceReportPart[], document: Document) {
-    const container = document.createElement('div')
-    container.classList.add('navbar-item')
+  private getResourceItem(title: string, anchor: string, reportParts: SpaceReportPart[], document: Document) {
+    const section = document.createElement('div')
+    section.classList.add('navbar-item')
+
+    const collapse = document.createElement('span')
+    collapse.classList.add('collapse-icon')
+    collapse.innerHTML = '<svg id="triangle" viewBox="0 0 100 100"><polygon fill="currentColor" points="50 15, 100 100, 0 100"/</svg>'
+    section.appendChild(collapse)
 
     const link = document.createElement('a')
+    link.classList.add('section-name')
     link.href = `#${anchor}`
     link.innerHTML = title
-    container.appendChild(link)
+    section.appendChild(link)
 
     if (ArrayUtils.isEmpty(reportParts)) {
-      return container
+      return section
     }
 
     const subnav = document.createElement('div')
     subnav.classList.add('subnav')
 
-    const subnavItems = reportParts.map(rp => {
+    const subItems = reportParts.map(rp => {
       const sublink = document.createElement('a')
       sublink.href = `#${this.REPORT_PART_ID_PREFIX}${rp.id}`
       sublink.innerHTML = rp.result.title
@@ -160,14 +180,10 @@ export class SpaceReportResultService {
       return sublink
     })
 
-    subnavItems.forEach(sni => subnav.appendChild(sni))
+    subItems.forEach(sni => subnav.appendChild(sni))
+    section.appendChild(subnav)
 
-    const subnavContainer = document.createElement('div')
-    subnavContainer.classList.add('subnav-container')
-    subnavContainer.appendChild(subnav)
-    container.appendChild(subnavContainer)
-
-    return container
+    return section
   }
 
   private getTitle(report: SpaceReport, document: Document) {
