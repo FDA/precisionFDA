@@ -24,7 +24,9 @@ template "#{node[:gsrs][:tomcat_path]}/conf/context.xml" do
 end
 
 bash "sync ginas indexes" do
+  live_stream true
   code <<-BASH
+    echo "Executing: aws s3 sync $SOURCE_PATH $DESTINATION_PATH --delete"
     aws s3 sync $SOURCE_PATH $DESTINATION_PATH --delete
     chown $OWNER_USER:$OWNER_GROUP $DESTINATION_PATH/ -R
   BASH
@@ -36,16 +38,20 @@ bash "sync ginas indexes" do
       OWNER_GROUP: node["gsrs"]["tomcat_group"],
     }
   end)
+  only_if { shell_out("aws s3 sync #{node.run_state.dig("ssm_params", "gsrs", "index_path") || node["gsrs"]["index_path"]} #{node['gsrs']['tomcat_path']}/ginas.ix --delete --dryrun | grep download").exitstatus == 0 }
+  notifies :run, "bash[wipe tomcat cache]", :immediately
 end
 
 git "#{node[:gsrs][:tomcat_path]}/repo" do
   repository node[:gsrs][:repo_url]
   revision(lazy { node.run_state.dig("ssm_params", "gsrs", "revision") || node[:gsrs][:revision] })
   depth 1
-  notifies :restart, "tomcat_service[gsrs]", :delayed
+  notifies :run, "bash[copy gsrs to webapps]", :immediately
 end
 
 bash "copy gsrs to webapps" do
+  action :nothing
+  live_stream true
   code <<-BASH
     rsync -a $SOURCE_PATH $DESTINATION_PATH \
     --exclude '.git' \
@@ -63,6 +69,20 @@ bash "copy gsrs to webapps" do
       OWNER_GROUP: node["gsrs"]["tomcat_group"],
     },
   )
+  notifies :run, "bash[wipe tomcat cache]", :immediately
+end
+
+bash "wipe tomcat cache" do
+  action :nothing
+  code <<-BASH
+    rm -rf $DESTINATION_PATH
+  BASH
+  environment(
+    {
+      DESTINATION_PATH: "#{node['gsrs']['tomcat_path']}/work/*",
+    }
+  )
+  notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/ROOT/WEB-INF/classes/application.yml" do
@@ -94,6 +114,7 @@ end
 
 template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/application.conf" do
   source "gsrs/application.conf.erb"
+  sensitive true
   mode 0644
   owner node[:gsrs][:tomcat_user]
   group node[:gsrs][:tomcat_grop]
@@ -110,7 +131,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
 end
 
 tomcat_service "gsrs" do
-  action :start
+  action [:start, :enable]
   service_name "gsrs"
   install_path node[:gsrs][:tomcat_path]
   tomcat_user node[:gsrs][:tomcat_user]
