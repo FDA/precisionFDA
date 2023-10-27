@@ -61,6 +61,7 @@ SecureHeaders::Configuration.default do |config|
       'unsafe-inline'
       'unsafe-eval'
       https://drugs.ncats.io
+      https://dnanexus.github.io
       https://www.recaptcha.net/recaptcha/
       https://www.gstatic.com/recaptcha/
     ),
