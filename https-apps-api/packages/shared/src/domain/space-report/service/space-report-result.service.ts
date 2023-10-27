@@ -129,7 +129,7 @@ export class SpaceReportResultService {
   private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
     const container = document.createElement('aside')
     container.setAttribute('id', 'sidebar')
-    container.style.width = '300px'
+    container.style.width = '250px'
     container.appendChild(this.getToC(items, document))
 
     return container
@@ -189,19 +189,42 @@ export class SpaceReportResultService {
     title.classList.add('title')
 
     const logo = document.createElement('div')
-    const reportTitle = document.createElement('span')
     logo.classList.add('logo')
     logo.innerHTML = await logoImage
+
+    const reportTitle = document.createElement('span')
     reportTitle.innerHTML = 'Space Report'
     reportTitle.classList.add('report-title')
+
+    const reportType = document.createElement('span')
+    reportType.innerHTML = 'Provenance Tracking'
+    reportType.classList.add('report-type')
+
     logo.appendChild(reportTitle)
     title.appendChild(logo)
+
+    title.appendChild(reportType)
+
+    const reportDescription = document.createElement('p')
+    reportDescription.innerHTML = `
+      The Provenance Tracking Report provides a comprehensive documentation 
+      of the lineage and history of Files, Apps, Executions, Assets, and 
+      Workflows within the precisionFDA system. Through this report, users 
+      can gain insights into the origin, movement, and life-cycle of each 
+      item, ensuring transparency, traceability, and accountability. Whether 
+      you're trying to verify the authenticity of a file, understand the 
+      sequence of a particular workflow, or track changes to an asset.
+    `
+    reportDescription.classList.add('report-description')
+    title.appendChild(reportDescription)
 
     const spaceName = document.createElement('h1')
     spaceName.innerHTML = report.space.name
     title.appendChild(spaceName)
 
+
     const reportCreated = document.createElement('p')
+    reportCreated.classList.add('created')
     reportCreated.innerHTML = new Date(report.createdAt).toLocaleString()
     title.appendChild(reportCreated)
 

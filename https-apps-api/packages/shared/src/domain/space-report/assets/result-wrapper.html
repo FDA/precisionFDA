@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="initial-scale=1.0, width=device-width" />
     <style>
       html {
         scroll-behavior: smooth;
@@ -9,6 +11,7 @@
         --black-color: #343e4d;
         --link-color: #1f70b5;
         --main-bg-color: #ddd;
+        --border-color: #ccc;
       }
 
       body {
@@ -26,13 +29,21 @@
       }
 
       h1 {
+        margin-top: 5rem;
         text-align: center;
       }
 
       h2 {
+        font-size: 2rem;
+        text-align: center;
         margin-top: 3rem;
         padding-top: 3rem;
-        border-top: 0.1rem solid var(--black-color);
+        margin-bottom: 3rem;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .created {
+        font-size: 1.4rem;
       }
 
       #container {
@@ -55,6 +66,19 @@
         display: flex;
         flex-direction: column;
         gap: 1.6rem;
+        border-right: 1px solid #d8d5d5;
+      }
+      #sidebar::-webkit-scrollbar-track {
+        background: rgba(9, 30, 66, 0.08);
+        border-radius: 4px;
+      }
+      #sidebar::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+      }
+      #sidebar::-webkit-scrollbar-thumb {
+        background: #97a0af;
+        border-radius: 4px;
       }
       #main {
         scroll-behavior: smooth;
@@ -83,25 +107,31 @@
         flex: 0 0 auto;
         cursor: ew-resize;
         background-color: var(--main-bg-color);
-        width: 7px;
+        border-right: 0.4rem solid var(--main-bg-color);
+        width: 0.4rem;
         height: 100%;
         transition: background-color 0.2s;
         cursor: ew-resize;
       }
       .sidenav {
         padding: 1rem;
+        padding-top: 3rem;
         text-wrap: nowrap;
+        padding-right: 0;
       }
       .resizing {
         background-color: var(--link-color);
       }
       #resizer:hover {
         background-color: var(--link-color);
+        box-shadow: none;
       }
 
       .logo {
-        max-width: 500px;
-        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        min-width: 40rem;
+        max-width: 40rem;
       }
 
       .item {
@@ -115,7 +145,7 @@
         color: var(--black-color);
         padding: 1.2rem;
         border-radius: 0.6rem;
-        border: 0.1rem solid var(--black-color);
+        border: 1px solid var(--border-color);
       }
 
       .item h3,
@@ -147,6 +177,26 @@
         align-self: center;
       }
 
+      .report-title {
+        text-wrap: nowrap;
+        font-weight: 300;
+        font-size: 1.8rem;
+        padding-bottom: 0.5rem;
+      }
+      .report-type {
+        margin-top: 5rem;
+        text-wrap: nowrap;
+        font-weight: 800;
+        font-size: 1.8rem;
+      }
+      .report-description {
+        margin-top: 2rem;
+        font-weight: 400;
+        font-size: 1.4rem;
+        line-height: 2.1rem;
+        max-width: 70rem;
+      }
+
       .navbar-item .section-name {
         font-weight: bold;
       }
@@ -169,8 +219,7 @@
 
       .navbar-item .subnav a {
         display: block;
-        border-bottom: 0.1rem solid white;
-        padding: 0.7rem 0 0.7rem 0;
+        padding: 0.5rem 0 0.5rem 0;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -202,6 +251,14 @@
 
       .navbar-item.expanded .subnav {
         max-height: fit-content;
+        margin-bottom: 8px;
+      }
+
+      @media (max-width: 950px) {
+        #sidebar,
+        #resizer {
+          display: none;
+        }
       }
 
       @media print {
@@ -217,6 +274,9 @@
         #container {
           display: block;
           overflow: visible;
+        }
+        #report .title {
+          margin-top: 0;
         }
       }
     </style>
@@ -238,7 +298,7 @@
         text-decoration: none;
         background-color: #eee;
         border-radius: 0.3rem;
-        border: 0.1em solid #ccc;
+        border: 0.1em solid var(--border-color);
         color: var(--link-color);
         font-family: serif;
       }
@@ -287,9 +347,9 @@
 
       const resizeData = {
         tracking: false,
-        startWidth: 200,
+        startWidth: 250,
         startCursorScreenX: null,
-        handleWidth: 10,
+        handleWidth: 12,
         resizeTarget: null,
         parentElement: null,
         maxWidth: null,
