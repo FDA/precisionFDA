@@ -90,6 +90,7 @@ services:
       - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-worker:/app/node_modules
   db:
+    platform: linux/x86_64
     extends:
       file: ./base.services.yml
       service: db_emulated
