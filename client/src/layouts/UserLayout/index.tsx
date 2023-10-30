@@ -14,7 +14,7 @@ const StyledLayoutLoader = styled.div`
 const LayoutLoader = () => (
   <StyledLayoutLoader>
     <div>Loading your experince</div>
-    <Loader />
+    <Loader className="pageloader" />
   </StyledLayoutLoader>
 )
 

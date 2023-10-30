@@ -1,6 +1,6 @@
 import React from 'react'
 import { Route } from 'react-router'
-import { history, render, screen, act } from '../../../test/test-utils'
+import { history, render, screen, waitFor } from '../../../test/test-utils'
 import { AppList } from '../apps/AppList'
 
 describe('My Home / Apps', () => {
@@ -11,11 +11,9 @@ describe('My Home / Apps', () => {
         <AppList scope="me" />
       </Route>,
     )
-
-    await act(async () => {
+    await waitFor(() => {
       const createButton = screen.getByTestId('home-apps-create-button')
       expect(createButton).toBeInTheDocument()
-
       const tableEl = screen.getByTestId('pfda-table')
       expect(tableEl).toBeInTheDocument()
     })

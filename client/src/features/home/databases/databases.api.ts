@@ -48,6 +48,7 @@ export interface FetchAccessibleFilesResponse {
 
 interface FetchAccessibleFilesRequest {
   search_string?: string
+  uid?: string[] | string
   limit?: number
   offset?: number
   scopes?: FileScope[]
@@ -58,6 +59,9 @@ interface FetchAccessibleFilesRequest {
 
 export async function fetchAccessibleFiles(body: FetchAccessibleFilesRequest) {
   return axios.post<FetchAccessibleFilesResponse>('/api/list_files', body).then(r => r.data)
+}
+export async function fetchAccessibleFilesByUID(body: FetchAccessibleFilesRequest) {
+  return axios.post<IAccessibleFile[]>('/api/list_files', body).then(r => r.data)
 }
 
 export interface CreateDatabasePayload {

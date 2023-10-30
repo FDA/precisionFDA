@@ -1,6 +1,24 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
 export const StyledSpecTab = styled.div`
+  table {
+    border-spacing: 0;
+
+    th {
+      font-weight: bold;
+      text-align: right;
+      padding-right: 8px;
+      white-space: nowrap;
+      min-width: 55px;
+    }
+    td {
+      padding-right: 16px;
+    }
+    td, th {
+      vertical-align: top;
+    }
+  }
+
   .__container {
     padding-left: 16px;
     padding-right: 16px;
@@ -13,29 +31,32 @@ export const StyledSpecTab = styled.div`
 
       &_label {
         margin-bottom: 5px;
-        color: #8198bc;
+        color: #6d6d6d;
         text-transform: uppercase;
         font-weight: 300;
         font-size: 14px;
       }
       &_value {
-        font-size: 19px;
+        font-size: 14px;
       }
     }
   }
   .__table-container {
-    background-color: #f4f8fd;
-    border: 1px solid #ddd;
+    margin-top: 16px;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     border-bottom-right-radius: 3px;
     border-bottom-left-radius: 3px;
     display: flex;
+    flex-wrap: wrap;
   }
   .__table {
+    flex: 0 1 auto;
     padding: 10px 15px;
-    width: 50%;
+    max-width: 550px;
+    min-width: 350px;
 
     &_title {
-      color: #8198bc;
       text-transform: uppercase;
       font-weight: 400;
       font-size: 14px;
@@ -43,22 +64,20 @@ export const StyledSpecTab = styled.div`
       padding-left: 8px;
     }
     &_row {
+      font-size: 14px;
       display: flex;
       padding: 8px;
       border-top: 1px solid #ddd;
-
-      &_even {
-        background: #ebf3fb;
-      }
     }
     &_type {
-      width: 120px;
-      color: #8198bc;
+      min-width: 100px;
+      font-size: 14px;
       font-family: 'PT Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
     }
     &_value {
       display: flex;
       flex-direction: column;
+      margin-left: 16px;
 
       span {
         margin-bottom: 5px;
@@ -72,7 +91,6 @@ export const StyledSpecTab = styled.div`
       }
     }
     &_required {
-      margin-right: 100px;
       margin-left: auto;
     }
     &_required-label {

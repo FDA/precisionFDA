@@ -1,4 +1,4 @@
-import { useQueryClient, useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { omit } from 'ramda'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -6,14 +6,17 @@ import { toast } from 'react-toastify'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
 import { SyncIcon } from '../../../components/icons/SyncIcon'
+import { getSpaceIdFromScope } from '../../../utils'
+import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
+import { getBaseLink } from '../apps/run/utils'
 import { ActionsButton } from '../show.styles'
 import { ResourceScope } from '../types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
 import { syncFilesRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionActions } from './useExecutionSelectActions'
-import { useAuthUser } from '../../auth/useAuthUser'
+
 
 export const ExecutionActionsRow = ({
   scope,
@@ -68,7 +71,7 @@ export const ExecutionActionsRow = ({
     if (execution.launched_by === user?.full_name) {
       window.open(execution.links.open_external,'_blank','noopener,noreferrer')
     } else {
-      toast.error(`This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution.`)
+      toast.error(`This Workstation was launched by ${execution.launched_by} and can only be accessed by them. If you wish to use a Workstation in this Space, please launch your own execution`)
     }
   }
 
@@ -105,7 +108,7 @@ export const ExecutionActionsRow = ({
       {isJobOwner && execution.links.sync_files && (
         <ButtonSolidBlue onClick={onSyncFilesClick}>Sync Files</ButtonSolidBlue>
       )}
-      <Link to={`/apps/${execution.links.app?.replace('/apps/', '')}/jobs/new`}>
+      <Link to={`/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.links.app?.replace('/apps/', '')}/jobs/new`}>
         <ButtonSolidBlue>Re-Run Execution</ButtonSolidBlue>
       </Link>
       <Dropdown
@@ -114,7 +117,7 @@ export const ExecutionActionsRow = ({
           <ActionsDropdownContent
             actions={
               ['terminated', 'failed', 'done'].includes(execution.state)
-                ? omit(['Snapshot'], actions)
+                ? omit(['Snapshot', 'Terminate'], actions)
                 : omit(['Copy to space', 'Snapshot'], actions)
             }
           />

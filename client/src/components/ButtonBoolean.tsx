@@ -1,47 +1,75 @@
 import React from 'react'
-import { ButtonGroup } from './Button/ButtonGroup'
-import { Button, ButtonSolidBlue } from './Button'
+import styled from 'styled-components'
+import { Button } from './Button'
+
+const StyledBooleanRadioButtons = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+`
 
 /**
- * Component for showing boolean values (including undefined). Component
- * consists of two buttons - True and False. Clicking on either of them
+ * Component for showing boolean values (including null). Component
+ * consists of two radio buttons - True and False. Clicking on either of them
  * sets the value and highlights the button that's displaying the value.
- * 
- * If no default value is provided no button is highlighted.
- * 
- * If default value is provided corresponding button is marked as default.
+ *
+ * If no value is provided no button is highlighted.
  */
-export const ButtonBoolean = ({ value, onChange, onBlur, defaultValue, disabled }:
-  {
-    value?: boolean, onChange: (value?: boolean) => void, onBlur?: () => void,
-    defaultValue?: boolean, disabled?: boolean
-  }) => {
-
-  const onChangeWithBlur = (val: boolean) => {
-    onChange(val)
+export const BooleanRadioButtons = ({
+  value,
+  onChange,
+  onBlur,
+  disabled,
+  optional,
+}: {
+  value?: 'true' | 'false' | boolean
+  onChange: (value: 'true' | 'false' | null) => void
+  onBlur?: () => void
+  disabled?: boolean
+  optional?: boolean
+}) => {
+  let val = value
+  if (typeof value === 'boolean') {
+    val = value ? 'true' : 'false'
+  }
+  const onChangeWithBlur = (e: any) => {
+    onChange(e.target.value)
     if (onBlur) {
       onBlur()
     }
   }
 
-  return (
-    <ButtonGroup>
-      {(value === false || value === undefined) &&
-        <Button onClick={() => onChangeWithBlur(true)} disabled={disabled}>
-          True {defaultValue === true ? '(default)' : ''}
-        </Button>}
-      {value && <ButtonSolidBlue disabled={disabled}>
-        True {defaultValue === true ? '(default)' : ''}
-      </ButtonSolidBlue>}
+  const handleClear = () => {
+    onChange(null)
+  }
 
-      {(value || value === undefined) &&
-        <Button onClick={() => onChangeWithBlur(false)} disabled={disabled}>
-          False {defaultValue === false ? '(default)' : ''}
-        </Button>}
-      {value === false &&
-        <ButtonSolidBlue disabled={disabled}>
-          False {defaultValue === false ? '(default)' : ''}
-        </ButtonSolidBlue>}
-    </ButtonGroup>
+  return (
+    <StyledBooleanRadioButtons>
+      <label htmlFor="boolean-true">
+        <input
+          onChange={onChangeWithBlur}
+          type="radio"
+          value="true"
+          checked={val === 'true'}
+          id="boolean-true"
+        />
+        True
+      </label>
+      <label htmlFor="boolean-false">
+        <input
+          onChange={onChangeWithBlur}
+          type="radio"
+          value="false"
+          checked={val === 'false'}
+          id="boolean-false"
+        />
+        False
+      </label>
+      {optional && (
+        <Button type="button" onClick={handleClear}>
+          Clear
+        </Button>
+      )}
+    </StyledBooleanRadioButtons>
   )
 }

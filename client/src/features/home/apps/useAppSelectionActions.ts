@@ -15,6 +15,7 @@ import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.ap
 import { IApp } from './apps.types'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
+import { getBaseLink } from './run/utils'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -178,13 +179,13 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1 || !selected[0].links.track,
     },
     'Edit': {
-      type: 'link',
-      link: selected[0]?.links?.edit,
-      isDisabled: selected.length !== 1 || !selected[0].links.edit || !selected[0].latest_revision,
+      type: 'route',
+      to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/edit`,
+      isDisabled: selected.length !== 1 || !selected[0].latest_revision,
     },
     'Fork': {
-      type: 'link',
-      link: selected[0]?.links?.fork,
+      type: 'route',
+      to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/fork`,
       isDisabled: selected.length !== 1 || !selected[0].links.fork,
     },
     'Export to': {
@@ -240,6 +241,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
+      shouldHide: ['private','public'].includes(selected[0]?.scope)
     },
     'Attach to...': {
       type: 'modal',

@@ -251,10 +251,7 @@ const app = {
 const job = {
   simple: (app: App): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
-    const runData: RunData = new RunData()
-    runData.run_instance_type = 'baseline-8'
-    runData.run_inputs = {}
-    runData.run_outputs = {}
+    const runData: RunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
     return {
       dxid,
       project: `project-${random.dxstr()}`,
@@ -281,10 +278,7 @@ const job = {
   },
   regular: (): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
-    const runData: RunData = new RunData()
-    runData.run_instance_type = 'baseline-8'
-    runData.run_inputs = {}
-    runData.run_outputs = {}
+    const runData: RunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
     return {
       dxid,
       project: `project-${random.dxstr()}`,

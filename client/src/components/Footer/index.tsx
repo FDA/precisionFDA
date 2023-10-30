@@ -62,8 +62,6 @@ const StyledFooter = styled.footer`
 
 `
 
-
-
 const SocialLink = styled.li`
   height: 20px;
   display: flex;

@@ -7,11 +7,13 @@ import { HomeLabel } from '../../../../components/HomeLabel'
 import { CogsIcon } from '../../../../components/icons/Cogs'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../../components/Tags'
+import { RESOURCE_LABELS } from '../../../../types/user'
 import { getBackPath } from '../../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home.styles'
 import {
   Header,
   HeaderLeft,
+  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -61,13 +63,13 @@ export const ExecutionDetails = ({
 
   useEffect(() => {
     if (notification == null) {
-        return
+      return
     }
     if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
-         NOTIFICATION_ACTION.JOB_RUNNING,
-         NOTIFICATION_ACTION.JOB_DONE,
-         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-         NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
+      NOTIFICATION_ACTION.JOB_RUNNING,
+      NOTIFICATION_ACTION.JOB_DONE,
+      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+      NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
       queryCache.invalidateQueries(['execution'])
     }
   }, [notification])
@@ -75,7 +77,7 @@ export const ExecutionDetails = ({
   const execution = data?.job
 
   if (status === 'loading') {
-    return <HomeLoader />
+    return <HomeLoader/>
   }
 
   if (!execution || !execution.id)
@@ -116,8 +118,8 @@ export const ExecutionDetails = ({
           <HeaderLeft>
             <div>
               <Title>
-                <CogsIcon height={24} />
-                <ExecutionState state={execution.state} />
+                <CogsIcon height={24}/>
+                <ExecutionState state={execution.state}/>
                 {execution.name}
               </Title>
               {execution?.failure_message && (
@@ -135,7 +137,7 @@ export const ExecutionDetails = ({
               />
             )}
           </HeaderLeft>
-          <div>
+          <HeaderRight>
             <ActionsRow>
               <ExecutionActionsRow
                 scope={scope}
@@ -144,7 +146,7 @@ export const ExecutionDetails = ({
                 isFetching={isFetching}
               />
             </ActionsRow>
-          </div>
+          </HeaderRight>
         </Header>
 
         <MetadataSection>
@@ -202,7 +204,7 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>Instance Type</MetadataKey>
-              <MetadataVal>{execution.instance_type}</MetadataVal>
+              <MetadataVal>{RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
           <MetadataRow>
@@ -231,8 +233,8 @@ export const ExecutionDetails = ({
         </MetadataSection>
       </Topbox>
 
-      <div className="pfda-padded-t40" />
-      <TabsSwitch tabsConfig={tabsConfig} />
+      <div className="pfda-padded-t40"/>
+      <TabsSwitch tabsConfig={tabsConfig}/>
     </>
   )
 }
