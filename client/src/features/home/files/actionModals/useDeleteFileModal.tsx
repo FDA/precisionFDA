@@ -23,20 +23,32 @@ const StyledPath = styled.div`
 
 const DeleteFiles = ({
   selected,
-  scope,
   setNodesToBeDeleted,
 }: {
   selected: IFile[]
-  scope: string
   setNodesToBeDeleted: (nodes: DownloadListResponse[]) => void
 }) => {
   const { data, status } = useQuery(
     ['download_list', selected],
-    () =>
-      fetchFilesDownloadList(
-        selected.map(s => s.id),
-        scope,
-      ),
+    () => {
+      // Group files by scope name
+      const filesByScopes = new Map<string, IFile[]>()
+      for (const file of selected) {
+        if (!filesByScopes.has(file.scope)) {
+          filesByScopes.set(file.scope, [])
+        }
+        filesByScopes.get(file.scope).push(file)
+      }
+
+      const promises: Promise<DownloadListResponse[]>[] = []
+      for (let [scope, files] of filesByScopes) {
+        promises.push(fetchFilesDownloadList(
+            files.map(s => s.id),
+            scope,
+        ))
+      }
+      return Promise.all(promises).then(fileArrays => Promise.resolve(fileArrays.flat()));
+    },
     {
       onSuccess: (res) => {
         setNodesToBeDeleted(res)
@@ -133,7 +145,7 @@ export const useDeleteFileModal = ({
   })
 
   const handleSubmit = () => {
-    mutation.mutateAsync(memoSelected.map(s => s.id))
+    mutation.mutateAsync(nodesToBeDeleted.map(s => s.id))
   }
 
   const modalComp = isShown && (
@@ -152,14 +164,14 @@ export const useDeleteFileModal = ({
           >
             Cancel
           </Button>
-          <ButtonSolidRed onClick={handleSubmit} disabled={mutation.isLoading}>
+          <ButtonSolidRed onClick={handleSubmit} disabled={!nodesToBeDeleted || mutation.isLoading}>
             Delete
           </ButtonSolidRed>
         </>
       }
     >
       <ModalScroll>
-        <DeleteFiles selected={memoSelected} scope={scope} setNodesToBeDeleted={setNodesToBeDeleted}/>
+        <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted}/>
       </ModalScroll>
     </Modal>
   )
