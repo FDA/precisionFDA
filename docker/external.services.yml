@@ -2,29 +2,25 @@ services:
   gsrs:
     build:
       context: ../
-      dockerfile: ./gsrs/docker/images/gsrs.Dockerfile
-    environment:
-      # - MYSQL_HOST=gsrsdb
-      # - MYSQL_DATABASE=ixginas
-      # - MYSQL_ROOT_PASSWORD=password
-      # - GSRS_PORT=8080
+      dockerfile: docker/images/gsrs.Dockerfile
     ports:
       - 8080:8080
     depends_on:
       - gsrsdb
 
   gsrsdb:
-    image: "mariadb:10.6.12"
+    image: "mariadb:10.6.15"
     tmpfs:
       - /tmp
     environment:
       MYSQL_DATABASE: ixginas
-      # MYSQL_USER: admin
-      MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: password
     ports:
       - 32900:3306
+    volumes:
+      # Script for the DB initialization (creating the tables)
+      - ./misc/gsrs-db-init:/docker-entrypoint-initdb.d
   gsrsdb_emulated:
     extends:
       service: gsrsdb
-    image: amd64/mariadb:10.6.12
+    image: amd64/mariadb:10.6.15
