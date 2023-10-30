@@ -60,19 +60,23 @@ class InputSpecPreparer
       end
 
       # Check compatibility with choices
-      add_error "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
+      add_error "#{key}: incompatiblity with choices" if choices.present? && !validate_choices(choices, value)
 
       case klass
       when "file"
-        file = validate_file(key, value, accessible_scopes)
-        dxvalue = { "$dnanexus_link" => file.dxid }
-        input_info.push_file(file)
+        if value.present?
+          file = validate_file(key, value, accessible_scopes)
+          dxvalue = { "$dnanexus_link" => file.dxid }
+          input_info.push_file(file)
+        end
       when "array:file"
         dxvalue = []
-        value.each do |uid|
-          file = validate_file(key, uid, accessible_scopes)
-          dxvalue << { "$dnanexus_link" => file.dxid }
-          input_info.push_file(file)
+        if value.present?
+          value.each do |uid|
+            file = validate_file(key, uid, accessible_scopes)
+            dxvalue << { "$dnanexus_link" => file.dxid }
+            input_info.push_file(file)
+          end
         end
       when "int"
         add_error "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
@@ -89,6 +93,14 @@ class InputSpecPreparer
     end
 
     input_info
+  end
+
+  def validate_choices(choices, value)
+    if value.is_a?(Array)
+      value.all? { |v| choices.include?(v) }
+    else
+      choices.include?(value)
+    end
   end
 
   def first_error

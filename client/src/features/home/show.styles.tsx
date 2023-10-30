@@ -61,7 +61,7 @@ export const HeaderLeft = styled.div`
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 `
 
 export const Topbox = styled.div`

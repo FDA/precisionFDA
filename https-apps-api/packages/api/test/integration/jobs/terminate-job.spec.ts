@@ -42,7 +42,11 @@ describe('PATCH /jobs/:id/terminate', () => {
       name: job.name,
       scope: job.scope,
       entityType: ENTITY_TYPE.HTTPS,
-      runData: "",
+      runData: {
+        run_inputs: {},
+        run_outputs: {},
+        run_instance_type: 'baseline-8',
+      },
       user: user.id,
       app: app.id,
       terminationEmailSent: false

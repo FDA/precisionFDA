@@ -1,3 +1,4 @@
+import { RESOURCE_LABELS } from '../../../types/user'
 import { ServerScope } from "../types";
 
 export enum ExecutionActions {
@@ -119,7 +120,7 @@ export interface IExecution {
   created_at_date_time: string
   energy_consumption: string
   duration: string
-  instance_type: string
+  instance_type: keyof typeof RESOURCE_LABELS
   launched_by: string
   launched_by_dxuser: string
   launched_on: string

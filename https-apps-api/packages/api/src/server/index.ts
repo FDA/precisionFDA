@@ -18,10 +18,10 @@ export const getServer = () => server
 
 export function createServer(callback: KoaCallback) {
   const startWSServer = async (): Promise<void> => {
-      if (server !== null) {
-        wss = await setupWSServer(server)
-        log.info('WebSocket server initialized')
-      }
+    if (server !== null) {
+      wss = await setupWSServer(server)
+      log.info('WebSocket server initialized')
+    }
   }
 
   const startHttpServer = async (): Promise<void> => {
@@ -58,7 +58,7 @@ export function createServer(callback: KoaCallback) {
   const stopServer = async (): Promise<void> => {
     await wss?.close(() => {
       log.info('WebSocket server closed')
-    }) 
+    })
 
     if (server?.listening) {
       await new Promise(done => server!.close(done))

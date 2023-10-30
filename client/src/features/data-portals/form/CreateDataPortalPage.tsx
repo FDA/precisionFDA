@@ -26,11 +26,11 @@ const CreateDataPortalPage = () => {
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)
       } else {
-        toast.error('Something went wrong!')
+        toast.error('Something went wrong')
       }
     },
     onError: () => {
-      toast.error('There was an issue creating the data portal.')
+      toast.error('There was an issue creating the data portal')
     },
   })
 

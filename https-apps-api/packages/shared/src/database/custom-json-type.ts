@@ -5,16 +5,17 @@
 // This workaround ensures that all JSON fields are parsed correctly
 
 import { JsonType } from '@mikro-orm/core'
+import { isNil } from 'ramda'
 
 // Usage
 // @Property({ type: WorkaroundJsonType })
 export class WorkaroundJsonType extends JsonType {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  convertToJSValue(value: any, platform: any) {
-    if (typeof value === 'string') {
-      return JSON.parse(value);
+  convertToJSValue(value: string | null) {
+    if (isNil(value)) {
+      return value
     }
-    return value;
+
+    return JSON.parse(value)
   }
 }
 

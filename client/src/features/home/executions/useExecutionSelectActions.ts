@@ -98,7 +98,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     'Terminate': {
       type: 'modal',
       func: () => setTerminateModal(true),
-      isDisabled: selected.length !== 1,
+      isDisabled: selected.length !== 1 || ['terminated', 'failed', 'done'].includes(selected[0]?.state),
       modal: terminateoModal,
       showModal: isShownTerminateModal,
     },

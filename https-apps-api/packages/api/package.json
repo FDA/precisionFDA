@@ -18,6 +18,9 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@bull-board/api": "^5.9.1",
+    "@bull-board/koa": "^5.9.1",
+    "@bull-board/ui": "^5.9.1",
     "@mikro-orm/core": "^5.6.3",
     "@mikro-orm/mysql": "^5.6.3",
     "@mikro-orm/reflection": "^5.6.3",
@@ -58,7 +61,8 @@
     "chance": "^1.1.7",
     "dirty-chai": "^2.0.1",
     "esbuild": "^0.17.5",
-    "eslint": "^8.33.0",
+    "eslint": "^8.52.0",
+    "eslint-plugin-import": "^2.29.0",
     "mocha": "^8.4.0",
     "node-hmr": "^1.3.1",
     "prettier": "^2.1.2",

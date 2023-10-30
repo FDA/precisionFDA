@@ -55,6 +55,8 @@ import {
 } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { RunJobPage } from '../../home/apps/run/RunJobPage'
+import { EditAppPage } from '../../home/apps/form/EditAppPage'
 
 const Spaces2 = ({
   space,
@@ -80,7 +82,7 @@ const Spaces2 = ({
       id: string
     }) => fixGuestPermissions(payload),
     onSuccess: () => {
-      toast.success('Permissions for guest side successfully updated.')
+      toast.success('Permissions for guest side successfully updated')
     },
     onError: (e:any) => {
         toast.error(e.response.data.error.message)
@@ -219,8 +221,14 @@ const Spaces2 = ({
               <Route exact path={`/spaces/${space.id}/apps`}>
                 <AppList spaceId={space.id} />
               </Route>
+              <Route path={`/spaces/${space.id}/apps/:appUid/jobs/new`}>
+                <RunJobPage spaceId={space.id} />
+              </Route>
+              <Route path={`/spaces/${space.id}/apps/:appUid/edit`}>
+                <EditAppPage spaceId={space.id} />
+              </Route>
               <Route path={`/spaces/${space.id}/apps/:appUid`}>
-                <AppsShow />
+                <AppsShow spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/workflows`}>
                 <WorkflowList spaceId={space.id} />

@@ -99,6 +99,41 @@ export interface IFile {
   'path': string
 }
 
+
+export interface User {
+  dxuser: string
+  full_name: string
+}
+
+export interface Org {
+  handle: string
+  name: string
+}
+
+export interface INode {
+  id: number
+  uid: string
+  className: string
+  fa_class: string
+  scope: string
+  path: string
+  owned: boolean
+  editable: boolean
+  accessible: boolean
+  file_path: string
+  parent_folder_name: string
+  public: boolean
+  private: boolean
+  in_space: boolean
+  space_private: boolean
+  space_public: boolean
+  title: string
+  description: any
+  state: string
+  file_size: number
+  user: User
+  org: Org
+}
 // this is the type of the "node". The BasicDataNode is what the library requires and the two properties before it are the ones we are using - parent (added by you) and title (already existed, but the "any" types hidden the fact, that it does not exist on the default node type).
 export type FileTreeNode = { parent: FileTreeNode, title: string } & BasicDataNode
 // Retrieves the second parameter of the onSelect method from the TreeProps interface with the node type generic. The Required type is needed, because the onSelect property on the TreeProps is defined as optional, but the Parameters type requires simply a function (not function | undefined).

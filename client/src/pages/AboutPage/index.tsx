@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { usePageMeta } from '../../hooks/usePageMeta'
@@ -8,72 +8,8 @@ import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { ButtonSolidBlue } from '../../components/Button/index'
 import { colors } from '../../styles/theme'
+import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
 
-const AboutTab = styled.div<{ isActive?: boolean }>`
-  position: relative;
-  top: 1px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  color: inherit;
-  background-color: #fafafa;
-  border: 1px solid #ddd;
-
-  ${({ isActive }) =>
-    isActive
-      ? css`
-          background-color: white;
-          border-bottom: 1px solid transparent;
-        `
-      : css`
-          border-bottom: 1px solid #ddd;
-          &:hover {
-            color: inherit;
-          }
-        `}
-`
-
-const AboutTabRow = styled.div`
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-
-  @media (min-width: 1000px) {
-    flex-direction: row;
-    gap: 8px;
-    border-bottom: 1px solid #ddd;
-  }
-`
-
-const AboutSection = styled.div<{ isShown?: boolean }>`
-  display: none;
-  margin-bottom: 32px;
-  padding: 16px;
-  line-height: 24px;
-
-  ${({ isShown }) =>
-    isShown &&
-    css`
-      box-sizing: border-box;
-      display: inline-block;
-      border: 1px solid #ddd;
-      border-top: 0;
-      width: 100%;
-      padding-top: 32px;
-    `}
-
-  hr {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border: 0;
-    border-top: 1px solid #eeeeee;
-  }
-`
 
 const Row = styled.div`
   display: flex;
@@ -91,10 +27,7 @@ const Row = styled.div`
 const AboutGuestInfo = styled.div`
   margin-bottom: 64px;
 `
-const TabTitle = styled.div`
-  font-size: 18px;
-  font-weight: bold;
-`
+
 const MainLine = styled.div`
   font-size: 20px;
   font-weight: bold;
@@ -118,35 +51,35 @@ const AboutPage = () => {
       <NavigationBar title={title} user={user} />
 
       <PageContainerMargin>
-        <AboutTabRow>
-          <AboutTab
+        <PfTabRow>
+          <PfTab
             isActive={selectedSection === 'why'}
             onClick={() => setSelectedSection('why')}
           >
-            <TabTitle>Why</TabTitle>
+            <PfTabTitle>Why</PfTabTitle>
             <div>Background and motivation</div>
-          </AboutTab>
-          <AboutTab
+          </PfTab>
+          <PfTab
             isActive={selectedSection === 'what'}
             onClick={() => setSelectedSection('what')}
           >
-            <TabTitle>What</TabTitle>
+            <PfTabTitle>What</PfTabTitle>
             <div>A genomics community and platform</div>
-          </AboutTab>
-          <AboutTab
+          </PfTab>
+          <PfTab
             isActive={selectedSection === 'who'}
             onClick={() => setSelectedSection('who')}
           >
-            <TabTitle>Who</TabTitle>
+            <PfTabTitle>Who</PfTabTitle>
             <div>The team behind the initiative</div>
-          </AboutTab>
-          <AboutTab as={Link} to="/docs">
-            <TabTitle>How</TabTitle>
+          </PfTab>
+          <PfTab as={Link} to="/docs">
+            <PfTabTitle>How</PfTabTitle>
             <div>Learn how to use the features</div>
-          </AboutTab>
-        </AboutTabRow>
+          </PfTab>
+        </PfTabRow>
 
-        <AboutSection isShown={selectedSection === 'why'}>
+        <PfTabContent isShown={selectedSection === 'why'}>
           <MainLine>
             The Food and Drug Administration (FDA) plays an integral role in
             precision medicine, which foresees the day when an individual’s
@@ -184,9 +117,9 @@ const AboutPage = () => {
               </p>
             </div>
           </Row>
-        </AboutSection>
+        </PfTabContent>
 
-        <AboutSection isShown={selectedSection === 'what'}>
+        <PfTabContent isShown={selectedSection === 'what'}>
           <MainLine>
             PrecisionFDA provides the genomics community with a secure,
             cloud-based platform where participants can access and share
@@ -217,9 +150,9 @@ const AboutPage = () => {
             <li>Patients</li>
             <li>FDA &amp; Other Government Agencies</li>
           </ul>
-        </AboutSection>
+        </PfTabContent>
 
-        <AboutSection isShown={selectedSection === 'who'}>
+        <PfTabContent isShown={selectedSection === 'who'}>
           <MainLine>
             PrecisionFDA is an initiative in the Office of Health Informatics
             (OHI) at the Food and Drug Administration led by the Chief Health
@@ -282,7 +215,7 @@ const AboutPage = () => {
               </li>
             </ul>
           </div>
-        </AboutSection>
+        </PfTabContent>
         {!isLoggedIn && (
           <AboutGuestInfo>
             <div className="container">

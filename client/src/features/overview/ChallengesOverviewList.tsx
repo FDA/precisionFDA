@@ -66,7 +66,7 @@ export default function ChallengesOverviewList() {
 
   return (
     <StyledChallengesOverview>
-      {(currentIsLoading || upcomingIsLoading || endedIsLoading) && <Loader displayInline />}
+      {(currentIsLoading || upcomingIsLoading || endedIsLoading) && <Loader className="inline" />}
       {!currentIsLoading &&
         current?.challenges &&
         current.challenges.length > 0 && (

@@ -54,7 +54,7 @@ const DeleteFiles = ({
         setNodesToBeDeleted(res)
       },
       onError: () => {
-        toast.error('Error: Fetching download list.')
+        toast.error('Error: Fetching download list')
       },
     },
   )
