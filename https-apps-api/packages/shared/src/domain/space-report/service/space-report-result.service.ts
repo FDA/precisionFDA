@@ -211,9 +211,7 @@ export class SpaceReportResultService {
       of the lineage and history of Files, Apps, Executions, Assets, and 
       Workflows within the precisionFDA system. Through this report, users 
       can gain insights into the origin, movement, and life-cycle of each 
-      item, ensuring transparency, traceability, and accountability. Whether 
-      you're trying to verify the authenticity of a file, understand the 
-      sequence of a particular workflow, or track changes to an asset.
+      item, ensuring transparency, traceability, and accountability.
     `
     reportDescription.classList.add('report-description')
     title.appendChild(reportDescription)
