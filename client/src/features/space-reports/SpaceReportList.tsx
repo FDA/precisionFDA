@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import React, { useEffect, useMemo } from 'react'
 import { UseResizeColumnsState } from 'react-table'
+import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { ButtonSolidBlue } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
@@ -116,6 +118,13 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
     resetSelected,
   })
 
+  const generateReport = async () => {
+    await generate.mutateAsync(spaceId)
+      .catch((e: AxiosError<{ error: { message: string } }>) => {
+        toast.error(e?.response?.data?.error?.message ?? 'Error creating space reports')
+      })
+  }
+
   if (query.status === 'error') return <div>Error! {JSON.stringify(query.error)}</div>
 
   return (
@@ -125,9 +134,9 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
           <QuickActions>
             <ButtonSolidBlue
               disabled={query.status === 'loading' || generate.status === 'loading'}
-              onClick={() => generate.mutateAsync(spaceId)}
+              onClick={generateReport}
             >
-              <PlusIcon height={12} /> Generate report
+              <PlusIcon height={12}/> Generate report
             </ButtonSolidBlue>
           </QuickActions>
           <Dropdown
@@ -158,7 +167,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
       />
 
       <ContentFooter>
-        <HoverDNAnexusLogo opacity height={14} />
+        <HoverDNAnexusLogo opacity height={14}/>
       </ContentFooter>
 
       {actions['Delete']?.modal}

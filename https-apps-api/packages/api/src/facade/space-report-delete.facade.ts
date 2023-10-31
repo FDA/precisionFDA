@@ -1,7 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { errors, spaceReport, user as userDomain, userFile } from '@pfda/https-apps-shared'
+import { SpaceReportState } from '@pfda/https-apps-shared/dist/domain/space-report/model/space-report-state.type'
 
 export class SpaceReportDeleteFacade {
+  private readonly DELETABLE_STATES: SpaceReportState[] = ['DONE', 'ERROR']
+
   private readonly em
   private readonly spaceReportService
   private readonly nodesRemoveOperation
@@ -22,6 +25,10 @@ export class SpaceReportDeleteFacade {
 
       if (reports.length !== ids.length) {
         throw new errors.NotFoundError('Space report not found')
+      }
+
+      if (reports.some(r => !this.DELETABLE_STATES.includes(r.state))) {
+        throw new errors.InvalidStateError('Cannot delete a report in non terminal state')
       }
 
       const spaceIds = new Set(reports.map(r => r.space.id))
