@@ -124,6 +124,7 @@ export enum SEVERITY {
 
 // TODO share the enum with backend
 export enum NOTIFICATION_ACTION {
+    JOB_INITIALIZING = 'JOB_INITIALIZING',
     JOB_RUNNING = 'JOB_RUNNING',
     JOB_RUNNABLE = 'JOB_RUNNABLE',
     JOB_DONE = 'JOB_DONE',

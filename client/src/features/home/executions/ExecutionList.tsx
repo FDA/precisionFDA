@@ -74,6 +74,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
       NOTIFICATION_ACTION.JOB_RUNNING,
       NOTIFICATION_ACTION.JOB_DONE,
+      NOTIFICATION_ACTION.JOB_FAILED,
       NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
       queryCache.invalidateQueries(['jobs'])
     }

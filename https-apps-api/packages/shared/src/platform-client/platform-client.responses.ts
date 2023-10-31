@@ -191,6 +191,9 @@ type JobDescribeResponse = {
   id: string
   name: string
   state: JOB_STATE
+  properties?: {
+    httpsAppState?: JOB_STATE
+  }
   project: string
   billTo: string
   httpsApp: {
@@ -207,6 +210,9 @@ type JobDescribeResponse = {
   failureCount?: any
   failureReason?: string
   failureMessage?: string
+  startedRunning?: number
+  stoppedRunning?: number
+  totalPrice?: number
 } & AnyObject
 
 export {
