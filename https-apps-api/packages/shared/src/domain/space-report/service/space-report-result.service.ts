@@ -36,23 +36,20 @@ export class SpaceReportResultService {
     container.classList.add('container')
     container.appendChild(this.getTitle(report, document))
 
-    container.appendChild(this.getReportPartTypeHeader('Space Files', this.FILES_HEADER_ID, document))
-    reportPartsMap.file.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
-    container.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
-    reportPartsMap.app.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
-    container.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
-    reportPartsMap.job.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
-    container.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
-    reportPartsMap.asset.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
-    container.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
-    reportPartsMap.workflow.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    container.appendChild(this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document))
+    container.appendChild(this.getReportSegment('Apps', this.APPS_HEADER_ID, reportPartsMap.app, document))
+    container.appendChild(this.getReportSegment('Executions', this.JOBS_HEADER_ID, reportPartsMap.job, document))
+    container.appendChild(this.getReportSegment('Assets', this.ASSETS_HEADER_ID, reportPartsMap.asset, document))
+    container.appendChild(this.getReportSegment('Workflows', this.WORKFLOWS_HEADER_ID, reportPartsMap.workflow, document))
 
     document.body.appendChild(container)
 
     return domContainer.serialize()
   }
 
-  private getReportPartTypeHeader(title: string, id: string, document: Document) {
+  private getReportSegment(title: string, id: string, parts: SpaceReportPart[], document: Document) {
+    const container = document.createElement('div')
+
     const header = document.createElement('h2')
     header.innerHTML = title
 
@@ -61,7 +58,20 @@ export class SpaceReportResultService {
     anchor.id = id
 
     header.prepend(anchor)
-    return header
+
+    container.appendChild(header)
+
+    if (ArrayUtils.isEmpty(parts)) {
+      const emptyText = document.createElement('p')
+      emptyText.innerHTML = `There are no ${title.toLowerCase()} in the space.`
+      container.appendChild(emptyText)
+
+      return container
+    }
+
+    parts.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+
+    return container
   }
 
   private getReportPartElement(rp: SpaceReportPart, document: Document) {
