@@ -9,7 +9,6 @@ import { EntityProvenanceResultTransformerService } from './entity-provenance-re
 // TODO - use import after introducing bundler with nestjs
 const assetsPath = path.join(__dirname, '../../../../../src/domain/provenance/assets')
 const assetNames = [
-  'main.css',
   'file-icon.svg',
   'user-icon.svg',
   'app-icon.svg',
@@ -23,7 +22,6 @@ const assetPromises = assetNames.map(i => fs.readFile(path.join(assetsPath, i), 
 export class EntityProvenanceSvgResultTransformerService implements EntityProvenanceResultTransformerService<'svg'> {
   async transform(provenance: EntityProvenance): Promise<string> {
     const [
-      css,
       fileIcon,
       userIcon,
       appIcon,
@@ -66,7 +64,7 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
       height: Math.abs(minY) + maxY + nodeSize.height,
     }
 
-    const dom = new JSDOM(`<svg class="canvas"><style>${css}</style></svg>`)
+    const dom = new JSDOM('<svg class="canvas"></svg>')
     const svg = select(dom.window.document.querySelector('.canvas'))
 
     const g = svg
