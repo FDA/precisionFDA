@@ -220,6 +220,8 @@ module Api
     def create_report
       response = https_apps_client.create_space_report(params[:id])
       render json: response, adapter: :json
+    rescue Net::HTTPClientException => e
+      render status: e.response.code, json: e.response.body
     end
 
     # GET /api/spaces/:id/report
