@@ -10,6 +10,7 @@
 
         --black-color: #343e4d;
         --link-color: #1f70b5;
+        --link-color-hover: #4297df;
         --main-bg-color: #ddd;
         --border-color: #ccc;
       }
@@ -226,7 +227,7 @@
         text-align: left;
       }
       .navbar-item .subnav a:hover {
-        color: green;
+        color: var(--link-color-hover);
       }
 
       .subnav {
@@ -278,60 +279,6 @@
         #report .title {
           margin-top: 0;
         }
-      }
-    </style>
-    <style>
-      .node-path {
-        fill: none;
-        stroke: #8198bc;
-      }
-
-      .node a {
-        display: inline-block;
-        padding: 0.5rem;
-        font-size: 1.3rem;
-        white-space: nowrap;
-        max-width: 100%;
-        box-sizing: border-box;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        text-decoration: none;
-        background-color: #eee;
-        border-radius: 0.3rem;
-        border: 0.1em solid var(--border-color);
-        color: var(--link-color);
-        font-family: serif;
-      }
-
-      .node svg path {
-        fill: var(--link-color);
-      }
-
-      .node a:hover {
-        color: #4297df;
-      }
-
-      .node a:hover svg path {
-        fill: #4297df;
-      }
-
-      .node .content {
-        text-align: center;
-      }
-
-      .node .content svg {
-        height: 1.8rem;
-        vertical-align: middle;
-        padding-right: 0.5rem;
-      }
-
-      .node .content span {
-        vertical-align: middle;
-      }
-
-      .canvas {
-        display: inline-block;
-        padding: 1.6em 1.6rem;
       }
     </style>
   </head>

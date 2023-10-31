@@ -12,6 +12,7 @@ import type { SpaceReport } from '../entity/space-report.entity'
 import type { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 
 // TODO - use import after introducing bundler with nestjs
+const provenanceStylesPath = fs.readFile(path.join(__dirname, '../../../../src/domain/provenance/assets/main.css'))
 const assetsPath = path.join(__dirname, '../../../../src/domain/space-report/assets')
 const logoImage = fs.readFile(path.join(assetsPath, 'logo.svg'), 'utf8')
 const html = fs.readFile(path.join(assetsPath, 'result-wrapper.html'), 'utf8')
@@ -27,6 +28,13 @@ export class SpaceReportResultService {
   async generateResult(spaceReport: SpaceReport) {
     const domContainer = new JSDOM(await html)
     const document = domContainer.window.document
+
+    // Load styles for provenance charts
+    const provenanceStyles = (await provenanceStylesPath).toString()
+    const head = document.getElementsByTagName('head')[0]
+    const style = document.createElement('style')
+    style.innerHTML = provenanceStyles
+    head.appendChild(style)
 
     const container = document.createElement('div')
     container.setAttribute('id', 'container')
