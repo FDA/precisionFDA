@@ -53,6 +53,8 @@ class App < ApplicationRecord
   before_update { |app| app.update_series_featured_status if app.featured_changed? }
   before_update { |app| app.update_series_deleted_status if app.deleted_changed? }
 
+  delegate :workstation_app_state?, to: :job, allow_nil: true
+
   attr_accessor :current_user
 
   store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
@@ -219,5 +221,9 @@ class App < ApplicationRecord
 
   def workstation_api_version
     return find_workstation_api_tag.split(":").last if has_workstation_api
+  end
+
+  def has_https_app_state?
+    internal["platform_tags"]&.select { |input| input.starts_with?("pfda_httpsAppState_enabled") }&.first.present?
   end
 end
