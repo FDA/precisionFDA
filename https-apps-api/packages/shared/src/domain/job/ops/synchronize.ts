@@ -36,7 +36,7 @@ import { getServiceFactory } from '../../../services/service-factory'
 /**
  * Checks job status if notifications should be triggered.
  */
-const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteState: JOB_STATE) => {
+const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteJob: JobDescribeResponse) => {
   const notificationService = getServiceFactory().getNotificationService(em)
   const meta = {
     linkTitle: 'View Execution',
@@ -46,8 +46,16 @@ const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: numb
     await notificationService.createNotification({message, severity, action, userId, meta})
   }
 
-  if (job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING) {
-    await sendNotification(`Job ${job.name} is running`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNING)
+  const remoteState = remoteJob.state
+  const isJobRunning = job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING
+  const httpsAppRunning = remoteState === JOB_STATE.RUNNING && remoteJob?.properties?.httpsAppState === JOB_STATE.RUNNING
+
+  if (isJobRunning && job.hasHttpsAppState()) {
+    await sendNotification(`Initializing ${job.name}`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_INITIALIZING)
+  }
+
+  if (isJobRunning && !job.hasHttpsAppState() || httpsAppRunning) {
+    await sendNotification(`${job.name} is running`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNING)
   }
 
   if (job.state !== JOB_STATE.RUNNABLE && remoteState === JOB_STATE.RUNNABLE) {
@@ -91,7 +99,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
   async run(input: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
-    const job = await jobRepo.findOne({ dxid: input.dxid })
+    const job = await jobRepo.findOne({ dxid: input.dxid }, { populate: ['app'] })
     const user = await em.findOne(User, { id: this.ctx.user.id })
 
     // check input data
@@ -169,10 +177,11 @@ export class SyncJobOperation extends WorkerBaseOperation<
       await terminateOp.execute({ dxid: job.dxid })
       return
     }
+    
     // fixme: the mapping is not perfect for the https apps
     // TODO(Zai): Figure out in what way this is not perfect and document it
     const remoteState = platformJobData.state
-    if (remoteState === job.state) {
+    if (remoteState === job.state && !job.hasHttpsAppState() || job.isHttpsAppRunning()) {
       this.ctx.log.info({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
       return
     }
@@ -208,7 +217,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       }
     }
 
-    await checkJobStatusForNotifications(em, this.ctx.user.id, job, remoteState)
+    await checkJobStatusForNotifications(em, this.ctx.user.id, job, platformJobData)
 
     this.ctx.log.info({
       jobId: input.dxid,
@@ -217,7 +226,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     }, 'SyncJobOperation: Updating job state and metadata from platform')
     const updatedJob = wrap(job).assign(
       {
-        describe: JSON.stringify(platformJobData),
+        describe: platformJobData,
         state: platformJobData.state,
       },
       { em },
