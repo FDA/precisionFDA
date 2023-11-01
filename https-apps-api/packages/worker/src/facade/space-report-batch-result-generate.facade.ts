@@ -79,7 +79,7 @@ export class SpaceReportBatchResultGenerateFacade {
 
     return await Promise.all(entities.map(async entity => {
       const entityProvenanceSource = { type, entity } as provenance.EntityProvenanceSourceUnion
-      const entityProvenance = await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, 'svg')
+      const entityProvenance = await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, 'svg', { omitStyles: true })
 
       const reportPart = reportParts.find(srp => entity.id === srp.sourceId)
       return {

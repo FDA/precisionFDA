@@ -4,11 +4,13 @@ import { JSDOM } from 'jsdom'
 import path from 'path'
 import { EntityType } from '../../../entity'
 import { EntityProvenance } from '../../model/entity-provenance'
+import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
 
 // TODO - use import after introducing bundler with nestjs
 const assetsPath = path.join(__dirname, '../../../../../src/domain/provenance/assets')
 const assetNames = [
+  'main.css',
   'file-icon.svg',
   'user-icon.svg',
   'app-icon.svg',
@@ -20,8 +22,9 @@ const assetNames = [
 const assetPromises = assetNames.map(i => fs.readFile(path.join(assetsPath, i), 'utf8'))
 
 export class EntityProvenanceSvgResultTransformerService implements EntityProvenanceResultTransformerService<'svg'> {
-  async transform(provenance: EntityProvenance): Promise<string> {
+  async transform(provenance: EntityProvenance, options?: EntityProvenanceSvgOptions): Promise<string> {
     const [
+      css,
       fileIcon,
       userIcon,
       appIcon,
@@ -67,6 +70,10 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
     const dom = new JSDOM('<svg class="canvas"></svg>')
     const svg = select(dom.window.document.querySelector('.canvas'))
 
+    if (!options?.omitStyles) {
+      svg.append('style').html(css)
+    }
+
     const g = svg
       .attr('width', canvasSize.width)
       .attr('height', canvasSize.height)
@@ -103,6 +110,10 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
       .text(d => `${d.data.data.title}`)
 
     return dom.window.document.querySelector('svg.canvas')!.outerHTML
+  }
+
+  async getStyles() {
+    return await assetPromises[0]
   }
 
   private getBoundaries(nodes: Array<{ x: number, y: number }>): { minY: number, minX: number, maxY: number, maxX: number } {

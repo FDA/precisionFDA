@@ -1,3 +1,3 @@
-import { EntityProvenanceFormatTypeToResultTypeMap } from './entity-provenance-format'
+import { EntityProvenanceFormatTypeToConfigMap } from './entity-provenance-format-type-to-config.map'
 
-export type EntityProvenanceFormatType = keyof EntityProvenanceFormatTypeToResultTypeMap
+export type EntityProvenanceFormatType = keyof EntityProvenanceFormatTypeToConfigMap

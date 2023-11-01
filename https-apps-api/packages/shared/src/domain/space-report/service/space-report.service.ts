@@ -94,8 +94,8 @@ export class SpaceReportService {
     return this.spaceReportPartService.completeBatch(batches)
   }
 
-  async generateResult(report: SpaceReport) {
-    return await this.spaceReportResultService.generateResult(report)
+  async generateResult(report: SpaceReport, styles?: string) {
+    return await this.spaceReportResultService.generateResult(report, styles)
   }
 
   async hasPendingBatch(reportId: number) {
