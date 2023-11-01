@@ -2,9 +2,9 @@ import fs from 'fs/promises'
 import path from 'path'
 import { JSDOM } from 'jsdom'
 import { ArrayUtils } from '../../..'
-import type { SpaceReportPart } from '../entity/space-report-part.entity'
-import type { SpaceReport } from '../entity/space-report.entity'
-import type { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
+import { SpaceReportPart } from '../entity/space-report-part.entity'
+import { SpaceReport } from '../entity/space-report.entity'
+import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 
 // TODO - use import after introducing bundler with nestjs
 const provenanceStylesPath = fs.readFile(path.join(__dirname, '../../../../src/domain/provenance/assets/main.css'))
@@ -66,6 +66,12 @@ export class SpaceReportResultService {
       ? reportPartsMap.file.forEach(rp => itemListFiles.appendChild(this.getReportPartContent(rp, document)))
       : itemListFiles.innerHTML = emptySectionText
 
+    // container.appendChild(this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document))
+    // container.appendChild(this.getReportSegment('Apps', this.APPS_HEADER_ID, reportPartsMap.app, document))
+    // container.appendChild(this.getReportSegment('Executions', this.JOBS_HEADER_ID, reportPartsMap.job, document))
+    // container.appendChild(this.getReportSegment('Assets', this.ASSETS_HEADER_ID, reportPartsMap.asset, document))
+    // container.appendChild(this.getReportSegment('Workflows', this.WORKFLOWS_HEADER_ID, reportPartsMap.workflow, document))
+
     report.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
     const itemListApps = document.createElement('div')
     itemListApps.classList.add('item-list')
@@ -104,7 +110,9 @@ export class SpaceReportResultService {
     return domContainer.serialize()
   }
 
-  private getReportPartTypeHeader(title: string, id: string, document: Document) {
+  private getReportSegment(title: string, id: string, parts: SpaceReportPart[], document: Document) {
+    const container = document.createElement('div')
+
     const sectionHeading = document.createElement('div')
     sectionHeading.classList.add('section-heading')
     const sectionTitle = document.createElement('h2')
@@ -120,7 +128,18 @@ export class SpaceReportResultService {
     sectionHeading.appendChild(spacer)
     sectionHeading.appendChild(anchor)
     sectionHeading.appendChild(sectionTitle)
-    return sectionHeading
+
+    if (ArrayUtils.isEmpty(parts)) {
+      const emptyText = document.createElement('p')
+      emptyText.innerHTML = `There are no ${title.toLowerCase()} in the space.`
+      container.appendChild(emptyText)
+
+      return container
+    }
+
+    parts.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+
+    return container
   }
 
   private getReportPartContent(rp: SpaceReportPart, document: Document) {
@@ -240,10 +259,10 @@ export class SpaceReportResultService {
 
     const reportDescription = document.createElement('p')
     reportDescription.innerHTML = `
-      The Provenance Tracking Report provides a comprehensive documentation 
-      of the lineage and history of Files, Apps, Executions, Assets, and 
-      Workflows within the precisionFDA system. Through this report, users 
-      can gain insights into the origin, movement, and life-cycle of each 
+      The Provenance Tracking Report provides a comprehensive documentation
+      of the lineage and history of Files, Apps, Executions, Assets, and
+      Workflows within the precisionFDA system. Through this report, users
+      can gain insights into the origin, movement, and life-cycle of each
       item, ensuring transparency, traceability, and accountability.
     `
     reportDescription.classList.add('report-description')
