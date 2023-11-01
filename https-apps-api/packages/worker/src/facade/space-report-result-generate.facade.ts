@@ -1,25 +1,27 @@
-import type { EntityManager } from '@mikro-orm/core'
 import { LockMode, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import type { UserFileCreateFacade } from '@pfda/https-apps-shared'
-import { errors, spaceReport, ENUMS, notification } from '@pfda/https-apps-shared'
+import { ENUMS, errors, notification, spaceReport, provenance } from '@pfda/https-apps-shared'
 
 export class SpaceReportResultGenerateFacade {
   private readonly spaceReportService
   private readonly userFileCreateFacade
   private readonly em
   private readonly notificationService
+  private readonly entityProvenanceService
 
   constructor(
     em: SqlEntityManager,
     spaceReportService: spaceReport.SpaceReportService,
     userFileCreateFacade: UserFileCreateFacade,
     notificationService: notification.NotificationService,
+    entityProvenanceService: provenance.EntityProvenanceService,
   ) {
     this.spaceReportService = spaceReportService
     this.userFileCreateFacade = userFileCreateFacade
     this.notificationService = notificationService
     this.em = em
+    this.entityProvenanceService = entityProvenanceService
   }
 
   async generate(reportId: number) {
@@ -51,7 +53,8 @@ export class SpaceReportResultGenerateFacade {
 
       await tem.populate(report, ['reportParts', 'space', 'createdBy'])
 
-      const reportResult = await this.spaceReportService.generateResult(report)
+      const provenanceStyles = await this.entityProvenanceService.getSvgStyles()
+      const reportResult = await this.spaceReportService.generateResult(report, provenanceStyles)
 
       const file = await this.userFileCreateFacade.createFileWithContent({
         scope: report.space.scope,

@@ -1,124 +1,428 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="initial-scale=1.0, width=device-width" />
     <style>
+      html {
+        scroll-behavior: smooth;
+        font-size: 62.5%;
+
+        --black-color: #343e4d;
+        --link-color: #1f70b5;
+        --link-color-hover: #4297df;
+        --main-bg-color: #ddd;
+        --border-color: #ccc;
+        --spacer-color: #ddd;
+        --sidebar-color: #fff;
+        --report-gutters: 4.6rem;
+      }
+
+      body {
+        font-family: Helvetica, sans-serif;
+        padding: 0;
+        margin: 0;
+        height: 100vh;
+      }
+
+      h1 {
+        margin-top: 5rem;
+        text-align: center;
+      }
+
+      h2 {
+        font-size: 2rem;
+        text-align: center;
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+      }
+
+      .created {
+        font-size: 1.4rem;
+      }
+
+      #container {
+        height: 100%;
+        overflow: hidden;
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-content: stretch;
+        align-items: stretch;
+      }
+
+      #sidebar {
+        background-color: var(--sidebar-color);
+        overflow: auto;
+        order: 0;
+        flex: 0 0 auto;
+        align-self: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.6rem;
+        border-right: 1px solid #d8d5d5;
+      }
+      #sidebar::-webkit-scrollbar-track {
+        background: rgba(9, 30, 66, 0.08);
+        border-radius: 4px;
+      }
+      #sidebar::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+      }
+      #sidebar::-webkit-scrollbar-thumb {
+        background: #97a0af;
+        border-radius: 4px;
+      }
+      #main {
+        scroll-behavior: smooth;
+        order: 0;
+        flex: 1 1 auto;
+        align-self: auto;
+        background-color: var(--main-bg-color);
+        padding: 1rem;
+      }
+      #report {
+        background-color: white;
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: var(--report-gutters);
+      }
+
+      #sidebar,
+      #main {
+        overflow: auto;
+      }
+
+      #resizer {
+        flex: 0 0 auto;
+        cursor: ew-resize;
+        background-color: var(--main-bg-color);
+        border-right: 0.4rem solid var(--main-bg-color);
+        width: 0.4rem;
+        height: 100%;
+        transition: background-color 0.2s;
+        cursor: ew-resize;
+      }
+      .sidenav {
+        padding: 1rem;
+        padding-top: 3rem;
+        text-wrap: nowrap;
+        padding-right: 0;
+      }
+      .resizing {
+        background-color: var(--link-color);
+      }
+      #resizer:hover {
+        background-color: var(--link-color);
+        box-shadow: none;
+      }
+
+      .title {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: flex-end;
+        min-width: 40rem;
+        max-width: 40rem;
+      }
+
+      .item-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        max-width: 100%;
+        text-align: center;
+        vertical-align: top;
+        margin-bottom: 2.4rem;
+        color: var(--black-color);
+      }
+
+      .item {
+        padding: 1.2rem;
+        border-radius: 0.6rem;
+        border: 1px solid var(--border-color);
+      }
+
+      .item h3,
+      p {
+        margin: 0;
+      }
+
+      .item-list {
+        justify-content: center;
+        flex-wrap: wrap;
+        display: flex;
+        gap: 1rem;
+        font-size: 1.2rem;
+      }
+
+      .empty-text {
+        text-align: center;
+        font-size: 1.5rem;
+      }
+
+      .canvas-wrapper {
+        overflow: auto;
+        margin-top: 1em;
+        display: inline-block;
+        max-width: 100%;
+      }
+
+      .header {
+        text-align: left;
+        padding-bottom: 0;
+        margin-top: 3rem;
+        flex-direction: column;
+        display: flex;
+      }
+
+      .report-title {
+        text-wrap: nowrap;
+        font-weight: 300;
+        font-size: 1.8rem;
+      }
+      .report-type {
+        text-align: right;
+        text-wrap: nowrap;
+        font-weight: 800;
+        font-size: 2rem;
+        align-self: flex-end;
+      }
+      .report-description {
+        margin-bottom: 3.2rem;
+        font-weight: 400;
+        font-size: 1.4rem;
+        line-height: 2.1rem;
+        text-align: justify;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .info-area {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.6rem;
+      }
+      .info-area .group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.6rem;
+        max-width: 70%;
+      }
+      .info-area .group .key {
+        font-size: 1.4rem;
+        text-wrap: nowrap;
+        line-height: 2.8rem;
+      }
+      .info-area .group .value {
+        font-size: 1.6rem;
+        font-weight: bold;
+      }
+
+      .spacer {
+        width: 100%;
+        border-bottom: 3px solid var(--spacer-color);
+        margin: 32px 0;
+      }
+
+      .section-heading {
+        padding-left: var(--report-gutters);
+        padding-right: var(--report-gutters);
+      }
+
+      .empty-text {
+        font-size: 1.4rem;
+      }
+
+      .navbar-item .section-name {
+        font-weight: bold;
+      }
+
+      .navbar-item {
+        min-height: 2.6rem;
+      }
+
+      .navbar-item a {
+        text-decoration: none;
+        font-size: 1.4rem;
+        color: var(--link-color);
+      }
+
+      .navbar-item svg {
+        width: 1rem;
+        height: 1rem;
+        color: var(--black-color);
+      }
+
+      .navbar-item .subnav a {
+        display: block;
+        padding: 0.5rem 0 0.5rem 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        text-align: left;
+      }
+      .navbar-item .subnav a:hover {
+        color: var(--link-color-hover);
+      }
+
+      .subnav {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+        margin-top: 0.8rem;
+        padding-left: 3.5rem;
+      }
+
+      .navbar-item .collapse-icon {
+        cursor: pointer;
+        padding: 0.8rem;
+      }
+      .navbar-item .empty-icon {
+        width: 1rem;
+        height: 1rem;
+        padding: 0.8rem;
+        opacity: 0;
+      }
+
+      .navbar-item svg {
+        transform: rotate(90deg);
+      }
+      .navbar-item.expanded svg {
+        transform: rotate(180deg);
+      }
+
+      .navbar-item.expanded .subnav {
+        max-height: fit-content;
+        margin-bottom: 8px;
+      }
+
+      @media (max-width: 950px) {
+        #sidebar,
+        #resizer {
+          display: none;
+        }
+      }
+
+      @media print {
         html {
-            scroll-behavior: smooth;
+          --report-gutters: 0;
         }
-
-        body {
-            font-family: Helvetica,sans-serif;
-            padding: 60px 0 0 0;
-            margin: 0;
+        #main {
+          background-color: white;
+          overflow: visible;
+          padding: 0;
         }
-
-        .anchor {
-            display: block;
-            position: relative;
-            top: -60px;
-            visibility: hidden;
+        #sidebar,
+        #resizer {
+          display: none;
         }
-
-        h1 {
-            text-align: center;
+        #container {
+          display: block;
+          overflow: visible;
         }
-
-        h2 {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid #343E4D;
+        #report .title {
+          margin-top: 0;
         }
-
-        .header {
-            padding: 10px 16px;
-            background: #343E4D;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 40px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-        }
-
-        .header svg {
-            height: 32px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-
-        .item {
-            display: inline-block;
-            max-width: 100%;
-            text-align: center;
-            vertical-align: top;
-            margin-bottom: 30px;
-            color: #343E4D;
-        }
-
-        .canvas-wrapper {
-            overflow: scroll;
-            padding: 10px;
-            display: inline-block;
-            max-width: 100%;
-        }
-
-        .title {
-            margin-top: 30px;
-        }
-
-        .navbar a {
-            color: #d5d5d5;
-        }
-
-        .navbar-item {
-            position: relative;
-            display: inline-block;
-            margin: 0 15px;
-        }
-
-        .navbar-item a {
-            display: inline-block;
-        }
-
-        .navbar-item .subnav-container {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            max-height: calc(100vh - 60px);
-            overflow-y: scroll;
-            padding-top: 10px;
-        }
-
-        .navbar-item:hover .subnav-container {
-            display: block;
-        }
-
-        .navbar-item .subnav {
-            background: #343E4D;
-            text-align: right;
-            border: 1px solid white;
-        }
-
-        .navbar-item .subnav a {
-            display: block;
-            border-bottom: 1px solid white;
-            padding: 10px 20px;
-            max-width: 250px;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            text-align: left;
-        }
+      }
     </style>
-</head>
-<body>
-</body>
+  </head>
+  <body>
+    <script>
+      function ready(fn) {
+        if (document.readyState !== 'loading') {
+          fn()
+          return
+        }
+        document.addEventListener('DOMContentLoaded', fn)
+      }
+
+      const resizeData = {
+        tracking: false,
+        startWidth: 250,
+        startCursorScreenX: null,
+        handleWidth: 12,
+        resizeTarget: null,
+        parentElement: null,
+        maxWidth: null,
+      }
+
+      const debounce = (func, delay) => {
+        let inDebounce
+        return function () {
+          const context = this
+          const args = arguments
+          clearTimeout(inDebounce)
+          inDebounce = setTimeout(() => func.apply(context, args), delay)
+        }
+      }
+
+      ready(function () {
+        const resizer = document.getElementById('resizer')
+        const sidebar = document.getElementById('sidebar')
+
+        resizer.addEventListener('mousedown', function (event) {
+          if (event.button === 0) {
+            event.preventDefault()
+            event.stopPropagation()
+
+            if (!resizer.parentElement) {
+              console.error(new Error('Parent element not found.'))
+              return
+            }
+
+            resizeData.startWidth = sidebar.offsetWidth
+            resizeData.startCursorScreenX = event.screenX
+            resizeData.resizeTarget = sidebar
+            resizeData.parentElement = resizer.parentElement
+            resizeData.maxWidth = resizer.parentElement.clientWidth - resizeData.handleWidth
+            resizeData.tracking = true
+          }
+        })
+
+        window.addEventListener(
+          'mousemove',
+          debounce(function (event) {
+            if (resizeData.tracking) {
+              const cursorScreenXDelta = event.screenX - resizeData.startCursorScreenX
+              const newWidth = Math.min(
+                resizeData.startWidth + cursorScreenXDelta,
+                resizeData.maxWidth,
+              )
+
+              resizeData.resizeTarget.style.width = newWidth + 'px'
+              resizer.classList.add('resizing')
+            }
+          }, 1),
+        )
+
+        window.addEventListener('mouseup', function (event) {
+          if (resizeData.tracking) {
+            resizeData.tracking = false
+            resizer.classList.remove('resizing')
+          }
+        })
+
+        const collapseIcons = document.querySelectorAll('.collapse-icon')
+
+        collapseIcons.forEach(function (icon) {
+          icon.addEventListener('click', function () {
+            const navbarItem = icon.closest('.navbar-item')
+            if (navbarItem) {
+              navbarItem.classList.toggle('expanded')
+            }
+          })
+        })
+      })
+    </script>
+  </body>
 </html>
