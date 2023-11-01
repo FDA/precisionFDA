@@ -6,10 +6,16 @@ import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
 export class AppProvenanceDataService implements EntityProvenanceDataService<'app'> {
   getData(app: App): EntityProvenanceData<'app'> {
+    let title = app.title
+
+    if (app.revision != null) {
+      title += ` (revision ${app.revision})`
+    }
+
     return {
       type: 'app',
       url: `${config.api.railsHost}/home/apps/${app.uid}`,
-      title: app.title,
+      title,
     }
   }
 

@@ -61,10 +61,12 @@ describe('POST /emails/:id/send', () => {
     const failureMessage = 'failure message'
 
     job.state = JOB_STATE.FAILED
-    job.describe = JSON.stringify({
+    job.describe = {
+      id: 'job-id',
+      class: 'job',
       failureReason: failureReason,
       failureMessage: failureMessage,
-    })
+    }
     await em.flush()
 
     const { body } = await supertest(getServer())

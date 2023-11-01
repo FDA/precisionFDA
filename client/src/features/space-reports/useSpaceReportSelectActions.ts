@@ -1,12 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { ActionFunctionsType } from '../home/types'
-import { ISpaceReport } from './space-report.types'
+import { ISpaceReport, SpaceReportState } from './space-report.types'
 import { useDeleteSpaceReportModal } from './useDeleteSpaceReportModal'
 
 export enum AppActions {
   'Delete' = 'Delete',
 }
+
+const DELETABLE_STATES: SpaceReportState[] = ['DONE', 'ERROR']
 
 export const userReportSelectActions = ({
   spaceId,
@@ -38,7 +40,7 @@ export const userReportSelectActions = ({
     'Delete': {
       type: 'modal',
       func: () => setDeleteModal(true),
-      isDisabled: selected.length === 0,
+      isDisabled: selected.length === 0 || selected.some(r => !DELETABLE_STATES.includes(r.state)),
       modal: deleteModal,
       showModal: isShownDeleteModal,
     },

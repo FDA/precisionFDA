@@ -4,8 +4,14 @@ import { SpaceReportPartResultMetaProvider } from './space-report-part-result-me
 
 export class SpaceReportPartAppResultMetaProvider implements SpaceReportPartResultMetaProvider<'app'> {
   getResultMeta(entity: App): SpaceReportPartResultMeta {
+    let title = entity.title
+
+    if (entity.revision != null) {
+      title += ` (revision ${entity.revision})`
+    }
+
     return {
-      title: entity.title,
+      title,
       created: entity.createdAt,
     }
   }

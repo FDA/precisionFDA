@@ -43,6 +43,10 @@ export class SpaceReportService {
       spaceReport.space = space
       spaceReport.reportParts.add(await this.createSpaceReportParts(spaceReport))
 
+      if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
+        throw new errors.InvalidStateError('Report not generated: No entities to report on in this space')
+      }
+
       tem.persist(spaceReport)
 
       return spaceReport
