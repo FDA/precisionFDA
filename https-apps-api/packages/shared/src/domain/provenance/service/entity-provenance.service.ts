@@ -2,6 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import * as errors from '../../../errors'
 import { WorkflowService } from '../../workflow/service/workflow.service'
 import { EntityProvenanceFormatType } from '../model/entity-provenance-format.type'
+import { EntityProvenanceOptionsType } from '../model/entity-provenance-options.type'
 import { EntityProvenanceResultType } from '../model/entity-provenance-result.type'
 import { EntityProvenanceSourceUnion } from '../model/entity-provenance-source-union'
 import { EntityProvenanceDataProviderService } from './entity-data/entity-provenance-data-provider.service'
@@ -24,6 +25,7 @@ export class EntityProvenanceService {
   async getEntityProvenance<T extends EntityProvenanceFormatType>(
     source: EntityProvenanceSourceUnion,
     format: T,
+    options?: EntityProvenanceOptionsType<T>,
   ): Promise<EntityProvenanceResultType<T>> {
     const provenanceData = await this.entityProvenanceDataProviderService.getEntityProvenanceData(source)
 
@@ -32,10 +34,14 @@ export class EntityProvenanceService {
     }
 
     if (format === 'svg') {
-      return await this.entityProvenanceSvgResultTransformerService.transform(provenanceData) as EntityProvenanceResultType<T>
+      return await this.entityProvenanceSvgResultTransformerService.transform(provenanceData, options) as EntityProvenanceResultType<T>
     }
 
     throw new errors.InvalidStateError('Generate entity provenance - Unsupported format type.')
+  }
+
+  async getSvgStyles() {
+    return this.entityProvenanceSvgResultTransformerService.getStyles()
   }
 
   // TODO - Remove with IOC
