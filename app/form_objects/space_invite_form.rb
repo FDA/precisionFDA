@@ -78,10 +78,14 @@ class SpaceInviteForm
     )
   end
 
+  def review_side?
+    space.space_memberships.active.find_by(user: current_user).side == SpaceMembership::SIDE_HOST
+  end
+
   def validate_invitees
     errors.add(:invitees, "List of invitees is empty!") if invitees.values.flatten.blank?
 
-    return unless space.government? || (space.review? && space.restricted_reviewer)
+    return unless space.government? || (space.review? && space.restricted_reviewer && review_side?)
 
     # Check invitees for valid government emails
     # N.B. the invite form allows both email and dxuser entries

@@ -125,11 +125,11 @@ export const SpaceForm = ({
     mutation.mutateAsync(vals)
   }
 
-  const handleProtectedSelection = (event: any) => {
+  const handleProtectedSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue('protected', event.target.checked)
   }
 
-  const handleRestrictedReviewer = (event: any) => {
+  const handleRestrictedReviewer = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue('restricted_reviewer', event.target.checked)
   }
 

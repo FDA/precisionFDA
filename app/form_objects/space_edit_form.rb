@@ -10,6 +10,7 @@ class SpaceEditForm < SpaceForm
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
+  validate :validate_fda_associated, if: -> { space_type == TYPE_REVIEW }
   validate :validate_sponsor_lead_dxuser, if: -> { space_type == TYPE_REVIEW }
 
   alias_method :reviewer_lead_dxuser, :host_lead_dxuser
