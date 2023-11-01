@@ -81,6 +81,7 @@ export interface EditableSpace {
   scope: string
   title: string
   protected: boolean
+  restricted_reviewer?: boolean
 }
 
 export type EditableSpacesResponse = EditableSpace[]

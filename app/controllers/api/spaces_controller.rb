@@ -65,7 +65,7 @@ module Api
     # Returns editable spaces list. Used only for Copy to space dropdown for now.
     def editable_spaces
       spaces = Space.editable_by(@context).order(:name, :space_type).map do |space|
-        { scope: space.uid, title: space.title, protected: space.protected }
+        { scope: space.uid, title: space.title, protected: space.protected, restricted_reviewer: space.restricted_reviewer }
       end
 
       render json: spaces

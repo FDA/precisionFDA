@@ -23,6 +23,7 @@ class SpaceForm
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
+  validate :validate_fda_associated, if: -> { space_type == TYPE_REVIEW }
   validate :validate_leads_orgs, if: -> { space_type == TYPE_REVIEW }
   validate :validate_guest_lead_dxuser, if: -> { space_type == TYPE_GROUPS }
   validate :validate_sponsor_lead_dxuser, if: -> { space_type == TYPE_REVIEW }
@@ -53,13 +54,15 @@ class SpaceForm
 
   private
 
+  def validate_fda_associated
+    return unless restricted_reviewer && host_admin && !host_admin.government_user?
+
+    errors.add(:reviewer_lead_user, "'#{host_lead_dxuser}' is not an FDA-associated user")
+  end
+
   # A host lead user validation
   def validate_host_lead_dxuser
     errors.add(:reviewer_lead_user, "'#{host_lead_dxuser}' not found") unless host_admin
-
-    return unless space_type == TYPE_REVIEW && restricted_reviewer && host_admin && !host_admin.government_user?
-
-    errors.add(:reviewer_lead_user, "'#{host_lead_dxuser}' is not an FDA-associated user")
   end
 
   # A guest lead user validation
