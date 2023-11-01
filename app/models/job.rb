@@ -169,6 +169,18 @@ class Job < ApplicationRecord
     describe.dig(:httpsApp, :dns, :url).chomp("/") + ":#{https_port}"
   end
 
+  def https_app_ready?
+    unless app.has_https_app_state?
+      return state == STATE_RUNNING
+    end
+
+    unless describe.dig(:properties, :httpsAppState).nil?
+      return describe["properties"]["httpsAppState"] == "running"
+    end
+
+    false
+  end
+
   def update_provenance!
     Auditor.suppress do
       new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs } }
