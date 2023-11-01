@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import fs from 'fs/promises'
 import path from 'path'
 import { JSDOM } from 'jsdom'
@@ -42,12 +37,14 @@ export class SpaceReportResultService {
 
     const reportPartsMap = spaceReport.reportParts.getItems()
       .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>((acc, rp) => {
-        acc[rp.sourceType].push(rp)
-        return acc
-      }, { app: [], file: [], job: [], asset: [], workflow: [] })
+      acc[rp.sourceType].push(rp)
+      return acc
+    }, { app: [], file: [], job: [], asset: [], workflow: [] })
+
+    const emptySectionText = '<div class="empty-text">There are no items in this section</div>'
 
     const sidebar = await this.getSidebar(reportPartsMap, document)
-    const title = await this.getTitle(spaceReport, document)
+    const title = await this.getFrontmatter(spaceReport, document)
     container.appendChild(sidebar)
 
     const resizer = document.createElement('div')
@@ -65,31 +62,41 @@ export class SpaceReportResultService {
     const itemListFiles = document.createElement('div')
     itemListFiles.classList.add('item-list')
     report.appendChild(itemListFiles)
-    reportPartsMap.file.forEach(rp => itemListFiles.appendChild(this.getReportPartElement(rp, document)))
+    reportPartsMap.file.length > 0
+      ? reportPartsMap.file.forEach(rp => itemListFiles.appendChild(this.getReportPartContent(rp, document)))
+      : itemListFiles.innerHTML = emptySectionText
 
     report.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
     const itemListApps = document.createElement('div')
     itemListApps.classList.add('item-list')
     report.appendChild(itemListApps)
-    reportPartsMap.app.forEach(rp => itemListApps.appendChild(this.getReportPartElement(rp, document)))
+    reportPartsMap.app.length > 0
+      ? reportPartsMap.app.forEach(rp => itemListApps.appendChild(this.getReportPartContent(rp, document)))
+      : itemListApps.innerHTML = emptySectionText
 
     report.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
     const itemListExecutions = document.createElement('div')
     itemListExecutions.classList.add('item-list')
     report.appendChild(itemListExecutions)
-    reportPartsMap.job.forEach(rp => itemListExecutions.appendChild(this.getReportPartElement(rp, document)))
+    reportPartsMap.job.length > 0
+      ? reportPartsMap.job.forEach(rp => itemListExecutions.appendChild(this.getReportPartContent(rp, document)))
+      : itemListExecutions.innerHTML = emptySectionText
 
     report.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
     const itemListAssets = document.createElement('div')
     itemListAssets.classList.add('item-list')
     report.appendChild(itemListAssets)
-    reportPartsMap.asset.forEach(rp => itemListAssets.appendChild(this.getReportPartElement(rp, document)))
+    reportPartsMap.asset.length > 0
+      ? reportPartsMap.asset.forEach(rp => itemListAssets.appendChild(this.getReportPartContent(rp, document)))
+      : itemListAssets.innerHTML = emptySectionText
 
     report.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
     const itemListWorkflows = document.createElement('div')
     itemListWorkflows.classList.add('item-list')
     report.appendChild(itemListWorkflows)
-    reportPartsMap.workflow.forEach(rp => itemListWorkflows.appendChild(this.getReportPartElement(rp, document)))
+    reportPartsMap.workflow.length > 0
+      ? reportPartsMap.workflow.forEach(rp => itemListWorkflows.appendChild(this.getReportPartContent(rp, document)))
+      : itemListWorkflows.innerHTML = emptySectionText
 
     main.appendChild(report)
     container.appendChild(main)
@@ -98,18 +105,25 @@ export class SpaceReportResultService {
   }
 
   private getReportPartTypeHeader(title: string, id: string, document: Document) {
-    const header = document.createElement('h2')
-    header.innerHTML = title
+    const sectionHeading = document.createElement('div')
+    sectionHeading.classList.add('section-heading')
+    const sectionTitle = document.createElement('h2')
+    sectionTitle.innerHTML = title
 
     const anchor = document.createElement('span')
     anchor.classList.add('anchor')
     anchor.id = id
 
-    header.prepend(anchor)
-    return header
+    const spacer = document.createElement('div')
+    spacer.classList.add('spacer')
+
+    sectionHeading.appendChild(spacer)
+    sectionHeading.appendChild(anchor)
+    sectionHeading.appendChild(sectionTitle)
+    return sectionHeading
   }
 
-  private getReportPartElement(rp: SpaceReportPart, document: Document) {
+  private getReportPartContent(rp: SpaceReportPart, document: Document) {
     const title = document.createElement('h3')
     title.innerHTML = rp.result.title
 
@@ -134,7 +148,7 @@ export class SpaceReportResultService {
     return container
   }
 
-  private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
+  private getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
     const container = document.createElement('aside')
     container.setAttribute('id', 'sidebar')
     container.style.width = '250px'
@@ -161,8 +175,12 @@ export class SpaceReportResultService {
     section.classList.add('navbar-item')
 
     const collapse = document.createElement('span')
-    collapse.classList.add('collapse-icon')
     collapse.innerHTML = '<svg id="triangle" viewBox="0 0 100 100"><polygon fill="currentColor" points="50 15, 100 100, 0 100"/</svg>'
+    if (ArrayUtils.isEmpty(reportParts)) {
+      collapse.classList.add('empty-icon')
+    } else {
+      collapse.classList.add('collapse-icon')
+    }
     section.appendChild(collapse)
 
     const link = document.createElement('a')
@@ -192,9 +210,15 @@ export class SpaceReportResultService {
     return section
   }
 
-  private async getTitle(report: SpaceReport, document: Document) {
-    const title = document.createElement('div')
-    title.classList.add('title')
+  private async getFrontmatter(report: SpaceReport, document: Document) {
+    const frontmatter = document.createElement('div')
+    frontmatter.classList.add('frontmatter')
+
+    const top = document.createElement('div')
+    top.classList.add('top')
+
+    const spacer = document.createElement('div')
+    spacer.classList.add('spacer')
 
     const logo = document.createElement('div')
     logo.classList.add('logo')
@@ -209,9 +233,10 @@ export class SpaceReportResultService {
     reportType.classList.add('report-type')
 
     logo.appendChild(reportTitle)
-    title.appendChild(logo)
-
-    title.appendChild(reportType)
+    top.appendChild(logo)
+    top.appendChild(reportType)
+    frontmatter.appendChild(top)
+    frontmatter.appendChild(spacer)
 
     const reportDescription = document.createElement('p')
     reportDescription.innerHTML = `
@@ -222,18 +247,39 @@ export class SpaceReportResultService {
       item, ensuring transparency, traceability, and accountability.
     `
     reportDescription.classList.add('report-description')
-    title.appendChild(reportDescription)
+    frontmatter.appendChild(reportDescription)
 
-    const spaceName = document.createElement('h1')
-    spaceName.innerHTML = report.space.name
-    title.appendChild(spaceName)
+    const infoRow1 = document.createElement('div')
+    const infoRow2 = document.createElement('div')
+    infoRow1.classList.add('info-area')
+    infoRow2.classList.add('info-area')
+    frontmatter.appendChild(infoRow1)
+    frontmatter.appendChild(infoRow2)
 
+    const createKVGroup = (key: string, value: string, classes: string[] = []) => {
+      const group = document.createElement('div')
+      group.classList.add('group', ...classes)
 
-    const reportCreated = document.createElement('p')
-    reportCreated.classList.add('created')
-    reportCreated.innerHTML = new Date(report.createdAt).toLocaleString()
-    title.appendChild(reportCreated)
+      const k = document.createElement('div')
+      k.classList.add('key')
+      k.innerHTML = key
+      const v = document.createElement('div')
+      v.classList.add('value')
+      v.innerHTML = value
 
-    return title
+      group.appendChild(k)
+      group.appendChild(v)
+
+      return group
+    }
+
+    const spaceName = createKVGroup('Space Name', report.space.name)
+    infoRow1.appendChild(spaceName)
+    const genAt = createKVGroup('Report Generated On', new Date(report.createdAt).toLocaleString(), ['align-right'])
+    infoRow1.appendChild(genAt)
+    const spaceDesc = createKVGroup('Space Description', report.space.description)
+    infoRow2.appendChild(spaceDesc)
+
+    return frontmatter
   }
 }
