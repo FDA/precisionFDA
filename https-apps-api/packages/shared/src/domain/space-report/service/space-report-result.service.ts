@@ -69,13 +69,13 @@ export class SpaceReportResultService {
   private getReportSegment(title: string, id: string, parts: SpaceReportPart[], document: Document) {
     const container = document.createElement('div')
 
+    const spacer = document.createElement('div')
+    spacer.classList.add('spacer')
+    container.appendChild(spacer)
+
     const sectionHeading = document.createElement('div')
     sectionHeading.classList.add('section-heading')
     container.appendChild(sectionHeading)
-
-    const spacer = document.createElement('div')
-    spacer.classList.add('spacer')
-    sectionHeading.appendChild(spacer)
 
     const sectionTitle = document.createElement('h2')
     sectionTitle.innerHTML = title
