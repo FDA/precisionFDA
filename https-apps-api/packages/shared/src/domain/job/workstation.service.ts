@@ -41,7 +41,7 @@ class WorkstationService {
       throw new errors.JobNotFoundError()
     }
 
-    if (!job.isHTTPS) {
+    if (!job.isHTTPS()) {
       throw new errors.InvalidStateError(`Job ${job.id} is not an HTTPS app`)
     }
 
