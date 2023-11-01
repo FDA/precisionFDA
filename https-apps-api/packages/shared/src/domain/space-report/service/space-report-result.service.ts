@@ -7,8 +7,8 @@ import { SpaceReport } from '../entity/space-report.entity'
 import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 
 // TODO - use import after introducing bundler with nestjs
-const provenanceStylesPath = fs.readFile(path.join(__dirname, '../../../../src/domain/provenance/assets/main.css'))
 const assetsPath = path.join(__dirname, '../../../../src/domain/space-report/assets')
+const triangleIcon = fs.readFile(path.join(assetsPath, 'triangle-icon.svg'), 'utf8')
 const logoImage = fs.readFile(path.join(assetsPath, 'logo.svg'), 'utf8')
 const html = fs.readFile(path.join(assetsPath, 'result-wrapper.html'), 'utf8')
 
@@ -20,92 +20,48 @@ export class SpaceReportResultService {
   private readonly WORKFLOWS_HEADER_ID = 'header-workflows'
   private readonly REPORT_PART_ID_PREFIX = 'report-part-'
 
-  async generateResult(spaceReport: SpaceReport) {
+  async generateResult(spaceReport: SpaceReport, styles?: string) {
     const domContainer = new JSDOM(await html)
     const document = domContainer.window.document
 
-    // Load styles for provenance charts
-    const provenanceStyles = (await provenanceStylesPath).toString()
     const head = document.getElementsByTagName('head')[0]
-    const style = document.createElement('style')
-    style.innerHTML = provenanceStyles
-    head.appendChild(style)
+
+    if (styles) {
+      const style = document.createElement('style')
+      style.innerHTML = styles
+      head.appendChild(style)
+    }
 
     const container = document.createElement('div')
-    container.setAttribute('id', 'container')
+    container.id = 'container'
     document.body.appendChild(container)
 
     const reportPartsMap = spaceReport.reportParts.getItems()
       .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>((acc, rp) => {
-      acc[rp.sourceType].push(rp)
-      return acc
-    }, { app: [], file: [], job: [], asset: [], workflow: [] })
-
-    const emptySectionText = '<div class="empty-text">There are no items in this section</div>'
+        acc[rp.sourceType].push(rp)
+        return acc
+      }, { app: [], file: [], job: [], asset: [], workflow: [] })
 
     const sidebar = await this.getSidebar(reportPartsMap, document)
-    const title = await this.getFrontmatter(spaceReport, document)
     container.appendChild(sidebar)
 
     const resizer = document.createElement('div')
-    resizer.setAttribute('id', 'resizer')
+    resizer.id = 'resizer'
     container.appendChild(resizer)
 
     const main = document.createElement('main')
-    main.setAttribute('id', 'main')
+    main.id = 'main'
+    container.appendChild(main)
 
     const report = document.createElement('div')
-    report.setAttribute('id', 'report')
-    report.appendChild(title)
-
-    report.appendChild(this.getReportPartTypeHeader('Space Files', this.FILES_HEADER_ID, document))
-    const itemListFiles = document.createElement('div')
-    itemListFiles.classList.add('item-list')
-    report.appendChild(itemListFiles)
-    reportPartsMap.file.length > 0
-      ? reportPartsMap.file.forEach(rp => itemListFiles.appendChild(this.getReportPartContent(rp, document)))
-      : itemListFiles.innerHTML = emptySectionText
-
-    // container.appendChild(this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document))
-    // container.appendChild(this.getReportSegment('Apps', this.APPS_HEADER_ID, reportPartsMap.app, document))
-    // container.appendChild(this.getReportSegment('Executions', this.JOBS_HEADER_ID, reportPartsMap.job, document))
-    // container.appendChild(this.getReportSegment('Assets', this.ASSETS_HEADER_ID, reportPartsMap.asset, document))
-    // container.appendChild(this.getReportSegment('Workflows', this.WORKFLOWS_HEADER_ID, reportPartsMap.workflow, document))
-
-    report.appendChild(this.getReportPartTypeHeader('Space Apps', this.APPS_HEADER_ID, document))
-    const itemListApps = document.createElement('div')
-    itemListApps.classList.add('item-list')
-    report.appendChild(itemListApps)
-    reportPartsMap.app.length > 0
-      ? reportPartsMap.app.forEach(rp => itemListApps.appendChild(this.getReportPartContent(rp, document)))
-      : itemListApps.innerHTML = emptySectionText
-
-    report.appendChild(this.getReportPartTypeHeader('Space Executions', this.JOBS_HEADER_ID, document))
-    const itemListExecutions = document.createElement('div')
-    itemListExecutions.classList.add('item-list')
-    report.appendChild(itemListExecutions)
-    reportPartsMap.job.length > 0
-      ? reportPartsMap.job.forEach(rp => itemListExecutions.appendChild(this.getReportPartContent(rp, document)))
-      : itemListExecutions.innerHTML = emptySectionText
-
-    report.appendChild(this.getReportPartTypeHeader('Space Assets', this.ASSETS_HEADER_ID, document))
-    const itemListAssets = document.createElement('div')
-    itemListAssets.classList.add('item-list')
-    report.appendChild(itemListAssets)
-    reportPartsMap.asset.length > 0
-      ? reportPartsMap.asset.forEach(rp => itemListAssets.appendChild(this.getReportPartContent(rp, document)))
-      : itemListAssets.innerHTML = emptySectionText
-
-    report.appendChild(this.getReportPartTypeHeader('Space Workflows', this.WORKFLOWS_HEADER_ID, document))
-    const itemListWorkflows = document.createElement('div')
-    itemListWorkflows.classList.add('item-list')
-    report.appendChild(itemListWorkflows)
-    reportPartsMap.workflow.length > 0
-      ? reportPartsMap.workflow.forEach(rp => itemListWorkflows.appendChild(this.getReportPartContent(rp, document)))
-      : itemListWorkflows.innerHTML = emptySectionText
-
+    report.id = 'report'
+    report.appendChild(await this.getHeader(spaceReport, document))
+    report.appendChild(this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document))
+    report.appendChild(this.getReportSegment('Apps', this.APPS_HEADER_ID, reportPartsMap.app, document))
+    report.appendChild(this.getReportSegment('Executions', this.JOBS_HEADER_ID, reportPartsMap.job, document))
+    report.appendChild(this.getReportSegment('Assets', this.ASSETS_HEADER_ID, reportPartsMap.asset, document))
+    report.appendChild(this.getReportSegment('Workflows', this.WORKFLOWS_HEADER_ID, reportPartsMap.workflow, document))
     main.appendChild(report)
-    container.appendChild(main)
 
     return domContainer.serialize()
   }
@@ -115,91 +71,84 @@ export class SpaceReportResultService {
 
     const sectionHeading = document.createElement('div')
     sectionHeading.classList.add('section-heading')
-    const sectionTitle = document.createElement('h2')
-    sectionTitle.innerHTML = title
-
-    const anchor = document.createElement('span')
-    anchor.classList.add('anchor')
-    anchor.id = id
+    container.appendChild(sectionHeading)
 
     const spacer = document.createElement('div')
     spacer.classList.add('spacer')
-
     sectionHeading.appendChild(spacer)
-    sectionHeading.appendChild(anchor)
+
+    const sectionTitle = document.createElement('h2')
+    sectionTitle.innerHTML = title
+    sectionTitle.id = id
     sectionHeading.appendChild(sectionTitle)
 
     if (ArrayUtils.isEmpty(parts)) {
       const emptyText = document.createElement('p')
-      emptyText.innerHTML = `There are no ${title.toLowerCase()} in the space.`
+      emptyText.classList.add('empty-text')
+      emptyText.innerHTML = `There are no ${title.toLowerCase()} in this space.`
       container.appendChild(emptyText)
 
       return container
     }
 
-    parts.forEach(rp => container.appendChild(this.getReportPartElement(rp, document)))
+    const itemList = document.createElement('div')
+    itemList.classList.add('item-list')
+    parts.forEach(rp => itemList.appendChild(this.getReportPartContent(rp, document)))
+    container.appendChild(itemList)
 
     return container
   }
 
   private getReportPartContent(rp: SpaceReportPart, document: Document) {
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('item-wrapper')
+
+    const container = document.createElement('div')
+    container.classList.add('item')
+    wrapper.appendChild(container)
+
     const title = document.createElement('h3')
     title.innerHTML = rp.result.title
-
-    const anchor = document.createElement('span')
-    anchor.classList.add('anchor')
-    anchor.id = `${this.REPORT_PART_ID_PREFIX}${rp.id}`
-    title.prepend(anchor)
+    title.id = `${this.REPORT_PART_ID_PREFIX}${rp.id}`
+    container.appendChild(title)
 
     const created = document.createElement('p')
     created.innerHTML = new Date(rp.result.created).toLocaleString()
+    container.appendChild(created)
 
     const diagram = document.createElement('div')
     diagram.classList.add('canvas-wrapper')
     diagram.innerHTML = rp.result.svg
-
-    const container = document.createElement('div')
-    container.classList.add('item')
-    container.appendChild(title)
-    container.appendChild(created)
     container.appendChild(diagram)
 
-    return container
+    return wrapper
   }
 
-  private getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
+  private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
     const container = document.createElement('aside')
-    container.setAttribute('id', 'sidebar')
+    container.id = 'sidebar'
     container.style.width = '250px'
-    container.appendChild(this.getToC(items, document))
+
+    const sidenav = document.createElement('div')
+    sidenav.classList.add('sidenav')
+    sidenav.appendChild(await this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document))
+    sidenav.appendChild(await this.getResourceItem('Apps', this.APPS_HEADER_ID, items.app, document))
+    sidenav.appendChild(await this.getResourceItem('Executions', this.JOBS_HEADER_ID, items.job, document))
+    sidenav.appendChild(await this.getResourceItem('Assets', this.ASSETS_HEADER_ID, items.asset, document))
+    sidenav.appendChild(await this.getResourceItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document))
+    container.appendChild(sidenav)
 
     return container
   }
 
-  private getToC(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
-    const container = document.createElement('div')
-    container.classList.add('sidenav')
-
-    container.appendChild(this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document))
-    container.appendChild(this.getResourceItem('Apps', this.APPS_HEADER_ID, items.app, document))
-    container.appendChild(this.getResourceItem('Executions', this.JOBS_HEADER_ID, items.job, document))
-    container.appendChild(this.getResourceItem('Assets', this.ASSETS_HEADER_ID, items.asset, document))
-    container.appendChild(this.getResourceItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document))
-
-    return container
-  }
-
-  private getResourceItem(title: string, anchor: string, reportParts: SpaceReportPart[], document: Document) {
+  private async getResourceItem(title: string, anchor: string, reportParts: SpaceReportPart[], document: Document) {
     const section = document.createElement('div')
     section.classList.add('navbar-item')
 
     const collapse = document.createElement('span')
-    collapse.innerHTML = '<svg id="triangle" viewBox="0 0 100 100"><polygon fill="currentColor" points="50 15, 100 100, 0 100"/</svg>'
-    if (ArrayUtils.isEmpty(reportParts)) {
-      collapse.classList.add('empty-icon')
-    } else {
-      collapse.classList.add('collapse-icon')
-    }
+    const collapseClass = ArrayUtils.isEmpty(reportParts) ? 'empty-icon' : 'collapse-icon'
+    collapse.classList.add(collapseClass)
+    collapse.innerHTML = await triangleIcon
     section.appendChild(collapse)
 
     const link = document.createElement('a')
@@ -214,91 +163,86 @@ export class SpaceReportResultService {
 
     const subnav = document.createElement('div')
     subnav.classList.add('subnav')
-
-    const subItems = reportParts.map(rp => {
-      const sublink = document.createElement('a')
-      sublink.href = `#${this.REPORT_PART_ID_PREFIX}${rp.id}`
-      sublink.innerHTML = rp.result.title
-
-      return sublink
-    })
-
-    subItems.forEach(sni => subnav.appendChild(sni))
+    reportParts.forEach(rp => subnav.appendChild(this.getResourceLink(rp, document)))
     section.appendChild(subnav)
 
     return section
   }
 
-  private async getFrontmatter(report: SpaceReport, document: Document) {
-    const frontmatter = document.createElement('div')
-    frontmatter.classList.add('frontmatter')
+  private getResourceLink(rp: SpaceReportPart, document: Document) {
+    const container = document.createElement('a')
+    container.href = `#${this.REPORT_PART_ID_PREFIX}${rp.id}`
+    container.innerHTML = rp.result.title
 
-    const top = document.createElement('div')
-    top.classList.add('top')
+    return container
+  }
 
-    const spacer = document.createElement('div')
-    spacer.classList.add('spacer')
+  private async getHeader(report: SpaceReport, document: Document) {
+    const container = document.createElement('div')
+    container.classList.add('header')
+
+    const title = document.createElement('div')
+    title.classList.add('title')
+    container.appendChild(title)
 
     const logo = document.createElement('div')
     logo.classList.add('logo')
     logo.innerHTML = await logoImage
+    title.appendChild(logo)
 
-    const reportTitle = document.createElement('span')
-    reportTitle.innerHTML = 'Space Report'
-    reportTitle.classList.add('report-title')
+    const name = document.createElement('span')
+    name.innerHTML = 'Space Report'
+    name.classList.add('report-title')
+    logo.appendChild(name)
 
     const reportType = document.createElement('span')
     reportType.innerHTML = 'Provenance Tracking'
     reportType.classList.add('report-type')
+    title.appendChild(reportType)
 
-    logo.appendChild(reportTitle)
-    top.appendChild(logo)
-    top.appendChild(reportType)
-    frontmatter.appendChild(top)
-    frontmatter.appendChild(spacer)
+    const spacer = document.createElement('div')
+    spacer.classList.add('spacer')
+    container.appendChild(spacer)
 
-    const reportDescription = document.createElement('p')
-    reportDescription.innerHTML = `
+    const description = document.createElement('p')
+    description.innerHTML = `
       The Provenance Tracking Report provides a comprehensive documentation
       of the lineage and history of Files, Apps, Executions, Assets, and
       Workflows within the precisionFDA system. Through this report, users
       can gain insights into the origin, movement, and life-cycle of each
       item, ensuring transparency, traceability, and accountability.
     `
-    reportDescription.classList.add('report-description')
-    frontmatter.appendChild(reportDescription)
+    description.classList.add('report-description')
+    container.appendChild(description)
 
     const infoRow1 = document.createElement('div')
-    const infoRow2 = document.createElement('div')
     infoRow1.classList.add('info-area')
+    infoRow1.appendChild(this.getHeaderInfoPart('Space Name', report.space.name, document))
+    infoRow1.appendChild(this.getHeaderInfoPart('Report Generated On', new Date(report.createdAt).toLocaleString(), document, ['align-right']))
+    container.appendChild(infoRow1)
+
+    const infoRow2 = document.createElement('div')
     infoRow2.classList.add('info-area')
-    frontmatter.appendChild(infoRow1)
-    frontmatter.appendChild(infoRow2)
+    infoRow2.appendChild(this.getHeaderInfoPart('Space Description', report.space.description, document))
+    container.appendChild(infoRow2)
 
-    const createKVGroup = (key: string, value: string, classes: string[] = []) => {
-      const group = document.createElement('div')
-      group.classList.add('group', ...classes)
+    return container
+  }
 
-      const k = document.createElement('div')
-      k.classList.add('key')
-      k.innerHTML = key
-      const v = document.createElement('div')
-      v.classList.add('value')
-      v.innerHTML = value
+  private getHeaderInfoPart(titleText: string, descriptionText: string, document: Document, classes: string[] = []) {
+    const container = document.createElement('div')
+    container.classList.add('group', ...classes)
 
-      group.appendChild(k)
-      group.appendChild(v)
+    const title = document.createElement('div')
+    title.classList.add('key')
+    title.innerHTML = titleText
+    container.appendChild(title)
 
-      return group
-    }
+    const description = document.createElement('div')
+    description.classList.add('value')
+    description.innerHTML = descriptionText
+    container.appendChild(description)
 
-    const spaceName = createKVGroup('Space Name', report.space.name)
-    infoRow1.appendChild(spaceName)
-    const genAt = createKVGroup('Report Generated On', new Date(report.createdAt).toLocaleString(), ['align-right'])
-    infoRow1.appendChild(genAt)
-    const spaceDesc = createKVGroup('Space Description', report.space.description)
-    infoRow2.appendChild(spaceDesc)
-
-    return frontmatter
+    return container
   }
 }
