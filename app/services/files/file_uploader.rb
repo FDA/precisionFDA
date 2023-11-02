@@ -38,7 +38,7 @@ module Files
       end
 
       unless file.nil?
-        unsafe_params = {"id" => file.uid}
+        unsafe_params = { "id" => file.uid }
         https_apps_client.file_close(file.uid, unsafe_params)
       end
 
