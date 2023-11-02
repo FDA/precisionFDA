@@ -31,11 +31,16 @@ module Files
         raise FileUploaderError, "Size of file exceeds maximum allowed file size"
       end
 
+      file = nil
       Node.transaction do
         file = create(options)
         upload(file.uid, file_io)
-        close(file.uid)
       end
+      if file != nil
+        unsafe_params = {"id" => file.uid}
+        https_apps_client.file_close(file.uid, unsafe_params)
+        end
+      file
     end
 
     private
@@ -107,6 +112,10 @@ module Files
       raise FileUploaderError,
             "Failed to upload chunk ##{index}. Please try again later. " \
             "If the problem persists, contact precisionFDA support."
+    end
+
+    def https_apps_client
+      @https_apps_client ||= HttpsAppsClient.new
     end
 
     def md5sum(chunk)
