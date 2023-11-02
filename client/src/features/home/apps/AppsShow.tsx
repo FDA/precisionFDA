@@ -114,7 +114,7 @@ const DetailActionsDropdown = (
   { app, comparatorLinks, challenges, spaceId }:
     { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
   const actions = useAppSelectionActions({
-    scope: app.location === 'Private' ? 'me' : app.location,
+    scope: getScopeMapping(app.scope, app.featured),
     spaceId,
     selectedItems: [app],
     resetSelected: () => { },
