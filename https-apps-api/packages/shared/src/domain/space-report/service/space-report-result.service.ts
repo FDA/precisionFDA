@@ -6,7 +6,7 @@ import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
 import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 
-// TODO - use import after introducing bundler with nestjs
+// TODO(PFDA-4701) - use import after introducing bundler with nestjs
 const assetsPath = path.join(__dirname, '../../../../src/domain/space-report/assets')
 const triangleIcon = fs.readFile(path.join(assetsPath, 'triangle-icon.svg'), 'utf8')
 const logoImage = fs.readFile(path.join(assetsPath, 'logo.svg'), 'utf8')
