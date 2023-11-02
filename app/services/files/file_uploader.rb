@@ -36,10 +36,12 @@ module Files
         file = create(options)
         upload(file.uid, file_io)
       end
-      if file != nil
+
+      unless file.nil?
         unsafe_params = {"id" => file.uid}
         https_apps_client.file_close(file.uid, unsafe_params)
-        end
+      end
+
       file
     end
 
