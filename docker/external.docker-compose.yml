@@ -1,12 +1,12 @@
 volumes:
-  db-gsrs-mysql-volume:
+  db-gsrs-mariadb-volume:
 
 services:
   web:
     depends_on:
       - gsrs
     environment:
-      - GSRS_URL=http://gsrs:9000
+      - GSRS_URL=http://gsrs:8080
       - GSRS_ENABLED=true
   gsrs:
     extends:
@@ -17,5 +17,5 @@ services:
       file: ./external.services.yml
       service: gsrsdb
     volumes:
-      - db-gsrs-mysql-volume:/var/lib/mysql
+      - db-gsrs-mariadb-volume:/var/lib/mariadb
 
