@@ -5,7 +5,6 @@ ENV GSRS_BRANCH=$gsrs_branch
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
-ENV CATALINA_OPTS="-Xms4G -Xmx4G -Djava.net.preferIPv4Stack=true -Dspring-boot.run.jvmArguments='-Dix.ginas.load.file=/usr/local/tomcat/webapps/substances/WEB-INF/classes/rep18.gsrs'"
 
 RUN mkdir -p "$CATALINA_HOME"
 
