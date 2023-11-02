@@ -7,7 +7,7 @@ import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
 
-// TODO - use import after introducing bundler with nestjs
+// TODO(PFDA-4701) - use import after introducing bundler with nestjs
 const assetsPath = path.join(__dirname, '../../../../../src/domain/provenance/assets')
 const assetNames = [
   'main.css',
