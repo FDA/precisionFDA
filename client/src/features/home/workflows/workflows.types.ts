@@ -66,6 +66,7 @@ export interface Revision {
   revision: number;
   uid: string;
   tag_list: any[];
+  deleted: boolean;
 }
 
 export interface Batches {}

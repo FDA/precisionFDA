@@ -34,13 +34,13 @@ namespace :apps do
 
     ActiveRecord::Base.transaction do
       app_series = create_app_series(app_info["name"], created_by, app_scope)
-      latest_revision_app = app_series.latest_revision_app
+      latest_revision_app = app_series.apps.order(revision: :desc).limit(1)[0]
       latest_revision = latest_revision_app&.revision.to_i
 
       if latest_revision > 0
         puts "Found already existing '#{app_name}' app with the last revision #{latest_revision}"
 
-        if app_info["version"] == latest_revision_app.version
+        if app_info["version"] == latest_revision_app.version && !latest_revision_app.deleted
           abort "The app on the platform has the same version as the existing one. " +
                 "Nothing to transfer"
         end
@@ -124,7 +124,7 @@ namespace :apps do
         entity_type: app_info["httpsApp"].present? ? App::TYPE_HTTPS : App::TYPE_REGULAR,
       )
 
-      app_series.update!(latest_revision_app: app, latest_version_app: app)
+      app_series.update!(latest_revision_app: app, latest_version_app: app, deleted: false)
     end
   end
 
