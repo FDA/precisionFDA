@@ -196,6 +196,10 @@ class Space < ActiveRecord::Base
     Job.accessible_by_space(self)
   end
 
+  def discussions
+    Discussion.accessible_by_space(self)
+  end
+
   def comparisons
     Comparison.accessible_by_space(self)
   end

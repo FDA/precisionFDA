@@ -24,10 +24,8 @@ export interface SiteSettingsResponse {
     },
 }
 
-export const onLogInWithSSO = (siteSettings: SiteSettingsResponse) => {
-  if (siteSettings?.ssoButton.isEnabled) {
-    window.location.assign(siteSettings.ssoButton.data.fdaSsoUrl)
-  }
+export const onLogInWithSSO = (fdaSsoUrl: string) => {
+    window.location.assign(fdaSsoUrl)
 }
 
 export const useSiteSettingsQuery = () => useQuery({

@@ -99,7 +99,7 @@ export const useAcceptLicensesModal = () => {
     setShowModal(true)
   }
 
-  const handleClick = (evt: any, license: License) => {
+  const handleClick = (evt: React.ChangeEvent<HTMLInputElement>, license: License) => {
     if (evt.target.checked) {
       setSelectedLicenses(prev => [...prev, license])
     } else {
@@ -112,7 +112,7 @@ export const useAcceptLicensesModal = () => {
   const getTitle = (license: License): ReactElement => (
     <>
       {!license.approval_required && (
-        <Checkbox onClick={(evt: unknown) => handleClick(evt, license)} />
+        <Checkbox onClick={(evt: React.ChangeEvent<HTMLInputElement>) => handleClick(evt, license)} />
       )}
       <StyledTabTitle>
         <StyledLicenceTitle>{license.title}</StyledLicenceTitle>

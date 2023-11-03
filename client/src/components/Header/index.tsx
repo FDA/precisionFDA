@@ -10,7 +10,7 @@ import Dropdown from '../Dropdown'
 import { BullsEyeIcon } from '../icons/BullsEyeIcon'
 import { CaretIcon } from '../icons/CaretIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
-import { CommentIcon } from '../icons/CommentIcon'
+import { DiscussionIcon } from '../icons/DiscussionIcon'
 import { CommentingIcon } from '../icons/CommentingIcon'
 import { FortIcon } from '../icons/FortIcon'
 import { GSRSIcon } from '../icons/GSRSIcon'
@@ -199,7 +199,7 @@ export const Header: React.FC = () => {
                 >
                   <MenuItem active={isActiveLink('/discussions')}>
                     <IconWrap>
-                      <CommentIcon height={16} />
+                      <DiscussionIcon height={16} />
                     </IconWrap>
                     <HeaderItemText>Discussions</HeaderItemText>
                   </MenuItem>

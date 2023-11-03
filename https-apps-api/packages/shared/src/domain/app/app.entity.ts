@@ -9,7 +9,8 @@ import {
   OneToMany,
   Enum,
   ManyToMany,
-  EntityRepositoryType, JsonType,
+  EntityRepositoryType,
+  JsonType,
 } from '@mikro-orm/core'
 import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'

@@ -10,7 +10,7 @@ enum STATIC_SCOPE {
   PUBLIC = 'public',
 }
 
-type Scope = STATIC_SCOPE & { [k: string]: string }
+type Scope = STATIC_SCOPE | `space-${number}`
 
 enum HOME_SCOPE {
   ME = 'me',

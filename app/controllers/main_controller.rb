@@ -26,6 +26,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                presskit
                                                news
                                                mislabeling
+                                               data_portals
                                                track)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
@@ -251,7 +252,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                  locals: { message: I18n.t("main.login_as_guest_warning") }
     else
       user_return_to = params[:user_return_to].presence
-
       uri_attrs = [oauth2_redirect_url]
       uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
 

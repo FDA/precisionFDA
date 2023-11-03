@@ -18,7 +18,7 @@ export interface BaseError {
     type: 'error'
   }
 }
-export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions' | 'reports'
+export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions' | 'reports' | 'discussions'
 export type APIResource =
   | 'files'
   | 'folders'
@@ -33,6 +33,8 @@ export type APIResource =
   | 'space-reports'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
+
+export type DialogType = 'radio' | 'checkbox'
 
 export interface DownloadListResponse {
   id: number
