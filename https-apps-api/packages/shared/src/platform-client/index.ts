@@ -1,85 +1,83 @@
 /* eslint-disable max-len */
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
-import { isNil, omit } from 'ramda'
 import type { Logger } from 'pino'
+import { isNil, omit } from 'ramda'
 import { errors } from '..'
 import { config } from '../config'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { OrgMembershipError } from '../errors'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
-import { OrgMembershipError } from '../errors'
-import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 import {
+  AppAddAuthorizedUsersParams,
+  AppCreateParams,
+  AppDescribeParams,
+  AppletCreateParams,
+  AppPublishParams,
+  CloneObjectsParams,
   CreateFolderParams,
   DbClusterActionParams,
   DbClusterCreateParams,
   DbClusterDescribeParams,
-  DescribeFoldersParams,
   DescribeDataObjectsParams,
+  DescribeFoldersParams,
   FileCloseParams,
+  FileCreateParams,
   FileDescribeParams,
   FileDownloadLinkParams,
+  FileGetUploadUrlParams,
+  FileRemoveParams,
   FileStatesParams,
-  OrgFindMembersParams,
-  ListFilesParams,
-  MoveFilesParams,
   JobCreateParams,
   JobDescribeParams,
+  JobFindParams,
   JobTerminateParams,
+  ListFilesParams,
+  MoveFilesParams,
+  ObjectsParams,
+  OrgDescribeParams,
+  OrgFindMembersParams,
   RemoveFolderParams,
   RenameFolderParams,
+  Starting,
+  UserDescribeParams,
   UserInviteToOrgParams,
   UserRemoveFromOrgParams,
   UserResetMfaParams,
   UserUnlockParams,
-  Starting,
   WorkflowDescribeParams,
-  AppDescribeParams,
-  FileRemoveParams,
-  AppletCreateParams,
-  AppCreateParams,
-  ObjectsParams,
-  FileCreateParams,
-  OrgDescribeParams,
-  UserDescribeParams,
-  JobFindParams,
-  FileGetUploadUrlParams,
-  CloneObjectsParams,
-  AppAddAuthorizedUsersParams,
-  AppPublishParams,
-  JobFindParams,
 } from './platform-client.params'
 import {
-  JobCreateResponse,
-  JobTerminateResponse,
-  ClassIdResponse,
-  JobDescribeResponse,
-  DescribeFoldersResponse,
-  DbClusterDescribeResponse,
-  FileCloseResponse,
-  IPaginatedResponse,
-  FileDescribeResponse,
-  FileStatesResponse,
-  FileStateResult,
-  ListFilesResult,
-  ListFilesResponse,
-  OrgFindMembersReponse,
-  UserInviteToOrgResponse,
-  UserRemoveFromOrgResponse,
-  DescribeDataObjectsResponse,
-  FileDownloadLinkResponse,
-  WorkflowDescribeResponse,
   AppDescribeResponse,
+  ClassIdResponse,
+  CloneObjectsResponse,
+  DbClusterDescribeResponse,
+  DescribeDataObjectsResponse,
+  DescribeFoldersResponse,
+  FileCloseResponse,
+  FileDescribeResponse,
+  FileDownloadLinkResponse,
   FileRemoveResponse,
-  UserDescribeResponse,
-  OrgDescribeResponse,
+  FileStateResult,
+  FileStatesResponse,
   FindJobsResponse,
   GetUploadURLResponse,
+  IPaginatedResponse,
+  JobCreateResponse,
+  JobDescribeResponse,
   JobTerminateResponse,
-  CloneObjectsResponse,
+  ListFilesResponse,
+  ListFilesResult,
+  OrgDescribeResponse,
+  OrgFindMembersReponse,
+  UserDescribeResponse,
+  UserInviteToOrgResponse,
+  UserRemoveFromOrgResponse,
+  WorkflowDescribeResponse,
 } from './platform-client.responses'
-import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -143,7 +141,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async appPublish(params: AppPublishParams): Promise<ClassIdResponse> {
@@ -155,7 +153,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ---------------
@@ -825,7 +823,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
 

@@ -8,7 +8,6 @@ import { Attachment } from './attachment/attachment.entity'
 import { ChallengeResource } from './challenge/challenge-resource.entity'
 import { Challenge } from './challenge/challenge.entity'
 import { AnswerComment, Comment, DiscussionComment } from './comment'
-import { Comment } from './comment/comment.entity'
 import { ComparisonInput } from './comparison-input/comparison-input.entity'
 import { Comparison } from './comparison/comparison.entity'
 import { DataPortal } from './data-portal/data-portal.entity'
@@ -42,7 +41,6 @@ import { UserFile } from './user-file/user-file.entity'
 import { User } from './user/user.entity'
 import { Vote } from './vote/vote.entity'
 import { Workflow } from './workflow/entity/workflow.entity'
-import { Workflow } from './workflow/workflow.entity'
 
 const entities = {
   AcceptedLicense,
