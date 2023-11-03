@@ -1,7 +1,7 @@
 import { Location } from '../types/utils'
 import { ResourceScope } from '../features/home/types'
 
-export type LocationResource = 'files' | 'apps' | 'workflows' | 'executions' | 'members'
+export type LocationResource = 'files' | 'apps' | 'workflows' | 'executions' | 'members' | 'discussions'
 
 export function getBackPath(
   location: Location,

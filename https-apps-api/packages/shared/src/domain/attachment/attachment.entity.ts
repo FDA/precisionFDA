@@ -1,6 +1,8 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
 import { Note } from '../note'
 
+export type ItemType = 'Node' | 'Job' | 'App' | 'Workflow' | 'Comparison'
+
 @Entity({ tableName: 'attachments' })
 export class Attachment {
   @PrimaryKey()
@@ -10,10 +12,10 @@ export class Attachment {
   note: Ref<Note>
 
   @Property()
-  item_id: number
+  itemId: number
 
-  @Property()
-  item_type: string
+  @Property({nullable: false})
+  itemType: ItemType
 
   constructor(note: Note) {
     this.note = Reference.create(note)

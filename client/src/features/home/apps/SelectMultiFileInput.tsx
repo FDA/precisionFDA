@@ -4,12 +4,12 @@ import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/Button/ButtonGroup'
 import { pluralize } from '../../../utils/formatting'
 import {
-  DialogType,
   useSelectFileModal,
 } from '../files/actionModals/useSelectFileModal'
 
 import { theme } from '../../../styles/theme'
 import { IAccessibleFile } from '../databases/databases.api'
+import { DialogType } from '../types'
 
 const FileButton = styled(Button)<{ isError?: boolean }>`
   margin-right: 4px;
@@ -59,7 +59,7 @@ export const SelectMultiFileInput = ({
     dialogType,
     handleSelect,
     dialogSubtitle,
-    scope,
+    scope ? [scope] : [],
     value,
   )
 

@@ -45,6 +45,10 @@ import {
   UserDescribeParams,
   JobFindParams,
   FileGetUploadUrlParams,
+  CloneObjectsParams,
+  AppAddAuthorizedUsersParams,
+  AppPublishParams,
+  JobFindParams,
 } from './platform-client.params'
 import {
   JobCreateResponse,
@@ -72,6 +76,8 @@ import {
   OrgDescribeResponse,
   FindJobsResponse,
   GetUploadURLResponse,
+  JobTerminateResponse,
+  CloneObjectsResponse,
 } from './platform-client.responses'
 import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
@@ -126,6 +132,30 @@ class PlatformClient {
       url,
     }
     return await this.sendRequest(options)
+  }
+
+  async appAddAuthorizedUsers(params: AppAddAuthorizedUsersParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.appId}/addAuthorizedUsers`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        authorizedUsers: params.authorizedUsers,
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async appPublish(params: AppPublishParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.appId}/publish`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        makeDefault: params.makeDefault ?? false,
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
   }
 
   // ---------------
@@ -202,7 +232,6 @@ class PlatformClient {
     }
     return await this.sendRequest(options)
   }
-
 
   // ----------------------
   //    F I L E S
@@ -780,6 +809,23 @@ class PlatformClient {
       url,
     }
     return await this.sendRequest(options)
+  }
+
+  // ---------------------
+  //    O B J E C T S
+  // ---------------------
+
+  async cloneObjects(params: CloneObjectsParams): Promise<CloneObjectsResponse> {
+    const url = `${config.platform.apiUrl}/${params.sourceProject}/clone`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        objects: params.objects,
+        project: params.destinationProject,
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
   }
 
 

@@ -7,6 +7,7 @@ export interface Counters {
   jobs: number;
   members: number;
   reports: number;
+  discussions: number;
 }
 
 export interface Links {

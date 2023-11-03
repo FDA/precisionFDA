@@ -1,5 +1,6 @@
 import { RESOURCE_LABELS } from '../../../types/user'
 import { ServerScope } from "../types";
+import { FileOrg, FileUser } from "../apps/apps.types";
 
 export enum ExecutionActions {
   "Run" = "Run",
@@ -98,6 +99,28 @@ export interface Job {
   entity_type: string;
   logged_dxuser: string;
   tags: any[];
+}
+
+export interface IJob {
+  id: number;
+  uid: string;
+  className: string;
+  fa_class: string;
+  scope: string;
+  path: string;
+  owned: boolean;
+  editable: boolean;
+  accessible: boolean;
+  file_path: null | string;
+  parent_folder_name: null | string;
+  public: boolean;
+  private: boolean;
+  in_space: boolean;
+  space_private: boolean;
+  space_public: boolean;
+  title: string;
+  user: FileUser
+  org: FileOrg
 }
 
 export interface IExecution {
