@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import { ServerScope } from '../../types'
 
 export interface Note {
   id: number;
   uid: string;
   className: string;
   fa_class: string;
-  scope: string;
+  scope: ServerScope;
   path: string;
   owned: boolean;
   editable: boolean;

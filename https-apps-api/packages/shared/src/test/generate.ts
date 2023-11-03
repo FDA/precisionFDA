@@ -246,6 +246,19 @@ const app = {
       app_gz: 'app-gzipped-file',
     },
   }),
+  appSeries: (): Partial<InstanceType<typeof entities.AppSeries>> => {
+    const dxid = `app-${random.dxstr()}`
+    return {
+      dxid,
+      name: chance.name(),
+      featured: false,
+      deleted: false,
+      verified: true,
+      scope: 'private',
+    }
+  },
+  appId: () => 'app-GP3J1V00XbPPz5qP4QPGxQ08',
+
 }
 
 const job = {
@@ -494,6 +507,7 @@ const comparison = {
     name: 'Test Comparison',
     description: chance.sentence(),
     state: COMPARISON_STATE.DONE,
+    scope: 'private'
   }),
 }
 

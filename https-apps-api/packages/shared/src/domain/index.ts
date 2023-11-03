@@ -1,7 +1,12 @@
 import { App } from './app/app.entity'
+import { Answer } from './answer/answer.entity'
+import { Attachment } from './attachment/attachment.entity'
 import { AppSeries } from './app-series'
 import { Workflow } from './workflow/workflow.entity'
-import { Comment } from './comment/comment.entity'
+import { Comment } from './comment'
+import { AnswerComment } from './comment'
+import { DiscussionComment } from './comment'
+import { Discussion } from './discussion'
 import { DataPortal } from './data-portal/data-portal.entity'
 import { DbCluster } from './db-cluster/db-cluster.entity'
 import { Expert } from './expert/expert.entity'
@@ -15,7 +20,7 @@ import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
 import { Node } from './user-file/node.entity'
-import { Note } from './note/note.entity'
+import { Note } from './note'
 import { Notification } from './notification/notification.entity'
 import { Folder } from './user-file/folder.entity'
 import { UserFile } from './user-file/user-file.entity'
@@ -35,19 +40,25 @@ import { ComparisonInput } from './comparison-input/comparison-input.entity'
 import { NotificationPreference } from './notification-preference/notification-preference.entity'
 import { Session } from './session'
 import { Resource } from './resource/resource.entity'
+import { Follow } from './follow/follow.entity'
+import { Vote } from './vote/vote.entity'
 
 const entities = {
   AcceptedLicense,
   AdminGroup,
   AdminMembership,
   App,
+  Attachment,
   AppSeries,
   DataPortal,
   Workflow,
   Asset,
+  Answer,
   Challenge,
   ChallengeResource,
   Comment,
+  AnswerComment,
+  DiscussionComment,
   Comparison,
   ComparisonInput,
   DbCluster,
@@ -56,14 +67,15 @@ const entities = {
   ExpertAnswer,
   ExpertQuestion,
   Notification,
-  Note,
   NotificationPreference,
   Folder,
+  Note,
   Job,
   License,
   LicensedItem,
   NewsItem,
   Node,
+  Discussion,
   Organization,
   Space,
   SpaceEvent,
@@ -74,56 +86,39 @@ const entities = {
   User,
   UserFile,
   Session,
+  Follow,
+  Vote,
 }
 
 export * as acceptedLicense from './accepted-license'
-
 export * as adminGroup from './admin-group'
-
 export * as spaceEvent from './space-event'
-
 export * as app from './app'
-
+export * as attachment from './attachment'
+export * as answer from './answer'
 export * as workflow from './workflow'
-
 export * as job from './job'
-
 export * as license from './license'
-
 export * as notification from './notification'
-
 export * as user from './user'
-
 export * as tag from './tag'
-
 export * as tagging from './tagging'
-
 export * as userFile from './user-file'
-
 export * as event from './event'
-
 export * as org from './org'
-
 export * as email from './email'
-
-export * as note from './note'
-
 export * as newsItem from './news-item'
-
 export * as comment from './comment'
-
 export * as dbCluster from './db-cluster'
-
 export * as space from './space'
-
 export * as spaceMembership from './space-membership'
-
 export * as challenge from './challenge'
-
 export * as dataPortal from './data-portal'
-
+export * as discussion from './discussion'
+export * as note from './note'
 export * as resource from './resource'
-
+export * as follow from './follow'
+export * as vote from './vote'
 
 export {
   entities,
@@ -131,6 +126,8 @@ export {
   AdminGroup,
   AdminMembership,
   App,
+  Answer,
+  Attachment,
   AppSeries,
   DataPortal,
   Workflow,
@@ -141,6 +138,7 @@ export {
   Comparison,
   ComparisonInput,
   DbCluster,
+  Discussion,
   Event,
   Expert,
   ExpertAnswer,
@@ -164,4 +162,6 @@ export {
   User,
   UserFile,
   Session,
+  Follow,
+  Vote,
 }

@@ -23,7 +23,6 @@ import {
   ActionsButton,
   Header,
   HeaderLeft,
-  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -209,11 +208,11 @@ export const WorkflowShow = ({ emitScope }: { emitScope?: (scope: ResourceScope)
               linkToRevision={r => `/home/workflows/${r.uid}`}
             />
           </HeaderLeft>
-          <HeaderRight>
+          <div>
             <StyledRight>
               {workflow && <DetailActionsDropdown workflow={workflow} />}
             </StyledRight>
-          </HeaderRight>
+          </div>
         </Header>
 
         {renderOptions(workflow, scope)}
