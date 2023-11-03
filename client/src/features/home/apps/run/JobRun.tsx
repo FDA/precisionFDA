@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup } from '../../../../components/form/FieldGroup'
 import { CubeIcon } from '../../../../components/icons/CubeIcon'
@@ -41,8 +40,6 @@ import {
   Section,
   SectionBody,
   SectionHeader,
-  StyledBackLink,
-  StyledForm,
   StyledJobName, StyledLabel,
   StyledRow,
   TipsRow,
@@ -52,15 +49,8 @@ import {
 } from './styles'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 import { IAccessibleFile } from '../../databases/databases.api'
+import { StyledForm, StyledBackLink } from '../../home.styles'
 import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
-
-export const StyledInputText = styled(InputText)`
-  width: 30%;
-`
-
-export const DisabledLabel = styled(StyledLabel)`
-  color: lightgrey;
-`
 
 const convertToAccessibleFile = (file: IFile): IAccessibleFile =>
   ({

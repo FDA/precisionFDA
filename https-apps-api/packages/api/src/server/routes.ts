@@ -21,6 +21,7 @@ import { router as challengesRouter } from '../challenges'
 import { router as cliRouter } from '../cli'
 import { router as nodesRouter } from '../nodes'
 import { router as notificationsRouter } from '../notifications'
+import { router as discussionsRouter } from '../discussions'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
@@ -46,6 +47,7 @@ router.use('/challenges', challengesRouter.routes(), challengesRouter.allowedMet
 router.use('/nodes', nodesRouter.routes(), nodesRouter.allowedMethods())
 router.use('/notifications', notificationsRouter.routes(), nodesRouter.allowedMethods())
 router.use('/cli', cliRouter.routes(), cliRouter.allowedMethods())
+router.use('/discussions', discussionsRouter.routes(), discussionsRouter.allowedMethods())
 // TODO: Add an admin authentication middleware, but not urgent
 
 export { router }

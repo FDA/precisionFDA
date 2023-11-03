@@ -8,7 +8,8 @@
     "composite": true,
     "declaration": true,
     "allowJs": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "strictNullChecks": true,
   },
   "include": ["src/**/*"],
   "exclude": ["src/test"],

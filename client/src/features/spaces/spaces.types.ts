@@ -6,6 +6,7 @@ export interface Counters {
   workflows: number;
   jobs: number;
   members: number;
+  discussions: number;
 }
 
 export interface Links {

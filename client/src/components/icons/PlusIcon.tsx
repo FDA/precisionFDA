@@ -16,4 +16,4 @@ export const PlusIcon = ({ width, height, style }: { height?: number, width?: nu
   </Svg>
 )
 
-export const CrossIcon = (props: any) => <PlusIcon style={{ transform: 'rotate(45deg)'}} {...props} />
+export const CrossIcon = (props: any) => <PlusIcon style={{ transform: 'rotate(45deg)' }} {...props} />

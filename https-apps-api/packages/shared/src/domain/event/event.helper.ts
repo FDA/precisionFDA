@@ -10,6 +10,7 @@ const EVENT_TYPES = {
   FOLDER_CREATED: 'Event::FolderCreated',
   FOLDER_DELETED: 'Event::FolderDeleted',
   JOB_CLOSED: 'Event::JobClosed',
+  JOB_ADDED: 'Event::JobAdded',
   FOLDER_LOCKED: 'Event::FolderLocked',
   FOLDER_UNLOCKED: 'Event::FolderUnlocked',
   FILE_ABANDONED: 'Event::FileAbandoned',
@@ -17,6 +18,7 @@ const EVENT_TYPES = {
   FILE_LOCKED: 'Event::FileLocked',
   FILE_UNLOCKED: 'Event::FileUnlocked',
   APP_CREATED: 'Event::AppCreated',
+  APP_PUBLISHED: 'Event::AppPublished',
   FILE_CREATED: 'Event::FileCreated',
 }
 
@@ -31,6 +33,21 @@ const createAppCreated = async (user: User, app: App): Promise<Event> => {
     dxuser: user.dxuser,
     param1: app.dxid,
     param2: app.title,
+  })
+  return event
+}
+
+const createAppPublished = async (app: App, user: User, scope: string): Promise<Event> => {
+  const event = new Event()
+  const organization = user.organization.isInitialized()
+    ? user.organization.getEntity()
+    : await user.organization.load()
+  wrap(event).assign({
+    type: EVENT_TYPES.APP_PUBLISHED,
+    orgHandle: organization.handle,
+    dxuser: user.dxuser,
+    param1: app.dxid,
+    param2: scope,
   })
   return event
 }
@@ -103,4 +120,4 @@ const createFileEvent = async (
   return event
 }
 
-export { EVENT_TYPES, createJobClosed, createFolderEvent, createFileEvent, createAppCreated }
+export { EVENT_TYPES, createJobClosed, createFolderEvent, createFileEvent, createAppCreated, createAppPublished }

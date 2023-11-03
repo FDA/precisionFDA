@@ -14,12 +14,15 @@ export { getLogger } from './logger'
 
 export { database } from './database'
 
+export * as entityFetcher  from './services/entity-fetcher.service'
+
 export {
   entities,
   acceptedLicense,
   dataPortal,
   job,
   app,
+  discussion,
   user,
   space,
   newsItem,

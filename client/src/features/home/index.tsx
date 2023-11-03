@@ -271,6 +271,7 @@ const Home2 = () => {
             <Route exact path={`${path}/databases/:dxid`}>
               <DatabaseShow emitScope={setPersistedScope} />
             </Route>
+
             <Route exact path={`${path}/assets`}>
               <AssetList scope={scopeQuery} />
             </Route>

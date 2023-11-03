@@ -25,7 +25,6 @@ import {
   ActionsButton,
   Header,
   HeaderLeft,
-  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -173,7 +172,7 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: (scope: ResourceScope) => void }) => {
+export const AppsShow = ({ spaceId, emitScope }: { spaceId?: string, emitScope?: (scope: ResourceScope) => void }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
@@ -237,7 +236,7 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
               linkToRevision={r => `/home/apps/${r.uid}`}
             />
           </HeaderLeft>
-          <HeaderRight>
+          <div>
             <StyledRight>
               {app &&
                 <DetailActionsDropdown
@@ -247,7 +246,7 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
                   challenges={meta.challenges} />
               }
             </StyledRight>
-          </HeaderRight>
+          </div>
         </Header>
 
         {renderOptions(app, scope)}
@@ -285,7 +284,7 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
             <AppExecutionsList appUid={appUid} />
           </Route>
           <Route path={`${match.path}`}>
-            <SpecTab spec={meta.spec} />
+            <SpecTab spaceId={spaceId} spec={meta.spec} />
           </Route>
         </Switch>
       </StyledTabPanel>

@@ -17,11 +17,11 @@ const StyledSpecName = styled.td`
 `
 
 const SpecDefault = ({
-  inSpace,
+  spaceId,
   value,
   sClass,
 }: {
-  inSpace: boolean
+  spaceId?: string
   value: boolean | number | string | IAccessibleFile[] | null
   sClass: IOSpec['class']
 }) => {
@@ -32,7 +32,7 @@ const SpecDefault = ({
         {value.map(f => {
           return (
             <div key={f}>
-              <Link to={`/${inSpace ? 'space' : 'home'}/files/${f}`}>{f}</Link>
+              <Link to={`/${spaceId ? `spaces/${spaceId}` : 'home'}/files/${f}`}>{f}</Link>
             </div>
           )
         })}
@@ -42,7 +42,7 @@ const SpecDefault = ({
   if (sClass === 'file') {
     defaultValues = value && (
       <StyledDefaultValue>
-        <Link to={`/${inSpace ? 'space' : 'home'}/files/${value}`}>
+        <Link to={`/${spaceId ? `spaces/${spaceId}` : 'home'}/files/${value}`}>
           {value}
         </Link>
       </StyledDefaultValue>
@@ -74,9 +74,11 @@ const SpecDefault = ({
 }
 
 export const SpecTable = ({
+  spaceId,
   title,
   config,
 }: {
+  spaceId?: string,
   title: string
   config: InputSpec[] | IOSpec[]
 }) => {
@@ -125,7 +127,7 @@ export const SpecTable = ({
                 <tr>
                   <th>Default :</th>
                   <td>
-                    <SpecDefault value={spec.default} sClass={spec.class} />
+                    <SpecDefault spaceId={spaceId} value={spec.default} sClass={spec.class} />
                   </td>
                 </tr>
               )}
