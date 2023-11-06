@@ -37,7 +37,9 @@ module Files
         upload(file.uid, file_io)
       end
 
-      unless file.nil?
+      if file.nil?
+        Rails.logger.error("FileUploader::create_and_upload: Error while uploading file")
+      else
         unsafe_params = { "id" => file.uid }
         https_apps_client.file_close(file.uid, unsafe_params)
       end
