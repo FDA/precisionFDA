@@ -81,7 +81,7 @@ export interface Links {
 }
 
 export interface IApp {
-  id: string;
+  id: number;
   uid: string;
   dxid: string;
   entity_type: string;

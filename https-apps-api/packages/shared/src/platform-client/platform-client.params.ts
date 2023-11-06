@@ -54,7 +54,16 @@ type AppCreateParams = {
   openSource?: boolean,
   billTo?: string,
   access?: any,
+}
 
+type AppAddAuthorizedUsersParams = {
+  appId: string,
+  authorizedUsers: string[],
+}
+
+type AppPublishParams = {
+  appId: string,
+  makeDefault?: boolean
 }
 
 type JobFindParams = {
@@ -229,14 +238,24 @@ type AppDescribeParams = {
   dxid: string
   data: {}
 }
+
 type WorkflowDescribeParams = {
   dxid: string
   data: {}
 }
 
+type CloneObjectsParams = {
+  sourceProject: string,
+  destinationProject: string,
+  objects: string[]
+}
+
+
 export {
   AppletCreateParams,
   AppCreateParams,
+  AppAddAuthorizedUsersParams,
+  AppPublishParams,
   ObjectsParams,
   PackageMapping,
   Starting,
@@ -270,4 +289,5 @@ export {
   UserUnlockParams,
   AppDescribeParams,
   WorkflowDescribeParams,
+  CloneObjectsParams,
 }

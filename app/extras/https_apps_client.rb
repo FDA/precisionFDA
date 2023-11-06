@@ -301,6 +301,167 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def discussion_create(body)
+    request(
+      "/discussions",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def discussion_update(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def discussion_publish(body)
+    request(
+      "/discussions/#{body[:id]}/publish",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def discussion_destroy(discussion_id)
+    request(
+      "/discussions/#{discussion_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def answer_destroy(discussion_id, answer_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def comment_destroy(discussion_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def answer_comment_destroy(discussion_id, answer_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def discussion_comment_create(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}/comments",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def discussion_comment_update(discussion_id, comment_id, body)
+    request(
+      "/discussions/#{discussion_id}/comments/#{comment_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def answer_comment_update(discussion_id, answer_id, comment_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments/#{comment_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def discussion_comment_show(discussion_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def answer_comment_show(discussion_id, answer_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def answer_comment_create(discussion_id, answer_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def answer_create(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def answer_publish(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{body[:id]}/publish",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def answer_show(discussion_id, answer_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def answer_update(discussion_id, answer_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def discussions_list(params)
+    request(
+      "/discussions",
+      {},
+      Net::HTTP::Get::METHOD,
+      params,
+    )
+  end
+
+  def discussion_show(id)
+    request(
+      "/discussions/#{id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def note_attachments(id)
+    request(
+      "/discussions/#{id}/attachments",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # News
 
   def news_list(params)

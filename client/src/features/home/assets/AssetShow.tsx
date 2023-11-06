@@ -14,7 +14,6 @@ import {
   ActionsButton,
   Header,
   HeaderLeft,
-  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -147,9 +146,9 @@ export const AssetShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) =>
               />
             )}
           </HeaderLeft>
-          <HeaderRight>
+          <div>
             <AssetActions scope={scope} asset={asset} />
-          </HeaderRight>
+          </div>
         </Header>
 
         <MetadataSection>

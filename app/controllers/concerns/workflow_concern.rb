@@ -97,7 +97,7 @@ module WorkflowConcern
         fail "#{input_field}: value is not an integer" unless input_value.to_i.to_s == value
         input_value = input_value.to_i
       when "float"
-        raise "#{input_field}: value is not a float" unless input_value.to_s =~ /\A[-+]?(\d+\.\d*|\.\d+)\z/
+        raise_api_error "#{input_field}: value is not a float" unless input_value.to_s =~ /\A[-+]?(\d+\.\d*|\.\d+)\z/
 
         input_value = input_value.to_f
       when "boolean"
@@ -118,6 +118,8 @@ module WorkflowConcern
 
     timeout_policy = {}
     workflow.stages_apps.each do |app|
+      raise_api_error "The app #{app.title} is deleted." if app.deleted
+
       timeout_policy[app.dxid] = { "*" => { "days" => 5 } }
     end
 

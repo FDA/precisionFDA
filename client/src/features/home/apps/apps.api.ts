@@ -76,6 +76,22 @@ export async function fetchFilteredFiles({ searchString, scopes, uid }: { search
   })
 }
 
+export async function fetchFilteredApps(searchString: string, scopes: ServerScope[]): Promise<IApp[]> {
+  return axios.post('/api/list_apps', {
+    scopes,
+    search_string: searchString,
+    describe: {
+      include: {
+        user: true,
+        org: true,
+        all_tags_list: false,
+      },
+    },
+    offset: 0,
+    limit: 1000,
+  }).then(r => r.data as IApp[])
+}
+
 export interface FetchAppsExecutionsQuery {
   jobs: IExecution[]
   meta: IMeta

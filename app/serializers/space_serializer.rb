@@ -96,6 +96,7 @@ class SpaceSerializer < ApplicationSerializer
       workflows: workflows_count,
       jobs: jobs_count,
       members: members_count,
+      discussions: discussions_count,
     }
   end
 
@@ -153,6 +154,12 @@ class SpaceSerializer < ApplicationSerializer
   # @return [Integer] Workflows count.
   def workflows_count
     object.workflows.unremoved.count
+  end
+
+  # Returns space discussions count.
+  # @return [Integer] Space members count.
+  def discussions_count
+    object.discussions.count
   end
 
   # Returns current user space membership

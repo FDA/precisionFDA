@@ -1,19 +1,12 @@
+import { writeHeapSnapshot } from 'v8'
 import { database, queue } from '@pfda/https-apps-shared'
 import { setupHandlers } from './queues'
 import { log } from './utils'
-import { writeHeapSnapshot } from 'v8'
 
 process.on('SIGUSR2', () => {
   const fileName = writeHeapSnapshot()
   log.info(`Created heap dump file: ${fileName}`)
 })
-
-const handleFatalError = (err: Error): void => {
-  process.removeAllListeners('uncaughtException')
-  process.removeAllListeners('unhandledRejection')
-
-  log.fatal({ error: err }, 'Fatal error occured. Exiting the worker')
-}
 
 const stopWorker = async (): Promise<void> => {
   log.info('worker closing')
@@ -23,6 +16,19 @@ const stopWorker = async (): Promise<void> => {
 
   await queue.disconnectQueues()
   await database.stop()
+  // eslint-disable-next-line node/no-process-exit
+  process.exit(1)
+}
+
+const handleFatalError = async (err: Error): Promise<void> => {
+  log.fatal({ error: err }, 'Fatal error occurred. Exiting the worker')
+  // eslint-disable-next-line node/no-process-exit
+  setTimeout(() => process.exit(2), 10000)
+  try {
+    await stopWorker()
+  } catch (err) {
+    log.error({ error: err }, 'Error stopping worker')
+  }
 }
 
 const startWorker = async (): Promise<void> => {
@@ -38,9 +44,9 @@ const startWorker = async (): Promise<void> => {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.once('SIGINT', () => stopWorker())
+  process.once('SIGINT', async () => await stopWorker())
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.once('SIGTERM', () => stopWorker())
+  process.once('SIGTERM', async () => await stopWorker())
 
   // start consuming queues
 
