@@ -1,5 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation, TypeUtils } from '../../../utils'
 import { UserOpsCtx } from '../../../types'
 import { Node } from '../node.entity'
 import { NodesInput } from '../user-file.input'
@@ -70,7 +70,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number>
     } catch (err) {
       if (input.async) {
         await notificationService.createNotification({
-          message: err.message ?? 'Error deleting files and folders.',
+          message: TypeUtils.getPropertyValueFromUnknownObject<string>(err, 'message') ?? 'Error deleting files and folders.',
           severity: SEVERITY.ERROR,
           action: NOTIFICATION_ACTION.NODES_REMOVED,
           userId: this.ctx.user.id,
