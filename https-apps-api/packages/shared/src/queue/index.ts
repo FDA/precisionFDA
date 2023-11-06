@@ -110,7 +110,7 @@ const addToQueue = async <T extends types.Task>(
     throw new Error('The queue was not started')
   }
   // default noop function
-  const whitelistPayloadFn = payloadFn || (payload => payload)
+  const whitelistPayloadFn = payloadFn ?? (payload => payload)
   log.info(
     {
       task: {
@@ -177,7 +177,7 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
   log.info({ jobId: job.id }, 'trying to remove repeatable job id')
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
-  await (queue || mainQueue).removeJobs(`${prefix}:${id}:*`)
+  await (queue ?? mainQueue).removeJobs(`${prefix}:${id}:*`)
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {

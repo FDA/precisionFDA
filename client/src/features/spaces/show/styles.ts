@@ -11,8 +11,7 @@ export const SpaceMainInfo = styled.div`
   display: flex;
   flex-direction: column;
   ${marginBottom}
-  max-width: 410px;
-`
+  `
 
 export const SpaceHeaderDescrip = styled.div`
   font-size: 14px;
@@ -21,6 +20,7 @@ export const SpaceHeaderDescrip = styled.div`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;  
   overflow: hidden;
+  max-width: 650px;
 
   ${Svg} {
     margin-right: 8px;
@@ -28,8 +28,8 @@ export const SpaceHeaderDescrip = styled.div`
 `
 
 export const SpaceHeaderTitle = styled.div`
-  font-size: ${fontSize.bannerTitle};
-  font-weight: ${fontWeight.medium};
+  font-size: 24px;
+  font-weight: 600;
   color: ${colors.textDarkGrey};
   margin: auto 0;
   margin-bottom: 8px;

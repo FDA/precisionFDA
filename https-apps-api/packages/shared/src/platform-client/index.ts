@@ -37,13 +37,42 @@ import {
   WorkflowDescribeParams,
   AppDescribeParams,
   FileRemoveParams,
-  AppletCreateParams, AppCreateParams, ObjectsParams, FileCreateParams, OrgDescribeParams, UserDescribeParams, JobFindParams
+  AppletCreateParams,
+  AppCreateParams,
+  ObjectsParams,
+  FileCreateParams,
+  OrgDescribeParams,
+  UserDescribeParams,
+  CloneObjectsParams,
+  AppAddAuthorizedUsersParams,
+  AppPublishParams,
+  JobFindParams,
 } from './platform-client.params'
 import {
-  JobCreateResponse, JobTerminateResponse, ClassIdResponse, JobDescribeResponse, DescribeFoldersResponse, DbClusterDescribeResponse,
-  FileCloseResponse, IPaginatedResponse, FileDescribeResponse, FileStatesResponse, FileStateResult, ListFilesResult, ListFilesResponse,
-  OrgFindMembersReponse, UserInviteToOrgResponse, UserRemoveFromOrgResponse, DescribeDataObjectsResponse, FileDownloadLinkResponse,
-  WorkflowDescribeResponse, AppDescribeResponse, FileRemoveResponse, UserDescribeResponse, OrgDescribeResponse, FindJobsResponse,
+  JobCreateResponse,
+  ClassIdResponse,
+  JobDescribeResponse,
+  DescribeFoldersResponse,
+  DbClusterDescribeResponse,
+  FileCloseResponse,
+  IPaginatedResponse,
+  FileDescribeResponse,
+  FileStatesResponse,
+  FileStateResult,
+  ListFilesResult,
+  ListFilesResponse,
+  OrgFindMembersReponse,
+  UserInviteToOrgResponse,
+  UserRemoveFromOrgResponse,
+  DescribeDataObjectsResponse,
+  FileDownloadLinkResponse,
+  WorkflowDescribeResponse,
+  AppDescribeResponse,
+  FileRemoveResponse,
+  UserDescribeResponse,
+  OrgDescribeResponse,
+  FindJobsResponse,
+  JobTerminateResponse, CloneObjectsResponse,
 } from './platform-client.responses'
 import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
@@ -95,6 +124,30 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: { ...omit(['accessToken'], params) },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async appAddAuthorizedUsers(params: AppAddAuthorizedUsersParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.appId}/addAuthorizedUsers`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        authorizedUsers: params.authorizedUsers,
+      },
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  async appPublish(params: AppPublishParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.appId}/publish`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        makeDefault: params.makeDefault ?? false,
+      },
       url,
     }
     return await this.sendRequest(options, url)
@@ -174,7 +227,6 @@ class PlatformClient {
     }
     return await this.sendRequest(options, url)
   }
-
 
   // ----------------------
   //    F I L E S
@@ -738,6 +790,23 @@ class PlatformClient {
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {},
+      url,
+    }
+    return await this.sendRequest(options, url)
+  }
+
+  // ---------------------
+  //    O B J E C T S
+  // ---------------------
+
+  async cloneObjects(params: CloneObjectsParams): Promise<CloneObjectsResponse> {
+    const url = `${config.platform.apiUrl}/${params.sourceProject}/clone`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        objects: params.objects,
+        project: params.destinationProject,
+      },
       url,
     }
     return await this.sendRequest(options, url)

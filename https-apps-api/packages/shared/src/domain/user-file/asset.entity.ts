@@ -19,6 +19,13 @@ import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE, IFileOrAsset, FILE_STI_TYPE,
 import { SCOPE } from '../../types/common'
 
 @Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
+@Filter({
+  name: 'accessibleBy', cond: args => ({
+    $or: [
+      {user: {id: args.userId}, scope: 'private'},
+      {scope: {$in: args.spaceScopes}}]
+  })
+})
 @Entity({ tableName: 'nodes', customRepository: () => AssetRepository })
 class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
@@ -48,14 +55,6 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
 
   @Property({ type: 'numeric' })
   fileSize?: number
-
-  // unused FK references
-  // resolves into User/Job/Asset and other entities in PFDA
-  @Property()
-  parentId: number
-
-  @Property()
-  parentType: PARENT_TYPE
 
   @Property({ fieldName: 'parent_folder_id' })
   parentFolderId?: number

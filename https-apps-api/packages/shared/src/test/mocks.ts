@@ -47,6 +47,9 @@ const fakes = {
     projectAcceptTransferFake: sinon.stub(),
     inviteUserToOrganizationFake: sinon.stub(),
     removeUserFromOrganizationFake: sinon.stub(),
+    cloneObjectFake: sinon.stub(),
+    appAddAuthorizedUsersFake: sinon.stub(),
+    appPublishFake: sinon.stub(),
   },
   queue: {
     findRepeatableFake: sinon.stub(),
@@ -105,9 +108,13 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.projectInviteFake.callsFake(() => ({ id: 'huh', state: 'accepted' })) //fix id
   fakes.client.userDescribeFake.callsFake(() => ({}))
   fakes.client.projectAcceptTransferFake.callsFake(() => ({ id: 'project-abc' }))
+  fakes.client.cloneObjectFake.callsFake(() => ({ id: generate.space.projectId(), project: 'project-abc' }))
+  fakes.client.appAddAuthorizedUsersFake.callsFake(() => ({ id: generate.app.appId() }))
+  fakes.client.appPublishFake.callsFake(() => ({ id: generate.app.appId()}))
 
   fakes.bull.addFake.callsFake(() => { })
   fakes.bull.getJobFake.callsFake(() => undefined)
+
 
   mockServiceFactory.reset()
 }
@@ -137,6 +144,9 @@ const mocksSetup = () => {
   sandbox.replace(client.PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
   sandbox.replace(client.PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
   sandbox.replace(client.PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
+  sandbox.replace(client.PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
+  sandbox.replace(client.PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
+  sandbox.replace(client.PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
 
   sandbox.replace(
     client.PlatformClient.prototype,

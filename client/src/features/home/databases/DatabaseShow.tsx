@@ -15,7 +15,6 @@ import {
   Description,
   Header,
   HeaderLeft,
-  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -173,14 +172,14 @@ export const DatabaseShow = ({ emitScope }: { emitScope?: (scope: ResourceScope)
             </Title>
             <Description>{db.description}</Description>
           </HeaderLeft>
-          <HeaderRight>
+          <div>
             <StyledRight>
               <Refresh spin={isFetching} onClick={() => refetch()}>
                 <SyncIcon />
               </Refresh>
               {db && <DetailActionsDropdown db={db} refetch={refetch} />}
             </StyledRight>
-          </HeaderRight>
+          </div>
         </Header>
 
         {renderOptions(db, scope)}

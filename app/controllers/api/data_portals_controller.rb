@@ -1,7 +1,7 @@
 module Api
   # Data Portals API controller
   class DataPortalsController < ApiController
-    before_action :require_login_or_guest
+    before_action :require_login
 
     wrap_parameters false
 
