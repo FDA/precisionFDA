@@ -1,9 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { errors, spaceReport, user as userDomain, userFile } from '@pfda/https-apps-shared'
-import { SpaceReportState } from '@pfda/https-apps-shared/dist/domain/space-report/model/space-report-state.type'
 
 export class SpaceReportDeleteFacade {
-  private readonly DELETABLE_STATES: SpaceReportState[] = ['DONE', 'ERROR']
+  private readonly DELETABLE_STATES: spaceReport.SpaceReportState[] = ['DONE', 'ERROR']
 
   private readonly em
   private readonly spaceReportService
