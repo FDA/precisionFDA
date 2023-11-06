@@ -1,5 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { app, ArrayUtils, errors, job, provenance, queue, spaceReport, userFile, workflow, entity } from '@pfda/https-apps-shared'
+import { app, ArrayUtils, errors, job, provenance, queue, spaceReport, userFile, workflow, entity as entityDomain } from '@pfda/https-apps-shared'
 import { UserCtx } from '@pfda/https-apps-shared/src/types'
 
 export class SpaceReportBatchResultGenerateFacade {
@@ -51,7 +51,7 @@ export class SpaceReportBatchResultGenerateFacade {
       }
 
       const reportPartSources: Record<spaceReport.SpaceReportPartSourceType, spaceReport.SpaceReportPart[]> = reportParts
-        .reduce((acc, rp) => {
+        .reduce((acc: Record<spaceReport.SpaceReportPartSourceType, spaceReport.SpaceReportPart[]>, rp) => {
           acc[rp.sourceType].push(rp)
           return acc
         }, { file: [], app: [], job: [], workflow: [], asset: [] })
@@ -74,14 +74,13 @@ export class SpaceReportBatchResultGenerateFacade {
     const entities = await this.sourceTypeToRepositoryMap[type]
       .find(reportParts.map(rps => rps.sourceId))
 
-    // TODO - test
     this.deletePartsWithMissingSources(entities.map(e => e.id), reportParts)
 
     return await Promise.all(entities.map(async entity => {
       const entityProvenanceSource = { type, entity } as provenance.EntityProvenanceSourceUnion
       const entityProvenance = await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, 'svg', { omitStyles: true })
 
-      const reportPart = reportParts.find(srp => entity.id === srp.sourceId)
+      const reportPart = reportParts.find(srp => entity.id === srp.sourceId)!
       return {
         id: reportPart.id,
         result: {
@@ -105,7 +104,7 @@ export class SpaceReportBatchResultGenerateFacade {
   }
 
   private getResultMetaData(provenanceSource: provenance.EntityProvenanceSourceUnion) {
-    const supportedSources: entity.EntityType[] = spaceReport.spaceReportPartSourceTypes
+    const supportedSources: entityDomain.EntityType[] = spaceReport.spaceReportPartSourceTypes
 
     if (!supportedSources.includes(provenanceSource.type)) {
       throw new errors.InvalidStateError(`Unsupported space report part type - ${provenanceSource.type}`)

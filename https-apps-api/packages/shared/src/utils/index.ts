@@ -19,3 +19,5 @@ export * as format from './format'
 export { ArrayUtils } from './array.utils'
 
 export { TimeUtils } from './time.utils'
+
+export { TypeUtils } from './type-utils'
