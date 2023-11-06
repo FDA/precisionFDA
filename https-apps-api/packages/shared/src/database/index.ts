@@ -24,10 +24,10 @@ const start = async(): Promise<void> => {
 
 const stop = async(): Promise<void> => {
   if (db) {
-    db.stop()
+    await db.stop()
   }
   if (dbReplica) {
-    dbReplica.stop()
+    await dbReplica.stop()
   }
 }
 
