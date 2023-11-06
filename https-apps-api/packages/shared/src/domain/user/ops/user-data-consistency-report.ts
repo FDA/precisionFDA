@@ -120,8 +120,8 @@ UserDataConsistencyReportOutput
         dxid: user.dxid,
         defaultFields: true,
         fields: {
-          email: true
-        }
+          email: true,
+        },
       })
 
       if (userDescribe.email !== user.email) {

@@ -63,6 +63,7 @@ import { DiscussionShow } from '../../discussions/DiscussionShow'
 import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
 import { RunJobPage } from '../../home/apps/run/RunJobPage'
 import { EditAppPage } from '../../home/apps/form/EditAppPage'
+import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 
 const Spaces2 = ({
   space,
@@ -110,7 +111,11 @@ const Spaces2 = ({
         <TopSpaceHeader>
           <SpaceMainInfo>
             <SpaceHeaderTitle>{space.name}</SpaceHeaderTitle>
-            <SpaceHeaderDescrip>{space.protected && <ProtectedIcon />}{space.description}</SpaceHeaderDescrip>
+            <SpaceHeaderDescrip>
+              {space.protected && <ProtectedIcon />}
+              {space.restricted_reviewer && <FdaRestrictedIcon />}
+              {space.description}
+            </SpaceHeaderDescrip>
           </SpaceMainInfo>
 
           <ButtonRow>

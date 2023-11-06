@@ -135,6 +135,7 @@ module SpaceService
         sponsor_org_id: space_form.space_sponsor&.org_id,
         space_type: space_form.space_type,
         cts: space_form.cts,
+        restricted_reviewer: space_form.restricted_reviewer,
         restrict_to_template: space_form.restrict_to_template,
         protected: space_form.protected,
       )

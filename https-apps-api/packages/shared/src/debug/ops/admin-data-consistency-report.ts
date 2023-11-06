@@ -128,7 +128,7 @@ AdminDataConsistencyReportOutput
 
       log.info({ output }, 'AdminDataConsistencyReportOperation: Completed')
 
-      this.sendReportEmail(output)
+      await this.sendReportEmail(output)
     } catch (error) {
       log.error({ error, output }, 'AdminDataConsistencyReportOperation: Error')
     }
