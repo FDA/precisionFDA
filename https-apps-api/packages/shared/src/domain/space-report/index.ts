@@ -5,3 +5,4 @@ export { SpaceReportPartSourceType, spaceReportPartSourceTypes } from './model/s
 export { BatchComplete } from './model/batch-complete'
 export { SpaceReportPartResult } from './model/space-report-part-result'
 export { SpaceReportPartSourceEntityUnion } from './model/space-report-part-source-entity-union'
+export { SpaceReportState } from './model/space-report-state.type'
