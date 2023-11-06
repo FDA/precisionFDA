@@ -20,6 +20,7 @@ import { FileIcon } from '../../components/icons/FileIcon'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { ProtectedIcon } from './ProtectedIcon'
+import { FdaRestrictedIcon } from './FdaRestrictedIcon'
 
 export const SpaceTableNameCell = styled.div`
   display: flex;
@@ -163,6 +164,15 @@ export const useSpacesColumns = ({
                         ? undefined
                         : colors.textDarkGreyInactive
                     }
+                  />
+                )}
+                {original.restricted_reviewer && (
+                  <FdaRestrictedIcon
+                          color={
+                              original.current_user_membership
+                                  ? undefined
+                                  : colors.textDarkGreyInactive
+                          }
                   />
                 )}
                 {original.current_user_membership ? (

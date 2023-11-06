@@ -32,6 +32,7 @@ interface SpaceCreateForm {
   review_lead_dxuser: string | null
   cts: string | null
   protected: boolean | null
+  restricted_reviewer: boolean | null
 }
 
 export interface ISpaceForm {
@@ -76,6 +77,7 @@ export const SpaceForm = ({
       sponsor_lead_dxuser: '',
       cts: null,
       protected: null,
+      restricted_reviewer: null,
       ...defaultValues,
     },
   })
@@ -123,8 +125,12 @@ export const SpaceForm = ({
     mutation.mutateAsync(vals)
   }
 
-  const handleProtectedSelection = (event: any) => {
+  const handleProtectedSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue('protected', event.target.checked)
+  }
+
+  const handleRestrictedReviewer = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('restricted_reviewer', event.target.checked)
   }
 
   const isSubmitting = mutation.isLoading
@@ -135,6 +141,18 @@ export const SpaceForm = ({
     isReviewAdmin,
     isDuplicate,
   })
+
+  const getConfirmMessage = () => {
+    const restrictions: string[] = []
+    if (getValues().protected) {
+      restrictions.push("protected")
+    }
+    if (getValues().restricted_reviewer) {
+      restrictions.push("FDA-associated restricted")
+    }
+
+    return "The space you are about to create will be " + restrictions.join(" and ")
+  }
 
   const {
     open: openConfirmation,
@@ -272,31 +290,47 @@ export const SpaceForm = ({
       )}
 
       {(watch().space_type === 'review' || watch().space_type === 'groups') && (
-        <FieldGroup>
-          <CheckboxLabel>
-            <Checkbox
-              {...register('protected')}
-              disabled={isSubmitting}
-              onChange={handleProtectedSelection}
-            />
-            Space Protection
-          </CheckboxLabel>
-          <HintText>
-            When enabled the space will be subject to the following restrictions:
-            <ul>
-              <li>Data in this space cannot be copied to My Home or Private Spaces, nor downloaded, except by a lead of the space.</li>
-              <li>Data in this space can only be copied to Spaces that also have protection enabled, and the copying user must be a lead member of both the source and destination spaces.</li>
-              <li>Space protection cannot be disabled for a Space or be turned off by any member, not even the leads.</li>
-            </ul>
-          </HintText>
-        </FieldGroup>
+          <FieldGroup>
+            <CheckboxLabel>
+              <Checkbox
+                  {...register('protected')}
+                  disabled={isSubmitting}
+                  onChange={handleProtectedSelection}
+              />
+              Space Protection
+            </CheckboxLabel>
+            <HintText>
+              When enabled the space will be subject to the following restrictions:
+              <ul>
+                <li>Data in this space cannot be copied to My Home or Private Spaces, nor downloaded, except by a lead of the space.</li>
+                <li>Data in this space can only be copied to Spaces that also have protection enabled, and the copying user must be a lead member of both the source and destination spaces.</li>
+                <li>Space protection cannot be disabled for a Space or be turned off by any member, not even the leads.</li>
+              </ul>
+            </HintText>
+          </FieldGroup>
+      )}
+
+      {watch().space_type === 'review' && (
+          <FieldGroup>
+            <CheckboxLabel>
+              <Checkbox
+                  {...register('restricted_reviewer')}
+                  disabled={isSubmitting}
+                  onChange={handleRestrictedReviewer}
+              />
+              Restrict Reviewer side of Space to FDA users only
+            </CheckboxLabel>
+            <HintText>
+              When checked, only users who have a @fda.hhs.gov or @fda.gov email associated with their account can be added.
+            </HintText>
+          </FieldGroup>
       )}
 
       <Row>
         <ButtonSolidBlue
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
-          onClick={getValues().protected ? openConfirmation: handleSubmit(onSubmit)}
+          onClick={getValues().protected || getValues().restricted_reviewer ? openConfirmation: handleSubmit(onSubmit)}
         >
           Create Space
         </ButtonSolidBlue>

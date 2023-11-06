@@ -23,6 +23,7 @@ import { fetchEditableSpacesList } from '../../spaces/spaces.api'
 import { APIResource } from '../types'
 import { ProtectedIcon } from '../../spaces/ProtectedIcon'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { FdaRestrictedIcon } from '../../spaces/FdaRestrictedIcon'
 
 const SpacesList = ({
   selected,
@@ -67,7 +68,10 @@ const SpacesList = ({
             key={s.scope}
             onClick={() => onSelect(s.scope)}
           >
-            <Col>{s.protected && <ProtectedIcon />}</Col>
+            <Col>
+              {s.protected && <ProtectedIcon />}
+              {s.restricted_reviewer && <FdaRestrictedIcon />}
+            </Col>
             <TitleCol>
               <ColBody>{s.title}</ColBody>
             </TitleCol>

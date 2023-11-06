@@ -62,7 +62,7 @@ class Space < ActiveRecord::Base
 
   acts_as_commentable
 
-  store :meta, accessors: [:cts], coder: JSON
+  store :meta, accessors: %i(cts restricted_reviewer), coder: JSON
 
   enum space_type: TYPES
 
