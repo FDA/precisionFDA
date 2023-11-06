@@ -255,8 +255,8 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <Button onClick={onRequestAccess}>Request Access</Button>
         <ButtonSolidBlue onClick={onLogIn}>Log In</ButtonSolidBlue>
         {data?.ssoButton.isEnabled && (
-          <ButtonSolidBlue onClick={() => onLogInWithSSO(data)}>
-            Log In With SSO
+          <ButtonSolidBlue onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+            Log In with SSO
           </ButtonSolidBlue>
         )}
       </PublicNavbarRightButtons>

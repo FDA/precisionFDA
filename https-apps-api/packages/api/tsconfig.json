@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "allowJs": true,
     "strictPropertyInitialization": false,
+    "strictNullChecks": true,
     "strict": true
   }
 }

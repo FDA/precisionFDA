@@ -5,24 +5,26 @@ import { colors } from '../../../styles/theme'
 import { SpaceMembership } from './members.types'
 import { Button } from '../../../components/Button/index'
 import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
+import { Identicon } from '../../../components/Identicon'
 
 export const StyledMemberCard = styled.div<{isDeactivated: boolean}>`
   min-width: 300px;
-  border: 2px solid ${colors.primaryBlue};
-  ${({ isDeactivated }) => isDeactivated && `border: 2px solid ${colors.borderDefault};;`}
+  border: 1px solid #cbcbcb;
+  ${({ isDeactivated }) => isDeactivated && `border: 1px solid ${colors.borderDefault};;`}
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
+  border-radius: 6px;
 `
 export const StyledCardHeader = styled.div`
-  background-color: ${colors.subtleBlue};
+  border-bottom: 1px solid #cbcbcb;
   padding: 4px;
 
   a {
     display: flex;
+    gap: 8px;
     align-items: center;
-    color: ${colors.primaryBlue};
-    font-size: 20px;
+    font-size: 14px;
     display: flex;
     line-height: 30px;
     cursor: pointer;
@@ -67,7 +69,7 @@ export function MemberCard({ member, spaceId }: { member: SpaceMembership, space
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Gravatar src={member.links.gravatar} />
+          <Identicon dxuser={member.user_name} />
           {member.title}
         </Link>
       </StyledCardHeader>

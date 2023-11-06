@@ -187,7 +187,6 @@ export const DocTable = styled.table`
     }
   }
 `
-
 export const PageMap = styled.ol`
   position: sticky;
   height: 300px;

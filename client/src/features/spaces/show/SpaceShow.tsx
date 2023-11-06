@@ -55,6 +55,10 @@ import {
 } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { DiscussionIcon } from '../../../components/icons/DiscussionIcon'
+import { DiscussionList } from '../../discussions/DiscussionList'
+import { DiscussionShow } from '../../discussions/DiscussionShow'
+import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
 import { RunJobPage } from '../../home/apps/run/RunJobPage'
 import { EditAppPage } from '../../home/apps/form/EditAppPage'
 
@@ -196,6 +200,17 @@ const Spaces2 = ({
               <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />
             )}
           </MenuItem>
+          {space.type !== 'private_type' && <MenuItem
+              data-testid="discussions-link"
+              to={`/spaces/${space.id}/discussions`}
+              activeClassName="active"
+          >
+            <DiscussionIcon height={14} />
+            <MenuText>Discussions</MenuText>
+            {expandedSidebar && (
+                <MenuCounter count={space.counters.discussions.toString()} active={activeResource === 'discussions'} />
+            )}
+          </MenuItem>}
           <Fill />
           <Expand
             data-testid="expand-sidebar"
@@ -247,6 +262,15 @@ const Spaces2 = ({
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
                 <MembersList space={space} />
+              </Route>
+              <Route exact path={`/spaces/${space.id}/discussions`}>
+                <DiscussionList space={space} scope={`space-${space.id}`} />
+              </Route>
+              <Route exact path={`/spaces/${space.id}/discussions/create`}>
+                <CreateDiscussionPage scope={`space-${space.id}`} />
+              </Route>
+              <Route exact path={`/spaces/${space.id}/discussions/:discussionId`}>
+                <DiscussionShow space={space} />
               </Route>
               <Route
                 exact

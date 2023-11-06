@@ -136,7 +136,7 @@ export const useAppSelectionActions = ({
       if(spaceId) {
         history.push(`/spaces/${spaceId}/apps`)
       } else {
-        history.push('/home/apps')
+        history.push(`/home/apps?scope=${scope}`)
       }
       if(resetSelected) resetSelected()
     },

@@ -161,6 +161,8 @@ Rails.application.routes.draw do
     get "/challenges/propose", to: "challenges#index"
     get "/challenges/create", to: "challenges#index"
 
+    get "/discussions/create", to: "discussions#index2"
+
     if ENV["GSRS_ENABLED"]
       match "/ginas/app/logout", to: "main#destroy", via: :all
       get "/ginas/app/api/v1/substances:path", to: "ginas#skip_request",
@@ -203,6 +205,25 @@ Rails.application.routes.draw do
 
       resources :site_settings do
         get :index, on: :collection
+      end
+
+      resources :discussions, only: %i(index show create update attachments publish destroy
+                                       answer_create answer_publish answers) do
+        get :attachments, on: :member
+        post :publish, on: :member
+        post :answers, to: "discussions#answer_create"
+        patch :answers, to: "discussions#answer_publish"
+        delete "answers/:answer_id" => "discussions#answer_destroy"
+        delete "comments/:comment_id" => "discussions#comment_destroy"
+        delete "answers/:answer_id/comments/:comment_id" => "discussions#answer_comment_destroy"
+        post :comments, on: :member, to: "discussions#discussion_comment_create"
+        post "answers/:answer_id/comments", to: "discussions#answer_comment_create"
+        get "answers/:answer_id" => "discussions#answer_show"
+        put "answers/:answer_id" => "discussions#answer_update"
+        get "comments/:comment_id" => "discussions#discussion_comment_show"
+        put "comments/:comment_id" => "discussions#discussion_comment_update"
+        get "answers/:answer_id/comments/:comment_id" => "discussions#answer_comment_show"
+        put "answers/:answer_id/comments/:comment_id" => "discussions#answer_comment_update"
       end
 
       # News

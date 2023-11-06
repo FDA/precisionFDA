@@ -56,6 +56,7 @@ const ModalComponent = ({ header, headerText, isShown, hide, children, footer, b
   )
 }
 // eslint-disable-next-line react/destructuring-assignment
+/** @deprecated use ModalNext component instead */
 export const Modal: FC<ModalProps> = (props) => props.isShown ? ReactDOM.createPortal(
     <ModalComponent {...props} />, document.body,
   ) : null

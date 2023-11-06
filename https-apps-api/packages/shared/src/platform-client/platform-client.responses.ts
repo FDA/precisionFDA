@@ -176,6 +176,11 @@ type WorkflowDescribeResponse = {
   id: string
 }
 
+type CloneObjectsResponse = {
+  id: string,
+  project: string,
+}
+
 type JobOutput = {
   [key: string]: IOType
 }
@@ -234,6 +239,7 @@ export {
   UserRemoveFromOrgResponse,
   AppDescribeResponse,
   WorkflowDescribeResponse,
+  CloneObjectsResponse,
   DnanexusLink,
   JobOutput,
 }

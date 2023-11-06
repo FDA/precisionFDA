@@ -29,12 +29,12 @@ import {
   SectionBody,
   SectionHeader,
   StyledBackLink,
-  StyledForm,
   StyledLine,
   Topbox,
   TopboxItem,
   WrapSingleField,
 } from '../../apps/run/styles'
+import { StyledForm } from '../../home.styles'
 import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
 import { GearIcon } from '../../../../components/icons/GearIcon'
 import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'

@@ -1,10 +1,7 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { InputText } from '../../../../components/InputText'
 import { BackLink } from '../../../../components/Page/PageBackLink'
-
-const pageContainer = css`
-  width: min(100% - 32px, 900px);
-`
+import { pageContainer } from '../../home.styles'
 
 export const AppsConfiguration = styled.div`
 `
