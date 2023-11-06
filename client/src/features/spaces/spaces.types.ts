@@ -98,6 +98,7 @@ export interface ISpace {
   shared_space_id?: string;
   can_duplicate: boolean;
   confidential_space: ConfidentialSpace;
+  restricted_reviewer?: boolean;
 }
 
 export const columnFilters = {
