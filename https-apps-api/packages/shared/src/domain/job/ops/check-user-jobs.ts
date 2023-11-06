@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
-import { Maybe, UserOpsCtx, UserCtx } from '../../../types'
+import type { Maybe, UserOpsCtx, UserCtx } from '../../../types'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { queue } from '../../..'
 import { isJobOrphaned } from '../../../queue/queue.utils'
@@ -10,14 +10,6 @@ import { SyncJobOperation } from './synchronize'
 
 
 const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any): Promise<void> => {
-  if (!job.isHTTPS()) {
-    // We can support resolving stale syncing of jobs of normal (non HTTPS) apps once
-    // the job_syncing.rb business logic is reimplemented as nodejs operations
-    // but for now we must skip these jobs
-    log.info({}, 'CheckUserJobsOperation: This is not an HTTPS app, and currently unsupported by this opeartion')
-    return
-  }
-
   const bullJobId = SyncJobOperation.getBullJobId(job.dxid)
   const bullJob = await queue.findRepeatable(bullJobId)
   if (!bullJob) {
@@ -65,16 +57,18 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
       this.ctx.log.info({}, 'CheckUserJobsOperation: No stale jobs found')
     } else {
       this.ctx.log.info(
-        { staleJobs: staleJobs.map(job => ({
-          jobId: job.id,
-          jobDxid: job.dxid,
-          jobState: job.state,
-        }))},
+        {
+          staleJobs: staleJobs.map(job => ({
+            jobId: job.id,
+            jobDxid: job.dxid,
+            jobState: job.state,
+          })),
+        },
         'CheckUserJobsOperation: Stale jobs - should be terminated',
       )
     }
 
-    // It is better to loop sychronously so that logs are colocated correctly and can be read logically
+    // It is better to loop synchronously so that logs are colocated correctly and can be read logically
     // and that we space out platform calls a little (lest we run into any rate limiter)
     for (const job of runningJobs) {
       // console.log(`Inspecting job: ${job.dxid} ${job.state}`)

@@ -52,10 +52,11 @@ module Api
 
       space = space_form.persist!(api, current_user)
 
-      if create_space_params[:protected]
-        space.tag_list = "Protected"
-        space.save
-      end
+      space.tag_list.push("Protected") if create_space_params[:protected]
+
+      space.tag_list.push("FDA-restricted") if create_space_params[:restricted_reviewer]
+
+      space.save unless space.tag_list.empty?
 
       render json: space, adapter: :json
     end
@@ -64,7 +65,7 @@ module Api
     # Returns editable spaces list. Used only for Copy to space dropdown for now.
     def editable_spaces
       spaces = Space.editable_by(@context).order(:name, :space_type).map do |space|
-        { scope: space.uid, title: space.title, protected: space.protected }
+        { scope: space.uid, title: space.title, protected: space.protected, restricted_reviewer: space.restricted_reviewer }
       end
 
       render json: spaces
@@ -389,7 +390,7 @@ module Api
     def create_space_params
       params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
                                     :space_type, :cts, :sponsor_org_handle, :source_space_id,
-                                    :sponsor_lead_dxuser, :restrict_to_template, :protected)
+                                    :sponsor_lead_dxuser, :restrict_to_template, :protected, :restricted_reviewer)
     end
   end
   # rubocop:enable Metrics/ClassLength

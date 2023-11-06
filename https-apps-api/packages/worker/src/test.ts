@@ -11,7 +11,7 @@ Promise.resolve()
     await queue.createSyncJobStatusTask(payload, {
       id: 3,
       dxuser: 'pfda_autotest1',
-      accessToken: 'foo-tokeen',
+      accessToken: 'foo-token',
     })
     await queue.disconnectQueues()
   })
