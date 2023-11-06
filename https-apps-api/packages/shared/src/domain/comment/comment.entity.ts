@@ -1,36 +1,53 @@
 import {
   Entity,
-  IdentifiedReference,
   ManyToOne,
-  PrimaryKey,
   Property,
+  Ref,
   Reference,
 } from '@mikro-orm/core'
 import { User } from '..'
 import { BaseEntity } from '../../database/base-entity'
 
-@Entity({ tableName: 'comments' })
+export type CommentableType = 'Discussion' | 'Answer' | 'Space' | 'Note'
+@Entity({
+  abstract: true,
+  tableName: 'comments',
+  discriminatorColumn: 'commentableType',
+})
 export class Comment extends BaseEntity {
-  @PrimaryKey()
-  id: number
+
+  @Property({ fieldName: 'commentable_type' })
+  commentableType: CommentableType
 
   @Property()
-  commentableId: number
+    body: string
 
   @Property()
-  commentableType: string
+    contentObjectId: number
 
   @Property()
-  body: string
+    contentObjectType: string
 
   @Property()
-  contentObjectId: number
+    title: string
 
   @Property()
-  contentObjectType: string
+    parentId: number
+
+  @Property()
+    state: number
+
+  @Property()
+    subject: string
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id' })
-  user!: IdentifiedReference<User>
+    user!: Ref<User>
+
+  @Property({ hidden: false })
+  createdAt = new Date()
+
+  @Property({ onUpdate: () => new Date(), hidden: false })
+  updatedAt = new Date()
 
   constructor(user: User) {
     super()

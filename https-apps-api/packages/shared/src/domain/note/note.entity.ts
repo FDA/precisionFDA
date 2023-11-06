@@ -1,17 +1,22 @@
 import {
+  Cascade,
   Collection,
   Entity,
-  ManyToOne, OneToMany,
+  ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
   Ref,
-  Reference
+  Reference,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
+import { SCOPE } from '../../types/common'
 import { Attachment } from '../attachment'
+import { User } from '../user'
 
-@Entity({tableName: 'notes'})
+export type NoteType = 'Discussion' | 'Answer'
+
+@Entity({ tableName: 'notes' })
 export class Note extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -23,19 +28,19 @@ export class Note extends BaseEntity {
   content: string
 
   @Property()
-  scope: string
+  scope: SCOPE
 
   @Property()
-  noteType: string
+  noteType: NoteType
 
   @ManyToOne(() => User)
   user: Ref<User>
 
-  @OneToMany(() => Attachment, attachment => attachment.note)
+  @OneToMany(() => Attachment, attachment => attachment.note, { cascade: [Cascade.REMOVE] })
   attachments = new Collection<Attachment>(this)
 
   constructor(user: User) {
-    super();
+    super()
     this.user = Reference.create(user)
   }
 }

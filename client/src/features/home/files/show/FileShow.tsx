@@ -18,7 +18,6 @@ import {
   ActionsButton,
   Header,
   HeaderLeft,
-  HeaderRight,
   HomeLoader,
   LockedRow,
   MetadataItem,
@@ -150,9 +149,9 @@ export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceSco
               )}
             </Title>
           </HeaderLeft>
-          <HeaderRight>
+          <div>
             <FileActions scope={scope} space={space} file={file} folderId={folderId} />
-          </HeaderRight>
+          </div>
         </Header>
 
         <FileDescription>

@@ -4,7 +4,7 @@ import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { ButtonRow } from '../styles'
 
 export const StyledConfirmDialog = styled.div`
-  padding: 12px 24px;
+  padding: 12px 12px 12px 24px;
   max-width: 400px;
 `
 

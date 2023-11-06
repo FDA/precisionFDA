@@ -52,6 +52,13 @@ export interface RunData {
   { 'state': JOB_STATE.DONE },
   { 'state': JOB_STATE.TERMINATED },
 ]}})
+@Filter({
+  name: 'accessibleBy', cond: args => ({
+    $or: [
+      {user: {id: args.userId}, scope: 'private'},
+      {scope: {$in: args.spaceScopes}}]
+  })
+})
 export class Job extends BaseEntity {
   @PrimaryKey()
   id: number

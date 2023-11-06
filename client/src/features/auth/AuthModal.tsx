@@ -23,13 +23,13 @@ export const AuthModal: React.FC<UseModal> = props => {
         hide={() => props.setShowModal(false)}
       />
       <Content overflowContent={false}>
-        You were logged out after 15 minutes of inactivity. Please log in again.
+        You were logged out after 15 minutes of inactivity. Please Log In again.
       </Content>
       <Footer>
         <ButtonRow>
           {data?.ssoButton.isEnabled && (
-            <ButtonSolidBlue onClick={() => onLogInWithSSO(data)}>
-              Log In With SSO
+            <ButtonSolidBlue onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+              Log In with SSO
             </ButtonSolidBlue>
           )}
           <ButtonSolidBlue onClick={() => (window.location = '/login')}>

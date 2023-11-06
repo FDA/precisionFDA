@@ -20,8 +20,8 @@ class Comparison extends BaseEntity {
   @PrimaryKey()
   id: number
 
-  @Property()
-  name?: string
+  @Property({nullable: false})
+  name: string
 
   @Property()
   description?: string
@@ -44,11 +44,11 @@ class Comparison extends BaseEntity {
   @Property()
   meta?: string
 
-  @ManyToOne({ entity: () => App, fieldName: 'app_dxid' })
-  app!: IdentifiedReference<App>
+  @ManyToOne({ entity: () => App, fieldName: 'app_dxid', nullable: false })
+  app: IdentifiedReference<App>
 
-  @ManyToOne({ entity: () => User, fieldName: 'user_id' })
-  user!: IdentifiedReference<User>
+  @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
+  user: IdentifiedReference<User>
 
   // TODO: Add rest of the references in comparison.rb
 

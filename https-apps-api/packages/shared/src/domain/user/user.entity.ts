@@ -14,14 +14,16 @@ import {
 import { config } from '../../config'
 import { NewsItem, NotificationPreference, SpaceMembership } from '..'
 import { BaseEntity } from '../../database/base-entity'
-import { Job } from '../job/job.entity'
+import { Job } from '../job'
 import { Organization } from '../org'
-import { ExpertQuestion } from '../expert-question/expert-question.entity'
-import { Expert } from '../expert/expert.entity'
+import { ExpertQuestion } from '../expert-question'
+import { Expert } from '../expert'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { ADMIN_GROUP_ROLES } from '../admin-group'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { UserRepository } from './user.repository'
+import { SPACE_MEMBERSHIP_ROLE } from "../space-membership/space-membership.enum";
+
 export enum USER_STATE {
   ENABLED = 0,
   LOCKED = 1,
@@ -200,7 +202,7 @@ export class User extends BaseEntity {
   @Property({ persist: false })
   get spaceUids(): string[] {
     const spaceUids: string[] = []
-    Array.from(this.spaceMemberships).forEach(spaceMembership => {
+    Array.from(this.spaceMemberships).filter(m => m.active && m.role != SPACE_MEMBERSHIP_ROLE.VIEWER).forEach(spaceMembership => {
       Array.from(spaceMembership.spaces).forEach(space => spaceUids.push(`space-${space.id}`))
     })
     return spaceUids

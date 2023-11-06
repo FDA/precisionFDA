@@ -37,7 +37,37 @@ const StyledTabs = styled(Tabs)`
   }
 `
 
-export const TabsSwitch = ({ tabsConfig }: { tabsConfig: ITab[]}) => {
+const TransparentStyledTabs = styled(Tabs)`
+  .__tab-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    border-bottom: 1px solid #DDDDDD;
+
+    &_tab {
+      box-sizing: border-box;
+      height: 35px;
+      padding: 5px 10px;
+      border: 1px solid rgba(0,0,0,0);
+      border-bottom: none;
+      cursor: pointer;
+      margin-left: 10px;
+      margin-bottom: -1px;
+      border-radius: 3px 3px 0 0;
+      font-weight: 400;
+      color: #272727;
+      font-size: 14px;
+    }
+  }
+  .react-tabs__tab--selected {
+    background: #fff;
+    border: 1px solid #DDDDDD;
+    border-bottom: 1px solid rgba(0,0,0,0);
+  }
+`
+
+export const TabsSwitch = ({ tabsConfig, transparent = false }: { tabsConfig: ITab[], transparent?: boolean }) => {
   const tabList: JSX.Element[] = []
   const tabPanels: JSX.Element[] = []
 
@@ -59,13 +89,15 @@ export const TabsSwitch = ({ tabsConfig }: { tabsConfig: ITab[]}) => {
     )
   })
 
+  const TabType = transparent ? TransparentStyledTabs : StyledTabs
+
   return (
-    <StyledTabs>
+    <TabType>
       <TabList className='__tab-list'>
         {tabList}
       </TabList>
       {tabPanels}
-    </StyledTabs>
+    </TabType>
   )
 }
 
