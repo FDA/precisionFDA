@@ -5,6 +5,7 @@ import type { Maybe, UserOpsCtx, UserCtx } from '../../../types'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { queue } from '../../..'
 import { isJobOrphaned } from '../../../queue/queue.utils'
+import { JobRepository } from '../job.repository'
 import { SyncJobOperation } from './synchronize'
 
 
@@ -43,7 +44,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
 > {
   async run(): Promise<Maybe<Job[]>> {
     const em = this.ctx.em
-    const jobRepo = em.getRepository(Job)
+    const jobRepo: JobRepository = em.getRepository(Job)
     const runningJobs = await jobRepo.findRunningJobsByUser({ userId: this.ctx.user.id })
     this.ctx.log.info({
       runningJobsCount: runningJobs.length,

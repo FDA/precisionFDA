@@ -6,7 +6,7 @@ import { Expert, User } from '@pfda/https-apps-shared/src/domain'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { ExpertScope, ExpertState } from '@pfda/https-apps-shared/src/domain/expert/expert.entity'
 
 describe('/experts', () => {
@@ -45,7 +45,7 @@ describe('/experts', () => {
   it('GET /experts has valid response', async () => {
     const { body } = await supertest(getServer())
       .get(`/experts`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(body.experts).to.have.length(6)
     for (let i = 0; i < 6; i++) {
@@ -75,7 +75,7 @@ describe('/experts', () => {
   it('GET /experts/years has valid response', async () => {
     const { body } = await supertest(getServer())
       .get(`/experts/years`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(body).to.deep.equal([
       2023,

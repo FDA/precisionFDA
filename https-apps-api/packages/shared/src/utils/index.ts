@@ -15,3 +15,9 @@ export * as aggregateError from './aggregate-error'
 export * as generics from './generics'
 
 export * as format from './format'
+
+export { ArrayUtils } from './array.utils'
+
+export { TimeUtils } from './time.utils'
+
+export { TypeUtils } from './type-utils'

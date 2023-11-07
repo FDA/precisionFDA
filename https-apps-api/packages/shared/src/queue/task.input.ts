@@ -38,6 +38,8 @@ export enum TASK_TYPE {
   UNLOCK_NODES = 'unlock_nodes',
   ADMIN_DATA_CONSISTENCY_REPORT = 'admin_data_consistency_report',
   USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
+  GENERATE_SPACE_REPORT_BATCH = 'generate_space_report_batch',
+  GENERATE_SPACE_REPORT_RESULT = 'generate_space_report_result',
 }
 
 // will be used in the sub-handler
@@ -105,6 +107,16 @@ export type LockNodesJob = TaskWithAuth & {
 export type UnlockNodesJob = TaskWithAuth & {
   type: TASK_TYPE.UNLOCK_NODES
   payload: number[]
+}
+
+export type GenerateSpaceReportBatchJob = TaskWithAuth & {
+  type: TASK_TYPE.GENERATE_SPACE_REPORT_BATCH
+  payload: number[]
+}
+
+export type GenerateSpaceReportResultJob = TaskWithAuth & {
+  type: TASK_TYPE.GENERATE_SPACE_REPORT_RESULT
+  payload: number
 }
 // ---------------------
 // Admin and Debug tasks

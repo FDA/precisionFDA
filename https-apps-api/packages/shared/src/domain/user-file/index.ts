@@ -53,3 +53,5 @@ export { FileUnlockOperation } from './ops/file-unlock'
 export { RequestNodesLockOperation } from './ops/start-lock-nodes-job'
 
 export { RequestNodesUnlockOperation } from './ops/start-unlock-nodes-job'
+
+export { UserFileService } from './service/user-file.service'
