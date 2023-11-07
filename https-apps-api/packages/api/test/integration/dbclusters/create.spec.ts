@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { omit, pick, invertObj } from 'ramda'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { database } from '@pfda/https-apps-shared'
+import { database, USER_CONTEXT_HTTP_HEADERS } from '@pfda/https-apps-shared'
 import { create, generate, db, mockResponses } from '@pfda/https-apps-shared/src/test'
 import { User } from '@pfda/https-apps-shared/src/domain'
 import {
@@ -13,7 +13,7 @@ import {
 } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /dbclusters/create', () => {
   let em: EntityManager
@@ -43,7 +43,7 @@ describe('POST /dbclusters/create', () => {
 
     const { body } = await supertest(getServer())
       .post(`/dbclusters/create`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(createInput)
       .expect(201)
 
@@ -70,11 +70,11 @@ describe('POST /dbclusters/create', () => {
     const createInput = { ...generate.dbCluster.createInput(), project: user.privateFilesProject }
 
     fakes.client.dbClusterCreateFake.onCall(0).returns({ id: dxid })
-    const userQueryData = getDefaultQueryData(user)
+    const userHeaderData = getDefaultHeaderData(user)
 
     await supertest(getServer())
       .post('/dbclusters/create')
-      .query({ ...userQueryData })
+      .set(userHeaderData)
       .send(createInput)
       .expect(201)
 
@@ -100,14 +100,14 @@ describe('POST /dbclusters/create', () => {
   })
 
   it('creates status sync task in a queue', async () => {
-    const userQueryData = getDefaultQueryData(user)
+    const userHeaderData = getDefaultHeaderData(user)
 
     const describeCallRes = { ...mockResponses.DBCLUSTER_DESC_RES, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
     await supertest(getServer())
       .post('/dbclusters/create')
-      .query({ ...userQueryData })
+      .set(userHeaderData)
       .send(generate.dbCluster.createInput())
       .expect(201)
 
@@ -118,7 +118,7 @@ describe('POST /dbclusters/create', () => {
       { dxid: dxid },
       {
         id: user.id,
-        accessToken: userQueryData.accessToken,
+        accessToken: userHeaderData[USER_CONTEXT_HTTP_HEADERS.accessToken],
         dxuser: user.dxuser,
       }
     ])

@@ -1,8 +1,10 @@
+import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserFile } from '../user-file.entity'
-import { User } from '../../user/user.entity'
+import { User } from '../../user'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { ComparisonInput, spaceEvent, tagging } from '../..'
+import { ComparisonInput, spaceEvent, SpaceReport, tagging } from '../..'
+import { errors } from '../../..'
 import { getIdFromScopeName } from '../../space/space.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../space-event/space-event.enum'
 import {
@@ -31,6 +33,14 @@ const validateComparisons = async (em: SqlEntityManager, fileToRemove: UserFile)
   }
 }
 
+const validateSpaceReports = async (em: EntityManager, fileToRemove: UserFile) => {
+  const count = await em.count(SpaceReport, { resultFile: fileToRemove })
+
+  if (count > 0) {
+    throw new errors.DeleteRelationError('file', 'space report')
+  }
+}
+
 class FileRemoveOperation extends BaseOperation<
 UserOpsCtx,
 IdInput,
@@ -41,36 +51,36 @@ number
   async run(input: IdInput): Promise<number> {
     this.ctx.log.info(input, 'FileRemoveOperation: Removing file')
 
-    const em = this.ctx.em.fork()
+    const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
     const userRepo = em.getRepository(User)
     const user = await userRepo.findOneOrFail(this.ctx.user.id)
     this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     const fileToRemove = await userFileRepo.findOneOrFail(input.id)
 
-    await em.begin()
-    try {
-      await validateComparisons(em, fileToRemove)
-      await validateEditableBy(em, fileToRemove, user)
-      await validateVerificationSpace(em, fileToRemove)
-      await validateProtectedSpaces(em, 'remove', this.ctx.user.id, fileToRemove)
+    return await em.transactional(async tm => {
+      await validateComparisons(tm, fileToRemove)
+      await validateEditableBy(tm, fileToRemove, user)
+      await validateVerificationSpace(tm, fileToRemove)
+      await validateProtectedSpaces(tm, 'remove', this.ctx.user.id, fileToRemove)
+      await validateSpaceReports(tm, fileToRemove)
 
-      const lastNode = await isLastNode(em, fileToRemove.dxid)
-      const filePath = await getNodePath(em, fileToRemove)
+      const lastNode = await isLastNode(tm, fileToRemove.dxid)
+      const filePath = await getNodePath(tm, fileToRemove)
 
-      const op = new tagging.RemoveTaggingsOperation({ em, log: this.ctx.log, user: this.ctx.user })
+      const op = new tagging.RemoveTaggingsOperation({ em: tm, log: this.ctx.log, user: this.ctx.user })
       await op.execute(fileToRemove.id)
 
-      em.remove(fileToRemove)
+      tm.remove(fileToRemove)
 
-      const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
+      const currentUser: User = await tm.findOneOrFail(User, { id: this.ctx.user.id })
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_DELETED,
         fileToRemove,
         filePath,
         currentUser,
       )
-      em.persist(fileEvent)
+      tm.persist(fileEvent)
 
       if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
@@ -91,14 +101,10 @@ number
         })
       }
 
-      em.remove(fileToRemove)
-      await em.commit()
+      tm.remove(fileToRemove)
       this.ctx.log.info({ fileName: fileToRemove.name }, 'FileRemoveOperation: Removed file')
       return 1
-    } catch (err) {
-      await em.rollback()
-      throw err
-    }
+    })
   }
 }
 

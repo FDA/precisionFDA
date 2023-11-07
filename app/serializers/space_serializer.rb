@@ -96,6 +96,7 @@ class SpaceSerializer < ApplicationSerializer
       workflows: workflows_count,
       jobs: jobs_count,
       members: members_count,
+      reports: reports_count,
       discussions: discussions_count,
     }
   end
@@ -148,6 +149,12 @@ class SpaceSerializer < ApplicationSerializer
   # @return [Integer] Space members count.
   def members_count
     object.space_memberships.count
+  end
+
+  # Returns space reports count.
+  # @return [Integer] Space members count.
+  def reports_count
+    object.space_reports.count
   end
 
   # Returns workflows count.

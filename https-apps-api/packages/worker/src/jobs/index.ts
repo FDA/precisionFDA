@@ -18,6 +18,8 @@ import { jobStatusHandler } from './job-status.handler'
 import { sendEmailHandler } from './send-email.handler'
 import { checkStaleJobsHandler } from './check-stale-jobs.handler'
 import { dbClusterSyncHandler } from './db-cluster-sync.handler'
+import { spaceReportBatchGenerationHandler } from './space-report-batch-generation.handler'
+import { spaceReportResultGenerationHandler } from './space-report-result-generation.handler'
 import { workstationSyncFilesHandler } from './workstation-sync-files.handler'
 import { checkNonTerminatedDbClustersHandler } from './check-nonterminated-dbclusters.handler'
 import { syncSpacesPermissionsHandler } from './sync-spaces-permissions.handler'
@@ -27,7 +29,7 @@ import { lockNodesHandler } from './lock-nodes.handler'
 import { unlockNodesHandler } from './unlock-nodes.handler'
 import { SyncOutputsHandler } from './sync-outputs.handler'
 import { CheckChallengeJobsHandler } from './check-challenge-jobs.handler'
-import { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
+import { CheckStatusJob, GenerateSpaceReportResultJob } from '@pfda/https-apps-shared/src/queue/task.input'
 
 type WorkerContext = WorkerOpsCtx<UserOpsCtx>
 
@@ -153,6 +155,12 @@ export const handler = async (job: Job<queue.types.Task>) => {
       return
     case queue.types.TASK_TYPE.UNLOCK_NODES:
       await unlockNodesHandler(job)
+      return
+    case queue.types.TASK_TYPE.GENERATE_SPACE_REPORT_BATCH:
+      await spaceReportBatchGenerationHandler(job)
+      return
+    case queue.types.TASK_TYPE.GENERATE_SPACE_REPORT_RESULT:
+      await spaceReportResultGenerationHandler(job as Job<GenerateSpaceReportResultJob>)
       return
     default:
       log.warn({ jobData: job.data }, 'Trying to handle unsupported task')

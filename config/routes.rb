@@ -302,6 +302,7 @@ Rails.application.routes.draw do
           get :cli
           get :editable_spaces
           get :info
+          delete "report", to: "spaces#delete_reports", constraints: ->(request) { request.query_parameters.key?("id") }
         end
 
         member do
@@ -312,6 +313,8 @@ Rails.application.routes.draw do
           post :accept
           post :add_data
           patch :fix_guest_permissions
+          post "report", to: "spaces#create_report"
+          get "report", to: "spaces#report"
 
           post :lock, controller: :space_requests
           post :unlock, controller: :space_requests

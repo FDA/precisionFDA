@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { errors, database } from '@pfda/https-apps-shared'
+import { errors, database, USER_CONTEXT_HTTP_HEADERS } from '@pfda/https-apps-shared'
 import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
 import {
   JOB_STATE,
@@ -13,7 +13,7 @@ import {
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
+import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
 describe('POST /apps/:id/run', () => {
   let em: EntityManager
@@ -35,7 +35,7 @@ describe('POST /apps/:id/run', () => {
   it('response shape', async () => {
     const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
     expect(body).to.deep.include({
@@ -60,7 +60,7 @@ describe('POST /apps/:id/run', () => {
   it('builds json fields in the db', async () => {
     const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
     const jobInDb = await em.findOne(Job, body.id)
@@ -81,7 +81,7 @@ describe('POST /apps/:id/run', () => {
   it('response shape - ttyd app (still user.private project)', async () => {
     const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(generate.app.runTtydAppInput())
       .expect(201)
     expect(stripEntityDates(body)).to.deep.include({
@@ -115,10 +115,10 @@ describe('POST /apps/:id/run', () => {
     }
     const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(input)
       .expect(201)
-    const jobInDb = await em.findOne(Job, { id: body.id })
+    const jobInDb = await em.findOneOrFail(Job, { id: body.id })
     var provenanceInDb = jobInDb?.provenance
     expect(provenanceInDb).to.be.deep.equal({
       [generate.job.jobId()]: {
@@ -127,10 +127,10 @@ describe('POST /apps/:id/run', () => {
         inputs: { snapshot: snapshotFile.dxid },
       },
     })
-    const jobFileRows = await em.createQueryBuilder('job_inputs').select('*').execute()
-    expect(jobFileRows).to.be.an('array').with.lengthOf(1)
-    expect(jobFileRows[0]).to.have.property('job_id', body.id)
-    expect(jobFileRows[0]).to.have.property('user_file_id', snapshotFile.id)
+
+    const inputFiles = await jobInDb.inputFiles.loadItems()
+    expect(inputFiles).to.be.an('array').with.lengthOf(1)
+    expect(inputFiles[0].id).to.equal(snapshotFile.id)
     // correct API call shape
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
     expect(platformCall).to.have.property('input')
@@ -156,7 +156,7 @@ describe('POST /apps/:id/run', () => {
     }
     await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(inputComplete)
       .expect(201)
     // all overrides took place
@@ -190,7 +190,7 @@ describe('POST /apps/:id/run', () => {
     }
     const { body } = await supertest(getServer())
       .post(`/apps/${ttydApp.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(ttydAppInput)
       .expect(201)
 
@@ -219,7 +219,7 @@ describe('POST /apps/:id/run', () => {
     }
     const { body } = await supertest(getServer())
       .post(`/apps/${rshinyApp.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(input)
       .expect(201)
     const platformCall = fakes.client.jobCreateFake.getCall(0).args[0]
@@ -228,7 +228,7 @@ describe('POST /apps/:id/run', () => {
       .that.deep.equals({
         app_gz: { $dnanexus_link: { id: gzipFile.dxid, project: user.privateFilesProject } },
       })
-    const jobInDb = await em.findOne(Job, { id: body.id })
+    const jobInDb = await em.findOneOrFail(Job, { id: body.id })
     expect(jobInDb).to.have.property('provenance')
     var provenanceInDb = jobInDb?.provenance
     expect(provenanceInDb).to.be.deep.equal({
@@ -238,10 +238,9 @@ describe('POST /apps/:id/run', () => {
         inputs: { app_gz: gzipFile.dxid },
       },
     })
-    const jobFileRows = await em.createQueryBuilder('job_inputs').select('*').execute()
-    expect(jobFileRows).to.be.an('array').with.lengthOf(1)
-    expect(jobFileRows[0]).to.have.property('job_id', body.id)
-    expect(jobFileRows[0]).to.have.property('user_file_id', gzipFile.id)
+    const inputFiles = await jobInDb.inputFiles.loadItems()
+    expect(inputFiles).to.be.an('array').with.lengthOf(1)
+    expect(inputFiles[0].id).to.equal(gzipFile.id)
   })
 
   it('accepts minimal input params (uses all defaults)', async () => {
@@ -252,7 +251,7 @@ describe('POST /apps/:id/run', () => {
     }
     await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(inputComplete)
       .expect(201)
     // all defaults took place
@@ -269,7 +268,7 @@ describe('POST /apps/:id/run', () => {
   it('calls the platform API', async () => {
     await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
     expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
@@ -278,7 +277,7 @@ describe('POST /apps/:id/run', () => {
   it('calls queue helper', async () => {
     const { body } = await supertest(getServer())
       .post(`/apps/${app.dxid}/run`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
     expect(fakes.queue.createSyncJobStatusTaskFake.calledOnce).to.be.true()
@@ -299,9 +298,9 @@ describe('POST /apps/:id/run', () => {
     it('throws 404 when user does not exist', async () => {
       const { body } = await supertest(getServer())
         .post(`/apps/${app.dxid}/run`)
-        .query({
-          ...getDefaultQueryData(user),
-          id: user.id + 1,
+        .set({
+          ...getDefaultHeaderData(user),
+          [USER_CONTEXT_HTTP_HEADERS.id]: user.id + 1,
         })
         .send(generate.app.runAppInput())
         .expect(404)
@@ -313,10 +312,8 @@ describe('POST /apps/:id/run', () => {
       await em.flush()
       const { body } = await supertest(getServer())
         .post(`/apps/${app.dxid}/run`)
-        .query({
-          ...getDefaultQueryData(user),
-          id: user.id,
-        })
+        .set(getDefaultHeaderData(user))
+        .query({ id: user.id })
         .send(generate.app.runAppInput())
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
@@ -329,9 +326,7 @@ describe('POST /apps/:id/run', () => {
       await em.flush()
       const { body } = await supertest(getServer())
         .post(`/apps/${anotherApp.dxid}/run`)
-        .query({
-          ...getDefaultQueryData(user),
-        })
+       .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
       expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
     })
@@ -341,9 +336,7 @@ describe('POST /apps/:id/run', () => {
       await em.flush()
       const { body } = await supertest(getServer())
         .post(`/apps/${anotherApp.dxid}/run`)
-        .query({
-          ...getDefaultQueryData(user),
-        })
+       .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
@@ -352,9 +345,7 @@ describe('POST /apps/:id/run', () => {
     it('throws 404 when snapshot is provided but file does not exist', async () => {
       const { body } = await supertest(getServer())
         .post(`/apps/${app.dxid}/run`)
-        .query({
-          ...getDefaultQueryData(user),
-        })
+       .set(getDefaultHeaderData(user))
         .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)

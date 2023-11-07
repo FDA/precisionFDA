@@ -1,80 +1,83 @@
 /* eslint-disable max-len */
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
-import { isNil, omit } from 'ramda'
 import type { Logger } from 'pino'
+import { isNil, omit } from 'ramda'
 import { errors } from '..'
 import { config } from '../config'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { OrgMembershipError } from '../errors'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
-import { OrgMembershipError } from '../errors'
-import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 import {
+  AppAddAuthorizedUsersParams,
+  AppCreateParams,
+  AppDescribeParams,
+  AppletCreateParams,
+  AppPublishParams,
+  CloneObjectsParams,
   CreateFolderParams,
   DbClusterActionParams,
   DbClusterCreateParams,
   DbClusterDescribeParams,
-  DescribeFoldersParams,
   DescribeDataObjectsParams,
+  DescribeFoldersParams,
   FileCloseParams,
+  FileCreateParams,
   FileDescribeParams,
   FileDownloadLinkParams,
+  FileGetUploadUrlParams,
+  FileRemoveParams,
   FileStatesParams,
-  OrgFindMembersParams,
-  ListFilesParams,
-  MoveFilesParams,
   JobCreateParams,
   JobDescribeParams,
+  JobFindParams,
   JobTerminateParams,
+  ListFilesParams,
+  MoveFilesParams,
+  ObjectsParams,
+  OrgDescribeParams,
+  OrgFindMembersParams,
   RemoveFolderParams,
   RenameFolderParams,
+  Starting,
+  UserDescribeParams,
   UserInviteToOrgParams,
   UserRemoveFromOrgParams,
   UserResetMfaParams,
   UserUnlockParams,
-  Starting,
   WorkflowDescribeParams,
-  AppDescribeParams,
-  FileRemoveParams,
-  AppletCreateParams,
-  AppCreateParams,
-  ObjectsParams,
-  FileCreateParams,
-  OrgDescribeParams,
-  UserDescribeParams,
-  CloneObjectsParams,
-  AppAddAuthorizedUsersParams,
-  AppPublishParams,
-  JobFindParams,
 } from './platform-client.params'
 import {
-  JobCreateResponse,
+  AppDescribeResponse,
   ClassIdResponse,
-  JobDescribeResponse,
-  DescribeFoldersResponse,
+  CloneObjectsResponse,
   DbClusterDescribeResponse,
+  DescribeDataObjectsResponse,
+  DescribeFoldersResponse,
   FileCloseResponse,
-  IPaginatedResponse,
   FileDescribeResponse,
-  FileStatesResponse,
+  FileDownloadLinkResponse,
+  FileRemoveResponse,
   FileStateResult,
-  ListFilesResult,
+  FileStatesResponse,
+  FindJobsResponse,
+  GetUploadURLResponse,
+  IPaginatedResponse,
+  JobCreateResponse,
+  JobDescribeResponse,
+  JobTerminateResponse,
   ListFilesResponse,
+  ListFilesResult,
+  OrgDescribeResponse,
   OrgFindMembersReponse,
+  UserDescribeResponse,
   UserInviteToOrgResponse,
   UserRemoveFromOrgResponse,
-  DescribeDataObjectsResponse,
-  FileDownloadLinkResponse,
   WorkflowDescribeResponse,
-  AppDescribeResponse,
-  FileRemoveResponse,
-  UserDescribeResponse,
-  OrgDescribeResponse,
-  FindJobsResponse,
-  JobTerminateResponse, CloneObjectsResponse,
 } from './platform-client.responses'
-import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 
 type DbClusterAction = 'start' | 'stop' | 'terminate'
 
@@ -111,7 +114,7 @@ class PlatformClient {
       data: { ...omit(['accessToken'], params) },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -126,7 +129,7 @@ class PlatformClient {
       data: { ...omit(['accessToken'], params) },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async appAddAuthorizedUsers(params: AppAddAuthorizedUsersParams): Promise<ClassIdResponse> {
@@ -138,7 +141,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async appPublish(params: AppPublishParams): Promise<ClassIdResponse> {
@@ -150,7 +153,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ---------------
@@ -169,7 +172,7 @@ class PlatformClient {
       data: { ...omit(['accessToken'], params) },
       url,
     }
-    return await this.sendRequest<FindJobsResponse>(options, url)
+    return await this.sendRequest<FindJobsResponse>(options)
   }
 
   async jobCreate(params: JobCreateParams): Promise<JobCreateResponse> {
@@ -179,7 +182,7 @@ class PlatformClient {
       data: { ...omit(['accessToken', 'appId'], params) },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async jobTerminate(params: JobTerminateParams): Promise<JobTerminateResponse> {
@@ -189,7 +192,7 @@ class PlatformClient {
       data: {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async renameFolder(params: RenameFolderParams): Promise<ClassIdResponse> {
@@ -202,7 +205,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async folderRemove(params: RemoveFolderParams): Promise<ClassIdResponse> {
@@ -215,7 +218,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async jobDescribe(params: JobDescribeParams): Promise<JobDescribeResponse> {
@@ -225,7 +228,7 @@ class PlatformClient {
       data: {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ----------------------
@@ -245,7 +248,7 @@ class PlatformClient {
       data: params,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -262,7 +265,7 @@ class PlatformClient {
       data: { objects: params.ids },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -278,7 +281,7 @@ class PlatformClient {
       data: {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -297,7 +300,7 @@ class PlatformClient {
       data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async fileStatesPaginated(
@@ -332,7 +335,7 @@ class PlatformClient {
       data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -381,7 +384,7 @@ class PlatformClient {
       data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
@@ -405,7 +408,18 @@ class PlatformClient {
       data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
+  }
+
+  async getFileUploadUrl(params: FileGetUploadUrlParams) {
+    const url = `${config.platform.apiUrl}/${params.dxid}/upload`
+    const data = {
+      size: params.size,
+      md5: params.md5,
+      index: params.index,
+    }
+
+    return await this.sendRequest<GetUploadURLResponse>({ method: 'POST', url, data })
   }
 
   // ----------------------
@@ -419,7 +433,7 @@ class PlatformClient {
       data: { fields: { folders: true } },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async folderCreate(params: CreateFolderParams): Promise<ClassIdResponse> {
@@ -433,7 +447,7 @@ class PlatformClient {
       data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async filesMoveToFolder(params: MoveFilesParams): Promise<ClassIdResponse> {
@@ -448,7 +462,7 @@ class PlatformClient {
       data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // -----------------------
@@ -466,7 +480,7 @@ class PlatformClient {
       url,
     }
 
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async dbClusterCreate(params: DbClusterCreateParams): Promise<ClassIdResponse> {
@@ -477,7 +491,7 @@ class PlatformClient {
       url,
     }
 
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async dbClusterDescribe(params: DbClusterDescribeParams): Promise<DbClusterDescribeResponse> {
@@ -488,7 +502,7 @@ class PlatformClient {
       url,
     }
 
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ---------------
@@ -507,7 +521,7 @@ class PlatformClient {
       data: { ...omit(['dxid'], params) },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -524,7 +538,7 @@ class PlatformClient {
       data: { ...omit(['orgDxid'], params) },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -538,7 +552,7 @@ class PlatformClient {
       data: params.data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -552,7 +566,7 @@ class PlatformClient {
       data: params.data,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ---------------
@@ -572,7 +586,7 @@ class PlatformClient {
       data: { ...omit(['dxid'], params) },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // TODO - Refactor auth API into a separate class
@@ -586,7 +600,7 @@ class PlatformClient {
 
     try {
       options.headers = this.setupHeaders()
-      this.logClientRequest(options, url)
+      this.logClientRequest(options)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
@@ -609,7 +623,7 @@ class PlatformClient {
 
     try {
       options.headers = this.setupHeaders()
-      this.logClientRequest(options, url)
+      this.logClientRequest(options)
       const res = await axios.request(options)
       return res.data
     } catch (err) {
@@ -641,7 +655,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -662,7 +676,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -685,7 +699,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -702,7 +716,7 @@ class PlatformClient {
       data: params.body ?? {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   /**
@@ -720,7 +734,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // -------------
@@ -744,7 +758,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async updateBillingInformation(orgDxid:string, billingInfo: any): Promise<any> {
@@ -758,7 +772,7 @@ class PlatformClient {
       data: billingInfo,
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ---------------------
@@ -772,7 +786,7 @@ class PlatformClient {
       data: {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async appDescribe(params: AppDescribeParams): Promise<AppDescribeResponse> {
@@ -782,7 +796,7 @@ class PlatformClient {
       data: {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   async workflowDescribe(params: WorkflowDescribeParams): Promise<WorkflowDescribeResponse> {
@@ -792,7 +806,7 @@ class PlatformClient {
       data: {},
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
   // ---------------------
@@ -809,7 +823,7 @@ class PlatformClient {
       },
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
 
@@ -830,7 +844,7 @@ class PlatformClient {
       method: 'POST',
       url,
     }
-    return await this.sendRequest(options, url)
+    return await this.sendRequest(options)
   }
 
 
@@ -865,10 +879,10 @@ class PlatformClient {
     return results
   }
 
-  private async sendRequest<T>(options: AxiosRequestConfig, url: string) {
+  private async sendRequest<T>(options: AxiosRequestConfig) {
     try {
       options.headers = this.setupHeaders()
-      this.logClientRequest(options, url)
+      this.logClientRequest(options)
       const res = await axios.request<T>(options)
       return res.data
     } catch (err) {
@@ -877,10 +891,10 @@ class PlatformClient {
     }
   }
 
-  private logClientRequest(options: AxiosRequestConfig, url: string): void {
+  private logClientRequest(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
     this.log.info(
-      { requestOptions: { ...options, headers: sanitized }, url },
+      { requestOptions: { ...options, headers: sanitized }, url: options.url },
       'PlatformClient: Running DNANexus API request',
     )
   }
