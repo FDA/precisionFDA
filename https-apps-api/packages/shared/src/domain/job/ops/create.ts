@@ -122,16 +122,8 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       // todo: create Event entry -> low priority probably
       em.persist(job)
       job.provenance = this.buildProvenance({ app, job })
-      await em.flush()
+      job.inputFiles.add(this.inputFiles)
 
-      const jobFilesRepo = this.ctx.em.getRepository(UserFile)
-      if (this.inputFiles.length > 0) {
-        const qb = jobFilesRepo.createUserFileJobRefs(
-          this.inputFiles.map(file => file.id),
-          job.id,
-        )
-        await qb.execute()
-      }
       await em.commit()
     } catch (err) {
       await em.rollback()

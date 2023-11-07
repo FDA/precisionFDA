@@ -4,22 +4,28 @@
 /* eslint-disable multiline-ternary */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import Bull, { Job, JobInformation, JobOptions, Queue, QueueOptions } from 'bull'
-import { UserCtx } from '../types'
-import { defaultLogger as log } from '../logger'
 import { config } from '../config'
-import { InvalidStateError } from '../errors'
-import { SyncJobOperation } from '../domain/job'
-import { formatDuration } from '../utils/format'
-import { EmailSendOperation } from '../domain/email'
+import { database } from '../database'
+import { AdminDataConsistencyReportOperation } from '../debug'
 import { SyncDbClusterOperation } from '../domain/db-cluster'
+import { EmailSendOperation } from '../domain/email'
+import { SyncJobOperation } from '../domain/job'
+import { NotificationService } from '../domain/notification'
+import { SpaceReportService } from '../domain/space-report'
 import { SyncFilesStateOperation } from '../domain/user-file'
+import { InvalidStateError } from '../errors'
+import { SpaceReportErrorFacade } from '../facade/space-report-error/space-report-error.facade'
+import { defaultLogger as log } from '../logger'
+import { UserCtx } from '../types'
+import { ArrayUtils, TimeUtils } from '../utils'
+import { formatDuration } from '../utils/format'
 import * as utils from './queue.utils'
 import * as types from './task.input'
-import { AdminDataConsistencyReportOperation } from '../debug/ops/admin-data-consistency-report'
 import { CheckStatusJob, SyncWorkstationFiles } from './task.input'
 
 let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
+let spaceReportQueue: Bull.Queue
 let emailsQueue: Bull.Queue
 let maintenanceQueue: Bull.Queue
 
@@ -28,7 +34,7 @@ const getFileSyncQueue = (): Bull.Queue => fileSyncQueue
 const getEmailsQueue = (): Bull.Queue => emailsQueue
 const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
-const getQueues = (): Bull.Queue[] => [mainQueue, fileSyncQueue, emailsQueue, maintenanceQueue]
+const getQueues = (): Bull.Queue[] => [mainQueue, fileSyncQueue, spaceReportQueue, emailsQueue, maintenanceQueue]
 
 const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformation[]> => {
   return await utils.clearOrphanedRepeatableJobs(q)
@@ -78,6 +84,53 @@ const createQueues = async (): Promise<void> => {
     },
   })
 
+  spaceReportQueue = new Bull(config.workerJobs.queues.spaceReport.name, config.redis.url, {
+    redis: redisOptions,
+    defaultJobOptions: {
+      removeOnComplete: true,
+      removeOnFail: { age: TimeUtils.weeksToSeconds(1) },
+      priority: 2,
+      attempts: 3,
+      backoff: TimeUtils.minutesToMilliseconds(1),
+    },
+  })
+
+  const em = database.orm().em.fork({ useContext: true })
+  const spaceReportService = SpaceReportService.getInstance(em)
+  const notificationService = new NotificationService(em.fork({ useContext: true }))
+  const spaceReportErrorFacade = new SpaceReportErrorFacade(em, spaceReportService, notificationService)
+  spaceReportQueue.on('failed', (job, error) => {
+    log.error({ job, error }, 'Space report queue error')
+
+    if (job.attemptsMade !== job.opts.attempts) {
+      return
+    }
+
+    const type = job?.data?.type
+    const payload = job?.data?.payload
+
+    if (type === types.TASK_TYPE.GENERATE_SPACE_REPORT_RESULT) {
+      if (Number.isNaN(payload)) {
+        return
+      }
+
+      spaceReportErrorFacade.setSpaceReportError(payload)
+      return
+    }
+
+    if (!Array.isArray(payload)) {
+      return
+    }
+
+    const filteredPayload = payload.filter(i => !Number.isNaN(i))
+
+    if (ArrayUtils.isEmpty(filteredPayload)) {
+      return
+    }
+
+    spaceReportErrorFacade.setSpaceReportPartsError(filteredPayload)
+  })
+
   maintenanceQueue = new Bull(config.workerJobs.queues.maintenance.name, config.redis.url, {
     redis: redisOptions,
     defaultJobOptions: {
@@ -88,6 +141,7 @@ const createQueues = async (): Promise<void> => {
   })
   await mainQueue.isReady()
   await fileSyncQueue.isReady()
+  await spaceReportQueue.isReady()
   await emailsQueue.isReady()
   await maintenanceQueue.isReady()
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -100,34 +154,59 @@ const createQueues = async (): Promise<void> => {
   log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
-const addToQueue = async <T extends types.Task>(
-  task: T,
-  queue: Bull.Queue,
-  options?: JobOptions,
-  payloadFn?: (payload: any) => any,
-): Promise<Job<T>> => {
+const getTaskInfo = (task: types.Task, payloadFn?: (payload: any) => any) => {
+  const whitelistPayloadFn = payloadFn ?? (payload => payload)
+
+  return {
+    type: task.type,
+    // TODO(samuel) fix
+    payload: whitelistPayloadFn((task as any).payload),
+    userId: (task as any)?.user?.id,
+  }
+}
+
+
+const validateQueue = (queue: Bull.Queue) => {
   if (typeof queue === 'undefined') {
     throw new Error('The queue was not started')
   }
-  // default noop function
-  const whitelistPayloadFn = payloadFn ?? (payload => payload)
+}
+
+const addBulkToQueue = async <T extends types.Task>(
+  tasks: Parameters<Bull.Queue<T>['addBulk']>[0],
+  queue: Bull.Queue<T>,
+) => {
+  validateQueue(queue)
+
   log.info(
     {
-      task: {
-        type: task.type,
-        // TODO(samuel) fix
-        payload: whitelistPayloadFn((task as any).payload),
-        userId: (task as any)?.user?.id,
-      },
+      tasks: tasks.map(t => getTaskInfo(t.data)),
+    },
+    'adding a bulk of task to queue',
+  )
+
+  return await queue.addBulk(tasks)
+}
+
+const addToQueue = async <T extends types.Task>(
+  task: T,
+  queue: Bull.Queue<T>,
+  options?: JobOptions,
+  payloadFn?: (payload: any) => any,
+): Promise<Job<T>> => {
+  validateQueue(queue)
+
+  log.info(
+    {
+      task: getTaskInfo(task, payloadFn),
       job: {
         id: options?.jobId,
       },
     },
     'adding a task to queue',
   )
-  // TODO(samuel) fix - idk why type resolution doesn't work
-  const job = (await queue.add(task, options)) as Bull.Job<T>
-  return job
+
+  return await queue.add(task, options)
 }
 
 const initMaintenanceQueue = async () => {
@@ -157,6 +236,7 @@ const disconnectQueues = async (): Promise<void> => {
   log.info('Disconnecting queues')
   await mainQueue.close(true)
   await fileSyncQueue.close(true)
+  await spaceReportQueue.close(true)
   await emailsQueue.close(true)
   await maintenanceQueue.close(true)
   log.info('Queues disconnected')
@@ -298,9 +378,8 @@ const createSendEmailTask = async (
     ? {
       jobId: taskId,
       // The following is important for emails that should not be repeated
-      // TODO(PFDA-4435) - use time utils for age for better readability
-      removeOnComplete: { age: 86400, count: 100 },
-      removeOnFail: { age: 604800, count: 500 },
+      removeOnComplete: { age: TimeUtils.daysToSeconds(1), count: 100 },
+      removeOnFail: { age: TimeUtils.weeksToSeconds(1), count: 500 },
     }
     : {
       jobId: EmailSendOperation.getBullJobId(data.emailType),
@@ -385,6 +464,28 @@ const createDbClusterSyncTask = async (data: types.SyncDbClusterJob['payload'], 
   }
 
   return await addToQueue(wrapped, mainQueue, options)
+}
+
+const createGenerateSpaceReportBatchTasks = async (batches: number[][], user: UserCtx) => {
+  const wrapped = batches.map(b => ({
+    data: {
+      type: types.TASK_TYPE.GENERATE_SPACE_REPORT_BATCH as const,
+      payload: b,
+      user,
+    },
+  }))
+
+  return await addBulkToQueue(wrapped, spaceReportQueue)
+}
+
+const createGenerateSpaceReportResultTask = async (reportId: number, user: UserCtx) => {
+  const wrapped = {
+    type: types.TASK_TYPE.GENERATE_SPACE_REPORT_RESULT as const,
+    payload: reportId,
+    user,
+  }
+
+  return await addToQueue(wrapped, spaceReportQueue)
 }
 
 const createUserCheckupTask = async (data: types.BasicUserJob) => {
@@ -483,4 +584,6 @@ export {
   clearOrphanedRepeatableJobs,
   createLockNodesJobTask,
   createUnlockNodesJobTask,
+  createGenerateSpaceReportBatchTasks,
+  createGenerateSpaceReportResultTask,
 }

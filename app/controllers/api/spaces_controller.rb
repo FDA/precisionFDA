@@ -217,6 +217,37 @@ module Api
       response[:errors] << e.message
     end
 
+    # POST /api/spaces/:id/report
+    def create_report
+      response = https_apps_client.create_space_report(params[:id])
+      render json: response, adapter: :json
+    rescue Net::HTTPClientException => e
+      render status: e.response.code, json: e.response.body
+    end
+
+    # GET /api/spaces/:id/report
+    def report
+      response = https_apps_client.get_space_reports(params[:id])
+
+      if response.blank?
+        render(plain: "[]", content_type: "application/json")
+      else
+        render json: response, root: true, adapter: :json
+      end
+    end
+
+    # DELETE /api/spaces/report
+    def delete_reports
+      ids = Rack::Utils.parse_query(request.query_string).fetch("id", [])
+      response = https_apps_client.delete_space_reports(ids)
+
+      if response.blank?
+        render(plain: "[]", content_type: "application/json")
+      else
+        render json: response, adapter: :json
+      end
+    end
+
     private
 
     # Sends space activatio email to leads.

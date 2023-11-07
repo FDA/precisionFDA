@@ -75,6 +75,7 @@ defined in `packages/src/shared/config/envs`
 
 ### Endpoints
 
+[//]: # (TODO - change to headers)
 - **Context**
   - all endpoints require `user context` provided to them
   - three values in request query:
@@ -99,6 +100,7 @@ defined in `packages/src/shared/config/envs`
 
 ### Useful Commands for Debugging
 
+[//]: # (TODO - change to headers)
 To test API calls from console, first store the user context required in an environment variable
 `export USER_CONTEXT="id=<USER_ID>&dxuser=<DXUSER>&accessToken=<ACCESS_TOKEN>"`
 

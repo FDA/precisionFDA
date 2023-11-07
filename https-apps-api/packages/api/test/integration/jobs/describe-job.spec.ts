@@ -9,7 +9,7 @@ import supertest from 'supertest'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
+import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /jobs/:id', () => {
   let em: EntityManager
@@ -33,9 +33,7 @@ describe.skip('GET /jobs/:id', () => {
   it('response shape', async () => {
     const { body } = await supertest(getServer())
       .get(`/jobs/${job.dxid}`)
-      .query({
-        ...getDefaultQueryData(user),
-      })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     // the best would be to remove them
     expect(stripEntityDates(body)).to.deep.equal({
@@ -71,9 +69,7 @@ describe.skip('GET /jobs/:id', () => {
     const jobDescribeFake = fakes.client.jobDescribeFake
     const { body } = await supertest(getServer())
       .get(`/jobs/${job.dxid}`)
-      .query({
-        ...getDefaultQueryData(user),
-      })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(body).to.have.property('dxid', job.dxid)
     expect(jobDescribeFake.notCalled).to.be.true()
@@ -86,9 +82,7 @@ describe.skip('GET /jobs/:id', () => {
 
     const { body } = await supertest(getServer())
       .get(`/jobs/${activeJob.dxid}`)
-      .query({
-        ...getDefaultQueryData(user),
-      })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(body).to.have.property('dxid', activeJob.dxid)
     expect(jobDescribeFake.calledOnce).to.be.true()
@@ -107,9 +101,7 @@ describe.skip('GET /jobs/:id', () => {
 
     const { body } = await supertest(getServer())
       .get(`/jobs/${anotherJob.dxid}`)
-      .query({
-        ...getDefaultQueryData(user),
-      })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(jobDescribeFake.calledOnce).to.be.true()
     expect(body).to.have.property('dxid', anotherJob.dxid)
@@ -133,9 +125,7 @@ describe.skip('GET /jobs/:id', () => {
       const longString = repeat('a', 65).join('')
       const { body } = await supertest(getServer())
         .get(`/jobs/${longString}`)
-        .query({
-          ...getDefaultQueryData(user),
-        })
+        .set(getDefaultHeaderData(user))
         .expect(400)
       expect(body.error).to.have.property('code', errors.ErrorCodes.VALIDATION)
       expect(body.props).to.have.property('validationErrors')
@@ -144,10 +134,8 @@ describe.skip('GET /jobs/:id', () => {
     it('returns 404 when job does not belong to the given user', async () => {
       const { body } = await supertest(getServer())
         .get(`/jobs/${job.dxid}`)
-        .query({
-          ...getDefaultQueryData(user),
-          id: user.id + 1,
-        })
+        .set(getDefaultHeaderData(user))
+        .query({ id: user.id + 1 })
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
@@ -155,9 +143,7 @@ describe.skip('GET /jobs/:id', () => {
     it.skip('returns 404 when job does not belong to the given app', async () => {
       const { body } = await supertest(getServer())
         .get(`/apps/${(app.id + 1).toString()}/jobs/${job.dxid}`)
-        .query({
-          ...getDefaultQueryData(user),
-        })
+        .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })

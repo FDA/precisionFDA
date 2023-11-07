@@ -7,7 +7,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('DELETE /folders/:id', () => {
   let em: EntityManager
@@ -37,7 +37,7 @@ describe('DELETE /folders/:id', () => {
   it('response shape & mocks call', async () => {
     await supertest(getServer())
       .delete(`/folders/${folder.id}`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(fakes.client.folderRemoveFake.calledOnce).to.be.true()
     const clientCall = fakes.client.folderRemoveFake.getCall(0).args[0]
@@ -48,7 +48,7 @@ describe('DELETE /folders/:id', () => {
   it('removes the folder from database', async () => {
     await supertest(getServer())
       .delete(`/folders/${folder.id}`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     em.clear()
     const foldersInDb = await em.find(Folder, {}, { filters: ['folder'] })
@@ -64,7 +64,7 @@ describe('DELETE /folders/:id', () => {
     await em.flush()
     await supertest(getServer())
       .delete(`/folders/${subfolder.id}`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     // subfolder path built properly
     const clientCall = fakes.client.folderRemoveFake.getCall(0).args[0]
@@ -117,7 +117,7 @@ describe('DELETE /folders/:id', () => {
     await em.flush()
     await supertest(getServer())
       .delete(`/folders/${subfolder.id}`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     em.clear()
     const foldersInDb = await em.find(Folder, {}, { filters: ['folder'] })
@@ -176,7 +176,7 @@ describe('DELETE /folders/:id', () => {
     await em.flush()
     await supertest(getServer())
       .delete(`/folders/${folder.id}`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     em.clear()
     const foldersInDb = await em.find(Folder, {}, { filters: ['folder'] })
@@ -197,7 +197,7 @@ describe('DELETE /folders/:id', () => {
       await em.flush()
       const { body } = await supertest(getServer())
         .delete(`/folders/${folder.id}`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.FOLDER_NOT_FOUND)
     })

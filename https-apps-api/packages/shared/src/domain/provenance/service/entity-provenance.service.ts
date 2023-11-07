@@ -1,0 +1,58 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import * as errors from '../../../errors'
+import { WorkflowService } from '../../workflow/service/workflow.service'
+import { EntityProvenanceFormatType } from '../model/entity-provenance-format.type'
+import { EntityProvenanceOptionsType } from '../model/entity-provenance-options.type'
+import { EntityProvenanceResultType } from '../model/entity-provenance-result.type'
+import { EntityProvenanceSourceUnion } from '../model/entity-provenance-source-union'
+import { EntityProvenanceDataProviderService } from './entity-data/entity-provenance-data-provider.service'
+import {
+  EntityProvenanceSvgResultTransformerService,
+} from './result-transform/entity-provenance-svg-result-transformer.service'
+
+export class EntityProvenanceService {
+  private readonly entityProvenanceDataProviderService: EntityProvenanceDataProviderService
+  private readonly entityProvenanceSvgResultTransformerService: EntityProvenanceSvgResultTransformerService
+
+  constructor(
+    entityProvenanceDataProviderService: EntityProvenanceDataProviderService,
+    entityProvenanceSvgResultTransformerService: EntityProvenanceSvgResultTransformerService,
+  ) {
+    this.entityProvenanceDataProviderService = entityProvenanceDataProviderService
+    this.entityProvenanceSvgResultTransformerService = entityProvenanceSvgResultTransformerService
+  }
+
+  async getEntityProvenance<T extends EntityProvenanceFormatType>(
+    source: EntityProvenanceSourceUnion,
+    format: T,
+    options?: EntityProvenanceOptionsType<T>,
+  ): Promise<EntityProvenanceResultType<T>> {
+    const provenanceData = await this.entityProvenanceDataProviderService.getEntityProvenanceData(source)
+
+    if (format === 'raw') {
+      return provenanceData as EntityProvenanceResultType<T>
+    }
+
+    if (format === 'svg') {
+      return await this.entityProvenanceSvgResultTransformerService.transform(provenanceData, options) as EntityProvenanceResultType<T>
+    }
+
+    throw new errors.InvalidStateError('Generate entity provenance - Unsupported format type.')
+  }
+
+  async getSvgStyles() {
+    return this.entityProvenanceSvgResultTransformerService.getStyles()
+  }
+
+  // TODO(PFDA-4701) - Remove with IOC
+  static getInstance(em: SqlEntityManager) {
+    const workflowService = new WorkflowService(em)
+    const entityProvenanceDataProviderService = new EntityProvenanceDataProviderService(em, workflowService)
+    const entityProvenanceSvgResultTransformerService = new EntityProvenanceSvgResultTransformerService()
+
+    return new EntityProvenanceService(
+      entityProvenanceDataProviderService,
+      entityProvenanceSvgResultTransformerService,
+    )
+  }
+}
