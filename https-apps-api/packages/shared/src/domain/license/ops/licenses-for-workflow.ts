@@ -15,9 +15,8 @@ export class LicensesForWorkflowOperation extends BaseOperation<
     const em = this.ctx.em
 
     const workflow = await em.findOneOrFail(Workflow, { uid: input.uid })
-    const parsedSpec = JSON.parse(workflow.spec)
 
-    const licensePromises = parsedSpec.input_spec.stages
+    const licensePromises = workflow.spec.input_spec.stages
       .map((stage: any) => new LicensesForAppOperation(this.ctx)
         .execute({ uid: stage.app_uid }))
 

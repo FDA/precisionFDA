@@ -1,47 +1,46 @@
-import { App } from './app/app.entity'
-import { Answer } from './answer/answer.entity'
-import { Attachment } from './attachment/attachment.entity'
-import { AppSeries } from './app-series'
-import { Workflow } from './workflow/workflow.entity'
-import { Comment } from './comment'
-import { AnswerComment } from './comment'
-import { DiscussionComment } from './comment'
-import { Discussion } from './discussion'
-import { DataPortal } from './data-portal/data-portal.entity'
-import { DbCluster } from './db-cluster/db-cluster.entity'
-import { Expert } from './expert/expert.entity'
-import { ExpertQuestion } from './expert-question/expert-question.entity'
-import { ExpertAnswer } from './expert-answer/expert-answer.entity'
-import { Job } from './job/job.entity'
 import { AcceptedLicense } from './accepted-license/accepted-license.entity'
-import { LicensedItem } from './licensed-item/licensed-item.entity'
-import { License } from './license/license.entity'
-import { User } from './user/user.entity'
-import { Tag } from './tag/tag.entity'
-import { Tagging } from './tagging/tagging.entity'
-import { Node } from './user-file/node.entity'
-import { Note } from './note'
-import { Notification } from './notification/notification.entity'
-import { Folder } from './user-file/folder.entity'
-import { UserFile } from './user-file/user-file.entity'
-import { Event } from './event/event.entity'
-import { Organization } from './org/org.entity'
-import { SpaceEvent } from './space-event/space-event.entity'
-import { Space } from './space/space.entity'
-import { SpaceMembership } from './space-membership/space-membership.entity'
-import { Asset } from './user-file/asset.entity'
-import { Challenge } from './challenge/challenge.entity'
 import { AdminGroup } from './admin-group/admin-group.entity'
 import { AdminMembership } from './admin-membership/admin-membership.entity'
+import { Answer } from './answer/answer.entity'
+import { AppSeries } from './app-series'
+import { App } from './app/app.entity'
+import { Attachment } from './attachment/attachment.entity'
 import { ChallengeResource } from './challenge/challenge-resource.entity'
-import { Comparison } from './comparison/comparison.entity'
-import { NewsItem } from './news-item/news-item.entity'
+import { Challenge } from './challenge/challenge.entity'
+import { AnswerComment, Comment, DiscussionComment } from './comment'
 import { ComparisonInput } from './comparison-input/comparison-input.entity'
-import { NotificationPreference } from './notification-preference/notification-preference.entity'
-import { Session } from './session'
-import { Resource } from './resource/resource.entity'
+import { Comparison } from './comparison/comparison.entity'
+import { DataPortal } from './data-portal/data-portal.entity'
+import { DbCluster } from './db-cluster/db-cluster.entity'
+import { Discussion } from './discussion'
+import { Event } from './event/event.entity'
+import { ExpertAnswer } from './expert-answer/expert-answer.entity'
+import { ExpertQuestion } from './expert-question/expert-question.entity'
+import { Expert } from './expert/expert.entity'
 import { Follow } from './follow/follow.entity'
+import { Job } from './job/job.entity'
+import { License } from './license/license.entity'
+import { LicensedItem } from './licensed-item/licensed-item.entity'
+import { NewsItem } from './news-item/news-item.entity'
+import { Note } from './note'
+import { NotificationPreference } from './notification-preference/notification-preference.entity'
+import { Notification } from './notification/notification.entity'
+import { Organization } from './org/org.entity'
+import { Resource } from './resource/resource.entity'
+import { Session } from './session'
+import { SpaceEvent } from './space-event/space-event.entity'
+import { SpaceMembership } from './space-membership/space-membership.entity'
+import { SpaceReport, SpaceReportPart } from './space-report'
+import { Space } from './space/space.entity'
+import { Tag } from './tag/tag.entity'
+import { Tagging } from './tagging/tagging.entity'
+import { Asset } from './user-file/asset.entity'
+import { Folder } from './user-file/folder.entity'
+import { Node } from './user-file/node.entity'
+import { UserFile } from './user-file/user-file.entity'
+import { User } from './user/user.entity'
 import { Vote } from './vote/vote.entity'
+import { Workflow } from './workflow/entity/workflow.entity'
 
 const entities = {
   AcceptedLicense,
@@ -80,6 +79,8 @@ const entities = {
   Space,
   SpaceEvent,
   SpaceMembership,
+  SpaceReport,
+  SpaceReportPart,
   Resource,
   Tag,
   Tagging,
@@ -119,6 +120,10 @@ export * as note from './note'
 export * as resource from './resource'
 export * as follow from './follow'
 export * as vote from './vote'
+export * as spaceReport from './space-report'
+export * as provenance from './provenance'
+export * as platform from './platform'
+export * as entity from './entity'
 
 export {
   entities,
@@ -156,6 +161,8 @@ export {
   Space,
   SpaceEvent,
   SpaceMembership,
+  SpaceReport,
+  SpaceReportPart,
   Resource,
   Tag,
   Tagging,

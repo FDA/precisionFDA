@@ -26,5 +26,6 @@ module.exports = {
   ],
   rules: {
     'import/group-exports': 0,
+    'eqeqeq': [2, "smart"],
   }
 }

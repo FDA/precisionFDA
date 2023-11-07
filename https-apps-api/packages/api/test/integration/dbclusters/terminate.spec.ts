@@ -11,7 +11,7 @@ import {
 } from '@pfda/https-apps-shared/src/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /dbclusters/terminate', () => {
   let em: EntityManager
@@ -36,7 +36,7 @@ describe('POST /dbclusters/terminate', () => {
   it('responds with success', async () => {
     const { body } = await supertest(getServer())
       .post('/dbclusters/terminate')
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ dxids: dxids })
       .expect(204)
 
@@ -56,7 +56,7 @@ describe('POST /dbclusters/terminate', () => {
 
     const { body } = await supertest(getServer())
       .post(`/dbclusters/terminate`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ dxids: [dxid] })
       .expect(204)
 
@@ -72,7 +72,7 @@ describe('POST /dbclusters/terminate', () => {
     it('throws error when the dbcluster does not exist', async () => {
       const { body } = await supertest(getServer())
         .post('/dbclusters/terminate')
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
         .expect(404)
 
@@ -85,7 +85,7 @@ describe('POST /dbclusters/terminate', () => {
 
       const { body } = await supertest(getServer())
         .post('/dbclusters/terminate')
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .send({ dxids: dxids })
         .expect(400)
 

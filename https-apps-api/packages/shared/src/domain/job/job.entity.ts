@@ -1,27 +1,28 @@
 import {
+  Collection,
   Entity,
-  EntityRepositoryType,
   Filter,
   IdentifiedReference,
   JsonType,
+  ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
   Reference,
-  OnLoad,
 } from '@mikro-orm/core'
-import { WorkaroundJsonType } from '../../database/custom-json-type'
-import { App } from '../app'
-import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
-import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
-import { JobRepository } from './job.repository'
-import { Provenance } from './job.input'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
-import { isStateActive, isStateTerminal } from './job.helper'
-import { formatDuration } from '../../utils/format'
-import { IOType, SCOPE } from '../../types/common'
 import { JobDescribeResponse } from '@pfda/https-apps-shared/src/platform-client'
+import { BaseEntity } from '../../database/base-entity'
+import { WorkaroundJsonType } from '../../database/custom-json-type'
+import { IOType, SCOPE } from '../../types/common'
+import { formatDuration } from '../../utils/format'
+import { App } from '../app'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
+import { User } from '../user'
+import { UserFile } from '../user-file'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
+import { isStateActive, isStateTerminal } from './job.helper'
+import { Provenance } from './job.input'
+import { JobRepository } from './job.repository'
 
 export interface RunData {
   output_folder_path?: string
@@ -121,16 +122,12 @@ export class Job extends BaseEntity {
   // @ManyToOne()
   // appSeries!: IdentifiedReference<AppSeries>
 
-  // pivot table key names are mismatched and this does not work :(
-  // @ManyToMany({
-  //   pivotTable: 'job_inputs',
-  //   joinColumn: 'job_id',
-  //   inverseJoinColumn: 'user_file_id',
-  // })
-  // @OneToMany(() => UserFile, userfile => userfile.parent)
-  // userFiles = new Collection<UserFile>(this);
-
-  [EntityRepositoryType]?: JobRepository
+  @ManyToMany({
+    pivotTable: 'job_inputs',
+    joinColumn: 'job_id',
+    inverseJoinColumn: 'user_file_id',
+  })
+  inputFiles = new Collection<UserFile>(this)
 
   constructor(user: User, app?: App) {
     super()

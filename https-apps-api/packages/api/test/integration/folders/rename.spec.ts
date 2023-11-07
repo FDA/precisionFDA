@@ -11,7 +11,7 @@ import {
   FILE_ORIGIN_TYPE,
 } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /folders/:id/rename', () => {
   let em: EntityManager
@@ -41,7 +41,7 @@ describe('PATCH /folders/:id/rename', () => {
   it('response shape', async () => {
     const { body } = await supertest(getServer())
       .patch(`/folders/${folder.id}/rename`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({
         newName: 'b',
       })
@@ -78,7 +78,7 @@ describe('PATCH /folders/:id/rename', () => {
     await em.flush()
     const { body } = await supertest(getServer())
       .patch(`/folders/${subfolder.id}/rename`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({
         newName: 'd',
       })
@@ -93,7 +93,7 @@ describe('PATCH /folders/:id/rename', () => {
       fakes.client.folderRenameFake.throws()
       await supertest(getServer())
         .patch(`/folders/${folder.id}/rename`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .send({
           newName: 'b',
         })

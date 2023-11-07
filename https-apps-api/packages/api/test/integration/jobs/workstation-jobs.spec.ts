@@ -8,7 +8,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { TASK_TYPE } from '@pfda/https-apps-shared/src/queue/task.input'
 import { WorkstationSnapshotOperation } from '@pfda/https-apps-shared/src/domain/job'
 import { Space } from '@pfda/https-apps-shared/src/domain'
@@ -53,7 +53,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('works for v1.0.0', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${job_v1_0.dxid}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(200)
@@ -68,7 +68,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('works for v1.1.0 without space', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(200)
@@ -86,7 +86,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('works with space job', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${job_in_space.dxid}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(200)
@@ -105,7 +105,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('doesnt call the platform API if api key is empty', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({})
 
     expect(response.statusCode).to.equal(400)
@@ -117,7 +117,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     await em.flush()
     const response = await supertest(getServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(422)
@@ -128,7 +128,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('throws 404 when the job does not exist', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${generate.random.dxstr()}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(404)
@@ -140,7 +140,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     await em.flush()
     const response = await supertest(getServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(422)
@@ -179,7 +179,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     }
     let response = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(params)
 
     expect(response.statusCode).to.equal(200)
@@ -204,7 +204,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     }
     const response = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(params)
 
     expect(response.statusCode).to.equal(200)
@@ -236,7 +236,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     }
     const response = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send(params)
 
     expect(response.statusCode).to.equal(422)
@@ -248,7 +248,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
   it('doesnt call the platform API if api key is empty', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({})
 
     expect(response.statusCode).to.equal(400)
@@ -262,13 +262,13 @@ describe('PATCH /jobs/:id/snapshot', () => {
       await em.flush()
       const response = await supertest(getServer())
         .patch(`/jobs/${job.dxid}/snapshot`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .send({
           key: 'hello world',
           code: 'code from auth server',
           name: 'MySnapshot',
         })
-  
+
       expect(fakes.bull.addFake.notCalled).to.be.true()
       expect(response.body.error.message).to.include('is not in running state')
     }
@@ -277,7 +277,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
   it('throws 404 when the job does not exist', async () => {
     const response = await supertest(getServer())
       .patch(`/jobs/${generate.random.dxstr()}/snapshot`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({
         key: 'hello world',
         code: 'code from auth server',
@@ -294,7 +294,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     await em.flush()
     const response = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({
         key: 'hello world',
         code: 'code from auth server',

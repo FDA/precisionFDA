@@ -15,6 +15,7 @@ import { CogsIcon } from '../../../components/icons/Cogs'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FlapIcon } from '../../../components/icons/FlapIcon'
+import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { Loader } from '../../../components/Loader'
 import { MenuCounter } from '../../../components/MenuCounter'
@@ -36,6 +37,7 @@ import {
   Row,
   StyledMenu,
 } from '../../home/home.styles'
+import { SpaceReportList } from '../../space-reports/SpaceReportList'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { WorkflowList } from '../../home/workflows/WorkflowList'
 import { WorkflowShow } from '../../home/workflows/WorkflowShow'
@@ -205,6 +207,17 @@ const Spaces2 = ({
               <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />
             )}
           </MenuItem>
+          <MenuItem
+            data-testid="space-reports-link"
+            to={`/spaces/${space.id}/reports`}
+            activeClassName="active"
+          >
+            <SpaceReportIcon height={14} />
+            <MenuText>Reports</MenuText>
+            {expandedSidebar && (
+              <MenuCounter count={space.counters.reports.toString()} active={activeResource === 'reports'} />
+            )}
+          </MenuItem>
           {space.type !== 'private_type' && <MenuItem
               data-testid="discussions-link"
               to={`/spaces/${space.id}/discussions`}
@@ -267,6 +280,9 @@ const Spaces2 = ({
               </Route>
               <Route exact path={`/spaces/${space.id}/members`}>
                 <MembersList space={space} />
+              </Route>
+              <Route exact path={`/spaces/${space.id}/reports`}>
+                <SpaceReportList spaceId={Number(space.id)} />
               </Route>
               <Route exact path={`/spaces/${space.id}/discussions`}>
                 <DiscussionList space={space} scope={`space-${space.id}`} />

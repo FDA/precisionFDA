@@ -14,8 +14,8 @@ const server = createServer(createApp().callback())
 before(async () => {
   mocks.mocksSetup()
 
-  await queue.createQueues()
   await database.start()
+  await queue.createQueues()
   await server.startHttpServer()
 
   await db.initDeleteProcedure(database.connection())
