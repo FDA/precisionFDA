@@ -33,7 +33,7 @@ export class SpaceReportResultGenerateFacade {
       message: `Report of space "${report.space.name}" successfully generated`,
       action: ENUMS.NOTIFICATION_ACTION.SPACE_REPORT_DONE,
       meta: {
-        linkTitle: 'go to reports',
+        linkTitle: 'Go to Reports',
         linkUrl: `/spaces/${report.space.id}/reports`,
       },
     })
