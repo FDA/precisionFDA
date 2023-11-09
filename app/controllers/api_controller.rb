@@ -11,8 +11,11 @@ class ApiController < ApplicationController
     render status: :service_unavailable, json: { error: { message: exception.message, statusCode: 503 } }
   end
 
-  skip_before_action :verify_authenticity_token
+
   skip_before_action :require_login
+  skip_before_action :verify_authenticity_token, unless: lambda {
+    @context.present? && @context.key?(:cli_client) && @context[:cli_client] == true
+  }
   # rubocop:todo Rails/LexicallyScopedActionFilter
   before_action :require_api_login,
                 except: %i(

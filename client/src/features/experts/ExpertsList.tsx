@@ -151,6 +151,7 @@ const ExpertsList = () => {
                       <ExpertButtonRowWrap>
                         <ExpertButtonRow>
                           <Button
+                            title={`Click here to View ${n.meta.title}'s Q&A`}
                             onClick={() =>
                               window.location.assign(`/experts/${n.id}/qa`)
                             }
@@ -178,7 +179,7 @@ const ExpertsList = () => {
                               as="a"
                               data-turbolinks="false"
                               href={`/experts/${n.id}/edit`}
-                              aria-label={`Click here to Edit the Expert ${n.id}`}
+                              title={`Click here to Edit the Expert ${n.meta.title}`}
                             >
                               <span className="fa fa-pencil" />
                               Edit Expert
@@ -187,7 +188,7 @@ const ExpertsList = () => {
                               as="a"
                               data-turbolinks="false"
                               href={`/experts/${n.id}/dashboard`}
-                              aria-label={`Click here to View ${n.id}'s Dashboard`}
+                              title={`Click here to View ${n.meta.title}'s Dashboard`}
                             >
                               <span className="fa fa-dashboard fa-fw" />
                               Dashboard
