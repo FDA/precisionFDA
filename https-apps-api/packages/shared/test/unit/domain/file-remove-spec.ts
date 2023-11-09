@@ -1,9 +1,8 @@
 import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { fakes, mocksReset } from '../../../src/test/mocks'
+import { fakes } from '../../../src/test/mocks'
 import { Tag, User, UserFile, Event, userFile } from '../../../src/domain'
-import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
 import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
@@ -22,9 +21,6 @@ describe('remove file tests', () => {
     log = getLogger()
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
-
-    mocksReset()
-    localMocksReset()
   })
 
   it('test fail remove file with comparisons', async () => {

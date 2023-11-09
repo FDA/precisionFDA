@@ -2,7 +2,6 @@ include_recipe('::configure_ssh')
 
 app_dir = node["rails_app_dir"]
 https_apps_dir = File.join(app_dir, "https-apps-api")
-nodejs_bin = node["nodejs"]["bin_path"]
 
 directory app_dir do
   owner node[:deploy_user]
@@ -16,7 +15,6 @@ ruby_block "set envs" do
     end
 
     ENV["HOME"] = "/home/#{node[:deploy_user]}"
-    ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
   end
 end
 

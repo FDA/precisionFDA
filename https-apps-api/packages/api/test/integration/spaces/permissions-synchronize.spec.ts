@@ -1,12 +1,12 @@
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { database } from '@pfda/https-apps-shared'
+import { database, USER_CONTEXT_HTTP_HEADERS } from '@pfda/https-apps-shared'
 import { create, db } from '@pfda/https-apps-shared/src/test'
 import { User } from '@pfda/https-apps-shared/src/domain'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 
 describe('POST /account/checkSpacesPermissions', () => {
@@ -23,11 +23,11 @@ describe('POST /account/checkSpacesPermissions', () => {
   })
 
   it('adds createSyncSpacesPermissionsTask to the queue', async () => {
-    const userQueryData = getDefaultQueryData(user)
+    const userHeaderData = getDefaultHeaderData(user)
 
     await supertest(getServer())
       .post('/account/checkSpacesPermissions')
-      .query({ ...userQueryData })
+      .set(userHeaderData)
       .expect(204)
 
 
@@ -36,7 +36,7 @@ describe('POST /account/checkSpacesPermissions', () => {
     expect(fakeCreateSyncSpacesPermissionsArgs).to.deep.equal([
       {
         id: user.id,
-        accessToken: userQueryData.accessToken,
+        accessToken: userHeaderData[USER_CONTEXT_HTTP_HEADERS.accessToken],
         dxuser: user.dxuser,
       },
     ])

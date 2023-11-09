@@ -1,1 +1,1 @@
-export { Workflow } from './workflow.entity'
+export { Workflow } from './entity/workflow.entity'

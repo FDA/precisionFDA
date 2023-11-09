@@ -3,6 +3,7 @@ import { Job } from '../job.entity'
 import type { ListJobsInput, PageJobs } from '../job.input'
 import { getSpaceIsAccessibleByContext } from '../../space/space.permissions'
 import { UserOpsCtx } from '../../../types'
+import { JobRepository } from '../job.repository'
 
 export class ListJobsOperation extends BaseOperation<UserOpsCtx, ListJobsInput, PageJobs> {
   async run(input: ListJobsInput): Promise<PageJobs> {
@@ -21,7 +22,7 @@ export class ListJobsOperation extends BaseOperation<UserOpsCtx, ListJobsInput, 
     }
 
     // appName, launched by?, location?, duration, energy, launched at, tags?
-    const jobRepo = em.getRepository(Job)
+    const jobRepo: JobRepository = em.getRepository(Job)
     const [jobs, totalCount] = await jobRepo.findPaginated(query)
     // todo: sync jobs here?
     const results: PageJobs = {

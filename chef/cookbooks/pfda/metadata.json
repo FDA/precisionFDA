@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "aws": "~> 9.0",
-    "nodejs": "~> 10.1",
     "tomcat": "~> 5.0"
   },
   "providing": {

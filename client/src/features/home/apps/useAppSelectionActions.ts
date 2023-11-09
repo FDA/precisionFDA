@@ -136,7 +136,7 @@ export const useAppSelectionActions = ({
       if(spaceId) {
         history.push(`/spaces/${spaceId}/apps`)
       } else {
-        history.push('/home/apps')
+        history.push(`/home/apps?scope=${scope}`)
       }
       if(resetSelected) resetSelected()
     },
@@ -162,8 +162,8 @@ export const useAppSelectionActions = ({
 
   let actions: ActionFunctionsType<AppActions> = {
     'Run': {
-      type: 'link',
-      link: `/apps/${selected[0]?.uid}/jobs/new`,
+      type: 'route',
+      to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/jobs/new`,
       isDisabled: selected.length !== 1 || !selected[0].links.run_job,
       cloudResourcesConditionType: 'all',
     },
@@ -241,6 +241,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
+      shouldHide: ['private','public'].includes(selected[0]?.scope)
     },
     'Attach to...': {
       type: 'modal',

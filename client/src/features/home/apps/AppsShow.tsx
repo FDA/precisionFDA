@@ -25,7 +25,6 @@ import {
   ActionsButton,
   Header,
   HeaderLeft,
-  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -37,7 +36,7 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { ResourceScope } from '../types'
+import { EmmitScope, ResourceScope, ServerScope } from '../types'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
@@ -45,7 +44,7 @@ import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
 import { getBaseLink } from './run/utils'
 
-const renderOptions = (app: IApp, scope: ResourceScope) => {
+const renderOptions = (app: IApp, scope?: ResourceScope) => {
   const columns = [
     {
       header: 'location',
@@ -114,7 +113,7 @@ const DetailActionsDropdown = (
   { app, comparatorLinks, challenges, spaceId }:
     { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
   const actions = useAppSelectionActions({
-    scope: app.location === 'Private' ? 'me' : app.location,
+    scope: getScopeMapping(app.scope, app.featured),
     spaceId,
     selectedItems: [app],
     resetSelected: () => { },
@@ -165,6 +164,7 @@ const DetailActionsDropdown = (
       {actions['Edit tags']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       {actions['Add to Comparators']?.modal}
       {actions['Remove from Comparators']?.modal}
       {actions['Set this app as comparison default']?.modal}
@@ -172,11 +172,15 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: (scope: ResourceScope) => void }) => {
+export const AppsShow = ({ spaceId, emitScope, scope }: { scope?: ResourceScope, spaceId?: string, emitScope?: EmmitScope }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
-  const { data, isLoading } = useFetchAppQuery(appUid)
+  const { data, isLoading } = useFetchAppQuery(appUid, {
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.app.scope, d.app.featured)
+    },
+  })
 
   const app = data?.app
   const meta = data?.meta
@@ -185,15 +189,11 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
   
   if (!app || !meta)
   return (
-      <NotFound>
-        <h1>App not found</h1>
-        <div>Sorry, this app does not exist or is not accessible by you.</div>
-      </NotFound>
-    )
-  const scope = getScopeMapping(app.scope, app.featured)
-  if (emitScope) {
-    emitScope(scope)
-  }
+    <NotFound>
+      <h1>App not found</h1>
+      <div>Sorry, this app does not exist or is not accessible by you.</div>
+    </NotFound>
+  )
 
   const appTitle = app.title ? app.title : app.name
 
@@ -205,7 +205,8 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
       <Topbox>
         <Header>
           <HeaderLeft>
-            <Title>
+            <Title
+              data-testid="app-title">
               <CubeIcon height={20} />
               &nbsp;{appTitle}
               {meta.comparator && (
@@ -236,7 +237,7 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
               linkToRevision={r => `/home/apps/${r.uid}`}
             />
           </HeaderLeft>
-          <HeaderRight>
+          <div>
             <StyledRight>
               {app &&
                 <DetailActionsDropdown
@@ -246,7 +247,7 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
                   challenges={meta.challenges} />
               }
             </StyledRight>
-          </HeaderRight>
+          </div>
         </Header>
 
         {renderOptions(app, scope)}
@@ -284,7 +285,7 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId: string, emitScope?: 
             <AppExecutionsList appUid={appUid} />
           </Route>
           <Route path={`${match.path}`}>
-            <SpecTab spec={meta.spec} />
+            <SpecTab spaceId={spaceId} spec={meta.spec} />
           </Route>
         </Switch>
       </StyledTabPanel>

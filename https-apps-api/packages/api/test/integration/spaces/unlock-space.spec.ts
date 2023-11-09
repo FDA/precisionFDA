@@ -6,7 +6,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { mocksReset, fakes } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@pfda/https-apps-shared/src/domain/space-membership/space-membership.enum'
 import { SPACE_STATE } from '@pfda/https-apps-shared/src/domain/space/space.enum'
 
@@ -57,7 +57,7 @@ describe('PATCH /spaces/:id/unlock', () => {
   it('unlocks space', async () => {
     await supertest(getServer())
       .patch(`/spaces/${space.id}/unlock`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(204)
 
     expect(fakes.queue.createEmailSendTaskFake.calledTwice).to.be.true()
@@ -70,7 +70,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     it('throws 404 when the space does not exist', async () => {
       const { body } = await supertest(getServer())
         .patch(`/spaces/4848/unlock`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.SPACE_NOT_FOUND)
     })
@@ -78,7 +78,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     it('does not allow to unlock space (user is not RSA) and returns 403', async () => {
       const { body } = await supertest(getServer())
         .patch(`/spaces/${space.id}/unlock`)
-        .query({ ...getDefaultQueryData(hostLead) })
+        .set(getDefaultHeaderData(hostLead))
         .expect(403)
       expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
     })
@@ -90,7 +90,7 @@ describe('PATCH /spaces/:id/unlock', () => {
 
       const { body } = await supertest(getServer())
         .patch(`/spaces/${alreadyUnlockedSpace.id}/unlock`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .expect(403)
       expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
     })

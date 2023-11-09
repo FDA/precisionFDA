@@ -1,14 +1,14 @@
 /* eslint-disable no-undefined */
-import { EntityManager } from '@mikro-orm/mysql'
+import type { EntityManager } from '@mikro-orm/mysql'
 import { config, database, queue } from '@pfda/https-apps-shared'
-import { App, User } from '@pfda/https-apps-shared/src/domain'
+import type { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { UserCtx } from '@pfda/https-apps-shared/src/types'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
+import type { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createUserCheckupTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
@@ -21,7 +21,6 @@ const createUserCheckupTask = async (user: UserCtx) => {
 describe('TASK: user-checkup', () => {
   let em: EntityManager
   let user: User
-  let adminUser: User
   let userContext: UserCtx
   let regularApp: App
   let httpsApp: App
@@ -31,7 +30,7 @@ describe('TASK: user-checkup', () => {
     em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
-    adminUser = create.userHelper.createAdmin(em)
+    create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })
     httpsApp = create.appHelper.createHTTPS(em, { user })
     await em.flush()
@@ -73,7 +72,7 @@ describe('TASK: user-checkup', () => {
     const job5 = create.jobHelper.create(em, { user, app: regularApp }, {
       state: JOB_STATE.RUNNING,
     })
-    const job6 = create.jobHelper.create(em, { user, app: httpsApp }, {
+    create.jobHelper.create(em, { user, app: httpsApp }, {
       state: JOB_STATE.TERMINATED,
     })
     await em.flush()
@@ -84,14 +83,23 @@ describe('TASK: user-checkup', () => {
 
     // Only non-terminated HTTPS jobs should result in task creation
     // In this case only job2 and job4
-    expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(2)
+    expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(5)
 
     const [payload1, userCtx] = fakes.queue.createSyncJobStatusTaskFake.getCall(0).args
-    expect(payload1).to.have.property('dxid', job2.dxid)
+    expect(payload1).to.have.property('dxid', job1.dxid)
     expect(userCtx).to.have.property('dxuser', user.dxuser)
 
-    const [payload, _] = fakes.queue.createSyncJobStatusTaskFake.getCall(1).args
-    expect(payload).to.have.property('dxid', job4.dxid)
+    const [payload2] = fakes.queue.createSyncJobStatusTaskFake.getCall(1).args
+    expect(payload2).to.have.property('dxid', job2.dxid)
+
+    const [payload3] = fakes.queue.createSyncJobStatusTaskFake.getCall(2).args
+    expect(payload3).to.have.property('dxid', job3.dxid)
+
+    const [payload4] = fakes.queue.createSyncJobStatusTaskFake.getCall(3).args
+    expect(payload4).to.have.property('dxid', job4.dxid)
+
+    const [payload5] = fakes.queue.createSyncJobStatusTaskFake.getCall(4).args
+    expect(payload5).to.have.property('dxid', job5.dxid)
   })
 
   it('ignores jobs that have sync tasks already there', async () => {
@@ -193,7 +201,7 @@ describe('TASK: user-checkup', () => {
 
   it('queues UserDataConsistencyReport if last checkup is over the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date((new Date()).getTime() + repeat * 1000 + 1)
+    user.lastDataCheckup = new Date(new Date().getTime() + (repeat * 1000) + 1)
     await em.flush()
 
     await createUserCheckupTask(userContext)
@@ -202,7 +210,7 @@ describe('TASK: user-checkup', () => {
 
   it('does not queue UserDataConsistencyReport if last checkup is under the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date((new Date()).getTime() + repeat * 1000 - 1)
+    user.lastDataCheckup = new Date(new Date().getTime() + (repeat * 1000) - 1)
     await em.flush()
 
     await createUserCheckupTask(userContext)

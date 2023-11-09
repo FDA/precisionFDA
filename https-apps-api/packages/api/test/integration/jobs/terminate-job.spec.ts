@@ -8,7 +8,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { errors, database } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /jobs/:id/terminate', () => {
   let em: EntityManager
@@ -31,7 +31,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   it('response shape', async () => {
     const { body } = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .send({})
       .expect(200)
     expect(body).to.be.deep.equal({
@@ -56,7 +56,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   it('calls the platform API', async () => {
     await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
     expect(fakes.client.jobTerminateFake.calledOnce).to.be.true()
   })
@@ -66,7 +66,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     await em.flush()
     const { body } = await supertest(getServer())
       .patch(`/jobs/${job.dxid}/terminate`)
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(422)
     expect(fakes.client.jobTerminateFake.notCalled).to.be.true()
     expect(body.error.message).to.equal('Job is already terminating or terminated')
@@ -76,7 +76,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     it('throws 404 when the job does not exist', async () => {
       const { body } = await supertest(getServer())
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
@@ -86,7 +86,7 @@ describe('PATCH /jobs/:id/terminate', () => {
       await em.flush()
       const { body } = await supertest(getServer())
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
-        .query({ ...getDefaultQueryData(user) })
+        .set(getDefaultHeaderData(user))
         .expect(404)
       expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })

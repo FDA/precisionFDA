@@ -297,7 +297,8 @@ export const AppForm = ({
               name="code"
               control={control}
               render={({ field }) => (
-                <FormFields>
+                <FormFields
+                  data-testid="script-editor">
                   <Help>
                     <span>Need help?</span>
                     <Link to="/docs/creating-apps#dev-script" target="_blank">

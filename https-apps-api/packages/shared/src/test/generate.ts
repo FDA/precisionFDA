@@ -246,6 +246,19 @@ const app = {
       app_gz: 'app-gzipped-file',
     },
   }),
+  appSeries: (): Partial<InstanceType<typeof entities.AppSeries>> => {
+    const dxid = `app-${random.dxstr()}`
+    return {
+      dxid,
+      name: chance.name(),
+      featured: false,
+      deleted: false,
+      verified: true,
+      scope: 'private',
+    }
+  },
+  appId: () => 'app-GP3J1V00XbPPz5qP4QPGxQ08',
+
 }
 
 const job = {
@@ -261,8 +274,9 @@ const job = {
       scope: 'private',
       uid: `${dxid}-1`,
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
-      describe: JSON.stringify({
+      describe: {
         id: dxid,
+        class: 'job',
         executable: app.dxid,
         executableName: app.title,
         runInput: {
@@ -273,7 +287,7 @@ const job = {
             url: `https://${dxid}.internal.dnanexus.cloud/`
           },
         },
-      }),
+      },
     }
   },
   regular: (): Partial<InstanceType<typeof entities.Job>> => {
@@ -283,7 +297,7 @@ const job = {
       dxid,
       project: `project-${random.dxstr()}`,
       runData,
-      describe: JSON.stringify({ id: dxid }),
+      describe: { id: dxid, class: 'job' },
       state: JOB_STATE.IDLE,
       name: chance.name(),
       scope: 'private',
@@ -493,6 +507,7 @@ const comparison = {
     name: 'Test Comparison',
     description: chance.sentence(),
     state: COMPARISON_STATE.DONE,
+    scope: 'private'
   }),
 }
 

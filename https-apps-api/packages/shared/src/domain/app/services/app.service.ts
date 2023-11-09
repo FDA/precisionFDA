@@ -83,7 +83,7 @@ export class AppService implements IAppService {
     }
 
     if (!Object.keys(allowedInstanceTypes).includes(appInput.instance_type)) {
-      this.throwValidationError(`The app \'instance type\' must be one of: ${Object.keys(allowedInstanceTypes)}`)
+      this.throwValidationError(`The app 'instance type' must be one of: ${Object.keys(allowedInstanceTypes)}`)
     }
 
     appInput.packages.forEach(packageName => {
@@ -97,7 +97,7 @@ export class AppService implements IAppService {
       const assets = await this.getAssets(userId, appInput.ordered_assets)
       assets.forEach(asset => inaccessible = inaccessible.filter(item => item !== asset.uid))
       if (inaccessible.length > 0) {
-        this.throwValidationError(`The app assets with uids \'${JSON.stringify(inaccessible)}\' do ` +
+        this.throwValidationError(`The app assets with uids '${JSON.stringify(inaccessible)}' do ` +
           'not exist or are not accessible by you.')
       }
     }
@@ -224,7 +224,7 @@ export class AppService implements IAppService {
       name: constructDxname(user.dxuser, appInput.name, appInput.scope),
       title: appInput.title,
       summary: ' ',
-      description: (appInput.readme && appInput.readme.length > 1) ? appInput.readme : 'no readme provided',
+      description: (appInput.readme && appInput.readme.length > 1) ? appInput.readme : ' ',
       version: `r${revision}-${crypto.randomBytes(3).toString('hex')}`,
       resources: assetDxids,
       details: {ordered_assets: assetDxids},

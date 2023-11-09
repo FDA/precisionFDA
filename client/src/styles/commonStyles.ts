@@ -1,6 +1,15 @@
 import styled, { css } from 'styled-components'
 import { theme } from './theme'
 
+export const imageReset = css`
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+  font-style: italic;
+  background-repeat: no-repeat;
+  background-size: cover;
+  shape-margin: 0.75rem;
+`
 
 export const commonStyles = {
   pageTitle: css`

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_08_24_141018) do
+ActiveRecord::Schema.define(version: 2023_11_08_104920) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -695,6 +695,30 @@ ActiveRecord::Schema.define(version: 2023_08_24_141018) do
     t.index ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id"
   end
 
+  create_table "space_report_parts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "space_report_id"
+    t.integer "source_id"
+    t.string "source_type"
+    t.json "result"
+    t.string "state", default: "CREATED"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["space_report_id"], name: "fk_rails_015b1a9336"
+  end
+
+  create_table "space_reports", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.integer "space_id"
+    t.integer "result_file_id"
+    t.string "state", default: "CREATED"
+    t.integer "created_by"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["created_at"], name: "index_space_reports_on_created_at"
+    t.index ["created_by"], name: "fk_rails_85038bae31"
+    t.index ["result_file_id"], name: "fk_rails_80499f7a14"
+    t.index ["space_id"], name: "fk_rails_b52dcac8ed"
+  end
+
   create_table "spaces", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -1003,6 +1027,10 @@ ActiveRecord::Schema.define(version: 2023_08_24_141018) do
   add_foreign_key "space_invitations", "spaces"
   add_foreign_key "space_invitations", "users", column: "inviter_id"
   add_foreign_key "space_memberships", "users"
+  add_foreign_key "space_report_parts", "space_reports", on_delete: :cascade
+  add_foreign_key "space_reports", "nodes", column: "result_file_id"
+  add_foreign_key "space_reports", "spaces"
+  add_foreign_key "space_reports", "users", column: "created_by"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
