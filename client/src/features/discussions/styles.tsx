@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components'
 import { colors, theme } from '../../styles/theme'
 import { TransparentButton } from '../../components/Button'
+import { imageReset } from '../../styles/commonStyles'
 
 export const CommentCount = styled.div`
   line-height: 32px;
@@ -179,6 +180,9 @@ export const StyledMarkdown = styled.div<{ isAnswer?: boolean }>`
     li {
       line-height: 1.6em;
     }
+  }
+  img {
+    ${imageReset}
   }
 `
 export const StyledCardList = styled.div`

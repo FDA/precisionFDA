@@ -1,15 +1,17 @@
-import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import React from 'react'
 import { useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
-import { FileIcon } from '../../../components/icons/FileIcon'
+import { HomeLabel } from '../../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../../components/Markdown'
+import { Filler } from '../../../components/Page/styles'
+import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
-import { HOME_TABS } from '../../../constants'
+import { FileIcon } from '../../../components/icons/FileIcon'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { StyledBackLink } from '../home.styles'
-import { HomeLabel } from '../../../components/HomeLabel'
+import { License } from '../licenses/License'
 import {
   ActionsButton,
   Header,
@@ -24,21 +26,17 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { ResourceScope } from '../types'
+import { EmmitScope, ResourceScope } from '../types'
 import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetActions } from './useAssetSelectActions'
-import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
-import { License } from '../licenses/License'
-import { Filler } from '../../../components/Page/styles'
-import { getScopeMapping } from '../getScopeMapping'
 
 const AssetActions = ({
   scope,
   asset,
 }: {
-  scope: ResourceScope
+  scope?: ResourceScope
   asset: IAsset
 }) => {
   const actions = useAssetActions({
@@ -68,13 +66,16 @@ const AssetActions = ({
   )
 }
 
-export const AssetShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
+export const AssetShow = ({ emitScope, scope }: { scope?: ResourceScope, emitScope?: EmmitScope }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
-  const [currentTab, setCurrentTab] = useState<any>('')
 
-  const { data, status } = useQuery(['asset', assetUid], () =>
-    fetchAsset(assetUid),
-  )
+  const { data, status } = useQuery({
+    queryKey: ['asset', assetUid],
+    queryFn: () => fetchAsset(assetUid),
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.asset.scope, d.asset.featured)
+    },
+  })
 
   const asset = data?.asset
   const meta = data?.meta
@@ -112,16 +113,7 @@ export const AssetShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) =>
     },
   ] as ITab[]
 
-  const tab =
-    currentTab && currentTab !== HOME_TABS.PRIVATE
-      ? `/${currentTab.toLowerCase()}`
-      : ''
-
-  const scope = getScopeMapping(asset.scope, asset.featured)
-  const scopeParamLink = `?scope=${scope.toLowerCase()}`
-  if (emitScope) {
-    emitScope(scope)
-  }
+  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
 
   return (
     <>

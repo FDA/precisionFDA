@@ -36,7 +36,7 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { ResourceScope } from '../types'
+import { EmmitScope, ResourceScope, ServerScope } from '../types'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
@@ -44,7 +44,7 @@ import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
 import { getBaseLink } from './run/utils'
 
-const renderOptions = (app: IApp, scope: ResourceScope) => {
+const renderOptions = (app: IApp, scope?: ResourceScope) => {
   const columns = [
     {
       header: 'location',
@@ -172,11 +172,15 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope }: { spaceId?: string, emitScope?: (scope: ResourceScope) => void }) => {
+export const AppsShow = ({ spaceId, emitScope, scope }: { scope?: ResourceScope, spaceId?: string, emitScope?: EmmitScope }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
-  const { data, isLoading } = useFetchAppQuery(appUid)
+  const { data, isLoading } = useFetchAppQuery(appUid, {
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.app.scope, d.app.featured)
+    },
+  })
 
   const app = data?.app
   const meta = data?.meta
@@ -185,15 +189,11 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId?: string, emitScope?:
   
   if (!app || !meta)
   return (
-      <NotFound>
-        <h1>App not found</h1>
-        <div>Sorry, this app does not exist or is not accessible by you.</div>
-      </NotFound>
-    )
-  const scope = getScopeMapping(app.scope, app.featured)
-  if (emitScope) {
-    emitScope(scope)
-  }
+    <NotFound>
+      <h1>App not found</h1>
+      <div>Sorry, this app does not exist or is not accessible by you.</div>
+    </NotFound>
+  )
 
   const appTitle = app.title ? app.title : app.name
 
