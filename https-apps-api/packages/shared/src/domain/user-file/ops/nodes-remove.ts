@@ -1,5 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { BaseOperation } from '../../../utils/base-operation'
+import { BaseOperation, TypeUtils } from '../../../utils'
 import { UserOpsCtx } from '../../../types'
 import { Node } from '../node.entity'
 import { NodesInput } from '../user-file.input'
@@ -8,7 +8,7 @@ import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { getLogger } from '../../../logger'
 import { getSuccessMessage, loadNodes } from '../user-file.helper'
-import { NotificationService } from '../../notification/services/notification.service'
+import { NotificationService } from '../../notification'
 
 const rollbackRemovingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
   getLogger().error(`Rolling back removing state for nodes ${nodes.length}`)
@@ -29,7 +29,7 @@ const rollbackRemovingState = async (em: SqlEntityManager, nodes: Node[]): Promi
 class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number> {
   async run(input: NodesInput): Promise<number> {
     getLogger().info(input.ids, 'Removing ids')
-    const em = this.ctx.em.fork()
+    const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, { ids: input.ids }, {})
     const notificationService = new NotificationService(em)
 
@@ -70,7 +70,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number>
     } catch (err) {
       if (input.async) {
         await notificationService.createNotification({
-          message: 'Error deleting files and folders.',
+          message: TypeUtils.getPropertyValueFromUnknownObject<string>(err, 'message') ?? 'Error deleting files and folders.',
           severity: SEVERITY.ERROR,
           action: NOTIFICATION_ACTION.NODES_REMOVED,
           userId: this.ctx.user.id,

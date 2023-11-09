@@ -55,7 +55,7 @@ router.delete(
       await new userFile.StartRemoveNodesJob(pickOpsCtx(ctx)).execute({ ids })
       ctx.status = 204
     } else {
-      ctx.body = await new userFile.NodesRemoveOperation(pickOpsCtx(ctx)).execute({ ids, async })
+      ctx.body = await new userFile.NodesRemoveOperation(pickOpsCtx({ ...ctx, em: ctx.em.fork() })).execute({ ids, async })
       ctx.status = 200
     }
   },

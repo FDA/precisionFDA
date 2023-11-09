@@ -17,7 +17,7 @@ module AppsConcern
     @revisions = @app.
       app_series.
       accessible_revisions(@context).
-      select(:title, :id, :uid, :revision, :version)
+      select(:title, :id, :uid, :revision, :version, :deleted)
   end
 
   # Loads common app relations and sets appropriate instance variables.

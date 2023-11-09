@@ -36,6 +36,8 @@ const allowedInstanceTypes = {
   'gpu-8' : 'mem3_ssd1_gpu_x8_fedramp',
 } as const
 
+type JobInstanceType = keyof typeof allowedInstanceTypes
+
 const DEFAULT_INSTANCE_TYPE = allowedInstanceTypes['baseline-2']
 
 const allowedFeatures = {
@@ -52,4 +54,5 @@ export {
   DEFAULT_INSTANCE_TYPE,
   allowedFeatures,
   allowedInstanceTypes,
+  JobInstanceType,
 }

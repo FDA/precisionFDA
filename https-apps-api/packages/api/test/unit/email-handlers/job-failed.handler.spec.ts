@@ -31,10 +31,10 @@ describe('job-failed.handler', () => {
       {
       scope: 'private',
       state: JOB_STATE.FAILED,
-      describe: JSON.stringify({
+      describe: {
         failureReason: 'FailureReason',
         failureMessage: 'failure message',
-      })
+      },
     })
     const space = create.spacesHelper.create(em, { name: 'my-test-space' })
     create.spacesHelper.addMember(em, { user, space })
@@ -54,8 +54,8 @@ describe('job-failed.handler', () => {
       const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
       await handler.setupContext()
       expect(handler.job).to.exist()
-      expect(handler.job.failureReason).to.equal('FailureReason')
-      expect(handler.job.failureMessage).to.equal('failure message')
+      expect(handler.job.describe?.failureReason).to.equal('FailureReason')
+      expect(handler.job.describe?.failureMessage).to.equal('failure message')
     })
   })
 
@@ -91,10 +91,12 @@ describe('job-failed.handler', () => {
     })
 
     it('returns cost limit exceeded template', async () => {
-      job.describe = JSON.stringify({
+      job.describe = {
+        id: 'job-id',
+        class: 'job',
         failureReason: 'CostLimitExceeded',
         failureMessage: 'failure message',
-      })
+      }
       await em.flush()
 
       const input = { jobId: job.id }

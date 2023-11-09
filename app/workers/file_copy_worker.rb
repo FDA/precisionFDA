@@ -6,21 +6,6 @@ class FileCopyWorker < ApplicationWorker
   end
 
   class << self
-    # Notifies a user if there was any error with copying.
-    # @param job [Sidekiq::Job] Current job.
-    def notify_user(job)
-      scope = job["args"].first
-
-      context = build_context(job)
-
-      subject = "An error occurred during the copying to scope '#{scope}'"
-      message = "#{subject}: #{job['error_message']}"
-
-      Rails.logger.error(message)
-
-      WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
-    end
-
     # Rollbacks files to "closed" state and returns "private" scope.
     # @param job [Sidekiq::Job] Current job.
     def remove_failed_files(job)
@@ -57,19 +42,40 @@ class FileCopyWorker < ApplicationWorker
   # @return [Copies] Object that includes all copied files.
   def perform(scope, file_ids, folder_id, session_auth_params)
     @context = Context.build(session_auth_params)
+    RequestContext.begin_request(@context.user_id, @context.user, @context.token)
     @scope = scope
 
     files = UserFile.where(id: file_ids)
-
     copies = copy_service.copy(files, @scope, folder_id)
 
     # replace COPYING state by a source file state.
     copies.each { |object, source, _| object.update!(state: source.state) }
+
+    message = if copies.all?(&:copied)
+      "File#{files.length == 1 ? ' was' : 's were'} successfully copied to the space"
+    elsif copies.any?(&:copied)
+      "Some files were successfully copied to the space, while some already exist there"
+    else
+      "No files were copied - all already exist in the space"
+    end
+
+    notification = {
+      action: "NODES_COPIED",
+      message:,
+      severity: "INFO",
+      userId: @context.user_id,
+    }
+
+    https_apps_client.send_notification(notification)
   end
 
   private
 
   def copy_service
     @copy_service ||= CopyService::FileCopier.new(api: @context.api, user: @context.user)
+  end
+
+  def https_apps_client
+    HttpsAppsClient.new
   end
 end

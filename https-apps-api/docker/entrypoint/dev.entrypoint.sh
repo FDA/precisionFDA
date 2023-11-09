@@ -6,15 +6,7 @@ if [[ "$#" -eq 0 ]]; then
 fi
 
 if [[ ! $SKIP_NODEJS_DEPS_SETUP || $SKIP_NODEJS_DEPS_SETUP = 0 ]]; then
-  is_node_modules_empty=$(find ./node_modules -maxdepth 0 -empty)
-  # In case of empty node modules, `yarn check` is a waste of time
-  if [[ $is_node_modules_empty ]]; then
     yarn --frozen-lockfile
-  else
-    # Verifies only direct dependencies - i.e. skips errors from transitive dependencies
-    # https://classic.yarnpkg.com/en/docs/cli/check#toc-yarn-check-verify-tree
-    yarn check --verify-tree || yarn --frozen-lockfile
-  fi
 fi
 
 # Reuse service-level env variables for db polling

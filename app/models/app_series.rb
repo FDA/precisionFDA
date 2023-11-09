@@ -164,7 +164,7 @@ class AppSeries < ApplicationRecord
   end
 
   def accessible_revisions(context)
-    apps.accessible_by(context).order(revision: :desc)
+    apps.accessible_by(context).unremoved.order(revision: :desc)
   end
 
   def latest_accessible(context)

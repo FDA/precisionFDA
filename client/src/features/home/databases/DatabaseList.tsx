@@ -40,7 +40,7 @@ const NoDatabases = styled.div`
 
 type ListType = { dbclusters: IDatabase[]; meta: IMeta }
 
-export const DatabaseList = ({ scope }: { scope: ResourceScope }) => {
+export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
   if (scope !== 'me') {
     return (
       <NoDatabases>
@@ -186,7 +186,7 @@ export const DatabaseListTable = ({
   sortBy?: SortingRule<string>[]
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  scope: ResourceScope
+  scope?: ResourceScope
   colWidths: KeyVal
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],

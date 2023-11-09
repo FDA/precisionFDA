@@ -1,18 +1,16 @@
 /* eslint-disable max-len */
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-undefined */
-import { EntityManager } from '@mikro-orm/core'
+import type { EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
-import { App, User } from '@pfda/https-apps-shared/src/domain'
+import type { App, User } from '@pfda/https-apps-shared/src/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
-import type { BasicUserJob, TASK_TYPE } from '@pfda/https-apps-shared/src/queue/task.input'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { UserCtx } from '@pfda/https-apps-shared/src/types'
+import type { UserCtx } from '@pfda/https-apps-shared/src/types'
 import { range } from 'ramda'
-
+import { mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createCheckUserJobsTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
@@ -22,7 +20,6 @@ const createCheckUserJobsTask = async (user: UserCtx) => {
     user,
   })
 }
-
 
 describe('TASK: check-user-jobs', () => {
   let em: EntityManager
@@ -99,7 +96,7 @@ describe('TASK: check-user-jobs', () => {
     await createCheckUserJobsTask(userContext)
 
     // Expect job sync calls to be made on missing or orphaned jobs
-    expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(5)
+    expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(6)
 
     const jobDxids = jobs.map(job => job.dxid)
     const callArgs = fakes.queue.createSyncJobStatusTaskFake.getCalls().map(call => call.args[0])
@@ -111,7 +108,7 @@ describe('TASK: check-user-jobs', () => {
     // console.log(callArgs)
 
     // Expected jobs that should have sync tasks recreated
-    const expectedJobIndexes = [2, 4, 5, 8, 9]
+    const expectedJobIndexes = [0, 3, 4, 7, 8, 9]
     for (const i of range(0, expectedJobIndexes.length)) {
       const payload = callArgs[i]
       expect(payload).to.have.property('dxid', jobs[expectedJobIndexes[i]].dxid)

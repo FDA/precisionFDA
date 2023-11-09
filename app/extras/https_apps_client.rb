@@ -301,6 +301,167 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def discussion_create(body)
+    request(
+      "/discussions",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def discussion_update(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def discussion_publish(body)
+    request(
+      "/discussions/#{body[:id]}/publish",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def discussion_destroy(discussion_id)
+    request(
+      "/discussions/#{discussion_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def answer_destroy(discussion_id, answer_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def comment_destroy(discussion_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def answer_comment_destroy(discussion_id, answer_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def discussion_comment_create(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}/comments",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def discussion_comment_update(discussion_id, comment_id, body)
+    request(
+      "/discussions/#{discussion_id}/comments/#{comment_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def answer_comment_update(discussion_id, answer_id, comment_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments/#{comment_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def discussion_comment_show(discussion_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def answer_comment_show(discussion_id, answer_id, comment_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments/#{comment_id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def answer_comment_create(discussion_id, answer_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}/comments",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def answer_create(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def answer_publish(discussion_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{body[:id]}/publish",
+      body,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def answer_show(discussion_id, answer_id)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def answer_update(discussion_id, answer_id, body)
+    request(
+      "/discussions/#{discussion_id}/answers/#{answer_id}",
+      body,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def discussions_list(params)
+    request(
+      "/discussions",
+      {},
+      Net::HTTP::Get::METHOD,
+      params,
+    )
+  end
+
+  def discussion_show(id)
+    request(
+      "/discussions/#{id}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def note_attachments(id)
+    request(
+      "/discussions/#{id}/attachments",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # News
 
   def news_list(params)
@@ -707,11 +868,52 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def create_space_report(id)
+    request(
+      "/spaces/#{id}/report",
+      {},
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def get_space_reports(id)
+    request(
+      "/spaces/#{id}/report",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def delete_space_reports(ids)
+    request(
+      "/spaces/report",
+      {},
+      Net::HTTP::Delete::METHOD,
+      { id: ids },
+    )
+  end
+
   private
 
   # rubocop:disable Metrics/ParameterLists
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, additional_query = {}, additional_headers = {})
-    query = auth_query.merge(additional_query).to_query
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, query = {}, additional_headers = {})
+    # Rails to_query method adds a suffix "[]" to keys of query parameters with array values.
+    #
+    # Rails approach - { id: [0,1,2]} => ?id[]=1&id[]=2&id[]=3
+    # Our approach - { id: [0,1,2]} => ?id=1&id=2&id=3
+    array_query_keys = query.select { |_, v| v.is_a?(Array) }.keys
+
+    additional_queries = query.except(*array_query_keys)
+    additional_query_string = additional_queries.to_query
+
+    array_queries = query.slice(*array_query_keys)
+    array_query_string = array_queries.map do |key, values|
+      values.map { |value| "#{key}=#{value}" }
+    end.flatten.join("&")
+
+    # 4. Combine the two query strings
+    query = [additional_query_string, array_query_string].compact.reject(&:empty?).join("&")
+
     uri = URI("#{ENV['HTTPS_APPS_API_URL']}#{path}?#{query}")
     use_ssl = uri.scheme == "https"
 
@@ -733,23 +935,24 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     @connection_opts ||= { read_timeout: 120 }
   end
 
-  def auth_query
+  def auth_headers
     unless RequestContext.instance
       Rails.logger.info("RequestContext.instance is not present, auth query part will be empty")
       return {}
     end
 
     {
-      id: RequestContext.instance.user_id,
-      dxuser: RequestContext.instance.username,
-      accessToken: RequestContext.instance.token,
+      "x-user_id": RequestContext.instance.user_id.to_s,
+      "x-dxuser": RequestContext.instance.username,
+      "x-accesstoken": RequestContext.instance.token,
     }.compact_blank
   end
 
   # Returns HTTP headers to be sent during every request.
   # @return [Hash] Headers to be sent.
   def headers
-    @headers ||= { "Content-Type" => "application/json" }
+    content_type = @headers ||= { "Content-Type" => "application/json" }
+    content_type.merge(auth_headers)
   end
 
   # Builds hash from response.

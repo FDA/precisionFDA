@@ -1,5 +1,6 @@
 import { ServerScope } from '../types'
 import { FileState } from '../files/files.types'
+import { FileOrg, FileUser } from '../apps/apps.types'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -53,8 +54,11 @@ export interface FileLicense {
   uid: string;
 }
 
+
+// TODO: revisit this type, doesn't look correct to me.
+// list_assets returns very similar results as list_files and the attributes listed here are not there
 export interface IAsset {
-  id: string;
+  id: number;
   uid: string;
   dxid: string;
   entity_type: string;
@@ -74,9 +78,13 @@ export interface IAsset {
   location: string;
   readme: string;
   revision: number;
+  public: boolean;
+  private: boolean;
+  in_space: boolean
   app_series_id: number;
   run_by_you: string;
-  org: string;
+  org: FileOrg;
+  path: string
   origin: {
     text?: string
     fa?: string
@@ -85,6 +93,7 @@ export interface IAsset {
   explorers: number;
   featured: boolean;
   scope: ServerScope;
+  user: FileUser
   active: boolean;
   links: Links;
   tags: any[];

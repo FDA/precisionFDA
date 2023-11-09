@@ -1,9 +1,8 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { fakes, mocksReset } from '../../../src/test/mocks'
+import { fakes } from '../../../src/test/mocks'
 import { Tag, User, Event, userFile, Folder } from '../../../src/domain'
-import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
 import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
@@ -23,9 +22,6 @@ describe('remove folder tests', () => {
     log = getLogger()
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
-
-    mocksReset()
-    localMocksReset()
   })
 
   it('test remove folder', async () => {

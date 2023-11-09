@@ -1,11 +1,11 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { errors } from '@pfda/https-apps-shared'
 import { createClient } from 'redis'
-import { Notification } from '../notification.entity'
 import { defaultLogger as logger } from '../../../logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '../../../services/redis.service'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { NotificationInput } from '../notification.input'
 import { User } from '../../user'
-import { errors } from '@pfda/https-apps-shared'
+import { Notification } from '../notification.entity'
+import { NotificationInput } from '../notification.input'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
@@ -14,8 +14,8 @@ export interface INotificationService {
 }
 
 export class NotificationService implements INotificationService {
-  private redisClient?: RedisClientType
-  protected em: SqlEntityManager
+  private redisClient?
+  protected em
 
   constructor(em: SqlEntityManager, redisClient?: RedisClientType) {
     this.em = em

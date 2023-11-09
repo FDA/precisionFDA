@@ -4,15 +4,17 @@ import { useLocation, useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../../components/HomeLabel'
-import { CogsIcon } from '../../../../components/icons/Cogs'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
 import { StyledTagItem, StyledTags } from '../../../../components/Tags'
+import { CogsIcon } from '../../../../components/icons/Cogs'
 import { RESOURCE_LABELS } from '../../../../types/user'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../../utils/config'
 import { getBackPath } from '../../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home.styles'
 import {
   Header,
   HeaderLeft,
+  HeaderRight,
   HomeLoader,
   MetadataItem,
   MetadataKey,
@@ -23,15 +25,13 @@ import {
   Title,
   Topbox,
 } from '../../show.styles'
-import { ResourceScope, Notification, NOTIFICATION_ACTION } from '../../types'
+import { EmmitScope, NOTIFICATION_ACTION, Notification, ResourceScope } from '../../types'
 import { getBasePath } from '../../utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
+import { InputsAndOutputs } from '../InputsAndOutputs'
 import { fetchExecution } from '../executions.api'
 import { JobState } from '../executions.types'
-import { InputsAndOutputs } from '../InputsAndOutputs'
 import { FailureMessage, StyledExecutionState } from './styles'
-import { getScopeMapping } from '../../getScopeMapping'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../../utils/config'
 
 const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
@@ -40,17 +40,22 @@ const ExecutionState = ({ state }: { state: JobState }) => (
 export const ExecutionDetails = ({
   emitScope,
   spaceId,
+  scope,
 }: {
-  emitScope?: (scope: ResourceScope) => void
+  emitScope?: EmmitScope
   spaceId?: string
+  scope?: ResourceScope
 }) => {
   const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
 
-  const { data, status, refetch, isFetching } = useQuery(
-    ['execution', executionUid],
-    () => fetchExecution(executionUid),
-  )
+  const { data, status, refetch, isFetching } = useQuery({
+    queryKey: ['execution', executionUid],
+    queryFn: () => fetchExecution(executionUid),
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.job.scope, d.job.featured)
+    },
+  })
   const queryCache = useQueryClient()
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
@@ -65,10 +70,12 @@ export const ExecutionDetails = ({
       return
     }
     if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
-      NOTIFICATION_ACTION.JOB_RUNNING,
-      NOTIFICATION_ACTION.JOB_DONE,
-      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-      NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
+         NOTIFICATION_ACTION.JOB_RUNNING,
+         NOTIFICATION_ACTION.JOB_INITIALIZING,
+         NOTIFICATION_ACTION.JOB_DONE,
+         NOTIFICATION_ACTION.JOB_FAILED,
+         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+         NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
       queryCache.invalidateQueries(['execution'])
     }
   }, [notification])
@@ -101,11 +108,8 @@ export const ExecutionDetails = ({
       ),
     },
   ] satisfies ITab[]
-  const scope = getScopeMapping(execution.scope, execution.featured)
+
   const scopeParamLink = `?scope=${scope?.toLowerCase()}`
-  if (emitScope) {
-    emitScope(scope)
-  }
 
   return (
     <>
@@ -127,7 +131,6 @@ export const ExecutionDetails = ({
                 </FailureMessage>
               )}
             </div>
-            {/* @ts-ignore */}
             {execution.showLicensePending && (
               <HomeLabel
                 value="License Pending Approval"
@@ -136,7 +139,7 @@ export const ExecutionDetails = ({
               />
             )}
           </HeaderLeft>
-          <div>
+          <HeaderRight>
             <ActionsRow>
               <ExecutionActionsRow
                 scope={scope}
@@ -145,7 +148,7 @@ export const ExecutionDetails = ({
                 isFetching={isFetching}
               />
             </ActionsRow>
-          </div>
+          </HeaderRight>
         </Header>
 
         <MetadataSection>

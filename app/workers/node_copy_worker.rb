@@ -6,30 +6,6 @@ class NodeCopyWorker < ApplicationWorker
   end
 
   class << self
-    # Notifies user if there was any error with copying.
-    # @param job [Sidekiq::Job] A sidekiq job.
-    def notify_user(job)
-      scope = job["args"].first
-      context = build_context(job)
-      RequestContext.begin_request(context.user_id, context.user, context.token)
-
-      subject = "An error occurred during the copying to scope '#{scope}'"
-      message = "#{subject}: #{job['error_message']}"
-
-      notification = {
-        action: "NODES_COPIED",
-        message: message,
-        severity: "INFO",
-        userId: context.user_id,
-      }
-      https_apps_client.send_notification(notification)
-      RequestContext.end_request
-
-      Rails.logger.error(message)
-
-      WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
-    end
-
     # Removes files from the new project where they were copied to.
     # @param job [Sidekiq::Job] Current job.
     def rollback_platform_files(job)
@@ -65,17 +41,17 @@ class NodeCopyWorker < ApplicationWorker
     nodes = Node.where(id: nodes_ids)
     copies = copy_service.copy(nodes, scope)
 
-    if copies.all?(&:copied)
-      message = "Files were successfully copied to the space"
+    message = if copies.all?(&:copied)
+      "File#{nodes.length == 1 ? ' was' : 's were'} successfully copied to the space"
     elsif copies.any?(&:copied)
-      message = "Some files were successfully copied to the space, while some already exist there"
+      "Some files were successfully copied to the space, while some already exist there"
     else
-      message = "No files were copied - all already exist in the space"
+      "No files were copied - all already exist in the space"
     end
 
     notification = {
       action: "NODES_COPIED",
-      message: message,
+      message:,
       severity: "INFO",
       userId: @context.user_id,
     }
@@ -102,9 +78,5 @@ class NodeCopyWorker < ApplicationWorker
 
   def copy_service
     @copy_service ||= CopyService::NodeCopier.new(api: @context.api, user: @context.user)
-  end
-
-  def https_apps_client
-    HttpsAppsClient.new
   end
 end

@@ -1,5 +1,6 @@
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema'
 import { config } from '../config'
+import { USER_CONTEXT_HTTP_HEADERS } from '../config/consts'
 
 // generic schemas
 
@@ -59,11 +60,11 @@ const getDxidInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'id'
 const userContextSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    id: idProp,
-    accessToken: { type: 'string', minLength: 1, maxLength: config.validation.maxStrLen },
-    dxuser: dxidProp,
+    [USER_CONTEXT_HTTP_HEADERS.id]: idProp,
+    [USER_CONTEXT_HTTP_HEADERS.accessToken]: { type: 'string', minLength: 1, maxLength: config.validation.maxStrLen },
+    [USER_CONTEXT_HTTP_HEADERS.dxUser]: dxidProp,
   },
-  required: ['id', 'accessToken', 'dxuser'],
+  required: Object.values(USER_CONTEXT_HTTP_HEADERS),
   additionalProperties: true,
 }
 

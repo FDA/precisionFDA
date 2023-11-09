@@ -29,7 +29,6 @@ ruby_block "create .env file and set env vars" do
     end
 
     ENV["HOME"] = "/home/#{node[:deploy_user]}"
-    ENV["PATH"] = "#{node["nodejs"]["bin_path"]}:#{ENV['PATH']}"
   end
 end
 
@@ -84,6 +83,15 @@ execute "Bundle gems" do
   # environment lazy { ENV.to_hash }
 end
 
+execute "Install bower dependencies" do
+  command %{
+    bower install
+  }
+
+  cwd app_dir
+  user node[:deploy_user]
+end
+
 template ::File.join(app_dir, "config", "database.yml") do
   source "database.erb"
   variables lazy {{
@@ -110,7 +118,6 @@ execute "Bundle frontend" do
   only_if { File.directory?(frontend_dir) }
 
   command %{
-    export PATH=#{node[:nodejs][:prefix]}/bin:$PATH && \
     yarn --frozen-lockfile --production=false && \
     yarn run build:production
   }

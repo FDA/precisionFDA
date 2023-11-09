@@ -1,12 +1,12 @@
 import { Link, NavLink } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { Button } from '../../components/Button'
-import { Svg } from '../../components/icons/Svg'
-import { BackLink } from '../../components/Page/PageBackLink'
 import { MainBanner } from '../../components/Banner'
-import { commonStyles } from '../../styles/commonStyles'
-import { colors, padding, sizing, fontSize, fontWeight } from '../../styles/theme'
+import { Button } from '../../components/Button'
+import { BackLink } from '../../components/Page/PageBackLink'
 import { compactScrollBar } from '../../components/Page/styles'
+import { Svg } from '../../components/icons/Svg'
+import { commonStyles } from '../../styles/commonStyles'
+import { colors, fontSize, fontWeight, padding, sizing } from '../../styles/theme'
 
 
 export const StyledBackLink = styled(BackLink)`
@@ -19,7 +19,7 @@ export const LoadingList = styled.span`
 
 export const MenuText = styled.span`
   flex: 1 0 auto;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: ${fontWeight.bold};
 `
 
@@ -96,7 +96,7 @@ export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
   align-items: center;
-  height: 50px;
+  min-height: 44px;
   padding-left: 20px;
   color: ${colors.textDarkGrey};
   font-weight: 400;
@@ -129,6 +129,7 @@ export const Row = styled.div`
 export const StyledMenu = styled.div<{ expanded: boolean }>`
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 
   ${({ expanded }) => expanded
     ? css`
@@ -182,6 +183,7 @@ export const Expand = styled.div`
 `
 export const Fill = styled.div`
   flex: 1 0 auto;
+  min-height: 20px;
 `
 
 export const StyledHomeTable = styled.div`
@@ -199,6 +201,11 @@ export const QuickActions = styled.div`
   ${Button} {
     margin-right: 4px;
   }
+`
+
+export const SpaceTitle = styled.h2`
+  margin: 0;
+  color: ${colors.textDarkGrey};
 `
 
 export const StyledRight = styled.div`
@@ -241,4 +248,8 @@ export const ActionsRow = styled.div`
 `
 export const StyledRunByYouLink = styled.a`
   font-size: 12px;
+`
+
+export const StyledForm = styled.form`
+
 `

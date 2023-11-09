@@ -8,8 +8,8 @@ import {
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
-import { User } from '../user/user.entity'
-import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE } from './user-file.types'
+import { User } from '../user'
+import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 import { SCOPE } from '../../types/common'
 
 @Entity({
@@ -64,6 +64,12 @@ export class Node extends BaseEntity {
 
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
+
+  @Property()
+  parentId: number
+
+  @Property()
+  parentType: PARENT_TYPE
 
   @Property({ persist: false })
   get isAsset(): boolean {

@@ -20,8 +20,15 @@ const setupHandlers = async (): Promise<void> => {
   // TODO(samuel) - refactor all queues should have their own specific handlers
   // TODO(samuel) - no need for single switch case for all
   // eslint-disable-next-line @typescript-eslint/return-await, require-await, id-length
-  await Promise.all(queue.getQueues().map(async q => q.process(handler))).catch(e => {
-    log.error(e, 'Job queue failed')
+  await Promise.all(queue
+    .getQueues()
+    .map(async q => await q
+      .process(async job => await handler(job)
+        .catch(error => {
+          log.error('Job handler failed', { job, error })
+          throw error
+        })))).catch(error => {
+    log.error(error, 'Job queue failed')
   })
 }
 

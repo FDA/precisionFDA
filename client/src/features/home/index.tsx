@@ -26,7 +26,7 @@ import { ExecutionDetails } from './executions/details/ExecutionDetails'
 import { FileList } from './files/FileList'
 import { FileShow } from './files/show/FileShow'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.styles'
-import { ResourceScope } from './types'
+import { ResourceScope, ServerScope } from './types'
 import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
 import { WorkflowList } from './workflows/WorkflowList'
@@ -39,6 +39,7 @@ import { CreateAppPage } from './apps/form/CreateAppPage'
 import { EditAppPage } from './apps/form/EditAppPage'
 import { ForkAppPage } from './apps/form/ForkAppPage'
 import { RunJobPage } from './apps/run/RunJobPage'
+import { getScopeMapping } from './getScopeMapping'
 
 
 interface CounterRequest {
@@ -66,9 +67,9 @@ const Home2 = () => {
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedMyHomeSidebar', true)
   const { path } = useRouteMatch()
   const history = useHistory()
-  const [scopeQuery = 'me', setScopeQuery] = useQueryParam<string, ResourceScope>('scope')
-  const [persistedScope, setPersistedScope] = useState<ResourceScope>(scopeQuery)
-  const { data: counterData } = useQuery(['counters', persistedScope], () => counterRequest(persistedScope))
+  const [homeScopeQuery = 'me', setHomeScopeQuery] = useQueryParam<string, ResourceScope>('scope')
+  const [persistedHomeScope, setPersistedHomeScope] = useState<ResourceScope>(homeScopeQuery)
+  const { data: counterData } = useQuery(['counters', persistedHomeScope], () => counterRequest(persistedHomeScope))
   const [activeResource] = useActiveResourceFromUrl('myhome')
   const [isPushed, setIsPushed] = useState<boolean>(false)
 
@@ -76,7 +77,7 @@ const Home2 = () => {
   const handleScopeClick = async (newScope: ResourceScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
     if(history.location.pathname === `/home/${activeResource}`) {
-      setScopeQuery(newScope)
+      setHomeScopeQuery(newScope)
       setIsPushed(false)
     } else {
       history.push(`/home/${activeResource}?scope=${newScope}`)
@@ -89,14 +90,19 @@ const Home2 = () => {
       setIsPushed(false)
       return
     }
-    if(scopeQuery) {
-      setPersistedScope(scopeQuery)
+    if(homeScopeQuery) {
+      setPersistedHomeScope(homeScopeQuery)
     }
-  }, [scopeQuery, isPushed])
+  }, [homeScopeQuery, isPushed])
+
+  const handleSetPersistedHomeScope = (rs: ServerScope, featured: boolean) => {
+    const resourceScope = getScopeMapping(rs, featured)
+    setPersistedHomeScope(resourceScope)
+  }
 
   const routeScopeParam = `?${ 
     new URLSearchParams({
-      scope: persistedScope,
+      scope: persistedHomeScope,
     }).toString()}`
 
   if(!user || user?.is_guest) {
@@ -115,7 +121,7 @@ const Home2 = () => {
     everybody: `${capitalizedResource} that are shared publicly, by you or anyone on precisionFDA`,
     spaces: `${capitalizedResource} in Spaces that you have access to`,
   }
-  const scopeDescription = scopeDescriptions[persistedScope]
+  const scopeDescription = scopeDescriptions[persistedHomeScope]
 
   return (
     <UserLayout>
@@ -126,28 +132,28 @@ const Home2 = () => {
             <BannerPickerItem
               data-testid="me-button"
               onClick={() => handleScopeClick('me')}
-              isActive={persistedScope === 'me'}
+              isActive={persistedHomeScope === 'me'}
             >
               Me
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="featured-button"
               onClick={() => handleScopeClick('featured')}
-              isActive={persistedScope === 'featured'}
+              isActive={persistedHomeScope === 'featured'}
             >
               Featured
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="everyone-button"
               onClick={() => handleScopeClick('everybody')}
-              isActive={persistedScope === 'everybody'}
+              isActive={persistedHomeScope === 'everybody'}
             >
               Everyone
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="spaces-button"
               onClick={() => handleScopeClick('spaces')}
-              isActive={persistedScope === 'spaces'}
+              isActive={persistedHomeScope === 'spaces'}
             >
               Spaces
             </BannerPickerItem>
@@ -242,55 +248,56 @@ const Home2 = () => {
         <Main>
           <Switch>
             <Route exact path={`${path}/files`}>
-              <FileList scope={scopeQuery} showFolderActions={(persistedScope === 'everybody' && user.admin) || persistedScope === 'me'} />
+              <FileList scope={homeScopeQuery} showFolderActions={(persistedHomeScope === 'everybody' && user.admin) || persistedHomeScope === 'me'} />
             </Route>
             <Route exact path={`${path}/apps`}>
-              <AppList scope={scopeQuery} />
+              <AppList scope={homeScopeQuery} />
             </Route>
             <Route exact path={`${path}/apps/create`}>
-              <CreateAppPage scope={scopeQuery} />
+              <CreateAppPage />
             </Route>
             <Route exact path={`${path}/apps/:appUid/fork`}>
-              <ForkAppPage scope={scopeQuery} />
+              <ForkAppPage />
             </Route>
             <Route exact path={`${path}/apps/:appUid/edit`}>
-              <EditAppPage scope={scopeQuery} />
+              <EditAppPage />
             </Route>
             <Route exact path={`${path}/apps/:appUid/jobs/new`}>
               <RunJobPage />
             </Route>
             <Route path={`${path}/apps/:appUid`}>
-              <AppsShow emitScope={setPersistedScope} />
+              <AppsShow scope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route exact path={`${path}/databases`}>
-              <DatabaseList scope={scopeQuery} />
+              <DatabaseList scope={homeScopeQuery} />
             </Route>
             <Route exact path={`${path}/databases/create`}>
-              <CreateDatabase scope={scopeQuery} />
+              <CreateDatabase scope={homeScopeQuery} />
             </Route>
             <Route exact path={`${path}/databases/:dxid`}>
-              <DatabaseShow emitScope={setPersistedScope} />
+              <DatabaseShow scope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
+
             <Route exact path={`${path}/assets`}>
-              <AssetList scope={scopeQuery} />
+              <AssetList scope={homeScopeQuery} />
             </Route>
             <Route exact path={`${path}/assets/:assetUid`}>
-              <AssetShow emitScope={setPersistedScope} />
+              <AssetShow scope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route exact path={`${path}/workflows`}>
-              <WorkflowList scope={scopeQuery} />
+              <WorkflowList scope={homeScopeQuery} />
             </Route>
             <Route path={`${path}/workflows/:workflowUid`}>
-              <WorkflowShow emitScope={setPersistedScope} />
+              <WorkflowShow scope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route path={`${path}/files/:fileId`}>
-              <FileShow emitScope={setPersistedScope} />
+              <FileShow scope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route exact path={`${path}/executions`}>
-              <ExecutionList scope={scopeQuery} />
+              <ExecutionList scope={homeScopeQuery} />
             </Route>
             <Route path={`${path}/executions/:executionUid`}>
-              <ExecutionDetails emitScope={setPersistedScope} />
+              <ExecutionDetails scope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
             <Route path={`${path}/jobs/:executionUid`} render={(props) => <Redirect to={`${path}/executions/${props.match.params.executionUid}`} />} />

@@ -9,7 +9,8 @@ import {
   OneToMany,
   Enum,
   ManyToMany,
-  EntityRepositoryType, JsonType,
+  EntityRepositoryType,
+  JsonType,
 } from '@mikro-orm/core'
 import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'
@@ -125,19 +126,17 @@ export class App extends BaseEntity {
     return this.entityType === ENTITY_TYPE.HTTPS
   }
 
+  @Property({ persist: false })
+  get workstationTags(): string[] {
+    return this.internal?.platform_tags ?? []
+  }
+
   // Workstation API support
   //
   @Property({ persist: false })
   get workstationAPITag(): string | null {
-    if (!this.internal) {
-      return null
-    }
-
     try {
-      if (this.internal.platform_tags) {
-        const workstationApi = this.internal.platform_tags.find((x: string) => x.startsWith('pfda_workstation_api'))
-        return workstationApi ? workstationApi : null
-      }
+      return this.workstationTags.find((x: string) => x.startsWith('pfda_workstation_api')) ?? null
     } catch (err) {
       logger.error('Unable to parse workstation API tag', {
         id: this.id,
@@ -166,5 +165,10 @@ export class App extends BaseEntity {
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
+  }
+
+  @Property({ persist: false })
+  get hasHttpsAppState(): boolean {
+    return this.workstationTags.some((x: string) => x.startsWith('pfda_httpsAppState_enabled'))
   }
 }
