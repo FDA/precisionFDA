@@ -1,7 +1,5 @@
 import styled from 'styled-components'
 import { InputText } from '../../../../components/InputText'
-import { BackLink } from '../../../../components/Page/PageBackLink'
-import { pageContainer } from '../../home.styles'
 
 export const AppsConfiguration = styled.div`
 `
@@ -49,8 +47,7 @@ export const Topbox = styled.div`
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  padding: 16px;
-  ${pageContainer}
+  padding: 32px 0;
 `
 
 export const TopboxItem = styled.div`
@@ -78,14 +75,12 @@ export const StyledScopeName = styled.div`
 `
 
 export const StyledForm = styled.form`
-  padding: 16px;
   padding-bottom: 64px;
-  ${pageContainer}
 `
 
 export const StyledWarning = styled.div`
-    color: darkred;
-    font-size: 14px;
+  color: darkred;
+  font-size: 14px;
 `
 
 export const WrapSingleField = styled.div`
@@ -98,8 +93,4 @@ export const WrapSingleField = styled.div`
 export const StyledLine = styled.div`
   display: flex;
   flex-direction: row;
-`
-
-export const StyledBackLink = styled(BackLink)`
-  margin-bottom: 32px;
 `

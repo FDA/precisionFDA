@@ -1,5 +1,6 @@
+import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
-import { IFilter, ResourceScope, SortBy } from './types'
+import { IFilter, ResourceScope, ServerScope, SortBy } from './types'
 
 // Only return the objects with keys from the pick array
 export function pickActions<T>(actions: T, pick: string[]) {
@@ -58,6 +59,11 @@ export function formatScopeQ(scope?: ResourceScope) {
 export const getBasePath = (spaceId?: string|number) => {
   if(spaceId) return `/spaces/${spaceId}`
   return '/home'
+}
+
+export const getBasePathFromScope = (scope?: ServerScope) => {
+  const spaceId = getSpaceIdFromScope(scope)
+  return getBasePath(spaceId)
 }
 
 export function prepareListFetch(filters: IFilter[], params: Params) {

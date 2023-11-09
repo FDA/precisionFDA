@@ -7,7 +7,6 @@ import { ErrorMessage } from '@hookform/error-message'
 import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Select from 'react-select'
-import DefaultLayout from '../../../../layouts/DefaultLayout'
 import {
   fetchLicensesOnWorkflow,
   fetchWorkflow,
@@ -28,7 +27,6 @@ import {
   Section,
   SectionBody,
   SectionHeader,
-  StyledBackLink,
   StyledLine,
   Topbox,
   TopboxItem,
@@ -47,6 +45,9 @@ import { IUser } from '../../../../types/user'
 import { fetchAndConvertSelectableSpaces } from '../../apps/run/job-run-helper'
 import { IAccessibleFile } from '../../databases/databases.api'
 import { IFile } from '../../files/files.types'
+import { UserLayout } from '../../../../layouts/UserLayout'
+import { FormPageContainer } from '../../../../components/Page/styles'
+import { BackLink } from '../../../../components/Page/PageBackLink'
 
 interface WorkflowRunData {
   analysisName: string;
@@ -313,25 +314,10 @@ const WorkflowRun = (
     }
   }
 
-  const workflowTitle = workflow.title ? workflow.title : workflow.name
-  const spaceId = getSpaceIdFromScope(workflow.scope)
-  const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
-
   return (
-    <DefaultLayout>
+    <>
       {licensesModal}
-      <Topbox>
-        <StyledBackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>
-          Back to Workflow
-        </StyledBackLink>
-        <TopboxItem>
-          <Title>
-            <CubeIcon height={20} />
-            <span>Run Workflow:</span>
-            <span>{workflowTitle}</span>
-          </Title>
-        </TopboxItem>
-      </Topbox>
+
       <StyledForm id="submitWorkflowForm" autoComplete="off">
         <WorkflowConfiguration>
           <Section>
@@ -405,7 +391,7 @@ const WorkflowRun = (
           {isSubmitting ? 'Running' : 'Run Workflow'}
         </ButtonSolidBlue>
       </StyledForm>
-    </DefaultLayout>
+    </>
   )
 }
 
@@ -424,7 +410,7 @@ const fetchDefaultFiles = (meta: any): Promise<{ files: IFile, meta: any }[]> =>
   return Promise.all(promises)
 }
 
-export const WorkflowRunForm = () => {
+const WorkflowRunPage = () => {
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data: workflowData, status: loadingWorkflowStatus } = useQuery(['workflow', workflowUid], () =>
     fetchWorkflow(workflowUid),
@@ -449,6 +435,11 @@ export const WorkflowRunForm = () => {
   const meta = workflowData?.meta
   const defaultFiles: IFile[] | undefined = defaultFilesData?.map(data => data.files)
 
+  const workflowTitle = workflow.title ? workflow.title : workflow.name
+  const spaceId = getSpaceIdFromScope(workflow.scope)
+  const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
+
+
   if (!workflow)
   return (
     <NotFound>
@@ -458,6 +449,22 @@ export const WorkflowRunForm = () => {
   )
 
   return (
+  <FormPageContainer>
+    <Topbox>
+      <BackLink linkTo={`/${baseLink}/workflows/${workflow.uid}`}>
+        Back to Workflow
+      </BackLink>
+      <TopboxItem>
+        <Title>
+          <CubeIcon height={20} />
+          <span>Run Workflow:</span>
+          <span>{workflowTitle}</span>
+        </Title>
+      </TopboxItem>
+    </Topbox>
     <WorkflowRun workflow={workflow} meta={meta} defaultFiles={defaultFiles} user={user} />
+  </FormPageContainer>
   )
 }
+
+export default WorkflowRunPage

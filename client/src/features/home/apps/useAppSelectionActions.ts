@@ -162,8 +162,8 @@ export const useAppSelectionActions = ({
 
   let actions: ActionFunctionsType<AppActions> = {
     'Run': {
-      type: 'link',
-      link: `/apps/${selected[0]?.uid}/jobs/new`,
+      type: 'route',
+      to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/jobs/new`,
       isDisabled: selected.length !== 1 || !selected[0].links.run_job,
       cloudResourcesConditionType: 'all',
     },

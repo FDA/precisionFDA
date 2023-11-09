@@ -34,14 +34,13 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { ResourceScope } from '../types'
+import { EmmitScope, ResourceScope } from '../types'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { WorkflowExecutionsList } from './WorkflowExecutionsList'
 import { fetchWorkflow } from './workflows.api'
 import { IWorkflow } from './workflows.types'
 import WorkflowsDiagram from './WorkflowsDiagram'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
-import { getScopeMapping } from '../getScopeMapping'
 
 interface IColumn {
   header: string
@@ -50,7 +49,7 @@ interface IColumn {
   dataTestId: string
 }
 
-const renderOptions = (workflow: IWorkflow, scope: ResourceScope) => {
+const renderOptions = (workflow: IWorkflow, scope?: ResourceScope) => {
   const columns: IColumn[] = [
     {
       header: 'location',
@@ -118,6 +117,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   return (
     <>
       <CloudResourcesHeaderButton
+        asReactLink
         data-turbolinks="false"
         href={`${workflow.links.show}/analyses/new`}
         isLinkDisabled={!workflow.links.run_workflow}
@@ -161,13 +161,17 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
+export const WorkflowShow = ({ emitScope, scope }: { scope?: ResourceScope, emitScope?: EmmitScope }) => {
   const match = useRouteMatch()
   const location: Location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
-  const { data, status, isLoading } = useQuery(['workflow', workflowUid], () =>
-    fetchWorkflow(workflowUid),
-  )
+  const { data, status, isLoading } = useQuery({
+    queryKey: ['workflow', workflowUid],
+    queryFn: () => fetchWorkflow(workflowUid),
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.workflow.scope, d.workflow.featured)
+    },
+  })
 
   const workflow = data?.workflow
   const meta = data?.meta
@@ -182,11 +186,6 @@ export const WorkflowShow = ({ emitScope }: { emitScope?: (scope: ResourceScope)
         </div>
       </NotFound>
     )
-
-  const scope = getScopeMapping(workflow.scope, workflow.featured)
-  if (emitScope) {
-    emitScope(scope)
-  }
 
   const workflowTitle = workflow.title ? workflow.title : workflow.name
 

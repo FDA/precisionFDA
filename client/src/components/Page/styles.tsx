@@ -53,6 +53,14 @@ export const PageContainer = styled.div`
   margin-left: auto;
   margin-right: auto;
 `
+export const pageContainer = css`
+  margin-inline: auto;
+  width: min(100% - 32px, 900px);
+`
+
+export const FormPageContainer = styled.div`
+  ${pageContainer}
+`
 
 export const PageContainerMargin = styled.div`
   --container-width: 1330px;

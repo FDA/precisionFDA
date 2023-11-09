@@ -36,6 +36,8 @@ export type ServerScope = 'public' | 'private' | `space-${string}`
 
 export type DialogType = 'radio' | 'checkbox'
 
+export type EmmitScope = (scope: ServerScope, featured: boolean) => void
+
 export interface DownloadListResponse {
   id: number
   name: string
