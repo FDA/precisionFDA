@@ -1,5 +1,6 @@
-import { Entity, IdentifiedReference, JsonType, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { Entity, IdentifiedReference, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '../../../database/base-entity'
+import { WorkaroundJsonType } from '../../../database/custom-json-type'
 import { User } from '../../user'
 import { WorkflowSpec } from '../model/workflow-spec'
 
@@ -32,7 +33,7 @@ export class Workflow extends BaseEntity {
   @Property()
   editVersion: number
 
-  @Property({ type: JsonType })
+  @Property({ type: WorkaroundJsonType })
   spec: WorkflowSpec
 
   // TODO: Add missing when needed - there is more in DB
