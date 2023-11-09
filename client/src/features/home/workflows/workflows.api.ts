@@ -51,7 +51,7 @@ export async function fetchLicensesOnWorkflow(workflowUid: string) {
 }
 
 export async function fetchWorkflow(workflowUid: string) {
-  return axios.get(`/api/workflows/${workflowUid}`).then(r => r.data as FetchWorkflowRequest[])
+  return axios.get(`/api/workflows/${workflowUid}`).then(r => r.data as FetchWorkflowRequest)
 }
 
 export interface FetchWorkflowExecutionsQuery {

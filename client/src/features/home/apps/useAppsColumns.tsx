@@ -1,19 +1,20 @@
-import React, { useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRouteMatch, useLocation } from 'react-router-dom'
+import React, { useMemo } from 'react'
+import { useLocation, useRouteMatch } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
-import { CubeIcon } from '../../../components/icons/CubeIcon'
-import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import {
   DefaultColumnFilter,
   SelectColumnFilter,
 } from '../../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { colors } from '../../../styles/theme'
 import { StyledLinkCell, StyledRunByYouLink } from '../home.styles'
 import { KeyVal } from '../types'
+import { getBasePathFromScope } from '../utils'
 import { IApp } from './apps.types'
 
 export const Pill = styled.div`
@@ -121,7 +122,7 @@ export const useAppsColumns = ({
           disableFilters: true,
           width: colWidths?.run_by_you || 100,
           Cell: props => (
-            <StyledRunByYouLink data-turbolinks="false" href={`/apps/${props.row.original.uid}/jobs/new`}><Pill>{props.value}</Pill></StyledRunByYouLink>
+            <StyledRunByYouLink data-turbolinks="false" href={`${getBasePathFromScope(props.row.original.scope)}/apps/${ props.row.original.uid}/jobs/new`}><Pill>{props.value}</Pill></StyledRunByYouLink>
           ),
         },
         {

@@ -28,10 +28,9 @@ import {
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { ResourceScope } from '../types'
-import { getScopeMapping } from '../getScopeMapping'
+import { EmmitScope, ResourceScope } from '../types'
 
-const renderOptions = (db: IDatabase, scope: ResourceScope) => (
+const renderOptions = (db: IDatabase, scope?: ResourceScope) => (
   <MetadataSection>
     <MetadataRow>
       <MetadataItem>
@@ -129,12 +128,15 @@ const DetailActionsDropdown = ({
   )
 }
 
-export const DatabaseShow = ({ emitScope }: { emitScope?: (scope: ResourceScope) => void }) => {
+export const DatabaseShow = ({ emitScope, scope }: { scope?: ResourceScope, emitScope?: EmmitScope }) => {
   const { dxid } = useParams<{ dxid: string }>()
-  const { data, status, isLoading, refetch, isFetching } = useQuery(
-    ['dbclusters', dxid],
-    () => fetchDatabaseRequest(dxid),
-  )
+  const { data, status, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['dbclusters', dxid],
+    queryFn: () => fetchDatabaseRequest(dxid),
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.db_cluster.scope, d.db_cluster.featured)
+    },
+  })
 
   const db = data?.db_cluster
 
@@ -149,11 +151,6 @@ export const DatabaseShow = ({ emitScope }: { emitScope?: (scope: ResourceScope)
         </div>
       </NotFound>
     )
-
-  const scope = getScopeMapping(db.scope, db.featured)
-  if (emitScope) {
-    emitScope(scope)
-  }
 
   return (
     <>

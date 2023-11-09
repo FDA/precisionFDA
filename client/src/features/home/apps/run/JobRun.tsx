@@ -15,7 +15,6 @@ import { InputText } from '../../../../components/InputText'
 import { EmptyTable } from '../../../../components/Table/styles'
 import { IUser } from '../../../../types/user'
 import { getSpaceIdFromScope } from '../../../../utils'
-import DefaultLayout from '../../../../layouts/DefaultLayout'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { fetchFile } from '../../files/files.api'
 import { FileTreeNode, IFile, TreeOnSelectInfo } from '../../files/files.types'
@@ -51,6 +50,7 @@ import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } fr
 import { IAccessibleFile } from '../../databases/databases.api'
 import { StyledForm, StyledBackLink } from '../../home.styles'
 import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
+import { UserLayout } from '../../../../layouts/UserLayout'
 
 const convertToAccessibleFile = (file: IFile): IAccessibleFile =>
   ({
@@ -361,7 +361,7 @@ const JobRun = ({
   const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
 
   return (
-    <DefaultLayout>
+    <UserLayout>
       {licensesModal}
       {organizeFileModal}
       <Topbox>
@@ -554,7 +554,7 @@ const JobRun = ({
           {isSubmitting ? 'Running' : 'Run App'}
         </ButtonSolidBlue>
       </StyledForm>
-    </DefaultLayout>
+    </UserLayout>
   )
 }
 

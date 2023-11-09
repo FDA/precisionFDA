@@ -250,11 +250,6 @@ export const StyledRunByYouLink = styled.a`
   font-size: 12px;
 `
 
-export const pageContainer = css`
-  margin-inline: auto;
-  width: min(100% - 32px, 900px);
-`
-
 export const StyledForm = styled.form`
 
 `
