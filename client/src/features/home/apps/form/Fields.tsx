@@ -537,7 +537,8 @@ export const SelectIOClass = ({
       trigger="click"
       // eslint-disable-next-line react/no-unstable-nested-components
       content={({ hide }) => (
-        <StyledDropMenuLinks>
+        <StyledDropMenuLinks
+          data-testid="io-items">
           <StyledItem
             onClick={() => {
               hide()
