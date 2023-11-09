@@ -54,8 +54,8 @@ describe('job-failed.handler', () => {
       const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
       await handler.setupContext()
       expect(handler.job).to.exist()
-      expect(handler.job.describe.failureReason).to.equal('FailureReason')
-      expect(handler.job.describe.failureMessage).to.equal('failure message')
+      expect(handler.job.describe?.failureReason).to.equal('FailureReason')
+      expect(handler.job.describe?.failureMessage).to.equal('failure message')
     })
   })
 
