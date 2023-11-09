@@ -181,7 +181,12 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // fixme: the mapping is not perfect for the https apps
     // TODO(Zai): Figure out in what way this is not perfect and document it
     const remoteState = platformJobData.state
-    if (remoteState === job.state && !job.hasHttpsAppState() || job.isHttpsAppRunning()) {
+    // Job description is updated only if:
+    // remoteState !== job.state => job's state changed
+    // remoteState === JOB_STATE.RUNNING && job.hasHttpsAppState() && !job.isHttpsAppRunning()
+    // => https app has not run yet
+    if ((remoteState === job.state) &&
+        (remoteState !== JOB_STATE.RUNNING || !job.hasHttpsAppState() || job.isHttpsAppRunning())) {
       this.ctx.log.info({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
       return
     }

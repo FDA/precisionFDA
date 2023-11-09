@@ -175,11 +175,11 @@ export class Job extends BaseEntity {
 
   // Calculated as the time during which the job stayed in running state
   runTime(): number {
-    if (!this.describe.startedRunning) {
+    if (!this.describe?.startedRunning) {
       return 0
     }
-    if (!this.describe.stoppedRunning) {
-      return new Date().getTime() - this.describe.startedRunning
+    if (!this.describe?.stoppedRunning) {
+      return new Date().getTime() - this.describe?.startedRunning
     }
     return this.describe.stoppedRunning - this.describe.startedRunning
   }
@@ -197,10 +197,6 @@ export class Job extends BaseEntity {
   }
 
   isHttpsAppRunning(): boolean {
-    if (!this.isHTTPS() || this.state !== JOB_STATE.RUNNING) {
-      return false
-    }
-
     return this.describe?.properties?.httpsAppState === 'running' ?? false
   }
 
