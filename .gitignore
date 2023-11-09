@@ -93,6 +93,3 @@ vendor/cache
 # Commented out, as docker-compose symlink expected
 # More on the topic in the docs
 docker/docker-compose.yml
-
-# Bower components
-vendor/assets/bower_components/

@@ -306,7 +306,6 @@ module Api
       raise ApiError, "File needs to be unlocked" if @file.locked?
 
       verify_nodes_for_protection([@file], "update")
-
       description = file_params[:description] || @file.description
       raise ApiError, "Can't rename a file." unless @file.rename(file_params[:name], description)
 
