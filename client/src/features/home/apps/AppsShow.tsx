@@ -205,7 +205,8 @@ export const AppsShow = ({ spaceId, emitScope }: { spaceId?: string, emitScope?:
       <Topbox>
         <Header>
           <HeaderLeft>
-            <Title>
+            <Title
+              data-testid="app-title">
               <CubeIcon height={20} />
               &nbsp;{appTitle}
               {meta.comparator && (
