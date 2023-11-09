@@ -12,7 +12,6 @@ import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
 import { Header } from './components/Header'
-import { WorkflowRunForm } from './features/home/workflows/run/WorkflowRun'
 import { Loader } from './components/Loader'
 import ExpertsSinglePage from './features/experts/details/index'
 import NoFoundPage from './pages/NoFoundPage'
@@ -47,6 +46,9 @@ const ExpertsListPage = React.lazy(
 )
 const ChallengeDetailsPage = React.lazy(
   () => import('./features/challenges/details/ChallengeDetails'),
+)
+const WorkflowRunPage = React.lazy(
+  () => import('./features/home/workflows/run/WorkflowRun'),
 )
 const UsersList = React.lazy(() => import('./features/admin/users'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
@@ -91,7 +93,7 @@ const root = () => {
                   <Spaces />
                 </Route>
                 <Route exact path="/workflows/:workflowUid/analyses/new">
-                  <WorkflowRunForm />
+                  <WorkflowRunPage />
                 </Route>
                 <Route exact path="/challenges">
                   <ChallengesList />

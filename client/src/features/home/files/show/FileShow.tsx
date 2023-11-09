@@ -29,7 +29,7 @@ import {
   Title,
   Topbox,
 } from '../../show.styles'
-import { ResourceScope } from '../../types'
+import { EmmitScope, ResourceScope } from '../../types'
 import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
@@ -87,10 +87,16 @@ const FileActions = ({
 }
 
 
-export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceScope) => void, space?: ISpace }) => {
+export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, emitScope?: EmmitScope, space?: ISpace }) => {
   const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
-  const { data, status } = useQuery(['file', fileId], () => fetchFile(fileId))
+  const { data, status } = useQuery({
+    queryKey: ['file', fileId],
+    queryFn: () => fetchFile(fileId),
+    onSuccess: (d) => {
+      if(emitScope) emitScope(d.files.scope, d.files.featured)
+    },
+  })
   const file = data?.files
   const meta = data?.meta
   const params = parse(location?.state?.fromSearch)
@@ -117,12 +123,10 @@ export const FileShow = ({ emitScope, space }: { emitScope?: (scope: ResourceSco
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
-  const scope = getScopeMapping(file.scope, file.featured)
+
   const scopeParamLink = `?scope=${scope?.toLowerCase()}`
   const backPath = getBackPath(location, 'files', scope)
-  if (emitScope) {
-    emitScope(scope)
-  }
+
   // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
   // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
   // const spaceId = file.space_id?.split('-')[1]
