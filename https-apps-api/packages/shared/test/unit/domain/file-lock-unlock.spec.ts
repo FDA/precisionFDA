@@ -1,9 +1,7 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import pino from 'pino'
-import { mocksReset } from '../../../src/test/mocks'
 import { User, UserFile, userFile } from '../../../src/domain'
-import { mocksReset as localMocksReset } from '../../../../worker/test/utils/mocks'
 import { create, db } from '../../../src/test'
 import { database, getLogger, types } from '@pfda/https-apps-shared'
 
@@ -20,9 +18,6 @@ describe('lock/unlock file tests', () => {
     log = getLogger()
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
-
-    mocksReset()
-    localMocksReset()
   })
 
   it('test lock file', async () => {

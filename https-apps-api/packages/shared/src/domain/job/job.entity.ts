@@ -1,26 +1,28 @@
 import {
+  Collection,
   Entity,
-  EntityRepositoryType,
   Filter,
   IdentifiedReference,
   JsonType,
+  ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
   Reference,
-  OnLoad,
 } from '@mikro-orm/core'
-import { WorkaroundJsonType } from '../../database/custom-json-type'
-import { App } from '../app'
+import { JobDescribeResponse } from '@pfda/https-apps-shared/src/platform-client'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
-import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
-import { JobRepository } from './job.repository'
-import { Provenance } from './job.input'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
-import { isStateActive, isStateTerminal } from './job.helper'
-import { formatDuration } from '../../utils/format'
+import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { IOType, SCOPE } from '../../types/common'
+import { formatDuration } from '../../utils/format'
+import { App } from '../app'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
+import { User } from '../user'
+import { UserFile } from '../user-file'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
+import { isStateActive, isStateTerminal } from './job.helper'
+import { Provenance } from './job.input'
+import { JobRepository } from './job.repository'
 
 export interface RunData {
   output_folder_path?: string
@@ -51,6 +53,13 @@ export interface RunData {
   { 'state': JOB_STATE.DONE },
   { 'state': JOB_STATE.TERMINATED },
 ]}})
+@Filter({
+  name: 'accessibleBy', cond: args => ({
+    $or: [
+      {user: {id: args.userId}, scope: 'private'},
+      {scope: {$in: args.spaceScopes}}]
+  })
+})
 export class Job extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -81,10 +90,9 @@ export class Job extends BaseEntity {
 
   @Property({
     hidden: true,
-    onCreate: (entity: Job) => entity.parseJobDescribe(),
-    onUpdate: (entity: Job) => entity.parseJobDescribe(),
+    type: WorkaroundJsonType,
   })
-  describe: string
+  describe: JobDescribeResponse
 
   @Property({ type: JsonType, hidden: true })
   provenance: Provenance
@@ -114,16 +122,12 @@ export class Job extends BaseEntity {
   // @ManyToOne()
   // appSeries!: IdentifiedReference<AppSeries>
 
-  // pivot table key names are mismatched and this does not work :(
-  // @ManyToMany({
-  //   pivotTable: 'job_inputs',
-  //   joinColumn: 'job_id',
-  //   inverseJoinColumn: 'user_file_id',
-  // })
-  // @OneToMany(() => UserFile, userfile => userfile.parent)
-  // userFiles = new Collection<UserFile>(this);
-
-  [EntityRepositoryType]?: JobRepository
+  @ManyToMany({
+    pivotTable: 'job_inputs',
+    joinColumn: 'job_id',
+    inverseJoinColumn: 'user_file_id',
+  })
+  inputFiles = new Collection<UserFile>(this)
 
   constructor(user: User, app?: App) {
     super()
@@ -139,6 +143,10 @@ export class Job extends BaseEntity {
 
   isHTTPS(): boolean {
     return this.entityType === JOB_DB_ENTITY_TYPE.HTTPS
+  }
+
+  hasHttpsAppState(): boolean {
+    return this.isHTTPS() && this.app?.getEntity().hasHttpsAppState || false
   }
 
   isActive(): boolean {
@@ -167,13 +175,13 @@ export class Job extends BaseEntity {
 
   // Calculated as the time during which the job stayed in running state
   runTime(): number {
-    if (!this.startedRunning) {
+    if (!this.describe?.startedRunning) {
       return 0
     }
-    if (!this.stoppedRunning) {
-      return new Date().getTime() - this.startedRunning
+    if (!this.describe?.stoppedRunning) {
+      return new Date().getTime() - this.describe?.startedRunning
     }
-    return this.stoppedRunning - this.startedRunning
+    return this.describe.stoppedRunning - this.describe.startedRunning
   }
 
   runTimeString(): string {
@@ -188,51 +196,17 @@ export class Job extends BaseEntity {
     return formatDuration(this.elapsedTimeSinceCreation())
   }
 
-  parseJobDescribe() {
-    if (!this.describe) {
-      return this.describe
-    }
-    try {
-      const parsedJSON = JSON.parse(this.describe)
-      this.startedRunning = parsedJSON.startedRunning
-      this.stoppedRunning = parsedJSON.stoppedRunning
-      this.failureReason = parsedJSON.failureReason
-      this.failureMessage = parsedJSON.failureMessage
-    }
-    catch {
-      console.log(`Error parsing job describe: ${this.describe}`)
-    }
-    // onCreate / onUpdate needs a return value
-    return this.describe
+  isHttpsAppRunning(): boolean {
+    return this.describe?.properties?.httpsAppState === 'running' ?? false
   }
-
-  // TODO(samuel) standardize or refactor this
-  // TODO(samuel) investigate mikro-orm docs if this is the optimal way to load entities
-  @OnLoad()
-  initDescribeFields() { this.parseJobDescribe() }
-
-  // Properties extracted from job describe
-  //
-  @Property({ persist: false })
-  startedRunning: number
-
-  @Property({ persist: false })
-  stoppedRunning: number
-
-  @Property({ persist: false, serializedName: 'failure_reason' })
-  failureReason: string
-
-  @Property({ persist: false, serializedName: 'failure_message' })
-  failureMessage: string
 
   getHttpsAppUrl(): string | null {
     if (!this.isHTTPS()) {
       return null
     }
 
-    const parsedDescribe = JSON.parse(this.describe)
-    const port: string = parsedDescribe.runInput?.port || '443'
-    let url: string = parsedDescribe.httpsApp?.dns?.url
+    const port: string = this.describe.runInput?.port || '443'
+    let url = <string>this.describe.httpsApp?.dns?.url
     if (!url) {
       return null
     }

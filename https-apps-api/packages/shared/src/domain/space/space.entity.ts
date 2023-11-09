@@ -62,8 +62,8 @@ export class Space extends BaseEntity {
   }
 
   @Property({ persist: false })
-  get scope(): string {
-    return `space-${this.id}`
+  get scope() {
+    return `space-${this.id}` as const
   }
 
   isConfidential(): boolean {

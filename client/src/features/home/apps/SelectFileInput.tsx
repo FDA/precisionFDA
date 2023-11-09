@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { ButtonGroup } from '../../../components/Button/ButtonGroup'
 import { Button } from '../../../components/Button'
-import { DialogType, useSelectFileModal } from '../files/actionModals/useSelectFileModal'
+import { useSelectFileModal } from '../files/actionModals/useSelectFileModal'
 import { IAccessibleFile } from '../databases/databases.api'
+import { DialogType } from '../types'
 
 export const SelectFileInput = ({ value, onChange, dialogType = 'radio', dialogTitle, dialogSubtitle, scope, disabled }:
   { value?: IAccessibleFile, onChange: (file: IAccessibleFile | undefined) => void, dialogType?: DialogType, dialogTitle: string,
@@ -25,7 +26,7 @@ export const SelectFileInput = ({ value, onChange, dialogType = 'radio', dialogT
     dialogType,
     handleSelect,
     dialogSubtitle,
-    scope)
+    scope ? [scope]: [])
   return (<>
     {modalComp}
     <ButtonGroup>

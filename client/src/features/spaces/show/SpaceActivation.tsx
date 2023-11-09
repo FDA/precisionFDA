@@ -17,6 +17,7 @@ import { acceptSpaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
+import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 
 const Row = styled.div`
   display: flex;
@@ -123,7 +124,11 @@ export function Activation({ space }: { space: ISpace }) {
       <Col>
         <SpaceMainInfo>
           <SpaceHeaderTitle>{name}</SpaceHeaderTitle>
-          <SpaceHeaderDescrip>{space.protected && <ProtectedIcon />}{description}</SpaceHeaderDescrip>
+          <SpaceHeaderDescrip>
+            {space.protected && <ProtectedIcon />}
+            {space.restricted_reviewer && <FdaRestrictedIcon />}
+            {description}
+          </SpaceHeaderDescrip>
         </SpaceMainInfo>
         <Row>
           <KeyVal>

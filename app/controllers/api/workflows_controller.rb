@@ -200,6 +200,7 @@ module Api
       raise ApiError, Message.bad_request(e.message)
     end
 
+    # POST /api/workflows
     def create
       ActiveRecord::Base.transaction do
         if presenter.valid?

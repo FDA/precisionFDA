@@ -37,6 +37,8 @@ export const RESOURCES = Object.keys(RESOURCE_LABELS) as (keyof typeof RESOURCE_
 export interface IUser {
   id: number,
   name: string,
+
+  fullName: string,
   org: string,
   url: string,
   isAccepted: boolean,

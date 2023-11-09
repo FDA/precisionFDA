@@ -48,5 +48,5 @@ export const isRequestFromFdaSubnet = (ctx: Api.Ctx): boolean => {
 export const isRequestFromAuthenticatedUser =
   (ctx: Api.Ctx): ctx is Api.Ctx & Required<Pick<Api.Ctx, 'user'>> => {
     const userContextValidatorFn = ajv.compile(utils.schemas.userContextSchema)
-    return userContextValidatorFn(ctx.request.query)
+    return userContextValidatorFn(ctx.request.headers)
   }

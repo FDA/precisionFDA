@@ -7,7 +7,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@pfda/https-apps-shared/src/domain/user-file/user-file.types'
 import { AbstractSqlDriver } from '@mikro-orm/mysql'
 import { FileCloseParams } from '@pfda/https-apps-shared/src/platform-client/platform-client.params'
@@ -100,7 +100,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .send({ id: file.uid })
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
 
     // console.log(res)
     expect(res.statusCode).to.equal(200)
@@ -141,7 +141,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .send({ id: file.uid })
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(200)
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
@@ -181,7 +181,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .send({ id: file.uid })
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
 
     expect(res.statusCode).to.equal(200)
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
@@ -201,7 +201,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .send({ id: file.uid })
-      .query({ ...getDefaultQueryData(user1) })
+      .set(getDefaultHeaderData(user1))
       .expect(200)
 
     expect(res.body).to.have.property('message', 'File is already in closing state')
@@ -220,7 +220,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${file.uid}/close`)
       .send({ id: file.uid })
-      .query({ ...getDefaultQueryData(user1) })
+      .set(getDefaultHeaderData(user1))
       .expect(200)
 
     expect(res.body).to.have.property('message', 'File is already closed')
@@ -244,7 +244,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${asset.uid}/close`)
       .send({ id: asset.uid })
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
 
     // console.log(res)
     expect(res.statusCode).to.equal(200)
@@ -268,7 +268,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${challengeBotFile.uid}/close`)
       .send({ id: challengeBotFile.uid })
-      .query({ ...getDefaultQueryData(siteAdmin) })
+      .set(getDefaultHeaderData(siteAdmin))
       .expect(200)
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
@@ -297,7 +297,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${challengeBotFile.uid}/close`)
       .send({ id: challengeBotFile.uid })
-      .query({ ...getDefaultQueryData(challengeAdmin) })
+      .set(getDefaultHeaderData(challengeAdmin))
       .expect(200)
 
     expect(fakes.client.fileCloseFake.calledOnce).to.be.true()
@@ -320,7 +320,7 @@ describe('PATCH /files/:id/close', () => {
     await supertest(getServer())
       .patch(`/files/${challengeBotFile.uid}/close`)
       .send({ id: challengeBotFile.uid })
-      .query({ ...getDefaultQueryData(user1) })
+      .set(getDefaultHeaderData(user1))
       .expect(403)
   })
 
@@ -328,7 +328,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${files[0].uid}/close`)
       .send({ id: files[0].uid })
-      .query({ ...getDefaultQueryData(user2) })
+      .set(getDefaultHeaderData(user2))
       .expect(403)
 
     expect(res.body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
@@ -341,7 +341,7 @@ describe('PATCH /files/:id/close', () => {
     const res = await supertest(getServer())
       .patch(`/files/${fileUid}/close`)
       .send({ id: fileUid })
-      .query({ ...getDefaultQueryData(user2) })
+      .set(getDefaultHeaderData(user2))
       .expect(404)
 
     expect(res.body.error).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)

@@ -9,25 +9,35 @@ import { ISpace, SideRole } from '../spaces.types'
 import { MemberCard } from './MemberCard'
 import { spacesMembersListRequest } from './members.api'
 import { useAddMembersModal } from './useAddMembersModal'
+import { SpaceTitle } from '../../home/home.styles'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
 
-export const StyledTitle = styled.h1`
-  margin: 0;
-  margin-bottom: 32px;
-`
 
-export const StyledMemberListPage = styled.div`
+const StyledMemberListPage = styled.div`
   padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 `
-export const StyledMemberList = styled.div`
-  gap: 10px;
+const StyledMemberList = styled.div`
+display: flex;
+padding-left: 0px;
+align-items: flex-start;
+gap: 16px;
+align-self: stretch;
+flex-wrap: wrap;
+`
+
+const StyledButtonGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
+  gap: 16px;
 `
 
-export const StyledButtonGroup = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin: 32px 0;
+const AddButton = styled(ButtonSolidBlue)`
+  svg {
+    margin-right: 4px;
+  }
 `
 
 export const MembersList = ({ space }: { space: ISpace }) => {
@@ -43,8 +53,8 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   return (
     <ErrorBoundary>
       <StyledMemberListPage>
-        <StyledTitle>Shared Area Members</StyledTitle>
         <StyledButtonGroup>
+          <SpaceTitle>Shared Area Members</SpaceTitle>
           {space.type === 'review' && (
             <RadioButtonGroup
               options={[
@@ -58,9 +68,10 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           )}
 
           {space.updatable && canAddMember && (
-            <ButtonSolidBlue onClick={() => setShowModal(true)}>
+            <AddButton type="button" onClick={() => setShowModal(true)}>
+              <PlusIcon height={12} />
               Add Members
-            </ButtonSolidBlue>
+            </AddButton>
           )}
         </StyledButtonGroup>
 

@@ -1,4 +1,5 @@
 import { Connection, MikroORM } from '@mikro-orm/core'
+import { MySqlDriver } from '@mikro-orm/mysql'
 import { config } from '..'
 import { DatabaseService, IDatabaseService } from './database.service'
 
@@ -24,10 +25,10 @@ const start = async(): Promise<void> => {
 
 const stop = async(): Promise<void> => {
   if (db) {
-    db.stop()
+    await db.stop()
   }
   if (dbReplica) {
-    dbReplica.stop()
+    await dbReplica.stop()
   }
 }
 
@@ -36,7 +37,7 @@ const stop = async(): Promise<void> => {
 export const database = {
   start: start,
   stop: stop,
-  orm: (): MikroORM => db!.getOrm()!,
+  orm: (): MikroORM<MySqlDriver> => db!.getOrm()!,
   connection: (): Connection => db!.getOrm()!.em.getConnection(),
   createDatabaseReplicaService,
 }

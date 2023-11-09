@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { FieldGroup } from '../../../../components/form/FieldGroup'
 import { CubeIcon } from '../../../../components/icons/CubeIcon'
@@ -16,7 +15,6 @@ import { InputText } from '../../../../components/InputText'
 import { EmptyTable } from '../../../../components/Table/styles'
 import { IUser } from '../../../../types/user'
 import { getSpaceIdFromScope } from '../../../../utils'
-import DefaultLayout from '../../../../layouts/DefaultLayout'
 import { useAuthUser } from '../../../auth/useAuthUser'
 import { fetchFile } from '../../files/files.api'
 import { FileTreeNode, IFile, TreeOnSelectInfo } from '../../files/files.types'
@@ -41,8 +39,6 @@ import {
   Section,
   SectionBody,
   SectionHeader,
-  StyledBackLink,
-  StyledForm,
   StyledJobName, StyledLabel,
   StyledRow,
   TipsRow,
@@ -52,15 +48,9 @@ import {
 } from './styles'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 import { IAccessibleFile } from '../../databases/databases.api'
+import { StyledForm, StyledBackLink } from '../../home.styles'
 import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
-
-export const StyledInputText = styled(InputText)`
-  width: 30%;
-`
-
-export const DisabledLabel = styled(StyledLabel)`
-  color: lightgrey;
-`
+import { UserLayout } from '../../../../layouts/UserLayout'
 
 const convertToAccessibleFile = (file: IFile): IAccessibleFile =>
   ({
@@ -371,7 +361,7 @@ const JobRun = ({
   const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
 
   return (
-    <DefaultLayout>
+    <UserLayout>
       {licensesModal}
       {organizeFileModal}
       <Topbox>
@@ -564,7 +554,7 @@ const JobRun = ({
           {isSubmitting ? 'Running' : 'Run App'}
         </ButtonSolidBlue>
       </StyledForm>
-    </DefaultLayout>
+    </UserLayout>
   )
 }
 

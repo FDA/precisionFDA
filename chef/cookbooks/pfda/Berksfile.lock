@@ -4,18 +4,8 @@ DEPENDENCIES
     metadata: true
 
 GRAPH
-  ark (6.0.21)
-    seven_zip (>= 3.1)
   aws (9.0.14)
-  chocolatey (3.0.0)
-  nodejs (10.1.11)
-    ark (>= 2.0.2)
-    chocolatey (>= 3.0)
-    yum (>= 7.2)
   pfda (0.1.0)
     aws (~> 9.0)
-    nodejs (~> 10.1)
     tomcat (~> 5.0)
-  seven_zip (4.2.7)
   tomcat (5.0.11)
-  yum (7.4.13)

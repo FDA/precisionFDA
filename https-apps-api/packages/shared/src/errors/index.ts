@@ -47,6 +47,7 @@ export enum ErrorCodes {
   INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR',
   INCOMPATIBLE_VERSION_ERROR = 'E_INCOMPATIBLE_VERSION',
   WORKSTATION_API_ERROR = 'E_WORKSTATION_API_ERROR',
+  DELETE_RELATION_ERROR = 'E_DELETE_RELATION_ERROR'
 }
 
 export class BaseError extends Error {
@@ -268,5 +269,17 @@ export class InvalidIpHeaderError extends BaseError {
       code: ErrorCodes.INVALID_IP_HEADER_ERROR,
       validationError: props?.validationError,
     })
+  }
+}
+
+export class DeleteRelationError extends BaseError {
+  constructor(entityName: string, relatedEntityName: string) {
+    super(
+      `Cannot delete a ${entityName}, as it is related to a ${relatedEntityName}`,
+      {
+        code: ErrorCodes.DELETE_RELATION_ERROR,
+        statusCode: 400,
+      },
+    )
   }
 }

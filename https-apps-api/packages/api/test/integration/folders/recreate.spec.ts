@@ -7,7 +7,7 @@ import { create, generate, db } from '@pfda/https-apps-shared/src/test'
 import { fakes, mocksReset } from '@pfda/https-apps-shared/src/test/mocks'
 import { database, errors } from '@pfda/https-apps-shared'
 import { getServer } from '../../../src/server'
-import { getDefaultQueryData } from '../../utils/expect-helper'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /folders/recreate', () => {
   let em: EntityManager
@@ -37,7 +37,7 @@ describe('POST /folders/recreate', () => {
   it('response shape & mocks default call', async () => {
     await supertest(getServer())
       .post('/folders/recreate')
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(204)
     expect(fakes.client.foldersListFake.calledOnce).to.be.true()
     expect(fakes.client.folderCreateFake.notCalled).to.be.true()
@@ -53,7 +53,7 @@ describe('POST /folders/recreate', () => {
     await em.flush()
     await supertest(getServer())
       .post('/folders/recreate')
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(204)
 
     expect(fakes.client.foldersListFake.calledOnce).to.be.true()
@@ -83,7 +83,7 @@ describe('POST /folders/recreate', () => {
     await em.flush()
     await supertest(getServer())
       .post('/folders/recreate')
-      .query({ ...getDefaultQueryData(user) })
+      .set(getDefaultHeaderData(user))
       .expect(204)
 
     expect(fakes.client.foldersListFake.calledOnce).to.be.true()

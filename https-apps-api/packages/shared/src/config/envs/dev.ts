@@ -10,6 +10,9 @@ export const config: ConfigOverride = () => ({
     pretty: false,
     level: 'debug',
   },
+  database: {
+    debug: true,
+  },
   workerJobs: {
     syncJob: {
       repeatPattern: '*/2 * * * *', // Every 2 minutes

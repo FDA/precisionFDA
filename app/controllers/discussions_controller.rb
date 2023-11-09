@@ -1,10 +1,15 @@
 class DiscussionsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show, :followers]
-  before_action :require_login_or_guest, only: [:index, :show, :followers]
+  skip_before_action :require_login, only: %i(index show followers)
+  before_action :require_login_or_guest, only: %i(index show followers)
+  layout "react", only: %i(index2)
 
   def index
-    @discussions = Discussion.accessible_by(@context).order(id: :desc).page unsafe_params[:discussions_page]
+    @discussions = Discussion.accessible_by(@context).
+      where(notes: { scope: %w(public private) }).
+      order(id: :desc).page unsafe_params[:discussions_page]
   end
+
+  def index2; end
 
   def show
     @discussion = Discussion.accessible_by(@context).find(unsafe_params[:id])

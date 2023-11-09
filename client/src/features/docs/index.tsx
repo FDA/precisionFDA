@@ -79,14 +79,6 @@ const Docs = () => {
           </NavItem>
           <NavItem
             activeClassName='active'
-            $active={isActiveLink('/docs/tutorials', pathname)}
-            to="/docs/tutorials"
-            data-turbolinks="false"
-          >
-            Tutorials
-          </NavItem>
-          <NavItem
-            activeClassName='active'
             $active={isActiveLink('/docs/discussions', pathname)}
             to="/docs/discussions"
             data-turbolinks="false"
