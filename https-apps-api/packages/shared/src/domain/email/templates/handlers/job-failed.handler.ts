@@ -42,7 +42,7 @@ export class JobFailedEmailHandler
 
   async template(receiver: User): Promise<EmailSendInput> {
     const body = buildEmailTemplate<JobFailedInputTemplate>(
-      this.job.describe.failureReason === 'CostLimitExceeded' ? jobCostLimitExceededTemplate : jobFailedTemplate,
+      this.job.describe?.failureReason === 'CostLimitExceeded' ? jobCostLimitExceededTemplate : jobFailedTemplate,
       {
         receiver,
         content: {
@@ -50,8 +50,8 @@ export class JobFailedEmailHandler
             id: this.job.id,
             uid: this.job.uid,
             name: this.job.name,
-            failureReason: this.job.describe.failureReason ?? '',
-            failureMessage: this.job.describe.failureMessage ?? '',
+            failureReason: this.job.describe?.failureReason ?? '',
+            failureMessage: this.job.describe?.failureMessage ?? '',
             runTimeString: this.job.runTimeString(),
           },
         },
