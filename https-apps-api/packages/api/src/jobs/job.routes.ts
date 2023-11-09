@@ -115,7 +115,7 @@ router.patch(
       terminate,
     }
     await new jobDomain.WorkstationSnapshotOperation(pickOpsCtx(ctx)).enqueue(input)
-    ctx.body = { 'message': `Snapshot for workstation ${input.jobDxid} started` }
+    ctx.body = { message: `Snapshot for workstation ${input.jobDxid} started` }
   },
 )
 

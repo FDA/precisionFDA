@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { JobRepository } from '../../domain/job/job.repository'
 import { BaseOperation } from '../../utils/base-operation'
 import { OpsCtx, UserCtx } from '../../types'
 import { config, database, queue } from '../..'
@@ -127,7 +128,7 @@ AdminDataConsistencyReportOutput
 
       log.info({ output }, 'AdminDataConsistencyReportOperation: Completed')
 
-      this.sendReportEmail(output)
+      await this.sendReportEmail(output)
     } catch (error) {
       log.error({ error, output }, 'AdminDataConsistencyReportOperation: Error')
     }
@@ -201,7 +202,7 @@ AdminDataConsistencyReportOutput
   }
 
   async checkRunningJobs(): Promise<any[]> {
-    const jobsRepo = this.em.getRepository(Job)
+    const jobsRepo: JobRepository = this.em.getRepository(Job)
     const runningJobs = await jobsRepo.findAllRunningJobs()
     const runningJobsInfo: any[] = []
     for (const job of runningJobs) {

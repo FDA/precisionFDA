@@ -36,6 +36,7 @@ enum PARENT_TYPE {
   JOB = 'Job',
   ASSET = 'Asset',
   COMPARISON = 'Comparison',
+  NODE = 'Node',
 }
 
 type ParentEntity = User | Job | Asset | Comparison

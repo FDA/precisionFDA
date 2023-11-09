@@ -14,12 +14,15 @@ export { getLogger } from './logger'
 
 export { database } from './database'
 
+export * as entityFetcher  from './services/entity-fetcher.service'
+
 export {
   entities,
   acceptedLicense,
   dataPortal,
   job,
   app,
+  discussion,
   user,
   space,
   newsItem,
@@ -32,7 +35,14 @@ export {
   dbCluster,
   adminGroup,
   spaceEvent,
+  spaceReport,
+  provenance,
+  platform,
+  entity,
+  workflow,
 } from './domain'
+
+export * from './facade'
 
 export * as utils from './utils'
 
@@ -46,3 +56,7 @@ export * as redis from './services/redis.service'
 export * as validation from './validation'
 
 export { BaseEntity } from './database/base-entity'
+
+export { ArrayUtils, TimeUtils, TypeUtils } from './utils'
+
+export * from './config/consts'

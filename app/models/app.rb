@@ -51,7 +51,9 @@ class App < ApplicationRecord
   has_many :challenges
 
   before_update { |app| app.update_series_featured_status if app.featured_changed? }
-  before_update { |app| app.update_series_deleted_status if app.deleted_changed? }
+  before_update { |app| app.update_series_deleted_status(app) if app.deleted_changed? }
+
+  delegate :workstation_app_state?, to: :job, allow_nil: true
 
   attr_accessor :current_user
 
@@ -201,8 +203,17 @@ class App < ApplicationRecord
     app_series.update(featured: featured)
   end
 
-  def update_series_deleted_status
-    app_series.update(deleted: deleted)
+  def update_series_deleted_status(app)
+    apps = app_series.apps.where(deleted: false).order(revision: :desc)
+    if apps.length > 1
+      second = apps[1]
+      app_series.update(latest_revision_app: second) if app.id == apps.first.id
+      app_series.update(latest_version_app: second) if app.id == app_series.latest_version_app_id
+      app_series.update(featured: false) if app.featured && !second.featured
+    elsif apps.length == 1
+      app_series.update(featured: false)
+      app_series.update(deleted:)
+    end
   end
 
   delegate :name, to: :app_series
@@ -219,5 +230,9 @@ class App < ApplicationRecord
 
   def workstation_api_version
     return find_workstation_api_tag.split(":").last if has_workstation_api
+  end
+
+  def has_https_app_state?
+    internal["platform_tags"]&.select { |input| input.starts_with?("pfda_httpsAppState_enabled") }&.first.present?
   end
 end

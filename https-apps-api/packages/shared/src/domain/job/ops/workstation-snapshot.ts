@@ -47,8 +47,8 @@ any
       type: WorkstationSnapshotOperation.getTaskType(),
       payload: input,
       user: this.ctx.user,
-    }  
-    const jobId = WorkstationSnapshotOperation.getBullJobId(input.jobDxid)  
+    }
+    const jobId = WorkstationSnapshotOperation.getBullJobId(input.jobDxid)
     return await queue.addToQueueEnsureUnique(queue.getFileSyncQueue(), queueData, jobId)
   }
 

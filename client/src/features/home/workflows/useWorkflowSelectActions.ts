@@ -79,8 +79,8 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
 
   let actions: ActionFunctionsType<WorkflowActions> = {
     'Run': {
-      type: 'link',
-      link: `${links?.show}/analyses/new`,
+      type: 'route',
+      to: `${links?.show}/analyses/new`,
       isDisabled: selected.length !== 1 || !links?.run_workflow,
       cloudResourcesConditionType: 'all',
     },

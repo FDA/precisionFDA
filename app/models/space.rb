@@ -57,12 +57,13 @@ class Space < ActiveRecord::Base
   has_many :confidential_spaces, class_name: "Space"
   has_many :space_events
   has_many :space_invitations
+  has_many :space_reports
 
   has_many :comments, as: :commentable
 
   acts_as_commentable
 
-  store :meta, accessors: [:cts], coder: JSON
+  store :meta, accessors: %i(cts restricted_reviewer), coder: JSON
 
   enum space_type: TYPES
 
@@ -193,6 +194,10 @@ class Space < ActiveRecord::Base
 
   def jobs
     Job.accessible_by_space(self)
+  end
+
+  def discussions
+    Discussion.accessible_by_space(self)
   end
 
   def comparisons

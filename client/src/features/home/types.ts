@@ -18,7 +18,7 @@ export interface BaseError {
     type: 'error'
   }
 }
-export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions'
+export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions' | 'reports' | 'discussions'
 export type APIResource =
   | 'files'
   | 'folders'
@@ -30,8 +30,13 @@ export type APIResource =
   | 'app-executions'
   | 'workflow-executions'
   | 'spaces'
+  | 'space-reports'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
+
+export type DialogType = 'radio' | 'checkbox'
+
+export type EmmitScope = (scope: ServerScope, featured: boolean) => void
 
 export interface DownloadListResponse {
   id: number
@@ -123,6 +128,7 @@ export enum SEVERITY {
 
 // TODO share the enum with backend
 export enum NOTIFICATION_ACTION {
+    JOB_INITIALIZING = 'JOB_INITIALIZING',
     JOB_RUNNING = 'JOB_RUNNING',
     JOB_RUNNABLE = 'JOB_RUNNABLE',
     JOB_DONE = 'JOB_DONE',
@@ -136,6 +142,8 @@ export enum NOTIFICATION_ACTION {
     SPACE_ACTIVATED = 'SPACE_ACTIVATED',
     WORKSTATION_SNAPSHOT_COMPLETED = 'WORKSTATION_SNAPSHOT_COMPLETED',
     WORKSTATION_SNAPSHOT_ERROR = 'WORKSTATION_SNAPSHOT_ERROR',
+    SPACE_REPORT_ERROR = 'SPACE_REPORT_ERROR',
+    SPACE_REPORT_DONE = 'SPACE_REPORT_DONE',
 }
 
 export type NotificationMeta = {

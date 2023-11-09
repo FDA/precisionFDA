@@ -91,15 +91,14 @@ export const RevisionDropdown = ({
   linkToRevision: (revision: Revision) => string
 }) => {
   const lastRevision = revisions.reduce(
-    (acc, shot) => (acc > shot.revision ? acc : shot.revision),
+    (acc, shot) => (acc > shot.revision || shot.deleted ? acc : shot.revision),
     0,
   )
-
   const renderRevisionsList = () => (
     <Ol>
       <LiTitle>Revisions</LiTitle>
       {revisions.map(r => (
-        <Li key={r.id} active={r.revision === selectedValue}><StyledLink to={linkToRevision(r)}>{r.revision}{r.revision === lastRevision && <TagPill>Latest</TagPill>}</StyledLink></Li>
+        !r.deleted && <Li key={r.id} active={r.revision === selectedValue}><StyledLink to={linkToRevision(r)}>{r.revision}{r.revision === lastRevision && <TagPill>Latest</TagPill>}</StyledLink></Li>
       ))}
     </Ol>
   )
@@ -114,7 +113,7 @@ export const RevisionDropdown = ({
         <StyledRevisionDropdownButton
           {...dropdownProps}
           active={dropdownProps.isActive}
-          data-testid="workflow-show-dropdown-revision-button"
+          data-testid="dropdown-revision-button"
         >
           <DropdownIcon>
             <HistoryIcon height={13} />

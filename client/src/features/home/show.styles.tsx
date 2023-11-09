@@ -56,12 +56,14 @@ export const HeaderLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px;
+  margin-bottom: 16px;
 `
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  padding-left: 16px;
+  padding-right: 16px;
 `
 
 export const Topbox = styled.div`
@@ -83,15 +85,12 @@ export const HeaderButton = styled(ButtonSolidBlue)`
 
 export const Title = styled.div`
   display: inline-block;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
+  display: flex;
   align-items: center;
   color: #52698f;
-  margin-bottom: 16px;
   gap: 8px;
-  * {
-    margin-right: 8px;
-  }
 `
 
 export const Description = styled.div`

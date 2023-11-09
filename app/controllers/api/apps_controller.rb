@@ -41,9 +41,9 @@ module Api
           accessible_by(@context).
           unremoved.
           eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
-
         apps = apps_series.map do |series|
           latest = series.latest_accessible(@context)
+
           if (latest&.scope == "private") && AppSeriesService::AppSeriesFilter.
               match(latest, filters)
             latest

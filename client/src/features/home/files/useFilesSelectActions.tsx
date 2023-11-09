@@ -477,7 +477,7 @@ export const useFilesSelectActions = ({
   }
 
   if (scope === 'spaces') {
-    actions = pick(['Open', 'Download', 'Rename', 'Copy to space', 'Comments'], actions)
+    actions = pick(['Open', 'Download', 'Rename', 'Copy to space', 'Comments', 'Delete'], actions)
   }
 
   return actions
