@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../../components/Button'
 import { Checkbox } from '../../../../components/Checkbox'
+import { FieldInfo } from '../../../../components/form/FieldInfo'
 import { StyledInput } from '../../../../components/InputText'
 import { Loader } from '../../../../components/Loader'
 import { Radio } from '../../../../components/Radio'
@@ -41,6 +42,18 @@ import { DialogType } from '../../types'
 
 const StyledLoader = styled.div`
   padding: 12px;
+`
+
+const SyledFilterWrapper = styled.div`
+  display: flex;
+`
+
+const StyledFilterFileSection = styled(StyledFilterSection)`
+  display: block;
+`
+
+const StyledFieldInfoWrapper = styled.div`
+  margin-top: 5px;
 `
 
 const FileIconAndLabel = ({ file }: { file: IAccessibleFile }) => {
@@ -252,19 +265,25 @@ const FileSelectTabs = ({
           }`}
           key="files"
         >
-          <StyledFilterSection>
-            <StyledInput
-              placeholder="Filter..."
-              onChange={evt => setFilter(evt.target.value)}
-            />
-            <StyledOnlyMine>
-              <input
-                type="checkbox"
-                onClick={e => toggleOnlyMine(e.target.checked)}
+          <StyledFilterFileSection>
+            <SyledFilterWrapper>
+              <StyledInput
+                placeholder="Filter..."
+                onChange={evt => setFilter(evt.target.value)}
               />
-              Only mine
-            </StyledOnlyMine>
-          </StyledFilterSection>
+              <StyledOnlyMine>
+                <input
+                  type="checkbox"
+                  onClick={e => toggleOnlyMine(e.target.checked)}
+                />
+                Only mine
+              </StyledOnlyMine>
+            </SyledFilterWrapper>
+            <StyledFieldInfoWrapper>
+              <FieldInfo text="Use % for wildcard searches" />
+            </StyledFieldInfoWrapper>
+          </StyledFilterFileSection>
+
           {loadingFilesStatus === 'loading' && <Loader />}
           {loadingFilesStatus === 'success' && (
             <ModalScroll>
