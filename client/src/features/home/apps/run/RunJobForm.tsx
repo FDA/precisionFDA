@@ -355,7 +355,7 @@ export const RunJobForm = ({
                         errors={errors}
                         disabled={isSubmitting}
                         register={register}
-                        scope={app.scope}
+                        scope={app.entity_type === 'https' ? watch().scope?.value : app.scope }
                       />
                     </FieldGroup>
                   )}
