@@ -872,7 +872,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			return err
 		}
 		if len(response) == 0 {
-			fmt.Println(">> Target folder not found or inaccessible")
+			c.HandleError(fmt.Errorf(">> Target folder not found or inaccessible"))
 			continue
 		}
 
