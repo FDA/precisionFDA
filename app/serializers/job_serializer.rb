@@ -292,8 +292,8 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
         item_run_data.merge!(value: item.value)
       end
     elsif item.files?
-      file_names = item.files.map(&:name)
-      file_uids = item.files.map(&:uid)
+      file_names = item.files.compact.map(&:name)
+      file_uids = item.files.compact.map(&:uid)
       item_run_data.merge!(file_names:)
       item_run_data.merge!(file_uids:)
     else
