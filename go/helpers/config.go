@@ -13,7 +13,7 @@ import (
 var ConfigPath = filepath.Join(getUserHomeDir(), ".pfda_config")
 
 type jsonConfig struct {
-	Key string `json:key`
+	Key    string `json:key`
 	Server string `json:server`
 	Scope  string `json:scope`
 }
@@ -40,15 +40,14 @@ func GetConfig() (*jsonConfig, error) {
 	return &config, nil
 }
 
-func SaveConfig(config *jsonConfig) {
+func SaveConfig(config *jsonConfig, jsonFlag bool) {
 	// If key was given by -key option in the command line
 	// marshal it to json and write into .pfda__config
 	// if marshaling fails, issue warning and exit
 	jsonData, err := json.Marshal(config)
-	if err != nil {
+	if err != nil && !jsonFlag {
 		fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", ConfigPath, err.Error())
 		fmt.Printf("You will need to submit authorization key in the command line in the next operation.\n")
-		// exit gracefully, without panic
 	}
 
 	// below is a more compact and cleaner implementation which is recommended when writing small files
@@ -56,12 +55,12 @@ func SaveConfig(config *jsonConfig) {
 	// os.WriteFile which opens, writes and closes a file in one swoop
 	// denote, that it also works on Windows ( checked on AWS EC2 windows instance )
 	// despite Linux style file permissions are given
-	// if .pfda_config exists it is truncaters before writing
-	// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it
+	// if .pfda_config exists it is truncated before writing
+	// denote also there is no need in defer f.Close(), since os.WriteFile closes the file immediately after writing it
 	err = os.WriteFile(ConfigPath, jsonData, 0644) // 0644 is '-rw -r- -r-'
-	if err != nil {
+	if err != nil && !jsonFlag {
 		fmt.Printf("Could not save authorization key in config file '%s': %s\n", ConfigPath, err.Error())
-	} else {
+	} else if !jsonFlag {
 		fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", ConfigPath)
 	}
 }

@@ -872,7 +872,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			return err
 		}
 		if len(response) == 0 {
-			fmt.Println(">> Target folder not found or inaccessible")
+			c.HandleError(fmt.Errorf(">> Target folder not found or inaccessible"))
 			continue
 		}
 
@@ -1352,7 +1352,7 @@ func pickFile(files []jsonFileResponse, label string) string {
 // pass all flags, so we can optimize the table header - if in 'private' do not show added-by
 func printListingResponse(response jsonListingResponse, flags map[string]bool) {
 	if flags["json"] {
-		prettyJSON, _ := json.MarshalIndent(response.Files, "", "    ")
+		prettyJSON, _ := json.MarshalIndent(response, "", "    ")
 		fmt.Printf("%s\n", string(prettyJSON))
 	} else if flags["brief"] {
 		printListingSimple(response.Files)
