@@ -1,7 +1,8 @@
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import type { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { App, job, Job, User } from '../../../src/domain'
-import { database, } from '@pfda/https-apps-shared'
+import type { App, User } from '../../../src/domain'
+import { Job } from '../../../src/domain'
+import { database } from '@pfda/https-apps-shared'
 import { create, db, generate } from '../../../src/test'
 import { JOB_STATE } from '../../../src/domain/job/job.enum'
 
@@ -33,21 +34,30 @@ describe('Job entity tests', () => {
     expect(httpsJob.getHttpsAppUrl()).to.contain(`${httpsJob.dxid}.internal.dnanexus.cloud`)
   })
 
-  it('getHttpAppUrl() doesn\t work with regular apps', async () => {
+  it('getHttpAppUrl() doesn\'t work with regular apps', async () => {
     expect(job.getHttpsAppUrl()).to.be.null()
   })
 
-  it('save and load runData', async () => {
+  it('save and load runData, describe', async () => {
     const jobToBeSaved = create.jobHelper.create(em, { user, app }, {
       runData: {
         run_instance_type: 'base-8',
         run_inputs: {},
         run_outputs: {},
       },
+      // @ts-ignore
+      describe: {
+        httpsApp: {
+          dns: {
+            url: 'url',
+          },
+        },
+      },
     })
     await em.flush()
 
     const loadedJob = await em.findOneOrFail(Job, { id: jobToBeSaved.id })
     expect(loadedJob.runData).to.deep.equal(jobToBeSaved.runData)
+    expect(loadedJob.describe).to.deep.equal(jobToBeSaved.describe)
   })
 })
