@@ -12,46 +12,30 @@ import {
   EntityRepositoryType,
   JsonType,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'
-import { Job } from '../job/job.entity'
+import { Job } from '../job'
 import { Asset } from '../user-file'
-import { User } from '../user/user.entity'
+import { User } from '../user'
 import { ENTITY_TYPE } from './app.enum'
 import { AppRepository } from './app.repository'
-import { Spec } from './app.input'
-import { isNil } from 'ramda'
+import type { Spec } from './app.input'
 
 const logger = getLogger('app.entity')
 
-export class AppSpec extends JsonType {
+export interface AppSpec {
   input_spec: Spec[]
   output_spec: Spec[]
   internet_access: boolean
   instance_type: string
-
-  convertToJSValue(value: string | null) {
-    if (isNil(value)) {
-      return value
-    }
-
-    return JSON.parse(value)
-  }
 }
 
-export class Internal extends JsonType {
+export interface Internal {
   ordered_assets?: string[]
   packages: string[]
   code: string
   platform_tags?: string[]
-
-  convertToJSValue(value: string | null) {
-    if (isNil(value)) {
-      return value
-    }
-
-    return JSON.parse(value)
-  }
 }
 
 @Entity({ tableName: 'apps', customRepository: () => AppRepository })
@@ -77,10 +61,10 @@ export class App extends BaseEntity {
   @Property()
   scope?: string
 
-  @Property({ type: AppSpec })
+  @Property({ type: WorkaroundJsonType })
   spec: AppSpec
 
-  @Property({ type: Internal })
+  @Property({ type: WorkaroundJsonType })
   internal: Internal
 
   @Property()

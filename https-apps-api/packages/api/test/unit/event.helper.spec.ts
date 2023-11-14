@@ -1,10 +1,16 @@
-import { expect } from 'chai'
-import { create, generate, db } from '@pfda/https-apps-shared/src/test'
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@pfda/https-apps-shared'
 import { User } from '@pfda/https-apps-shared/src/domain'
+import {
+  createFolderEvent,
+  createJobClosed,
+  EVENT_TYPES,
+} from '@pfda/https-apps-shared/src/domain/event/event.helper'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
-import { EntityManager } from '@mikro-orm/mysql'
-import { createFolderEvent, createJobClosed, EVENT_TYPES } from '@pfda/https-apps-shared/src/domain/event/event.helper'
+import { create, db, generate } from '@pfda/https-apps-shared/src/test'
+import { expect } from 'chai'
+import { STATIC_SCOPE } from '@pfda/https-apps-shared/src/enums'
+import { JobDescribeResponse } from '@pfda/https-apps-shared/src/platform-client'
 
 describe('event.helper', () => {
   let em: EntityManager
@@ -22,10 +28,13 @@ describe('event.helper', () => {
   context('createJobClosed()', () => {
     it('should create event for normal job', async () => {
       const app = create.appHelper.createHTTPS(em, { user })
-      const job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.DONE })
+      const job = create.jobHelper.create(em, { user, app }, {
+        scope: STATIC_SCOPE.PRIVATE,
+        state: JOB_STATE.DONE,
+      })
       await em.flush()
 
-      const event = await createJobClosed(user, job)
+      const event = await createJobClosed(user, job, { totalPrice: 1 } as JobDescribeResponse)
       await em.persist(event)
       await em.flush()
 
@@ -37,10 +46,13 @@ describe('event.helper', () => {
 
     // For this, see PFDA-3217 for context
     it('should create event for job whose app was deleted', async () => {
-      const job = create.jobHelper.create(em, { user }, { scope: 'private', state: JOB_STATE.DONE })
+      const job = create.jobHelper.create(em, { user }, {
+        scope: STATIC_SCOPE.PRIVATE,
+        state: JOB_STATE.DONE,
+      })
       await em.flush()
 
-      const event = await createJobClosed(user, job)
+      const event = await createJobClosed(user, job, { totalPrice: 1 } as JobDescribeResponse)
       await em.persist(event)
       await em.flush()
 
