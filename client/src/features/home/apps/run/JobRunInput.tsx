@@ -141,7 +141,7 @@ export const JobRunInput = ({
             dialogTitle="Select input file"
             disabled={disabled}
             onChange={value => {
-              field.onChange(value && value[0].uid)
+              field.onChange(value?.[0].uid ?? null)
               field.onBlur()
             }}
             dialogType="radio"
@@ -162,7 +162,7 @@ export const JobRunInput = ({
             dialogTitle="Select input files"
             disabled={disabled}
             onChange={value => {
-              field.onChange(value?.map(v => v.uid))
+              field.onChange(value?.map(v => v.uid) ?? null)
               field.onBlur()
             }}
             value={field?.value ?? null}
