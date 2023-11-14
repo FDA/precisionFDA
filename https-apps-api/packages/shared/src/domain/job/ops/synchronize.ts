@@ -194,7 +194,9 @@ export class SyncJobOperation extends WorkerBaseOperation<
     if (isStateTerminal(remoteState)) {
       this.ctx.log.debug({ remoteState }, 'SyncJobOperation: Remote job state is terminal, will sync folders and files')
       // create jobClosed event
-      const eventEntity = await createJobClosed(user, job)
+      // TODO: this is worth refactoring, because job.describe (that is used for event) is updated
+      // with data from platformJobData later in createSyncWorkstationFilesTask and createSyncOutputsTask
+      const eventEntity = await createJobClosed(user, job, platformJobData)
       em.persist(eventEntity)
 
       if (remoteState === JOB_STATE.FAILED) {

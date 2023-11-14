@@ -15,7 +15,6 @@ import { Resource } from '../../resource'
 import { entities, errors, userFile as userFileDomain } from '@pfda/https-apps-shared'
 import { getLogger } from '../../../logger'
 import { User } from '../../user'
-import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
@@ -50,7 +49,7 @@ export class DataPortalService implements IDataPortalService {
     SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
     SPACE_MEMBERSHIP_ROLE.VIEWER,
   ]
-    
+
   constructor(
     em: SqlEntityManager,
     userPlatformClient: PlatformClient,
@@ -164,20 +163,10 @@ export class DataPortalService implements IDataPortalService {
     userFile.uid = `${response.id}-1`
 
     await this.em.persist(userFile)
-    await this.createFileEvent(userFile, user, EVENT_TYPES.FILE_CREATED)
+    // file event is created upon close
     await this.em.flush()
 
     return userFile
-  }
-
-  private createFileEvent = async (userFile: UserFile, user: User, type: string) => {
-    const fileEvent = await createFileEvent(
-      type,
-      userFile,
-      userFile.name,
-      user,
-    )
-    this.em.persist(fileEvent)
   }
 
   createCardImage = async(input: FileParam, dataPortalId: number, userId: number): Promise<string> => {

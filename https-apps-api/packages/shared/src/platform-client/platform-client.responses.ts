@@ -212,7 +212,7 @@ type JobDescribeResponse = {
   describe: {
     output: JobOutput
   }
-  failureCount?: any
+  failureCount?: number
   failureReason?: string
   failureMessage?: string
   startedRunning?: number

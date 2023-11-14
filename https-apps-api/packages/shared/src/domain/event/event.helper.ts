@@ -1,7 +1,8 @@
 import { wrap } from '@mikro-orm/core'
+import { JobDescribeResponse } from '../../platform-client'
 import { Job } from '../job'
 import { User } from '../user'
-import { Folder } from '../user-file/folder.entity'
+import { Folder } from '../user-file'
 import { IFileOrAsset } from '../user-file/user-file.types'
 import { Event } from './event.entity'
 import { App } from '../app'
@@ -52,20 +53,19 @@ const createAppPublished = async (app: App, user: User, scope: string): Promise<
   return event
 }
 
-const createJobClosed = async (user: User, job: Job): Promise<Event> => {
+const createJobClosed = async (user: User, job: Job, platformJobData: JobDescribeResponse): Promise<Event> => {
   const event = new Event()
   const app = job.app
     ? job.app.isInitialized() ? job.app.getEntity() : await job.app.load()
     : undefined
-  const organization = user.organization.isInitialized()
-    ? user.organization.getEntity()
-    : await user.organization.load()
+  const organization = await user.organization.load()
   wrap(event).assign({
     type: EVENT_TYPES.JOB_CLOSED,
     orgHandle: organization.handle,
     dxuser: user.dxuser,
     param1: job.dxid,
     param2: app?.dxid,
+    param3: platformJobData.totalPrice?.toString(),
   })
   return event
 }
@@ -112,7 +112,7 @@ const createFileEvent = async (
     type: eventType,
     orgHandle: organization.handle,
     dxuser: user.dxuser,
-    param1: filePath,
+    param1: file.fileSize ? file.fileSize.toString() : '0',
     param2: file.dxid,
     param3,
     data,
