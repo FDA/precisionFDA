@@ -27,7 +27,7 @@ const FileButton = styled(Button)<{ isError?: boolean }>`
 interface Props {
   dialogType?: DialogType
   value?: string[]
-  onChange: (file?: IAccessibleFile[]) => void
+  onChange: (file?: IAccessibleFile[] | null) => void
   dialogTitle: string
   dialogSubtitle?: string
   scope?: string
