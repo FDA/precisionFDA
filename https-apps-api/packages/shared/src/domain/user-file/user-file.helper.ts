@@ -1,5 +1,4 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
-import { Collection } from '@mikro-orm/core'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
 import { Asset, entities, Node, Space, User, UserFile } from '..'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
@@ -268,6 +267,19 @@ const findFolderForPath = (
   return currentFolder
 }
 
+/**
+ * Returns parentFolder if scope is private, public or null, otherwise it returns scopedParentFolder
+ * @param node
+ */
+export const getParentFolder = (node: Node) => {
+  if (
+    [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
+  ) {
+    return node.parentFolder
+  }
+  return node.scopedParentFolder
+}
+
 const getNodePath = async (
   em: SqlEntityManager,
   node: Node,
@@ -284,18 +296,6 @@ const getNodePath = async (
   return getNodePath(em, parentFolder as Node, folders)
 }
 
-/**
- * Returns parentFolder if scope is private, public or null, otherwise it returns scopedParentFolder
- * @param node
- */
-export const getParentFolder = (node: Node) => {
-  if (
-    [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
-  ) {
-    return node.parentFolder
-  }
-  return node.scopedParentFolder
-}
 
 const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Promise<void> => {
   if (node.scope && node.scope.startsWith('space')) {
@@ -337,15 +337,6 @@ const validateProtectedSpaces = async (em: SqlEntityManager, action: string, use
       }
     }
   }
-}
-
-const belongsToSpace = (spaces: Collection<Space>, spaceId: number): boolean => {
-  for (const space of spaces) {
-    if (space.id === spaceId) {
-      return true
-    }
-  }
-  return false
 }
 
 const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser: User) => {
@@ -397,7 +388,7 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
         throw new Error(`You have no permissions to lock or unlock '${node.name}'.`)
       }
     } else {
-      return nodes.filter(node => node.user.id === currentUser.id)
+      return nodes.filter(innerNode => innerNode.user.id === currentUser.id)
     }
   }
 
