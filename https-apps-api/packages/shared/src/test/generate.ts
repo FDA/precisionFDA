@@ -1,46 +1,43 @@
 /* eslint-disable max-len */
 import Chance from 'chance'
-import { nanoid } from 'nanoid'
 import crypto from 'crypto'
 import { DateTime } from 'luxon'
+import { nanoid } from 'nanoid'
 import { App, entities } from '../domain'
-import {
-  JOB_STATE,
-  JOB_DB_ENTITY_TYPE,
-} from '../domain/job/job.enum'
+import { AppSpec, Internal } from '../domain/app/app.entity'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
+import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
+import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
+import { SyncDbClusterOperation } from '../domain/db-cluster'
 import {
-  STATUS as DB_CLUSTER_STATUS,
   ENGINE as DB_CLUSTER_ENGINE,
   ENGINES,
+  STATUS as DB_CLUSTER_STATUS,
 } from '../domain/db-cluster/db-cluster.enum'
-import { STATIC_SCOPE } from '../enums'
-import type { AnyObject, UserCtx } from '../types'
-import {
-  FILE_STATE_DX,
-  FILE_STI_TYPE,
-  FILE_ORIGIN_TYPE,
-  PARENT_TYPE,
-} from '../domain/user-file/user-file.types'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '../domain/space-membership/space-membership.enum'
+import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
+import { SyncJobOperation } from '../domain/job'
+import { RunData } from '../domain/job/job.entity'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
   PARENT_TYPE as SPACE_EVENT_PARENT_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
-import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
-import { TASK_TYPE } from '../queue/task.input'
-import { SyncDbClusterOperation } from '../domain/db-cluster'
-import { SyncJobOperation } from '../domain/job'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '../domain/space-membership/space-membership.enum'
 import { SyncFilesStateOperation } from '../domain/user-file'
-import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
+import {
+  FILE_ORIGIN_TYPE,
+  FILE_STATE_DX,
+  FILE_STI_TYPE,
+  PARENT_TYPE,
+} from '../domain/user-file/user-file.types'
 import { USER_STATE } from '../domain/user/user.entity'
-import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
-import { AppSpec, Internal } from '../domain/app/app.entity'
-import { RunData } from '../domain/job/job.entity'
+import { STATIC_SCOPE } from '../enums'
+import { TASK_TYPE } from '../queue/task.input'
+import type { AnyObject, UserCtx } from '../types'
 
 const chance = new Chance()
 
@@ -78,7 +75,7 @@ const user = {
 }
 
 const app = {
-    jupyterAppSpecData: () => {
+  jupyterAppSpecData: () => {
     return {
       internet_access: true,
       instance_type: 'baseline-2',
@@ -148,7 +145,7 @@ const app = {
           class: 'int',
           default: 443,
           label: 'ttyd port',
-          help: "ttyd shell will appear on this port",
+          help: 'ttyd shell will appear on this port',
           optional: true,
           choices: [443, 8081, 8080],
         },
@@ -176,13 +173,18 @@ const app = {
       title: 'app-title',
       scope: 'public',
       spec:
-        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-2"}',
+        {
+          input_spec: [],
+          output_spec: [],
+          internet_access: true,
+          instance_type: 'baseline-2',
+        },
       release: 'default-release-value',
       entityType: ENTITY_TYPE.NORMAL,
       version: '1',
       revision: 1,
       readme: 'readme',
-      internal: JSON.stringify({}),
+      internal: {},
       verified: true,
       devGroup: 'devGroup',
     }
@@ -193,8 +195,12 @@ const app = {
       dxid,
       title: 'https-app-title',
       scope: 'public',
-      spec:
-        '{"input_spec":[],"output_spec":[],"internet_access":true,"instance_type":"baseline-2"}',
+      spec: {
+        input_spec: [],
+        output_spec: [],
+        internet_access: true,
+        instance_type: 'baseline-2',
+      },
       release: 'default-release-value',
       entityType: ENTITY_TYPE.HTTPS,
       verified: true,
@@ -217,12 +223,12 @@ const app = {
             help: '',
             optional: false,
             patterns: ['*.tar.gz'],
-          }
+          },
         ],
         output_spec: [],
         internet_access: true,
-        instance_type: 'baseline-4'
-      }
+        instance_type: 'baseline-4',
+      },
     }
   },
   runAppInput: (): AnyObject => ({
@@ -284,7 +290,7 @@ const job = {
         },
         httpsApp: {
           dns: {
-            url: `https://${dxid}.internal.dnanexus.cloud/`
+            url: `https://${dxid}.internal.dnanexus.cloud/`,
           },
         },
       },
@@ -300,7 +306,7 @@ const job = {
       describe: { id: dxid, class: 'job' },
       state: JOB_STATE.IDLE,
       name: chance.name(),
-      scope: 'private',
+      scope: STATIC_SCOPE.PRIVATE,
       uid: `${dxid}-1`,
       entityType: JOB_DB_ENTITY_TYPE.REGULAR,
     }

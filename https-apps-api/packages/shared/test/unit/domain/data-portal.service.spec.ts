@@ -1,13 +1,14 @@
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import type { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { expect } from 'chai'
 import { create, db } from '../../../src/test'
 import { database, entities } from '@pfda/https-apps-shared'
-import { DataPortal, User, Event } from '../../../src/domain'
-import { DataPortalService } from '../../../src/domain/data-portal/service/data-portal.service'
-import { DataPortalParam, FileParam } from '../../../src/domain/data-portal/service/data-portal.types'
-import { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
-import { FileCreateParams, FileDownloadLinkParams } from '../../../src/platform-client/platform-client.params'
-import { FileDownloadLinkResponse } from '../../../src/platform-client/platform-client.responses'
-import { expect } from 'chai'
+import type { DataPortal, User } from '../../../src/domain'
+import { Event } from '../../../src/domain'
+import { DataPortalService } from '../../../src/domain/data-portal'
+import type { DataPortalParam, FileParam } from '../../../src/domain/data-portal'
+import type { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
+import type { FileCreateParams, FileDownloadLinkParams } from '../../../src/platform-client/platform-client.params'
+import type { FileDownloadLinkResponse } from '../../../src/platform-client/platform-client.responses'
 import {
   DATA_PORTAL_MEMBER_ROLE,
   DATA_PORTAL_STATUS
@@ -19,8 +20,8 @@ import {
 import { FILE_STATE_DX } from '../../../src/domain/user-file/user-file.types'
 import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
 import * as generate from '../../../src/test/generate'
-import { FileRemoveOperation } from '../../../src/domain/user-file'
-import { IdInput } from '../../../src/types'
+import type { FileRemoveOperation } from '../../../src/domain/user-file'
+import type { IdInput } from '../../../src/types'
 
 describe('data portal service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -47,38 +48,38 @@ describe('data portal service tests', () => {
   })
 
   const createPortalAndAddMember = async (portalName: string, role: SPACE_MEMBERSHIP_ROLE): Promise<any> => {
-    const space = create.spacesHelper.create(em, {name: portalName})
-    const internalUser = create.userHelper.create(em, {dxuser: generate.random.chance.name()})
+    const space = create.spacesHelper.create(em, { name: portalName })
+    const internalUser = create.userHelper.create(em, { dxuser: generate.random.chance.name() })
     await em.flush()
 
     const portal = create.dataPortalsHelper.create(em, { space }, { name: portalName })
     await em.flush()
-    create.spacesHelper.addMember(em, {user: internalUser, space}, {
-      role: role,
-      side: SPACE_MEMBERSHIP_SIDE.HOST
+    create.spacesHelper.addMember(em, { user: internalUser, space }, {
+      role,
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
     })
-    return {userId: internalUser.id, portalId: portal.id}
+    return { userId: internalUser.id, portalId: portal.id }
   }
 
-  const createPortal = async(spaceName: string, hostLeadDxUser: string, guestLeadDxUser: string,
-                             portalName: string, description: string, status: DATA_PORTAL_STATUS,
-                             sortOrder: number, cardImageId: string, cardImageUrl: string): Promise<DataPortal> => {
-    const space = create.spacesHelper.create(em, {name: spaceName})
+  const createPortal = async (spaceName: string, hostLeadDxUser: string, guestLeadDxUser: string,
+    portalName: string, description: string, status: DATA_PORTAL_STATUS,
+    sortOrder: number, cardImageId: string, cardImageUrl: string): Promise<DataPortal> => {
+    const space = create.spacesHelper.create(em, { name: spaceName})
     await em.flush()
-    const hostLead = create.userHelper.create(em, {dxuser: hostLeadDxUser})
-    const guestLead = create.userHelper.create(em, {dxuser: guestLeadDxUser})
+    const hostLead = create.userHelper.create(em, { dxuser: hostLeadDxUser })
+    const guestLead = create.userHelper.create(em, { dxuser: guestLeadDxUser })
     await em.flush()
-    create.spacesHelper.addMember(em, {user: hostLead, space}, {
+    create.spacesHelper.addMember(em, { user: hostLead, space }, {
       role: SPACE_MEMBERSHIP_ROLE.LEAD,
-      side: SPACE_MEMBERSHIP_SIDE.HOST
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
     })
-    create.spacesHelper.addMember(em, {user: guestLead, space}, {
+    create.spacesHelper.addMember(em, { user: guestLead, space }, {
       role: SPACE_MEMBERSHIP_ROLE.LEAD,
-      side: SPACE_MEMBERSHIP_SIDE.GUEST
+      side: SPACE_MEMBERSHIP_SIDE.GUEST,
     })
-    create.spacesHelper.addMember(em, {user, space}, {
+    create.spacesHelper.addMember(em, { user, space }, {
       role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-      side: SPACE_MEMBERSHIP_SIDE.GUEST
+      side: SPACE_MEMBERSHIP_SIDE.GUEST,
     })
 
     return create.dataPortalsHelper.create(em, { space }, {
@@ -93,7 +94,7 @@ describe('data portal service tests', () => {
 
   it('test create data portal', async () => {
     const siteAdmin = create.userHelper.createSiteAdmin(em)
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
 
     const input = {
@@ -154,7 +155,7 @@ describe('data portal service tests', () => {
   })
 
   it('test update data portal', async () => {
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     const cardImageFile = create.filesHelper.create(em, { user }, { name: 'cardImageFile' })
     await em.flush()
 
@@ -166,7 +167,10 @@ describe('data portal service tests', () => {
       cardImageId: 'testUid',
       cardImageUrl: 'testUrl',
     })
-    create.spacesHelper.addMember(em, {user, space}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
+    create.spacesHelper.addMember(em, { user, space }, {
+      role: SPACE_MEMBERSHIP_ROLE.LEAD,
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
+    })
     await em.flush()
 
     await dataPortalService.update({
@@ -178,7 +182,7 @@ describe('data portal service tests', () => {
       cardImageUid: cardImageFile.uid,
       content: 'content-update',
       editorState: 'editorState'
-    } as DataPortalParam,user.id)
+    } as DataPortalParam, user.id)
     em.clear()
 
     const loadedDataPortal = await em.findOneOrFail(entities.DataPortal, { id: portal.id }, { populate: ['space'] })
@@ -193,10 +197,13 @@ describe('data portal service tests', () => {
   })
 
   it('test update data portal settings - fail without space lead privileges', async () => {
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     const portal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
-    create.spacesHelper.addMember(em, {user, space}, {role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST})
+    create.spacesHelper.addMember(em, { user, space }, {
+      role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
+    })
     await em.flush()
 
     try {
@@ -215,33 +222,40 @@ describe('data portal service tests', () => {
     const admin = create.userHelper.create(em)
     const lead = create.userHelper.create(em)
     const ordinary = create.userHelper.create(em)
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     const portal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
-    create.spacesHelper.addMember(em, {user: admin, space}, {role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {user: lead, space}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
-    create.spacesHelper.addMember(em, {
+    create.spacesHelper.addMember(em, { user: admin, space }, {
+      role: SPACE_MEMBERSHIP_ROLE.ADMIN,
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
+    })
+    create.spacesHelper.addMember(em, { user: lead, space }, {
+      role: SPACE_MEMBERSHIP_ROLE.LEAD,
+      side: SPACE_MEMBERSHIP_SIDE.HOST,
+    })
+    create.spacesHelper.addMember(em,
+      {
         user: ordinary,
-        space
+        space,
       },
-      {role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST},
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
     )
     await em.flush()
 
     await dataPortalService.update({
       id: portal.id,
-      content: 'change 1'
+      content: 'change 1',
     } as DataPortalParam, admin.id)
 
     await dataPortalService.update({
       id: portal.id,
-      content: 'change 2'
+      content: 'change 2',
     } as DataPortalParam, lead.id)
 
     try {
       await dataPortalService.update({
         id: portal.id,
-        content: 'change 3'
+        content: 'change 3',
       } as DataPortalParam, ordinary.id)
       expect.fail('Operation is expected to fail.')
     } catch (error: any) {
@@ -251,13 +265,23 @@ describe('data portal service tests', () => {
   })
 
   it('test get data portal', async () => {
-    const portal = await createPortal('space-name', 'host-lead', 'guest-lead',
-      'test-data-portal', 'description', DATA_PORTAL_STATUS.OPEN, 1, 'testUid', 'testUrl')
-    create.spacesHelper.addMember(em, {
+    const portal = await createPortal(
+      'space-name',
+      'host-lead',
+      'guest-lead',
+      'test-data-portal',
+      'description',
+      DATA_PORTAL_STATUS.OPEN,
+      1,
+      'testUid',
+      'testUrl',
+    )
+    create.spacesHelper.addMember(em,
+      {
         user,
-        space: portal.space.getEntity()
+        space: portal.space.getEntity(),
       },
-      {role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.HOST},
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.HOST },
     )
 
     await em.flush()
@@ -335,7 +359,7 @@ describe('data portal service tests', () => {
     const contributor = await createPortalAndAddMember('portal2', SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR)
     const admin = await createPortalAndAddMember('portal3', SPACE_MEMBERSHIP_ROLE.ADMIN)
     const lead = await createPortalAndAddMember('portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
-    const nocoiner = await create.userHelper.create(em, {dxuser: 'has nothing'})
+    const nocoiner = create.userHelper.create(em, { dxuser: 'has nothing' })
 
     let result = await dataPortalService.list(viewer.userId)
     expect(result.data_portals.length).eq(1)
@@ -353,13 +377,13 @@ describe('data portal service tests', () => {
     expect(result.data_portals.length).eq(0)
   })
 
-  it('test list data portal - filter by default', async() => {
-    const siteAdmin = await create.userHelper.createSiteAdmin(em)
-    const space = await create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
+  it('test list data portal - filter by default', async () => {
+    const siteAdmin = create.userHelper.createSiteAdmin(em)
+    const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
     await em.flush()
-    await create.spacesHelper.addMember(em, { space, user }, {role: SPACE_MEMBERSHIP_ROLE.VIEWER })
-    await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-default', default: true })
-    await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-non-default', default: false })
+    create.spacesHelper.addMember(em, { space, user }, { role: SPACE_MEMBERSHIP_ROLE.VIEWER })
+    create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-default', default: true })
+    create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-non-default', default: false })
     await em.flush()
 
     let result = await dataPortalService.list(user.id)
@@ -373,11 +397,11 @@ describe('data portal service tests', () => {
   })
 
   it('test update data portal and make sure only one is default', async () => {
-    const siteAdmin = await create.userHelper.createSiteAdmin(em)
-    const space = await create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
+    const siteAdmin = create.userHelper.createSiteAdmin(em)
+    const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
     await em.flush()
     await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-default', default: true })
-    const dataPortal2 = await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-non-default', default: false })
+    const dataPortal2 = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal-non-default', default: false })
     await em.flush()
 
     await dataPortalService.update({ id: dataPortal2.id, default: true } as DataPortalParam, siteAdmin.id)
@@ -387,12 +411,12 @@ describe('data portal service tests', () => {
   })
 
   it('test create data portal card image', async () => {
-    const challengeUser = await create.userHelper.createChallengeBot(em)
-    const space = await create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
-    const dataPortal = await create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
+    const challengeUser = create.userHelper.createChallengeBot(em)
+    const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
+    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
     await em.flush()
-    const result = await dataPortalService.createCardImage({name: 'test-card.jpg', description: 'description'}, dataPortal.id, challengeUser.id)
-    const file = await em.findOneOrFail(entities.UserFile, {name: 'test-card.jpg'})
+    const result = await dataPortalService.createCardImage({ name: 'test-card.jpg', description: 'description' }, dataPortal.id, challengeUser.id)
+    const file = await em.findOneOrFail(entities.UserFile, { name: 'test-card.jpg' })
 
     expect(result).eq('file-dxid-1')
     expect(file.project).eq('hostProject')
@@ -405,10 +429,10 @@ describe('data portal service tests', () => {
   })
 
   const createAndLoadPortal = async (): Promise<DataPortal> => {
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    create.spacesHelper.addMember(em, {user, space}, {role: SPACE_MEMBERSHIP_ROLE.LEAD})
-    const dataPortal = create.dataPortalsHelper.create(em, {space}, {name: 'portal-name'})
+    create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
+    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
     await em.flush()
 
     await dataPortalService.createResource({
@@ -416,7 +440,7 @@ describe('data portal service tests', () => {
       description: 'description'
     }, dataPortal.id, user.id)
     em.clear()
-    return await em.findOneOrFail(entities.DataPortal, {id: dataPortal.id}, {populate: ['space', 'resources.userFile']})
+    return await em.findOneOrFail(entities.DataPortal, { id: dataPortal.id }, { populate: ['space', 'resources.userFile'] })
   }
 
   it('test create data portal resource', async () => {
@@ -429,13 +453,13 @@ describe('data portal service tests', () => {
   })
 
   it('test create data portal resource - fail with lack of privileges', async () => {
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    const dataPortal = create.dataPortalsHelper.create(em, {space}, {name: 'portal-name'})
+    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
     await em.flush()
 
     try {
-      await dataPortalService.createResource({name: 'test'} as FileParam, dataPortal.id, user.id)
+      await dataPortalService.createResource({ name: 'test' } as FileParam, dataPortal.id, user.id)
       expect.fail('Operation is expected to fail')
     } catch (error: any) {
       expect(error.name).to.equal('PermissionError')
@@ -444,15 +468,15 @@ describe('data portal service tests', () => {
   })
 
   it('test remove data portal resource', async () => {
-    let fileRemoveOperationParam: IdInput
+    let fileRemoveOperationParam: IdInput = { id: 0 }
     const fileRemoveOperation = {
       async run(input): Promise<number> {
-        const fileToDelete = await em.findOne(entities.UserFile, {id: input.id})
+        const fileToDelete = await em.findOne(entities.UserFile, { id: input.id })
         if (fileToDelete) {
           const fileDeleteEvent = new Event()
           fileDeleteEvent.type = EVENT_TYPES.FILE_DELETED
           fileDeleteEvent.dxuser = user.dxuser
-          fileDeleteEvent.param1 = fileToDelete.name
+          fileDeleteEvent.param1 = '10'
           fileDeleteEvent.param2 = fileToDelete.dxid
 
           await em.persistAndFlush(fileDeleteEvent)
@@ -470,33 +494,30 @@ describe('data portal service tests', () => {
     em.clear()
 
     // load portal and verify that resource was removed
-    const loadedDataPortalAfterRemoval = await em.findOneOrFail(entities.DataPortal, {id: loadedDataPortal.id}, {populate: ['space', 'resources.userFile']})
+    const loadedDataPortalAfterRemoval = await em.findOneOrFail(entities.DataPortal, { id: loadedDataPortal.id }, { populate: ['space', 'resources.userFile'] })
     expect(loadedDataPortalAfterRemoval.resources.getItems().length).eq(0)
 
     // verify that resource was removed from database
-    const userFile = await em.findOne(entities.UserFile, {name: 'test-resource.jpg'})
+    const userFile = await em.findOne(entities.UserFile, { name: 'test-resource.jpg' })
     expect(userFile).eq(null)
     const resource = await em.find(entities.Resource, {})
     expect(resource.length).eq(0)
 
     // verify that event was created
     const events = await em.find(entities.Event, {})
-    expect(events.length).eq(2)
+    expect(events.length).eq(1)
 
-    expect(events[0].type).eq(EVENT_TYPES.FILE_CREATED)
+    expect(events[0].type).eq(EVENT_TYPES.FILE_DELETED)
     expect(events[0].dxuser).eq(user.dxuser)
-    expect(events[0].param1).eq('test-resource.jpg')
+    expect(events[0].param1).eq('10')
     expect(events[0].param2).eq('file-dxid')
 
-    expect(events[1].type).eq(EVENT_TYPES.FILE_DELETED)
-    expect(events[1].dxuser).eq(user.dxuser)
-    expect(events[1].param1).eq('test-resource.jpg')
-    expect(events[1].param2).eq('file-dxid')
+    expect(fileRemoveOperationParam?.id).eq(1)
   })
 
   it('test remove data portal resource - fail with lack of privileges', async () => {
     const loadedDataPortal = await createAndLoadPortal()
-    const unprivilegedUser = await create.userHelper.create(em)
+    const unprivilegedUser = create.userHelper.create(em)
     await em.flush()
 
     try {
@@ -509,13 +530,13 @@ describe('data portal service tests', () => {
   })
 
   it('test list resources', async () => {
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    create.spacesHelper.addMember(em, {user, space}, {role: SPACE_MEMBERSHIP_ROLE.LEAD})
-    const dataPortal = create.dataPortalsHelper.create(em, {space}, {name: 'portal-name'})
+    create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
+    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
     await em.flush()
-    create.dataPortalsHelper.addResource(em, {user, dataPortal}, 'name1', 'dxid1')
-    create.dataPortalsHelper.addResource(em, {user, dataPortal}, 'name2', 'dxid2')
+    create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name1', 'dxid1')
+    create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name2', 'dxid2')
     await em.flush()
 
     const result = await dataPortalService.listResources(dataPortal.id, user.id)
@@ -524,7 +545,7 @@ describe('data portal service tests', () => {
 
   it('test list resources - unprivileged receives no resources', async () => {
     const loadedDataPortal = await createAndLoadPortal()
-    const unprivilegedUser = await create.userHelper.create(em)
+    const unprivilegedUser = create.userHelper.create(em)
     await em.flush()
 
     const result = await dataPortalService.listResources(loadedDataPortal.id, unprivilegedUser.id)
@@ -532,18 +553,18 @@ describe('data portal service tests', () => {
   })
 
   it('test create resource link', async () => {
-    await create.userHelper.createChallengeBot(em)
-    const space = create.spacesHelper.create(em, {name: 'space-name'})
+    create.userHelper.createChallengeBot(em)
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    const dataPortal = create.dataPortalsHelper.create(em, {space}, {name: 'portal-name'})
+    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
     await em.flush()
-    const resource = create.dataPortalsHelper.addResource(em, {user, dataPortal}, 'name1', 'dxid1')
+    const resource = create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name1', 'dxid1')
     await em.flush()
     em.clear()
 
     const result = await dataPortalService.createResourceLink(resource.id)
     expect(result).eq('testingURL')
-    const loadedResource = await em.findOneOrFail(entities.Resource, {id: resource.id})
+    const loadedResource = await em.findOneOrFail(entities.Resource, { id: resource.id })
     expect(loadedResource.url).eq('testingURL')
   })
 })

@@ -13,16 +13,17 @@ import {
 import { JobDescribeResponse } from '@pfda/https-apps-shared/src/platform-client'
 import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
-import { IOType, SCOPE } from '../../types/common'
-import { formatDuration } from '../../utils/format'
 import { App } from '../app'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { User } from '../user'
-import { UserFile } from '../user-file'
-import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
-import { isStateActive, isStateTerminal } from './job.helper'
-import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
+import { isStateActive, isStateTerminal } from './job.helper'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
+import { Provenance } from './job.input'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
+import { formatDuration } from '../../utils/format'
+import type { IOType} from '../../types/common'
+import { SCOPE } from '../../types/common'
+import { UserFile } from '../user-file'
 
 export interface RunData {
   output_folder_path?: string
@@ -41,17 +42,17 @@ export interface RunData {
 // @Filter({ name: 'isActive', cond: { $or: [ ACTIVE_STATES.map(x => { return { 'state': x } }) ]}})
 // @Filter({ name: 'isTerminal', cond: { $or: [ TERMINAL_STATES.map(x => { return { 'state': x } }) ]}})
 @Filter({ name: 'isActive', cond: { $or: [
-  { 'state': JOB_STATE.IDLE },
-  { 'state': JOB_STATE.RUNNING },
+  { state: JOB_STATE.IDLE },
+  { state: JOB_STATE.RUNNING },
 ]}})
 @Filter({ name: 'isNonTerminal', cond: { $or: [
-  { 'state': JOB_STATE.IDLE },
-  { 'state': JOB_STATE.RUNNING },
-  { 'state': JOB_STATE.TERMINATING },
+  { state: JOB_STATE.IDLE },
+  { state: JOB_STATE.RUNNING },
+  { state: JOB_STATE.TERMINATING },
 ]}})
 @Filter({ name: 'isTerminal', cond: { $or: [
-  { 'state': JOB_STATE.DONE },
-  { 'state': JOB_STATE.TERMINATED },
+  { state: JOB_STATE.DONE },
+  { state: JOB_STATE.TERMINATED },
 ]}})
 @Filter({
   name: 'accessibleBy', cond: args => ({

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { EntityManager, Reference } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/core'
 import { App, Job, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { create, generate, db } from '@pfda/https-apps-shared/src/test'
@@ -87,7 +87,7 @@ describe('job-failed.handler', () => {
       const template = await handler.template(user)
 
       expect(template).to.have.property('emailType', EMAIL_TYPES.jobFailed)
-      expect(template.body).to.include("FailureReason: failure message")
+      expect(template.body).to.include('FailureReason: failure message')
     })
 
     it('returns cost limit exceeded template', async () => {
@@ -104,7 +104,7 @@ describe('job-failed.handler', () => {
       await handler.setupContext()
       const template = await handler.template(user)
 
-      expect(template.body).to.include("limit being reached")
+      expect(template.body).to.include('limit being reached')
     })
   })
 })
