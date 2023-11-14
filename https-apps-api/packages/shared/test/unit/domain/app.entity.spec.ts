@@ -2,9 +2,10 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
 import { App, Job, User } from '../../../src/domain'
 import { database, } from '@pfda/https-apps-shared'
+import { Spec } from '../../../src/domain/app/app.input'
 import { create, db, generate } from '../../../src/test'
 import { JOB_STATE } from '../../../src/domain/job/job.enum'
-import { Internal } from '../../../src/domain/app/app.entity'
+import { AppSpec, Internal } from '../../../src/domain/app/app.entity'
 
 describe('app.entity tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -82,5 +83,16 @@ describe('app.entity tests', () => {
     expect(app.hasWorkstationAPI).to.be.false()
     expect(app.workstationAPITag).to.equal(null)
     expect(app.workstationAPIVersion).to.equal(null)
+  })
+
+  it('save and load JSON types appEntity.spec and appEntity.internal', async () => {
+    const app = create.appHelper.createRegular(em, { user }, {
+      spec: {
+        input_spec: [],
+        output_spec: [],
+        internet_access: true,
+        instance_type: 't2.micro',
+      } as AppSpec
+    })
   })
 })

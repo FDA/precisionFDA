@@ -1,17 +1,18 @@
 /* eslint-disable no-warning-comments */
+import { EntityManager } from '@mikro-orm/mysql'
 import { UserFile } from '../..'
+import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { User } from '../../user/user.entity'
 import { client, config, errors, queue } from '../../..'
 import { BaseOperation } from '../../../utils/base-operation'
 import { UserCtx, UserOpsCtx } from '../../../types'
 import { UserRepository } from '../../user/user.repository'
-import { FILE_STATE_DX, FILE_STATE_PFDA } from '../user-file.types'
+import { FILE_STATE_DX, FILE_STATE_PFDA, IFileOrAsset } from '../user-file.types'
 import { createSyncFilesStateTask } from '../../../queue'
 import { findFileOrAssetWithUid } from '../user-file.helper'
 import { SyncFilesStateOperation } from './sync-files-state'
 import { FileUpdateOperation } from './file-update'
 import { CloseFileInput } from '../user-file.input'
-
 
 const responseMap = {
   [FILE_STATE_DX.ABANDONED]: 'Cannot close file because it has been abandoned',
@@ -22,6 +23,17 @@ const responseMap = {
 
 type FileCloseOperationResponse = {
   message?: string
+}
+
+const createFileCreateEvent = async (userFile: IFileOrAsset, user: User, em: EntityManager) => {
+  const fileEvent = await createFileEvent(
+    EVENT_TYPES.FILE_CREATED,
+    userFile,
+    userFile.name,
+    user,
+  )
+  em.persist(fileEvent)
+  await em.flush()
 }
 
 // FileCloseOperation closes an open File or Asset
@@ -124,6 +136,7 @@ class FileCloseOperation extends BaseOperation<
                   state: updatedFileOrAsset.state,
                   size: updatedFileOrAsset.fileSize,
                 }, 'FileCloseOperation: File is now closed after FileUpdateOperation')
+                await createFileCreateEvent(updatedFileOrAsset, user, em)
               } else {
                 if (input.forceWaitForClose) {
                   // TODO this is just temporary solution for PFDA-4599, before
@@ -147,6 +160,7 @@ class FileCloseOperation extends BaseOperation<
                           size: updatedFileOrAsset.fileSize,
                         }, 'FileCloseOperation: File was not closed after FileUpdateOperation, retrying finished')
                         updateFinished = true
+                        await createFileCreateEvent(updatedFileOrAsset, user, em)
                       }
                     })
                   }
