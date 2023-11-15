@@ -104,7 +104,7 @@ interface INavigationBarProps {
   title?: string,
   subtitle?: string,
   user?: any,
-  children: ReactNode
+  children?: ReactNode
 }
 
 const NavigationBar = ({ children, title, subtitle, user }: INavigationBarProps) => {

@@ -169,8 +169,8 @@ export const workflowExecutionPrefix = 'workflow-'
 
 export interface Pagination {
   current_page: number;
-  next_page?: any;
-  prev_page?: any;
+  next_page?: number | null;
+  prev_page?: number | null;
   total_pages: number;
   total_count: number;
 }

@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import Select from 'react-select'
 import { fetchChallengeScopes } from './api'
 
-const useFetchChallengeScopesQuery = (id?: string) =>
-  useQuery(['challenge-scopes'], () => fetchChallengeScopes(id), {
+const useFetchChallengeScopesQuery = () =>
+  useQuery(['challenge-scopes'], () => fetchChallengeScopes(), {
     select(data) {
       return data?.map(s => ({
         label: s[0],
@@ -14,19 +14,17 @@ const useFetchChallengeScopesQuery = (id?: string) =>
   })
 
 export const ScopeFieldSelect = ({
-  challengeId,
   value,
   onBlur,
   isSubmitting,
   onChange,
 }: {
-  challengeId?: string
   value: { label: string, value: string } | null
   onBlur: () => void
   isSubmitting: boolean
   onChange: (v: any) => void
 }) => {
-  const { data: scopesOptions, isLoading } = useFetchChallengeScopesQuery(challengeId)
+  const { data: scopesOptions, isLoading } = useFetchChallengeScopesQuery()
   return (
     <Select
       options={scopesOptions}
