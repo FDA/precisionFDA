@@ -50,7 +50,7 @@
     "@types/ramda": "^0.27.28",
     "@types/tough-cookie": "^4.0.2",
     "ajv": "^8.0.5",
-    "axios": "^0.21.4",
+    "axios": "^1.6.0",
     "axios-cookiejar-support": "^4.0.6",
     "bull": "^4.8.5",
     "chai": "^4.2.0",
