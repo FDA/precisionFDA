@@ -39,7 +39,7 @@
     "@storybook/react": "^7.0.0-beta.53",
     "@tanstack/react-query": "^4.23.0",
     "@tanstack/react-query-devtools": "^4.23.0",
-    "axios": "^1.2.3",
+    "axios": "^1.6.0",
     "classnames": "^2.2.6",
     "core-js": "^3.8.2",
     "date-fns": "^2.16.1",
