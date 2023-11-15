@@ -815,7 +815,7 @@ class ApiController < ApplicationController
       scope: "public",
     )
 
-    render json: { id: file.uid }
+    render json: { uid: file.uid, id: file.id }
   end
 
   # Inputs:

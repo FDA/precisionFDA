@@ -1,37 +1,22 @@
 /* eslint-disable no-nested-ternary */
-import { AxiosError } from 'axios'
-import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+import React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
-import { NotAllowedPage } from '../../../components/NotAllowed'
-import { PageTitle } from '../../../components/Page/styles'
-import { MutationErrors } from '../../../types/utils'
-import { dateToInput } from '../../../utils/datetime'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { NotAllowedPage } from '../../../components/NotAllowed'
+import { BackLinkMargin } from '../../../components/Page/PageBackLink'
+import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
+import { dateToInput } from '../../../utils/datetime'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { StyledBackLink } from '../../home/home.styles'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
+import { ChallengePayload, editChallengeRequest } from '../api'
 import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
-import { createChallengeCardImage, editChallengeRequest, getChallengeImageLink } from './api'
-import { ChallengeForm } from './ChallengeForm'
-import { subtitle, title } from './common'
-
-function formatMutationErrors(
-  obj?: Record<string, any> | unknown,
-): MutationErrors | undefined {
-  const nObj = obj
-  if (nObj) {
-    delete nObj['app_id']
-    return {
-      errors: [obj['app_id']],
-      fieldErrors: { ...nObj },
-    }
-  }
-  return undefined
-}
+import { ChallengeForm, IChallengeForm } from './ChallengeForm'
+import { formatMutationErrors, mapFormToPayload, subtitle, title } from './common'
 
 const EditChallengePage = () => {
   const history = useHistory()
@@ -39,12 +24,11 @@ const EditChallengePage = () => {
   const queryClient = useQueryClient()
   const { challengeId } = useParams<{ challengeId: string }>()
   const { data, isLoading } = useChallengeDetailsQuery(challengeId, true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [imgUid, setImageUid] = useState('')
 
   const mutation = useMutation({
     mutationKey: ['edit-challenge'],
-    mutationFn: (payload: any) => editChallengeRequest(payload, challengeId),
+    mutationFn: (payload: ChallengePayload) =>
+      editChallengeRequest(payload, parseInt(challengeId, 10)),
     onSuccess: () => {
       queryClient.invalidateQueries(['challenge-custom', challengeId])
       queryClient.invalidateQueries(['challenge', challengeId])
@@ -52,24 +36,10 @@ const EditChallengePage = () => {
       toast.success('Challenge successfully edited')
     },
     onError: (e: AxiosError) => {
-      if(e?.response?.data?.app_id) toast.error(`Error: ${e?.response?.data?.app_id}`)
+      if (e?.response?.data?.app_id)
+        toast.error(`Error: ${e?.response?.data?.app_id}`)
     },
   })
-
-  const imageMutation = useMutation({
-    mutationFn: (v: any) => createChallengeCardImage(v),
-    onError: () => setIsSaving(false),
-    mutationKey: ['create-challenge-image'],
-  })
-
-  const linkMutation = useMutation({
-    mutationFn: (fileUid: string) => getChallengeImageLink(fileUid),
-  })
-
-  const handleImageSelection = async (img: File) => {
-    const result = await imageMutation.mutateAsync(img)
-    setImageUid(result)
-  }
 
   const mutationErrors = formatMutationErrors(
     mutation.error instanceof AxiosError
@@ -77,28 +47,11 @@ const EditChallengePage = () => {
       : undefined,
   )
 
-  const handleSubmit = async (v: any) => {
-    setIsSaving(true)
-    let link
-    if(imgUid) {
-      link = await linkMutation.mutateAsync(imgUid)
-    }
-    
-    await mutation.mutateAsync({
-      name: v.name,
-      description: v.description,
-      scope: v.scope?.value,
-      app_owner_id: v.app_owner_id?.value,
-      start_at: v.start_at,
-      end_at: v.end_at,
-      status: v.status?.value,
-      card_image_id: v.card_image_id,
-      card_image_url: link?.url || v.card_image_url,
-      pre_registration_url: v.pre_registration_url,
-    })
+  const handleSubmit = async (v: IChallengeForm) => {
+    await mutation.mutateAsync(mapFormToPayload(v))
   }
 
-  const challenge = data?.challenge
+  const challenge = data
 
   const defaultValues = challenge && {
     name: challenge?.name,
@@ -133,28 +86,29 @@ const EditChallengePage = () => {
   return (
     <UserLayout>
       <NavigationBar title={title} subtitle={subtitle} user={user} />
-      <StyledBackLink linkTo={`/challenges/${challengeId}`}>
-        Back to Challenge
-      </StyledBackLink>
-      {isLoading ? (
-        <Loader />
-      ) : user?.can_create_challenges ? (
-        <StyledPageCenter>
-          <StyledPageContent>
-            <PageTitle>Editing Challenge: {data?.challenge.name}</PageTitle>
-            <ChallengeForm
-              defaultValues={defaultValues}
-              challenge={data?.challenge}
-              onSubmit={handleSubmit}
-              mutationErrors={mutationErrors}
-              onImageSelection={handleImageSelection}
-              isSaving={isSaving}
-            />
-          </StyledPageContent>
-        </StyledPageCenter>
-      ) : (
-        <NotAllowedPage />
-      )}
+      <StyledPageCenter>
+        <StyledPageContent>
+          <BackLinkMargin linkTo={`/challenges/${challengeId}`}>
+            Back to Challenge
+          </BackLinkMargin>
+          {isLoading ? (
+            <Loader />
+          ) : user?.can_create_challenges ? (
+            <>
+              <PageTitle>Editing Challenge: {data?.name}</PageTitle>
+              <ChallengeForm
+                defaultValues={defaultValues}
+                challenge={data}
+                onSubmit={handleSubmit}
+                mutationErrors={mutationErrors}
+                isSaving={mutation.isLoading}
+              />
+            </>
+          ) : (
+            <NotAllowedPage />
+          )}
+        </StyledPageContent>
+      </StyledPageCenter>
     </UserLayout>
   )
 }
