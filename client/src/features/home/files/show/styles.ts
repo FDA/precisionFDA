@@ -33,6 +33,7 @@ export const FileDescription = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  white-space: pre-line;
 `
 export const StyledTagContainer = styled.div`
   display: flex;
