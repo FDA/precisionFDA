@@ -48,6 +48,7 @@ import { IFile } from '../../files/files.types'
 import { UserLayout } from '../../../../layouts/UserLayout'
 import { FormPageContainer } from '../../../../components/Page/styles'
 import { BackLink } from '../../../../components/Page/PageBackLink'
+import { getValue } from '../../apps/run/utils';
 
 interface WorkflowRunData {
   analysisName: string;
@@ -96,6 +97,7 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
 
   stages?.flatMap(stage => stage.inputs).forEach(input => {
     const fieldName = `${input.parent_slot}#${input.name}`
+
     const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
     if (defaultValue !== undefined) {
       if (input.class === 'file') {
@@ -217,12 +219,20 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
 
   Object.keys(vals.inputs).forEach(key => {
     const value = vals.inputs[key]
-    const input: RunWorkflowInput = {
-      input_name: key.replace('#', '.'),
-      input_value: (typeof value === 'object') ? (value as IAccessibleFile).uid : value,
-      class: classes.get(key) ?? '',
+    const stageName = key.substring(0, key.indexOf('#'))
+    const inputName = key.substring(key.indexOf('#') + 1)
+    const stage = stages?.find(stage => stage.slotId === stageName)
+    const inputOutput = stage?.inputs.find(input => input.name === inputName)
+    if (inputOutput !== undefined) {
+      const inputSpec: InputSpec = {default: null, choices: null, class: inputOutput.class, help: "", name: inputOutput.name}
+      const input: RunWorkflowInput = {
+        input_name: key.replace('#', '.'),
+        input_value: (typeof value === 'object') ? (value as IAccessibleFile).uid : getValue(inputName, value, [inputSpec]),
+        class: classes.get(key) ?? '',
+      }
+
+      inputs.push(input)
     }
-    inputs.push(input)
   })
 
   return {
