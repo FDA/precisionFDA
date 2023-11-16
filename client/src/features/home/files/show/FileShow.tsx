@@ -173,7 +173,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
           <MetadataRow>
             <MetadataItem>
               <MetadataKey>Location</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="file-location">
                 {file.links.space ? (
                   <Link target="_blank" to={file.links.space}>
                     {file.location}
@@ -188,7 +188,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
 
             <MetadataItem>
               <MetadataKey>ID</MetadataKey>
-              <MetadataVal>{file.uid}</MetadataVal>
+              <MetadataVal data-testid="file-uid">{file.uid}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
@@ -202,7 +202,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
 
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="file-origin">
                 {file.links?.origin_object?.origin_type === 'Job' ||
                 file.links?.origin_object?.origin_type === 'Comparison' ? (
                   <Link
@@ -224,7 +224,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
 
             <MetadataItem>
               <MetadataKey>File Size</MetadataKey>
-              <MetadataVal>{file.file_size}</MetadataVal>
+              <MetadataVal data-testid="file-size">{file.file_size}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
@@ -237,7 +237,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
           {file.tags.length > 0 && (
             <StyledTags>
               {file.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                <StyledTagItem data-testid="file-tag-item" key={tag}>{tag}</StyledTagItem>
               ))}
             </StyledTags>
           )}
