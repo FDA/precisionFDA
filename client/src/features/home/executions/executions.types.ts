@@ -124,7 +124,7 @@ export interface IJob {
 }
 
 export interface IExecution {
-  id: string
+  id: number
   state: JobState
   uid: string
   dxid: string
@@ -158,7 +158,10 @@ export interface IExecution {
   links: Links
   jobs?: Job[]
   logged_dxuser: string
-  tags: any[]
+  tags: string[]
+  properties: {
+    [key: string]: string
+  }
   workflow_uid?: string
   workflow_title?: string
 }

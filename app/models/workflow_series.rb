@@ -23,6 +23,8 @@ class WorkflowSeries < ApplicationRecord
   include TagsContainer
 
   has_many :workflows
+  has_many :properties, -> { where(target_type: "workflowSeries") }, foreign_key: "target_id"
+
   belongs_to :latest_revision_workflow, class_name: "Workflow"
   belongs_to :user
 

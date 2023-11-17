@@ -1,6 +1,6 @@
 import {
   Entity,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   PrimaryKey,
   Property,
@@ -43,10 +43,10 @@ export class SpaceEvent {
   data?: string
 
   @ManyToOne(() => User)
-  user: IdentifiedReference<User>
+  user: Ref<User>
 
   @ManyToOne(() => Space)
-  space: IdentifiedReference<Space>
+  space: Ref<Space>
 
   constructor(user: User, space: Space) {
     this.user = Reference.create(user)

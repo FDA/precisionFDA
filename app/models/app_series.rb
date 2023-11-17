@@ -28,6 +28,7 @@ class AppSeries < ApplicationRecord
 
   has_many :apps
   has_many :jobs
+  has_many :properties, -> { where(target_type: "appSeries") }, foreign_key: "target_id"
   belongs_to :latest_revision_app, class_name: "App"
   belongs_to :latest_version_app, class_name: "App"
   belongs_to :user

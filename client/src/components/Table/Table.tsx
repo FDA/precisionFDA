@@ -7,6 +7,7 @@ import React, {
   ReactElement,
   ReactNode,
   useMemo,
+  useState,
 } from 'react'
 import {
   Cell,
@@ -17,6 +18,7 @@ import {
   SortingRule,
   TableInstance,
   TableOptions,
+  UseResizeColumnsState,
   useColumnOrder,
   useExpanded,
   useFilters,
@@ -26,15 +28,112 @@ import {
   useMountedLayoutEffect,
   usePagination,
   useResizeColumns,
-  UseResizeColumnsState,
-  useRowSelect, useSortBy,
+  useRowSelect,
+  useSortBy,
   useTable,
 } from 'react-table'
 import 'regenerator-runtime'
-import { DefaultColumnFilter } from './helpers'
+import styled from 'styled-components'
+import { ActionsDropdownGroupContent } from '../../features/home/ActionDropdownContent'
+import { ActionFunctionsType, ActionGroupType } from '../../features/home/types'
+import { TransparentButton } from '../Button'
+import Dropdown from '../Dropdown'
+import { ColumnsIcon } from '../icons/ColumnsIcon'
 import { LoadingRows } from './LoadingRows'
+import { DefaultColumnFilter } from './helpers'
 import { ReactTableStyles, StyledTable } from './styles'
 import { expandHook, selectionHook } from './tableHooks'
+import { useComponentWidth } from './useComponentWidth'
+
+const StyledColumnSelect = styled.div`
+  position: sticky;
+  top: 0;
+  left: calc(100%);
+  width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 3;
+  display: grid;
+`
+
+const Back = styled.div`
+  grid-area: 1 / 1;
+  background-color: white;
+  width: 48px;
+  height: 32px;
+  margin-right: -4px;
+  filter: blur(3px);
+`
+
+const Front = styled(Dropdown)`
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 3;
+  width: 32px;
+  svg {
+    color: #3c4043;
+  }
+`
+
+type SelectColumn = {
+  key: string
+  title: string
+  isVisible: boolean
+  groupTitle: string
+}
+
+type FilterSelectColumn = {
+  [key: string]: SelectColumn
+}
+
+const ColumnSelect = ({
+  columns,
+  onChangeVisible,
+}: {
+  columns: SelectColumn[],
+  onChangeVisible: (hiddenCols: string, cols: boolean) => void,
+}) => {
+  const actions: {[key: string]: ActionFunctionsType<any>} = {}
+  for (const col of columns) {
+    if (!actions[col.groupTitle]) {
+      actions[col.groupTitle] = {}
+    }
+    actions[col.groupTitle][col.key] = {
+      type: 'selection',
+      isDisabled: false,
+      isSelected: col.isVisible,
+      key: col.key,
+      title: col.title,
+      func: (isVisible: boolean) => {
+        onChangeVisible(col.key, isVisible)
+      },
+    }
+  }
+  const content: ActionGroupType[] = Object.entries(actions).map(([title, actions]) => ({
+    actions,
+    title,
+  }))
+  return (
+    <StyledColumnSelect>
+      <Front
+        trigger="click"
+        content={
+          <ActionsDropdownGroupContent content={content} />
+        }
+      >
+        {dropdownProps => (
+          <TransparentButton {...dropdownProps} active={dropdownProps.isActive}>
+            <ColumnsIcon height={14} />
+          </TransparentButton>
+        )}
+      </Front>
+      <Back />
+    </StyledColumnSelect>
+  )
+}
 
 export interface IRowActionProps<T extends object = {}> extends CellProps<T> {
   context: any
@@ -44,6 +143,7 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   name: string
   fillWidth?: boolean
   hiddenColumns?: string[]
+  properties?: string[] | undefined
   loading?: boolean
   loadingComponent?: any
   shouldResetFilters?: any[]
@@ -74,7 +174,9 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
   getRowId?: Parameters<typeof useTable>[0]['getRowId']
+  enableColumnSelect?: boolean
   shouldAllowScrollbar?: boolean
+  saveHiddenColumns: (cols: string[]) => void
 }
 
 export default function Table<T extends object>(
@@ -85,7 +187,7 @@ export default function Table<T extends object>(
     loading = true,
     columns,
     subcomponent,
-    hiddenColumns,
+    properties,
     isSelectable = false,
     selectedRows,
     setSelectedRows,
@@ -107,8 +209,10 @@ export default function Table<T extends object>(
     saveColumnResizeWidth,
     manualFilters,
     shouldAllowScrollbar,
+    enableColumnSelect = false,
+    hiddenColumns,
+    saveHiddenColumns = () => {},
   } = props
-
   const defaultColumn = {
     Filter: DefaultColumnFilter,
     disableResizing: !isColsResizable,
@@ -119,7 +223,6 @@ export default function Table<T extends object>(
     // width: 50, // width is used for both the flex-basis and flex-grow
     // maxWidth: 700, // maxWidth is only used as a limit for resizing
   }
-
   const instance = useTable<T>(
     {
       ...props,
@@ -137,22 +240,23 @@ export default function Table<T extends object>(
       manualSortBy: true,
       disableMultiSort: true,
     },
+
     useColumnOrder,
-    isFilterable ? useFilters : () => {},
-    isFilterable ? useGlobalFilter : () => {},
+    isFilterable ? useFilters : () => { },
+    isFilterable ? useGlobalFilter : () => { },
     useGroupBy,
-    isSortable ? useSortBy : () => {},
-    isExpandable ? useExpanded : () => {},
+    isSortable ? useSortBy : () => { },
+    isExpandable ? useExpanded : () => { },
     usePagination,
     useFlexLayout,
-    isExpandable ? expandHook : () => {},
-    isSelectable ? useRowSelect : () => {},
-    isSelectable ? selectionHook : () => {},
-    isColsResizable ? useResizeColumns : () => {},
-  )
-
-  const {
-    getTableProps,
+    isExpandable ? expandHook : () => { },
+    isSelectable ? useRowSelect : () => { },
+    isSelectable ? selectionHook : () => { },
+    isColsResizable ? useResizeColumns : () => { },
+    )
+    
+    const {
+      getTableProps,
     getTableBodyProps,
     prepareRow,
     visibleColumns,
@@ -163,27 +267,54 @@ export default function Table<T extends object>(
     toggleAllRowsSelected,
     setAllFilters,
   } = instance
+  
+
+  // Fix empty space with column header with calculated width
+  const { containerRef, containerWidth = 50 } = useComponentWidth()
+  const spacerWidth = useMemo(() => {
+    const sum = visibleColumns.map(c => c.width as number).reduce((accumulator, value) => {
+      return accumulator + value
+    }, 0)
+    return containerWidth > sum ? containerWidth - sum - 8 : 50
+  }, [visibleColumns])
+
+  const visibleFilters: FilterSelectColumn = useMemo(() => ({
+    ...visibleColumns
+    .filter((col: any) => typeof col.Header === 'string')
+    .reduce((value: FilterSelectColumn, curr: any) => ({
+      ...value,
+      [curr.id]: {
+        key: curr.id,
+        title: curr.Header,
+        isVisible: true,
+        groupTitle: 'Default Columns',
+    }}), {}),
+  }), [visibleColumns])
+
+  const [filterColumns, setFilterColumns] = useState<FilterSelectColumn>({})
 
   useMountedLayoutEffect(() => {
-    if(setSelectedRows) setSelectedRows(selectedRowIds)
+    if (setSelectedRows) setSelectedRows(selectedRowIds)
   }, [selectedRowIds, setSelectedRows])
 
   useMountedLayoutEffect(() => {
-    if(setSortByPreference) setSortByPreference(sortBy)
+    if (setSortByPreference) setSortByPreference(sortBy)
   }, [sortBy])
 
   // TODO: find a better way to reset filters when scope changes
   const reset = useMemo(() => shouldResetFilters, shouldResetFilters)
   useMountedLayoutEffect(() => {
-    if(reset && reset.length > 0) setAllFilters([])
+    if (reset && reset.length > 0) setAllFilters([])
   }, reset)
 
   useMountedLayoutEffect(() => {
-    if(typeof setFilters === 'function') setFilters(state.filters)
+    if (typeof setFilters === 'function') setFilters(state.filters)
   }, [state.filters, setFilters])
 
   useMountedLayoutEffect(() => {
-    if(hiddenColumns) setHiddenColumns(hiddenColumns)
+    if (hiddenColumns) {
+      setHiddenColumns(hiddenColumns)
+    }
   }, [hiddenColumns])
 
   useMountedLayoutEffect(() => {
@@ -202,21 +333,51 @@ export default function Table<T extends object>(
     }
   }, [columnResizing])
 
+  const onChangeVisible = (col: string, isVisible: boolean) => {
+    const newHCols = [...hiddenColumns ?? []]
+    if (isVisible) {
+      const index = hiddenColumns?.indexOf(col) ?? -1
+      if (index > -1) {
+        newHCols?.splice(index, 1)
+        saveHiddenColumns([...newHCols || []])
+      }
+    } else {
+      newHCols?.push(col)
+      saveHiddenColumns([...newHCols || []])
+    }
+  }
+
+  const getAvailableCols = () => {
+    const standardColumns = columns?.filter((c) => c?.id === typeof 'string' || true && !c.id?.includes('props.'))
+    .map(c => ({ key: c?.accessor, title: c.Header, groupTitle: 'Standard Columns', isVisible: !hiddenColumns?.includes(c.accessor) })) ?? []
+    const propColums = properties?.map(p => ({ key: `props.${p}`, title: p, groupTitle: 'Property Columns', isVisible: !hiddenColumns?.includes(`props.${p}`) })) ?? []
+
+    return [...standardColumns, ...propColums]
+  }
+
   return (
     <StyledTable data-testid="pfda-table">
-      <ReactTableStyles shouldFillWidth={fillWidth} shouldAllowScrollbar={shouldAllowScrollbar}>
-        <div className="tableWrap">
+      <ReactTableStyles
+        shouldFillWidth={fillWidth}
+        shouldAllowScrollbar={shouldAllowScrollbar}
+      >
+        <div className="tableWrap" ref={containerRef}>
           <div {...getTableProps()} className="table sticky">
             <div className="thead">
+              {enableColumnSelect && <ColumnSelect
+                columns={getAvailableCols()}
+                hiddenColumns={hiddenColumns}
+                onChangeVisible={onChangeVisible}
+                />
+              }
               {visibleColumns.map((column, i) => (
                 // eslint-disable-next-line react/jsx-key
                 <div {...column.getHeaderProps()} className="th">
                   {isColsResizable && column.getResizerProps && (
                     <div
                       {...column.getResizerProps()}
-                      className={`resizer ${
-                        column.isResizing ? 'isResizing' : ''
-                      }`}
+                      className={`resizer ${column.isResizing ? 'isResizing' : ''
+                        }`}
                     />
                   )}
                   {isSortable && column.canSort ? (
@@ -236,6 +397,7 @@ export default function Table<T extends object>(
                   )}
                 </div>
               ))}
+              <div className="th" style={{ width: spacerWidth, minWidth: 50 }} />
             </div>
 
             {isFilterable && (
@@ -269,15 +431,15 @@ export default function Table<T extends object>(
                       className="tr"
                     >
                       {r.cells.map(cell => (
-                          // eslint-disable-next-line react/jsx-key
-                          <div
-                            {...cell.getCellProps(cellProps && cellProps(cell))}
-                            className="td"
-                            data-testid={`table-col-${cell.column.id}`}
-                          >
-                            {cell.render('Cell')}
-                          </div>
-                        ))}
+                        // eslint-disable-next-line react/jsx-key
+                        <div
+                          {...cell.getCellProps(cellProps && cellProps(cell))}
+                          className="td"
+                          data-testid={`table-col-${cell.column.id}`}
+                        >
+                          {cell.render('Cell')}
+                        </div>
+                      ))}
                     </div>
                     {isExpandable && r.isExpanded
                       ? subcomponent && subcomponent(r)

@@ -26,6 +26,7 @@ class WorkflowSerializer < ApplicationSerializer
 
   attribute :all_tags_list, key: :tags
   attribute :job_count, key: :job_count
+  attribute :properties_object, key: :properties
 
   # Returns manually assigned jobs - do not confuse with object.jobs.
   attr_accessor :jobs
@@ -45,6 +46,14 @@ class WorkflowSerializer < ApplicationSerializer
   # Returns a tags list for a Workflow
   def all_tags_list
     object.workflow_series.all_tags_list
+  end
+
+  def properties_object
+    props = {}
+    object.properties.each do |prop|
+      props[prop.property_name] = prop.property_value
+    end
+    props
   end
 
   # Returns a user who has created this workflow.

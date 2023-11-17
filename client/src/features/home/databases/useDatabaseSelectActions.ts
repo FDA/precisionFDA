@@ -9,6 +9,7 @@ import { copyDatabasesRequest } from './databases.api'
 import { DBStatus, IDatabase } from './databases.types'
 import { useEditDatabaseModal } from './useEditDatabaseModal'
 import { useMethodModal } from './useMethodModal'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export const HOME_DATABASES_ACTIONS = {
   START: 'start',
@@ -29,6 +30,7 @@ export enum DatabaseActions {
   'Detach License' = 'Detach License',
   'Edit Database Info' = 'Edit Database Info',
   'Edit tags' = 'Edit tags',
+  'Edit properties' = 'Edit properties',
 }
 
 export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKeys: string[]) => {
@@ -89,6 +91,18 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownTagsModal,
   } = useEditTagsModal<IDatabase>({
     resource: 'dbclusters', selected: selected[0], onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+
+  const {
+    modalComp: propertiesModal,
+    setShowModal: setPropertiesModal,
+    isShown: isShownPropertiesModal,
+  } = useEditPropertiesModal<IDatabase>({
+    type: 'dbCluster',
+    selected: selected[0],
+    onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
     },
   })
@@ -176,6 +190,12 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
+    },
+    'Edit properties': {
+      func: () => setPropertiesModal(true),
+      isDisabled: selected.length !== 1,
+      modal: propertiesModal,
+      showModal: isShownPropertiesModal,
     },
   }
 

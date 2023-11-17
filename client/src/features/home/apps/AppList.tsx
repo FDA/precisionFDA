@@ -1,15 +1,15 @@
 import { omit } from 'ramda'
-import React, { useEffect, useMemo, useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import React, { useMemo } from 'react'
+import { Link, useHistory, useLocation } from 'react-router-dom'
+import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { Pagination } from '../../../components/Pagination'
-import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { EmptyTable } from '../../../components/Table/styles'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
@@ -17,11 +17,12 @@ import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchApps } from './apps.api'
 import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
-import { useAppsColumns } from './useAppsColumns'
 import { useAppSelectionActions } from './useAppSelectionActions'
+import { useAppsColumns } from './useAppsColumns'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -45,6 +46,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
     saveColumnResizeWidth,
     colWidths,
     resetSelected,
+    saveHiddenColumns,
+    hiddenColumns,
   } = useList<ListType>({
     fetchList: fetchApps,
     resource: 'apps',
@@ -53,6 +56,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
       scope: scope || undefined,
     },
   })
+  const { data: propertiesData } = usePropertiesQuery('appSeries', scope, spaceId) 
 
   const { status, data, error } = query
 
@@ -142,6 +146,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
         apps={data?.apps}
+        properties={propertiesData?.keys}
         isLoading={status === 'loading'}
         sortBy={sortBy}
         setSortBy={setSortBy}
@@ -150,6 +155,8 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
         setSelectedRows={setSelectedIndexes}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        saveHiddenColumns={saveHiddenColumns}
+        hiddenColumns={hiddenColumns}
       />
 
         <ContentFooter>
@@ -171,6 +178,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
       {actions['Copy to space']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
       
@@ -183,6 +191,7 @@ export const AppsListTable = ({
   isAdmin,
   filters,
   apps,
+  properties,
   handleRowClick,
   isLoading,
   setFilters,
@@ -193,10 +202,13 @@ export const AppsListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  saveHiddenColumns,
+  hiddenColumns,
 }: {
   isAdmin: boolean
   filters: IFilter[]
   apps?: IApp[]
+  properties?: string[]
   handleRowClick: (fileId: string) => void
   setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
@@ -209,32 +221,33 @@ export const AppsListTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  saveHiddenColumns: (cols: string[]) => void
+  hiddenColumns: string[]
 }) => {
+  const location = useLocation()
 
-  const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
-  const locationColumnHide = scope !== 'spaces' ? 'location' : null
-  const addedByColumnHide = scope === 'me' ? 'added_by' : null
-  const explorersColumnHide = scope !== undefined ? 'explorers' : null
-  const orgColumnHide = scope !== undefined ? 'org' : null
-  const runByYouColumnHide = scope !== undefined ? 'run_by_you' : null
+  function filterColsByScope(c: Column<IApp>): boolean {
+    // Check if any of the conditions is true, then hide the column
+    return !(
+      // If the scope is 'me', hide 'added_by' regardless of other conditions.
+      (scope === 'me' && c.accessor === 'added_by') ||
+      
+      // Hide 'location' for all scopes except 'spaces'.
+      (scope !== 'spaces' && c.accessor === 'location') ||
+      
+      // Hide 'featured' for all scopes except 'everybody'.
+      (scope !== 'everybody' && c.accessor === 'featured') ||
+      
+      // Hide 'explorers', 'org', 'run_by_you' if scope is defined to something specific.
+      (scope !== undefined && c.accessor === 'explorers') ||
+      (scope !== undefined && c.accessor === 'org') ||
+      (scope !== undefined && c.accessor === 'run_by_you')
+    )
+  }
 
-  const hidden = [
-    featuredColumnHide,
-    locationColumnHide,
-    addedByColumnHide,
-    explorersColumnHide,
-    orgColumnHide,
-    runByYouColumnHide,
-  ].filter(Boolean) as string[]
+  const col = useAppsColumns({ colWidths, isAdmin, properties }).filter(filterColsByScope)
 
-  const col = useAppsColumns({ colWidths, isAdmin })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>(hidden)
-
-  useEffect(() => {
-    sethiddenColumns(hidden)
-  }, [scope])
-
-  const columns = useMemo(() => col, [col])
+  const columns = useMemo(() => col, [col, location.search, properties])
   const data = useMemo(() => apps || [], [apps])
 
   return (
@@ -242,8 +255,11 @@ export const AppsListTable = ({
       <Table<IApp>
         name="apps"
         columns={columns}
+        enableColumnSelect
         hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         data={data}
+        properties={properties}
         isSelectable
         isSortable
         isFilterable

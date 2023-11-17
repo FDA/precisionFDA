@@ -541,6 +541,27 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def set_properties(target_id, target_type, properties)
+    request(
+      "/properties",
+      {
+        targetId: target_id,
+        targetType: target_type,
+        properties: properties,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def get_valid_property_keys(type, scope)
+    request(
+      "/properties/#{type}/scope/#{scope}/keys",
+      {},
+      Net::HTTP::Get::METHOD,
+      )
+
+  end
+
   # Update notification's delivered date time
   # @param notification_id [String] id of the notification
   # @param delivered_at [DateTime] date and time of delivery

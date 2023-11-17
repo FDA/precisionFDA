@@ -88,7 +88,7 @@ const ResourceTable = ({
       loadingComponent={<div>Loading...</div>}
       selectedRows={selected}
       setSelectedRows={setSelected}
-      emptyComponent={<EmptyTable>You have no apps in My Home.</EmptyTable>}
+      emptyComponent={<EmptyTable>You have no {resource} in My Home.</EmptyTable>}
     />
   )
 }

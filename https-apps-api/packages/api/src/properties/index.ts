@@ -1,0 +1,1 @@
+export { router } from './properties.routes'

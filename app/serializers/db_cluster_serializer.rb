@@ -30,11 +30,20 @@ class DbClusterSerializer < ApplicationSerializer
 
   attribute :scope_name, key: :scope
   attribute :all_tags_list, key: :tags
+  attribute :properties_object, key: :properties
 
   # Returns formatted status_as_of time.
   # @return [String] Formatted time.
   def status_updated_date_time
     formatted_date_time(object.status_as_of)
+  end
+
+  def properties_object
+    props = {}
+    object.properties.each do |prop|
+      props[prop.property_name] = prop.property_value
+    end
+    props
   end
 
   def title

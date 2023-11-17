@@ -70,8 +70,18 @@ module Api
         eager_load(user: :org).search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id)).
-        order(order_params).page(page_from_params).per(page_size)
+      user_files = Node.eager_load(user: :org).where(id: (files + folders).map(&:id))
+
+      if params[:order_by_property]
+        user_files = user_files.
+          # has to join properties because of sorting by them.
+          left_outer_joins(:properties).
+          order(order_params).
+          page(page_from_params).per(page_size)
+      else
+        user_files = user_files.order(order_params).page(page_from_params).per(page_size)
+      end
+
       page_dict = pagination_dict(user_files)
 
       render json: user_files, root: "files", adapter: :json,
@@ -239,13 +249,16 @@ module Api
       if show_count
         render plain: files.size
       else
-        nodes = Node.where(id: files + folders).eager_load(user: :org).to_a
+        # TODO: try if this method can be used instead of commented-out code below.
+        render_files_list(files: files, folders: folders)
 
-        nodes = sort_array_by_fields(nodes, "created_at")
-        page_meta = pagination_meta(nodes.count)
-        nodes = paginate_array(nodes)
-
-        render json: nodes, root: "files", adapter: :json, meta: files_meta.merge(page_meta)
+        # nodes = Node.where(id: files + folders).eager_load(user: :org).to_a
+        #
+        # nodes = sort_array_by_fields(nodes, "created_at")
+        # page_meta = pagination_meta(nodes.count)
+        # nodes = paginate_array(nodes)
+        #
+        # render json: nodes, root: "files", adapter: :json, meta: files_meta.merge(page_meta)
       end
     end
 
@@ -260,18 +273,18 @@ module Api
 
       # TODO: move common data to common_concern.rb
       comparison = if @file.parent_type == "Comparison"
-        @file.parent.slice(:id, :user_id, :scope, :state)
-      else
-        synchronizer.sync_comparisons!(@context.user)
-        @file.comparisons.accessible_by(@context).includes(:taggings)
-      end
+                     @file.parent.slice(:id, :user_id, :scope, :state)
+                   else
+                     synchronizer.sync_comparisons!(@context.user)
+                     @file.comparisons.accessible_by(@context).includes(:taggings)
+                   end
 
       comments = if @file.in_space?
-        Comment.where(commentable: @file.space_object, content_object: @file).
-          order(id: :desc).page(params[:comments_page])
-      else
-        @file.root_comments.order(id: :desc).page(params[:comments_page])
-      end
+                   Comment.where(commentable: @file.space_object, content_object: @file).
+                     order(id: :desc).page(params[:comments_page])
+                 else
+                   @file.root_comments.order(id: :desc).page(params[:comments_page])
+                 end
 
       notes_ids = Attachment.file_attachments(@file.id).pluck(:note_id)
       notes = Note.where(id: notes_ids).real_notes.
@@ -374,10 +387,10 @@ module Api
           where.not(scope: UserFile::SCOPE_PUBLIC)
         nodes.each do |node|
           files += if node.is_a?(Folder)
-            node.all_files(Node.where.not(scope: UserFile::SCOPE_PUBLIC))
-          else
-            [node]
-          end
+                     node.all_files(Node.where.not(scope: UserFile::SCOPE_PUBLIC))
+                   else
+                     [node]
+                   end
         end
       when DELETE_ACTION
         nodes = Node.editable_by(@context).where(id: params[:ids]).to_a
@@ -529,10 +542,10 @@ module Api
       end
 
       path = if target_folder.present?
-        pathify_folder(target_folder)
-      else
-        result.value[:scope] == "public" ? everybody_api_files_path : api_files_path
-      end
+               pathify_folder(target_folder)
+             else
+               result.value[:scope] == "public" ? everybody_api_files_path : api_files_path
+             end
 
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
@@ -604,9 +617,18 @@ module Api
           where(scoped_parent_folder_id: folder_id).
           where(state: [nil, "closing", "closed", "open"]).
           includes(:taggings).eager_load(user: :org).
-          search_by_tags(params.dig(:filters, :tags)).
-          order(order_params).
-          page(page_from_params).per(page_size)
+          search_by_tags(params.dig(:filters, :tags))
+
+        if params[:order_by_property]
+          nodes = nodes.
+            left_outer_joins(:properties).
+            order(order_params).
+            page(page_from_params).per(page_size)
+        else
+          nodes = nodes.order(order_params).
+              page(page_from_params).per(page_size)
+        end
+
         nodes = FileService::FilesFilter.call(nodes, params[:filters])
       end
 
@@ -628,7 +650,7 @@ module Api
       unless params[:folders_only] == "true"
         files = FileService::FilesFilter.call(
           @space.nodes.files.where(scoped_parent_folder_id: folder_id).
-          eager_load(user: :org), params[:filters]
+            eager_load(user: :org), params[:filters]
         )
       end
       unless params[:files_only] == "true"
@@ -646,9 +668,14 @@ module Api
 
       return render(plain: files_size) if show_count
 
-      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org).
-        order(order_params).page(page_from_params).per(page_size)
+      user_files = Node.where(id: (files + folders).map(&:id)).eager_load(user: :org)
 
+      if params[:order_by_property]
+        user_files = user_files.left_outer_joins(:properties).
+          order(order_params).page(page_from_params).per(page_size)
+      else
+        user_files = user_files.order(order_params).page(page_from_params).per(page_size)
+      end
       page_dict = pagination_dict(user_files)
       page_dict[:total_count] = files_size
 
@@ -660,7 +687,9 @@ module Api
 
     # Default to reverse chronological order unless overriden by params
     def order_params
-      if params[:order_by]
+      if params[:order_by_property]
+        create_property_order
+      elsif params[:order_by]
         order_from_params
       else
         { created_at: Sortable::DIRECTION_DESC }
@@ -768,6 +797,19 @@ module Api
           where(name: params[:name]).
           first.id
       end
+    end
+
+    def create_property_order
+      properties_table = Arel::Table.new(:properties)
+      property_order = ActiveRecord::Base.sanitize_sql(params[:order_by_property])
+      order_dir = params[:order_dir].upcase == "ASC" ? "ASC" : "DESC"
+
+      order_by_case = Arel::Nodes::Case.new(properties_table[:property_name]).when(property_order).then(0).else(1)
+      order_by_property_value = properties_table[:property_value].send(order_dir.downcase.to_sym)
+
+      # It will produce something like this - easier to understand for node migration later:
+      # CASE WHEN properties.property_name = #{params[:order_by_property]} THEN 0 ELSE 1 END, properties.property_value #{params[:order_dir]}
+      [order_by_case, order_by_property_value]
     end
   end
 

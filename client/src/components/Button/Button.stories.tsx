@@ -7,6 +7,7 @@ import {
   ButtonSolidBlue,
   ButtonSolidGreen,
   ButtonSolidRed,
+  ButtonText,
 } from '.'
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
@@ -29,6 +30,9 @@ const ButtonSolidRedTemplate: StoryFn<typeof Button> = args => (
 const ButtonSolidGreenTemplate: StoryFn<typeof Button> = args => (
   <ButtonSolidGreen {...args}>All Good</ButtonSolidGreen>
 )
+const ButtonTextTemplate: StoryFn<typeof Button> = args => (
+  <ButtonText {...args}>Add a property</ButtonText>
+)
 
 export const Blue = ButtonSolidBlueTemplate.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
@@ -43,5 +47,10 @@ Red.args = {
 
 export const Green = ButtonSolidGreenTemplate.bind({})
 Green.args = {
+  disabled: false,
+}
+
+export const Text = ButtonTextTemplate.bind({})
+Text.args = {
   disabled: false,
 }

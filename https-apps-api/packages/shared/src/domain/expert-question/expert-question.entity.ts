@@ -1,7 +1,7 @@
-import { Entity, Enum, IdentifiedReference, ManyToOne, OneToOne, Property, Reference } from "@mikro-orm/core";
+import { Entity, Enum, Ref, ManyToOne, OneToOne, Property, Reference } from "@mikro-orm/core";
 import { BaseEntity } from '../../database/base-entity'
 import { ExpertAnswer } from "../expert-answer";
-import { Expert } from "../expert/expert.entity";
+import { Expert } from "../expert";
 import { User } from "../user";
 
 export enum ExpertQuestionState {
@@ -26,7 +26,7 @@ export class ExpertQuestion extends BaseEntity {
   expert: Expert
 
   @OneToOne({ inversedBy: 'question', orphanRemoval: true, entity: () => ExpertAnswer })
-  answer: IdentifiedReference<ExpertAnswer>
+  answer: Ref<ExpertAnswer>
 
   @Property({type: 'text'})
   body!: string
