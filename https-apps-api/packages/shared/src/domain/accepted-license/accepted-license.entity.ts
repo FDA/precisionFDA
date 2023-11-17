@@ -1,6 +1,6 @@
 import {
   Entity,
-  IdentifiedReference,
+  Ref,
   OneToOne,
   PrimaryKey,
   Property,
@@ -8,7 +8,7 @@ import {
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
-import { License } from '../license/license.entity'
+import { License } from '../license'
 
 @Entity({ tableName: 'accepted_licenses' })
 export class AcceptedLicense extends BaseEntity {
@@ -16,10 +16,10 @@ export class AcceptedLicense extends BaseEntity {
   id: number
 
   @OneToOne()
-  license: IdentifiedReference<License>
+  license: Ref<License>
 
   @OneToOne()
-  user: IdentifiedReference<User>
+  user: Ref<User>
 
   @Property()
   state: string

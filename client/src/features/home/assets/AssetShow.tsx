@@ -5,10 +5,7 @@ import { Link } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { HomeLabel } from '../../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../../components/Markdown'
-import { Filler } from '../../../components/Page/styles'
-import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
-import { StyledTagItem, StyledTags } from '../../../components/Tags'
-import { FileIcon } from '../../../components/icons/FileIcon'
+import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../../components/Tags'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { StyledBackLink } from '../home.styles'
 import { License } from '../licenses/License'
@@ -31,6 +28,9 @@ import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetActions } from './useAssetSelectActions'
+import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
+import { FileIcon } from '../../../components/icons/FileIcon'
+import { Filler } from '../../../components/Page/styles'
 
 const AssetActions = ({
   scope,
@@ -61,6 +61,7 @@ const AssetActions = ({
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Rename']?.modal}
     </>
   )
@@ -191,15 +192,32 @@ export const AssetShow = ({ emitScope, scope }: { scope?: ResourceScope, emitSco
           </MetadataRow>
         </MetadataSection>
         
-        <MetadataSection>
-          {asset.tags.length > 0 && (
+        {asset.tags.length > 0 && (
+          <MetadataSection>
             <StyledTags>
               {asset.tags.map(tag => (
                 <StyledTagItem key={tag}>{tag}</StyledTagItem>
-                ))}
+              ))}
             </StyledTags>
-          )}
-        </MetadataSection>
+          </MetadataSection>
+        )}
+        {Object.entries(asset.properties).length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                  <MetadataKey>Properties</MetadataKey>
+                    <StyledTags>
+                      {Object.entries(asset.properties).map(([key, value]) => (
+                        <StyledPropertyItem key={key}>
+                          <StyledPropertyKey>{key}</StyledPropertyKey>
+                          <span>{value}</span>
+                        </StyledPropertyItem>
+                      ))}
+                    </StyledTags>
+                </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
       </Topbox>
 
       <Filler size={40} />

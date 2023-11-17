@@ -45,6 +45,7 @@ export const colors = {
   backgroundLightGray: 'rgb(242, 242, 242)',
   shadedBg: '#e7eaec',
   borderDefault: '#C8C8C8',
+  hoverLink: '#4297df',
   // Used for jobs or executions
   stateRunningBackground: '#f0f9fd',
   stateRunningColor: '#2071b5',

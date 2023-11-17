@@ -13,7 +13,7 @@ import {
   StyledTabList,
   StyledTabPanel,
 } from '../../../components/Tabs'
-import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../../components/Tags'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { IChallenge } from '../../../types/challenge'
 import { Location } from '../../../types/utils'
@@ -162,6 +162,7 @@ const DetailActionsDropdown = (
       {actions['Copy to space']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
       {actions['Copy to My Home (private)']?.modal}
@@ -251,15 +252,37 @@ export const AppsShow = ({ spaceId, emitScope, scope }: { scope?: ResourceScope,
         </Header>
 
         {renderOptions(app, scope)}
-        <MetadataSection>
-          {app.tags.length > 0 && (
-            <StyledTags>
-              {app.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-              ))}
-            </StyledTags>
-          )}
-        </MetadataSection>
+        {app.tags.length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                <MetadataKey>Tags</MetadataKey>
+                <StyledTags>
+                  {app.tags.map(tag => (
+                    <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+        {Object.entries(app.properties).length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                  <MetadataKey>Properties</MetadataKey>
+                    <StyledTags>
+                      {Object.entries(app.properties).map(([key, value]) => (
+                        <StyledPropertyItem key={key}>
+                          <StyledPropertyKey>{key}</StyledPropertyKey>
+                          <span>{value}</span>
+                        </StyledPropertyItem>
+                      ))}
+                    </StyledTags>
+                </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
       </Topbox>
 
       <StyledTabList>

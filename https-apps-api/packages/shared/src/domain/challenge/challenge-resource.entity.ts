@@ -1,6 +1,6 @@
 import {
   Entity,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   Property,
 } from '@mikro-orm/core'
@@ -29,13 +29,13 @@ class ChallengeResource extends BaseEntity {
   meta: any
 
   @ManyToOne({ entity: () => Challenge })
-  challenge: IdentifiedReference<Challenge>
+  challenge: Ref<Challenge>
 
   @ManyToOne({ entity: () => UserFile })
-  userFile: IdentifiedReference<UserFile>
+  userFile: Ref<UserFile>
 
   @ManyToOne({ entity: () => User })
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   @Property({ persist: false })
   get name(): string {

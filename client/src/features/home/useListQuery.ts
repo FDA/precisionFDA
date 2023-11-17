@@ -24,13 +24,18 @@ interface IUseListQuery<T> {
 }
 
 
-export function useListQuery<T>({ fetchList, resource, params = {}, queryOptions, pagination = {}, order = {}, filter = {} }: IUseListQuery<T>) {
-  return useQuery<T>(
-    [resource, toArrayFromObject(filter), pagination?.page, pagination?.perPage, order?.order_by, order?.order_dir, ...Object.keys(params).map(k => `${k}=${params[k]}`)],
-    () => fetchList(toArrayFromObject(filter), { page: pagination?.page, perPage: pagination?.perPage, sortBy: order, ...params }),
-    {
-      refetchOnWindowFocus: false,
-      ...queryOptions,
-    },
-  )
+export function useListQuery<T>({ fetchList, resource, params = {}, queryOptions, pagination = {}, order = {}, filter = {}}: IUseListQuery<T>) {
+  return useQuery<T>({
+    queryKey: [resource, toArrayFromObject(filter), pagination?.page, pagination?.perPage, order?.order_by, order?.order_dir, ...Object.keys(params).map(k => `${k}=${params[k]}`)],
+    queryFn: () => fetchList(
+      toArrayFromObject(filter),
+      {
+        page: pagination?.page,
+        perPage: pagination?.perPage,
+        sortBy: order, 
+        ...params,
+      }),
+    refetchOnWindowFocus: false,
+    ...queryOptions,
+  })
 }

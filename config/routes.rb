@@ -509,6 +509,9 @@ Rails.application.routes.draw do
       post "create_challenge_resource"
       post "create_resource_link"
       post "set_tags"
+      post "set_properties"
+      get "properties/:type/scope/:scope/keys",
+          action: :get_valid_property_keys
       post "assign_app"
       get "list_licenses"
       get "cli_latest_version"

@@ -1,14 +1,14 @@
 import {
   Collection,
   Entity,
-  IdentifiedReference,
+  Ref,
   ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { App, ComparisonInput, User, UserFile } from '..'
+import { App, User, UserFile } from '..'
 import { BaseEntity } from '../../database/base-entity'
 
 enum COMPARISON_STATE {
@@ -54,10 +54,10 @@ class Comparison extends BaseEntity {
   inputFiles = new Collection<UserFile>(this)
 
   @ManyToOne({ entity: () => App, fieldName: 'app_dxid', nullable: false })
-  app: IdentifiedReference<App>
+  app: Ref<App>
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
-  user: IdentifiedReference<User>
+  user: Ref<User>
 
   // TODO: Add rest of the references in comparison.rb
 

@@ -267,6 +267,30 @@ const app = {
 
 }
 
+const appSeries = {
+    simple: (): Partial<InstanceType<typeof entities.AppSeries>> => {
+      const name = random.word()
+      const dxid = `app-${random.dxstr()}-${name}`
+        return {
+            dxid,
+            name,
+          scope: "private"
+      }
+    },
+}
+
+const workflowSeries = {
+    simple: (): Partial<InstanceType<typeof entities.WorkflowSeries>> => {
+        const name = random.word()
+        const dxid = `workflow-${random.dxstr()}-${name}`
+        return {
+            dxid,
+            name,
+            scope: "private"
+        }
+    }
+}
+
 const job = {
   simple: (app: App): Partial<InstanceType<typeof entities.Job>> => {
     const dxid = `job-${random.dxstr()}`
@@ -655,6 +679,8 @@ export {
   user,
   job,
   app,
+  appSeries,
+  workflowSeries,
   comparison,
   userFile,
   folder,

@@ -8,6 +8,7 @@ import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useComparatorModal } from '../comparators/useComparatorModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
@@ -34,6 +35,7 @@ export enum AppActions {
   'Comments' = 'Comments',
   'Set as Challenge App' = 'Set as Challenge App',
   'Edit tags' = 'Edit tags',
+  'Edit properties' = 'Edit properties',
   'Add to Comparators' = 'Add to Comparators',
   'Set this app as comparison default' = 'Set this app as comparison default',
   'Remove from Comparators' = 'Remove from Comparators',
@@ -149,6 +151,24 @@ export const useAppSelectionActions = ({
   } = useEditTagsModal({
     resource: 'apps',
     selected: { uid: `app-series-${selected[0]?.app_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
+    onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+
+  const {
+    modalComp: propertiesModal,
+    setShowModal: setPropertiesModal,
+    isShown: isShownPropertiesModal,
+  } = useEditPropertiesModal({
+    type: 'appSeries',
+    selected: {
+      id: selected[0]?.app_series_id,
+      name: selected[0]?.name,
+      properties: selected[0]?.properties,
+      scope: selected[0]?.scope,
+      featured: selected[0]?.featured,
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
     },
@@ -271,6 +291,14 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || (selected.length !== 1),
+    },
+    'Edit properties': {
+      type: 'modal',
+      func: () => setPropertiesModal(true),
+      isDisabled: selected.length !== 1,
+      modal: propertiesModal,
+      showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || (selected.length !== 1),
     },
     'Add to Comparators': {

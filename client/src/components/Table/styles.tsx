@@ -11,6 +11,10 @@ export const ExpandArrowIcon = styled(ArrowIcon)<{expanded?: boolean, hide?: boo
   `}
 `
 
+export const SelectCheck = styled.div`
+  padding-left: 7px;
+`
+
 export const EmptyTable = styled.div`
   display: flex;
   justify-content: center;
@@ -144,9 +148,9 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
       &.collapse {
         width: 0.0000000001%;
       }
-      :first-child {
+      /* :first-child {
         padding-left: 12px;
-      }
+      } */
       :last-child {
         border-right: 0;
       }
@@ -170,6 +174,8 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
           z-index: 2;
         &.filters {
           top: 43px;
+          z-index: 1;
+          border-top: none;
         }
       }
 
