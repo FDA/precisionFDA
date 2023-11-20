@@ -49,6 +49,7 @@ import { UserLayout } from '../../../../layouts/UserLayout'
 import { FormPageContainer } from '../../../../components/Page/styles'
 import { BackLink } from '../../../../components/Page/PageBackLink'
 import { getValue } from '../../apps/run/utils';
+import { getDefaultValueFromServer } from '../../apps/form/common';
 
 interface WorkflowRunData {
   analysisName: string;
@@ -103,7 +104,7 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
       if (input.class === 'file') {
         defaultValues.inputs[fieldName] = getDefaultValue(input, defaultFiles)
       } else {
-        defaultValues.inputs[fieldName] = defaultValue
+        defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
       }
     }
   })
