@@ -33,6 +33,7 @@ export type APIResource =
   | 'space-reports'
 export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
+export type PropertiesResource = 'node' | 'asset' | 'workflowSeries' | 'job' | 'appSeries' | 'dbCluster'
 
 export type DialogType = 'radio' | 'checkbox'
 
@@ -79,11 +80,21 @@ export type ActionType = {
     func: (arg?: IModal) => void
     modal?: ReactNode | null
     showModal?: boolean
-  })
+  }) | {
+    type: 'selection'
+    title: string
+    isSelected: boolean
+    func: (isSelected: boolean) => void
+  }
 )
 
 export type ActionFunctionsType<KeyT extends string> = {
   [key in KeyT]?: ActionType
+}
+
+export type ActionGroupType = {
+  actions: ActionFunctionsType<any>
+  title: string
 }
 
 export type ResourcePage = 'details' | 'list'

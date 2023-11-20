@@ -14,7 +14,7 @@ import {
   StyledTabList,
   StyledTabPanel,
 } from '../../../components/Tabs'
-import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../../components/Tags'
 import { Location } from '../../../types/utils'
 import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
@@ -154,6 +154,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         )}
       </Dropdown>
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Copy to space']?.modal}
       {actions['Export to']?.modal}
       {actions['Delete']?.modal}
@@ -173,7 +174,7 @@ export const WorkflowShow = ({ emitScope, scope }: { scope?: ResourceScope, emit
     },
   })
 
-  const workflow = data?.workflow
+  const workflow = data?.workflow as IWorkflow
   const meta = data?.meta
 
   if (isLoading) return <HomeLoader />
@@ -215,16 +216,39 @@ export const WorkflowShow = ({ emitScope, scope }: { scope?: ResourceScope, emit
         </Header>
 
         {renderOptions(workflow, scope)}
-        <MetadataSection>
-          {workflow.tags.length > 0 && (
-            <StyledTags>
-              {/* TODO(samuel) validate that tag is non-null string */}
-              {workflow.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-                ))}
-            </StyledTags>
-          )}
-        </MetadataSection>
+        {workflow.tags.length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                  <MetadataKey>Tags</MetadataKey>
+                  <StyledTags>
+                    {/* TODO(samuel) validate that tag is non-null string */}
+                    {workflow.tags.map(tag => (
+                      <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                      ))}
+                  </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+        {Object.entries(workflow.properties).length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                  <MetadataKey>Properties</MetadataKey>
+                    <StyledTags>
+                      {Object.entries(workflow.properties).map(([key, value]) => (
+                        <StyledPropertyItem key={key}>
+                          <StyledPropertyKey>{key}</StyledPropertyKey>
+                          <span>{value}</span>
+                        </StyledPropertyItem>
+                      ))}
+                    </StyledTags>
+                </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+
       </Topbox>
 
       <StyledTabList>

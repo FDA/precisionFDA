@@ -7,7 +7,7 @@ import { Loader } from '../../../components/Loader'
 import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'
 import { SyncIcon } from '../../../components/icons/SyncIcon'
 import { Refresh } from '../../../components/Page/styles'
-import { StyledTagItem, StyledTags } from '../../../components/Tags'
+import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../../components/Tags'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home.styles'
 import {
@@ -119,6 +119,7 @@ const DetailActionsDropdown = ({
       {actions['Copy to space']?.modal}
       {actions['Edit Database Info']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Start']?.modal}
       {actions['Stop']?.modal}
       {actions['Terminate']?.modal}
@@ -180,15 +181,28 @@ export const DatabaseShow = ({ emitScope, scope }: { scope?: ResourceScope, emit
         </Header>
 
         {renderOptions(db, scope)}
-        <MetadataSection>
-          {db.tags.length > 0 && (
+        {db.tags.length > 0 && (<MetadataSection>
             <StyledTags>
               {db.tags.map(tag => (
                 <StyledTagItem key={tag}>{tag}</StyledTagItem>
-                ))}
+              ))}
             </StyledTags>
-          )}
-        </MetadataSection>
+        </MetadataSection>)}
+        {Object.entries(db.properties).length > 0 && (<MetadataSection>
+          <MetadataRow>
+            <MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                  <StyledTags>
+                    {Object.entries(db.properties).map(([key, value]) => (
+                      <StyledPropertyItem key={key}>
+                        <StyledPropertyKey>{key}</StyledPropertyKey>
+                        <span>{value}</span>
+                      </StyledPropertyItem>
+                    ))}
+                  </StyledTags>
+              </MetadataItem>
+          </MetadataRow>
+        </MetadataSection>)}
       </Topbox>
     </>
   )

@@ -1,13 +1,16 @@
 import {
   Entity,
   Enum,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   PrimaryKey,
   Property,
+  OneToMany,
+  Collection,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
+import { NodeProperty } from '../property'
 import { User } from '../user'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 import { SCOPE } from '../../types/common'
@@ -65,6 +68,13 @@ export class Node extends BaseEntity {
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
 
+  @OneToMany({
+    entity: () => NodeProperty,
+    mappedBy: 'node',
+    orphanRemoval: true
+  })
+  properties = new Collection<NodeProperty>(this)
+
   @Property()
   parentId: number
 
@@ -87,7 +97,7 @@ export class Node extends BaseEntity {
   }
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   elapsedTimeSinceCreation(): number {
     return new Date().getTime() - this.createdAt.getTime()
@@ -96,4 +106,5 @@ export class Node extends BaseEntity {
   elapsedTimeSinceCreationString(): string {
     return formatDuration(this.elapsedTimeSinceCreation())
   }
+
 }

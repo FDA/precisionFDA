@@ -8,6 +8,7 @@ import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
@@ -48,6 +49,7 @@ export enum FileActions {
   'Request license approval' = 'Request license approval',
   'Accept License' = 'Accept License',
   'Edit tags' = 'Edit tags',
+  'Edit properties' = 'Edit properties',
   'Lock' = 'Lock',
   'Unlock' = 'Unlock',
   'Comments' = 'Comments',
@@ -283,6 +285,17 @@ export const useFilesSelectActions = ({
       queryClient.invalidateQueries(resourceKeys)
     },
   })
+  const {
+    modalComp: propertiesModal,
+    setShowModal: setPropertiesModal,
+    isShown: isShownPropertiesModal,
+  } = useEditPropertiesModal<IFile>({
+    type: 'node',
+    selected: selected[0],
+    onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const isFolder = selected.every(e => e.type === 'Folder')
@@ -468,6 +481,14 @@ export const useFilesSelectActions = ({
       isDisabled: openSelected || isFolder || selected.some(e => e.locked),
       modal: tagsModal,
       showModal: isShownTagsModal,
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || scope === 'spaces',
+    },
+    'Edit properties': {
+      type: 'modal',
+      func: () => setPropertiesModal(true),
+      isDisabled: openSelected || selected.some(e => e.locked),
+      modal: propertiesModal,
+      showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || scope === 'spaces',
     },
     Comments: {

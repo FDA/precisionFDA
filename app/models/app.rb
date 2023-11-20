@@ -45,6 +45,7 @@ class App < ApplicationRecord
   has_many :jobs
   has_many :attachments, as: :item, dependent: :destroy
   has_many :notes, through: :attachments
+  has_many :properties, through: :app_series, source: :properties
 
   has_and_belongs_to_many :assets, join_table: "apps_assets"
 

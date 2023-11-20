@@ -3,7 +3,7 @@ import {
   Entity,
   EntityRepositoryType,
   Enum,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -141,14 +141,14 @@ export class User extends BaseEntity {
   spaceMemberships = new Collection<SpaceMembership>(this)
 
   @ManyToOne({ fieldName: 'org_id', entity: () => Organization })
-  organization!: IdentifiedReference<Organization>
+  organization!: Ref<Organization>
 
   @OneToOne({
     entity: () => NotificationPreference,
     mappedBy: 'user',
     nullable: true,
     })
-  notificationPreference: IdentifiedReference<NotificationPreference>;
+  notificationPreference: Ref<NotificationPreference>;
 
   [EntityRepositoryType]?: UserRepository
 
@@ -157,7 +157,7 @@ export class User extends BaseEntity {
     mappedBy: 'user',
     orphanRemoval: true,
     })
-  expert: IdentifiedReference<Expert>
+  expert: Ref<Expert>
 
   @OneToMany({
     entity: () => ExpertQuestion,

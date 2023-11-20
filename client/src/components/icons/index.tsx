@@ -9,6 +9,7 @@ import { BookIcon } from './BookIcon'
 import { BullsEyeIcon } from './BullsEyeIcon'
 import { CaretIcon } from './CaretIcon'
 import { CaretUpIcon } from './CaretUpIcon'
+import { CheckIcon } from './CheckIcon'
 import { CircleCheckIcon } from './CircleCheckIcon'
 import { ChevronRightIcon } from './ChevronRightIcon'
 import { CogsIcon } from './Cogs'
@@ -55,6 +56,7 @@ export const IconNames = {
 'BullsEyeIcon': BullsEyeIcon,
 'CaretIcon': CaretIcon,
 'CaretUpIcon': CaretUpIcon,
+'CheckIcon': CheckIcon,
 'CircleCheckIcon': CircleCheckIcon,
 'ChevronRightIcon': ChevronRightIcon,
 'CogsIcon': CogsIcon,
