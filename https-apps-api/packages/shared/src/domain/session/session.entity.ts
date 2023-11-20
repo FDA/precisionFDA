@@ -1,5 +1,5 @@
 import {
-  IdentifiedReference,
+  Ref,
   Entity,
   ManyToOne,
   PrimaryKey,
@@ -18,7 +18,7 @@ export class Session extends BaseEntity {
   key: string
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id' })
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   constructor(user: User) {
     super()

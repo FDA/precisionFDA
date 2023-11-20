@@ -53,7 +53,10 @@ export interface IDatabase {
   host: string;
   port: string;
   show_license_pending: boolean;
-  tags: any[];
+  tags: string[];
+  properties: {
+    [key: string]: string;
+  };
   links: Links;
   scope: ServerScope;
   featured: boolean;

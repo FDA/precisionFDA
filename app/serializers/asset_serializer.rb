@@ -8,10 +8,19 @@ class AssetSerializer < UserFileSerializer
     :links,
     :file_license,
   )
+  attribute :properties_object, key: :properties
 
   # get array of asset archive_entries
   def archive_content
     object.file_paths
+  end
+
+  def properties_object
+    props = {}
+    object.properties.each do |prop|
+      props[prop.property_name] = prop.property_value
+    end
+    props
   end
 
   # Builds links to files.

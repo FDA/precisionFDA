@@ -11,6 +11,7 @@ import { useExportToModal } from '../apps/useExportToModal'
 import { ActionFunctionsType, ResourceScope } from '../types'
 import { copyWorkflowsRequest, deleteWorkflowRequest } from './workflows.api'
 import { IWorkflow, WorkflowActions } from './workflows.types'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resourceKeys, resetSelected }: { scope?: ResourceScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
   const queryClient = useQueryClient()
@@ -45,6 +46,24 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
   } = useEditTagsModal({
     resource: 'workflows',
     selected: { uid: `workflow-series-${selected[0]?.workflow_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
+    onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+
+  const {
+    modalComp: propertiesModal,
+    setShowModal: setPropertiesModal,
+    isShown: isShownPropertiesModal,
+  } = useEditPropertiesModal({
+    type: 'workflowSeries',
+    selected: {
+      id: selected[0]?.workflow_series_id,
+      name: selected[0]?.name,
+      properties: selected[0]?.properties,
+      scope: selected[0]?.scope,
+      featured: selected[0]?.featured,
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
     },
@@ -156,6 +175,14 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
+    },
+    'Edit properties': {
+      type: 'modal',
+      func: () => setPropertiesModal(true),
+      isDisabled: false,
+      modal: propertiesModal,
+      showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
     },
   }

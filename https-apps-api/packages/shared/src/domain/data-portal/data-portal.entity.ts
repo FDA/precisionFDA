@@ -1,10 +1,12 @@
 import {
   Collection,
-  Entity, Enum,
+  Entity,
+  Enum,
   IdentifiedReference,
   ManyToOne,
   OneToMany,
-  Property, Reference,
+  Property,
+  Reference,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { DATA_PORTAL_STATUS } from './data-portal.enum'

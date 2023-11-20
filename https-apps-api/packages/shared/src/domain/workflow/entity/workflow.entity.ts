@@ -1,4 +1,4 @@
-import { Entity, IdentifiedReference, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '../../../database/base-entity'
 import { WorkaroundJsonType } from '../../../database/custom-json-type'
 import { User } from '../../user'
@@ -36,11 +36,15 @@ export class Workflow extends BaseEntity {
   @Property({ type: WorkaroundJsonType })
   spec: WorkflowSpec
 
+  // foreign keys -> not yet mapped
+  @Property()
+  workflowSeriesId: number
+
   // TODO: Add missing when needed - there is more in DB
 
   // references
   @ManyToOne({ entity: () => User, serializedName: 'userId' })
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   constructor(user: User) {
     super()

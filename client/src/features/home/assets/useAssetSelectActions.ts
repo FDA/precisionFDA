@@ -14,6 +14,7 @@ import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
 import { deleteAssetsRequest } from './assets.api'
 import { IAsset } from './assets.types'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export enum AssetActions {
   'Rename' = 'Rename',
@@ -28,6 +29,7 @@ export enum AssetActions {
   'Request license approval' = 'Request license approval',
   'Accept License' = 'Accept License',
   'Edit tags' = 'Edit tags',
+  'Edit properties' = 'Edit properties',
   'Comments' = 'Comments',
 }
 
@@ -88,6 +90,18 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     isShown: isShownTagsModal,
   } = useEditTagsModal<IAsset>({
     resource: 'assets',
+    selected: selected[0],
+    onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+
+  const {
+    modalComp: propertiesModal,
+    setShowModal: setPropertiesModal,
+    isShown: isShownPropertiesModal,
+  } = useEditPropertiesModal<IAsset>({
+    type: 'node',
     selected: selected[0],
     onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
@@ -224,6 +238,14 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || (selected.length !== 1),
+    },
+    'Edit properties': {
+      type: 'modal',
+      func: () => setPropertiesModal(true),
+      isDisabled: false,
+      modal: propertiesModal,
+      showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || (selected.length !== 1),
     },
     'Comments': {

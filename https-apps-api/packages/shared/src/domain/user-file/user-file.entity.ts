@@ -3,13 +3,13 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  IdentifiedReference, ManyToMany,
+  Ref,
   ManyToOne,
   OneToMany,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User, Tagging, Job } from '..'
+import { User, Tagging } from '..'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
 import {
@@ -71,10 +71,10 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   // todo: micro-orm can do single table inheritance
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
-  taggings = new Collection<Tagging>(this);
+  taggings = new Collection<Tagging>(this)
 
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'userFile', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this);

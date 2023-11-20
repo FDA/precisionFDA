@@ -76,6 +76,7 @@ class Job < ApplicationRecord
 
   has_many :attachments, as: :item, dependent: :destroy
   has_many :notes, through: :attachments
+  has_many :properties, -> { where(target_type: "job") }, foreign_key: "target_id"
 
   has_one :submission
 

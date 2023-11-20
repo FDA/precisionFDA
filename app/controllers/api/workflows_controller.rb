@@ -25,9 +25,12 @@ module Api
         if find_user_space
           workflows = @space.latest_revision_workflows.unremoved.
             eager_load(:workflow_series, :user).includes(:taggings)
+
+          workflows = workflows.includes(workflow_series: :properties).order(create_property_order) if params[:order_by_property]
+
           workflows = filter_workflows(workflows, filters)
           workflows.each { |workflow| workflow.current_user = @context.user }
-          workflows = sort_array_by_fields(workflows)
+          workflows = sort_array_by_fields(workflows) unless params[:order_by_property]
           page_meta = pagination_meta(workflows.count)
           workflows = paginate_array(workflows)
         end
@@ -50,8 +53,15 @@ module Api
         eager_load(latest_revision_workflow: [user: :org]).
         accessible_by_private.unremoved.
         includes(latest_revision_workflow: [user: :org]).
-        includes(:taggings).
-        order(order_from_params).
+        includes(:taggings)
+
+      if params[:order_by_property]
+        workflows = workflows.left_outer_joins(:properties).order(create_property_order)
+      else
+        workflows = workflows.order(order_from_params)
+      end
+
+      workflows = workflows.
         map do |series|
           latest = series.latest_accessible(@context)
           latest if Workflows::WorkflowFilter.match(latest, filters)
@@ -69,8 +79,15 @@ module Api
       filters = params[:filters]
       workflows = WorkflowSeries.featured.unremoved.
         accessible_by_public.eager_load(:user, :taggings).
-        order(order_from_params).
-        search_by_tags(params.dig(:filters, :tags)).map do |series|
+        search_by_tags(params.dig(:filters, :tags))
+
+      if params[:order_by_property]
+        workflows = workflows.left_outer_joins(:properties).order(create_property_order)
+      else
+        workflows = workflows.order(order_from_params)
+      end
+
+      workflows = workflows.map do |series|
           latest = series.latest_accessible(@context)
           latest if Workflows::WorkflowFilter.match(latest, filters)
         end.compact
@@ -78,23 +95,23 @@ module Api
       render_workflows_list workflows
     end
 
-    # GET /api/workflows/everybody
-    # A fetch method for workflows, accessible by public and of latest revisions.
-    # @param order_by, order_dir [String] Params for ordering.
-    # @return workflows [App] Array of Workflow objects if they exist OR workflows: [].
     def everybody
       filters = params[:filters]
-      workflows = WorkflowSeries.
-        unremoved.
+      workflows = WorkflowSeries.unremoved.
         accessible_by_public.
-        eager_load(latest_revision_workflow: [user: :org]).
-        includes(:taggings).
-        order(order_from_params).
-        map do |series|
-          latest = series.latest_accessible(@context)
-          latest if Workflows::WorkflowFilter.match(latest, filters)
-        end.compact
+        eager_load(latest_revision_workflow: [user: :org]).includes(:taggings)
 
+      if params[:order_by_property]
+        workflows = workflows.left_outer_joins(:properties).order(create_property_order)
+      else
+        workflows = workflows.order(order_from_params)
+      end
+
+      workflows = workflows.map do |series|
+        latest = series.latest_accessible(@context)
+        latest if Workflows::WorkflowFilter.match(latest, filters)
+      end.compact
+      
       render_workflows_list workflows
     end
 
@@ -238,6 +255,19 @@ module Api
     end
 
     private
+
+    def create_property_order
+      properties_table = Arel::Table.new(:properties)
+      property_order = ActiveRecord::Base.sanitize_sql(params[:order_by_property])
+      order_dir = params[:order_dir].upcase == "ASC" ? "ASC" : "DESC"
+
+      order_by_case = Arel::Nodes::Case.new(properties_table[:property_name]).when(property_order).then(0).else(1)
+      order_by_property_value = properties_table[:property_value].send(order_dir.downcase.to_sym)
+
+      # It will produce something like this - easier to understand for node migration later:
+      # CASE WHEN properties.property_name = #{params[:order_by_property]} THEN 0 ELSE 1 END, properties.property_value #{params[:order_dir]}
+      [order_by_case, order_by_property_value]
+    end
 
     def filter_workflows(workflows, filters)
       workflows.map do |workflow|

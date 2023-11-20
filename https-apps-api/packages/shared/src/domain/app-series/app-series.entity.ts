@@ -1,13 +1,15 @@
 import {
+  Collection,
   Entity,
-  IdentifiedReference,
-  ManyToOne,
+  Ref,
+  ManyToOne, OneToMany,
   PrimaryKey,
   Property,
   Reference,
 } from '@mikro-orm/core'
 import { User } from '../user'
 import { BaseEntity } from '../../database/base-entity'
+import { AppSeriesProperty } from '../property'
 
 @Entity({ tableName: 'app_series' })
 export class AppSeries extends BaseEntity {
@@ -39,7 +41,7 @@ export class AppSeries extends BaseEntity {
   deleted: boolean
 
   @ManyToOne({ entity: () => User, serializedName: 'userId' })
-  user?: IdentifiedReference<User>
+  user?: Ref<User>
 
   constructor(user?: User) {
     super()
@@ -47,4 +49,11 @@ export class AppSeries extends BaseEntity {
       this.user = Reference.create(user)
     }
   }
+
+  @OneToMany({
+    entity: () => AppSeriesProperty,
+    mappedBy: 'appSeries',
+    orphanRemoval: true,
+  })
+  properties = new Collection<AppSeriesProperty>(this)
 }

@@ -29,6 +29,7 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
   )
 
   attribute :all_tags_list, key: :tags
+  attribute :properties_object, key: :properties
   attribute :job_count, key: :job_count
   attribute :latest_revision, key: :latest_revision
   attribute :scope_id, key: :scope
@@ -46,6 +47,14 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
   # Returns a tags list for an App
   def all_tags_list
     object.app_series.all_tags_list
+  end
+
+  def properties_object
+    props = {}
+    object.app_series.properties.each do |prop|
+      props[prop.property_name] = prop.property_value
+    end
+    props
   end
 
   # Returns an app user org handle.

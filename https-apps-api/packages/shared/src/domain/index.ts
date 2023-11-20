@@ -1,33 +1,37 @@
+import { App } from './app/app.entity'
+import { Answer } from './answer/answer.entity'
+import { Attachment } from './attachment/attachment.entity'
+import { AppSeries } from './app-series'
+import { WorkflowSeries } from './workflow-series'
+import { Comment } from './comment'
+import { AnswerComment } from './comment'
+import { DiscussionComment } from './comment'
+import { Discussion } from './discussion'
+import { DataPortal } from './data-portal/data-portal.entity'
+import { DbCluster } from './db-cluster/db-cluster.entity'
+import { Expert } from './expert/expert.entity'
+import { ExpertQuestion } from './expert-question/expert-question.entity'
+import { ExpertAnswer } from './expert-answer/expert-answer.entity'
+import { Job } from './job/job.entity'
 import { AcceptedLicense } from './accepted-license/accepted-license.entity'
 import { AdminGroup } from './admin-group/admin-group.entity'
 import { AdminMembership } from './admin-membership/admin-membership.entity'
-import { Answer } from './answer/answer.entity'
-import { AppSeries } from './app-series'
-import { App } from './app/app.entity'
-import { Attachment } from './attachment/attachment.entity'
-import { ChallengeResource } from './challenge/challenge-resource.entity'
-import { Challenge } from './challenge/challenge.entity'
-import { AnswerComment, Comment, DiscussionComment } from './comment'
+import { ChallengeResource } from './challenge'
+import { Comparison } from './comparison'
+import { NewsItem } from './news-item'
 import { ComparisonInput } from './comparison-input/comparison-input.entity'
-import { Comparison } from './comparison/comparison.entity'
-import { DataPortal } from './data-portal/data-portal.entity'
-import { DbCluster } from './db-cluster/db-cluster.entity'
-import { Discussion } from './discussion'
+import { NotificationPreference } from './notification-preference'
+import { Session } from './session'
+import { GeneralProperty } from './property'
+import { Resource } from './resource/resource.entity'
+import { Challenge } from './challenge/challenge.entity'
 import { Event } from './event/event.entity'
-import { ExpertAnswer } from './expert-answer/expert-answer.entity'
-import { ExpertQuestion } from './expert-question/expert-question.entity'
-import { Expert } from './expert/expert.entity'
 import { Follow } from './follow/follow.entity'
-import { Job } from './job/job.entity'
 import { License } from './license/license.entity'
 import { LicensedItem } from './licensed-item/licensed-item.entity'
-import { NewsItem } from './news-item/news-item.entity'
 import { Note } from './note'
-import { NotificationPreference } from './notification-preference/notification-preference.entity'
 import { Notification } from './notification/notification.entity'
 import { Organization } from './org/org.entity'
-import { Resource } from './resource/resource.entity'
-import { Session } from './session'
 import { SpaceEvent } from './space-event/space-event.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
 import { SpaceReport, SpaceReportPart } from './space-report'
@@ -51,6 +55,7 @@ const entities = {
   AppSeries,
   DataPortal,
   Workflow,
+  WorkflowSeries,
   Asset,
   Answer,
   Challenge,
@@ -76,6 +81,7 @@ const entities = {
   Node,
   Discussion,
   Organization,
+  GeneralProperty,
   Space,
   SpaceEvent,
   SpaceMembership,
@@ -107,6 +113,9 @@ export * as tagging from './tagging'
 export * as userFile from './user-file'
 export * as event from './event'
 export * as org from './org'
+
+export * as property from './property'
+
 export * as email from './email'
 export * as newsItem from './news-item'
 export * as comment from './comment'
@@ -136,6 +145,7 @@ export {
   AppSeries,
   DataPortal,
   Workflow,
+  WorkflowSeries,
   Asset,
   Challenge,
   ChallengeResource,
@@ -158,6 +168,7 @@ export {
   NewsItem,
   Node,
   Organization,
+  GeneralProperty,
   Space,
   SpaceEvent,
   SpaceMembership,

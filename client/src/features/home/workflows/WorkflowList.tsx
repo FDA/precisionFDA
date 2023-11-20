@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import React, { useMemo } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
+import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { Pagination } from '../../../components/Pagination'
-import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { EmptyTable } from '../../../components/Table/styles'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
@@ -21,6 +21,7 @@ import {
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { usePropertiesQuery } from '../usePropertiesQuery'
 import { useWorkflowColumns } from './useWorkflowColumns'
 import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
@@ -55,6 +56,8 @@ export const WorkflowList = ({
     saveColumnResizeWidth,
     colWidths,
     resetSelected,
+    hiddenColumns,
+    saveHiddenColumns,
   } = useList<ListType>({
     fetchList: fetchWorkflowList,
     resource: 'workflows',
@@ -64,6 +67,7 @@ export const WorkflowList = ({
     },
   })
   const { status, data, error } = query
+  const { data: propetiesData } = usePropertiesQuery('workflowSeries', scope, spaceId)
 
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
@@ -134,6 +138,7 @@ export const WorkflowList = ({
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
         workflows={data?.workflows}
+        properties={propetiesData?.keys}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
@@ -142,6 +147,8 @@ export const WorkflowList = ({
         setSortBy={setSortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
       />
 
       <ContentFooter>
@@ -165,6 +172,7 @@ export const WorkflowList = ({
       {actions['Delete']?.modal}
       {actions['Export to']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
     </ErrorBoundary>
   )
 }
@@ -173,6 +181,7 @@ export const WorkflowListTable = ({
   isAdmin,
   filters,
   workflows,
+  properties,
   handleRowClick,
   isLoading,
   setFilters,
@@ -183,10 +192,13 @@ export const WorkflowListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  hiddenColumns,
+  saveHiddenColumns,
 }: {
   isAdmin?: boolean
   filters: IFilter[]
   workflows?: IWorkflow[]
+  properties?: string[]
   handleRowClick: (fileId: string) => void
   setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
@@ -199,24 +211,29 @@ export const WorkflowListTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  saveHiddenColumns: (cols: string[]) => void
+  hiddenColumns: string[]
 }) => {
-  const col = useWorkflowColumns({ handleRowClick, colWidths, isAdmin })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>([])
+  const location = useLocation()
 
-  useEffect(() => {
-    // Show or hide the Featured column based on scope
-    const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
-    const locationColumnHide = scope !== 'spaces' ? 'location' : null
-    const addedByColumnHide = scope === 'me' ? 'added_by' : null
-    const cols = [
-      featuredColumnHide,
-      locationColumnHide,
-      addedByColumnHide,
-    ].filter(Boolean) as string[]
-    sethiddenColumns(cols)
-  }, [scope])
+  function filterColsByScope(c: Column<IWorkflow>): boolean {
+    // Check if any of the conditions is true, then hide the column
+    return !(
+      // If the scope is 'me', hide 'added_by' regardless of other conditions.
+      (scope === 'me' && c.accessor === 'added_by') ||
+      
+      // Hide 'location' for all scopes except 'spaces'.
+      (scope !== 'spaces' && c.accessor === 'location') ||
+      
+      // Hide 'featured' for all scopes except 'everybody'.
+      (scope !== 'everybody' && c.accessor === 'featured')
+    )
+  }
 
-  const columns = useMemo(() => col, [col])
+
+  const col = useWorkflowColumns({ handleRowClick, colWidths, isAdmin, properties }).filter(filterColsByScope)
+
+  const columns = useMemo(() => col, [col, location.search, properties])
 
   const data = useMemo(() => workflows || [], [workflows])
 
@@ -225,8 +242,11 @@ export const WorkflowListTable = ({
       <Table<IWorkflow>
         name="apps"
         columns={columns}
+        enableColumnSelect
         hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         data={data}
+        properties={properties}
         isSelectable
         isSortable
         isFilterable

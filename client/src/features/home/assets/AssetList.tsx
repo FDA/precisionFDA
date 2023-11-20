@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { Pagination } from '../../../components/Pagination'
+import Table from '../../../components/Table/Table'
+import { EmptyTable } from '../../../components/Table/styles'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { KeyIcon } from '../../../components/icons/KeyIcon'
 import { QuestionIcon } from '../../../components/icons/QuestionIcon'
-import { ContentFooter } from '../../../components/Page/ContentFooter'
-import { Pagination } from '../../../components/Pagination'
-import { EmptyTable } from '../../../components/Table/styles'
-import Table from '../../../components/Table/Table'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useGenerateKeyModal } from '../../auth/useGenerateKeyModal'
@@ -18,6 +18,7 @@ import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
@@ -45,6 +46,8 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
     saveColumnResizeWidth,
     colWidths,
     resetSelected,
+    hiddenColumns,
+    saveHiddenColumns,
   } = useList<ListType>({
     fetchList: fetchAssets,
     resource: 'assets',
@@ -54,6 +57,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
     },
   })
   const { status, data, error } = query
+  const { data: propertiesData } = usePropertiesQuery('asset', scope, spaceId)
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
@@ -111,6 +115,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
         apps={data?.assets}
+        properties={propertiesData?.keys}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
@@ -119,6 +124,8 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
       />
 
       <ContentFooter>
@@ -143,6 +150,7 @@ export const AssetList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?:
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Rename']?.modal}
       {generateCLIKeyAction?.modalComp}
     </>
@@ -153,6 +161,7 @@ export const AssetsListTable = ({
   isAdmin,
   filters,
   apps,
+  properties,
   handleRowClick,
   isLoading,
   setFilters,
@@ -163,10 +172,13 @@ export const AssetsListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  hiddenColumns,
+  saveHiddenColumns,
 }: {
   isAdmin?: boolean
   filters: IFilter[]
   apps?: IAsset[]
+  properties?: string[]
   handleRowClick: (fileId: string) => void
   setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
@@ -179,24 +191,26 @@ export const AssetsListTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  saveHiddenColumns: (cols: string[]) => void
+  hiddenColumns: string[]
 }) => {
-  const col = useAssetColumns({ handleRowClick, colWidths, isAdmin })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>([])
+  function filterColsByScope(c: Column<IAsset>): boolean {
+    // Check if any of the conditions is true, then hide the column
+    return !(
+      // If the scope is 'me', hide 'added_by' regardless of other conditions.
+      (scope === 'me' && c.accessor === 'added_by') ||
+      
+      // Hide 'location' for all scopes except 'spaces'.
+      (scope !== 'spaces' && c.accessor === 'location') ||
+      
+      // Hide 'featured' for all scopes except 'everybody'.
+      (scope !== 'everybody' && c.accessor === 'featured')
+    )
+  }
 
-  useEffect(() => {
-    // Show or hide the Featured column based on scope
-    const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
-    const locationColumnHide = scope !== 'spaces' ? 'location' : null
-    const addedByColumnHide = scope === 'me' ? 'added_by' : null
-    const cols = [
-      featuredColumnHide,
-      locationColumnHide,
-      addedByColumnHide,
-    ].filter(Boolean) as string[]
-    sethiddenColumns(cols)
-  }, [scope])
+  const col = useAssetColumns({ handleRowClick, colWidths, isAdmin, properties }).filter(filterColsByScope)
 
-  const columns = useMemo(() => col, [col])
+  const columns = useMemo(() => col, [col, properties])
   const data = useMemo(() => apps || [], [apps])
 
   return (
@@ -204,8 +218,11 @@ export const AssetsListTable = ({
       <Table<IAsset>
         name="apps"
         columns={columns}
+        enableColumnSelect
         hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         data={data}
+        properties={properties}
         isSelectable
         isSortable
         isFilterable

@@ -3,7 +3,7 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   OneToMany,
   Property,
@@ -79,7 +79,7 @@ export class Folder extends Node implements ITrackable {
   userId: number
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>;
+  user!: Ref<User>;
 
   /**
    * Children collection always has to be initialized by caller using 'init()'
