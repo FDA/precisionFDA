@@ -19,17 +19,12 @@ import { IOSpec, InputSpec, JobRunForm } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
 
-const getDefaultValue = (val: any) => {
-  if (val === null || val.length === 0) {
-    return undefined
-  }
-  let op
-  if (isArray(val)) {
-    op = val.map(value => ({ value, label: value }))
-  } else {
-    op = { value: val, label: val }
-  }
-  return op
+const getDefaultValue = (val) => {
+  if (val === null || val === undefined || val.length === 0) return undefined
+
+  return Array.isArray(val)
+    ? val.map(value => ({ value, label: value }))
+    : { value: val, label: val }
 }
 
 /**
