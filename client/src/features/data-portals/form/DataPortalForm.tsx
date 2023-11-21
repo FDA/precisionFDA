@@ -211,6 +211,7 @@ export const DataPortalForm = ({
                   onChange={onChange}
                   onBlur={onBlur}
                   value={value}
+                  inputId="data-portal_host-lead"
                 />
               )}
             />
@@ -230,6 +231,7 @@ export const DataPortalForm = ({
                   onBlur={onBlur}
                   value={value}
                   isDisabled={isEditMode || isSubmitting}
+                  inputId="data-portal_guest-lead"
                 />
               )}
             />
