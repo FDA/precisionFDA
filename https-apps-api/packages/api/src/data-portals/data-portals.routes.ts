@@ -135,6 +135,20 @@ router.get(
 )
 
 /**
+ * Get list of custom Data Portals
+ */
+router.get(
+  '/custom',
+  async ctx => {
+    const userClient = new client.PlatformClient(ctx.user!.accessToken, ctx.log)
+    const dataPortalService = new dataPortal.DataPortalService(ctx.em, userClient)
+    const res = await dataPortalService.listAccessibleCustomPortals(ctx.user!.id)
+    ctx.body = res
+    ctx.status = 200
+  },
+)
+
+/**
  * Returns details of the portal (including content).
  */
 router.get(

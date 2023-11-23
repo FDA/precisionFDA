@@ -44,6 +44,8 @@ import { SyncIcon } from './SyncIcon'
 import { TaskIcon } from './TaskIcon'
 import { TrashIcon } from './TrashIcon'
 import { TrophyIcon } from './TrophyIcon'
+import { PrismIcon } from './PrismIcon'
+import { ToolsIcon } from './ToolsIcon'
 
 export const IconNames = {
 'AngleDownIcon': AngleDownIcon,
@@ -91,6 +93,8 @@ export const IconNames = {
 'TaskIcon': TaskIcon,
 'TrashIcon': TrashIcon,
 'TrophyIcon': TrophyIcon,
+'PrismIcon': PrismIcon,
+'ToolsIcon': ToolsIcon,
 }
 
 export type IconType = keyof typeof IconNames

@@ -21,8 +21,8 @@ import { Expert } from '../expert'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { ADMIN_GROUP_ROLES } from '../admin-group'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { UserRepository } from './user.repository'
-import { SPACE_MEMBERSHIP_ROLE } from "../space-membership/space-membership.enum";
 
 export enum USER_STATE {
   ENABLED = 0,
