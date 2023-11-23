@@ -1,8 +1,10 @@
+import { parseIntFromProcess } from '../../../config'
+import { ENVS } from '../../../enums'
 import {
-  CreateResourceResponse,
+  CreateResourceResponse, CustomPortal,
   DataPortalMemberParam,
   DataPortalParam,
-  FileParam
+  FileParam,
 } from './data-portal.types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { DataPortal } from '../data-portal.entity'
@@ -22,20 +24,7 @@ import { SCOPE } from '../../../types/common'
 
 const logger = getLogger('data-portals.service')
 
-export interface IDataPortalService {
-  create: (input: DataPortalParam, userId: number) => Promise<DataPortalParam>
-  update: (input: DataPortalParam, userId: number) => Promise<DataPortalParam>
-  list: (userId: number, defaultParam?: boolean) => Promise<any>
-  get: (dataPortalId: number, userId: number) => Promise<DataPortalParam>
-  getDefault: (userId: number) => Promise<DataPortalParam>
-  createCardImage: (input: FileParam, dataPortalId: number, userId: number) => Promise<string>
-  createResource: (input: FileParam, dataPortalId: number, userId: number) => Promise<CreateResourceResponse>
-  createResourceLink: (id: number) => Promise<string>
-  listResources: (dataPortalId: number, userId: number) => Promise<Resource[]>
-  removeResource: (id: number, userId: number) => Promise<void>
-}
-
-export class DataPortalService implements IDataPortalService {
+export class DataPortalService {
   private DATA_PORTAL_DEFAULTS_KEY = 'dataPortalDefaults'
 
   private em: SqlEntityManager
@@ -85,6 +74,56 @@ export class DataPortalService implements IDataPortalService {
     } else {
       return {"resources": []} // Ruby needs the root key
     }
+  }
+
+  /**
+   * Returns PRISM portal and Tools portal if the user has access to them.
+   * @param userId
+   */
+  async listAccessibleCustomPortals(userId: number): Promise<CustomPortal[]> {
+    const user = await this.em.findOneOrFail(entities.User, { id: userId }, { populate: ['organization'] })
+
+    const PRISM_PORTAL_ID = parseIntFromProcess(process.env.PRISM_PORTAL_ID) ?? undefined
+    const PRISM_SPACE_ID = parseIntFromProcess(process.env.PRISM_SPACE_ID) ?? undefined
+    const TOOLS_PORTAL_ID = parseIntFromProcess(process.env.TOOLS_PORTAL_ID) ?? undefined
+    const TOOLS_SPACE_ID = parseIntFromProcess(process.env.TOOLS_SPACE_ID) ?? undefined
+
+    if (!(PRISM_PORTAL_ID && PRISM_SPACE_ID && TOOLS_PORTAL_ID && TOOLS_SPACE_ID)) {
+      logger.info('DataPortalService: listAccessibleCustomPortals: missing env vars')
+      return []
+    }
+
+    const prismPortal: CustomPortal = { name: 'PRISM', id: PRISM_PORTAL_ID, spaceId: PRISM_SPACE_ID }
+    const toolsPortal: CustomPortal = { name: 'Tools', id: TOOLS_PORTAL_ID, spaceId: TOOLS_SPACE_ID }
+
+    // site admin
+    if (await user.isSiteAdmin()) {
+      return [prismPortal, toolsPortal]
+    }
+
+    // regular users
+    const accessiblePortals: CustomPortal[] = []
+    if (await this.hasAccessToSpace(prismPortal.spaceId, userId)) {
+      accessiblePortals.push(prismPortal)
+    }
+    if (await this.hasAccessToSpace(toolsPortal.spaceId, userId)) {
+      accessiblePortals.push(toolsPortal)
+    }
+    return accessiblePortals
+  }
+
+  /**
+   * Returns true if user has any member role in a given space.
+   */
+  private async hasAccessToSpace(spaceId: number, userId: number): Promise<boolean> {
+    const space = await this.em.findOne(entities.Space, {
+      id: spaceId,
+      spaceMemberships: {
+        user: userId,
+        active: true,
+      },
+    })
+    return Boolean(space)
   }
 
   createResourceLink = async (id: number): Promise<string> => {

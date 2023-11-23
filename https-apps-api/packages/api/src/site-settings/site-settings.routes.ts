@@ -1,6 +1,7 @@
-import { DefaultState } from 'koa'
+import type { DefaultState } from 'koa'
 import Router from 'koa-router'
-import { client, config, dataPortal, errors } from '@pfda/https-apps-shared'
+import type { client } from '@pfda/https-apps-shared'
+import { config, dataPortal, errors } from '@pfda/https-apps-shared'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../server/utils'
 
 const router = new Router<DefaultState, Api.Ctx>()

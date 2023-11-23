@@ -254,6 +254,7 @@ Rails.application.routes.draw do
         post :card_image, on: :member
         delete "/resources/:resource_id" => "data_portals#remove_resource", as: :delete_resource_route
         post "/resources/:resource_id" => "data_portals#create_resource_link", as: :create_resource_link
+        get :custom, on: :collection, to: "data_portals#custom"
       end
 
       resources :submissions, only: %i(index) do

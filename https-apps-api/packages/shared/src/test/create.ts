@@ -204,6 +204,27 @@ const userHelper = {
     })
   },
 
+  addRSARole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+    const adminGroup = adminGroupHelper.createReviewSpaceAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    em.persist(adminMembership)
+    return user
+  },
+
+  addSiteAdminRole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+    const adminGroup = adminGroupHelper.createSiteAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    em.persist(adminMembership)
+    return user
+  },
+
+  addChallengeAdminRole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+    const adminGroup = adminGroupHelper.createChallengeAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    em.persist(adminMembership)
+    return user
+  },
+
   getChallengeBotToken: () => config.platform.challengeBotAccessToken,
 }
 
