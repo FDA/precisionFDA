@@ -19,9 +19,9 @@
     "uninstall": "rm -rf ./node_modules"
   },
   "dependencies": {
-    "@mikro-orm/core": "^5.6.3",
-    "@mikro-orm/mysql": "^5.6.3",
-    "@mikro-orm/reflection": "^5.6.3",
+    "@mikro-orm/core": "5.7.14",
+    "@mikro-orm/mysql": "5.7.14",
+    "@mikro-orm/reflection": "5.7.14",
     "@pfda/https-apps-shared": "^1.0.0",
     "bull": "^4.8.5",
     "nanoid": "^3.1.31",
@@ -34,7 +34,6 @@
     "@types/chance": "^1.1.0",
     "@types/dirty-chai": "^2.0.2",
     "@types/luxon": "^1.26.5",
-    "@types/pino": "^7.0.5",
     "@types/mocha": "^8.2.3",
     "@types/ramda": "^0.27.32",
     "@types/sinon": "^9.0.8",

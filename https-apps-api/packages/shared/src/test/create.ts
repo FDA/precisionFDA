@@ -6,7 +6,7 @@ import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
-import { STATIC_SCOPE } from '../enums'
+import { STATIC_SCOPE } from "../enums";
 
 const attachmentHelper = {
   create: (
@@ -199,9 +199,29 @@ const userHelper = {
   },
 
   createChallengeBot: (em: EntityManager) => {
-    const user = userHelper.create(em, {
+    return userHelper.create(em, {
       dxuser: config.platform.challengeBotUser,
     })
+  },
+
+  addRSARole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+    const adminGroup = adminGroupHelper.createReviewSpaceAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    em.persist(adminMembership)
+    return user
+  },
+
+  addSiteAdminRole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+    const adminGroup = adminGroupHelper.createSiteAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    em.persist(adminMembership)
+    return user
+  },
+
+  addChallengeAdminRole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+    const adminGroup = adminGroupHelper.createChallengeAdminGroup(em)
+    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    em.persist(adminMembership)
     return user
   },
 
@@ -299,22 +319,20 @@ const appHelper = {
 }
 
 const appSeriesHelper = {
-  create: (
-    em: EntityManager,
-    references: { user: InstanceType<typeof entities.User>, appId: number },
-    data?: Partial<InstanceType<typeof entities.AppSeries>>,
-  ) => {
-    const defaults = generate.app.appSeries()
-    const input = {
-      ...defaults,
-      ...data,
-      latestRevisionAppId: references.appId,
-    }
-    const appSeries = wrap(new entities.AppSeries(references.user)).assign(input, { em })
-    em.persist(appSeries)
-    return appSeries
-  }
+    create: (
+        em: EntityManager,
+        references: { user: InstanceType<typeof entities.User> },
+        appSeriesData: Partial<InstanceType<typeof entities.AppSeries>>) => {
+        const appSeriesDefaults = generate.appSeries.simple()
+        const appSeriesInput = {
+            ...appSeriesDefaults,
+            ...appSeriesData,
+        }
 
+        const appSeries = wrap(new entities.AppSeries(references.user)).assign(appSeriesInput, { em })
+        em.persist(appSeries)
+        return appSeries
+    }
 }
 
 const filesHelper = {
@@ -737,6 +755,24 @@ const workflowHelper = {
   },
 }
 
+const workflowSeriesHelper = {
+    create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.WorkflowSeries>>,
+    ) => {
+    const workflowSeriesDefaults = generate.workflowSeries.simple()
+    const workflowSeriesInput = {
+        ...workflowSeriesDefaults,
+        ...data,
+    }
+
+    const workflowSeries = wrap(new entities.WorkflowSeries(references.user)).assign(workflowSeriesInput, { em })
+    em.persist(workflowSeries)
+    return workflowSeries
+    }
+}
+
 export {
   assetHelper,
   attachmentHelper,
@@ -761,4 +797,5 @@ export {
   expertHelper,
   newsHelper,
   workflowHelper,
+  workflowSeriesHelper,
 }

@@ -114,7 +114,6 @@ export const DataPortalForm = ({
   useEffect(() => {
     const img = watch().card_image_file
     if (img?.[0] != null) {
-      if (onImageSelection) onImageSelection(img[0])
       getBase64(img?.[0], setBase64Image)
     }
   }, [watch().card_image_file])
@@ -212,6 +211,7 @@ export const DataPortalForm = ({
                   onChange={onChange}
                   onBlur={onBlur}
                   value={value}
+                  inputId="data-portal_host-lead"
                 />
               )}
             />
@@ -231,6 +231,7 @@ export const DataPortalForm = ({
                   onBlur={onBlur}
                   value={value}
                   isDisabled={isEditMode || isSubmitting}
+                  inputId="data-portal_guest-lead"
                 />
               )}
             />

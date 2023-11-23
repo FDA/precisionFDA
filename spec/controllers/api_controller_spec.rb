@@ -278,12 +278,13 @@ RSpec.describe ApiController, type: :controller do
 
         it "returns a challenge card image file uid" do
           post :create_challenge_card_image, params: params
-          expect(parsed_response["id"]).to eq dxid.concat("-1")
+          expect(parsed_response["id"]).to eq dxid
+          expect(parsed_response["uid"]).to eq dxid.concat("-1")
         end
 
         it "returns a public challenge card image file" do
           post :create_challenge_card_image, params: params
-          file = UserFile.find_by(uid: parsed_response["id"])
+          file = UserFile.find_by(uid: parsed_response["uid"])
           expect(file.scope).to eq "public"
         end
       end

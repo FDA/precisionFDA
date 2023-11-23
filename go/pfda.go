@@ -326,7 +326,6 @@ func mainInternal() int {
 	help := *flagHelp || *flagHelpShort
 
 	if !help && *command != "" {
-
 		if config == nil {
 			if *authKey == "" {
 				return helpers.InputError("Missing authorization key >>> Could not find config file and no key was provided with the command.")
@@ -657,7 +656,7 @@ func mainInternal() int {
 		}
 
 		config.Key = newToken
-		helpers.SaveConfig(config)
+		helpers.SaveConfig(config, *flagJson)
 		return 0
 
 	case "api":
@@ -693,7 +692,7 @@ func mainInternal() int {
 			config = helpers.CreateConfig()
 		}
 		config.Key = *authKey
-		helpers.SaveConfig(config)
+		helpers.SaveConfig(config, *flagJson)
 	}
 
 	return 0

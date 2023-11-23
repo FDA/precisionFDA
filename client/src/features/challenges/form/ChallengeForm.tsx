@@ -25,20 +25,20 @@ const StyledDateInput = styled(InputText)`
   width: fit-content;
 `
 
-interface CreateChallengeForm {
+export interface IChallengeForm {
   name: string
   description: string
-  scope: { label: string; value: string } | null
-  app_owner_id: { label: string; value: string } | null
-  start_at: Date | null
-  end_at: Date | null
-  host_lead_dxuser: { label: string; value: string } | null
-  guest_lead_dxuser: { label: string; value: string } | null
-  cardImage: null | FileList
-  card_image_url: string | null
-  card_image_id: string | null
-  status: { label: string; value: string } | null
-  pre_registration_url: string | null
+  scope: { label: string; value: string }
+  app_owner_id: { label: string; value: string }
+  start_at: Date
+  end_at: Date
+  host_lead_dxuser: { label: string; value: string }
+  guest_lead_dxuser: { label: string; value: string }
+  card_image_url: string
+  card_image_id: string
+  card_image_file: File[]
+  status: { label: string; value: string }
+  pre_registration_url: string
 }
 
 const StyledForm = styled.form`
@@ -58,6 +58,14 @@ const Row = styled.div`
   gap: 16px;
 `
 
+const ImageUploadPreview = styled.img`
+  width: 100%;
+  max-width: 214px;
+  border-radius: 12px;
+  height: 214px;
+  object-fit: cover;
+`
+
 function getBase64(file?: File, callback?: (a: string | null) => void) {
   if (file) {
     const reader = new FileReader()
@@ -73,14 +81,12 @@ export const ChallengeForm = ({
   challenge,
   defaultValues = {},
   onSubmit,
-  onImageSelection,
   isSaving = false,
   mutationErrors,
 }: {
   challenge?: Challenge
   defaultValues?: any
   onSubmit: (a: any) => Promise<any>
-  onImageSelection?: (img: File) => Promise<any>
   isSaving?: boolean
   mutationErrors?: MutationErrors
 }) => {
@@ -98,7 +104,7 @@ export const ChallengeForm = ({
     watch,
     formState: { errors, isSubmitting, dirtyFields },
     trigger,
-  } = useForm<CreateChallengeForm>({
+  } = useForm<IChallengeForm>({
     mode: 'onBlur',
     resolver: yupResolver(
       isEditMode ? editValidationSchema : createValidationSchema,
@@ -112,7 +118,7 @@ export const ChallengeForm = ({
       end_at: null,
       host_lead_dxuser: null,
       guest_lead_dxuser: null,
-      cardImage: null,
+      card_image_file: null,
       card_image_url: null,
       card_image_id: null,
       status: null,
@@ -121,14 +127,12 @@ export const ChallengeForm = ({
     },
   })
 
-  const img = watch().cardImage
-
   useEffect(() => {
+    const img = watch().card_image_file
     if (img?.[0] != null) {
-      if (onImageSelection) onImageSelection(img[0])
       getBase64(img?.[0], setBase64Image)
     }
-  }, [watch().cardImage])
+  }, [watch().card_image_file])
 
   useMutationErrorEffect(setError, mutationErrors)
 
@@ -174,31 +178,36 @@ export const ChallengeForm = ({
           </FieldGroup>
 
           <FieldGroup>
-            <label>Challenge image (required)</label>
-            {(base64Image || challenge?.card_image_url) && (
-              <img
+            {base64Image ? (
+              <ImageUploadPreview
                 width={300}
-                src={base64Image || challenge?.card_image_url || undefined}
-                alt="challenge card"
+                src={base64Image || undefined}
+                alt="portal img"
               />
+            ) : (
+              defaultValues?.card_image_url && (
+                <ImageUploadPreview
+                  width={300}
+                  src={defaultValues?.card_image_url}
+                  alt="challenge img"
+                />
+              )
             )}
 
             <>
               <InputText
-                label="cardImage"
+                label="Challenge image file"
                 type="file"
                 accept="image/*"
-                {...register('cardImage')}
+                {...register('card_image_file')}
                 disabled={isSubmitting}
               />
               <ErrorMessage
                 errors={errors}
-                name="cardImage"
+                name="card_image_file"
                 render={({ message }) => <InputError>{message}</InputError>}
               />
             </>
-
-            {/* disabled changing image for edit mode */}
           </FieldGroup>
 
           <FieldGroup>
@@ -208,7 +217,6 @@ export const ChallengeForm = ({
               control={control}
               render={({ field: { onChange, onBlur, value }}) => (
                 <ScopeFieldSelect
-                  challengeId={challenge?.id.toString() || undefined}
                   isSubmitting={isSubmitting}
                   onChange={onChange}
                   onBlur={onBlur}

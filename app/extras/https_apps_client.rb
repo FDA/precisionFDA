@@ -4,6 +4,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
+  # List custom data portals
+  def custom_data_portals_list
+    request(
+      "/data-portals/custom",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # Start sync job
   # @param job_dxid [String] Job dxid to sync.
   def job_sync(job_dxid)
@@ -539,6 +548,27 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       ops,
       Net::HTTP::Patch::METHOD,
     )
+  end
+
+  def set_properties(target_id, target_type, properties)
+    request(
+      "/properties",
+      {
+        targetId: target_id,
+        targetType: target_type,
+        properties: properties,
+      },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def get_valid_property_keys(type, scope)
+    request(
+      "/properties/#{type}/scope/#{scope}/keys",
+      {},
+      Net::HTTP::Get::METHOD,
+      )
+
   end
 
   # Update notification's delivered date time

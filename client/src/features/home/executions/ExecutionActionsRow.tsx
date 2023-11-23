@@ -129,6 +129,7 @@ export const ExecutionActionsRow = ({
       </Dropdown>
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Terminate']?.modal}
       {actions['Snapshot']?.modal}

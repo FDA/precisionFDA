@@ -614,7 +614,8 @@ class ApiController < ApplicationController
   # tag_context (string, optional): indicates the tag context to use
   def set_tags
     taggable_uid = unsafe_params[:taggable_uid]
-    unless taggable_uid.is_a?(String) && taggable_uid != ""
+    taggable_folder_id = unsafe_params[:taggable_folder_id]
+    unless taggable_uid.is_a?(String) && taggable_uid != "" || taggable_folder_id != ""
       raise ApiError, "Taggable uid needs to be a non-empty string"
     end
 
@@ -626,7 +627,8 @@ class ApiController < ApplicationController
 
     tag_context = unsafe_params[:tag_context] # Optional
 
-    taggable = item_from_uid(taggable_uid)
+    taggable = item_from_uid(taggable_uid) if taggable_uid
+    taggable = Folder.accessible_by(@context).find_by(id: taggable_folder_id) if taggable_folder_id
 
     verify_nodes_for_protection([taggable], "set tags") if taggable.is_a?(UserFile)
 
@@ -652,6 +654,22 @@ class ApiController < ApplicationController
     raise ApiError, e.message
   end
 
+  def set_properties
+    # doesnt work for folders yet. might force FE to send id and type? for spaces and folders we only have id anyway..
+    item_id = params[:item_id]
+    item_type = params[:type]
+    properties = unsafe_params[:properties]
+    verify_nodes_for_protection([Node.find_by(id: item_id)], "set properties") if item_type == "node"
+
+    result = https_apps_client.set_properties(item_id.to_i, item_type, properties)
+    render json: result
+  end
+
+
+  def get_valid_property_keys
+    result = https_apps_client.get_valid_property_keys(params[:type], params[:scope])
+    render json: result, adapter: :json
+  end
   # Inputs
   #
   # uid (string, required): the uid of the item to describe
@@ -815,7 +833,7 @@ class ApiController < ApplicationController
       scope: "public",
     )
 
-    render json: { id: file.uid }
+    render json: { uid: file.uid, id: file.id }
   end
 
   # Inputs:

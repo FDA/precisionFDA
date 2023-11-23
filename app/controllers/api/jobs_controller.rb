@@ -73,6 +73,8 @@ module Api
           includes(:taggings).
           search_by_tags(params.dig(:filters, :tags))
 
+        jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
+
         jobs = JobService::JobsFilter.call(jobs, params[:filters])
 
         render_jobs_list(jobs)
@@ -91,6 +93,7 @@ module Api
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags))
 
+      jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
 
       render_jobs_list(jobs)
@@ -107,6 +110,8 @@ module Api
         eager_load(:app, user: :org, analysis: :workflow).
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags))
+
+      jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
 
@@ -141,8 +146,13 @@ module Api
         app_series.jobs.accessible_by(@context).
         eager_load(:app, user: :org, analysis: :workflow).
         includes(:taggings).
-        search_by_tags(params.dig(:filters, :tags)).
-        order(order_from_params).page(page_from_params).per(page_size)
+        search_by_tags(params.dig(:filters, :tags))
+
+      if params[:order_by_property]
+        jobs = jobs.left_outer_joins(:properties).order(create_property_order).per(page_size)
+      else
+        jobs = jobs.order(order_from_params).page(page_from_params).per(page_size)
+      end
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
       jobs.each { |job| job.current_user = @context.user }
@@ -166,6 +176,8 @@ module Api
         eager_load(:app, user: :org, analysis: :workflow).
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags))
+
+      jobs = jobs.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
 
       jobs = JobService::JobsFilter.call(jobs, params[:filters])
 
@@ -323,6 +335,19 @@ module Api
       end
     end
 
+    def create_property_order
+      properties_table = Arel::Table.new(:properties)
+      property_order = ActiveRecord::Base.sanitize_sql(params[:order_by_property])
+      order_dir = params[:order_dir].upcase == "ASC" ? "ASC" : "DESC"
+
+      order_by_case = Arel::Nodes::Case.new(properties_table[:property_name]).when(property_order).then(0).else(1)
+      order_by_property_value = properties_table[:property_value].send(order_dir.downcase.to_sym)
+
+      # It will produce something like this - easier to understand for node migration later:
+      # CASE WHEN properties.property_name = #{params[:order_by_property]} THEN 0 ELSE 1 END, properties.property_value #{params[:order_dir]}
+      [order_by_case, order_by_property_value]
+    end
+
     # A common method for apps list json rendering.
     # Added a virtual attribute `current_user` - to use in serializer
     # @param jobs [Array] Array of Job objects.
@@ -385,7 +410,9 @@ module Api
         end
       end.flatten!
 
-      page_array = paginate_array(sort_array_by_fields(workflow_with_jobs))
+      workflow_with_jobs = sort_array_by_fields(workflow_with_jobs) unless params[:order_by_property]
+
+      page_array = paginate_array(workflow_with_jobs)
       page_meta = pagination_meta(workflow_with_jobs.count)
 
       page_meta[:pagination][:total_count] = jobs_size

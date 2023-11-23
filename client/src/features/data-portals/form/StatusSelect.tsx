@@ -27,6 +27,7 @@ export const StatusSelect = ({
       onBlur={onBlur}
       value={value}
       isDisabled={isDisabled}
+      inputId="data-portal_status"
     />
   )
 }

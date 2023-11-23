@@ -3,7 +3,7 @@ import {
   PrimaryKey,
   Property,
   Reference,
-  IdentifiedReference, JsonType, OneToOne,
+  Ref, JsonType, OneToOne,
 } from '@mikro-orm/core'
 import { User } from '../user/user.entity'
 import { NOTIFICATION_TYPES } from '../email/email.config'
@@ -29,7 +29,7 @@ export class NotificationPreference {
   data: typeof NOTIFICATION_TYPES
 
   @OneToOne({ entity: () => User, serializedName: 'userId' })
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   constructor(user: User) {
     this.user = Reference.create(user)

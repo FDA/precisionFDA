@@ -216,10 +216,20 @@ module Api
     # @param assets [Array] Array of Asset objects.
     # @return render assets as json with meta
     def render_assets_list(assets)
-      filtered_assets = FileService::FilesFilter.call(assets, params[:filters]).
-        order(order_from_params).
-        page(page_from_params).
-        per(page_size)
+      filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
+      property_order = params[:order_by_property]
+      if property_order
+        filtered_assets = filtered_assets.
+          left_outer_joins(:properties).
+          order(create_property_order).
+          page(page_from_params).
+          per(page_size)
+      else
+        filtered_assets = filtered_assets.
+          order(order_from_params).
+          page(page_from_params).
+          per(page_size)
+      end
 
       page_dict = pagination_dict(filtered_assets)
 
@@ -259,6 +269,19 @@ module Api
       # end
 
       meta
+    end
+
+    def create_property_order
+      properties_table = Arel::Table.new(:properties)
+      property_order = ActiveRecord::Base.sanitize_sql(params[:order_by_property])
+      order_dir = params[:order_dir].upcase == "ASC" ? "ASC" : "DESC"
+
+      order_by_case = Arel::Nodes::Case.new(properties_table[:property_name]).when(property_order).then(0).else(1)
+      order_by_property_value = properties_table[:property_value].send(order_dir.downcase.to_sym)
+
+      # It will produce something like this - easier to understand for node migration later:
+      # CASE WHEN properties.property_name = #{params[:order_by_property]} THEN 0 ELSE 1 END, properties.property_value #{params[:order_dir]}
+      [order_by_case, order_by_property_value]
     end
 
     def can_copy_to_scope?

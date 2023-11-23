@@ -58,7 +58,7 @@ const getConfirmationMessage = (title: ValType) => {
 
 export function useExportToModal<
   T extends {
-    id: string
+    id: number
     name: string
     links?: { export?: string; cwl_export?: string; wdl_export?: string }
   },

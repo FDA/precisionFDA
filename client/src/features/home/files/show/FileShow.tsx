@@ -7,7 +7,12 @@ import Dropdown from '../../../../components/Dropdown'
 import { HomeLabel } from '../../../../components/HomeLabel'
 import { FileIcon } from '../../../../components/icons/FileIcon'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
-import { StyledTagItem, StyledTags } from '../../../../components/Tags'
+import {
+  StyledTagItem,
+  StyledTags,
+  StyledPropertyItem,
+  StyledPropertyKey,
+} from '../../../../components/Tags'
 import { Location } from '../../../../types/utils'
 import { getBackPath } from '../../../../utils/getBackPath'
 import { ISpace } from '../../../spaces/spaces.types'
@@ -37,7 +42,6 @@ import { FileDescription } from './styles'
 import { Filler } from '../../../../components/Page/styles'
 import { LockIcon } from '../../../../components/icons/LockIcon'
 import { theme } from '../../../../styles/theme'
-import { getScopeMapping } from '../../getScopeMapping'
 
 const FileActions = ({
   scope,
@@ -57,6 +61,7 @@ const FileActions = ({
     resourceKeys: ['file', file.uid],
     folderId,
   })
+
   return (
     <>
       <Dropdown
@@ -80,6 +85,7 @@ const FileActions = ({
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Lock']?.modal}
       {actions['Unlock']?.modal}
     </>
@@ -173,7 +179,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
           <MetadataRow>
             <MetadataItem>
               <MetadataKey>Location</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="file-location">
                 {file.links.space ? (
                   <Link target="_blank" to={file.links.space}>
                     {file.location}
@@ -188,7 +194,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
 
             <MetadataItem>
               <MetadataKey>ID</MetadataKey>
-              <MetadataVal>{file.uid}</MetadataVal>
+              <MetadataVal data-testid="file-uid">{file.uid}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
@@ -202,7 +208,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
 
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="file-origin">
                 {file.links?.origin_object?.origin_type === 'Job' ||
                 file.links?.origin_object?.origin_type === 'Comparison' ? (
                   <Link
@@ -224,7 +230,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
 
             <MetadataItem>
               <MetadataKey>File Size</MetadataKey>
-              <MetadataVal>{file.file_size}</MetadataVal>
+              <MetadataVal data-testid="file-size">{file.file_size}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
@@ -233,15 +239,37 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-        <MetadataSection>
-          {file.tags.length > 0 && (
-            <StyledTags>
-              {file.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-              ))}
-            </StyledTags>
-          )}
-        </MetadataSection>
+        {file.tags.length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+              <MetadataKey>Tags</MetadataKey>
+                  <StyledTags>
+                    {file.tags.map(tag => (
+                      <StyledTagItem data-testid="file-tag-item" key={tag}>{tag}</StyledTagItem>
+                    ))}
+                  </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+        {Object.entries(file.properties).length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                  <MetadataKey>Properties</MetadataKey>
+                    <StyledTags>
+                      {Object.entries(file.properties).map(([key, value]) => (
+                        <StyledPropertyItem key={key}>
+                          <StyledPropertyKey>{key}</StyledPropertyKey>
+                          <span>{value}</span>
+                        </StyledPropertyItem>
+                      ))}
+                    </StyledTags>
+                </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
       </Topbox>
 
       <Filler size={40} />

@@ -14,6 +14,7 @@ export enum WorkflowActions {
   'Copy to space' = 'Copy to space',
   'Comments' = 'Comments',
   'Edit tags' = 'Edit tags',
+  'Edit properties' = 'Edit properties',
 }
 
 export type WorkflowActionTypes = `${WorkflowActions}`
@@ -150,7 +151,7 @@ export interface Links {
 }
 
 export interface IWorkflow {
-  id: string;
+  id: number;
   uid: string;
   name: string;
   title: string;
@@ -173,7 +174,10 @@ export interface IWorkflow {
   links: Links;
   jobs?: any;
   logged_dxuser: string;
-  tags: any[];
+  tags: string[];
+  properties: {
+    [key: string]: string;
+  };
 }
 
 export interface FetchWorkflowRequest {

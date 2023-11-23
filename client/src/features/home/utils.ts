@@ -79,12 +79,19 @@ export function prepareListFetch(filters: IFilter[], params: Params) {
     filterParams[`filters[${f.id}]`] = f.value
   })
 
+  const order_by_key = params.sortBy?.order_by?.includes('props.')
+    ? 'order_by_property'
+    : 'order_by'
+  const order_by_val = order_by_key === 'order_by_property'
+    ? params.sortBy?.order_by.replace('props.', '')
+    : renameOrderByKeys(params?.sortBy?.order_by)
+
   const queryParams = cleanObject({
     folder_id: params?.folderId,
     space_id: params?.spaceId,
     per_page: params?.perPage,
     page: params?.page,
-    order_by: renameOrderByKeys(params?.sortBy?.order_by),
+    [order_by_key]: order_by_val,
     order_dir: params?.sortBy?.order_dir,
     ...filterParams,
   })

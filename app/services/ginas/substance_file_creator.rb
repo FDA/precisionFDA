@@ -16,6 +16,14 @@ module Ginas
       substance_uuid = substance_data&.fetch("uuid", nil)
       substance_name = substance_data&.fetch("name", nil)
 
+      substance_description = <<~GSRS
+        This file still needs to be submitted. Contact the FDA to be added to a shared Space where this file may be placed:
+        1. Email fda-srs@fda.hhs.gov requesting a precisionFDA Shared Review Space. Include your precisionFDA login ID.
+        2. Upon receiving email prompt, accept the invite to the Shared Review Space to activate it.
+        3. Confirm the submission file is closed (file size is visible).
+        4. Once the Space is active, select Actions -> Copy to Space. Notify FDA SRS by email that the file is now present in the Shared Review Space.
+      GSRS
+
       unless substance_uuid || substance_type || substance_name
         raise SubstanceFileCreatorError, "Can't find the required fields in the substance body"
       end
@@ -24,6 +32,7 @@ module Ginas
         @context,
         name: substance_file_name(request, substance_name, substance_uuid),
         content: data.to_json,
+        description: substance_description,
       )
       file.tag_list.add(GSRS_TAG, substance_type)
       file.save

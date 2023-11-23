@@ -104,7 +104,10 @@ export interface IApp {
   featured: boolean;
   active: boolean;
   links: Links;
-  tags: any[];
+  tags: string[];
+  properties: {
+    [key: string]: string;
+  };
   scope: ServerScope;
   forked_from: string;
 }

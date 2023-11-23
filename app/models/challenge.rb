@@ -294,12 +294,15 @@ class Challenge < ApplicationRecord
 
   def update_card_image_url!
     return unless previous_changes.key?(:card_image_id)
+
     return if card_image_id.blank?
 
-    card_image = UserFile.find_by!(uid: card_image_id)
+    card_image = UserFile.find(card_image_id)
+    return unless card_image.state == "closed"
+
     update(
       card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image),
-    ) if card_image.closed
+    )
   end
 
   # Updates specified_order of challenges setting challenge to appear after replacement challenge.

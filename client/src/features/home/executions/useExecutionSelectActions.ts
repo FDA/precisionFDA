@@ -11,6 +11,7 @@ import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
 import { useTerminateModal } from './useTerminateModal'
 import { useSnapshotModal } from './useSnapshotModal'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export enum ExecutionAction {
   'View Logs' = 'View Logs',
@@ -24,6 +25,7 @@ export enum ExecutionAction {
   'Attach to...' = 'Attach to...',
   'Comments' = 'Comments',
   'Edit tags' = 'Edit tags',
+  'Edit properties' = 'Edit properties',
 }
 
 export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { scope?: ResourceScope, selectedItems: IExecution[], resourceKeys: string[]}) => {
@@ -59,6 +61,18 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     isShown: isShownTagsModal,
   } = useEditTagsModal<IExecution>({
     resource: 'jobs', selected: selected[0], onSuccess: () => {
+      queryClient.invalidateQueries(resourceKeys)
+    },
+  })
+
+  const {
+    modalComp: propertiesModal,
+    setShowModal: setPropertiesModal,
+    isShown: isShownPropertiesModal,
+  } = useEditPropertiesModal<IExecution>({
+    type: 'job',
+    selected: selected[0],
+    onSuccess: () => {
       queryClient.invalidateQueries(resourceKeys)
     },
   })
@@ -161,7 +175,15 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && isJobOwner) || (selected.length !== 1),
+      shouldHide: (!isAdmin && !isJobOwner) || (selected.length !== 1),
+    },
+    'Edit properties': {
+      type: 'modal',
+      func: () => setPropertiesModal(true),
+      isDisabled: false,
+      modal: propertiesModal,
+      showModal: isShownPropertiesModal,
+      shouldHide: (!isAdmin && !isJobOwner) || (selected.length !== 1),
     },
   }
 
@@ -182,6 +204,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
         'Attach to...',
         'Comments',
         'Edit tags',
+        'Edit properties',
       ], actions)
     }
   }
