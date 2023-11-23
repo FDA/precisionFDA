@@ -3,15 +3,16 @@ import {
   Property,
   Unique,
   ManyToOne,
-  IdentifiedReference,
+  Ref,
   Reference,
   Enum,
-  Filter,
+  Filter, OneToMany, Collection,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
 import { User } from '../user/user.entity'
 import { STATUS, ENGINE } from './db-cluster.enum'
+import { DbClusterProperty } from "../property";
 
 @Entity({ tableName: 'dbclusters' })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
@@ -64,7 +65,14 @@ export class DbCluster extends BaseEntity {
   engine!: ENGINE
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
+
+  @OneToMany({
+    entity: () => DbClusterProperty,
+    mappedBy: 'dbCluster',
+    orphanRemoval: true,
+  })
+  properties = new Collection<DbClusterProperty>(this);
 
   constructor(user: User) {
     super()

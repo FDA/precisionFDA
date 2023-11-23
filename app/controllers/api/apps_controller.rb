@@ -30,10 +30,12 @@ module Api
     def index
       apps = []
       filters = params[:filters]
+      property_order = params[:order_by_property]
 
       if params[:space_id]
         if find_user_space
           apps = @space.latest_revision_apps.unremoved.eager_load(:app_series, :user).includes(:taggings)
+          apps.includes(app_series: :properties).order(create_property_order) if params[:order_by_property]
           apps = filter_apps(apps, filters)
         end
       else
@@ -41,6 +43,9 @@ module Api
           accessible_by(@context).
           unremoved.
           eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
+
+        apps_series = apps_series.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
+
         apps = apps_series.map do |series|
           latest = series.latest_accessible(@context)
 
@@ -51,7 +56,8 @@ module Api
         end.compact
       end
 
-      apps = sort_array_by_fields(apps)
+      # if property order was used, it is already sorted properly.
+      apps = sort_array_by_fields(apps) unless property_order
       page_meta = pagination_meta(apps.count)
       apps = paginate_array(apps)
 
@@ -66,7 +72,11 @@ module Api
       filters = params[:filters]
       apps = AppSeries.unremoved.featured.
         accessible_by_public.eager_load(:user, :taggings).
-        search_by_tags(params.dig(:filters, :tags)).map do |series|
+        search_by_tags(params.dig(:filters, :tags))
+
+      apps = apps.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
+
+      apps = apps.map do |series|
           latest = series.latest_accessible(@context)
           if (latest&.scope == "public") && AppSeriesService::AppSeriesFilter.
               match(latest, filters)
@@ -74,7 +84,7 @@ module Api
           end
         end.compact
 
-      apps = sort_array_by_fields(apps)
+      apps = sort_array_by_fields(apps) unless params[:order_by_property]
       page_meta = pagination_meta(apps.count)
       apps = paginate_array(apps)
 
@@ -102,6 +112,8 @@ module Api
         accessible_by_public.
         eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
 
+      apps_series = apps_series.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
+
       filters = params[:filters]
       apps = apps_series.map do |series|
         latest = series.latest_accessible(@context)
@@ -111,7 +123,7 @@ module Api
         end
       end.compact
 
-      apps = sort_array_by_fields(apps)
+      apps = sort_array_by_fields(apps) unless params[:order_by_property]
       page_meta = pagination_meta(apps.count)
       apps = paginate_array(apps)
 
@@ -128,6 +140,8 @@ module Api
         eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org]).
         where.not(scope: [SCOPE_PUBLIC, SCOPE_PRIVATE])
 
+      apps_series = apps_series.left_outer_joins(:properties).order(create_property_order) if params[:order_by_property]
+
       filters = params[:filters]
       apps = apps_series.map do |series|
         series_app = series.latest_accessible(@context)
@@ -137,7 +151,7 @@ module Api
         end
       end.compact
 
-      apps = sort_array_by_fields(apps)
+      apps = sort_array_by_fields(apps) unless params[:order_by_property]
       page_meta = pagination_meta(apps.count)
       apps = paginate_array(apps)
 
@@ -733,6 +747,21 @@ module Api
 
       { comparators: links }
     end
+
+    def create_property_order
+      properties_table = Arel::Table.new(:properties)
+      property_order = ActiveRecord::Base.sanitize_sql(params[:order_by_property])
+      order_dir = params[:order_dir].upcase == "ASC" ? "ASC" : "DESC"
+
+      order_by_case = Arel::Nodes::Case.new(properties_table[:property_name]).when(property_order).then(0).else(1)
+      order_by_property_value = properties_table[:property_value].send(order_dir.downcase.to_sym)
+
+      # It will produce something like this - easier to understand for node migration later:
+      # CASE WHEN properties.property_name = #{params[:order_by_property]} THEN 0 ELSE 1 END, properties.property_value #{params[:order_dir]}
+      [order_by_case, order_by_property_value]
+    end
+
   end
+
   # rubocop:enable Metrics/ClassLength
 end

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { IUser } from '../../types/user'
 import { backendCall } from '../../utils/api'
 import { SiteSettingsResponse } from './useSiteSettingsQuery'
+import { CustomPortal } from './useCustomPortalsQuery'
 
 export function useAuthUserQuery() {
   return useQuery(['auth-user'], {
@@ -28,6 +29,10 @@ export type CDMHKey = 'cdmhPortal' | 'cdrBrowser' | 'cdrAdmin' | 'connectPortal'
 
 export async function siteSettingsRequest() {
   return axios.get('/api/site_settings').then(r => r.data as SiteSettingsResponse)
+}
+
+export async function customPortalsRequest() {
+  return axios.get('/api/data_portals/custom').then(r => r.data as CustomPortal[])
 }
 
 interface GenerateKeyResponse {

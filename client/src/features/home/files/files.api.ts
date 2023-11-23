@@ -12,9 +12,9 @@ export interface FetchFilesQuery {
 
 export async function fetchFiles(filters: IFilter[], params: Params): Promise<FetchFilesQuery> {
   const query = prepareListFetch(filters, params)
+
   const paramQ = `?${new URLSearchParams(query as {}).toString()}`
   const scopeQ = formatScopeQ(params.scope)
-
   const res = await fetch(`/api/files${scopeQ}${paramQ}`).then(checkStatus)
   return res.json()
 }

@@ -1,8 +1,8 @@
 import React, { useState, useRef, FC } from 'react'
 import { usePopper } from 'react-popper'
+import { Placement } from '@popperjs/core'
 import { PopperContainer, DropdownMenu } from './styles'
 import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
-import { Placement } from '@popperjs/core'
 import { useKeyPress } from '../../hooks/useKeyPress'
 
 export const Dropdown: FC<{
@@ -11,7 +11,7 @@ export const Dropdown: FC<{
   forceShowPopper?: boolean
   trigger?: 'click' | 'hover'
   children: ({}: any) => React.ReactNode
-}> = ({ forceShowPopper, trigger = 'hover', content, children, placement = 'bottom-end' }) => {
+}> = ({ forceShowPopper, trigger = 'hover', content, children, placement = 'bottom-end', ...rest }) => {
   const [showPopper, setShowPopper] = useState(false)
   const [delayHandler, setDelayHandler] = useState<any>(null)
   useKeyPress('Escape', () => setShowPopper(false))
@@ -53,11 +53,11 @@ export const Dropdown: FC<{
         //   },
         // },
       ],
-    }
+    },
   )
 
   return (
-    <div ref={clickRef} style={{display: 'contents'}}>
+    <div ref={clickRef} { ...rest }>
       {children({
         style: { cursor: 'pointer' },
         ref: buttonRef,

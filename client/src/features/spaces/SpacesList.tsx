@@ -19,6 +19,7 @@ import { useListQuery } from '../home/useListQuery'
 import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
 import { useSpacesColumns } from './useSpacesColumns'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 
 const SpacesHeader = styled.div`
   display: flex;
@@ -60,8 +61,8 @@ const SpacesList = () => {
   const { sortBy, sort, setSortBy } = useOrderByParams({
     onSetSortBy: () => setSelectedIndexes({}),
   })
-  const { colWidths, saveColumnResizeWidth } =
-    useColumnWidthLocalStorage(resource)
+  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
+  const { hiddenColumns, saveHiddenColumns } = useHiddenColumnLocalStorage(resource)
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
     onSetFilter: () => {
@@ -106,6 +107,8 @@ const SpacesList = () => {
         setSelectedRows={setSelectedIndexes}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
       />
 
       <ContentFooter>
@@ -165,6 +168,8 @@ const TableTable = ({
   colWidths,
   selectedRows,
   setSelectedRows,
+  hiddenColumns,
+  saveHiddenColumns,
 }: {
   data?: ISpace[]
   filters: IFilter[]
@@ -178,6 +183,8 @@ const TableTable = ({
   ) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
+  saveHiddenColumns: (cols: string[]) => void
+  hiddenColumns: string[]
 }) => {
   const columns = useSpacesColumns({ colWidths, isAdmin: false })
   const mdata = useMemo(() => data || [], [data])
@@ -189,6 +196,9 @@ const TableTable = ({
         data={mdata}
         loading={isLoading}
         saveColumnResizeWidth={saveColumnResizeWidth}
+        enableColumnSelect
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         manualFilters
         emptyComponent={<EmptyTable>You have no spaces.</EmptyTable>}
         isColsResizable

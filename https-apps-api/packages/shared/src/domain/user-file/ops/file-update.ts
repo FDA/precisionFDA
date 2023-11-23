@@ -16,6 +16,7 @@ IFileOrAsset
   async run(input: UidInput): Promise<IFileOrAsset> {
     const log = this.ctx.log
     const em = this.ctx.em
+    log.info(`FileUpdateOperation: updating file with uid ${input.uid}`)
     const fileOrAsset = await findFileOrAssetWithUid(em, input.uid)
     if (!fileOrAsset) {
       log.error(`FileUpdateOperation: File or asset with uid ${input.uid} not found`)

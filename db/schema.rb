@@ -611,6 +611,13 @@ ActiveRecord::Schema.define(version: 2023_11_08_104920) do
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
+  create_table "properties", primary_key: ["target_id", "target_type", "property_name"], charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.integer "target_id", null: false
+    t.string "target_type", null: false
+    t.string "property_name", null: false
+    t.string "property_value", null: false
+  end
+
   create_table "resources", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "user_id"
     t.integer "user_file_id"

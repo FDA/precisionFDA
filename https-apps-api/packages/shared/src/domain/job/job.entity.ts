@@ -2,14 +2,16 @@ import {
   Collection,
   Entity,
   Filter,
-  IdentifiedReference,
+  Ref,
   JsonType,
   ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
   Reference,
+  OneToMany,
 } from '@mikro-orm/core'
+import { JobProperty } from "../property";
 import { JobDescribeResponse } from '@pfda/https-apps-shared/src/platform-client'
 import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
@@ -35,6 +37,7 @@ export interface RunData {
     [key: string]: IOType
   }
 }
+
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
@@ -86,6 +89,13 @@ export class Job extends BaseEntity {
   @Property()
   terminationEmailSent: boolean
 
+  @OneToMany({
+    entity: () => JobProperty,
+    mappedBy: 'job',
+    orphanRemoval: true
+  })
+  properties = new Collection<JobProperty>(this);
+
   @Property({ type: WorkaroundJsonType })
   runData: RunData
 
@@ -108,20 +118,14 @@ export class Job extends BaseEntity {
   @Property({ hidden: true })
   localFolderId: number
 
-  // @ManyToOne()
-  // analysis?: IdentifiedReference<Analysis>
-
   // relations
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   // App could be null if this job is associated with an analysis (workflow) instead
   // or if the app was deleted from the database
   @ManyToOne({ entity: () => App, nullable: true })
-  app?: IdentifiedReference<App>
-
-  // @ManyToOne()
-  // appSeries!: IdentifiedReference<AppSeries>
+  app?: Ref<App>
 
   @ManyToMany({
     pivotTable: 'job_inputs',

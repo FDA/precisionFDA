@@ -40,6 +40,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
   )
 
   attribute :all_tags_list, key: :tags
+  attribute :properties_object, key: :properties
   attr_reader :launched_on
 
   delegate :name, :location, to: :object
@@ -81,6 +82,14 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
   def run_data_updates
     object.run_data["run_outputs"]&.each { |_k, v| v&.concat("-1") if v.is_a?(String) && v[0..3] == "file" }
     object.run_data
+  end
+
+  def properties_object
+    props = {}
+    object.properties.each do |prop|
+      props[prop.property_name] = prop.property_value
+    end
+    props
   end
 
   # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column

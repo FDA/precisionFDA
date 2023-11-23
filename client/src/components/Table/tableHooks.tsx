@@ -2,7 +2,7 @@ import React from 'react'
 import { Hooks, HeaderProps, CellProps, useResizeColumns } from 'react-table'
 import initial from 'lodash/initial'
 import { IndeterminateCheckbox } from './IndeterminateCheckbox'
-import { ExpandArrowIcon } from './styles'
+import { ExpandArrowIcon, SelectCheck } from './styles'
 import { TransparentButton } from '../Button'
 
 
@@ -16,16 +16,16 @@ export const selectionHook = (hooks: Hooks<any>) => {
       // The header can use the table's getToggleAllRowsSelectedProps method
       // to render a checkbox
       Header: ({ getToggleAllRowsSelectedProps }) => (
-        <div>
+        <SelectCheck>
           <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-        </div>
+        </SelectCheck>
       ),
       // The cell can use the individual row's getToggleRowSelectedProps method
       // to the render a checkbox
       Cell: ({ row }) => (
-        <div>
+        <SelectCheck>
           <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-        </div>
+        </SelectCheck>
       ),
     },
     ...columns,

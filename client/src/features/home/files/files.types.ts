@@ -80,6 +80,9 @@ export interface IFile {
     href?: string
   }
   'tags': string[],
+  'properties': {
+    [key: string]: string,
+  },
   'uid': string,
   'file_size': string,
   'created_at_date_time': string,

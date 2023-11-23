@@ -3,8 +3,7 @@ import styled from 'styled-components'
 export const StyledTags = styled.div`
   display: flex;
   align-items: center;
-  overflow-x: auto;
-  overflow-y: hidden;
+  flex-wrap: wrap;
   gap: 10px;
 
   &:hover {
@@ -52,3 +51,29 @@ export const StyledTagItem = styled.div`
     left: -10px;
   }
 `
+
+export const StyledPropertyItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 4px 10px;
+  background-color: #f6dab2;
+  font-size: 12px;
+  position: relative;
+
+  &:before {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #e6c69a;
+  }
+`
+
+export const StyledPropertyKey = styled.span`
+  font-weight: bold;
+  margin-right: 8px;
+`
+

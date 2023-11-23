@@ -58,7 +58,7 @@ export const ChallengeDetails = ({
   useEffect(() => {
     setTocFromRef(docRef, setToc)
   }, [docRef, tabIndex])
-  
+
   const handleJoinChallenge = () => {
     if (challenge.is_followed) {
       return
@@ -66,30 +66,30 @@ export const ChallengeDetails = ({
     // this.props.history.push(`/challenges/${challengeId}/join`)
     window.location.assign(`/challenges/${challenge.id}/join`)
   }
-  
+
   const timeStatus = getTimeStatus(challenge.start_at, challenge.end_at)
-  
+
   const challengePreRegistration = challenge.status === 'pre-registration'
   const challengeSetupOrPreRegistration =
     challenge.status === 'setup' || challengePreRegistration
-    
-    const userCanJoin =
+
+  const userCanJoin =
     isLoggedIn &&
     !challenge.is_followed &&
     timeStatus === 'current' &&
     challenge.status === 'open'
-    const userCanSubmitEntry =
+  const userCanSubmitEntry =
     isLoggedIn &&
     challenge.is_followed &&
     timeStatus === 'current' &&
     challenge.status === 'open'
   const userIsChallengeAdmin = isLoggedIn && canCreate
-  
+
   const userCanSeePreRegistration =
     (challengePreRegistration ||
       (userIsChallengeAdmin && challengeSetupOrPreRegistration)) &&
-      !isOld
-      
+    !isOld
+
   // Introduction is visible to:
   //  - everyone when a challenge is not in pre-registration phase
   //  - challenge admins in all phases of a challenge
@@ -169,7 +169,7 @@ export const ChallengeDetails = ({
       subroute: '/my_entries',
       content: (
         <ChallengeMyEntriesTable
-          user={user}  
+          user={user}
           challengeId={challenge.id}
           isSpaceMember={challenge.is_space_member}
         />
@@ -347,9 +347,7 @@ const ChallengeDetailsPage = () => {
   if (isFetched && !data) {
     return (
       <PublicLayout>
-        <NavigationBar
-          user={user}
-        />
+        <NavigationBar user={user} />
         <ChallengeNotFound />
       </PublicLayout>
     )
@@ -357,20 +355,22 @@ const ChallengeDetailsPage = () => {
 
   return (
     <PublicLayout>
-      {isLoading ? (
-        <PageContainerMargin><Loader /></PageContainerMargin>
-      ) : (
+      {!isLoading && data ? (
         <>
-          <ChallengeDetailsBanner challenge={data?.challenge} user={user} />
+          <ChallengeDetailsBanner challenge={data} user={user} />
           <ChallengeDetails
             canCreate={user?.can_create_challenges}
             isLoggedIn={!!user?.id}
             isGuest={user?.is_guest}
-            challenge={data?.challenge}
+            challenge={data}
             page={page}
             user={user}
           />
         </>
+      ) : (
+        <PageContainerMargin>
+          <Loader />
+        </PageContainerMargin>
       )}
     </PublicLayout>
   )

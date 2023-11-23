@@ -35,6 +35,7 @@ class Workflow < ApplicationRecord
   belongs_to :user
   belongs_to :workflow_series
   has_many :analyses, dependent: :destroy
+  has_many :properties, through: :workflow_series, source: :properties
 
   store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 
