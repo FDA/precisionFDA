@@ -467,15 +467,15 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID string) error {
 	folders := make(map[string]string, 20)
 
-	p, _ := path.Split(folderPath)
-	folders[path.Clean(p)] = folderID
+	p, _ := filepath.Split(folderPath)
+	folders[filepath.Clean(p)] = folderID
 
 	fmt.Println(">> Uploading content of:", folderPath)
 
 	var fileList []string
 	err := filepath.Walk(folderPath, func(currentPath string, f os.FileInfo, err error) error {
 		if f.IsDir() {
-			parent, _ := path.Split(currentPath)
+			parent, _ := filepath.Split(currentPath)
 			id, err := c.createNewFolder(filepath.Base(currentPath), folders[filepath.Dir(parent)], spaceID)
 			if err != nil {
 				return err
@@ -499,7 +499,7 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(file string) {
-			parent, _ := path.Split(file)
+			parent, _ := filepath.Split(file)
 			err := c.UploadFile(file, folders[filepath.Dir(parent)], spaceID, false)
 			if err != nil {
 				fmt.Println(err)
@@ -590,19 +590,19 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 			return err
 		}
 
-		outputFilePath = path.Join(dir, fileName)
+		outputFilePath = filepath.Join(dir, fileName)
 	} else {
 		if fileInfo, err := os.Stat(outputFilePath); err == nil && fileInfo.IsDir() {
 			// If outputFilePath exists and it is a directory then the file should be downloaded
 			// to that directory while retaining its original name
 			// fmt.Printf(">> Specified outputFilePath %s is an existing directory\n", outputFilePath)
-			outputFilePath = path.Join(outputFilePath, fileName)
+			outputFilePath = filepath.Join(outputFilePath, fileName)
 		} else if strings.HasSuffix(outputFilePath, "/") {
 			// A trailing / means the user has specified a directory, but it doesn't exist.
 			if err := os.MkdirAll(outputFilePath, os.ModePerm); err != nil {
 				return err
 			}
-			outputFilePath = path.Join(outputFilePath, fileName)
+			outputFilePath = filepath.Join(outputFilePath, fileName)
 
 		} else if _, err := os.Stat(filepath.Dir(outputFilePath)); err != nil {
 			// This is now assumed to be a file path and not a dir path, and the parent directory does not exist
@@ -872,7 +872,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			return err
 		}
 		if len(response) == 0 {
-			fmt.Println(">> Target folder not found or inaccessible")
+			c.HandleError(fmt.Errorf(">> Target folder not found or inaccessible"))
 			continue
 		}
 
@@ -1352,7 +1352,7 @@ func pickFile(files []jsonFileResponse, label string) string {
 // pass all flags, so we can optimize the table header - if in 'private' do not show added-by
 func printListingResponse(response jsonListingResponse, flags map[string]bool) {
 	if flags["json"] {
-		prettyJSON, _ := json.MarshalIndent(response.Files, "", "    ")
+		prettyJSON, _ := json.MarshalIndent(response, "", "    ")
 		fmt.Printf("%s\n", string(prettyJSON))
 	} else if flags["brief"] {
 		printListingSimple(response.Files)

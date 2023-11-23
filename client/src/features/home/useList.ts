@@ -8,6 +8,8 @@ import { useFilterParams } from './useFilterState'
 import { useListQuery } from './useListQuery'
 import { ISortByParams, useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
+import { createLocationKey } from '../../utils'
 
 export interface IListProps {
   pagination: ReturnType<typeof usePaginationParams>
@@ -35,10 +37,13 @@ Object.keys(columnFilters).forEach(v => {
 
 
 export function useList<T extends ListType>({ fetchList, resource, params = {}, queryOptions }: IUseList<T>) {
+  const locationKey = createLocationKey(resource, params?.spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
   const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
   const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: (cols) => setSelectedIndexes({}) })
-  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
+  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
+  const { hiddenColumns, saveHiddenColumns } = useHiddenColumnLocalStorage(locationKey)
+  
   const resetSelected = () => setSelectedIndexes(undefined)
 
   const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
@@ -86,5 +91,7 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}, 
     perPageParam,
     saveColumnResizeWidth,
     colWidths,
+    hiddenColumns,
+    saveHiddenColumns,
   }
 }

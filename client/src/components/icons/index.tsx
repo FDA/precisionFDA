@@ -9,6 +9,7 @@ import { BookIcon } from './BookIcon'
 import { BullsEyeIcon } from './BullsEyeIcon'
 import { CaretIcon } from './CaretIcon'
 import { CaretUpIcon } from './CaretUpIcon'
+import { CheckIcon } from './CheckIcon'
 import { CircleCheckIcon } from './CircleCheckIcon'
 import { ChevronRightIcon } from './ChevronRightIcon'
 import { CogsIcon } from './Cogs'
@@ -43,6 +44,8 @@ import { SyncIcon } from './SyncIcon'
 import { TaskIcon } from './TaskIcon'
 import { TrashIcon } from './TrashIcon'
 import { TrophyIcon } from './TrophyIcon'
+import { PrismIcon } from './PrismIcon'
+import { ToolsIcon } from './ToolsIcon'
 
 export const IconNames = {
 'AngleDownIcon': AngleDownIcon,
@@ -55,6 +58,7 @@ export const IconNames = {
 'BullsEyeIcon': BullsEyeIcon,
 'CaretIcon': CaretIcon,
 'CaretUpIcon': CaretUpIcon,
+'CheckIcon': CheckIcon,
 'CircleCheckIcon': CircleCheckIcon,
 'ChevronRightIcon': ChevronRightIcon,
 'CogsIcon': CogsIcon,
@@ -89,6 +93,8 @@ export const IconNames = {
 'TaskIcon': TaskIcon,
 'TrashIcon': TrashIcon,
 'TrophyIcon': TrophyIcon,
+'PrismIcon': PrismIcon,
+'ToolsIcon': ToolsIcon,
 }
 
 export type IconType = keyof typeof IconNames

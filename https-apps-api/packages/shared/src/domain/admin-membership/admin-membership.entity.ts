@@ -1,6 +1,6 @@
 // note(samuel): manually created pivot table, as mikro-orm ManyToMany relation doesn't extend BaseEntity
 
-import { Entity, ManyToOne, IdentifiedReference, Reference, Unique } from '@mikro-orm/core'
+import { Entity, ManyToOne, Ref, Reference, Unique } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
 import { AdminGroup } from '../admin-group/admin-group.entity'
@@ -10,11 +10,11 @@ import { AdminGroup } from '../admin-group/admin-group.entity'
 export class AdminMembership extends BaseEntity {
   @Unique()
   @ManyToOne(() => User)
-  user: IdentifiedReference<User>
+  user: Ref<User>
 
   @Unique()
   @ManyToOne(() => AdminGroup)
-  adminGroup: IdentifiedReference<AdminGroup>
+  adminGroup: Ref<AdminGroup>
 
   constructor(user: User, adminGroup: AdminGroup) {
     super()

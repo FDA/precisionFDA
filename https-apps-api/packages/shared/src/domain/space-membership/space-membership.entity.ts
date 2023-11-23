@@ -1,7 +1,7 @@
 import {
   Collection,
   Entity,
-  IdentifiedReference,
+  Ref,
   ManyToMany,
   ManyToOne,
   PrimaryKey,
@@ -28,7 +28,7 @@ export class SpaceMembership extends BaseEntity {
   role: SPACE_MEMBERSHIP_ROLE
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   @ManyToMany(() => Space, space => space.spaceMemberships)
   spaces = new Collection<Space>(this)

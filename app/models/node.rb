@@ -46,6 +46,7 @@ class Node < ApplicationRecord
   belongs_to :parent, polymorphic: true
   belongs_to :scoped_parent_folder, class_name: "Folder"
 
+  has_many :properties, -> { where(target_type: "node") }, foreign_key: "target_id"
   attr_accessor :current_user
 
   scope :files_folders_assets, -> { where(sti_type: %w(Folder UserFile Asset)) } # used only in spaces

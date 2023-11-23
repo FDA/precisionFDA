@@ -20,7 +20,7 @@ export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: S
     order_dir: defaultOrder?.order_dir,
   })
   const handleSetSortBy = (cols: Cols) => {
-    onSetSortBy && onSetSortBy(cols)
+    if(onSetSortBy) onSetSortBy(cols)
     let col: any
     if (cols.length === 0) {
       col = { order_by: undefined, order_dir: undefined }
@@ -43,7 +43,7 @@ export function useOrderByParams({ defaultOrder, onSetSortBy }: {defaultOrder?: 
     order_dir: withDefault(StringParam,  defaultOrder?.order_dir),
   })
   const handleSetSortBy = (cols: Cols) => {
-    onSetSortBy && onSetSortBy(cols)
+    if(onSetSortBy) onSetSortBy(cols)
     let col: any
     if (cols.length === 0) {
       col = { order_by: undefined, order_dir: undefined }

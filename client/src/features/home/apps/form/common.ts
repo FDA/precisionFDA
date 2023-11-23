@@ -1,10 +1,11 @@
 /* eslint-disable func-names */
 import * as Yup from 'yup'
-import { isBoolean, toString } from 'lodash'
+import { toString } from 'lodash'
 import { IOSpec, InputSpec } from '../apps.types'
 import { csvToArray } from '../../../../utils/csvToArray'
 import { stringToSnakeCase } from '../../../../utils/stringToSnakeCase'
 import { IAccessibleFile } from '../../databases/databases.api'
+import '../../../../utils/yupValidators'
 
 export const formatStringToArray = (csvVal: string | null) => {
   if(csvVal === null || csvVal.length === 0) {
@@ -155,35 +156,6 @@ function isValidCSVString(str: string) {
 function emptyOrNull(v?: string | null) {
   return v === ''  || v == null
 }
-
-/**
- * Adds a custom validation method to the Yup library for arrays, allowing checking for unique values based on a specified field.
- *
- * @param {string} field - The field within each object in the array to be used for uniqueness comparison.
- * @param {string} message - The error message to be displayed if the validation fails.
- * @returns {Yup.Schema} - The updated Yup schema with the 'unique' validation method applied.
- */
-Yup.addMethod(Yup.array, 'unique', function (field, message) {
-  return this.test('unique', message, function (array: any) {
-    const uniqueData = Array.from(
-      new Set(array.map((row) => row[field]?.toLowerCase())),
-    )
-    const isUnique = array.length === uniqueData.length
-    if (isUnique) {
-      return true
-    }
-    const index = array.findIndex(
-      (row, i) => row[field]?.toLowerCase() !== uniqueData[i],
-    )
-    if (array[index][field] === '') {
-      return true
-    }
-    return this.createError({
-      path: `${this.path}.${index}.${field}`,
-      message,
-    })
-  })
-})
 
 function areAllValuesInB(a: string[], b: string[]): boolean {
   const bSet = new Set(b)

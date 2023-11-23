@@ -1,18 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { SyncIcon } from '../../../components/icons/SyncIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { Refresh } from '../../../components/Page/styles'
 import { Pagination } from '../../../components/Pagination'
-import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { EmptyTable } from '../../../components/Table/styles'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
+import { SyncIcon } from '../../../components/icons/SyncIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import {
@@ -23,6 +23,7 @@ import {
 import { ActionsButton } from '../show.styles'
 import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
@@ -66,6 +67,8 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
+    hiddenColumns,
+    saveHiddenColumns,
   } = useList<ListType>({
     fetchList: fetchDatabaseList,
     resource: 'dbclusters',
@@ -74,6 +77,7 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
     },
   })
   const { status, data } = query
+  const { data: propertiesData } = usePropertiesQuery('dbCluster', scope)
 
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
@@ -127,6 +131,7 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
         data={data?.dbclusters}
+        properties={propertiesData?.keys}
         isLoading={status === 'loading'}
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
@@ -135,6 +140,8 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
       />
       <ContentFooter>
         <Pagination
@@ -153,6 +160,7 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
 
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Edit Database Info']?.modal}
       {actions['Start']?.modal}
       {actions['Stop']?.modal}
@@ -166,6 +174,7 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
 export const DatabaseListTable = ({
   filters,
   data,
+  properties,
   handleRowClick,
   isLoading,
   setFilters,
@@ -176,9 +185,12 @@ export const DatabaseListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  hiddenColumns,
+  saveHiddenColumns,
 }: {
   filters: IFilter[]
   data?: IDatabase[]
+  properties?: string[]
   handleRowClick: (fileId: string) => void
   setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
@@ -191,18 +203,12 @@ export const DatabaseListTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  saveHiddenColumns: (cols: string[]) => void
+  hiddenColumns: string[]
 }) => {
-  const col = useDatabaseColumns({ handleRowClick, colWidths })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>([])
+  const col = useDatabaseColumns({ handleRowClick, colWidths, properties })
 
-  useEffect(() => {
-    // Show or hide the Featured column based on scope
-    const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
-    const cols = [featuredColumnHide].filter(Boolean) as string[]
-    sethiddenColumns(cols)
-  }, [scope])
-
-  const columns = useMemo(() => col, [col])
+  const columns = useMemo(() => col, [col, properties])
   const memoData = useMemo(() => data || [], [data])
 
   return (
@@ -210,8 +216,11 @@ export const DatabaseListTable = ({
       <Table<IDatabase>
         name="apps"
         columns={columns}
+        enableColumnSelect
         hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         data={memoData}
+        properties={properties}
         isSelectable
         isSortable
         isFilterable

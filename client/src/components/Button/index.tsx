@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { fontWeight, theme } from '../../styles/theme'
+import { fontWeight, theme, colors } from '../../styles/theme'
 
 export interface IButton {
   active?: 'warning' | 'danger' | 'success' | boolean
@@ -181,6 +181,21 @@ export const ButtonOutlineGrey = styled(Button)`
 
   &:active {
     box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
+  }
+`
+
+export const ButtonText = styled(Button)`
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 5px 0;
+
+  &:hover {
+    background-color: transparent;
+    color: ${colors.hoverLink};
+  }
+  &:active {
+    box-shadow: none;
   }
 `
 

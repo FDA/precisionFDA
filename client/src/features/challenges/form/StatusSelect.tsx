@@ -33,6 +33,7 @@ export const StatusSelect = ({
       onBlur={onBlur}
       value={value}
       isDisabled={isSubmitting}
+      inputId="challenge_status"
     />
   )
 }

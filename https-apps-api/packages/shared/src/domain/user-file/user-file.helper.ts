@@ -1,12 +1,11 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { Asset, entities, Node, Space, User, UserFile } from '..'
+import { User, Node, UserFile, Asset, entities, Space, Folder } from '..'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { STATIC_SCOPE } from '../../enums'
 import { AssetRepository } from './asset.repository'
-import { Folder } from './folder.entity'
 import { FolderRepository } from './folder.repository'
 import { IdsInput, nodeQueryFilter } from './user-file.input'
 import { UserFileRepository } from './user-file.repository'
@@ -458,7 +457,7 @@ const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlE
  * @param filters
  * @returns
  */
-const loadNodes = async (em: any, input: IdsInput, filters: nodeQueryFilter) => {
+const loadNodes = async (em: SqlEntityManager, input: IdsInput, filters: nodeQueryFilter) => {
   const nodes: Node[] = await em.find(entities.Node, {
     $or: [
       {

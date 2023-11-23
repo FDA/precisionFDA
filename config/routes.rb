@@ -254,6 +254,7 @@ Rails.application.routes.draw do
         post :card_image, on: :member
         delete "/resources/:resource_id" => "data_portals#remove_resource", as: :delete_resource_route
         post "/resources/:resource_id" => "data_portals#create_resource_link", as: :create_resource_link
+        get :custom, on: :collection, to: "data_portals#custom"
       end
 
       resources :submissions, only: %i(index) do
@@ -509,6 +510,9 @@ Rails.application.routes.draw do
       post "create_challenge_resource"
       post "create_resource_link"
       post "set_tags"
+      post "set_properties"
+      get "properties/:type/scope/:scope/keys",
+          action: :get_valid_property_keys
       post "assign_app"
       get "list_licenses"
       get "cli_latest_version"

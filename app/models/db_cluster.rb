@@ -39,6 +39,7 @@ class DbCluster < ApplicationRecord
   has_one :licensed_item, as: :licenseable, dependent: :destroy
   has_one :license, through: :licensed_item
   has_many :accepted_licenses, through: :license
+  has_many :properties, -> { where(target_type: "dbCluster") }, foreign_key: "target_id"
 
   STATUS_CREATING = "creating".freeze
   STATUS_AVAILABLE = "available".freeze

@@ -1,13 +1,12 @@
 import {
   Collection,
   Filter,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   OneToMany,
   ManyToMany,
   Property,
   Reference,
-  EntityRepository,
   EntityRepositoryType,
   Entity,
 } from '@mikro-orm/core'
@@ -63,7 +62,7 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   scopedParentFolderId?: number
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)

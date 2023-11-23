@@ -71,14 +71,11 @@ number
       const op = new tagging.RemoveTaggingsOperation({ em: tm, log: this.ctx.log, user: this.ctx.user })
       await op.execute(fileToRemove.id)
 
-      tm.remove(fileToRemove)
-
-      const currentUser: User = await tm.findOneOrFail(User, { id: this.ctx.user.id })
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_DELETED,
         fileToRemove,
         filePath,
-        currentUser,
+        user,
       )
       tm.persist(fileEvent)
 

@@ -3,7 +3,7 @@ import {
   PrimaryKey,
   Property,
   ManyToOne,
-  IdentifiedReference,
+  Ref,
   Reference,
   Collection,
   OneToMany,
@@ -87,16 +87,17 @@ export class App extends BaseEntity {
   appSeriesId: number
 
   // references
-  @ManyToOne({ entity: () => User, serializedName: 'userId' })
-  user!: IdentifiedReference<User>
+  @ManyToOne({entity: () => User, serializedName: 'userId'})
+  user!: Ref<User>
 
-  @OneToMany({ entity: () => Job, mappedBy: 'app' })
+  @OneToMany({entity: () => Job, mappedBy: 'app'})
   jobs = new Collection<Job>(this)
 
   @ManyToMany(() => Asset, 'apps', {
     pivotTable: 'apps_assets',
     owner: true,
-    inverseJoinColumn: 'asset_id'})
+    inverseJoinColumn: 'asset_id'
+  })
   assets = new Collection<Asset>(this)
 
   @Enum()
@@ -107,7 +108,7 @@ export class App extends BaseEntity {
   }
 
   isHTTPS() {
-    return this.entityType === ENTITY_TYPE.HTTPS
+      return this.entityType === ENTITY_TYPE.HTTPS
   }
 
   @Property({ persist: false })
@@ -117,7 +118,7 @@ export class App extends BaseEntity {
 
   // Workstation API support
   //
-  @Property({ persist: false })
+  @Property({persist: false})
   get workstationAPITag(): string | null {
     try {
       return this.workstationTags.find((x: string) => x.startsWith('pfda_workstation_api')) ?? null
@@ -132,13 +133,13 @@ export class App extends BaseEntity {
     return null
   }
 
-  @Property({ persist: false })
+  @Property({persist: false})
   get hasWorkstationAPI(): boolean {
     const tag = this.workstationAPITag
     return (tag != null)
   }
 
-  @Property({ persist: false })
+  @Property({persist: false})
   get workstationAPIVersion(): string | null {
     const tag = this.workstationAPITag
     return tag?.split(':')[1] ?? null

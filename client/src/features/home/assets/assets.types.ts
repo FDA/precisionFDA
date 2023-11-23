@@ -96,6 +96,9 @@ export interface IAsset {
   user: FileUser
   active: boolean;
   links: Links;
-  tags: any[];
+  tags: string[];
+  properties: {
+    [key: string]: string;
+  };
 }
 

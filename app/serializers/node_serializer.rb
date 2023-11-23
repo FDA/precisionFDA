@@ -23,9 +23,18 @@ class NodeSerializer < ApplicationSerializer
   attribute :origin, if: -> { object.is_a?(UserFile) || (object.is_a?(Folder) && object.https?) }
   attribute :all_tags_list, key: :tags
   attribute :scope_id, key: :scope
+  attribute :properties_object, key: :properties
 
   def scope_id
     object.scope
+  end
+
+  def properties_object
+    props = {}
+    object.properties.each do |prop|
+      props[prop.property_name] = prop.property_value
+    end
+    props
   end
 
   # Builds links to files.

@@ -30,7 +30,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number>
   async run(input: NodesInput): Promise<number> {
     getLogger().info(input.ids, 'Removing ids')
     const em = this.ctx.em
-    const nodes: Node[] = await loadNodes(em, { ids: input.ids }, {})
+    const nodes: Node[] = await loadNodes(em.fork(), { ids: input.ids }, {})
     const notificationService = new NotificationService(em)
 
     let removedFilesCount = 0

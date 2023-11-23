@@ -1,4 +1,4 @@
-import {DATA_PORTAL_MEMBER_ROLE, DATA_PORTAL_STATUS } from '../data-portal.enum'
+import type { DATA_PORTAL_MEMBER_ROLE, DATA_PORTAL_STATUS } from '../data-portal.enum'
 
 class CreateResourceResponse {
   id: number
@@ -7,6 +7,12 @@ class CreateResourceResponse {
 class FileParam {
   name: string
   description: string
+}
+
+class CustomPortal {
+  name: string
+  id: number
+  spaceId: number
 }
 
 class DataPortalMemberParam {
@@ -31,4 +37,4 @@ class DataPortalParam {
   members: DataPortalMemberParam[]
 }
 
-export { DataPortalParam, FileParam, DataPortalMemberParam, CreateResourceResponse }
+export { DataPortalParam, FileParam, DataPortalMemberParam, CreateResourceResponse, CustomPortal }

@@ -35,6 +35,7 @@ export {
   dbCluster,
   adminGroup,
   spaceEvent,
+  property,
   spaceReport,
   provenance,
   platform,

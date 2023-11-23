@@ -382,6 +382,7 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
         render={({ field }) => {
           return (
             <IndeterminateCheckbox
+              data-testid={`${base}.${index}.optional`}
               checked={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -414,6 +415,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
         render={({ field }) => {
           return (
             <IndeterminateCheckbox
+              data-testid={`${base}.${index}.isArray`}
               checked={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
