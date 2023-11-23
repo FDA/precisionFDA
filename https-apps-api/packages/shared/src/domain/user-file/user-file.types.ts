@@ -1,4 +1,4 @@
-import { IdentifiedReference } from '@mikro-orm/core'
+import { Ref } from '@mikro-orm/core'
 import { User } from '../user/user.entity'
 import { SCOPE } from '../../types/common'
 import { Asset, Comparison, Job } from '..'
@@ -52,9 +52,9 @@ interface IFileOrAsset {
   scope: SCOPE
   state: string
   fileSize?: number
+  user: Ref<User>
   entityType: FILE_ORIGIN_TYPE
   createdAt: Date
-  user: IdentifiedReference<User>
   isFile: boolean
   isAsset: boolean
   isCreatedByChallengeBot: () => boolean

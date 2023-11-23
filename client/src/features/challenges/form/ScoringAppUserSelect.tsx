@@ -36,6 +36,7 @@ export const ScoringAppUserSelect = ({
       value={value}
       isDisabled={isSubmitting}
       isLoading={isLoading}
+      inputId="challenge_scoring-app-user"
     />
   )
 }

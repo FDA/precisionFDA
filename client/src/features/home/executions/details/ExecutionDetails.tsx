@@ -5,8 +5,12 @@ import { Link } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../../components/HomeLabel'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'
-import { StyledTagItem, StyledTags } from '../../../../components/Tags'
-import { CogsIcon } from '../../../../components/icons/Cogs'
+import {
+  StyledTagItem,
+  StyledTags,
+  StyledPropertyItem,
+  StyledPropertyKey,
+} from '../../../../components/Tags'
 import { RESOURCE_LABELS } from '../../../../types/user'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../../utils/config'
 import { getBackPath } from '../../../../utils/getBackPath'
@@ -32,6 +36,7 @@ import { InputsAndOutputs } from '../InputsAndOutputs'
 import { fetchExecution } from '../executions.api'
 import { JobState } from '../executions.types'
 import { FailureMessage, StyledExecutionState } from './styles'
+import { CogsIcon } from '../../../../components/icons/Cogs'
 
 const ExecutionState = ({ state }: { state: JobState }) => (
   <StyledExecutionState state={state}>{state}</StyledExecutionState>
@@ -224,15 +229,37 @@ export const ExecutionDetails = ({
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-        <MetadataSection>
-          {execution.tags.length > 0 && (
-            <StyledTags>
-              {execution.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-              ))}
-            </StyledTags>
-          )}
-        </MetadataSection>
+        {execution.tags.length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                <MetadataKey>Tags</MetadataKey>
+                <StyledTags>
+                  {execution.tags.map(tag => (
+                    <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+        {Object.entries(execution.properties).length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                  <MetadataKey>Properties</MetadataKey>
+                    <StyledTags>
+                      {Object.entries(execution.properties).map(([key, value]) => (
+                        <StyledPropertyItem key={key}>
+                          <StyledPropertyKey>{key}</StyledPropertyKey>
+                          <span>{value}</span>
+                        </StyledPropertyItem>
+                      ))}
+                    </StyledTags>
+                </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
       </Topbox>
 
       <div className="pfda-padded-t40"/>

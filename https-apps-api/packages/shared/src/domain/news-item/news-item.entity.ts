@@ -1,4 +1,4 @@
-import { Entity, EntityRepositoryType, IdentifiedReference, ManyToOne, OneToOne, Property, Reference } from '@mikro-orm/core'
+import { Entity, EntityRepositoryType, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { User } from '../user'
 import { NewsRepository } from './news-item.repository'
@@ -33,7 +33,7 @@ class NewsItem extends BaseEntity {
   userId: number
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   @Property({ persist: false })
   get year() {

@@ -1,7 +1,7 @@
 import {
   Collection,
   Entity,
-  IdentifiedReference,
+  Ref,
   ManyToOne,
   OneToMany,
   PrimaryKey,
@@ -62,10 +62,10 @@ export class Challenge extends BaseEntity {
   appId: number
 
   @ManyToOne(() => User)
-  admin!: IdentifiedReference<User>
+  admin!: Ref<User>
 
   @ManyToOne(() => User)
-  appOwner!: IdentifiedReference<User>
+  appOwner!: Ref<User>
 
   @OneToMany(({ entity: () => ChallengeResource, mappedBy: 'challenge', orphanRemoval: true }))
   challengeResources = new Collection<ChallengeResource>(this)

@@ -1,16 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
 import { useQueryClient } from '@tanstack/react-query'
+import React, { useEffect, useMemo } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
+import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import Dropdown from '../../../components/Dropdown'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { Pagination } from '../../../components/Pagination'
-import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
+import { EmptyTable } from '../../../components/Table/styles'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { colors } from '../../../styles/theme'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
@@ -18,15 +19,15 @@ import {
   ActionsRow, StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { getStateBgColorFromState } from './executions.util'
 import { getSubComponentValue } from './getSubComponentValue'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionActions } from './useExecutionSelectActions'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -49,6 +50,8 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
+    hiddenColumns,
+    saveHiddenColumns,
   } = useList<ListType>({
     fetchList: fetchExecutions,
     resource: 'jobs',
@@ -59,6 +62,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
   })
   const queryCache = useQueryClient()
   const { status, data, error } = query
+  const { data: propertiesData } = usePropertiesQuery('job', scope, spaceId)
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
     share: true,
@@ -123,6 +127,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
+        properties={propertiesData?.keys}
         isLoading={status === 'loading'}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
@@ -130,6 +135,8 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
       />
       <ContentFooter>
         <Pagination
@@ -148,6 +155,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
 
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}s
       {actions['Attach to...']?.modal}
       {actions['Snapshot']?.modal}
       {actions['Terminate']?.modal}
@@ -161,6 +169,7 @@ export const ExecutionsListTable = ({
   isAdmin,
   filters,
   jobs,
+  properties,
   isLoading,
   setFilters,
   selectedRows,
@@ -170,10 +179,13 @@ export const ExecutionsListTable = ({
   scope,
   saveColumnResizeWidth,
   colWidths,
+  hiddenColumns,
+  saveHiddenColumns,
 }: {
   isAdmin?: boolean
   filters: IFilter[]
   jobs?: IExecution[]
+  properties?: string[]
   setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
@@ -185,20 +197,30 @@ export const ExecutionsListTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing']
   ) => void
+  saveHiddenColumns: (cols: string[]) => void
+  hiddenColumns: string[]
 }) => {
-  const col = useExecutionColumns({ colWidths, isAdmin })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>([])
+  const location = useLocation()
+  function filterColsByScope(c: Column<IExecution>): boolean {
+    // Check if any of the conditions is true, then hide the column
+    return !(
+      // If the scope is 'me', hide 'added_by' regardless of other conditions.
+      (scope === 'me' && c.accessor === 'added_by') ||
+      
+      // Hide 'location' for all scopes except 'spaces'.
+      (scope !== 'spaces' && c.accessor === 'location') ||
+      
+      // Hide 'featured' for all scopes except 'everybody'.
+      (scope !== 'everybody' && c.accessor === 'featured') ||
+      
+      c.accessor === 'created_at_date_time'||
+      c.accessor === 'workflow_title'
+    )
+  }
+  
+  const col = useExecutionColumns({ colWidths, isAdmin, properties }).filter(filterColsByScope)
 
-  useEffect(() => {
-    // Show or hide the Featured column based on scope
-    const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
-    const locationColumnHide = scope !== 'spaces' ? 'location' : null
-    const launchedByColumnHide = scope === 'me' ? 'launched_by' : null
-    const cols = ['workflow', 'created_at_date_time', featuredColumnHide, locationColumnHide, launchedByColumnHide].filter(Boolean) as string[]
-    sethiddenColumns(cols)
-  }, [scope])
-
-  const columns = useMemo(() => col, [col])
+  const columns = useMemo(() => col, [col, location.search, properties])
 
   const data = useMemo(() => jobs || [], [jobs])
 
@@ -207,8 +229,11 @@ export const ExecutionsListTable = ({
       <Table<IExecution>
         name="jobs"
         columns={columns}
+        enableColumnSelect
         hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         data={data}
+        properties={properties}
         isSelectable
         loading={isLoading}
         loadingComponent={<div>Loading...</div>}

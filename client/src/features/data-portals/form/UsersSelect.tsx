@@ -31,11 +31,13 @@ export const UsersSelect = ({
   onBlur,
   isDisabled,
   onChange,
+  inputId,
 }: {
   value: {label: string, value: string} | null
   onBlur: () => void
   isDisabled: boolean
   onChange: (v:any) => void
+  inputId?: string
 }) => {
   const { data, isLoading } = useFetchActiveUsersQuery()
   return (
@@ -49,6 +51,7 @@ export const UsersSelect = ({
       value={value}
       isDisabled={isDisabled}
       isLoading={isLoading}
+      inputId={inputId}
     />
   )
 }

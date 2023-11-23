@@ -1,4 +1,4 @@
-import { Collection, Entity, EntityRepositoryType, Enum, IdentifiedReference, OneToMany, OneToOne, Property, Reference } from '@mikro-orm/core'
+import { Collection, Entity, EntityRepositoryType, Enum, Ref, OneToMany, OneToOne, Property, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { ExpertQuestion } from '../expert-question'
 import { ExpertQuestionState } from '../expert-question/expert-question.entity'
@@ -24,7 +24,7 @@ export class Expert extends BaseEntity {
   updatedAt = new Date()
 
   @OneToOne({ entity: () => User, inversedBy: 'expert' })
-  user: IdentifiedReference<User>
+  user: Ref<User>
 
   @OneToMany({ entity: () => ExpertQuestion, mappedBy: 'expert' })
   questions = new Collection<ExpertQuestion>(this)

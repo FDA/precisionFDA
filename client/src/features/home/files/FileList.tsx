@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
 import {
@@ -11,14 +11,14 @@ import {
 } from '../../../components/Breadcrumb'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
-import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { Pagination } from '../../../components/Pagination'
-import { EmptyTable } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
+import { EmptyTable } from '../../../components/Table/styles'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
@@ -28,8 +28,9 @@ import {
   StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, MetaPath, ResourceScope, Notification } from '../types'
+import { IFilter, IMeta, KeyVal, MetaPath, Notification, ResourceScope } from '../types'
 import { useList } from '../useList'
+import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
@@ -42,7 +43,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   const { path } = useRouteMatch()
   const location = useLocation()
   const queryCache = useQueryClient()
-  
+
   const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>(
     'folder_id',
   )
@@ -65,6 +66,8 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     resetSelected,
     saveColumnResizeWidth,
     colWidths,
+    hiddenColumns,
+    saveHiddenColumns,
   } = useList<ListType>({
     fetchList: fetchFiles,
     resource: 'files',
@@ -95,7 +98,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
       queryCache.invalidateQueries(['counters'])
     }
   }, [notification])
-
+  const { data: propertiesData } = usePropertiesQuery('node', scope, space?.id)
   const { status, data, error } = query
 
   const onFolderClick = (folderId: string) => {
@@ -119,7 +122,6 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
   }, [scope])
 
   const files = data?.files || data?.entries
-
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
     files,
@@ -132,7 +134,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     resetSelected,
     resourceKeys: ['files'],
   })
-  
+
   delete actions['Comments']
   delete actions['Request license approval']
   if(scope) {
@@ -202,6 +204,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
         files={files}
+        properties={propertiesData?.keys}
         onFolderClick={onFolderClick}
         onFileClick={onRowClick}
         selectedRows={selectedIndexes}
@@ -211,6 +214,8 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
         shouldResetFilters={[folderIdParam, scope]}
+        hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
       />
       
       <ContentFooter>
@@ -245,6 +250,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
       {actions['Edit tags']?.modal}
+      {actions['Edit properties']?.modal}
       {actions['Lock']?.modal}
       {actions['Unlock']?.modal}
     </ErrorBoundary>
@@ -282,6 +288,7 @@ export const FilesListTable = ({
   isAdmin,
   filters,
   files,
+  properties,
   onFolderClick,
   onFileClick,
   setFilters,
@@ -294,12 +301,15 @@ export const FilesListTable = ({
   saveColumnResizeWidth,
   colWidths,
   shouldResetFilters = [],
+  saveHiddenColumns,
+  hiddenColumns,
 }: {
   shouldResetFilters?: any[]
   isAdmin: boolean
   filters: IFilter[]
   files?: IFile[]
   isLoading: boolean
+  properties?: string[]
   onFolderClick: (folderId: string) => void
   onFileClick: (fileId: string) => void
   setFilters: (val: IFilter[]) => void
@@ -312,42 +322,47 @@ export const FilesListTable = ({
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
   ) => void
+  hiddenColumns: string[]
+  saveHiddenColumns: (cols: string[]) => void
 }) => {
-  // Show or hide the Featured column based on scope
-  const featuredColumnHide = scope !== 'everybody' ? 'featured' : null
-  const locationColumnHide = scope !== 'spaces' ? 'location' : null
-  const addedByColumnHide = scope === 'me' ? 'added_by' : null
-  const meFeaturedColumnHide = scope === 'me' ? 'featured' : null
-  const stateColumnHide = scope !== undefined ? 'state' : null
-  const hidden = [
-    meFeaturedColumnHide,
-    featuredColumnHide,
-    locationColumnHide,
-    addedByColumnHide,
-    stateColumnHide,
-  ].filter(Boolean) as string[]
+  const location = useLocation()
+
+  function filterColsByScope(c: Column<IFile>): boolean {
+    return !(
+      // If the scope is 'me', hide 'added_by' regardless of other conditions.
+      (scope === 'me' && c.accessor === 'added_by') ||
+      
+      // Hide 'location' for all scopes except 'spaces'.
+      (scope !== 'spaces' && c.accessor === 'location') ||
+      
+      // Hide 'featured' for all scopes except 'everybody'.
+      (scope !== 'everybody' && c.accessor === 'featured') ||
+      
+      // Hide 'state' if scope is defined to something specific.
+      (scope !== undefined && c.accessor === 'state')
+    )
+  }
+
   const col = useFilesColumns({
     onFolderClick,
     onFileClick,
     colWidths,
     isAdmin,
-  })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>(hidden)
-
-  useEffect(() => {
-    sethiddenColumns(hidden)
-  }, [scope])
+    properties,
+  }).filter(filterColsByScope)
   
-  const columns = useMemo(() => col, [col])
+  const columns = useMemo(() => col, [col, location.search, properties])
   const data = useMemo(() => files || [], [files])
-
   return (
     <StyledHomeTable>
       <Table<IFile>
         name="files"
         columns={columns}
+        enableColumnSelect
         hiddenColumns={hiddenColumns}
+        saveHiddenColumns={saveHiddenColumns}
         data={data}
+        properties={properties}
         isSelectable
         isSortable
         isFilterable

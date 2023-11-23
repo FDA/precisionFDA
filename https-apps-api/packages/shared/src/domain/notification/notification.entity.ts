@@ -1,4 +1,4 @@
-import { Entity, IdentifiedReference, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import { User } from '../user'
@@ -32,7 +32,7 @@ export class Notification extends BaseEntity {
   deliveredAt?: Date
 
   @ManyToOne(() => User)
-  user?: IdentifiedReference<User>
+  user?: Ref<User>
 
   constructor(user: User | null,
               action?: NOTIFICATION_ACTION,

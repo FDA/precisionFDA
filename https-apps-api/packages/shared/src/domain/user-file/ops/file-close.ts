@@ -25,6 +25,16 @@ type FileCloseOperationResponse = {
   message?: string
 }
 
+const getChallengeBotCtx = async(userRepo: UserRepository): Promise<UserCtx> => {
+  const challengeBotUser = await userRepo.findChallengeBotUser()
+  const challengeBotCtx: UserCtx = {
+    id: challengeBotUser.id,
+    dxuser: challengeBotUser.dxuser,
+    accessToken: User.getChallengeBotToken(),
+  }
+  return challengeBotCtx
+}
+
 const createFileCreateEvent = async (userFile: IFileOrAsset, user: User, em: EntityManager) => {
   const fileEvent = await createFileEvent(
     EVENT_TYPES.FILE_CREATED,
@@ -115,72 +125,72 @@ class FileCloseOperation extends BaseOperation<
         log.info({ bullJob }, 'FileCloseOperation: Not creating SyncFilesStateTask because one already exists')
       }
 
-      if (!isChallengeBotFile) {
-        // TODO: This is to be removed in favour of async notifications once those are ready
-        //
-        // Quite often a file is in closed state after a short delay, and to improve our My Home upload UI
-        // we do this update so that the frontend has the correct state immediately after refresh
-        // This is not for challege bot files because we still want file sync to invoke it's
-        // card image update logic
-        const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
-        const refreshFileState = async () => {
-          await delay(500).then(async () => {
-            log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
-            await new FileUpdateOperation(this.ctx).execute({ uid: fileOrAsset.uid })
+      const challengeBotCtx = await getChallengeBotCtx(userRepo)
+      const ctxForUpdate: UserOpsCtx = isChallengeBotFile ? { user: challengeBotCtx, log, em } : this.ctx
+      // TODO: This is to be removed in favour of async notifications once those are ready
+      //
+      // Quite often a file is in closed state after a short delay, and to improve our My Home upload UI
+      // we do this update so that the frontend has the correct state immediately after refresh
+      // This is not for challenge bot files because we still want file sync to invoke it's
+      // card image update logic
+      const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
+      const refreshFileState = async () => {
+        await delay(500).then(async () => {
+          log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
+          await new FileUpdateOperation(ctxForUpdate).execute({ uid: fileOrAsset.uid })
 
-            const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.id)
-            if (updatedFileOrAsset) {
-              if (updatedFileOrAsset.state === FILE_STATE_DX.CLOSED) {
-                log.info({
-                  uid: input.id,
-                  state: updatedFileOrAsset.state,
-                  size: updatedFileOrAsset.fileSize,
-                }, 'FileCloseOperation: File is now closed after FileUpdateOperation')
-                await createFileCreateEvent(updatedFileOrAsset, user, em)
-              } else {
-                if (input.forceWaitForClose) {
-                  // TODO this is just temporary solution for PFDA-4599, before
-                  //  we implement async closing solution
-                  let numberOfRetries = 0
-                  let updateFinished = false
-                  while (numberOfRetries < 11 && !updateFinished) {
-                    await delay(1000).then(async () => {
-                      numberOfRetries++
+          const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.id)
+          if (updatedFileOrAsset) {
+            if (updatedFileOrAsset.state === FILE_STATE_DX.CLOSED) {
+              log.info({
+                uid: input.id,
+                state: updatedFileOrAsset.state,
+                size: updatedFileOrAsset.fileSize,
+              }, 'FileCloseOperation: File is now closed after FileUpdateOperation')
+              await createFileCreateEvent(updatedFileOrAsset, user, em)
+            } else {
+              if (input.forceWaitForClose) {
+                // TODO this is just temporary solution for PFDA-4599, before
+                //  we implement async closing solution
+                let numberOfRetries = 0
+                let updateFinished = false
+                while (numberOfRetries < 11 && !updateFinished) {
+                  await delay(1000).then(async () => {
+                    numberOfRetries++
+                    log.info({
+                      uid: input.id,
+                      state: updatedFileOrAsset.state,
+                      size: updatedFileOrAsset.fileSize,
+                    }, `FileCloseOperation: File is still not closed after FileUpdateOperation, retrying with attempt no ${numberOfRetries}`)
+                    await new FileUpdateOperation(ctxForUpdate).execute({ uid: fileOrAsset.uid })
+                    const updatedNode = await findFileOrAssetWithUid(em, input.id)
+                    if (updatedNode?.state === FILE_STATE_DX.CLOSED) {
                       log.info({
                         uid: input.id,
                         state: updatedFileOrAsset.state,
                         size: updatedFileOrAsset.fileSize,
-                      }, `FileCloseOperation: File is still not closed after FileUpdateOperation, retrying with attempt no ${numberOfRetries}`)
-                      await new FileUpdateOperation(this.ctx).execute({uid: fileOrAsset.uid})
-                      const updatedNode = await findFileOrAssetWithUid(em, input.id)
-                      if (updatedNode?.state === FILE_STATE_DX.CLOSED) {
-                        log.info({
-                          uid: input.id,
-                          state: updatedFileOrAsset.state,
-                          size: updatedFileOrAsset.fileSize,
-                        }, 'FileCloseOperation: File was not closed after FileUpdateOperation, retrying finished')
-                        updateFinished = true
-                        await createFileCreateEvent(updatedFileOrAsset, user, em)
-                      }
-                    })
-                  }
-                } else {
-                  log.info({
-                    uid: input.id,
-                    state: updatedFileOrAsset.state,
-                    size: updatedFileOrAsset.fileSize,
-                  }, 'FileCloseOperation: File is still not closed after FileUpdateOperation')
+                      }, 'FileCloseOperation: File was not closed after FileUpdateOperation, retrying finished')
+                      updateFinished = true
+                      await createFileCreateEvent(updatedFileOrAsset, user, em)
+                    }
+                  })
                 }
+              } else {
+                log.info({
+                  uid: input.id,
+                  state: updatedFileOrAsset.state,
+                  size: updatedFileOrAsset.fileSize,
+                }, 'FileCloseOperation: File is still not closed after FileUpdateOperation')
               }
-            } else {
-              log.info({
-                uid: input.id,
-              }, 'FileCloseOperation: File no longer exists after FileUpdateOperation?? What?!')
             }
-          })
-        }
-        await refreshFileState()
+          } else {
+            log.info({
+              uid: input.id,
+            }, 'FileCloseOperation: File no longer exists after FileUpdateOperation?? What?!')
+          }
+        })
       }
+      await refreshFileState()
 
       return {}
     }
