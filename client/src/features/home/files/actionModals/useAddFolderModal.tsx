@@ -8,14 +8,14 @@ import { FieldGroup, InputError } from '../../../../components/form/styles'
 import { InputText } from '../../../../components/InputText'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../../../modal/styles'
 import { useConditionalModal } from '../../../modal/useModal'
-import { ResourceScope } from '../../types'
+import { HomeScope } from '../../types'
 import { addFolderRequest } from '../files.api'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 
 type FolderModalArgs = {
   folderId?: string
   spaceId?: string
-  scope?: ResourceScope
+  homeScope?: HomeScope
   isAllowed: boolean
   onViolation: () => void
 }
@@ -23,7 +23,7 @@ type FolderModalArgs = {
 export const useAddFolderModal = ({
   folderId,
   spaceId,
-  scope,
+  homeScope,
   isAllowed,
   onViolation,
 }: FolderModalArgs) => {
@@ -40,7 +40,7 @@ export const useAddFolderModal = ({
   const mutation = useMutation({
     mutationKey: ['add-folder'],
     mutationFn: (payload: { name: string }) =>
-      addFolderRequest(payload, folderId, spaceId, scope),
+      addFolderRequest(payload, folderId, spaceId, homeScope),
     onSuccess: res => {
       if (res?.message?.type === 'error') {
         const errorMessage = res.message?.text ?? 'Unknown error adding folder'

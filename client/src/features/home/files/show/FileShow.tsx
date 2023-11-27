@@ -34,7 +34,7 @@ import {
   Title,
   Topbox,
 } from '../../show.styles'
-import { EmmitScope, ResourceScope } from '../../types'
+import { EmmitScope, HomeScope } from '../../types'
 import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
@@ -44,18 +44,18 @@ import { LockIcon } from '../../../../components/icons/LockIcon'
 import { theme } from '../../../../styles/theme'
 
 const FileActions = ({
-  scope,
+  homeScope,
   space,
   file,
   folderId,
 }: {
-  scope?: ResourceScope
+  homeScope?: HomeScope
   space?: ISpace
   file: IFile
   folderId?: string
 }) => {
   const actions = useFilesSelectActions({
-    scope,
+    homeScope,
     space,
     selectedItems: [file],
     resourceKeys: ['file', file.uid],
@@ -93,7 +93,7 @@ const FileActions = ({
 }
 
 
-export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, emitScope?: EmmitScope, space?: ISpace }) => {
+export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope, space?: ISpace }) => {
   const location: Location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery({
@@ -130,8 +130,8 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
     },
   ] as ITab[]
 
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
-  const backPath = getBackPath(location, 'files', scope)
+  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
+  const backPath = getBackPath(location, 'files', homeScope)
 
   // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
   // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
@@ -160,7 +160,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
             </Title>
           </HeaderLeft>
           <div>
-            <FileActions scope={scope} space={space} file={file} folderId={folderId} />
+            <FileActions homeScope={homeScope} space={space} file={file} folderId={folderId} />
           </div>
         </Header>
 
@@ -186,7 +186,7 @@ export const FileShow = ({ emitScope, space, scope }: { scope?: ResourceScope, e
                   </Link>
                 ) : (
                   <Link to={`/home/files${scopeParamLink}`}>
-                    {scope === 'featured' ? 'Featured' : file.location}
+                    {homeScope === 'featured' ? 'Featured' : file.location}
                   </Link>
                 )}
               </MetadataVal>

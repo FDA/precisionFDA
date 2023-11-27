@@ -13,7 +13,7 @@ import { itemsCountString, pluralize } from '../../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { Footer, ModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
-import { DownloadListResponse } from '../../types'
+import { DownloadListResponse, ServerScope } from '../../types'
 import { fetchFilesListLockingRequest, LockUnlockActionType, lockUnlockFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
 
@@ -68,7 +68,7 @@ export const useLockUnlockFileModal = ({
 }: {
   selected: IFile[]
   onSuccess?: () => void
-  scope?: string
+  scope?: ServerScope
   spaceId?: string
   type: LockUnlockActionType
 }) => {
