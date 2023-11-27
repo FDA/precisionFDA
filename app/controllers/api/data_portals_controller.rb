@@ -16,6 +16,7 @@ module Api
         sortOrder: data_portal_params[:sort_order],
         hostLeadDxUser: data_portal_params[:host_lead_dxuser],
         guestLeadDxUser: data_portal_params[:guest_lead_dxuser],
+        default: data_portal_params[:default],
       }
       portal = https_apps_client.data_portal_save(data_portal)
 
@@ -80,6 +81,13 @@ module Api
       file_dxid = https_apps_client.data_portal_card_image_create(params[:id], file_params)
       render json: file_dxid,
              adapter: :json
+    rescue Net::HTTPClientException => e
+      render status: e.response.code, json: e.response.body
+    end
+
+    def custom
+      response = https_apps_client.custom_data_portals_list
+      render json: response
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body
     end

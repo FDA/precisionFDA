@@ -11,7 +11,7 @@ import type { FileCreateParams, FileDownloadLinkParams } from '../../../src/plat
 import type { FileDownloadLinkResponse } from '../../../src/platform-client/platform-client.responses'
 import {
   DATA_PORTAL_MEMBER_ROLE,
-  DATA_PORTAL_STATUS
+  DATA_PORTAL_STATUS,
 } from '../../../src/domain/data-portal/data-portal.enum'
 import {
   SPACE_MEMBERSHIP_ROLE,
@@ -566,5 +566,89 @@ describe('data portal service tests', () => {
     expect(result).eq('testingURL')
     const loadedResource = await em.findOneOrFail(entities.Resource, { id: resource.id })
     expect(loadedResource.url).eq('testingURL')
+  })
+
+  it('list custom portals - no env variables set', async () => {
+    const result = await dataPortalService.listAccessibleCustomPortals(user.id)
+
+    expect(result.length).eq(0)
+  })
+
+  const customDPIds = (prismPortalId?: number, prismSpaceId?: number, toolsPortalId?: number, toolsSpaceId?: number) => {
+    const PRISM_PORTAL_ID = prismPortalId ?? 1
+    const PRISM_SPACE_ID = prismSpaceId ?? 1
+    const TOOLS_PORTAL_ID = toolsPortalId ?? 2
+    const TOOLS_SPACE_ID = toolsSpaceId ?? 2
+
+    process.env.PRISM_PORTAL_ID = PRISM_PORTAL_ID.toString()
+    process.env.PRISM_SPACE_ID = PRISM_SPACE_ID.toString()
+    process.env.TOOLS_PORTAL_ID = TOOLS_PORTAL_ID.toString()
+    process.env.TOOLS_SPACE_ID = TOOLS_SPACE_ID.toString()
+    return { PRISM_PORTAL_ID, PRISM_SPACE_ID, TOOLS_PORTAL_ID, TOOLS_SPACE_ID }
+  }
+
+  const testPortalsForAdmin = async (userId: number) => {
+    const { PRISM_PORTAL_ID, PRISM_SPACE_ID, TOOLS_PORTAL_ID, TOOLS_SPACE_ID } = customDPIds()
+
+    const result = await dataPortalService.listAccessibleCustomPortals(userId)
+
+    expect(result.length).eq(2)
+    expect(result[0].name).eq('PRISM')
+    expect(result[0].id).eq(PRISM_PORTAL_ID)
+    expect(result[0].spaceId).eq(PRISM_SPACE_ID)
+    expect(result[1].name).eq('Tools')
+    expect(result[1].id).eq(TOOLS_PORTAL_ID)
+    expect(result[1].spaceId).eq(TOOLS_SPACE_ID)
+  }
+
+  it('list custom portals - admin access combo', async () => {
+    create.userHelper.addSiteAdminRole(em, user)
+    await em.flush()
+
+    await testPortalsForAdmin(user.id)
+  })
+
+  it('list custom portals - accessible PRISM portal', async () => {
+    const prismSpace = create.spacesHelper.create(em, { name: 'PRISM' })
+    await em.flush()
+    create.spacesHelper.addMember(em, { user, space: prismSpace }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
+    const prismPortal = create.dataPortalsHelper.create(em, { space: prismSpace }, { name: 'PRISM_PORTAL' })
+    await em.flush()
+    const { PRISM_PORTAL_ID, PRISM_SPACE_ID } = customDPIds(prismPortal.id, prismSpace.id)
+
+    const result = await dataPortalService.listAccessibleCustomPortals(user.id)
+    expect(result.length).eq(1)
+    expect(result[0].name).eq('PRISM')
+    expect(result[0].id).eq(PRISM_PORTAL_ID)
+    expect(result[0].spaceId).eq(PRISM_SPACE_ID)
+  })
+
+  it('list custom portals - accessible Tools portal', async () => {
+    const toolsSpace = create.spacesHelper.create(em, { name: 'TOOLS' })
+    await em.flush()
+    create.spacesHelper.addMember(em, { user, space: toolsSpace }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
+    const toolsPortal = create.dataPortalsHelper.create(em, { space: toolsSpace }, { name: 'Tools_PORTAL' })
+    await em.flush()
+    const { TOOLS_PORTAL_ID, TOOLS_SPACE_ID } = customDPIds(100, 100, toolsPortal.id, toolsSpace.id)
+
+    const result = await dataPortalService.listAccessibleCustomPortals(user.id)
+    expect(result.length).eq(1)
+    expect(result[0].name).eq('Tools')
+    expect(result[0].id).eq(TOOLS_PORTAL_ID)
+    expect(result[0].spaceId).eq(TOOLS_SPACE_ID)
+  })
+
+  it('list custom portals - envs set, but not accessible', async () => {
+    const prismSpace = create.spacesHelper.create(em, { name: 'PRISM' })
+    const toolsSpace = create.spacesHelper.create(em, { name: 'TOOLS' })
+    await em.flush()
+    const prismPortal = create.dataPortalsHelper.create(em, { space: prismSpace }, { name: 'Prism_PORTAL' })
+    const toolsPortal = create.dataPortalsHelper.create(em, { space: toolsSpace }, { name: 'Tools_PORTAL' })
+    await em.flush()
+
+    customDPIds(prismPortal.id, prismSpace.id, toolsPortal.id, toolsSpace.id)
+
+    const result = await dataPortalService.listAccessibleCustomPortals(user.id)
+    expect(result.length).eq(0)
   })
 })

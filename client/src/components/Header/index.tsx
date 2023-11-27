@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { SUPPORT_EMAIL } from '../../constants'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
+import { useCustomPortalsQuery } from '../../features/auth/useCustomPortalsQuery'
 import { IUser } from '../../types/user'
 import { CloudResourceModal } from '../CloudResourcesModal'
 import Dropdown from '../Dropdown'
@@ -16,6 +17,7 @@ import { FortIcon } from '../icons/FortIcon'
 import { GSRSIcon } from '../icons/GSRSIcon'
 import { HomeIcon } from '../icons/HomeIcon'
 import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
+import { PrismIcon } from '../icons/PrismIcon'
 import { ProfileIcon } from '../icons/ProfileIcon'
 import { QuestionIcon } from '../icons/QuestionIcon'
 import { StarIcon } from '../icons/StarIcon'
@@ -41,6 +43,7 @@ import {
 import { DataPortalIcon } from '../icons/DataPortalIcon'
 import { useMainDataPortal } from '../../features/data-portals/queries'
 import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
+import { ToolsIcon } from '../icons/ToolsIcon'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -141,6 +144,7 @@ export const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
+  const customPortals = useCustomPortalsQuery()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
     useState(false)
 
@@ -165,6 +169,8 @@ export const Header: React.FC = () => {
 
   if (!user) return null
 
+  const prismDataPortal = customPortals.data?.find((p) => p.name === 'PRISM')
+  const toolsDataPortal = customPortals.data?.find((p) => p.name === 'Tools')
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
   const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
 
@@ -309,6 +315,33 @@ export const Header: React.FC = () => {
             )}
 
             {siteSettings?.data?.dataPortals?.isEnabled && <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} />}
+
+            {prismDataPortal && (
+              <Link
+                to={`/data-portals/${prismDataPortal.id}`}
+                title="PRISM"
+              >
+                <MenuItem>
+                  <IconWrap>
+                    <PrismIcon height={17} />
+                  </IconWrap>
+                  <HeaderItemText>PRISM</HeaderItemText>
+                </MenuItem>
+              </Link>
+            )}
+            {toolsDataPortal && (
+              <Link
+                to={`/data-portals/${toolsDataPortal.id}`}
+                title="Tools"
+              >
+                <MenuItem>
+                  <IconWrap>
+                    <ToolsIcon height={16} />
+                  </IconWrap>
+                  <HeaderItemText>Tools</HeaderItemText>
+                </MenuItem>
+              </Link>
+            )}
           </HeaderLeft>
           <HeaderRight>
             <a
