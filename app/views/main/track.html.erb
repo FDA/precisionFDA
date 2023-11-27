@@ -1,7 +1,8 @@
 <% content_for :title do %>Track <%= @item.title %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-flip-vertical fa-sitemap"></span> Track  <small><%= unilink(@item, { current_user: @context.user }) %></small></div>
+  <div class="page-title"><span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <small><%= unilinkfw(@item, data: { turbolinks: false }) %></small></div>
 </div>
 
 <div class="container-fluid container-padded">

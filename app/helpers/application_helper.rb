@@ -132,7 +132,8 @@ module ApplicationHelper
       if opts[:nolink]
         icon_span + item.title.to_s
       else
-        link_to(icon_span + item.title.to_s, home_path_to_item(item, opts[:no_home]), html_opts)
+        path = item.in_space? ? space_path_to_item(item) : home_path_to_item(item, opts[:no_home])
+        link_to(icon_span + item.title.to_s, path, html_opts)
       end
     else
       icon_span + item.title.to_s # do not show item uid if unaccessible
@@ -147,6 +148,12 @@ module ApplicationHelper
     else
       pathify(item)
     end
+  end
+
+  # Concat item path with /spaces/<space_id>/ to crate a link to Spaces - for specific items
+  def space_path_to_item(item)
+    space_id = item.scope.match(/(\d+)/)[0]
+    space_pathify(item, space_id)
   end
 
   # Shortcut for unilink(..., icon_class: fa-fw)
