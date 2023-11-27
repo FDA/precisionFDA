@@ -45,11 +45,10 @@ import { IUser } from '../../../../types/user'
 import { fetchAndConvertSelectableSpaces } from '../../apps/run/job-run-helper'
 import { IAccessibleFile } from '../../databases/databases.api'
 import { IFile } from '../../files/files.types'
-import { UserLayout } from '../../../../layouts/UserLayout'
 import { FormPageContainer } from '../../../../components/Page/styles'
 import { BackLink } from '../../../../components/Page/PageBackLink'
-import { getValue } from '../../apps/run/utils';
-import { getDefaultValueFromServer } from '../../apps/form/common';
+import { getValue } from '../../apps/run/utils'
+import { getDefaultValueFromServer } from '../../apps/form/common'
 
 interface WorkflowRunData {
   analysisName: string;
@@ -173,10 +172,9 @@ const getLicensesToAccept = (
   const acceptedIds = acceptedLicenses
     .filter(item => item.state === 'active' || item.state === null)
     .map(item => item.license.toString())
-  const remainingLicenses = licensesToAccept.filter(
+  return licensesToAccept.filter(
     license => !acceptedIds.includes(license.id.toString()),
   )
-  return remainingLicenses
 }
 
 const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, defaultFiles }:
@@ -222,10 +220,10 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
     const value = vals.inputs[key]
     const stageName = key.substring(0, key.indexOf('#'))
     const inputName = key.substring(key.indexOf('#') + 1)
-    const stage = stages?.find(stage => stage.slotId === stageName)
+    const stage = stages?.find(s => s.slotId === stageName)
     const inputOutput = stage?.inputs.find(input => input.name === inputName)
     if (inputOutput !== undefined) {
-      const inputSpec: InputSpec = {default: null, choices: null, class: inputOutput.class, help: "", name: inputOutput.name}
+      const inputSpec: InputSpec = { default: null, choices: null, class: inputOutput.class, help: '', name: inputOutput.name }
       const input: RunWorkflowInput = {
         input_name: key.replace('#', '.'),
         input_value: (typeof value === 'object') ? (value as IAccessibleFile).uid : getValue(inputName, value, [inputSpec]),
