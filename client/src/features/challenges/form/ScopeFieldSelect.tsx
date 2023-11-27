@@ -36,6 +36,7 @@ export const ScopeFieldSelect = ({
       value={value}
       isDisabled={isSubmitting}
       isLoading={isLoading}
+      inputId="challenge_scope"
     />
   )
 }

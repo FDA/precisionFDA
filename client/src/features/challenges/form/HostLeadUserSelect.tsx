@@ -38,6 +38,7 @@ export const HostLeadUserSelect = ({
       value={value}
       isDisabled={isDisabled}
       isLoading={isLoading}
+      inputId="challenge_host-lead-user"
     />
   )
 }

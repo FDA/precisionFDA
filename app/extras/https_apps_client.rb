@@ -4,6 +4,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
+  # List custom data portals
+  def custom_data_portals_list
+    request(
+      "/data-portals/custom",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # Start sync job
   # @param job_dxid [String] Job dxid to sync.
   def job_sync(job_dxid)
