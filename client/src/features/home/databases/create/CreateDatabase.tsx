@@ -18,7 +18,6 @@ import { InputText } from '../../../../components/InputText'
 import { Loader } from '../../../../components/Loader'
 import { StyledBackLink } from '../../home.styles'
 import { NotFound } from '../../show.styles'
-import { ResourceScope } from '../../types'
 import { createDatabaseRequest, fetchAccessibleFiles, IAccessibleFile } from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
 
@@ -80,7 +79,7 @@ const validationSchema = Yup.object().shape({
     .nullable().required('Required'),
 })
 
-export const CreateDatabase = ({ scope = 'me' }: { scope?: ResourceScope }) => {
+export const CreateDatabase = () => {
   const history = useHistory()
   const [inputValue, setInputValue] = useState('')
   const { data, isLoading } = useAccessibleFiles(inputValue)

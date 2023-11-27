@@ -31,7 +31,7 @@ export type APIResource =
   | 'workflow-executions'
   | 'spaces'
   | 'space-reports'
-export type ResourceScope = 'everybody' | 'featured' | 'spaces' | 'me'
+export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
 export type PropertiesResource = 'node' | 'asset' | 'workflowSeries' | 'job' | 'appSeries' | 'dbCluster'
 

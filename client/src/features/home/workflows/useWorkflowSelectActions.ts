@@ -8,12 +8,12 @@ import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useExportToModal } from '../apps/useExportToModal'
-import { ActionFunctionsType, ResourceScope } from '../types'
+import { ActionFunctionsType, HomeScope } from '../types'
 import { copyWorkflowsRequest, deleteWorkflowRequest } from './workflows.api'
 import { IWorkflow, WorkflowActions } from './workflows.types'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
-export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resourceKeys, resetSelected }: { scope?: ResourceScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
+export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, resourceKeys, resetSelected }: { homeScope?: HomeScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -137,7 +137,7 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     'Unfeature': {
       type: 'modal',
@@ -145,14 +145,14 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
+      shouldHide: !isAdmin || homeScope !== 'everybody' && homeScope !== 'featured',
     },
     'Delete': {
       type: 'modal',
       func: () => setDeleteModal(true),
       modal: deleteModal,
       showModal: isShownDeleteModal,
-      shouldHide: scope === 'spaces',
+      shouldHide: homeScope === 'spaces',
       isDisabled: selected.some((e) => !e.links?.delete) || selected.length === 0,
     },
     'Copy to space': {
@@ -187,7 +187,7 @@ export const useWorkflowSelectActions = ({ scope, spaceId, selectedItems, resour
     },
   }
 
-  if(scope === 'spaces') {
+  if(homeScope === 'spaces') {
     actions = pick(['Fork', 'Export to', 'Copy to space'], actions)
   }
 
