@@ -11,7 +11,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { itemsCountString, pluralize } from '../../../../utils/formatting'
+import { itemsCountString } from '../../../../utils/formatting'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 import { DownloadListResponse } from '../../types'
@@ -112,11 +112,9 @@ const getMessage = (nodes?: DownloadListResponse[]) => {
 export const useDeleteFileModal = ({
   selected,
   onSuccess,
-  scope,
 }: {
   selected: IFile[]
   onSuccess: () => void
-  scope: string
 }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()

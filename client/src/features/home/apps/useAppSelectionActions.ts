@@ -11,7 +11,7 @@ import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useComparatorModal } from '../comparators/useComparatorModal'
-import { ActionFunctionsType, ResourceScope } from '../types'
+import { ActionFunctionsType, HomeScope } from '../types'
 import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.api'
 import { IApp } from './apps.types'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
@@ -42,7 +42,7 @@ export enum AppActions {
 }
 
 export const useAppSelectionActions = ({
-  scope,
+  homeScope,
   spaceId,
   selectedItems,
   resourceKeys,
@@ -50,7 +50,7 @@ export const useAppSelectionActions = ({
   comparatorLinks,
   challenges,
 }: {
-  scope?: ResourceScope,
+  homeScope?: HomeScope,
   spaceId?: string,
   selectedItems: IApp[],
   resourceKeys: string[],
@@ -138,7 +138,7 @@ export const useAppSelectionActions = ({
       if(spaceId) {
         history.push(`/spaces/${spaceId}/apps`)
       } else {
-        history.push(`/home/apps?scope=${scope}`)
+        history.push(`/home/apps?scope=${homeScope}`)
       }
       if(resetSelected) resetSelected()
     },
@@ -230,7 +230,7 @@ export const useAppSelectionActions = ({
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     'Unfeature': {
       type: 'modal',
@@ -238,7 +238,7 @@ export const useAppSelectionActions = ({
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
+      shouldHide: !isAdmin || homeScope !== 'everybody' && homeScope !== 'featured',
     },
     'Delete': {
       type: 'modal',
@@ -327,7 +327,7 @@ export const useAppSelectionActions = ({
     },
   }
 
-  if(scope === 'spaces') {
+  if(homeScope === 'spaces') {
     actions = pick(['Copy to space', 'Attach to...'], actions)
   }
 

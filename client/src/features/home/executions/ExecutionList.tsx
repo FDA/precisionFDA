@@ -19,7 +19,7 @@ import {
   ActionsRow, StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification, HomeScope } from '../types'
 import { useList } from '../useList'
 import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchExecutions } from './executions.api'
@@ -31,7 +31,7 @@ import { useExecutionActions } from './useExecutionSelectActions'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
-export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
   const history = useHistory()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
@@ -57,12 +57,12 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     resource: 'jobs',
     params: {
       spaceId: spaceId || undefined,
-      scope: scope || undefined,
+      scope: homeScope || undefined,
     },
   })
   const queryCache = useQueryClient()
   const { status, data, error } = query
-  const { data: propertiesData } = usePropertiesQuery('job', scope, spaceId)
+  const { data: propertiesData } = usePropertiesQuery('job', homeScope, spaceId)
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
     share: true,
@@ -88,7 +88,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
     selectedIndexes,
     data?.jobs,
   )
-  const actions = useExecutionActions({ scope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
+  const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -103,7 +103,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
               <ActionsDropdownContent
                 actions={actions}
                 message={
-                  scope === 'spaces' &&
+                  homeScope === 'spaces' &&
                   'To perform other actions on this file, access it from the Space'
                 }
               />
@@ -122,7 +122,7 @@ export const ExecutionList = ({ scope, spaceId }: { scope?: ResourceScope, space
 
       <ExecutionsListTable
         isAdmin={isAdmin}
-        scope={scope}
+        homeScope={homeScope}
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
@@ -176,7 +176,7 @@ export const ExecutionsListTable = ({
   setSelectedRows,
   setSortBy,
   sortBy,
-  scope,
+  homeScope,
   saveColumnResizeWidth,
   colWidths,
   hiddenColumns,
@@ -192,7 +192,7 @@ export const ExecutionsListTable = ({
   sortBy?: SortingRule<string>[]
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  scope?: ResourceScope
+  homeScope?: HomeScope
   colWidths: KeyVal
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing']
@@ -204,14 +204,14 @@ export const ExecutionsListTable = ({
   function filterColsByScope(c: Column<IExecution>): boolean {
     // Check if any of the conditions is true, then hide the column
     return !(
-      // If the scope is 'me', hide 'added_by' regardless of other conditions.
-      (scope === 'me' && c.accessor === 'added_by') ||
+      // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
+      (homeScope === 'me' && c.accessor === 'added_by') ||
       
-      // Hide 'location' for all scopes except 'spaces'.
-      (scope !== 'spaces' && c.accessor === 'location') ||
+      // Hide 'location' for all homeScopes except 'spaces'.
+      (homeScope !== 'spaces' && c.accessor === 'location') ||
       
-      // Hide 'featured' for all scopes except 'everybody'.
-      (scope !== 'everybody' && c.accessor === 'featured') ||
+      // Hide 'featured' for all homeScopes except 'everybody'.
+      (homeScope !== 'everybody' && c.accessor === 'featured') ||
       
       c.accessor === 'created_at_date_time'||
       c.accessor === 'workflow_title'
@@ -242,7 +242,7 @@ export const ExecutionsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={[scope]}
+        shouldResetFilters={[homeScope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no executions here.</EmptyTable>}

@@ -21,7 +21,7 @@ import {
   StyledHomeTable, StyledRight,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, HomeScope } from '../types'
 import { useList } from '../useList'
 import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchDatabaseList } from './databases.api'
@@ -41,11 +41,11 @@ const NoDatabases = styled.div`
 
 type ListType = { dbclusters: IDatabase[]; meta: IMeta }
 
-export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
-  if (scope !== 'me') {
+export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
+  if (homeScope !== 'me') {
     return (
       <NoDatabases>
-        <div>Scope: "{scope}", does not have any databases.</div>
+        <div>Scope: "{homeScope}", does not have any databases.</div>
         <BackLink linkTo="/home/databases?scope=me">
           Go to the "My" scope
         </BackLink>
@@ -73,11 +73,11 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
     fetchList: fetchDatabaseList,
     resource: 'dbclusters',
     params: {
-      scope: scope || undefined,
+      scope: homeScope || undefined,
     },
   })
   const { status, data } = query
-  const { data: propertiesData } = usePropertiesQuery('dbCluster', scope)
+  const { data: propertiesData } = usePropertiesQuery('dbCluster', homeScope)
 
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
@@ -126,7 +126,7 @@ export const DatabaseList = ({ scope }: { scope?: ResourceScope }) => {
       </div>
 
       <DatabaseListTable
-        scope={scope}
+        homeScope={homeScope}
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
@@ -182,7 +182,7 @@ export const DatabaseListTable = ({
   setSelectedRows,
   setSortBy,
   sortBy,
-  scope,
+  homeScope,
   saveColumnResizeWidth,
   colWidths,
   hiddenColumns,
@@ -198,7 +198,7 @@ export const DatabaseListTable = ({
   sortBy?: SortingRule<string>[]
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  scope?: ResourceScope
+  homeScope?: HomeScope
   colWidths: KeyVal
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
@@ -231,7 +231,7 @@ export const DatabaseListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={[scope]}
+        shouldResetFilters={[homeScope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no databases here.</EmptyTable>}

@@ -12,7 +12,7 @@ import { TrashIcon } from '../../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../../utils'
 import { ButtonRow, Footer, ModalScroll } from '../../../../modal/styles'
 import { useConditionalModal } from '../../../../modal/useModal'
-import { ResourceScope } from '../../../types'
+import { HomeScope } from '../../../types'
 import { itemsCountString } from '../../../../../utils/formatting'
 import {
   FilesMeta,
@@ -43,7 +43,7 @@ const isUniqFile = (blobs: any, file: any) =>
   )
 
 type UploadModalArgs = {
-  scope?: ResourceScope
+  homeScope?: HomeScope
   folderId?: string
   spaceId?: string
   isAllowed: boolean
@@ -51,7 +51,7 @@ type UploadModalArgs = {
 }
 
 export const useFileUploadModal = ({
-  scope,
+  homeScope,
   folderId,
   spaceId,
   isAllowed,
@@ -147,7 +147,7 @@ export const useFileUploadModal = ({
         filesMeta,
         updateFileStatus: updateFilesStatus,
         scope:
-          scope === 'me' ? 'private' : scope === 'everybody' ? 'public' : scope,
+          homeScope === 'me' ? 'private' : homeScope === 'everybody' ? 'public' : homeScope,
         spaceId,
         folderId,
       })
