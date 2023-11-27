@@ -13,7 +13,7 @@ describe('My Home / Files', () => {
     history.replace('/home/files')
     render(
       <Route path="/home/files">
-        <FileList scope="me" showFolderActions />
+        <FileList homeScope="me" showFolderActions />
       </Route>,
     )
 

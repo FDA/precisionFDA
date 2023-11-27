@@ -8,7 +8,7 @@ import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
-import { ResourceScope } from '../../types'
+import { HomeScope } from '../../types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 
@@ -17,7 +17,7 @@ const PublishFolder = ({
   scope,
 }: {
   selectedFiles: IFile[]
-  scope: ResourceScope
+  scope: HomeScope
 }) => {
   const {
     data = [],
@@ -55,7 +55,7 @@ const PublishFolder = ({
 export const usePublishFolderModal = (
   selectedFiles: IFile[],
   resetSelected: () => void,
-  scope: ResourceScope,
+  scope: HomeScope,
 ) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()

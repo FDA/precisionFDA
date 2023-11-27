@@ -11,7 +11,7 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { getBaseLink } from '../apps/run/utils'
 import { ActionsButton } from '../show.styles'
-import { ResourceScope } from '../types'
+import { HomeScope } from '../types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
 import { syncFilesRequest } from './executions.api'
 import { IExecution } from './executions.types'
@@ -19,12 +19,12 @@ import { useExecutionActions } from './useExecutionSelectActions'
 
 
 export const ExecutionActionsRow = ({
-  scope,
+  homeScope,
   execution,
   refetch,
   isFetching,
 }: {
-  scope?: ResourceScope
+  homeScope?: HomeScope
   execution: IExecution
   refetch: () => void
   isFetching: boolean
@@ -48,7 +48,7 @@ export const ExecutionActionsRow = ({
   })
 
   const actions = useExecutionActions({
-    scope,
+    homeScope,
     selectedItems: [execution],
     resourceKeys: ['execution', execution.uid],
   })

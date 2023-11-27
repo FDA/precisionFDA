@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
+import { useLocation } from 'react-router'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import {
@@ -17,7 +18,6 @@ import { StyledLinkCell } from '../home.styles'
 import { KeyVal } from '../types'
 import { getBasePath } from '../utils'
 import { IExecution } from './executions.types'
-import { useLocation } from 'react-router'
 
 export const useExecutionColumns = ({
   colWidths,
