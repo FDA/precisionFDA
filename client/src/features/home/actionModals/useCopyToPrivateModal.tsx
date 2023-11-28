@@ -7,7 +7,7 @@ import { Loader } from '../../../components/Loader'
 import { ResourceTable } from '../../../components/ResourceTable'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { APIResource, ResourceScope } from '../types'
+import { APIResource, HomeScope } from '../types'
 import { resourceCountString } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
@@ -26,7 +26,7 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
   resource: APIResource
   selected: T[]
   request: (ids: number[]) => Promise<any>
-  scope?: ResourceScope
+  scope?: HomeScope
   onSuccess?: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()

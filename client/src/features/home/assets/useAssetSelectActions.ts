@@ -9,7 +9,7 @@ import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import { ActionFunctionsType, ResourceScope } from '../types'
+import { ActionFunctionsType, HomeScope } from '../types'
 import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
 import { deleteAssetsRequest } from './assets.api'
@@ -34,13 +34,13 @@ export enum AssetActions {
 }
 
 type AssetActionArgs = {
-  scope?: ResourceScope,
+  homeScope?: HomeScope,
   selectedItems: IAsset[],
   resourceKeys: string[],
   resetSelected?: () => void
 }
 
-export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs) => {
+export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs) => {
   const queryClient = useQueryClient()
   const history = useHistory()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -168,7 +168,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     'Unfeature': {
       type: 'modal',
@@ -176,7 +176,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || (scope !== 'featured' && scope !== 'everybody'),
+      shouldHide: !isAdmin || (homeScope !== 'featured' && homeScope !== 'everybody'),
     },
     'Make Public': {
       type: 'link',
@@ -199,7 +199,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
       func: () => setDeleteModal(true),
       modal: deleteModal,
       showModal: isShownDeleteModal,
-      shouldHide: scope === 'spaces',
+      shouldHide: homeScope === 'spaces',
     },
     'Attach License': {
       type: 'modal',
@@ -256,7 +256,7 @@ export const useAssetActions = ({ scope, selectedItems, resourceKeys, resetSelec
     },
   }
 
-  if(scope === 'spaces') {
+  if(homeScope === 'spaces') {
     actions = pick(['Download', 'Attach to...'], actions)
   }
 

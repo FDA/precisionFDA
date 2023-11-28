@@ -4,7 +4,7 @@
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-comments-o"></span> Comments for <%= @item.klass %>:
-    <%= link_to @item.title, CGI.escapeHTML(@item_path) %>
+    <%= unilinkfw(@item, noicon: true, data: { turbolinks: false }) %>
   </div>
 </div>
 

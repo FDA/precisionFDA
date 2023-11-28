@@ -34,7 +34,7 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { EmmitScope, ResourceScope } from '../types'
+import { EmmitScope, HomeScope } from '../types'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { WorkflowExecutionsList } from './WorkflowExecutionsList'
 import { fetchWorkflow } from './workflows.api'
@@ -49,7 +49,7 @@ interface IColumn {
   dataTestId: string
 }
 
-const renderOptions = (workflow: IWorkflow, scope?: ResourceScope) => {
+const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
   const columns: IColumn[] = [
     {
       header: 'location',
@@ -80,7 +80,7 @@ const renderOptions = (workflow: IWorkflow, scope?: ResourceScope) => {
     },
   ]
 
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
 
   const list = columns.map(e => (
     <MetadataItem key={e.header}>
@@ -89,7 +89,7 @@ const renderOptions = (workflow: IWorkflow, scope?: ResourceScope) => {
       {e.header === 'location' && !e.link ? (
         <MetadataVal>
           <Link to={`/home/workflows${scopeParamLink}`} data-testid={e.dataTestId}>
-            {scope === 'featured' ? 'Featured' : workflow[e.value]}
+            {homeScope === 'featured' ? 'Featured' : workflow[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
@@ -109,7 +109,7 @@ const renderOptions = (workflow: IWorkflow, scope?: ResourceScope) => {
 
 const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   const actions = useWorkflowSelectActions({
-    scope: workflow.scope === 'private' ? 'me' : workflow.scope,
+    homeScope: workflow.scope === 'private' ? 'me' : workflow.scope,
     selectedItems: [workflow],
     resourceKeys: ['workflow', workflow.uid],
   })
@@ -162,7 +162,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ emitScope, scope }: { scope?: ResourceScope, emitScope?: EmmitScope }) => {
+export const WorkflowShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
   const match = useRouteMatch()
   const location: Location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
@@ -192,7 +192,7 @@ export const WorkflowShow = ({ emitScope, scope }: { scope?: ResourceScope, emit
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'workflows', scope)} data-testid="workflow-show-back-link">
+      <StyledBackLink linkTo={getBackPath(location, 'workflows', homeScope)} data-testid="workflow-show-back-link">
         Back to Workflows
       </StyledBackLink>
       <Topbox>
@@ -215,7 +215,7 @@ export const WorkflowShow = ({ emitScope, scope }: { scope?: ResourceScope, emit
           </div>
         </Header>
 
-        {renderOptions(workflow, scope)}
+        {renderOptions(workflow, homeScope)}
         {workflow.tags.length > 0 && (
           <MetadataSection>
             <MetadataRow>
