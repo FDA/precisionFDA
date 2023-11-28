@@ -494,6 +494,7 @@ export const useFilesSelectActions = ({
     Comments: {
       type: 'link',
       link: `/files/${selected[0]?.uid}/comments`,
+      isDisabled: false,
     },
   }
 
