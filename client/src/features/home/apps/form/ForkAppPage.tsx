@@ -9,8 +9,9 @@ import { NotAllowedPage } from '../../../../components/NotAllowed'
 import { cleanObject } from '../../../../utils/object'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { mapFromServerToForm } from './common'
+import { getBasePath } from '../../utils'
 
-export const ForkAppPage = () => {
+export const ForkAppPage = ({ spaceId }: { spaceId: number }) => {
   const history = useHistory()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
@@ -22,7 +23,7 @@ export const ForkAppPage = () => {
     mutationFn: (payload: any) => createEditAppRequest(payload),
     onSuccess: res => {
       if (res?.id) {
-        history.push(`/home/apps/${res?.id}`)
+        history.push(`${getBasePath(spaceId)}/apps/${res?.id}`)
         queryClient.invalidateQueries(['apps', 'app'])
         toast.success('Forked app')
       } else if (res?.error) {
@@ -54,7 +55,7 @@ export const ForkAppPage = () => {
         name: data.app.name,
         title: data.app.title,
         readme: data.app.readme,
-        forked_from: data.app.forked_from,
+        forked_from: data.app.uid,
         instance_type: data.meta.spec.instance_type,
         internet_access: data.meta.spec.internet_access,
         release: data.meta.release || '16.04',

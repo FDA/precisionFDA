@@ -9,7 +9,7 @@ import { CreateAppPayload, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
-import { getBaseLink } from '../run/utils'
+import { getBasePath } from '../../utils'
 
 
 export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
@@ -24,7 +24,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
     mutationFn: createEditAppRequest,
     onSuccess: res => {
       if (res?.id) {
-        history.push(`/${getBaseLink(spaceId)}/apps/${res?.id}`)
+        history.push(`${getBasePath(spaceId)}/apps/${res?.id}`)
         queryClient.invalidateQueries(['apps', 'app'])
         toast.success('New revision created')
       } else if (res?.error) {
