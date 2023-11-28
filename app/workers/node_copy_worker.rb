@@ -37,7 +37,8 @@ class NodeCopyWorker < ApplicationWorker
   # @param session_auth_params [Hash] User session auth params.
   def perform(scope, nodes_ids, session_auth_params)
     @context = Context.build(session_auth_params)
-    RequestContext.begin_request(@context.user_id, @context.user, @context.token)
+    RequestContext.begin_request(@context.user_id, @context.username, @context.token)
+
     nodes = Node.where(id: nodes_ids)
     copies = copy_service.copy(nodes, scope)
 
