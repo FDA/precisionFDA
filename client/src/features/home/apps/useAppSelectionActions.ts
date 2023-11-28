@@ -1,4 +1,3 @@
-import { pick } from 'ramda'
 import { useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import { IChallenge } from '../../../types/challenge'
@@ -17,6 +16,7 @@ import { IApp } from './apps.types'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
 import { getBaseLink } from './run/utils'
+import { pick } from 'ramda'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -261,7 +261,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
-      shouldHide: ['private','public'].includes(selected[0]?.scope)
+      shouldHide: ['private','public'].includes(selected[0]?.scope),
     },
     'Attach to...': {
       type: 'modal',
