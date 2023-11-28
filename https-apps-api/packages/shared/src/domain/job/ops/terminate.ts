@@ -23,10 +23,6 @@ export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxId
       throw new errors.JobNotFoundError()
     }
 
-    if (job.entityType !== ENTITY_TYPE.HTTPS) {
-      throw new errors.JobNotFoundError('Job is not HTTPS job.')
-    }
-
     if (isStateTerminal(job.state) || job.state === JOB_STATE.TERMINATING) {
       this.ctx.log.info({ jobId: job.id }, 'Job is already terminating or terminated')
       throw new errors.InvalidStateError('Job is already terminating or terminated')
