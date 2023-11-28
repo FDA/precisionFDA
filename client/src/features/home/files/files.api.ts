@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { checkStatus, getApiRequestOpts } from '../../../utils/api'
 import { cleanObject } from '../../../utils/object'
-import { DownloadListResponse, IFilter, IMeta, ResourceScope } from '../types'
+import { DownloadListResponse, IFilter, IMeta, HomeScope } from '../types'
 import { formatScopeQ, Params, prepareListFetch } from '../utils'
 import { IFile } from './files.types'
 
@@ -67,12 +67,12 @@ export async function addFolderRequest(
   { name }: { name: string },
   parentFolderId?: string,
   spaceId?: string,
-  scope?: ResourceScope,
+  homeScope?: HomeScope,
 ) {
   const data = cleanObject({
     name,
     parent_folder_id: parentFolderId ?? null,
-    public: scope === 'everybody' ? 'true' : null,
+    public: homeScope === 'everybody' ? 'true' : null,
     space_id: spaceId ?? null,
   })
   const res = await fetch('/api/files/create_folder', {
@@ -136,7 +136,7 @@ export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?
   return axios.get(url).then(res => res.data as FetchFolderChildrenResponse)
 }
 
-export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number, scope?: ResourceScope, spaceId?: string) => {
+export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number, homeScope?: HomeScope, spaceId?: string) => {
   const url = spaceId ? `/api/spaces/${spaceId}/files/move` : '/api/files/move'
   const body = cleanObject({
     node_ids: nodeIds,
@@ -150,10 +150,10 @@ export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number
   return res.json()
 }
 
-export async function createFile(name: string, scope: string, folder_id: string | null) {
+export async function createFile(name: string, homeScope: string, folder_id: string | null) {
   const res = await fetch('/api/create_file', {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ name, scope: scope === 'everybody' ? 'public' : null, folder_id }),
+    body: JSON.stringify({ name, scope: homeScope === 'everybody' ? 'public' : null, folder_id }),
   }).then(checkStatus)
 
   return res.json()

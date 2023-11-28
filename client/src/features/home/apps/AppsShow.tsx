@@ -19,7 +19,7 @@ import { IChallenge } from '../../../types/challenge'
 import { Location } from '../../../types/utils'
 import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { getScopeMapping } from '../getScopeMapping'
+import { getHomeScopeFromServerScope } from '../getHomeScopeFromServerScope'
 import { StyledBackLink, StyledRight } from '../home.styles'
 import {
   ActionsButton,
@@ -36,7 +36,7 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { EmmitScope, ResourceScope, ServerScope } from '../types'
+import { EmmitScope, HomeScope, ServerScope } from '../types'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
@@ -44,7 +44,7 @@ import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
 import { getBaseLink } from './run/utils'
 
-const renderOptions = (app: IApp, scope?: ResourceScope) => {
+const renderOptions = (app: IApp, homeScope?: HomeScope) => {
   const columns = [
     {
       header: 'location',
@@ -78,7 +78,7 @@ const renderOptions = (app: IApp, scope?: ResourceScope) => {
     })
   }
 
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
 
   const list = columns.map((e: any) => (
     <MetadataItem key={e.header}>
@@ -88,7 +88,7 @@ const renderOptions = (app: IApp, scope?: ResourceScope) => {
         <MetadataVal>
           <Link to={`/home/apps${scopeParamLink}`}>
             {/* @ts-ignore */}
-            {scope === 'featured' ? 'Featured' : app[e.value]}
+            {homeScope === 'featured' ? 'Featured' : app[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
@@ -113,7 +113,7 @@ const DetailActionsDropdown = (
   { app, comparatorLinks, challenges, spaceId }:
     { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
   const actions = useAppSelectionActions({
-    scope: getScopeMapping(app.scope, app.featured),
+    homeScope: getHomeScopeFromServerScope(app.scope, app.featured),
     spaceId,
     selectedItems: [app],
     resetSelected: () => { },
@@ -173,7 +173,7 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope, scope }: { scope?: ResourceScope, spaceId?: string, emitScope?: EmmitScope }) => {
+export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: string, emitScope?: EmmitScope }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
@@ -200,7 +200,7 @@ export const AppsShow = ({ spaceId, emitScope, scope }: { scope?: ResourceScope,
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'apps', scope)}>
+      <StyledBackLink linkTo={getBackPath(location, 'apps', homeScope)}>
         Back to Apps
       </StyledBackLink>
       <Topbox>
@@ -251,7 +251,7 @@ export const AppsShow = ({ spaceId, emitScope, scope }: { scope?: ResourceScope,
           </div>
         </Header>
 
-        {renderOptions(app, scope)}
+        {renderOptions(app, homeScope)}
         {app.tags.length > 0 && (
           <MetadataSection>
             <MetadataRow>

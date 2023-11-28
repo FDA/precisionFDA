@@ -28,17 +28,17 @@ import {
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { EmmitScope, ResourceScope } from '../types'
+import { EmmitScope, HomeScope } from '../types'
 
-const renderOptions = (db: IDatabase, scope?: ResourceScope) => (
+const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
   <MetadataSection>
     <MetadataRow>
       <MetadataItem>
         <MetadataKey>Location</MetadataKey>
         <MetadataVal>
           {db.location && (
-            <Link target="_blank" to={`/home/databases?scope=${scope?.toLowerCase()}`}>
-              {scope === 'featured' ? 'Featured' : db.location}
+            <Link target="_blank" to={`/home/databases?scope=${homeScope?.toLowerCase()}`}>
+              {homeScope === 'featured' ? 'Featured' : db.location}
             </Link>
           )}
         </MetadataVal>
@@ -129,7 +129,7 @@ const DetailActionsDropdown = ({
   )
 }
 
-export const DatabaseShow = ({ emitScope, scope }: { scope?: ResourceScope, emitScope?: EmmitScope }) => {
+export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
   const { dxid } = useParams<{ dxid: string }>()
   const { data, status, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['dbclusters', dxid],
@@ -180,7 +180,7 @@ export const DatabaseShow = ({ emitScope, scope }: { scope?: ResourceScope, emit
           </div>
         </Header>
 
-        {renderOptions(db, scope)}
+        {renderOptions(db, homeScope)}
         {db.tags.length > 0 && (<MetadataSection>
             <StyledTags>
               {db.tags.map(tag => (
