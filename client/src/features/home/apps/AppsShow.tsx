@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import { omit } from 'ramda'
+import { omit, pick } from 'ramda'
 import React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { Link, Redirect, Route, Switch } from 'react-router-dom'
@@ -17,7 +17,7 @@ import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { IChallenge } from '../../../types/challenge'
 import { Location } from '../../../types/utils'
-import { getBackPath } from '../../../utils/getBackPath'
+import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { getHomeScopeFromServerScope } from '../getHomeScopeFromServerScope'
 import { StyledBackLink, StyledRight } from '../home.styles'
@@ -43,8 +43,11 @@ import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
 import { getBaseLink } from './run/utils'
+import { getBasePath } from '../utils'
+import { getSpaceIdFromScope } from '../../../utils'
 
 const renderOptions = (app: IApp, homeScope?: HomeScope) => {
+  const spaceId = getSpaceIdFromScope(app.scope)
   const columns = [
     {
       header: 'location',
@@ -70,11 +73,11 @@ const renderOptions = (app: IApp, homeScope?: HomeScope) => {
     },
   ]
 
-  if (app.links.forked_from) {
+  if (app.forked_from) {
     columns.push({
       header: 'Forked from',
       value: 'forked_from',
-      link: app.links.forked_from,
+      link: `${getBasePath(spaceId)}/apps/${app.forked_from}`,
     })
   }
 
@@ -110,10 +113,10 @@ const renderOptions = (app: IApp, homeScope?: HomeScope) => {
 }
 
 const DetailActionsDropdown = (
-  { app, comparatorLinks, challenges, spaceId }:
-    { app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
-  const actions = useAppSelectionActions({
-    homeScope: getHomeScopeFromServerScope(app.scope, app.featured),
+  { homeScope, app, comparatorLinks, challenges, spaceId }:
+    { homeScope?: HomeScope, app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
+  let actions = useAppSelectionActions({
+    homeScope,
     spaceId,
     selectedItems: [app],
     resetSelected: () => { },
@@ -121,6 +124,12 @@ const DetailActionsDropdown = (
     comparatorLinks,
     challenges,
   })
+
+  if(homeScope === 'spaces') {
+    actions = pick(['Copy to space', 'Attach to...'], actions)
+  }
+
+  actions = omit(['Run', 'Run batch'], actions)
 
   return (
     <>
@@ -148,11 +157,7 @@ const DetailActionsDropdown = (
       </CloudResourcesHeaderButton>
       <Dropdown
         trigger="click"
-        content={
-          <ActionsDropdownContent
-            actions={omit(['Run', 'Run batch'], actions)}
-          />
-        }
+        content={<ActionsDropdownContent actions={actions} />}
       >
         {dropdownProps => (
           <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
@@ -173,7 +178,7 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: string, emitScope?: EmmitScope }) => {
+export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: number, emitScope?: EmmitScope }) => {
   const location: Location = useLocation()
   const match = useRouteMatch()
   const { appUid } = useParams<{ appUid: string }>()
@@ -197,10 +202,16 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
   )
 
   const appTitle = app.title ? app.title : app.name
+  const backPath = getBackPathNext({
+    location, 
+    resourceLocation: 'apps',
+    homeScope,
+    spaceId
+  })
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'apps', homeScope)}>
+      <StyledBackLink linkTo={backPath}>
         Back to Apps
       </StyledBackLink>
       <Topbox>
@@ -235,13 +246,14 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
             <RevisionDropdown
               revisions={meta.revisions}
               selectedValue={app.revision}
-              linkToRevision={r => `/home/apps/${r.uid}`}
+              linkToRevision={r => `${getBasePath(spaceId)}/apps/${r.uid}`}
             />
           </HeaderLeft>
           <div>
             <StyledRight>
               {app &&
                 <DetailActionsDropdown
+                  homeScope={homeScope}
                   spaceId={spaceId}
                   app={app}
                   comparatorLinks={meta.links?.comparators ?? []}
