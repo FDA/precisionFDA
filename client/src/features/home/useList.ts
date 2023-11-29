@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { UseQueryOptions } from '@tanstack/react-query'
 import { usePrevious } from '../../hooks/usePrevious'
 import { columnFilters } from './columnFilters'
-import { APIResource, IMeta, ResourceScope } from './types'
+import { APIResource, IMeta, HomeScope } from './types'
 import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useFilterParams } from './useFilterState'
 import { useListQuery } from './useListQuery'
@@ -21,7 +21,7 @@ export interface IListProps {
 type ListType = { [key: string]: {}, meta: IMeta }
 interface IUseList<T> {
   spaceId?: string,
-  scope?: ResourceScope,
+  scope?: HomeScope,
   fetchList: any,
   resource: APIResource,
   params?: {

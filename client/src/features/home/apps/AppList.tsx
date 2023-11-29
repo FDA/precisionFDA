@@ -15,7 +15,7 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, HomeScope } from '../types'
 import { useList } from '../useList'
 import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchApps } from './apps.api'
@@ -26,7 +26,7 @@ import { useAppsColumns } from './useAppsColumns'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
-export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: string }) => {
+export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
   const history = useHistory()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
@@ -53,10 +53,10 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
     resource: 'apps',
     params: {
       spaceId: spaceId || undefined,
-      scope: scope || undefined,
+      scope: homeScope || undefined,
     },
   })
-  const { data: propertiesData } = usePropertiesQuery('appSeries', scope, spaceId) 
+  const { data: propertiesData } = usePropertiesQuery('appSeries', homeScope, spaceId) 
 
   const { status, data, error } = query
 
@@ -65,7 +65,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
     data?.apps,
   )
   const actions = useAppSelectionActions({
-    scope,
+    homeScope,
     spaceId,
     selectedItems: selectedAppObjects,
     resourceKeys: ['apps'],
@@ -75,12 +75,11 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
   })
 
   const listActions = useAppListActions({
-    scope,
     spaceId,
     resourceKeys: ['apps'],
   })
 
-  if(scope) {
+  if(homeScope) {
     delete actions['Copy to My Home (private)']
   } else {
     // Disable actions in spaces
@@ -95,7 +94,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
       <div>
         <ActionsRow>
           <QuickActions>
-            {scope === 'me' && (
+            {homeScope === 'me' && (
               <ButtonSolidBlue
                 as={Link}
                 to="/home/apps/create"
@@ -122,7 +121,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
               <ActionsDropdownContent
                 actions={omit(['Comments'], actions)}
                 message={
-                  scope === 'spaces' &&
+                  homeScope === 'spaces' &&
                   'To perform other actions on this app, access it from the Space'
                 }
               />
@@ -141,7 +140,7 @@ export const AppList = ({ scope, spaceId }: { scope?: ResourceScope, spaceId?: s
 
       <AppsListTable
         isAdmin={isAdmin}
-        scope={scope}
+        homeScope={homeScope}
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
@@ -199,7 +198,7 @@ export const AppsListTable = ({
   setSelectedRows,
   sortBy,
   setSortBy,
-  scope,
+  homeScope,
   saveColumnResizeWidth,
   colWidths,
   saveHiddenColumns,
@@ -216,7 +215,7 @@ export const AppsListTable = ({
   sortBy: SortingRule<string>[]
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  scope?: ResourceScope
+  homeScope?: HomeScope
   colWidths: KeyVal
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
@@ -229,19 +228,19 @@ export const AppsListTable = ({
   function filterColsByScope(c: Column<IApp>): boolean {
     // Check if any of the conditions is true, then hide the column
     return !(
-      // If the scope is 'me', hide 'added_by' regardless of other conditions.
-      (scope === 'me' && c.accessor === 'added_by') ||
+      // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
+      (homeScope === 'me' && c.accessor === 'added_by') ||
       
-      // Hide 'location' for all scopes except 'spaces'.
-      (scope !== 'spaces' && c.accessor === 'location') ||
+      // Hide 'location' for all homeScopes except 'spaces'.
+      (homeScope !== 'spaces' && c.accessor === 'location') ||
       
-      // Hide 'featured' for all scopes except 'everybody'.
-      (scope !== 'everybody' && c.accessor === 'featured') ||
+      // Hide 'featured' for all homeScopes except 'everybody'.
+      (homeScope !== 'everybody' && c.accessor === 'featured') ||
       
-      // Hide 'explorers', 'org', 'run_by_you' if scope is defined to something specific.
-      (scope !== undefined && c.accessor === 'explorers') ||
-      (scope !== undefined && c.accessor === 'org') ||
-      (scope !== undefined && c.accessor === 'run_by_you')
+      // Hide 'explorers', 'org', 'run_by_you' if homeScope is defined to something specific.
+      (homeScope !== undefined && c.accessor === 'explorers') ||
+      (homeScope !== undefined && c.accessor === 'org') ||
+      (homeScope !== undefined && c.accessor === 'run_by_you')
     )
   }
 
@@ -270,7 +269,7 @@ export const AppsListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={[scope]}
+        shouldResetFilters={[homeScope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no apps here.</EmptyTable>}

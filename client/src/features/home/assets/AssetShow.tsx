@@ -23,7 +23,7 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { EmmitScope, ResourceScope } from '../types'
+import { EmmitScope, HomeScope } from '../types'
 import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
 import { IAsset } from './assets.types'
@@ -33,14 +33,14 @@ import { FileIcon } from '../../../components/icons/FileIcon'
 import { Filler } from '../../../components/Page/styles'
 
 const AssetActions = ({
-  scope,
+  homeScope,
   asset,
 }: {
-  scope?: ResourceScope
+  scope?: HomeScope
   asset: IAsset
 }) => {
   const actions = useAssetActions({
-    scope,
+    homeScope,
     selectedItems: [asset],
     resourceKeys: ['asset', asset.uid],
   })
@@ -67,7 +67,7 @@ const AssetActions = ({
   )
 }
 
-export const AssetShow = ({ emitScope, scope }: { scope?: ResourceScope, emitScope?: EmmitScope }) => {
+export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
 
   const { data, status } = useQuery({
@@ -114,7 +114,7 @@ export const AssetShow = ({ emitScope, scope }: { scope?: ResourceScope, emitSco
     },
   ] as ITab[]
 
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
 
   return (
     <>
@@ -140,7 +140,7 @@ export const AssetShow = ({ emitScope, scope }: { scope?: ResourceScope, emitSco
             )}
           </HeaderLeft>
           <div>
-            <AssetActions scope={scope} asset={asset} />
+            <AssetActions scope={homeScope} asset={asset} />
           </div>
         </Header>
 
@@ -155,7 +155,7 @@ export const AssetShow = ({ emitScope, scope }: { scope?: ResourceScope, emitSco
                   </Link>
                 ) : (
                   <Link to={`/home/assets${scopeParamLink}`}>
-                    {scope === 'featured' ? 'Featured' : asset.location}
+                    {homeScope === 'featured' ? 'Featured' : asset.location}
                   </Link>
                 )}
               </MetadataVal>
