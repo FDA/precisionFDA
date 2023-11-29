@@ -1,6 +1,6 @@
 import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
-import { IFilter, ResourceScope, ServerScope, SortBy } from './types'
+import { IFilter, HomeScope, ServerScope, SortBy } from './types'
 
 // Only return the objects with keys from the pick array
 export function pickActions<T>(actions: T, pick: string[]) {
@@ -45,9 +45,9 @@ const customKeyMappings = {
 const renameOrderByKeys = (key?: string) => key && key in customKeyMappings ?
   customKeyMappings[key as keyof typeof customKeyMappings] : key
 
-export type Params = { folderId?: string, spaceId?: string, scope?: ResourceScope, page?: string, perPage?: number, sortBy?: SortBy }
+export type Params = { folderId?: string, spaceId?: string, scope?: HomeScope, page?: string, perPage?: number, sortBy?: SortBy }
 
-export function formatScopeQ(scope?: ResourceScope) {
+export function formatScopeQ(scope?: HomeScope) {
   let scopeQ = ''
   if(scope) {
     scopeQ = scope === 'me' ? '' : scope

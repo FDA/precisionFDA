@@ -8,7 +8,7 @@ describe('My Home / Apps', () => {
     history.replace('/home/apps')
     render(
       <Route path="/home/apps">
-        <AppList scope="me" />
+        <AppList homeScope="me" />
       </Route>,
     )
     await waitFor(() => {

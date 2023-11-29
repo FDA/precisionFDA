@@ -64,6 +64,7 @@ import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPag
 import { RunJobPage } from '../../home/apps/run/RunJobPage'
 import { EditAppPage } from '../../home/apps/form/EditAppPage'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
+import { ForkAppPage } from '../../home/apps/form/ForkAppPage'
 
 const Spaces2 = ({
   space,
@@ -260,6 +261,9 @@ const Spaces2 = ({
               <Route path={`/spaces/${space.id}/apps/:appUid/edit`}>
                 <EditAppPage spaceId={space.id} />
               </Route>
+              <Route path={`/spaces/${space.id}/apps/:appUid/fork`}>
+                <ForkAppPage spaceId={space.id} />
+              </Route>
               <Route path={`/spaces/${space.id}/apps/:appUid`}>
                 <AppsShow spaceId={space.id} />
               </Route>
@@ -267,7 +271,7 @@ const Spaces2 = ({
                 <WorkflowList spaceId={space.id} />
               </Route>
               <Route path={`/spaces/${space.id}/workflows/:workflowUid`}>
-                <WorkflowShow />
+                <WorkflowShow spaceId={space.id} />
               </Route>
               <Route exact path={`/spaces/${space.id}/executions`}>
                 <ExecutionList spaceId={space.id} />

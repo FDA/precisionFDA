@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import { ResourceScope } from './types'
+import { HomeScope } from './types'
 
-export const useEmmitScope = (scope: ResourceScope, setterFn?: (scope: ResourceScope) => void) => {
+export const useEmmitScope = (homeScope: HomeScope, setterFn?: (homeScope: HomeScope) => void) => {
   useEffect(() => {
     if (setterFn) {
-      setterFn(scope)
+      setterFn(homeScope)
     }
-  }, [scope, setterFn])
+  }, [homeScope, setterFn])
 }

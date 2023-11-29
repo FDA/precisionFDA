@@ -19,7 +19,7 @@ import {
   StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, HomeScope } from '../types'
 import { useList } from '../useList'
 import { usePropertiesQuery } from '../usePropertiesQuery'
 import { useWorkflowColumns } from './useWorkflowColumns'
@@ -31,10 +31,10 @@ import { IWorkflow } from './workflows.types'
 type ListType = { workflows: IWorkflow[]; meta: IMeta }
 
 export const WorkflowList = ({
-  scope,
+  homeScope,
   spaceId,
 }: {
-  scope?: ResourceScope
+  homeScope?: HomeScope
   spaceId?: string
 }) => {
   const history = useHistory()
@@ -63,18 +63,18 @@ export const WorkflowList = ({
     resource: 'workflows',
     params: {
       spaceId: spaceId || undefined,
-      scope: scope || undefined,
+      scope: homeScope || undefined,
     },
   })
   const { status, data, error } = query
-  const { data: propetiesData } = usePropertiesQuery('workflowSeries', scope, spaceId)
+  const { data: propetiesData } = usePropertiesQuery('workflowSeries', homeScope, spaceId)
 
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
     data?.workflows,
   )
   const actions = useWorkflowSelectActions({
-    scope,
+    homeScope,
     spaceId,
     selectedItems: selectedObjects,
     resourceKeys: ['workflows'],
@@ -82,7 +82,7 @@ export const WorkflowList = ({
   })
   const listActions = useWorkflowListActions({ spaceId })
   const message =
-    scope === 'spaces' &&
+    homeScope === 'spaces' &&
     'To perform other actions on this workflow, access it from the Space'
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
@@ -92,7 +92,7 @@ export const WorkflowList = ({
       <div>
         <ActionsRow>
           <QuickActions>
-            {scope === 'me' && (
+            {homeScope === 'me' && (
               <ButtonSolidBlue
                 data-testid="home-workflows-create-link"
                 as="a"
@@ -133,7 +133,7 @@ export const WorkflowList = ({
 
       <WorkflowListTable
         isAdmin={isAdmin}
-        scope={scope}
+        homeScope={homeScope}
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
@@ -189,7 +189,7 @@ export const WorkflowListTable = ({
   setSelectedRows,
   sortBy,
   setSortBy,
-  scope,
+  homeScope,
   saveColumnResizeWidth,
   colWidths,
   hiddenColumns,
@@ -206,7 +206,7 @@ export const WorkflowListTable = ({
   sortBy: SortingRule<string>[]
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  scope?: ResourceScope
+  homeScope?: HomeScope
   colWidths: KeyVal
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
@@ -219,14 +219,14 @@ export const WorkflowListTable = ({
   function filterColsByScope(c: Column<IWorkflow>): boolean {
     // Check if any of the conditions is true, then hide the column
     return !(
-      // If the scope is 'me', hide 'added_by' regardless of other conditions.
-      (scope === 'me' && c.accessor === 'added_by') ||
+      // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
+      (homeScope === 'me' && c.accessor === 'added_by') ||
       
-      // Hide 'location' for all scopes except 'spaces'.
-      (scope !== 'spaces' && c.accessor === 'location') ||
+      // Hide 'location' for all homeScopes except 'spaces'.
+      (homeScope !== 'spaces' && c.accessor === 'location') ||
       
-      // Hide 'featured' for all scopes except 'everybody'.
-      (scope !== 'everybody' && c.accessor === 'featured')
+      // Hide 'featured' for all homeScopes except 'everybody'.
+      (homeScope !== 'everybody' && c.accessor === 'featured')
     )
   }
 
@@ -257,7 +257,7 @@ export const WorkflowListTable = ({
         sortByPreference={sortBy}
         setSortByPreference={setSortBy}
         manualFilters
-        shouldResetFilters={[scope]}
+        shouldResetFilters={[homeScope]}
         filters={filters}
         setFilters={setFilters}
         emptyComponent={<EmptyTable>You have no workflows here.</EmptyTable>}
