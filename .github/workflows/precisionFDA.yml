@@ -171,7 +171,9 @@ jobs:
         with:
           bundler-cache: true
           cache-version: 1
-
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/setup-node@v3
         with:
           node-version: '18.9.1'
@@ -182,11 +184,8 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            ./https-apps-api/node_modules
-            ./https-apps-api/packages/api/node_modules
-            ./https-apps-api/packages/worker/node_modules
-            ./https-apps-api/packages/shared/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('./https-apps-api/yarn.lock') }}
+            ./server/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('./server/pnpm-lock.yaml') }}
 
       - name: Prepare env & db
         env:
@@ -200,17 +199,17 @@ jobs:
           bundle exec rake user:generate_test_users
       - name: Install Deps
         run: make install
-        working-directory: ./https-apps-api
+        working-directory: ./server
       - name: Test
         run: |
           make test-shared
           make test-worker
           make test-api
-        working-directory: ./https-apps-api
+        working-directory: ./server
 
       - name: Test production build
-        run: yarn workspaces run build
-        working-directory: ./https-apps-api
+        run: pnpm run build
+        working-directory: ./server
 
   test-react-app:
     name: Test React app

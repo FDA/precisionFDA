@@ -4,7 +4,7 @@
 repo-env-files-init:
 	echo Setting up .env files
 	cp -n docker/.env.example docker/.env || echo Skipping docker .env
-	cp -n https-apps-api/.env.example https-apps-api/.env || echo Skipping https-apps-api .env
+	cp -n server/.env.example server/.env || echo Skipping server .env
 	cp -n .env.example .env || echo Skipping root directory .env
 
 repo-db-config-init:
@@ -28,12 +28,12 @@ repo-init: repo-db-config-init repo-env-files-init repo-githooks-init
 check-missing-env-variables:
 	./utils/scripts/check-missing-env-variables.sh .env .env.example
 	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-missing-env-variables.sh https-apps-api/.env https-apps-api/.env.example
+	./utils/scripts/check-missing-env-variables.sh server/.env server/.env.example
 
 check-unpublished-env-variables:
 	./utils/scripts/check-unpublished-env-variables.sh .env .env.example
 	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-unpublished-env-variables.sh https-apps-api/.env https-apps-api/.env.example
+	./utils/scripts/check-unpublished-env-variables.sh server/.env server/.env.example
 
 
 # ┌───────────────────────┐

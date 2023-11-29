@@ -25,7 +25,7 @@ services:
       - type: volume
         source: webpack-cache-client
         target: /precision-fda/.build_cache/
-    command: yarn watch:docker
+    command: pnpm run watch:docker
   nodejs-api:
     extends:
       file: ./base.services.yml
