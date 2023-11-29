@@ -1,17 +1,17 @@
 import { useCloudResourcesCondition } from '../../../hooks/useCloudResourcesCondition'
-import { ActionFunctionsType, ResourceScope } from '../types'
+import { ActionFunctionsType, HomeScope } from '../types'
 import { useAddFolderModal } from './actionModals/useAddFolderModal'
 import { useCopyFilesToSpaceModal } from './actionModals/useCopyFilesToSpaceModal'
 import { useFileUploadModal } from './actionModals/useFileUploadModal'
 import { useOptionAddFileModal } from './actionModals/useOptionAddFileModal'
 import { FolderActions } from './files.types'
 
-export const useFolderActions = (scope?: ResourceScope, folderId?: string, spaceId?: string) => {
+export const useFolderActions = (homeScope?: HomeScope, folderId?: string, spaceId?: string) => {
   const { isAllowed, onViolation } = useCloudResourcesCondition('totalLimitCheck')
   const { modalComp: AddFolderModal, setShowModal: setShowAddFolderModal } =
-    useAddFolderModal({ scope, folderId, spaceId, isAllowed, onViolation })
+    useAddFolderModal({ homeScope, folderId, spaceId, isAllowed, onViolation })
   const { modalComp: FileUploadModal, setShowModal: setShowFileUploadModal } =
-    useFileUploadModal({ scope, folderId, spaceId, isAllowed, onViolation })
+    useFileUploadModal({ homeScope, folderId, spaceId, isAllowed, onViolation })
   const { modalComp: CopyFilesModal, setShowModal: setShowCopyFilesModal } =
     useCopyFilesToSpaceModal({ spaceId })
   const {
