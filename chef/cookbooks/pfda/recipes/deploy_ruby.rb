@@ -118,8 +118,8 @@ execute "Bundle frontend" do
   only_if { File.directory?(frontend_dir) }
 
   command %{
-    yarn --frozen-lockfile --production=false && \
-    yarn run build:production
+    pnpm i --frozen-lockfile --prod=false && \
+    pnpm run build:production
   }
 
   cwd frontend_dir

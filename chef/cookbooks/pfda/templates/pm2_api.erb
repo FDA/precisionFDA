@@ -2,7 +2,8 @@
   "apps": [
     {
       name: "https_apps_api",
-      script: "./packages/api/dist/index.js",
+			script: "npm",
+			args: "run start:prod:api",
       instances: 1,
       exec_mode: "fork",
       watch: false,

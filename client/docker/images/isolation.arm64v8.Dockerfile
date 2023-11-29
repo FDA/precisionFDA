@@ -4,11 +4,12 @@ ARG FRONTEND_IMAGE_TAG
 FROM amd64/node:${FRONTEND_IMAGE_TAG}
 
 WORKDIR /precision-fda
+RUN npm i -g pnpm
 COPY package.json \
-    yarn.lock \
+    pnpm-lock.yaml \
     /precision-fda/
 
-RUN yarn --frozen-lockfile
+RUN pnpm i --frozen-lockfile
 
 COPY webpack.fragment.base.js \
     webpack.fragment.swc.js \
@@ -17,4 +18,4 @@ COPY webpack.fragment.base.js \
     tsconfig.json \
     /precision-fda/
 COPY src/ /precision-fda/src/
-CMD [ "yarn watch:docker" ]
+CMD [ "pnpm run watch:docker" ]
