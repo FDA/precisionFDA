@@ -247,10 +247,10 @@ const Home2 = () => {
         <Main>
           <Switch>
             <Route exact path={`${path}/files`}>
-              <FileList homeScope={homeScopeQuery} showFolderActions={(persistedHomeScope === 'everybody' && user.admin) || persistedHomeScope === 'me'} />
+              <FileList homeScope={persistedHomeScope} showFolderActions={(persistedHomeScope === 'everybody' && user.admin) || persistedHomeScope === 'me'} />
             </Route>
             <Route exact path={`${path}/apps`}>
-              <AppList homeScope={homeScopeQuery} />
+              <AppList homeScope={persistedHomeScope} />
             </Route>
             <Route exact path={`${path}/apps/create`}>
               <CreateAppPage />
@@ -268,7 +268,7 @@ const Home2 = () => {
               <AppsShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route exact path={`${path}/databases`}>
-              <DatabaseList homeScope={homeScopeQuery} />
+              <DatabaseList homeScope={persistedHomeScope} />
             </Route>
             <Route exact path={`${path}/databases/create`}>
               <CreateDatabase />
@@ -278,13 +278,13 @@ const Home2 = () => {
             </Route>
 
             <Route exact path={`${path}/assets`}>
-              <AssetList homeScope={homeScopeQuery} />
+              <AssetList homeScope={persistedHomeScope} />
             </Route>
             <Route exact path={`${path}/assets/:assetUid`}>
               <AssetShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route exact path={`${path}/workflows`}>
-              <WorkflowList homeScope={homeScopeQuery} />
+              <WorkflowList homeScope={persistedHomeScope} />
             </Route>
             <Route path={`${path}/workflows/:workflowUid`}>
               <WorkflowShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
@@ -293,7 +293,7 @@ const Home2 = () => {
               <FileShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />
             </Route>
             <Route exact path={`${path}/executions`}>
-              <ExecutionList homeScope={homeScopeQuery} />
+              <ExecutionList homeScope={persistedHomeScope} />
             </Route>
             <Route path={`${path}/executions/:executionUid`}>
               <ExecutionDetails homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />

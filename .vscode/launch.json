@@ -2,25 +2,25 @@
     "version": "0.2.0",
     "configurations": [
         // To run nodejs tests, make sure you install all the depdendencies:
-        // precision-fda $ cd https-apps-api && yarn
+        // precision-fda $ cd server && pnpm install
         {
             "name": "nodejs-shared Tests",
-            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+            "program": "${workspaceRoot}/server/node_modules/.bin/mocha",
             "args": [
                 "--config",
-                "./packages/shared/.mocharc.js",
+                "./libs/shared/.mocharc.js",
                 // "-u",
                 // "tdd",
                 "--timeout",
                 "999999",
                 "--recursive",
                 "--colors",
-                "${workspaceFolder}/https-apps-api/packages/shared/test/**/*.spec.ts",
+                "${workspaceFolder}/server/libs/shared/test/**/*.spec.ts",
                 // Uncomment the following to run only specific tests
                 // "--grep",
                 // "<PATTERN>",
             ],
-            "cwd": "${workspaceFolder}/https-apps-api",
+            "cwd": "${workspaceFolder}/server",
             "env": {
                 "NODE_ENV": "test",
             },
@@ -35,22 +35,22 @@
         // To run nodejs-api tests, stop your nodejs-api docker container
         {
             "name": "nodejs-api Tests",
-            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+            "program": "${workspaceRoot}/server/node_modules/.bin/mocha",
             "args": [
                 "--config",
-                "./packages/api/.mocharc.js",
+                "./apps/api/.mocharc.js",
                 // "-u",
                 // "tdd",
                 "--timeout",
                 "999999",
                 "--recursive",
                 "--colors",
-                "${workspaceFolder}/https-apps-api/packages/api/test/**/*.spec.ts",
+                "${workspaceFolder}/server/apps/api/test/**/*.spec.ts",
                 // Uncomment the following to run only specific tests
                 // "--grep",
                 // "<PATTERN>",
             ],
-            "cwd": "${workspaceFolder}/https-apps-api",
+            "cwd": "${workspaceFolder}/server",
             "env": {
                 "NODE_ENV": "test",
             },
@@ -64,22 +64,22 @@
         },
         {
             "name": "nodejs-worker Tests",
-            "program": "${workspaceRoot}/https-apps-api/node_modules/.bin/mocha",
+            "program": "${workspaceRoot}/server/node_modules/.bin/mocha",
             "args": [
                 "--config",
-                "./packages/worker/.mocharc.js",
+                "./apps/worker/.mocharc.js",
                 // "-u",
                 // "tdd",
                 "--timeout",
                 "999999",
                 "--recursive",
                 "--colors",
-                "${workspaceFolder}/https-apps-api/packages/worker/test/**/*.spec.ts",
+                "${workspaceFolder}/server/apps/worker/test/**/*.spec.ts",
                 // Uncomment the following to run only specific tests
                 // "--grep",
                 // "<PATTERN>",
             ],
-            "cwd": "${workspaceFolder}/https-apps-api",
+            "cwd": "${workspaceFolder}/server",
             "env": {
                 "NODE_ENV": "test",
             },

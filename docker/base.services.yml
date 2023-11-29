@@ -16,7 +16,7 @@ services:
   base_nodejs:
     build:
       context: ../
-      dockerfile: ./https-apps-api/docker/images/node.isolated-qa.Dockerfile
+      dockerfile: ./server/docker/images/node.isolated-qa.Dockerfile
       args:
         - NODEJS_IMAGE_TAG=18.9.1
     environment:
@@ -50,7 +50,7 @@ services:
         source: ../app/assets/packs
         target: /precision-fda/dist
     working_dir: /precision-fda
-    command: yarn watch:docker
+    command: pnpm run watch:docker
   # TODO(samuel) setup correct NODE_ENV here
   nodejs-api:
     extends:
