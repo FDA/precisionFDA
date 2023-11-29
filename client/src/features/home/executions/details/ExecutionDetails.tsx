@@ -29,7 +29,7 @@ import {
   Title,
   Topbox,
 } from '../../show.styles'
-import { EmmitScope, NOTIFICATION_ACTION, Notification, ResourceScope } from '../../types'
+import { EmmitScope, NOTIFICATION_ACTION, Notification, HomeScope } from '../../types'
 import { getBasePath } from '../../utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { InputsAndOutputs } from '../InputsAndOutputs'
@@ -45,11 +45,11 @@ const ExecutionState = ({ state }: { state: JobState }) => (
 export const ExecutionDetails = ({
   emitScope,
   spaceId,
-  scope,
+  homeScope,
 }: {
   emitScope?: EmmitScope
   spaceId?: string
-  scope?: ResourceScope
+  homeScope?: HomeScope
 }) => {
   const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
@@ -114,11 +114,11 @@ export const ExecutionDetails = ({
     },
   ] satisfies ITab[]
 
-  const scopeParamLink = `?scope=${scope?.toLowerCase()}`
+  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'executions', scope)}>
+      <StyledBackLink linkTo={getBackPath(location, 'executions', homeScope)}>
         Back to Executions
       </StyledBackLink>
       <Topbox>
@@ -147,7 +147,7 @@ export const ExecutionDetails = ({
           <HeaderRight>
             <ActionsRow>
               <ExecutionActionsRow
-                scope={scope}
+                homeScope={homeScope}
                 execution={execution}
                 refetch={refetch}
                 isFetching={isFetching}
@@ -175,7 +175,7 @@ export const ExecutionDetails = ({
                   </a>
                 ) : (
                   <Link to={`/home/executions${scopeParamLink}`}>
-                    {scope === 'featured' ? 'Featured' : execution.location}
+                    {homeScope === 'featured' ? 'Featured' : execution.location}
                   </Link>
                 )}
               </MetadataVal>

@@ -5,7 +5,7 @@ import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
-import { ActionFunctionsType, ResourceScope } from '../types'
+import { ActionFunctionsType, HomeScope } from '../types'
 import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
@@ -28,7 +28,7 @@ export enum ExecutionAction {
   'Edit properties' = 'Edit properties',
 }
 
-export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { scope?: ResourceScope, selectedItems: IExecution[], resourceKeys: string[]}) => {
+export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: { homeScope?: HomeScope, selectedItems: IExecution[], resourceKeys: string[]}) => {
   const queryClient = useQueryClient()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
@@ -133,13 +133,13 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody',
+      shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     'Unfeature': {
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || scope !== 'everybody' && scope !== 'featured',
+      shouldHide: !isAdmin || homeScope !== 'everybody' && homeScope !== 'featured',
     },
     'Make Public': {
       type: 'link',
@@ -187,7 +187,7 @@ export const useExecutionActions = ({ scope, selectedItems, resourceKeys }: { sc
     },
   }
 
-  if(scope === 'spaces') {
+  if(homeScope === 'spaces') {
     if (isJobOwner) {
       actions = omit([
         'Make Public',

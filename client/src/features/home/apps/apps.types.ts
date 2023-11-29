@@ -1,5 +1,5 @@
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
-import { ResourceScope, ServerScope } from '../types'
+import { HomeScope, ServerScope } from '../types'
 import { CreateAppPayload } from './apps.api'
 import { IFile } from '../files/files.types'
 import { IAccessibleFile } from '../databases/databases.api'
@@ -92,7 +92,7 @@ export interface IApp {
   created_at: string;
   created_at_date_time: string;
   updated_at: Date;
-  location: ResourceScope | 'Private';
+  location: HomeScope | 'Private';
   readme: string;
   revision: number;
   latest_revision: boolean;

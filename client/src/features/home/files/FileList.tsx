@@ -28,7 +28,7 @@ import {
   StyledHomeTable,
 } from '../home.styles'
 import { ActionsButton } from '../show.styles'
-import { IFilter, IMeta, KeyVal, MetaPath, Notification, ResourceScope } from '../types'
+import { IFilter, IMeta, KeyVal, MetaPath, Notification, HomeScope } from '../types'
 import { useList } from '../useList'
 import { usePropertiesQuery } from '../usePropertiesQuery'
 import { fetchFiles } from './files.api'
@@ -39,7 +39,7 @@ import { useFolderActions } from './useFolderActions'
 
 type ListType = { files: IFile[]; meta: IMeta }
 
-export const FileList = ({ scope, space, showFolderActions = false }: { scope?: ResourceScope, space?: ISpace, showFolderActions?: boolean }) => {
+export const FileList = ({ homeScope, space, showFolderActions = false }: { homeScope?: HomeScope, space?: ISpace, showFolderActions?: boolean }) => {
   const { path } = useRouteMatch()
   const location = useLocation()
   const queryCache = useQueryClient()
@@ -74,7 +74,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     params: {
       folderId: folderIdParam || undefined,
       spaceId: space?.id || undefined,
-      scope: scope || undefined,
+      scope: homeScope || undefined,
     },
   })
 
@@ -98,14 +98,14 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
       queryCache.invalidateQueries(['counters'])
     }
   }, [notification])
-  const { data: propertiesData } = usePropertiesQuery('node', scope, space?.id)
+  const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id)
   const { status, data, error } = query
 
   const onFolderClick = (folderId: string) => {
     resetSelected()
     const search = new URLSearchParams(cleanObject({
       folder_id: folderId,
-      scope: scope as string,
+      scope: homeScope as string,
       per_page: perPageParam.toString(),
     })).toString()
     history.push({ search })
@@ -119,7 +119,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
       return
     }
     setFolderIdParam(undefined, 'pushIn')
-  }, [scope])
+  }, [homeScope])
 
   const files = data?.files || data?.entries
   const selectedObjects = getSelectedObjectsFromIndexes(
@@ -127,7 +127,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
     files,
   )
   const actions = useFilesSelectActions({
-    scope,
+    homeScope,
     space,
     folderId: folderIdParam,
     selectedItems: selectedObjects,
@@ -137,11 +137,11 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
 
   delete actions['Comments']
   delete actions['Request license approval']
-  if(scope) {
+  if(homeScope) {
     delete actions['Copy to My Home (private)']
   }
 
-  const listActions = useFolderActions(scope, folderIdParam!, space?.id)
+  const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
 
@@ -177,7 +177,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
               <ActionsDropdownContent
                 actions={actions}
                 message={
-                  scope === 'spaces' &&
+                  homeScope === 'spaces' &&
                   'To perform other actions on this file, access it from the Space'
                 }
               />
@@ -193,13 +193,13 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
           </Dropdown>
         </ActionsRow>
         <ActionsRow>
-          {breadcrumbs(path, data?.meta?.path, scope)}
+          {breadcrumbs(path, data?.meta?.path, homeScope)}
         </ActionsRow>
       </div>
 
       <FilesListTable
         isAdmin={isAdmin}
-        scope={scope}
+        homeScope={homeScope}
         isLoading={status === 'loading'}
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
@@ -213,7 +213,7 @@ export const FileList = ({ scope, space, showFolderActions = false }: { scope?: 
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
-        shouldResetFilters={[folderIdParam, scope]}
+        shouldResetFilters={[folderIdParam, homeScope]}
         hiddenColumns={hiddenColumns}
         saveHiddenColumns={saveHiddenColumns}
       />
@@ -263,7 +263,7 @@ const createSearchParam = (params: Record<string, any>) => {
   return paramQ
 }
 
-const breadcrumbs = (basePath: string, metaPath: MetaPath[] = [], scope?: ResourceScope) => (
+const breadcrumbs = (basePath: string, metaPath: MetaPath[] = [], scope?: HomeScope) => (
   <StyledBreadcrumbs>
     <BreadcrumbLabel>You are here:</BreadcrumbLabel>
     {[{ id: 0, name: 'Files', href: `${basePath}${createSearchParam({ scope })}` }]
@@ -297,7 +297,7 @@ export const FilesListTable = ({
   setSelectedRows,
   setSortBy,
   sortBy,
-  scope,
+  homeScope,
   saveColumnResizeWidth,
   colWidths,
   shouldResetFilters = [],
@@ -317,7 +317,7 @@ export const FilesListTable = ({
   setSelectedRows: (ids: Record<string, boolean>) => void
   sortBy?: SortingRule<string>[]
   setSortBy: (cols: SortingRule<string>[]) => void
-  scope?: ResourceScope
+  homeScope?: HomeScope
   colWidths: KeyVal
   saveColumnResizeWidth: (
     columnResizing: UseResizeColumnsState<any>['columnResizing'],
@@ -329,17 +329,17 @@ export const FilesListTable = ({
 
   function filterColsByScope(c: Column<IFile>): boolean {
     return !(
-      // If the scope is 'me', hide 'added_by' regardless of other conditions.
-      (scope === 'me' && c.accessor === 'added_by') ||
+      // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
+      (homeScope === 'me' && c.accessor === 'added_by') ||
       
-      // Hide 'location' for all scopes except 'spaces'.
-      (scope !== 'spaces' && c.accessor === 'location') ||
+      // Hide 'location' for all homeScopes except 'spaces'.
+      (homeScope !== 'spaces' && c.accessor === 'location') ||
       
-      // Hide 'featured' for all scopes except 'everybody'.
-      (scope !== 'everybody' && c.accessor === 'featured') ||
+      // Hide 'featured' for all homeScopes except 'everybody'.
+      (homeScope !== 'everybody' && c.accessor === 'featured') ||
       
-      // Hide 'state' if scope is defined to something specific.
-      (scope !== undefined && c.accessor === 'state')
+      // Hide 'state' if homeScope is defined to something specific.
+      (homeScope !== undefined && c.accessor === 'state')
     )
   }
 

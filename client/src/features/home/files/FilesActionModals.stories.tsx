@@ -30,7 +30,7 @@ type Story = StoryObj<Props>
 
 const AddFolderModalWrapper = () => {
   const { modalComp, setShowModal } = useAddFolderModal({
-    scope: undefined,
+    homeScope: undefined,
     folderId: '1',
     spaceId: '1',
     isAllowed: true,
@@ -47,7 +47,7 @@ export const AddFolderModal: Story = {
 
 const FileUploadModalWrapper = () => {
   const { modalComp, setShowModal } = useFileUploadModal({
-    scope: undefined,
+    homeScope: undefined,
     folderId: '1',
     spaceId: '1',
     isAllowed: true,
