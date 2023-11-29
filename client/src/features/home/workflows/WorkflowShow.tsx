@@ -41,6 +41,7 @@ import { fetchWorkflow } from './workflows.api'
 import { IWorkflow } from './workflows.types'
 import WorkflowsDiagram from './WorkflowsDiagram'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
+import { getBasePath } from '../utils'
 
 interface IColumn {
   header: string
@@ -162,7 +163,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
+export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: number, homeScope?: HomeScope, emitScope?: EmmitScope }) => {
   const match = useRouteMatch()
   const location: Location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
@@ -205,7 +206,7 @@ export const WorkflowShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
             <RevisionDropdown
               revisions={meta.revisions}
               selectedValue={workflow.revision}
-              linkToRevision={r => `/home/workflows/${r.uid}`}
+              linkToRevision={r => `${getBasePath(spaceId)}/workflows/${r.uid}`}
             />
           </HeaderLeft>
           <div>

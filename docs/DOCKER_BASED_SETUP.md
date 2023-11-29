@@ -69,7 +69,7 @@ to do most of the required setup at once
 
 This does multiple things
 
-* Sets up .env files in `.`, `./docker`, `./https-apps-api` directories
+* Sets up .env files in `.`, `./docker`, `./server` directories
 * Creates default database config in `config/database.sample.yml` 
 * Creates custom pre-push githooks that validate `.env.example` files
 
@@ -81,7 +81,7 @@ To get summary of all [Makefile](../Makefile) commands, take a look at [this doc
 ## Configuration differences for arm64v8.dev
 
 
-If you're running `make run` with `arm64v8.dev` configuration (i.e. `arm64v8` architecture and `PFDA_ROLE=dev`), it uses different key paths for `nodejs-api`. Edit `https-apps-api/.env` with following values
+If you're running `make run` with `arm64v8.dev` configuration (i.e. `arm64v8` architecture and `PFDA_ROLE=dev`), it uses different key paths for `nodejs-api`. Edit `server/.env` with following values
 
 ```
 NODE_PATH_CERT=/keys/cert.pem

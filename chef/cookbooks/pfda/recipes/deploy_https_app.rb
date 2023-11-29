@@ -1,7 +1,7 @@
 include_recipe('::configure_ssh')
 
 app_dir = node["rails_app_dir"]
-https_apps_dir = File.join(app_dir, "https-apps-api")
+https_apps_dir = File.join(app_dir, "server")
 
 directory app_dir do
   owner node[:deploy_user]
@@ -49,14 +49,14 @@ end
 
 execute "make install" do
   cwd https_apps_dir
-  command "yarn --frozen-lockfile --production=false"
+  command "pnpm install --frozen-lockfile --production=false"
   user node[:deploy_user]
   environment lazy { ENV.to_hash }
 end
 
 execute "make build" do
   cwd https_apps_dir
-  command "yarn workspaces run build"
+  command "pnpm run build"
   user node[:deploy_user]
   environment lazy { ENV.to_hash }
 end
