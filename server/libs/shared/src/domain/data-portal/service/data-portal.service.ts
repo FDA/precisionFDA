@@ -96,12 +96,6 @@ export class DataPortalService {
     const prismPortal: CustomPortal = { name: 'PRISM', id: PRISM_PORTAL_ID, spaceId: PRISM_SPACE_ID }
     const toolsPortal: CustomPortal = { name: 'Tools', id: TOOLS_PORTAL_ID, spaceId: TOOLS_SPACE_ID }
 
-    // site admin
-    if (await user.isSiteAdmin()) {
-      return [prismPortal, toolsPortal]
-    }
-
-    // regular users
     const accessiblePortals: CustomPortal[] = []
     if (await this.hasAccessToSpace(prismPortal.spaceId, userId)) {
       accessiblePortals.push(prismPortal)
