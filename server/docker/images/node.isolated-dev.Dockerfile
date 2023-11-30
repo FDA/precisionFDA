@@ -3,7 +3,7 @@ ARG NODEJS_IMAGE_TAG
 FROM node:${NODEJS_IMAGE_TAG}
 
 RUN apt-get update && \
-    apt-get install -y default-mysql-client
+    apt-get install -y build-essential libtool autoconf default-mysql-client
 
 WORKDIR /app
 
