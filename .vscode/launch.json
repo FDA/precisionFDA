@@ -29,7 +29,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v18.9.1/bin/node",
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v20.9.0/bin/node",
             "type": "node"
         },
         // To run nodejs-api tests, stop your nodejs-api docker container
@@ -59,7 +59,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v18.9.1/bin/node",
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v20.9.0/bin/node",
             "type": "node"
         },
         {
@@ -88,7 +88,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v18.9.1/bin/node",
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v20.9.0/bin/node",
             "type": "node"
         },
         // Debugging Go CLI

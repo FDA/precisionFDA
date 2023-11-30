@@ -40,8 +40,9 @@ export class JobRepository extends EntityRepository<Job> {
       $or: [
         { state: JOB_STATE.IDLE },
         { state: JOB_STATE.RUNNING },
+        { state: JOB_STATE.RUNNABLE },
         { state: JOB_STATE.TERMINATING },
-      ]
+      ],
     })
   }
 
@@ -50,8 +51,9 @@ export class JobRepository extends EntityRepository<Job> {
       $or: [
         { state: JOB_STATE.IDLE },
         { state: JOB_STATE.RUNNING },
+        { state: JOB_STATE.RUNNABLE },
         { state: JOB_STATE.TERMINATING },
-      ]
+      ],
     },
     {
       filters: {
