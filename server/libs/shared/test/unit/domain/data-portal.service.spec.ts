@@ -587,6 +587,19 @@ describe('data portal service tests', () => {
     return { PRISM_PORTAL_ID, PRISM_SPACE_ID, TOOLS_PORTAL_ID, TOOLS_SPACE_ID }
   }
 
+  const testPortalsForAdmin = async (userId: number) => {
+    const result = await dataPortalService.listAccessibleCustomPortals(userId)
+
+    expect(result.length).eq(0)
+  }
+
+  it('list custom portals - site admin role is irrelevant', async () => {
+    create.userHelper.addSiteAdminRole(em, user)
+    await em.flush()
+
+    await testPortalsForAdmin(user.id)
+  })
+
   it('list custom portals - accessible PRISM portal', async () => {
     const prismSpace = create.spacesHelper.create(em, { name: 'PRISM' })
     await em.flush()
