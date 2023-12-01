@@ -6,16 +6,15 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
+	"regexp"
 )
 
 var ConfigPath = filepath.Join(getUserHomeDir(), ".pfda_config")
 
 type jsonConfig struct {
-	Key    string `json:key`
-	Server string `json:server`
-	Scope  string `json:scope`
+	Key    string `json:"key"`
+	Server string `json:"server"`
+	Scope  string `json:"scope"`
 }
 
 func CreateConfig() *jsonConfig {
@@ -48,6 +47,7 @@ func SaveConfig(config *jsonConfig, jsonFlag bool) {
 	if err != nil && !jsonFlag {
 		fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", ConfigPath, err.Error())
 		fmt.Printf("You will need to submit authorization key in the command line in the next operation.\n")
+		// exit gracefully, without panic
 	}
 
 	// below is a more compact and cleaner implementation which is recommended when writing small files
@@ -56,7 +56,7 @@ func SaveConfig(config *jsonConfig, jsonFlag bool) {
 	// denote, that it also works on Windows ( checked on AWS EC2 windows instance )
 	// despite Linux style file permissions are given
 	// if .pfda_config exists it is truncated before writing
-	// denote also there is no need in defer f.Close(), since os.WriteFile closes the file immediately after writing it
+	// denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it
 	err = os.WriteFile(ConfigPath, jsonData, 0644) // 0644 is '-rw -r- -r-'
 	if err != nil && !jsonFlag {
 		fmt.Printf("Could not save authorization key in config file '%s': %s\n", ConfigPath, err.Error())
@@ -66,18 +66,14 @@ func SaveConfig(config *jsonConfig, jsonFlag bool) {
 }
 
 func (c *jsonConfig) GetSpaceId() string {
-	parts := strings.Split(c.Scope, "-")
-	// scope is private/public
-	if len(parts) != 2 {
+	re := regexp.MustCompile(`^space-(\d+)$`)
+	matches := re.FindStringSubmatch(c.Scope)
+	if len(matches) != 2 {
+		// scope is private/public
 		return ""
 	}
 	// only can be space-{id} now
-	_, err := strconv.Atoi(parts[1])
-	if (err) != nil {
-		fmt.Println("Error while parsing space-id", err)
-		return ""
-	}
-	return parts[1]
+	return matches[1]
 }
 
 func getUserHomeDir() string {

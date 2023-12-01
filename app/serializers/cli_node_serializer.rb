@@ -22,9 +22,6 @@ class CliNodeSerializer < ApplicationSerializer
   attribute :sti_type, key: :type
   attribute :scope_id, key: :scope
 
-  def file_size
-    number_to_human_size(object.file_size)
-  end
 
   def scope_id
     object.scope

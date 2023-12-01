@@ -31,7 +31,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.4.1 "
+const userAgent = "precisionFDA CLI/2.5.0"
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 67MB (min. 5MB)
 const minRoutines = 1
@@ -82,6 +82,7 @@ type PFDAClient struct {
 	MaxChunkSize    int
 	MaxFileSize     int
 	ContinueOnError bool
+	JsonResponse    bool
 
 	Client  *retryablehttp.Client
 	AuthKey string
@@ -184,7 +185,7 @@ type jsonFileResponse struct {
 	State     string `json:"state"`
 	AddedBy   string `json:"added_by"`
 	CreatedAt string `json:"created_at"`
-	Size      string `json:"file_size"`
+	Size      int64    `json:"file_size"`
 	// populated for Folders only
 	Children int `json:"children,omitempty"`
 }
@@ -261,11 +262,11 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	}
 
 	if assetSize > maxFileSize {
-		inputError(fmt.Sprintf("Size of asset folder '%s' (%d) exceeds maximum allowed file size(%d).", rootFolderPath, assetSize, maxFileSize))
+		return fmt.Errorf("Size of asset folder '%s' (%d) exceeds maximum allowed file size(%d)", rootFolderPath, assetSize, maxFileSize)
 	}
 
 	if assetSize == 0 {
-		inputError(fmt.Sprintf("Size of asset folder '%s' is 0. Uploading an empty asset is not allowed.", rootFolderPath))
+		return fmt.Errorf("Size of asset folder '%s' is 0 - uploading an empty asset is not allowed", rootFolderPath)
 	}
 
 	// Read in the readme all at once
@@ -291,8 +292,9 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	chunkPool := make(chan uploadChunk, c.NumRoutines)
 	wg := c.initWaitGroup(fileID, chunkPool, &assetSize, true)
 
-	fmt.Println(">> Archiving asset...")
-
+	if !c.JsonResponse {
+		fmt.Println(">> Archiving asset...")
+	}
 	// different approach for WinOS tar command
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("tar", "-cf", name, "-C", rootFolderPath, ".")
@@ -326,18 +328,16 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 		}
 		c.readAndChunk(stdout, chunkPool, &assetSize)
 	}
+	if !c.JsonResponse {
+		fmt.Print(">> Uploading asset |")
+	}
 
-	fmt.Print(">> Uploading asset |")
-	// no need to open the rootFolderPath, asset is read from stdout
-	// f, err := os.Open(rootFolderPath)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer f.Close()
 	close(chunkPool)
 	wg.Wait()
 
-	fmt.Println(">| Uploaded 100%\n>> Finalizing asset...")
+	if !c.JsonResponse {
+		fmt.Println(">| Uploaded 100%\n>> Finalizing asset...")
+	}
 	jsonData, err = json.Marshal(jsonID{
 		ID: fileID,
 	})
@@ -346,7 +346,14 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	}
 
 	c.makeRequestFail("POST", closeURL, jsonData)
-	fmt.Println(">> Done! Access your asset at " + c.BaseURL + "/home/assets/" + fileID)
+	assetURL := c.BaseURL + "/home/assets/" + fileID
+	if c.JsonResponse {
+		helpers.PrintResultAsJSON(struct {
+			Url string `json:"url"`
+		}{Url: assetURL})
+	} else {
+		fmt.Println(">> Done! Access your asset at " + assetURL)
+	}
 	return nil
 }
 
@@ -367,11 +374,11 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 
 	size := info.Size()
 	if size > maxFileSize {
-		return fmt.Errorf(">> Size of file '%s' (%d) exceeds maximum allowed file size(%d).", path, size, maxFileSize)
+		return fmt.Errorf("Size of file '%s' (%d) exceeds maximum allowed file size(%d)", path, size, maxFileSize)
 	}
 
 	if size == 0 {
-		return fmt.Errorf(">> Size of file '%s' is 0. Uploading an empty file is not allowed.", path)
+		return fmt.Errorf("Size of file '%s' is 0 - uploading an empty file is not allowed", path)
 	}
 
 	err = c.Upload(&*file, path, folderID, spaceID, size, withProgressBar)
@@ -379,6 +386,8 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 
 	return nil
 }
+
+
 
 func (c *PFDAClient) UploadStdin(fileName string, folderID string, spaceID string, withProgressBar bool) error {
 	// we do not know the size, stdin is buffered stream of data
@@ -394,12 +403,9 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 	createURL := c.BaseURL + "/api/create_file"
 	closeURL := c.BaseURL + "/api/close_file"
 
-	scope := ""
-	parentType := ""
-	parentId := ""
+	scope, parentType, parentId := "", "", ""
 	if spaceID != "" {
-		_, err := strconv.Atoi(spaceID)
-		if err != nil {
+		if _, err := strconv.Atoi(spaceID); err != nil {
 			return err
 		}
 		scope = "space-" + spaceID
@@ -430,7 +436,7 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 
 	chunkPool := make(chan uploadChunk, c.NumRoutines)
 
-	if withProgressBar {
+	if withProgressBar && !c.JsonResponse {
 		fmt.Printf(">> Uploading file %s\n", path)
 	}
 
@@ -440,7 +446,7 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 	close(chunkPool)
 	wg.Wait()
 
-	if withProgressBar {
+	if withProgressBar && !c.JsonResponse {
 		fmt.Println(">> Finalizing file...")
 	}
 
@@ -452,13 +458,21 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 	}
 
 	c.makeRequestFail("POST", closeURL, jsonData)
-	fmt.Println(">> Uploaded: ", path)
-	if withProgressBar {
-		if spaceID != "" {
-			fmt.Println(">> Done! Access your file at " + c.BaseURL + "/spaces/" + spaceID + "/files/" + fileID)
-		} else {
-			fmt.Println(">> Done! Access your file at " + c.BaseURL + "/home/files/" + fileID)
-		}
+	var finalUrl string
+	if spaceID != "" {
+		finalUrl = c.BaseURL + "/spaces/" + spaceID + "/files/" + fileID
+	} else {
+		finalUrl = c.BaseURL + "/home/files/" + fileID
+	}
+
+	if c.JsonResponse {
+		helpers.PrintResultAsJSON(struct {Url string `json:"url"`}{Url: finalUrl})
+	} else {
+		fmt.Println(">> Uploaded: ", path)
+	}
+
+	if withProgressBar && !c.JsonResponse {
+		fmt.Println(">> Done! Access your file at " + finalUrl)
 	}
 
 	return nil
@@ -470,7 +484,9 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 	p, _ := filepath.Split(folderPath)
 	folders[filepath.Clean(p)] = folderID
 
-	fmt.Println(">> Uploading content of:", folderPath)
+	if !c.JsonResponse {
+		fmt.Println(">> Uploading content of:", folderPath)
+	}
 
 	var fileList []string
 	err := filepath.Walk(folderPath, func(currentPath string, f os.FileInfo, err error) error {
@@ -502,7 +518,7 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 			parent, _ := filepath.Split(file)
 			err := c.UploadFile(file, folders[filepath.Dir(parent)], spaceID, false)
 			if err != nil {
-				fmt.Println(err)
+				helpers.PrintError(err, c.JsonResponse)
 			}
 			<-guard
 			wg.Done()
@@ -511,37 +527,45 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 	}
 	wg.Wait()
 
+	var finalUrl string
 	if spaceID != "" {
-		fmt.Println(">> Done! Access your files at " + c.BaseURL + "/spaces/" + spaceID + "/files?folder_id=" + folders[folderPath])
-
+		finalUrl = c.BaseURL + "/spaces/" + spaceID + "/files?folder_id=" + folders[folderPath]
 	} else {
-		fmt.Println(">> Done! Access your files at " + c.BaseURL + "/home/files?folder_id=" + folders[folderPath])
+		finalUrl = c.BaseURL + "/home/files?folder_id=" + folders[folderPath]
+	}
+
+	if c.JsonResponse {
+		helpers.PrintResultAsJSON(struct {
+			Url string `json:"url"`
+		}{Url: finalUrl})
+	} else {
+		fmt.Println(">> Done! Access your files at " + finalUrl)
 	}
 	return nil
 }
 
 func (c *PFDAClient) UploadMultipleFiles(paths []string, folderID string, spaceID string) error {
 
-	fmt.Printf(">> Uploading multiple files...\n")
+	if !c.JsonResponse {
+		fmt.Printf(">> Uploading multiple files...\n")
+	}
 
 	// this could be done in parallel - be careful to used memory otherwise will get terminated by kernel OOM-killer.
 	for _, path := range paths {
 		f, err := os.Stat(path)
 		if os.IsNotExist(err) {
-			fmt.Println(fmt.Sprintf("Input path '%s' does not exist - skipping.", path))
+			helpers.PrintError(fmt.Errorf("Input path '%s' does not exist - skipping", path), c.JsonResponse)
 			continue
 		}
 		path = filepath.Clean(path)
-		if f.IsDir() {
-			err = c.UploadFolder(path, folderID, spaceID)
-			if err != nil {
-				fmt.Println(err)
+		if err := func() error {
+			if f.IsDir() {
+				return c.UploadFolder(path, folderID, spaceID)
+			} else {
+				return c.UploadFile(path, folderID, spaceID, false)
 			}
-		} else {
-			err = c.UploadFile(path, folderID, spaceID, false)
-			if err != nil {
-				fmt.Println(err)
-			}
+		}(); err != nil {
+			helpers.PrintError(err, c.JsonResponse)
 		}
 	}
 
@@ -551,11 +575,13 @@ func (c *PFDAClient) UploadMultipleFiles(paths []string, folderID string, spaceI
 func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite string) error {
 
 	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, arg)
-	fmt.Println(">> Preparing to download")
+	if !c.JsonResponse {
+		fmt.Println(">> Preparing to download")
+	}
 	status, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
 		if status == "404 Not Found" {
-			return fmt.Errorf(">> %s not found. Please check that this file exists and you have access to it", arg)
+			return fmt.Errorf("%s not found. Please check that this file exists and you have access to it", arg)
 		} else {
 			return err
 		}
@@ -575,14 +601,14 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 	originalName := path.Base(fileURL)
 	fileName, err := url.PathUnescape(originalName)
 	if err != nil {
-		fmt.Printf("Error while unescaping file name, using the original name.")
 		fileName = originalName
 	}
-	fmt.Printf("   Downloading :  %s\n", fileName)
 
 	fileSize := resultJSON["file_size"].(float64)
-	fmt.Printf("     File Size :  %s\n", units.BytesSize(fileSize))
-
+	if !c.JsonResponse {
+		fmt.Printf("   Downloading :  %s\n", fileName)
+		fmt.Printf("     File Size :  %s\n", units.BytesSize(fileSize))
+	}
 	if outputFilePath == "" {
 		// If output is not specified, use the original filename and current working directory
 		dir, err := os.Getwd()
@@ -606,30 +632,33 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 
 		} else if _, err := os.Stat(filepath.Dir(outputFilePath)); err != nil {
 			// This is now assumed to be a file path and not a dir path, and the parent directory does not exist
-			return fmt.Errorf("Error: The parent directory %s of the specified output doesn't exist", filepath.Dir(outputFilePath))
+			return fmt.Errorf("The parent directory %s of the specified output doesn't exist", filepath.Dir(outputFilePath))
 		}
 	}
 	// After the above block, outputFilePath should contain the target file path and cannot be a directory
-
 	if _, err := os.Stat(outputFilePath); err == nil && overwrite == "" {
 		fmt.Printf(">> File %s already exists\n", outputFilePath)
 		dialogOverwrite := yesNo("  Overwrite already existing path? ")
 		if !dialogOverwrite {
-			return fmt.Errorf(">> Download cancelled")
+			return fmt.Errorf("Download cancelled")
 		}
 	} else if err == nil && overwrite == "false" {
-		return fmt.Errorf(">> Error: path %s already exists but -overwrite flag not set to true. Skipping download.\n", outputFilePath)
+		return fmt.Errorf("Path %s already exists but -overwrite flag not set to true - skipping download", outputFilePath)
 	}
 
-	fmt.Printf(">> Output File :  %s\n", outputFilePath)
-
-	withProgressBar := true
+	if !c.JsonResponse {
+		fmt.Printf(">> Output File :  %s\n", outputFilePath)
+	}
+	withProgressBar := !c.JsonResponse
 	err = Download(fileURL, outputFilePath, int64(fileSize), withProgressBar)
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf(">> Done!\n\n")
+	if c.JsonResponse {
+		helpers.PrintResult(outputFilePath, true)
+	} else {
+		fmt.Printf(">> Done!\n\n")
+	}
 	return nil
 }
 
@@ -678,8 +707,7 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 		}
 
 		var children jsonListingResponse
-		err = json.Unmarshal(body, &children)
-		if err != nil {
+		if err := json.Unmarshal(body, &children); err != nil {
 			return err
 		}
 
@@ -702,7 +730,7 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 			selected := pickFile(children.Files, "Multiple files found matching the given name, select which to download")
 			fileIDs = append(fileIDs, selected)
 		} else if !recursive {
-			fmt.Println(fmt.Errorf(">> No files found matching: %s - please check it does exist and you have access to it", fileName))
+			helpers.PrintError(fmt.Errorf("No files found matching: %s - please check it does exist and you have access to it", fileName), c.JsonResponse)
 		}
 	}
 
@@ -721,7 +749,7 @@ func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
 	status, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
 		if status == "404 Not Found" {
-			return fmt.Errorf(">> %s not found - please check that it does exist and you have access to it", entityID)
+			return fmt.Errorf("%s not found - please check that it does exist and you have access to it", entityID)
 		} else {
 			return err
 		}
@@ -744,7 +772,7 @@ func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
 }
 
 func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/spaces/cli?", c.BaseURL)
+	apiURL := fmt.Sprintf("%s/api/spaces/cli", c.BaseURL)
 
 	params := url.Values{}
 	for flag, value := range flags {
@@ -752,46 +780,36 @@ func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
 			params.Add(flag, strconv.FormatBool(value))
 		}
 	}
-
-	status, body, err := c.makeRequestFail("GET", apiURL+params.Encode(), nil)
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	status, body, err := c.makeRequestFail("GET", fullURL, nil)
 	if err != nil {
 		if status == "404 Not Found" {
-			return fmt.Errorf(">> Something went wrong")
+			return fmt.Errorf("Something went wrong")
 		} else {
 			return err
 		}
 	}
 
 	var spaces []jsonSpaceResponse
-	err = json.Unmarshal(body, &spaces)
-	if err != nil {
+	if err := json.Unmarshal(body, &spaces); err != nil {
 		return err
 	}
 
-	printListSpacesResponse(spaces, flags)
-
+	printListSpacesResponse(spaces, flags["json"])
 	return nil
 }
 
 func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/files/cli?", c.BaseURL)
+	apiURL := fmt.Sprintf("%s/api/files/cli", c.BaseURL)
 
 	params := url.Values{}
 
-	if spaceID != "" {
-		_, err := strconv.Atoi(spaceID)
-		if err != nil {
-			return fmt.Errorf(">> invalid space ID - expected an integer")
-		}
-		params.Add("space_id", spaceID)
+	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
+		return err
 	}
 
-	if folderID != "" {
-		_, err := strconv.Atoi(folderID)
-		if err != nil {
-			return fmt.Errorf(">> invalid folder ID - expected an integer")
-		}
-		params.Add("folder_id", folderID)
+	if err := helpers.ValidateID(folderID, "folder_id", params); err != nil {
+		return err
 	}
 
 	for flag, value := range flags {
@@ -800,22 +818,21 @@ func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) 
 		}
 	}
 
-	status, body, err := c.makeRequestFail("GET", apiURL+params.Encode(), nil)
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	status, body, err := c.makeRequestFail("GET", fullURL, nil)
 	if err != nil {
 		if status == "404 Not Found" {
-			return fmt.Errorf(">> Target location not found or inaccessible")
-		} else {
-			return err
+			return fmt.Errorf("Target location not found or inaccessible")
 		}
-	}
-
-	var response jsonListingResponse
-	err = json.Unmarshal(body, &response)
-	if err != nil {
 		return err
 	}
 
-	printListingResponse(response, flags)
+	var response jsonListingResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return err
+	}
+
+	printListingResponse(response, flags["json"], flags["brief"])
 	return nil
 }
 
@@ -825,17 +842,26 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 
 	if parents {
 		for _, dir := range dirs {
-			parts := strings.Split(dir, string(os.PathSeparator))
+			parts := strings.Split(strings.TrimSuffix(dir, string(os.PathSeparator)), string(os.PathSeparator))
 			parentId := folderID
 			// created nested folders.
 			for _, folder := range parts {
 				id, err := c.createNewFolder(folder, parentId, spaceID)
 				if err == nil {
-					fmt.Printf(">> Created folder %s (id: %s) \n", folder, id)
+					if c.JsonResponse {
+						folderId, _ := strconv.Atoi(id)
+						helpers.PrintResultAsJSON(struct {
+							Name string `json:"name"`
+							ID   int    `json:"id"`
+						}{Name: folder, ID: folderId})
+					} else {
+						fmt.Printf("Created folder %s (id: %s) \n", folder, id)
+					}
 				}
 				parentId = id
 			}
 		}
+
 		return nil
 	}
 
@@ -843,7 +869,15 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 		id, err := c.createNewFolder(dir, folderID, spaceID)
 		c.HandleError(err)
 		if err == nil {
-			fmt.Printf(">> Created folder %s (id: %s) \n", dir, id)
+			if c.JsonResponse {
+				folderId, _ := strconv.Atoi(id)
+				helpers.PrintResultAsJSON(struct {
+					Name string `json:"name"`
+					ID   int    `json:"id"`
+				}{Name: dir, ID: folderId})
+			} else {
+				fmt.Printf("Created folder %s (id: %s) \n", dir, id)
+			}
 		}
 	}
 	return nil
@@ -855,7 +889,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 
 	for _, arg := range args {
 		if !helpers.IsFolderId(arg) {
-			c.HandleError(fmt.Errorf(">> Invalid folder id: %s - expected an integer", arg))
+			c.HandleError(fmt.Errorf("Invalid folder id: %s - expected an integer", arg))
 			continue
 		}
 
@@ -865,14 +899,13 @@ func (c *PFDAClient) Rmdir(args []string) error {
 		}
 		_, body, err := c.makeRequestFail("POST", c.BaseURL+"/api/files/cli_node_search", jsonData)
 		c.HandleError(err)
-		var response []jsonFileResponse
 
-		err = json.Unmarshal(body, &response)
-		if err != nil {
+		var response []jsonFileResponse
+		if err := json.Unmarshal(body, &response); err != nil {
 			return err
 		}
 		if len(response) == 0 {
-			c.HandleError(fmt.Errorf(">> Target folder not found or inaccessible"))
+			c.HandleError(fmt.Errorf("Target folder not found or inaccessible"))
 			continue
 		}
 
@@ -880,7 +913,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			err := c.RemoveDir(arg)
 			c.HandleError(err)
 		} else {
-			fmt.Println(">> Unable to remove non-empty folder.")
+			helpers.PrintError(fmt.Errorf("Unable to remove non-empty folder"), c.JsonResponse)
 		}
 	}
 
@@ -890,7 +923,6 @@ func (c *PFDAClient) Rmdir(args []string) error {
 func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 
 	c.ContinueOnError = len(args) > 1
-
 	for _, arg := range args {
 
 		if helpers.IsFileId(arg) {
@@ -936,13 +968,16 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 				// arg processed, continue to next
 				continue
 			}
-
-			fmt.Println(">> Delete aborted")
+			if c.JsonResponse {
+				helpers.PrintResult("delete aborted", true)
+			} else {
+				fmt.Println(">> Delete aborted")
+			}
 			// arg processed, continue to next
 			continue
 		}
 		if toBeDeletedCount == 0 {
-			fmt.Println(">> Target file not found or inaccessible")
+			helpers.PrintError(fmt.Errorf("Target file not found or inaccessible"), c.JsonResponse)
 			// arg processed, continue to next
 			continue
 		}
@@ -963,7 +998,7 @@ func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
 	status, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
 		if status == "404 Not Found" {
-			return "", fmt.Errorf("Something went wrong.")
+			return "", fmt.Errorf("Something went wrong")
 		} else {
 			return "", err
 		}
@@ -997,7 +1032,7 @@ func (c *PFDAClient) GetLatestVersion() (string, error) {
 
 func (c *PFDAClient) SetChunkSize(chunkSize int) {
 	if chunkSize > maxChunkSize || chunkSize < minChunkSize {
-		inputError("Chunk size must be between 5MB and 5GB.")
+		inputError("Chunk size must be between 5MB and 5GB")
 	} else {
 		c.ChunkSize = chunkSize
 	}
@@ -1005,7 +1040,7 @@ func (c *PFDAClient) SetChunkSize(chunkSize int) {
 
 func (c *PFDAClient) SetNumRoutines(numRoutines int) {
 	if numRoutines > maxRoutines || numRoutines < minRoutines {
-		inputError("Maximum number of threads must an integer within the range of [1-100].")
+		inputError("Maximum number of threads must an integer within the range of [1-100]")
 	} else {
 		c.NumRoutines = numRoutines
 	}
@@ -1017,7 +1052,7 @@ func (c *PFDAClient) createFileID(url string, data []byte) (string, error) {
 		if status == "404 Not Found" {
 			// 404 should only be returned if the specified spaceId is invalid
 			// For invalid folder-id, an error json is returned
-			return "", fmt.Errorf("Error uploading the file. Please check that the space-id is correct and that you have access to that Space.")
+			return "", fmt.Errorf("uploading file - Please check that the space-id is correct and that you have access to that Space")
 		} else {
 			return "", err
 		}
@@ -1055,14 +1090,13 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 	}
 
 	var resultJSON jsonCreateFolderResponse
-	err = json.Unmarshal(body, &resultJSON)
-	if err != nil {
+	if err := json.Unmarshal(body, &resultJSON); err != nil {
 		return "", err
 	}
 
 	newFolderID := strconv.Itoa(resultJSON.Id)
 	if resultJSON.Message.Type == "error" {
-		return newFolderID, fmt.Errorf(">> Unable to create folder: %s - already exists in target location", name)
+		return newFolderID, fmt.Errorf("unable to create folder: %s - already exists in target location", name)
 	}
 
 	return newFolderID, nil
@@ -1071,27 +1105,25 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 func (c *PFDAClient) Head(arg string, lines int) error {
 
 	if !helpers.IsFileId(arg) {
-		return fmt.Errorf(">> Invalid file-id provided: %s", arg)
+		return fmt.Errorf("invalid file-id provided: %s", arg)
 	}
 
 	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, arg)
 	status, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
 		if status == "404 Not Found" {
-			return fmt.Errorf(">> %s not found. Please check that this file exists and you have access to it", arg)
-		} else {
-			return err
+			return fmt.Errorf("%s not found. Please check that this file exists and you have access to it", arg)
 		}
+		return err
 	}
 
 	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
-	if err != nil {
+	if err := json.Unmarshal(body, &resultJSON); err != nil {
 		return err
 	}
 
 	if resultJSON["file_url"] == nil {
-		return fmt.Errorf("No file_url in response!\n\nResponse: %s", string(body))
+		return fmt.Errorf("no file_url in response!\n\nResponse: %s", string(body))
 	}
 	fileURL := resultJSON["file_url"].(string)
 
@@ -1100,7 +1132,7 @@ func (c *PFDAClient) Head(arg string, lines int) error {
 	if lines == -1 && fileSize > 10_000_000 {
 		agree := yesNo("The size of the file is over 10Mb - are you sure you want to display the whole content?")
 		if !agree {
-			return fmt.Errorf(">> Cat cancelled")
+			return fmt.Errorf("cat cancelled")
 		}
 	}
 
@@ -1124,7 +1156,7 @@ func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string,
 
 	downloaded := make(map[string]string)
 	for _, file := range resultJSON {
-		DownloadDirectly(file["url"].(string), outputFilePath, overwrite)
+		DownloadDirectly(file["url"].(string), outputFilePath, overwrite, c.JsonResponse)
 		downloaded[file["uid"].(string)] = ""
 	}
 
@@ -1132,7 +1164,11 @@ func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string,
 	for _, uid := range uidsChunk {
 		_, found := downloaded[uid]
 		if !found {
-			fmt.Println(fmt.Errorf(">> Unable to download: %s", uid))
+			if c.JsonResponse {
+				helpers.PrintError(fmt.Errorf("unable to download: %s", uid), c.JsonResponse)
+			} else {
+				fmt.Printf(">> Unable to download: %s\n", uid)
+			}
 		}
 	}
 
@@ -1143,7 +1179,9 @@ func (c *PFDAClient) parallelDownload(uids []string, outputFilePath string, over
 	if len(uids) == 0 {
 		return
 	}
-	fmt.Printf(">> Preparing to download: %d files \n", len(uids))
+	if !c.JsonResponse {
+		fmt.Printf(">> Preparing to download: %d files \n", len(uids))
+	}
 	var wg = sync.WaitGroup{}
 	maxGoroutines := 5 // do not exceed 10 - magical TCP issues with lost packages appears.
 	guard := make(chan struct{}, maxGoroutines)
@@ -1196,7 +1234,7 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 				atomic.AddUint64(&totalSent, uint64(len(chunk.data)))
 				currentSize := atomic.LoadUint64(&totalSent)
 				totalSize := atomic.LoadInt64(size)
-				if withProgressBar {
+				if withProgressBar && !c.JsonResponse {
 					fmt.Fprintf(writer, "     %.1f%% (%s / %s)\n",
 						100*float64(currentSize)/float64(totalSize), units.BytesSize(float64(currentSize)), units.BytesSize(float64(totalSize)))
 					writer.Flush()
@@ -1221,7 +1259,7 @@ func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte
 	body, _ = io.ReadAll(resp.Body)
 
 	if !strings.HasPrefix(status, "2") {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
+		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n", requestType, url, status)
 	}
 	return status, body, err
 }
@@ -1241,7 +1279,7 @@ func (c *PFDAClient) makeRequestWithHeadersFail(requestType string, url string, 
 	body, _ = io.ReadAll(resp.Body)
 
 	if !strings.HasPrefix(status, "2") {
-		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n\nResponse: %s", requestType, url, status, string(body))
+		err = fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided id and auth-key are still valid.\n", requestType, url, status)
 	}
 	return status, body, err
 }
@@ -1333,7 +1371,7 @@ func pickFile(files []jsonFileResponse, label string) string {
 	ids := make([]string, 0)
 	for _, file := range files {
 		if file.Type == "UserFile" {
-			options = append(options, "created "+file.CreatedAt+" - "+file.Size+" - "+file.Name+" ("+file.Uid+")")
+			options = append(options, "created "+file.CreatedAt+" - " +helpers.HumanReadableSize(file.Size)+ " - "+file.Name+" ("+file.Uid+")")
 			ids = append(ids, file.Uid)
 		}
 	}
@@ -1350,11 +1388,11 @@ func pickFile(files []jsonFileResponse, label string) string {
 }
 
 // pass all flags, so we can optimize the table header - if in 'private' do not show added-by
-func printListingResponse(response jsonListingResponse, flags map[string]bool) {
-	if flags["json"] {
+func printListingResponse(response jsonListingResponse, asJSON bool, brief bool) {
+	if asJSON {
 		prettyJSON, _ := json.MarshalIndent(response, "", "    ")
-		fmt.Printf("%s\n", string(prettyJSON))
-	} else if flags["brief"] {
+		fmt.Println(string(prettyJSON))
+	} else if brief {
 		printListingSimple(response.Files)
 	} else {
 		printListingVerbose(response.Files, response.Meta)
@@ -1365,33 +1403,50 @@ func printListingSimple(files []jsonFileResponse) {
 	if len(files) == 0 {
 		return
 	}
+
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 
-	fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "Name"}, "\t")+"\t")
+	// Function to join and print a line
+	printLine := func(columns []string) {
+		fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+	}
+
+	// Print header
+	printLine([]string{"File/Folder ID", "Name"})
 
 	for _, file := range files {
+		var id string
 		if file.Type == "UserFile" {
-			fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.Name}, "\t")+"\t")
+			id = file.Uid
 		} else {
-			fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(file.Id), file.Name}, "\t")+"\t")
+			id = strconv.Itoa(file.Id)
 		}
+		printLine([]string{id, file.Name})
 	}
+
 	writer.Flush()
 }
 
-func printListSpacesResponse(spaces []jsonSpaceResponse, flags map[string]bool) {
-	if flags["json"] {
+func printListSpacesResponse(spaces []jsonSpaceResponse, asJSON bool) {
+	if asJSON {
 		prettyJSON, _ := json.MarshalIndent(spaces, "", "    ")
-		fmt.Printf("%s\n", string(prettyJSON))
+		fmt.Println(string(prettyJSON))
 	} else if len(spaces) > 0 {
 		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 
-		fmt.Fprintln(writer, strings.Join([]string{"ID", "Type", "Status", "Role", "Side", "Name"}, "\t")+"\t")
+		// Function to join and print a line
+		printLine := func(columns []string) {
+			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+		}
+
+		headers := []string{"ID", "Type", "Status", "Role", "Side", "Name"}
+		printLine(headers)
+
 		for _, space := range spaces {
-			fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(space.Id), space.Type, helpers.FormatValue(space.Protected, "Protected"), space.Role, space.Side, space.Title}, "\t")+"\t")
+			columns := []string{strconv.Itoa(space.Id), space.Type, helpers.FormatValue(space.Protected, "Protected"), space.Role, space.Side, space.Title}
+			printLine(columns)
 		}
 		writer.Flush()
-
 	}
 }
 
@@ -1404,24 +1459,31 @@ func printListingVerbose(files []jsonFileResponse, meta jsonMetaResponse) {
 	isSpaceOrPublicContext := strings.Contains(meta.Scope, "space") || strings.Contains(meta.Scope, "Public")
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', tabwriter.AlignRight)
 
+	// Function to join and print a line
+	printLine := func(columns []string) {
+		fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+	}
+
+	// Determine the headers based on the context
+	headers := []string{"File/Folder ID", "State", "Type", "Status", "Size", "Created"}
 	if isSpaceOrPublicContext {
-		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State " + "\t", "Type", "Status", "Size", "Created", "Added By", "Name"}, "\t")+"\t")
-		for _, file := range files {
-			if file.Type == "UserFile" {
-				fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.State + "\t", file.Type, helpers.FormatValue(file.Locked, "Locked"), file.Size, file.CreatedAt, file.AddedBy, file.Name}, "\t")+"\t")
-			} else {
-				fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(file.Id), "\t", file.Type, helpers.FormatValue(file.Locked, "Locked"), "", file.CreatedAt, file.AddedBy, file.Name}, "\t")+"\t")
-			}
+		headers = append(headers, "Added By")
+	}
+	headers = append(headers, "Name")
+	printLine(headers)
+
+	for _, file := range files {
+		var columns []string
+		if file.Type == "UserFile" {
+			columns = []string{file.Uid, file.State, file.Type, helpers.FormatValue(file.Locked, "Locked"), helpers.HumanReadableSize(file.Size), file.CreatedAt}
+		} else {
+			columns = []string{strconv.Itoa(file.Id), "", file.Type, helpers.FormatValue(file.Locked, "Locked"), "", file.CreatedAt}
 		}
-	} else {
-		fmt.Fprintln(writer, strings.Join([]string{"File/Folder ID", "State" + "\t", "Type", "Status", "Size", "Created", "Name"}, "\t")+"\t")
-		for _, file := range files {
-			if file.Type == "UserFile" {
-				fmt.Fprintln(writer, strings.Join([]string{file.Uid, file.State + "\t", file.Type, helpers.FormatValue(file.Locked, "Locked"), file.Size, file.CreatedAt, file.Name}, "\t")+"\t")
-			} else {
-				fmt.Fprintln(writer, strings.Join([]string{strconv.Itoa(file.Id), "\t", file.Type, helpers.FormatValue(file.Locked, "Locked"), "", file.CreatedAt, file.Name}, "\t")+"\t")
-			}
+		if isSpaceOrPublicContext {
+			columns = append(columns, file.AddedBy)
 		}
+		columns = append(columns, file.Name)
+		printLine(columns)
 	}
 	writer.Flush()
 }
@@ -1429,7 +1491,7 @@ func printListingVerbose(files []jsonFileResponse, meta jsonMetaResponse) {
 // HandleError Check for error, if found behave accordingly
 func (c *PFDAClient) HandleError(err error) {
 	if err != nil {
-		fmt.Println(err)
+		helpers.ErrorFromError(err, c.JsonResponse)
 		if !c.ContinueOnError {
 			os.Exit(1)
 		}
