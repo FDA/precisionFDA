@@ -588,20 +588,12 @@ describe('data portal service tests', () => {
   }
 
   const testPortalsForAdmin = async (userId: number) => {
-    const { PRISM_PORTAL_ID, PRISM_SPACE_ID, TOOLS_PORTAL_ID, TOOLS_SPACE_ID } = customDPIds()
-
     const result = await dataPortalService.listAccessibleCustomPortals(userId)
 
-    expect(result.length).eq(2)
-    expect(result[0].name).eq('PRISM')
-    expect(result[0].id).eq(PRISM_PORTAL_ID)
-    expect(result[0].spaceId).eq(PRISM_SPACE_ID)
-    expect(result[1].name).eq('Tools')
-    expect(result[1].id).eq(TOOLS_PORTAL_ID)
-    expect(result[1].spaceId).eq(TOOLS_SPACE_ID)
+    expect(result.length).eq(0)
   }
 
-  it('list custom portals - admin access combo', async () => {
+  it('list custom portals - site admin role is irrelevant', async () => {
     create.userHelper.addSiteAdminRole(em, user)
     await em.flush()
 
