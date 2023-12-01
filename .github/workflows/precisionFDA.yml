@@ -137,7 +137,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "18.9.1"
+          node-version: "20.9.0"
           cache: 'yarn'
           cache-dependency-path: ./client/yarn.lock
 
@@ -176,7 +176,7 @@ jobs:
           version: 8
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.9.1'
+          node-version: '20.9.0'
       # TODO(samuel) - yarn cache from setup-node@3 github actions still is quite slow and results in install time of 1 minute
       # My guess: issue might be related to the use of workspaces
       # Workaround: node_modules directly stored in the package
@@ -219,7 +219,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.9.1'
+          node-version: '20.9.0'
           cache: 'yarn'
           cache-dependency-path: ./client/yarn.lock
 
@@ -241,7 +241,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.9.1'
+          node-version: '20.9.0'
           cache: 'yarn'
           cache-dependency-path: ./client/yarn.lock
 
