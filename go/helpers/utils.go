@@ -1,10 +1,16 @@
 package helpers
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 )
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
 
 func Min(a, b int) int {
 	if a < b {
@@ -52,13 +58,54 @@ func GetChunkSize(filesCount int) int {
 	}
 }
 
+func ValidateID(id string, paramName string, params url.Values) error {
+	if id != "" {
+		if _, err := strconv.Atoi(id); err != nil {
+			return fmt.Errorf("Invalid %s - expected an integer", paramName)
+		}
+		params.Add(paramName, id)
+	}
+	return nil
+}
+
 func CheckErr(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
 
-func InputError(msg string) int {
-	PrintError(fmt.Errorf(msg))
+// PrintError prints the error to standard output. If asJSON is true, it prints in JSON format.
+func PrintError(err error, asJSON bool) {
+	if asJSON {
+		jsonErr, _ := json.Marshal(ErrorResponse{Error: err.Error()})
+		fmt.Println(string(jsonErr))
+	} else {
+		// Default to plain text
+		fmt.Println("Error:", err.Error())
+	}
+}
+
+func ErrorFromError(err error, asJSON bool) int {
+	PrintError(err, asJSON)
 	return 1
+}
+
+func ErrorFromString(msg string, asJSON bool) int {
+	PrintError(fmt.Errorf(msg), asJSON)
+	return 1
+}
+
+func PrintResult(result string, asJSON bool) {
+	if asJSON {
+		jsonData, _ := json.Marshal(struct {Result string `json:"result"`}{Result: result})
+		fmt.Println(string(jsonData))
+	} else {
+		// Default to plain text
+		fmt.Println(result)
+	}
+}
+
+func PrintResultAsJSON(data interface{}) {
+	jsonData, _ := json.Marshal(data)
+	fmt.Println(string(jsonData))
 }
