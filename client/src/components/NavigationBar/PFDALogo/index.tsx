@@ -8,10 +8,10 @@ const StyledImg = styled.img`
   height: 40px;
 `
 
-export const PFDALogoLight = ({ className='' }) => {
-  return <StyledImg className={className} src={precisionFDALight} style={{ color: '#ffffff' }}/>
+export const PFDALogoLight = ({ className='', ...rest }) => {
+  return <StyledImg className={className} src={precisionFDALight} alt='PFDA Light logo' style={{ color: '#ffffff' }} {...rest}/>
 }
 
-export const PFDALogoDark = ({ className='' }) => {
-  return <StyledImg className={className} src={precisionFDADark} alt='PFDA Dark logo to navigate to home page' />
+export const PFDALogoDark = ({ className='', ...rest }) => {
+  return <StyledImg className={className} src={precisionFDADark} alt='PFDA Dark logo' {...rest} />
 }
