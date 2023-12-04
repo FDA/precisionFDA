@@ -112,6 +112,18 @@ export const DocsTip = styled.div`
   border-radius: 3px;
 `
 
+export const DocsTip2 = styled.div`
+    background-color: #d9edf7;
+    color: #31708f;
+    padding: 15px;
+    top: -3px;
+    position: relative;
+    margin-bottom: 20px;
+    border: 2px solid #31708f;
+    border-bottom-width: 5px;
+    border-radius: 8px;
+`
+
 export const VideoWrapper = styled.div`
   padding-bottom: 48px;
   overflow: hidden;

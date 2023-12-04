@@ -1,6 +1,7 @@
 package precisionfda
 
 import (
+	"dnanexus.com/precision-fda-cli/helpers"
 	"fmt"
 	"io"
 	"net/http"
@@ -59,7 +60,7 @@ func (wc *Printer) Write(p []byte) (int, error) {
 	lines := strings.Split(strings.ReplaceAll(content, "\r\n", "\n"), "\n")
 	for _, line := range lines {
 		if wc.Lines == wc.LinesToPrint {
-			return -1, fmt.Errorf(">> Line limit reached")
+			return -1, fmt.Errorf("Line limit reached")
 		}
 		fmt.Println(line)
 		wc.Lines = wc.Lines + 1
@@ -87,7 +88,7 @@ func Download(fileURL string, outputFilePath string, fileSize int64, withProgres
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf(">> Error downloading file: %s", resp.Status)
+		return fmt.Errorf("Error while downloading file: %s", resp.Status)
 	}
 
 	writer := uilive.New()
@@ -106,7 +107,7 @@ func Download(fileURL string, outputFilePath string, fileSize int64, withProgres
 	}
 }
 
-func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite string) error {
+func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite string, asJSON bool) error {
 	fileURL := downloadUrl
 	originalName := path.Base(fileURL)
 	fileName, err := url.PathUnescape(originalName)
@@ -123,23 +124,30 @@ func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite strin
 
 		outputFilePath = path.Join(dir, fileName)
 	} else if fileInfo, err := os.Stat(outputFilePath); err == nil && fileInfo.IsDir() {
-		// If outputFilePath exists and it is a directory then the file should be downloaded
+		// If outputFilePath exists, and it is a directory then the file should be downloaded
 		// to that directory while retaining its original name
 		outputFilePath = path.Join(outputFilePath, fileName)
 	}
 
 	if _, err := os.Stat(outputFilePath); err == nil && (overwrite == "false" || overwrite == "") {
-		fmt.Printf(">> Error: path %s already exists but -overwrite flag not set to true. Skipping download.\n", outputFilePath)
+		helpers.PrintError(fmt.Errorf("Path %s already exists but -overwrite flag not set to true - skipping download", outputFilePath), asJSON)
 		return nil
 	}
 
 	withProgressBar := false
 	err = Download(fileURL, outputFilePath, 0, withProgressBar)
 	if err != nil {
-		fmt.Printf(">> Error during download of %s - %s.\n", fileName, err)
+		helpers.PrintError(fmt.Errorf("Download of %s failed - %s.\n", fileName, err), asJSON)
 		return nil
 	}
-	fmt.Printf(">> Downloaded:  %s\n", outputFilePath)
+
+	if asJSON {
+		helpers.PrintResultAsJSON(struct {
+			FileName string `json:"file_name"`
+			Path  string `json:"path"`}{FileName: fileName, Path: outputFilePath})
+	} else {
+		fmt.Printf("Downloaded %s to %s", fileName, outputFilePath)
+	}
 	return nil
 }
 
@@ -157,7 +165,7 @@ func Head(fileURL string, lines int) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf(">> Error while getting file: %s", resp.Status)
+		return fmt.Errorf("Error while getting file: %s", resp.Status)
 	}
 
 	writer := uilive.New()
