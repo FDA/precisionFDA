@@ -64,10 +64,11 @@ export function NumberRangeColumnFilter({
 }
 
 export function SelectColumnFilter({
-  column: { filterValue, setFilter, preFilteredRows, id, options, filterDataTestId },
+  column: { filterValue, setFilter, preFilteredRows, id, options, filterDataTestId, title },
 }: any) {
   return (
     <InputSelect
+      title={title}
       value={filterValue}
       onChange={e => setFilter(e.target.value || undefined)}
       data-testid={filterDataTestId}

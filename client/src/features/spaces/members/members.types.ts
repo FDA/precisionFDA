@@ -8,7 +8,7 @@ export type MemberRole = 'lead' | 'contributor' | 'viewer' | 'admin' | 'disable'
 export type MemberSide = 'host' | 'guest'
 
 export interface SpaceMembership {
-  id: string;
+  id: number;
   user_name: string;
   title: string;
   active: boolean;

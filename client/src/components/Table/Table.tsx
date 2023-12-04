@@ -125,7 +125,7 @@ const ColumnSelect = ({
         }
       >
         {dropdownProps => (
-          <TransparentButton {...dropdownProps} active={dropdownProps.isActive}>
+          <TransparentButton {...dropdownProps} active={dropdownProps.isActive} title="Column Select">
             <ColumnsIcon height={14} />
           </TransparentButton>
         )}
@@ -363,7 +363,7 @@ export default function Table<T extends object>(
       >
         <div className="tableWrap" ref={containerRef}>
           <div {...getTableProps()} className="table sticky">
-            <div className="thead">
+            <div className="thead" role="row">
               {enableColumnSelect && <ColumnSelect
                 columns={getAvailableCols()}
                 hiddenColumns={hiddenColumns}
@@ -401,7 +401,7 @@ export default function Table<T extends object>(
             </div>
 
             {isFilterable && (
-              <div className="thead filters">
+              <div className="thead filters" role="row">
                 {visibleColumns.map((column, i) => (
                   // eslint-disable-next-line react/jsx-key
                   <div {...column.getHeaderProps()} className="th">
@@ -429,6 +429,8 @@ export default function Table<T extends object>(
                     <div
                       {...r.getRowProps(rowProps && rowProps(r))}
                       className="tr"
+                      role="row"
+                      data-testid="data-row"
                     >
                       {r.cells.map(cell => (
                         // eslint-disable-next-line react/jsx-key

@@ -1,16 +1,16 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
-import { FieldGroup, InputError, Hint } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
-import { Modal } from '../../modal'
-import { ButtonRow, StyledForm } from '../../modal/styles'
+import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer, StyledForm } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { addMembersToSpaceRequest } from './members.api'
 import { MemberRole } from './members.types'
@@ -25,7 +25,8 @@ const validationSchema = Yup.object().shape({
   invitees_role: Yup.object()
     .shape({
       value: Yup.string().required('Role required'),
-    }).required('Required'),
+    })
+    .required('Required'),
 })
 
 export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
@@ -39,13 +40,20 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
     reset,
   } = useForm<FormValues>({
     mode: 'onBlur',
-    defaultValues: { invitees: '', invitees_role: { value: 'admin', label: 'Admin' }},
+    defaultValues: {
+      invitees: '',
+      invitees_role: { value: 'admin', label: 'Admin' },
+    },
     resolver: yupResolver(validationSchema),
   })
   const mutation = useMutation({
     mutationKey: ['add-members-to-space'],
     mutationFn: ({ invitees, invitees_role }: FormValues) =>
-      addMembersToSpaceRequest({ spaceId, invitees, invitees_role: invitees_role.value }),
+      addMembersToSpaceRequest({
+        spaceId,
+        invitees,
+        invitees_role: invitees_role.value,
+      }),
     onSuccess: res => {
       reset()
       queryClient.invalidateQueries(['space-members'])
@@ -62,17 +70,21 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
   }
 
   const modalComp = (
-    <Modal
+    <ModalNext
+      id="modal-add-members"
       data-testid="modal-add-members"
-      headerText="Add members to space"
       isShown={isShown}
-      hide={() => {
-        reset()
-        setShowModal(false)
-      }}
-      overflowContent={false}
+      hide={() => setShowModal(false)}
     >
       <StyledForm onSubmit={handleSubmit(onSubmit)}>
+        <ModalHeaderTop
+          disableClose={false}
+          headerText="Add members to space"
+          hide={() => {
+            setShowModal(false)
+          }}
+        />
+
         <FieldGroup>
           <label>Username List</label>
           <InputText
@@ -97,7 +109,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
           <Controller
             name="invitees_role"
             control={control}
-            render={({ field: { value, onChange, onBlur }}) => (
+            render={({ field: { value, onChange, onBlur } }) => (
               <Select
                 options={[
                   { value: 'admin', label: 'Admin' },
@@ -119,28 +131,30 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => {
-              reset()
-              setShowModal(false)
-            }}
-            disabled={mutation.isLoading}
-            aria-label="Close modal"
-          >
-            Cancel
-          </Button>
-          <ButtonSolidBlue
-            type="submit"
-            disabled={Object.keys(errors).length > 0 || mutation.isLoading}
-            aria-label="Submit add members"
-          >
-            Add Members
-          </ButtonSolidBlue>
-        </ButtonRow>
+        <Footer>
+          <ButtonRow>
+            <Button
+              type="button"
+              onClick={() => {
+                reset()
+                setShowModal(false)
+              }}
+              disabled={mutation.isLoading}
+              aria-label="Close modal"
+            >
+              Cancel
+            </Button>
+            <ButtonSolidBlue
+              type="submit"
+              disabled={Object.keys(errors).length > 0 || mutation.isLoading}
+              aria-label="Submit add members"
+            >
+              Add Members
+            </ButtonSolidBlue>
+          </ButtonRow>
+        </Footer>
       </StyledForm>
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

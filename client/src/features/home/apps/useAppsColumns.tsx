@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useLocation, useRouteMatch } from 'react-router-dom'
+import { useLocation, useRouteMatch, Link } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
@@ -12,7 +12,7 @@ import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 import { colors } from '../../../styles/theme'
-import { StyledLinkCell, StyledRunByYouLink } from '../home.styles'
+import { StyledLinkCell, StyledNameCell, StyledRunByYouLink } from '../home.styles'
 import { KeyVal } from '../types'
 import { getBasePathFromScope } from '../utils'
 import { IApp } from './apps.types'
@@ -45,18 +45,18 @@ export const useAppsColumns = ({
       accessor: 'name',
       Filter: DefaultColumnFilter,
       width: colWidths?.name || 198,
+      Cell: props => (
+        <StyledNameCell as={Link} to={{ pathname: `${path}/${props.cell.row.original.uid}`, state: { from: location.pathname, fromSearch: location.search }}}>
+          <CubeIcon height={14} />
+          {props.value}
+        </StyledNameCell>
+      ),
     },
     {
       Header: 'Title',
       accessor: 'title',
       Filter: DefaultColumnFilter,
       width: colWidths?.title || 300,
-      Cell: props => (
-        <StyledLinkCell to={{ pathname: `${path}/${props.cell.row.original.uid}`, state: { from: location.pathname, fromSearch: location.search }}}>
-          <CubeIcon height={14} />
-          {props.value}
-        </StyledLinkCell>
-      ),
     },
     {
       Header: 'Featured',
