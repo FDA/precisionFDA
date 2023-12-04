@@ -271,11 +271,11 @@ export const useSpacesColumns = ({
                 <CubeIcon height={14} /> {row.original?.counters.apps}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
-                <BoltIcon /> {row.original?.counters.jobs}
+                <BoltIcon /> {row.original?.counters.workflows}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <CogsIcon height={14} />
-                {row.original?.counters.workflows}
+                {row.original?.counters.jobs}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <UsersIcon /> {row.original?.counters.members}
