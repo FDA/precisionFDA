@@ -68,7 +68,7 @@ export function InsertImageUriDialogBody({
       <DataPortalResourceSelect onSelect={setSrc} />
       <DialogActions>
         <Button
-          data-test-id="image-modal-confirm-btn"
+          data-testid="image-modal-confirm-btn"
           disabled={isDisabled}
           onClick={() => onClick({ altText, src })}
         >
@@ -108,18 +108,18 @@ export function InsertImageUploadedDialogBody({
         label="Image Upload"
         onChange={loadImage}
         accept="image/*"
-        data-test-id="image-modal-file-upload"
+        data-testid="image-modal-file-upload"
       />
       <TextInput
         label="Alt Text"
         placeholder="Descriptive alternative text"
         onChange={setAltText}
         value={altText}
-        data-test-id="image-modal-alt-text-input"
+        data-testid="image-modal-alt-text-input"
       />
       <DialogActions>
         <Button
-          data-test-id="image-modal-file-upload-btn"
+          data-testid="image-modal-file-upload-btn"
           disabled={isDisabled}
           onClick={() => onClick({ altText, src })}
         >

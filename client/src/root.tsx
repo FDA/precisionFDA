@@ -12,12 +12,12 @@ import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
 import history from './utils/history'
 import { Header } from './components/Header'
-import { Loader } from './components/Loader'
 import ExpertsSinglePage from './features/experts/details/index'
 import NoFoundPage from './pages/NoFoundPage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import queryClient from './utils/queryClient'
 import DataPortalRoutes from './features/data-portals/routes'
+import { LayoutLoader } from './layouts/UserLayout'
 
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
@@ -71,7 +71,7 @@ const root = () => {
       >
         <Router history={history}>
           <Header />
-          <React.Suspense fallback={<Loader className="pageloader" />}>
+          <React.Suspense fallback={<LayoutLoader />}>
             <QueryParamProvider adapter={ReactRouter5Adapter}>
               <Switch>
                 <Route exact path="/">

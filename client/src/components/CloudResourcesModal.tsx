@@ -2,8 +2,8 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import { Loader } from './Loader'
 import { colors, theme } from '../styles/theme'
-import { Modal } from '../features/modal'
 import { CloudResourcesResponse, useCloudResourcesQuery } from '../hooks/useCloudResourcesCondition'
+import { ModalHeaderTop, ModalNext } from '../features/modal/ModalNext'
 
 type Props = {
   isShown: boolean
@@ -109,12 +109,17 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
 export const CloudResourceModal = ({ isShown, hide }: Props) => {
   const query = useCloudResourcesQuery()
   return (
-    <Modal
-      data-test-id="cloud-resource-modal"
-      headerText="Cloud usage report"
+    <ModalNext
+      id="cloud-resource-modal"
+      data-testid="cloud-resource-modal"
       isShown={isShown}
       hide={hide}
     >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Cloud usage report"
+        hide={hide}
+      />
       {query.isLoading && <Loader height={14} />}
       {query.error && (
         <div>
@@ -122,8 +127,6 @@ export const CloudResourceModal = ({ isShown, hide }: Props) => {
         </div>
       )}
       {!query.error && !query.isLoading && <CloudUsageReport stats={query.data!} />}
-    </Modal>
+    </ModalNext>
   )
-
 }
-

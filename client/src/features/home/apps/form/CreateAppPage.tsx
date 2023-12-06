@@ -21,6 +21,7 @@ export const CreateAppPage = () => {
       if (res?.id) {
         history.push(`/home/apps/${res?.id}`)
         queryClient.invalidateQueries(['apps'])
+        queryClient.invalidateQueries(['counters'])
         toast.success('Your app was created successfully')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)
