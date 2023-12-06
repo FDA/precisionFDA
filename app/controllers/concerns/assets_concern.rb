@@ -5,7 +5,7 @@ module AssetsConcern
   # @return [asset] An Asset Object if it is accessible by user.
   #   raise ApiError if not.
   def find_asset
-    @asset = Asset.accessible_by(@context).find_by(uid: params[:id])
+    @asset = Asset.unscoped.accessible_by(@context).find_by(uid: params[:id])
 
     raise ApiError, I18n.t("asset_not_accessible") if @asset.nil?
 
