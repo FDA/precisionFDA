@@ -40,8 +40,8 @@ export class SpaceReportResultGenerateFacade {
   }
 
   private async generateAndUploadReport(reportId: number) {
-    return await this.em.transactional(async tem => {
-      const report = await tem.findOne(
+    return await this.em.transactional(async () => {
+      const report = await this.em.findOne(
         spaceReport.SpaceReport,
         { id: reportId, state: { $in: ['CREATED', 'ERROR'] } },
         { lockMode: LockMode.PESSIMISTIC_WRITE },
@@ -51,7 +51,7 @@ export class SpaceReportResultGenerateFacade {
         throw new errors.NotFoundError(`Report with id ${reportId} does not exist or is in an invalid state`)
       }
 
-      await tem.populate(report, ['reportParts', 'space', 'createdBy'])
+      await this.em.populate(report, ['reportParts', 'space', 'createdBy'])
 
       const provenanceStyles = await this.entityProvenanceService.getSvgStyles()
       const reportResult = await this.spaceReportService.generateResult(report, provenanceStyles)

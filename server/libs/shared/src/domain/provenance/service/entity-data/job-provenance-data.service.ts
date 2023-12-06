@@ -16,7 +16,7 @@ export class JobProvenanceDataService implements EntityProvenanceDataService<'jo
   async getParents(job: Job): Promise<EntityProvenanceSourceUnion[]> {
     const parents: EntityProvenanceSourceUnion[] = []
 
-    const inputFiles = (await job.inputFiles.init()).getItems()
+    const inputFiles = await job.inputFiles.loadItems()
     inputFiles.forEach(file => parents.push({ type: 'file', entity: file }))
 
     const app = await job.app?.load()

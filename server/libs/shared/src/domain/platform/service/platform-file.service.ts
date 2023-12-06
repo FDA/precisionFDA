@@ -21,26 +21,6 @@ export class PlatformFileService {
     return await this.platformClient.fileCreate(params)
   }
 
-  async deleteFiles(files: UserFile[]) {
-    const projectsToFileDxids = files.reduce<Record<string, string[]>>((acc, file) => {
-      if (!acc[file.project]) {
-        acc[file.project] = []
-      }
-
-      acc[file.project].push(file.dxid)
-
-      return acc
-    }, {})
-
-    const apiCalls = Object.keys(projectsToFileDxids)
-      .map(project => this.platformClient.fileRemove({
-        projectId: project,
-        ids: projectsToFileDxids[project],
-      }))
-
-    await Promise.all(apiCalls)
-  }
-
   async uploadFileContent(file: UserFile, content: string) {
     const chunks = this.getChunksFromString(content)
 
@@ -60,7 +40,7 @@ export class PlatformFileService {
   }
 
   private getChunksFromString(str: string) {
-    const buffer = Buffer.from(str)
+    const buffer = Buffer.from(str ?? '')
     const chunkBuffers: Buffer[] = []
 
     for (let start = 0; start < buffer.length; start += this.CHUNK_SIZE) {

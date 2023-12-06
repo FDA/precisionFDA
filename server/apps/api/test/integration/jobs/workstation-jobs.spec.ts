@@ -79,7 +79,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     expect(fakes.workstationClient.setPFDAConfig.calledOnce).to.be.true()
     expect(fakes.workstationClient.setPFDAConfig.getCall(0).args[0]).to.deep.equal({
       Key: 'hello world',
-      Server: 'localhost:3000',
+      Server: 'rails-host:1234',
     })
   })
 
@@ -97,7 +97,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     expect(fakes.workstationClient.setPFDAConfig.calledOnce).to.be.true()
     expect(fakes.workstationClient.setPFDAConfig.getCall(0).args[0]).to.deep.equal({
       Key: 'hello world',
-      Server: 'localhost:3000',
+      Server: 'rails-host:1234',
       Scope: `space-${space.id}`,
     })
   })
