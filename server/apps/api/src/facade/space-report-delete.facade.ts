@@ -37,11 +37,11 @@ export class SpaceReportDeleteFacade {
         throw new errors.NotFoundError('Space not found')
       }
 
+      const removedIds = await this.spaceReportService.deleteReports(reports)
+
       const resultFilesIds = reports
         .map(r => r.resultFile?.id)
         .filter(id => id != null)
-
-      const removedIds = await this.spaceReportService.deleteReports(reports)
 
       await this.nodesRemoveOperation.execute({ ids: resultFilesIds, async: false })
 

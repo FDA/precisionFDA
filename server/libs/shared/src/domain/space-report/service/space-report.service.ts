@@ -37,30 +37,31 @@ export class SpaceReportService {
       throw new errors.InvalidStateError('Space id is required for creating a report')
     }
 
-    return await this.em.transactional(async tem => {
+    return await this.em.transactional(async () => {
       const space = await this.getSpaceForUserValidated(spaceId, user)
       const spaceReport = new SpaceReport(user)
       spaceReport.space = space
-      spaceReport.reportParts.add(await this.createSpaceReportParts(spaceReport))
+      spaceReport.reportParts.add(await this.createSpaceReportParts(spaceReport, space.scope))
 
       if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
         throw new errors.InvalidStateError('Report not generated: No entities to report on in this space')
       }
 
-      tem.persist(spaceReport)
+      this.em.persist(spaceReport)
 
       return spaceReport
     })
   }
 
   async getReports(ids: number[]) {
-    return await this.em.transactional(tm => tm.find(SpaceReport, ids))
+    return await this.em.find(SpaceReport, ids)
   }
 
+  // TODO(PFDA-4701) - get the current user from the IOC
   async getReportsForSpace(spaceId: number, user: User) {
-    return await this.em.transactional(async tem => {
+    return await this.em.transactional(async () => {
       const space = await this.getSpaceForUserValidated(spaceId, user)
-      const reports = await tem.find(
+      const reports = await this.em.find(
         SpaceReport,
         { space },
         {
@@ -83,11 +84,9 @@ export class SpaceReportService {
       return []
     }
 
-    const ids = reports.map(r => r.id)
+    await this.em.transactional(async () => this.em.remove(reports))
 
-    await this.em.transactional(async tm => tm.remove(reports))
-
-    return ids
+    return reports.map(r => r.id)
   }
 
   async completePartsBatch(batches: BatchComplete[]) {
@@ -108,8 +107,8 @@ export class SpaceReportService {
   }
 
   async setSpaceReportError(id: number) {
-    return await this.em.transactional(async tem => {
-      const spaceReport = await tem.findOneOrFail(SpaceReport, id)
+    return await this.em.transactional(async () => {
+      const spaceReport = await this.em.findOneOrFail(SpaceReport, id)
 
       if (spaceReport.state === 'ERROR') {
         return null
@@ -146,9 +145,7 @@ export class SpaceReportService {
     return this.spaceReportPartService.getSpaceReportPartMetaData(source)
   }
 
-  private async createSpaceReportParts(spaceReport: SpaceReport): Promise<SpaceReportPart[]> {
-    const space = await this.em.findOneOrFail(Space, spaceReport.space.id)
-    const scope = space.scope
+  private async createSpaceReportParts(spaceReport: SpaceReport, scope: string): Promise<SpaceReportPart[]> {
     const spaceFiles = await this.em.find(UserFile, { scope })
     const spaceApps = await this.em.find(App, { scope })
     const spaceJobs = await this.em.find(Job, { scope })

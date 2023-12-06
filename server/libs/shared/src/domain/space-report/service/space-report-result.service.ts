@@ -66,7 +66,7 @@ export class SpaceReportResultService {
     return domContainer.serialize()
   }
 
-  private getReportSegment(title: string, id: string, parts: SpaceReportPart[], document: Document) {
+  private getReportSegment(title: string, id: string, reportParts: SpaceReportPart[], document: Document) {
     const container = document.createElement('div')
 
     const spacer = document.createElement('div')
@@ -82,7 +82,7 @@ export class SpaceReportResultService {
     sectionTitle.id = id
     sectionHeading.appendChild(sectionTitle)
 
-    if (ArrayUtils.isEmpty(parts)) {
+    if (ArrayUtils.isEmpty(reportParts)) {
       const emptyText = document.createElement('p')
       emptyText.classList.add('empty-text')
       emptyText.innerHTML = `There are no ${title.toLowerCase()} in this space.`
@@ -93,13 +93,13 @@ export class SpaceReportResultService {
 
     const itemList = document.createElement('div')
     itemList.classList.add('item-list')
-    parts.forEach(rp => itemList.appendChild(this.getReportPartContent(rp, document)))
+    reportParts.forEach(rp => itemList.appendChild(this.getReportPartContent(rp, document)))
     container.appendChild(itemList)
 
     return container
   }
 
-  private getReportPartContent(rp: SpaceReportPart, document: Document) {
+  private getReportPartContent(reportPart: SpaceReportPart, document: Document) {
     const wrapper = document.createElement('div')
     wrapper.classList.add('item-wrapper')
 
@@ -108,17 +108,17 @@ export class SpaceReportResultService {
     wrapper.appendChild(container)
 
     const title = document.createElement('h3')
-    title.innerHTML = rp.result.title
-    title.id = `${this.REPORT_PART_ID_PREFIX}${rp.id}`
+    title.innerHTML = reportPart.result.title
+    title.id = `${this.REPORT_PART_ID_PREFIX}${reportPart.id}`
     container.appendChild(title)
 
     const created = document.createElement('p')
-    created.innerHTML = new Date(rp.result.created).toLocaleString()
+    created.innerHTML = new Date(reportPart.result.created).toLocaleString()
     container.appendChild(created)
 
     const diagram = document.createElement('div')
     diagram.classList.add('canvas-wrapper')
-    diagram.innerHTML = rp.result.svg
+    diagram.innerHTML = reportPart.result.svg
     container.appendChild(diagram)
 
     return wrapper
@@ -169,10 +169,10 @@ export class SpaceReportResultService {
     return section
   }
 
-  private getResourceLink(rp: SpaceReportPart, document: Document) {
+  private getResourceLink(reportPart: SpaceReportPart, document: Document) {
     const container = document.createElement('a')
-    container.href = `#${this.REPORT_PART_ID_PREFIX}${rp.id}`
-    container.innerHTML = rp.result.title
+    container.href = `#${this.REPORT_PART_ID_PREFIX}${reportPart.id}`
+    container.innerHTML = reportPart.result.title
 
     return container
   }

@@ -43,8 +43,8 @@ export class SpaceReportBatchResultGenerateFacade {
   }
 
   private async generateAndSaveResults(ids: number[]) {
-    return await this.em.transactional(async tem => {
-      const reportParts = await tem.find(spaceReport.SpaceReportPart, ids)
+    return await this.em.transactional(async () => {
+      const reportParts = await this.em.find(spaceReport.SpaceReportPart, ids)
 
       if (ArrayUtils.isEmpty(reportParts)) {
         return
@@ -71,6 +71,10 @@ export class SpaceReportBatchResultGenerateFacade {
     type: spaceReport.SpaceReportPartSourceType,
     reportParts: spaceReport.SpaceReportPart[],
   ): Promise<spaceReport.BatchComplete[]> {
+    if (ArrayUtils.isEmpty(reportParts)) {
+      return []
+    }
+
     const entities = await this.sourceTypeToRepositoryMap[type]
       .find(reportParts.map(rps => rps.sourceId))
 
@@ -78,13 +82,14 @@ export class SpaceReportBatchResultGenerateFacade {
 
     return await Promise.all(entities.map(async entity => {
       const entityProvenanceSource = { type, entity } as provenance.EntityProvenanceSourceUnion
+      const metaData = this.getResultMetaData(entityProvenanceSource)
       const entityProvenance = await this.entityProvenanceService.getEntityProvenance(entityProvenanceSource, 'svg', { omitStyles: true })
 
       const reportPart = reportParts.find(srp => entity.id === srp.sourceId)!
       return {
         id: reportPart.id,
         result: {
-          ...this.getResultMetaData(entityProvenanceSource),
+          ...metaData,
           svg: entityProvenance,
         },
       }

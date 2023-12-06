@@ -157,13 +157,14 @@ router.get(
   },
 )
 
+// TODO(PFDA-4701) - cover reports with integration tests after setting up full test env
 router.post(
   '/:id/report',
   makeSchemaValidationMdw({ params: utils.schemas.idInputSchema }),
   async ctx => {
     const opsCtx = pickOpsCtx(ctx)
 
-    const facade = new SpaceReportCreateFacade(opsCtx, spaceReport.SpaceReportService.getInstance(ctx.em.fork()))
+    const facade = new SpaceReportCreateFacade(opsCtx, spaceReport.SpaceReportService.getInstance(ctx.em.fork({ useContext: true })))
 
     const report = await facade.createSpaceReport(parseInt(ctx.params?.id, 10))
 

@@ -1,4 +1,3 @@
-import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { ArrayUtils, ENUMS } from '../..'
 import { NotificationService } from '../../domain/notification'
@@ -38,8 +37,8 @@ export class SpaceReportErrorFacade {
       return
     }
 
-    await this.em.transactional(async tem => {
-      const part = await tem.findOne(SpaceReportPart, ids)
+    await this.em.transactional(async () => {
+      const part = await this.em.findOne(SpaceReportPart, ids)
 
       if (!part) {
         return

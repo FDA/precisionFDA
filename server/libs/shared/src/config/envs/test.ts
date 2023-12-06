@@ -19,6 +19,7 @@ export const config: ConfigOverride = () => ({
         maskSize: 1,
       },
     },
+    railsHost: 'https://rails-host:1234',
   },
   emails: {
     smtp: {
@@ -48,6 +49,9 @@ export const config: ConfigOverride = () => ({
       staleJobsEmailAfter: 60 * 60 * 24 * 2,
       // 3 days
       staleJobsTerminateAfter: 60 * 60 * 24 * 3,
+    },
+    spaceReport: {
+      partBatchSize: 3,
     },
   },
   devFlags: {

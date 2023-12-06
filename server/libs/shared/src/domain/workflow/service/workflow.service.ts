@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { ArrayUtils } from '@shared'
 import { App } from '../../app'
-import { Workflow } from '../entity/workflow.entity'
+import { Workflow } from '@shared/domain'
 
 export class WorkflowService {
   private readonly em
@@ -8,9 +9,14 @@ export class WorkflowService {
   constructor(em: SqlEntityManager) {
     this.em = em
   }
-  async getApps(workflow: Workflow) {
-    const appsUids = workflow?.spec.input_spec.stages.map(s => s.app_uid)
 
-    return await this.em.find(App, { uid: appsUids })
+  async getApps(workflow: Workflow) {
+    const inputStages = workflow?.spec?.input_spec?.stages
+
+    if (ArrayUtils.isEmpty(inputStages)) {
+      return []
+    }
+
+    return await this.em.find(App, { uid: inputStages.map(s => s.app_uid) })
   }
 }

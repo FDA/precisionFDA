@@ -4,6 +4,7 @@ import { FILE_STATE_DX, PARENT_TYPE } from '../../domain/user-file/user-file.typ
 import { UserCtx } from '../../types'
 import { FileCreate } from './model/file-create'
 import { FileCreateWithContent } from './model/file-create-with-content'
+import { errors } from '../..'
 
 export class UserFileCreateFacade {
   private readonly userCtx
@@ -28,7 +29,11 @@ export class UserFileCreateFacade {
   }
 
   async createFile({ name, project, scope, description }: FileCreate) {
-    const dxid = (await this.platformFileService.createFile({ name, project, description })).id
+    const dxid = (await this.platformFileService.createFile({ name, project, description }))?.id
+
+    if (dxid == null) {
+      throw new errors.InternalError('Failed to create the file on the platform')
+    }
 
     return await this.userFileService.createFile({
       parentId: this.userCtx.id,

@@ -1,19 +1,13 @@
-import type { SqlEntityManager } from '@mikro-orm/mysql'
-import { database, job, spaceReport, provenance } from '@shared'
-import type { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
+import { database, provenance, spaceReport } from '@shared'
 import type { GenerateSpaceReportBatchJob } from '@shared/queue/task.input'
 import type { Job } from 'bull'
 import { SpaceReportBatchResultGenerateFacade } from '../facade/space-report-batch-result-generate.facade'
-import { getChildLogger } from '../utils'
 
 class SpaceReportBatchGenerationHandler {
-  private readonly spaceReportBatchResultGenerateFacade
+  private readonly spaceReportBatchResultGenerateFacade: SpaceReportBatchResultGenerateFacade
 
-  constructor(
-    spaceReportBatchResultGenerateFacade: SpaceReportBatchResultGenerateFacade,
-  ) {
+  constructor(spaceReportBatchResultGenerateFacade: SpaceReportBatchResultGenerateFacade) {
     this.spaceReportBatchResultGenerateFacade = spaceReportBatchResultGenerateFacade
-
   }
 
   async handle(bullJob: Job<GenerateSpaceReportBatchJob>) {

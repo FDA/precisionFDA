@@ -15,7 +15,7 @@ import { SpaceReportPartWorkflowResultMetaProvider } from './space-report-part-w
 export class SpaceReportPartService {
   private readonly em
 
-  // TODO(PFDA-4701) - use IOC
+  // TODO(PFDA-4701) - use IOC and create unit tests after that
   private readonly sourceTypeToMetaProviderMap: { [ T in SpaceReportPartSourceType ]: SpaceReportPartResultMetaProvider<T> } = {
     job: new SpaceReportPartJobResultMetaProvider(),
     file: new SpaceReportPartFileResultMetaProvider(),

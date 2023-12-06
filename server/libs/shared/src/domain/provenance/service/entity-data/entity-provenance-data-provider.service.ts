@@ -16,6 +16,7 @@ import { WorkflowProvenanceDataService } from './workflow-provenance-data.servic
 export class EntityProvenanceDataProviderService {
   private readonly ENTITY_TYPE_TO_PARENT_RESOLVER_MAP: { [T in EntityType]: EntityProvenanceDataService<T> }
 
+  // TODO(PFDA-4701) - use IOC and create unit tests after that
   constructor(em: SqlEntityManager, workflowService: WorkflowService) {
     this.ENTITY_TYPE_TO_PARENT_RESOLVER_MAP = {
       file: new FileProvenanceDataService(em),

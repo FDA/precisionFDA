@@ -1,5 +1,5 @@
 export class ArrayUtils {
-  static isEmpty(input: unknown[]): input is [] {
+  static isEmpty(input: unknown[] | null | undefined): input is [] {
     if (!Array.isArray(input)) {
       return true
     }
