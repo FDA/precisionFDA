@@ -149,7 +149,7 @@ export function useAddResourceToModal({
           <ButtonSolidBlue
             type="submit"
             onClick={handleSubmit}
-            disabled={!selectedUids || mutation?.isLoading}
+            disabled={!selectedUids.length || mutation?.isLoading}
           >
             Add to Space
           </ButtonSolidBlue>
