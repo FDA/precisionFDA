@@ -107,7 +107,7 @@ any
         })
       } else {
         notificationService.createNotification({
-          message: `Error creating snapshot for ${job.name}: ${res.data}`,
+          message: `Error creating snapshot for ${job.name}: ${res.error?.message}`,
           meta: {
             linkTitle: 'View Execution',
             linkUrl: `/home/executions/${job.uid}`,
