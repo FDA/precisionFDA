@@ -80,7 +80,7 @@ bash "wipe tomcat cache" do
   environment(
     {
       DESTINATION_PATH: "#{node['gsrs']['tomcat_path']}/work/*",
-    }
+    },
   )
   notifies :restart, "tomcat_service[gsrs]", :delayed
 end
@@ -131,7 +131,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
 end
 
 tomcat_service "gsrs" do
-  action [:start, :enable]
+  action %i(enable start)
   service_name "gsrs"
   install_path node[:gsrs][:tomcat_path]
   tomcat_user node[:gsrs][:tomcat_user]
