@@ -192,9 +192,10 @@ export const CLI = () => {
           <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
           <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Uploads the file to the specified space.</li>
           <li><StyledCode>-folder-id &lt;ID&gt;</StyledCode>: Uploads the file to the specified folder.</li>
-          <li><StyledCode>-name &lt;NAME&gt;</StyledCode>: Specifies the name of a stdin file. Required for stdin input.
-          </li>
+          <li><StyledCode>-name &lt;NAME&gt;</StyledCode>: Specifies the name of a stdin file. Required for stdin input.</li>
           <li><StyledCode>-json</StyledCode>: Responds the command result in JSON format.</li>
+          <li><StyledCode>-threads</StyledCode>: Changes number of upload threads to spawn per file (Max 100). Consider memory usage.</li>
+          <li><StyledCode>-chunksize</StyledCode>: Changes size of each upload chunk in bytes (Min 16MB, Max 4GB). Consider memory usage.</li>
         </ul>
 
         <h3>Examples</h3>
@@ -267,6 +268,14 @@ export const CLI = () => {
             ./pfda upload-file script01.py -json
           </code>
         </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Uploads large file 'data.sql' to the root folder of My Home with manually set chunksize and upload threads.
+          </div>
+          <code className="command">
+            ./pfda upload-file script01.py -threads 20 -chunksize 134217728
+          </code>
+        </ExampleBlock>
 
         <HelpSection>
           <HelpTitle>💡Tips and Notes</HelpTitle>
@@ -285,6 +294,14 @@ export const CLI = () => {
           <HelpTip><strong>Uploading multiple items:</strong></HelpTip>
           <HelpTipText>
             When uploading multiple files and/or folders, ensure they are all passed as arguments before any flags.
+          </HelpTipText>
+          <HelpTip><strong>Optimizing uploads:</strong></HelpTip>
+          <HelpTipText>
+            The <StyledCode>{'-threads'}</StyledCode> and <StyledCode>{'-chunksize'}</StyledCode> flags are useful for optimizing uploads.
+            Increasing the number of threads can speed up the process, but be mindful of memory usage.
+            Similarly, increasing the chunk size can reduce the number of API calls, though this also impacts memory usage.
+            These values are not controlled and if you decide to use them, you might run into <strong>OutOfMemory errors</strong> on the host machine.
+            The default values are 10 threads and 16MB chunk size.
           </HelpTipText>
         </HelpSection>
 

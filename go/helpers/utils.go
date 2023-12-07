@@ -3,6 +3,7 @@ package helpers
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -14,6 +15,13 @@ type ErrorResponse struct {
 
 func Min(a, b int) int {
 	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b
@@ -56,6 +64,14 @@ func GetChunkSize(filesCount int) int {
 	default:
 		return 25
 	}
+}
+
+// Calculate chunk size using math.Ceil to round up,
+// ensuring the number of chunks does not exceed 10 000.
+func CalculateChunkSize(fileSize int64, minChunkSize int) int {
+	const maxChunks = 10_000
+	idealChunkSize := int(math.Ceil(float64(fileSize) / float64(maxChunks - 1)))
+	return Max(idealChunkSize, minChunkSize)
 }
 
 func ValidateID(id string, paramName string, params url.Values) error {
