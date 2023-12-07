@@ -22,7 +22,7 @@ import (
 
 // CONSTANTS
 const defaultNumRoutines = 10
-const defaultChunkSize = 1 << 26 // default 16.8MB (min. 5MB)
+const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
@@ -209,7 +209,7 @@ func mainInternal() int {
 	// inside mainInternal so that they can be unit tested
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute. Must be one of ['upload-file','upload-asset','api'].")
+	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute.")
 	authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
 	apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
 	jsonInput := flag.String("json-payload", "", "JSON payload for specified API call (if any).")
@@ -270,14 +270,16 @@ func mainInternal() int {
 		flag.Parse()
 	}
 
+	if *command != "" {
+		fmt.Println("\nWARNING! THIS SYNTAX IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda <command> <args> \n")
+	}
+
 	if positionalCmd != "" {
 		if *command != "" {
 			return helpers.ErrorFromString("Error input >>> both positional command and -cmd option specified. Please remove one or the other", *flagJson)
 		}
 		*command = positionalCmd
 	}
-
-
 
 	// always check if config != nil
 	config, configErr := helpers.GetConfig()
@@ -438,6 +440,10 @@ func mainInternal() int {
 
 				}
 			} else {
+				if *inputChunkSize == defaultChunkSize {
+					// if chunkSize was not set by user, calculate it based on file size
+					*inputChunkSize = helpers.CalculateChunkSize(f.Size(), pfdaclient.MinChunkSize)
+				}
 				err = invokeUploadFile(pfdaclient, &path, folderID, spaceID, inputChunkSize, inputNumRoutines)
 				if err != nil {
 					return helpers.ErrorFromError(err, *flagJson)

@@ -33,11 +33,11 @@ import (
 
 const userAgent = "precisionFDA CLI/2.5.0"
 const defaultNumRoutines = 10
-const defaultChunkSize = 1 << 26 // default 67MB (min. 5MB)
+const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
 const maxRoutines = 100
-const minChunkSize = 5 * 1 << 11 // min. 5MB
-const maxChunkSize = 1 << 32     // max. 2GB
+const minChunkSize = 1 << 24 // min. 16MB
+const maxChunkSize = 1 << 32     // max. 4GB
 const maxFileSize = 5 * 1 << 41  // max. 5TB
 
 // retryablehttp defaults
