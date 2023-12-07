@@ -108,8 +108,7 @@ class WorkstationService {
     if (compareVersions(this.client.apiVersion, '1.1') < 0) {
       this.ctx.log.info('WorkstationService: setAPIKey')
       return await this.client.setAPIKey(key)
-      }
-    else {
+    } else {
       const pfdaConfig: CLIConfigParams = {
         Key: key,
       }
@@ -132,7 +131,7 @@ class WorkstationService {
     this.checkRunningWorkstation()
     this.checkValidSession()
     this.ctx.log.info('WorkstationService: Beginning snapshot', { name, terminate })
-    await this.client.setAPIKey(key)
+    await this.setAPIKey(key)
     const res = await this.client.snapshot({ name, terminate })
     this.ctx.log.info('WorkstationService: snapshot returned results', { name, terminate, res })
     return res
