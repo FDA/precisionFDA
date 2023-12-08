@@ -47,7 +47,6 @@ export function createEntrypoint(getAppCallback: () => KoaCallback) {
     process.once('SIGTERM', stopAll)
 
     // start the services in correct order
-    await database.start()
     await queue.createQueues()
     await api.startHttpsServer()
     await api.startWSServer()
