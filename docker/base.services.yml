@@ -80,7 +80,7 @@ services:
       - redis
   db:
     # ! Don't forget to update "db_emulated" image when updating version
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
@@ -97,4 +97,4 @@ services:
   db_emulated:
     extends:
       service: db
-    image: amd64/mysql:5.7
+    image: amd64/mysql:8.0
