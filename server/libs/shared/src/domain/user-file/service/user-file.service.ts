@@ -18,6 +18,7 @@ export class UserFileService {
     file.state = fileCreate.state
     file.description = fileCreate.description
     file.parentType = fileCreate.parentType
+    file.parentId = fileCreate.parentId
     file.scope = fileCreate.scope
     file.parentFolderId = fileCreate.parentFolderId
     file.scopedParentFolderId = fileCreate.scopedParentFolderId
