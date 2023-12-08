@@ -158,6 +158,10 @@ var invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folde
 	return client.Download(*args, *folderID, *spaceID, public, recursive, *outputFilePath, *overwriteFile)
 }
 
+var invokeFileViewLink = func(client precisionfda.IPFDAClient, fileID *string) error {
+	return client.FileViewLink(*fileID)
+}
+
 var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType string) error {
 	return client.DescribeEntity(*entityID, entityType)
 }
@@ -337,7 +341,6 @@ func mainInternal() int {
 		}
 	}
 
-
 	switch *command {
 	case "upload-asset":
 		if help {
@@ -480,19 +483,38 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
+	case "view-link":
+		if help {
+			return helpers.PrintViewLinkHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("File ID is required", *flagJson)
+		}
+
+		if !helpers.IsFileId(args[0]) {
+			return helpers.ErrorFromString(fmt.Sprintf("File ID '%s' is invalid", args[0]), *flagJson)
+		}
+
+		err := invokeFileViewLink(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
 	case "describe-app":
 		if help {
 			return helpers.PrintDescribeAppHelp()
 		}
 
-		if *appID == "" {
-			return helpers.ErrorFromString("App ID is required", *flagJson)
+		if *appID != "" {
+			args = []string{*appID}
 		}
 
 		if len(args) == 0 {
+			return helpers.ErrorFromString("App ID is required", *flagJson)
 		}
 
-		err := invokeDescribe(pfdaclient, appID, "app")
+		err := invokeDescribe(pfdaclient, &args[0], "app")
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -502,11 +524,15 @@ func mainInternal() int {
 			return helpers.PrintDescribeWorkflowHelp()
 		}
 
-		if *workflowID == "" {
+		if *workflowID != "" {
+			args = []string{*workflowID}
+		}
+
+		if len(args) == 0 {
 			return helpers.ErrorFromString("Workflow ID is required", *flagJson)
 		}
 
-		err := invokeDescribe(pfdaclient, workflowID, "workflow")
+		err := invokeDescribe(pfdaclient, &args[0], "workflow")
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}

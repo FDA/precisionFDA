@@ -279,3 +279,19 @@ func PrintGetSpaceIdHelp() int {
 	return 0
 }
 
+func PrintViewLinkHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Get view link of file.\n")
+	writeLine("  Usage:", "view-link <FILE_ID>\n")
+	writeLine("  Examples:", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 [Prints view link for specified file.]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -json", "Displays response in JSON format")
+
+	writer.Flush()
+	return 0
+}
+

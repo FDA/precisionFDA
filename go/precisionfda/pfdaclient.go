@@ -57,6 +57,7 @@ type IPFDAClient interface {
 	UploadMultipleFiles(paths []string, folderID string, spaceID string) error
 	DownloadFile(arg string, outputFilePath string, overwrite string) error
 	Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error
+	FileViewLink(arg string) error
 	DescribeEntity(entityID string, entityType string) error
 	ListSpaces(flags map[string]bool) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
@@ -739,6 +740,38 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 	} else if len(fileIDs) == 1 {
 		err := c.DownloadFile(fileIDs[0], outputFilePath, overwrite)
 		c.HandleError(err)
+	}
+	return nil
+}
+
+func (c *PFDAClient) FileViewLink(arg string) error {
+	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, arg)
+
+	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("%s not found. Please check that this file exists and you have access to it", arg)
+		} else {
+			return err
+		}
+	}
+
+	var resultJSON map[string]interface{}
+	err = json.Unmarshal(body, &resultJSON)
+	if err != nil {
+		return err
+	}
+
+	if resultJSON["file_url"] == nil {
+		return fmt.Errorf("Error while getting the url")
+	}
+
+	resultUrl := resultJSON["file_url"].(string) + "?inline"
+
+	if c.JsonResponse {
+		helpers.PrintResultAsJSON(struct {Url string `json:"url"`}{Url: resultUrl})
+	} else {
+		fmt.Println("Url to view file:", resultUrl)
 	}
 	return nil
 }
