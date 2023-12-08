@@ -665,6 +665,8 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 
 func (c *PFDAClient) Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error {
 
+	c.ContinueOnError = len(args) > 1
+
 	fileIDs := make([]string, 0)
 	fileNames := make([]string, 0)
 
@@ -731,7 +733,7 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 			selected := pickFile(children.Files, "Multiple files found matching the given name, select which to download")
 			fileIDs = append(fileIDs, selected)
 		} else if !recursive {
-			helpers.PrintError(fmt.Errorf("No files found matching: %s - please check it does exist and you have access to it", fileName), c.JsonResponse)
+			c.HandleError(fmt.Errorf("Unable to find any files matching '%s' - verify it exists and you have access to it", fileName))
 		}
 	}
 
@@ -946,7 +948,7 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			err := c.RemoveDir(arg)
 			c.HandleError(err)
 		} else {
-			helpers.PrintError(fmt.Errorf("Unable to remove non-empty folder"), c.JsonResponse)
+			c.HandleError(fmt.Errorf("Unable to remove non-empty folder"))
 		}
 	}
 
@@ -1010,7 +1012,7 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 			continue
 		}
 		if toBeDeletedCount == 0 {
-			helpers.PrintError(fmt.Errorf("Target file not found or inaccessible"), c.JsonResponse)
+			c.HandleError(fmt.Errorf("Target file not found or inaccessible"))
 			// arg processed, continue to next
 			continue
 		}
