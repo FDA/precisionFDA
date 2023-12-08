@@ -2,6 +2,7 @@ import { LockMode, Reference } from '@mikro-orm/core'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
 import type { notification, provenance, UserFileCreateFacade } from '@shared'
 import { ENUMS, spaceReport } from '@shared'
+import { SpaceMembership } from '@shared/domain'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
 import { SpaceReportResultGenerateFacade } from '../../src/facade/space-report-result-generate.facade'
@@ -17,11 +18,13 @@ describe('SpaceReportResultGenerateFacade', () => {
   const SPACE_NAME = 'space name'
   const SPACE_SCOPE = 'space scope'
   const SPACE_HOST_PROJECT = 'space host project'
+  const SPACE_GUEST_PROJECT = 'space guest project'
   const SPACE = {
     id: SPACE_ID,
     name: SPACE_NAME,
     scope: SPACE_SCOPE,
     hostProject: SPACE_HOST_PROJECT,
+    guestProject: SPACE_GUEST_PROJECT,
   }
 
   const REPORT = {
@@ -30,6 +33,9 @@ describe('SpaceReportResultGenerateFacade', () => {
     space: SPACE,
     createdAt: REPORT_CREATED_AT,
   }
+
+  const SPACE_MEMBERSHIP_IS_HOST = true
+  const SPACE_MEMBERSHIP = { isHost: () => SPACE_MEMBERSHIP_IS_HOST }
 
   const STYLES = 'styles'
   const RESULT = 'result'
@@ -62,6 +68,12 @@ describe('SpaceReportResultGenerateFacade', () => {
         { lockMode: LockMode.PESSIMISTIC_WRITE },
       )
       .resolves(REPORT)
+      .withArgs(SpaceMembership, {
+        spaces: SPACE_ID,
+        user: CREATOR_ID,
+        active: true,
+      })
+      .resolves(SPACE_MEMBERSHIP)
 
     populateStub.reset()
     populateStub.throws()
@@ -184,6 +196,32 @@ describe('SpaceReportResultGenerateFacade', () => {
     await getInstance().generate(REPORT_ID)
 
     expect(createNotificationStub.calledOnce).to.be.true()
+  })
+
+  it('should use guest project when membership is not host', async () => {
+    findOneStub
+      .withArgs(SpaceMembership, {
+        spaces: SPACE_ID,
+        user: CREATOR_ID,
+        active: true,
+      })
+      .resolves({ isHost: () => false })
+
+    createFileWithContentStub.reset()
+    createFileWithContentStub.throws()
+    createFileWithContentStub
+      .withArgs({
+        scope: SPACE_SCOPE,
+        project: SPACE_GUEST_PROJECT,
+        name: `PFDA - Space 100 report - ${REPORT_CREATED_AT.toLocaleDateString()}.html`,
+        content: RESULT,
+        description: `Report of a precisionFDA space space name, generatad on ${REPORT_CREATED_AT.toLocaleString()}`,
+      })
+      .resolves(FILE)
+
+    await getInstance().generate(REPORT_ID)
+
+    expect(createFileWithContentStub.calledOnce).to.be.true()
   })
 
   function getInstance() {

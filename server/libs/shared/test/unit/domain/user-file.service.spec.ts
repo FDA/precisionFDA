@@ -84,6 +84,7 @@ describe('UserFileService', () => {
       expect(res.user).to.eq(USER)
       expect(res.name).to.eq(NAME)
       expect(res.state).to.eq(STATE)
+      expect(res.parentId).to.eq(PARENT_ID)
       expect(res.parentType).to.eq(FILE_PARENT_TYPE)
       expect(res.scope).to.eq(FILE_SCOPE)
       expect(res.uid).to.eq(`${DXID}-1`)

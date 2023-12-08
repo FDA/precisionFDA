@@ -2,13 +2,15 @@ import { LockMode, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import type { UserFileCreateFacade } from '@shared'
 import { ENUMS, errors, notification, spaceReport, provenance } from '@shared'
+import { SpaceMembership } from '@shared/domain'
+import { getProjectDxid } from '@shared/domain/space/space.helper'
 
 export class SpaceReportResultGenerateFacade {
-  private readonly spaceReportService
-  private readonly userFileCreateFacade
-  private readonly em
-  private readonly notificationService
-  private readonly entityProvenanceService
+  private readonly spaceReportService: spaceReport.SpaceReportService
+  private readonly userFileCreateFacade: UserFileCreateFacade
+  private readonly em: SqlEntityManager
+  private readonly notificationService: notification.NotificationService
+  private readonly entityProvenanceService: provenance.EntityProvenanceService
 
   constructor(
     em: SqlEntityManager,
@@ -48,7 +50,9 @@ export class SpaceReportResultGenerateFacade {
       )
 
       if (report == null) {
-        throw new errors.NotFoundError(`Report with id ${reportId} does not exist or is in an invalid state`)
+        throw new errors.NotFoundError(
+          `Report with id ${reportId} does not exist or is in an invalid state`,
+        )
       }
 
       await this.em.populate(report, ['reportParts', 'space', 'createdBy'])
@@ -56,9 +60,21 @@ export class SpaceReportResultGenerateFacade {
       const provenanceStyles = await this.entityProvenanceService.getSvgStyles()
       const reportResult = await this.spaceReportService.generateResult(report, provenanceStyles)
 
+      const membership = await this.em.findOne(SpaceMembership, {
+        spaces: report.space.id,
+        user: report.createdBy.id,
+        active: true,
+      })
+
+      if (membership == null) {
+        throw new errors.NotFoundError(
+          `The report creator with id "${report.createdBy.id}" no longer has an active membership in space id "${report.space.id}"`,
+        )
+      }
+
       const file = await this.userFileCreateFacade.createFileWithContent({
         scope: report.space.scope,
-        project: report.space.hostProject,
+        project: getProjectDxid(report.space, membership),
         name: this.getName(report),
         content: reportResult,
         description: this.getDescription(report),

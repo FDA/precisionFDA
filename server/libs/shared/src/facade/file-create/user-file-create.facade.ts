@@ -7,9 +7,9 @@ import { FileCreateWithContent } from './model/file-create-with-content'
 import { errors } from '../..'
 
 export class UserFileCreateFacade {
-  private readonly userCtx
-  private readonly platformFileService
-  private readonly userFileService
+  private readonly userCtx: UserCtx
+  private readonly platformFileService: PlatformFileService
+  private readonly userFileService: UserFileService
 
   constructor(
     userCtx: UserCtx,
