@@ -139,7 +139,7 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
-### 2.5.0 (2023-12-07) 
+### 2.5.0 (2023-12-14) 
 - fixed uploading complex folder structure on windows
 - fixed uploading large files 
 - added support of JSON response format for most commands
