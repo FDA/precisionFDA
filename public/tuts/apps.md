@@ -59,7 +59,7 @@ Click the Windows download button to place the zip file and double click it in t
 
 ![](https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/image5.png)
 
-Click on Extract all to decompress the pfda CLI and browse to select the Desktop as the destination for the pfda.exe file.
+Click on Extract all to decompress the pfda CLI and browse to select the Desktop as the destination for the pfda.exe file. NOTE: On FDA laptops, you will need to install the pfda.exe file in C:\temp\ or you will get a permissions error when trying to run it.
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
   <img src="https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/image6.png" alt="1" />
@@ -78,11 +78,13 @@ First, copy a file ID to test downloading, and retrieve an authorization key tha
 ![](https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/image10.png)
 
 ```
-:: Provide the auth key
-:: Download the selected file
+# Provide the auth key
+set key=<paste key>
+
+# Download the selected file
 C:\Users\oserang\Desktop\pfda.exe download -key <key> -file-id file-GJv1zKj0Kj2vzFP4Gg475ZyX-1
 
-:: Copy it to a new file and upload it
+# Copy it to a new file and upload it
 copy foo2.txt moo2.txt
 C:\Users\oserang\Desktop\pfda.exe upload-file -file moo2.txt
 
@@ -98,15 +100,15 @@ Copy the download URL and install and test uploading and downloading files. Firs
 
 ![](https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/image10.png)
 
-```bash
+```
 -- Install pfda CLI
-wget https://pfda-production-static-files.s3.amazonaws.com/tuts/cli/pfda-linux-2.2.tar.gz
-tar xf pfda-linux-2.2.tar.gz 
+wget <paste URL from CLI download>
+tar xf pfda-linux-<version>.tar.gz 
 mv pfda /usr/bin/
 pfda --version
 
 -- Provide the auth key
-key="….."
+key="<paste key>"
 
 -- Download the selected file
 pfda download -key $key -file-id file-GJv1zKj0Kj2vzFP4Gg475ZyX-1
@@ -125,7 +127,16 @@ foo2.txt  moo2.txt
 
 The first app demonstrates the use of string input variables, allowing the app to access the internet, how to use the emit shell function to output a named file. This app pulls a docker image and saves it to a .tar file suitable for use in precisionFDA apps. We'll create three image files in our Files:
 
-![](https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/table.png)
+<table>
+  <thead>
+    <tr><th></th><th>docker_source</th><th>docker_image_filename</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>ubuntu:latest</td><td>ubuntu_latest.tar</td></tr>
+    <tr><td>2</td><td>biocontainers/samtools:v1.9-4-deb_cv1</td><td>samtools_biocontainers.tar</td></tr>
+    <tr><td>3</td><td>postgres:13.4-buster</td><td>postgres_13.4-buster.tar</td></tr>
+  </tbody>
+</table>
 
 ## Create the docker_pull_and_save App
 
@@ -303,12 +314,13 @@ after the tar command above is run in the app script.
 
 In My Home / Apps, click the Create App button to create the *worker_layout_inspection* app. In the I/O Spec tab, add the input and output fields.
 
-![](https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/image21.png)
+![](/tuts/apps-media/image21.png)
 
 <table>
   <thead>
     <tr>
       <th>Class</th>
+      <th>Array?</th>
       <th>Input Name</th>
       <th>Label</th>
       <th>Default Value</th>
@@ -316,67 +328,100 @@ In My Home / Apps, click the Create App button to create the *worker_layout_insp
   </thead>
   <tr>
     <td>string</td>
+    <td></td>
     <td>string_input</td>
     <td>example string input</td>
     <td>this is a string</td>
   </tr>
   <tr>
     <td>int</td>
+    <td></td>
     <td>integer_input</td>
     <td>example integer input</td>
     <td>54321</td>
   </tr>
   <tr>
     <td>float</td>
+    <td></td>
     <td>float_input</td>
     <td>example float input</td>
     <td>1.234</td>
   </tr>
   <tr>
     <td>boolean</td>
+    <td></td>
     <td>boolean_input</td>
     <td>example boolean input</td>
     <td>FALSE</td>
   </tr>
   <tr>
     <td>file</td>
+    <td></td>
     <td>observation_data</td>
     <td>Delimited observation data</td>
     <td>observations.txt</td>
   </tr>
   <tr>
     <td>file</td>
+    <td></td>
     <td>patient data -</td>
     <td>Delimited patient data</td>
     <td>patients.txt</td>
   </tr>
   <tr>
     <td>file</td>
+    <td></td>
     <td>samtools docker - image</td>
     <td>Docker image for Samtools</td>
     <td>samtools biocontaine rs.tar</td>
   </tr>
   <tr>
     <td>file</td>
+    <td></td>
     <td>postgres_docker_ image</td>
     <td>Docker image for postgres server</td>
     <td>postgres_13.4- buster.tar</td>
   </tr>
   <tr>
     <td>string</td>
+    <td></td>
     <td>inspection resul ts filename -</td>
     <td>Inspection results filename</td>
     <td>inspection_results.t xt</td>
   </tr>
   <tr>
     <td>string</td>
+    <td></td>
     <td>url_to_fetch</td>
     <td>URL to pass to next app in workflow</td>
     <td>https://pfda- production-static- files.s3.amazonaws.c om/cli/pfda-linux- 2.2.tar.gz</td>
   </tr>
+
+  <tr>
+    <td>string</td>
+    <td>Yes</td>
+    <td>string_array_input image</td>
+    <td>example string array input</td>
+    <td>string1,string2,string3</td>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>Yes</td>
+    <td>integer_array_input</td>
+    <td>example integer array input</td>
+    <td>5,4,3,2,1</td>
+  </tr>
+  <tr>
+    <td>file</td>
+    <td>Yes</td>
+    <td>file_array_input</td>
+    <td>example file array input</td>
+    <td>(select three files)</td>
+  </tr>
   <thead>
     <tr>
       <th>Class</th>
+      <th>Array?</th>
       <th>Output Name</th>
       <th>Label</th>
       <th></th>
@@ -384,14 +429,30 @@ In My Home / Apps, click the Create App button to create the *worker_layout_insp
   </thead>
   <tr>
     <td>file</td>
+    <td></td>
     <td>Inspection resul - ts</td>
     <td>Worker layout and variable inspection results</td>
     <td></td>
   </tr>
   <tr>
     <td>string</td>
+    <td></td>
     <td>url_to_fetch</td>
     <td>URL to pass to next app in workflow</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>file</td>
+    <td>Yes</td>
+    <td>file_array_output</td>
+    <td>example file array output</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>Yes</td>
+    <td>string_array_output</td>
+    <td>example string array output</td>
     <td></td>
   </tr>
 </table>
@@ -400,7 +461,7 @@ In My Home / Apps, click the Create App button to create the *worker_layout_insp
 
 In the VM Environment tab, enable internet access, select default instance Baseline 2, and add the following assets: worker_layout_inspection, pfda_cli_2.2, and ubuntu_asset.
 
-![](https://pfda-production-static-files.s3.amazonaws.com/tuts/apps-media/image22.png)
+![](/tuts/apps-media/image22.png)
 
 ### Specify the Script
 
@@ -771,12 +832,14 @@ Create a *untar_files* app titled "Untar archive to files", with the
 following I/O Spec.
 
 <table>
+  <thead>
     <tr>
         <th>Class</th>
         <th>Input Name</th>
         <th>Label</th>
         <th>Default Value</th>
     </tr>
+    </thead>
     <tr>
         <td>string</td>
         <td>pfda_key</td>
