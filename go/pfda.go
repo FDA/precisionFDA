@@ -75,18 +75,19 @@ To print version info and exit :
    pfda -version
 
 All available commands:
+   pfda cat
    pfda describe-app
    pfda describe-workflow
    pfda download
-   pfda ls
+   pfda get-space-id
+   pfda head
    pfda list-spaces
+   pfda ls
+   pfda mkdir
+   pfda rm
+   pfda rmdir
    pfda upload-asset
    pfda upload-file
-   pfda mkdir
-   pfda rmdir
-   pfda rm
-   pfda head
-   pfda cat
 
 Command specific help section with description, examples and available flags:
    pfda <COMMAND> -help
@@ -637,13 +638,11 @@ func mainInternal() int {
 			return helpers.PrintGetSpaceIdHelp()
 		}
 
-		spaceID := config.GetSpaceId()
-		if config == nil || spaceID == "" {
+		if config == nil || config.GetSpaceId() == "" {
 			// error while getting config or spaceID not set
 			return helpers.ErrorFromString("No space detected", *flagJson)
 		}
-
-		helpers.PrintResult(spaceID, *flagJson)
+		helpers.PrintResult(config.GetSpaceId(), *flagJson)
 
 	case "refresh-key":
 		// add option for auto-refresh later
@@ -683,7 +682,7 @@ func mainInternal() int {
 
 	default:
 		// Invalid, non-empty command
-		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of \n'cat' \n'describe-app' \n'describe-workflow' \n'download' \n'get-space-id' \n'head \n'list-spaces' \n'ls' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n", *command), *flagJson)
+		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of \n'cat' \n'describe-app' \n'describe-workflow' \n'download' \n'get-space-id' \n'head \n'list-spaces' \n'ls' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n", *command), *flagJson)
 	}
 
 	// Write configuration and save key
