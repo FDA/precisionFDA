@@ -13,10 +13,10 @@ import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { capitalize } from '../../../utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, StyledForm } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { changeMembershipRoleRequest } from './members.api'
 import { MemberRole, SpaceMembership } from './members.types'
+import { StyledFields, StyledFooter } from './members.styles'
 
 interface FormValues {
   role: { label: string; value: MemberRole }
@@ -113,46 +113,46 @@ export const useChangeMemberRoleModal = ({
         headerText="Change member role"
         hide={() => setShowModal(false)}
       />
-      <StyledForm onSubmit={handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <label>Username</label>
-          <InputText label="Username" value={member.user_name} disabled />
-        </FieldGroup>
-        <FieldGroup>
-          <label>Current role</label>
-          <InputText
-            label="Current Role"
-            value={member.active ? member.role : `${member.role} (disabled)`}
-            disabled
-          />
-        </FieldGroup>
-        <FieldGroup>
-          <label>Change to role</label>
-          <Controller
-            name="role"
-            control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Select
-                options={roleOptions}
-                onChange={onChange}
-                isLoading={mutation.isLoading}
-                onBlur={onBlur}
-                value={value}
-                isDisabled={mutation.isLoading}
-                defaultInputValue={undefined}
-              />
-            )}
-          />
-          <Hint>Select the members role</Hint>
-          <ErrorMessage
-            errors={errors}
-            name="name"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
-        </FieldGroup>
-      </StyledForm>
-      <Footer>
-        <ButtonRow>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <StyledFields>
+          <FieldGroup>
+            <label>Username</label>
+            <InputText label="Username" value={member.user_name} disabled />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Current role</label>
+            <InputText
+              label="Current Role"
+              value={member.active ? member.role : `${member.role} (disabled)`}
+              disabled
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Change to role</label>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <Select
+                  options={roleOptions}
+                  onChange={onChange}
+                  isLoading={mutation.isLoading}
+                  onBlur={onBlur}
+                  value={value}
+                  isDisabled={mutation.isLoading}
+                  defaultInputValue={undefined}
+                />
+              )}
+            />
+            <Hint>Select the members role</Hint>
+            <ErrorMessage
+              errors={errors}
+              name="name"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
+        </StyledFields>
+        <StyledFooter>
           <Button
             type="button"
             onClick={() => {
@@ -167,12 +167,12 @@ export const useChangeMemberRoleModal = ({
           <ButtonSolidBlue
             type="submit"
             disabled={Object.keys(errors).length > 0 || mutation.isLoading}
-            aria-label="Submit add members"
+            aria-label="Change member role"
           >
             Change Role
           </ButtonSolidBlue>
-        </ButtonRow>
-      </Footer>
+        </StyledFooter>
+      </form>
     </ModalNext>
   )
   return {

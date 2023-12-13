@@ -10,10 +10,11 @@ import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, StyledForm } from '../../modal/styles'
+import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { addMembersToSpaceRequest } from './members.api'
 import { MemberRole } from './members.types'
+import { StyledFields, StyledFooter } from './members.styles'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
@@ -76,7 +77,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
-      <StyledForm onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <ModalHeaderTop
           disableClose={false}
           headerText="Add members to space"
@@ -84,6 +85,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
             setShowModal(false)
           }}
         />
+        <StyledFields>
 
         <FieldGroup>
           <label>Username List</label>
@@ -109,7 +111,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
           <Controller
             name="invitees_role"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur }}) => (
               <Select
                 options={[
                   { value: 'admin', label: 'Admin' },
@@ -131,7 +133,8 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <Footer>
+        </StyledFields>
+        <StyledFooter>
           <ButtonRow>
             <Button
               type="button"
@@ -152,8 +155,8 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
               Add Members
             </ButtonSolidBlue>
           </ButtonRow>
-        </Footer>
-      </StyledForm>
+        </StyledFooter>
+      </form>
     </ModalNext>
   )
   return {
