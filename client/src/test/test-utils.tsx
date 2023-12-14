@@ -2,6 +2,7 @@
 import '@testing-library/jest-dom/extend-expect'
 import 'whatwg-fetch'
 import { render, RenderOptions } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React, { FC, ReactElement } from 'react'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
@@ -47,4 +48,4 @@ afterEach(() => {
 })
 afterAll(() => server.close())
 
-export { customRender as render, history }
+export { customRender as render, history, userEvent }

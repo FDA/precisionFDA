@@ -6,11 +6,11 @@
  *
  */
 
-import './Modal.css'
+import './Modal.css';
 
-import * as React from 'react'
-import { ReactNode, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
+import * as React from 'react';
+import {ReactNode, useEffect, useRef} from 'react';
+import {createPortal} from 'react-dom';
 
 function PortalImpl({
   onClose,
@@ -23,48 +23,48 @@ function PortalImpl({
   onClose: () => void;
   title: string;
 }) {
-  const modalRef = useRef<HTMLDivElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (modalRef.current !== null) {
-      modalRef.current.focus()
+      modalRef.current.focus();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    let modalOverlayElement: HTMLElement | null = null
+    let modalOverlayElement: HTMLElement | null = null;
     const handler = (event: KeyboardEvent) => {
-      if (event.keyCode === 27) {
-        onClose()
+      if (event.key === 'Escape') {
+        onClose();
       }
-    }
+    };
     const clickOutsideHandler = (event: MouseEvent) => {
-      const { target } = event
+      const target = event.target;
       if (
         modalRef.current !== null &&
         !modalRef.current.contains(target as Node) &&
         closeOnClickOutside
       ) {
-        onClose()
+        onClose();
       }
-    }
-    const modelElement = modalRef.current
+    };
+    const modelElement = modalRef.current;
     if (modelElement !== null) {
-      modalOverlayElement = modelElement.parentElement
+      modalOverlayElement = modelElement.parentElement;
       if (modalOverlayElement !== null) {
-        modalOverlayElement.addEventListener('click', clickOutsideHandler)
+        modalOverlayElement.addEventListener('click', clickOutsideHandler);
       }
     }
 
-    window.addEventListener('keydown', handler)
+    window.addEventListener('keydown', handler);
 
     return () => {
-      window.removeEventListener('keydown', handler)
+      window.removeEventListener('keydown', handler);
       if (modalOverlayElement !== null) {
-        modalOverlayElement?.removeEventListener('click', clickOutsideHandler)
+        modalOverlayElement?.removeEventListener('click', clickOutsideHandler);
       }
-    }
-  }, [closeOnClickOutside, onClose])
+    };
+  }, [closeOnClickOutside, onClose]);
 
   return (
     <div className="Modal__overlay" role="dialog">
@@ -80,7 +80,7 @@ function PortalImpl({
         <div className="Modal__content">{children}</div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function Modal({
@@ -102,5 +102,5 @@ export default function Modal({
       {children}
     </PortalImpl>,
     document.body,
-  )
+  );
 }
