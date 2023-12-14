@@ -6,10 +6,10 @@
  *
  */
 
-import './Input.css'
+import './Input.css';
 
-import * as React from 'react'
-import { HTMLInputTypeAttribute } from 'react'
+import * as React from 'react';
+import {HTMLInputTypeAttribute} from 'react';
 
 type Props = Readonly<{
   'data-testid'?: string;
@@ -37,10 +37,10 @@ export default function TextInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => {
-          onChange(e.target.value)
+          onChange(e.target.value);
         }}
         data-testid={dataTestId}
       />
     </div>
-  )
+  );
 }
