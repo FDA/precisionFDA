@@ -17,6 +17,9 @@ dependencies:
   '@lexical/code':
     specifier: 0.12.4
     version: 0.12.4(lexical@0.12.4)
+  '@lexical/hashtag':
+    specifier: 0.12.4
+    version: 0.12.4(lexical@0.12.4)
   '@lexical/html':
     specifier: 0.12.4
     version: 0.12.4(lexical@0.12.4)
@@ -24,6 +27,12 @@ dependencies:
     specifier: 0.12.4
     version: 0.12.4(lexical@0.12.4)
   '@lexical/list':
+    specifier: 0.12.4
+    version: 0.12.4(lexical@0.12.4)
+  '@lexical/mark':
+    specifier: 0.12.4
+    version: 0.12.4(lexical@0.12.4)
+  '@lexical/overflow':
     specifier: 0.12.4
     version: 0.12.4(lexical@0.12.4)
   '@lexical/react':
