@@ -57,7 +57,8 @@ import {
 } from 'react';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
-// import {IS_APPLE} from 'shared/environment';
+import {IS_APPLE} from '../environment';
+import DOMPurify from 'dompurify';
 
 import {CellContext} from '../plugins/TablePlugin';
 import {
@@ -72,8 +73,6 @@ import {
   Rows,
   TableNode,
 } from './TableNode';
-import { IS_APPLE } from '../environment';
-import DOMPurify from 'dompurify';
 
 type SortOptions = {type: 'ascending' | 'descending'; x: number};
 
@@ -1719,7 +1718,11 @@ export default function TableComponent({
   }
 
   return (
-    <div style={{position: 'relative'}}>
+    <div
+      style={{
+        position: 'relative',
+        width: (tableRef.current?.offsetWidth || 0) + 'px',
+      }}>
       <table
         className={`${theme.table} ${isSelected ? theme.tableSelected : ''}`}
         ref={tableRef}

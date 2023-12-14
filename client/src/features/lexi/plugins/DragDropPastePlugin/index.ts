@@ -6,13 +6,13 @@
  *
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { DRAG_DROP_PASTE } from '@lexical/rich-text'
-import { isMimeType, mediaFileReader } from '@lexical/utils'
-import { COMMAND_PRIORITY_LOW } from 'lexical'
-import { useEffect } from 'react'
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {DRAG_DROP_PASTE} from '@lexical/rich-text';
+import {isMimeType, mediaFileReader} from '@lexical/utils';
+import {COMMAND_PRIORITY_LOW} from 'lexical';
+import {useEffect} from 'react';
 
-import { INSERT_IMAGE_COMMAND } from '../ImagesPlugin'
+import {INSERT_IMAGE_COMMAND} from '../ImagesPlugin';
 
 const ACCEPTABLE_IMAGE_TYPES = [
   'image/',
@@ -20,10 +20,10 @@ const ACCEPTABLE_IMAGE_TYPES = [
   'image/heif',
   'image/gif',
   'image/webp',
-]
+];
 
 export default function DragDropPaste(): null {
-  const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext();
   useEffect(() => {
     return editor.registerCommand(
       DRAG_DROP_PASTE,
@@ -32,20 +32,20 @@ export default function DragDropPaste(): null {
           const filesResult = await mediaFileReader(
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x),
-          )
-          for (const { file, result } of filesResult) {
+          );
+          for (const {file, result} of filesResult) {
             if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
               editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
                 altText: file.name,
                 src: result,
-              })
+              });
             }
           }
-        })()
-        return true
+        })();
+        return true;
       },
       COMMAND_PRIORITY_LOW,
-    )
-  }, [editor])
-  return null
+    );
+  }, [editor]);
+  return null;
 }
