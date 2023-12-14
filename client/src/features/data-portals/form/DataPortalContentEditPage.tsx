@@ -22,6 +22,7 @@ const ContentEditButtonRow = styled.div`
   justify-content: space-between;
   margin-bottom: 16px;
   padding: 0 12px;
+  max-width: 1000px;
 `
 
 const SubmitRow = styled.div`

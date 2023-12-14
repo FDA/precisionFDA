@@ -24,72 +24,66 @@ import type {
   SerializedEditor,
   SerializedLexicalNode,
   Spread,
-} from 'lexical'
+} from 'lexical';
 
-import { $applyNodeReplacement, createEditor, DecoratorNode } from 'lexical'
-import * as React from 'react'
-import { Suspense } from 'react'
+import {$applyNodeReplacement, createEditor, DecoratorNode} from 'lexical';
+import * as React from 'react';
+import {Suspense} from 'react';
 
-const InlineImageComponent = React.lazy(() => import('./InlineImageComponent'))
+const InlineImageComponent = React.lazy(() => import('./InlineImageComponent'));
 
-export type Position = 'left' | 'right' | 'full' | undefined
+export type Position = 'left' | 'right' | 'full' | undefined;
 
 export interface InlineImagePayload {
-  altText: string
-  caption?: LexicalEditor
-  height?: number
-  key?: NodeKey
-  showCaption?: boolean
-  src: string
-  width?: number
-  position?: Position
+  altText: string;
+  caption?: LexicalEditor;
+  height?: number;
+  key?: NodeKey;
+  showCaption?: boolean;
+  src: string;
+  width?: number;
+  position?: Position;
 }
 
 export interface UpdateInlineImagePayload {
-  altText?: string
-  showCaption?: boolean
-  position?: Position
+  altText?: string;
+  showCaption?: boolean;
+  position?: Position;
 }
 
 function convertInlineImageElement(domNode: Node): null | DOMConversionOutput {
   if (domNode instanceof HTMLImageElement) {
-    const { alt: altText, src, width, height } = domNode
-    const node = $createInlineImageNode({ altText, height, src, width })
-    return { node }
+    const {alt: altText, src, width, height} = domNode;
+    const node = $createInlineImageNode({altText, height, src, width});
+    return {node};
   }
-  return null
+  return null;
 }
 
 export type SerializedInlineImageNode = Spread<
   {
-    altText: string
-    caption: SerializedEditor
-    height?: number
-    showCaption: boolean
-    src: string
-    width?: number
-    position?: Position
+    altText: string;
+    caption: SerializedEditor;
+    height?: number;
+    showCaption: boolean;
+    src: string;
+    width?: number;
+    position?: Position;
   },
   SerializedLexicalNode
->
+>;
 
 export class InlineImageNode extends DecoratorNode<JSX.Element> {
-  __src: string
-
-  __altText: string
-
-  __width: 'inherit' | number
-
-  __height: 'inherit' | number
-
-  __showCaption: boolean
-
-  __caption: LexicalEditor
-
-  __position: Position
+  __src: string;
+  __altText: string;
+  __width: 'inherit' | number;
+  __height: 'inherit' | number;
+  __showCaption: boolean;
+  __caption: LexicalEditor;
+  __position: Position;
 
   static getType(): string {
-    return 'inline-image'
+    return 'inline-image';
   }
 
   static clone(node: InlineImageNode): InlineImageNode {
@@ -102,14 +96,14 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
       node.__showCaption,
       node.__caption,
       node.__key,
-    )
+    );
   }
 
   static importJSON(
     serializedNode: SerializedInlineImageNode,
   ): InlineImageNode {
-    const { altText, height, width, caption, src, showCaption, position } =
-      serializedNode
+    const {altText, height, width, caption, src, showCaption, position} =
+      serializedNode;
     const node = $createInlineImageNode({
       altText,
       height,
@@ -117,13 +111,13 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
       showCaption,
       src,
       width,
-    })
-    const nestedEditor = node.__caption
-    const editorState = nestedEditor.parseEditorState(caption.editorState)
+    });
+    const nestedEditor = node.__caption;
+    const editorState = nestedEditor.parseEditorState(caption.editorState);
     if (!editorState.isEmpty()) {
-      nestedEditor.setEditorState(editorState)
+      nestedEditor.setEditorState(editorState);
     }
-    return node
+    return node;
   }
 
   static importDOM(): DOMConversionMap | null {
@@ -132,7 +126,7 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
         conversion: convertInlineImageElement,
         priority: 0,
       }),
-    }
+    };
   }
 
   constructor(
@@ -145,23 +139,23 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
     caption?: LexicalEditor,
     key?: NodeKey,
   ) {
-    super(key)
-    this.__src = src
-    this.__altText = altText
-    this.__width = width || 'inherit'
-    this.__height = height || 'inherit'
-    this.__showCaption = showCaption || false
-    this.__caption = caption || createEditor()
-    this.__position = position
+    super(key);
+    this.__src = src;
+    this.__altText = altText;
+    this.__width = width || 'inherit';
+    this.__height = height || 'inherit';
+    this.__showCaption = showCaption || false;
+    this.__caption = caption || createEditor();
+    this.__position = position;
   }
 
   exportDOM(): DOMExportOutput {
-    const element = document.createElement('img')
-    element.setAttribute('src', this.__src)
-    element.setAttribute('alt', this.__altText)
-    element.setAttribute('width', this.__width.toString())
-    element.setAttribute('height', this.__height.toString())
-    return { element }
+    const element = document.createElement('img');
+    element.setAttribute('src', this.__src);
+    element.setAttribute('alt', this.__altText);
+    element.setAttribute('width', this.__width.toString());
+    element.setAttribute('height', this.__height.toString());
+    return {element};
   }
 
   exportJSON(): SerializedInlineImageNode {
@@ -175,72 +169,72 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
       type: 'inline-image',
       version: 1,
       width: this.__width === 'inherit' ? 0 : this.__width,
-    }
+    };
   }
 
   getSrc(): string {
-    return this.__src
+    return this.__src;
   }
 
   getAltText(): string {
-    return this.__altText
+    return this.__altText;
   }
 
   setAltText(altText: string): void {
-    const writable = this.getWritable()
-    writable.__altText = altText
+    const writable = this.getWritable();
+    writable.__altText = altText;
   }
 
   setWidthAndHeight(
     width: 'inherit' | number,
     height: 'inherit' | number,
   ): void {
-    const writable = this.getWritable()
-    writable.__width = width
-    writable.__height = height
+    const writable = this.getWritable();
+    writable.__width = width;
+    writable.__height = height;
   }
 
   getShowCaption(): boolean {
-    return this.__showCaption
+    return this.__showCaption;
   }
 
   setShowCaption(showCaption: boolean): void {
-    const writable = this.getWritable()
-    writable.__showCaption = showCaption
+    const writable = this.getWritable();
+    writable.__showCaption = showCaption;
   }
 
   getPosition(): Position {
-    return this.__position
+    return this.__position;
   }
 
   setPosition(position: Position): void {
-    const writable = this.getWritable()
-    writable.__position = position
+    const writable = this.getWritable();
+    writable.__position = position;
   }
 
   update(payload: UpdateInlineImagePayload): void {
-    const writable = this.getWritable()
-    const { altText, showCaption, position } = payload
+    const writable = this.getWritable();
+    const {altText, showCaption, position} = payload;
     if (altText !== undefined) {
-      writable.__altText = altText
+      writable.__altText = altText;
     }
     if (showCaption !== undefined) {
-      writable.__showCaption = showCaption
+      writable.__showCaption = showCaption;
     }
     if (position !== undefined) {
-      writable.__position = position
+      writable.__position = position;
     }
   }
 
   // View
 
   createDOM(config: EditorConfig): HTMLElement {
-    const span = document.createElement('span')
-    const className = `${config.theme.inlineImage} position-${this.__position}`
+    const span = document.createElement('span');
+    const className = `${config.theme.inlineImage} position-${this.__position}`;
     if (className !== undefined) {
-      span.className = className
+      span.className = className;
     }
-    return span
+    return span;
   }
 
   updateDOM(
@@ -248,14 +242,14 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
     dom: HTMLElement,
     config: EditorConfig,
   ): false {
-    const position = this.__position
+    const position = this.__position;
     if (position !== prevNode.__position) {
-      const className = `${config.theme.inlineImage} position-${position}`
+      const className = `${config.theme.inlineImage} position-${position}`;
       if (className !== undefined) {
-        dom.className = className
+        dom.className = className;
       }
     }
-    return false
+    return false;
   }
 
   decorate(): JSX.Element {
@@ -272,7 +266,7 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
           position={this.__position}
         />
       </Suspense>
-    )
+    );
   }
 }
 
@@ -297,11 +291,11 @@ export function $createInlineImageNode({
       caption,
       key,
     ),
-  )
+  );
 }
 
 export function $isInlineImageNode(
   node: LexicalNode | null | undefined,
 ): node is InlineImageNode {
-  return node instanceof InlineImageNode
+  return node instanceof InlineImageNode;
 }

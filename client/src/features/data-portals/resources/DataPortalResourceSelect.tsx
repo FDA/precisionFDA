@@ -50,10 +50,8 @@ const DataPortalResourceSelect = ({
   }>()
   const { data, status, refetch } = useListDataPortalResourcesQuery(portalId)
 
-  if (status === 'loading') return <Loader />
-
   return (
-    <ModalScroll>
+    <ModalScroll data-testid="lexi-resource-select">
       {data?.length === 0 && (
         <NoContent>
           <p>This Data Portal has no resources</p>
@@ -70,7 +68,7 @@ const DataPortalResourceSelect = ({
           </Button>
         </NoContent>
       )}
-      <ResourcesSelect list={data || []} onChange={onSelect} />
+      {status === 'loading' ? <Loader /> : <ResourcesSelect list={data || []} onChange={onSelect} />}
     </ModalScroll>
   )
 }
