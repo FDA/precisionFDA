@@ -44,7 +44,7 @@ export const buildMessageFromMfaResponse = (userEntries: ResponseShape<Result>[]
   let finalMessages = successfulResponses.length > 0 ? [
     `${successfulResponses.length} user MFA requests were successful`,
   ] : []
-  finalMessages = finalMessages.concat(Object.entries(handledErrorsDict).map(([errorType, { message, users }]) => `${itemsCountString('user', users.length)} encountered "${errorType}", with message "${message}" - Impacted ${itemsCountString('user', users.length)}`))
+  finalMessages = finalMessages.concat(Object.entries(handledErrorsDict).map(([errorType, { message, users }]) => `${itemsCountString('user', users.length)} encountered "${errorType}", with message "${message}"`))
   if (unhandledErrorResponses.length > 0) {
     finalMessages = finalMessages.concat([
       `${itemsCountString('user', unhandledErrorResponses.length)} encountered unhandled server error - ${unhandledErrorResponses.map(({ dxuser: user }) => `"${user}"`).join(', ')}`,
