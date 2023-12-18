@@ -49,6 +49,21 @@ module PathHelper
     end
   end
 
+  def space_pathify(item, space_id)
+    case item.klass
+    when "file"
+      "/spaces/#{space_id}/files/#{item.uid}"
+    when "app"
+      "/spaces/#{space_id}/apps/#{item.uid}"
+    when "workflow"
+      "/spaces/#{space_id}/workflows/#{item.uid}"
+    when "job"
+      "/spaces/#{space_id}/executions/#{item.uid}"
+    else
+      raise "Unknown class #{item.klass}"
+    end
+  end
+
   def pathify(item)
     case item.klass
     when "file"

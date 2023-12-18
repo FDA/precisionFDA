@@ -1,5 +1,5 @@
 file node[:ssh_key_path] do
-  content lazy { node.run_state["ssm_params"]["app"]["app_source"]["ssh_key"] }
+  content(lazy { node.run_state["ssm_params"]["app"]["app_source"]["ssh_key"] })
   owner node[:deploy_user]
   group node[:deploy_user]
   mode 0600

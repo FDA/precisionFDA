@@ -215,7 +215,6 @@ export const StyledRight = styled.div`
 
 export const StyledNameCell = styled.div<{ color?: string }>`
   display: flex;
-  flex-grow: 1;
   align-items: center;
   cursor: pointer;
   color: ${colors.primaryBlue};
@@ -232,6 +231,7 @@ export const StyledNameCell = styled.div<{ color?: string }>`
 `
 
 export const StyledLinkCell = styled(Link)`
+  width: min-content;
   display: flex;
   align-items: center;
   gap: 5px;

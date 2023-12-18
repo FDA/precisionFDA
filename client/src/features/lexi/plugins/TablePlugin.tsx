@@ -124,7 +124,7 @@ export function InsertTableDialog({
         label="Rows"
         onChange={setRows}
         value={rows}
-        data-test-id="table-modal-rows"
+        data-testid="table-modal-rows"
         type="number"
       />
       <TextInput
@@ -132,10 +132,10 @@ export function InsertTableDialog({
         label="Columns"
         onChange={setColumns}
         value={columns}
-        data-test-id="table-modal-columns"
+        data-testid="table-modal-columns"
         type="number"
       />
-      <DialogActions data-test-id="table-model-confirm-insert">
+      <DialogActions data-testid="table-model-confirm-insert">
         <Button disabled={isDisabled} onClick={onClick}>
           Confirm
         </Button>
@@ -177,7 +177,7 @@ export function InsertNewTableDialog({
         label="Rows"
         onChange={setRows}
         value={rows}
-        data-test-id="table-modal-rows"
+        data-testid="table-modal-rows"
         type="number"
       />
       <TextInput
@@ -185,10 +185,10 @@ export function InsertNewTableDialog({
         label="Columns"
         onChange={setColumns}
         value={columns}
-        data-test-id="table-modal-columns"
+        data-testid="table-modal-columns"
         type="number"
       />
-      <DialogActions data-test-id="table-model-confirm-insert">
+      <DialogActions data-testid="table-model-confirm-insert">
         <Button disabled={isDisabled} onClick={onClick}>
           Confirm
         </Button>

@@ -75,7 +75,7 @@ module Admin
 
     # ┌───────────────────────────────────────────────────────────┐
     # │                                                           │
-    # │   Bulk methods implemented in https-apps-api begin here   │
+    # │   Bulk methods implemented in server begin here   │
     # │                                                           │
     # └───────────────────────────────────────────────────────────┘
 
@@ -171,7 +171,7 @@ module Admin
 
     # ┌───────────────────────────────────────────────────────┐
     # │                                                       │
-    # │  Bulk methods implemented in https-apps-api end here  │
+    # │  Bulk methods implemented in server end here  │
     # │                                                       │
     # └───────────────────────────────────────────────────────┘
 

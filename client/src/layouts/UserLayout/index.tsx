@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { NotAllowedPage } from '../../components/NotAllowed'
 import { useAuthUserQuery } from '../../features/auth/api'
+import { PFDALogoDark } from '../../components/NavigationBar/PFDALogo'
 
 const StyledLayoutLoader = styled.div`
   display: flex;
@@ -11,9 +12,10 @@ const StyledLayoutLoader = styled.div`
   margin-top: 64px;
 `
 
-const LayoutLoader = () => (
+export const LayoutLoader = () => (
   <StyledLayoutLoader>
-    <div>Loading your experince</div>
+    <PFDALogoDark style={{ height: 40 }} />
+    <br />
     <Loader className="pageloader" />
   </StyledLayoutLoader>
 )
@@ -33,8 +35,8 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     return children
   }
   return (
-    <div className="pfda-loader-wrapper">
+    <main className="pfda-loader-wrapper">
       {content()}
-    </div>
+    </main>
   )
 }

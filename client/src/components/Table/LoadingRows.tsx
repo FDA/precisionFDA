@@ -51,7 +51,7 @@ export function LoadingRows<T extends {}>({ visibleColumns, loading, delay }: { 
     <>
       {loading && <Row>
         {visibleColumns.map((column, i) => (
-            <div style={{...column.getHeaderProps().style, borderBottom: 0 }} className="tr" key={i} role="loading-row">
+            <div role="row" style={{...column.getHeaderProps().style, borderBottom: 0 }} className="tr" key={i}>
               <div className="td" style={{ opacity: 0.5 }}><Loading1 delay={delay}><span></span></Loading1></div>
             </div>
         ))}
