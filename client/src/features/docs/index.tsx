@@ -9,6 +9,7 @@ import { fetchCurrentUser } from '../auth/api'
 import { useAuthUser } from '../auth/useAuthUser'
 import { Apps } from './pages/Apps'
 import { ChallengeWorkbench } from './pages/ChallengeWorkbench'
+import { CLI_old } from './pages/CLI_old'
 import { CLI } from './pages/CLI'
 import { Comparisons } from './pages/Comparisons'
 import { CreatingApps } from './pages/CreatingApps'
@@ -287,6 +288,9 @@ const Docs = () => {
             </Route>
             <Route exact path="/docs/spaces">
               <ReviewSpaces />
+            </Route>
+            <Route exact path="/docs/cli-old">
+              <CLI_old />
             </Route>
             <Route exact path="/docs/cli">
               <CLI />

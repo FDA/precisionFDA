@@ -1,14 +1,15 @@
 package precisionfda
 
 import (
+	"dnanexus.com/precision-fda-cli/helpers"
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 // Remove single file by uid.
 func (c *PFDAClient) RemoveFile(uids []string) error {
 	deleteFileURL := c.BaseURL + "/api/files/cli_remove"
-
 	data := map[string]interface{}{"uids": uids}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -26,11 +27,15 @@ func (c *PFDAClient) RemoveFile(uids []string) error {
 	}
 
 	if resultJSON["count"].(float64) == 0 {
-		return fmt.Errorf(">> File(s) %s not found or inaccessible", uids)
+		return fmt.Errorf("File(s) %s not found or inaccessible", uids)
 	}
 
-	for _,uid := range uids {
-		fmt.Printf(">> Deleted %s \n", uid)
+	for _, uid := range uids {
+		if c.JsonResponse {
+			helpers.PrintResultAsJSON(struct {Uid string `json:"uid"`}{Uid: uid})
+		} else {
+			fmt.Printf("Removed %s \n", uid)
+		}
 	}
 	return nil
 }
@@ -56,9 +61,16 @@ func (c *PFDAClient) RemoveDir(uid string) error {
 	}
 
 	if resultJSON["count"].(float64) == 0 {
-		return fmt.Errorf(">> Folder with id: %s not found or inaccessible", uid)
+		return fmt.Errorf("folder with id: %s not found or inaccessible", uid)
 	}
 
-	fmt.Printf(">> Deleted dir (id: %s) \n", uid)
+	if c.JsonResponse {
+		folderId, _ := strconv.Atoi(uid)
+		helpers.PrintResultAsJSON(struct {
+			ID int `json:"id"`
+		}{ID: folderId})
+	} else {
+		fmt.Printf("Removed dir (id: %s) \n", uid)
+	}
 	return nil
 }

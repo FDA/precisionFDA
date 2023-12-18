@@ -1,22 +1,28 @@
-import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { AxiosError } from 'axios'
+import React, { useMemo, useState } from 'react'
+import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidRed } from '../../../../components/Button'
-import { FileIcon } from '../../../../components/icons/FileIcon'
-import { FolderIcon } from '../../../../components/icons/FolderIcon'
 import { Loader } from '../../../../components/Loader'
 import { VerticalCenter } from '../../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../../components/ResourceTable'
-import { Modal } from '../../../modal'
-import { useModal } from '../../../modal/useModal'
+import { FileIcon } from '../../../../components/icons/FileIcon'
+import { FolderIcon } from '../../../../components/icons/FolderIcon'
 import { itemsCountString } from '../../../../utils/formatting'
+import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../../../modal/styles'
+import { useModal } from '../../../modal/useModal'
+import { DownloadListResponse } from '../../types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
-import { DownloadListResponse } from '../../types'
-import { ModalScroll } from '../../../modal/styles'
 
+const StyledResourceTable = styled(ResourceTable)`
+  padding: 12px;
+`
+const StyledLoader = styled.div`
+  padding: 12px;
+`
 const StyledPath = styled.div`
   min-width: 150px;
 `
@@ -58,25 +64,23 @@ const DeleteFiles = ({
       },
     },
   )
-  if (status === 'loading') return <div>Loading...</div>
+  if (status === 'loading') return <StyledLoader>Loading...</StyledLoader>
   return (
-    <div>
-      {data && (
-        <ResourceTable
-          rows={data.map(s => ({
-            name: (
-              <StyledName href={s.viewURL} target="_blank">
-                <VerticalCenter>
-                  {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-                </VerticalCenter>
-                {s.name}
-              </StyledName>
-            ),
-            path: <StyledPath>{s.fsPath}</StyledPath>,
-          }))}
-        />
-      )}
-    </div>
+    data ? (
+      <StyledResourceTable
+        rows={data.map(s => ({
+          name: (
+            <StyledName href={s.viewURL} target="_blank">
+              <VerticalCenter>
+                {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
+              </VerticalCenter>
+              {s.name}
+            </StyledName>
+          ),
+          path: <StyledPath>{s.fsPath}</StyledPath>,
+        }))}
+      />
+    ) : <div />
   )
 }
 
@@ -119,11 +123,11 @@ export const useDeleteFileModal = ({
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
-  const [nodesToBeDeleted, setNodesToBeDeleted] = useState<DownloadListResponse[]>()
+  const [nodesToBeDeleted, setNodesToBeDeleted] = useState<DownloadListResponse[]>([])
 
   const mutation = useMutation({
     mutationKey: ['delete-files'],
-    mutationFn: (ids: string[]) => deleteFilesRequest(ids),
+    mutationFn: (ids: number[]) => deleteFilesRequest(ids),
     onError: (e: AxiosError) => {
       const error = e?.response?.data?.error
       if(error?.message) {
@@ -147,14 +151,22 @@ export const useDeleteFileModal = ({
   }
 
   const modalComp = isShown && (
-    <Modal
+    <ModalNext
       id="modal-files-delete"
-      data-testid="modal-files-delete"
-      headerText={`Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`}
+      data-test-id="modal-files-delete"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
-        <>
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`}
+        hide={() => setShowModal(false)}
+      />
+      <ModalScroll>
+        <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted}/>
+      </ModalScroll>
+      <Footer>
+        <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button
             onClick={() => setShowModal(false)}
@@ -162,16 +174,12 @@ export const useDeleteFileModal = ({
           >
             Cancel
           </Button>
-          <ButtonSolidRed onClick={handleSubmit} disabled={!nodesToBeDeleted || mutation.isLoading}>
+          <ButtonSolidRed onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isLoading}>
             Delete
           </ButtonSolidRed>
-        </>
-      }
-    >
-      <ModalScroll>
-        <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted}/>
-      </ModalScroll>
-    </Modal>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

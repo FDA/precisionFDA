@@ -1,16 +1,17 @@
-import React, { useMemo } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import React, { useMemo } from 'react'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { ResourceTable } from '../../../components/ResourceTable'
-import { Modal } from '../../modal'
-import { ButtonRow } from '../../modal/styles'
-import { useModal } from '../../modal/useModal'
 import { itemsCountString } from '../../../utils/formatting'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
+import { useModal } from '../../modal/useModal'
 
-
-export function useDeleteModal<T extends { id: string; name: string; location: string }>({
+export function useDeleteModal<
+  T extends { id: string; name: string; location: string },
+>({
   resource,
   selected,
   request,
@@ -27,7 +28,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
     mutationKey: ['delete-resource', resource],
     mutationFn: request,
     onError: () => {
-      toast.error(`Error: Deleting ${resource}`)
+      toast.error(`There was a problem deleting: ${resource}`)
     },
     onSuccess: (res: any) => {
       if (res?.meta?.messages[0].type === 'error') {
@@ -37,7 +38,7 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
       if (onSuccess) onSuccess(res)
       setShowModal(false)
       toast.success(
-        `Success: Deleted ${itemsCountString(resource, momoSelected.length)}`,
+        `Deleted ${itemsCountString(resource, momoSelected.length)}`,
       )
     },
   })
@@ -47,13 +48,29 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
   }
 
   const modalComp = isShown && (
-    <Modal
-      data-testid={`modal-${resource}-delete`}
-      headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
+    <ModalNext
+      id="modal-resource-delete"
+      data-test-id="modal-resource-delete"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      title={`Modal window to select ${resource}s for deletion`}
-      footer={
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={`Delete ${itemsCountString(
+          resource,
+          momoSelected.length,
+        )}?`}
+        hide={() => setShowModal(false)}
+      />
+      <ModalScroll>
+        <ResourceTable
+          rows={momoSelected.map(s => ({
+            name: <div>{s.name}</div>,
+            path: <div>{s.location}</div>,
+          }))}
+        />
+      </ModalScroll>
+      <Footer>
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
@@ -61,15 +78,8 @@ export function useDeleteModal<T extends { id: string; name: string; location: s
             Delete
           </ButtonSolidBlue>
         </ButtonRow>
-      }
-    >
-      <ResourceTable
-        rows={momoSelected.map(s => ({
-          name: <div>{s.name}</div>,
-          path: <div>{s.location}</div>,
-        }))}
-      />
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

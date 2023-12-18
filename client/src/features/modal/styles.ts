@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
-import { Svg } from '../../components/icons/Svg'
 import { compactScrollBar } from '../../components/Page/styles'
+import { Svg } from '../../components/icons/Svg'
 import { colors, fontSize, fontWeight, sizing } from '../../styles/theme'
 
 export const Wrapper = styled.div`
@@ -27,6 +27,10 @@ export const Backdrop = styled.div<{ blur: boolean }>`
   z-index: 500;
 `
 export const StyledModal = styled.div`
+  --modal-padding-LR: 1.5rem;
+  --modal-padding-TB: 1rem;
+  --modal-border-radius: 0.5rem;
+
   z-index: 100;
   background: white;
   border-radius: ${sizing.modalBorderRadius};
@@ -51,7 +55,7 @@ export const HeaderTop = styled.div`
   align-items: center;
   padding: 0.3rem; 
   border-bottom: 1px solid #e5e5e5;
-  padding: 12px 24px;
+  padding: var(--modal-padding-TB) var(--modal-padding-LR);
   color: ${colors.textBlack};
 `
 
@@ -61,7 +65,7 @@ export const Footer = styled.div`
   align-items: center;
   gap: 8px;
   border-top: 1px solid #e5e5e5;
-  padding: 16px;
+padding: 16px;
 `
 export const HeaderText = styled.div`
   align-self: center;

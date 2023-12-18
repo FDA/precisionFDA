@@ -1,24 +1,28 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { colors } from '../../../styles/theme'
-import { SpaceMembership } from './members.types'
-import { Button } from '../../../components/Button/index'
-import { useChangeMemberRoleModal } from './useChangeMemberRoleModal'
 import { Identicon } from '../../../components/Identicon'
+import { colors } from '../../../styles/theme'
+import MemberEditButton from './MemberEditButton'
+import { SpaceMembership } from './members.types'
 
-export const StyledMemberCard = styled.div<{isDeactivated: boolean}>`
+export const StyledMemberCard = styled.div<{ isDeactivated: boolean }>`
   min-width: 300px;
   border: 1px solid #cbcbcb;
-  ${({ isDeactivated }) => isDeactivated && `border: 1px solid ${colors.borderDefault};;`}
+  ${({ isDeactivated }) =>
+    isDeactivated && `border: 1px solid ${colors.borderDefault};;`}
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   border-radius: 6px;
 `
 export const StyledCardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid #cbcbcb;
   padding: 4px;
+  padding-right: 8px;
 
   a {
     display: flex;
@@ -40,8 +44,9 @@ export const Gravatar = styled.img`
   height: 30px;
   margin-right: 5px;
 `
-export const StyledDetails = styled.div<{isDeactivated: boolean}>`
-  ${({ isDeactivated }) => isDeactivated && `color: ${colors.textDarkGreyInactive};`}
+export const StyledDetails = styled.div<{ isDeactivated: boolean }>`
+  ${({ isDeactivated }) =>
+    isDeactivated && `color: ${colors.textDarkGreyInactive};`}
   font-size: 14px;
   line-height: 22px;
   ul {
@@ -55,12 +60,13 @@ export const StyledDetails = styled.div<{isDeactivated: boolean}>`
   }
 `
 
-const RoleButton = styled(Button)`
-  margin: 4px;
-`
-
-export function MemberCard({ member, spaceId }: { member: SpaceMembership, spaceId: string }) {
-  const { modalComp, setShowModal } = useChangeMemberRoleModal({ spaceId, member })
+export function MemberCard({
+  member,
+  spaceId,
+}: {
+  member: SpaceMembership
+  spaceId: number
+}) {
   return (
     <StyledMemberCard isDeactivated={!member.active}>
       <StyledCardHeader>
@@ -72,6 +78,9 @@ export function MemberCard({ member, spaceId }: { member: SpaceMembership, space
           <Identicon dxuser={member.user_name} />
           {member.title}
         </Link>
+        {member.to_roles.length > 0 && (
+          <MemberEditButton spaceId={spaceId} member={member} />
+        )}
       </StyledCardHeader>
       <StyledDetails isDeactivated={!member.active}>
         <ul>
@@ -89,7 +98,9 @@ export function MemberCard({ member, spaceId }: { member: SpaceMembership, space
           </li>
           <li>
             <Key>Role:</Key>
-            <Value>{member.active ? member.role : `${member.role} (disabled)`}</Value>
+            <Value>
+              {member.active ? member.role : `${member.role} (disabled)`}
+            </Value>
           </li>
           <li>
             <Key>Organization:</Key>
@@ -100,7 +111,6 @@ export function MemberCard({ member, spaceId }: { member: SpaceMembership, space
             <Value>{member.created_at}</Value>
           </li>
         </ul>
-        {member.to_roles.length > 0 && <><RoleButton onClick={() => setShowModal(true)}>Change Role</RoleButton>{modalComp}</>}
       </StyledDetails>
     </StyledMemberCard>
   )

@@ -6,11 +6,10 @@ class ApplicationWorker
 
   # Notifies a user if there was any error with copying.
   # @param job [Sidekiq::Job] Current job.
-  def notify_user(job)
+  def self.notify_user(job)
     scope = job["args"].first
 
     context = build_context(job)
-    RequestContext.begin_request(context.user_id, context.user, context.token)
 
     subject = "An error occurred during the copying to scope '#{scope}'"
     message = "#{subject}: #{job['error_message']}"
@@ -21,7 +20,8 @@ class ApplicationWorker
       severity: "ERROR",
       userId: context.user_id,
     }
-    https_apps_client.send_notification(notification)
+    h_a_client = HttpsAppsClient.new
+    h_a_client.send_notification(notification)
     RequestContext.end_request
 
     Rails.logger.error(message)

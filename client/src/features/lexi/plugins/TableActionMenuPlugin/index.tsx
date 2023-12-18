@@ -486,7 +486,7 @@ function TableActionMenu({
         <button
           className="item"
           onClick={() => mergeTableCellsAtSelection()}
-          data-test-id="table-merge-cells">
+          data-testid="table-merge-cells">
           Merge cells
         </button>
       );
@@ -495,7 +495,7 @@ function TableActionMenu({
         <button
           className="item"
           onClick={() => unmergeTableCellsAtSelection()}
-          data-test-id="table-unmerge-cells">
+          data-testid="table-unmerge-cells">
           Unmerge cells
         </button>
       );
@@ -521,14 +521,14 @@ function TableActionMenu({
             />
           ))
         }
-        data-test-id="table-background-color">
+        data-testid="table-background-color">
         <span className="text">Background color</span>
       </button>
       <hr />
       <button
         className="item"
         onClick={() => insertTableRowAtSelection(false)}
-        data-test-id="table-insert-row-above">
+        data-testid="table-insert-row-above">
         <span className="text">
           Insert{' '}
           {selectionCounts.rows === 1 ? 'row' : `${selectionCounts.rows} rows`}{' '}
@@ -538,7 +538,7 @@ function TableActionMenu({
       <button
         className="item"
         onClick={() => insertTableRowAtSelection(true)}
-        data-test-id="table-insert-row-below">
+        data-testid="table-insert-row-below">
         <span className="text">
           Insert{' '}
           {selectionCounts.rows === 1 ? 'row' : `${selectionCounts.rows} rows`}{' '}
@@ -549,7 +549,7 @@ function TableActionMenu({
       <button
         className="item"
         onClick={() => insertTableColumnAtSelection(false)}
-        data-test-id="table-insert-column-before">
+        data-testid="table-insert-column-before">
         <span className="text">
           Insert{' '}
           {selectionCounts.columns === 1
@@ -561,7 +561,7 @@ function TableActionMenu({
       <button
         className="item"
         onClick={() => insertTableColumnAtSelection(true)}
-        data-test-id="table-insert-column-after">
+        data-testid="table-insert-column-after">
         <span className="text">
           Insert{' '}
           {selectionCounts.columns === 1
@@ -574,19 +574,19 @@ function TableActionMenu({
       <button
         className="item"
         onClick={() => deleteTableColumnAtSelection()}
-        data-test-id="table-delete-columns">
+        data-testid="table-delete-columns">
         <span className="text">Delete column</span>
       </button>
       <button
         className="item"
         onClick={() => deleteTableRowAtSelection()}
-        data-test-id="table-delete-rows">
+        data-testid="table-delete-rows">
         <span className="text">Delete row</span>
       </button>
       <button
         className="item"
         onClick={() => deleteTableAtSelection()}
-        data-test-id="table-delete">
+        data-testid="table-delete">
         <span className="text">Delete table</span>
       </button>
       <hr />

@@ -53,7 +53,7 @@ class NotificationPreference < ApplicationRecord
   ).freeze
 
   # email types currently handled by nodejs app
-  # File - /https-apps-api/packages/shared/src/domain/email/email.config.ts
+  # File - /server/libs/shared/src/domain/email/email.config.ts
   EMAIL_TYPES = {
     notification_job_done: 1,
     notification_content: 2,
