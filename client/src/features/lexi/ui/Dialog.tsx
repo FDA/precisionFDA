@@ -12,7 +12,7 @@ import * as React from 'react'
 import { ReactNode } from 'react'
 
 type Props = Readonly<{
-  'data-test-id'?: string;
+  'data-testid'?: string;
   children: ReactNode;
 }>;
 
@@ -21,11 +21,11 @@ export function DialogButtonsList({ children }: Props): JSX.Element {
 }
 
 export function DialogActions({
-  'data-test-id': dataTestId,
+  'data-testid': dataTestId,
   children,
 }: Props): JSX.Element {
   return (
-    <div className="DialogActions" data-test-id={dataTestId}>
+    <div className="DialogActions" data-testid={dataTestId}>
       {children}
     </div>
   )

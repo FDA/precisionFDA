@@ -46,8 +46,8 @@ const Lite = styled.div`
 `
 
 export const HoverDNAnexusLogo = ({ opacity, ...rest }: { opacity?: boolean, width?: number, height?: number }) => (
-  <StyledLogo isOpacity={opacity} as="a" href="https://www.dnanexus.com/" target="_blank" rel="noreferrer">
-    <Lite>Powered by</Lite>
+  <StyledLogo aria-disabled="true" aria-label="Powered by" isOpacity={opacity} as="a" href="https://www.dnanexus.com/" target="_blank" rel="noreferrer">
+    <Lite aria-hidden="true">Powered by</Lite>
     <DNAnexusLogo {...rest} />
   </StyledLogo>
 )

@@ -42,7 +42,7 @@ class FileCopyWorker < ApplicationWorker
   # @return [Copies] Object that includes all copied files.
   def perform(scope, file_ids, folder_id, session_auth_params)
     @context = Context.build(session_auth_params)
-    RequestContext.begin_request(@context.user_id, @context.user, @context.token)
+    RequestContext.begin_request(@context.user_id, @context.username, @context.token)
     @scope = scope
 
     files = UserFile.where(id: file_ids)

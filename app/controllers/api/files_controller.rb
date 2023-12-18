@@ -149,7 +149,7 @@ module Api
           uid: node[:uid],
           type: node[:stiType],
           name: node[:name],
-          file_size: number_to_human_size(node[:fileSize]),
+          file_size: node[:fileSize],
           created_at: node[:createdAt].to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         }
         n.merge!({ children: node[:children].length }) if node[:stiType] == "Folder"

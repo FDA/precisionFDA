@@ -12,7 +12,7 @@ import * as React from 'react'
 import { HTMLInputTypeAttribute } from 'react'
 
 type Props = Readonly<{
-  'data-test-id'?: string;
+  'data-testid'?: string;
   label: string;
   onChange: (val: string) => void;
   placeholder?: string;
@@ -25,7 +25,7 @@ export default function TextInput({
   value,
   onChange,
   placeholder = '',
-  'data-test-id': dataTestId,
+  'data-testid': dataTestId,
   type = 'text',
 }: Props): JSX.Element {
   return (
@@ -39,7 +39,7 @@ export default function TextInput({
         onChange={(e) => {
           onChange(e.target.value)
         }}
-        data-test-id={dataTestId}
+        data-testid={dataTestId}
       />
     </div>
   )

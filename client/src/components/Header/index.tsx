@@ -53,13 +53,26 @@ type UserMenuProps = {
   showCloudResourcesModal: () => void
 }
 
-const DataPortalsLink = ({ isActiveLink, isSiteAdmin = false }: { isActiveLink: (l: string) => boolean, isSiteAdmin?: boolean }) => {
+const DataPortalsLink = ({
+  isActiveLink,
+  isSiteAdmin = false,
+  excludePortalIds,
+}: {
+  isActiveLink: (l: string) => boolean,
+  isSiteAdmin?: boolean,
+  excludePortalIds?: number[] // do not hightlight if in this list
+}) => {
   const { data } = useMainDataPortal()
   let link = '/data-portals/main'
 
+  let excludedUrls: string[] = []
+  if (excludePortalIds) {
+    excludedUrls = excludePortalIds.map(id => `/data-portals/${id}`)
+  }
+
   const comp = (to: string) => (
     <Link to={to} title="Data Portals">
-      <MenuItem active={isActiveLink('/data-portals')}>
+      <MenuItem active={isActiveLink('/data-portals') && !(excludedUrls.some(url => isActiveLink(url)))}>
         <IconWrap>
           <DataPortalIcon height={18} />
         </IconWrap>
@@ -171,6 +184,7 @@ export const Header: React.FC = () => {
 
   const prismDataPortal = customPortals.data?.find((p) => p.name === 'PRISM')
   const toolsDataPortal = customPortals.data?.find((p) => p.name === 'Tools')
+  const customPortalIds = customPortals.data?.filter((p) => p.name === 'Tools' || p.name === 'PRISM')?.map((p) => p.id)
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
   const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
 
@@ -314,14 +328,15 @@ export const Header: React.FC = () => {
               </Dropdown>
             )}
 
-            {siteSettings?.data?.dataPortals?.isEnabled && <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} />}
+            {siteSettings?.data?.dataPortals?.isEnabled && 
+                <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} excludePortalIds={customPortalIds} />}
 
             {prismDataPortal && (
               <Link
                 to={`/data-portals/${prismDataPortal.id}`}
                 title="PRISM"
               >
-                <MenuItem>
+                <MenuItem active={isActiveLink(`/data-portals/${prismDataPortal.id}`)}>
                   <IconWrap>
                     <PrismIcon height={17} />
                   </IconWrap>
@@ -334,7 +349,7 @@ export const Header: React.FC = () => {
                 to={`/data-portals/${toolsDataPortal.id}`}
                 title="Tools"
               >
-                <MenuItem>
+                <MenuItem active={isActiveLink(`/data-portals/${toolsDataPortal.id}`)}>
                   <IconWrap>
                     <ToolsIcon height={16} />
                   </IconWrap>

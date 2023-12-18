@@ -7,257 +7,291 @@ import (
 	"text/tabwriter"
 )
 
+// Function type for writing a line to a tabwriter
+type lineWriterFunc func(left, right string)
+
+// Create a line writer for a given writer
+func newLineWriter(writer *tabwriter.Writer) lineWriterFunc {
+	return func(left, right string) {
+		fmt.Fprintln(writer, strings.Join([]string{left, right}, "\t")+"\t")
+	}
+}
+
+
 func PrintListSpacesHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Listing active spaces you have access to."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "list-spaces [FLAG...]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "list-spaces -groups -private [Show all active spaces of type group or private]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "list-spaces -unactivated -json [Show only unactivated spaces and present result as JSON]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -json", "Display response as JSON array"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -locked", "Show only locked spaces"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -unactivated", "Show only unactivated spaces"}, "\t")+"\t")
-	// fmt.Fprintln(writer, strings.Join([]string{"   -protected","Show PHI protected spaces only"}, "\t") + "\t") // UNCOMMENT THIS ONCE PHI FEATURE IN PROD
-	fmt.Fprintln(writer, strings.Join([]string{"   -review", "Show review spaces"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -groups", "Show groups spaces"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -private", "Show private spaces"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -administrator", "Show administrator spaces"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -government", "Show government spaces"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing active spaces you have access to.\n")
+	writeLine("  Usage:", "list-spaces [FLAG...]\n")
+	writeLine("  Examples:", "list-spaces -groups -private [Shows all active spaces of type groups or private]")
+	writeLine("  ", "list-spaces -unactivated -json [Shows only unactivated spaces and present result as JSON]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exit")
+	writeLine("   -locked", "Shows only locked spaces")
+	writeLine("   -unactivated", "Shows only unactivated spaces")
+	// writeLine("   -protected", "Show PHI protected spaces only") // UNCOMMENT THIS ONCE PHI FEATURE IN PROD
+	writeLine("   -review", "Shows only review spaces")
+	writeLine("   -groups", "Shows only groups spaces")
+	writeLine("   -private", "Shows only private spaces")
+	writeLine("   -administrator", "Shows only administrator spaces")
+	writeLine("   -government", "Shows only government spaces")
+	writeLine("   -json", "Displays response as JSON array")
+
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintLsHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Listing files in given location. If no location provided, root of My Home is used."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"      ", "Public files are not listed by default."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "ls [FLAG...]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "ls -files -folder-id 55 [Show only files from private folder with id 55]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "ls -folders -brief [Show only folders from My Home root in brief version]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "ls -space-id 24 -folder-id 42 -json [Show content of folder with id 42 from space with id 24 and present result as JSON]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -json", "Display response as JSON array"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -brief", "Display a brief version of the response; Only shows ID and name"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -files", "Display only files"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -folders", "Display only folders"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -space-id <ID>", "Execute in given space"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -folder-id <ID>", "Execute in given folder"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -public", "Display only public files"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing files in given location. If no location provided, the root of My Home is used.")
+	writeLine("      ", "Public files are not listed by default.\n")
+	writeLine("  Usage:", "ls [FLAG...]\n")
+	writeLine("  Examples:", "ls -files -folder-id 55 [Show only files from private folder with id 55]")
+	writeLine("  ", "ls -folders -brief [Show only folders from the My Home root in a brief version]")
+	writeLine("  ", "ls -space-id 24 -folder-id 42 -json [Show the content of the folder with id 42 from the space with id 24 and present the result as JSON]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -brief", "Displays a brief version of the response; Only shows ID and name")
+	writeLine("   -files", "Displays only files")
+	writeLine("   -folders", "Displays only folders")
+	writeLine("   -public", "Displays only public files & folders")
+	writeLine("   -space-id <ID>", "Executes in the specified space")
+	writeLine("   -folder-id <ID>", "Executes in the specified folder")
+	writeLine("   -json", "Displays response as JSON array")
+
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintDownloadHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Downloading a file or folder from pFDA. If you want download root of My Home or a space (has no folder-id), use flag \"-folder-id root\"."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "Supports downloading multiple files - simply pass them as positional args before any flags (check examples)."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "For files you can use either filename or file-id - name might not be unique, file-id always is."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "Filename wildcards are supported, use \"?\" for exactly 1 char, \"*\" for 0 or more characters. \n"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "By default, folder download only applies to top level files. Use flag \"-recursive\" to download whole folder content."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "If you want to download content of a public folder, use flag -public together with the command."}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
 
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "download <FILE-ID> [FLAG...] OR download <FILENAME> [FLAG...] OR download -folder-id <ID> [FLAG]\n"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Downloads the file to current working directory]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -output \"data/results_final.csv\" [Downloads the file to existing folder named \"data\" with new name \"results_final.csv\"]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download outputs_334_1.csv -output \"data/results_final.csv\" [Downloads the file to existing folder named \"data\" with new name \"results_final.csv\"]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -output \"data/\" [Downloads the file to existing folder named \"data/\" and keep original name]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -overwrite true [Downloads the file to current working directory and overwrites already existing file]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download -folder-id 1222 -output \"my_outputs/\" -overwrite true [Downloads folder content to existing folder named \"my_outputs/ and overwrites already existing files]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download -folder-id 2221 -space-id 123 -overwrite false [Downloads space's folder content to current working directory and skip files that already exists there]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download -folder-id 3333 -public [Downloads all files from given public folder]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download -folder-id root -space-id 123 -recursive [Recursively downloads space's folder content to current working directory]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download -folder-id root -overwrite true [Downloads top level content of 'My Home' to current working directory and overwrites already existing files if exist]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download 'data*.csv' -folder-id 1222 -overwrite true [Downloads only CSV files with 'data' in their name from folder (id:1222) and overwrites already existing files if exist]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 file-YZm9QpQ0b69Qd8bP454kmcf76-2 [Downloads multiple files to the current working directory]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "download results.csv results_final.csv -folder-id 2221 [Downloads multiple files by name from folder (id:2221) to the current working directory]"}, "\t")+"\t")
-
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -output <PATH/TO/FILE>", "Downloads file to given path"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -overwrite true|false", "Preselect overwrite option for dialog if path already exists in the target location."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -recursive", "Recursively download content of selected folder."}, "\t")+"\t")
+	writeLine("  ", "  ")
+	writeLine("  For:", "Downloading a file or folder from pFDA. If you want download the root of My Home or a space (which has no folder-id), use the flag \"-folder-id root\".")
+	writeLine("  ", "Supports downloading multiple files - simply pass them as positional args before any flags (check examples).")
+	writeLine("  ", "For files you can use either filename or file-id - name might not be unique, file-id always is.")
+	writeLine("  ", "Filename wildcards are supported, use \"?\" for exactly 1 char, \"*\" for 0 or more characters. \n")
+	writeLine("  ", "By default, folder download only applies to top level files. Use flag \"-recursive\" to download whole folder content.")
+	writeLine("  ", "If you want to download content of a public folder, use flag -public together with the command.")
+	writeLine("  Usage:", "download <FILE-ID> [FLAG...] OR download <FILENAME> [FLAG...] OR download -folder-id <ID> [FLAG]\n")
+	writeLine("  Examples:", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Downloads the file to current working directory]")
+	writeLine("  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -output \"data/results_final.csv\" [Downloads the file to existing folder named \"data\" with new name \"results_final.csv\"]")
+	writeLine("  ", "download outputs_334_1.csv -output \"data/results_final.csv\" [Downloads the file to existing folder named \"data\" with new name \"results_final.csv\"]")
+	writeLine("  ", "download 'data*.csv' -folder-id 1222 -overwrite true [Downloads only CSV files with 'data' in their name from folder (id:1222) and overwrites already existing files if exist]")
+	writeLine("  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 file-YZm9QpQ0b69Qd8bP454kmcf76-2 [Downloads multiple files to the current working directory]")
+	writeLine("  ", "download results.csv results_final.csv -folder-id 2221 [Downloads multiple files by name from folder (id:2221) to the current working directory]\n")
+	writeLine("  ", "download -space-id 27 -folder-id root -recursive [Downloads recursively from the root folder of the Space]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exit")
+	writeLine("   -space-id <ID>", "Downloads from the specified space")
+	writeLine("   -folder-id <ID>", "Downloads from the specified folder")
+	writeLine("   -output <PATH/TO/FILE>", "Downloads to given path")
+	writeLine("   -overwrite true|false", "Preselects overwrite option for dialog if path already exists in the target location.")
+	writeLine("   -recursive", "Recursively downloads content of selected folder.")
+	writeLine("   -json", "Displays response in JSON format")
 
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintUploadFileHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Uploading a file or folder into given location. If no location provided, root of My Home is used."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "Supports uploading multiple files - simply pass them as positional args before any flags (check examples).\n"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "Supports uploading via stdin (piped input) - requires setting -name flag (check examples).\n"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
 
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "upload-file <PATH/TO/FILE> [FLAG...]\n"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "upload-file script01.py [Uploads the file to the root folder of My Home]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file script01.py -space-id 12 [Uploads the file to the root folder of the space]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file script01.py -folder-id 10 [Uploads the file to the specified folder]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file data_folder/ -folder-id 10 [Uploads the folder and its content to the specified folder]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file script01.py info/readme.txt data_folder/ -folder-id 111 [Uploads multiple files to the specified folder]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file script01.py parser.py validator.py -space-id 21 [Uploads multiple files to the specified space]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file script01.py parser.py validator.py -space-id 21 -folder-id 222 [Uploads multiple files to the specified space's folder]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "upload-file -name piped_file.csv [Uploads file with given name provided via stdin]"}, "\t")+"\t")
+	writeLine("  ", "  ")
+	writeLine("  For:", "Uploading a file or folder into a given location. If no location provided, the root of My Home is used.")
+	writeLine("  ", "Supports uploading multiple files - simply pass them as positional args before any flags (check examples).")
+	writeLine("  ", "Supports uploading via stdin (piped input) - requires setting -name flag (check examples).\n")
+	writeLine("  Usage:", "upload-file <PATH/TO/FILE> [FLAG...]\n")
+	writeLine("  Examples:", "upload-file script01.py [Uploads the file to the root folder of My Home]")
+	writeLine("  ", "upload-file script01.py -space-id 12 [Uploads the file to the root folder of the space]")
+	writeLine("  ", "upload-file script01.py -folder-id 10 [Uploads the file to the specified folder]")
+	writeLine("  ", "upload-file data_folder/ -folder-id 10 [Uploads the folder and its content to the specified folder]")
+	writeLine("  ", "upload-file script01.py info/readme.txt data_folder/ -folder-id 111 [Uploads multiple files to the specified folder]")
+	writeLine("  ", "upload-file script01.py parser.py validator.py -space-id 21 [Uploads multiple files to the specified space]")
+	writeLine("  ", "upload-file script01.py parser.py validator.py -space-id 21 -folder-id 222 [Uploads multiple files to the specified space's folder]")
+	writeLine("  ", "upload-file -name piped_file.csv [Uploads file with given name provided via stdin]")
+	writeLine("  ", "upload-file large_file.sql -threads 20 -chunksize 134217728 [Uploads large file with custom number of threads and chunksize]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exit")
+	writeLine("   -space-id <ID>", "Uploads into the specified space")
+	writeLine("   -folder-id <ID>", "Uploads into the specified folder")
+	writeLine("   -name <NAME>", "Uploads a stdin file with given name [required for stdin input]")
+	writeLine("   -json", "Displays response in JSON format")
+	writeLine("   -threads", "Changes number of upload threads to spawn (Max 100). Consider memory usage, not controlled.")
+	writeLine("   -chunksize", "Changes size of each upload chunk in bytes (Min 16MB, Max 4GB). Consider memory usage, not controlled.")
 
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -space-id <ID>", "Uploads into the given space"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -folder-id <ID>", "Uploads into the given folder"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -name <NAME>", "Uploads stdin file with given name [required for stdin input]"}, "\t")+"\t")
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintDescribeAppHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Getting details about given app."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "describe-app -app-id <ID>"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "describe-app -app-id app-GJk3k5v85a4ZfgQ8bP5911Xg0-1 [Describes the app]"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Getting details about given app. Always responds in JSON format.\n")
+	writeLine("  Usage:", "describe-app <APP_ID>\n")
+	writeLine("  Examples:", "describe-app app-GJk3k5v85a4ZfgQ8bP5911Xg0-1 [Describes the app]")
+
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintDescribeWorkflowHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Getting details about given workflow."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "describe-workflow -workflow-id <ID>"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "describe-workflow -workflow-id workflow-GJkk5v005xggB4JcB4Zf9326V-1 [Describes the workflow]"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Getting details about given workflow. Always responds in JSON format.\n")
+	writeLine("  Usage:", "describe-workflow <WORKFLOW_ID>\n")
+	writeLine("  Examples:", "describe-workflow workflow-GJkk5v005xggB4JcB4Zf9326V-1 [Describes the workflow]")
+
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintUploadAssetHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Uploading an asset."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "upload-asset -name <NAME{.tar,.tar.gz}> -root </PATH/TO/ROOT/FOLDER> -readme <README{.txt,.md} "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "upload-asset -name asset01.tar.gz -root ./asset01 -readme ./readme.md [Uploads asset with root folder asset01 and readme file readme.md from current directory]"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Uploading an asset. Assets can be uploaded to the root of My Home only.\n")
+	writeLine("  Usage:", "upload-asset -name <NAME{.tar,.tar.gz}> -root </PATH/TO/ROOT/FOLDER> -readme <README{.txt,.md}\n")
+	writeLine("  Examples:", "upload-asset -name asset01.tar.gz -root ./asset01 -readme ./readme.md [Uploads asset with root folder asset01 and readme file readme.md from current directory]")
+
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintMkdirHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Creating a folder."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "mkdir <NAME> [FLAG...] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "mkdir DATA [Created new folder named DATA in your My Home section]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "mkdir DATA -space-id 12 [Creates a new folder named DATA in root of the space]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "mkdir DATA scripts results -folder-id 2221 [Creates 3 new folders in folder (id:2221)]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "mkdir scripts/python/v1 scripts/python/v2 -p [Creates the given folder structure]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -space-id <ID>", "Create the folder in the given space"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -folder-id <ID>", "Create the folder in the given folder"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -p, -parents", "Create parent directories as needed, no error if existing"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Creating a folder.\n")
+	writeLine("  Usage:", "mkdir <NAME> [FLAG...]\n")
+	writeLine("  Examples:", "mkdir DATA [Creates a new folder named DATA in your My Home section]")
+	writeLine("  ", "mkdir DATA -space-id 12 [Creates a new folder named DATA in root of the space]")
+	writeLine("  ", "mkdir DATA scripts results -folder-id 2221 [Creates 3 new folders in folder (id:2221)]")
+	writeLine("  ", "mkdir scripts/python/v1 scripts/python/v2 -p [Creates the specified folder structure]")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -space-id <ID>", "Creates the folder in the specified space")
+	writeLine("   -folder-id <ID>", "Creates the folder in the specified folder")
+	writeLine("   -p, -parents", "Creates parent directories as needed, no error if existing")
+	writeLine("   -json", "Displays response in JSON format")
 
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintRmHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Removing a file."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "rm <FILE-ID> [FLAG...] OR rm <NAME> [FLAG...] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Removes file with given id]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1 file-YZm9QpQ0b69Qd8bP454kmcf76-2 [Removes multiple files given by ids]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "rm inputs_01.csv inputs_02.csv -folder-id 2221 [Removes multiple files given by names in folder (id:2221)]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "rm 'inputs*.csv' -space-id 12 [Removes all CSV files with 'inputs' in their name from root of given space]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "rm '*.txt' -space-id 12 -folder-id 1212 [Removes all txt files with from the folder of given space]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -space-id <ID>", "Execute in given space"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -folder-id <ID>", "Execute in given folder"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Removing a file.\n")
+	writeLine("  Usage:", "rm <FILE_ID | FILE_NAME> [FLAG...] OR rm <NAME> [FLAG...]\n")
+	writeLine("  Examples:", "rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Removes file with given id]")
+	writeLine("  ", "rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1 file-YZm9QpQ0b69Qd8bP454kmcf76-2 [Removes multiple files given by ids]")
+	writeLine("  ", "rm inputs_01.csv inputs_02.csv -folder-id 2221 [Removes multiple files given by names in the folder (id:2221)]")
+	writeLine("  ", "rm 'inputs*.csv' -space-id 12 [Removes all CSV files with 'inputs' in their name from the root of given space]")
+	writeLine("  ", "rm '*.txt' -space-id 12 -folder-id 1212 [Removes all txt files with from the folder of given space]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -space-id <ID>", "Executes in the specified space")
+	writeLine("   -folder-id <ID>", "Executes in the specified folder")
+	writeLine("   -json", "Displays response in JSON format")
 
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintRmdirHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Deleting a folder. Only empty folders are allowed to be deleted."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "rmdir <FOLDER-ID> [FLAG...] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "rmdir 2221 [Removes folder (id:2221)] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "rmdir 2221 2332 2333 [Removes folders with given ids if empty] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
 
+	writeLine("  ", "  ")
+	writeLine("  For:", "Deleting a folder. Only empty folders are allowed to be deleted.\n")
+	writeLine("  Usage:", "rmdir <FOLDER_ID> [FLAG...]\n")
+	writeLine("  Examples:", "rmdir 2221 [Removes folder (id:2221)]")
+	writeLine("  ", "rmdir 2221 2332 2333 [Removes folders with given ids if empty]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -json", "Displays response in JSON format")
+	
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintCatHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Display content of a file."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "cat <FILE-ID>"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "cat file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Prints content of the given file] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Displaying the content of a file.\n")
+	writeLine("  Usage:", "cat <FILE_ID>\n")
+	writeLine("  Examples:", "cat file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Prints content of the given file]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
 
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintHeadHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Display first lines of a file. By default, fist 10 lines are displayed."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "head <FILE-ID> [FLAGS...]"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Prints first 10 lines of the given file] "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{" ", "head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -lines 50 [Prints first 50 lines of the given file] "}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
 
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -lines", "Alter number of lines to display"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
+	writeLine("  ", "  ")
+	writeLine("  For:", "Displays the first lines of a file. By default, the first 10 lines are displayed.\n")
+	writeLine("  Usage:", "head <FILE_ID> [FLAGS...]\n")
+	writeLine("  Examples:", "head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Prints the first 10 lines of the given file]")
+	writeLine("  ", "head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -lines 50 [Prints the first 50 lines of the given file]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -lines", "Alter number of lines to display")
+	writeLine("   -h, -help", "Displays the help message and exit")
 
 	writer.Flush()
-	return 1
+	return 0
 }
 
 func PrintGetSpaceIdHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  For:", "Display space ID of current workstation's context."}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Usage:", "get-space-id"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Examples:", "get-space-id [Prints integer representing id of current space] "}, "\t")+"\t")
+	writeLine := newLineWriter(writer)
 
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  Flags:", "All flags listed below are OPTIONAL"}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"  ", "  "}, "\t")+"\t")
-	fmt.Fprintln(writer, strings.Join([]string{"   -h, -help", "Show this help message and exit"}, "\t")+"\t")
+	writeLine("  ", "  ")
+	writeLine("  For:", "Display the space ID of the current workstation's context.\n")
+	writeLine("  Usage:", "get-space-id\n")
+	writeLine("  Examples:", "get-space-id [Prints integer representing id of current space]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -json", "Displays response in JSON format")
 
 	writer.Flush()
-	return 1
+	return 0
 }
 
-func PrintError(err error) {
-	fmt.Println()
-	fmt.Println(err)
+func PrintViewLinkHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Get view link of file.\n")
+	writeLine("  Usage:", "view-link <FILE_ID>\n")
+	writeLine("  Examples:", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 [Prints view link for specified file.]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+	writeLine("   -json", "Displays response in JSON format")
+
+	writer.Flush()
+	return 0
 }
+

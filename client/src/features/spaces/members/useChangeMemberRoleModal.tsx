@@ -1,23 +1,22 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHistory } from 'react-router'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
-import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
+import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { capitalize } from '../../../utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Modal } from '../../modal'
-import { ButtonRow, StyledForm } from '../../modal/styles'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
 import { changeMembershipRoleRequest } from './members.api'
 import { MemberRole, SpaceMembership } from './members.types'
-
+import { StyledFields, StyledFooter } from './members.styles'
 
 interface FormValues {
   role: { label: string; value: MemberRole }
@@ -36,10 +35,17 @@ const validationSchema = Yup.object().shape({
   role: Yup.object()
     .shape({
       value: Yup.string().required('Role required'),
-    }).required('Required'),
+    })
+    .required('Required'),
 })
 
-export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string, member: SpaceMembership }) => {
+export const useChangeMemberRoleModal = ({
+  spaceId,
+  member,
+}: {
+  spaceId: number
+  member: SpaceMembership
+}) => {
   const authUser = useAuthUser()
   const queryClient = useQueryClient()
   const history = useHistory()
@@ -55,23 +61,29 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
   const mutation = useMutation({
     mutationKey: ['change-membership-role'],
     mutationFn: ({ role }: FormValues) =>
-      changeMembershipRoleRequest({ spaceId, memberId: member.id, role: role.value }),
+      changeMembershipRoleRequest({
+        spaceId,
+        memberId: member.id,
+        role: role.value,
+      }),
     onSuccess: res => {
-      if (authUser.dxuser === res.member && res.role === 'disable') {
+      if (authUser?.dxuser === res.member && res.role === 'disable') {
         history.push('/spaces')
         toast.success('Disabled yourself from the space')
       } else {
         reset()
         queryClient.invalidateQueries(['space-members'])
         setShowModal(false)
-        if (['enable','disable'].includes(res.role)){
-          toast.success(`${capitalize(res.role)}d member ${res.member} in the space`)
+        if (['enable', 'disable'].includes(res.role)) {
+          toast.success(
+            `${capitalize(res.role)}d member ${res.member} in the space`,
+          )
         } else {
           toast.success(`Changed ${res.member} member role to ${res.role}`)
         }
       }
     },
-    onError: (e) => {
+    onError: e => {
       toast.error(`Error: Change member role. ${e.response.data.errors}`)
     },
   })
@@ -87,61 +99,60 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
     { value: 'lead', label: LABEL['lead'] },
     { value: 'disable', label: LABEL['disable'] },
     { value: 'enable', label: LABEL['enable'] },
-  ].filter(r => member.to_roles.some((a) => a === r.value))
+  ].filter(r => member.to_roles.some(a => a === r.value))
 
   const modalComp = (
-    <Modal
-      data-testid="modal-add-members"
-      headerText="Change member role"
+    <ModalNext
+      id="add-resource-to-space"
+      data-testid="modal-change-membership-role"
       isShown={isShown}
-      hide={() => {
-        reset()
-        setShowModal(false)
-      }}
-      overflowContent={false}
+      hide={() => setShowModal(false)}
     >
-      <StyledForm onSubmit={handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <label>Username</label>
-          <InputText
-            label="Username"
-            value={member.user_name}
-            disabled
-          />
-        </FieldGroup>
-        <FieldGroup>
-          <label>Current role</label>
-          <InputText
-            label="Current Role"
-            value={member.active ? member.role : `${member.role} (disabled)`}
-            disabled
-          />
-        </FieldGroup>
-        <FieldGroup>
-          <label>Change to role</label>
-          <Controller
-            name="role"
-            control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Select
-                options={roleOptions}
-                onChange={onChange}
-                isLoading={mutation.isLoading}
-                onBlur={onBlur}
-                value={value}
-                isDisabled={mutation.isLoading}
-                defaultInputValue={undefined}
-              />
-            )}
-          />
-          <Hint>Select the members role</Hint>
-          <ErrorMessage
-            errors={errors}
-            name="name"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
-        </FieldGroup>
-        <ButtonRow>
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Change member role"
+        hide={() => setShowModal(false)}
+      />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <StyledFields>
+          <FieldGroup>
+            <label>Username</label>
+            <InputText label="Username" value={member.user_name} disabled />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Current role</label>
+            <InputText
+              label="Current Role"
+              value={member.active ? member.role : `${member.role} (disabled)`}
+              disabled
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <label>Change to role</label>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <Select
+                  options={roleOptions}
+                  onChange={onChange}
+                  isLoading={mutation.isLoading}
+                  onBlur={onBlur}
+                  value={value}
+                  isDisabled={mutation.isLoading}
+                  defaultInputValue={undefined}
+                />
+              )}
+            />
+            <Hint>Select the members role</Hint>
+            <ErrorMessage
+              errors={errors}
+              name="name"
+              render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
+        </StyledFields>
+        <StyledFooter>
           <Button
             type="button"
             onClick={() => {
@@ -156,13 +167,13 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string,
           <ButtonSolidBlue
             type="submit"
             disabled={Object.keys(errors).length > 0 || mutation.isLoading}
-            aria-label="Submit add members"
+            aria-label="Change member role"
           >
             Change Role
           </ButtonSolidBlue>
-        </ButtonRow>
-      </StyledForm>
-    </Modal>
+        </StyledFooter>
+      </form>
+    </ModalNext>
   )
   return {
     modalComp,

@@ -16,9 +16,9 @@ services:
   base_nodejs:
     build:
       context: ../
-      dockerfile: ./https-apps-api/docker/images/node.isolated-qa.Dockerfile
+      dockerfile: ./server/docker/images/node.isolated-qa.Dockerfile
       args:
-        - NODEJS_IMAGE_TAG=18.9.1
+        - NODEJS_IMAGE_TAG=20.9.0-slim
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
       
@@ -44,13 +44,13 @@ services:
       context: ../client
       dockerfile: ./docker/images/isolation.Dockerfile
       args:
-        - FRONTEND_IMAGE_TAG=18.9.1
+        - FRONTEND_IMAGE_TAG=20.9.0-slim
     volumes:
       - type: bind
         source: ../app/assets/packs
         target: /precision-fda/dist
     working_dir: /precision-fda
-    command: yarn watch:docker
+    command: pnpm run watch:docker
   # TODO(samuel) setup correct NODE_ENV here
   nodejs-api:
     extends:
@@ -80,7 +80,7 @@ services:
       - redis
   db:
     # ! Don't forget to update "db_emulated" image when updating version
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
@@ -97,4 +97,4 @@ services:
   db_emulated:
     extends:
       service: db
-    image: amd64/mysql:5.7
+    image: amd64/mysql:8.0

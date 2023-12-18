@@ -20,7 +20,7 @@ describe('My Home / Files', () => {
     await waitFor(async () => {
       const tableEl = screen.getByTestId('pfda-table')
       expect(tableEl).toBeInTheDocument()
-      const rowEls = screen.getAllByRole('row')
+      const rowEls = screen.getAllByTestId('data-row')
       expect(rowEls.length).toBe(8)
     })
   })

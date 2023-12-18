@@ -61,6 +61,7 @@ export const StatusCell = styled.div<{ $isActive: boolean }>`
   align-items: center;
   color: ${({ $isActive }) => ($isActive ? 'green' : 'red')};
   text-transform: capitalize;
+  font-weight: 600;
 
   ${Dot} {
     color: ${({ $isActive }) => ($isActive ? 'green' : 'red')};
@@ -134,6 +135,7 @@ export const useSpacesColumns = ({
           accessor: 'type',
           disableSortBy: true,
           Filter: SelectColumnFilter,
+          title: 'Select space type',
           options: [
             { label: 'Groups', value: 'groups' },
             { label: 'Review', value: 'review' },
@@ -197,6 +199,7 @@ export const useSpacesColumns = ({
           width: colWidths?.state || 150,
           disableSortBy: true,
           Filter: SelectColumnFilter,
+          title: 'Select state',
           options: [
             { label: 'Active', value: 'active' },
             { label: 'Locked', value: 'locked' },
@@ -268,11 +271,11 @@ export const useSpacesColumns = ({
                 <CubeIcon height={14} /> {row.original?.counters.apps}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
-                <BoltIcon /> {row.original?.counters.jobs}
+                <BoltIcon /> {row.original?.counters.workflows}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <CogsIcon height={14} />
-                {row.original?.counters.workflows}
+                {row.original?.counters.jobs}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <UsersIcon /> {row.original?.counters.members}

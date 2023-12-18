@@ -1,7 +1,7 @@
 {
-  "prettier.configPath": "./https-apps-api/.prettierrc.js",
-  "eslint.packageManager": "yarn",
+  "prettier.configPath": "./server/.prettierrc.js",
+  "eslint.packageManager": "pnpm",
   "eslint.workingDirectories": [
-  "./https-apps-api"
+  "./server"
   ]
 }

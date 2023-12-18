@@ -139,7 +139,21 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
-### 2.3 (2023-03-27)
+### 2.5.0 (2023-12-14) 
+- fixed uploading complex folder structure on windows
+- fixed uploading large files 
+- added support of JSON response format for most commands
+
+### 2.4.1 (2023-07-20)
+- fixed folder-id manipulation
+
+
+### 2.4 (2023-05-25)
+- New feature - get-space-id; get space ID from current workstation's context
+- New feature - upload-file stdin; added support for stdin input
+
+
+### 2.3 (2023-03-08)
 - improved syntax of commands 
 - added support for multiple files/folders to upload-file and download commands.
 - New feature - mkdir; create new folders in any location

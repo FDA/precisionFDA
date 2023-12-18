@@ -16,11 +16,4 @@ module.exports = {
     ["@babel/plugin-transform-runtime", { "regenerator": true }]
   ],
   sourceMaps: true,
-  env: {
-    production: {
-      plugins: [
-        "transform-react-remove-prop-types",
-      ],
-    },
-  },
 }

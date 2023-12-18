@@ -6,7 +6,6 @@ AllCops:
   Exclude:
     - "db/schema.rb"
     - "vendor/**/*"
-    - "chef/**/*"
   DisplayCopNames: true
   StyleGuideCopsOnly: false
   TargetRubyVersion: 3.2.2
@@ -128,7 +127,7 @@ Layout/LineEndStringConcatenationIndentation:
   Enabled: true
 
 Layout/LineLength:
-  Max: 120
+  Max: 180
   AllowHeredoc: true
   AllowURI: true
   URISchemes:

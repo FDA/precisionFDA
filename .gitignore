@@ -76,12 +76,13 @@ run-ui-test.sh
 dist/
 # mikro-orm metadata provider helper
 temp/
-/https-apps-api/test-emails/*
-!/https-apps-api/test-emails/.gitkeep
+/server/test-emails/*
+!/server/test-emails/.gitkeep
+/server/.pnpm-store
 
 *.tsbuildinfo
 node_modules/
-https-apps-api/package-lock.json
+server/package-lock.json
 
 lerna-debug.log
 

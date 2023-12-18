@@ -135,6 +135,7 @@ export const Pagination = ({
       {showPerPage && perPage && (
         <PerPage>
           <StyledPerPageSelect
+            title="Select Items Per Page"
             value={perPage}
             name="perPage"
             onChange={e => onPerPageSelect(parseInt(e.target.value, 10))}
@@ -172,6 +173,7 @@ export const Pagination = ({
       {showPageJump && (
         <JumpToForm onSubmit={handleJumpToSubmit}>
           <StyledInputJumpTo
+            title="Current Page Number"
             data-testid="pagination-jumpto-input"
             defaultValue={1}
             type="number"
