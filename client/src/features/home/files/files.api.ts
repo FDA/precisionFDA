@@ -53,7 +53,7 @@ export async function fetchFilesListLockingRequest(ids: number[], scope?: string
     .then(r => r.data as DownloadListResponse[])
 }
 
-export async function deleteFilesRequest(ids: string[]) {
+export async function deleteFilesRequest(ids: number[]) {
   return axios.post('/api/files/remove', { ids }).then(r => r.data)
 }
 

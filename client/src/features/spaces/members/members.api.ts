@@ -18,7 +18,7 @@ export async function addMembersToSpaceRequest({ spaceId, invitees, invitees_rol
   return res.data as Promise<any>
 }
 
-export async function changeMembershipRoleRequest({ spaceId, memberId, role }: { spaceId: string, memberId: string, role: MemberRole }) {
+export async function changeMembershipRoleRequest({ spaceId, memberId, role }: { spaceId: number, memberId: number, role: MemberRole }) {
   const res = await axios.patch(`/api/spaces/${spaceId}/memberships/${memberId}`, {
     role,
   })

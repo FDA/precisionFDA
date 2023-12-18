@@ -5,18 +5,15 @@ import (
 )
 
 func ParseArgsUntilFlag(args []string) ([]string, int) {
+	const offset = 2 // skip first two which is "pfda <command>"
 
 	validArgs := make([]string, 0)
-	// skip first two which is "pfda <command>"
-	OFFSET := 2
-
-	for index, arg := range args[OFFSET:] {
-		if !strings.HasPrefix(arg, "-") {
-			validArgs = append(validArgs, arg)
-		} else {
-			return validArgs, index + OFFSET
+	for index, arg := range args[offset:] {
+		if strings.HasPrefix(arg, "-") {
+			return validArgs, index + offset
 		}
+		validArgs = append(validArgs, arg)
 	}
 
-	return validArgs, OFFSET
+	return validArgs, len(args)
 }

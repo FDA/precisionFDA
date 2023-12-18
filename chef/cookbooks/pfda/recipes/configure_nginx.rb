@@ -4,21 +4,23 @@ directory "/etc/nginx/ssl" do
 end
 
 file "/etc/nginx/ssl/pfda.crt" do
-  content lazy { node.run_state["ssm_params"]["app"]["ssl_configuration"]["certificate"] }
+  content(lazy { node.run_state["ssm_params"]["app"]["ssl_configuration"]["certificate"] })
   only_if { node.run_state["ssm_params"]["app"]["enable_ssl"] }
 end
 
 file "/etc/nginx/ssl/pfda.key" do
-  content lazy { node.run_state["ssm_params"]["app"]["ssl_configuration"]["private_key"] }
+  content(lazy { node.run_state["ssm_params"]["app"]["ssl_configuration"]["private_key"] })
   only_if { node.run_state["ssm_params"]["app"]["enable_ssl"] }
 end
 
 template "/etc/nginx/nginx.conf" do
   source "nginx.conf.erb"
-  variables lazy { {
-    app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0],
-    unii_host: node.run_state["ssm_params"]["app"]["environment"]["UNII_HOST"]
-  } }
+  variables(lazy do
+              {
+                app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0],
+                unii_host: node.run_state["ssm_params"]["app"]["environment"]["UNII_HOST"],
+              }
+            end)
 end
 
 template "/etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf" do

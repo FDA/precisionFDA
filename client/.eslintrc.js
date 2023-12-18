@@ -35,6 +35,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
     'react/jsx-props-no-spreading': 'off',
+    'jsx-a11y/label-has-associated-control': 'off',
     'comma-dangle': ['error', 'always-multiline'],
     'import/extensions': 'off',
     'no-redeclare': 'off',

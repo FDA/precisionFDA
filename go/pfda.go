@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.4.1
+// Version 2.5.0
 package main
 
 import (
@@ -22,11 +22,11 @@ import (
 
 // CONSTANTS
 const defaultNumRoutines = 10
-const defaultChunkSize = 1 << 24 // default 16.8MB (min. 5MB)
+const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.4.1
+PFDA COMMAND LINE TOOL v2.5.0
 ****************************
 
 To upload a file:
@@ -75,18 +75,19 @@ To print version info and exit :
    pfda -version
 
 All available commands:
+   pfda cat
    pfda describe-app
    pfda describe-workflow
    pfda download
-   pfda ls
+   pfda get-space-id
+   pfda head
    pfda list-spaces
+   pfda ls
+   pfda mkdir
+   pfda rm
+   pfda rmdir
    pfda upload-asset
    pfda upload-file
-   pfda mkdir
-   pfda rmdir
-   pfda rm
-   pfda head
-   pfda cat
 
 Command specific help section with description, examples and available flags:
    pfda <COMMAND> -help
@@ -158,8 +159,12 @@ var invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folde
 	return client.Download(*args, *folderID, *spaceID, public, recursive, *outputFilePath, *overwriteFile)
 }
 
-var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType *string) error {
-	return client.DescribeEntity(*entityID, *entityType)
+var invokeFileViewLink = func(client precisionfda.IPFDAClient, fileID *string) error {
+	return client.FileViewLink(*fileID)
+}
+
+var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType string) error {
+	return client.DescribeEntity(*entityID, entityType)
 }
 
 var invokeListSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
@@ -209,7 +214,7 @@ func mainInternal() int {
 	// inside mainInternal so that they can be unit tested
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute. Must be one of ['upload-file','upload-asset','api'].")
+	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute.")
 	authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
 	apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
 	jsonInput := flag.String("json-payload", "", "JSON payload for specified API call (if any).")
@@ -270,53 +275,47 @@ func mainInternal() int {
 		flag.Parse()
 	}
 
+	if *command != "" {
+		fmt.Println("\nWARNING! THIS SYNTAX IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda <command> <args> \n")
+	}
+
 	if positionalCmd != "" {
-		if *command == "" {
-			*command = positionalCmd
-		} else {
-			return helpers.InputError("Error input >>> both positional command and -cmd option specified. Please remove one or the other")
+		if *command != "" {
+			return helpers.ErrorFromString("Error input >>> both positional command and -cmd option specified. Please remove one or the other", *flagJson)
 		}
+		*command = positionalCmd
 	}
 
 	// always check if config != nil
 	config, configErr := helpers.GetConfig()
-	if configErr != nil && !os.IsNotExist(configErr) {
-		fmt.Println("Error >>> ", configErr)
+	if configErr != nil {
+		if !os.IsNotExist(configErr) {
+			return helpers.ErrorFromError(configErr, *flagJson)
+		}
 	}
 
+	serverURL := defaultURL
 	if *server != "" && *server != defaultURL {
-		pfdaclient = precisionfda.NewPFDAClient(*server)
-	} else {
-		if config != nil && config.Server != "" {
-			pfdaclient = precisionfda.NewPFDAClient(config.Server)
-		} else {
-			pfdaclient = precisionfda.NewPFDAClient(defaultURL)
-		}
+		serverURL = *server
+	} else if config != nil && config.Server != "" {
+		serverURL = config.Server
 	}
+
+	pfdaclient := precisionfda.NewPFDAClient(serverURL)
 	pfdaclient.Platform = OsArch
+	pfdaclient.JsonResponse = *flagJson
 
-	b, err := strconv.ParseBool(*skipVerify)
-	if err != nil {
-		helpers.PrintError(err)
-		return 1
-	}
-
-	if b {
+	skipVerifyBool, _ := strconv.ParseBool(*skipVerify)
+	transport := pfdaclient.Client.HTTPClient.Transport.(*http.Transport)
+	if skipVerifyBool {
 		// Setting '-skipverify' true will allow devs to connect to local instances with self-signed certs
-		pfdaclient.Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
-			ServerName:         *server,
-		}
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true, ServerName: *server}
 	} else {
-		pfdaclient.Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
-			MinVersion: tls.VersionTLS12,
-		}
+		transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
-	// if -version flag was given, print pfda info
 	if *pfda_version {
 		printInfo(pfdaclient)
-		// if only -version without any command , exit
 		checkLatestVersion(pfdaclient)
 		return 0
 	}
@@ -326,21 +325,19 @@ func mainInternal() int {
 	help := *flagHelp || *flagHelpShort
 
 	if !help && *command != "" {
-		if config == nil {
-			if *authKey == "" {
-				return helpers.InputError("Missing authorization key >>> Could not find config file and no key was provided with the command.")
+		// Set AuthKey based on provided authKey or from config.
+		pfdaclient.AuthKey = *authKey
+		if *authKey == "" {
+			if config == nil {
+				return helpers.ErrorFromString("Missing authorization key - could not find config file and no key was provided with the command.", *flagJson)
 			}
-			pfdaclient.AuthKey = *authKey
-		} else {
-			if *authKey == "" {
-				pfdaclient.AuthKey = config.Key
-			} else {
-				pfdaclient.AuthKey = *authKey
-			}
-			if *spaceID == "" {
-				if !*flagMe && !*flagPublic {
-					*spaceID = config.GetSpaceId()
-				}
+			pfdaclient.AuthKey = config.Key
+		}
+
+		// Set spaceID from config if it's not provided and neither flagMe nor flagPublic is set.
+		if *spaceID == "" && !*flagMe && !*flagPublic {
+			if config != nil {
+				*spaceID = config.GetSpaceId()
 			}
 		}
 	}
@@ -352,35 +349,34 @@ func mainInternal() int {
 		}
 
 		if *assetFolderPath == "" {
-			return helpers.InputError("Root directory for the asset is required. Provide it as [-root <ASSET_ROOT>].")
+			return helpers.ErrorFromString("Root directory for the asset is required - provide it as [-root <ASSET_ROOT>]", *flagJson)
 		}
 
 		f, err := os.Stat(*assetFolderPath)
 		if os.IsNotExist(err) || !f.IsDir() {
-			return helpers.InputError(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory.", *assetFolderPath))
+			return helpers.ErrorFromString(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory", *assetFolderPath), *flagJson)
 		}
 
 		if *fileName == "" {
-			return helpers.InputError("Asset name (ending with .tar or .tar.gz) is required. Provide it as [-name <ASSET_NAME>].")
+			return helpers.ErrorFromString("Asset name (ending with .tar or .tar.gz) is required - provide it as [-name <ASSET_NAME>]", *flagJson)
 		}
 
 		if !strings.HasSuffix(*fileName, ".tar") && !strings.HasSuffix(*fileName, ".tar.gz") {
-			return helpers.InputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *fileName))
+			return helpers.ErrorFromString(fmt.Sprintf("input asset name '%s' does not end with '.tar' or '.tar.gz'.", *fileName), *flagJson)
 		}
 
 		if *readmeFilePath == "" {
-			return helpers.InputError("Readme file for the asset (ending with .txt or .md) is required. Provide it as [-readme <ASSET_README>].")
+			return helpers.ErrorFromString("Readme file for the asset (ending with .txt or .md) is required - provide it as [-readme <ASSET_README>]", *flagJson)
 		}
 
 		f, err = os.Stat(*readmeFilePath)
 		if os.IsNotExist(err) || f.IsDir() {
-			return helpers.InputError(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory.", *readmeFilePath))
+			return helpers.ErrorFromString(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory", *readmeFilePath), *flagJson)
 		}
 
 		err = invokeUploadAsset(pfdaclient, assetFolderPath, fileName, readmeFilePath, inputChunkSize, inputNumRoutines)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "upload-file":
@@ -401,57 +397,60 @@ func mainInternal() int {
 			args = []string{*inputFilePath}
 		}
 
+		// STDIN upload logic
 		if len(args) == 0 && stdinData {
 			if *fileName == "" {
-				return helpers.InputError("Filename for stdin input is required. Provide it as [-name <FILE_NAME>]")
+				return helpers.ErrorFromString("Filename for stdin input is required - provide it as [-name <FILE_NAME>]", *flagJson)
 			}
 			err := invokeUploadStdinFile(pfdaclient, fileName, folderID, spaceID, inputChunkSize, inputNumRoutines)
 			if err != nil {
-				helpers.PrintError(err)
-				return 1
+				return helpers.ErrorFromError(err, *flagJson)
+
 			}
 			defer stdinFile.Close()
 			break
 		}
 
 		if len(args) != 0 && stdinData {
-			return helpers.InputError("Cannot combine multiple file sources. Use either args or stdin.")
+			return helpers.ErrorFromString("Cannot combine multiple file sources - use either args or stdin", *flagJson)
 		}
 
 		if len(args) == 0 {
-			return helpers.InputError("Path for upload is required. Please provide it as an argument or stdin.")
+			return helpers.ErrorFromString("Path for upload is required - provide it as an argument or stdin", *flagJson)
 		}
 
-		if *fileName != "" {
+		if *fileName != "" && !*flagJson {
 			fmt.Println(">> Filename flag ignored for upload")
 		}
 
 		// uploading more than one file/folder
 		if len(args) > 1 {
-			err = invokeUploadMultipleFiles(pfdaclient, &args, folderID, spaceID, inputChunkSize, inputNumRoutines)
+			err := invokeUploadMultipleFiles(pfdaclient, &args, folderID, spaceID, inputChunkSize, inputNumRoutines)
 			if err != nil {
-				helpers.PrintError(err)
-				return 1
+				return helpers.ErrorFromError(err, *flagJson)
 			}
 			// just one file/folder to upload
 		} else {
 			path := filepath.Clean(args[0])
 			f, err := os.Stat(path)
 			if os.IsNotExist(err) {
-				return helpers.InputError(fmt.Sprintf("Input path '%s' does not exist.", path))
+				return helpers.ErrorFromString(fmt.Sprintf("Input path '%s' does not exist", path), *flagJson)
 			}
 
 			if f.IsDir() {
 				err = invokeUploadFolder(pfdaclient, &path, folderID, spaceID, inputChunkSize, inputNumRoutines)
 				if err != nil {
-					helpers.PrintError(err)
-					return 1
+					return helpers.ErrorFromError(err, *flagJson)
+
 				}
 			} else {
+				if *inputChunkSize == defaultChunkSize {
+					// if chunkSize was not set by user, calculate it based on file size
+					*inputChunkSize = helpers.CalculateChunkSize(f.Size(), pfdaclient.MinChunkSize)
+				}
 				err = invokeUploadFile(pfdaclient, &path, folderID, spaceID, inputChunkSize, inputNumRoutines)
 				if err != nil {
-					helpers.PrintError(err)
-					return 1
+					return helpers.ErrorFromError(err, *flagJson)
 				}
 			}
 		}
@@ -462,27 +461,45 @@ func mainInternal() int {
 		}
 
 		if *fileID == "" && *folderID == "" && *spaceID == "" && len(args) == 0 {
-			return helpers.InputError("File ID or name of the file to be downloaded is required: [-file-id <FILE_ID>]\n  Or provide either of Space and/or Folder ID you want to bulk-download: [-folder-id <FOLDER_ID> -space-id <SPACE_ID>]")
+			return helpers.ErrorFromString("File ID or name of the file to be downloaded is required: [-file-id <FILE_ID>]\n  Or provide either of Space and/or Folder ID you want to bulk-download: [-folder-id <FOLDER_ID> -space-id <SPACE_ID>]", *flagJson)
 		}
 
 		if *fileID != "" && *folderID != "" {
-			return helpers.InputError("Cannot combine FileID and folderID flags")
+			return helpers.ErrorFromString("Cannot combine file-id and folder-id flags", *flagJson)
 		}
 
-		// we need tri-state as there is different behavior for -overwrite=false and completely ommited -overwrite flag
-		if *flagOverwriteFile != "true" && *flagOverwriteFile != "false" && *flagOverwriteFile != "" {
-			return helpers.InputError("-overwrite flag only accepts true/false or omit it completely.")
+		// we need tri-state as there is different behavior for -overwrite=false and completely omitted -overwrite flag
+		validOverwrite := map[string]bool{"": true, "true": true, "false": true}
+		if !validOverwrite[*flagOverwriteFile] {
+			return helpers.ErrorFromString("Invalid value for -overwrite flag - acceptable values are true, false, or omit it completely", *flagJson)
 		}
 
-		// if -file-id flag used, override args.
+		// Override args with -file-id if provided
 		if *fileID != "" {
 			args = []string{*fileID}
 		}
 
 		err := invokeDownload(pfdaclient, &args, folderID, spaceID, *flagPublic, recursive, outputFilePath, flagOverwriteFile)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "view-link":
+		if help {
+			return helpers.PrintViewLinkHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("File ID is required", *flagJson)
+		}
+
+		if !helpers.IsFileId(args[0]) {
+			return helpers.ErrorFromString(fmt.Sprintf("File ID '%s' is invalid", args[0]), *flagJson)
+		}
+
+		err := invokeFileViewLink(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "describe-app":
@@ -495,14 +512,12 @@ func mainInternal() int {
 		}
 
 		if len(args) == 0 {
-			return helpers.InputError(">> App ID is required.")
+			return helpers.ErrorFromString("App ID is required", *flagJson)
 		}
 
-		var entityType = "app"
-		err := invokeDescribe(pfdaclient, &args[0], &entityType)
+		err := invokeDescribe(pfdaclient, &args[0], "app")
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "describe-workflow":
@@ -515,14 +530,12 @@ func mainInternal() int {
 		}
 
 		if len(args) == 0 {
-			return helpers.InputError(">> Workflow ID is required.")
+			return helpers.ErrorFromString("Workflow ID is required", *flagJson)
 		}
 
-		var entityType = "workflow"
-		err := invokeDescribe(pfdaclient, &args[0], &entityType)
+		err := invokeDescribe(pfdaclient, &args[0], "workflow")
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "list-spaces":
@@ -546,8 +559,7 @@ func mainInternal() int {
 		}
 		err := invokeListSpaces(pfdaclient, flags)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "ls":
@@ -556,7 +568,7 @@ func mainInternal() int {
 		}
 
 		if *flagFilesOnly && *flagFoldersOnly {
-			return helpers.InputError("Cannot combine -folders and -files flags together. Please choose one of the flags only.")
+			return helpers.ErrorFromString("The flags '-folders' and '-files' cannot be used together - use only one of these flags.", *flagJson)
 		}
 
 		flags := map[string]bool{
@@ -573,41 +585,34 @@ func mainInternal() int {
 
 		err := invokeListing(pfdaclient, folderID, spaceID, flags)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "mkdir":
 		if help {
 			return helpers.PrintMkdirHelp()
 		}
-
 		err := invokeMkdir(pfdaclient, &args, folderID, spaceID, parents)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "rmdir":
 		if help {
 			return helpers.PrintRmdirHelp()
 		}
-
 		err := invokeRmdir(pfdaclient, &args)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "rm":
 		if help {
 			return helpers.PrintRmHelp()
 		}
-
 		err := invokeRm(pfdaclient, &args, folderID, spaceID)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "head":
@@ -616,8 +621,7 @@ func mainInternal() int {
 		}
 		err := invokeHead(pfdaclient, &args[0], *flagLines)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "cat":
@@ -626,8 +630,7 @@ func mainInternal() int {
 		}
 		err := invokeCat(pfdaclient, &args[0])
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "get-space-id":
@@ -637,22 +640,19 @@ func mainInternal() int {
 
 		if config == nil || config.GetSpaceId() == "" {
 			// error while getting config or spaceID not set
-			fmt.Println("No space detected.")
-			return 1
+			return helpers.ErrorFromString("No space detected", *flagJson)
 		}
-		fmt.Println(config.GetSpaceId())
+		helpers.PrintResult(config.GetSpaceId(), *flagJson)
 
 	case "refresh-key":
 		// add option for auto-refresh later
 		newToken, err := invokeRefreshToken(pfdaclient, false)
 		if err != nil {
-			fmt.Printf("There was an error during key refresh action. Please provide new Key from pFDA website.\n")
-			return 1
+			return helpers.ErrorFromString("There was an error during key refresh action, please provide new Key from precisionFDA website", *flagJson)
 		}
 
 		if configErr != nil {
-			fmt.Printf("Could not save authorization key in config file '%s': %s\n", helpers.ConfigPath, err.Error())
-			return 1
+			return helpers.ErrorFromString(fmt.Sprintf("Could not save authorization key in config file '%s': %s", helpers.ConfigPath, err.Error()), *flagJson)
 		}
 
 		config.Key = newToken
@@ -661,29 +661,28 @@ func mainInternal() int {
 
 	case "api":
 		if *apiRoute == "" {
-			return helpers.InputError("API route is required. Please provide it as '-route <API_ROUTE_NAME>'.")
+			return helpers.ErrorFromString("API route is required - provide it as '-route <API_ROUTE_NAME>'.", *flagJson)
 		}
 
 		if *jsonInput != "" && !isValidJSON(*jsonInput) {
-			return helpers.InputError(fmt.Sprintf("Provided JSON '%s' is not valid. Please provide the input in valid JSON format.", *jsonInput))
+			//TODO check this - not passing anything into the function's %s
+			return helpers.ErrorFromString(fmt.Sprintf("Provided JSON '%s' is not valid - provide the input in valid JSON format.", *jsonInput), *flagJson)
 		}
 
 		err := pfdaclient.CallAPI(*apiRoute, *jsonInput, *outputFilePath)
 		if err != nil {
-			helpers.PrintError(err)
-			return 1
+			return helpers.ErrorFromError(err, *flagJson)
 		}
 
 	case "":
 		// Empty command
 		fmt.Println(usageString)
 		checkLatestVersion(pfdaclient)
-		return 1
+		return 0
 
 	default:
 		// Invalid, non-empty command
-		fmt.Printf("Command '%s' not found. Must be one of \n'cat' \n'describe-app' \n'describe-workflow' \n'download' \n'get-space-id' \n'head \n'list-spaces' \n'ls' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n", *command)
-		return 1
+		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of \n'cat' \n'describe-app' \n'describe-workflow' \n'download' \n'get-space-id' \n'head \n'list-spaces' \n'ls' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n", *command), *flagJson)
 	}
 
 	// Write configuration and save key
@@ -753,7 +752,6 @@ func GetTLSVersion(tr *http.Transport) string {
 	case tls.VersionTLS13:
 		return "TLS 1.3"
 	}
-
 	return "Unknown"
 }
 
