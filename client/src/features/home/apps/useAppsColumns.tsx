@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useLocation, useRouteMatch, Link } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
@@ -36,7 +36,6 @@ export const useAppsColumns = ({
   properties?: string[]
 }) => {
   const location = useLocation()
-  const { path } = useRouteMatch()
   const queryClient = useQueryClient()
   
   return [
@@ -46,7 +45,7 @@ export const useAppsColumns = ({
       Filter: DefaultColumnFilter,
       width: colWidths?.name || 198,
       Cell: props => (
-        <StyledNameCell as={Link} to={{ pathname: `${path}/${props.cell.row.original.uid}`, state: { from: location.pathname, fromSearch: location.search }}}>
+        <StyledNameCell as={Link} to={`${location.pathname}/${props.cell.row.original.uid}`} state={{ from: location.pathname, fromSearch: location.search }}>
           <CubeIcon height={14} />
           {props.value}
         </StyledNameCell>

@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { debounce } from 'lodash'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -80,7 +80,7 @@ const validationSchema = Yup.object().shape({
 })
 
 export const CreateDatabase = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [inputValue, setInputValue] = useState('')
   const { data, isLoading } = useAccessibleFiles(inputValue)
   const allowedInstancesQuery = useQuery<{
@@ -129,7 +129,7 @@ export const CreateDatabase = () => {
     mutationFn: (payload: any) => createDatabaseRequest(payload),
     onSuccess: (res) => {
       if (res?.db_cluster) {
-        history.push(`/home/databases/${res?.db_cluster?.dxid}`)
+        navigate(`/home/databases/${res?.db_cluster?.dxid}`)
         queryClient.invalidateQueries(['dbclusters'])
         toast.success('Database created')
       } else if (res?.error) {

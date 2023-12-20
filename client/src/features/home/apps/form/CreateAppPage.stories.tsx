@@ -8,19 +8,12 @@ const meta: Meta = {
   component: CreateAppPageImport,
 }
 
-const CreateAppPageWrapper = (args: any) => {
+const CreateAppPageWrapper = () => {
   return <StorybookProviders><CreateAppPageImport /></StorybookProviders>
 }
 
 export const CreateAppPage: StoryObj = {
   render: args => <CreateAppPageWrapper {...args} />,
-  args: {
-    loading: false,
-    isSelectable: true,
-    isExpandable: true,
-    isFilterable: true,
-    isSortable: true,
-  },
 }
 
 export default meta

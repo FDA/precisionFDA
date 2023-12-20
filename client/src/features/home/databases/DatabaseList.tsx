@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
@@ -52,8 +52,8 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
       </NoDatabases>
     )
   }
-  const history = useHistory()
-  const onRowClick = (id: string) => history.push(`/home/databases/${id}`)
+  const navigate = useNavigate()
+  const onRowClick = (id: string) => navigate(`/home/databases/${id}`)
   const {
     setSortBy,
     sortBy,

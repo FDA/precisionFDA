@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import React from 'react'
-import { Link, Redirect } from 'react-router-dom'
+import { Link, Navigate, Redirect } from 'react-router-dom'
 import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import { StringParam, useQueryParam } from 'use-query-params'
@@ -181,7 +181,7 @@ function ListAdminNews() {
           {isLoading ? (
             <Loader />
           ) : (
-            data!.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)
+            data?.map(i => <SortableItem key={i.id} id={i.id} newsItem={i} />)
           )}
           {data?.length === 0 && <div>No news items found</div>}
         </StyledList>
@@ -194,7 +194,7 @@ const IsAdminWrapper = () => {
   const { data } = useAuthUserQuery()
   if (!data?.user) return <div />
   if (!data?.user.admin) {
-    return <Redirect to="/news" />
+    return <Navigate to="/news" />
   }
   return <ListAdminNews />
 }

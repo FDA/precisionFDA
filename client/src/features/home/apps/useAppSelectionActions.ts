@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { IChallenge } from '../../../types/challenge'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
@@ -59,7 +59,7 @@ export const useAppSelectionActions = ({
   challenges: IChallenge[] | undefined
 }) => {
   const queryClient = useQueryClient()
-  const history = useHistory()
+  const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user?.admin
@@ -136,9 +136,9 @@ export const useAppSelectionActions = ({
     onSuccess: () => {
       queryClient.invalidateQueries(['apps'])
       if(spaceId) {
-        history.push(`/spaces/${spaceId}/apps`)
+        navigate(`/spaces/${spaceId}/apps`)
       } else {
-        history.push(`/home/apps?scope=${homeScope}`)
+        navigate(`/home/apps?scope=${homeScope}`)
       }
       if(resetSelected) resetSelected()
     },

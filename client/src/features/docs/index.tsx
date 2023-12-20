@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { isActiveLink } from '../../helpers'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
@@ -29,7 +29,7 @@ import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsLayout, DocsNav, DocsTitle, NavItem } from './styles'
 import { TutorialMarkdown } from './tutorials/TutorialMarkdown'
-import { Assets } from "./pages/Assets";
+import { Assets } from './pages/Assets'
 
 const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
@@ -240,80 +240,53 @@ const Docs = () => {
           )}
         </DocsNav>
         <DocsContent>
-          <Switch>
-            <Route exact path="/docs/introduction">
-              <Intro />
-            </Route>
-            <Route exact path="/docs/tutorials/apps-workflows">
-              <TutorialMarkdown fileName="apps.md" />
-            </Route>
-            <Route exact path="/docs/tutorials/workstations">
-              <TutorialMarkdown fileName="workstations.md" />
-            </Route>
-            <Route exact path="/docs/discussions">
-              <Discussions />
-            </Route>
-            <Route exact path="/docs/notes">
-              <Notes />
-            </Route>
-            <Route exact path="/docs/files">
-              <Files />
-            </Route>
-            <Route exact path="/docs/comparisons">
-              <Comparisons />
-            </Route>
-            <Route exact path="/docs/apps">
-              <Apps />
-            </Route>
-            <Route exact path="/docs/creating-apps">
-              <CreatingApps />
-            </Route>
-            <Route exact path="/docs/assets">
-              <Assets />
-            </Route>
-            <Route exact path="/docs/workstations">
-              <Workstations />
-            </Route>
-            <Route exact path="/docs/workflows">
-              <Workflows />
-            </Route>
-            <Route exact path="/docs/tracking">
-              <Tracking />
-            </Route>
-            <Route exact path="/docs/publishing">
-              <Publishing />
-            </Route>
-            <Route exact path="/docs/licenses">
-              <Licenses />
-            </Route>
-            <Route exact path="/docs/spaces">
-              <ReviewSpaces />
-            </Route>
-            <Route exact path="/docs/cli-old">
-              <CLI_old />
-            </Route>
-            <Route exact path="/docs/cli">
-              <CLI />
-            </Route>
-            <Route exact path="/docs/challenge-workbench">
-              <ChallengeWorkbench />
-            </Route>
-            <Route exact path="/docs/site-activity-reporting">
-              <SiteActivityReporting />
-            </Route>
-            <Route exact path="/docs/site-customization">
-              <SiteCustomization />
-            </Route>
-            <Route exact path="/docs/site-administration">
-              <SiteAdministration />
-            </Route>
-            <Route exact path="/docs/organizations-deprecation">
-              <OrganizationsDeprecation />
-            </Route>
-            <Route path="/docs">
-              <Redirect to="/docs/introduction" />
-            </Route>
-          </Switch>
+          <Routes>
+            <Route path="/" element={<Navigate to="/docs/introduction" />} />
+            <Route path="/introduction" element={<Intro />} />
+            <Route
+              path="/tutorials/apps-workflows"
+              element={<TutorialMarkdown fileName="apps.md" />}
+            />
+            <Route
+              path="/tutorials/workstations"
+              element={<TutorialMarkdown fileName="workstations.md" />}
+            />
+            <Route path="/discussions" element={<Discussions />} />
+            <Route path="/notes" element={<Notes />} />
+            <Route path="/files" element={<Files />} />
+            <Route path="/comparisons" element={<Comparisons />} />
+            <Route path="/apps" element={<Apps />} />
+            <Route path="/creating-apps" element={<CreatingApps />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/workstations" element={<Workstations />} />
+            <Route path="/workflows" element={<Workflows />} />
+            <Route path="/tracking" element={<Tracking />} />
+            <Route path="/publishing" element={<Publishing />} />
+            <Route path="/licenses" element={<Licenses />} />
+            <Route path="/spaces" element={<ReviewSpaces />} />
+            <Route path="/cli" element={<CLI />} />
+            <Route path="/cli-old" element={<CLI_old />} />
+            <Route
+              path="/challenge-workbench"
+              element={<ChallengeWorkbench />}
+            />
+            <Route
+              path="/site-activity-reporting"
+              element={<SiteActivityReporting />}
+            />
+            <Route
+              path="/site-customization"
+              element={<SiteCustomization />}
+            />
+            <Route
+              path="/site-administration"
+              element={<SiteAdministration />}
+            />
+            <Route
+              path="/organizations-deprecation"
+              element={<OrganizationsDeprecation />}
+            />
+          </Routes>
         </DocsContent>
       </DocsLayout>
     </PublicLayout>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
@@ -249,7 +249,7 @@ const WorkflowRun = (
 ) => {
   const { stages }: { stages: Stage[] } = meta.spec.input_spec
   const { apps }: { apps: [] } = meta
-  const history = useHistory()
+  const navigate = useNavigate()
   const defaultValues = prepareDefaultValues(workflow, user, stages, defaultFiles)
   const validationSchema = prepareValidations(user, stages, workflow.scope)
 
@@ -285,9 +285,9 @@ const WorkflowRun = (
         const spaceScope = getValues().spaceScope?.value
         if (spaceScope) {
           const spaceId = spaceScope.replace('space-', '')
-          history.push(`/spaces/${spaceId}/executions`)
+          navigate(`/spaces/${spaceId}/executions`)
         } else {
-          history.push(`/home/workflows/${workflow.uid}/jobs`)
+          navigate(`/home/workflows/${workflow.uid}/jobs`)
         }
       } else if (res?.error) {
           toast.error(res.error.message)

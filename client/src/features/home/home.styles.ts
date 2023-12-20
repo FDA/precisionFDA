@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { MainBanner } from '../../components/Banner'
 import { Button } from '../../components/Button'
@@ -7,6 +7,7 @@ import { compactScrollBar } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { commonStyles } from '../../styles/commonStyles'
 import { colors, fontSize, fontWeight, padding, sizing } from '../../styles/theme'
+import { NavLink } from '../../components/NavLink'
 
 
 export const StyledBackLink = styled(BackLink)`

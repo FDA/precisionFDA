@@ -1,6 +1,6 @@
 import { omit } from 'ramda'
 import React, { useMemo } from 'react'
-import { Link, useHistory, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -27,11 +27,11 @@ import { useAppsColumns } from './useAppsColumns'
 type ListType = { apps: IApp[]; meta: IMeta }
 
 export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
-  const onRowClick = (id: string) => history.push(`/home/apps/${id}`)
+  const onRowClick = (id: string) => navigate(`/home/apps/${id}`)
   const {
     setPerPageParam,
     setPageParam,

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import {
@@ -60,15 +60,14 @@ export const useExecutionColumns = ({
         const rowType = row.original.workflow_series_id ? 'workflows' : 'executions'
         const spaceId = getSpaceIdFromScope(row.original.scope)
         const pathname = `${getBasePath(spaceId)}/${rowType}/${cell.row.original.uid}`
-        const to = { pathname, state: { from: location.pathname, fromSearch: location.search }}
 
         return row.original.jobs ? (
-            <StyledLinkCell to={to}>
+            <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
               <BoltIcon height={14} />
               {value}
             </StyledLinkCell>
           ) : (
-            <StyledLinkCell to={to}>
+            <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
               <CogsIcon height={14} />
               {value}
             </StyledLinkCell>

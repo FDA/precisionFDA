@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import { HomeScope, PropertiesResource, ServerScope } from './types'
 
-type FetchProperties = {
+export type FetchProperties = {
   keys: string[]
 }
 

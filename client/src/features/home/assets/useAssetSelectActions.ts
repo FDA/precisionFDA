@@ -1,6 +1,6 @@
 import { pick } from 'ramda'
 import { useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
@@ -42,7 +42,7 @@ type AssetActionArgs = {
 
 export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs) => {
   const queryClient = useQueryClient()
-  const history = useHistory()
+  const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user?.admin
@@ -74,7 +74,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     request: deleteAssetsRequest,
     onSuccess: () => {
       queryClient.invalidateQueries(['assets'])
-      history.push('/home/assets')
+      navigate('/home/assets')
       if(resetSelected) resetSelected()
     },
   })

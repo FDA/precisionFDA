@@ -2,8 +2,8 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
+import { unstable_usePrompt } from 'react-router-dom'
 import { Controller, useForm } from 'react-hook-form'
-import { Prompt } from 'react-router'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
@@ -92,14 +92,15 @@ export const PrososeChallengeForm = ({
 
   useMutationErrorEffect(setError, mutationErrors)
 
+  unstable_usePrompt({
+    message: 'There are unsaved changes, are you sure you want to leave?',
+    when: ({ currentLocation, nextLocation }: any) => 
+      (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
+      currentLocation.pathname !== nextLocation.pathname,
+  })
+
   return (
     <>
-      <Prompt
-        when={
-          !isSubmitting && Object.keys(dirtyFields).length > 0
-        }
-        message="There are unsaved changes, are you sure you want to leave?"
-      />
       <div>
         <SectionTitle>PrecisionFDA Challenge Inquiry</SectionTitle>
         <p>Please complete this form for your new challenge proposal. Thank you!</p>

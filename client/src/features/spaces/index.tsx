@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { UserLayout } from '../../layouts/UserLayout'
 import { CreateSpace } from './form/CreateSpace'
@@ -11,27 +11,16 @@ import SpacesList from './SpacesList'
 
 const Spaces = () => {
   usePageMeta({ title: 'Spaces - precisionFDA' })
-  const { path } = useRouteMatch()
 
   return (
     <UserLayout>
-      <Switch>
-        <Route exact path={`${path}`}>
-          <SpacesList />
-        </Route>
-        <Route exact path={`${path}/:spaceId/edit`}>
-          <SpaceSettings />
-        </Route>
-        <Route exact path={`${path}/:spaceId/duplicate`}>
-          <DuplicateSpace />
-        </Route>
-        <Route exact path={`${path}/new`}>
-          <CreateSpace />
-        </Route>
-        <Route path={`${path}/:spaceId`}>
-          <SpaceShow />
-        </Route>
-      </Switch>
+      <Routes>
+        <Route path="/" element={<SpacesList />} />
+        <Route path={`/:spaceId/edit`} element={<SpaceSettings />} />
+        <Route path={`/:spaceId/duplicate`} element={<DuplicateSpace />} />
+        <Route path={`/new`} element={<CreateSpace />} />
+        <Route path={`/:spaceId/*`} element={<SpaceShow />} />
+      </Routes>
     </UserLayout>
   )
 }

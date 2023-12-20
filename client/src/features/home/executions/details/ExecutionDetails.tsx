@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
-import { useLocation, useParams } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../../components/HomeLabel'
 import { ITab, TabsSwitch } from '../../../../components/TabsSwitch'

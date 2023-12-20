@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory, useRouteMatch } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
@@ -14,8 +14,8 @@ import { DiscussionForm } from './DiscussionForm'
 import { usePublishNoteMutation } from './usePublishNoteMutation'
 
 export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
-  const history = useHistory()
-  const { url } = useRouteMatch()
+  const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
 
   const publishMutation = usePublishNoteMutation()
@@ -32,7 +32,7 @@ export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
         toPublish: variables.attachments,
       })
       queryClient.invalidateQueries(['space'])
-      history.push(
+      navigate(
         `/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`,
       )
     },
@@ -49,7 +49,7 @@ export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
     })
   }
 
-  const backPath = url.replace('/create', '')
+  const backPath = location.pathname.replace('/create', '')
 
   return (
     <UserLayout>

@@ -2,12 +2,11 @@ import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import {
-  Redirect,
   Route,
-  Switch,
-  useHistory,
+  Routes,
+  useNavigate,
   useParams,
-  useRouteMatch,
+  Navigate,
 } from 'react-router-dom'
 import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
@@ -52,8 +51,11 @@ import {
   ActionButton,
   ButtonRow,
   SpaceHeader,
-  SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo,
-  SpaceTypeHeader, TopSpaceHeader,
+  SpaceHeaderDescrip,
+  SpaceHeaderTitle,
+  SpaceMainInfo,
+  SpaceTypeHeader,
+  TopSpaceHeader,
 } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
@@ -73,27 +75,25 @@ const Spaces2 = ({
   space: ISpace
   isLoading: boolean
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage(
     'expandedSpacesSidebar',
     true,
   )
   useToastWSHandler(user)
-  const { path } = useRouteMatch()
+
   const spaceActions = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
 
   const fixSpaceMutation = useMutation({
     mutationKey: ['fix-guest-permissions'],
-    mutationFn: (payload: {
-      id: string
-    }) => fixGuestPermissions(payload),
+    mutationFn: (payload: { id: string }) => fixGuestPermissions(payload),
     onSuccess: () => {
       toast.success('Permissions for guest side successfully updated')
     },
-    onError: (e:any) => {
-        toast.error(e.response.data.error.message)
+    onError: (e: any) => {
+      toast.error(e.response.data.error.message)
     },
   })
 
@@ -104,7 +104,6 @@ const Spaces2 = ({
   if (space.state === 'unactivated') {
     return <Activation space={space} />
   }
-
 
   return (
     <>
@@ -123,7 +122,7 @@ const Spaces2 = ({
             {!spaceActions['Edit Space']?.shouldHide && (
               <ActionButton
                 data-testid="edit-space-button"
-                onClick={() => history.push(`/spaces/${space.id}/edit`)}
+                onClick={() => navigate(`/spaces/${space.id}/edit`)}
               >
                 Space Settings
               </ActionButton>
@@ -131,7 +130,7 @@ const Spaces2 = ({
             {!spaceActions['Duplicate Space']?.shouldHide && (
               <ActionButton
                 data-testid="duplicate-space-button"
-                onClick={() => history.push(`/spaces/${space.id}/duplicate`)}
+                onClick={() => navigate(`/spaces/${space.id}/duplicate`)}
               >
                 Duplicate Space
               </ActionButton>
@@ -161,7 +160,10 @@ const Spaces2 = ({
             <FileIcon height={14} />
             <MenuText>Files</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.files.toString()} active={activeResource === 'files'} />
+              <MenuCounter
+                count={space.counters.files.toString()}
+                active={activeResource === 'files'}
+              />
             )}
           </MenuItem>
           <MenuItem
@@ -172,7 +174,10 @@ const Spaces2 = ({
             <CubeIcon height={14} />
             <MenuText>Apps</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.apps.toString()} active={activeResource === 'apps'} />
+              <MenuCounter
+                count={space.counters.apps.toString()}
+                active={activeResource === 'apps'}
+              />
             )}
           </MenuItem>
           <MenuItem
@@ -183,7 +188,10 @@ const Spaces2 = ({
             <BoltIcon height={14} />
             <MenuText>Workflows</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.workflows.toString()} active={activeResource === 'workflows'} />
+              <MenuCounter
+                count={space.counters.workflows.toString()}
+                active={activeResource === 'workflows'}
+              />
             )}
           </MenuItem>
           <MenuItem
@@ -194,7 +202,10 @@ const Spaces2 = ({
             <CogsIcon height={14} />
             <MenuText>Executions</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.jobs.toString()} active={activeResource === 'executions'} />
+              <MenuCounter
+                count={space.counters.jobs.toString()}
+                active={activeResource === 'executions'}
+              />
             )}
           </MenuItem>
           <MenuItem
@@ -205,7 +216,10 @@ const Spaces2 = ({
             <UsersIcon height={14} />
             <MenuText>Members</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />
+              <MenuCounter
+                count={space.counters.members.toString()}
+                active={activeResource === 'members'}
+              />
             )}
           </MenuItem>
           <MenuItem
@@ -216,20 +230,28 @@ const Spaces2 = ({
             <SpaceReportIcon height={14} />
             <MenuText>Reports</MenuText>
             {expandedSidebar && (
-              <MenuCounter count={space.counters.reports.toString()} active={activeResource === 'reports'} />
+              <MenuCounter
+                count={space.counters.reports.toString()}
+                active={activeResource === 'reports'}
+              />
             )}
           </MenuItem>
-          {space.type !== 'private_type' && (space.type !== 'review' || space.private_space_id == null) && <MenuItem
+          {space.type !== 'private_type' && (space.type !== 'review' || space.private_space_id == null) && (
+            <MenuItem
               data-testid="discussions-link"
               to={`/spaces/${space.id}/discussions`}
               activeClassName="active"
-          >
-            <DiscussionIcon height={14} />
-            <MenuText>Discussions</MenuText>
-            {expandedSidebar && (
-                <MenuCounter count={space.counters.discussions.toString()} active={activeResource === 'discussions'} />
-            )}
-          </MenuItem>}
+            >
+              <DiscussionIcon height={14} />
+              <MenuText>Discussions</MenuText>
+              {expandedSidebar && (
+                <MenuCounter
+                  count={space.counters.discussions.toString()}
+                  active={activeResource === 'discussions'}
+                />
+              )}
+            </MenuItem>
+          )}
           <Fill />
           <Expand
             data-testid="expand-sidebar"
@@ -242,69 +264,84 @@ const Spaces2 = ({
           {isLoading ? (
             <Loader />
           ) : (
-            <Switch>
-              <Route exact path={`/spaces/${space.id}/files`}>
-                <FileList
-                  space={space}
-                  showFolderActions={!!space.links.add_data}
-                />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/files/:fileId`}>
-                <FileShow space={space} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/apps`}>
-                <AppList spaceId={space.id} />
-              </Route>
-              <Route path={`/spaces/${space.id}/apps/:appUid/jobs/new`}>
-                <RunJobPage spaceId={space.id} />
-              </Route>
-              <Route path={`/spaces/${space.id}/apps/:appUid/edit`}>
-                <EditAppPage spaceId={space.id} />
-              </Route>
-              <Route path={`/spaces/${space.id}/apps/:appUid/fork`}>
-                <ForkAppPage spaceId={space.id} />
-              </Route>
-              <Route path={`/spaces/${space.id}/apps/:appUid`}>
-                <AppsShow spaceId={space.id} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/workflows`}>
-                <WorkflowList spaceId={space.id} />
-              </Route>
-              <Route path={`/spaces/${space.id}/workflows/:workflowUid`}>
-                <WorkflowShow spaceId={space.id} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/executions`}>
-                <ExecutionList spaceId={space.id} />
-              </Route>
+            <Routes>
               <Route
-                exact
-                path={`/spaces/${space.id}/executions/:executionUid`}
-              >
-                <ExecutionDetails spaceId={space.id} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/members`}>
-                <MembersList space={space} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/reports`}>
-                <SpaceReportList spaceId={Number(space.id)} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/discussions`}>
-                <DiscussionList space={space} scope={`space-${space.id}`} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/discussions/create`}>
-                <CreateDiscussionPage scope={`space-${space.id}`} />
-              </Route>
-              <Route exact path={`/spaces/${space.id}/discussions/:discussionId`}>
-                <DiscussionShow space={space} />
-              </Route>
-              <Route
-                exact
-                path={`${path}`}
-                render={props => (
-                  <Redirect to={`${props.match.params.spaceId}/files`} />
-                )}
+                path={`files`}
+                element={
+                  <FileList
+                    space={space}
+                    showFolderActions={!!space.links.add_data}
+                  />
+                }
               />
-            </Switch>
+              <Route
+                path={`files/:fileId`}
+                element={<FileShow space={space} />}
+              />
+              <Route
+                path={`apps`}
+                element={<AppList spaceId={space.id} />}
+              />
+              <Route
+                path={`apps/:appUid/jobs/new`}
+                element={<RunJobPage spaceId={space.id} />}
+              />
+              <Route
+                path={`apps/:appUid/edit`}
+                element={<EditAppPage spaceId={space.id} />}
+              />
+              <Route
+                path={`apps/:appUid/fork`}
+                element={<ForkAppPage spaceId={space.id} />}
+              />
+              <Route
+                path={`apps/:appUid/*`}
+                element={<AppsShow spaceId={space.id} />}
+              />
+              <Route
+                path={`workflows`}
+                element={<WorkflowList spaceId={space.id} />}
+              />
+              <Route
+                path={`workflows/:workflowUid/*`}
+                element={<WorkflowShow spaceId={space.id} />}
+              />
+              <Route
+                path={`executions`}
+                element={<ExecutionList spaceId={space.id} />}
+              />
+              <Route
+                path={`executions/:executionUid`}
+                element={<ExecutionDetails spaceId={space.id} />}
+              />
+              <Route
+                path={`members`}
+                element={<MembersList space={space} />}
+              />
+              <Route
+                path={`reports`}
+                element={<SpaceReportList spaceId={Number(space.id)} />}
+              />
+              <Route
+                path={`discussions`}
+                element={
+                  <DiscussionList space={space} scope={`space-${space.id}`} />
+                }
+              />
+              <Route
+                path={`discussions/create`}
+                element={<CreateDiscussionPage scope={`space-${space.id}`} />}
+              />
+              <Route
+                path={`discussions/:discussionId`}
+                element={<DiscussionShow space={space} />}
+              />
+
+              <Route
+                path="/"
+                element={<Navigate to={`files`} />}
+              />
+            </Routes>
           )}
         </Main>
       </Row>
@@ -320,11 +357,11 @@ export const SpaceShow = () => {
     () => spaceId && spaceRequest({ id: spaceId }),
     {
       retry: (failureCount, error: any) => {
-        if(error.response.status === 403) {
+        if (error.response.status === 403) {
           setIsNotAllowed(true)
           return false
         }
-        if(failureCount > 3) {
+        if (failureCount > 3) {
           return true
         }
         return false

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { CreateAppPayload, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
@@ -11,8 +11,8 @@ import { useFetchAppQuery } from '../useFetchAppQuery'
 import { mapFromServerToForm } from './common'
 import { getBasePath } from '../../utils'
 
-export const ForkAppPage = ({ spaceId }: { spaceId: number }) => {
-  const history = useHistory()
+export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
 
@@ -23,7 +23,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId: number }) => {
     mutationFn: (payload: any) => createEditAppRequest(payload),
     onSuccess: res => {
       if (res?.id) {
-        history.push(`${getBasePath(spaceId)}/apps/${res?.id}`)
+        navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
         queryClient.invalidateQueries(['apps', 'app'])
         toast.success('Forked app')
       } else if (res?.error) {

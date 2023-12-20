@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useLocation, useRouteMatch } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../../components/FeaturedToggle'
 import {
@@ -27,7 +26,7 @@ export const useWorkflowColumns = ({
 }) => {
   const location = useLocation()
   const queryClient = useQueryClient()
-  const { path } = useRouteMatch()
+
   return [
     {
       Header: 'Name',
@@ -37,7 +36,8 @@ export const useWorkflowColumns = ({
       Cell: props => (
         <StyledNameCell
           as={Link}
-          to={{ pathname: `${path}/${props.cell.row.original.uid}`, state: { from: location.pathname, fromSearch: location.search }}}
+          to={`${location.pathname}/${props.cell.row.original.uid}`}
+          state={{ from: location.pathname, fromSearch: location.search }}
         >
           <BoltIcon height={14} />
           {props.value}

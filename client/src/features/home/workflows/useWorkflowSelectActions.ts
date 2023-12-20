@@ -1,6 +1,6 @@
 import { pick } from 'ramda'
 import { useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
@@ -15,7 +15,7 @@ import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, resourceKeys, resetSelected }: { homeScope?: HomeScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
   const queryClient = useQueryClient()
-  const history = useHistory()
+  const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user ? user.admin : false
@@ -33,7 +33,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     toast.success('The workflow has been published successfully!')
     queryClient.invalidateQueries(resourceKeys).then(() => {
       if (Array.isArray(res.workflows)) {
-        history.push(`/home/workflows/${res.workflows[0].uid}`)
+        navigate(`/home/workflows/${res.workflows[0].uid}`)
       }
     },
     )
@@ -80,9 +80,9 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     onSuccess: () => {
       queryClient.invalidateQueries(['workflows'])
       if(spaceId) {
-        history.push(`/spaces/${spaceId}/workflows`)
+        navigate(`/spaces/${spaceId}/workflows`)
       } else {
-        history.push('/home/workflows')
+        navigate('/home/workflows')
       }
       if(resetSelected) resetSelected()
     },

@@ -1,8 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { omit, pick } from 'ramda'
 import React from 'react'
-import { useLocation, useParams, useRouteMatch } from 'react-router'
-import { Link, Redirect, Route, Switch } from 'react-router-dom'
+import { Link, Route, Routes, useLocation, useParams, Navigate } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
@@ -16,10 +15,8 @@ import {
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../../components/Tags'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { IChallenge } from '../../../types/challenge'
-import { Location } from '../../../types/utils'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
-import { getHomeScopeFromServerScope } from '../getHomeScopeFromServerScope'
 import { StyledBackLink, StyledRight } from '../home.styles'
 import {
   ActionsButton,
@@ -36,13 +33,12 @@ import {
   Title,
   Topbox,
 } from '../show.styles'
-import { EmmitScope, HomeScope, ServerScope } from '../types'
+import { EmmitScope, HomeScope } from '../types'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
-import { getBaseLink } from './run/utils'
 import { getBasePath } from '../utils'
 import { getSpaceIdFromScope } from '../../../utils'
 
@@ -114,7 +110,7 @@ const renderOptions = (app: IApp, homeScope?: HomeScope) => {
 
 const DetailActionsDropdown = (
   { homeScope, app, comparatorLinks, challenges, spaceId }:
-    { homeScope?: HomeScope, app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId: string }) => {
+    { homeScope?: HomeScope, app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId?: string }) => {
   let actions = useAppSelectionActions({
     homeScope,
     spaceId,
@@ -134,7 +130,7 @@ const DetailActionsDropdown = (
   return (
     <>
       <CloudResourcesHeaderButton
-        href={`/${getBaseLink(spaceId)}/apps/${app.uid}/jobs/new`}
+        href={`${getBasePath(spaceId)}/apps/${app.uid}/jobs/new`}
         isLinkDisabled={!app.links.run_job}
         conditionType='all'
         asReactLink
@@ -178,9 +174,8 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: number, emitScope?: EmmitScope }) => {
-  const location: Location = useLocation()
-  const match = useRouteMatch()
+export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: string, emitScope?: EmmitScope }) => {
+  const location = useLocation()
   const { appUid } = useParams<{ appUid: string }>()
   const { data, isLoading } = useFetchAppQuery(appUid, {
     onSuccess: (d) => {
@@ -206,8 +201,10 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
     location, 
     resourceLocation: 'apps',
     homeScope,
-    spaceId
+    spaceId,
   })
+
+  const basePath = getBasePath(spaceId)
 
   return (
     <>
@@ -246,7 +243,7 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
             <RevisionDropdown
               revisions={meta.revisions}
               selectedValue={app.revision}
-              linkToRevision={r => `${getBasePath(spaceId)}/apps/${r.uid}`}
+              linkToRevision={r => `${basePath}/apps/${r.uid}`}
             />
           </HeaderLeft>
           <div>
@@ -298,31 +295,23 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" exact to={{ pathname: `${match.url}`, state: location.state }}>
+        <StyledTab activeClassName="active" end to={{ pathname: `${basePath}/apps/${app.uid}`, state: location.state }}>
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/jobs`, state: location.state }}>
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }}>
           Executions ({app.job_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/readme`, state: location.state }}>
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }}>
           Readme
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
-        <Switch>
-          <Route path={`${match.path}/spec`} exact>
-            <Redirect to={`${match.url}`} />
-          </Route>
-          <Route path={`${match.path}/readme`} exact>
-            <MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>
-          </Route>
-          <Route path={`${match.path}/jobs`}>
-            <AppExecutionsList appUid={appUid} />
-          </Route>
-          <Route path={`${match.path}`}>
-            <SpecTab spaceId={spaceId} spec={meta.spec} />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path={`/`} element={<SpecTab spaceId={spaceId} spec={meta.spec} />} />
+          <Route path={`spec`} element={<Navigate to={`${location.pathname}`} />} />
+          <Route path={`readme`} element={<MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>} />
+          <Route path={`jobs`} element={<AppExecutionsList appUid={app.uid} />} />
+        </Routes>
       </StyledTabPanel>
     </>
   )

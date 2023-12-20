@@ -1,7 +1,7 @@
 import { Editor } from '@monaco-editor/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { ChangeEvent, useState } from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -54,7 +54,7 @@ const FileUpload = ({
   setShowModal: (show: boolean) => void
   filetype: FileType
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [text, setText] = useState<string>()
   const [fileName, setFileName] = useState<string>()
@@ -71,7 +71,7 @@ const FileUpload = ({
       if (res.id) {
         setShowModal(false)
         queryClient.invalidateQueries(['apps'])
-        history.push(`/home/apps/${res.id}`)
+        navigate(`/home/apps/${res.id}`)
         toast.success(
           `Created app by importing ${filetypeName[filetype]} file`,
         )

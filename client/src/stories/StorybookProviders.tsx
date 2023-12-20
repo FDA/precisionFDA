@@ -1,27 +1,28 @@
-import { QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { Router } from 'react-router'
+import { BrowserRouter } from 'react-router-dom'
 import { QueryParamProvider } from 'use-query-params'
-import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import GlobalStyle from '../styles/global'
-import history from '../utils/history'
-import queryClient from '../utils/queryClient'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: Infinity,
+    },
+  },
+})
 
 export function StorybookProviders({ children }: React.PropsWithChildren) {
   return (
-    <QueryClientProvider
-      client={queryClient({
-        onAuthFailure: () => console.log('AuthFailure'),
-      })}
-    >
-      <Router history={history}>
-        <QueryParamProvider adapter={ReactRouter5Adapter}>
-          <>
-            <GlobalStyle />
-            {children}
-          </>
+    <BrowserRouter>
+      <GlobalStyle />
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          {children}
         </QueryParamProvider>
-      </Router>
-    </QueryClientProvider>
+      </QueryClientProvider>
+  </BrowserRouter>
   )
 }

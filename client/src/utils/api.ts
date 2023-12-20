@@ -1,6 +1,6 @@
 import httpStatusCodes from 'http-status-codes'
 import queryString from 'query-string'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 export const requestOpts: RequestInit = {
@@ -14,13 +14,13 @@ export const requestOpts: RequestInit = {
 }
 
 export const unauthorizedHandler = () => {
-const history = useHistory()
+const navigate = useNavigate()
 toast.error('Session expired. Please log in again', {
   toastId: '401 toast',
   position: toast.POSITION.TOP_CENTER,
   autoClose: false,
   closeOnClick: false,
-  onClick: () => history.push('/login'),
+  onClick: () => navigate('/login'),
 })
 }
 // TODO: separate app errors from network errors.

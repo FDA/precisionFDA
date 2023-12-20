@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -17,7 +17,7 @@ import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
   const { data: portal, isLoading } = useDataPortalByIdQuery(portalId)
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -26,7 +26,7 @@ const EditDataPortalPage = () => {
     onSuccess: res => {
       if (!res?.error) {
         queryClient.invalidateQueries(['data-portal-list'])
-        history.push('/data-portals')
+        navigate('/data-portals')
         toast.success('Data Portal updated')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)

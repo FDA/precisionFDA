@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -21,13 +21,13 @@ const useNewsItemRequest = (id: string) => {
 }
 
 const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const editNewsItemMutation = useMutation({
     mutationKey: ['edit-news-item'],
     mutationFn: (payload: any) => editNewsItemRequest(data.id, payload),
     onSuccess: res => {
-      history.push('/admin/news')
+      navigate('/admin/news')
       queryClient.invalidateQueries(['news'])
       queryClient.invalidateQueries(['news-item'])
       toast.success('Edited news item')
@@ -41,7 +41,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     mutationKey: ['delete-news-item'],
     mutationFn: () => deleteNewsItemRequest(data.id),
     onSuccess: res => {
-      history.push('/admin/news')
+      navigate('/admin/news')
       queryClient.invalidateQueries(['news-item'])
       queryClient.invalidateQueries(['news'])
       toast.success('Deleted news item')
@@ -58,7 +58,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     if (window.confirm('Are you sure you wish to delete this item?')) deleteNewsItemMutation.mutateAsync()
   }
 
-  const tData = { ...data, createdAt: new Date(data.createdAt).toISOString().substring(0,10) } satisfies NewsItem
+  const tData = { ...data, createdAt: new Date(data.created_at)?.toISOString().substring(0,10) } satisfies NewsItem
 
   return <NewsItemForm onSubmit={handleSubmit} onDelete={handleDelete} defaultValues={tData} />
 }

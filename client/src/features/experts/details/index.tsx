@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { Link, NavLink, Route, Switch, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useParams } from 'react-router-dom'
 import 'react-toastify/dist/ReactToastify.css'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
@@ -23,6 +23,7 @@ import {
   StyledTab,
   StyledTabList,
 } from './styles'
+import { NavLink } from '../../../components/NavLink'
 
 const StyledNavigationBar = styled.div`
   width: 100%;
@@ -105,14 +106,10 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               </StyledTab>
             </StyledTabList>
 
-            <Switch>
-              <Route exact path={`/experts/${expert?.id}/blog`}>
-                <ExpertBlog user={user} expert={expert} />
-              </Route>
-              <Route path={`/experts/${expert?.id}`}>
-                <ExpertAbout expert={expert} />
-              </Route>
-            </Switch>
+            <Routes>
+              <Route path={`${expert?.id}/blog`} element={<ExpertBlog user={user} expert={expert} />} />
+              <Route index path={`${expert?.id}`} element={<ExpertAbout expert={expert} />} />
+            </Routes>
           </ExpertContentRow>
         </ExpertRow>
       </PageContainerMargin>
