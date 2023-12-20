@@ -1,6 +1,6 @@
 import { pick } from 'ramda'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ISpace } from '../../spaces/spaces.types'
@@ -89,7 +89,7 @@ export const useFilesSelectActions = ({
   resetSelected?: () => void
 }) => {
   const queryClient = useQueryClient()
-  const history = useHistory()
+  const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user?.admin
@@ -179,19 +179,19 @@ export const useFilesSelectActions = ({
     onSuccess: () => {
       if (space) {
         if (folderId) {
-          history.push(`/spaces/${space.id}/files?folder_id=${folderId}`)
+          navigate(`/spaces/${space.id}/files?folder_id=${folderId}`)
           queryClient.invalidateQueries(['files', folderId])
         } else {
-          history.push(`/spaces/${space.id}/files`)
+          navigate(`/spaces/${space.id}/files`)
           queryClient.invalidateQueries(['files'])
         }
       } else {
         // eslint-disable-next-line no-lonely-if
         if (folderId) {
-          history.push(`/home/files?folder_id=${folderId}`)
+          navigate(`/home/files?folder_id=${folderId}`)
           queryClient.invalidateQueries(['files', folderId])
         } else {
-          history.push('/home/files')
+          navigate('/home/files')
           queryClient.invalidateQueries(['files'])
         }
       }

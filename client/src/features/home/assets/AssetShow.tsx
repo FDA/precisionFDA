@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { useParams } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { HomeLabel } from '../../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../../components/Markdown'
@@ -36,7 +35,7 @@ const AssetActions = ({
   homeScope,
   asset,
 }: {
-  scope?: HomeScope
+  homeScope?: HomeScope
   asset: IAsset
 }) => {
   const actions = useAssetActions({
@@ -140,7 +139,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
             )}
           </HeaderLeft>
           <div>
-            <AssetActions scope={homeScope} asset={asset} />
+            <AssetActions homeScope={homeScope} asset={asset} />
           </div>
         </Header>
 

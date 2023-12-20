@@ -55,8 +55,5 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
   }
 `
-
-export const LayoutBody = styled.div`
-`
  
 export default GlobalStyle

@@ -1,7 +1,6 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { Loader } from '../../../components/Loader'
 import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'

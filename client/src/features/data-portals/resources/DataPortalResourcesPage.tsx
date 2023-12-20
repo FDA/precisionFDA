@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-query'
 import axios from 'axios'
 import React from 'react'
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'

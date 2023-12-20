@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
@@ -48,7 +48,7 @@ export const useChangeMemberRoleModal = ({
 }) => {
   const authUser = useAuthUser()
   const queryClient = useQueryClient()
-  const history = useHistory()
+  const navigate = useNavigate()
   const { isShown, setShowModal } = useModal()
   const {
     handleSubmit,
@@ -68,7 +68,7 @@ export const useChangeMemberRoleModal = ({
       }),
     onSuccess: res => {
       if (authUser?.dxuser === res.member && res.role === 'disable') {
-        history.push('/spaces')
+        navigate('/spaces')
         toast.success('Disabled yourself from the space')
       } else {
         reset()

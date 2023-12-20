@@ -1,5 +1,5 @@
 import React from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -12,7 +12,7 @@ import { createDataPortalRequest } from '../api'
 import { DataPortalForm } from './DataPortalForm'
 
 const CreateDataPortalPage = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -21,7 +21,7 @@ const CreateDataPortalPage = () => {
     onSuccess: res => {
       if (!res?.error) {
         queryClient.invalidateQueries(['data-portal-list'])
-        history.push(`/data-portals/${res.id}`)
+        navigate(`/data-portals/${res.id}`)
         toast.success('Data Portal created')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)

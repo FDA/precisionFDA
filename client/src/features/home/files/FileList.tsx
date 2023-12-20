@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
@@ -40,7 +40,6 @@ import { useFolderActions } from './useFolderActions'
 type ListType = { files: IFile[]; meta: IMeta }
 
 export const FileList = ({ homeScope, space, showFolderActions = false }: { homeScope?: HomeScope, space?: ISpace, showFolderActions?: boolean }) => {
-  const { path } = useRouteMatch()
   const location = useLocation()
   const queryCache = useQueryClient()
 
@@ -50,7 +49,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const {
     setPerPageParam,
@@ -79,7 +78,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
   })
 
   const onRowClick = (id: string) => {
-    history.push(`${path}/${id}`, { from: location.pathname, fromSearch: location.search })
+    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search }})
   }
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
@@ -108,7 +107,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
       scope: homeScope as string,
       per_page: perPageParam.toString(),
     })).toString()
-    history.push({ search })
+    navigate({ search })
   }
 
   // If the component is rendering for the first time, skip setting folderIdParam
@@ -193,7 +192,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
           </Dropdown>
         </ActionsRow>
         <ActionsRow>
-          {breadcrumbs(path, data?.meta?.path, homeScope)}
+          {breadcrumbs(location.pathname, data?.meta?.path, homeScope)}
         </ActionsRow>
       </div>
 

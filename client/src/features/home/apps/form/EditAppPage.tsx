@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../../components/Loader'
 import { NotAllowedPage } from '../../../../components/NotAllowed'
@@ -13,7 +13,7 @@ import { getBasePath } from '../../utils'
 
 
 export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
 
@@ -24,7 +24,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
     mutationFn: createEditAppRequest,
     onSuccess: res => {
       if (res?.id) {
-        history.push(`${getBasePath(spaceId)}/apps/${res?.id}`)
+        navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
         queryClient.invalidateQueries(['apps', 'app'])
         toast.success('New revision created')
       } else if (res?.error) {

@@ -2,8 +2,7 @@
 import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useLocation, useParams } from 'react-router'
-import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
+import { Link, Route, Navigate, Routes, useLocation, useParams } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../../components/Dropdown'
 import { RevisionDropdown } from '../../../components/Dropdown/RevisionDropdown'
@@ -15,8 +14,7 @@ import {
   StyledTabPanel,
 } from '../../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../../components/Tags'
-import { Location } from '../../../types/utils'
-import { getBackPath } from '../../../utils/getBackPath'
+import { getBackPath, getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home.styles'
 import {
@@ -164,8 +162,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
 }
 
 export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: number, homeScope?: HomeScope, emitScope?: EmmitScope }) => {
-  const match = useRouteMatch()
-  const location: Location = useLocation()
+  const location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data, status, isLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
@@ -191,9 +188,11 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
 
   const workflowTitle = workflow.title ? workflow.title : workflow.name
 
+  const basePath = getBasePath(spaceId)
+
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'workflows', homeScope)} data-testid="workflow-show-back-link">
+      <StyledBackLink linkTo={getBackPathNext({location, resourceLocation: 'workflows', homeScope, spaceId})} data-testid="workflow-show-back-link">
         Back to Workflows
       </StyledBackLink>
       <Topbox>
@@ -253,37 +252,42 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" exact to={{ pathname: `${match.url}`, state: location.state }} data-testid="workflow-show-tab-spec">
+        <StyledTab activeClassName="active" end to={{ pathname: `${basePath}/workflows/${workflow.uid}`, state: location.state }} data-testid="workflow-show-tab-spec">
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/jobs`, state: location.state }} data-testid="workflow-show-tab-executions">
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/workflows/${workflow.uid}/jobs`, state: location.state }} data-testid="workflow-show-tab-executions">
           Executions ({workflow.job_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/diagram`, state: location.state }} data-testid="workflow-show-tab-diagram">
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/workflows/${workflow.uid}/diagram`, state: location.state }} data-testid="workflow-show-tab-diagram">
           Diagram
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${match.url}/readme`, state: location.state }} data-testid="workflow-show-tab-readme">
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/workflows/${workflow.uid}/readme`, state: location.state }} data-testid="workflow-show-tab-readme">
           Readme
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
-        <Switch>
-          <Route path={`${match.path}/spec`} exact>
-            <Redirect to={`${match.url}`} />
-          </Route>
-          <Route path={`${match.path}/readme`} exact>
-            <MarkdownStyle><Markdown data={workflow.readme} /></MarkdownStyle>
-          </Route>
-          <Route path={`${match.path}/diagram`} exact>
-            <WorkflowsDiagram workflowId={workflow.uid} />
-          </Route>
-          <Route path={`${match.path}/jobs`} exact>
-            <WorkflowExecutionsList uid={workflowUid} />
-          </Route>
-          <Route path={`${match.path}`}>
-            <HomeWorkflowsSpec spec={meta.spec} />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route
+            path={`/`}
+            element={<HomeWorkflowsSpec spec={meta.spec} />}
+          />
+          <Route
+            path={`spec`}
+            element={<Navigate to={`${location.pathname}`} />}
+          />
+          <Route
+            path={`readme`}
+            element={<MarkdownStyle><Markdown data={workflow.readme} /></MarkdownStyle>}
+          />
+          <Route
+            path={`diagram`}
+            element={<WorkflowsDiagram workflowId={workflow.uid} />}
+          />
+          <Route
+            path={`jobs`}
+            element={<WorkflowExecutionsList uid={workflow.uid} />}
+          />
+        </Routes>
       </StyledTabPanel>
     </>
   )

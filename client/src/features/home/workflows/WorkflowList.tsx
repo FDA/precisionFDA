@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -37,11 +37,11 @@ export const WorkflowList = ({
   homeScope?: HomeScope
   spaceId?: string
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
-  const onRowClick = (id: string) => history.push(`/home/workflows/${id}`)
+  const onRowClick = (id: string) => navigate(`/home/workflows/${id}`)
   const {
     sortBy,
     setSortBy,

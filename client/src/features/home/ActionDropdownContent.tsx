@@ -1,11 +1,11 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { colors } from '../../styles/theme'
 import { ActionFunctionsType, ActionGroupType, Link as LinkType } from './types'
 import { CheckIcon } from '../../components/icons/CheckIcon'
+import { NavLink } from '../../components/NavLink'
 
 // Updated disbaled text color for remediation using textMediumGrey
 export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boolean }>`

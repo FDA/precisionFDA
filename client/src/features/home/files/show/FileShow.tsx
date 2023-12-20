@@ -1,8 +1,7 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { parse } from 'query-string'
-import { useParams } from 'react-router'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import Dropdown from '../../../../components/Dropdown'
 import { HomeLabel } from '../../../../components/HomeLabel'
 import { FileIcon } from '../../../../components/icons/FileIcon'
@@ -13,7 +12,6 @@ import {
   StyledPropertyItem,
   StyledPropertyKey,
 } from '../../../../components/Tags'
-import { Location } from '../../../../types/utils'
 import { getBackPath } from '../../../../utils/getBackPath'
 import { ISpace } from '../../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../../ActionDropdownContent'
@@ -94,7 +92,7 @@ const FileActions = ({
 
 
 export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope, space?: ISpace }) => {
-  const location: Location = useLocation()
+  const location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, status } = useQuery({
     queryKey: ['file', fileId],

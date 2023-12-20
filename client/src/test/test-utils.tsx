@@ -1,15 +1,18 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom'
 import 'whatwg-fetch'
-import { render, RenderOptions } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import React, { FC, ReactElement } from 'react'
+import React, { FC } from 'react'
+import { BrowserRouter } from 'react-router-dom'
 import { QueryParamProvider } from 'use-query-params'
-import { ReactRouter5Adapter } from 'use-query-params/adapters/react-router-5'
-import { QueryClientProvider, QueryClient, QueryCache } from '@tanstack/react-query'
-import { Router } from 'react-router-dom'
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
+import {
+  QueryClientProvider,
+  QueryClient,
+  QueryCache,
+} from '@tanstack/react-query'
 import { server } from '../mocks/server'
-import history from '../utils/history'
 
 const queryCache = new QueryCache()
 const queryClient = new QueryClient({
@@ -24,19 +27,19 @@ const queryClient = new QueryClient({
 export const AllTheProviders: FC<{ children: React.ReactNode }> = ({
   children,
 }) => (
-  <QueryClientProvider client={queryClient}>
-    <Router history={history}>
-      <QueryParamProvider adapter={ReactRouter5Adapter}>
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <QueryParamProvider adapter={ReactRouter6Adapter}>
         {children}
       </QueryParamProvider>
-    </Router>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </BrowserRouter>
 )
 
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>,
-) => render(ui, { wrapper: AllTheProviders, ...options })
+const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {
+  window.history.pushState({}, 'Test page', route)
+  return render(ui, { wrapper: AllTheProviders })
+}
 
 export * from '@testing-library/react'
 
@@ -48,4 +51,4 @@ afterEach(() => {
 })
 afterAll(() => server.close())
 
-export { customRender as render, history, userEvent }
+export { customRender as render, userEvent }

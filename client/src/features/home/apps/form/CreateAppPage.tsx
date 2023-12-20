@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { cleanObject } from '../../../../utils/object'
 import { createEditAppRequest } from '../apps.api'
@@ -11,7 +11,7 @@ import { AppForm } from './AppForm'
 
 
 export const CreateAppPage = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const createAppMutation = useMutation({
@@ -19,7 +19,7 @@ export const CreateAppPage = () => {
     mutationFn: (payload: any) => createEditAppRequest(payload),
     onSuccess: res => {
       if (res?.id) {
-        history.push(`/home/apps/${res?.id}`)
+        navigate(`/home/apps/${res?.id}`)
         queryClient.invalidateQueries(['apps'])
         queryClient.invalidateQueries(['counters'])
         toast.success('Your app was created successfully')

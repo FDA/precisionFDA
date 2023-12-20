@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ButtonOutlineGrey, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -74,7 +74,7 @@ export interface ISpaceSettingsForm {
 
 export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   const user = useAuthUser()
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const spaceActions = useSpaceActions({ space })
   const[formError, setFormError] = useState<string | undefined>()
@@ -107,7 +107,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       editSpaceRequest(space.id, payload),
     onSuccess: res => {
       if (res?.space) {
-        history.push(`/spaces/${res?.space?.id}`)
+        navigate(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries(['spaces'])
         toast.success('Success: editing space settings')
       } else if (res?.errors) {

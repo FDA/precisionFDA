@@ -1,7 +1,8 @@
+
 /* eslint-disable no-multi-str */
+import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { requestOpts } from '../utils/api'
 import { useAuthUser } from '../features/auth/useAuthUser'
 
 export type CloudResourcesResponse = {
@@ -15,8 +16,7 @@ export type CloudResourcesResponse = {
 }
 
 export const fetchCloudResources = async () => {
-  const res = await fetch('/api/user/cloud_resources', requestOpts)
-  return res.json() as any as CloudResourcesResponse
+  return axios.get<CloudResourcesResponse>('/api/user/cloud_resources').then(r => r.data)
 }
 
 export const useCloudResourcesQuery = () => useQuery<CloudResourcesResponse>(['cloud_resources'], fetchCloudResources)

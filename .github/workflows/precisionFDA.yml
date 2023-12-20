@@ -181,7 +181,7 @@ jobs:
       # My guess: issue might be related to the use of workspaces
       # Workaround: node_modules directly stored in the package
       # Removal requires more investingation
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ./server/node_modules
@@ -217,19 +217,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2
         with:
+          version: 8
           node-version: '20.9.0'
-          cache: 'yarn'
-          cache-dependency-path: ./client/yarn.lock
 
-      - name: Install
-        run: yarn --frozen-lockfile
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ./client/node_modules
+          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./client/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
         working-directory: ./client
+        run: pnpm install --prod=false
 
       - name: Test
-        run: yarn test
         working-directory: ./client
+        run: pnpm test
 
   test-react-app-production:
     name: Test React app production build
@@ -238,17 +243,21 @@ jobs:
       NODE_ENV: production
     steps:
       - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v3
+      
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: '20.9.0'
-          cache: 'yarn'
-          cache-dependency-path: ./client/yarn.lock
+          version: 8
 
-      - name: Install
-        run: yarn --frozen-lockfile --production=false
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ./client/node_modules
+          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./client/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
         working-directory: ./client
+        run: pnpm install --prod=false
 
       - name: Build production
-        run: yarn run build:production
         working-directory: ./client
+        run: pnpm run build:production

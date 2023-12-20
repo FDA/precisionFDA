@@ -3,7 +3,6 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Prompt } from 'react-router'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
@@ -15,6 +14,7 @@ import { SavingModal } from './SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
 import { createValidationSchema, editValidationSchema } from './common'
+import { unstable_usePrompt } from 'react-router-dom'
 
 type SelectItem = { label: string; value: string }
 
@@ -127,17 +127,18 @@ export const DataPortalForm = ({
     }
   }, [mutationErrors])
 
+  unstable_usePrompt({
+    message: 'There are unsaved changes, are you sure you want to leave?',
+    when: ({ currentLocation, nextLocation }: any) =>
+      (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
+      currentLocation.pathname !== nextLocation.pathname,
+  })
+
   const submitErrors = { ...errors }
   delete submitErrors['root']
 
   return (
     <>
-      <Prompt
-        when={
-          !isSubmitting && isEditMode && Object.keys(dirtyFields).length > 0
-        }
-        message="There are unsaved changes, are you sure you want to leave?"
-      />
       <div>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FieldGroup label="Name" required>

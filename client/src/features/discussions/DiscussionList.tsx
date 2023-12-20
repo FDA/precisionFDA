@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { Link, useRouteMatch } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
@@ -67,7 +67,7 @@ export const DiscussionList = ({
   const { data, status } = useQuery(['discussions', scope], () =>
     fetchDiscussionsRequest(scope),
   )
-  const { path } = useRouteMatch()
+  const location = useLocation()
 
   const membershipType = space.current_user_membership
   const canCreateDiscussion = membershipType.role !== 'viewer'
@@ -83,7 +83,7 @@ export const DiscussionList = ({
                 data-turbolinks="false"
                 data-testid="space-discussion-create-link"
                 as={Link}
-                to={`${path}/create`}
+                to={`${location.pathname}/create`}
               >
                 <PlusIcon height={12} /> Start a Discussion
               </ButtonSolidBlue>
@@ -100,7 +100,7 @@ export const DiscussionList = ({
             data.reverse().map(discussion => (
               <DiscussionListItem key={discussion.id}>
                 <Left>
-                  <StyledDiscussionLink to={`${path}/${discussion.id}`}>
+                  <StyledDiscussionLink to={`${location.pathname}/${discussion.id}`}>
                     {discussion.note.title}
                   </StyledDiscussionLink>
                   <Info>

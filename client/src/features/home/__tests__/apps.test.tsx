@@ -1,16 +1,11 @@
 import React from 'react'
-import { Route } from 'react-router'
-import { history, render, screen, waitFor } from '../../../test/test-utils'
+import { render, screen, waitFor } from '../../../test/test-utils'
 import { AppList } from '../apps/AppList'
 
 describe('My Home / Apps', () => {
   test('User should be allowed to view apps list', async () => {
-    history.replace('/home/apps')
-    render(
-      <Route path="/home/apps">
-        <AppList homeScope="me" />
-      </Route>,
-    )
+    render(<AppList homeScope="me" />, { route: '/home/apps' })
+
     await waitFor(() => {
       const createButton = screen.getByTestId('home-apps-create-button')
       expect(createButton).toBeInTheDocument()

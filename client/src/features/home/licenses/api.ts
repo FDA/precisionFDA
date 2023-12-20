@@ -24,11 +24,7 @@ export async function fetchLicensesForFiles(ids: number[]) {
 }
 
 export async function fetchLicensesList(): Promise<{ licenses: License[]}> {
-  const res = await fetch('/api/list_licenses', {
-    method: 'GET',
-    ...requestOpts,
-  }).then(checkStatus)
-  return res.json()
+  return axios.get('/api/list_licenses').then(r => r.data as { licenses: License[] })
 }
 
 export async function attachLicenseRequest({ licenseId, dxid }: { licenseId: string, dxid: string }): Promise<Error | {}> {

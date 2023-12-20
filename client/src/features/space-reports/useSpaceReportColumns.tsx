@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
 import { formatDate } from '../../utils/formatting'
 import { KeyVal } from '../home/types'

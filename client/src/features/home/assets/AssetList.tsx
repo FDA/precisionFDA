@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import { ButtonSolidBlue } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
@@ -27,11 +27,11 @@ import { useAssetActions } from './useAssetSelectActions'
 type ListType = { assets: IAsset[]; meta: IMeta }
 
 export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
-  const onRowClick = (uid: string) => history.push(`/home/assets/${uid}`)
+  const onRowClick = (uid: string) => navigate(`/home/assets/${uid}`)
   const {
     setPerPageParam,
     setPageParam,

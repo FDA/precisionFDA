@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import Dropdown from '../../../components/Dropdown'
@@ -32,11 +32,11 @@ import { useExecutionActions } from './useExecutionSelectActions'
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
 export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
-  const onRowClick = (uid: string) => history.push(`/home/executions/${uid}`)
+  const onRowClick = (uid: string) => navigate(`/home/executions/${uid}`)
   const {
     setPerPageParam,
     setPageParam,
@@ -155,7 +155,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
 
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}s
+      {actions['Edit properties']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Snapshot']?.modal}
       {actions['Terminate']?.modal}

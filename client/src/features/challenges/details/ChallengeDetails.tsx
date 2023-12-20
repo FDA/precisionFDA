@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import classNames from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, useHistory, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { ButtonSolidBlue } from '../../../components/Button/index'
 import { Loader } from '../../../components/Loader'
@@ -50,7 +50,7 @@ export const ChallengeDetails = ({
   page?: string
   user?: any
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   usePageMeta({ title: `${challenge.name} - precisionFDA Challenge` })
   const [tabIndex, setTabIndex] = useState(-1)
   const docRef = useRef(null)
@@ -206,7 +206,7 @@ export const ChallengeDetails = ({
 
   const onSelectTab = (index: number) => {
     const url = `/challenges/${challenge.id}${tabSubroutes[index]}`
-    history.replace(url)
+    navigate(url, { replace: true })
     setTabIndex(index)
   }
 

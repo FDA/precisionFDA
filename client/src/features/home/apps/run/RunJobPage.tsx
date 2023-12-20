@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 import { BackLink } from '../../../../components/Page/PageBackLink'
 import { FormPageContainer } from '../../../../components/Page/styles'
 import { CubeIcon } from '../../../../components/icons/CubeIcon'

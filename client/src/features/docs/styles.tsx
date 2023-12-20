@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { breakPoints, colors } from '../../styles/theme'
+import { NavLink } from '../../components/NavLink'
 
 export const DocsLayout = styled.div`
   display: flex;
