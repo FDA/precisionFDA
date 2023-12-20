@@ -159,7 +159,7 @@ export const SpaceForm = ({
     Confirm: ConfirmSubmit,
   } = useConfirm({
     onOk: handleSubmit(onSubmit),
-    body: <div><b>The space you are about to create will be protected.</b><p>Are you sure you would like to continue?</p></div>,
+    body: <div><b>{getConfirmMessage()}</b><p>Are you sure you would like to continue?</p></div>,
   })
 
   return (
