@@ -70,12 +70,13 @@ class FilePublisher
             raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
           end
 
-          CopyService::FileCopier.copy_record(
+          new_file = CopyService::FileCopier.copy_record(
             file,
             scope,
             destination_project,
             state: UserFile::STATE_CLOSED,
           )
+          new_file.update!(parent_type: "Asset") if new_file.asset?
 
           count += 1
 
