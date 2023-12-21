@@ -137,7 +137,7 @@ export interface CreateAppPayload {
   is_new: boolean
   forked_from: null | string
   name: string
-  scope: string
+  scope: ServerScope
   title: string
   release: string
   readme: string
