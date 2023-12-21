@@ -547,6 +547,10 @@ class Space < ActiveRecord::Base
     user_membership.present? && (unactivated? || active? || locked?)
   end
 
+  def in_space?
+    false
+  end
+
   # This method works as #accessible_by? but uses a user argument, not context.
   def accessible_by_user?(user)
     user_membership = space_memberships.active.find_by(user: user)
