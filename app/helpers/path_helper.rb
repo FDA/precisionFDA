@@ -60,7 +60,7 @@ module PathHelper
     when "job"
       "/spaces/#{space_id}/executions/#{item.uid}"
     else
-      raise "Unknown class #{item.klass}"
+      "Unknown class #{item.klass}"
     end
   end
 
