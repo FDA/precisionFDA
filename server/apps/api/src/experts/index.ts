@@ -1,1 +1,1 @@
-export { router } from "./experts.routes";
+export { ExpertsApiModule } from './experts.api.module'

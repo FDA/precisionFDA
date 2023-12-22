@@ -1,1 +1,1 @@
-export { router } from './discussions.routes'
+export { DiscussionsApiModule } from './discussions.api.module'

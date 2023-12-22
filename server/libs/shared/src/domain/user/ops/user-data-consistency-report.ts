@@ -91,7 +91,7 @@ UserDataConsistencyReportOutput
 
     let output: UserDataConsistencyReportOutput = {}
 
-    log.info({
+    log.log({
       id: userCtx.id,
       dxuser: userCtx.dxuser,
     }, 'UserDataConsistencyReportOperation: Starting')
@@ -312,7 +312,7 @@ UserDataConsistencyReportOutput
 
       await this.sendReportEmail(output)
 
-      log.info({
+      log.log({
         id: userCtx.id,
         dxuser: userCtx.dxuser,
         output,
@@ -338,7 +338,7 @@ UserDataConsistencyReportOutput
     }
 
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.userDataConsistencyReport)
-    this.ctx.log.info('UserDataConsistencyReportOperation: Sending report email to admin')
+    this.ctx.log.log('UserDataConsistencyReportOperation: Sending report email to admin')
     const tempUserCtx: UserCtx = { id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'notUsed' }
     await createSendEmailTask(email, tempUserCtx, jobId)
   }

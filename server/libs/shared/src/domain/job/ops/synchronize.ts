@@ -119,10 +119,10 @@ export class SyncJobOperation extends WorkerBaseOperation<
     this.job = job
     this.user = user
     this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
-    this.ctx.log.info({ jobId: job.id }, 'SyncJobOperation: Processing job')
+    this.ctx.log.log({ jobId: job.id }, 'SyncJobOperation: Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.ctx.log.info({ input, job }, 'SyncJobOperation: Job is already finished. Removing task from main queue')
+      this.ctx.log.log({ input, job }, 'SyncJobOperation: Job is already finished. Removing task from main queue')
       await removeRepeatable(this.ctx.job, getMainQueue())
       this.removeTerminationEmailJob()
       return
@@ -139,13 +139,13 @@ export class SyncJobOperation extends WorkerBaseOperation<
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.info({ error: err.props },
+          this.ctx.log.log({ error: err.props },
             'SyncJobOperation: Received 401 from platform, removing sync task')
           await removeRepeatable(this.ctx.job)
         }
       }
       else {
-        this.ctx.log.info({ error: err },
+        this.ctx.log.log({ error: err },
           'SyncJobOperation: Unhandled error from job/describe, will retry later')
       }
       return
@@ -153,7 +153,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
     // TODO(samuel) this shoudl be part of platform client
     delete platformJobData["sshHostKey"]
-    this.ctx.log.info({ platformJobData: platformJobData }, 'SyncJobOperation: Received job/describe from platform')
+    this.ctx.log.log({ platformJobData: platformJobData }, 'SyncJobOperation: Received job/describe from platform')
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
     const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
@@ -168,7 +168,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       em.persist(job)
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.ctx.log.info({ jobId: job.id, jobUid: job.uid }, 'SyncJobOperation: Job marked as stale, trying to terminate')
+      this.ctx.log.log({ jobId: job.id, jobUid: job.uid }, 'SyncJobOperation: Job marked as stale, trying to terminate')
       const terminateOp = new RequestTerminateJobOperation({
         log: this.ctx.log,
         em: this.ctx.em,
@@ -177,7 +177,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       await terminateOp.execute({ dxid: job.dxid })
       return
     }
-    
+
     // fixme: the mapping is not perfect for the https apps
     // TODO(Zai): Figure out in what way this is not perfect and document it
     const remoteState = platformJobData.state
@@ -187,7 +187,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // => https app has not run yet
     if ((remoteState === job.state) &&
         (remoteState !== JOB_STATE.RUNNING || !job.hasHttpsAppState() || job.isHttpsAppRunning())) {
-      this.ctx.log.info({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
+      this.ctx.log.log({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
       return
     }
 
@@ -202,13 +202,13 @@ export class SyncJobOperation extends WorkerBaseOperation<
       if (remoteState === JOB_STATE.FAILED) {
         if (job.state === JOB_STATE.RUNNING) {
         // if latest known state was 'running' then platform terminated the job
-          this.ctx.log.info({
+          this.ctx.log.log({
             jobId: input.dxid,
             failureReason: platformJobData.failureReason,
             failureMessage: platformJobData.failureMessage,
           }, 'SyncJobOperation: Detected job termination by platform')
         } else {
-          this.ctx.log.info({
+          this.ctx.log.log({
             failureCounts: platformJobData.failureCounts,
             failureReason: platformJobData.failureReason,
             failureMessage: platformJobData.failureMessage,
@@ -226,7 +226,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
     await checkJobStatusForNotifications(em, this.ctx.user.id, job, platformJobData)
 
-    this.ctx.log.info({
+    this.ctx.log.log({
       jobId: input.dxid,
       fromState: job.state,
       toState: remoteState,
@@ -243,7 +243,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // Note(samuel) email has to be sent after em. flush, otherwise failureReason won't be propagated in database
     // Alternative - pass failure reason and other
     if (remoteState === JOB_STATE.FAILED) {
-      this.ctx.log.info({
+      this.ctx.log.log({
         failureCounts: platformJobData.failureCounts,
         failureReason: platformJobData.failureReason,
         failureMessage: platformJobData.failureMessage,
@@ -272,7 +272,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       body,
     }
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
-    this.ctx.log.info({
+    this.ctx.log.log({
       jobId: this.job.id,
       jobDxid: this.job.dxid,
       user: this.user.dxuser,

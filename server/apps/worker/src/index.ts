@@ -1,15 +1,15 @@
 import { writeHeapSnapshot } from 'v8'
 import { database, queue } from '@shared'
 import { setupHandlers } from './queues'
-import { log } from './utils'
+import { initLogger, log } from './utils'
 
 process.on('SIGUSR2', () => {
   const fileName = writeHeapSnapshot()
-  log.info(`Created heap dump file: ${fileName}`)
+  log.log(`Created heap dump file: ${fileName}`)
 })
 
 const stopWorker = async (): Promise<void> => {
-  log.info('worker closing')
+  log.log('worker closing')
 
   process.removeAllListeners('SIGINT')
   process.removeAllListeners('SIGTREM')
@@ -32,7 +32,9 @@ const handleFatalError = async (err: Error): Promise<void> => {
 }
 
 const startWorker = async (): Promise<void> => {
-  log.info('worker starting')
+  await initLogger()
+
+  log.log('worker starting')
   process.once('uncaughtException', err => {
     log.error('Worker crash: Uncaught exception')
     handleFatalError(err)
@@ -49,7 +51,6 @@ const startWorker = async (): Promise<void> => {
   process.once('SIGTERM', async () => await stopWorker())
 
   // start consuming queues
-
   await database.start()
   await setupHandlers()
 }

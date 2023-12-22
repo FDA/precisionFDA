@@ -42,7 +42,7 @@ const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformatio
 
 // set up the queues
 const createQueues = async (): Promise<void> => {
-  log.info({}, 'Initializing queues')
+  log.log({}, 'Initializing queues')
 
   // other config passed into IORedis constructor
   const redisOptions: QueueOptions['redis'] = {
@@ -151,7 +151,7 @@ const createQueues = async (): Promise<void> => {
   //        by exceeding timeout on GitHub but it works fine locally.
   //        Find a better solution at some point.
   const removedJobs = clearOrphanedRepeatableJobs(mainQueue)
-  log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
+  log.log({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
 const getTaskInfo = (task: types.Task, payloadFn?: (payload: any) => any) => {
@@ -178,7 +178,7 @@ const addBulkToQueue = async <T extends types.Task>(
 ) => {
   validateQueue(queue)
 
-  log.info(
+  log.log(
     {
       tasks: tasks.map(t => getTaskInfo(t.data)),
     },
@@ -196,7 +196,7 @@ const addToQueue = async <T extends types.Task>(
 ): Promise<Job<T>> => {
   validateQueue(queue)
 
-  log.info(
+  log.log(
     {
       task: getTaskInfo(task, payloadFn),
       job: {
@@ -210,7 +210,7 @@ const addToQueue = async <T extends types.Task>(
 }
 
 const initMaintenanceQueue = async () => {
-  log.info({}, 'Initializing maintenance queue')
+  log.log({}, 'Initializing maintenance queue')
   if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
     await addToQueue({ type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const }, maintenanceQueue, {
       repeat: {
@@ -233,13 +233,13 @@ const initMaintenanceQueue = async () => {
 }
 
 const disconnectQueues = async (): Promise<void> => {
-  log.info('Disconnecting queues')
+  log.log('Disconnecting queues')
   await mainQueue.close(true)
   await fileSyncQueue.close(true)
   await spaceReportQueue.close(true)
   await emailsQueue.close(true)
   await maintenanceQueue.close(true)
-  log.info('Queues disconnected')
+  log.log('Queues disconnected')
 }
 
 
@@ -254,14 +254,14 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
   if (typeof mainQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
-  log.info({ jobId: job.id }, 'trying to remove repeatable job id')
+  log.log({ jobId: job.id }, 'trying to remove repeatable job id')
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
   await (queue ?? mainQueue).removeJobs(`${prefix}:${id}:*`)
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
-  log.info(
+  log.log(
     { jobId: job.id, cron: job.cron },
     'removeRepeatableJob: trying to remove repeatable job',
   )
@@ -278,7 +278,7 @@ const findRepeatable = async (bullJobId: string) => {
 // TASK PRODUCERS
 
 const createSyncFilesStateTask = async (user: UserCtx) => {
-  log.info({ userId: user.id }, 'Creating SyncFilesStateTask')
+  log.log({ userId: user.id }, 'Creating SyncFilesStateTask')
 
   const task = {
     type: types.TASK_TYPE.SYNC_FILES_STATE as const,

@@ -1,1 +1,1 @@
-export { log, getChildLogger } from './logger'
+export { log, getChildLogger, initLogger } from './logger'

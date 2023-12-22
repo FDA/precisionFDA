@@ -1,3 +1,4 @@
+import { FilterQuery } from '@mikro-orm/core/typings'
 import { GetValidKeysInput, SetPropertiesInput } from '../property.input'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { GeneralProperty, PropertyType } from '../property.entity'
@@ -115,33 +116,27 @@ export class PropertyService implements IPropertyService {
   }
 
   private getConditionByType(input: { scope: string, targetType: PropertyType }, user: UserCtx) {
-    let condition = {}
+    const condition: FilterQuery<any> = {}
     if (input.scope === 'spaces') input.scope = 'space-%'
     switch (input.targetType) {
       case 'node':
-        condition = {
-          node: {
-            scope: { $like: input.scope },
-            stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
-          },
+        condition['node'] = {
+          scope: { $like: input.scope },
+          stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
         }
         break
       case 'asset':
-        condition = {
-          node: {
-            scope: { $like: input.scope },
-            stiType: [FILE_STI_TYPE.ASSET],
-          },
+        condition['node'] = {
+          scope: { $like: input.scope },
+          stiType: [FILE_STI_TYPE.ASSET],
         }
         break
       case 'workflowSeries':
       case 'appSeries':
       case 'job':
       case 'dbCluster':
-        condition = {
-          [input.targetType]: {
-            scope: { $like: input.scope },
-          },
+        condition[input.targetType] = {
+          scope: { $like: input.scope },
         }
         break
       default:
@@ -149,12 +144,10 @@ export class PropertyService implements IPropertyService {
     }
 
     if (input.scope == 'private') {
-      if (input.targetType == "asset") {
-        //@ts-ignore NO IDEA HOW TO FIX THIS
-        Object.assign(condition['node'], {user: user.id})
+      if (input.targetType == 'asset') {
+        condition['node'] = { ...condition['node'], user: user.id }
       } else {
-        //@ts-ignore NO IDEA HOW TO FIX THIS
-        Object.assign(condition[input.targetType], {user: user.id})
+        condition[input.targetType] = { ...condition[input.targetType], user: user.id }
       }
     }
 

@@ -1,1 +1,1 @@
-export { router } from './workflow.routes'
+export { WorkflowApiModule } from './workflow.api.module'

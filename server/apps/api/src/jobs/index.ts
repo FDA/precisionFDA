@@ -1,2 +1,1 @@
-export { router } from './job.routes'
-
+export { JobApiModule } from './job.api.module'

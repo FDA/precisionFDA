@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
-import type { Logger } from 'pino'
+import type { Logger } from '@nestjs/common'
 import { errors } from '..'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
@@ -29,7 +29,7 @@ class PlatformClientBase {
 
   protected logClientRequest(options: AxiosRequestConfig, url: string): void {
     const sanitized = maskAuthHeader(options.headers)
-    this.log.info(
+    this.log.log(
       { requestOptions: { ...options, headers: sanitized }, url },
       'PlatformClient: Running DNANexus API request',
     )

@@ -31,7 +31,7 @@ export class SpaceReportService {
     this.spaceReportResultService = spaceReportResultService
   }
 
-  // TODO(PFDA-4701) - get the current user from the IOC
+  // TODO(PFDA-4833) - get the current user from the IOC
   async createReport(spaceId: number, user: User) {
     if (spaceId == null) {
       throw new errors.InvalidStateError('Space id is required for creating a report')
@@ -57,7 +57,7 @@ export class SpaceReportService {
     return await this.em.find(SpaceReport, ids)
   }
 
-  // TODO(PFDA-4701) - get the current user from the IOC
+  // TODO(PFDA-4833) - get the current user from the IOC
   async getReportsForSpace(spaceId: number, user: User) {
     return await this.em.transactional(async () => {
       const space = await this.getSpaceForUserValidated(spaceId, user)
@@ -162,7 +162,7 @@ export class SpaceReportService {
     return this.spaceReportPartService.createReportParts(reportPartSources)
   }
 
-  // TODO(PFDA-4701) - Remove with IOC
+  // TODO(PFDA-4833) - Remove with IOC
   static getInstance(em: SqlEntityManager) {
     const spaceReportPartService = new SpaceReportPartService(em)
     const spaceReportResultService = new SpaceReportResultService()

@@ -1,1 +1,1 @@
-export { router } from './challenge.routes'
+export { ChallengeApiModule } from './challenge.api.module'

@@ -27,7 +27,7 @@ export class StopDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput,
       dxid: dbCluster.dxid,
     }, 'stop')
 
-    this.ctx.log.info(
+    this.ctx.log.log(
       { id: dbCluster.id, dxid: dbCluster.dxid, apiResult },
       'Run stop action for DB Cluster'
     )

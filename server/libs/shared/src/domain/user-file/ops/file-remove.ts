@@ -49,7 +49,7 @@ number
   protected client: PlatformClient
 
   async run(input: IdInput): Promise<number> {
-    this.ctx.log.info(input, 'FileRemoveOperation: Removing file')
+    this.ctx.log.log(input, 'FileRemoveOperation: Removing file')
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
@@ -99,7 +99,7 @@ number
       }
 
       tm.remove(fileToRemove)
-      this.ctx.log.info({ fileName: fileToRemove.name }, 'FileRemoveOperation: Removed file')
+      this.ctx.log.log({ fileName: fileToRemove.name }, 'FileRemoveOperation: Removed file')
       return 1
     })
   }

@@ -63,7 +63,7 @@ export class JobService implements IJobService {
    * @param userId
    */
   async syncOutputs(jobDxId: string, userId: number): Promise<void> {
-    logger.info(`JobService: syncing output files for job ${jobDxId}`)
+    logger.log(`JobService: syncing output files for job ${jobDxId}`)
 
     const user = await this.userRepo.findOneOrFail({ id: userId })
     const job = await this.jobRepo.findOneOrFail({ dxid: jobDxId })
@@ -88,7 +88,7 @@ export class JobService implements IJobService {
 
       await this.createNotification(jobDxId, userId)
       await this.em.commit()
-      logger.info(`JobService: outputs for job ${jobDxId} have been synchronized`)
+      logger.log(`JobService: outputs for job ${jobDxId} have been synchronized`)
     } catch (error) {
       logger.error('JobService: error synchronizing outputs', error)
       await this.em.rollback()

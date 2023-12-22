@@ -27,7 +27,7 @@ export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdI
       dxid: dbCluster.dxid,
     }, 'terminate')
 
-    this.ctx.log.info(
+    this.ctx.log.log(
       { id: dbCluster.id, dxid: dbCluster.dxid, apiResult },
       'Run terminate action for DB Cluster'
     )

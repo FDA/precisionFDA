@@ -30,7 +30,7 @@ export class SpaceService implements ISpaceService {
   }
 
   private createSpaceInDB = async(input: SpaceParam): Promise<Space> => {
-    logger.info('SpaceService: creating space in database')
+    logger.log('SpaceService: creating space in database')
     const uuid = crypto.randomBytes(5).toString('hex')
 
     const space = new Space()
@@ -57,14 +57,14 @@ export class SpaceService implements ISpaceService {
   }
 
   private createOrgs = async (orgs: string[]) => {
-    logger.info(`SpaceService: creating orgs ${orgs}`)
+    logger.log(`SpaceService: creating orgs ${orgs}`)
     for (const orgDxid in orgs) {
       await this.orgService.create(orgDxid, false)
     }
   }
 
   create = async(input: SpaceParam): Promise<number> => {
-    logger.info(input, 'SpaceService: creating space')
+    logger.log(input, 'SpaceService: creating space')
     // create space in DB
     const space = await this.createSpaceInDB(input)
 

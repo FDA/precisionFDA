@@ -46,13 +46,13 @@ const defaultConfig = {
     url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
-    allowErrorTestingRoutes: process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
+    allowErrorTestingRoutes: parseBooleanFromProcess(process.env.NODE_ALLOW_ERROR_TESTING_ROUTES, true),
     fdaSubnet: {
       allowedIpCidrBlock: {
         ipv4Quadruple: [127, 0, 0, 1],
         maskSize: 0,
       },
-      nginxIpHeader: 'X-Forwarded-For',
+      nginxIpHeader: 'x-forwarded-for',
     },
   },
   logs: {

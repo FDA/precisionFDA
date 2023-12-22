@@ -1,1 +1,1 @@
-export { router } from './admin.routes'
+export { AdminApiModule } from './admin.api.module'

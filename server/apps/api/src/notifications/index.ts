@@ -1,1 +1,1 @@
-export { router } from './notifications.routes'
+export { NotificationsApiModule } from './notifications.api.module'

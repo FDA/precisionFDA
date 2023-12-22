@@ -57,7 +57,7 @@ export class PlatformFileService {
     return await this.platformClient.getFileUploadUrl({ dxid, index, md5, size })
   }
 
-  // TODO(PFDA-4701) - Remove with IOC
+  // TODO(PFDA-4833) - Remove with IOC
   static getInstance(userCtx: WorkerOpsCtx<UserOpsCtx>) {
     const client = new PlatformClient(userCtx.user.accessToken)
     const fileCloseOp = new FileCloseOperation(userCtx)

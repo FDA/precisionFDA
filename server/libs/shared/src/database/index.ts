@@ -41,3 +41,6 @@ export const database = {
   connection: (): Connection => db!.getOrm()!.em.getConnection(),
   createDatabaseReplicaService,
 }
+
+export { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from './provider/deprecated-sql-entity-manager.provider'
+export { DatabaseModule } from './database.module'

@@ -44,7 +44,7 @@ export class EntityProvenanceService {
     return this.entityProvenanceSvgResultTransformerService.getStyles()
   }
 
-  // TODO(PFDA-4701) - Remove with IOC
+  // TODO(PFDA-4833) - Remove with IOC
   static getInstance(em: SqlEntityManager) {
     const workflowService = new WorkflowService(em)
     const entityProvenanceDataProviderService = new EntityProvenanceDataProviderService(em, workflowService)

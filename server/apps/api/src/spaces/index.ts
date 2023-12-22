@@ -1,1 +1,1 @@
-export { router } from './spaces.routes'
+export { SpacesApiModule } from './spaces.api.module'

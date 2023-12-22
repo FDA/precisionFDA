@@ -1,1 +1,1 @@
-export { router } from './nodes.routes'
+export { NodesApiModule } from './nodes.api.module'

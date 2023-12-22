@@ -1,3 +1,4 @@
+import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { AxiosRequestConfig } from 'axios'
 import { path } from 'ramda'
 import { config } from '../config'
@@ -8,7 +9,9 @@ type Payload = {
   accessToken?: string
 }
 
-const maskAccessTokenUserCtx = (userCtx: Payload): Payload | null => {
+const MASKED = '[masked]'
+
+const maskAccessTokenUserCtx = <T extends Payload>(userCtx: T): T | null => {
   if (!userCtx) {
     return null
   }
@@ -16,12 +19,15 @@ const maskAccessTokenUserCtx = (userCtx: Payload): Payload | null => {
     return userCtx
   }
   // nothing to mask, we are done
-  if (!userCtx.accessToken) {
+  if (!userCtx.accessToken && !userCtx[USER_CONTEXT_HTTP_HEADERS.accessToken]) {
     return userCtx
   }
   const dataCopy = { ...userCtx }
   if (dataCopy.accessToken) {
-    dataCopy.accessToken = '[masked]'
+    dataCopy.accessToken = MASKED
+  }
+  if (dataCopy[USER_CONTEXT_HTTP_HEADERS.accessToken]) {
+    dataCopy[USER_CONTEXT_HTTP_HEADERS.accessToken] = MASKED
   }
   return dataCopy
 }

@@ -63,7 +63,7 @@ export class DataPortalService {
   }
 
   listResources = async (dataPortalId: number, userId: number): Promise<any> => {
-    logger.info(`DataPortalService: listing resources for portal id: ${dataPortalId}`)
+    logger.log(`DataPortalService: listing resources for portal id: ${dataPortalId}`)
     const dataPortal = await this.em.findOneOrFail(
       entities.DataPortal,
       {id: dataPortalId},
@@ -89,7 +89,7 @@ export class DataPortalService {
     const TOOLS_SPACE_ID = parseIntFromProcess(process.env.TOOLS_SPACE_ID) ?? undefined
 
     if (!(PRISM_PORTAL_ID && PRISM_SPACE_ID && TOOLS_PORTAL_ID && TOOLS_SPACE_ID)) {
-      logger.info('DataPortalService: listAccessibleCustomPortals: missing env vars')
+      logger.log('DataPortalService: listAccessibleCustomPortals: missing env vars')
       return []
     }
 
@@ -121,7 +121,7 @@ export class DataPortalService {
   }
 
   createResourceLink = async (id: number): Promise<string> => {
-    logger.info(`DataPortalService: creating resource link for resource id: ${id}`)
+    logger.log(`DataPortalService: creating resource link for resource id: ${id}`)
     const resource = await this.em.findOneOrFail(entities.Resource, {id: id}, { populate: ['userFile'] })
     resource.url = await this.getUserFileUrl(resource.userFile.getEntity().uid)
     await this.em.flush()
@@ -129,7 +129,7 @@ export class DataPortalService {
   }
 
   createResource = async (input: FileParam, dataPortalId: number, userId: number): Promise<CreateResourceResponse>  => {
-    logger.info(`DataPortalService: creating resource for portal id: ${dataPortalId}`, input)
+    logger.log(`DataPortalService: creating resource for portal id: ${dataPortalId}`, input)
     const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['organization']})
     const dataPortal = await this.em.findOneOrFail(
       entities.DataPortal,
@@ -148,7 +148,7 @@ export class DataPortalService {
   }
 
   removeResource = async (id: number, userId: number) => {
-    logger.info(`DataPortalService: removing resource: ${id}`)
+    logger.log(`DataPortalService: removing resource: ${id}`)
     const resource = await this.em.findOneOrFail(entities.Resource, {id: id})
     const dataPortal = await this.em.findOneOrFail(entities.DataPortal, {id: resource.dataPortal.id}, {populate: ['space.spaceMemberships.user', 'space']})
     if (! await this.hasRoles(dataPortal, CAN_EDIT_ROLES, userId)) {
@@ -161,7 +161,7 @@ export class DataPortalService {
   }
 
   private getUserFileUrl = async(uid: string): Promise<string> => {
-    logger.info(`DataPortalService: getting url for id: ${uid}`)
+    logger.log(`DataPortalService: getting url for id: ${uid}`)
     const fileRepo = this.em.getRepository(UserFile) as UserFileRepository
     const userFile = await fileRepo.findFileWithUid(uid)
 
@@ -203,7 +203,7 @@ export class DataPortalService {
   }
 
   createCardImage = async(input: FileParam, dataPortalId: number, userId: number): Promise<string> => {
-    logger.info('DataPortalService: creating card image', input)
+    logger.log('DataPortalService: creating card image', input)
     const dataPortal = await this.em.findOneOrFail(entities.DataPortal, {id: dataPortalId}, {populate: ['space']})
     const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['organization']})
     const userFile = await this.createFile(input, user, dataPortal.space.getEntity().hostProject, `space-${dataPortal.space.id}`)
@@ -211,14 +211,14 @@ export class DataPortalService {
   }
 
   private hasSiteAdminRole = async(userId: number): Promise<boolean> => {
-    logger.info(`DataPortalService: verifying site admin role for id ${userId}`)
+    logger.log(`DataPortalService: verifying site admin role for id ${userId}`)
     const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['adminMemberships', 'adminMemberships.adminGroup']})
     return user.isSiteAdmin()
   }
 
   // TODO: Refactor as method in DataPortal entity object
   private isPortalLead = async(dataPortal: DataPortal, userId: number): Promise<boolean> => {
-    logger.info(`DataPortalService: verifying portal leads role id ${userId}`)
+    logger.log(`DataPortalService: verifying portal leads role id ${userId}`)
     for (const membership of dataPortal.space.getEntity().spaceMemberships.getItems()) {
       if (membership.isLead() && membership.user.id === userId) {
         return true
@@ -229,7 +229,7 @@ export class DataPortalService {
 
   // TODO: Refactor as method in DataPortal entity object
   private isPortalAdmin = async(dataPortal: DataPortal, userId: number): Promise<boolean> => {
-    logger.info(`DataPortalService: verifying portal admin role id ${userId}`)
+    logger.log(`DataPortalService: verifying portal admin role id ${userId}`)
     for (const membership of dataPortal.space.getEntity().spaceMemberships.getItems()) {
       if (membership.isAdmin() && membership.user.id === userId) {
         return true
@@ -240,7 +240,7 @@ export class DataPortalService {
 
   // TODO: Refactor as method in DataPortal entity object
   private isPortalMember = async(dataPortal: DataPortal, userId: number): Promise<boolean> => {
-    logger.info(`DataPortalService: verifying portal member role id ${userId}`)
+    logger.log(`DataPortalService: verifying portal member role id ${userId}`)
     for (const membership of dataPortal.space.getEntity().spaceMemberships.getItems()) {
       if (membership.user.id === userId) {
         return true
@@ -261,7 +261,7 @@ export class DataPortalService {
 
   // TODO add creating spaces once we have them in Node.js
   create = async(input: DataPortalParam, userId: number): Promise<DataPortalParam> => {
-    logger.info('DataPortalService: creating data portal', input, userId)
+    logger.log('DataPortalService: creating data portal', input, userId)
     if (!(await this.hasSiteAdminRole(userId))) {
       throw new errors.PermissionError('Only site admins can create Data Portals')
     }
@@ -292,7 +292,7 @@ export class DataPortalService {
   }
 
   update = async (input: DataPortalParam, userId: number): Promise<DataPortalParam> => {
-    logger.info('DataPortalService: updating data portal', input, userId)
+    logger.log('DataPortalService: updating data portal', input, userId)
     const portal = await this.em.findOneOrFail(entities.DataPortal, {id: input.id}, {populate: ['space.spaceMemberships.user']})
 
     if (!await this.hasSiteAdminRole(userId)) {
@@ -330,7 +330,7 @@ export class DataPortalService {
   }
 
   list = async(userId: number, defaultParam?: boolean): Promise<any> => {
-    logger.info('DataPortalService: getting data portals for user', userId)
+    logger.log('DataPortalService: getting data portals for user', userId)
     let portals
 
     if (await this.hasSiteAdminRole(userId)) {
@@ -362,7 +362,7 @@ export class DataPortalService {
   }
 
   get = async(id: number, userId: number): Promise<DataPortalParam> => {
-    logger.info('DataPortalService: get data portal detail', id, userId)
+    logger.log('DataPortalService: get data portal detail', id, userId)
 
     const portal = await this.em.findOne(entities.DataPortal, {id}, {populate: ['space.spaceMemberships.user']})
     if (portal) {
@@ -380,7 +380,7 @@ export class DataPortalService {
     const userFromDb = await this.em.findOneOrFail(entities.User, { id: userId })
     const isSiteAdmin = await userFromDb.isSiteAdmin()
 
-    logger.info('DataPortalService: get default data portal detail')
+    logger.log('DataPortalService: get default data portal detail')
     const portal = await this.em.findOne(entities.DataPortal, { default: true }, {populate: ['space.spaceMemberships.user']})
     if (portal) {
       if (isSiteAdmin) {

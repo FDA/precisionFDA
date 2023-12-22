@@ -8,7 +8,7 @@ import { FILE_STATE_DX } from '../user-file.types'
 
 class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput[], void> {
   async run(input: IdInput[]): Promise<void> {
-    this.ctx.log.info(input, 'Locking files')
+    this.ctx.log.log(input, 'Locking files')
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
@@ -30,7 +30,7 @@ class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput[], void> {
   }
 
   private logOperation(file: UserFile): void {
-    this.ctx.log.info({ fileName: file.name }, 'Locked file')
+    this.ctx.log.log({ fileName: file.name }, 'Locked file')
   }
 
   private async createEvent(file: UserFile): Promise<void> {

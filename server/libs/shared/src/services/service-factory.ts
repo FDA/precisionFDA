@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import type { Logger } from 'pino'
+import type { Logger } from '@nestjs/common'
 import {
   INotificationService,
   NotificationService,

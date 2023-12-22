@@ -14,7 +14,7 @@ export { getLogger } from './logger'
 
 export { database } from './database'
 
-export * as entityFetcher  from './services/entity-fetcher.service'
+export * as entityFetcher from './services/entity-fetcher.service'
 
 export {
   entities,
@@ -61,3 +61,13 @@ export { BaseEntity } from './database/base-entity'
 export { ArrayUtils, TimeUtils, TypeUtils } from './utils'
 
 export * from './config/consts'
+
+export * from './database'
+
+export * from './logger'
+
+export * from './user-context'
+
+export * from './logger'
+
+export * from './database'

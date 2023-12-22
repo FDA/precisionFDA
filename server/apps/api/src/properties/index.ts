@@ -1,1 +1,1 @@
-export { router } from './properties.routes'
+export { PropertiesApiModule } from './properties.api.module'
