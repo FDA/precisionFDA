@@ -73,7 +73,7 @@ class FileCloseOperation extends BaseOperation<
       await em.populate(file, ['challengeResources'])
       isChallengeBotFile = file.isCreatedByChallengeBot() && (await user.isSiteAdmin() || await user.isChallengeAdmin())
       if (isChallengeBotFile) {
-        log.info({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: Challenge bot file')
+        log.log({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: Challenge bot file')
       } else {
         log.error(
           { fileDxid: fileOrAsset.dxid },
@@ -85,13 +85,13 @@ class FileCloseOperation extends BaseOperation<
     }
 
     if (fileOrAsset.state === FILE_STATE_DX.OPEN) {
-      log.info({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: File is in open state. Syncing from platform')
+      log.log({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: File is in open state. Syncing from platform')
 
       const userClient = new client.PlatformClient(accessToken, this.ctx.log)
       const response = await userClient.fileClose({
         fileDxid: fileOrAsset.dxid,
       })
-      log.info({ response }, 'FileCloseOperation: Received response from platform')
+      log.log({ response }, 'FileCloseOperation: Received response from platform')
 
       fileOrAsset.state = FILE_STATE_DX.CLOSING
       await em.flush()
@@ -99,17 +99,17 @@ class FileCloseOperation extends BaseOperation<
       const syncFilesOpDxuser = isChallengeBotFile ? config.platform.challengeBotUser : this.ctx.user.dxuser
 
       const bullJobId = SyncFilesStateOperation.getBullJobId(syncFilesOpDxuser)
-      log.info({ bullJobId }, 'FileCloseOperation: Looking for existing sync task in queue')
+      log.log({ bullJobId }, 'FileCloseOperation: Looking for existing sync task in queue')
       let bullJob = await queue.findRepeatable(bullJobId)
       if (bullJob && queue.utils.isJobOrphaned(bullJob)) {
-        log.info('FileCloseOperation: Existing SyncFilesStateTask is orphaned, removing it')
+        log.log('FileCloseOperation: Existing SyncFilesStateTask is orphaned, removing it')
         await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
         bullJob = undefined
       }
 
       if (!bullJob) {
         if (isChallengeBotFile) {
-          log.info('FileCloseOperation: Creating SyncFilesStateTask for challenge bot user')
+          log.log('FileCloseOperation: Creating SyncFilesStateTask for challenge bot user')
           const challengeBotUser = await userRepo.findChallengeBotUser()
           const challengeBotCtx: UserCtx = {
             id: challengeBotUser.id,
@@ -118,11 +118,11 @@ class FileCloseOperation extends BaseOperation<
           }
           createSyncFilesStateTask(challengeBotCtx)
         } else {
-          log.info(`FileCloseOperation: Creating SyncFilesStateTask for user ${this.ctx.user.dxuser}`)
+          log.log(`FileCloseOperation: Creating SyncFilesStateTask for user ${this.ctx.user.dxuser}`)
           createSyncFilesStateTask(this.ctx.user)
         }
       } else {
-        log.info({ bullJob }, 'FileCloseOperation: Not creating SyncFilesStateTask because one already exists')
+        log.log({ bullJob }, 'FileCloseOperation: Not creating SyncFilesStateTask because one already exists')
       }
 
       const challengeBotCtx = await getChallengeBotCtx(userRepo)
@@ -136,13 +136,13 @@ class FileCloseOperation extends BaseOperation<
       const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
       const refreshFileState = async () => {
         await delay(500).then(async () => {
-          log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
+          log.log('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
           await new FileUpdateOperation(ctxForUpdate).execute({ uid: fileOrAsset.uid })
 
           const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.id)
           if (updatedFileOrAsset) {
             if (updatedFileOrAsset.state === FILE_STATE_DX.CLOSED) {
-              log.info({
+              log.log({
                 uid: input.id,
                 state: updatedFileOrAsset.state,
                 size: updatedFileOrAsset.fileSize,
@@ -157,7 +157,7 @@ class FileCloseOperation extends BaseOperation<
                 while (numberOfRetries < 11 && !updateFinished) {
                   await delay(1000).then(async () => {
                     numberOfRetries++
-                    log.info({
+                    log.log({
                       uid: input.id,
                       state: updatedFileOrAsset.state,
                       size: updatedFileOrAsset.fileSize,
@@ -165,7 +165,7 @@ class FileCloseOperation extends BaseOperation<
                     await new FileUpdateOperation(ctxForUpdate).execute({ uid: fileOrAsset.uid })
                     const updatedNode = await findFileOrAssetWithUid(em, input.id)
                     if (updatedNode?.state === FILE_STATE_DX.CLOSED) {
-                      log.info({
+                      log.log({
                         uid: input.id,
                         state: updatedFileOrAsset.state,
                         size: updatedFileOrAsset.fileSize,
@@ -176,7 +176,7 @@ class FileCloseOperation extends BaseOperation<
                   })
                 }
               } else {
-                log.info({
+                log.log({
                   uid: input.id,
                   state: updatedFileOrAsset.state,
                   size: updatedFileOrAsset.fileSize,
@@ -184,7 +184,7 @@ class FileCloseOperation extends BaseOperation<
               }
             }
           } else {
-            log.info({
+            log.log({
               uid: input.id,
             }, 'FileCloseOperation: File no longer exists after FileUpdateOperation?? What?!')
           }

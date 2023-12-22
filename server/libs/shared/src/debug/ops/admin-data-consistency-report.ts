@@ -75,7 +75,7 @@ AdminDataConsistencyReportOutput
 
     let output: AdminDataConsistencyReportOutput = {}
 
-    log.info('AdminDataConsistencyReportOperation: Starting operation')
+    log.log('AdminDataConsistencyReportOperation: Starting operation')
 
     try {
       const infoMapping = (f: any): any => {
@@ -126,7 +126,7 @@ AdminDataConsistencyReportOutput
       output.spaces = spacesInfo
       output.spacesWithErrorsCount = spacesInfo.length
 
-      log.info({ output }, 'AdminDataConsistencyReportOperation: Completed')
+      log.log({ output }, 'AdminDataConsistencyReportOperation: Completed')
 
       await this.sendReportEmail(output)
     } catch (error) {
@@ -261,7 +261,7 @@ AdminDataConsistencyReportOutput
     }
 
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.adminDataConsistencyReport)
-    this.ctx.log.info('AdminDataConsistencyReportOperation: Sending report email to admin')
+    this.ctx.log.log('AdminDataConsistencyReportOperation: Sending report email to admin')
     const tempUserCtx: UserCtx = { id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'notUsed' }
     await createSendEmailTask(email, tempUserCtx, jobId)
   }

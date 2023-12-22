@@ -71,7 +71,7 @@ export class AppService implements IAppService {
   }
 
   private async validateAppInput(appInput: AppInput, userId: number) {
-    logger.info('starting app validations')
+    logger.log('starting app validations')
 
     if (!UBUNTU_RELEASES.includes(appInput.release)) {
       this.throwValidationError(`Unacceptable release ${appInput.release}`)
@@ -107,7 +107,7 @@ export class AppService implements IAppService {
     const alreadySeenOutputs: string[] = []
     appInput.output_spec.forEach(spec => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
-    logger.info('app validations finished successfully')
+    logger.log('app validations finished successfully')
   }
 
   private getScope = (scope?: string) => {
@@ -151,7 +151,7 @@ export class AppService implements IAppService {
       appSeries.name = appName
       appSeries.dxid = appSeriesDxid
       appSeries.scope = scope
-      logger.info('AppService: creating app series', appSeries)
+      logger.log('AppService: creating app series', appSeries)
       await this.em.persistAndFlush(appSeries)
     }
     return appSeries
@@ -189,7 +189,7 @@ export class AppService implements IAppService {
    * @param release
    */
   private createApplet = async (user: User, appInput: AppInput, release: string): Promise<string> => {
-    logger.info('AppService: creating applet in platform', user, appInput, release)
+    logger.log('AppService: creating applet in platform', user, appInput, release)
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
       inputSpec: this.remapPfdaSpecToPlatformSpec(appInput.input_spec),
@@ -217,7 +217,7 @@ export class AppService implements IAppService {
 
   private createAppInPlatform = async (appletId: string, appInput: AppInput, revision: number, user: User,
                                assets: Asset[]): Promise<string> => {
-    logger.info('AppService: creating app in platform', appletId, appInput, revision, user, assets)
+    logger.log('AppService: creating app in platform', appletId, appInput, revision, user, assets)
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
       applet: appletId,
@@ -237,13 +237,13 @@ export class AppService implements IAppService {
   }
 
   private createAppEvent = async (user: User, app: App) => {
-    logger.info('AppService: creating app event', user, app)
+    logger.log('AppService: creating app event', user, app)
     const createAppEvent = await createAppCreated(user, app)
     await this.em.persistAndFlush(createAppEvent)
   }
 
   private updateAppSeries = async (appSeries: AppSeries, appInput: AppInput, app: App) => {
-    logger.info('AppService: updating app series', appSeries, appInput, app)
+    logger.log('AppService: updating app series', appSeries, appInput, app)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && scopeContainsId(appInput.scope)) {
       appSeries.latestVersionAppId = app.id
@@ -261,7 +261,7 @@ export class AppService implements IAppService {
 
   private saveAppInDB = async (user: User, platformAppId: string, revision: number, release: string,
                        assets: Asset[], appInput: AppInput, appSeriesId: number) => {
-    logger.info('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
+    logger.log('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
     const app = new App(user)
     app.dxid = platformAppId
     app.uid = `${app.dxid}-${revision}`
@@ -297,7 +297,7 @@ export class AppService implements IAppService {
    * @return uid of newly created app
    */
   create = async (appInput: AppInput, userId: number): Promise<string> => {
-    logger.info('AppService: creating app', appInput, userId)
+    logger.log('AppService: creating app', appInput, userId)
     await this.validateAppInput(appInput, userId)
     await this.em.begin()
     try {

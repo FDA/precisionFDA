@@ -5,6 +5,7 @@ import { database, queue } from '@shared'
 import { db } from '@shared/test'
 import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import { setupHandlers } from '../src/queues'
+import { initLogger } from '../src/utils'
 import { mocksSetup as localMocksSetup, mocksRestore as localMocksRestore } from './utils/mocks'
 
 // Handle exception being thrown inside an async test
@@ -25,6 +26,7 @@ chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
 before(async () => {
+  await initLogger()
   mocksSetup()
   localMocksSetup()
 

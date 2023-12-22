@@ -1,1 +1,1 @@
-export { router } from './data-portals.routes'
+export { DataPortalsApiModule } from './data-portals.api.module'

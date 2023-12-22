@@ -1,1 +1,1 @@
-export { router } from './license.routes'
+export { LicenseApiModule } from './license.api.module'

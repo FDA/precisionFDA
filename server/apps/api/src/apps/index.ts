@@ -1,1 +1,1 @@
-export { router } from './app.routes'
+export { AppApiModule } from './app.api.module'

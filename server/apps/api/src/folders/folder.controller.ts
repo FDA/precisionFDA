@@ -1,0 +1,76 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Inject,
+  Logger,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, UserContext, userFile } from '@shared'
+import { RenameFolderInput } from '@shared/domain/user-file/user-file.input'
+import { UserOpsCtx } from '@shared/types'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { pickOpsCtx } from '../utils/pick-ops-ctx'
+import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
+
+@UseGuards(UserContextGuard)
+@Controller('/folders')
+export class FolderController {
+  constructor(
+    private readonly user: UserContext,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    private readonly log: Logger,
+  ) {}
+
+  @Patch('/:id/rename')
+  async renameFolder(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new JsonSchemaPipe(userFile.inputs.renameFolderSchema))
+    body: Omit<RenameFolderInput, 'id'>,
+  ) {
+    const opsCtx: UserOpsCtx = {
+      log: this.log,
+      user: this.user,
+      em: this.em,
+    }
+
+    return await new userFile.FolderRenameOperation(opsCtx).execute({
+      newName: body.newName,
+      id,
+    })
+  }
+
+  @Delete('/:id')
+  async removeFolder(@Param('id', ParseIntPipe) id: number) {
+    const opsCtx: UserOpsCtx = {
+      log: this.log,
+      user: this.user,
+      em: this.em,
+    }
+
+    return await new userFile.FolderRemoveRecursiveOperation(opsCtx).execute({ id })
+  }
+
+  @HttpCode(204)
+  @Post('/recreate')
+  async recreateFolder(@Body() body: { userId: string; projectId: string }) {
+    const opsCtx: UserOpsCtx = {
+      log: this.log,
+      user: this.user,
+      em: this.em,
+    }
+
+    const { userId, projectId } = body
+
+    await new userFile.FolderRecreateOperation(opsCtx).execute({
+      userId,
+      projectId,
+    })
+  }
+}

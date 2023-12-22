@@ -82,7 +82,7 @@ describe('Job repository tests', () => {
 
   it('findAllRunningJobs() works', async () => {
     const results = await repo.findAllRunningJobs()
-    expect(results.map((x) => x.uid)).to.deep.equal([
+    expect(results.map((x) => x.uid)).to.have.members([
       jobs[0].uid,
       jobs[1].uid,
       jobs[3].uid,

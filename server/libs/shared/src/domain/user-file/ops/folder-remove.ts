@@ -65,7 +65,7 @@ number
       em.persist(folderEvent)
       em.remove(folderToRemove)
       await em.commit()
-      this.ctx.log.info({ folderName: folderToRemove.name }, 'Removed folder')
+      this.ctx.log.log({ folderName: folderToRemove.name }, 'Removed folder')
       return 1
     } catch (err) {
       await em.rollback()

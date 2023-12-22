@@ -1,1 +1,1 @@
-export { router } from './folder.routes'
+export { FolderApiModule } from './folder.api.module'

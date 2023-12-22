@@ -1,1 +1,1 @@
-export { router } from './debug.routes'
+export { DebugApiModule } from './debug.api.module'

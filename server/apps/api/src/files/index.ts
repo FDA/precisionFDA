@@ -1,2 +1,1 @@
-export { router } from './files.routes'
-
+export { FilesApiModule } from './files.api.module'

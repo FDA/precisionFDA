@@ -1,1 +1,1 @@
-export { router } from './cli.routes'
+export { CliApiModule } from './cli.api.module'

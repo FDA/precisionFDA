@@ -36,10 +36,10 @@ Maybe<DbCluster>
     }
 
     const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
-    this.ctx.log.info({ dbClusterId: dbCluster.id }, 'SyncDbClusterOperation: Processing job')
+    this.ctx.log.log({ dbClusterId: dbCluster.id }, 'SyncDbClusterOperation: Processing job')
 
     if (dbCluster.status === STATUS.TERMINATED) {
-      this.ctx.log.info(
+      this.ctx.log.log(
         { input, dbCluster },
         'SyncDbClusterOperation: DB Cluster already has terminated status. Removing task',
       )
@@ -59,19 +59,19 @@ Maybe<DbCluster>
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.info({ error: err.props },
+          this.ctx.log.log({ error: err.props },
             'SyncDbClusterOperation: Received 401 from platform, removing sync task')
           await removeRepeatable(this.ctx.job)
         }
       }
       else {
-        this.ctx.log.info({ error: err },
+        this.ctx.log.log({ error: err },
           'SyncDbClusterOperation: Unhandled error from dbcluster/describe, will retry later')
       }
       return
     }
 
-    this.ctx.log.info(
+    this.ctx.log.log(
       { data: describeDbClusterRes },
       'SyncDbClusterOperation: Received dbcluster describe response from platform',
     )
@@ -83,14 +83,14 @@ Maybe<DbCluster>
         // TODO(samuel) validate if there is some possible type mismatch - if you git blame properly I didn't code it, just ran eslint
         && dbCluster.host == describeDbClusterRes.endpoint
         && dbCluster.port == describeDbClusterRes.port?.toString()) {
-      this.ctx.log.info(
+      this.ctx.log.log(
         { dxid: dbCluster.dxid },
         'SyncDbClusterOperation: Status, endpoint or port have not been changed, no updates',
       )
       return
     }
 
-    this.ctx.log.info({
+    this.ctx.log.log({
       dxid: dbCluster.dxid,
       fromState: currentStatus,
       toState: describeDbClusterRes.status,

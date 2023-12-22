@@ -1,1 +1,1 @@
-export { router } from "./news.routes";
+export { NewsApiModule } from './news.api.module'

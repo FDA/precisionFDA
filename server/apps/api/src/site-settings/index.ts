@@ -1,1 +1,1 @@
-export { router } from './site-settings.routes'
+export { SiteSettingsApiModule } from './site-settings.api.module'

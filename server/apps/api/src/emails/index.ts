@@ -1,1 +1,1 @@
-export { router } from './email.router'
+export { EmailApiModule } from './email.api.module'

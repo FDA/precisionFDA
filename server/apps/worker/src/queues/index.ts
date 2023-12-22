@@ -7,7 +7,7 @@ const setupHandlers = async (): Promise<void> => {
   await queue.createQueues()
 
   await Promise.all(queue.getQueues().map(async q => {
-    log.info(
+    log.log(
       {
         queueStatus: q.client.status,
         currentJobCounts: await q.getJobCounts(),

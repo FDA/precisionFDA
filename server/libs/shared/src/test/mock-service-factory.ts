@@ -1,5 +1,5 @@
 import { AxiosInstance } from "axios";
-import { Logger } from "pino";
+import { Logger } from '@nestjs/common';
 import sinon from "sinon";
 import { Job } from "../domain/job";
 import { INotificationService } from "../domain/notification/services/notification.service";
@@ -18,7 +18,7 @@ class MockServiceFactory extends ServiceFactory {
     createNotification: sinon.stub(),
     reset: () => {
       this.notificationService.createNotification.callsFake(() => {})
-      this.notificationService.createNotification.resetHistory()  
+      this.notificationService.createNotification.resetHistory()
     }
   }
 
@@ -27,10 +27,10 @@ class MockServiceFactory extends ServiceFactory {
     userResetMfa: sinon.stub(),
     reset: () => {
       this.platformAuthClient.newAuthToken.callsFake(() => ({ 'authorization_code': '12345678' }))
-      this.platformAuthClient.newAuthToken.resetHistory()  
+      this.platformAuthClient.newAuthToken.resetHistory()
 
       this.platformAuthClient.userResetMfa.callsFake(() => ({ 'authorization_code': '12345678' }))
-      this.platformAuthClient.userResetMfa.resetHistory()  
+      this.platformAuthClient.userResetMfa.resetHistory()
     }
   }
 

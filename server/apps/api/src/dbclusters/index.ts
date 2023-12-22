@@ -1,1 +1,1 @@
-export { router } from './dbcluster.routes'
+export { DbclusterApiModule } from './dbcluster.api.module'

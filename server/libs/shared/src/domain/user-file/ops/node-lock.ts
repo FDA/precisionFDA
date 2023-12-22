@@ -22,7 +22,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
   }
 
   async run(input: NodesInput): Promise<void> {
-    this.ctx.log.info(input.ids, 'NodesLockOperation: Locking ids')
+    this.ctx.log.log(input.ids, 'NodesLockOperation: Locking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: false })
     const filteredNodes = await this.filterNodes(nodes)
@@ -39,7 +39,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
         await this.notifyUserSuccess(filteredNodes.length)
       }
 
-      this.ctx.log.info(
+      this.ctx.log.log(
         { filesCount: filteredNodes.length },
         'NodesLockOperation: Locked total objects',
       )

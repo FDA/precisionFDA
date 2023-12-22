@@ -42,12 +42,12 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('response shape & mocks call shape (JOB_FINISHED email) - is now deprecated', async () => {
-    const { body } = await supertest(getServer())
+    const { text } = await supertest(getServer())
       .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { jobId: job.id } })
       .expect(200)
-    expect(body).to.be.true()
+    expect(text).to.eq('true')
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
 
     expect(taskInput).to.have.property('to', user.email)
@@ -69,13 +69,13 @@ describe('POST /emails/:id/send', () => {
     }
     await em.flush()
 
-    const { body } = await supertest(getServer())
+    const { text } = await supertest(getServer())
       .post(`/emails/${emailId}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { jobId: job.id } })
       .expect(200)
 
-    expect(body).to.be.true()
+    expect(text).to.eq('true')
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
 
     expect(taskInput).to.have.property('to', user.email)
@@ -84,12 +84,12 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {
-    const { body } = await supertest(getServer())
+    const { text } = await supertest(getServer())
       .post(`/emails/${EMAIL_ID_SPACE_CONTENT}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { spaceEventId: spaceEventJobAdded.id } })
       .expect(200)
-    expect(body).to.be.true()
+    expect(text).to.eq('true')
     expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
     // user - the owner is filtered out
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args

@@ -21,7 +21,7 @@ const rollbackUnlockingState = async (em: SqlEntityManager, nodes: Node[]): Prom
 
 class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
   async run(input: NodesInput): Promise<void> {
-    this.ctx.log.info(input.ids, 'NodesUnlockOperation: Unlocking ids')
+    this.ctx.log.log(input.ids, 'NodesUnlockOperation: Unlocking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: true })
     const notificationService = new NotificationService(em)
@@ -62,7 +62,7 @@ class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
             userId: this.ctx.user.id,
           })
         }
-        this.ctx.log.info(
+        this.ctx.log.log(
           { foldersCount: unlockedFoldersCount, filesCount: unlockedFilesCount },
           'NodesUnlockOperation: Unlocked total objects',
         )

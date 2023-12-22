@@ -134,7 +134,7 @@ const buildFilterByUserSettings =
           membershipOrUser instanceof SpaceMembership
             ? membershipOrUser.user.id
             : membershipOrUser.id
-        log.info(
+        log.log(
           {
             receiverId: userId,
             emailTypeId: config.emailId,

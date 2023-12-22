@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import type { Logger } from 'pino'
+import type { Logger } from '@nestjs/common'
 import { errors } from '..'
 import { config } from '../config'
 import { getLogger } from '../logger'
@@ -77,9 +77,9 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
       headers,
     }
 
-    this.log.info({ options }, 'PlatformAuthClient sending newAuthToken request')
+    this.log.log({ options }, 'PlatformAuthClient sending newAuthToken request')
     const res = await this.axiosInstance.request(options)
-    this.log.info({
+    this.log.log({
       headers: res.headers,
       config: res.config,
       data: res.data,

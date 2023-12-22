@@ -10,7 +10,7 @@ import { maskAccessTokenUserCtx } from './logging'
 export type DefaultInput = AnyObject
 
 export abstract class BaseOperation<CtxT extends OpsCtx, In, Out> {
-  protected ctx: CtxT 
+  protected ctx: CtxT
   protected id: string
 
   // input context has to be provided by the server or the worker setup
@@ -22,7 +22,7 @@ export abstract class BaseOperation<CtxT extends OpsCtx, In, Out> {
 
   async execute(props?: In): Promise<Out> {
     const startTime = Date.now()
-    this.ctx.log.info(
+    this.ctx.log.log(
       {
         name: this.constructor.name,
         startTime,
@@ -73,14 +73,14 @@ export abstract class WorkerBaseOperation<Ctx extends OpsCtx, In, Out> extends B
       bullJobId: this.ctx.job.id,
       bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
     }
-    this.ctx.log.info({...operationInfo},
+    this.ctx.log.log({...operationInfo},
       'Worker operation started',
     )
 
     try {
       // run the operation with context
       const res = await this.run(props)
-      this.ctx.log.info(
+      this.ctx.log.log(
         {
           ...operationInfo,
           executionTime: Date.now() - startTime,

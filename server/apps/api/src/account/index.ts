@@ -1,1 +1,1 @@
-export { router } from './account.routes'
+export { AccountApiModule } from './account.api.module'
