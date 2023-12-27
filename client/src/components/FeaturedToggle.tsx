@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { useFeatureMutation } from '../features/home/actionModals/useFeatureMutation'
+import { useFeatureMutation } from '../features/actionModals/useFeatureMutation'
 import { APIResource } from '../features/home/types'
 import { HeartOutlineIcon, HeartSolidIcon } from './icons/HeartIcon'
 

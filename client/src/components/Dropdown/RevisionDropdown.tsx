@@ -5,7 +5,7 @@ import { Dropdown } from '.'
 import { CaretIcon } from '../icons/CaretIcon'
 import { HistoryIcon } from '../icons/HistoryIcon'
 import { colors } from '../../styles/theme'
-import { Revision } from '../../features/home/workflows/workflows.types'
+import { Revision } from '../../features/workflows/workflows.types'
 import { compactScrollBar } from '../Page/styles'
 
 const StyledRevisionDropdownButton = styled.button`

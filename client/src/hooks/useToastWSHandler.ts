@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
-import { confirmNotification } from '../features/home/notifications/notifications.api'
+import { confirmNotification } from '../features/notifications/notifications.api'
 import { Notification, NOTIFICATION_ACTION, SEVERITY } from '../features/home/types'
 import { IUser } from '../types/user'
 import {

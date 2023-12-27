@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, waitFor } from '../../../test/test-utils'
-import { AppList } from '../apps/AppList'
+import { AppList } from '../../apps/AppList'
 
 describe('My Home / Apps', () => {
   test('User should be allowed to view apps list', async () => {

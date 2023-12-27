@@ -1,4 +1,4 @@
-import { IExecution, Job } from '../features/home/executions/executions.types'
+import { IExecution, Job } from '../features/executions/executions.types'
 import { ConfidentialSpace, ISpace } from '../features/spaces/spaces.types'
 
 export const createMockJob = (id: number, uid: string): Job => {
