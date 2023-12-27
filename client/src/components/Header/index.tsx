@@ -5,6 +5,7 @@ import { SUPPORT_EMAIL } from '../../constants'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { useCustomPortalsQuery } from '../../features/auth/useCustomPortalsQuery'
+import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
 import { IUser } from '../../types/user'
 import { CloudResourceModal } from '../CloudResourcesModal'
 import Dropdown from '../Dropdown'
@@ -51,6 +52,7 @@ type UserMenuProps = {
   userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
+  generateCLIKey: () => void
 }
 
 const DataPortalsLink = ({
@@ -95,6 +97,7 @@ export const UserMenu = ({
   userCanAdministerSite = false,
   handleLogout,
   showCloudResourcesModal,
+  generateCLIKey,
 }: UserMenuProps) => (
   <StyledDropMenuLinks>
     <StyledLink data-turbolinks="false" href="/profile">
@@ -110,6 +113,9 @@ export const UserMenu = ({
         </StyledOnClickModalDiv>
       </>
     )}
+    <StyledLink as="div" onClick={generateCLIKey}>
+      Generate CLI Key
+    </StyledLink>
     <StyledLink data-turbolinks="false" href="/licenses">
       Manage Licenses
     </StyledLink>
@@ -171,6 +177,8 @@ export const Header: React.FC = () => {
       window.location.replace('/')
     })
   }
+
+  const generateCLIKeyAction = useGenerateKeyModal()
 
   const isActiveLink = (linkPath: string) => {
     if (linkPath === '/') {
@@ -392,9 +400,8 @@ export const Header: React.FC = () => {
                   userCanAdministerSite={userCanAdministerSite}
                   userIsGuest={userIsGuest}
                   handleLogout={handleLogout}
-                  showCloudResourcesModal={() =>
-                    setCloudResourcesModalShown(true)
-                  }
+                  showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
+                  generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}
                 />
               }
             >
@@ -422,6 +429,7 @@ export const Header: React.FC = () => {
           setCloudResourcesModalShown(false)
         }}
       />
+      {generateCLIKeyAction.modalComp}
     </>
   )
 }
