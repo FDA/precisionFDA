@@ -2,9 +2,9 @@
 import { http, HttpResponse } from 'msw'
 import { CloudResourcesResponse } from '../hooks/useCloudResourcesCondition'
 import { SiteSettingsResponse } from '../features/auth/useSiteSettingsQuery'
-import { FetchFilesQuery } from '../features/home/files/files.api'
+import { FetchFilesQuery } from '../features/files/files.api'
 import { FetchProperties } from '../features/home/usePropertiesQuery'
-import { ComputeInstance } from '../features/home/apps/apps.types'
+import { ComputeInstance } from '../features/apps/apps.types'
 import { NewsItem } from '../features/news/types'
 
 export const handlers = [

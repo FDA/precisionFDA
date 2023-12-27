@@ -14,7 +14,7 @@ import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { useEditTagsModal } from '../../home/actionModals/useEditTagsModal'
+import { useEditTagsModal } from '../../actionModals/useEditTagsModal'
 import { SpaceTypeName } from '../common'
 import {
   CreateSpacePayload,

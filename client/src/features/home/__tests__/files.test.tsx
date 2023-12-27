@@ -4,7 +4,7 @@ import {
   screen,
   waitFor,
 } from '../../../test/test-utils'
-import { FileList } from '../files/FileList'
+import { FileList } from '../../files/FileList'
 
 describe('My Home / Files', () => {
   test('User should be allowed to view files list', async () => {

@@ -52,7 +52,7 @@ const ChallengeDetailsPage = React.lazy(
   () => import('./features/challenges/details/ChallengeDetails'),
 )
 const WorkflowRunPage = React.lazy(
-  () => import('./features/home/workflows/run/WorkflowRun'),
+  () => import('./features/workflows/run/WorkflowRun'),
 )
 const UsersList = React.lazy(() => import('./features/admin/users'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
