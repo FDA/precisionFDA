@@ -54,7 +54,7 @@ services:
       service: nodejs-api
     build:
       context: ../
-      dockerfile: ./https-apps-api/docker/images/node.isolated-dev.Dockerfile
+      dockerfile: ./server/docker/images/node.isolated-dev.Dockerfile
     command: ['make', 'watch']
     environment:
       - NODE_ENV=development
@@ -64,8 +64,8 @@ services:
       - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
     volumes:
       - type: bind
-        source: ../https-apps-api/packages
-        target: /app/packages
+        source: ../server
+        target: /app
       - yarn-network-cache-nodejs-api:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-api:/app/node_modules
 
@@ -75,7 +75,7 @@ services:
       service: nodejs-worker
     build:
       context: ../
-      dockerfile: ./https-apps-api/docker/images/node.isolated-dev.Dockerfile
+      dockerfile: ./server/docker/images/node.isolated-dev.Dockerfile
     command: ['make', 'watch-worker']
     environment:
       - NODE_ENV=development
@@ -85,11 +85,12 @@ services:
       - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
     volumes:
       - type: bind
-        source: ../https-apps-api/packages
-        target: /app/packages
+        source: ../server
+        target: /app
       - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-worker:/app/node_modules
   db:
+    platform: linux/x86_64
     extends:
       file: ./base.services.yml
       service: db_emulated
