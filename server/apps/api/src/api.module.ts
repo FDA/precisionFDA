@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { APP_FILTER } from '@nestjs/core'
 import { DatabaseModule, LoggerModule } from '@shared'
+import { QueueModule } from '@shared/queue/queue.module'
 import { AccountApiModule } from './account'
 import { AdminApiModule } from './admin'
 import { AppApiModule } from './apps'
@@ -33,6 +34,7 @@ import { WorkflowApiModule } from './workflows'
   imports: [
     DatabaseModule,
     LoggerModule,
+    QueueModule,
     UserContextModule,
     BullBoardModule,
     AccountApiModule,

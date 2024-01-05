@@ -54,7 +54,7 @@ any
 
   async run(input: WorkstationSnapshotOperationParams): Promise<any> {
     const log = this.ctx.log
-    log.log({ ...omit(['code', 'key'], input) },
+    log.verbose({ ...omit(['code', 'key'], input) },
       'WorkstationSnapshotOperation: Start',
     )
 
@@ -70,7 +70,7 @@ any
       const terminate = input.terminate ?? false
       const res = await workstationService.snapshot(input.key, input.name, terminate)
 
-      log.log({ res },
+      log.verbose({ res },
         'WorkstationSnapshotOperation: Received snapshot response',
       )
 
@@ -84,7 +84,7 @@ any
             // Snapshot is created, now we should invoke workstation sync for the file to appear in My Home
             await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
           } catch (err) {
-            log.log({ err },
+            log.verbose({ err },
               // Most likely a sync file operation already queued up or processing,
               // either because user invoked Snapshot twice quickly or they had clicked Sync Files
               'WorkstationSnapshotOperation: Unable to queue SyncWorkstationFiles',

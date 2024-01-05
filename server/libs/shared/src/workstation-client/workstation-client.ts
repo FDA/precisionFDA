@@ -71,10 +71,10 @@ class WorkstationClient implements IWorkstationClient {
     // First get the Referer url
     const jobResponse = await this.axiosInstance.get(this.workstationUrl)
     const refrerUrl = jobResponse.config.url
-    this.log.log(`WorkstationClient obtained refrerUrl ${refrerUrl}`)
+    this.log.verbose(`WorkstationClient obtained refrerUrl ${refrerUrl}`)
 
     const url = `${this.workstationUrl}/oauth2/access?code=${authToken}`
-    this.log.log(`WorkstationClient oauth calling url ${url}`)
+    this.log.verbose(`WorkstationClient oauth calling url ${url}`)
 
     const options: AxiosRequestConfig = {
       method: 'GET',
@@ -95,9 +95,9 @@ class WorkstationClient implements IWorkstationClient {
       this.cookie = cookie
 
       // Should not print cookie to logs, the following is for debugging
-      // this.log.log(`WorkstationClient got cookie: ${this.cookie}`)
+      // this.log.verbose(`WorkstationClient got cookie: ${this.cookie}`)
 
-      this.log.log({
+      this.log.verbose({
         workstationUrl: this.workstationUrl,
         host: this.host,
         baseUrl: this.baseUrl,
@@ -111,12 +111,12 @@ class WorkstationClient implements IWorkstationClient {
 
   private async extractWorkstationCookie(response: any): Promise<string | null> {
     const jar = response.config.jar as CookieJar
-    this.log.log({ jar }, 'extractWorkstationCookie jar')
+    this.log.verbose({ jar }, 'extractWorkstationCookie jar')
 
     const cookies = await jar.getCookies(this.workstationUrl)
-    this.log.log({ cookies }, 'extractWorkstationCookie cookies')
+    this.log.verbose({ cookies }, 'extractWorkstationCookie cookies')
     for (const cookie of cookies) {
-      // this.log.log({ cookie }, 'cookie')
+      // this.log.verbose({ cookie }, 'cookie')
       if (cookie.key.startsWith('job-')) {
         return `${cookie.key}=${cookie.value}`
       }
@@ -214,7 +214,7 @@ class WorkstationClient implements IWorkstationClient {
     try {
       this.logClientRequest(options)
       const res = await this.axiosInstance.request(options)
-      this.log.log({ data: res.data }, 'WorkstationClient: sendRequest response')
+      this.log.verbose({ data: res.data }, 'WorkstationClient: sendRequest response')
       return returnFullResponse ? res : res.data
     } catch (err) {
       this.logClientFailed(options)
@@ -242,7 +242,7 @@ class WorkstationClient implements IWorkstationClient {
   protected logClientRequest(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
     const data = this.maskRequestData(options.data)
-    this.log.log(
+    this.log.verbose(
       {
         requestOptions: { ...options, headers: sanitized, data },
         url: options.url,

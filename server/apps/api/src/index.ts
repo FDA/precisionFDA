@@ -4,7 +4,7 @@ import { log } from './logger'
 
 process.on('SIGUSR2', () => {
   const fileName = writeHeapSnapshot()
-  log.log(`Created heap dump file: ${fileName}`)
+  log.verbose(`Created heap dump file: ${fileName}`)
 })
 
 createEntrypoint()()

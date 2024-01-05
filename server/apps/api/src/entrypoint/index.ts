@@ -24,7 +24,6 @@ export function createEntrypoint() {
       await api.stopServer()
     }
     await database.stop()
-    await queue.disconnectQueues()
   }
 
   const startAll = async (): Promise<void> => {
@@ -47,7 +46,6 @@ export function createEntrypoint() {
 
     // start the services in correct order
     await database.start()
-    await queue.createQueues()
     await api.startHttpsServer()
     await api.startWSServer()
   }

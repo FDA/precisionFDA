@@ -28,7 +28,7 @@ void
 
     const fileRepo = em.getRepository(UserFile) as UserFileRepository
     const cardImage = await fileRepo.findFileWithUid(challenge.cardImageId)
-    log.log({ challengeId, cardImage }, `ChallengeUpdateCardImageUrlOperation: Updating ${challengeId} cardImage`)
+    log.verbose({ challengeId, cardImage }, `ChallengeUpdateCardImageUrlOperation: Updating ${challengeId} cardImage`)
     if (!cardImage) {
       throw new errors.NotFoundError(`ChallengeUpdateCardImageUrlOperation: Cannot find card image id ${challenge.cardImageId} for challenge ${challengeId}`)
     }
@@ -42,7 +42,7 @@ void
     })
 
     if (link.url) {
-      log.log({ link }, 'ChallengeUpdateCardImageUrlOperation: Updating cardImageUrl')
+      log.verbose({ link }, 'ChallengeUpdateCardImageUrlOperation: Updating cardImageUrl')
       challenge.cardImageUrl = link.url
       em.flush()
     }

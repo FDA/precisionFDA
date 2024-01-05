@@ -1,9 +1,8 @@
 import { queue } from '@shared'
+import { startWorker } from './index'
 
 Promise.resolve()
-  .then(() => {
-    queue.createQueues()
-  })
+  .then(() => startWorker())
   .then(async () => {
     // different payload does not change the id
     const payload = { dxid: 'job-FyfPxYj00B7105b03ZXZq1g3' }
@@ -13,7 +12,6 @@ Promise.resolve()
       dxuser: 'pfda_autotest1',
       accessToken: 'foo-token',
     })
-    await queue.disconnectQueues()
   })
   .catch(err => {
     console.log(err, 'failed to add task to queue')

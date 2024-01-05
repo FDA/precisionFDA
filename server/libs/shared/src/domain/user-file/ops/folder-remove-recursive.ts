@@ -72,7 +72,7 @@ number
       }
 
       await em.commit()
-      this.ctx.log.log(
+      this.ctx.log.verbose(
         { foldersCnt: folderSubtree.length, filesCnt: filesToRemove.length },
         'Removed total objects',
       )

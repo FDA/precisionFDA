@@ -1,36 +1,23 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ArrayUtils } from '../../../../utils'
+import { Inject, Injectable } from '@nestjs/common'
+import { ENTITY_TYPE_TO_PARENT_RESOLVER_MAP } from '@shared/domain/provenance/providers/entity-type-to-parent-resolver-map.provider'
+import { ArrayUtils } from '@shared'
 import { EntityType } from '../../../entity'
-import { WorkflowService } from '../../../workflow/service/workflow.service'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
-import { AppProvenanceDataService } from './app-provenance-data.service'
-import { AssetProvenanceDataService } from './asset-provenance-data.service'
-import { ComparisonProvenanceDataService } from './comparison-provenance-data.service'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
-import { FileProvenanceDataService } from './file-provenance-data.service'
-import { JobProvenanceDataService } from './job-provenance-data.service'
-import { UserProvenanceDataService } from './user-provenance-data.service'
-import { WorkflowProvenanceDataService } from './workflow-provenance-data.service'
 
+@Injectable()
 export class EntityProvenanceDataProviderService {
-  private readonly ENTITY_TYPE_TO_PARENT_RESOLVER_MAP: { [T in EntityType]: EntityProvenanceDataService<T> }
-
-  // TODO(PFDA-4833) - use IOC and create unit tests after that
-  constructor(em: SqlEntityManager, workflowService: WorkflowService) {
-    this.ENTITY_TYPE_TO_PARENT_RESOLVER_MAP = {
-      file: new FileProvenanceDataService(em),
-      job: new JobProvenanceDataService(),
-      user: new UserProvenanceDataService(),
-      comparison: new ComparisonProvenanceDataService(),
-      asset: new AssetProvenanceDataService(),
-      app: new AppProvenanceDataService(),
-      workflow: new WorkflowProvenanceDataService(workflowService),
-    }
-  }
+  constructor(
+    @Inject(ENTITY_TYPE_TO_PARENT_RESOLVER_MAP)
+    private readonly ENTITY_PARENT_RESOLVER_MAP: {
+      [T in EntityType]: EntityProvenanceDataService<T>
+    },
+  ) {}
 
   async getEntityProvenanceData(source: EntityProvenanceSourceUnion): Promise<EntityProvenance> {
-    const dataService: EntityProvenanceDataService<typeof source.type> = this.ENTITY_TYPE_TO_PARENT_RESOLVER_MAP[source.type]
+    const dataService: EntityProvenanceDataService<typeof source.type> =
+      this.ENTITY_PARENT_RESOLVER_MAP[source.type]
 
     const result: EntityProvenance = {
       data: dataService.getData(source.entity),
@@ -38,7 +25,7 @@ export class EntityProvenanceDataProviderService {
 
     const parents = await dataService.getParents(source.entity)
     if (!ArrayUtils.isEmpty(parents)) {
-      result.parents = await Promise.all(parents.map(p => this.getEntityProvenanceData(p)))
+      result.parents = await Promise.all(parents.map((p) => this.getEntityProvenanceData(p)))
     }
 
     return result

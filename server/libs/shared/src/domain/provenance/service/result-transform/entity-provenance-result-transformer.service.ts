@@ -4,5 +4,8 @@ import { EntityProvenanceOptionsType } from '../../model/entity-provenance-optio
 import { EntityProvenanceResultType } from '../../model/entity-provenance-result.type'
 
 export interface EntityProvenanceResultTransformerService<T extends EntityProvenanceFormatType> {
-  transform(provenance: EntityProvenance, options?: EntityProvenanceOptionsType<T>): Promise<EntityProvenanceResultType<T>>
+  transform(
+    provenance: EntityProvenance,
+    options?: EntityProvenanceOptionsType<T>,
+  ): Promise<EntityProvenanceResultType<T>>
 }

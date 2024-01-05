@@ -1,0 +1,29 @@
+import { Provider } from '@nestjs/common'
+import { EntityType } from '@shared/domain/entity'
+import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
+import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
+import { ComparisonProvenanceDataService } from '@shared/domain/provenance/service/entity-data/comparison-provenance-data.service'
+import { EntityProvenanceDataService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data.service'
+import { FileProvenanceDataService } from '@shared/domain/provenance/service/entity-data/file-provenance-data.service'
+import { JobProvenanceDataService } from '@shared/domain/provenance/service/entity-data/job-provenance-data.service'
+import { UserProvenanceDataService } from '@shared/domain/provenance/service/entity-data/user-provenance-data.service'
+import { WorkflowProvenanceDataService } from '@shared/domain/provenance/service/entity-data/workflow-provenance-data.service'
+
+export const ENTITY_TYPE_TO_PARENT_RESOLVER_MAP = 'ENTITY_TYPE_TO_PARENT_RESOLVER_MAP'
+
+export const entityTypeToParentResolverMapProvider: Provider = {
+  provide: ENTITY_TYPE_TO_PARENT_RESOLVER_MAP,
+  inject: [
+    AppProvenanceDataService,
+    AssetProvenanceDataService,
+    ComparisonProvenanceDataService,
+    FileProvenanceDataService,
+    JobProvenanceDataService,
+    UserProvenanceDataService,
+    WorkflowProvenanceDataService,
+  ],
+  useFactory: (app, asset, comparison, file, job, user, workflow) =>
+    ({ file, job, user, comparison, asset, app, workflow }) satisfies {
+      [T in EntityType]: EntityProvenanceDataService<T>
+    },
+}

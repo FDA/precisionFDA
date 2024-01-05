@@ -28,7 +28,7 @@ const rollbackRemovingState = async (em: SqlEntityManager, nodes: Node[]): Promi
  */
 class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number> {
   async run(input: NodesInput): Promise<number> {
-    getLogger().log(input.ids, 'Removing ids')
+    getLogger().verbose(input.ids, 'Removing ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em.fork(), { ids: input.ids }, {})
     const notificationService = new NotificationService(em)
@@ -63,7 +63,7 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number>
         })
       }
 
-      this.ctx.log.log(
+      this.ctx.log.verbose(
         { foldersCount: removedFoldersCount, filesCount: removedFilesCount },
         'Removed total objects',
       )

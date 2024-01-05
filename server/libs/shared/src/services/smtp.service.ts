@@ -30,7 +30,7 @@ class EmailClient implements IEmailService {
     this.transporter = nodemailer.createTransport(transportConfig)
     this.transporter.verify((error, success) => {
       if (success) {
-        log.log({ success }, 'SMTP connection configuration is successful')
+        log.verbose({ success }, 'SMTP connection configuration is successful')
       }
       if (error) {
         log.error({ error }, 'SMTP connection configuration failed')
@@ -49,7 +49,7 @@ class EmailClient implements IEmailService {
       },
       (error, info) => {
         if (info) {
-          log.log({ info }, 'SMTP request successful')
+          log.verbose({ info }, 'SMTP request successful')
         }
         if (error) {
           log.error({ error: error }, 'SendEmail failed')
@@ -66,11 +66,11 @@ class EmailClient implements IEmailService {
 
 class SaveEmailToFileClient implements IEmailService {
   constructor() {
-    log.log('Email saving to file is enabled')
+    log.verbose('Email saving to file is enabled')
   }
 
   async sendEmail(input: SendEmailJob['payload']): Promise<void> {
-    log.log('Email saving to file is started')
+    log.verbose('Email saving to file is started')
     const html = `
     <pre>email: ${input.to}\n
     subject: ${input.subject}\n</pre>
@@ -82,7 +82,7 @@ class SaveEmailToFileClient implements IEmailService {
       `test-email-${input.emailType}-${currentDate}.html`,
     )
     await fs.promises.writeFile(targetPath, html)
-    log.log({ targetPath }, 'Email has been successfully saved to file')
+    log.verbose({ targetPath }, 'Email has been successfully saved to file')
   }
 }
 

@@ -40,14 +40,14 @@ void> {
     const fileDxids = files.map(x => x.dxid)
 
     // This call can be particularly time-consuming, so log the times so we can later analyze
-    this.log.log('SyncFilesStateOperation: Starting platform findDataObjects call')
+    this.log.verbose('SyncFilesStateOperation: Starting platform findDataObjects call')
 
     const params: FileStatesParams = {
       fileDxids,
       projectDxid,
     }
     const response = await this.platformClient.fileStates(params)
-    this.log.log({ platformFilesCount: response.length },
+    this.log.verbose({ platformFilesCount: response.length },
       'SyncFilesStateOperation: End platform findDataObjects call',
     )
 
@@ -56,13 +56,13 @@ void> {
     // in this case we remove the file record on our side
     const responseFileDxids = response.map(x => x.id)
     const abandonedFileDxids = difference(fileDxids, responseFileDxids)
-    this.log.log({ abandonedFileDxids },
+    this.log.verbose({ abandonedFileDxids },
       'SyncFilesStateOperation: Deleting files removed by platform',
     )
     for (const dxid of abandonedFileDxids) {
       const fileOrAssets = await findFileOrAssetsWithDxid(this.ctx.em, dxid)
       if (!fileOrAssets) {
-        this.log.log({ dxid, fileOrAssets },
+        this.log.verbose({ dxid, fileOrAssets },
           'SyncFilesStateOperation: Error removing abandoned file. File with dxid not found',
         )
         continue
@@ -76,12 +76,12 @@ void> {
           em.remove(file)
           await em.flush()
 
-          this.log.log({
+          this.log.verbose({
             dxid: file.dxid,
             uid: file.uid,
           }, 'SyncFilesStateOperation: Removed abandoned file')
         } catch (err) {
-          this.ctx.log.log({
+          this.ctx.log.verbose({
             error: err,
             dxid,
           },
@@ -99,7 +99,7 @@ void> {
           continue
         }
 
-        this.log.log({ fileDxid: fileOrAsset.dxid, fileInfo },
+        this.log.verbose({ fileDxid: fileOrAsset.dxid, fileInfo },
           `SyncFilesStateOperation: Updating file state ${fileInfo.describe.state} for file ${fileOrAsset.name}`,
         )
         fileOrAsset.fileSize = fileInfo.describe.size
@@ -111,7 +111,7 @@ void> {
           const challengeRepo = this.ctx.em.getRepository(Challenge) as ChallengeRepository
           const challenge = await challengeRepo.findOneWithCardImageUid(fileOrAsset.uid)
           if (challenge) {
-            this.log.log({ fileUid: fileOrAsset.uid },
+            this.log.verbose({ fileUid: fileOrAsset.uid },
               `SyncFilesStateOperation: File associated with challenge ${fileInfo.describe.state} for file ${fileOrAsset.name}`,
             )
             try {
@@ -151,7 +151,7 @@ void> {
     this.platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     let openFiles = await findUnclosedFilesOrAssets(em, user.id)
 
-    this.log.log({
+    this.log.verbose({
       dxuser,
       numberOfOpenFiles: openFiles.length,
       openFiles: openFiles.map(f => f.dxid),
@@ -164,7 +164,7 @@ void> {
       for (const projectDxid in openFilesByProject) {
         if (openFilesByProject.hasOwnProperty(projectDxid)) {
           const openFilesInProject = openFilesByProject[projectDxid]
-          this.log.log({
+          this.log.verbose({
             projectDxid,
             openFiles: openFilesInProject.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
           }, 'SyncFilesStateOperation: Syncing files state in project')
@@ -178,13 +178,13 @@ void> {
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.log({ error: err.props },
+          this.ctx.log.verbose({ error: err.props },
             'SyncFilesStateOperation: Received 401 from platform, removing sync task')
           await removeRepeatable(this.ctx.job)
         }
       }
       else {
-        this.ctx.log.log({ error: err },
+        this.ctx.log.verbose({ error: err },
           'SyncFilesStateOperation: Unhandled error from platform, will retry later')
       }
       return
@@ -193,10 +193,10 @@ void> {
     // If user has no more unclosed files, remove this task
     openFiles = await findUnclosedFilesOrAssets(em, user.id)
     if (openFiles.length === 0) {
-      this.log.log('SyncFilesStateOperation: Completed and all user files closed, removing repeatable job')
+      this.log.verbose('SyncFilesStateOperation: Completed and all user files closed, removing repeatable job')
       await queue.removeRepeatable(this.ctx.job)
     } else {
-      this.log.log({
+      this.log.verbose({
         dxuser: user.dxuser,
         openFiles: openFiles.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid, createdAt: f.createdAt })),
       }, 'SyncFilesStateOperation: Completed with open files remaining',

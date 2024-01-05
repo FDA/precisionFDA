@@ -1,12 +1,11 @@
+import { database } from '@shared'
+import { db } from '@shared/test'
+import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
-import { database, queue } from '@shared'
-import { db } from '@shared/test'
-import { mocksRestore, mocksSetup } from '@shared/test/mocks'
-import { setupHandlers } from '../src/queues'
-import { initLogger } from '../src/utils'
-import { mocksSetup as localMocksSetup, mocksRestore as localMocksRestore } from './utils/mocks'
+import { startWorker } from '../src'
+import { mocksRestore as localMocksRestore, mocksSetup as localMocksSetup } from './utils/mocks'
 
 // Handle exception being thrown inside an async test
 // This seems to be a flaw in mocha since 8.2.1
@@ -26,12 +25,10 @@ chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
 before(async () => {
-  await initLogger()
   mocksSetup()
   localMocksSetup()
 
-  await database.start()
-  await setupHandlers()
+  await startWorker()
   await db.initDeleteProcedure(database.connection())
 })
 

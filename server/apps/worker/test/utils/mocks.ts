@@ -1,14 +1,15 @@
+import { mockHandler } from '@worker-test/utils/handler-mock'
 import sinon from 'sinon'
 import Bull, { Job } from 'bull'
-import { handler } from '../../src/jobs'
 
 const sandbox = sinon.createSandbox()
 
 // LOCAL stubs for queue handling
 const fakes = {
   // add to queue triggers execution immediately
-  addToQueueStub: sinon.stub().callsFake(async input => {
-    await handler({ data: input } as Job)
+  addToQueueStub: sinon.stub().callsFake(async (...args) => {
+    console.log(args)
+    await mockHandler({ data: args[1] } as Job)
   }),
   getJobStub: sinon.stub(),
   getJobCountsStub: sinon.stub(),

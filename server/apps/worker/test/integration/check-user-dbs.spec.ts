@@ -8,23 +8,22 @@ import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import type { BasicUserJob } from '@shared/queue/task.input'
 import { JobOptions } from 'bull'
-import {
-  STATUS as DB_CLUSTER_STATUS,
-} from '@shared/domain/db-cluster/db-cluster.enum'
+import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster'
 
-
-const createUserCheckupTask = async (
-  user: BasicUserJob['user'],
-) => {
+const createUserCheckupTask = async (user: BasicUserJob['user']) => {
   const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.USER_CHECKUP}` }
   const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.USER_CHECKUP,
-    user,
-  }, options)
+  await defaultTestQueue.add(
+    queue.types.TASK_TYPE.USER_CHECKUP,
+    {
+      type: queue.types.TASK_TYPE.USER_CHECKUP,
+      user,
+    },
+    options,
+  )
 }
 
 describe('TASK: check-user-dbs', () => {
@@ -64,7 +63,9 @@ describe('TASK: check-user-dbs', () => {
       generate.bullQueue.syncDbClusterStatus(dbClusters[3].dxid, userCtx2),
     ]
     fakes.queue.findRepeatableFake.callsFake((bullJobId: string): object | undefined => {
-      const match = bullJobsInQueue.filter((job => SyncDbClusterOperation.getBullJobId(job.data.payload.dxid) === bullJobId))
+      const match = bullJobsInQueue.filter(
+        (job) => SyncDbClusterOperation.getBullJobId(job.data.payload.dxid) === bullJobId,
+      )
       return match.length > 0 ? match[0] : undefined
     })
 
@@ -87,13 +88,15 @@ describe('TASK: check-user-dbs', () => {
 
   it('does nothing if all DbClusters already have sync task', async () => {
     // Insert existing queue jobs
-    const bullJobsInQueue = dbClusters.map(dbCluster => {
+    const bullJobsInQueue = dbClusters.map((dbCluster) => {
       const userCtx = dbCluster.user.getEntity().id === user1.id ? userCtx1 : userCtx2
       return generate.bullQueue.syncDbClusterStatus(dbCluster.dxid, userCtx)
     })
 
     fakes.queue.findRepeatableFake.callsFake((bullJobId: string): object | undefined => {
-      const match = bullJobsInQueue.filter((job => SyncDbClusterOperation.getBullJobId(job.data.payload.dxid) === bullJobId))
+      const match = bullJobsInQueue.filter(
+        (job) => SyncDbClusterOperation.getBullJobId(job.data.payload.dxid) === bullJobId,
+      )
       return match.length > 0 ? match[0] : undefined
     })
 

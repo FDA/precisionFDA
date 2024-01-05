@@ -41,18 +41,18 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
       const runningJob = await queue.getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
       if (!runningJob) {
         await queue.createSyncJobStatusTask(job, this.ctx.user)
-        this.ctx.log.log({}, `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`)
+        this.ctx.log.verbose({}, `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`)
       }
     })
     if (runningJobs.length === 0) {
-      this.ctx.log.log({}, 'CheckStaleJobsOperation: No running jobs found')
+      this.ctx.log.verbose({}, 'CheckStaleJobsOperation: No running jobs found')
       return []
     }
 
     const isOverMaxDuration = buildIsOverMaxDuration('notify')
     const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
     if (staleJobs.length === 0) {
-      this.ctx.log.log({}, 'CheckStaleJobsOperation: No stale jobs found')
+      this.ctx.log.verbose({}, 'CheckStaleJobsOperation: No stale jobs found')
     }
 
     // TODO(samuel) use Set instead - reduce bundle size
@@ -69,11 +69,11 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
     const nonStaleJobsInfo = nonStaleJobs.map(createJobInfo)
     const staleJobsInfo = staleJobs.map(createJobInfo)
 
-    this.ctx.log.log(
+    this.ctx.log.verbose(
       { nonStaleJobsInfo: nonStaleJobsInfo },
       'CheckStaleJobsOperation: Non stale jobs - for admin to note the times',
     )
-    this.ctx.log.log(
+    this.ctx.log.verbose(
       { staleJobs: staleJobsInfo },
       'CheckStaleJobsOperation: Stale jobs - should be terminated',
     )

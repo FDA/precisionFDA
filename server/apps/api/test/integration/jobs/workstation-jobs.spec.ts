@@ -185,8 +185,8 @@ describe('PATCH /jobs/:id/snapshot', () => {
     expect(response.statusCode).to.equal(200)
     expect(response.body.message).to.contain('Snapshot')
 
-    const bullJob = fakes.bull.addFake.getCall(0).args[0]
-    const bullJobOptions = fakes.bull.addFake.getCall(0).args[1]
+    const bullJob = fakes.bull.addFake.getCall(0).args[1]
+    const bullJobOptions = fakes.bull.addFake.getCall(0).args[2]
     expect(bullJob.type).to.equal(TASK_TYPE.WORKSTATION_SNAPSHOT)
     expect(bullJob.payload).to.deep.include({
       ...params,
@@ -211,8 +211,8 @@ describe('PATCH /jobs/:id/snapshot', () => {
     expect(response.body.message).to.contain('Snapshot')
     expect(fakes.bull.addFake.calledOnce).to.be.true()
 
-    const bullJob = fakes.bull.addFake.getCall(0).args[0]
-    const bullJobOptions = fakes.bull.addFake.getCall(0).args[1]
+    const bullJob = fakes.bull.addFake.getCall(0).args[1]
+    const bullJobOptions = fakes.bull.addFake.getCall(0).args[2]
     expect(bullJob.type).to.equal(TASK_TYPE.WORKSTATION_SNAPSHOT)
     expect(bullJob.payload).to.deep.include({
       ...params,

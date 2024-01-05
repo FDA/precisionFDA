@@ -1,9 +1,11 @@
+import { Injectable } from '@nestjs/common'
 import { config } from '../../../..'
 import { App } from '../../../app'
 import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
+@Injectable()
 export class AppProvenanceDataService implements EntityProvenanceDataService<'app'> {
   getData(app: App): EntityProvenanceData<'app'> {
     let title = app.title
@@ -22,7 +24,7 @@ export class AppProvenanceDataService implements EntityProvenanceDataService<'ap
   async getParents(app: App): Promise<EntityProvenanceSourceUnion[]> {
     const assets = await app.assets.loadItems()
 
-    return assets.map(asset => ({
+    return assets.map((asset) => ({
       type: 'asset',
       entity: asset,
     }))

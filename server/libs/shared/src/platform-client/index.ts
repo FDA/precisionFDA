@@ -893,7 +893,7 @@ class PlatformClient {
 
   private logClientRequest(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
-    this.log.log(
+    this.log.verbose(
       { requestOptions: { ...options, headers: sanitized }, url: options.url },
       'PlatformClient: Running DNANexus API request',
     )

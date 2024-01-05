@@ -16,24 +16,24 @@ IFileOrAsset
   async run(input: UidInput): Promise<IFileOrAsset> {
     const log = this.ctx.log
     const em = this.ctx.em
-    log.log(`FileUpdateOperation: updating file with uid ${input.uid}`)
+    log.verbose(`FileUpdateOperation: updating file with uid ${input.uid}`)
     const fileOrAsset = await findFileOrAssetWithUid(em, input.uid)
     if (!fileOrAsset) {
       log.error(`FileUpdateOperation: File or asset with uid ${input.uid} not found`)
       throw new errors.FileNotFoundError(`File or asset with uid ${input.uid} not found`)
     }
 
-    log.log('FileUpdateOperation: Calling platform fileDescribe')
+    log.verbose('FileUpdateOperation: Calling platform fileDescribe')
     const platformClient = new client.PlatformClient(this.ctx.user.accessToken, log)
     const fileDescribe = await platformClient.fileDescribe({
       fileDxid: fileOrAsset.dxid,
       projectDxid: fileOrAsset.project,
     })
 
-    log.log({ fileDescribe }, 'FileUpdateOperation: Platform fileDescribe response')
+    log.verbose({ fileDescribe }, 'FileUpdateOperation: Platform fileDescribe response')
 
     if (fileDescribe.state) {
-      log.log({
+      log.verbose({
         uid: fileOrAsset.uid,
         name: fileOrAsset.name,
         state: fileDescribe.state,

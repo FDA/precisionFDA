@@ -54,7 +54,7 @@ class WorkstationService {
 
     await this.initSession()
 
-    this.ctx.log.log({
+    this.ctx.log.verbose({
       jobId: job.id,
       jobDxid: job.dxid,
     }, 'WorkstationService: finished initWithJob')
@@ -63,7 +63,7 @@ class WorkstationService {
 
   // Initialize session by obtaining an auth token
   async initSession() {
-    this.ctx.log.log('WorkstationService: initSession')
+    this.ctx.log.verbose('WorkstationService: initSession')
 
     // Keeping the following code for the day we migrate the newAuthToken call to nodejs
     // This did not work even when replicating the same oauth2/access call minicing the Rails headers
@@ -73,7 +73,7 @@ class WorkstationService {
     // const userService = new UserService(this.ctx.user, this.ctx.log, this.axiosInstance)
     // this.authToken = await userService.newAuthToken(redirectUri)
     //
-    // this.ctx.log.log(`WorkstationService: got authToken ${this.authToken}, calling oauth`)
+    // this.ctx.log.verbose(`WorkstationService: got authToken ${this.authToken}, calling oauth`)
 
     this.client = getServiceFactory().getWorkstationClient(this.jobUrl, this.axiosInstance)
     const apiVersion = this.job.app?.getEntity().workstationAPIVersion
@@ -85,7 +85,7 @@ class WorkstationService {
 
   checkRunningWorkstation() {
     if (this.job.state !== JOB_STATE.RUNNING) {
-      this.ctx.log.log({ jobId: this.job.id }, 'WorkstationService: Job is not in running state')
+      this.ctx.log.verbose({ jobId: this.job.id }, 'WorkstationService: Job is not in running state')
       throw new errors.InvalidStateError('Job is not in running state')
     }
   }
@@ -106,7 +106,7 @@ class WorkstationService {
     this.checkRunningWorkstation()
     this.checkValidSession()
     if (compareVersions(this.client.apiVersion, '1.1') < 0) {
-      this.ctx.log.log('WorkstationService: setAPIKey')
+      this.ctx.log.verbose('WorkstationService: setAPIKey')
       return await this.client.setAPIKey(key)
     } else {
       const pfdaConfig: CLIConfigParams = {
@@ -120,7 +120,7 @@ class WorkstationService {
         pfdaConfig.Scope = this.job.scope
       }
 
-      this.ctx.log.log({
+      this.ctx.log.verbose({
         ...omit(['Key'], pfdaConfig),
       }, 'WorkstationService: setPFDAConfig')
       return await this.client.setPFDAConfig(pfdaConfig)
@@ -130,10 +130,10 @@ class WorkstationService {
   async snapshot(key: string, name: string, terminate: boolean): Promise<any> {
     this.checkRunningWorkstation()
     this.checkValidSession()
-    this.ctx.log.log('WorkstationService: Beginning snapshot', { name, terminate })
+    this.ctx.log.verbose('WorkstationService: Beginning snapshot', { name, terminate })
     await this.setAPIKey(key)
     const res = await this.client.snapshot({ name, terminate })
-    this.ctx.log.log('WorkstationService: snapshot returned results', { name, terminate, res })
+    this.ctx.log.verbose('WorkstationService: snapshot returned results', { name, terminate, res })
     return res
   }
 }

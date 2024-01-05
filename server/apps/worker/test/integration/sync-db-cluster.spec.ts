@@ -15,7 +15,7 @@ const createSyncDbClusterTestTask = async (
   user: SyncDbClusterJob['user'],
 ) => {
   const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add({
+  await defaultTestQueue.add(queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS, {
     type: queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS,
     payload,
     user,
@@ -83,7 +83,7 @@ describe('TASK: sync db cluster', () => {
   })
 
   it('updates local database if remote port is different', async () => {
-    const remotePort = parseInt(dbCluster.port) + 1;
+    const remotePort = parseInt(dbCluster.port) + 1
     const describeCallRes = {
       ...mockResponses.DBCLUSTER_DESC_RES,
       endpoint: dbCluster.host,
@@ -210,7 +210,8 @@ describe('TASK: sync db cluster', () => {
         new errors.ClientRequestError('client error', {
           clientResponse: {},
           clientStatusCode: 500,
-        }))
+        }),
+      )
       await createSyncDbClusterTestTask(
         { dxid: dbCluster.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },

@@ -13,7 +13,7 @@ string,
 User
 > {
   async run(key: string): Promise<User> {
-    this.ctx.log.log('executing auth session operation')
+    this.ctx.log.verbose('executing auth session operation')
     const em = this.ctx.em.fork()
     const session = await em.findOneOrFail(Session, { key }, { populate: ['user'] })
     return session.user.getEntity()

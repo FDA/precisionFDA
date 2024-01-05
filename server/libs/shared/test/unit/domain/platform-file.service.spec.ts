@@ -1,9 +1,9 @@
+import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
+import { FileCloseOperation, UserFile } from '@shared/domain/user-file'
+import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub, match } from 'sinon'
-import { PlatformFileService } from '../../../src/domain/platform'
-import type { FileCloseOperation, UserFile } from '../../../src/domain/user-file'
-import type { PlatformClient } from '../../../src/platform-client'
 
 describe('PlatformFileService', () => {
   describe('#createFile', () => {

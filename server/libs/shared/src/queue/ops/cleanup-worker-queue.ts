@@ -17,7 +17,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   //
   // This also cleans up job sync tasks created before we assigned unique IDs
   //
-  log.log('CleanupWorkerQueueOperation: Cleaning up status queue')
+  log.verbose('CleanupWorkerQueueOperation: Cleaning up status queue')
   const mainQueue = queue.getMainQueue()
   const repeatableJobs = await mainQueue.getRepeatableJobs()
 
@@ -30,10 +30,10 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
 
     if (job.id?.startsWith(TASK_TYPE.SYNC_JOB_STATUS)) {
       const jobDxid = SyncJobOperation.getJobDxidFromBullJobId(job.id)
-      log.log({ jobDxid, job }, 'CleanupWorkerQueueOperation: Considering job sync task')
+      log.verbose({ jobDxid, job }, 'CleanupWorkerQueueOperation: Considering job sync task')
       const jobFromDb: Job = await jobRepo.findOne({ dxid: jobDxid })
       if (isNil(jobFromDb)) {
-        log.log({
+        log.verbose({
           jobDxid,
           hoursSinceNext,
         }, 'CleanupWorkerQueueOperation: Removing job sync task because job does not exist in the db')
@@ -46,7 +46,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
       }
       else if (isStateTerminal(jobFromDb.state)) {
         // Removing job sync if the job has terminated
-        log.log({
+        log.verbose({
           jobDxid,
           jobState: jobFromDb.state,
           hoursSinceNext,
@@ -60,7 +60,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
       }
     }
     else {
-      log.log({ job, hoursSinceNext }, 'CleanupWorkerQueueOperation: Inspecing unhandled repeatable job')
+      log.verbose({ job, hoursSinceNext }, 'CleanupWorkerQueueOperation: Inspecing unhandled repeatable job')
     }
 
     if (hoursSinceNext > 1) {
@@ -75,7 +75,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
       // mainQueue.removeRepeatableByKey(job.key)
     }
   }
-  log.log({ removedRepeatableJobs }, 'CleanupWorkerQueueOperation: Removed orphaned repeatable jobs')
+  log.verbose({ removedRepeatableJobs }, 'CleanupWorkerQueueOperation: Removed orphaned repeatable jobs')
 
   const failedStatusJobs = await clearFailedJobs(mainQueue, log)
 
@@ -91,7 +91,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   //
   // On staging/prod there were a lot of failed email tasks lingering around
   //
-  log.log('CleanupWorkerQueueOperation: Cleaning up email queue')
+  log.verbose('CleanupWorkerQueueOperation: Cleaning up email queue')
   const emailQueue = queue.getEmailsQueue()
   const failedEmailJobs = await clearFailedJobs(emailQueue, log)
 
@@ -113,12 +113,12 @@ const clearJobs = async (q: any, state: any, log: any): Promise<any> => {
   const jobs = await q.getJobs(state)
   const count = jobs.length
   if (count > 0) {
-    log.log({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
+    log.verbose({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
     q.clean(0, state);
-    log.log({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
+    log.verbose({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
   }
   else {
-    log.log(`CleanupWorkerQueueOperation: No ${state} jobs in ${q.name}`)
+    log.verbose(`CleanupWorkerQueueOperation: No ${state} jobs in ${q.name}`)
   }
   return jobs
 }

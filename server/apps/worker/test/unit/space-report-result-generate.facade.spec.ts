@@ -1,11 +1,19 @@
 import { LockMode, Reference } from '@mikro-orm/core'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import type { notification, provenance, UserFileCreateFacade } from '@shared'
-import { ENUMS, spaceReport } from '@shared'
+import type { notification } from '@shared'
+import { ENUMS } from '@shared'
 import { SpaceMembership } from '@shared/domain'
+import {
+  EntityProvenanceService
+} from '@shared/domain/provenance/service/entity-provenance.service'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
-import { SpaceReportResultGenerateFacade } from '../../src/facade/space-report-result-generate.facade'
+import {
+  SpaceReportResultGenerateFacade
+} from '../../src/facade/space-report/space-report-result-generate.facade'
 
 describe('SpaceReportResultGenerateFacade', () => {
   const REPORT_ID = 0
@@ -63,7 +71,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     findOneStub.throws()
     findOneStub
       .withArgs(
-        spaceReport.SpaceReport,
+        SpaceReport,
         { id: REPORT_ID, state: { $in: ['CREATED', 'ERROR'] } },
         { lockMode: LockMode.PESSIMISTIC_WRITE },
       )
@@ -233,7 +241,7 @@ describe('SpaceReportResultGenerateFacade', () => {
 
     const spaceReportService = {
       generateResult: generateResultStub,
-    } as unknown as spaceReport.SpaceReportService
+    } as unknown as SpaceReportService
 
     const userFileCreateFacade = {
       createFileWithContent: createFileWithContentStub,
@@ -241,7 +249,7 @@ describe('SpaceReportResultGenerateFacade', () => {
 
     const entityProvenanceService = {
       getSvgStyles: getSvgStylesStub,
-    } as unknown as provenance.EntityProvenanceService
+    } as unknown as EntityProvenanceService
 
     const notificationService = {
       createNotification: createNotificationStub,

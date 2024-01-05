@@ -1,13 +1,14 @@
-import { errors, UserFileCreateFacade } from '@shared'
+import { errors } from '@shared'
+import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
+import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { PlatformFileService } from '../../../src/domain/platform'
-import { UserFileService } from '../../../src/domain/user-file'
-import { FILE_STATE_DX, PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
-import { STATIC_SCOPE } from '../../../src/enums'
-import { FileCreate } from '../../../src/facade/file-create/model/file-create'
-import { FileCreateWithContent } from '../../../src/facade/file-create/model/file-create-with-content'
-import { UserCtx } from '../../../src/types'
+import { UserFileService } from '@shared/domain/user-file'
+import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
+import { FileCreate } from '@shared/facade/file-create/model/file-create'
+import { FileCreateWithContent } from '@shared/facade/file-create/model/file-create-with-content'
+import { UserCtx } from '@shared/types'
 
 describe('UserFileCreateFacade', () => {
   const USER_ID = 0
@@ -83,7 +84,10 @@ describe('UserFileCreateFacade', () => {
         .withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION })
         .returns({ id: null })
 
-      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(errors.InternalError, 'Failed to create the file on the platform')
+      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
+        errors.InternalError,
+        'Failed to create the file on the platform',
+      )
     })
 
     it('should reject if platform returns an empty response', async () => {
@@ -91,7 +95,10 @@ describe('UserFileCreateFacade', () => {
         .withArgs({ name: NAME, project: PROJECT, description: DESCRIPTION })
         .returns(undefined)
 
-      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(errors.InternalError, 'Failed to create the file on the platform')
+      await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
+        errors.InternalError,
+        'Failed to create the file on the platform',
+      )
     })
 
     it('should return correctly created file', async () => {
@@ -117,7 +124,9 @@ describe('UserFileCreateFacade', () => {
       uploadFileContentStub.reset()
       uploadFileContentStub.throws(error)
 
-      await expect(getInstance().createFileWithContent(FILE_CREATE_WITH_CONTENT)).to.be.rejectedWith(error)
+      await expect(
+        getInstance().createFileWithContent(FILE_CREATE_WITH_CONTENT),
+      ).to.be.rejectedWith(error)
     })
 
     it('should return response from the service', async () => {

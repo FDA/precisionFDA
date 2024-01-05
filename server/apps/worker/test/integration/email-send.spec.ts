@@ -6,10 +6,7 @@ import { expect } from 'chai'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import {
-  fakes as queueFakes,
-  mocksReset as queueMocksReset,
-} from '../utils/mocks'
+import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createSendEmailTask = async (
   payload: SendEmailJob['payload'],
@@ -17,7 +14,7 @@ const createSendEmailTask = async (
 ) => {
   const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add({
+  await defaultTestQueue.add(queue.types.TASK_TYPE.SEND_EMAIL, {
     type: queue.types.TASK_TYPE.SEND_EMAIL,
     payload,
     user,
@@ -57,9 +54,9 @@ describe('TASK: email-send', () => {
     expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
 
     const call = queueFakes.addToQueueStub.getCall(0)
-    expect(call.args[0].type).to.equal('send_email')
-    expect(call.args[0].payload).to.equal(payload)
-    expect(call.args[0].user.dxuser).to.equal(user.dxuser)
+    expect(call.args[1].type).to.equal('send_email')
+    expect(call.args[1].payload).to.equal(payload)
+    expect(call.args[1].user.dxuser).to.equal(user.dxuser)
   })
 
   // TODO: Add more tests

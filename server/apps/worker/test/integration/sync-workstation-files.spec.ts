@@ -22,12 +22,12 @@ import {
   PARENT_TYPE,
 } from '@shared/domain/user-file/user-file.types'
 
-
 const insertFoldersToDb = async (em, user, job: Job, folderCount: number) => {
   const folders = []
   for (let i = 0; i < folderCount; i++) {
     const folder = create.filesHelper.createFolder(
-      em, { user },
+      em,
+      { user },
       { name: `folder-${i}`, parentId: job.id, project: job.project },
     )
     folders.push(folder)
@@ -41,7 +41,7 @@ const createSyncWorkstationFilesTask = async (
 ) => {
   const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add({
+  await defaultTestQueue.add(queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES, {
     type: queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES,
     payload,
     user,
@@ -76,7 +76,7 @@ describe('TASK: sync_workstation_files', () => {
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.RUNNING })
       // not sure if the calls will be called in this order
       // might require a smarter handler (based on path return mock or something)
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/') {
           return FILES_LIST_RES_ROOT
         }
@@ -143,7 +143,7 @@ describe('TASK: sync_workstation_files', () => {
 
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.RUNNING })
       // custom stub return function based on folderPath
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -171,7 +171,7 @@ describe('TASK: sync_workstation_files', () => {
         id: FOLDERS_LIST_RES.id,
         folders: ['/'],
       })
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -217,7 +217,7 @@ describe('TASK: sync_workstation_files', () => {
         folders: ['/subfolder'],
       })
       // nothing in root
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/subfolder') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -243,8 +243,12 @@ describe('TASK: sync_workstation_files', () => {
 
       const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
       expect(taggingsInDb).to.be.an('array').with.lengthOf(2)
-      const fileTagging = wrap(taggingsInDb.find(tagging => tagging.taggableId === resultFile.id)).toJSON()
-      const folderTagging = wrap(taggingsInDb.find(tagging => tagging.taggableId === resultFolder.id)).toJSON()
+      const fileTagging = wrap(
+        taggingsInDb.find((tagging) => tagging.taggableId === resultFile.id),
+      ).toJSON()
+      const folderTagging = wrap(
+        taggingsInDb.find((tagging) => tagging.taggableId === resultFolder.id),
+      ).toJSON()
       expect(fileTagging).to.exist()
       expect(folderTagging).to.exist()
       expect(fileTagging).to.have.property('tag')
@@ -265,7 +269,7 @@ describe('TASK: sync_workstation_files', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // custom stub return function based on folderPath
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/.Notebook_snapshots') {
           return [FILES_LIST_RES_SNAPSHOT[0]]
         }
@@ -279,19 +283,19 @@ describe('TASK: sync_workstation_files', () => {
       const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
       const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'] })
       expect(foldersInDb).to.be.an('array').with.lengthOf(2)
-      const snapshotsFolder = foldersInDb.find(f => f.name === '.Notebook_snapshots')
+      const snapshotsFolder = foldersInDb.find((f) => f.name === '.Notebook_snapshots')
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
       expect(filesInDb[0]).to.have.property('entityType', FILE_ORIGIN_TYPE.HTTPS)
       expect(filesInDb[0].parentFolder.id).to.be.equal(snapshotsFolder.id)
       const taggings = await em.find(Tagging, {}, { populate: ['tag'] })
       expect(taggings).to.be.an('array').with.lengthOf(4)
-      expect(taggings.map(t => t.taggableId)).to.have.members([
+      expect(taggings.map((t) => t.taggableId)).to.have.members([
         filesInDb[0].id,
         filesInDb[0].id,
-        ...foldersInDb.map(f => f.id),
+        ...foldersInDb.map((f) => f.id),
       ])
       // two folder + one file = 3, the file is a snapshot = 1
-      expect(taggings.map(t => t.tag.taggingCount)).to.have.members([1, 3, 3, 3])
+      expect(taggings.map((t) => t.tag.taggingCount)).to.have.members([1, 3, 3, 3])
     })
     // todo: create snapshot in a subfolder
 
@@ -331,7 +335,7 @@ describe('TASK: sync_workstation_files', () => {
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/test-folder') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -346,7 +350,7 @@ describe('TASK: sync_workstation_files', () => {
       // todo: add assertions
       const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
       const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'] })
-      const subfolder = foldersInDb.find(f => f.name === 'test-folder')
+      const subfolder = foldersInDb.find((f) => f.name === 'test-folder')
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
       // // converted to JSON to remove user reference
       const resultFile = wrap(filesInDb[0]).toJSON()
@@ -356,7 +360,7 @@ describe('TASK: sync_workstation_files', () => {
       const taggingsInDb = await em.find(Tagging, {}, { populate: ['tag'] })
       // one file, two folders
       expect(taggingsInDb).to.be.an('array').with.lengthOf(3)
-      const resultTagging = wrap(taggingsInDb.find(t => t.taggableId === resultFile.id)).toJSON()
+      const resultTagging = wrap(taggingsInDb.find((t) => t.taggableId === resultFile.id)).toJSON()
       expect(resultTagging).to.exist()
       expect(resultTagging).to.have.property('tag')
       expect(resultTagging.tag).to.have.property('taggingCount', 3)
@@ -374,7 +378,7 @@ describe('TASK: sync_workstation_files', () => {
       const firstFile = create.filesHelper.create(
         em,
         // { user, parentFolder: null },
-        { user},
+        { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
           state: FILE_STATE_DX.CLOSED,
@@ -436,7 +440,7 @@ describe('TASK: sync_workstation_files', () => {
       const firstFile = create.filesHelper.create(
         em,
         // { user, parentFolder: null },
-        { user},
+        { user },
         {
           entityType: FILE_ORIGIN_TYPE.HTTPS,
           state: FILE_STATE_DX.CLOSED,
@@ -464,7 +468,7 @@ describe('TASK: sync_workstation_files', () => {
         id: FOLDERS_LIST_RES.id,
         folders: ['/'],
       })
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/') {
           return [
             {
@@ -585,7 +589,8 @@ describe('TASK: sync_workstation_files', () => {
     // See PFDA-2715 for why
     it('handles more than 32 remote folders', async () => {
       const job = create.jobHelper.create(
-        em, { user, app },
+        em,
+        { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       await em.flush()
@@ -602,7 +607,11 @@ describe('TASK: sync_workstation_files', () => {
       em.clear()
 
       const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
-      const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
+      const foldersInDb = await em.find(
+        Folder,
+        {},
+        { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } },
+      )
       expect(filesInDb).to.be.an('array').with.lengthOf(0)
       expect(foldersInDb).to.be.an('array').with.lengthOf(33)
       expect(foldersInDb.map((f: Folder) => f.name).slice(0, 5)).to.have.ordered.members([
@@ -617,7 +626,8 @@ describe('TASK: sync_workstation_files', () => {
     // Skipping this for now because it exceeds the timeout for a unit test
     it.skip('handles deletion of more than 10000 folders', async () => {
       const job = create.jobHelper.create(
-        em, { user, app },
+        em,
+        { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       await em.flush()
@@ -635,7 +645,11 @@ describe('TASK: sync_workstation_files', () => {
       em.clear()
 
       const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
-      const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
+      const foldersInDb = await em.find(
+        Folder,
+        {},
+        { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } },
+      )
       expect(filesInDb).to.be.an('array').with.lengthOf(0)
       expect(foldersInDb).to.be.an('array').with.lengthOf(2)
       expect(foldersInDb.map((f: Folder) => f.name)).to.have.ordered.members([
@@ -651,24 +665,31 @@ describe('TASK: sync_workstation_files', () => {
     //
     it.skip('handles simultaneous creation of the same folder name in both platform and pFDA', async () => {
       const job = create.jobHelper.create(
-        em, { user, app },
+        em,
+        { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       const tag = create.tagsHelper.create(em, { name: 'HTTPS File' })
       await em.flush()
       const folder = create.filesHelper.createFolder(
-        em, { user },
+        em,
+        { user },
         { name: 'foobar', parentId: job.id, project: job.project },
       )
       await em.flush()
       const file = create.filesHelper.create(
-        em, { user, parentFolder: folder.id },
+        em,
+        { user, parentFolder: folder.id },
         { name: 'stu', parentId: job.id, project: job.project },
       )
-      create.tagsHelper.createTagging(em, { tag }, {
-        userFile: file,
-        tagger: user,
-      })
+      create.tagsHelper.createTagging(
+        em,
+        { tag },
+        {
+          userFile: file,
+          tagger: user,
+        },
+      )
       await em.flush()
 
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -676,7 +697,7 @@ describe('TASK: sync_workstation_files', () => {
         id: FOLDERS_LIST_RES.id,
         folders: ['/', '/foobar'],
       })
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/foobar') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -690,7 +711,11 @@ describe('TASK: sync_workstation_files', () => {
       em.clear()
 
       const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
-      const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
+      const foldersInDb = await em.find(
+        Folder,
+        {},
+        { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } },
+      )
       // In this case, where folders are created on both platform and PFDA there is a conflict,
       //
       expect(foldersInDb).to.be.an('array').with.lengthOf(1)
@@ -701,14 +726,15 @@ describe('TASK: sync_workstation_files', () => {
 
     it('handles simultaneous files and folder insertion and deletion', async () => {
       const job = create.jobHelper.create(
-        em, { user, app },
+        em,
+        { user, app },
         { ...generate.job.simple, state: JOB_STATE.RUNNING, project: user.privateFilesProject },
       )
       await em.flush()
 
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.RUNNING })
       fakes.client.foldersListFake.returns(FOLDERS_LIST_RES_MEDIUM)
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/foo/bar/stu') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -721,7 +747,11 @@ describe('TASK: sync_workstation_files', () => {
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
       )
       {
-        const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
+        const foldersInDb = await em.find(
+          Folder,
+          {},
+          { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } },
+        )
         const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
         expect(foldersInDb).to.be.an('array').with.lengthOf(5)
         expect(filesInDb).to.be.an('array').with.lengthOf(1)
@@ -733,7 +763,7 @@ describe('TASK: sync_workstation_files', () => {
       // User deletes two folder via the workstation
       platformFolders.folders = platformFolders.folders.slice(0, -2)
       fakes.client.foldersListFake.returns(platformFolders)
-      fakes.client.filesListFake.callsFake(args => {
+      fakes.client.filesListFake.callsFake((args) => {
         if (args?.folder === '/foo') {
           return [FILES_LIST_RES_ROOT[0]]
         }
@@ -747,7 +777,11 @@ describe('TASK: sync_workstation_files', () => {
       em.clear()
 
       const filesInDb = await em.find(UserFile, {}, { populate: false, filters: ['userfile'] })
-      const foldersInDb = await em.find(Folder, {}, { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } })
+      const foldersInDb = await em.find(
+        Folder,
+        {},
+        { populate: false, filters: ['folder'], orderBy: { name: 'ASC' } },
+      )
       expect(foldersInDb).to.be.an('array').with.lengthOf(3)
       expect(foldersInDb[0].name).to.be.equal('.Notebook_snapshots')
       expect(filesInDb).to.be.an('array').with.lengthOf(1)
