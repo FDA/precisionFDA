@@ -24,14 +24,14 @@ import {
   space,
   spaceEvent,
   spaceMembership,
-  spaceReport,
   user,
   UserContext,
   userFile,
 } from '@shared'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserOpsCtx } from '@shared/types'
-import { SpaceReportCreateFacade } from '../facade/space-report-create.facade'
-import { SpaceReportDeleteFacade } from '../facade/space-report-delete.facade'
+import { SpaceReportCreateFacade } from '../facade/space-report/space-report-create.facade'
+import { SpaceReportDeleteFacade } from '../facade/space-report/space-report-delete.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 // TODO most of the ops can be patch instead of post (currently used by ruby), might refactor
@@ -39,10 +39,12 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 @Controller('/spaces')
 export class SpacesController {
   constructor(
-    private readonly em: SqlEntityManager,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly oldEm: SqlEntityManager,
     private readonly log: Logger,
     private readonly user: UserContext,
+    private readonly spaceReportCreateFacade: SpaceReportCreateFacade,
+    private readonly spaceReportService: SpaceReportService,
+    private readonly spaceReportDeleteFacade: SpaceReportDeleteFacade,
   ) {}
 
   @HttpCode(204)
@@ -163,7 +165,7 @@ export class SpacesController {
         invitee: spaceToFix.guestDxOrg,
         level: 'CONTRIBUTE',
       })
-      this.log.log({ response }, 'Guest organization invited to host project.')
+      this.log.verbose({ response }, 'Guest organization invited to host project.')
     }
   }
 
@@ -181,46 +183,18 @@ export class SpacesController {
   // TODO(PFDA-4831) - cover reports with integration tests after setting up full test env
   @Post('/:id/report')
   async createReport(@Param('id', ParseIntPipe) id: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.log,
-      user: this.user,
-      em: this.em,
-    }
-
-    const facade = new SpaceReportCreateFacade(
-      opsCtx,
-      spaceReport.SpaceReportService.getInstance(this.em),
-    )
-
-    const report = await facade.createSpaceReport(id)
+    const report = await this.spaceReportCreateFacade.createSpaceReport(id)
 
     return report?.id
   }
 
   @Get('/:id/report')
   async getReports(@Param('id', ParseIntPipe) id: number) {
-    const spaceReportService = spaceReport.SpaceReportService.getInstance(this.em)
-
-    return await spaceReportService.getReportsForSpace(
-      id,
-      this.em.getReference(user.User, this.user.id),
-    )
+    return await this.spaceReportService.getReportsForSpace(id)
   }
 
   @Delete('/report')
   async deleteReports(@Query('id', new ParseArrayPipe({ items: Number })) ids: number[]) {
-    const opsCtx: UserOpsCtx = {
-      log: this.log,
-      user: this.user,
-      em: this.em,
-    }
-
-    const facade = new SpaceReportDeleteFacade(
-      this.em,
-      spaceReport.SpaceReportService.getInstance(this.em),
-      new userFile.NodesRemoveOperation(opsCtx),
-    )
-
-    return await facade.deleteSpaceReports(ids, this.em.getReference(user.User, this.user.id))
+    return await this.spaceReportDeleteFacade.deleteSpaceReports(ids)
   }
 }

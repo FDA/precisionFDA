@@ -17,10 +17,12 @@ import { Asset, SyncFilesStateOperation } from '@shared/domain/user-file'
 import { UserCtx } from '@shared/types'
 import { FileStatesParams } from '@shared/platform-client/platform-client.params'
 import R from 'ramda'
-import { findFileOrAssetsWithDxid, findFileOrAssetWithUid } from '@shared/domain/user-file/user-file.helper'
+import {
+  findFileOrAssetsWithDxid,
+  findFileOrAssetWithUid,
+} from '@shared/domain/user-file/user-file.helper'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { errorsFactory } from '../utils/errors-factory'
-
 
 describe('SyncFilesStateOperation static methods', () => {
   it('creates correct bullJob ids', async () => {
@@ -35,7 +37,7 @@ describe('SyncFilesStateOperation static methods', () => {
 const createSyncFilesStateTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
   // .add() is stubbed
-  await defaultTestQueue.add({
+  await defaultTestQueue.add(SyncFilesStateOperation.getTaskType(), {
     type: SyncFilesStateOperation.getTaskType(),
     user,
   })
@@ -66,7 +68,11 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
     user1Ctx = { id: user1.id, dxuser: user1.dxuser, accessToken: 'foo1' }
     user2Ctx = { id: user2.id, dxuser: user2.dxuser, accessToken: 'foo2' }
-    botUserCtx = { id: botUser.id, dxuser: botUser.dxuser, accessToken: create.userHelper.getChallengeBotToken() }
+    botUserCtx = {
+      id: botUser.id,
+      dxuser: botUser.dxuser,
+      accessToken: create.userHelper.getChallengeBotToken(),
+    }
 
     const filesParams = (userId: number, state: FILE_STATE) => ({
       parentId: userId,
@@ -116,7 +122,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
   })
 
   it('syncs files and assets state changes for user1', async () => {
-    const filesToClose = filesAndAssets.filter(f => {
+    const filesToClose = filesAndAssets.filter((f) => {
       return f.user.getEntity().id === user1.id && f.state !== FILE_STATE_DX.CLOSED
     })
     const untouchedFiles = R.difference(files, filesToClose)
@@ -126,7 +132,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
     // Fake all pending files are closed
     fakes.client.fileStatesFake.callsFake((params: FileStatesParams) => {
-      return params.fileDxids.map(fileDxid => ({
+      return params.fileDxids.map((fileDxid) => ({
         id: fileDxid,
         describe: {
           size: FILE_SIZE,
@@ -138,25 +144,30 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     await createSyncFilesStateTask(user1Ctx)
     expect(localFakes.addToQueueStub.calledOnce).to.be.true()
 
-
     // N.B. must use forked EntityManager to be able to retrieve
     //      changes made inside the operation
     const afterEm = em.fork()
-    const uidsToClose = filesToClose.map(f => f.uid)
+    const uidsToClose = filesToClose.map((f) => f.uid)
     // console.log("uidsToClose")
     // console.log(uidsToClose)
 
     for (const uid of uidsToClose) {
       const fileOrAsset: IFileOrAsset = await findFileOrAssetWithUid(afterEm, uid)
-      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be closed`).to.equal(FILE_STATE_DX.CLOSED)
-      expect(fileOrAsset.fileSize, `expecting file ${fileOrAsset.name} to have size`).to.equal(FILE_SIZE)
+      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be closed`).to.equal(
+        FILE_STATE_DX.CLOSED,
+      )
+      expect(fileOrAsset.fileSize, `expecting file ${fileOrAsset.name} to have size`).to.equal(
+        FILE_SIZE,
+      )
     }
 
-    const untouchedFilesUids = untouchedFiles.map(f => f.uid)
+    const untouchedFilesUids = untouchedFiles.map((f) => f.uid)
     for (const uid of untouchedFilesUids) {
       const fileOrAsset: IFileOrAsset = await findFileOrAssetWithUid(afterEm, uid)
-      const originalFile = untouchedFiles.find(f => uid === f.uid)
-      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be unchanged`).to.equal(originalFile.state)
+      const originalFile = untouchedFiles.find((f) => uid === f.uid)
+      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be unchanged`).to.equal(
+        originalFile.state,
+      )
     }
 
     expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
@@ -164,29 +175,31 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
   it('syncs files for user2 but does not remove the repeatble job if unclosed files remain', async () => {
     // Only close user2's file and asset in closing state, leaving alone user2's file in open state
-    const filesToClose = filesAndAssets.filter(f => {
+    const filesToClose = filesAndAssets.filter((f) => {
       return f.user.getEntity().id === user2.id && f.state === FILE_STATE_DX.CLOSING
     })
     const untouchedFiles = R.difference(files, filesToClose)
 
-    const filesToCloseDxid = filesToClose.map(f => f.dxid)
+    const filesToCloseDxid = filesToClose.map((f) => f.dxid)
 
     // Fake all pending files are closed
     fakes.client.fileStatesFake.callsFake((params: FileStatesParams) => {
-      return params.fileDxids.map(fileDxid => {
-        return filesToCloseDxid.includes(fileDxid) ? {
-          id: fileDxid,
-          describe: {
-            size: FILE_SIZE,
-            state: FILE_STATE_DX.CLOSED,
-          },
-        } : {
-          id: fileDxid,
-          describe: {
-            size: FILE_SIZE,
-            state: FILE_STATE_DX.OPEN,
-          },
-        }
+      return params.fileDxids.map((fileDxid) => {
+        return filesToCloseDxid.includes(fileDxid)
+          ? {
+              id: fileDxid,
+              describe: {
+                size: FILE_SIZE,
+                state: FILE_STATE_DX.CLOSED,
+              },
+            }
+          : {
+              id: fileDxid,
+              describe: {
+                size: FILE_SIZE,
+                state: FILE_STATE_DX.OPEN,
+              },
+            }
       })
     })
 
@@ -196,19 +209,25 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     // N.B. must use forked EntityManager to be able to retrieve
     //      changes made inside the operation
     const afterEm = em.fork()
-    const uidsToClose = filesToClose.map(f => f.uid)
+    const uidsToClose = filesToClose.map((f) => f.uid)
 
     for (const uid of uidsToClose) {
       const fileOrAsset: IFileOrAsset = await findFileOrAssetWithUid(afterEm, uid)
-      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be closed`).to.equal(FILE_STATE_DX.CLOSED)
-      expect(fileOrAsset.fileSize, `expecting file ${fileOrAsset.name} to have size`).to.equal(FILE_SIZE)
+      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be closed`).to.equal(
+        FILE_STATE_DX.CLOSED,
+      )
+      expect(fileOrAsset.fileSize, `expecting file ${fileOrAsset.name} to have size`).to.equal(
+        FILE_SIZE,
+      )
     }
 
-    const untouchedFilesUids = untouchedFiles.map(f => f.uid)
+    const untouchedFilesUids = untouchedFiles.map((f) => f.uid)
     for (const uid of untouchedFilesUids) {
       const fileOrAsset: IFileOrAsset = await findFileOrAssetWithUid(afterEm, uid)
-      const originalFile = untouchedFiles.find(f => uid === f.uid)
-      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be unchanged`).to.equal(originalFile.state)
+      const originalFile = untouchedFiles.find((f) => uid === f.uid)
+      expect(fileOrAsset.state, `expecting file ${fileOrAsset.name} to be unchanged`).to.equal(
+        originalFile.state,
+      )
     }
 
     expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.false()
@@ -228,8 +247,8 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
 
     fakes.client.fileStatesFake.callsFake((params: FileStatesParams) => {
       return params.fileDxids
-        .filter(fileDxid => !abandonedFileDxids.includes(fileDxid))
-        .map(fileDxid => {
+        .filter((fileDxid) => !abandonedFileDxids.includes(fileDxid))
+        .map((fileDxid) => {
           return {
             id: fileDxid,
             describe: {
@@ -237,8 +256,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
               state: FILE_STATE_DX.OPEN,
             },
           }
-        }
-      )
+        })
     })
 
     // Check that abandoned files are all removed
@@ -246,22 +264,25 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     // User 1
     await createSyncFilesStateTask(user1Ctx)
     const fileRepo = em.getRepository(UserFile)
-    expect((await findFileOrAssetsWithDxid(em, user1Abandoned[0]))).have.length(0)
-    expect((await findFileOrAssetsWithDxid(em, user1Abandoned[1]))).have.length(0)
-    expect((await findFileOrAssetsWithDxid(em, user1Abandoned[2]))).have.length(0)
+    expect(await findFileOrAssetsWithDxid(em, user1Abandoned[0])).have.length(0)
+    expect(await findFileOrAssetsWithDxid(em, user1Abandoned[1])).have.length(0)
+    expect(await findFileOrAssetsWithDxid(em, user1Abandoned[2])).have.length(0)
     expect((await findFileOrAssetsWithDxid(em, user2Abandoned[0]))[0].dxid).to.equal(files[5].dxid)
     expect((await findFileOrAssetsWithDxid(em, user2Abandoned[1]))[0].dxid).to.equal(assets[4].dxid)
 
     // User 2
     await createSyncFilesStateTask(user2Ctx)
-    expect((await findFileOrAssetsWithDxid(em, user2Abandoned[0]))).have.length(0)
-    expect((await findFileOrAssetsWithDxid(em, user2Abandoned[1]))).have.length(0)
+    expect(await findFileOrAssetsWithDxid(em, user2Abandoned[0])).have.length(0)
+    expect(await findFileOrAssetsWithDxid(em, user2Abandoned[1])).have.length(0)
 
     // // Check that non-abandoned files are not removed
-    const nonAbandonedFileDxids = R.difference(files.map(x => x.dxid), abandonedFileDxids)
+    const nonAbandonedFileDxids = R.difference(
+      files.map((x) => x.dxid),
+      abandonedFileDxids,
+    )
     for (const dxid of nonAbandonedFileDxids) {
       const filesInDb = await fileRepo.findFilesWithDxid(dxid)
-      expect(await filesInDb.map(x => x.dxid)).to.deep.equal([dxid])
+      expect(await filesInDb.map((x) => x.dxid)).to.deep.equal([dxid])
     }
   })
 

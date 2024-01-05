@@ -12,15 +12,14 @@ export class BullBoardModule implements NestModule {
       return
     }
 
-    log.log('creating bull board')
+    log.verbose('creating bull board')
     const serverAdapter = new ExpressAdapter()
     serverAdapter.setBasePath('/bull-board')
     try {
-      await queueDomain.createQueues()
       const queues = queueDomain.getQueues()
       createBullBoard({
         queues: queues.map((queue) => {
-          log.log(`adding queue: ${queue.name} to bull board`)
+          log.verbose(`adding queue: ${queue.name} to bull board`)
           return new BullAdapter(queue)
         }),
         serverAdapter,
@@ -32,7 +31,7 @@ export class BullBoardModule implements NestModule {
       })
 
       consumer.apply(serverAdapter.getRouter()).forRoutes('/bull-board')
-      log.log('bull board created')
+      log.verbose('bull board created')
     } catch (e) {
       log.error(`bull board creation error ${e}`)
     }

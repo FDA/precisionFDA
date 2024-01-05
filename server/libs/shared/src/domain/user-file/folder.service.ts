@@ -31,7 +31,7 @@ export class FolderService implements IFolderService {
    * Creates folders on a path. If the folder already exists, it is not created and only returned.
    */
   async createFoldersOnPath(path: string, scope: SCOPE, userId: number, parent?: InputEntityUnion,): Promise<Folder[]> {
-    logger.log(`FolderService: creating folders ${path} with scope ${scope}`)
+    logger.verbose(`FolderService: creating folders ${path} with scope ${scope}`)
     if (!path) {
       throw new errors.ValidationError('Path must not be empty')
     }
@@ -59,7 +59,7 @@ export class FolderService implements IFolderService {
     parent?: InputEntityUnion,
     parentFolderId?: number,
   ): Promise<Folder> {
-    logger.log(`FolderService: creating folder ${name}` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
+    logger.verbose(`FolderService: creating folder ${name}` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
 
     try {
@@ -84,7 +84,7 @@ export class FolderService implements IFolderService {
   ): Promise<Folder> {
     let folder = await this.findFolder(name, scope, parentFolderId)
     if (folder) {
-      logger.log(`FolderService: folder ${name} already exists`)
+      logger.verbose(`FolderService: folder ${name} already exists`)
       return folder
     }
 

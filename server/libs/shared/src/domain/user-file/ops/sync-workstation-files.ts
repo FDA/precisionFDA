@@ -35,7 +35,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
       return
     }
 
-    this.ctx.log.log({ jobId: job.id }, 'WorkstationSyncFilesOperation: Beginning files sync for job')
+    this.ctx.log.verbose({ jobId: job.id }, 'WorkstationSyncFilesOperation: Beginning files sync for job')
 
     const projectDesc = await client.foldersList({
       projectId: job.project,
@@ -56,7 +56,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     // for each local folder query files and check for differences
     // null is added -> root folder
     const folderPathsToCheck: Array<Folder | null> = [null, ...localFolders]
-    this.ctx.log.log({
+    this.ctx.log.verbose({
       foldersToCheckCount: folderPathsToCheck.length,
     }, 'WorkstationSyncFilesOperation: About to sync files in folders')
 
@@ -133,6 +133,6 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     )
     await em.flush()
 
-    this.ctx.log.log({ jobId: job.id }, 'WorkstationSyncFilesOperation: Completed sync')
+    this.ctx.log.verbose({ jobId: job.id }, 'WorkstationSyncFilesOperation: Completed sync')
   }
 }

@@ -14,7 +14,6 @@ before(async () => {
   mocks.mocksSetup()
 
   await database.start()
-  await queue.createQueues()
   await server.startHttpServer()
 
   await db.initDeleteProcedure(database.connection())

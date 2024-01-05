@@ -25,13 +25,13 @@ const connectionsCleanup = () => {
 
 const storeConnection = (user: userDomain.User, wsc: WebSocketConnection) => {
   if (!clientConnections.get(user.id) || clientConnections.get(user.id)?.length === 0) {
-    log.log(`Store WS connection`)
+    log.verbose(`Store WS connection`)
     clientConnections.set(user.id, [wsc])
   } else {
     clientConnections.get(user.id)?.push(wsc)
   }
-  log.log(`User ${user.dxuser} successfully authenticated for receiving WebSocket notifications`)
-  log.log(`Count of connectedClients ${clientConnections.size}`)
+  log.verbose(`User ${user.dxuser} successfully authenticated for receiving WebSocket notifications`)
+  log.verbose(`Count of connectedClients ${clientConnections.size}`)
 }
 
 const authenticateUserConnection = async (connection: any, message: any) => {
@@ -67,10 +67,10 @@ export const setupWSServer = async (server: http.Server) => {
   wss.on('connection', conn => {
     //@ts-ignore
     conn.on('message', messagePayload => {
-      log.log(`WS messagePayload ${messagePayload}`)
+      log.verbose(`WS messagePayload ${messagePayload}`)
       const message = JSON.parse(messagePayload.toString())
       if (message.action === 'login') {
-        log.log('starting login session')
+        log.verbose('starting login session')
         authenticateUserConnection(conn, message)
       }
     })
@@ -90,7 +90,7 @@ export const setupWSServer = async (server: http.Server) => {
     const wscs = clientConnections.get(userId)
     wscs?.forEach(wsc => {
       try {
-        log.log(`sending notification to client ${JSON.stringify(notification)}`)
+        log.verbose(`sending notification to client ${JSON.stringify(notification)}`)
         wsc.connection.send(JSON.stringify(notification))
       } catch (error) {
         log.error(`error: ${error}`)
@@ -100,7 +100,7 @@ export const setupWSServer = async (server: http.Server) => {
 
   wss.on('close', () => {
     console.log('on close event')
-    log.log('closing redis connection')
+    log.verbose('closing redis connection')
     client.quit()
   })
 

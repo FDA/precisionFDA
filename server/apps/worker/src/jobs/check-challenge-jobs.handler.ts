@@ -18,7 +18,7 @@ class CheckChallengeJobsHandler implements JobHandler<queue.types.Task> {
     const requestId = String(bullJob.id)
     const logger = getChildLogger(requestId)
 
-    logger.log(`CheckChallengeJobsHandler: running`)
+    logger.verbose(`CheckChallengeJobsHandler: running`)
     const challengeBotUser = await this.em
       .getRepository(user.User)
       .findOne({ dxuser: config.platform.challengeBotUser })
@@ -36,12 +36,12 @@ class CheckChallengeJobsHandler implements JobHandler<queue.types.Task> {
     if (jobs.length > 0) {
       await this.processJobs(challengeBotUser.id, jobs, logger)
     } else {
-      logger.log('CheckChallengeJobsHandler: No non-terminal jobs found for challenge bot user')
+      logger.verbose('CheckChallengeJobsHandler: No non-terminal jobs found for challenge bot user')
     }
   }
 
   private async processJobs(challengeBotUserId: number, jobs: jobDomain.Job[], logger: Logger) {
-    logger.log(
+    logger.verbose(
       'CheckChallengeJobsHandler: Found non-terminal users for challenge bot user, syncing outputs',
     )
     for (const job of jobs) {

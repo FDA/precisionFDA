@@ -14,7 +14,7 @@ import { mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createCheckUserJobsTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add({
+  await defaultTestQueue.add(queue.types.TASK_TYPE.CHECK_USER_JOBS, {
     type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
     payload: undefined,
     user,
@@ -98,9 +98,9 @@ describe('TASK: check-user-jobs', () => {
     // Expect job sync calls to be made on missing or orphaned jobs
     expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(6)
 
-    const jobDxids = jobs.map(job => job.dxid)
-    const callArgs = fakes.queue.createSyncJobStatusTaskFake.getCalls().map(call => call.args[0])
-    callArgs.forEach(callArg => {
+    const jobDxids = jobs.map((job) => job.dxid)
+    const callArgs = fakes.queue.createSyncJobStatusTaskFake.getCalls().map((call) => call.args[0])
+    callArgs.forEach((callArg) => {
       callArg.index = jobDxids.indexOf(callArg.dxid)
     })
     // Useful for debugging:

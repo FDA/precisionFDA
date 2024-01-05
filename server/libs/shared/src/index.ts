@@ -36,14 +36,9 @@ export {
   adminGroup,
   spaceEvent,
   property,
-  spaceReport,
-  provenance,
-  platform,
   entity,
   workflow,
 } from './domain'
-
-export * from './facade'
 
 export * as utils from './utils'
 

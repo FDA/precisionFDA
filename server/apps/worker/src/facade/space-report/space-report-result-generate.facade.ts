@@ -1,30 +1,23 @@
 import { LockMode, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import type { UserFileCreateFacade } from '@shared'
-import { ENUMS, errors, notification, spaceReport, provenance } from '@shared'
+import { Injectable } from '@nestjs/common'
+import { ENUMS, errors, notification } from '@shared'
 import { SpaceMembership } from '@shared/domain'
+import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { getProjectDxid } from '@shared/domain/space/space.helper'
+import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 
+@Injectable()
 export class SpaceReportResultGenerateFacade {
-  private readonly spaceReportService: spaceReport.SpaceReportService
-  private readonly userFileCreateFacade: UserFileCreateFacade
-  private readonly em: SqlEntityManager
-  private readonly notificationService: notification.NotificationService
-  private readonly entityProvenanceService: provenance.EntityProvenanceService
-
   constructor(
-    em: SqlEntityManager,
-    spaceReportService: spaceReport.SpaceReportService,
-    userFileCreateFacade: UserFileCreateFacade,
-    notificationService: notification.NotificationService,
-    entityProvenanceService: provenance.EntityProvenanceService,
-  ) {
-    this.spaceReportService = spaceReportService
-    this.userFileCreateFacade = userFileCreateFacade
-    this.notificationService = notificationService
-    this.em = em
-    this.entityProvenanceService = entityProvenanceService
-  }
+    private readonly em: SqlEntityManager,
+    private readonly spaceReportService: SpaceReportService,
+    private readonly userFileCreateFacade: UserFileCreateFacade,
+    private readonly notificationService: notification.NotificationService,
+    private readonly entityProvenanceService: EntityProvenanceService,
+  ) {}
 
   async generate(reportId: number) {
     const report = await this.generateAndUploadReport(reportId)
@@ -44,7 +37,7 @@ export class SpaceReportResultGenerateFacade {
   private async generateAndUploadReport(reportId: number) {
     return await this.em.transactional(async () => {
       const report = await this.em.findOne(
-        spaceReport.SpaceReport,
+        SpaceReport,
         { id: reportId, state: { $in: ['CREATED', 'ERROR'] } },
         { lockMode: LockMode.PESSIMISTIC_WRITE },
       )
@@ -87,11 +80,11 @@ export class SpaceReportResultGenerateFacade {
     })
   }
 
-  private getName(report: spaceReport.SpaceReport) {
+  private getName(report: SpaceReport) {
     return `PFDA - Space ${report.space.id} report - ${report.createdAt.toLocaleDateString()}.html`
   }
 
-  private getDescription(report: spaceReport.SpaceReport) {
+  private getDescription(report: SpaceReport) {
     const generated = new Date(report.createdAt).toLocaleString()
     return `Report of a precisionFDA space ${report.space.name}, generatad on ${generated}`
   }

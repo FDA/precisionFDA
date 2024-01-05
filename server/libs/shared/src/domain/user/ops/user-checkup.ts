@@ -19,7 +19,7 @@ const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log: any): P
     }, 'CheckUserJobsOperation: FilesStateSyncTask missing, recreating it')
     await queue.createSyncFilesStateTask(user)
   } else if (isJobOrphaned(bullJob)) {
-    log.log({
+    log.verbose({
       dxusd: user.dxuser,
       bullJob,
     }, 'CheckUserJobsOperation: FilesStateSyncTask found, but it is orphaned. '
@@ -27,7 +27,7 @@ const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log: any): P
     await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
     await queue.createSyncFilesStateTask(user)
   } else {
-    log.log({
+    log.verbose({
       dxusd: user.dxuser,
       bullJob,
     }, 'CheckUserJobsOperation: FilesStateSyncTask found, everything is fine')
@@ -55,12 +55,12 @@ void
       return
     }
 
-    log.log({
+    log.verbose({
       id: userCtx.id,
       dxuser: userCtx.dxuser,
     }, 'UserCheckupOperation: Starting user checkup')
 
-    log.log({
+    log.verbose({
       lastDataCheckup: user.lastDataCheckup,
       now: new Date(),
     }, 'UserCheckupOperation: Checking if user needs a UserDataConsistencyReport')
@@ -73,7 +73,7 @@ void
     // sync task is queued up
     const openFiles = await findUnclosedFilesOrAssets(em, userCtx.id)
     if (openFiles.length > 0) {
-      log.log({
+      log.verbose({
         dxuser: userCtx.dxuser,
         openFiles,
       }, 'UserCheckupOperation: User has open files')
@@ -84,7 +84,7 @@ void
     await new job.CheckUserJobsOperation(this.ctx as any).execute()
     await new dbCluster.CheckUserDbClustersOperation(this.ctx as any).execute()
 
-    log.log({
+    log.verbose({
       id: userCtx.id,
       dxuser: userCtx.dxuser,
     }, 'UserCheckupOperation: Completed user checkup')

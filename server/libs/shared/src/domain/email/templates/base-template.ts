@@ -14,7 +14,7 @@ export class BaseTemplate<InputT, CtxT extends OpsCtx = OpsCtx> {
     this.ctx = ctx
     this.config = getEmailConfig(emailTypeId)
     this.emailType = emailTypeId
-    this.ctx.log.log({ emailType: this.emailType }, 'Email template build')
+    this.ctx.log.verbose({ emailType: this.emailType }, 'Email template build')
 
     this.validatedInput = this.validate(input)
   }

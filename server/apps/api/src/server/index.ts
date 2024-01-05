@@ -1,6 +1,9 @@
 import { INestApplication } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { config } from '@shared'
+import { config, queue } from '@shared'
+import { ENVS } from '@shared/enums'
+import { QueueModule } from '@shared/queue/queue.module'
+import { QueueProxy } from '@shared/queue/queue.proxy'
 import fs from 'fs'
 import { Logger } from 'nestjs-pino'
 import { ApiModule } from '../api.module'
@@ -25,8 +28,14 @@ export function createServer() {
 
   const startHttpServer = async (): Promise<void> => {
     app = await NestFactory.create(ApiModule)
-    app.useLogger(app.get(Logger))
     await app.listen(config.api.port)
+
+    if (config.env !== ENVS.LOCAL) {
+      app.useLogger(app.get(Logger))
+    }
+
+    const queueProvider = app.select(QueueModule).get(QueueProxy)
+    await queue.createQueues(queueProvider)
 
     log.log(`HTTP Server: started (port: ${config.api.port.toString()})`)
   }
@@ -41,7 +50,13 @@ export function createServer() {
         cert: fs.readFileSync(config.api.certPath),
       },
     })
-    app.useLogger(app.get(Logger))
+
+    if (config.env !== ENVS.LOCAL) {
+      app.useLogger(app.get(Logger))
+    }
+
+    const queueProvider = app.select(QueueModule).get(QueueProxy)
+    await queue.createQueues(queueProvider)
 
     await app.listen(config.api.port)
 

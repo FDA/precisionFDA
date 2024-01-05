@@ -94,11 +94,11 @@ SyncFolderFilesOutput
         'SyncFilesInFolderOperation: Remote files detected in given subfolder',
       )
     }
-    this.ctx.log.log(
+    this.ctx.log.verbose(
       { folderPath, toAdd, toRemove },
       'SyncFilesInFolderOperation: Files detected to add/remove under given subfolder path',
     )
-    this.ctx.log.log(
+    this.ctx.log.verbose(
       { locallyCreatedFileDxids, folderPath },
       'SyncFilesInFolderOperation: Local NORMAL type files to consider',
     )
@@ -114,7 +114,7 @@ SyncFolderFilesOutput
           details: { fileId: userfile.id },
         })
       }
-      this.ctx.log.log(
+      this.ctx.log.verbose(
         { localFile: userfile, remoteFile: remoteState.describe },
         'SyncFilesInFolderOperation: Updating file metadata',
       )

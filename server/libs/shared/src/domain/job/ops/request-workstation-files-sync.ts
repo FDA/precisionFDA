@@ -19,7 +19,7 @@ export class RequestWorkstationSyncFilesOperation extends BaseOperation<UserOpsC
     }
 
     if (input.force) {
-      this.ctx.log.log('RequestWorkstationSyncFilesOperation: Force mode enabled, ignoring job state')
+      this.ctx.log.verbose('RequestWorkstationSyncFilesOperation: Force mode enabled, ignoring job state')
     }
     else if (job.state !== JOB_STATE.RUNNING) {
       throw new errors.InvalidStateError('RequestWorkstationSyncFilesOperation: Job is currently not running.')

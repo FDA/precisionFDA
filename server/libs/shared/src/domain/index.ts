@@ -1,3 +1,5 @@
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { App } from './app/app.entity'
 import { Answer } from './answer/answer.entity'
 import { Attachment } from './attachment/attachment.entity'
@@ -34,7 +36,6 @@ import { Notification } from './notification/notification.entity'
 import { Organization } from './org/org.entity'
 import { SpaceEvent } from './space-event/space-event.entity'
 import { SpaceMembership } from './space-membership/space-membership.entity'
-import { SpaceReport, SpaceReportPart } from './space-report'
 import { Space } from './space/space.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
@@ -129,9 +130,6 @@ export * as note from './note'
 export * as resource from './resource'
 export * as follow from './follow'
 export * as vote from './vote'
-export * as spaceReport from './space-report'
-export * as provenance from './provenance'
-export * as platform from './platform'
 export * as entity from './entity'
 
 export {
@@ -172,8 +170,6 @@ export {
   Space,
   SpaceEvent,
   SpaceMembership,
-  SpaceReport,
-  SpaceReportPart,
   Resource,
   Tag,
   Tagging,

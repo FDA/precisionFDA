@@ -2,9 +2,7 @@ import { EntityManager } from '@mikro-orm/core'
 import { database, queue } from '@shared'
 import { DbCluster, User } from '@shared/domain'
 import { expect } from 'chai'
-import {
-  STATUS as DB_CLUSTER_STATUS,
-} from '@shared/domain/db-cluster/db-cluster.enum'
+import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { create, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { UserCtx } from '@shared/types'
@@ -12,13 +10,9 @@ import { TASK_TYPE } from '@shared/queue/task.input'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 
-
-
-const createCheckDbClusterTestTask = async (
-  user: UserCtx,
-) => {
+const createCheckDbClusterTestTask = async (user: UserCtx) => {
   const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add({
+  await defaultTestQueue.add(queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS, {
     type: queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
     undefined,
     user,
@@ -54,7 +48,11 @@ describe('TASK: check-non-terminated', () => {
   })
 
   it('runs and sends an email with non-terminated db clusters', async () => {
-    await createCheckDbClusterTestTask({ id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'fake-token' })
+    await createCheckDbClusterTestTask({
+      id: adminUser.id,
+      dxuser: adminUser.dxuser,
+      accessToken: 'fake-token',
+    })
 
     expect(queueFakes.addToQueueStub.callCount).to.equal(1)
     expect(fakes.queue.createEmailSendTaskFake.callCount).to.equal(2)
@@ -62,13 +60,13 @@ describe('TASK: check-non-terminated', () => {
     let call = fakes.queue.createEmailSendTaskFake.getCall(0)
     expect(call.args[0].emailType).to.equal(EMAIL_TYPES.nonTerminatedDbClusters)
     const nonTerminatedIndexes = [0, 1, 3, 4]
-    nonTerminatedIndexes.forEach(index => {
+    nonTerminatedIndexes.forEach((index) => {
       expect(call.args[0].body).to.contain(dbClusters[index].dxid)
     })
 
     call = fakes.queue.createEmailSendTaskFake.getCall(1)
     expect(call.args[0].emailType).to.equal(EMAIL_TYPES.nonTerminatedDbClusters)
-    nonTerminatedIndexes.forEach(index => {
+    nonTerminatedIndexes.forEach((index) => {
       expect(call.args[0].body).to.contain(dbClusters[index].dxid)
     })
   })

@@ -1,9 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { app, job, provenance, queue, spaceReport, userFile, workflow } from '@shared'
+import { app, job, queue, userFile, workflow } from '@shared'
+import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserCtx } from '@shared/types'
 import { expect } from 'chai'
 import { restore, SinonStub, stub } from 'sinon'
-import { SpaceReportBatchResultGenerateFacade } from '../../src/facade/space-report-batch-result-generate.facade'
+import { SpaceReportBatchResultGenerateFacade } from '../../src/facade/space-report/space-report-batch-result-generate.facade'
 
 describe('SpaceReportBatchResultGenerateFacade', () => {
   const REPORT_ID = 0
@@ -21,7 +24,12 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
   const PART_1_ID = 100
   const PART_1_TYPE = 'app'
-  const PART_1 = { id: PART_1_ID, sourceType: PART_1_TYPE, sourceId: APP_1_ID, spaceReport: { id: REPORT_ID } }
+  const PART_1 = {
+    id: PART_1_ID,
+    sourceType: PART_1_TYPE,
+    sourceId: APP_1_ID,
+    spaceReport: { id: REPORT_ID },
+  }
   const PART_1_PROVENANCE_SVG = 'part 1 provenance svg'
   const PART_1_META_TITLE = 'part 1 meta title'
   const PART_1_META_CREATED = 'part 1 meta created'
@@ -29,7 +37,12 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
   const PART_2_ID = 200
   const PART_2_TYPE = 'app'
-  const PART_2 = { id: PART_2_ID, sourceType: PART_2_TYPE, sourceId: APP_2_ID, spaceReport: { id: REPORT_ID } }
+  const PART_2 = {
+    id: PART_2_ID,
+    sourceType: PART_2_TYPE,
+    sourceId: APP_2_ID,
+    spaceReport: { id: REPORT_ID },
+  }
   const PART_2_PROVENANCE_SVG = 'part 2 provenance svg'
   const PART_2_META_TITLE = 'part 2 meta title'
   const PART_2_META_CREATED = 'part 2 meta created'
@@ -37,7 +50,12 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
   const PART_3_ID = 300
   const PART_3_TYPE = 'workflow'
-  const PART_3 = { id: PART_3_ID, sourceType: PART_3_TYPE, sourceId: WORKFLOW_1_ID, spaceReport: { id: REPORT_ID } }
+  const PART_3 = {
+    id: PART_3_ID,
+    sourceType: PART_3_TYPE,
+    sourceId: WORKFLOW_1_ID,
+    spaceReport: { id: REPORT_ID },
+  }
   const PART_3_PROVENANCE_SVG = 'part 3 provenance svg'
   const PART_3_META_TITLE = 'part 3 meta title'
   const PART_3_META_CREATED = 'part 3 meta created'
@@ -60,7 +78,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
   const assetFindStub = stub()
   const fileFindStub = stub()
 
-  const hasPendingBatchStub = stub()
+  const hasAllBatchesDoneStub = stub()
   const completePartsBatchStub = stub()
   const getSpaceReportPartMetaDataStub = stub()
 
@@ -77,7 +95,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
     findStub.reset()
     findStub.throws()
-    findStub.withArgs(spaceReport.SpaceReportPart, PART_IDS).resolves(PARTS)
+    findStub.withArgs(SpaceReportPart, PART_IDS).resolves(PARTS)
 
     removeStub.reset()
     removeStub.throws()
@@ -107,9 +125,9 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     getRepositoryStub.withArgs(userFile.Asset).returns({ find: assetFindStub })
     getRepositoryStub.withArgs(userFile.UserFile).returns({ find: fileFindStub })
 
-    hasPendingBatchStub.reset()
-    hasPendingBatchStub.throws()
-    hasPendingBatchStub.withArgs(REPORT_ID).resolves(false)
+    hasAllBatchesDoneStub.reset()
+    hasAllBatchesDoneStub.throws()
+    hasAllBatchesDoneStub.withArgs(REPORT_ID).resolves(true)
 
     completePartsBatchStub.reset()
     completePartsBatchStub.throws()
@@ -144,15 +162,57 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
     getSpaceReportPartMetaDataStub.reset()
     getSpaceReportPartMetaDataStub.throws()
-    getSpaceReportPartMetaDataStub.withArgs({ type: PART_1_TYPE, entity: APP_1 }).returns(PART_1_META)
-    getSpaceReportPartMetaDataStub.withArgs({ type: PART_2_TYPE, entity: APP_2 }).returns(PART_2_META)
-    getSpaceReportPartMetaDataStub.withArgs({ type: PART_3_TYPE, entity: WORKFLOW_1 }).returns(PART_3_META)
+    getSpaceReportPartMetaDataStub
+      .withArgs({
+        type: PART_1_TYPE,
+        entity: APP_1,
+      })
+      .returns(PART_1_META)
+    getSpaceReportPartMetaDataStub
+      .withArgs({
+        type: PART_2_TYPE,
+        entity: APP_2,
+      })
+      .returns(PART_2_META)
+    getSpaceReportPartMetaDataStub
+      .withArgs({
+        type: PART_3_TYPE,
+        entity: WORKFLOW_1,
+      })
+      .returns(PART_3_META)
 
     getEntityProvenanceStub.reset()
     getEntityProvenanceStub.throws()
-    getEntityProvenanceStub.withArgs({ type: PART_1_TYPE, entity: APP_1 }, 'svg', { omitStyles: true }).resolves(PART_1_PROVENANCE_SVG)
-    getEntityProvenanceStub.withArgs({ type: PART_2_TYPE, entity: APP_2 }, 'svg', { omitStyles: true }).resolves(PART_2_PROVENANCE_SVG)
-    getEntityProvenanceStub.withArgs({ type: PART_3_TYPE, entity: WORKFLOW_1 }, 'svg', { omitStyles: true }).resolves(PART_3_PROVENANCE_SVG)
+    getEntityProvenanceStub
+      .withArgs(
+        {
+          type: PART_1_TYPE,
+          entity: APP_1,
+        },
+        'svg',
+        { omitStyles: true },
+      )
+      .resolves(PART_1_PROVENANCE_SVG)
+    getEntityProvenanceStub
+      .withArgs(
+        {
+          type: PART_2_TYPE,
+          entity: APP_2,
+        },
+        'svg',
+        { omitStyles: true },
+      )
+      .resolves(PART_2_PROVENANCE_SVG)
+    getEntityProvenanceStub
+      .withArgs(
+        {
+          type: PART_3_TYPE,
+          entity: WORKFLOW_1,
+        },
+        'svg',
+        { omitStyles: true },
+      )
+      .resolves(PART_3_PROVENANCE_SVG)
 
     createGenerateSpaceReportResultTaskStub.reset()
     createGenerateSpaceReportResultTaskStub.throws()
@@ -211,8 +271,8 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
   it('should not catch an error from hasPendingBatch', async () => {
     const error = new Error('my error')
-    hasPendingBatchStub.reset()
-    hasPendingBatchStub.throws(error)
+    hasAllBatchesDoneStub.reset()
+    hasAllBatchesDoneStub.throws(error)
 
     await expect(getInstance().generate(PART_IDS)).to.be.rejectedWith(error)
   })
@@ -282,7 +342,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
   })
 
   it('should not create space report result task if pending parts', async () => {
-    hasPendingBatchStub.withArgs(REPORT_ID).resolves(true)
+    hasAllBatchesDoneStub.withArgs(REPORT_ID).resolves(false)
 
     await getInstance().generate(PART_IDS)
 
@@ -304,15 +364,20 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     } as unknown as SqlEntityManager
 
     const spaceReportService = {
-      hasPendingBatch: hasPendingBatchStub,
+      hasAllBatchesDone: hasAllBatchesDoneStub,
       completePartsBatch: completePartsBatchStub,
       getSpaceReportPartMetaData: getSpaceReportPartMetaDataStub,
-    } as unknown as spaceReport.SpaceReportService
+    } as unknown as SpaceReportService
 
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
-    } as unknown as provenance.EntityProvenanceService
+    } as unknown as EntityProvenanceService
 
-    return new SpaceReportBatchResultGenerateFacade(em, USER_CTX, spaceReportService, entityProvenanceService)
+    return new SpaceReportBatchResultGenerateFacade(
+      em,
+      USER_CTX,
+      spaceReportService,
+      entityProvenanceService,
+    )
   }
 })

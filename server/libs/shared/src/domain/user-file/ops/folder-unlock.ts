@@ -29,7 +29,7 @@ class FolderUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
       folderToUnlock.state = null
       await em.persistAndFlush(folderEvent)
       await em.commit()
-      this.ctx.log.log({ folderName: folderToUnlock.name }, 'Unlocked folder')
+      this.ctx.log.verbose({ folderName: folderToUnlock.name }, 'Unlocked folder')
     } catch (err) {
       await em.rollback()
       throw err

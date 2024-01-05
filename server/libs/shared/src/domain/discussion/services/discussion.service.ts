@@ -82,7 +82,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
-    logger.log(`DiscussionService: getting discussion id: ${discussionId}`)
+    logger.verbose(`DiscussionService: getting discussion id: ${discussionId}`)
     const res = await this.fetcher.getAccessibleById(Discussion, discussionId, {},
       { populate: ['note', 'user', 'answers', 'answers.note', 'answers.user', 'answers.comments', 'comments', 'comments.user'] })
     if (!res) {
@@ -92,7 +92,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getAnswers(discussionId: number): Promise<AnswerDTO[]> {
-    logger.log(`DiscussionService: getting answers for discussion id: ${discussionId}`)
+    logger.verbose(`DiscussionService: getting answers for discussion id: ${discussionId}`)
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
       throw new errors.NotFoundError('User not found.')
@@ -110,7 +110,7 @@ export class DiscussionService implements IDiscussionService {
    * @param discussionInput
    */
   async createDiscussion(discussionInput: BaseInput) {
-    logger.log(`DiscussionService: creating discussion: ${JSON.stringify(discussionInput)}`)
+    logger.verbose(`DiscussionService: creating discussion: ${JSON.stringify(discussionInput)}`)
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
       throw new errors.NotFoundError('User not found.')
@@ -141,7 +141,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async updateDiscussion(discussionInput: UpdateDiscussionInput): Promise<void> {
-    logger.log(`DiscussionService: updating discussion: ${JSON.stringify(discussionInput)}`)
+    logger.verbose(`DiscussionService: updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async (tem) => {
 
@@ -166,7 +166,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async publishDiscussion(discussionInput: PublishDiscussionInput): Promise<number> {
-    logger.log(`DiscussionService: publishing discussion: ${JSON.stringify(discussionInput)}`)
+    logger.verbose(`DiscussionService: publishing discussion: ${JSON.stringify(discussionInput)}`)
     const discussion = await this.fetcher.getEditableById(Discussion, discussionInput.id, {}, { populate: ['note'] })
     if (!discussion) {
       throw new errors.NotFoundError('Unable to publish discussion: not found or insufficient permissions.')
@@ -210,7 +210,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async deleteDiscussion(discussionId: number): Promise<void> {
-    logger.log(`DiscussionService: deleting discussion: ${discussionId}`)
+    logger.verbose(`DiscussionService: deleting discussion: ${discussionId}`)
     const discussion = await this.fetcher.getEditableById(Discussion, discussionId, {}, { populate: ['note', 'answers', 'comments', 'note.attachments', 'answers.note', 'answers.note.attachments'] })
     if (!discussion) {
       throw new errors.NotFoundError('Unable to delete discussion: insufficient permissions.')
@@ -253,7 +253,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getDiscussions(scope: string): Promise<DiscussionDTO[]> {
-    logger.log(`DiscussionService: getting discussion with scope: ${scope}`)
+    logger.verbose(`DiscussionService: getting discussion with scope: ${scope}`)
     if (scope === 'public') {
       const publishedDiscussions = await this.fetcher.getPublic(Discussion, {}, { populate: ['note', 'user'] })
       const privateDiscussions = await this.fetcher.getPrivate(Discussion, {}, { populate: ['note', 'user'] })
@@ -278,7 +278,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async createAnswer(answerInput: CreateAnswerInput) {
-    logger.log(`DiscussionService: creating answer: ${JSON.stringify(answerInput)}`)
+    logger.verbose(`DiscussionService: creating answer: ${JSON.stringify(answerInput)}`)
     const discussion = await this.fetcher.getAccessibleById(Discussion, answerInput.discussionId, {}, { populate: ['note'] })
     if (!discussion) {
       throw new errors.NotFoundError('Unable to create answer: discussion not found or inaccessible.')
@@ -315,7 +315,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async updateAnswer(input: UpdateAnswerInput) {
-    logger.log(`DiscussionService: updating answer: ${JSON.stringify(input)}`)
+    logger.verbose(`DiscussionService: updating answer: ${JSON.stringify(input)}`)
     const answer = await this.fetcher.getEditableById(entities.Answer, input.answerId, {}, { populate: ['note'] })
 
     if (!answer) {
@@ -338,7 +338,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async publishAnswer(answerInput: PublishAnswerInput) {
-    logger.log(`DiscussionService: publishing answer: ${JSON.stringify(answerInput)}`)
+    logger.verbose(`DiscussionService: publishing answer: ${JSON.stringify(answerInput)}`)
     const answer = await this.fetcher.getEditableById(entities.Answer, answerInput.id, {}, { populate: ['note'] })
     if (!answer) {
       throw new errors.NotFoundError('Unable to publish answer: not found or insufficient permissions.')
@@ -379,7 +379,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async deleteAnswer(answerId: number) {
-    logger.log(`DiscussionService: deleting answer with id: ${answerId}`)
+    logger.verbose(`DiscussionService: deleting answer with id: ${answerId}`)
     const answer = await this.fetcher.getEditableById(Answer, answerId, {}, { populate: ['note', 'comments', 'note.attachments'] })
     if (answer === null) {
       throw new errors.NotFoundError('Unable to delete answer: not found or insufficient permissions.')
@@ -614,7 +614,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async createComment(commentInput: CreateCommentInput) {
-    logger.log(`DiscussionService: creating comment: ${JSON.stringify(commentInput)}`)
+    logger.verbose(`DiscussionService: creating comment: ${JSON.stringify(commentInput)}`)
 
     const user = await this.fetcher.getById(entities.User, this.userCtx.id)
     if (!user) {
@@ -646,7 +646,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async updateComment(commentInput: EditCommentInput) {
-    logger.log(`DiscussionService: editing comment: ${JSON.stringify(commentInput)}`)
+    logger.verbose(`DiscussionService: editing comment: ${JSON.stringify(commentInput)}`)
 
     if (commentInput.targetType === 'Discussion') {
       const comment = await this.fetcher.getEditableById(entities.DiscussionComment, commentInput.id)
@@ -667,7 +667,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async deleteComment(commentId: number, type: CommentableType) {
-    logger.log(`DiscussionService: deleting comment with id: ${commentId}`)
+    logger.verbose(`DiscussionService: deleting comment with id: ${commentId}`)
 
     let comment: AnswerComment | DiscussionComment | null
     if (type == 'Discussion') {
@@ -708,7 +708,7 @@ export class DiscussionService implements IDiscussionService {
     type: string
     name: string
   }>> {
-    logger.log(`DiscussionService: getting attachments for note id: ${noteId}`)
+    logger.verbose(`DiscussionService: getting attachments for note id: ${noteId}`)
     const note = await this.fetcher.getAccessibleById(entities.Note, noteId, {}, { populate: ['attachments'] })
     if (!note) {
       throw new errors.NotFoundError('Unable to get attachments: note not found or insufficient permissions.')
@@ -766,7 +766,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getAnswer(answerId: number): Promise<AnswerDTO> {
-    logger.log(`DiscussionService: getting answer with id: ${answerId}`)
+    logger.verbose(`DiscussionService: getting answer with id: ${answerId}`)
     const res = await this.fetcher.getAccessibleById(entities.Answer, answerId, {}, { populate: ['note', 'user', 'comments', 'comments.user'] })
     if (!res) {
       throw new errors.NotFoundError('Unable to get discussion: not found or insufficient permissions.')
@@ -776,7 +776,7 @@ export class DiscussionService implements IDiscussionService {
 
 
   async getComment(commentId: number, type: CommentableType): Promise<CommentDTO> {
-    logger.log(`DiscussionService: getting comment with id: ${commentId}`)
+    logger.verbose(`DiscussionService: getting comment with id: ${commentId}`)
 
     if (type === 'Discussion') {
       const res = await this.em.findOne(entities.DiscussionComment, { id: commentId }, { populate: ['user'] })

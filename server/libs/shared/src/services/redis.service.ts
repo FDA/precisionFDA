@@ -13,7 +13,7 @@ export const createRedisClient = async (name?: string): Promise<any> => {
   const url = new URL(config.redis.url)
 
   try {
-    getLogger().log('connecting to redis')
+    getLogger().verbose('connecting to redis')
     const client = createClient({
       //@ts-ignore doesn't compile, but needs to be here
       socket: {
@@ -30,7 +30,7 @@ export const createRedisClient = async (name?: string): Promise<any> => {
       //@ts-ignore doesn't compile, but needs to be here
       client.auth({ password: config.redis.authPassword })
     }
-    getLogger().log('connected to redis')
+    getLogger().verbose('connected to redis')
     return client
   } catch (error) {
     getLogger().error(error)

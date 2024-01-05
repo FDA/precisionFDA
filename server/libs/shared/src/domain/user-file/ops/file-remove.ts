@@ -1,9 +1,10 @@
 import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { UserFile } from '../user-file.entity'
 import { User } from '../../user'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { ComparisonInput, spaceEvent, SpaceReport, tagging } from '../..'
+import { ComparisonInput, spaceEvent, tagging } from '../..'
 import { errors } from '../../..'
 import { getIdFromScopeName } from '../../space/space.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../space-event/space-event.enum'
@@ -49,7 +50,7 @@ number
   protected client: PlatformClient
 
   async run(input: IdInput): Promise<number> {
-    this.ctx.log.log(input, 'FileRemoveOperation: Removing file')
+    this.ctx.log.verbose(input, 'FileRemoveOperation: Removing file')
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
@@ -99,7 +100,7 @@ number
       }
 
       tm.remove(fileToRemove)
-      this.ctx.log.log({ fileName: fileToRemove.name }, 'FileRemoveOperation: Removed file')
+      this.ctx.log.verbose({ fileName: fileToRemove.name }, 'FileRemoveOperation: Removed file')
       return 1
     })
   }

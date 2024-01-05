@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common'
 import { hierarchy, linkVertical, select, tree } from 'd3'
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom'
@@ -8,7 +9,10 @@ import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-op
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
-const assetsPath = path.join(__dirname, '../../../../../../../../../../libs/shared/src/domain/provenance/assets')
+const assetsPath = path.join(
+  __dirname,
+  '../../../../../../../../../../libs/shared/src/domain/provenance/assets',
+)
 const assetNames = [
   'main.css',
   'file-icon.svg',
@@ -19,20 +23,20 @@ const assetNames = [
   'job-icon.svg',
   'workflow-icon.svg',
 ]
-const assetPromises = assetNames.map(i => fs.readFile(path.join(assetsPath, i), 'utf8').catch(() => ''))
+const assetPromises = assetNames.map((i) =>
+  fs.readFile(path.join(assetsPath, i), 'utf8').catch(() => ''),
+)
 
-export class EntityProvenanceSvgResultTransformerService implements EntityProvenanceResultTransformerService<'svg'> {
-  async transform(provenance: EntityProvenance, options?: EntityProvenanceSvgOptions): Promise<string> {
-    const [
-      css,
-      fileIcon,
-      userIcon,
-      appIcon,
-      assetIcon,
-      comparisonIcon,
-      jobIcon,
-      workflowIcon,
-    ] = await Promise.all(assetPromises)
+@Injectable()
+export class EntityProvenanceSvgResultTransformerService
+  implements EntityProvenanceResultTransformerService<'svg'>
+{
+  async transform(
+    provenance: EntityProvenance,
+    options?: EntityProvenanceSvgOptions,
+  ): Promise<string> {
+    const [css, fileIcon, userIcon, appIcon, assetIcon, comparisonIcon, jobIcon, workflowIcon] =
+      await Promise.all(assetPromises)
 
     const nodeTypeToIconMap = {
       file: fileIcon,
@@ -53,14 +57,19 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
 
     const treeLayout = tree()
       .nodeSize([nodeSize.width, nodeSize.height + verticalSpacing])
-      .separation((a, b) => a.parent === b.parent ? 1.1 : 1.3)
+      .separation((a, b) => (a.parent === b.parent ? 1.1 : 1.3))
 
-    const root = hierarchy(provenance, d => d.parents)
+    const root = hierarchy(provenance, (d) => d.parents)
     const links = treeLayout(root).links()
 
     const nodes = root.descendants()
 
-    const { maxX, maxY, minX, minY } = this.getBoundaries(nodes as unknown as Array<{ x: number, y: number }>)
+    const { maxX, maxY, minX, minY } = this.getBoundaries(
+      nodes as unknown as Array<{
+        x: number
+        y: number
+      }>,
+    )
 
     const canvasSize = {
       width: Math.abs(minX) + maxX + nodeSize.width,
@@ -80,34 +89,36 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
       .append('g')
       .attr('transform', `translate(${Math.abs(minX)}, ${Math.abs(minY)})`)
 
-    const linkPathGenerator = linkVertical<unknown, { x: number, y: number }>()
-      .x(d => d.x + (nodeSize.width / 2))
-      .y(d => d.y + (nodeSize.height / 2))
+    const linkPathGenerator = linkVertical<unknown, { x: number; y: number }>()
+      .x((d) => d.x + nodeSize.width / 2)
+      .y((d) => d.y + nodeSize.height / 2)
 
-    g.selectAll('path').data(links)
+    g.selectAll('path')
+      .data(links)
       .enter()
       .append('path')
       .classed('node-path', true)
       .attr('d', linkPathGenerator)
 
-    g.selectAll('foreignObject').data(nodes)
+    g.selectAll('foreignObject')
+      .data(nodes)
       .enter()
       .append('foreignObject')
       .classed('node', true)
       .attr('width', nodeSize.width)
       .attr('height', nodeSize.height)
-      .attr('x', d => (d as unknown as { x: number }).x)
-      .attr('y', d => (d as unknown as { y: number }).y)
+      .attr('x', (d) => (d as unknown as { x: number }).x)
+      .attr('y', (d) => (d as unknown as { y: number }).y)
       .append('div')
       .attr('xmlns', 'http://www.w3.org/1999/xhtml')
       .append('div')
       .classed('content', true)
       .append('a')
-      .attr('href', d => d.data.data.url)
+      .attr('href', (d) => d.data.data.url)
       .attr('target', '_blank')
-      .html(d => nodeTypeToIconMap[d.data.data.type])
+      .html((d) => nodeTypeToIconMap[d.data.data.type])
       .append('span')
-      .text(d => `${d.data.data.title}`)
+      .text((d) => `${d.data.data.title}`)
 
     return dom.window.document.querySelector('svg.canvas')!.outerHTML
   }
@@ -116,10 +127,15 @@ export class EntityProvenanceSvgResultTransformerService implements EntityProven
     return await assetPromises[0]
   }
 
-  private getBoundaries(nodes: Array<{ x: number, y: number }>): { minY: number, minX: number, maxY: number, maxX: number } {
-    const result = {} as { minY: number, minX: number, maxY: number, maxX: number }
+  private getBoundaries(nodes: Array<{ x: number; y: number }>): {
+    minY: number
+    minX: number
+    maxY: number
+    maxX: number
+  } {
+    const result = {} as { minY: number; minX: number; maxY: number; maxX: number }
 
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (result.minY == null || result.minY > node.y) {
         result.minY = node.y
       }

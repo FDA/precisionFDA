@@ -77,9 +77,9 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
       headers,
     }
 
-    this.log.log({ options }, 'PlatformAuthClient sending newAuthToken request')
+    this.log.verbose({ options }, 'PlatformAuthClient sending newAuthToken request')
     const res = await this.axiosInstance.request(options)
-    this.log.log({
+    this.log.verbose({
       headers: res.headers,
       config: res.config,
       data: res.data,
