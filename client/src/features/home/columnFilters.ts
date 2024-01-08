@@ -1,6 +1,7 @@
 export const columnFilters = {
   name: 'string',
   title: 'string',
+  revision: 'string',
   state: 'string',
   engine: 'string',
   dx_instance_class: 'string',
