@@ -1,4 +1,4 @@
-import { Workflow } from '../../domain/workflow'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { EntityDataProvider } from './entity-data.provider'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
 

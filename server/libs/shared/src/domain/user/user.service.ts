@@ -1,9 +1,9 @@
+import { User } from '@shared/domain/user/user.entity'
+import { IPlatformAuthClient } from '@shared/platform-client/platform-auth-client'
 import axios, { AxiosInstance } from 'axios'
 import { UserOpsCtx } from '../../types'
-import { IPlatformAuthClient } from '../../platform-client'
 import { getServiceFactory } from '../../services/service-factory'
 import { getLogger } from '../../logger'
-import { entities } from '../index'
 
 const logger = getLogger('user.service')
 
@@ -38,13 +38,13 @@ class UserService implements IUserService {
 
   async listActiveUserNames(): Promise<string[]> {
     logger.verbose('UserService: getting list of active user names')
-    const result = await this.ctx.em.find(entities.User, { userState: 0})
+    const result = await this.ctx.em.find(User, { userState: 0})
     return result.map(user => user.dxuser)
   }
 
   async listGovernmentUserNames(): Promise<string[]> {
     logger.verbose('UserService: getting list of government user names')
-    const result = await this.ctx.em.find(entities.User, {$and: [{userState: 0}, {email: {$like: '%fda.hhs.gov'}}]})
+    const result = await this.ctx.em.find(User, {$and: [{userState: 0}, {email: {$like: '%fda.hhs.gov'}}]})
     return result.map(user => user.dxuser)
   }
 

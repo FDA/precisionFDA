@@ -1,6 +1,6 @@
 import { Tagging } from '../tagging.entity'
 import { UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 
 /**
  * Operation removes tags corresponding to entity represented by id.

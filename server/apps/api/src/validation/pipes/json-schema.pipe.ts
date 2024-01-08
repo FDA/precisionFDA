@@ -1,12 +1,13 @@
 import { ArgumentMetadata, PipeTransform } from '@nestjs/common'
-import { ajv, errors } from '@shared'
+import { ErrorCodes, InternalError, ValidationError } from '@shared/errors'
+import { ajv } from '@shared/utils/validator'
 import type { JSONSchema7 } from 'json-schema'
 import { isEmpty } from 'ramda'
 
 export class JsonSchemaPipe implements PipeTransform {
   constructor(private readonly schema: JSONSchema7) {
     if (isEmpty(schema)) {
-      throw new errors.InternalError('Empty schema spec passed to json schema pipe.')
+      throw new InternalError('Empty schema spec passed to json schema pipe.')
     }
   }
 
@@ -17,8 +18,8 @@ export class JsonSchemaPipe implements PipeTransform {
       return value
     }
 
-    throw new errors.ValidationError(`Request ${metadata.type} invalid`, {
-      code: errors.ErrorCodes.VALIDATION,
+    throw new ValidationError(`Request ${metadata.type} invalid`, {
+      code: ErrorCodes.VALIDATION,
       statusCode: 400,
       validationErrors: validateFunction.errors,
     })

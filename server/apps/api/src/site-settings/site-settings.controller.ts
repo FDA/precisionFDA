@@ -1,13 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Controller, Get, Headers, Inject, Logger } from '@nestjs/common'
-import type { client } from '@shared'
-import {
-  config,
-  dataPortal,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  errors,
-  UserContext,
-} from '@shared'
+import { config } from '@shared/config'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NotFoundError, PermissionError, ServiceError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../server/utils'
 
 @Controller('/site-settings')
@@ -43,21 +41,16 @@ export class SiteSettingsController {
       return body
     }
     try {
-      const dataPortalService = new dataPortal.DataPortalService(
-        this.em,
-        {} as client.PlatformClient,
-      )
+      const dataPortalService = new DataPortalService(this.em, {} as PlatformClient)
       await dataPortalService.getDefault(this.user.id)
       body.dataPortals = { isEnabled: true }
       return body
     } catch (error) {
-      if (error instanceof errors.PermissionError || error instanceof errors.NotFoundError) {
+      if (error instanceof PermissionError || error instanceof NotFoundError) {
         body.dataPortals = { isEnabled: false }
         return body
       } else {
-        throw new errors.ServiceError(
-          `Unexpected error while checking Data Portals feature: ${error}`,
-        )
+        throw new ServiceError(`Unexpected error while checking Data Portals feature: ${error}`)
       }
     }
   }

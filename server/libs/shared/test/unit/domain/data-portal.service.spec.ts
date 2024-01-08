@@ -1,14 +1,21 @@
 import type { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
+import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
+import { DataPortalParam, FileParam } from '@shared/domain/data-portal/service/data-portal.types'
+import { Resource } from '@shared/domain/resource/resource.entity'
+import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
 import { expect } from 'chai'
 import { create, db } from '../../../src/test'
-import { database, entities } from '@shared'
-import type { DataPortal, User } from '../../../src/domain'
-import { Event } from '../../../src/domain'
-import { DataPortalService } from '../../../src/domain/data-portal'
-import type { DataPortalParam, FileParam } from '../../../src/domain/data-portal'
-import type { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
+import type { PlatformClient } from '../../../src/platform-client'
 import type { FileCreateParams, FileDownloadLinkParams } from '../../../src/platform-client/platform-client.params'
-import type { FileDownloadLinkResponse } from '../../../src/platform-client/platform-client.responses'
+import type {
+  ClassIdResponse,
+  FileDownloadLinkResponse,
+} from '../../../src/platform-client/platform-client.responses'
 import {
   DATA_PORTAL_MEMBER_ROLE,
   DATA_PORTAL_STATUS,
@@ -20,7 +27,6 @@ import {
 import { FILE_STATE_DX } from '../../../src/domain/user-file/user-file.types'
 import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
 import * as generate from '../../../src/test/generate'
-import type { FileRemoveOperation } from '../../../src/domain/user-file'
 import type { IdInput } from '../../../src/types'
 
 describe('data portal service tests', () => {
@@ -107,7 +113,7 @@ describe('data portal service tests', () => {
     const portal = await dataPortalService.create(input, siteAdmin.id)
     em.clear()
 
-    const loadedDataPortal = await em.findOneOrFail(entities.DataPortal, { id: portal.id }, { populate: ['space'] })
+    const loadedDataPortal = await em.findOneOrFail(DataPortal, { id: portal.id }, { populate: ['space'] })
     expect(loadedDataPortal.name).eq('test-data-portal')
     expect(loadedDataPortal.description).eq('description')
     expect(loadedDataPortal.sortOrder).eq(1)
@@ -185,7 +191,7 @@ describe('data portal service tests', () => {
     } as DataPortalParam, user.id)
     em.clear()
 
-    const loadedDataPortal = await em.findOneOrFail(entities.DataPortal, { id: portal.id }, { populate: ['space'] })
+    const loadedDataPortal = await em.findOneOrFail(DataPortal, { id: portal.id }, { populate: ['space'] })
     expect(loadedDataPortal.name).eq('name-updated')
     expect(loadedDataPortal.description).eq('description-updated')
     expect(loadedDataPortal.sortOrder).eq(2)
@@ -416,7 +422,7 @@ describe('data portal service tests', () => {
     const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
     await em.flush()
     const result = await dataPortalService.createCardImage({ name: 'test-card.jpg', description: 'description' }, dataPortal.id, challengeUser.id)
-    const file = await em.findOneOrFail(entities.UserFile, { name: 'test-card.jpg' })
+    const file = await em.findOneOrFail(UserFile, { name: 'test-card.jpg' })
 
     expect(result).eq('file-dxid-1')
     expect(file.project).eq('hostProject')
@@ -440,7 +446,7 @@ describe('data portal service tests', () => {
       description: 'description'
     }, dataPortal.id, user.id)
     em.clear()
-    return await em.findOneOrFail(entities.DataPortal, { id: dataPortal.id }, { populate: ['space', 'resources.userFile'] })
+    return await em.findOneOrFail(DataPortal, { id: dataPortal.id }, { populate: ['space', 'resources.userFile'] })
   }
 
   it('test create data portal resource', async () => {
@@ -471,7 +477,7 @@ describe('data portal service tests', () => {
     let fileRemoveOperationParam: IdInput = { id: 0 }
     const fileRemoveOperation = {
       async run(input): Promise<number> {
-        const fileToDelete = await em.findOne(entities.UserFile, { id: input.id })
+        const fileToDelete = await em.findOne(UserFile, { id: input.id })
         if (fileToDelete) {
           const fileDeleteEvent = new Event()
           fileDeleteEvent.type = EVENT_TYPES.FILE_DELETED
@@ -494,17 +500,17 @@ describe('data portal service tests', () => {
     em.clear()
 
     // load portal and verify that resource was removed
-    const loadedDataPortalAfterRemoval = await em.findOneOrFail(entities.DataPortal, { id: loadedDataPortal.id }, { populate: ['space', 'resources.userFile'] })
+    const loadedDataPortalAfterRemoval = await em.findOneOrFail(DataPortal, { id: loadedDataPortal.id }, { populate: ['space', 'resources.userFile'] })
     expect(loadedDataPortalAfterRemoval.resources.getItems().length).eq(0)
 
     // verify that resource was removed from database
-    const userFile = await em.findOne(entities.UserFile, { name: 'test-resource.jpg' })
+    const userFile = await em.findOne(UserFile, { name: 'test-resource.jpg' })
     expect(userFile).eq(null)
-    const resource = await em.find(entities.Resource, {})
+    const resource = await em.find(Resource, {})
     expect(resource.length).eq(0)
 
     // verify that event was created
-    const events = await em.find(entities.Event, {})
+    const events = await em.find(Event, {})
     expect(events.length).eq(1)
 
     expect(events[0].type).eq(EVENT_TYPES.FILE_DELETED)
@@ -564,7 +570,7 @@ describe('data portal service tests', () => {
 
     const result = await dataPortalService.createResourceLink(resource.id)
     expect(result).eq('testingURL')
-    const loadedResource = await em.findOneOrFail(entities.Resource, { id: resource.id })
+    const loadedResource = await em.findOneOrFail(Resource, { id: resource.id })
     expect(loadedResource.url).eq('testingURL')
   })
 

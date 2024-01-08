@@ -1,7 +1,7 @@
+import { Job } from '@shared/domain/job/job.entity'
 import * as errors from '../../../errors'
 import { OpsCtx } from '../../../types'
-import { Job } from '..'
-import { BaseOperation } from '../../../utils/base-operation'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { JobRepository } from '../job.repository'
 
 abstract class WorkstationBaseOperation<CtxT extends OpsCtx, In, Out>

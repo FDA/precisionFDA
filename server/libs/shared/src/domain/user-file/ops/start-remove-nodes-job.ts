@@ -1,8 +1,8 @@
+import { createRemoveNodesJobTask } from '@shared/queue'
 import { FILE_STATE_PFDA } from '../user-file.types'
 import { Node } from '../node.entity'
-import { queue } from '../../..'
 import { IdsInput, UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 
 class StartRemoveNodesJob extends BaseOperation<UserOpsCtx, IdsInput, void> {
   async run(input: IdsInput): Promise<void> {
@@ -16,7 +16,7 @@ class StartRemoveNodesJob extends BaseOperation<UserOpsCtx, IdsInput, void> {
 
     await em.flush()
 
-    await queue.createRemoveNodesJobTask(input.ids, this.ctx.user)
+    await createRemoveNodesJobTask(input.ids, this.ctx.user)
   }
 }
 

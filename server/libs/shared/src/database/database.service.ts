@@ -1,9 +1,9 @@
-import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Connection, MikroORM } from '@mikro-orm/core'
-import { defaultLogger as log } from '../logger'
-import { entities } from '../domain'
-import { BaseEntity } from './base-entity'
 import { MySqlDriver } from '@mikro-orm/mysql'
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
+import { BaseEntity } from '@shared/database/base-entity'
+import { entities } from '@shared/database/entities'
+import { defaultLogger as log } from '../logger'
 
 export interface IDatabaseService {
   getOrm(): MikroORM<MySqlDriver> | null
@@ -51,7 +51,7 @@ export class DatabaseService implements IDatabaseService {
       throw err
     }
   }
-  
+
   async stop(): Promise<void> {
     try {
       if (this.orm && (await this.orm.isConnected())) {

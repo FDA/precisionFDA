@@ -1,11 +1,11 @@
 import { Logger } from '@nestjs/common'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { getEmailsQueue, getFileSyncQueue, getMainQueue } from '@shared/queue'
 import { isNil } from 'ramda'
-import { queue } from '../..'
-import { SyncJobOperation } from '../../domain/job'
 import { Job } from '../../domain/job/job.entity'
 import { isStateTerminal } from '../../domain/job/job.helper'
 import { OpsCtx } from '../../types'
-import { BaseOperation } from '../../utils/base-operation'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { clearFailedJobs } from '../queue.utils'
 import { TASK_TYPE } from '../task.input'
 
@@ -18,7 +18,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   // This also cleans up job sync tasks created before we assigned unique IDs
   //
   log.verbose('CleanupWorkerQueueOperation: Cleaning up status queue')
-  const mainQueue = queue.getMainQueue()
+  const mainQueue = getMainQueue()
   const repeatableJobs = await mainQueue.getRepeatableJobs()
 
   const jobRepo = em.getRepository(Job)
@@ -84,7 +84,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   // Some observed cases where jobs have failed:
   //   "failedReason": "job stalled more than allowable limit"
   //
-  const fileSyncQueue = queue.getFileSyncQueue()
+  const fileSyncQueue = getFileSyncQueue()
   const failedFileSyncJobs = await clearFailedJobs(fileSyncQueue, log)
 
   // Cleanup sent emails
@@ -92,7 +92,7 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   // On staging/prod there were a lot of failed email tasks lingering around
   //
   log.verbose('CleanupWorkerQueueOperation: Cleaning up email queue')
-  const emailQueue = queue.getEmailsQueue()
+  const emailQueue = getEmailsQueue()
   const failedEmailJobs = await clearFailedJobs(emailQueue, log)
 
   // TODO - determine if we also need to clear completed items that aren't removed automatically

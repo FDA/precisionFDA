@@ -1,6 +1,6 @@
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { UidInput, UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
-import { Workflow } from '../../workflow'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { License } from '../license.entity'
 import { LicensesForAppOperation } from './licenses-for-app'
 

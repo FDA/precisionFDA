@@ -10,22 +10,19 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import {
-  app as appDomain,
-  client,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  entities,
-  job as jobDomain,
-  license as licenseDomain,
-  UserContext,
-} from '@shared'
-import { App } from '@shared/domain'
-import { AppInput } from '@shared/domain/app/app.input'
-import { DxId } from '@shared/domain/entity'
-import { RunAppInput } from '@shared/domain/job/job.input'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { App } from '@shared/domain/app/app.entity'
+import { AppInput, saveAppSchema } from '@shared/domain/app/app.input'
+import { AppService } from '@shared/domain/app/services/app.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { RunAppInput, runAppSchema } from '@shared/domain/job/job.input'
+import { CreateJobOperation } from '@shared/domain/job/ops/create'
+import { LicensesForAppOperation } from '@shared/domain/license/ops/licenses-for-app'
+import { PlatformClient } from '@shared/platform-client'
 import { AppDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { AnyObject, UserOpsCtx } from '@shared/types'
-import { schemas } from '@shared/utils'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
@@ -40,9 +37,9 @@ export class AppController {
 
   @HttpCode(200)
   @Post()
-  async createApp(@Body(new JsonSchemaPipe(appDomain.inputs.saveAppSchema)) body: AppInput) {
-    const platformClient = new client.PlatformClient(this.user.accessToken)
-    const appService = new appDomain.AppService(this.em, platformClient)
+  async createApp(@Body(new JsonSchemaPipe(saveAppSchema)) body: AppInput) {
+    const platformClient = new PlatformClient(this.user.accessToken)
+    const appService = new AppService(this.em, platformClient)
 
     return await appService.create(body, this.user.id)
   }
@@ -58,7 +55,7 @@ export class AppController {
       em: this.em,
     }
 
-    return await new licenseDomain.LicensesForAppOperation(opsCtx).execute({
+    return await new LicensesForAppOperation(opsCtx).execute({
       ...body,
       uid: appDxId,
     })
@@ -67,7 +64,7 @@ export class AppController {
   @Post('/:appDxId/run')
   async run(
     @Param('appDxId', new JsonSchemaPipe(schemas.dxidProp)) appDxId: DxId<'app'>,
-    @Body(new JsonSchemaPipe(jobDomain.inputs.runAppSchema)) body: Omit<RunAppInput, 'appDxid'>,
+    @Body(new JsonSchemaPipe(runAppSchema)) body: Omit<RunAppInput, 'appDxid'>,
   ) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
@@ -80,16 +77,16 @@ export class AppController {
       appDxId,
     }
 
-    return await new jobDomain.CreateJobOperation(opsCtx).execute(input)
+    return await new CreateJobOperation(opsCtx).execute(input)
   }
 
   // uses pFDA uid , not platfrom dxid
   @HttpCode(201)
   @Get('/:uid/describe')
   async describeApp(@Param('uid') uid: string) {
-    const app = await this.em.findOneOrFail(entities.App, { uid }, { populate: ['user'] })
+    const app = await this.em.findOneOrFail(App, { uid }, { populate: ['user'] })
 
-    const platformClient = new client.PlatformClient(this.user.accessToken, this.log)
+    const platformClient = new PlatformClient(this.user.accessToken, this.log)
     const platformAppData = await platformClient.appDescribe({
       dxid: app.dxid,
       data: {},

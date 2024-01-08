@@ -1,7 +1,10 @@
 /* eslint-disable no-undefined */
 import { EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import { User, Space } from '@shared/domain'
+import { database } from '@shared/database'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMaintenanceQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, db } from '@shared/test'
 import { UserCtx } from '@shared/types'
@@ -11,13 +14,13 @@ import { JobOptions } from 'bull'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createSyncSpacesPermissionsTask = async (user: UserCtx) => {
-  const defaultQueue = queue.getMaintenanceQueue()
-  const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS}` }
+  const defaultQueue = getMaintenanceQueue()
+  const options: JobOptions = { jobId: `${TASK_TYPE.SYNC_SPACES_PERMISSIONS}` }
 
   await defaultQueue.add(
-    queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS,
+    TASK_TYPE.SYNC_SPACES_PERMISSIONS,
     {
-      type: queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS,
+      type: TASK_TYPE.SYNC_SPACES_PERMISSIONS,
       user,
     },
     options,

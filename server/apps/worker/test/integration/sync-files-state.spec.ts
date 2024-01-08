@@ -1,8 +1,12 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable max-len */
 import { EntityManager } from '@mikro-orm/mysql'
-import { database, queue } from '@shared'
-import { User, UserFile } from '@shared/domain'
+import { database } from '@shared/database'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -13,7 +17,6 @@ import {
   IFileOrAsset,
   PARENT_TYPE,
 } from '@shared/domain/user-file/user-file.types'
-import { Asset, SyncFilesStateOperation } from '@shared/domain/user-file'
 import { UserCtx } from '@shared/types'
 import { FileStatesParams } from '@shared/platform-client/platform-client.params'
 import R from 'ramda'
@@ -35,7 +38,7 @@ describe('SyncFilesStateOperation static methods', () => {
 // Adding the task directly to the queue instead of using queue.createSyncFilesStateTask
 // as that function adds a repeatble job and won't be run during the test
 const createSyncFilesStateTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getMainQueue()
+  const defaultTestQueue = getMainQueue()
   // .add() is stubbed
   await defaultTestQueue.add(SyncFilesStateOperation.getTaskType(), {
     type: SyncFilesStateOperation.getTaskType(),

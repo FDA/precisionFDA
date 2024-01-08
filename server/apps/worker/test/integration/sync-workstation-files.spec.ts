@@ -1,7 +1,15 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import { App, User, UserFile, Tag, Tagging, Folder, Job } from '@shared/domain'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import type { CheckStatusJob } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
@@ -39,10 +47,10 @@ const createSyncWorkstationFilesTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getMainQueue()
+  const defaultTestQueue = getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add(queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES, {
-    type: queue.types.TASK_TYPE.SYNC_WORKSTATION_FILES,
+  await defaultTestQueue.add(TASK_TYPE.SYNC_WORKSTATION_FILES, {
+    type: TASK_TYPE.SYNC_WORKSTATION_FILES,
     payload,
     user,
   })

@@ -1,4 +1,4 @@
-import { EmailTemplateInput } from '../../email.config'
+import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer, getBottomSpacer, getExecutionDetailButton } from './common'
 
 export type JobStaleInputTemplate = EmailTemplateInput & {

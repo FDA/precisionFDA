@@ -1,21 +1,22 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import {
+  NotificationPreference
+} from '@shared/domain/notification-preference/notification-preference.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
-import {
-  App,
-  Job,
-  SpaceMembership,
-  SpaceEvent,
-  User,
-  Space, NotificationPreference,
-} from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
-import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers'
+import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers/content-change.handler'
 import { UserOpsCtx } from '@shared/types'
 import { defaultLogger } from '@shared/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { database } from '@shared'
 import { PARENT_TYPE } from '@shared/domain/space-event/space-event.enum'
 
 describe('content-change.handler', () => {

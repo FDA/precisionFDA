@@ -1,4 +1,4 @@
-import { Space } from '../../domain/space'
+import { Space } from '@shared/domain/space/space.entity'
 import { EntityDataProvider } from './entity-data.provider'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
 

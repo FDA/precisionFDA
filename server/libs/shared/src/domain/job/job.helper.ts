@@ -1,16 +1,16 @@
+import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
 import { DateTime, Duration, Interval } from 'luxon'
 import { createSendEmailTask } from '../../queue'
 import { UserOpsCtx, WorkerOpsCtx } from '../../types'
 import { config } from '../../config'
 import { EMAIL_TYPES } from '../email/email.config'
-import { JobFailedEmailHandler } from '../email/templates/handlers'
 import { Job } from './job.entity'
 import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
 
-const isStateTerminal = (state: string): boolean =>
+export const isStateTerminal = (state: string): boolean =>
   Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
 
-const shouldSyncStatus = (job: Job): boolean => {
+export const shouldSyncStatus = (job: Job): boolean => {
   if (isStateTerminal(job.state)) {
     // the job has already ended and PFDA knows of it
     return false
@@ -18,16 +18,16 @@ const shouldSyncStatus = (job: Job): boolean => {
   return true
 }
 
-const isJobPrivate = (job: Job): boolean => job.scope.toLowerCase() === 'private'
+export const isJobPrivate = (job: Job): boolean => job.scope.toLowerCase() === 'private'
 
-const isJobPublic = (job: Job): boolean => job.scope.toLowerCase() === 'public'
+export const isJobPublic = (job: Job): boolean => job.scope.toLowerCase() === 'public'
 
-const isJobInSpace = (job: Job): boolean => job.scope.toLowerCase().startsWith('space')
+export const isJobInSpace = (job: Job): boolean => job.scope.toLowerCase().startsWith('space')
 
-const isStateActive = (state: string): boolean =>
+export const isStateActive = (state: string): boolean =>
   Object.values(ACTIVE_STATES).includes(state as JOB_STATE)
 
-const buildIsOverMaxDuration = (
+export const buildIsOverMaxDuration = (
   terminateOrNotify: 'terminate' | 'notify',
 ): ((job: Job) => boolean) => {
   // which config setting to use
@@ -49,8 +49,8 @@ const buildIsOverMaxDuration = (
   }
 }
 
-const sendJobFailedEmails = async (jobId:string, ctx: WorkerOpsCtx<UserOpsCtx>): Promise<void> => {
-  const handler = new JobFailedEmailHandler(
+export const sendJobFailedEmails = async (jobId:string, ctx: WorkerOpsCtx<UserOpsCtx>): Promise<void> => {
+  const handler = new EMAIL_CONFIG.jobFailed.handlerClass(
     EMAIL_TYPES.jobFailed,
     { jobId},
     ctx,
@@ -74,15 +74,4 @@ const sendJobFailedEmails = async (jobId:string, ctx: WorkerOpsCtx<UserOpsCtx>):
 
     await createSendEmailTask(email, ctx.user)
   })) as any
-}
-
-export {
-  shouldSyncStatus,
-  isStateTerminal,
-  sendJobFailedEmails,
-  buildIsOverMaxDuration,
-  isStateActive,
-  isJobPrivate,
-  isJobPublic,
-  isJobInSpace,
 }

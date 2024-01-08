@@ -2,7 +2,8 @@ import { createBullBoard } from '@bull-board/api'
 import { BullAdapter } from '@bull-board/api/bullAdapter'
 import { ExpressAdapter } from '@bull-board/express'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import { config, queue as queueDomain } from '@shared'
+import { config } from '@shared/config'
+import { getQueues } from '@shared/queue'
 import { log } from '../logger'
 
 @Module({})
@@ -16,7 +17,7 @@ export class BullBoardModule implements NestModule {
     const serverAdapter = new ExpressAdapter()
     serverAdapter.setBasePath('/bull-board')
     try {
-      const queues = queueDomain.getQueues()
+      const queues = getQueues()
       createBullBoard({
         queues: queues.map((queue) => {
           log.verbose(`adding queue: ${queue.name} to bull board`)

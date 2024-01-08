@@ -1,6 +1,6 @@
+import { Job } from '@shared/domain/job/job.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { Job } from '../../../src/domain'
 import {
   JobProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/job-provenance-data.service'

@@ -1,6 +1,7 @@
 import { Provider, Scope } from '@nestjs/common'
 import { REQUEST } from '@nestjs/core'
-import { USER_CONTEXT_HTTP_HEADERS, UserContext } from '@shared'
+import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 export const userContextProvider: Provider = {
   provide: UserContext,

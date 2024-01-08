@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { User } from '../../user'
+import { User } from '@shared/domain/user/user.entity'
 import { UserFileCreate } from '../domain/user-file-create'
 import { UserFile } from '../user-file.entity'
 

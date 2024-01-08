@@ -1,7 +1,11 @@
 /* eslint-disable no-undefined */
 import type { EntityManager } from '@mikro-orm/mysql'
-import { config, database, queue } from '@shared'
-import type { App, User } from '@shared/domain'
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -11,9 +15,9 @@ import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.t
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createUserCheckupTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add(queue.types.TASK_TYPE.USER_CHECKUP, {
-    type: queue.types.TASK_TYPE.USER_CHECKUP,
+  const defaultTestQueue = getMainQueue()
+  await defaultTestQueue.add(TASK_TYPE.USER_CHECKUP, {
+    type: TASK_TYPE.USER_CHECKUP,
     user,
   })
 }

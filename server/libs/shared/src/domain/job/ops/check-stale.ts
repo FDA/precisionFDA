@@ -1,21 +1,20 @@
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { User } from '@shared/domain/user/user.entity'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { CheckStaleJobsJob } from '../../../queue/task.input'
 import { Job } from '../job.entity'
 import { Maybe, UserOpsCtx } from '../../../types'
 import { config } from '../../../config'
-import { queue } from '../../..'
-import { User } from '../..'
 import { buildEmailTemplate } from '../../email/email.helper'
 import {
   reportStaleJobsTemplate,
   ReportStaleJobsTemplateInput,
 } from '../../email/templates/mjml/report-stale-jobs.template'
 import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
-import { createSendEmailTask } from '../../../queue'
+import { createSendEmailTask, createSyncJobStatusTask, getMainQueue } from '../../../queue'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { PlatformClient } from '../../../platform-client'
 import { difference } from 'ramda'
-import { SyncJobOperation } from '../'
 
 
 // This operation is run by admin to alert her/him that there are stale jobs that need
@@ -38,9 +37,9 @@ export class CheckStaleJobsOperation extends WorkerBaseOperation<
     })
 
     runningJobs.map(async (job) => {
-      const runningJob = await queue.getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
+      const runningJob = await getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
       if (!runningJob) {
-        await queue.createSyncJobStatusTask(job, this.ctx.user)
+        await createSyncJobStatusTask(job, this.ctx.user)
         this.ctx.log.verbose({}, `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`)
       }
     })

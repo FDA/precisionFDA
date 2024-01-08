@@ -1,26 +1,30 @@
 import { EntityManager } from '@mikro-orm/core'
 import { Logger } from '@nestjs/common'
-import { config, job as jobDomain, queue, user } from '@shared'
+import { config } from '@shared/config'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobService } from '@shared/domain/job/job.service'
+import { User } from '@shared/domain/user/user.entity'
+import { Task } from '@shared/queue/task.input'
 import { Job as BullJob } from 'bull'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 import { JobHandler } from './job.handler'
 
-class CheckChallengeJobsHandler implements JobHandler<queue.types.Task> {
+class CheckChallengeJobsHandler implements JobHandler<Task> {
   private readonly em: EntityManager
-  private readonly jobService: jobDomain.JobService
+  private readonly jobService: JobService
 
-  constructor(em: EntityManager, jobService: jobDomain.JobService) {
+  constructor(em: EntityManager, jobService: JobService) {
     this.em = em
     this.jobService = jobService
   }
 
-  async handle(bullJob: BullJob<queue.types.Task>): Promise<void> {
+  async handle(bullJob: BullJob<Task>): Promise<void> {
     const requestId = String(bullJob.id)
     const logger = getChildLogger(requestId)
 
     logger.verbose(`CheckChallengeJobsHandler: running`)
     const challengeBotUser = await this.em
-      .getRepository(user.User)
+      .getRepository(User)
       .findOne({ dxuser: config.platform.challengeBotUser })
     if (challengeBotUser) {
       await this.checkChallengeBotJobs(challengeBotUser, logger)
@@ -31,7 +35,7 @@ class CheckChallengeJobsHandler implements JobHandler<queue.types.Task> {
     }
   }
 
-  private async checkChallengeBotJobs(challengeBotUser: user.User, logger: Logger) {
+  private async checkChallengeBotJobs(challengeBotUser: User, logger: Logger) {
     const jobs = await this.jobService.getNonTerminalJobs(challengeBotUser.id)
     if (jobs.length > 0) {
       await this.processJobs(challengeBotUser.id, jobs, logger)
@@ -40,7 +44,7 @@ class CheckChallengeJobsHandler implements JobHandler<queue.types.Task> {
     }
   }
 
-  private async processJobs(challengeBotUserId: number, jobs: jobDomain.Job[], logger: Logger) {
+  private async processJobs(challengeBotUserId: number, jobs: Job[], logger: Logger) {
     logger.verbose(
       'CheckChallengeJobsHandler: Found non-terminal users for challenge bot user, syncing outputs',
     )

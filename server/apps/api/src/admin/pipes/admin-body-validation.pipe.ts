@@ -1,5 +1,11 @@
 import { Injectable, PipeTransform } from '@nestjs/common'
-import { errors, UserContext, utils, validation } from '@shared'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ErrorCodes, ValidationError } from '@shared/errors'
+import { aggregateSchemaErrors, formatAggregatedError } from '@shared/utils/aggregate-error'
+import {
+  getKeysDifferenceFromObject,
+  validateNonNegativeInteger,
+} from '@shared/validation/validators'
 
 // TODO(samuel) This function is not 100% accurate in TS
 // The return type of this fn is the same schema type
@@ -20,14 +26,14 @@ export function getAdminBodyValidationPipe<
     constructor(readonly user: UserContext) {}
 
     transform(value: any) {
-      const { errors: caughtErrors } = utils.aggregateError.aggregateSchemaErrors(
+      const { errors: caughtErrors } = aggregateSchemaErrors(
         this.bindCtxArgument((val) => this.makeCloudGovBulkUserUpdateMiddlewareSchema(val), value),
       )
       if (caughtErrors.length > 0) {
-        throw utils.aggregateError.formatAggregatedError('Ctx validation failed', caughtErrors, {
+        throw formatAggregatedError('Ctx validation failed', caughtErrors, {
           clientResponse: 'Validation Error',
           clientStatusCode: 400,
-          code: errors.ErrorCodes.VALIDATION,
+          code: ErrorCodes.VALIDATION,
           statusCode: 400,
         })
       }
@@ -62,30 +68,30 @@ export function getAdminBodyValidationPipe<
       const bc = bodyFieldConfig
       const requiredProperties = ['ids'].concat(Object.keys(bc ?? {}))
       // @ts-ignore
-      const { missingKeys, extraKeys } = validation.validators.getKeysDifferenceFromObject(
+      const { missingKeys, extraKeys } = getKeysDifferenceFromObject(
         value,
         requiredProperties,
       )
       if (missingKeys.length > 0) {
-        throw new errors.ValidationError(
+        throw new ValidationError(
           `Missing required properties from request body: ${JSON.stringify(missingKeys)}`,
         )
       }
       if (extraKeys.length > 0) {
-        throw new errors.ValidationError(
+        throw new ValidationError(
           `Request body contains extra keys: ${JSON.stringify(extraKeys)}`,
         )
       }
       // @ts-ignore
       if (value.ids.length === 0) {
-        throw new errors.ValidationError('No ids specified')
+        throw new ValidationError('No ids specified')
       }
       // @ts-ignore
       const invalidInputIds = value.ids.filter(
-        (id: any) => !validation.validators.validateNonNegativeInteger(id),
+        (id: any) => !validateNonNegativeInteger(id),
       )
       if (invalidInputIds.length > 0) {
-        throw new errors.ValidationError(
+        throw new ValidationError(
           `Invalid input ids in request body: ${JSON.stringify(
             invalidInputIds,
           )}, expected positive integer`,

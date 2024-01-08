@@ -1,6 +1,6 @@
 import { invertObj } from 'ramda'
 import * as errors from '../../../errors'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import * as client from '../../../platform-client'
 import { DbCluster } from '../db-cluster.entity'
 import { STATUS, STATUSES } from '../db-cluster.enum'

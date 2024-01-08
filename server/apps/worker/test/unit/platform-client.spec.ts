@@ -1,4 +1,4 @@
-import { client } from '@shared'
+import { PlatformClient } from '@shared/platform-client'
 import {
   createPermissionsDeniedError,
   createGatewayError,
@@ -9,7 +9,7 @@ import { expect } from 'chai'
 
 describe('platform-client', () => {
   it('handles normal platform errors', async () => {
-    const platformClient = new client.PlatformClient()
+    const platformClient = new PlatformClient()
     try {
       platformClient.handleFailed(createPermissionsDeniedError())
     } catch (error) {
@@ -21,7 +21,7 @@ describe('platform-client', () => {
   })
 
   it('handles 504 errors', async () => {
-    const platformClient = new client.PlatformClient()
+    const platformClient = new PlatformClient()
     try {
       platformClient.handleFailed(createGatewayError())
     } catch (error) {
@@ -34,7 +34,7 @@ describe('platform-client', () => {
 
   it('handles HTML errors', async () => {
     try {
-      const platformClient = new client.PlatformClient()
+      const platformClient = new PlatformClient()
       platformClient.handleFailed(createETIMEOUTError())
     } catch (error) {
       const expectedMessage = 'Error: connect ETIMEDOUT 192.168.119.135:443\n    at ' +

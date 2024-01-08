@@ -1,4 +1,8 @@
-import { errors, validation } from '@shared'
+import { ValidationError } from '@shared/errors'
+import {
+  getKeysDifferenceFromObject,
+  validateNonNegativeInteger,
+} from '@shared/validation/validators'
 
 export const makeCloudGovBulkUserUpdateMiddlewareSchema = <
   // TODO(samuel) make fieldPath array insted when reusing this schema builder
@@ -7,25 +11,25 @@ export const makeCloudGovBulkUserUpdateMiddlewareSchema = <
   body: (ctx: Api.Ctx<{}, Partial<Record<'id' | keyof ConfigT, any>>>) => {
     const requiredProperties = ['ids'].concat(Object.keys(bodyFieldConfig ?? {}))
     // @ts-ignore
-    const { missingKeys, extraKeys } = validation.validators.getKeysDifferenceFromObject(ctx.request.body, requiredProperties)
+    const { missingKeys, extraKeys } = getKeysDifferenceFromObject(ctx.request.body, requiredProperties)
     if (missingKeys.length > 0) {
-      throw new errors.ValidationError(`Missing required properties from request body: ${
+      throw new ValidationError(`Missing required properties from request body: ${
         JSON.stringify(missingKeys)
       }`)
     }
     if (extraKeys.length > 0) {
-      throw new errors.ValidationError(`Request body contains extra keys: ${
+      throw new ValidationError(`Request body contains extra keys: ${
         JSON.stringify(extraKeys)
       }`)
     }
     // @ts-ignore
     if (ctx.request.body.ids.length === 0) {
-      throw new errors.ValidationError('No ids specified')
+      throw new ValidationError('No ids specified')
     }
     // @ts-ignore
-    const invalidInputIds = ctx.request.body.ids.filter((id: any) => !validation.validators.validateNonNegativeInteger(id))
+    const invalidInputIds = ctx.request.body.ids.filter((id: any) => !validateNonNegativeInteger(id))
     if (invalidInputIds.length > 0) {
-      throw new errors.ValidationError(`Invalid input ids in request body: ${
+      throw new ValidationError(`Invalid input ids in request body: ${
         JSON.stringify(invalidInputIds)
       }, expected positive integer`)
     }
@@ -37,7 +41,7 @@ export const makeCloudGovBulkUserUpdateMiddlewareSchema = <
 // TODO(samuel) possibly reuse these utils
 export const numericBodyValidator = (value: number, fieldPath: string) => {
   if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
-    throw new errors.ValidationError(`Invalid "${fieldPath}": ${
+    throw new ValidationError(`Invalid "${fieldPath}": ${
       value
     }, expected non-negative number`)
   }

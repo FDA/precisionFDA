@@ -5,7 +5,7 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
-import { User } from '..'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 
 export type CommentableType = 'Discussion' | 'Answer' | 'Space' | 'Note'

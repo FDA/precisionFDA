@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
+import { MfaAlreadyResetError } from '@shared/errors'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import type { Logger } from '@nestjs/common'
-import { errors } from '..'
 import { config } from '../config'
 import { getLogger } from '../logger'
 import { PlatformClientBase } from './platform-client-base'
@@ -107,7 +107,7 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
       this.logClientFailed(options)
       return this.handleFailed(err, (_, __, message) => {
         if (message.includes('MFA is already reset')) {
-          throw new errors.MfaAlreadyResetError()
+          throw new MfaAlreadyResetError()
         }
       })
     }

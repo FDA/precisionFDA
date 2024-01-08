@@ -1,5 +1,5 @@
 import * as errors from '../../../errors'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from '../job.entity'
 import { DxIdInput } from '../job.input'
 import * as client from '../../../platform-client'

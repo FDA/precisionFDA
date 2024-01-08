@@ -1,17 +1,20 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { App, Job, User } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { errors, database } from '@shared'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { TASK_TYPE } from '@shared/queue/task.input'
-import { WorkstationSnapshotOperation } from '@shared/domain/job'
-import { Space } from '@shared/domain'
 
 describe('PATCH /jobs/:id/setAPIKey', () => {
   let em: EntityManager
@@ -132,7 +135,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(404)
-    expect(response.body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+    expect(response.body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
   })
 
   it('throws error when the job type is NOT HTTPS', async () => {
@@ -144,7 +147,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(422)
-    expect(response.body.error).to.have.property('code', errors.ErrorCodes.INVALID_STATE)
+    expect(response.body.error).to.have.property('code', ErrorCodes.INVALID_STATE)
   })
 })
 
@@ -285,7 +288,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
       })
 
     expect(response.statusCode).to.equal(404)
-    expect(response.body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+    expect(response.body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
     expect(fakes.bull.addFake.notCalled).to.be.true()
   })
 
@@ -302,7 +305,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
       })
 
     expect(response.statusCode).to.equal(422)
-    expect(response.body.error).to.have.property('code', errors.ErrorCodes.INVALID_STATE)
+    expect(response.body.error).to.have.property('code', ErrorCodes.INVALID_STATE)
     expect(fakes.bull.addFake.notCalled).to.be.true()
   })
 })

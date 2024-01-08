@@ -1,12 +1,12 @@
 import type { EntityManager } from '@mikro-orm/mysql'
-import { database } from '@shared'
-import type { User } from '@shared/domain'
-import { Space } from '@shared/domain'
+import { database } from '@shared/database'
 import {
 	SPACE_MEMBERSHIP_ROLE,
 	SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { User } from '@shared/domain/user/user.entity'
 import { create, db, generate } from '@shared/test'
 import { random } from '@shared/test/generate'
 import { PROJECT_DESCRIBE_RES } from '@shared/test/mock-responses'

@@ -1,13 +1,17 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import {
-  dbCluster as dbClusterDomain,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  UserContext,
-  utils,
-} from '@shared'
-import { CreateDbClusterInput } from '@shared/domain/db-cluster/db-cluster.input'
+  CreateDbClusterInput,
+  createDbClusterSchema,
+} from '@shared/domain/db-cluster/db-cluster.input'
+import { CreateDbClusterOperation } from '@shared/domain/db-cluster/ops/create'
+import { StartDbClusterOperation } from '@shared/domain/db-cluster/ops/start'
+import { StopDbClusterOperation } from '@shared/domain/db-cluster/ops/stop'
+import { TerminateDbClusterOperation } from '@shared/domain/db-cluster/ops/terminate'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
@@ -27,7 +31,7 @@ export class DbClusterController {
   @HttpCode(204)
   @Post('/start')
   async startDbCluster(
-    @Body(new JsonSchemaPipe(utils.schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
+    @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
   ) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
@@ -37,7 +41,7 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new dbClusterDomain.StartDbClusterOperation(opsCtx).execute({
+        return await new StartDbClusterOperation(opsCtx).execute({
           dxid,
         })
       }),
@@ -47,7 +51,7 @@ export class DbClusterController {
   @HttpCode(204)
   @Post('/stop')
   async stopDbCluster(
-    @Body(new JsonSchemaPipe(utils.schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
+    @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
   ) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
@@ -57,7 +61,7 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new dbClusterDomain.StopDbClusterOperation(opsCtx).execute({
+        return await new StopDbClusterOperation(opsCtx).execute({
           dxid,
         })
       }),
@@ -67,7 +71,7 @@ export class DbClusterController {
   @HttpCode(204)
   @Post('/terminate')
   async terminateDbCluster(
-    @Body(new JsonSchemaPipe(utils.schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
+    @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
   ) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
@@ -77,7 +81,7 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new dbClusterDomain.TerminateDbClusterOperation(opsCtx).execute({
+        return await new TerminateDbClusterOperation(opsCtx).execute({
           dxid,
         })
       }),
@@ -87,7 +91,7 @@ export class DbClusterController {
   @HttpCode(201)
   @Post('/create')
   async createDbCluster(
-    @Body(new JsonSchemaPipe(dbClusterDomain.inputs.createDbClusterSchema))
+    @Body(new JsonSchemaPipe(createDbClusterSchema))
     body: CreateDbClusterInput,
   ) {
     const opsCtx: UserOpsCtx = {
@@ -96,6 +100,6 @@ export class DbClusterController {
       em: this.em,
     }
 
-    return await new dbClusterDomain.CreateDbClusterOperation(opsCtx).execute(body)
+    return await new CreateDbClusterOperation(opsCtx).execute(body)
   }
 }

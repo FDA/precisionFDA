@@ -1,14 +1,21 @@
 import { QueryOrder, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { errors, UserContext } from '@shared'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
-import { App, Asset, Job, Space, User, UserFile, Workflow } from '@shared/domain'
 import { SpaceReportPartSourceEntity } from '@shared/domain/space-report/model/space-report-part-source-entity'
 import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
 import { SpaceReportResultService } from '@shared/domain/space-report/service/space-report-result.service'
@@ -116,7 +123,7 @@ describe('SpaceReportService', () => {
 
     it('should reject if no space id provided', async () => {
       await expect(getInstance().createReport(null)).to.be.rejectedWith(
-        errors.InvalidStateError,
+        InvalidStateError,
         'Space id is required for creating a report',
       )
     })
@@ -132,7 +139,7 @@ describe('SpaceReportService', () => {
       getResultStub.resolves([])
 
       await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(
-        errors.NotFoundError,
+        NotFoundError,
         'Space not found',
       )
     })
@@ -142,7 +149,7 @@ describe('SpaceReportService', () => {
       createPartsStub.resolves([])
 
       await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(
-        errors.InvalidStateError,
+        InvalidStateError,
         'Report not generated: No entities to report on in this space',
       )
     })
@@ -404,7 +411,7 @@ describe('SpaceReportService', () => {
       getResultStub.resolves([])
 
       await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(
-        errors.NotFoundError,
+        NotFoundError,
         'Space not found',
       )
     })

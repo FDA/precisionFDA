@@ -1,12 +1,11 @@
+import { WorkstationService } from '@shared/domain/job/workstation.service'
 import * as errors from '../../../errors'
-import { queue } from '../../..'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { UserOpsCtx } from '../../../types'
-import { WorkstationService } from '..'
 import { omit } from 'ramda'
 import { WorkstationBaseOperation } from './workstation-base-operation'
 import { TASK_TYPE } from '../../../queue/task.input'
-import { createSyncWorkstationFilesTask } from '../../../queue'
+import { addToQueueEnsureUnique, createSyncWorkstationFilesTask, getFileSyncQueue } from '../../../queue'
 import { JOB_STATE } from '../job.enum'
 import { getServiceFactory } from '../../../services/service-factory'
 import { compareVersions } from 'compare-versions'
@@ -49,7 +48,7 @@ any
       user: this.ctx.user,
     }
     const jobId = WorkstationSnapshotOperation.getBullJobId(input.jobDxid)
-    return await queue.addToQueueEnsureUnique(queue.getFileSyncQueue(), queueData, jobId)
+    return await addToQueueEnsureUnique(getFileSyncQueue(), queueData, jobId)
   }
 
   async run(input: WorkstationSnapshotOperationParams): Promise<any> {

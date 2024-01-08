@@ -1,8 +1,15 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Delete, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, UserContext, userFile } from '@shared'
-import { NodesInput } from '@shared/domain/user-file/user-file.input'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { NodesLockOperation } from '@shared/domain/user-file/ops/node-lock'
+import { NodesUnlockOperation } from '@shared/domain/user-file/ops/node-unlock'
+import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
+import { RequestNodesLockOperation } from '@shared/domain/user-file/ops/start-lock-nodes-job'
+import { StartRemoveNodesJob } from '@shared/domain/user-file/ops/start-remove-nodes-job'
+import { RequestNodesUnlockOperation } from '@shared/domain/user-file/ops/start-unlock-nodes-job'
+import { NodesInput, nodesSchema } from '@shared/domain/user-file/user-file.input'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
@@ -17,7 +24,7 @@ export class NodesController {
 
   @HttpCode(204)
   @Post('/lock')
-  async lockNodes(@Body(new JsonSchemaPipe(userFile.inputs.nodesSchema)) body: NodesInput) {
+  async lockNodes(@Body(new JsonSchemaPipe(nodesSchema)) body: NodesInput) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
       user: this.user,
@@ -27,15 +34,15 @@ export class NodesController {
     const { ids, async } = body
 
     if (async) {
-      await new userFile.RequestNodesLockOperation(opsCtx).execute({ ids })
+      await new RequestNodesLockOperation(opsCtx).execute({ ids })
     } else {
-      await new userFile.NodesLockOperation(opsCtx).execute({ ids, async })
+      await new NodesLockOperation(opsCtx).execute({ ids, async })
     }
   }
 
   @HttpCode(204)
   @Post('/unlock')
-  async unlockNodes(@Body(new JsonSchemaPipe(userFile.inputs.nodesSchema)) body: NodesInput) {
+  async unlockNodes(@Body(new JsonSchemaPipe(nodesSchema)) body: NodesInput) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
       user: this.user,
@@ -45,14 +52,14 @@ export class NodesController {
     const { ids, async } = body
 
     if (async) {
-      await new userFile.RequestNodesUnlockOperation(opsCtx).execute({ ids })
+      await new RequestNodesUnlockOperation(opsCtx).execute({ ids })
     } else {
-      await new userFile.NodesUnlockOperation(opsCtx).execute({ ids, async })
+      await new NodesUnlockOperation(opsCtx).execute({ ids, async })
     }
   }
 
   @Delete('/remove')
-  async removeNodes(@Body(new JsonSchemaPipe(userFile.inputs.nodesSchema)) body: NodesInput) {
+  async removeNodes(@Body(new JsonSchemaPipe(nodesSchema)) body: NodesInput) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
       user: this.user,
@@ -62,9 +69,9 @@ export class NodesController {
     const { ids, async } = body
 
     if (async) {
-      await new userFile.StartRemoveNodesJob(opsCtx).execute({ ids })
+      await new StartRemoveNodesJob(opsCtx).execute({ ids })
     } else {
-      return await new userFile.NodesRemoveOperation({ ...opsCtx, em: opsCtx.em.fork() }).execute({
+      return await new NodesRemoveOperation({ ...opsCtx, em: opsCtx.em.fork() }).execute({
         ids,
         async,
       })

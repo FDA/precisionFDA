@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { App } from '../../../app'
+import { App } from '@shared/domain/app/app.entity'
 import { SpaceReportPartResultMeta } from '../../model/space-report-part-result-meta'
 import { SpaceReportPartResultMetaProvider } from './space-report-part-result-meta.provider'
 

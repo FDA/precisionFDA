@@ -1,13 +1,14 @@
 import { EntityManager } from '@mikro-orm/mysql'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { InvalidStateError } from '@shared/errors'
 import { PlatformClient } from '../../../platform-client'
-import { Space, SpaceMembership } from '../..'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserOpsCtx } from '../../../types'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../space.enum'
 import { spaceActionPolicy } from '../space.action-policy'
 import { getOppositeOrgDxid, getOrgDxid, getProjectDxid, isAcceptedBy, setOrgDxid, setProjectDxid } from '../space.helper'
-import { errors } from '../../..'
 import { NotificationService } from '../../notification/services/notification.service'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 
@@ -39,7 +40,7 @@ void
 
     const currentLead = space.spaceMemberships.getItems().find(sm => sm.user.getEntity().id === userId)
     if (!currentLead) {
-      throw new errors.InvalidStateError('You cannot accept space you are not member of.')
+      throw new InvalidStateError('You cannot accept space you are not member of.')
     }
 
     if (spaceActionPolicy.canAccept(space, confidentialSpaces, currentLead)) {
@@ -103,7 +104,7 @@ void
     switch (space.type) {
       case SPACE_TYPE.REVIEW: await this.handleReviewSpaceAccept(space, confidentialSpaces, admin)
         break
-      case SPACE_TYPE.VERIFICATION: throw new errors.InvalidStateError('Verification space is deprecated and cannot be accepted.')
+      case SPACE_TYPE.VERIFICATION: throw new InvalidStateError('Verification space is deprecated and cannot be accepted.')
       case SPACE_TYPE.GOVERNMENT:
       case SPACE_TYPE.ADMINISTRATOR:
       case SPACE_TYPE.GROUPS: await this.handleSpaceAccept(space, admin)

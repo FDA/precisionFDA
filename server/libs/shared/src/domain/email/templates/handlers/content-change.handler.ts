@@ -1,3 +1,6 @@
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { ErrorCodes, NotFoundError, ValidationError } from '@shared/errors'
 import { filter, pipe, uniqBy, isNil } from 'ramda'
 import {
   EmailSendInput,
@@ -11,15 +14,13 @@ import {
   buildFilterByUserSettings,
   buildEmailTemplate,
 } from '../../email.helper'
-import { SpaceMembership, User } from '../../..'
-import { errors } from '../../../..'
-import { SpaceEvent } from '../../../space-event'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../../../space-event/space-event.enum'
 import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content.template'
-import { BaseTemplate } from '..'
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
+import { User } from '@shared/domain/user/user.entity'
 
 export class ContentChangedEmailHandler
   extends BaseTemplate<NewContentAdded>
@@ -72,16 +73,16 @@ export class ContentChangedEmailHandler
       { populate: ['space', 'user'] },
     )
     if (!spaceEvent || !spaceEvent.user.unwrap() || !spaceEvent.space.unwrap()) {
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `SpaceEvent id ${this.validatedInput.spaceEventId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
     const action = SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType].split('_')[1]
     if (isNil(action)) {
-      throw new errors.ValidationError(
+      throw new ValidationError(
         `Action code name ${SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType]} is not applicable`,
-        { code: errors.ErrorCodes.EMAIL_VALIDATION },
+        { code: ErrorCodes.EMAIL_VALIDATION },
       )
     }
     const objectType = SPACE_EVENT_OBJECT_TYPE[spaceEvent.objectType].toLowerCase()

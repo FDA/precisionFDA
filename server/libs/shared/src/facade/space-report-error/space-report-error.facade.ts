@@ -1,8 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
-import { ArrayUtils, ENUMS } from '../..'
-import { NotificationService } from '../../domain/notification'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
 export class SpaceReportErrorFacade {
   constructor(
@@ -27,10 +28,10 @@ export class SpaceReportErrorFacade {
     }
 
     await this.notificationService.createNotification({
-      severity: ENUMS.SEVERITY.ERROR,
+      severity: SEVERITY.ERROR,
       userId: report.createdBy.id,
       message: 'Space report generation failed',
-      action: ENUMS.NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
+      action: NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
     })
   }
 

@@ -1,15 +1,22 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
+import { Job } from '@shared/domain/job/job.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { JobRepository } from '../../domain/job/job.repository'
-import { BaseOperation } from '../../utils/base-operation'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { OpsCtx, UserCtx } from '../../types'
-import { config, database, queue } from '../..'
-import { Job, Space, User, Folder, Node, UserFile, SpaceMembership } from '../../domain'
 import { AdminDataConsistencyReportTask, TASK_TYPE } from '../../queue/task.input'
 import { SPACE_MEMBERSHIP_SIDE } from '../../domain/space-membership/space-membership.enum'
 import { adminDataConsistencyReportTemplate } from '../../domain/email/templates/mjml/admin-data-consistency-report.template'
 import { EMAIL_TYPES, EmailSendInput } from '../../domain/email/email.config'
-import { EmailSendOperation } from '../../domain/email'
-import { createSendEmailTask } from '../../queue'
+import { addToQueue, createSendEmailTask, getMaintenanceQueue } from '../../queue'
 import { EntityManager } from '@mikro-orm/mysql'
 import { SPACE_TYPE } from '../../domain/space/space.enum'
 
@@ -55,7 +62,7 @@ AdminDataConsistencyReportOutput
     const task: AdminDataConsistencyReportTask = {
       type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
     }
-    await queue.addToQueue<AdminDataConsistencyReportTask>(task, queue.getMaintenanceQueue(), {
+    await addToQueue<AdminDataConsistencyReportTask>(task, getMaintenanceQueue(), {
       repeat: {
         cron: config.workerJobs.adminDataConsistencyReport.repeatPattern,
       },

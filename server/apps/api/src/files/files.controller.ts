@@ -1,8 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Inject, Logger, Param, Patch, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, UserContext, userFile } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
 import { CloseFileInput } from '@shared/domain/user-file/user-file.input'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { JSONSchema7 } from 'json-schema'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
@@ -42,6 +44,6 @@ export class FilesController {
       em: this.em,
     }
 
-    return await new userFile.FileCloseOperation(opsCtx).execute(body)
+    return await new FileCloseOperation(opsCtx).execute(body)
   }
 }

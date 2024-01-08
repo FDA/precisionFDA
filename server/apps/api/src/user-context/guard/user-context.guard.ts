@@ -1,5 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
-import { ajv, errors, UserContext, utils } from '@shared'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ErrorCodes, ValidationError } from '@shared/errors'
+import { schemas } from '@shared/utils/base-schemas'
+import { maskAccessTokenUserCtx } from '@shared/utils/logging'
+import { ajv } from '@shared/utils/validator'
 
 @Injectable()
 export class UserContextGuard implements CanActivate {
@@ -11,7 +15,7 @@ export class UserContextGuard implements CanActivate {
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>()
 
-    const validatorFn = ajv.compile(utils.schemas.userContextSchema)
+    const validatorFn = ajv.compile(schemas.userContextSchema)
 
     if (validatorFn(request.headers)) {
       return true
@@ -20,13 +24,13 @@ export class UserContextGuard implements CanActivate {
     this.log.warn(
       {
         url: request.url,
-        input: utils.maskAccessTokenUserCtx(this.user),
+        input: maskAccessTokenUserCtx(this.user),
         errors: validatorFn.errors,
       },
       'User context - validation failed',
     )
-    throw new errors.ValidationError('User context (request headers) invalid', {
-      code: errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID,
+    throw new ValidationError('User context (request headers) invalid', {
+      code: ErrorCodes.USER_CONTEXT_QUERY_INVALID,
       statusCode: 400,
       validationErrors: validatorFn.errors,
     })

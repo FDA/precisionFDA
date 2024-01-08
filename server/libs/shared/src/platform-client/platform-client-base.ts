@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
+import { ClientRequestError } from '@shared/errors'
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
 import type { Logger } from '@nestjs/common'
-import { errors } from '..'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 
@@ -73,7 +73,7 @@ class PlatformClientBase {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new errors.ClientRequestError(
+      throw new ClientRequestError(
         `${errorType} (${statusCode}): ${errorMessage}`,
         {
           clientResponse: err.response.data,
@@ -90,7 +90,7 @@ class PlatformClientBase {
     // TODO(2): Need to consider other error types and handle them with a descriptive message
     // e.g. See ETIMEOUT error in platform-client.mock.ts
     const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
-    throw new errors.ClientRequestError(
+    throw new ClientRequestError(
       errorMessage,
       {
         clientResponse: err.response?.data || 'No platform response',

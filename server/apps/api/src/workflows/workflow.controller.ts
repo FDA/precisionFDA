@@ -1,17 +1,14 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Param, UseGuards } from '@nestjs/common'
-import {
-  client,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  entities,
-  license as licenseDomain,
-  UserContext,
-} from '@shared'
-import { Workflow } from '@shared/domain'
-import { DxId } from '@shared/domain/entity'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { LicensesForWorkflowOperation } from '@shared/domain/license/ops/licenses-for-workflow'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { PlatformClient } from '@shared/platform-client'
 import { WorkflowDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { UidInput, UserOpsCtx } from '@shared/types'
-import { schemas } from '@shared/utils'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
@@ -35,7 +32,7 @@ export class WorkflowController {
       em: this.em,
     }
 
-    return await new licenseDomain.LicensesForWorkflowOperation(opsCtx).execute({
+    return await new LicensesForWorkflowOperation(opsCtx).execute({
       ...body,
       uid,
     })
@@ -45,9 +42,9 @@ export class WorkflowController {
   @HttpCode(201)
   @Get('/:uid/describe')
   async describeWorkflow(@Param('uid') uid: string) {
-    const workflow = await this.em.findOneOrFail(entities.Workflow, { uid }, { populate: ['user'] })
+    const workflow = await this.em.findOneOrFail(Workflow, { uid }, { populate: ['user'] })
 
-    const platformClient = new client.PlatformClient(this.user.accessToken, this.log)
+    const platformClient = new PlatformClient(this.user.accessToken, this.log)
 
     const platformWorkflowData = await platformClient.workflowDescribe({
       dxid: workflow.dxid,

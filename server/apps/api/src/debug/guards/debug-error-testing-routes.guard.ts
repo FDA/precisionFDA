@@ -1,5 +1,5 @@
 import { CanActivate, Injectable } from '@nestjs/common'
-import { config } from '@shared'
+import { config } from '@shared/config'
 
 // Debugging exception capturing and memory
 @Injectable()

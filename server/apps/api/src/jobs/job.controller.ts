@@ -12,11 +12,21 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, job as jobDomain, queue, UserContext } from '@shared'
-import { DxId } from '@shared/domain/entity'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ListJobsInput } from '@shared/domain/job/job.input'
+import { DescribeJobOperation } from '@shared/domain/job/ops/describe'
+import { ListJobsOperation } from '@shared/domain/job/ops/list'
+import {
+  RequestWorkstationSyncFilesOperation
+} from '@shared/domain/job/ops/request-workstation-files-sync'
+import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
+import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
+import { WorkstationService } from '@shared/domain/job/workstation.service'
+import { createSyncJobStatusTask } from '@shared/queue'
 import { UserOpsCtx } from '@shared/types'
-import { schemas } from '@shared/utils'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import {
@@ -47,7 +57,7 @@ export class JobController {
       em: this.em,
     }
 
-    return await new jobDomain.ListJobsOperation(opsCtx).execute({
+    return await new ListJobsOperation(opsCtx).execute({
       page: query.page ?? 1,
       limit: query.limit ?? 10,
       scope: query.scope ?? undefined,
@@ -64,7 +74,7 @@ export class JobController {
       em: this.em,
     }
 
-    return await new jobDomain.DescribeJobOperation(opsCtx).execute({ dxid })
+    return await new DescribeJobOperation(opsCtx).execute({ dxid })
   }
 
   // ------------------------
@@ -78,12 +88,12 @@ export class JobController {
       em: this.em,
     }
 
-    return await new jobDomain.RequestTerminateJobOperation(opsCtx).execute({ dxid })
+    return await new RequestTerminateJobOperation(opsCtx).execute({ dxid })
   }
 
   @Patch('/:jobDxId/syncJob')
   async syncJobStatus(@Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>) {
-    await queue.createSyncJobStatusTask({ dxid }, this.user)
+    await createSyncJobStatusTask({ dxid }, this.user)
     return { message: 'Job sync task created' }
   }
 
@@ -98,7 +108,7 @@ export class JobController {
       em: this.em,
     }
 
-    return await new jobDomain.RequestWorkstationSyncFilesOperation(opsCtx).execute({ dxid, force })
+    return await new RequestWorkstationSyncFilesOperation(opsCtx).execute({ dxid, force })
   }
 
   @Patch('/:jobDxId/checkAlive')
@@ -112,7 +122,7 @@ export class JobController {
       em: this.em,
     }
 
-    const workstationService = await new jobDomain.WorkstationService(
+    const workstationService = await new WorkstationService(
       opsCtx,
       body.code,
     ).initWithJob(dxid)
@@ -131,7 +141,7 @@ export class JobController {
       em: this.em,
     }
 
-    const workstationService = await new jobDomain.WorkstationService(
+    const workstationService = await new WorkstationService(
       opsCtx,
       body.code,
     ).initWithJob(dxid)
@@ -157,7 +167,7 @@ export class JobController {
       terminate,
     }
 
-    await new jobDomain.WorkstationSnapshotOperation(opsCtx).enqueue(input)
+    await new WorkstationSnapshotOperation(opsCtx).enqueue(input)
 
     return { message: `Snapshot for workstation ${input.jobDxid} started` }
   }

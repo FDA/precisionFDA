@@ -1,8 +1,11 @@
 /* eslint-disable max-len */
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-undefined */
-import { database, errors, getLogger, queue } from '@shared'
-import { App, Job, User } from '@shared/domain'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -11,7 +14,7 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { UserCtx, UserOpsCtx } from '@shared/types'
 import { WorkstationSnapshotOperation, WorkstationSnapshotOperationParams } from '@shared/domain/job/ops/workstation-snapshot'
 import { MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
-import { InvalidStateError, JobNotFoundError } from '@shared/errors'
+import { ErrorCodes, InvalidStateError, JobNotFoundError } from '@shared/errors'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { errorsFactory } from '../utils/errors-factory'
 
@@ -172,7 +175,7 @@ describe('TASK: workstation-snapshot', () => {
     const userOpsCtx: UserOpsCtx = { em, log, user: userCtx }
     const invoke = async () => await new WorkstationSnapshotOperation(userOpsCtx).execute(input)
     const res = await invoke()
-    expect(res.error).to.have.property('code', errors.ErrorCodes.WORKSTATION_API_ERROR)
+    expect(res.error).to.have.property('code', ErrorCodes.WORKSTATION_API_ERROR)
     expect(res.error.message).to.include('Error')
 
     expect(fakes.notificationService.createNotification.callCount).to.equal(1)

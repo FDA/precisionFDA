@@ -1,5 +1,5 @@
+import { Job } from '@shared/domain/job/job.entity'
 import { expect } from 'chai'
-import { Job } from '../../../src/domain'
 import {
   SpaceReportPartJobResultMetaProvider,
 } from '../../../src/domain/space-report/service/part/space-report-part-job-result-meta.provider'

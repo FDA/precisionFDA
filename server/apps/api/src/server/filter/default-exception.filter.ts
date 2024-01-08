@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common'
-import { config, ENUMS } from '@shared'
+import { config } from '@shared/config'
+import { ENVS } from '@shared/enums'
 import { BaseError } from '@shared/errors'
 import { Response } from 'express'
 
@@ -19,7 +20,7 @@ export class DefaultExceptionFilter implements ExceptionFilter {
         code: 'GENERIC',
       },
     }
-    if (config.env !== ENUMS.ENVS.PRODUCTION) {
+    if (config.env !== ENVS.PRODUCTION) {
       payload.stack = err.stack
     }
     console.error(err)

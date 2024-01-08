@@ -1,12 +1,15 @@
-import { BaseOperation } from '../../../utils'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { FileUnlockOperation } from '@shared/domain/user-file/ops/file-unlock'
+import { FolderUnlockOperation } from '@shared/domain/user-file/ops/folder-unlock'
+import { User } from '@shared/domain/user/user.entity'
+import { PermissionError } from '@shared/errors'
+import { getLogger } from '@shared/logger'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Node } from '../node.entity'
 import { NodesInput } from '../user-file.input'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
-import { User, userFile } from '../..'
 import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
-import { errors, getLogger } from '../../..'
-import { NotificationService } from '../../notification'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 
@@ -31,15 +34,15 @@ class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
     let unlockedFoldersCount = 0
     if (filteredNodes?.length) {
       try {
-        const fileUnlockOp = new userFile.FileUnlockOperation(this.ctx)
-        const folderUnlockOp = new userFile.FolderUnlockOperation(this.ctx)
+        const fileUnlockOp = new FileUnlockOperation(this.ctx)
+        const folderUnlockOp = new FolderUnlockOperation(this.ctx)
 
         for (const node of filteredNodes) {
           if (node.stiType === FILE_STI_TYPE.ASSET) {
             this.ctx.log.error(
               `NodesUnlockOperation: Unlocking of asset  ${node.uid} is not allowed`,
             )
-            throw new errors.PermissionError(`Unlocking of asset  ${node.uid} is not allowed`)
+            throw new PermissionError(`Unlocking of asset  ${node.uid} is not allowed`)
           }
 
           if (node.stiType === FILE_STI_TYPE.USERFILE) {

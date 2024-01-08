@@ -1,16 +1,16 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { database } from '@shared'
-import { User } from '@shared/domain'
+import { database } from '@shared/database'
 import {
   createFolderEvent,
   createJobClosed,
   EVENT_TYPES,
 } from '@shared/domain/event/event.helper'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db, generate } from '@shared/test'
 import { expect } from 'chai'
 import { STATIC_SCOPE } from '@shared/enums'
-import { JobDescribeResponse } from '@shared/platform-client'
 
 describe('event.helper', () => {
   let em: EntityManager

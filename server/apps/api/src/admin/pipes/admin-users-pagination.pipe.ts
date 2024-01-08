@@ -1,9 +1,20 @@
 import { Injectable, Logger, PipeTransform } from '@nestjs/common'
-import { BaseEntity, errors, UserContext, utils, validation } from '@shared'
+import { BaseEntity } from '@shared/database/base-entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ValidationError } from '@shared/errors'
+import {
+  bindGetValueToSchema,
+  createEnumFilter,
+  FilterSchemaNode,
+  MATCH_FILTER,
+  NUMERIC_RANGE_FILTER,
+} from '@shared/utils/filters'
+import { MapValueObjectByKey, MapValuesToReturnType } from '@shared/utils/generics'
+import { parseEnumValueFromString } from '@shared/validation/parsers'
 
 type PaginationOpts<
   SortColumnT,
-  FilterSchemaT extends Record<string, utils.filters.FilterSchemaNode>,
+  FilterSchemaT extends Record<string, FilterSchemaNode>,
 > = Partial<{
   pagination: {
     defaultPerPage?: number
@@ -30,8 +41,8 @@ const defaultKeyMapper = (key: string) => `filters[${key}]`
 export class AdminUsersPaginationPipe<
   T extends BaseEntity,
   SortColumnT extends string = Extract<keyof T, string>,
-  FilterSchemaT extends Partial<Record<string, utils.filters.FilterSchemaNode>> = Partial<
-    Record<Extract<keyof T, string>, utils.filters.FilterSchemaNode>
+  FilterSchemaT extends Partial<Record<string, FilterSchemaNode>> = Partial<
+    Record<Extract<keyof T, string>, FilterSchemaNode>
   >,
 > implements PipeTransform
 {
@@ -53,13 +64,13 @@ export class AdminUsersPaginationPipe<
     },
     filter: {
       schema: {
-        dxuser: utils.filters.MATCH_FILTER,
-        email: utils.filters.MATCH_FILTER,
+        dxuser: MATCH_FILTER,
+        email: MATCH_FILTER,
         // :D
-        userState: utils.filters.createEnumFilter(['0', '1', '2']),
-        lastLogin: utils.filters.MATCH_FILTER,
-        totalLimit: utils.filters.NUMERIC_RANGE_FILTER,
-        jobLimit: utils.filters.NUMERIC_RANGE_FILTER,
+        userState: createEnumFilter(['0', '1', '2']),
+        lastLogin: MATCH_FILTER,
+        totalLimit: NUMERIC_RANGE_FILTER,
+        jobLimit: NUMERIC_RANGE_FILTER,
       },
     },
   }
@@ -72,13 +83,13 @@ export class AdminUsersPaginationPipe<
   private readonly sortableColums = this.opts?.sort?.sortableColumns ?? []
   // @ts-ignore
   private readonly filterKeyMapper = this.opts?.filter?.keyMapper ?? defaultKeyMapper
-  private readonly orderByParser = validation.parsers.parseEnumValueFromString<
+  private readonly orderByParser = parseEnumValueFromString<
     Extract<(typeof this.opts)['sort']['sortableColumns'][number], string>
   >(
     this.sortableColums as any,
     (value) => `"order_by" param was "${value}", expected ${JSON.stringify(this.sortableColums)}`,
   )
-  private readonly orderDirParser = validation.parsers.parseEnumValueFromString(
+  private readonly orderDirParser = parseEnumValueFromString(
     ['ASC', 'DESC'],
     (value) => `"order_dir" param was "${value}", expected to be either "ASC" or "DESC"`,
   )
@@ -97,11 +108,11 @@ export class AdminUsersPaginationPipe<
     const isPerPageInvalid = perPage < 1
     switch (true) {
       case isPageInvalid && isPerPageInvalid:
-        throw new errors.ValidationError('"page" and "per_page" parameters were null')
+        throw new ValidationError('"page" and "per_page" parameters were null')
       case isPageInvalid:
-        throw new errors.ValidationError('"page" parameter was null')
+        throw new ValidationError('"page" parameter was null')
       case isPerPageInvalid:
-        throw new errors.ValidationError('"per_page" parameter was null')
+        throw new ValidationError('"per_page" parameter was null')
       default:
         break
     }
@@ -119,14 +130,14 @@ export class AdminUsersPaginationPipe<
 
     const filters = Object.fromEntries(
       Object.entries(
-        utils.filters.bindGetValueToSchema(
+        bindGetValueToSchema(
           (key) => value[this.filterKeyMapper(key)]?.toString(),
           (this.opts?.filter?.schema ?? {}) as FilterSchemaT,
         ),
       ).map(([schemaKey, schemaValue]) => [schemaKey, schemaValue.parser(schemaKey)]),
-    ) as utils.generics.MapValuesToReturnType<
-      utils.generics.MapValuesToReturnType<
-        utils.generics.MapValueObjectByKey<'parser', FilterSchemaT>
+    ) as MapValuesToReturnType<
+      MapValuesToReturnType<
+        MapValueObjectByKey<'parser', FilterSchemaT>
       >
     >
 

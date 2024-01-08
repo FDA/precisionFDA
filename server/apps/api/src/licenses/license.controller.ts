@@ -1,7 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
-import { acceptedLicense, DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, license, UserContext } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
+import { FilesInput, filesSchema } from '@shared/domain/license/license.input'
+import { LicensesForFilesOperation } from '@shared/domain/license/ops/licenses-for-files'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
@@ -16,7 +20,7 @@ export class LicenseController {
 
   @Get('/accepted')
   async listAcceptedLicences() {
-    const [acceptedLicenses] = await this.em.findAndCount(acceptedLicense.AcceptedLicense, {
+    const [acceptedLicenses] = await this.em.findAndCount(AcceptedLicense, {
       user: this.user.id,
     })
 
@@ -26,7 +30,7 @@ export class LicenseController {
   @HttpCode(200)
   @Post('/files')
   async listLicencesForFiles(
-    @Body(new JsonSchemaPipe(license.inputs.filesSchema)) body: license.inputs.FilesInput,
+    @Body(new JsonSchemaPipe(filesSchema)) body: FilesInput,
   ) {
     const opsCtx: UserOpsCtx = {
       log: this.log,
@@ -34,6 +38,6 @@ export class LicenseController {
       em: this.em,
     }
 
-    return await new license.LicensesForFilesOperation(opsCtx).execute({ ...body })
+    return await new LicensesForFilesOperation(opsCtx).execute({ ...body })
   }
 }

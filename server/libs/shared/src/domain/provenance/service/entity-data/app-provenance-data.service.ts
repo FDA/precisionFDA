@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { config } from '../../../..'
-import { App } from '../../../app'
+import { config } from '@shared/config'
+import { App } from '@shared/domain/app/app.entity'
 import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'

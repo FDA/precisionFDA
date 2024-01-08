@@ -1,5 +1,5 @@
 import { Provider, Scope } from '@nestjs/common'
-import { database } from '@shared'
+import { database } from '@shared/database'
 
 /**
  * @deprecated Use SqlEntityManager from '@mikro-orm/mysql' instead

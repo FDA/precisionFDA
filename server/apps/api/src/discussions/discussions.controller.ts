@@ -13,15 +13,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import {
-  client,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  discussion as discussionDomain,
-  entityFetcher,
-  UserContext,
-} from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { CommentableType } from '@shared/domain/comment/comment.entity'
 import { CreateCommentInput, EditCommentInput } from '@shared/domain/discussion/discussion.types'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { PlatformClient } from '@shared/platform-client'
+import { EntityFetcherService } from '@shared/services/entity-fetcher.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { ZodPipe } from '../validation/pipes/zod.pipe'
 import type {
@@ -233,14 +232,14 @@ export class DiscussionsController {
 
   private getDiscussionService() {
     // TODO completely replace with IoC
-    const publisherService = new discussionDomain.PublisherService(
+    const publisherService = new PublisherService(
       this.em,
       this.user,
-      new client.PlatformClient(this.user.accessToken),
+      new PlatformClient(this.user.accessToken),
     )
-    const fetcherService = new entityFetcher.EntityFetcherService(this.em, this.user)
+    const fetcherService = new EntityFetcherService(this.em, this.user)
 
-    return new discussionDomain.DiscussionService(
+    return new DiscussionService(
       this.em,
       this.user,
       publisherService,

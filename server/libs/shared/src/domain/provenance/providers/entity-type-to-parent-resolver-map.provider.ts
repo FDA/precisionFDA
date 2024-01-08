@@ -1,5 +1,5 @@
 import { Provider } from '@nestjs/common'
-import { EntityType } from '@shared/domain/entity'
+import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
 import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
 import { ComparisonProvenanceDataService } from '@shared/domain/provenance/service/entity-data/comparison-provenance-data.service'

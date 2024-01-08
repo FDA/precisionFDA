@@ -1,5 +1,4 @@
-import { client } from '@shared'
-
+import { PlatformErrors } from '@shared/platform-client'
 
 export const createPlatformError = (statusCode: number, type: string, message: string) => {
   return {
@@ -20,7 +19,7 @@ export const createPlatformError = (statusCode: number, type: string, message: s
 export const createPermissionsDeniedError = () => {
   return createPlatformError(
     401,
-    client.PlatformErrors.PermissionDenied,
+    PlatformErrors.PermissionDenied,
     'BillTo for this job\'s project must have the "httpsApp" feature enabled to run this executable',
   )
 }

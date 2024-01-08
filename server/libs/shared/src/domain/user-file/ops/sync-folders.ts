@@ -1,5 +1,8 @@
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserNotFoundError } from '@shared/errors'
 import { differenceWith } from 'ramda'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Folder } from '../folder.entity'
 import { SyncFoldersInput } from '../user-file.input'
 import { getPathsToBuild,
@@ -11,8 +14,6 @@ import { getPathsToBuild,
   getPathsToKeep,
   filterDuplicities,
   getFolderPath, getParentFolders } from '../user-file.helper'
-import { User, UserFile } from '../..'
-import { errors } from '../../..'
 import { FILE_ORIGIN_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
@@ -32,7 +33,7 @@ Folder[]
     const em = this.ctx.em
     const user = await em.findOne(User, { id: this.ctx.user.id })
     if (!user) {
-      throw new errors.UserNotFoundError()
+      throw new UserNotFoundError()
     }
     const repo = em.getRepository(Folder)
 

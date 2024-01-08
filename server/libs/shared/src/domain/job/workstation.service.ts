@@ -1,16 +1,15 @@
 /* eslint-disable max-len */
+import { config } from '@shared/config'
+import { Job } from '@shared/domain/job/job.entity'
 import axios, { AxiosInstance } from 'axios'
 import { wrapper } from 'axios-cookiejar-support'
 import { CookieJar } from 'tough-cookie'
 import * as errors from '../../errors'
 import { UserOpsCtx } from '../../types'
-import { Job } from '.'
 import { JOB_STATE } from './job.enum'
 import { getServiceFactory } from '../../services/service-factory'
-import { IWorkstationClient } from '../../workstation-client'
-import { CLIConfigParams } from '../../workstation-client/workstation-client'
+import { CLIConfigParams, IWorkstationClient } from '../../workstation-client/workstation-client'
 import { compareVersions } from 'compare-versions'
-import { config } from '../..'
 import { omit } from 'ramda'
 
 

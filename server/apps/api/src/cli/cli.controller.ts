@@ -1,7 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Post } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, UserContext, userFile } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { CLINodeSearchOperation } from '@shared/domain/user-file/ops/cli-node-search'
+import { CLINodeSearchInput, CLINodeSearchSchema } from '@shared/domain/user-file/user-file.input'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
@@ -17,8 +20,8 @@ export class CliController {
   @HttpCode(200)
   @Post('/nodes')
   async findNodes(
-    @Body(new JsonSchemaPipe(userFile.inputs.CLINodeSearchSchema))
-    body: userFile.inputs.CLINodeSearchInput,
+    @Body(new JsonSchemaPipe(CLINodeSearchSchema))
+    body: CLINodeSearchInput,
   ) {
     const { spaceId, folderId, arg, type } = body
 
@@ -28,7 +31,7 @@ export class CliController {
       em: this.em,
     }
 
-    const res = await new userFile.CLINodeSearchOperation(opsCtx).execute({
+    const res = await new CLINodeSearchOperation(opsCtx).execute({
       spaceId,
       folderId,
       arg,

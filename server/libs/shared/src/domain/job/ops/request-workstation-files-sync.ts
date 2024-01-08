@@ -1,6 +1,6 @@
 import * as errors from '../../../errors'
 import * as client from '../../../platform-client'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from '../job.entity'
 import { WorkstationSyncFilesInput } from '../job.input'
 import { JOB_STATE } from '../job.enum'

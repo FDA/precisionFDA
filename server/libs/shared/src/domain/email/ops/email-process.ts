@@ -1,4 +1,4 @@
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { EmailProcessInput, getEmailConfig, EmailTemplate } from '../email.config'
 import { createSendEmailTask } from '../../../queue'
 import { UserOpsCtx } from '../../../types'

@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core'
-import { config, database } from '@shared'
+import { database } from '@shared/database'
+import { config } from '@shared/config'
 import { ENVS } from '@shared/enums'
 import { QueueModule } from '@shared/queue/queue.module'
 import { QueueProxy } from '@shared/queue/queue.proxy'
 import { Logger as PinoLogger } from 'nestjs-pino/Logger'
 import { writeHeapSnapshot } from 'v8'
 import { setupHandlers } from './queues'
-import { log } from './utils'
+import { log } from './utils/logger'
 import { WorkerModule } from './worker.module'
 
 process.on('SIGUSR2', () => {

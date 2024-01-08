@@ -1,8 +1,10 @@
 /* eslint-disable no-await-in-loop */
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { ClientRequestError } from '@shared/errors'
 import { difference, groupBy } from 'ramda'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { UserOpsCtx } from '../../../types'
-import { client, errors, queue } from '../../..'
 import { User } from '../../user/user.entity'
 import { TASK_TYPE } from '../../../queue/task.input'
 import { PlatformClient } from '../../../platform-client'
@@ -11,10 +13,8 @@ import { findFileOrAssetsWithDxid, findFileOrAssetWithUid, findUnclosedFilesOrAs
 import { FILE_STATE_DX, IFileOrAsset } from '../user-file.types'
 import { ChallengeUpdateCardImageUrlOperation } from '../../challenge/ops/update-challenge-card-image-url'
 import { ChallengeRepository } from '../../challenge/challenge.repository'
-import { Challenge } from '../../challenge'
 import { removeRepeatable } from '../../../queue'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { UserFile } from '..'
 
 
 // Sync all files in non-closed states given a user context
@@ -148,7 +148,7 @@ void> {
       return
     }
 
-    this.platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    this.platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
     let openFiles = await findUnclosedFilesOrAssets(em, user.id)
 
     this.log.verbose({
@@ -173,7 +173,7 @@ void> {
         }
       }
     } catch (err) {
-      if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {
+      if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
         if (err.props.clientStatusCode === 401) {
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
@@ -194,7 +194,7 @@ void> {
     openFiles = await findUnclosedFilesOrAssets(em, user.id)
     if (openFiles.length === 0) {
       this.log.verbose('SyncFilesStateOperation: Completed and all user files closed, removing repeatable job')
-      await queue.removeRepeatable(this.ctx.job)
+      await removeRepeatable(this.ctx.job)
     } else {
       this.log.verbose({
         dxuser: user.dxuser,

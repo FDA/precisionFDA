@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import type { WorkerOpsCtx } from '@shared/types'
+import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { createHash } from 'crypto'
 import { PlatformClient } from '../../../platform-client'
 import type { FileCreateParams } from '../../../platform-client/platform-client.params'
-import type { UserOpsCtx } from '../../../types'
-import type { UserFile } from '../../user-file'
-import { FileCloseOperation } from '../../user-file'
 
 @Injectable()
 export class PlatformFileService {

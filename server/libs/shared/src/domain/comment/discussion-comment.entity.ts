@@ -1,8 +1,7 @@
 import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
-import { Discussion } from '../discussion'
-import { User } from '../user'
-import { Comment } from '.'
-
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
 
 @Entity({ discriminatorValue: 'Discussion' })
 export class DiscussionComment extends Comment {

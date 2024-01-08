@@ -1,10 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
+import { UserService } from '@shared/domain/user/user.service'
+import { getLogger } from '@shared/logger'
 import { create, db } from '../../../src/test'
-import { database, getLogger } from '@shared'
 import { expect } from 'chai'
 import P from 'pino'
-import { User } from '../../../src/domain'
-import { UserService } from '../../../src/domain/user'
 import { UserCtx, UserOpsCtx } from '../../../src/types'
 
 describe('user service tests', () => {

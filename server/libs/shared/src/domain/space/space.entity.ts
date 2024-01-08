@@ -1,5 +1,6 @@
 import { Collection, Entity, EntityRepositoryType, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core'
-import { SpaceMembership, User } from '..'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'

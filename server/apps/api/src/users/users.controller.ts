@@ -1,7 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Controller, Get, Inject, Logger, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, user, UserContext } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { UserService } from '@shared/domain/user/user.service'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
@@ -21,7 +23,7 @@ export class UsersController {
       em: this.em,
     }
 
-    const userService = new user.UserService(opsCtx)
+    const userService = new UserService(opsCtx)
 
     return await userService.listActiveUserNames()
   }
@@ -34,7 +36,7 @@ export class UsersController {
       em: this.em,
     }
 
-    const userService = new user.UserService(opsCtx)
+    const userService = new UserService(opsCtx)
 
     return await userService.listGovernmentUserNames()
   }

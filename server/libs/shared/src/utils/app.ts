@@ -1,8 +1,9 @@
-import { config, errors } from '@shared'
+import { config } from '@shared/config'
+import { ServiceError } from '@shared/errors'
 
 export const codeRemap = (code: string): string => {
   if (!config.api.appKit) {
-    throw new errors.ServiceError('AppKit environment variable is not configured', {})
+    throw new ServiceError('AppKit environment variable is not configured', {})
   }
   return `
       dx cat ${config.api.appKit} | tar -z -x -C / --no-same-owner --no-same-permissions -f -

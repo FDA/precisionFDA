@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Provider, Scope } from '@nestjs/common'
-import { database } from '@shared'
+import { database } from '@shared/database'
 
 export const sqlEntityManagerProvider: Provider = {
   provide: SqlEntityManager,

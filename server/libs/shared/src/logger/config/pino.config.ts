@@ -1,5 +1,5 @@
-import { config } from '@shared'
-import { maskAccessTokenUserCtx } from '@shared/utils'
+import { config } from '@shared/config'
+import { maskAccessTokenUserCtx } from '@shared/utils/logging'
 import { nanoid } from 'nanoid'
 import { Params } from 'nestjs-pino/params'
 import pino from 'pino'

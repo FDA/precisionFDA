@@ -1,5 +1,5 @@
+import { ErrorCodes, ServiceError } from '@shared/errors'
 import * as nodemailer from 'nodemailer'
-import { errors } from '..'
 import { config } from '../config'
 import { SendEmailJob } from '../queue/task.input'
 import { getLogger } from '../logger'
@@ -53,8 +53,8 @@ class EmailClient implements IEmailService {
         }
         if (error) {
           log.error({ error: error }, 'SendEmail failed')
-          throw new errors.ServiceError('SMTP request failed', {
-            code: errors.ErrorCodes.AWS_SES_SERVICE_ERROR,
+          throw new ServiceError('SMTP request failed', {
+            code: ErrorCodes.AWS_SES_SERVICE_ERROR,
             clientResponse: error.message,
             clientStatusCode: 424,
           })

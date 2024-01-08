@@ -1,8 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ENUMS } from '@shared'
-import { NotificationService } from '@shared/domain/notification'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SpaceReportErrorFacade } from '@shared/facade/space-report-error/space-report-error.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
@@ -37,10 +37,10 @@ describe('SpaceReportErrorFacade', () => {
     createNotificationStub.throws()
     createNotificationStub
       .withArgs({
-        severity: ENUMS.SEVERITY.ERROR,
+        severity: SEVERITY.ERROR,
         userId: SPACE_REPORT_CREATOR_ID,
         message: 'Space report generation failed',
-        action: ENUMS.NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
+        action: NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
       })
       .resolves()
 

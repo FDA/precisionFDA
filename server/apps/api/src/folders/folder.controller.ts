@@ -12,11 +12,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, UserContext, userFile } from '@shared'
-import { RenameFolderInput } from '@shared/domain/user-file/user-file.input'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { FolderRecreateOperation } from '@shared/domain/user-file/ops/folder-recreate'
+import { FolderRemoveRecursiveOperation } from '@shared/domain/user-file/ops/folder-remove-recursive'
+import { FolderRenameOperation } from '@shared/domain/user-file/ops/folder-rename'
+import { RenameFolderInput, renameFolderSchema } from '@shared/domain/user-file/user-file.input'
 import { UserOpsCtx } from '@shared/types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { pickOpsCtx } from '../utils/pick-ops-ctx'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
 @UseGuards(UserContextGuard)
@@ -31,7 +34,7 @@ export class FolderController {
   @Patch('/:id/rename')
   async renameFolder(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new JsonSchemaPipe(userFile.inputs.renameFolderSchema))
+    @Body(new JsonSchemaPipe(renameFolderSchema))
     body: Omit<RenameFolderInput, 'id'>,
   ) {
     const opsCtx: UserOpsCtx = {
@@ -40,7 +43,7 @@ export class FolderController {
       em: this.em,
     }
 
-    return await new userFile.FolderRenameOperation(opsCtx).execute({
+    return await new FolderRenameOperation(opsCtx).execute({
       newName: body.newName,
       id,
     })
@@ -54,7 +57,7 @@ export class FolderController {
       em: this.em,
     }
 
-    return await new userFile.FolderRemoveRecursiveOperation(opsCtx).execute({ id })
+    return await new FolderRemoveRecursiveOperation(opsCtx).execute({ id })
   }
 
   @HttpCode(204)
@@ -68,7 +71,7 @@ export class FolderController {
 
     const { userId, projectId } = body
 
-    await new userFile.FolderRecreateOperation(opsCtx).execute({
+    await new FolderRecreateOperation(opsCtx).execute({
       userId,
       projectId,
     })

@@ -1,8 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { database, queue } from '@shared'
+import { database } from '@shared/database'
+import { TaskWithAuth } from '@shared/queue/task.input'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
 import { Job } from 'bull'
-import { getChildLogger } from '../../utils'
+import { getChildLogger } from '../../utils/logger'
 
 type WorkerContext = WorkerOpsCtx<UserOpsCtx>
 
@@ -10,7 +11,7 @@ type WorkerContext = WorkerOpsCtx<UserOpsCtx>
  * @deprecated used by old non-DI-integrated job processors
  */
 export abstract class BaseQueueProcessor {
-  protected async handleUserTask<TJob extends queue.types.TaskWithAuth>(
+  protected async handleUserTask<TJob extends TaskWithAuth>(
     bullJob: Job,
     execute: (ctx: WorkerContext, input: any) => Promise<any>,
   ) {

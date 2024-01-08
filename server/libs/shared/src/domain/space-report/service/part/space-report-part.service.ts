@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { ArrayUtils } from '@shared'
 import { SOURCE_TYPE_TO_META_PROVIDER_MAP } from '@shared/domain/space-report/providers/source-type-to-meta-provider-map.provider'
+import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../../entity/space-report-part.entity'
 import type { BatchComplete } from '../../model/batch-complete'
 import type { SpaceReportPartSource } from '../../model/space-report-part-source'

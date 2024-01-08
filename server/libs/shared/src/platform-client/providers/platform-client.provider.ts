@@ -1,5 +1,5 @@
 import { Provider } from '@nestjs/common'
-import { UserContext } from '@shared'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PlatformClient } from '@shared/platform-client'
 
 export const platformClientProvider: Provider = {

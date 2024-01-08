@@ -1,10 +1,13 @@
 import { wrap } from '@mikro-orm/core'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { NotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
 import { difference, map, prop } from 'ramda'
-import { Folder, User, UserFile } from '../..'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
-import { errors, client } from '../../..'
 import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 
@@ -22,7 +25,7 @@ SyncFolderFilesOutput
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
     this.ctx.log.debug({ input }, 'SyncFilesInFolderOperation input params')
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const folderRepo = em.getRepository(Folder)
     const fileRepo = em.getRepository(UserFile)
@@ -36,7 +39,7 @@ SyncFolderFilesOutput
     if (input.folderId) {
       current = foldersInProject.find(f => f.id === input.folderId)
       if (!current) {
-        throw new errors.NotFoundError(`Folder id ${input.folderId.toString()} `
+        throw new NotFoundError(`Folder id ${input.folderId.toString()} `
           + 'does not exist under given project')
       }
       // transfer folderId into API path string
@@ -110,7 +113,7 @@ SyncFolderFilesOutput
       }
       const remoteState = remoteFiles.find(r => r.id === userfile.dxid)
       if (!remoteState) {
-        throw new errors.NotFoundError('Remote state for local file was not found', {
+        throw new NotFoundError('Remote state for local file was not found', {
           details: { fileId: userfile.id },
         })
       }

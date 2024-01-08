@@ -1,6 +1,7 @@
-import { Space, SpaceMembership } from '..'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { isAdminOrLead } from '../space-membership/space-membership.helper'
-import { User } from '../user'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { isAcceptedBy } from './space.helper'
 

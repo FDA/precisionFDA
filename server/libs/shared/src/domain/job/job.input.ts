@@ -1,9 +1,9 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { schemas } from '../../utils'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 import { SCOPE } from '../../types/common'
+import { schemas } from '@shared/utils/base-schemas'
 
 
 type DxIdInput = {

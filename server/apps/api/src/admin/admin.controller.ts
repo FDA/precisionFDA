@@ -1,16 +1,14 @@
 /* eslint-disable multiline-ternary */
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Post, Put, Query, UseGuards } from '@nestjs/common'
-import {
-  client,
-  config,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  errors,
-  queue,
-  user,
-  UserContext,
-  utils,
-} from '@shared'
+import { config } from '@shared/config'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
+import { ValidationError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { createCheckStaleJobsTask } from '@shared/queue'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { buildFiltersWithColumnNodes } from '@shared/utils/filters'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
@@ -31,7 +29,7 @@ interface IIdListParams {
   ids: number[]
 }
 
-type Resource = (typeof user.RESOURCE_TYPES)[number]
+type Resource = (typeof RESOURCE_TYPES)[number]
 
 interface IResourceTypeParams {
   ids: number[]
@@ -49,7 +47,7 @@ export class AdminController {
 
   @Get('/checkStaleJobs')
   async checkStaleJobs() {
-    return await queue.createCheckStaleJobsTask(this.user)
+    return await createCheckStaleJobsTask(this.user)
   }
 
   @Get('/users')
@@ -60,7 +58,7 @@ export class AdminController {
       orderBy === 'jobLimit' ||
       Boolean(filters.totalLimit) ||
       Boolean(filters.jobLimit)
-        ? await this.em.getRepository(user.User).findPaginatedWithJsonFields({
+        ? await this.em.getRepository(User).findPaginatedWithJsonFields({
             ...pagination,
             ...(function () {
               if (!orderBy) {
@@ -88,7 +86,7 @@ export class AdminController {
               } as any
               // Note(samuel) added 'as any' because of poor type resolution of conditionals
             })(),
-            filters: utils.filters.buildFiltersWithColumnNodes(filters, {
+            filters: buildFiltersWithColumnNodes(filters, {
               totalLimit: {
                 sqlColumn: 'cloud_resource_settings' as any,
                 path: ['total_limit'],
@@ -99,7 +97,7 @@ export class AdminController {
               },
             }),
           })
-        : await this.em.getRepository(user.User).findPaginated({
+        : await this.em.getRepository(User).findPaginated({
             ...pagination,
             orderBy,
             filters: {
@@ -124,7 +122,7 @@ export class AdminController {
     body: ISetTotalLimitParams,
   ) {
     const { ids, totalLimit } = body
-    await this.em.getRepository(user.User).bulkUpdateSetTotalLimit(ids, totalLimit)
+    await this.em.getRepository(User).bulkUpdateSetTotalLimit(ids, totalLimit)
 
     return 'updated'
   }
@@ -139,7 +137,7 @@ export class AdminController {
     body: ISetJobLimitParams,
   ) {
     const { ids, jobLimit } = body
-    await this.em.getRepository(user.User).bulkUpdateSetJobLimit(ids, jobLimit)
+    await this.em.getRepository(User).bulkUpdateSetJobLimit(ids, jobLimit)
 
     return 'updated'
   }
@@ -148,12 +146,12 @@ export class AdminController {
   @Post('/users/reset2fa')
   async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
-    const adminUserClient = new client.PlatformClient(
+    const adminUserClient = new PlatformClient(
       config.platform.adminUserAccessToken,
       this.log,
     )
     const results = await this.em
-      .getRepository(user.User)
+      .getRepository(User)
       .bulkUpdateReset2fa(ids, adminUserClient, this.user)
 
     return results
@@ -163,16 +161,16 @@ export class AdminController {
   @Post('/users/unlock')
   async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
-    const adminUserClient = new client.PlatformClient(
+    const adminUserClient = new PlatformClient(
       config.platform.adminUserAccessToken,
       this.log,
     )
     const results = await this.em
-      .getRepository(user.User)
+      .getRepository(User)
       .bulkUpdateUnlock(ids, adminUserClient, this.user)
 
     if (results.some(({ result }) => result.status === 'unhandledError')) {
-      throw new errors.ValidationError(undefined, { details: results })
+      throw new ValidationError(undefined, { details: results })
     }
 
     return results
@@ -185,7 +183,7 @@ export class AdminController {
         ids: (value: number[], _: string, user: UserContext) => {
           const currentUserId = user.id
           if (value.includes(currentUserId)) {
-            throw new errors.ValidationError('Cannot activate self')
+            throw new ValidationError('Cannot activate self')
           }
         },
       }),
@@ -193,7 +191,7 @@ export class AdminController {
     body: IIdListParams,
   ) {
     const { ids } = body
-    await this.em.getRepository(user.User).bulkActivate(ids)
+    await this.em.getRepository(User).bulkActivate(ids)
 
     return 'updated'
   }
@@ -205,7 +203,7 @@ export class AdminController {
         ids: (value: number[], _: string, user: UserContext) => {
           const currentUserId = user.id
           if (value.includes(currentUserId)) {
-            throw new errors.ValidationError('Cannot deactivate self')
+            throw new ValidationError('Cannot deactivate self')
           }
         },
       }),
@@ -213,7 +211,7 @@ export class AdminController {
     body: IIdListParams,
   ) {
     const { ids } = body
-    await this.em.getRepository(user.User).bulkDeactivate(ids)
+    await this.em.getRepository(User).bulkDeactivate(ids)
 
     return 'updated'
   }
@@ -222,13 +220,13 @@ export class AdminController {
   async enableResourceTypeForUsers(
     @Body(
       getAdminBodyValidationPipe({
-        resource: enumValidator<Resource>(user.RESOURCE_TYPES as any as Resource[]),
+        resource: enumValidator<Resource>(RESOURCE_TYPES as any as Resource[]),
       }),
     )
     body: IResourceTypeParams,
   ) {
     const { ids, resource } = body
-    await this.em.getRepository(user.User).bulkEnableResourceType(ids, resource)
+    await this.em.getRepository(User).bulkEnableResourceType(ids, resource)
 
     return 'updated'
   }
@@ -238,7 +236,7 @@ export class AdminController {
     @Body(getAdminBodyValidationPipe()) body: IResourceTypeParams,
   ) {
     const { ids } = body
-    await this.em.getRepository(user.User).bulkEnableAll(ids)
+    await this.em.getRepository(User).bulkEnableAll(ids)
 
     return 'updated'
   }
@@ -247,13 +245,13 @@ export class AdminController {
   async disableResourceTypeForUsers(
     @Body(
       getAdminBodyValidationPipe({
-        resource: enumValidator<Resource>(user.RESOURCE_TYPES as any as Resource[]),
+        resource: enumValidator<Resource>(RESOURCE_TYPES as any as Resource[]),
       }),
     )
     body: IResourceTypeParams,
   ) {
     const { ids, resource } = body
-    await this.em.getRepository(user.User).bulkDisableResourceType(ids, resource)
+    await this.em.getRepository(User).bulkDisableResourceType(ids, resource)
 
     return 'updated'
   }
@@ -261,7 +259,7 @@ export class AdminController {
   @Put('/users/disableAllResourceTypes')
   async disableAllResourceTypesForUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
-    await this.em.getRepository(user.User).bulkDisableAll(ids)
+    await this.em.getRepository(User).bulkDisableAll(ids)
 
     return 'updated'
   }

@@ -1,4 +1,4 @@
-import type { DxId } from '../../entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import type { UId } from '../../entity/domain/uid'
 import type { JobInstanceType } from '../../job/job.enum'
 

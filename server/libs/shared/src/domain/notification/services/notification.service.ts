@@ -1,11 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Optional } from '@nestjs/common'
-import { errors } from '@shared'
+import { User } from '@shared/domain/user/user.entity'
+import { NotFoundError, PermissionError } from '@shared/errors'
 import { createClient } from 'redis'
 import { defaultLogger as logger } from '../../../logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
-import { User } from '../../user'
-import { Notification } from '@shared/domain'
+import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationInput } from '../notification.input'
 
 export type RedisClientType = ReturnType<typeof createClient>
@@ -79,7 +79,7 @@ export class NotificationService implements INotificationService {
         populate: ['user'],
       })
       if (loadedFromDb.user?.id !== userId) {
-        throw new errors.PermissionError()
+        throw new PermissionError()
       }
 
       loadedFromDb.updatedAt = new Date()
@@ -90,7 +90,7 @@ export class NotificationService implements INotificationService {
       await this.em.flush()
       return loadedFromDb
     } else {
-      throw new errors.NotFoundError()
+      throw new NotFoundError()
     }
   }
 }

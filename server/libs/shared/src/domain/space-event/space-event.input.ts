@@ -1,5 +1,5 @@
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from './space-event.enum'
-import { SpaceMembership } from '..'
 import { InputEntityUnion } from '../../utils/object-utils'
 
 type SpaceEventInput = {

@@ -1,19 +1,42 @@
+import { config } from '@shared/config'
+import {
+  ChallengeOpenedEmailHandler
+} from '@shared/domain/email/templates/handlers/challenge-opened.handler'
+import {
+  ChallengePreregEmailHandler
+} from '@shared/domain/email/templates/handlers/challenge-prereg.handler'
+import {
+  CommentAddedEmailHandler
+} from '@shared/domain/email/templates/handlers/comment-added.handler'
+import {
+  ContentChangedEmailHandler
+} from '@shared/domain/email/templates/handlers/content-change.handler'
+import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
+import {
+  JobFinishedEmailHandler
+} from '@shared/domain/email/templates/handlers/job-finished.handler'
+import {
+  MemberChangedEmailHandler
+} from '@shared/domain/email/templates/handlers/member-change.handler'
+import {
+  SpaceChangedEmailHandler
+} from '@shared/domain/email/templates/handlers/space-change.handler'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { stringValues, stringValuesDowncased } from '@shared/utils/enum-utils'
+import { schemas } from '@shared/utils/base-schemas'
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import type { JSONSchema7 } from 'json-schema'
 import { AnyObject, OpsCtx } from '../../types'
-import { schemas, enumUtils } from '../../utils'
-import { SpaceEvent, User } from '..'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
-import { config } from '../..'
-import { handlers } from './templates'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
 /**
  * List of all notification bases, which may be applied to a role.
  */
-const NOTIFICATION_TYPES_BASE = {
+export const NOTIFICATION_TYPES_BASE = {
   // space event based
   membership_changed: true,
   member_added_to_space: true,
@@ -32,7 +55,7 @@ const NOTIFICATION_TYPES_BASE = {
  * List of notification roles, roles are represented by a prefix in the DB column,
  * so we want to document this mapping.
  */
-const NOTIFICATION_ROLE_PREFIXES = {
+export const NOTIFICATION_ROLE_PREFIXES = {
   admin: 'admin',
   reviewer_lead: 'reviewer_lead',
   sponsor_lead: 'sponsor_lead',
@@ -100,7 +123,7 @@ const NOTIFICATION_PRIVATE = {
 }
 
 // we use as any here to overwrite mergeAll type declaration
-const NOTIFICATION_TYPES:   Partial<typeof NOTIFICATION_TYPES_ADMIN> &
+export const NOTIFICATION_TYPES:   Partial<typeof NOTIFICATION_TYPES_ADMIN> &
   Partial<typeof NOTIFICATION_TYPES_REVIEWER> &
   Partial<typeof NOTIFICATION_TYPES_SPONSOR> &
   Partial<typeof NOTIFICATION_TYPES_REVIEWER_LEAD> &
@@ -168,7 +191,7 @@ const spaceChangedEmailSchema: JSONSchema7 = {
   properties: {
     initUserId: schemas.idProp,
     spaceId: schemas.idProp,
-    activityType: { type: 'string', enum: enumUtils.stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
+    activityType: { type: 'string', enum: stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
   },
   required: ['initUserId', 'spaceId', 'activityType'],
   additionalProperties: false,
@@ -180,10 +203,10 @@ const membershipChangedEmailSchema: JSONSchema7 = {
     initUserId: schemas.idProp,
     spaceId: schemas.idProp,
     updatedMembershipId: schemas.idProp,
-    activityType: { type: 'string', enum: enumUtils.stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
+    activityType: { type: 'string', enum: stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
     newMembershipRole: {
       type: 'string',
-      enum: enumUtils.stringValuesDowncased(SPACE_MEMBERSHIP_ROLE),
+      enum: stringValuesDowncased(SPACE_MEMBERSHIP_ROLE),
     },
   },
   required: ['initUserId', 'spaceId', 'activityType', 'updatedMembershipId'],
@@ -200,11 +223,11 @@ const emailInputSchemas = {
   challengeCreatedEmailSchema,
 }
 
-type NewContentAdded = { spaceEventId: number }
+export type NewContentAdded = { spaceEventId: number }
 
-type CommentAdded = { spaceEventId: number }
+export type CommentAdded = { spaceEventId: number }
 
-type MemberChanged = {
+export type MemberChanged = {
   updatedMembershipId: number
   initUserId: number
   spaceId: number
@@ -212,44 +235,44 @@ type MemberChanged = {
   newMembershipRole?: keyof typeof SPACE_MEMBERSHIP_ROLE
 }
 
-type SpaceChanged = {
+export type SpaceChanged = {
   initUserId: number
   spaceId: number
   activityType: string
   spaceMembershipId: number
 }
 
-type ChallengeOpened = { challengeId: number }
+export type ChallengeOpened = { challengeId: number }
 
-type ChallengeCreated = { challengeId: number; name: string; scope: string }
+export type ChallengeCreated = { challengeId: number; name: string; scope: string }
 
 // EMAIL OPERATIONS INPUTS
 
-type EmailProcessInput = {
+export type EmailProcessInput = {
   emailTypeId: number
   receiverUserIds: number[]
   input: AnyObject
 }
 
-type EmailSendInput = {
+export type EmailSendInput = {
   emailType: EMAIL_TYPES,
   to: string
   subject: string
   body: string
 }
 
-type EmailTemplateInput = { receiver: User }
+export type EmailTemplateInput = { receiver: User }
 
 // fixme: NOTIFICATION_TYPES into EMAIL_TYPES mapping
 
 // EMAIL CONFIG AND HELPERS
-type EmailTemplateContructor = new (
+export type EmailTemplateContructor = new (
   emailTypeId: number,
   emailInput: any,
   ctx: OpsCtx,
 ) => EmailTemplate
 
-interface EmailTemplate {
+export interface EmailTemplate {
   config: EmailConfigItem
   emailType: EMAIL_TYPES
   ctx: OpsCtx
@@ -263,7 +286,7 @@ interface EmailTemplate {
   setupContext(): Promise<void>
 }
 
-enum EMAIL_TYPES {
+export enum EMAIL_TYPES {
   jobFinished = 1,
   newContentAdded = 2,
   memberChangedAddedRemoved = 3,
@@ -279,7 +302,7 @@ enum EMAIL_TYPES {
   userDataConsistencyReport = 13,
 }
 
-type EmailConfigItem = {
+export type EmailConfigItem = {
   // unique name
   name: string
   // API param value -> EMAIL_TYPE, must be also unique
@@ -291,58 +314,58 @@ type EmailConfigItem = {
   handlerClass: EmailTemplateContructor
 }
 
-const EMAIL_CONFIG = {
+export const EMAIL_CONFIG = {
   jobFinished: {
     name: 'jobFinished',
     emailId: EMAIL_TYPES.jobFinished,
     schema: emailInputSchemas.jobFinishedEmailSchema,
-    handlerClass: handlers.JobFinishedEmailHandler,
+    handlerClass: JobFinishedEmailHandler,
   },
   jobFailed: {
     name: 'jobFailed',
     emailId: EMAIL_TYPES.jobFailed,
     schema: emailInputSchemas.jobFailedEmailSchema,
-    handlerClass: handlers.JobFailedEmailHandler,
+    handlerClass: JobFailedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
     emailId: EMAIL_TYPES.newContentAdded,
     schema: emailInputSchemas.spaceEventEmailSchema,
-    handlerClass: handlers.ContentChangedEmailHandler,
+    handlerClass: ContentChangedEmailHandler,
   },
   memberChangedAddedRemoved: {
     name: 'memberChangedAddedRemoved',
     emailId: EMAIL_TYPES.memberChangedAddedRemoved,
     schema: emailInputSchemas.membershipChangedEmailSchema,
-    handlerClass: handlers.MemberChangedEmailHandler,
+    handlerClass: MemberChangedEmailHandler,
   },
   spaceChanged: {
     name: 'spaceChanged',
     emailId: EMAIL_TYPES.spaceChanged,
     schema: emailInputSchemas.spaceChangedEmailSchema,
-    handlerClass: handlers.SpaceChangedEmailHandler,
+    handlerClass: SpaceChangedEmailHandler,
   },
   commentAdded: {
     name: 'commentAdded',
     emailId: EMAIL_TYPES.commentAdded,
     schema: emailInputSchemas.spaceEventEmailSchema,
-    handlerClass: handlers.CommentAddedEmailHandler,
+    handlerClass: CommentAddedEmailHandler,
   },
   challengeOpened: {
     name: 'challengeOpened',
     emailId: EMAIL_TYPES.challengeOpened,
     schema: emailInputSchemas.challengeStartedEmailSchema,
-    handlerClass: handlers.ChallengeOpenedEmailHandler,
+    handlerClass: ChallengeOpenedEmailHandler,
   },
   challengePrereg: {
     name: 'challengePrereg',
     emailId: EMAIL_TYPES.challengePrereg,
     schema: emailInputSchemas.challengeCreatedEmailSchema,
-    handlerClass: handlers.ChallengePreregEmailHandler,
+    handlerClass: ChallengePreregEmailHandler,
   },
 } as const
 
-const emailTypeIds = Object.entries(EMAIL_CONFIG).map(([key, value]) => {
+export const emailTypeIds = Object.entries(EMAIL_CONFIG).map(([key, value]) => {
   return value.emailId
 })
 
@@ -361,32 +384,10 @@ const emailConfigPerId = pipe(
   }),
 )(Object.values(EMAIL_CONFIG))
 
-const getEmailConfig = (emailId: number): EmailConfigItem => {
+export const getEmailConfig = (emailId: number): EmailConfigItem => {
   const emailConfig = emailConfigPerId[emailId.toString()]
   if (!emailConfig) {
     throw new Error(`Email config for emailId=${emailId} not found`)
   }
   return emailConfig
-}
-
-export {
-  emailTypeIds,
-  getEmailConfig,
-  EmailConfigItem,
-  EMAIL_TYPES,
-  EMAIL_CONFIG,
-  NOTIFICATION_TYPES,
-  NOTIFICATION_TYPES_BASE,
-  NOTIFICATION_ROLE_PREFIXES,
-  EmailProcessInput,
-  EmailSendInput,
-  EmailTemplateInput,
-  EmailTemplate,
-  EmailTemplateContructor,
-  NewContentAdded,
-  MemberChanged,
-  SpaceChanged,
-  CommentAdded,
-  ChallengeOpened,
-  ChallengeCreated,
 }

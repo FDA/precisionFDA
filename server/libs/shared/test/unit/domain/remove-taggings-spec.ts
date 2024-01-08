@@ -1,9 +1,14 @@
 import { EntityManager } from '@mikro-orm/core'
 import { MySqlDriver } from '@mikro-orm/mysql'
-import { database, getLogger, types } from '@shared'
+import { database } from '@shared/database'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { RemoveTaggingsOperation } from '@shared/domain/tagging/ops/remove-taggings'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import pino from 'pino'
 import { expect } from 'chai'
-import { Tag, Tagging, tagging, UserFile, User } from '../../../src/domain'
 import { create, db } from '../../../src/test'
 
 /**
@@ -14,7 +19,7 @@ describe('remove taggings tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   let file1: UserFile
   let file2: UserFile
@@ -50,7 +55,7 @@ describe('remove taggings tests', () => {
   })
 
   it('test remove tagging for file1', async () => {
-    const op = new tagging.RemoveTaggingsOperation({
+    const op = new RemoveTaggingsOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -73,7 +78,7 @@ describe('remove taggings tests', () => {
   })
 
   it('test remove tagging for file2', async () => {
-    const op = new tagging.RemoveTaggingsOperation({
+    const op = new RemoveTaggingsOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,

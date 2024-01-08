@@ -1,7 +1,8 @@
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
+import { createSendEmailTask, getMainQueue } from '@shared/queue'
 import { Maybe } from "../../../types"
 import { WorkerBaseOperation } from "../../../utils/base-operation"
-import { DbCluster, SyncDbClusterOperation } from ".."
-import { queue } from "../../../"
 import { User } from "../../user/user.entity"
 import { reportNonTerminatedDbClustersTemplate, ReportNonTerminatedDbClustersTemplateInput } from "../../email/templates/mjml/report-non-terminated-dbclusters.template"
 import { EmailSendInput, EMAIL_TYPES } from "../../email/email.config"
@@ -25,10 +26,10 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
       populate: ['user'],
     })
     nonTerminatedDbClusters.forEach(async (nonTerminatedDbCluster) => {
-      const dbSyncOperation = await queue.getMainQueue().getJob(SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid))
+      const dbSyncOperation = await getMainQueue().getJob(SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid))
       if (!dbSyncOperation) {
         this.ctx.log.warn(
-          { 
+          {
             user: nonTerminatedDbCluster.user.getEntity().dxuser,
             dbCluster: nonTerminatedDbCluster,
           },
@@ -66,8 +67,8 @@ export class CheckNonTerminatedDbClustersOperation extends WorkerBaseOperation<
       subject: 'Non-terminated dbclusters',
     }
 
-    await queue.createSendEmailTask(email, undefined)
-    await queue.createSendEmailTask(emailToPfda, undefined)
+    await createSendEmailTask(email, undefined)
+    await createSendEmailTask(emailToPfda, undefined)
 
     return nonTerminatedDbClusters
   }

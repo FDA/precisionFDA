@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Logger, Provider, Scope } from '@nestjs/common'
-import { UserContext } from '@shared'
-import { FileCloseOperation } from '@shared/domain/user-file'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
 
 export const fileCloseOperationProvider: Provider = {
   provide: FileCloseOperation,

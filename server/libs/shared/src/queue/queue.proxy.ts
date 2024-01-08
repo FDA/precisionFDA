@@ -1,6 +1,6 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
-import { config } from '@shared'
+import { config } from '@shared/config'
 import { Queue } from 'bull'
 
 @Injectable()

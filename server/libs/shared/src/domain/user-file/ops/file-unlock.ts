@@ -1,8 +1,8 @@
+import { User } from '@shared/domain/user/user.entity'
 import { UserFile } from '../user-file.entity'
-import { User } from '../../user'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { getNodePath } from '../user-file.helper'
 import { FILE_STATE_DX } from "../user-file.types";
 

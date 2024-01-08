@@ -1,7 +1,7 @@
-import { USER_CONTEXT_HTTP_HEADERS } from '@shared'
+import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { User } from '@shared/domain/user/user.entity'
 import { DateTime } from 'luxon'
 import { omit } from 'ramda'
-import { User } from '@shared/domain'
 import { BaseEntity } from '@shared/database/base-entity'
 
 const serializeEntityDates = (entity: BaseEntity) => ({

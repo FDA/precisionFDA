@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { config } from '../../../..'
-import { Workflow } from '../../../workflow'
+import { config } from '@shared/config'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { WorkflowService } from '../../../workflow/service/workflow.service'
 import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'

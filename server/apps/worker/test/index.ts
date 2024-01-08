@@ -1,4 +1,4 @@
-import { database } from '@shared'
+import { database } from '@shared/database'
 import { db } from '@shared/test'
 import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import chai from 'chai'
