@@ -1,3 +1,9 @@
+import { Resource } from '@shared/domain/resource/resource.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { InternalError, NotFoundError, PermissionError } from '@shared/errors'
 import { parseIntFromProcess } from '../../../config'
 import { ENVS } from '../../../enums'
 import {
@@ -9,14 +15,10 @@ import {
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { DataPortal } from '../data-portal.entity'
 import { PlatformClient } from '../../../platform-client'
-import { UserFile } from '../../user-file'
 import { UserFileRepository } from '../../user-file/user-file.repository'
 import { QueryOrder } from '@mikro-orm/core'
 import { FILE_STATE_DX } from '../../user-file/user-file.types'
-import { Resource } from '../../resource'
-import { entities, errors, userFile as userFileDomain } from '@shared'
 import { getLogger } from '../../../logger'
-import { User } from '../../user'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
@@ -29,7 +31,7 @@ export class DataPortalService {
 
   private em: SqlEntityManager
   private userPlatformClient: PlatformClient
-  private fileRemoveOperation?: userFileDomain.FileRemoveOperation
+  private fileRemoveOperation?: FileRemoveOperation
 
   private editRolesText = ['ADMIN', 'LEAD', 'CONTRIBUTOR']
   private viewRoles = [
@@ -42,7 +44,7 @@ export class DataPortalService {
   constructor(
     em: SqlEntityManager,
     userPlatformClient: PlatformClient,
-    fileRemoveOperation?: userFileDomain.FileRemoveOperation,
+    fileRemoveOperation?: FileRemoveOperation,
   ) {
     this.em = em
     this.userPlatformClient = userPlatformClient
@@ -52,7 +54,7 @@ export class DataPortalService {
   checkUserHasDataPortal = async (userId: number) => {
     try {
       // check whether there is a membership in at least one portal
-      let count = await this.em.count(entities.DataPortal,
+      let count = await this.em.count(DataPortal,
         { space: { spaceMemberships: { user: userId } } }
       )
       return count > 0
@@ -65,7 +67,7 @@ export class DataPortalService {
   listResources = async (dataPortalId: number, userId: number): Promise<any> => {
     logger.verbose(`DataPortalService: listing resources for portal id: ${dataPortalId}`)
     const dataPortal = await this.em.findOneOrFail(
-      entities.DataPortal,
+      DataPortal,
       {id: dataPortalId},
       {populate: ['resources', 'space.spaceMemberships']}
     )
@@ -81,7 +83,7 @@ export class DataPortalService {
    * @param userId
    */
   async listAccessibleCustomPortals(userId: number): Promise<CustomPortal[]> {
-    const user = await this.em.findOneOrFail(entities.User, { id: userId }, { populate: ['organization'] })
+    const user = await this.em.findOneOrFail(User, { id: userId }, { populate: ['organization'] })
 
     const PRISM_PORTAL_ID = parseIntFromProcess(process.env.PRISM_PORTAL_ID) ?? undefined
     const PRISM_SPACE_ID = parseIntFromProcess(process.env.PRISM_SPACE_ID) ?? undefined
@@ -110,7 +112,7 @@ export class DataPortalService {
    * Returns true if user has any member role in a given space.
    */
   private async hasAccessToSpace(spaceId: number, userId: number): Promise<boolean> {
-    const space = await this.em.findOne(entities.Space, {
+    const space = await this.em.findOne(Space, {
       id: spaceId,
       spaceMemberships: {
         user: userId,
@@ -122,7 +124,7 @@ export class DataPortalService {
 
   createResourceLink = async (id: number): Promise<string> => {
     logger.verbose(`DataPortalService: creating resource link for resource id: ${id}`)
-    const resource = await this.em.findOneOrFail(entities.Resource, {id: id}, { populate: ['userFile'] })
+    const resource = await this.em.findOneOrFail(Resource, {id: id}, { populate: ['userFile'] })
     resource.url = await this.getUserFileUrl(resource.userFile.getEntity().uid)
     await this.em.flush()
     return resource.url
@@ -130,14 +132,14 @@ export class DataPortalService {
 
   createResource = async (input: FileParam, dataPortalId: number, userId: number): Promise<CreateResourceResponse>  => {
     logger.verbose(`DataPortalService: creating resource for portal id: ${dataPortalId}`, input)
-    const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['organization']})
+    const user = await this.em.findOneOrFail(User, {id: userId}, {populate: ['organization']})
     const dataPortal = await this.em.findOneOrFail(
-      entities.DataPortal,
+      DataPortal,
       { id: dataPortalId },
       { populate: ['space.spaceMemberships.user', 'space'] }
     )
     if (! await this.hasRoles(dataPortal, CAN_EDIT_ROLES, userId)) {
-      throw new errors.PermissionError(`Only roles ${this.editRolesText} can create resources`)
+      throw new PermissionError(`Only roles ${this.editRolesText} can create resources`)
     }
     const userFile = await this.createFile(input, user, dataPortal.space.getEntity().hostProject, `space-${dataPortal.space.id}`)
 
@@ -149,10 +151,10 @@ export class DataPortalService {
 
   removeResource = async (id: number, userId: number) => {
     logger.verbose(`DataPortalService: removing resource: ${id}`)
-    const resource = await this.em.findOneOrFail(entities.Resource, {id: id})
-    const dataPortal = await this.em.findOneOrFail(entities.DataPortal, {id: resource.dataPortal.id}, {populate: ['space.spaceMemberships.user', 'space']})
+    const resource = await this.em.findOneOrFail(Resource, {id: id})
+    const dataPortal = await this.em.findOneOrFail(DataPortal, {id: resource.dataPortal.id}, {populate: ['space.spaceMemberships.user', 'space']})
     if (! await this.hasRoles(dataPortal, CAN_EDIT_ROLES, userId)) {
-      throw new errors.PermissionError(`Only roles ${this.editRolesText} can remove resources`)
+      throw new PermissionError(`Only roles ${this.editRolesText} can remove resources`)
     }
 
     // TODO fix transaction work
@@ -166,7 +168,7 @@ export class DataPortalService {
     const userFile = await fileRepo.findFileWithUid(uid)
 
     if (!userFile) {
-      throw new errors.NotFoundError(`Cannot find card image id ${uid}`)
+      throw new NotFoundError(`Cannot find card image id ${uid}`)
     }
     const link = await this.userPlatformClient.fileDownloadLink({
       fileDxid: userFile.dxid,
@@ -204,15 +206,15 @@ export class DataPortalService {
 
   createCardImage = async(input: FileParam, dataPortalId: number, userId: number): Promise<string> => {
     logger.verbose('DataPortalService: creating card image', input)
-    const dataPortal = await this.em.findOneOrFail(entities.DataPortal, {id: dataPortalId}, {populate: ['space']})
-    const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['organization']})
+    const dataPortal = await this.em.findOneOrFail(DataPortal, {id: dataPortalId}, {populate: ['space']})
+    const user = await this.em.findOneOrFail(User, {id: userId}, {populate: ['organization']})
     const userFile = await this.createFile(input, user, dataPortal.space.getEntity().hostProject, `space-${dataPortal.space.id}`)
     return userFile.uid
   }
 
   private hasSiteAdminRole = async(userId: number): Promise<boolean> => {
     logger.verbose(`DataPortalService: verifying site admin role for id ${userId}`)
-    const user = await this.em.findOneOrFail(entities.User, {id: userId}, {populate: ['adminMemberships', 'adminMemberships.adminGroup']})
+    const user = await this.em.findOneOrFail(User, {id: userId}, {populate: ['adminMemberships', 'adminMemberships.adminGroup']})
     return user.isSiteAdmin()
   }
 
@@ -263,9 +265,9 @@ export class DataPortalService {
   create = async(input: DataPortalParam, userId: number): Promise<DataPortalParam> => {
     logger.verbose('DataPortalService: creating data portal', input, userId)
     if (!(await this.hasSiteAdminRole(userId))) {
-      throw new errors.PermissionError('Only site admins can create Data Portals')
+      throw new PermissionError('Only site admins can create Data Portals')
     }
-    const space = await this.em.findOneOrFail(entities.Space, {id: input.spaceId}, {populate: ['spaceMemberships.user']})
+    const space = await this.em.findOneOrFail(Space, {id: input.spaceId}, {populate: ['spaceMemberships.user']})
 
     await this.processDefault(input.default)
 
@@ -284,7 +286,7 @@ export class DataPortalService {
   private async processDefault(defaultParam: boolean) {
     if (defaultParam) {
       // make sure we un-default all others
-      const portals = await this.em.find(entities.DataPortal, {default: true})
+      const portals = await this.em.find(DataPortal, {default: true})
       for (const p of portals) {
         p.default = false
       }
@@ -293,16 +295,16 @@ export class DataPortalService {
 
   update = async (input: DataPortalParam, userId: number): Promise<DataPortalParam> => {
     logger.verbose('DataPortalService: updating data portal', input, userId)
-    const portal = await this.em.findOneOrFail(entities.DataPortal, {id: input.id}, {populate: ['space.spaceMemberships.user']})
+    const portal = await this.em.findOneOrFail(DataPortal, {id: input.id}, {populate: ['space.spaceMemberships.user']})
 
     if (!await this.hasSiteAdminRole(userId)) {
       if (input.content) {
         if (!(await this.isPortalAdmin(portal, userId) || await this.isPortalLead(portal, userId))) {
-          throw new errors.PermissionError('Only portal admins and leads can update portal content')
+          throw new PermissionError('Only portal admins and leads can update portal content')
         }
       } else {
         if (!(await this.isPortalLead(portal, userId))) {
-          throw new errors.PermissionError('Only portal leads can update portal settings')
+          throw new PermissionError('Only portal leads can update portal settings')
         }
       }
     }
@@ -334,12 +336,12 @@ export class DataPortalService {
     let portals
 
     if (await this.hasSiteAdminRole(userId)) {
-      portals = await this.em.find(entities.DataPortal, {...(defaultParam && {default: defaultParam})}, {
+      portals = await this.em.find(DataPortal, {...(defaultParam && {default: defaultParam})}, {
         populate: ['space.spaceMemberships.user'],
         orderBy: {sortOrder: QueryOrder.ASC}
       })
     } else {
-      portals = await this.em.find(entities.DataPortal,
+      portals = await this.em.find(DataPortal,
         {
           $and: [
             {
@@ -364,24 +366,24 @@ export class DataPortalService {
   get = async(id: number, userId: number): Promise<DataPortalParam> => {
     logger.verbose('DataPortalService: get data portal detail', id, userId)
 
-    const portal = await this.em.findOne(entities.DataPortal, {id}, {populate: ['space.spaceMemberships.user']})
+    const portal = await this.em.findOne(DataPortal, {id}, {populate: ['space.spaceMemberships.user']})
     if (portal) {
       if (!(await this.isPortalMember(portal, userId))) {
-        throw new errors.PermissionError('Only members of the corresponding space can access this portal')
+        throw new PermissionError('Only members of the corresponding space can access this portal')
       }
       return this.map(portal, true)
     }
 
-    throw new errors.NotFoundError(`DataPortal with id ${id} was not found`)
+    throw new NotFoundError(`DataPortal with id ${id} was not found`)
   }
 
   // TODO this is called frequently for site-settings, consider caching
   getDefault = async(userId: number): Promise<DataPortalParam> => {
-    const userFromDb = await this.em.findOneOrFail(entities.User, { id: userId })
+    const userFromDb = await this.em.findOneOrFail(User, { id: userId })
     const isSiteAdmin = await userFromDb.isSiteAdmin()
 
     logger.verbose('DataPortalService: get default data portal detail')
-    const portal = await this.em.findOne(entities.DataPortal, { default: true }, {populate: ['space.spaceMemberships.user']})
+    const portal = await this.em.findOne(DataPortal, { default: true }, {populate: ['space.spaceMemberships.user']})
     if (portal) {
       if (isSiteAdmin) {
         return this.map(portal, true)
@@ -390,10 +392,10 @@ export class DataPortalService {
       if (canView) {
         return this.map(portal, true)
       }
-      throw new errors.PermissionError('Only users with Data Portal access can view this portal')
+      throw new PermissionError('Only users with Data Portal access can view this portal')
     }
 
-    throw new errors.NotFoundError('Default DataPortal was not found')
+    throw new NotFoundError('Default DataPortal was not found')
   }
 
   private getRole(role: SPACE_MEMBERSHIP_ROLE): DATA_PORTAL_MEMBER_ROLE {
@@ -407,7 +409,7 @@ export class DataPortalService {
       case SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR:
         return DATA_PORTAL_MEMBER_ROLE.CONTRIBUTOR
       default:
-        throw new errors.InternalError(`Unknown role ${role}`)
+        throw new InternalError(`Unknown role ${role}`)
     }
   }
 

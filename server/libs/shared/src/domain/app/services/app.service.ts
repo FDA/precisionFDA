@@ -1,28 +1,28 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { PlatformClient } from '../../../platform-client'
-import { AppInput, PlatformSpec, Spec } from '../app.input'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ValidationError } from '@shared/errors'
+import * as crypto from 'crypto'
+import { UBUNTU_16, UBUNTU_RELEASES, VALID_IO_CLASSES } from '../../../config/consts'
+import { validUbuntuPackages } from '../../../config/ubuntu_packages'
 import { STATIC_SCOPE } from '../../../enums'
-import { AssetRepository } from '../../user-file/asset.repository'
-import { Asset } from '../../user-file'
-import { constructDxid, constructDxname } from '../app.helper'
-import { User } from '../../user'
-import { AppSeries } from '../../app-series'
-import { UBUNTU_16, UBUNTU_RELEASES, VALID_IO_CLASSES} from '../../../config/consts'
+import { getLogger } from '../../../logger'
+import { PlatformClient } from '../../../platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
-  PackageMapping
+  PackageMapping,
 } from '../../../platform-client/platform-client.params'
-import { allowedInstanceTypes } from '../../job/job.enum'
-import * as crypto from 'crypto'
-import { App, Internal, AppSpec } from '../app.entity'
-import { ENTITY_TYPE } from '../app.enum'
-import { scopeContainsId } from '../../space/space.helper'
-import { createAppCreated } from '../../event/event.helper'
-import { errors } from '@shared'
-import { getLogger } from '../../../logger'
-import { validUbuntuPackages } from '../../../config/ubuntu_packages'
 import { codeRemap } from '../../../utils/app'
+import { createAppCreated } from '../../event/event.helper'
+import { allowedInstanceTypes } from '../../job/job.enum'
+import { scopeContainsId } from '../../space/space.helper'
+import { AssetRepository } from '../../user-file/asset.repository'
+import { App, AppSpec, Internal } from '../app.entity'
+import { ENTITY_TYPE } from '../app.enum'
+import { constructDxid, constructDxname } from '../app.helper'
+import { AppInput, PlatformSpec, Spec } from '../app.input'
 
 const logger = getLogger('app.service')
 
@@ -67,7 +67,7 @@ export class AppService implements IAppService {
 
   private throwValidationError(message: string) {
     logger.error(message)
-    throw new errors.ValidationError(message)
+    throw new ValidationError(message)
   }
 
   private async validateAppInput(appInput: AppInput, userId: number) {

@@ -1,6 +1,6 @@
 import { BullModule } from '@nestjs/bull'
 import { Global, Module } from '@nestjs/common'
-import { config } from '@shared'
+import { config } from '@shared/config'
 import { EmailModule } from '@shared/domain/email/email.module'
 import { SpaceReportModule } from '@shared/domain/space-report/space-report.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'

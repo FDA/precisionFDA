@@ -1,12 +1,13 @@
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { UserOpsCtx } from '../../../../types'
 import { EmailSendInput, EmailTemplate, EMAIL_TYPES, NOTIFICATION_TYPES_BASE } from '../../email.config'
-import { Job, User } from '../../..'
 import {
   JobFailedInputTemplate,
   jobFailedTemplate,
   jobCostLimitExceededTemplate,
 } from '../mjml/job-failed.template'
-import { BaseTemplate } from '..'
 import { buildEmailTemplate } from '../../email.helper'
 
 type JobFailedInputType = { jobId: number }

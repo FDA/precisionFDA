@@ -1,8 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Logger, Post } from '@nestjs/common'
-import { challenge, DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, UserContext } from '@shared'
-import { ChallengeProposeInput } from '@shared/domain/challenge/ops/propose-challenge'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import {
+  ChallengeProposeInput,
+  ChallengeProposeOperation,
+} from '@shared/domain/challenge/ops/propose-challenge'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 @Controller('/challenges')
 export class ChallengeController {
@@ -21,6 +25,6 @@ export class ChallengeController {
       em: this.em,
     }
 
-    await new challenge.ChallengeProposeOperation(opsCtx).execute(body)
+    await new ChallengeProposeOperation(opsCtx).execute(body)
   }
 }

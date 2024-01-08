@@ -1,8 +1,7 @@
 import { Collection, Entity, EntityRepositoryType, Enum, Ref, OneToMany, OneToOne, Property, Reference } from '@mikro-orm/core'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { ExpertQuestion } from '../expert-question'
-import { ExpertQuestionState } from '../expert-question/expert-question.entity'
-import { User } from '../user'
+import { ExpertQuestion, ExpertQuestionState } from '../expert-question/expert-question.entity'
 import { ExpertMeta } from './expert.serializer'
 import { ExpertRepository } from './expert.repository'
 

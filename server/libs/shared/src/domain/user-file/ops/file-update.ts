@@ -1,5 +1,6 @@
-import { client, errors } from '../../..'
-import { BaseOperation } from '../../../utils/base-operation'
+import { FileNotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UidInput, UserOpsCtx } from '../../../types'
 import { findFileOrAssetWithUid } from '../user-file.helper'
 import { IFileOrAsset } from '../user-file.types'
@@ -20,11 +21,11 @@ IFileOrAsset
     const fileOrAsset = await findFileOrAssetWithUid(em, input.uid)
     if (!fileOrAsset) {
       log.error(`FileUpdateOperation: File or asset with uid ${input.uid} not found`)
-      throw new errors.FileNotFoundError(`File or asset with uid ${input.uid} not found`)
+      throw new FileNotFoundError(`File or asset with uid ${input.uid} not found`)
     }
 
     log.verbose('FileUpdateOperation: Calling platform fileDescribe')
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, log)
+    const platformClient = new PlatformClient(this.ctx.user.accessToken, log)
     const fileDescribe = await platformClient.fileDescribe({
       fileDxid: fileOrAsset.dxid,
       projectDxid: fileOrAsset.project,

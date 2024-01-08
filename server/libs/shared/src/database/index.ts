@@ -1,6 +1,6 @@
 import { Connection, MikroORM } from '@mikro-orm/core'
 import { MySqlDriver } from '@mikro-orm/mysql'
-import { config } from '..'
+import { config } from '@shared/config'
 import { DatabaseService, IDatabaseService } from './database.service'
 
 let db: IDatabaseService | null
@@ -41,6 +41,3 @@ export const database = {
   connection: (): Connection => db!.getOrm()!.em.getConnection(),
   createDatabaseReplicaService,
 }
-
-export { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from './provider/deprecated-sql-entity-manager.provider'
-export { DatabaseModule } from './database.module'

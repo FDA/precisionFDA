@@ -11,33 +11,21 @@ import {
   Reference,
   OneToMany,
 } from '@mikro-orm/core'
-import { JobProperty } from "../property";
-import { JobDescribeResponse } from '@shared/platform-client'
+import { App } from '@shared/domain/app/app.entity'
+import { JobRunData } from '@shared/domain/job/job.types'
+import { JobProperty } from '@shared/domain/property/job-property.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
-import { App } from '../app'
-import { User } from '../user'
 import { JobRepository } from './job.repository'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { Provenance } from './job.input'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { formatDuration } from '../../utils/format'
-import type { IOType} from '../../types/common'
 import { SCOPE } from '../../types/common'
-import { UserFile } from '../user-file'
-
-export interface RunData {
-  output_folder_path?: string
-  run_instance_type: string
-  run_inputs: {
-    [key: string]: IOType
-  }
-  run_outputs: {
-    [key: string]: IOType
-  }
-}
-
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
@@ -97,7 +85,7 @@ export class Job extends BaseEntity {
   properties = new Collection<JobProperty>(this);
 
   @Property({ type: WorkaroundJsonType })
-  runData: RunData
+  runData: JobRunData
 
   @Property({
     hidden: true,
@@ -222,3 +210,5 @@ export class Job extends BaseEntity {
     return `${url}:${port}`
   }
 }
+
+export const foo = 'bar'

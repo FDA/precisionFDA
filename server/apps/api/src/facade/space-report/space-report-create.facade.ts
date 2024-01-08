@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { ArrayUtils, config, queue, UserContext } from '@shared'
+import { config } from '@shared/config'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { createGenerateSpaceReportBatchTasks } from '@shared/queue'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
 @Injectable()
 export class SpaceReportCreateFacade {
@@ -18,7 +21,7 @@ export class SpaceReportCreateFacade {
     const partIds: number[] = report.reportParts.getItems().map((p) => p.id)
     const reportBatches = ArrayUtils.batchArray(partIds, this.REPORT_PART_BATCH_SIZE)
 
-    await queue.createGenerateSpaceReportBatchTasks(reportBatches, this.user)
+    await createGenerateSpaceReportBatchTasks(reportBatches, this.user)
 
     return report
   }

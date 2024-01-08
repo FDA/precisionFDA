@@ -1,10 +1,10 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
-import { User } from '../../../src/domain'
-import { UserFileService } from '../../../src/domain/user-file'
-import { UserFileCreate } from '../../../src/domain/user-file/domain/user-file-create'
 import { FILE_STATE_DX, PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '../../../src/enums'
 

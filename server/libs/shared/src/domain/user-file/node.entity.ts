@@ -8,10 +8,10 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core'
+import { NodeProperty } from '@shared/domain/property/node-property.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
-import { NodeProperty } from '../property'
-import { User } from '../user'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 import { SCOPE } from '../../types/common'
 

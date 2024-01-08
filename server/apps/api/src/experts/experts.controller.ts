@@ -1,7 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Controller, Get, Inject, Query } from '@nestjs/common'
-import { adminGroup, DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, entities, UserContext } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
+import { Expert } from '@shared/domain/expert/expert.entity'
 import { ExpertFindPaginatedParams } from '@shared/domain/expert/expert.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { expertListQuerySchema } from './experts.schemas'
 
@@ -26,8 +29,8 @@ export class ExpertsController {
     // TODO(samuel) find a way to apply user.isSiteAdmin method
     const canUserAdministerSite =
       this.user &&
-      (await this.em.findOne(entities.AdminGroup, {
-        role: adminGroup.ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
+      (await this.em.findOne(AdminGroup, {
+        role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
         adminMemberships: {
           user: {
             id: this.user.id,
@@ -35,7 +38,7 @@ export class ExpertsController {
         },
       }))
 
-    return await this.em.getRepository(entities.Expert).findPaginated(
+    return await this.em.getRepository(Expert).findPaginated(
       {
         page,
         limit,
@@ -48,6 +51,6 @@ export class ExpertsController {
 
   @Get('/years')
   async getYears() {
-    return await this.em.getRepository(entities.Expert).findYears()
+    return await this.em.getRepository(Expert).findYears()
   }
 }

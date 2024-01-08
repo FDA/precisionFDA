@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
-import { errors, UserContext } from '../..'
-import { UserFileService } from '../../domain/user-file'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { InternalError } from '@shared/errors'
 import { FILE_STATE_DX, PARENT_TYPE } from '../../domain/user-file/user-file.types'
 import { FileCreate } from './model/file-create'
 import { FileCreateWithContent } from './model/file-create-with-content'
@@ -25,7 +26,7 @@ export class UserFileCreateFacade {
     const dxid = (await this.platformFileService.createFile({ name, project, description }))?.id
 
     if (dxid == null) {
-      throw new errors.InternalError('Failed to create the file on the platform')
+      throw new InternalError('Failed to create the file on the platform')
     }
 
     return await this.userFileService.createFile({

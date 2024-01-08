@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Logger, Provider, Scope } from '@nestjs/common'
-import { UserContext } from '@shared'
-import { NodesRemoveOperation } from '@shared/domain/user-file'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
 
 export const nodesRemoveOperationProvider: Provider = {
   provide: NodesRemoveOperation,

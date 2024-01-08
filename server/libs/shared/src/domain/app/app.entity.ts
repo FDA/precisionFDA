@@ -12,12 +12,12 @@ import {
   EntityRepositoryType,
   JsonType,
 } from '@mikro-orm/core'
+import { Job } from '@shared/domain/job/job.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'
-import { Job } from '../job'
-import { Asset } from '../user-file'
-import { User } from '../user'
 import { ENTITY_TYPE } from './app.enum'
 import { AppRepository } from './app.repository'
 import type { Spec } from './app.input'

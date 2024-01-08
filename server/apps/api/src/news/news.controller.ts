@@ -14,7 +14,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, entities, errors, UserContext } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { NewsItem } from '@shared/domain/news-item/news-item.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { InvalidStateError } from '@shared/errors'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { ZodPipe } from '../validation/pipes/zod.pipe'
 import {
@@ -46,7 +50,7 @@ export class NewsController {
     const type = query?.type
     const orderBy = query?.orderBy ? { [query.orderBy]: 'DESC' } : {}
 
-    return await this.em.getRepository(entities.NewsItem).findPaginated(
+    return await this.em.getRepository(NewsItem).findPaginated(
       {
         page,
         limit,
@@ -69,7 +73,7 @@ export class NewsController {
     if (type === 'article') whereType = { isPublication: false }
     if (type === 'publication') whereType = { isPublication: true }
 
-    return this.em.getRepository(entities.NewsItem).createQueryBuilder().where(whereType).orderBy({
+    return this.em.getRepository(NewsItem).createQueryBuilder().where(whereType).orderBy({
       createdAt: -1,
     })
   }
@@ -77,7 +81,7 @@ export class NewsController {
   @Get('/years')
   async listYears() {
     const allYears: { year: number }[] = await this.em
-      .getRepository(entities.NewsItem)
+      .getRepository(NewsItem)
       .createQueryBuilder()
       .select('YEAR(created_at) as year', true)
       .orderBy({ year: 'desc' })
@@ -88,14 +92,14 @@ export class NewsController {
 
   @Get('/:id')
   async getNews(@Param('id', ParseIntPipe) id: number) {
-    return await this.em.getRepository(entities.NewsItem).findOne({ id })
+    return await this.em.getRepository(NewsItem).findOne({ id })
   }
 
   @UseGuards(SiteAdminGuard)
   @HttpCode(204)
   @Delete('/:id')
   async deleteNews(@Param('id', ParseIntPipe) id: number) {
-    const newsItem = this.em.getReference(entities.NewsItem, id)
+    const newsItem = this.em.getReference(NewsItem, id)
     await this.em.remove(newsItem).flush()
   }
 
@@ -103,9 +107,9 @@ export class NewsController {
   @HttpCode(201)
   @Post()
   async createNews(@Body(new ZodPipe(newsPostRequestSchema)) body: NewsPostReqBody) {
-    const userRepo = this.em.getRepository(entities.User)
+    const userRepo = this.em.getRepository(User)
     const user = await userRepo.findOne({ id: this.user?.id })
-    const newNewsItem = wrap(new entities.NewsItem(user!)).assign(body)
+    const newNewsItem = wrap(new NewsItem(user!)).assign(body)
     await this.em.persistAndFlush(newNewsItem)
 
     return newNewsItem
@@ -118,7 +122,7 @@ export class NewsController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ZodPipe(newsPostRequestSchema)) body: NewsPostReqBody,
   ) {
-    const existing = await this.em.findOneOrFail(entities.NewsItem, id)
+    const existing = await this.em.findOneOrFail(NewsItem, id)
     const to_save = wrap(existing).assign(body, { mergeObjects: true })
     await this.em.persistAndFlush(to_save)
   }
@@ -131,7 +135,7 @@ export class NewsController {
     const em = this.em.fork()
 
     const idsToUpdate: number[] = Object.keys(news_items).map((i) => parseInt(i, 10))
-    const recordsToUpdate = await em.find(entities.NewsItem, { id: { $in: idsToUpdate } })
+    const recordsToUpdate = await em.find(NewsItem, { id: { $in: idsToUpdate } })
 
     await em.begin()
     try {
@@ -144,7 +148,7 @@ export class NewsController {
       await em.commit()
     } catch (e) {
       await em.rollback()
-      throw new errors.InvalidStateError()
+      throw new InvalidStateError()
     }
   }
 }

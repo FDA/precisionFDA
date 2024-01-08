@@ -1,16 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import {
-  app,
-  ArrayUtils,
-  entity as entityDomain,
-  errors,
-  job,
-  queue,
-  UserContext,
-  userFile,
-  workflow,
-} from '@shared'
+import { App } from '@shared/domain/app/app.entity'
+import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { Job } from '@shared/domain/job/job.entity'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
@@ -21,6 +13,13 @@ import {
   spaceReportPartSourceTypes,
 } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { InvalidStateError } from '@shared/errors'
+import { createGenerateSpaceReportResultTask } from '@shared/queue'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
 @Injectable()
 export class SpaceReportBatchResultGenerateFacade {
@@ -33,11 +32,11 @@ export class SpaceReportBatchResultGenerateFacade {
     private readonly entityProvenanceService: EntityProvenanceService,
   ) {
     this.sourceTypeToRepositoryMap = {
-      file: em.getRepository(userFile.UserFile),
-      app: em.getRepository(app.App),
-      job: em.getRepository(job.Job),
-      asset: em.getRepository(userFile.Asset),
-      workflow: em.getRepository(workflow.Workflow),
+      file: em.getRepository(UserFile),
+      app: em.getRepository(App),
+      job: em.getRepository(Job),
+      asset: em.getRepository(Asset),
+      workflow: em.getRepository(Workflow),
     } satisfies Record<SpaceReportPartSourceType, object>
   }
 
@@ -52,7 +51,7 @@ export class SpaceReportBatchResultGenerateFacade {
       return
     }
 
-    await queue.createGenerateSpaceReportResultTask(reportId, this.currentUser)
+    await createGenerateSpaceReportResultTask(reportId, this.currentUser)
   }
 
   private async generateAndSaveResults(ids: number[]) {
@@ -136,10 +135,10 @@ export class SpaceReportBatchResultGenerateFacade {
   }
 
   private getResultMetaData(provenanceSource: EntityProvenanceSourceUnion) {
-    const supportedSources: entityDomain.EntityType[] = spaceReportPartSourceTypes
+    const supportedSources: EntityType[] = spaceReportPartSourceTypes
 
     if (!supportedSources.includes(provenanceSource.type)) {
-      throw new errors.InvalidStateError(
+      throw new InvalidStateError(
         `Unsupported space report part type - ${provenanceSource.type}`,
       )
     }

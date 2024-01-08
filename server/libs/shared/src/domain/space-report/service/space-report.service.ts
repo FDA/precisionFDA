@@ -1,14 +1,17 @@
 import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
-import { ArrayUtils, errors, UserContext } from '../../..'
-import { App } from '../../app'
-import { Job } from '../../job'
-import { Space } from '../../space'
-import { User } from '../../user'
-import { Asset, UserFile } from '@shared/domain'
-import { Workflow } from '../../workflow'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
@@ -29,7 +32,7 @@ export class SpaceReportService {
 
   async createReport(spaceId: number) {
     if (spaceId == null) {
-      throw new errors.InvalidStateError('Space id is required for creating a report')
+      throw new InvalidStateError('Space id is required for creating a report')
     }
 
     return await this.em.transactional(async () => {
@@ -39,7 +42,7 @@ export class SpaceReportService {
       spaceReport.reportParts.add(await this.createSpaceReportParts(space.scope))
 
       if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
-        throw new errors.InvalidStateError(
+        throw new InvalidStateError(
           'Report not generated: No entities to report on in this space',
         )
       }
@@ -106,7 +109,7 @@ export class SpaceReportService {
     const spaces = await this.getSpacesForUser([spaceId])
 
     if (ArrayUtils.isEmpty(spaces)) {
-      throw new errors.NotFoundError('Space not found')
+      throw new NotFoundError('Space not found')
     }
 
     return spaces[0]

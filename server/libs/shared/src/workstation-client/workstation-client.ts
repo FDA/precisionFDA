@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
+import { ClientRequestError, IncompatibleVersionError, InternalError } from '@shared/errors'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { compareVersions } from 'compare-versions'
 import type { Logger } from '@nestjs/common'
 import { CookieJar } from 'tough-cookie'
-import { errors } from '..'
 import { maskAuthHeader } from '../utils/logging'
 import { getLogger } from '../logger'
 
@@ -90,7 +90,7 @@ class WorkstationClient implements IWorkstationClient {
       const response = await this.sendRequest(options, true)
       const cookie = await this.extractWorkstationCookie(response)
       if (!cookie) {
-        throw new errors.InternalError('Unable to obtain workstation cookie')
+        throw new InternalError('Unable to obtain workstation cookie')
       }
       this.cookie = cookie
 
@@ -126,7 +126,7 @@ class WorkstationClient implements IWorkstationClient {
 
   private validateCookie() {
     if (this.cookie === undefined) {
-      throw new errors.InternalError('Workstation cookie is not present. Check for oauth failure')
+      throw new InternalError('Workstation cookie is not present. Check for oauth failure')
     }
   }
 
@@ -194,7 +194,7 @@ class WorkstationClient implements IWorkstationClient {
     if (this.apiVersion && compareVersions(this.apiVersion, '1.1') < 0) {
       const message = `Error: Cannot use /api/setPFDAConfig because job's api version (${this.apiVersion}) is less than 1.1`
       this.log.error(message)
-      throw new errors.IncompatibleVersionError(message)
+      throw new IncompatibleVersionError(message)
     }
 
     this.validateCookie()
@@ -274,7 +274,7 @@ class WorkstationClient implements IWorkstationClient {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new errors.ClientRequestError(
+      throw new ClientRequestError(
         `${errorType} (${statusCode}): ${errorMessage}`,
         {
           clientResponse: err.response.data,

@@ -1,6 +1,8 @@
 import { EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import { DbCluster, User } from '@shared/domain'
+import { database } from '@shared/database'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
 import { expect } from 'chai'
 import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { create, db } from '@shared/test'
@@ -11,9 +13,9 @@ import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/moc
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 
 const createCheckDbClusterTestTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add(queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS, {
-    type: queue.types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
+  const defaultTestQueue = getMainQueue()
+  await defaultTestQueue.add(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS, {
+    type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
     undefined,
     user,
   })

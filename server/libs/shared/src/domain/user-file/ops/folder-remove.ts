@@ -1,6 +1,8 @@
-import { Folder, tagging } from '../..'
-import { BaseOperation } from '../../../utils/base-operation'
-import { client, errors } from '../../..'
+import { RemoveTaggingsOperation } from '@shared/domain/tagging/ops/remove-taggings'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderNotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { getNodePath, validateEditableBy, validateProtectedSpaces, validateVerificationSpace } from '../user-file.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
@@ -18,7 +20,7 @@ number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em.fork()
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     try {
       await em.begin()
@@ -28,7 +30,7 @@ number
       folderToRemove && await validateProtectedSpaces(em, 'remove', this.ctx.user.id, folderToRemove)
 
       if (!folderToRemove) {
-        throw new errors.FolderNotFoundError()
+        throw new FolderNotFoundError()
       }
 
       await folderToRemove.children.init()
@@ -44,7 +46,7 @@ number
 
       const folderPath = await getNodePath(em, folderToRemove)
 
-      const op = new tagging.RemoveTaggingsOperation({ em, log: this.ctx.log, user: this.ctx.user })
+      const op = new RemoveTaggingsOperation({ em, log: this.ctx.log, user: this.ctx.user })
       await op.execute(folderToRemove.id)
 
       if (folderToRemove.entityType === FILE_ORIGIN_TYPE.HTTPS

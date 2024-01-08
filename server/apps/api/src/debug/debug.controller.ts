@@ -1,6 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Delete, Get, Inject, Logger, Param, UseGuards } from '@nestjs/common'
-import { debug, DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, queue } from '@shared'
+import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { CleanupWorkerQueueOperation, createTestMaxMemoryTask } from '@shared/queue'
+import { debugQueueJobs, removeRepeatableDebug, debugQueueJob, removeJobs } from '@shared/queue/queue.debug'
 import { OpsCtx } from '@shared/types'
 import { JSONSchema7 } from 'json-schema'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
@@ -29,7 +32,7 @@ export class DebugController {
   // Debugging bull queue
   @Get('/queue')
   async getQueueJobs() {
-    return await queue.debug.debugQueueJobs()
+    return await debugQueueJobs()
   }
 
   @Get('/queue/cleanup')
@@ -39,24 +42,24 @@ export class DebugController {
       em: this.em,
     }
 
-    return await new queue.CleanupWorkerQueueOperation(opsCtx).execute()
+    return await new CleanupWorkerQueueOperation(opsCtx).execute()
   }
 
   @Get('/queue/job/:bullJobId')
   async debugQueueJob(@Param('bullJobId') bullJobId: string) {
-    return await queue.debug.debugQueueJob(bullJobId)
+    return await debugQueueJob(bullJobId)
   }
 
   @Delete('/queue/removeJobs/:pattern')
   async removeJobs(@Param('pattern') pattern: string) {
-    return await queue.debug.removeJobs(pattern)
+    return await removeJobs(pattern)
   }
 
   @Delete('/queue/removeRepeatable')
   async removeRepeatableJobs(
     @Body(new JsonSchemaPipe(removeRepeatableSchema)) body: IRemoveRepeatableParams,
   ) {
-    return await queue.debug.removeRepeatable(body.key)
+    return await removeRepeatableDebug(body.key)
   }
 
   @UseGuards(DebugErrorTestingRoutesGuard)
@@ -68,14 +71,14 @@ export class DebugController {
   @UseGuards(DebugErrorTestingRoutesGuard)
   @Get('/errors/testApiMemoryAllocationError')
   testHeapMemoryAllocationError() {
-    debug.testHeapMemoryAllocationError()
+    testHeapMemoryAllocationError()
     return { result: 'Test api heap memory allocation test finished - did not crash?' }
   }
 
   @UseGuards(DebugErrorTestingRoutesGuard)
   @Get('/errors/testWorkerMemoryAllocationError')
   createTestMaxMemoryTask() {
-    queue.createTestMaxMemoryTask()
+    createTestMaxMemoryTask()
     return { result: 'Test worker heap memory allocation test queued' }
   }
 }

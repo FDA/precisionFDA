@@ -1,7 +1,7 @@
-import { ArrayUtils } from '@shared'
 import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
 import { EntityProvenanceSvgResultTransformerService } from '@shared/domain/provenance/service/result-transform/entity-provenance-svg-result-transformer.service'
+import { ArrayUtils } from '@shared/utils/array.utils'
 import { expect } from 'chai'
 import { JSDOM } from 'jsdom'
 

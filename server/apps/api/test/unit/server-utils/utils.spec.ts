@@ -1,4 +1,4 @@
-import { USER_CONTEXT_HTTP_HEADERS } from '@shared'
+import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
 import { expect } from 'chai'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../../../src/server/utils'
 import { log } from '../../../src/logger'

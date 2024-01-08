@@ -1,4 +1,4 @@
-import { database, queue } from '@shared'
+import { database } from '@shared/database'
 import { log } from '../logger'
 import { createServer } from '../server'
 

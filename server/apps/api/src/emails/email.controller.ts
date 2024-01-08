@@ -1,8 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Logger, Param, Post, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN, email, UserContext } from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EmailProcessInput } from '@shared/domain/email/email.config'
+import { sendEmailBodySchema, sendEmailParamSchema } from '@shared/domain/email/email.input'
+import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 
@@ -18,9 +21,9 @@ export class EmailController {
   @HttpCode(200)
   @Post('/:emailId/send')
   async sendEmail(
-    @Param(new JsonSchemaPipe(email.inputs.sendEmailParamSchema))
+    @Param(new JsonSchemaPipe(sendEmailParamSchema))
     params: { emailId: number },
-    @Body(new JsonSchemaPipe(email.inputs.sendEmailBodySchema))
+    @Body(new JsonSchemaPipe(sendEmailBodySchema))
     body: Omit<EmailProcessInput, 'emailTypeId'>,
   ) {
     const opsCtx: UserOpsCtx = {
@@ -29,7 +32,7 @@ export class EmailController {
       em: this.em,
     }
 
-    return await new email.EmailProcessOperation(opsCtx).execute({
+    return await new EmailProcessOperation(opsCtx).execute({
       input: body.input,
       receiverUserIds: body.receiverUserIds,
       emailTypeId: params.emailId,

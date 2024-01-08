@@ -1,4 +1,9 @@
 import { wrap } from '@mikro-orm/core'
+import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
+import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
+import { User } from '@shared/domain/user/user.entity'
+import { ClientRequestError } from '@shared/errors'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
@@ -9,7 +14,7 @@ import {
   sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
-import { PlatformClient, JobDescribeResponse } from '../../../platform-client'
+import { PlatformClient } from '../../../platform-client'
 import {
   createSendEmailTask, createSyncOutputsTask,
   createSyncWorkstationFilesTask, getMainQueue,
@@ -17,10 +22,7 @@ import {
   removeRepeatable,
 } from '../../../queue'
 import type { Maybe, UserOpsCtx } from '../../../types'
-import { User } from '../..'
-import { errors } from '../../..'
 import { createJobClosed } from '../../event/event.helper'
-import { RequestTerminateJobOperation } from '..'
 import {
   JobStaleInputTemplate,
   jobStaleTemplate,
@@ -28,7 +30,6 @@ import {
 import { buildEmailTemplate } from '../../email/email.helper'
 import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
-import { EmailSendOperation } from '../../email'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getServiceFactory } from '../../../services/service-factory'
@@ -134,7 +135,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
         jobId: input.dxid,
       })
     } catch (err) {
-      if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {
+      if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
         if (err.props.clientStatusCode === 401) {
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated

@@ -1,6 +1,6 @@
 import { JOB_REF } from '@nestjs/bull'
 import { Provider, Scope } from '@nestjs/common'
-import { UserContext } from '@shared'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Job } from 'bull'
 
 export const userContextProvider: Provider = {

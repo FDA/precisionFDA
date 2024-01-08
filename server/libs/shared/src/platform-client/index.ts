@@ -1,16 +1,14 @@
 /* eslint-disable max-len */
+import type { Logger } from '@nestjs/common'
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
-import type { Logger } from '@nestjs/common'
 import { isNil, omit } from 'ramda'
-import { errors } from '..'
 import { config } from '../config'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
-import { OrgMembershipError } from '../errors'
+import { ClientRequestError, MfaAlreadyResetError, OrgMembershipError } from '../errors'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
-import { IPlatformAuthClient, PlatformAuthClient } from './platform-auth-client'
 import {
   AppAddAuthorizedUsersParams,
   AppCreateParams,
@@ -89,7 +87,7 @@ export enum PlatformErrors {
 
 const defaultLog = getLogger('platform-client-logger')
 
-class PlatformClient {
+export class PlatformClient {
   accessToken: string
   log: Logger
 
@@ -607,7 +605,7 @@ class PlatformClient {
       this.logClientFailed(options)
       return this.handleFailed(err, (_, __, message) => {
         if (message.includes('MFA is already reset')) {
-          throw new errors.MfaAlreadyResetError()
+          throw new MfaAlreadyResetError()
         }
       })
     }
@@ -941,7 +939,7 @@ class PlatformClient {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new errors.ClientRequestError(
+      throw new ClientRequestError(
         `${errorType} (${statusCode}): ${errorMessage}`,
         {
           clientResponse: err.response.data,
@@ -958,7 +956,7 @@ class PlatformClient {
     // TODO(2): Need to consider other error types and handle them with a descriptive message
     // e.g. See ETIMEOUT error in platform-client.mock.ts
     const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
-    throw new errors.ClientRequestError(
+    throw new ClientRequestError(
       errorMessage,
       {
         clientResponse: err.response?.data || 'No platform response',
@@ -966,18 +964,4 @@ class PlatformClient {
       },
     )
   }
-}
-
-export {
-  PlatformClient,
-  IPlatformAuthClient,
-  PlatformAuthClient,
-  JobDescribeResponse,
-  JobCreateResponse,
-  ListFilesResponse,
-  ClassIdResponse,
-  JobCreateParams,
-  DescribeFoldersResponse,
-  DbClusterCreateParams,
-  DbClusterDescribeResponse,
 }

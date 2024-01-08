@@ -1,10 +1,10 @@
+import { Job } from '@shared/domain/job/job.entity'
 import { isNil } from "ramda"
 import { PlatformClient } from "../../../platform-client"
 import { CheckStatusJob } from "../../../queue/task.input"
 import { Maybe, UserOpsCtx } from "../../../types"
 import { WorkerBaseOperation } from "../../../utils/base-operation"
 import { removeRepeatable } from '../../../queue'
-import { Job } from "../../job"
 import { Tag } from "../../tag/tag.entity"
 import { Folder } from "../folder.entity"
 import { assignTags } from "../user-file-tags"

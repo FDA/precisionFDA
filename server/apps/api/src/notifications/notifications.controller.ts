@@ -1,11 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Param, Post, Put, UseGuards } from '@nestjs/common'
-import {
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  notification as notificationDomain,
-  UserContext,
-} from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
@@ -19,7 +17,7 @@ export class NotificationsController {
   @HttpCode(204)
   @Post()
   async createNotification(@Body() notification: NotificationInput) {
-    const notificationService = new notificationDomain.NotificationService(this.em)
+    const notificationService = new NotificationService(this.em)
     notificationService.createNotification(notification)
   }
 
@@ -30,7 +28,7 @@ export class NotificationsController {
   ) {
     input.id = notificationId
 
-    const notificationService = new notificationDomain.NotificationService(this.em)
+    const notificationService = new NotificationService(this.em)
     const updated = await notificationService.updateDeliveredAt(
       input.id,
       input.deliveredAt,

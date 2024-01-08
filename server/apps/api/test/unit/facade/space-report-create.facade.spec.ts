@@ -1,4 +1,4 @@
-import { queue } from '@shared'
+import * as queue from '@shared/queue'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'

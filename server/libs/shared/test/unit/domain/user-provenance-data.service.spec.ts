@@ -1,5 +1,5 @@
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { User } from '../../../src/domain'
 import {
   UserProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/user-provenance-data.service'

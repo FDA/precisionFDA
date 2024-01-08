@@ -1,7 +1,8 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { database } from '../../../src/database'
-import { Space, User } from '@shared/domain'
 import { create, db } from '@shared/test'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 

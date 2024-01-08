@@ -1,7 +1,8 @@
+import { database } from '@shared/database'
+import { getLogger } from '@shared/logger'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
-import { database, getLogger } from '@shared'
 import { db } from '../src/test'
 import { mocksRestore, mocksSetup } from '../src/test/mocks'
 

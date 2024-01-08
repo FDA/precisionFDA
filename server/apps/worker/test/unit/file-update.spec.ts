@@ -1,9 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { FileUpdateOperation } from '@shared/domain/user-file/ops/file-update'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
-import { userFile, database, getLogger } from '@shared'
 import { create, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { Asset, User, UserFile } from '@shared/domain'
 import { UserCtx } from '@shared/types'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
 
@@ -33,7 +37,7 @@ describe('FileUpdateOperation tests', () => {
   })
 
   it('syncs a file that is closed on platform', async () => {
-    const op = new userFile.FileUpdateOperation({
+    const op = new FileUpdateOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -54,7 +58,7 @@ describe('FileUpdateOperation tests', () => {
   })
 
   it('syncs an asset that is closed on platform', async () => {
-    const op = new userFile.FileUpdateOperation({
+    const op = new FileUpdateOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -75,7 +79,7 @@ describe('FileUpdateOperation tests', () => {
   })
 
   it('syncs a file that is not closed on platform', async () => {
-    const op = new userFile.FileUpdateOperation({
+    const op = new FileUpdateOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -95,7 +99,7 @@ describe('FileUpdateOperation tests', () => {
   })
 
   it('throws exception if file uid is not found', async () => {
-    const op = new userFile.FileUpdateOperation({
+    const op = new FileUpdateOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

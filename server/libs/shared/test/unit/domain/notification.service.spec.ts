@@ -1,9 +1,10 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { User } from '../../../src/domain'
+import { database } from '@shared/database'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { Notification } from '@shared/domain/notification/notification.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
-import { database, notification as notifDomain } from '@shared'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../src/enums'
-import { NotificationService } from '../../../src/domain/notification'
 import { expect } from 'chai'
 import { PermissionError } from '../../../src/errors'
 import sinon from 'sinon'
@@ -46,7 +47,7 @@ describe('Notification service tests', () => {
       severity: SEVERITY.WARN
     })
 
-    const [notifications, count] = await em.findAndCount(notifDomain.Notification, {})
+    const [notifications, count] = await em.findAndCount(Notification, {})
     expect(count).to.be.equal(1)
     expect(notifications[0].action).to.be.equal(NOTIFICATION_ACTION.NODES_REMOVED)
     expect(notifications[0].message).to.be.equal("msg")
@@ -82,7 +83,7 @@ describe('Notification service tests', () => {
       severity: SEVERITY.WARN,
     })
 
-    const [notifications, count] = await em.findAndCount(notifDomain.Notification, {})
+    const [notifications, count] = await em.findAndCount(Notification, {})
     expect(count).to.be.equal(1)
     expect(notifications[0].action).to.be.equal(NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED)
     expect(notifications[0].message).to.be.equal("msg")
@@ -95,11 +96,11 @@ describe('Notification service tests', () => {
   })
 
   it('Test get unread Notifications', async() => {
-    const savedNotification = new notifDomain.Notification(
+    const savedNotification = new Notification(
       user1, NOTIFICATION_ACTION.NODES_REMOVED, "test", SEVERITY.ERROR
     )
     await em.persistAndFlush(savedNotification)
-    await em.persistAndFlush(new notifDomain.Notification(
+    await em.persistAndFlush(new Notification(
       user2, NOTIFICATION_ACTION.NODES_REMOVED, "test", SEVERITY.ERROR
     ))
 
@@ -109,19 +110,19 @@ describe('Notification service tests', () => {
   })
 
   it('Test update Notification', async() => {
-    const savedNotification = new notifDomain.Notification(
+    const savedNotification = new Notification(
       user1, NOTIFICATION_ACTION.NODES_REMOVED, "test", SEVERITY.ERROR
     )
     await em.persistAndFlush(savedNotification)
 
     await notificationService.updateDeliveredAt(savedNotification.id, new Date(), userId)
 
-    const loadedFromDb = await em.findOneOrFail(notifDomain.Notification, savedNotification.id)
+    const loadedFromDb = await em.findOneOrFail(Notification, savedNotification.id)
     expect(loadedFromDb.deliveredAt).not.to.be.null()
   })
 
   it('Test update Notification with PermissionError', async() => {
-    const savedNotification = new notifDomain.Notification(
+    const savedNotification = new Notification(
       user1, NOTIFICATION_ACTION.NODES_REMOVED, "test", SEVERITY.ERROR
     )
     await em.persistAndFlush(savedNotification)

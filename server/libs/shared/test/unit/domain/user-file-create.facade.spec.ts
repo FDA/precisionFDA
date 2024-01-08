@@ -1,9 +1,9 @@
-import { errors } from '@shared'
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { InternalError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { UserFileService } from '@shared/domain/user-file'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '@shared/enums'
 import { FileCreate } from '@shared/facade/file-create/model/file-create'
@@ -85,7 +85,7 @@ describe('UserFileCreateFacade', () => {
         .returns({ id: null })
 
       await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
-        errors.InternalError,
+        InternalError,
         'Failed to create the file on the platform',
       )
     })
@@ -96,7 +96,7 @@ describe('UserFileCreateFacade', () => {
         .returns(undefined)
 
       await expect(getInstance().createFile(FILE_CREATE)).to.be.rejectedWith(
-        errors.InternalError,
+        InternalError,
         'Failed to create the file on the platform',
       )
     })

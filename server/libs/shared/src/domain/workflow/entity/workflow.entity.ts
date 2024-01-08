@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../../database/base-entity'
 import { WorkaroundJsonType } from '../../../database/custom-json-type'
-import { User } from '../../user'
 import { WorkflowSpec } from '../model/workflow-spec'
 
 @Entity({ tableName: 'workflows' })

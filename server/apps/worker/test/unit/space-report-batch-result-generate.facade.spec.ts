@@ -1,8 +1,13 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { app, job, queue, userFile, workflow } from '@shared'
+import * as queue from '@shared/queue'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { UserCtx } from '@shared/types'
 import { expect } from 'chai'
 import { restore, SinonStub, stub } from 'sinon'
@@ -119,11 +124,11 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
     getRepositoryStub.reset()
     getRepositoryStub.throws()
-    getRepositoryStub.withArgs(app.App).returns({ find: appFindStub })
-    getRepositoryStub.withArgs(job.Job).returns({ find: jobFindStub })
-    getRepositoryStub.withArgs(workflow.Workflow).returns({ find: workflowFindStub })
-    getRepositoryStub.withArgs(userFile.Asset).returns({ find: assetFindStub })
-    getRepositoryStub.withArgs(userFile.UserFile).returns({ find: fileFindStub })
+    getRepositoryStub.withArgs(App).returns({ find: appFindStub })
+    getRepositoryStub.withArgs(Job).returns({ find: jobFindStub })
+    getRepositoryStub.withArgs(Workflow).returns({ find: workflowFindStub })
+    getRepositoryStub.withArgs(Asset).returns({ find: assetFindStub })
+    getRepositoryStub.withArgs(UserFile).returns({ find: fileFindStub })
 
     hasAllBatchesDoneStub.reset()
     hasAllBatchesDoneStub.throws()

@@ -1,8 +1,9 @@
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { SpaceParam } from './space.types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { PlatformClient } from '../../../platform-client'
 import { Space} from '../space.entity'
-import { entities, getLogger } from '@shared'
 import * as crypto from 'crypto'
 import { constructDxOrg } from '../../org/org.utils'
 import { SPACE_TYPE } from '../space.enum'
@@ -46,7 +47,7 @@ export class SpaceService implements ISpaceService {
     space.protected = input.protected
     if (input.type === SPACE_TYPE.REVIEW && input.sponsorLeadDxUser) {
       const sponsor = await this.em.findOneOrFail(
-        entities.User,
+        User,
         { dxuser: input.sponsorLeadDxUser }, { populate: ['organization']}
       )
       space.sponsorOrgId = sponsor.organization.id

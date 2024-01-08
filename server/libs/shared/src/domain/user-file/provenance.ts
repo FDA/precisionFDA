@@ -1,8 +1,8 @@
 import { EntityRepository } from '@mikro-orm/core'
 import { EntityManager } from '@mikro-orm/mysql'
-import { Comparison } from '../comparison'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { Job } from '../job/job.entity'
-import { User } from '../user'
 import { Asset } from './asset.entity'
 import { ITrackable, PARENT_TYPE } from './user-file.types'
 

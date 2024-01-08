@@ -1,11 +1,14 @@
 import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
+import { CreateSpaceEventOperation } from '@shared/domain/space-event/ops/create-space-event'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { RemoveTaggingsOperation } from '@shared/domain/tagging/ops/remove-taggings'
+import { User } from '@shared/domain/user/user.entity'
+import { DeleteRelationError } from '@shared/errors'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserFile } from '../user-file.entity'
-import { User } from '../../user'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { ComparisonInput, spaceEvent, tagging } from '../..'
-import { errors } from '../../..'
 import { getIdFromScopeName } from '../../space/space.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../space-event/space-event.enum'
 import {
@@ -15,7 +18,6 @@ import {
   validateVerificationSpace
 } from '../user-file.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
 import { PlatformClient } from '../../../platform-client'
 
 const isLastNode = async (em: SqlEntityManager, fileDxid: string): Promise<Boolean> => {
@@ -38,7 +40,7 @@ const validateSpaceReports = async (em: EntityManager, fileToRemove: UserFile) =
   const count = await em.count(SpaceReport, { resultFile: fileToRemove })
 
   if (count > 0) {
-    throw new errors.DeleteRelationError('file', 'space report')
+    throw new DeleteRelationError('file', 'space report')
   }
 }
 
@@ -69,7 +71,7 @@ number
       const lastNode = await isLastNode(tm, fileToRemove.dxid)
       const filePath = await getNodePath(tm, fileToRemove)
 
-      const op = new tagging.RemoveTaggingsOperation({ em: tm, log: this.ctx.log, user: this.ctx.user })
+      const op = new RemoveTaggingsOperation({ em: tm, log: this.ctx.log, user: this.ctx.user })
       await op.execute(fileToRemove.id)
 
       const fileEvent = await createFileEvent(
@@ -90,7 +92,7 @@ number
 
       if (fileToRemove.scope && fileToRemove.scope.startsWith('space')) {
         const spaceId = getIdFromScopeName(fileToRemove.scope)
-        const eventOp = new spaceEvent.CreateSpaceEventOperation(this.ctx)
+        const eventOp = new CreateSpaceEventOperation(this.ctx)
         await eventOp.execute({
           entity: { type: 'userFile', value: fileToRemove },
           spaceId,

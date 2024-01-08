@@ -1,7 +1,9 @@
 import { Ref } from '@mikro-orm/core'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '../user/user.entity'
 import { SCOPE } from '../../types/common'
-import { Asset, Comparison, Job } from '..'
 
 // File state from the platform
 enum FILE_STATE_DX {

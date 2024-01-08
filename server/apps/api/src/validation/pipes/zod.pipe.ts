@@ -1,5 +1,5 @@
 import { PipeTransform } from '@nestjs/common'
-import { errors } from '@shared'
+import { ErrorCodes, ValidationError } from '@shared/errors'
 import * as z from 'zod'
 
 export class ZodPipe implements PipeTransform {
@@ -9,8 +9,8 @@ export class ZodPipe implements PipeTransform {
     try {
       return this.schema.parse(value)
     } catch (error) {
-      throw new errors.ValidationError('', {
-        code: errors.ErrorCodes.VALIDATION,
+      throw new ValidationError('', {
+        code: ErrorCodes.VALIDATION,
         statusCode: 400,
         validationErrors: error,
       })

@@ -1,6 +1,8 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { Asset, User, UserFile } from '@shared/domain'
 import { create, db } from '@shared/test'
 import { database } from '../../../src/database'
 import {

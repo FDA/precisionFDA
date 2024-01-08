@@ -1,4 +1,4 @@
-import { database, queue } from '@shared'
+import { database } from '@shared/database'
 import { db, mocks } from '@shared/test'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'

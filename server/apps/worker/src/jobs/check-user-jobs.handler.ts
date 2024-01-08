@@ -1,8 +1,9 @@
-import { database, job } from '@shared'
+import { database } from '@shared/database'
+import { CheckUserJobsOperation } from '@shared/domain/job/ops/check-user-jobs'
 import type { BasicUserJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const checkUserJobsHandler = async (bullJob: Job) => {
   const data = bullJob.data as BasicUserJob
@@ -16,5 +17,5 @@ export const checkUserJobsHandler = async (bullJob: Job) => {
     job: bullJob,
   }
 
-  await new job.CheckUserJobsOperation(ctx as any).execute()
+  await new CheckUserJobsOperation(ctx as any).execute()
 }

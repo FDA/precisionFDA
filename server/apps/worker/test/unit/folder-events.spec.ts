@@ -1,7 +1,12 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { User } from '@shared/domain'
-import { Event } from '@shared/domain/event'
-import { userFile, database, getLogger, types } from '@shared'
+import { database } from '@shared/database'
+import {
+  FolderRemoveRecursiveOperation
+} from '@shared/domain/user-file/ops/folder-remove-recursive'
+import { SyncFoldersOperation } from '@shared/domain/user-file/ops/sync-folders'
+import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
+import { getLogger } from '@shared/logger'
 import { create, db } from '@shared/test'
 import { EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { expect } from 'chai'
@@ -12,7 +17,7 @@ describe('folder events tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: any
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
   let defaultInput: Omit<SyncFoldersInput, 'remoteFolderPaths'>
   const project = 'project-foo'
 
@@ -44,7 +49,7 @@ describe('folder events tests', () => {
     await em.flush()
 
     // delete folder
-    const deleteOp = new userFile.FolderRemoveRecursiveOperation({
+    const deleteOp = new FolderRemoveRecursiveOperation({
       em,
       log,
       user: userCtx,
@@ -79,7 +84,7 @@ describe('folder events tests', () => {
 
   it('test SyncFoldersOperation to create CreateFolder and DeleteFolder events', async () => {
     // create three folders
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

@@ -1,11 +1,14 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { Space, User, SpaceEvent, SpaceMembership } from '../..'
-import { BaseOperation } from '../../../utils'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserOpsCtx } from '../../../types'
 import { spaceActionPolicy } from '../space.action-policy'
 import { SPACE_STATE } from '../space.enum'
 import { ENTITY_TYPE, PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../space-event/space-event.enum'
-import { errors } from '../../..'
 
 type SpaceLockInput = { spaceId: number }
 
@@ -35,10 +38,10 @@ void
     )
 
     if (!space) {
-      throw new errors.SpaceNotFoundError()
+      throw new SpaceNotFoundError()
     }
     if (!user) {
-      throw new errors.UserNotFoundError()
+      throw new UserNotFoundError()
     }
 
     const canBeLockedByCurrentUser = await spaceActionPolicy.canLock(space, user)
@@ -54,7 +57,7 @@ void
           SpaceMembership,
           { spaces: input.spaceId },
         )
-        
+
         const spaceEvent = this.em.create(SpaceEvent, {
           space,
           user,
@@ -77,6 +80,6 @@ void
       return
     }
 
-    throw new errors.PermissionError('Lock operation is not permitted.')
+    throw new PermissionError('Lock operation is not permitted.')
   }
 }

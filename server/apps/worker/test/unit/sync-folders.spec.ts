@@ -1,7 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { SyncFoldersOperation } from '@shared/domain/user-file/ops/sync-folders'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
-import { Folder, Tagging, User } from '@shared/domain'
-import { userFile, database, getLogger, types } from '@shared'
 import { create, db } from '@shared/test'
 import type { SyncFoldersInput } from '@shared/domain/user-file/user-file.input'
 import { FILE_ORIGIN_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
@@ -10,7 +14,7 @@ describe('syncFolders operation', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: any
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
   let defaultInput: Omit<SyncFoldersInput, 'remoteFolderPaths'>
   const project = 'project-foo'
 
@@ -32,7 +36,7 @@ describe('syncFolders operation', () => {
   })
 
   it('creates a folder', async () => {
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       // parentFolder init issues
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       // em,
@@ -57,7 +61,7 @@ describe('syncFolders operation', () => {
   it('creates two subfolders with the same name', async () => {
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
     await em.flush()
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -79,7 +83,7 @@ describe('syncFolders operation', () => {
   })
 
   it('creates folders with the same name', async () => {
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -104,7 +108,7 @@ describe('syncFolders operation', () => {
     create.tagsHelper.createTagging(em, { tag }, { folder: subfolder, tagger: user })
     await em.flush()
 
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       em,
       log,
       user: userCtx,
@@ -142,7 +146,7 @@ describe('syncFolders operation', () => {
     create.tagsHelper.createTagging(em, { tag }, { folder: sub2, tagger: user })
     await em.flush()
 
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       em,
       log,
       user: userCtx,
@@ -156,7 +160,7 @@ describe('syncFolders operation', () => {
   it('creates a folder and deletes a folder', async () => {
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
     await em.flush()
-    const op = new userFile.SyncFoldersOperation({
+    const op = new SyncFoldersOperation({
       em,
       log,
       user: userCtx,

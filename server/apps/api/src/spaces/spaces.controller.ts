@@ -1,3 +1,4 @@
+import { types } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Controller,
@@ -14,22 +15,26 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
-  client,
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  email,
-  entities,
-  errors,
-  space,
-  spaceEvent,
-  spaceMembership,
-  user,
-  UserContext,
-  userFile,
-} from '@shared'
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
+import { SpaceLockOperation } from '@shared/domain/space/ops/lock-space'
+import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-spaces'
+import { SpaceUnlockOperation } from '@shared/domain/space/ops/unlock-space'
+import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { PermissionError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceReportCreateFacade } from '../facade/space-report/space-report-create.facade'
 import { SpaceReportDeleteFacade } from '../facade/space-report/space-report-delete.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -56,7 +61,7 @@ export class SpacesController {
       em: this.oldEm,
     }
 
-    await new space.SpaceAcceptOperation(opsCtx).execute({ spaceId })
+    await new SpaceAcceptOperation(opsCtx).execute({ spaceId })
   }
 
   @HttpCode(204)
@@ -68,18 +73,18 @@ export class SpacesController {
       em: this.oldEm,
     }
 
-    await new space.SpaceLockOperation(opsCtx).execute({ spaceId })
-    await new email.EmailProcessOperation(opsCtx).execute({
+    await new SpaceLockOperation(opsCtx).execute({ spaceId })
+    await new EmailProcessOperation(opsCtx).execute({
       input: {
         initUserId: this.user.id,
         spaceId,
         activityType:
-          spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE[
-            spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE.space_locked
+          SPACE_EVENT_ACTIVITY_TYPE[
+            SPACE_EVENT_ACTIVITY_TYPE.space_locked
           ],
       },
       receiverUserIds: [],
-      emailTypeId: email.emailConfig.EMAIL_TYPES.spaceChanged as any,
+      emailTypeId: EMAIL_TYPES.spaceChanged as any,
     })
   }
 
@@ -92,29 +97,29 @@ export class SpacesController {
       em: this.oldEm,
     }
 
-    await new space.SpaceUnlockOperation(opsCtx).execute({ spaceId })
+    await new SpaceUnlockOperation(opsCtx).execute({ spaceId })
 
-    await new email.EmailProcessOperation(opsCtx).execute({
+    await new EmailProcessOperation(opsCtx).execute({
       input: {
         initUserId: this.user.id,
         spaceId,
         activityType:
-          spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE[
-            spaceEvent.types.SPACE_EVENT_ACTIVITY_TYPE.space_unlocked
+          SPACE_EVENT_ACTIVITY_TYPE[
+            SPACE_EVENT_ACTIVITY_TYPE.space_unlocked
           ],
       },
       receiverUserIds: [],
-      emailTypeId: email.emailConfig.EMAIL_TYPES.spaceChanged as any,
+      emailTypeId: EMAIL_TYPES.spaceChanged as any,
     })
   }
 
   @HttpCode(204)
   @Patch('/:id/fix_guest_permissions')
   async fixGuestPermissions(@Param('id', ParseIntPipe) id: number) {
-    const spaceToFix = await this.oldEm.findOne(entities.Space, { id }, {})
+    const spaceToFix = await this.oldEm.findOne(Space, { id }, {})
 
     const membership = await this.oldEm.findOne(
-      entities.SpaceMembership,
+      SpaceMembership,
       {
         spaces: id,
         user: this.user.id,
@@ -125,13 +130,13 @@ export class SpacesController {
     if (
       spaceToFix == null ||
       membership == null ||
-      spaceToFix.type !== space.types.SPACE_TYPE.GROUPS ||
-      membership.role !== spaceMembership.types.SPACE_MEMBERSHIP_ROLE.LEAD
+      spaceToFix.type !== SPACE_TYPE.GROUPS ||
+      membership.role !== SPACE_MEMBERSHIP_ROLE.LEAD
     ) {
-      throw new errors.PermissionError('Operation not permitted.')
+      throw new PermissionError('Operation not permitted.')
     }
-    const platformClient = new client.PlatformClient(this.user.accessToken, this.log)
-    if (membership.side === spaceMembership.types.SPACE_MEMBERSHIP_SIDE.GUEST) {
+    const platformClient = new PlatformClient(this.user.accessToken, this.log)
+    if (membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.
         await platformClient.projectDescribe({
@@ -139,12 +144,12 @@ export class SpacesController {
           body: {},
         })
       } catch (err) {
-        throw new errors.PermissionError(
+        throw new PermissionError(
           'Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.',
         )
       }
       // if no error, the permissions are correct.
-      throw new errors.PermissionError('Permissions are already corrected for guest side.')
+      throw new PermissionError('Permissions are already corrected for guest side.')
     } else {
       // check project first.
       const res = await platformClient.projectDescribe({
@@ -157,7 +162,7 @@ export class SpacesController {
       })
 
       if (spaceToFix.guestDxOrg in res.permissions) {
-        throw new errors.PermissionError('Permissions are already corrected for guest side.')
+        throw new PermissionError('Permissions are already corrected for guest side.')
       }
 
       const response = await platformClient.projectInvite({
@@ -177,7 +182,7 @@ export class SpacesController {
       em: this.oldEm,
     }
 
-    return await new space.SelectableSpacesOperation(opsCtx).execute(id)
+    return await new SelectableSpacesOperation(opsCtx).execute(id)
   }
 
   // TODO(PFDA-4831) - cover reports with integration tests after setting up full test env

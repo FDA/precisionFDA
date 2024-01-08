@@ -6,7 +6,7 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core'
-import { Tagging } from '../tagging'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TagRepository } from './tag.repository'
 
 @Entity({ tableName: 'tags', customRepository: () => TagRepository })

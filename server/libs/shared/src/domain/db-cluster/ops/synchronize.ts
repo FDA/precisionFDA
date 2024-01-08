@@ -1,12 +1,14 @@
 import { wrap } from '@mikro-orm/core'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ClientRequestError } from '@shared/errors'
+import { DbClusterDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { invertObj } from 'ramda'
 import { SyncDbClusterJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
-import { PlatformClient, DbClusterDescribeResponse } from '../../../platform-client'
+import { PlatformClient } from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe, UserOpsCtx } from '../../../types'
-import { DbCluster, User } from '../..'
-import { errors } from '../../..'
 import { STATUS, STATUSES } from '../db-cluster.enum'
 
 export class SyncDbClusterOperation extends WorkerBaseOperation<
@@ -54,7 +56,7 @@ Maybe<DbCluster>
         project: dbCluster.project,
       })
     } catch (err) {
-      if (err instanceof errors.ClientRequestError && err.props?.clientStatusCode) {
+      if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
         if (err.props.clientStatusCode === 401) {
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated

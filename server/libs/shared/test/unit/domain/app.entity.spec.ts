@@ -1,11 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { App, Job, User } from '../../../src/domain'
-import { database, } from '@shared'
-import { Spec } from '../../../src/domain/app/app.input'
 import { create, db, generate } from '../../../src/test'
 import { JOB_STATE } from '../../../src/domain/job/job.enum'
-import { AppSpec, Internal } from '../../../src/domain/app/app.entity'
+import { App, AppSpec, Internal } from '../../../src/domain/app/app.entity'
 
 describe('app.entity tests', () => {
   let em: EntityManager<MySqlDriver>

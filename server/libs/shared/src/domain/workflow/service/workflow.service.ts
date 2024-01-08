@@ -1,8 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { ArrayUtils } from '@shared'
-import { App } from '../../app'
-import { Workflow } from '@shared/domain'
+import { App } from '@shared/domain/app/app.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
 @Injectable()
 export class WorkflowService {

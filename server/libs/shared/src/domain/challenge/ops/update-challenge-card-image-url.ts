@@ -1,10 +1,11 @@
-import { BaseOperation } from '../../../utils'
+import { config } from '@shared/config'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { NotFoundError } from '@shared/errors'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { OpsCtx } from '../../../types'
-import { config, errors } from '../../..'
 import { ChallengeRepository } from '../challenge.repository'
 import { Challenge } from '../challenge.entity'
 import { PlatformClient } from '../../../platform-client'
-import { UserFile } from '../../user-file'
 import { UserFileRepository } from '../../user-file/user-file.repository'
 
 
@@ -19,18 +20,18 @@ void
     const repo = em.getRepository(Challenge) as ChallengeRepository
     const challenge = await repo.findOneWithId(challengeId)
     if (!challenge) {
-      throw new errors.NotFoundError(`ChallengeUpdateCardImageUrlOperation: Challenge ${challengeId} not found`)
+      throw new NotFoundError(`ChallengeUpdateCardImageUrlOperation: Challenge ${challengeId} not found`)
     }
 
     if (!challenge.cardImageId) {
-      throw new errors.NotFoundError(`ChallengeUpdateCardImageUrlOperation: Challenge ${challengeId} has empty card_image_id`)
+      throw new NotFoundError(`ChallengeUpdateCardImageUrlOperation: Challenge ${challengeId} has empty card_image_id`)
     }
 
     const fileRepo = em.getRepository(UserFile) as UserFileRepository
     const cardImage = await fileRepo.findFileWithUid(challenge.cardImageId)
     log.verbose({ challengeId, cardImage }, `ChallengeUpdateCardImageUrlOperation: Updating ${challengeId} cardImage`)
     if (!cardImage) {
-      throw new errors.NotFoundError(`ChallengeUpdateCardImageUrlOperation: Cannot find card image id ${challenge.cardImageId} for challenge ${challengeId}`)
+      throw new NotFoundError(`ChallengeUpdateCardImageUrlOperation: Cannot find card image id ${challenge.cardImageId} for challenge ${challengeId}`)
     }
 
     const platformClient = new PlatformClient(config.platform.challengeBotAccessToken, this.ctx.log)

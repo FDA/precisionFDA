@@ -1,6 +1,6 @@
+import { Session } from '@shared/domain/session/session.entity'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { User } from '../user.entity'
-import { Session } from '../../session'
-import { BaseOperation } from '../../../utils'
 import { UserOpsCtx } from '../../../types'
 
 /**

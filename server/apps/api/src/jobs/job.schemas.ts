@@ -1,13 +1,13 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { JSONSchema7 } from "json-schema"
-import { utils } from '@shared'
+import { schemas } from '@shared/utils/base-schemas'
+import { JSONSchema7 } from 'json-schema'
 
 export const jobListQuerySchema: JSONSchema7 = {
   type: 'object',
   properties: {
     scope: { type: 'string', default: false },
     spaceId: { type: 'string', default: false },
-    ...utils.schemas.paginationSchema.properties,
+    ...schemas.paginationSchema.properties,
   },
   required: [],
   additionalProperties: true,

@@ -1,3 +1,4 @@
+import { App } from '@shared/domain/app/app.entity'
 import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
 import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
@@ -6,7 +7,6 @@ import { EntityProvenanceService } from '@shared/domain/provenance/service/entit
 import { EntityProvenanceSvgResultTransformerService } from '@shared/domain/provenance/service/result-transform/entity-provenance-svg-result-transformer.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import type { App } from '@shared/domain'
 
 describe('EntityProvenanceService', () => {
   const ENTITY_TYPE = 'app'

@@ -1,5 +1,6 @@
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
-import { FileCloseOperation, UserFile } from '@shared/domain/user-file'
+import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'

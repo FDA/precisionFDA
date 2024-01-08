@@ -1,7 +1,9 @@
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { expect } from 'chai'
 import { JSDOM } from 'jsdom'
 import { stub } from 'sinon'
-import type { Space, SpaceReport, SpaceReportPart } from '../../../src/domain'
 import { SpaceReportResultService } from '../../../src/domain/space-report/service/space-report-result.service'
 
 describe('SpaceReportResultService', () => {

@@ -1,7 +1,7 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import type { userFile } from '@shared'
-import { errors } from '@shared'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
@@ -104,32 +104,32 @@ describe('SpaceReportDeleteFacade', () => {
   it('should throw an error if no reports found and rollback transaction', async () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([])
 
-    await expectReject(errors.NotFoundError, 'Space report not found')
+    await expectReject(NotFoundError, 'Space report not found')
   })
 
   it('should throw an error if some reports not found and rollback transaction', async () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([SPACE_REPORT_1])
 
-    await expectReject(errors.NotFoundError, 'Space report not found')
+    await expectReject(NotFoundError, 'Space report not found')
   })
 
   it('should throw an error if some reports not in a terminal state and rollback transaction', async () => {
     const SPACE_REPORT_2_NON_TERMINAL = { ...SPACE_REPORT_2, state: 'CREATED' }
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([SPACE_REPORT_1, SPACE_REPORT_2_NON_TERMINAL])
 
-    await expectReject(errors.InvalidStateError, 'Cannot delete a report in non terminal state')
+    await expectReject(InvalidStateError, 'Cannot delete a report in non terminal state')
   })
 
   it('should throw an error if no spaces found and rollback transaction', async () => {
     getSpacesForUserStub.withArgs(SPACE_IDS).returns([])
 
-    await expectReject(errors.NotFoundError, 'Space not found')
+    await expectReject(NotFoundError, 'Space not found')
   })
 
   it('should throw an error if some spaces not found and rollback transaction', async () => {
     getSpacesForUserStub.withArgs(SPACE_IDS).returns([SPACE_2])
 
-    await expectReject(errors.NotFoundError, 'Space not found')
+    await expectReject(NotFoundError, 'Space not found')
   })
 
   it('should call nodesRemoveOperation with all file ids', async () => {
@@ -162,7 +162,7 @@ describe('SpaceReportDeleteFacade', () => {
 
     const nodesRemoveOperation = {
       execute: nodesRemoveExecuteStub,
-    } as unknown as userFile.NodesRemoveOperation
+    } as unknown as NodesRemoveOperation
 
     return new SpaceReportDeleteFacade(em, spaceReportService, nodesRemoveOperation)
   }

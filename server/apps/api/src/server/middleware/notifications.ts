@@ -1,11 +1,14 @@
 
+import { database } from '@shared/database'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { AuthSessionOperation } from '@shared/domain/user/ops/auth.session'
+import { User } from '@shared/domain/user/user.entity'
+import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import http from 'http'
 import ws from 'ws'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { user as userDomain, redis, database } from '@shared'
 import { log } from '../../logger'
 import { UserCtx } from '@shared/types'
-import { notification as notificationDomain } from '@shared'
 
 // list of client connections grouped together by user id for faster access
 const clientConnections = new Map<number, WebSocketConnection[]>()
@@ -23,7 +26,7 @@ const connectionsCleanup = () => {
   })
 }
 
-const storeConnection = (user: userDomain.User, wsc: WebSocketConnection) => {
+const storeConnection = (user: User, wsc: WebSocketConnection) => {
   if (!clientConnections.get(user.id) || clientConnections.get(user.id)?.length === 0) {
     log.verbose(`Store WS connection`)
     clientConnections.set(user.id, [wsc])
@@ -35,8 +38,8 @@ const storeConnection = (user: userDomain.User, wsc: WebSocketConnection) => {
 }
 
 const authenticateUserConnection = async (connection: any, message: any) => {
-  const notificationService = new notificationDomain.NotificationService(database.orm().em.fork() as SqlEntityManager)
-  const authSessionOp = new userDomain.AuthSessionOperation({
+  const notificationService = new NotificationService(database.orm().em.fork() as SqlEntityManager)
+  const authSessionOp = new AuthSessionOperation({
     log,
     em: database.orm().em as SqlEntityManager,
     user: {} as UserCtx,
@@ -80,9 +83,9 @@ export const setupWSServer = async (server: http.Server) => {
     })
   })
 
-  const client = await redis.createRedisClient('worker')
+  const client = await createRedisClient('worker')
 
-  client.subscribe(redis.NOTIFICATIONS_QUEUE, eventPayload => {
+  client.subscribe(NOTIFICATIONS_QUEUE, eventPayload => {
     //@ts-ignore compilation says it's instance of Error, but it's actually a string
     const notification = JSON.parse(eventPayload)
     const userId = notification.user.id

@@ -1,6 +1,9 @@
 import { EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import { App, User } from '@shared/domain'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import type { SendEmailJob } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, db } from '@shared/test'
@@ -12,10 +15,10 @@ const createSendEmailTask = async (
   payload: SendEmailJob['payload'],
   user: SendEmailJob['user'],
 ) => {
-  const defaultTestQueue = queue.getMainQueue()
+  const defaultTestQueue = getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add(queue.types.TASK_TYPE.SEND_EMAIL, {
-    type: queue.types.TASK_TYPE.SEND_EMAIL,
+  await defaultTestQueue.add(TASK_TYPE.SEND_EMAIL, {
+    type: TASK_TYPE.SEND_EMAIL,
     payload,
     user,
   })

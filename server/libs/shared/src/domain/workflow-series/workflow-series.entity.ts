@@ -7,9 +7,9 @@ import {
     Property,
     Reference,
 } from '@mikro-orm/core'
-import { User } from '../user'
+import { WorkflowSeriesProperty } from '@shared/domain/property/workflow-series-property.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { WorkflowSeriesProperty } from "../property";
 
 @Entity({ tableName: 'workflow_series' })
 export class WorkflowSeries extends BaseEntity {

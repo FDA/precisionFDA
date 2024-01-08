@@ -1,4 +1,4 @@
-import { EmailTemplateInput } from '../../email.config'
+import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer, getViewSpaceButton, getBottomSpacer } from './common'
 
 export type CommentAddedTemplateInput = EmailTemplateInput & {

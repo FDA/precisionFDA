@@ -8,7 +8,9 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { App, User, UserFile } from '..'
+import { App } from '@shared/domain/app/app.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 
 enum COMPARISON_STATE {

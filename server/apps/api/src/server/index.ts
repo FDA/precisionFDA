@@ -1,7 +1,8 @@
 import { INestApplication } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { config, queue } from '@shared'
+import { config } from '@shared/config'
 import { ENVS } from '@shared/enums'
+import { createQueues } from '@shared/queue'
 import { QueueModule } from '@shared/queue/queue.module'
 import { QueueProxy } from '@shared/queue/queue.proxy'
 import fs from 'fs'
@@ -35,7 +36,7 @@ export function createServer() {
     }
 
     const queueProvider = app.select(QueueModule).get(QueueProxy)
-    await queue.createQueues(queueProvider)
+    await createQueues(queueProvider)
 
     log.log(`HTTP Server: started (port: ${config.api.port.toString()})`)
   }
@@ -56,7 +57,7 @@ export function createServer() {
     }
 
     const queueProvider = app.select(QueueModule).get(QueueProxy)
-    await queue.createQueues(queueProvider)
+    await createQueues(queueProvider)
 
     await app.listen(config.api.port)
 

@@ -9,7 +9,8 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User, Tagging } from '..'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
 import {

@@ -1,5 +1,5 @@
 import { Process, Processor } from '@nestjs/bull'
-import { config } from '@shared'
+import { config } from '@shared/config'
 import * as types from '@shared/queue/task.input'
 import { GenerateSpaceReportBatchJob, GenerateSpaceReportResultJob } from '@shared/queue/task.input'
 import { Job } from 'bull'

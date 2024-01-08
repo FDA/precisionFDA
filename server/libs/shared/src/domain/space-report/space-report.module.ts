@@ -1,15 +1,15 @@
 import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
-import { config, TimeUtils } from '@shared'
+import { config } from '@shared/config'
 import { SpaceReportPartAppResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-app-result-meta.provider'
 import { SpaceReportPartAssetResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-asset-result-meta.provider'
 import { SpaceReportPartFileResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-file-result-meta.provider'
 import { SpaceReportPartJobResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-job-result-meta.provider'
 import { SpaceReportPartWorkflowResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-workflow-result-meta.provider'
 import { SpaceReportPartModule } from '@shared/domain/space-report/service/part/space-report-part.module'
-import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
 import { SpaceReportResultService } from '@shared/domain/space-report/service/space-report-result.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { TimeUtils } from '@shared/utils/time.utils'
 
 @Module({
   imports: [

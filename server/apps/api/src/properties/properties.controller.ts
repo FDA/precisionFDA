@@ -1,11 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Param, Post } from '@nestjs/common'
-import {
-  DEPRECATED_SQL_ENTITY_MANAGER_TOKEN,
-  property as propertyDomain,
-  UserContext,
-} from '@shared'
+import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { PropertyType } from '@shared/domain/property/property.entity'
+import { PropertyService } from '@shared/domain/property/services/property.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ZodPipe } from '../validation/pipes/zod.pipe'
 import { PropertiesPostReqBody, propertiesPostRequestSchema } from './properties.schemas'
 
@@ -19,7 +17,7 @@ export class PropertiesController {
   @HttpCode(201)
   @Post()
   async setProperty(@Body(new ZodPipe(propertiesPostRequestSchema)) body: PropertiesPostReqBody) {
-    const propertyService = new propertyDomain.PropertyService(this.em, this.user)
+    const propertyService = new PropertyService(this.em, this.user)
 
     return await propertyService.setProperty({
       targetId: body.targetId,
@@ -35,7 +33,7 @@ export class PropertiesController {
     @Param('scope') scope: string,
     @Param('targetType') targetType: PropertyType,
   ) {
-    const propertyService = new propertyDomain.PropertyService(this.em, this.user)
+    const propertyService = new PropertyService(this.em, this.user)
     const res = await propertyService.getValidKeys({ scope, targetType })
 
     return { keys: res }

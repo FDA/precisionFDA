@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { createSyncJobStatusTask, findRepeatable, getMainQueue, removeRepeatableJob } from '@shared/queue'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
 import type { Maybe, UserOpsCtx, UserCtx } from '../../../types'
 import { buildIsOverMaxDuration } from '../job.helper'
-import { queue } from '../../..'
 import { isJobOrphaned } from '../../../queue/queue.utils'
 import { JobRepository } from '../job.repository'
 import { SyncJobOperation } from './synchronize'
@@ -11,21 +11,21 @@ import { SyncJobOperation } from './synchronize'
 
 const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any): Promise<void> => {
   const bullJobId = SyncJobOperation.getBullJobId(job.dxid)
-  const bullJob = await queue.findRepeatable(bullJobId)
+  const bullJob = await findRepeatable(bullJobId)
   if (!bullJob) {
     log.warn({
       jobDxid: job.dxid,
       bullJobId,
     }, 'CheckUserJobsOperation: Status sync task for job missing, recreating it')
-    await queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
+    await createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else if (isJobOrphaned(bullJob)) {
     log.verbose({
       jobDxid: job.dxid,
       bullJob,
     }, 'CheckUserJobsOperation: Status sync task found, but it is orphaned. '
        + 'Removing and recreating it')
-    await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
-    await queue.createSyncJobStatusTask({ dxid: job.dxid }, user)
+    await removeRepeatableJob(bullJob, getMainQueue())
+    await createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else {
     log.verbose({
       jobDxid: job.dxid,

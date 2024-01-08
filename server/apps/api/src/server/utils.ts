@@ -1,5 +1,7 @@
 import { Logger } from '@nestjs/common'
-import { ajv, config, utils } from '@shared'
+import { config } from '@shared/config'
+import { schemas } from '@shared/utils/base-schemas'
+import { ajv } from '@shared/utils/validator'
 import { ipv4QuadrupleToBooleanArray, ipv4StringToQuadruple } from '../utils/ipv4'
 
 // TODO(samuel) investigate if it's possible to have this logic on Nginx
@@ -44,6 +46,6 @@ export const isRequestFromFdaSubnet = (log: Logger, ipv4Header: string): boolean
   return true
 }
 export const isRequestFromAuthenticatedUser = (headers: Record<string, string>): boolean => {
-  const userContextValidatorFn = ajv.compile(utils.schemas.userContextSchema)
+  const userContextValidatorFn = ajv.compile(schemas.userContextSchema)
   return userContextValidatorFn(headers) as boolean
 }

@@ -1,7 +1,10 @@
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
 import { STATIC_SCOPE } from '../../../../enums'
-import { Challenge, SpaceMembership, User } from '../../..'
 import {
   EmailTemplate,
   ChallengeOpened,
@@ -15,7 +18,6 @@ import {
   buildIsNotificationEnabled,
   pfdaNoReplyUser,
 } from '../../email.helper'
-import { BaseTemplate } from '../base-template'
 import {
   challengeOpenedTemplate,
   ChallengeOpenedTemplateInput,

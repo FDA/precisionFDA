@@ -1,6 +1,9 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import { App, User } from '@shared/domain'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -10,13 +13,13 @@ import { JobOptions } from 'bull'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 
 const createCheckStaleJobsTask = async (user: CheckStaleJobsJob['user']) => {
-  const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.CHECK_STALE_JOBS}` }
-  const defaultTestQueue = queue.getMainQueue()
+  const options: JobOptions = { jobId: `${TASK_TYPE.CHECK_STALE_JOBS}` }
+  const defaultTestQueue = getMainQueue()
   // .add() is stubbed by default
   await defaultTestQueue.add(
-    queue.types.TASK_TYPE.CHECK_STALE_JOBS,
+    TASK_TYPE.CHECK_STALE_JOBS,
     {
-      type: queue.types.TASK_TYPE.CHECK_STALE_JOBS,
+      type: TASK_TYPE.CHECK_STALE_JOBS,
       user,
     },
     options,

@@ -8,11 +8,11 @@ import {
   Enum,
   Filter, OneToMany, Collection,
 } from '@mikro-orm/core'
+import { DbClusterProperty } from "@shared/domain/property/db-cluster-property.entity";
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
 import { User } from '../user/user.entity'
 import { STATUS, ENGINE } from './db-cluster.enum'
-import { DbClusterProperty } from "../property";
 
 @Entity({ tableName: 'dbclusters' })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })

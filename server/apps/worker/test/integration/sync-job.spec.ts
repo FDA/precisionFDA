@@ -1,7 +1,15 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { DateTime } from 'luxon'
-import { database, queue, errors } from '@shared'
-import { App, User, Job, UserFile, Tag, Tagging, Folder } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import type { CheckStatusJob } from '@shared/queue/task.input'
 import { expect } from 'chai'
@@ -9,7 +17,6 @@ import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { FILES_DESC_RES, FILES_LIST_RES_ROOT, FOLDERS_LIST_RES } from '@shared/test/mock-responses'
 import { FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { SyncJobOperation } from '@shared/domain/job'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
@@ -34,10 +41,10 @@ const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getMainQueue()
+  const defaultTestQueue = getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add(queue.types.TASK_TYPE.SYNC_JOB_STATUS, {
-    type: queue.types.TASK_TYPE.SYNC_JOB_STATUS,
+  await defaultTestQueue.add(TASK_TYPE.SYNC_JOB_STATUS, {
+    type: TASK_TYPE.SYNC_JOB_STATUS,
     payload,
     user,
   })

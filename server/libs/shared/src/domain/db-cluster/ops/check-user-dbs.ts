@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { queue } from '../../..'
+import { createDbClusterSyncTask, findRepeatable } from '@shared/queue'
 import { PlatformClient } from '../../../platform-client'
 import { Maybe, UserCtx, UserOpsCtx } from '../../../types'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
@@ -12,7 +12,7 @@ const recreateDbSyncOperationIfMissing = async (
   userCtx: UserCtx,
 ): Promise<void> => {
   log.verbose(`Checking dbcluster ${dbCluster.dxid}, userId ${userCtx.id}, status ${dbCluster.status}`)
-  const dbSyncOperation = await queue.findRepeatable(
+  const dbSyncOperation = await findRepeatable(
     SyncDbClusterOperation.getBullJobId(dbCluster.dxid),
   )
   if (!dbSyncOperation) {
@@ -20,7 +20,7 @@ const recreateDbSyncOperationIfMissing = async (
       { dbCluster, userId: userCtx.id },
       'CheckUserDbClustersOperation: Recreating missing DB Cluster sync operation',
     )
-    await queue.createDbClusterSyncTask({ dxid: dbCluster.dxid }, userCtx)
+    await createDbClusterSyncTask({ dxid: dbCluster.dxid }, userCtx)
   }
 }
 

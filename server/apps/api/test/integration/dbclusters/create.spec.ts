@@ -1,10 +1,11 @@
+import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { omit, pick, invertObj } from 'ramda'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { database, USER_CONTEXT_HTTP_HEADERS } from '@shared'
 import { create, generate, db, mockResponses } from '@shared/test'
-import { User } from '@shared/domain'
 import {
   STATUS as DB_CLUSTER_STATUS,
   ENGINE as DB_CLUSTER_ENGINE,
