@@ -5,6 +5,7 @@ import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { VerticalCenter } from '../../../components/Page/styles'
 import { ResourceTable, StyledAction, StyledName } from '../../../components/ResourceTable'
+import { pluralize } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -32,11 +33,11 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const modalComp = isShown && (
     <ModalNext
       data-testid="modal-files-organize"
-      headerText={`Open ${momoSelected.length} items(s)`}
+      headerText={`Open ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop headerText={`Open ${momoSelected.length} items(s)`} hide={() => setShowModal(false)} />
+      <ModalHeaderTop headerText={`Open ${momoSelected.length} ${pluralize('item', momoSelected.length)}`} hide={() => setShowModal(false)} />
       <ModalScroll>
         <StyledResourceTable
           rows={momoSelected.map(s => {
