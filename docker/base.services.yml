@@ -1,5 +1,6 @@
 services:
   base_ruby:
+    platform: linux/x86_64
     env_file: ../.env
     build:
       context: ../
