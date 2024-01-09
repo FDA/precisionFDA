@@ -173,5 +173,5 @@ end
 
 group :production, :staging, :dev do
   gem "exception_notification", "~> 4.4"
-  gem "puma", "~> 6.3"
+  gem "puma", "~> 6.4"
 end
