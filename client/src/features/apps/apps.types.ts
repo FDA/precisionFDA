@@ -98,7 +98,6 @@ export interface IApp {
   latest_revision: boolean;
   app_series_id: number;
   run_by_you: string;
-  job_count: number;
   org: string;
   explorers: number;
   featured: boolean;

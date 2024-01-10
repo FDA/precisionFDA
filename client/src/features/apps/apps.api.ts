@@ -159,6 +159,7 @@ export interface CreateAppResponse {
 export interface AppFetchResponse {
   app: IApp
   meta: {
+    accessible_jobs_count: number;
     spec: AppSpec
     internal: {
       code: string,
