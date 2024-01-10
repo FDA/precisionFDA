@@ -299,7 +299,7 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
           Spec
         </StyledTab>
         <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }}>
-          Executions ({app.job_count})
+          Executions ({meta.accessible_jobs_count})
         </StyledTab>
         <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }}>
           Readme
