@@ -1,31 +1,31 @@
 import React from 'react'
 import { Hooks, HeaderProps, CellProps, useResizeColumns } from 'react-table'
 import initial from 'lodash/initial'
-import { IndeterminateCheckbox } from './IndeterminateCheckbox'
-import { ExpandArrowIcon, SelectCheck } from './styles'
+import { ExpandArrowIcon, SelectCheckLabel } from './styles'
 import { TransparentButton } from '../Button'
+import { Checkbox } from '../CheckboxNext'
 
 
 export const selectionHook = (hooks: Hooks<any>) => {
   hooks.visibleColumns.push(columns => [
     {
       id: 'selection',
-      width: 40,
-      minWidth: 40,
+      width: 44,
+      minWidth: 44,
       disableResizing: true,
       // The header can use the table's getToggleAllRowsSelectedProps method
       // to render a checkbox
       Header: ({ getToggleAllRowsSelectedProps }) => (
-        <SelectCheck>
-          <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-        </SelectCheck>
+        <SelectCheckLabel id="select-header">
+          <Checkbox {...getToggleAllRowsSelectedProps()} />
+        </SelectCheckLabel>
       ),
       // The cell can use the individual row's getToggleRowSelectedProps method
       // to the render a checkbox
       Cell: ({ row }) => (
-        <SelectCheck>
-          <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-        </SelectCheck>
+        <SelectCheckLabel id={`select-row-${row.id}`}>
+          <Checkbox {...row.getToggleRowSelectedProps()} />
+        </SelectCheckLabel>
       ),
     },
     ...columns,

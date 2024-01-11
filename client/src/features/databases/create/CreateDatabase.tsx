@@ -7,7 +7,6 @@ import { debounce } from 'lodash'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import Select from 'react-select'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
@@ -20,6 +19,7 @@ import { StyledBackLink } from '../../home/home.styles'
 import { NotFound } from '../../home/show.styles'
 import { createDatabaseRequest, fetchAccessibleFiles, IAccessibleFile } from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
+import { Select } from '../../../components/Select'
 
 const useAccessibleFiles = (inputValue: string) => useQuery(['accessible-files', inputValue],
   () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects), {

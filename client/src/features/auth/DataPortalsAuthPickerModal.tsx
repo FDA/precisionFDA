@@ -39,7 +39,7 @@ export const DataPortalsAuthPickerModal: React.FC<{ modal: UseModal }> = ({
         headerText={'Access To Data Analytics as a Service (DAaaS) Requires Login'}
         hide={() => modal.setShowModal(false)}
       />
-      <Content overflowContent={false}>
+      <Content $overflowContent={false}>
         {'Please select one of the following options:'}
       </Content>
       <Footer>

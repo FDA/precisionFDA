@@ -215,8 +215,8 @@ const EditPropertiesForm = ({
                     {...register(`props.${index}.key`)}
                     data-tip
                     data-for={`props.${index}.key`}
-                    disable={mutation.isLoading}
-                    isError={isError}
+                    disabled={mutation.isLoading}
+                    $isError={isError}
                   />
                   {isError && (
                     <ReactTooltip
@@ -231,7 +231,7 @@ const EditPropertiesForm = ({
                   <InputTextS
                     autoComplete="off"
                     {...register(`props.${index}.value`)}
-                    disable={mutation.isLoading}
+                    disabled={mutation.isLoading}
                   />
                   <Remove onClick={() => remove(index)}>
                     <CrossIcon />

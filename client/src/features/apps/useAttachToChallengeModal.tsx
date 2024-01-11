@@ -58,7 +58,7 @@ const ChallengesList = ({
         </HeaderRow>
         {meta!.challenges.map((s: any, i: number) => (
           <TableRow
-            isSelected={selected === s.id}
+            $isSelected={selected === s.id}
             key={i}
             onClick={() => onSelect(s.id)}
           >

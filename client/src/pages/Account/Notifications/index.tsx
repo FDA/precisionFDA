@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import Select from 'react-select'
 import {
   PageHeader,
   PageTitle,
@@ -15,6 +14,7 @@ import { mapValues } from '../../../utils/object'
 import { useAuthUser } from '../../../features/auth/useAuthUser'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { usePageMeta } from '../../../hooks/usePageMeta'
+import { Select } from '../../../components/Select'
 
 enum Roles {
   'reviewer' = 'reviewer',

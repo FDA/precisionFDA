@@ -7,14 +7,13 @@ import { ITab, TabsSwitch } from '../TabsSwitch'
 import { StyledMarkdown } from '../../features/discussions/styles'
 import { MarkdownIcon } from '../icons/MarkdownIcon'
 import ExternalLink from '../Controls/ExternalLink'
-import { colors } from '../../styles/theme'
 
 export const Help = styled.div`
   padding: 6px;
   padding-right: 12px;
-  background-color: #f9f9f9;
-  border-left: 5px solid #e5e5e5;
-  color: #777777;
+  background-color: var(--tertiary-100);
+  border-left: 5px solid var(--c-layout-border);
+  color: var(--c-text-400);
   text-align: left;
   font-size: 13px;
   width: fit-content;
@@ -26,12 +25,12 @@ export const WeMarkdown = styled.div`
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #6d6d6d;
+  color: var(--c-text-500);
   opacity: 0.6;
   transition: opacity 0.08s linear 0.08s;
 
   svg {
-    color: ${colors.primaryBlue};
+    color: var(--primary-600);
   }
   &:hover {
       opacity: 1;
@@ -51,9 +50,16 @@ export const StyedEditor = styled.div`
     padding: var(--spacing);
     min-height: 70px;
     border-radius: 5px;
-    border: 1px solid #d0d7de;
-    background: #f6f8fa;
+    border: 1px solid var(--tertiary-250);
+    background: var(--c-textarea-bg);
     height: 20vh;
+
+    &:focus {
+      border-color: var(--primary-600);
+      border-right-width: 1px !important;
+      outline: 0;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
   }
 `
 const StyledPreview = styled(StyledMarkdown)`

@@ -171,7 +171,7 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
           </HeaderLeft>
           <div>
             <StyledRight>
-              <Refresh spin={isFetching} onClick={() => refetch()}>
+              <Refresh $spin={isFetching} onClick={() => refetch()}>
                 <SyncIcon />
               </Refresh>
               {db && <DetailActionsDropdown db={db} refetch={refetch} />}

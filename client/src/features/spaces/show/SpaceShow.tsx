@@ -145,13 +145,13 @@ const Spaces2 = ({
             )}
           </ButtonRow>
         </TopSpaceHeader>
-        <SpaceTypeHeader expandedSidebar={expandedSidebar}>
+        <SpaceTypeHeader $expandedSidebar={expandedSidebar}>
           <SpaceTypeTabs space={space} />
         </SpaceTypeHeader>
       </SpaceHeader>
 
       <Row>
-        <StyledMenu expanded={expandedSidebar}>
+        <StyledMenu $expanded={expandedSidebar}>
           <MenuItem
             data-testid="files-link"
             to={`/spaces/${space.id}/files`}

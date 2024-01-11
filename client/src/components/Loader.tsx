@@ -22,7 +22,7 @@ type Props = {
 export const Loader = ({ height = 16, ...rest }: Props) => (
   <LoaderWrapper {...rest}>
     <Svg height={height} width={60}>
-      <circle fill={colors.darkBlue} stroke="none" cx="6" cy={height / 2} r="6">
+      <circle fill="var(--base)" stroke="none" cx="6" cy={height / 2} r="6">
         <animate
           attributeName="opacity"
           dur="1s"
@@ -31,7 +31,7 @@ export const Loader = ({ height = 16, ...rest }: Props) => (
           begin="0.1"
         />
       </circle>
-      <circle fill={colors.darkBlue} stroke="none" cx="26" cy={height / 2} r="6">
+      <circle fill="var(--base)" stroke="none" cx="26" cy={height / 2} r="6">
         <animate
           attributeName="opacity"
           dur="1s"
@@ -40,7 +40,7 @@ export const Loader = ({ height = 16, ...rest }: Props) => (
           begin="0.2"
         />
       </circle>
-      <circle fill={colors.darkBlue} stroke="none" cx="46" cy={height / 2} r="6">
+      <circle fill="var(--base)" stroke="none" cx="46" cy={height / 2} r="6">
         <animate
           attributeName="opacity"
           dur="1s"

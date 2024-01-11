@@ -43,27 +43,27 @@ const TransparentStyledTabs = styled(Tabs)`
     margin: 0;
     padding: 0;
     display: flex;
-    border-bottom: 1px solid #DDDDDD;
+    border-bottom: 1px solid var(--c-layout-border);
 
     &_tab {
       box-sizing: border-box;
       height: 35px;
       padding: 5px 10px;
-      border: 1px solid rgba(0,0,0,0);
+      border: 1px solid transparent;
       border-bottom: none;
       cursor: pointer;
       margin-left: 10px;
-      margin-bottom: -1px;
+      margin-bottom: -2px;
       border-radius: 3px 3px 0 0;
       font-weight: 400;
-      color: #272727;
+      color: var(--base);
       font-size: 14px;
     }
   }
   .react-tabs__tab--selected {
-    background: #fff;
-    border: 1px solid #DDDDDD;
-    border-bottom: 1px solid rgba(0,0,0,0);
+    background: var(--background);
+    border: 1px solid var(--c-layout-border);
+    border-bottom: 1px solid transparent;
   }
 `
 

@@ -6,7 +6,6 @@ import * as Yup from 'yup'
 import { ErrorMessage } from '@hookform/error-message'
 import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import Select from 'react-select'
 import {
   fetchLicensesOnWorkflow,
   fetchWorkflow,
@@ -15,7 +14,7 @@ import {
   RunWorkflowRequest,
 } from '../workflows.api'
 import { InputOutput, IWorkflow, Stage } from '../workflows.types'
-import { InputText } from '../../../components/InputText'
+import { InputNumber, InputText } from '../../../components/InputText'
 import { InputError } from '../../../components/form/styles'
 import { HomeLoader, NotFound, Title } from '../../home/show.styles'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
@@ -49,6 +48,7 @@ import { FormPageContainer } from '../../../components/Page/styles'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { getValue } from '../../apps/run/utils'
 import { getDefaultValueFromServer } from '../../apps/form/common'
+import { Select } from '../../../components/Select'
 
 interface WorkflowRunData {
   analysisName: string;
@@ -345,7 +345,7 @@ const WorkflowRun = (
                   </FieldGroup>
                 </StyledAnalysisName>
                 <FieldGroup label="Cost Execution Limit" required >
-                  <InputText label="jobLimit" type="number"
+                  <InputNumber
                     {...register('jobLimit')}
                     disabled={isSubmitting}
                   />

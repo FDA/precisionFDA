@@ -18,17 +18,17 @@ import {
 import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { StyledDropMenuLinks } from '../../../components/Header/styles'
 import { InputText } from '../../../components/InputText'
-import { IndeterminateCheckbox } from '../../../components/Table/IndeterminateCheckbox'
 import { InputError } from '../../../components/form/styles'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { theme } from '../../../styles/theme'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { CreateAppForm, IOSpec } from '../apps.types'
 import { formatCSVStringToArray, handleSnakeNameChange } from './common'
+import { Checkbox } from '../../../components/CheckboxNext'
 
-export const InputTextS = styled(InputText)<{ isError: boolean }>`
-  ${({ isError }) =>
-    isError &&
+export const InputTextS = styled(InputText)<{ $isError?: boolean }>`
+  ${({ $isError }) =>
+    $isError &&
     css`
       border-color: #ff5040;
       &:focus {
@@ -103,7 +103,7 @@ export const Name = ({ base, register, index, errors }: SpecProps) => {
         data-tip
         data-for={`${base}.${index}.name`}
         placeholder={`Enter ${base === 'input_spec' ? 'input' : 'output'} name`}
-        isError={isError}
+        $isError={isError}
       />
 
       {isError && (
@@ -130,7 +130,7 @@ export const Label = ({ base, register, index, errors }: SpecProps) => {
         {...register(`${base}.${index}.label`)}
         data-tip
         data-for={`${base}.${index}.label`}
-        isError={isError}
+        $isError={isError}
         placeholder={`Enter ${
           base === 'input_spec' ? 'input' : 'output'
         } label`}
@@ -159,7 +159,7 @@ export const Help = ({ base, register, index, errors }: SpecProps) => {
         {...register(`${base}.${index}.help`)}
         data-tip
         data-for={`${base}.${index}.help`}
-        isError={isError}
+        $isError={isError}
         placeholder="Enter help text"
       />
       {isError && (
@@ -181,7 +181,7 @@ export const DefaultString = ({ base, register, index, errors }: SpecProps) => {
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
         data-tip
         data-for={`${base}.${index}.default`}
-        isError={isError}
+        $isError={isError}
         placeholder="Optional default"
       />
       {isError && (
@@ -206,7 +206,7 @@ export const DefaultFloat = ({ base, register, index, errors }: SpecProps) => {
         data-tip
         data-for={`${base}.${index}.default`}
         placeholder="Optional default"
-        isError={isError}
+        $isError={isError}
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
@@ -231,7 +231,7 @@ export const DefaultInt = ({ base, register, index, errors }: SpecProps) => {
         data-tip
         data-for={`${base}.${index}.default`}
         placeholder="Optional default"
-        isError={isError}
+        $isError={isError}
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
@@ -352,7 +352,7 @@ export const Choice = ({ base, register, index, errors }: SpecProps) => {
       <InputTextS
         data-tip
         data-for={`${base}.${index}.choices`}
-        isError={isError}
+        $isError={isError}
         {...register(`${base}.${index}.choices`, { setValueAs: formatCSVStringToArray })}
         placeholder="Optional comma separated values"
       />
@@ -370,29 +370,32 @@ export const Choice = ({ base, register, index, errors }: SpecProps) => {
 }
 
 export const Optional = ({ base, index, control, errors }: SpecProps) => {
-  const isError = Boolean(get(errors, `${base}.${index}.choices`))
-  const errorMessage = get(errors, `${base}.${index}.choices`)?.message || null
+  const id = `${base}.${index}.optional`
+  const isError = Boolean(get(errors, `${base}.${index}.optional`))
+  const errorMessage = get(errors, `${base}.${index}.optional`)?.message || null
   return (
     <td>
       <Controller
         data-tip
-        data-for={`${base}.${index}.optional`}
-        name={`${base}.${index}.optional`}
+        data-for={id}
+        name={id}
         control={control}
         render={({ field }) => {
           return (
-            <IndeterminateCheckbox
-              data-testid={`${base}.${index}.optional`}
-              checked={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
+            <label id={id}>
+              <Checkbox
+                data-testid={id+'-checkbox'}
+                checked={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            </label>
           )
         }}
       />
       {isError && (
         <ReactTooltip
-          id={`${base}.${index}.choices`}
+          id={id}
           place="top"
           effect="solid"
         >
@@ -403,29 +406,32 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
   )
 }
 export const IsArray = ({ base, index, control, errors }: SpecProps) => {
-  const isError = Boolean(get(errors, `${base}.${index}.isArray`))
-  const errorMessage = get(errors, `${base}.${index}.isArray`)?.message || null
+  const id = `${base}.${index}.isArray`
+  const isError = Boolean(get(errors, id))
+  const errorMessage = get(errors, id)?.message || null
   return (
     <StyledIsArray>
       <Controller
         data-tip
-        data-for={`${base}.${index}.isArray`}
-        name={`${base}.${index}.isArray`}
+        data-for={id}
+        name={id}
         control={control}
         render={({ field }) => {
           return (
-            <IndeterminateCheckbox
-              data-testid={`${base}.${index}.isArray`}
-              checked={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
+            <label id={id}>
+              <Checkbox
+                data-testid={id+'-checkbox'}
+                checked={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            </label>
           )
         }}
       />
       {isError && (
         <ReactTooltip
-          id={`${base}.${index}.isArray`}
+          id={id}
           place="top"
           effect="solid"
         >

@@ -70,13 +70,13 @@ const StyledPageRow = styled.div`
 const StyledInnerHTML = styled.div`
   max-width: 900px;
   font-size: 15px;
-  color: #000;
+  color: var(--c-text-700);
   line-height: 1.7;
   font-weight: 400;
 
   details {
-    background: #fcfcfc;
-    border: 1px solid #eee;
+    background: var(--tertiary-50);
+    border: 1px solid var(--tertiary-100);
     border-radius: 10px;
     margin-bottom: 8px;
   }
@@ -92,7 +92,7 @@ const StyledInnerHTML = styled.div`
   }
 
   table, tbody, tr, td, th {
-    border: 1px solid #bbb !important; 
+    border: 1px solid var(--c-layout-border) !important; 
   }
 
   .PlaygroundEditorTheme__layoutItem {

@@ -47,6 +47,7 @@ import {
 import { getBaseLink } from '../run/utils'
 import { getSpaceIdFromScope } from '../../../utils'
 import { CreateAppPayload } from '../apps.api'
+import { Select } from '../../../components/Select'
 
 loader.config({
   paths: {
@@ -55,6 +56,11 @@ loader.config({
 })
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
+
+const ubuntuReleasesOptions = [
+  { value: '16.04', label: '16.04' },
+  { value: '20.04', label: '20.04' }
+];
 
 export const AppForm = ({
   isEdit = false,
@@ -215,10 +221,12 @@ export const AppForm = ({
               render={({ field }) => (
                 <SelectFieldLabel>
                   Ubuntu Release
-                  <select {...field}>
-                    <option value="16.04">16.04</option>
-                    <option value="20.04">20.04</option>
-                  </select>
+                  <Select
+                    {...field}
+                    options={ubuntuReleasesOptions}
+                    onChange={(option) => field.onChange(option?.value)}
+                    value={ubuntuReleasesOptions.find(option => option.value === field.value)}
+                  />
                   <ErrorMessage
                     errors={errors}
                     name="release"
@@ -233,28 +241,28 @@ export const AppForm = ({
         <div>
           <TabRow>
             <StyledPfTab
-              isActive={selectedSection === 'io'}
+              $isActive={selectedSection === 'io'}
               onClick={() => setSelectedSection('io')}
             >
               <TabTitle>I/O SPEC</TabTitle>
               <TabDesc>Configure Input & Output Fields</TabDesc>
             </StyledPfTab>
             <StyledPfTab
-              isActive={selectedSection === 'vm'}
+              $isActive={selectedSection === 'vm'}
               onClick={() => setSelectedSection('vm')}
             >
               <TabTitle>VM ENVIRONMENT</TabTitle>
               <TabDesc>Configure your resources</TabDesc>
             </StyledPfTab>
             <StyledPfTab
-              isActive={selectedSection === 'script'}
+              $isActive={selectedSection === 'script'}
               onClick={() => setSelectedSection('script')}
             >
               <TabTitle>SCRIPT</TabTitle>
               <TabDesc>Write your shell script</TabDesc>
             </StyledPfTab>
             <StyledPfTab
-              isActive={selectedSection === 'readme'}
+              $isActive={selectedSection === 'readme'}
               onClick={() => setSelectedSection('readme')}
             >
               <TabTitle>README</TabTitle>
@@ -262,7 +270,7 @@ export const AppForm = ({
             </StyledPfTab>
           </TabRow>
 
-          <PfTabContent isShown={selectedSection === 'io'}>
+          <PfTabContent $isShown={selectedSection === 'io'}>
             <Help>
               <span>Need help?</span>
               <Link to="/docs/creating-apps#dev-io" target="_blank">
@@ -288,11 +296,11 @@ export const AppForm = ({
             />
           </PfTabContent>
 
-          <PfTabContent isShown={selectedSection === 'vm'}>
+          <PfTabContent $isShown={selectedSection === 'vm'}>
             <VmEnvTab control={control} />
           </PfTabContent>
 
-          <PfTabContent isShown={selectedSection === 'script'}>
+          <PfTabContent $isShown={selectedSection === 'script'}>
             <Controller
               name="code"
               control={control}
@@ -322,7 +330,7 @@ export const AppForm = ({
             />
           </PfTabContent>
 
-          <PfTabContent isShown={selectedSection === 'readme'}>
+          <PfTabContent $isShown={selectedSection === 'readme'}>
             <Controller
               name="readme"
               control={control}

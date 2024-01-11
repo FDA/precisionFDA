@@ -9,7 +9,7 @@ export const ContentFooter = styled.div`
   padding-right: 12px;
   padding-top: 8px;
   padding-bottom: 8px;
-  border-top: 1px solid #d5d5d5;
+  border-top: 1px solid var(--c-layout-border);
   display: flex;
   justify-content: space-between;
 `

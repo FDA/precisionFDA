@@ -4,7 +4,7 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { UseMutationResult } from '@tanstack/react-query'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { Divider, InputError } from '../../../components/form/styles'
+import { Divider, FieldLabelRow, InputError } from '../../../components/form/styles'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -12,13 +12,13 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
-import { HintText, Row, CheckboxLabel, StyledForm } from './styles'
+import { HintText, Row, StyledForm } from './styles'
 import {
   getSpaceTypeOptions,
   SPACE_TYPE_HINT,
   validationSchema,
 } from './helpers'
-import { Checkbox } from '../../../components/Checkbox'
+import { Checkbox } from '../../../components/CheckboxNext'
 import { useConfirm } from '../../modal/useConfirm'
 
 interface SpaceCreateForm {
@@ -125,11 +125,11 @@ export const SpaceForm = ({
     mutation.mutateAsync(vals)
   }
 
-  const handleProtectedSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProtectedSelection = (event: React.ChangeEvent<Element>) => {
     setValue('protected', event.target.checked)
   }
 
-  const handleRestrictedReviewer = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRestrictedReviewer = (event: React.ChangeEvent<Element>) => {
     setValue('restricted_reviewer', event.target.checked)
   }
 
@@ -291,14 +291,15 @@ export const SpaceForm = ({
 
       {(watch().space_type === 'review' || watch().space_type === 'groups') && (
           <FieldGroup>
-            <CheckboxLabel>
+            <FieldLabelRow>
               <Checkbox
-                  {...register('protected')}
-                  disabled={isSubmitting}
-                  onChange={handleProtectedSelection}
+                {...register('protected')}
+                disabled={isSubmitting}
+                onChange={handleProtectedSelection}
+                checked={watch().protected || undefined}
               />
               Space Protection
-            </CheckboxLabel>
+            </FieldLabelRow>
             <HintText>
               When enabled the space will be subject to the following restrictions:
               <ul>
@@ -312,14 +313,15 @@ export const SpaceForm = ({
 
       {watch().space_type === 'review' && (
           <FieldGroup>
-            <CheckboxLabel>
+            <FieldLabelRow>
               <Checkbox
-                  {...register('restricted_reviewer')}
-                  disabled={isSubmitting}
-                  onChange={handleRestrictedReviewer}
+                {...register('restricted_reviewer')}
+                disabled={isSubmitting}
+                onChange={handleRestrictedReviewer}
+                checked={watch().restricted_reviewer || undefined}
               />
               Restrict Reviewer side of Space to FDA users only
-            </CheckboxLabel>
+            </FieldLabelRow>
             <HintText>
               When checked, only users who have a @fda.hhs.gov or @fda.gov email associated with their account can be added.
             </HintText>

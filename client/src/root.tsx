@@ -15,13 +15,14 @@ import { AuthModal } from './features/auth/AuthModal'
 import { useModal } from './features/modal/useModal'
 import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
-import { Header } from './components/Header'
 import ExpertsSinglePage from './features/experts/details/index'
 import NoFoundPage from './pages/NoFoundPage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import queryClient from './utils/queryClient'
 import DataPortalRoutes from './features/data-portals/routes'
 import { LayoutLoader } from './layouts/UserLayout'
+import { ThemeProvider } from './utils/ThemeContext'
+import Header from './components/Header'
 
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
@@ -66,29 +67,31 @@ const RootComponent = () => {
   toast.configure({ limit: 5 })
 
   return (
-    <React.Fragment>
-      <GlobalStyle />
-      <QueryClientProvider
-        client={queryClient({
-          onAuthFailure: () => authModal.setShowModal(true),
-        })}
-      >
-        <Header />
-        <QueryParamProvider adapter={ReactRouter6Adapter}>
-          <React.Suspense fallback={<LayoutLoader />}>
-            <Outlet />
-          </React.Suspense>
-        </QueryParamProvider>
-        <StyledToastContainer
-          position="top-right"
-          transition={Slide}
-          hideProgressBar
-          pauseOnHover
-        />
-        <AuthModal {...authModal} />
-        <ExpiringSessionModal modal={expiringSessionModal} />
-      </QueryClientProvider>
-    </React.Fragment>
+    <ThemeProvider>
+      <React.Fragment>
+        <GlobalStyle />
+        <QueryClientProvider
+          client={queryClient({
+            onAuthFailure: () => authModal.setShowModal(true),
+          })}
+        >
+          <Header />
+          <QueryParamProvider adapter={ReactRouter6Adapter}>
+            <React.Suspense fallback={<LayoutLoader />}>
+              <Outlet />
+            </React.Suspense>
+          </QueryParamProvider>
+          <StyledToastContainer
+            position="top-right"
+            transition={Slide}
+            hideProgressBar
+            pauseOnHover
+          />
+          <AuthModal {...authModal} />
+          <ExpiringSessionModal modal={expiringSessionModal} />
+        </QueryClientProvider>
+      </React.Fragment>
+    </ThemeProvider>
   )
 }
 

@@ -9,7 +9,14 @@ export const FieldLabel = styled.label`
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
+`
+
+export const FieldLabelRow = styled(FieldLabel)`
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
 `
 
 export const SelectFieldLabel = styled(FieldLabel)`
@@ -17,7 +24,7 @@ export const SelectFieldLabel = styled(FieldLabel)`
   gap: 4px;
   select {
     height: 32px;
-    border: 1px solid #d9d9d9;
+    border: 1px solid var(--c-layout-border);
     border-radius: 2px;
     padding-left: 8px; 
     padding-right: 8px; 
@@ -33,12 +40,12 @@ export const FieldGroup = styled.div`
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0;
-    color: ${colors.textDarkGrey};
+    color: var(--c-text-700);
   }
 `
 
 export const Hint = styled.div`
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
   font-size: 14px;
 `
 
@@ -52,7 +59,7 @@ export const inputFocus = css`
 `
 
 export const InputSelect = styled.select`
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--tertiary-250);
   border-radius: 2px;
   padding: 4px 16px 4px 8px;
   ${inputFocus};
@@ -66,7 +73,7 @@ export const InputSelect = styled.select`
 
 export const InputError = styled.div`
   font-size: 14px;
-  color: ${colors.stateFailedColor};
+  color: var(--warning-800);
   
   &::before {
     display: inline;
@@ -77,7 +84,7 @@ export const InputError = styled.div`
 export const Divider = styled.div`
   box-sizing: border-box;
   width: 100%;
-  border-bottom: 1.5px solid #d9d9d9;
+  border-bottom: 1.5px solid var(--c-layout-border);
 `
 
 export const CheckboxLabel = styled.label`

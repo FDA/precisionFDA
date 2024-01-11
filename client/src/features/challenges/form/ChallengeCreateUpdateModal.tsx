@@ -23,7 +23,7 @@ export const ChallengeCreateUpdateModal = ({
         }
         hide={() => null}
       />
-      <Content overflowContent={false}>
+      <Content $overflowContent={false}>
         The challenge is being {isEditMode ? 'updated' : 'created'}, please wait
         until this message disappears.
       </Content>

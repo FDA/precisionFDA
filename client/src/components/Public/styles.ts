@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { PageContainer } from '../Page/styles'
-import { breakPoints, colors } from '../../styles/theme'
+import { breakPoints } from '../../styles/theme'
 
 export const ButtonRow = styled.div`
   display: flex;
   gap: 8px;
 `
 export const ItemDate = styled.div`
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
   font-size: 14px;
   font-weight: bold;
-  border-top: 1.5px solid #dbdbdb;
+  border-top: 1.5px solid var(--tertiary-200);
   line-height: 36px;
   padding-right: 16px;
   min-width: 128px;
@@ -20,7 +19,7 @@ export const ItemDate = styled.div`
   letter-spacing: 0.7px;
 `
 export const Title = styled.div`
-  color: ${colors.textBlack};
+  color: var(--c-text-700);
   font-size: 20px;
   font-weight: bold;
   line-height: 20px;
@@ -29,7 +28,7 @@ export const PageLoaderWrapper = styled.div`
   flex: 1 0 auto;
 `
 export const Content = styled.div`
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
   font-size: 14px;
   line-height: 20px;
   display: -webkit-box;
@@ -44,9 +43,9 @@ export const RightSideItem = styled.div`
   flex-direction: column;
   font-size: 14px;
   line-height: 20px;
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
   padding-bottom: 44px;
-  border-bottom: 1px solid #dbdbdb;
+  border-bottom: 1px solid var(--tertiary-200);
 `
 export const RightSide = styled.div`
   flex: 1 0 auto;
@@ -65,7 +64,7 @@ export const SectionTitle = styled.h3`
   font-size: 14px;
   font-weight: bold;
   text-transform: uppercase;
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
   letter-spacing: 0.7px;
   margin-bottom: 16px;
 `
@@ -85,7 +84,7 @@ export const PageFilterTitle = styled.h2`
   margin-bottom: 32px;
   margin-top: 0;
   text-transform: uppercase;
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
 `
 
 export const PageList = styled.div`
@@ -137,16 +136,16 @@ export const Container = styled.div`
 
 export const ItemButton = styled.button<{ selected?: boolean }>`
   border-radius: 3px;
-  border-color: rgba(255, 255, 255, 0);
+  border-color: transparent;
   background: none;
   padding: 3px 4px;
-  color: ${colors.primaryBlue};
+  color: var(--primary-500);
   cursor: pointer;
   &:hover {
-    color: ${colors.lightBlue};
+    color: var(--primary-400);
   }
   ${({ selected }) => selected && css`
-    background-color: ${colors.primaryBlue};
+    background-color: var(--primary-500);
     color: white;
     &:hover {
       color: white;

@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { FieldInfo } from '../../../components/form/FieldInfo'
-import { StyledInput } from '../../../components/InputText'
+import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { Radio } from '../../../components/Radio'
 import { StyledName } from '../../../components/ResourceTable'
@@ -267,7 +267,7 @@ const FileSelectTabs = ({
         >
           <StyledFilterFileSection>
             <SyledFilterWrapper>
-              <StyledInput
+              <InputText
                 placeholder="Filter..."
                 onChange={evt => setFilter(evt.target.value)}
               />

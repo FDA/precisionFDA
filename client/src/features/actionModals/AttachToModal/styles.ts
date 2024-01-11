@@ -9,13 +9,13 @@ export const NotesMarkdown = styled(Markdown)`
 
 export const SearchInput = styled.div`
   padding: 16px 8px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--c-layout-border);
   display: flex;
   align-items: center;
 
   ${Svg} {
     padding-left: 8px;
-    color: #777;
+    color: var(--tertiary-300);
   }
 `
 
@@ -31,16 +31,16 @@ export const NoteContainer = styled.div`
   margin-right: 6px;
   min-width: 500px;
   overflow-y: auto;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid var(--c-layout-border);
 
   ._title {
     font-size: 30px;
     margin: 15px 0;
     padding-bottom: 15px;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--c-layout-border);
   }
   ._no-content {
-    color: #777777;
+    color: var(--c-text-400);
   }
 `
 
@@ -62,7 +62,7 @@ export const StyledAttachToModal = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--c-layout-border);
 
     &:hover &_chevron {
       color: #8198BC;
@@ -80,7 +80,6 @@ export const StyledAttachToModal = styled.div`
       margin: 0;
     }
     .__menu-item_clear {
-      color: ${colors.primaryBlue};
     }
     ._no-content {
       color: #777777;

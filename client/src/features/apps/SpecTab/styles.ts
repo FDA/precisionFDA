@@ -43,8 +43,8 @@ export const StyledSpecTab = styled.div`
   }
   .__table-container {
     margin-top: 16px;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-top: 1px solid var(--c-layout-border);
+    border-bottom: 1px solid var(--c-layout-border);
     border-bottom-right-radius: 3px;
     border-bottom-left-radius: 3px;
     display: flex;
@@ -67,7 +67,7 @@ export const StyledSpecTab = styled.div`
       font-size: 14px;
       display: flex;
       padding: 8px;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid var(--c-layout-border);
     }
     &_type {
       min-width: 100px;

@@ -6,8 +6,8 @@ import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 
 import { ButtonSolidBlue } from '../../../components/Button'
-import { FieldGroup, InputError } from '../../../components/form/styles'
-import { InputText } from '../../../components/InputText'
+import { FieldGroup, FieldLabel, InputError } from '../../../components/form/styles'
+import { InputDateTime, InputFile, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
 import { MutationErrors } from '../../../types/utils'
@@ -21,7 +21,7 @@ import { ScoringAppUserSelect } from './ScoringAppUserSelect'
 import { StatusSelect } from './StatusSelect'
 import { unstable_usePrompt } from 'react-router-dom'
 
-const StyledDateInput = styled(InputText)`
+const StyledDateInput = styled(InputDateTime)`
   width: fit-content;
 `
 
@@ -150,7 +150,6 @@ export const ChallengeForm = ({
           <FieldGroup>
             <label>Name (required)</label>
             <InputText
-              label="Name"
               placeholder="Name of the challenge"
               {...register('name')}
               disabled={isSubmitting}
@@ -166,7 +165,6 @@ export const ChallengeForm = ({
             <label>Description</label>
             <InputText
               type="textarea"
-              label="Description"
               placeholder="What is this challenge about?"
               {...register('description')}
               disabled={isSubmitting}
@@ -196,11 +194,13 @@ export const ChallengeForm = ({
             )}
 
             <>
-              <InputText
-                label="Challenge image file"
+              <FieldLabel>
+                Challenge image file
+              </FieldLabel>
+              <InputFile
+                {...register('card_image_file')}
                 type="file"
                 accept="image/*"
-                {...register('card_image_file')}
                 disabled={isSubmitting}
               />
               <ErrorMessage
@@ -257,7 +257,6 @@ export const ChallengeForm = ({
             <label>Start at (required)</label>
             <StyledDateInput
               type="datetime-local"
-              label="Start at"
               {...register('start_at', { valueAsDate: true })}
               disabled={isSubmitting || ended}
             />
@@ -272,7 +271,6 @@ export const ChallengeForm = ({
             <label>End at (required)</label>
             <StyledDateInput
               type="datetime-local"
-              label="End at"
               {...register('end_at', { valueAsDate: true })}
               disabled={isSubmitting || ended}
             />
@@ -353,7 +351,6 @@ export const ChallengeForm = ({
           <FieldGroup>
             <label>Preregistration Link</label>
             <InputText
-              label="pre_registration_url"
               placeholder="URL for challenge pre-registration"
               {...register('pre_registration_url')}
               disabled={isSubmitting}

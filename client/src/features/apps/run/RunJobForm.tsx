@@ -3,10 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
-import Select from 'react-select'
 import { toast } from 'react-toastify'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
-import { InputText } from '../../../components/InputText'
+import { InputNumber, InputText } from '../../../components/InputText'
 import { EmptyTable } from '../../../components/Table/styles'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { QuestionIcon } from '../../../components/icons/QuestionIcon'
@@ -46,6 +45,7 @@ import {
   getLicensesToAccept,
   prepareValidations,
 } from './utils'
+import { Select } from '../../../components/Select'
 
 const buildPath = (node: FileTreeNode): string => {
   if (!node || node.title === '/') {
@@ -240,9 +240,8 @@ export const RunJobForm = ({
                 </FieldGroup>
               </StyledJobName>
               <FieldGroup label="Execution Cost Limit ($)" required>
-                <InputText
+                <InputNumber
                   label="jobLimit"
-                  type="number"
                   min="0"
                   step="10"
                   {...register('jobLimit')}

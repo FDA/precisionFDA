@@ -1,19 +1,19 @@
 import styled, { css } from 'styled-components'
 import { commonStyles } from '../../styles/commonStyles'
-import { colors, breakPoints, padding } from '../../styles/theme'
+import { breakPoints, padding } from '../../styles/theme'
 import { Svg } from '../icons/Svg'
 
 export const compactScrollBar = css`
-  ::-webkit-scrollbar-track {
-    background: rgba(9, 30, 66, 0.08);
+  &::-webkit-scrollbar-track {
+    background: transparent;
     border-radius: 4px;
   }
-  ::-webkit-scrollbar {
+  &::-webkit-scrollbar {
     width: 7px;
     height: 7px;
   }
-  ::-webkit-scrollbar-thumb {
-    background: #97a0af;
+  &::-webkit-scrollbar-thumb {
+    background: var(--c-scrollbar);
     border-radius: 4px;
   }
 `
@@ -76,7 +76,6 @@ export const PageContainerMargin = styled.div`
 
 export const PageTitle = styled.h1`
   ${commonStyles.pageTitle};
-  color: ${colors.textBlack};
   margin: 0;
 `
 
@@ -97,14 +96,13 @@ export const VerticalCenter = styled.span`
   align-items: center;
 `
 
-export const Refresh = styled.span<{ spin?: boolean }>`
+export const Refresh = styled.span<{ $spin?: boolean }>`
   display: flex;
   align-items: center;
   cursor: pointer;
-  color: ${colors.textDarkGrey};
 
   ${Svg} {
-    animation-name: ${({ spin }) => (spin ? 'spin' : 'none')};
+    animation-name: ${({ $spin }) => ($spin ? 'spin' : 'none')};
     animation-duration: 2000ms;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
@@ -129,6 +127,6 @@ export const PageContentItems = styled.div`
   margin: 16px 0;
 `
 
-export const Filler = styled.div<{ size: number }>`
-  height: ${({ size }) => size}px;
+export const Filler = styled.div<{ $size: number }>`
+  height: ${({ $size }) => $size}px;
 `

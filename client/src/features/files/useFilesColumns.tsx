@@ -21,7 +21,7 @@ import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 import { IFile } from './files.types'
 
-const StyledLocked = styled.div<{ isLocked: boolean }>`
+const StyledLocked = styled.div<{ $isLocked: boolean }>`
   flex: 1 0 auto;
   padding: 2px 4px;
   display: flex;
@@ -59,16 +59,17 @@ export const useFilesColumns = ({
         return (
           // eslint-disable-next-line react/jsx-no-useless-fragment
           <>
-            <StyledLocked isLocked={node.locked}>
+            <StyledLocked $isLocked={node.locked}>
               {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
                 <>
                   <StyledNameCell
                     data-tip
                     data-for={`fileNameTooltip${node.uid}`}
                     color={
+                      // TODO: Use css className or data attr
                       isIncompleteFile(node.state)
-                        ? colors.stateLabelGrey
-                        : colors.primaryBlue
+                        ? 'var(--tertiary-600)'
+                        : 'var(--c-link)'
                     }
                     onClick={() => onFileClick(node.uid)}
                   >

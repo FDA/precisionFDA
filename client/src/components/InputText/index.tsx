@@ -1,8 +1,7 @@
-import React from 'react'
 import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
 
-export const StyledInput = styled.input`
+export const InputText = styled.input.attrs({ type: 'text' })`
     font-family: ${theme.fontFamily};
     box-sizing: border-box;
     margin: 0;
@@ -15,29 +14,27 @@ export const StyledInput = styled.input`
     width: 100%;
     min-width: 0;
     padding: 4px 10px;
-    color: rgba(0, 0, 0, 0.65);
+    color: var(--c-text-700);
     font-size: 14px;
     line-height: 1.5715;
-    background-color: #fff;
+    background-color: var(--background-color);
     background-image: none;
-    border: 1px solid #d9d9d9;
+    border: 1px solid var(--c-input-border);
     border-radius: 2px;
     transition: all 0.3s;
 
     &:focus {
-      border-color: #40a9ff;
+      border-color: var(--primary-600);
       border-right-width: 1px !important;
       outline: 0;
       box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
     }
 
     ${({ disabled }) => disabled && css`
-      background-color: #f5f5f5;
+      background-color: var(--tertiary-100);
     `}
 `
 
-export const InputText = React.forwardRef((props: any, ref) => (
-  <StyledInput ref={ref} type="text" {...props} />
-))
-
-InputText.displayName = 'InputText'
+export const InputDateTime = styled(InputText).attrs({ type: 'datetime-local' })``
+export const InputFile = styled(InputText).attrs({ type: 'file' })``
+export const InputNumber = styled(InputText).attrs({ type: 'number' })``

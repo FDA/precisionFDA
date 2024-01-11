@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Controller } from 'react-hook-form'
+import { Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import {
@@ -10,7 +10,7 @@ import {
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import {
   FieldGroup,
-  FieldLabel,
+  FieldLabelRow,
   SelectFieldLabel,
 } from '../../../components/form/styles'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
@@ -21,6 +21,7 @@ import { CreateAppForm } from '../apps.types'
 import { InputTextS } from './Fields'
 import { FormFields, Help } from './styles'
 import { InstanceTypeSelect } from './InstanceTypeSelect'
+import { Checkbox } from '../../../components/CheckboxNext'
 
 const AssetList = styled.div`
   display: flex;
@@ -35,8 +36,8 @@ const AssetList = styled.div`
 const Box = styled.div`
   padding: 10px 10px;
   margin-bottom: -1px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
+  background-color: var(--tertiary-70);
+  border: 1px solid var(--c-layout-border-200);
   border-radius: 3px;
 `
 
@@ -223,10 +224,10 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
           name="internet_access"
           control={control}
           render={({ field }) => (
-            <FieldLabel>
+            <FieldLabelRow>
+              <Checkbox {...field} checked={field.value}  />
               Enable Internet Access
-              <input {...field} type="checkbox" checked={field.value}  />
-            </FieldLabel>
+            </FieldLabelRow>
           )}
         />
       </FieldGroup>
