@@ -40,7 +40,7 @@ const Info = styled.div`
 `
 const DiscussionListItem = styled.div`
   align-self: stretch;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--c-layout-border);
   display: flex;
   justify-content: space-between;
   flex: 1;

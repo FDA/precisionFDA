@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components'
-import { theme } from '../../styles/theme'
 import { ArrowIcon } from '../icons/ArrowIcon'
 
 export const ExpandArrowIcon = styled(ArrowIcon)<{expanded?: boolean, hide?: boolean}>`
@@ -11,8 +10,10 @@ export const ExpandArrowIcon = styled(ArrowIcon)<{expanded?: boolean, hide?: boo
   `}
 `
 
-export const SelectCheck = styled.div`
-  padding-left: 7px;
+export const SelectCheckLabel = styled.label`
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
 `
 
 export const EmptyTable = styled.div`
@@ -24,24 +25,14 @@ export const EmptyTable = styled.div`
 `
 
 export const StyledTable = styled.div`
-  background-color: white;
+  --_table-bg-color: var(--background);
+  --_table-border-color: var(--tertiary-250);
 `
-
-export const StyledRowActionComponent = styled.div`
-  height: 100%;
-  background: white;
-  display: flex;
-  align-items: center;
-  padding-right: 5px;
-  gap: 0.5rem;
-  box-shadow: -17px 0px 11px -7px #ffffff;
-`
-
 
 type ReactTableStylesProps = {
-  shouldFillWidth?: boolean
-  shouldAllowScrollbar?: boolean
-  stickyHeaders?: boolean
+  $shouldFillWidth?: boolean
+  $shouldAllowScrollbar?: boolean
+  $stickyHeaders?: boolean
 }
 export const ReactTableStyles = styled.div<ReactTableStylesProps>`
   .sort {
@@ -51,52 +42,12 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
     padding-right: 4px;
   }
 
-  .checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    border: 1px solid #c4c4c4;
-    outline: none;
-    position: relative;
-    border-radius: 2px;
-    margin: 3px 3px 3px 4px;
-    padding: initial;
-
-    &:checked:before {
-      top: 1px;
-      left: 5px;
-      width: 7px;
-      height: 12px;
-      content: '';
-      position: absolute;
-      transform: rotate(35deg);
-      background: transparent;
-      border-right: 3px solid #1582b1;
-      border-bottom: 3px solid #1582b1;
-    }
-
-    &:indeterminate:before {
-      top: 7px;
-      left: 3px;
-      right: 3px;
-      bottom: 6px;
-      content: "";
-      position: absolute;
-      background: #1582b1;
-    }
-  }
-
-  /* .tableWrap {
-    overflow-x: scroll;
-    overflow-y: hidden;
-  } */
-
   .table {
     .thead {
+      background: var(--_table-bg-color);
       display: flex;
-      border-top: 1px solid #d5d5d5;
-      border-bottom: 2px solid #d5d5d5;
-      /* box-shadow: 0rem 0.2rem 1.2rem 0 rgba(0, 0, 0, 0.05); */
+      border-top: 1px solid var(--_table-border-color);
+      border-bottom: 2px solid var(--_table-border-color);
       user-select: none;
 
       /* &:hover {
@@ -111,17 +62,17 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
       flex: 1 1 auto;
       width: 100%;
       flex-direction: column;
-      background-color: white;
-      ${({ shouldAllowScrollbar }) => shouldAllowScrollbar && css`
+      background-color: var(--_table-bg-color);
+      ${({ $shouldAllowScrollbar }) => $shouldAllowScrollbar && css`
         max-height: 50vh;
         overflow-y: scroll;
       `}
     }
 
     .tr {
-      ${({ shouldFillWidth }) => !shouldFillWidth && 'width: fit-content;'} 
-      border-bottom: 1px solid #d5d5d5;
-      :last-child {
+      ${({ $shouldFillWidth }) => !$shouldFillWidth && 'width: fit-content;'} 
+      border-bottom: 1px solid var(--_table-border-color);
+      &:last-child {
         .td {
           border-bottom: 0;
         }
@@ -151,7 +102,7 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
       /* :first-child {
         padding-left: 12px;
       } */
-      :last-child {
+      &:last-child {
         border-right: 0;
       }
 
@@ -167,9 +118,9 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
 
     &.sticky {
       .thead{
-        ${({ shouldFillWidth }) => !shouldFillWidth && 'width: fit-content;'}
+        ${({ $shouldFillWidth }) => !$shouldFillWidth && 'width: fit-content;'}
           position: sticky;
-          background-color: white;
+          background-color: var(--_table-bg-color);
           top: 0px;
           z-index: 2;
         &.filters {
@@ -202,8 +153,8 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
     display: inline-block;
     /* opacity: 0.8; */
     transition: ease-in-out opacity 0.2s;
-    border-left: 1px solid ${theme.colors.textLightGrey};
-    border-right: 1px solid ${theme.colors.textDarkGrey};
+    border-left: 1px solid var(--_table-border-color);
+    border-right: 1px solid var(--_table-border-color);
     width: 3px;
     height: 60%;
     position: absolute;
@@ -213,7 +164,7 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
     cursor: col-resize;
     ${'' /* prevents from scrolling while dragging on touch devices */}
     touch-action:none;
-    background: white;
+    background: var(--_table-bg-color);
 
     &.isResizing {
     }

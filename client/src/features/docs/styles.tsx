@@ -23,7 +23,7 @@ export const DocCallout = styled.div`
 export const DocsContent = styled.main`
   display: flex;
   flex: 1 1 auto;
-  color: #333333;
+  color: var(--c-text-700);
   line-height: 1.428571429;
   font-size: 16px;
   padding: 0 16px;
@@ -31,19 +31,22 @@ export const DocsContent = styled.main`
   box-sizing: border-box;
 
   p {
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
   }
 
+  h1, h2, h3, h4 {
+    font-weight: bold;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
   h1 {
     margin-top: 3rem;
     margin-bottom: 1rem;
     font-size: 32px;
-    color: #333333;
   }
-  h2, h3, h4 {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+  h2 {
+    font-size: 20px;
   }
 
   code.inline {
@@ -56,7 +59,6 @@ export const DocsContent = styled.main`
 
   pre {
     -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     box-sizing: border-box;
     overflow: auto;
     display: block;
@@ -66,7 +68,6 @@ export const DocsContent = styled.main`
     line-height: 1.428571429;
     word-break: break-all;
     word-wrap: break-word;
-    color: #333333;
     background-color: #f5f5f5;
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -79,10 +80,10 @@ export const DocsNav = styled.nav`
   min-width: 300px;
   max-width: 300px;
   background-color: #f2f2f2;
-  color: #333333;
   overflow: auto;
   padding-top: 16px;
   padding-bottom: 32px;
+  font-size: 14px;
 `
 
 export const NavItem = styled(NavLink)<{$active?: boolean}>`
@@ -200,17 +201,17 @@ export const DocTable = styled.table`
   }
 `
 export const PageMap = styled.ol`
+  font-size: 14px;
   position: sticky;
   height: 300px;
-  top: 83px;
+  top: 40px;
   padding: 0;
   margin: 0;
   list-style-type: none;
-  font-size: 16px;
-  line-height: 20px;
+  line-height: 18px;
 
   li {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     text-decoration: none;
     border-left: 1px solid transparent;
     padding-left: 16px;

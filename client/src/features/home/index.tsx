@@ -162,28 +162,28 @@ const Home2 = () => {
             <BannerPickerItem
               data-testid="me-button"
               onClick={() => handleScopeClick('me')}
-              isActive={persistedHomeScope === 'me'}
+              $isActive={persistedHomeScope === 'me'}
             >
               Me
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="featured-button"
               onClick={() => handleScopeClick('featured')}
-              isActive={persistedHomeScope === 'featured'}
+              $isActive={persistedHomeScope === 'featured'}
             >
               Featured
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="everyone-button"
               onClick={() => handleScopeClick('everybody')}
-              isActive={persistedHomeScope === 'everybody'}
+              $isActive={persistedHomeScope === 'everybody'}
             >
               Everyone
             </BannerPickerItem>
             <BannerPickerItem
               data-testid="spaces-button"
               onClick={() => handleScopeClick('spaces')}
-              isActive={persistedHomeScope === 'spaces'}
+              $isActive={persistedHomeScope === 'spaces'}
             >
               Spaces
             </BannerPickerItem>
@@ -194,7 +194,7 @@ const Home2 = () => {
         </BannerRight>
       </ResourceBanner>
       <Row>
-        <StyledMenu expanded={expandedSidebar}>
+        <StyledMenu $expanded={expandedSidebar}>
           <MenuItem
             data-testid="home-files-link"
             to={`/home/files${routeScopeParam}`}

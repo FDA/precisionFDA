@@ -2,7 +2,7 @@ import * as React from 'react'
 import { NavLink as BaseNavLink } from 'react-router-dom'
 
 export const NavLink = React.forwardRef(
-  ({ activeClassName, activeStyle, ...props }, ref) => {
+  ({ activeClassName, activeStyle, style, ...props }: any, ref) => {
     return (
       <BaseNavLink
         ref={ref}
@@ -13,7 +13,7 @@ export const NavLink = React.forwardRef(
             .join(' ')
         }
         style={({ isActive }) => ({
-          ...props.style,
+          ...style,
           ...(isActive ? activeStyle : null),
         })}
       />

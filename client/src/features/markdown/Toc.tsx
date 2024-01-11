@@ -3,10 +3,10 @@ import styled from 'styled-components'
 import { breakPoints } from '../../styles/theme'
 import { useScrollToHash } from '../../hooks/useScrollToHash'
 
-export const ToCItem = styled.li<{ level?: number }>`
+export const ToCItem = styled.li<{ $level?: number }>`
   list-style: none;
   padding-bottom: 8px;
-  ${({ level }) => level && `margin-left: ${level * 16}px;`}
+  ${({ $level }) => $level && `margin-left: ${$level * 16}px;`}
 `
 
 export const StyledToC = styled.div`
@@ -72,7 +72,7 @@ export const ToC = ({
         {items?.map(i => {
           return (
             <a key={i.id} href={`#${i.id}`}>
-              <ToCItem level={parseInt(i.tagName[1], 10) - 1}>
+              <ToCItem $level={parseInt(i.tagName[1], 10) - 1}>
                 {i.textContent}
               </ToCItem>
             </a>

@@ -11,15 +11,15 @@ const ButtonRow = styled.div`
   justify-content: flex-end;
 
   button {
-    :first-of-type {
+    &:first-of-type {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    :not(:first-of-type) {
+    &:not(:first-of-type) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
-    :not(:first-of-type):not(:last-of-type) {
+    &:not(:first-of-type):not(:last-of-type) {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
@@ -32,10 +32,10 @@ const TopReadme = styled.div`
   align-items: center;
 `
 
-const View = styled.div<{ shouldDisplay: boolean }>`
+const View = styled.div<{ $shouldDisplay: boolean }>`
   display: none;
-  ${({ shouldDisplay }) =>
-    shouldDisplay &&
+  ${({ $shouldDisplay }) =>
+    $shouldDisplay &&
     css`
       display: initial;
     `}
@@ -72,7 +72,7 @@ export const ReadMeInput = ({
         </ButtonRow>
       </TopReadme>
 
-      <View shouldDisplay={selected === 'edit'}>
+      <View $shouldDisplay={selected === 'edit'}>
         <Editor
           height="40vh"
           onChange={val => onChange(val)}
@@ -86,7 +86,7 @@ export const ReadMeInput = ({
         />
       </View>
 
-      <View shouldDisplay={selected === 'preview'}>
+      <View $shouldDisplay={selected === 'preview'}>
         <Markdown data={value} />
       </View>
     </FormFields>

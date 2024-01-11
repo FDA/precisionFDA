@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
 import { compactScrollBar } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
-import { colors, fontSize, fontWeight, sizing } from '../../styles/theme'
+import { fontSize, fontWeight, sizing } from '../../styles/theme'
 
 export const Wrapper = styled.div`
   position: fixed;
@@ -14,8 +14,8 @@ export const Wrapper = styled.div`
   min-width: 400px;
   max-height: max(100% - 232px, 90%);
 `
-export const Backdrop = styled.div<{ blur: boolean }>`
-  ${({ blur }) => blur && css`
+export const Backdrop = styled.div<{ $blur: boolean }>`
+  ${({ $blur }) => $blur && css`
     backdrop-filter: blur(8px);
   `}
   position: fixed;
@@ -31,11 +31,13 @@ export const StyledModal = styled.div`
   --modal-padding-TB: 1rem;
   --modal-border-radius: 0.5rem;
 
+  color: var(--c-text-700);
   z-index: 100;
-  background: white;
+  background: var(--background);
   border-radius: ${sizing.modalBorderRadius};
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--c-modal-border, transparent);
 
   table {
     display: table;
@@ -54,9 +56,8 @@ export const HeaderTop = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 0.3rem; 
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--c-layout-border);
   padding: var(--modal-padding-TB) var(--modal-padding-LR);
-  color: ${colors.textBlack};
 `
 
 export const Footer = styled.div`
@@ -64,14 +65,13 @@ export const Footer = styled.div`
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  border-top: 1px solid #e5e5e5;
-padding: 16px;
+  border-top: 1px solid var(--c-layout-border);
+  padding: 16px;
 `
 export const HeaderText = styled.div`
   align-self: center;
   font-size: ${fontSize.h2};
   font-weight: ${fontWeight.bold};
-  color: #333333;
 `
 export const CloseButton = styled.button`
   font-size: 0.8rem;
@@ -81,8 +81,8 @@ export const CloseButton = styled.button`
   background: none;
   padding: 0;
   margin: 0;
-  color: #333333;
-  :hover {
+  color: var(--c-text-700);
+  &:hover {
     cursor: pointer;
   }
   ${Svg} {
@@ -95,8 +95,8 @@ export const ButtonRow = styled.div`
   justify-content: flex-end;
   align-items: center;
 `
-export const Content = styled.div<{ overflowContent?: boolean }>`
-  ${({ overflowContent = true }) => overflowContent && 'overflow-y: scroll;'}
+export const Content = styled.div<{ $overflowContent?: boolean }>`
+  ${({ $overflowContent = true }) => $overflowContent && 'overflow-y: scroll;'}
   margin: 24px;
 `
 

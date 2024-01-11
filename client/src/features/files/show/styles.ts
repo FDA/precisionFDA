@@ -28,7 +28,6 @@ export const FileName = styled.span`
 
 export const FileDescription = styled.div`
   font-size: 16px;
-  color: #52698f;
   padding: 16px;
   display: flex;
   flex-direction: column;

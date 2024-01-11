@@ -64,7 +64,7 @@ const SpacesList = ({
         </HeaderRow>
         {spacesList.map(s => (
           <TableRow
-            isSelected={selected === s.scope}
+            $isSelected={selected === s.scope}
             key={s.scope}
             onClick={() => onSelect(s.scope)}
           >

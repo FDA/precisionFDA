@@ -3,3 +3,4 @@
 .build_cache/
 storybook-static/
 build-storybook.log
+.swc

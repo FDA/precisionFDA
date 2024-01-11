@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
-import { StyledInput } from '../../../components/InputText'
+import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { Radio } from '../../../components/Radio'
 import { StyledName } from '../../../components/ResourceTable'
@@ -196,7 +196,7 @@ export const useSelectJobModal = (
         </Tab>
         <Tab title={`Jobs ${jobs.length}`} key="files">
           <StyledFilterSection>
-            <StyledInput
+            <InputText
               placeholder="Filter..."
               onChange={evt => setFilter(evt.target.value)}
             />

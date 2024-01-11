@@ -22,7 +22,7 @@ export const AuthModal: React.FC<UseModal> = props => {
         headerText="Session Expired"
         hide={() => props.setShowModal(false)}
       />
-      <Content overflowContent={false}>
+      <Content $overflowContent={false}>
         You were logged out after 15 minutes of inactivity. Please Log In again.
       </Content>
       <Footer>

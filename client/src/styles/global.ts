@@ -1,11 +1,24 @@
-import styled, { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle } from 'styled-components'
 import { colors, theme } from './theme'
+import { colorvars, themes } from './variables'
+
 
 const GlobalStyle = createGlobalStyle`
+  ${colorvars}
+  ${themes}
+
+  * {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+  }
+
   body {
     margin: 0;
     padding: 0;
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: var(--background);
+    color: var(--base);
   }
   #app-root {
     display: flex;
@@ -15,13 +28,13 @@ const GlobalStyle = createGlobalStyle`
     scroll-padding-top: 70px;
   }
   html, body, main, #app-root, .pfda-loader-wrapper {
-    height: 100svh;
+    height: 100%;
   }
   a {
-    color: ${colors.primaryBlue};
+    color: var(--c-link);
     text-decoration: none;
     &:hover {
-      color: #4297df;
+      color: var(--c-link-hover);
     }
   }
   .pfda-loader-wrapper {
@@ -47,12 +60,32 @@ const GlobalStyle = createGlobalStyle`
 
   input[type="date"] { 
     background: white;
-    border: 1px solid #d9d9d9;
+    border: 1px solid var(--c-input-border);
     padding: 4px 10px;
     font-family: ${theme.fontFamily};
   }
-  label {
-    margin: 0;
+
+  img, picture, svg, video {
+    display: block;
+    max-width: 100%;
+  }
+
+  label, input, select, textarea, button {
+    color: inherit;
+  }
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+  p {
+    max-width: 72ch;
+    text-wrap: pretty;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :has(:target) {
+      scroll-behavior: smooth;
+      scroll-padding-top: 2rem;
+    }
   }
 `
  

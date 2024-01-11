@@ -219,7 +219,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
         )}
       </Topbox>
 
-      <Filler size={40} />
+      <Filler $size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )

@@ -15,7 +15,7 @@ export const SpaceMainInfo = styled.div`
 
 export const SpaceHeaderDescrip = styled.div`
   font-size: 14px;
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;  
@@ -30,7 +30,7 @@ export const SpaceHeaderDescrip = styled.div`
 export const SpaceHeaderTitle = styled.div`
   font-size: 24px;
   font-weight: 600;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
   margin: auto 0;
   margin-bottom: 8px;
   display: inline-block;
@@ -41,12 +41,13 @@ export const SpaceHeaderTitle = styled.div`
 `
 
 export const ActionButton = styled(Button)`
-  color: ${colors.primaryBlue};
-  background: ${colors.subtleBlue};
-  border-color: ${colors.lightBlue};
+  color: var(--c-text-700);
+  background: var(--tertiary-100);
+  border: 1px solid var(--c-layout-border);
 
   &:hover {
-    background: white;
+    background: var(--tertiary-200);
+    color: var(--c-text-800);
   }
 `
 
@@ -66,32 +67,36 @@ export const Tabs = styled.div`
   gap: 10px;
   margin-bottom: -1px;
 `
-export const Tab = styled.div<{ isactive?: string }>`
+export const Tab = styled.div<{ $isactive?: string }>`
   font-size: 14px;
   font-weight: 600;
   box-sizing: border-box;
-  background: ${colors.inactiveTab};
+  background: var(--background);
   border-width: 1px 1px 1px 1px;
   border-style: solid;
-  border-color: ${colors.borderDefault};
+  border-color: var(--c-layout-border);
   border-radius: 4px 4px 0px 0px;
   padding: 6px 20px;
-  color: ${colors.textDarkGreyInactive};
+  color: var(--c-text-100);
   cursor: pointer;
   flex: 1 0 auto;
 
-  ${({ isactive }) => isactive &&
+
+  &:hover {
+    color: var(--c-text-700);
+  }
+
+  ${({ $isactive }) => $isactive &&
     css`
-      background: white;
       border-bottom: 0;
-      color: ${colors.textDarkGrey};
+      color: var(--c-text-700);
     `}
 `
 export const TransparentTab = styled(Tab)`
   border: none;
   background: transparent;
   cursor: initial;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
 `
 export const KeyValRow = styled.div`
   display: flex;
@@ -108,16 +113,19 @@ export const TopSpaceHeader = styled.div`
 `
 
 export const SpaceHeader = styled.div`
+  --background-color: var(--background-shaded);
+  --border-color: var(--c-layout-border);
+
   display: flex;
   flex-direction: column;
-  background-color: ${colors.shadedBg};
+  background-color: var(--background-color);
   padding: 0 20px;
   padding-top: 16px;
-  border-bottom: 1px solid ${colors.borderDefault};
+  border-bottom: 1px solid var(--border-color);
 `
 
-export const SpaceTypeHeader = styled.div<{ expandedSidebar: boolean }>`
-  ${({ expandedSidebar }) => expandedSidebar ? css`
+export const SpaceTypeHeader = styled.div<{ $expandedSidebar: boolean }>`
+  ${({ $expandedSidebar }) => $expandedSidebar ? css`
   margin-left: 244px;
   `: css`
   margin-left: 86px;

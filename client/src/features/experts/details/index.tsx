@@ -81,9 +81,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               <StyledTab
                 as={NavLink}
                 to={`/experts/${expert?.id}`}
-                data-turbolinks="false"
                 activeClassName="selected"
-                exact
               >
                 About This Expert
               </StyledTab>
@@ -91,7 +89,6 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
                 as={NavLink}
                 to={`/experts/${expert?.id}/blog`}
                 activeClassName="selected"
-                data-turbolinks="false"
               >
                 Blog Post
               </StyledTab>

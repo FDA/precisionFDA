@@ -99,11 +99,14 @@ interface RemovePayload {
   resourceId: number
 }
 
+export type DataPortalResourceResponse = {
+  resources: DataPortalResource[]
+}
+
 // TODO: Extract API calls to api.ts
 const listDataPortalResourcesRequest = (id: string) =>
-  axios
-    .get(`/api/data_portals/${id}/resources`)
-    .then(r => r.data.resources as DataPortalResource[])
+  axios.get<DataPortalResourceResponse>(`/api/data_portals/${id}/resources`)
+    .then(r => r.data)
 
 const removeResourceByIdRequest = ({ portalId, resourceId }: RemovePayload) =>
   axios
@@ -114,6 +117,7 @@ const useListDataPortalResourcesQuery = (id: string) =>
   useQuery({
     queryKey: ['resources-list-portal'],
     queryFn: () => listDataPortalResourcesRequest(id),
+    select: (d) => d.resources
   })
 
 const useResourceRemoveMutation = (

@@ -74,7 +74,7 @@ const DataPortalsLink = ({
 
   const comp = (to: string) => (
     <Link to={to} title="Data Portals">
-      <MenuItem active={isActiveLink('/data-portals') && !(excludedUrls.some(url => isActiveLink(url)))}>
+      <MenuItem $active={isActiveLink('/data-portals') && !(excludedUrls.some(url => isActiveLink(url)))}>
         <IconWrap>
           <DataPortalIcon height={18} />
         </IconWrap>
@@ -159,7 +159,7 @@ const getUsername = (user: any) => {
   return '...'
 }
 
-export const Header: React.FC = () => {
+const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
@@ -209,7 +209,7 @@ export const Header: React.FC = () => {
               title={isSpacesPath || isDataPortalsPath ? 'Back Home' : 'Overview'}
               data-turbolinks="false"
             >
-              <MenuItem active={isActiveLink('/')}>
+              <MenuItem $active={isActiveLink('/')}>
                 <IconWrap>
                   {isSpacesPath || isDataPortalsPath ? <FortIcon height={16} /> : <HomeIcon height={16} />}
                 </IconWrap>
@@ -225,7 +225,7 @@ export const Header: React.FC = () => {
                   href="/discussions"
                   title="Discussions"
                 >
-                  <MenuItem active={isActiveLink('/discussions')}>
+                  <MenuItem $active={isActiveLink('/discussions')}>
                     <IconWrap>
                       <DiscussionIcon height={16} />
                     </IconWrap>
@@ -237,7 +237,7 @@ export const Header: React.FC = () => {
                   title="Challenges"
                   data-turbolinks="false"
                 >
-                  <MenuItem active={isActiveLink('/challenges')}>
+                  <MenuItem $active={isActiveLink('/challenges')}>
                     <IconWrap>
                       <TrophyIcon height={16} />
                     </IconWrap>
@@ -245,7 +245,7 @@ export const Header: React.FC = () => {
                   </MenuItem>
                 </Link>
                 <Link to="/experts" title="Experts" data-turbolinks="false">
-                  <MenuItem active={isActiveLink('/experts')}>
+                  <MenuItem $active={isActiveLink('/experts')}>
                     <IconWrap>
                       <StarIcon height={16} />
                     </IconWrap>
@@ -254,7 +254,7 @@ export const Header: React.FC = () => {
                 </Link>
                 <HeaderSpacer />
                 <Link to="/home" title="My Home" data-turbolinks="false">
-                  <MenuItem active={isActiveLink('/home')}>
+                  <MenuItem $active={isActiveLink('/home')}>
                     <IconWrap>
                       <FortIcon height={16} />
                     </IconWrap>
@@ -263,7 +263,7 @@ export const Header: React.FC = () => {
                 </Link>
                 <HeaderSpacer />
                 <a data-turbolinks="false" href="/notes" title="Notes">
-                  <MenuItem active={isActiveLink('/notes')}>
+                  <MenuItem $active={isActiveLink('/notes')}>
                     <IconWrap>
                       <StickyNoteIcon height={16} />
                     </IconWrap>
@@ -275,7 +275,7 @@ export const Header: React.FC = () => {
                   href="/comparisons"
                   title="Comparisons"
                 >
-                  <MenuItem active={isActiveLink('/comparisons')}>
+                  <MenuItem $active={isActiveLink('/comparisons')}>
                     <IconWrap>
                       <BullsEyeIcon height={16} />
                     </IconWrap>
@@ -286,7 +286,7 @@ export const Header: React.FC = () => {
             )}
             <HeaderSpacer />
             <Link to="/spaces" title="Spaces" data-turbolinks="false">
-              <MenuItem active={isActiveLink('/spaces')}>
+              <MenuItem $active={isActiveLink('/spaces')}>
                 <IconWrap>
                   <ObjectGroupIcon height={16} />
                 </IconWrap>
@@ -322,7 +322,7 @@ export const Header: React.FC = () => {
                 {dropdownProps => (
                   <DropdownMenuItem
                     {...dropdownProps}
-                    active={dropdownProps.isActive}
+                    $active={dropdownProps.isActive}
                   >
                     <IconWrap>
                       <CDMHIcon height={20} />
@@ -344,7 +344,7 @@ export const Header: React.FC = () => {
                 to={`/data-portals/${prismDataPortal.id}`}
                 title="PRISM"
               >
-                <MenuItem active={isActiveLink(`/data-portals/${prismDataPortal.id}`)}>
+                <MenuItem $active={isActiveLink(`/data-portals/${prismDataPortal.id}`)}>
                   <IconWrap>
                     <PrismIcon height={17} />
                   </IconWrap>
@@ -357,7 +357,7 @@ export const Header: React.FC = () => {
                 to={`/data-portals/${toolsDataPortal.id}`}
                 title="Tools"
               >
-                <MenuItem active={isActiveLink(`/data-portals/${toolsDataPortal.id}`)}>
+                <MenuItem $active={isActiveLink(`/data-portals/${toolsDataPortal.id}`)}>
                   <IconWrap>
                     <ToolsIcon height={16} />
                   </IconWrap>
@@ -385,7 +385,7 @@ export const Header: React.FC = () => {
               title="Get Started"
               data-turbolinks="false"
             >
-              <MenuItem active={isActiveLink('/docs/introduction')}>
+              <MenuItem $active={isActiveLink('/docs/introduction')}>
                 <IconWrap>
                   <QuestionIcon height={16} />
                 </IconWrap>
@@ -408,7 +408,7 @@ export const Header: React.FC = () => {
               {dropdownProps => (
                 <DropdownMenuItem
                   {...dropdownProps}
-                  active={dropdownProps.isActive}
+                  $active={dropdownProps.isActive}
                 >
                   <IconWrap>
                     <ProfileIcon height={16} />
@@ -433,3 +433,5 @@ export const Header: React.FC = () => {
     </>
   )
 }
+
+export default Header

@@ -34,7 +34,7 @@ const ExpirationInfo = styled.div`
   }
 `
 
-const StyledInput = styled.textarea`
+const StyledTextarea = styled.textarea`
   margin: 0;
   padding: 8px;
   flex: 1 0 auto;
@@ -90,7 +90,7 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
               <Loader />
             </KeyLoader>
           ) : (
-            <StyledInput ref={inputRef} disabled value={data?.Key} />
+            <StyledTextarea ref={inputRef} disabled value={data?.Key} />
           )}
         </ContentWrapper>
       </ModalScroll>

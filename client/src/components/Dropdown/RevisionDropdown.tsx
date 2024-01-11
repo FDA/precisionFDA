@@ -11,28 +11,27 @@ import { compactScrollBar } from '../Page/styles'
 const StyledRevisionDropdownButton = styled.button`
   width: fit-content;
   height: 34px;
-  background: white;
-  border: 1px solid #daeffb;
+  background: transparent;
+  border: 1px solid var(--c-layout-border);
   border-radius: 3px;
   padding: 6px 12px;
   display: flex;
   align-items: center;
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-700);
   font-size: 14px;
   font-weight: 700;
   display: flex;
   gap: 6px;
   &:hover {
-    background-color: #F4F8FD;
-    border-color: #63A5DE;
+    border-color: var(--primary-600);
   }
 `
 const RevisionNum = styled.span`
-  color: ${colors.textBlack};
+  color: var(--c-text-700);
 `
 const TagPill = styled.div`
   color: #ffffff;
-  background-color: #1F70B5;
+  background-color: var(--primary-500);
   font-weight: 400;
   font-size: 12px;
   border-radius: 3px;
@@ -49,9 +48,9 @@ const LiTitle = styled.li`
   padding: 3px 20px;
   color: ${colors.textMediumGrey};
 `
-const Li = styled.li<{active: boolean}>`
+const Li = styled.li<{$active: boolean}>`
   white-space: nowrap;
-  ${({ active }) => active && css`background-color: ${colors.subtleBlue};`}
+  ${({ $active }) => $active && css`background-color: ${colors.subtleBlue};`}
   &:hover {background-color: ${colors.white110};}
   a {
     color: ${colors.textBlack};
@@ -98,7 +97,7 @@ export const RevisionDropdown = ({
     <Ol>
       <LiTitle>Revisions</LiTitle>
       {revisions.map(r => (
-        !r.deleted && <Li key={r.id} active={r.revision === selectedValue}><StyledLink to={linkToRevision(r)}>{r.revision}{r.revision === lastRevision && <TagPill>Latest</TagPill>}</StyledLink></Li>
+        !r.deleted && <Li key={r.id} $active={r.revision === selectedValue}><StyledLink to={linkToRevision(r)}>{r.revision}{r.revision === lastRevision && <TagPill>Latest</TagPill>}</StyledLink></Li>
       ))}
     </Ol>
   )
@@ -112,7 +111,6 @@ export const RevisionDropdown = ({
       {dropdownProps => (
         <StyledRevisionDropdownButton
           {...dropdownProps}
-          active={dropdownProps.isActive}
           data-testid="dropdown-revision-button"
         >
           <DropdownIcon>

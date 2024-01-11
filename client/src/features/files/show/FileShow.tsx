@@ -270,7 +270,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
         )}
       </Topbox>
 
-      <Filler size={40} />
+      <Filler $size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )

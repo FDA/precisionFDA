@@ -5,7 +5,7 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { InputText } from '../../../components/InputText'
+import { InputFile, InputNumber, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { IndeterminateCheckbox } from '../../../components/Table/IndeterminateCheckbox'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -143,7 +143,6 @@ export const DataPortalForm = ({
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FieldGroup label="Name" required>
             <InputText
-              label="Name"
               placeholder="Name of the portal"
               {...register('name')}
               disabled={isSubmitting}
@@ -157,7 +156,6 @@ export const DataPortalForm = ({
           <FieldGroup label="Description">
             <InputText
               type="textarea"
-              label="Description"
               placeholder="What is this portal about?"
               {...register('description')}
               disabled={isSubmitting}
@@ -186,8 +184,7 @@ export const DataPortalForm = ({
             )}
 
             <>
-              <InputText
-                label="cardImage"
+              <InputFile
                 type="file"
                 accept="image/*"
                 {...register('card_image_file')}
@@ -264,11 +261,9 @@ export const DataPortalForm = ({
           {canEditMainDataPortal && (
             <Row>
               <FieldGroup label="Sort order">
-                <InputText
-                  type="number"
+                <InputNumber
                   step="1"
                   min="0"
-                  label="Sort Order"
                   placeholder="What is the portal's sort order?"
                   {...register('sort_order')}
                   disabled={isSubmitting || watch().default === true}

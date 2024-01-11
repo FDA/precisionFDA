@@ -38,21 +38,6 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
   },
-  module: {
-    rules: [
-      {
-        test: /\.(ts|js)x?$/,
-        exclude: [/node_modules/, /dist/, /.build_cache/],
-        loader: 'babel-loader',
-        options: {
-          plugins: ['babel-plugin-styled-components'],
-          presets: [],
-          cacheDirectory: true,
-          cacheCompression: false,
-        },
-      },
-    ],
-  },
   watchOptions: {
     ignored: [
       path.resolve(__dirname, 'dist'),

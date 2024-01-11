@@ -42,32 +42,32 @@ export const TabRow = styled.div`
   display: flex;
   flex-direction: row;
   gap: 4px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--c-layout-border);
 `
 
 export const TabTitle = styled.div`
-  color: ${theme.colors.primaryBlue};
+  color: var(--c-text-500);
   text-transform: uppercase;
   font-size: 14px;
 `
 
 export const TabDesc = styled.div`
-  color: #8198bc;
+  color: var(--tertiary-400);
   font-size: 12px;
   line-height: 1.428571429;
 `
 
-export const StyledPfTab = styled(PfTab)<{ isActive: boolean }>`
+export const StyledPfTab = styled(PfTab)<{ $isActive: boolean }>`
   text-align: left;
   justify-content: flex-start;
   align-items: flex-start;
   gap: 2px;
 
-  ${({ isActive }) =>
-    isActive &&
+  ${({ $isActive }) =>
+    $isActive &&
     css`
       ${TabTitle} {
-        color: #555;
+        color: var(--c-text-700);
       }
     `}
 `
@@ -106,9 +106,9 @@ export const SectionTitleRow = styled.div`
   border-bottom: 1px solid;
   padding: 6px;
   padding-left: 12px;
-  color: #333333;
-  background-color: #f5f5f5;
-  border-color: #ddd;
+  color: var(--c-text-700);
+  background-color: var(--tertiary-70);
+  border-color: var(--c-layout-border-200);
   `
 
 export const StyledInputOutputBox = styled.div`
@@ -116,11 +116,11 @@ export const StyledInputOutputBox = styled.div`
   margin-top: 20px;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  background-color: #fff;
-  border: 1px solid transparent;
-  border-color: #ddd;
+  background-color: var(--tertiary-50);
+  border: 1px solid var(--c-layout-border-200);
   border-radius: 3px;
   box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  font-size: 14px;
 `
 
 export const SectionTitle = styled.div`
@@ -157,8 +157,7 @@ export const StyledRemove = styled.div`
 export const Help = styled.div`
   padding: 6px;
   padding-right: 12px;
-  background-color: #f9f9f9;
-  border-left: 5px solid #e5e5e5;
+  border-left: 5px solid var(--tertiary-200);
   color: #777777;
   text-align: left;
   font-size: 13px;

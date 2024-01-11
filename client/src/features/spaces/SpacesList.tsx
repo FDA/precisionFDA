@@ -142,7 +142,7 @@ const StyledTable = styled.div`
     width: min(100% - 32px, 100%);
     font-size: 14px;
     .table {
-      border-left:1px solid #d5d5d5;
+      border-left:1px solid var(--c-layout-border);
       .tr {
         height: 56px;
         .td {
@@ -212,7 +212,7 @@ const TableTable = ({
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
       />
-      <Filler size={16} />
+      <Filler $size={16} />
     </StyledTable>
   )
 }

@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { compactScrollBar } from './Page/styles'
 
 export const StyledTags = styled.div`
   display: flex;
@@ -6,33 +7,12 @@ export const StyledTags = styled.div`
   flex-wrap: wrap;
   gap: 10px;
 
-  &:hover {
-  /* width */
-  ::-webkit-scrollbar {
-    height: 5px;
-  }
-
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: #888;
-  }
-
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-  }
-
-
+  ${compactScrollBar}
 `
 
 export const StyledTagItem = styled.div`
-  background-color: #f6dab2;
+  background-color: var(--c-property-item);
+  color: #333;
   padding: 5px;
   position: relative;
   line-height: 12px;
@@ -45,7 +25,7 @@ export const StyledTagItem = styled.div`
     height: 0px;
     border-style: solid;
     border-width: 11px 10px 11px 0;
-    border-color: transparent #f6dab2 transparent transparent;
+    border-color: transparent var(--c-property-item) transparent transparent;
     position: absolute;
     top: 0;
     left: -10px;
@@ -57,7 +37,7 @@ export const StyledPropertyItem = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 4px 8px 4px 10px;
-  background-color: #f6dab2;
+  background-color: var(--c-property-item);
   font-size: 12px;
   position: relative;
 
@@ -68,7 +48,7 @@ export const StyledPropertyItem = styled.div`
     height: 100%;
     top: 0;
     left: 0;
-    background-color: #e6c69a;
+    background-color: var(--c-property-item);
   }
 `
 
