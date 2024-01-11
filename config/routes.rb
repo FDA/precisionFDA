@@ -163,7 +163,7 @@ Rails.application.routes.draw do
 
     get "/discussions/create", to: "discussions#index2"
 
-    if ENV["GSRS_ENABLED"]
+    if ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
       match "/ginas/app/logout", to: "main#destroy", via: :all
       get "/ginas/app/api/v1/substances:path", to: "ginas#skip_request",
         constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
