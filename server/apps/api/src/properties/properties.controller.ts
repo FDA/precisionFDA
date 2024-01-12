@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Param, Post } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { PropertyType } from '@shared/domain/property/property.entity'
 import { PropertyService } from '@shared/domain/property/services/property.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -11,7 +11,7 @@ import { PropertiesPostReqBody, propertiesPostRequestSchema } from './properties
 export class PropertiesController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   @HttpCode(201)

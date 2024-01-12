@@ -2,7 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Process, Processor } from '@nestjs/bull'
 import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
 import {
   AdminDataConsistencyReportOperation
@@ -26,7 +26,7 @@ import { BaseQueueProcessor } from './base-queue.processor'
 
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
-  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager) {
+  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager) {
     super()
   }
 

@@ -35,9 +35,4 @@ before(async () => {
 after(async () => {
   localMocksRestore()
   mocksRestore()
-  // TODO(samuel) solve this somehow
-  // uncommenting throws timeout errors, failed to investigate why, as it works locally
-  // shouldn't impact test results as redis communication is mocked
-  // await queue.disconnectQueues()
-  await database.stop()
 })

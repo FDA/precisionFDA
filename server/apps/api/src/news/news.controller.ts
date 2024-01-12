@@ -14,7 +14,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -39,7 +39,7 @@ const DEFAULT_PAGE_SIZE = 10
 export class NewsController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   @Get()

@@ -2,7 +2,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Process, Processor } from '@nestjs/bull'
 import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { JobService } from '@shared/domain/job/job.service'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import {
@@ -20,7 +20,7 @@ import { BaseQueueProcessor } from '../../../queues/processor/base-queue.process
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
-  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager) {
+  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager) {
     super()
   }
 

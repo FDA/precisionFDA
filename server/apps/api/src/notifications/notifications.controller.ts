@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Param, Post, Put, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -11,7 +11,7 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 export class NotificationsController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   @HttpCode(204)

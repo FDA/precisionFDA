@@ -4,13 +4,13 @@ import { Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
@@ -42,9 +42,7 @@ export class SpaceReportService {
       spaceReport.reportParts.add(await this.createSpaceReportParts(space.scope))
 
       if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
-        throw new InvalidStateError(
-          'Report not generated: No entities to report on in this space',
-        )
+        throw new InvalidStateError('Report not generated: No entities to report on in this space')
       }
 
       this.em.persist(spaceReport)

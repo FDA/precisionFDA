@@ -1,4 +1,3 @@
-import { types } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Controller,
@@ -15,7 +14,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
@@ -31,10 +30,10 @@ import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-s
 import { SpaceUnlockOperation } from '@shared/domain/space/ops/unlock-space'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceReportCreateFacade } from '../facade/space-report/space-report-create.facade'
 import { SpaceReportDeleteFacade } from '../facade/space-report/space-report-delete.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -44,7 +43,7 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 @Controller('/spaces')
 export class SpacesController {
   constructor(
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly oldEm: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly log: Logger,
     private readonly user: UserContext,
     private readonly spaceReportCreateFacade: SpaceReportCreateFacade,
@@ -78,10 +77,7 @@ export class SpacesController {
       input: {
         initUserId: this.user.id,
         spaceId,
-        activityType:
-          SPACE_EVENT_ACTIVITY_TYPE[
-            SPACE_EVENT_ACTIVITY_TYPE.space_locked
-          ],
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
       },
       receiverUserIds: [],
       emailTypeId: EMAIL_TYPES.spaceChanged as any,
@@ -103,10 +99,7 @@ export class SpacesController {
       input: {
         initUserId: this.user.id,
         spaceId,
-        activityType:
-          SPACE_EVENT_ACTIVITY_TYPE[
-            SPACE_EVENT_ACTIVITY_TYPE.space_unlocked
-          ],
+        activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_unlocked],
       },
       receiverUserIds: [],
       emailTypeId: EMAIL_TYPES.spaceChanged as any,

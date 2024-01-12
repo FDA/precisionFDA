@@ -85,11 +85,9 @@ UserDataConsistencyReportOutput
     const log = this.ctx.log
     let em: SqlEntityManager = this.ctx.em
     try {
-      const dbReplicaService = await database.createDatabaseReplicaService()
-      await dbReplicaService.start()
-      em = dbReplicaService.getOrm()!.em
+      em = await database.getReadOnlyEM()
     } catch (error) {
-      log.warn('Cannot create dbReplicaService, using main db')
+      log.warn('Not connected to the readonly replica db, using main db')
     }
 
     let output: UserDataConsistencyReportOutput = {}

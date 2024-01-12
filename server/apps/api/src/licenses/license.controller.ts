@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { FilesInput, filesSchema } from '@shared/domain/license/license.input'
 import { LicensesForFilesOperation } from '@shared/domain/license/ops/licenses-for-files'
@@ -14,7 +14,7 @@ import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 export class LicenseController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 

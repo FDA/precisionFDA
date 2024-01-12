@@ -2,7 +2,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
@@ -42,7 +42,7 @@ export class AdminController {
   constructor(
     private readonly user: UserContext,
     private readonly log: Logger,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   @Get('/checkStaleJobs')

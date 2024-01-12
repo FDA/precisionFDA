@@ -10,7 +10,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { App } from '@shared/domain/app/app.entity'
 import { AppInput, saveAppSchema } from '@shared/domain/app/app.input'
 import { AppService } from '@shared/domain/app/services/app.service'
@@ -31,7 +31,7 @@ import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 export class AppController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 

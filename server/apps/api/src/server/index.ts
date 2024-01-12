@@ -1,12 +1,9 @@
 import { INestApplication } from '@nestjs/common'
+import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface'
 import { NestFactory } from '@nestjs/core'
+import { setupNestApp } from '@shared/app-initialization'
 import { config } from '@shared/config'
-import { ENVS } from '@shared/enums'
-import { createQueues } from '@shared/queue'
-import { QueueModule } from '@shared/queue/queue.module'
-import { QueueProxy } from '@shared/queue/queue.proxy'
 import fs from 'fs'
-import { Logger } from 'nestjs-pino'
 import { ApiModule } from '../api.module'
 import { log } from '../logger'
 import { setupWSServer } from './middleware/notifications'
@@ -19,6 +16,25 @@ let wss: any = null
 
 export const getServer = () => app.getHttpServer()
 
+const startApp = async (cfg: { ssl: boolean }) => {
+  const options: NestApplicationOptions = {}
+
+  if (cfg?.ssl) {
+    options.httpsOptions = {
+      key: fs.readFileSync(config.api.keyCertPath),
+      cert: fs.readFileSync(config.api.certPath),
+    }
+  }
+
+  app = await NestFactory.create(ApiModule, options)
+
+  await setupNestApp(app)
+
+  await app.listen(config.api.port)
+
+  log.log(`${cfg?.ssl ? 'HTTPS' : 'HTTP'} Server: started (port: ${config.api.port.toString()})`)
+}
+
 export function createServer() {
   const startWSServer = async (): Promise<void> => {
     if (app !== null) {
@@ -28,40 +44,14 @@ export function createServer() {
   }
 
   const startHttpServer = async (): Promise<void> => {
-    app = await NestFactory.create(ApiModule)
-    await app.listen(config.api.port)
-
-    if (config.env !== ENVS.LOCAL) {
-      app.useLogger(app.get(Logger))
-    }
-
-    const queueProvider = app.select(QueueModule).get(QueueProxy)
-    await createQueues(queueProvider)
-
-    log.log(`HTTP Server: started (port: ${config.api.port.toString()})`)
+    await startApp({ ssl: false })
   }
 
   const startHttpsServer = async (): Promise<void> => {
     // Uncomment to debug server config
     // log.log({config: config} , 'HTTP Server config')
 
-    app = await NestFactory.create(ApiModule, {
-      httpsOptions: {
-        key: fs.readFileSync(config.api.keyCertPath),
-        cert: fs.readFileSync(config.api.certPath),
-      },
-    })
-
-    if (config.env !== ENVS.LOCAL) {
-      app.useLogger(app.get(Logger))
-    }
-
-    const queueProvider = app.select(QueueModule).get(QueueProxy)
-    await createQueues(queueProvider)
-
-    await app.listen(config.api.port)
-
-    log.log(`HTTPS Server: started (port: ${config.api.port.toString()})`)
+    await startApp({ ssl: true })
   }
 
   const stopServer = async (): Promise<void> => {

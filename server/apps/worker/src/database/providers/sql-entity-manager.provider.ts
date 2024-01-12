@@ -1,9 +1,10 @@
+import { MikroORM } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Provider, Scope } from '@nestjs/common'
-import { database } from '@shared/database'
 
 export const sqlEntityManagerProvider: Provider = {
   provide: SqlEntityManager,
-  useFactory: () => database.orm().em.fork({ useContext: true }),
+  inject: [MikroORM],
+  useFactory: (orm: MikroORM) => orm.em.fork({ useContext: true }),
   scope: Scope.REQUEST,
 }

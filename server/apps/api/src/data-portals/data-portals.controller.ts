@@ -16,7 +16,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { DataPortalParam, FileParam } from '@shared/domain/data-portal/service/data-portal.types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -33,7 +33,7 @@ export class DataPortalsController {
   constructor(
     private readonly user: UserContext,
     private readonly log: Logger,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   /**

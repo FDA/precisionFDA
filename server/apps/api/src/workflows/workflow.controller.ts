@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Get, HttpCode, Inject, Logger, Param, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { LicensesForWorkflowOperation } from '@shared/domain/license/ops/licenses-for-workflow'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
@@ -17,7 +17,7 @@ import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 export class WorkflowController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 

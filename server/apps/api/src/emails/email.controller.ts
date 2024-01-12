@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Logger, Param, Post, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EmailProcessInput } from '@shared/domain/email/email.config'
 import { sendEmailBodySchema, sendEmailParamSchema } from '@shared/domain/email/email.input'
 import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
@@ -14,7 +14,7 @@ import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 export class EmailController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 
