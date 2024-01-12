@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Controller, Get, Headers, Inject, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError, ServiceError } from '@shared/errors'
@@ -13,7 +13,7 @@ export class SiteSettingsController {
   constructor(
     private readonly user: UserContext,
     private readonly log: Logger,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   @Get()

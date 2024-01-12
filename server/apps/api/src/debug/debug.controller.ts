@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Delete, Get, Inject, Logger, Param, UseGuards } from '@nestjs/common'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { CleanupWorkerQueueOperation, createTestMaxMemoryTask } from '@shared/queue'
 import { debugQueueJobs, removeRepeatableDebug, debugQueueJob, removeJobs } from '@shared/queue/queue.debug'
 import { OpsCtx } from '@shared/types'
@@ -25,7 +25,7 @@ const removeRepeatableSchema: JSONSchema7 = {
 @Controller('/debug')
 export class DebugController {
   constructor(
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 

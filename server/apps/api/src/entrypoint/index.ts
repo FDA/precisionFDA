@@ -1,4 +1,3 @@
-import { database } from '@shared/database'
 import { log } from '../logger'
 import { createServer } from '../server'
 
@@ -11,7 +10,7 @@ export function createEntrypoint() {
     process.removeAllListeners('uncaughtException')
     process.removeAllListeners('unhandledRejection')
 
-    log.fatal({ error: err }, 'Fatal error occured. Exiting the app')
+    log.fatal(err, 'Fatal error occured. Exiting the app')
   }
 
   const stopAll = async (): Promise<void> => {
@@ -23,7 +22,6 @@ export function createEntrypoint() {
     if (api) {
       await api.stopServer()
     }
-    await database.stop()
   }
 
   const startAll = async (): Promise<void> => {
@@ -45,7 +43,6 @@ export function createEntrypoint() {
     process.once('SIGTERM', stopAll)
 
     // start the services in correct order
-    await database.start()
     await api.startHttpsServer()
     await api.startWSServer()
   }

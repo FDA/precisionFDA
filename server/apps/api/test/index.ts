@@ -13,7 +13,6 @@ const server = createServer()
 before(async () => {
   mocks.mocksSetup()
 
-  await database.start()
   await server.startHttpServer()
 
   await db.initDeleteProcedure(database.connection())
@@ -23,5 +22,4 @@ after(async () => {
   mocks.mocksRestore()
 
   await server.stopServer()
-  await database.stop()
 })

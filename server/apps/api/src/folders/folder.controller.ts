@@ -12,7 +12,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FolderRecreateOperation } from '@shared/domain/user-file/ops/folder-recreate'
 import { FolderRemoveRecursiveOperation } from '@shared/domain/user-file/ops/folder-remove-recursive'
@@ -27,7 +27,7 @@ import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 export class FolderController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 

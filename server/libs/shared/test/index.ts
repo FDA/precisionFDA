@@ -1,4 +1,8 @@
+import { INestApplicationContext } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
+import { exposeOrm } from '@shared/app-initialization'
 import { database } from '@shared/database'
+import { DatabaseModule } from '@shared/database/database.module'
 import { getLogger } from '@shared/logger'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
@@ -25,14 +29,19 @@ process.on('unhandledRejection', err => {
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
+let app: INestApplicationContext
+
 before(async () => {
   mocksSetup()
 
-  await database.start()
+  app = await NestFactory.create(DatabaseModule)
+  app.enableShutdownHooks()
+  exposeOrm(app)
+
   await db.initDeleteProcedure(database.connection())
 })
 
 after(async () => {
+  await app.close()
   mocksRestore()
-  await database.stop()
 })

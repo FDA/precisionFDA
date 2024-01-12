@@ -1,6 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, Delete, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER_TOKEN } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { NodesLockOperation } from '@shared/domain/user-file/ops/node-lock'
 import { NodesUnlockOperation } from '@shared/domain/user-file/ops/node-unlock'
 import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
@@ -18,7 +18,7 @@ import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 export class NodesController {
   constructor(
     private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER_TOKEN) private readonly em: SqlEntityManager,
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
   ) {}
 

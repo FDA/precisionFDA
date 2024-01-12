@@ -73,11 +73,9 @@ AdminDataConsistencyReportOutput
   async run(): Promise<AdminDataConsistencyReportOutput> {
     const log = this.ctx.log
     try {
-      const dbReplicaService = await database.createDatabaseReplicaService()
-      await dbReplicaService.start()
-      this.em = dbReplicaService.getOrm()!.em
+      this.em = await database.getReadOnlyEM()
     } catch (error) {
-      log.warn('Cannot create dbReplicaService, using main db')
+      log.warn('Not connected to the readonly replica db, using main db')
     }
 
     let output: AdminDataConsistencyReportOutput = {}
