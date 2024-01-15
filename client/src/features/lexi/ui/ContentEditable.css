@@ -12,8 +12,9 @@
   display: block;
   position: relative;
   outline: 0;
-  padding: 24px 28px 40px;
+  padding: 8px 28px 40px;
   min-height: 150px;
+  max-width: 1000px; /* NOTE: change from main theme */
 }
 @media (max-width: 1025px) {
   .ContentEditable__root {

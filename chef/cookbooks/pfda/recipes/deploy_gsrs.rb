@@ -38,7 +38,9 @@ bash "sync ginas indexes" do
       OWNER_GROUP: node["gsrs"]["tomcat_group"],
     }
   end)
-  only_if { shell_out("aws s3 sync #{node.run_state.dig("ssm_params", "gsrs", "index_path") || node["gsrs"]["index_path"]} #{node['gsrs']['tomcat_path']}/ginas.ix --delete --dryrun | grep download").exitstatus == 0 }
+  only_if do
+    shell_out("aws s3 sync #{node.run_state.dig('ssm_params', 'gsrs', 'index_path') || node['gsrs']['index_path']} #{node['gsrs']['tomcat_path']}/ginas.ix --delete --dryrun | grep download").exitstatus == 0
+  end
   notifies :run, "bash[wipe tomcat cache]", :immediately
 end
 

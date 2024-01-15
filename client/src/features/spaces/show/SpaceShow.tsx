@@ -219,7 +219,7 @@ const Spaces2 = ({
               <MenuCounter count={space.counters.reports.toString()} active={activeResource === 'reports'} />
             )}
           </MenuItem>
-          {space.type !== 'private_type' && <MenuItem
+          {space.type !== 'private_type' && (space.type !== 'review' || space.private_space_id == null) && <MenuItem
               data-testid="discussions-link"
               to={`/spaces/${space.id}/discussions`}
               activeClassName="active"

@@ -6,31 +6,12 @@
  *
  */
 
-export type SettingName =
-  | 'disableBeforeInput'
-  | 'measureTypingPerf'
-  | 'isRichText'
-  | 'isCollab'
-  | 'isCharLimit'
-  | 'isMaxLength'
-  | 'isCharLimitUtf8'
-  | 'isAutocomplete'
-  | 'shouldUseLexicalContextMenu'
-  | 'showTreeView'
-  | 'showNestedEditorTreeView'
-  | 'emptyEditor'
-  | 'showTableOfContents'
-  | 'tableCellMerge'
-  | 'tableCellBackgroundColor';
-
-export type Settings = Record<SettingName, boolean>;
-
-const hostName = window.location.hostname
+const hostName = window.location.hostname;
 export const isDevPlayground: boolean =
   hostName !== 'playground.lexical.dev' &&
-  hostName !== 'lexical-playground.vercel.app'
+  hostName !== 'lexical-playground.vercel.app';
 
-export const DEFAULT_SETTINGS: Settings = {
+export const DEFAULT_SETTINGS = {
   disableBeforeInput: false,
   emptyEditor: isDevPlayground,
   isAutocomplete: false,
@@ -43,7 +24,11 @@ export const DEFAULT_SETTINGS: Settings = {
   shouldUseLexicalContextMenu: false,
   showNestedEditorTreeView: false,
   showTableOfContents: false,
-  showTreeView: false,
+  showTreeView: true,
   tableCellBackgroundColor: true,
   tableCellMerge: true,
-}
+};
+
+export type SettingName = keyof typeof DEFAULT_SETTINGS;
+
+export type Settings = typeof DEFAULT_SETTINGS;

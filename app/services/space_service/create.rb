@@ -247,6 +247,7 @@ module SpaceService
         host_dxorg: shared_space.host_dxorg,
         restrict_to_template: space_form.restrict_to_template,
         protected: space_form.protected,
+        restricted_reviewer: space_form.restricted_reviewer,
       )
 
       project_dxid = api.project_new(
