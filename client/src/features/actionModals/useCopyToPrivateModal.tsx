@@ -69,7 +69,7 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
         headerText={`Copy ${resourceCountString(
           resource,
           momoSelected.length,
-        )} to private area?`}
+        )} to My Home (private)?`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>
