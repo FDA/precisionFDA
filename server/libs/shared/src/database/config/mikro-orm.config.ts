@@ -1,5 +1,6 @@
 import { MikroOrmModuleSyncOptions } from '@mikro-orm/nestjs/typings'
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
+import { config } from '@shared/config'
 import { BaseEntity } from '@shared/database/base-entity'
 import { entities } from '@shared/database/entities'
 
@@ -14,4 +15,5 @@ export const mikroOrmBaseConfig: MikroOrmModuleSyncOptions = {
   // this way, created timestamps do not depend on developer's timezone
   // useful for testing database, for example
   forceUtcTimezone: true,
+  cache: { enabled: config.database.ormCacheEnabled },
 }
