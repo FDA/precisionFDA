@@ -19,6 +19,7 @@ import {
   FloatInput,
   IntInput,
   SelectIOClass,
+  SpecProps,
   StringInput,
 } from './Fields'
 import { SectionTitle, SectionTitleRow, StyledClassTd, StyledInputOutputBox, StyledRemove, TableStyles } from './styles'
@@ -63,6 +64,15 @@ const InputSpecRow = ({
     trigger(`input_spec.${index}.default`)
   }, [watch(`input_spec.${index}.choices`)])
 
+  const baseProps = {
+    base: 'input_spec',
+    sClass,
+    errors,
+    control,
+    index,
+    register,
+  } satisfies SpecProps
+
   return (
     <tr key={field.id}>
       <StyledClassTd>
@@ -70,50 +80,19 @@ const InputSpecRow = ({
       </StyledClassTd>
 
       {(sClass === 'string' || sClass === 'array:string') && (
-        <StringInput
-          base="input_spec"
-          errors={errors}
-          control={control}
-          index={index}
-          register={register}
-        />
+        <StringInput {...baseProps} />
       )}
       {(sClass === 'file' || sClass === 'array:file') && (
-        <FileInput
-          sClass={sClass}
-          base="input_spec"
-          errors={errors}
-          control={control}
-          index={index}
-          register={register}
-        />
+        <FileInput {...baseProps} />
       )}
       {(sClass === 'int' || sClass === 'array:int') && (
-        <IntInput
-          base="input_spec"
-          errors={errors}
-          control={control}
-          index={index}
-          register={register}
-        />
+        <IntInput {...baseProps} />
       )}
       {sClass === 'boolean' && (
-        <BooleanInput
-          base="input_spec"
-          errors={errors}
-          control={control}
-          index={index}
-          register={register}
-        />
+        <BooleanInput {...baseProps} />
       )}
       {(sClass === 'float' || sClass === 'array:float') && (
-        <FloatInput
-          base="input_spec"
-          errors={errors}
-          control={control}
-          index={index}
-          register={register}
-        />
+        <FloatInput {...baseProps} />
       )}
       <td>
         <StyledRemove>

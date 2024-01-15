@@ -15,7 +15,7 @@ const GlobalStyle = createGlobalStyle`
     scroll-padding-top: 70px;
   }
   html, body, main, #app-root, .pfda-loader-wrapper {
-    height: 100%;
+    height: 100svh;
   }
   a {
     color: ${colors.primaryBlue};

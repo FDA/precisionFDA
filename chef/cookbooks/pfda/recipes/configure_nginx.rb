@@ -27,14 +27,6 @@ template "/etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf" do
   source "json_analytics_log_format_for_prometheus.conf.erb"
 end
 
-template "/usr/local/conf/modsecurity.conf" do
-  source "modsecurity.erb"
-end
-
-template "/usr/local/conf/pfda_modsec_rules.conf" do
-  source "pfda_modsec_rules.erb"
-end
-
 service "nginx" do
   action :restart
 end

@@ -1,5 +1,6 @@
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Connection, MikroORM } from '@mikro-orm/core'
+import { config } from '@shared'
 import { defaultLogger as log } from '../logger'
 import { entities } from '../domain'
 import { BaseEntity } from './base-entity'
@@ -41,6 +42,7 @@ export class DatabaseService implements IDatabaseService {
         // this way, created timestamps do not depend on developer's timezone
         // useful for testing database, for example
         forceUtcTimezone: true,
+        cache: { enabled: config.database.ormCacheEnabled },
       })
       log.debug('DatabaseService: connection')
       await this.orm.em.getConnection().execute('SELECT 1+1 as foo;')
@@ -51,7 +53,7 @@ export class DatabaseService implements IDatabaseService {
       throw err
     }
   }
-  
+
   async stop(): Promise<void> {
     try {
       if (this.orm && (await this.orm.isConnected())) {
