@@ -189,9 +189,9 @@ export interface JobRunForm {
   };
 }
 
-interface InputSpecForm extends Omit<InputSpec, 'choices' | 'default'> {
-  choices: string | null
-  default: null | string | IAccessibleFile[]
+export interface InputSpecForm extends Omit<InputSpec, 'choices' | 'default'> {
+  choices: string[] | null
+  default: null | string[] | IAccessibleFile[]
 }
 
 export interface CreateAppForm extends Omit<CreateAppPayload, 'ordered_assets' | 'input_spec'> {

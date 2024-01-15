@@ -5,56 +5,56 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import { $isCodeNode } from '@lexical/code'
+import {$isCodeNode} from '@lexical/code';
 import {
   $getNearestNodeFromDOMNode,
   $getSelection,
   $setSelection,
   LexicalEditor,
-} from 'lexical'
-import * as React from 'react'
-import { useState } from 'react'
+} from 'lexical';
+import * as React from 'react';
+import {useState} from 'react';
 
-import { useDebounce } from '../../utils'
+import {useDebounce} from '../../utils';
 
 interface Props {
   editor: LexicalEditor;
   getCodeDOMNode: () => HTMLElement | null;
 }
 
-export function CopyButton({ editor, getCodeDOMNode }: Props) {
-  const [isCopyCompleted, setCopyCompleted] = useState<boolean>(false)
+export function CopyButton({editor, getCodeDOMNode}: Props) {
+  const [isCopyCompleted, setCopyCompleted] = useState<boolean>(false);
 
   const removeSuccessIcon = useDebounce(() => {
-    setCopyCompleted(false)
-  }, 1000)
+    setCopyCompleted(false);
+  }, 1000);
 
   async function handleClick(): Promise<void> {
-    const codeDOMNode = getCodeDOMNode()
+    const codeDOMNode = getCodeDOMNode();
 
     if (!codeDOMNode) {
-      return
+      return;
     }
 
-    let content = ''
+    let content = '';
 
     editor.update(() => {
-      const codeNode = $getNearestNodeFromDOMNode(codeDOMNode)
+      const codeNode = $getNearestNodeFromDOMNode(codeDOMNode);
 
       if ($isCodeNode(codeNode)) {
-        content = codeNode.getTextContent()
+        content = codeNode.getTextContent();
       }
 
-      const selection = $getSelection()
-      $setSelection(selection)
-    })
+      const selection = $getSelection();
+      $setSelection(selection);
+    });
 
     try {
-      await navigator.clipboard.writeText(content)
-      setCopyCompleted(true)
-      removeSuccessIcon()
+      await navigator.clipboard.writeText(content);
+      setCopyCompleted(true);
+      removeSuccessIcon();
     } catch (err) {
-      console.error('Failed to copy: ', err)
+      console.error('Failed to copy: ', err);
     }
   }
 
@@ -66,5 +66,5 @@ export function CopyButton({ editor, getCodeDOMNode }: Props) {
         <i className="format copy" />
       )}
     </button>
-  )
+  );
 }

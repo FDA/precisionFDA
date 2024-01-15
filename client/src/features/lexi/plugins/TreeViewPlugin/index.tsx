@@ -6,12 +6,12 @@
  *
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { TreeView } from '@lexical/react/LexicalTreeView'
-import * as React from 'react'
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {TreeView} from '@lexical/react/LexicalTreeView';
+import * as React from 'react';
 
 export default function TreeViewPlugin(): JSX.Element {
-  const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext();
   return (
     <TreeView
       viewClassName="tree-view-output"
@@ -22,5 +22,5 @@ export default function TreeViewPlugin(): JSX.Element {
       timeTravelPanelButtonClassName="debug-timetravel-panel-button"
       editor={editor}
     />
-  )
+  );
 }
