@@ -54,7 +54,7 @@ const SpecDefault = ({
     sClass === 'array:int'
   ) {
     defaultValues = value && (
-      <StyledDefaultValue>[{value?.map(v => ` ${v}`)} ]</StyledDefaultValue>
+      <StyledDefaultValue>{`[ ${value.map(v => ` ${v}`).toString()} ]`}</StyledDefaultValue>
     )
   }
   if (sClass === 'boolean') {

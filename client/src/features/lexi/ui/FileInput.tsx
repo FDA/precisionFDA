@@ -6,9 +6,9 @@
  *
  */
 
-import './Input.css'
+import './Input.css';
 
-import * as React from 'react'
+import * as React from 'react';
 
 type Props = Readonly<{
   'data-testid'?: string;
@@ -34,5 +34,5 @@ export default function FileInput({
         data-testid={dataTestId}
       />
     </div>
-  )
+  );
 }

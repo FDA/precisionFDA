@@ -2,7 +2,6 @@ user www-data;
 worker_processes auto;
 pid /var/run/nginx.pid;
 error_log <%= node[:nginx][:log_dir] %>/nginx_error.log warn;
-load_module modules/ngx_http_modsecurity_module.so;
 
 events {
   worker_connections 1024;
@@ -52,9 +51,6 @@ http {
     listen [::]:443 ssl http2;
 
     <%= render 'ssl_settings.conf.erb' %>
-
-    modsecurity on;
-    modsecurity_rules_file /usr/local/conf/modsecurity.conf;
 
     # Reverse proxy to UNII site on CloudFront
     location /uniisearch {

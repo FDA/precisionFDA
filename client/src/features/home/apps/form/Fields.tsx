@@ -24,7 +24,7 @@ import { PlusIcon } from '../../../../components/icons/PlusIcon'
 import { theme } from '../../../../styles/theme'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { CreateAppForm, IOSpec } from '../apps.types'
-import { handleSnakeNameChange } from './common'
+import { formatCSVStringToArray, handleSnakeNameChange } from './common'
 
 export const InputTextS = styled(InputText)<{ isError: boolean }>`
   ${({ isError }) =>
@@ -178,7 +178,7 @@ export const DefaultString = ({ base, register, index, errors }: SpecProps) => {
   return (
     <td>
       <InputTextS
-        {...register(`${base}.${index}.default`, {})}
+        {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
         data-tip
         data-for={`${base}.${index}.default`}
         isError={isError}
@@ -207,7 +207,7 @@ export const DefaultFloat = ({ base, register, index, errors }: SpecProps) => {
         data-for={`${base}.${index}.default`}
         placeholder="Optional default"
         isError={isError}
-        {...register(`${base}.${index}.default`, {})}
+        {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
         <ReactTooltip
@@ -232,7 +232,7 @@ export const DefaultInt = ({ base, register, index, errors }: SpecProps) => {
         data-for={`${base}.${index}.default`}
         placeholder="Optional default"
         isError={isError}
-        {...register(`${base}.${index}.default`, {})}
+        {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
         <ReactTooltip
@@ -353,7 +353,7 @@ export const Choice = ({ base, register, index, errors }: SpecProps) => {
         data-tip
         data-for={`${base}.${index}.choices`}
         isError={isError}
-        {...register(`${base}.${index}.choices`)}
+        {...register(`${base}.${index}.choices`, { setValueAs: formatCSVStringToArray })}
         placeholder="Optional comma separated values"
       />
       {isError && (

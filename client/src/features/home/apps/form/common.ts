@@ -1,26 +1,26 @@
 /* eslint-disable func-names */
 import * as Yup from 'yup'
 import { toString } from 'lodash'
-import { IOSpec, InputSpec } from '../apps.types'
+import { IOSpec, InputSpec, InputSpecForm } from '../apps.types'
 import { csvToArray } from '../../../../utils/csvToArray'
 import { stringToSnakeCase } from '../../../../utils/stringToSnakeCase'
 import { IAccessibleFile } from '../../databases/databases.api'
 import '../../../../utils/yupValidators'
 
-export const formatStringToArray = (csvVal: string | null) => {
+export const formatCSVStringToArray = (csvVal: string | null) => {
   if(csvVal === null || csvVal.length === 0) {
     return null
   }
   return csvToArray(csvVal)[0].map(c => c.trim())
 }
 
-interface CreateType {
+interface DefaultCreateType {
   'array:file': IAccessibleFile[] | null
   'file': string | null
   'boolean': string | null
-  'array:int': string | null
-  'array:float': string | null
-  'array:string': string | null
+  'array:int': string[] | null
+  'array:float': string[] | null
+  'array:string': string[] | null
   'float': string | null
   'int': string | null
   'string': string | null
@@ -48,13 +48,13 @@ interface ServerType {
   'string': string | null
 }
 
-const createDefs: { [CLASS_TYPE in IOSpec['class']]: (t: CreateType[CLASS_TYPE]) => ServerType[CLASS_TYPE] | null } = {
+const defaultCreateDefs: { [CLASS_TYPE in IOSpec['class']]: (t: DefaultCreateType[CLASS_TYPE]) => ServerType[CLASS_TYPE] | null } = {
   'array:file': v => v?.length > 0 ? v : null,
   'file': v => v ?? null,
   'boolean': v => v === 'null' ? null : v === 'true',
-  'array:int': v => formatStringToArray(v)?.map(i => parseInt(i, 10)) ?? null,
-  'array:float': v => formatStringToArray(v)?.map(i => parseFloat(i)) ?? null,
-  'array:string': v => formatStringToArray(v),
+  'array:int': v => v?.map(i => parseInt(i, 10)) ?? null,
+  'array:float': v => v?.map(i => parseFloat(i)) ?? null,
+  'array:string': v => v,
   'float': v => parseFloat(v) ?? null,
   'int': v => parseInt(v, 10) ?? null,
   'string': v => v || null,
@@ -72,18 +72,18 @@ const runDefs: { [CLASS_TYPE in IOSpec['class']]: (t: ServerType[CLASS_TYPE]) =>
   'string': v => v || null,
 }
 
-export function getDefaultValueFromForm<T extends IOSpec['class']>(sClass: T, val: CreateType[T]) {
+export function getDefaultValueFromForm<T extends IOSpec['class']>(sClass: T, val: DefaultCreateType[T]) {
   if(val === '') return null
-  return val && createDefs[sClass]?.(val)
+  return val && defaultCreateDefs[sClass]?.(val)
 }
-export function getChoicesValueFromForm<T extends IOSpec['class']>(sClass: T, val: string) {
+export function getChoicesValueFromForm<T extends IOSpec['class']>(sClass: T, val: string[]) {
   if(sClass === 'array:int' || sClass === 'int') {
-    return val &&  formatStringToArray(val)?.map(v => parseInt(v, 10))
+    return val &&  val?.map(v => parseInt(v, 10))
   }
   if(sClass === 'array:float' || sClass === 'float') {
-    return val &&  formatStringToArray(val)?.map(v => parseFloat(v))
+    return val &&  val?.map(v => parseFloat(v))
   }
-  return val && formatStringToArray(val)
+  return val && val
 }
 export function getDefaultValueFromServer<T extends IOSpec['class']>(sClass: T, val: RunType[T]) {
   return val == null ? null : runDefs[sClass]?.(val)
@@ -100,7 +100,7 @@ function formatFormDefault(val: any, sClass: IOSpec['class']) {
   return val?.toString() ?? null
 }
 
-export function mapFromServerToForm<T extends InputSpec>(spec: T): T {
+export function mapFromServerToForm<T extends InputSpec>(spec: T): InputSpecForm {
   return {
     ...spec,
     choices: spec.choices ? spec.choices.toString() : '',
@@ -117,49 +117,30 @@ export function handleSnakeNameChange(e: any) {
   return e
 }
 
-const csvIntRegex = /^(?:[-+]?\d+)(?:,(?:[-+]?\d+))*$/
-
-function isValidArrayOfInts(str: string) {
-  return csvIntRegex.test(str)
-}
-
-function isValidArrayOfStrings(str: string) {
-  try {
-    const parsedArray = JSON.parse(`[${str}]`)
-    if (!Array.isArray(parsedArray)) {
-      return false
-    }
-
-    return parsedArray.every(element => typeof element === 'string')
-  } catch (error) {
-    return false
-  }
-}
-const csvFloatRegex = /^(?:[-+]?\d*\.\d+|\d+)(?:,(?:[-+]?\d*\.\d+|\d+))*$/
-
-function isValidArrayOfFloats(str: string) {
-  return csvFloatRegex.test(str)
-}
-
 export function isStrictlyInteger(str: string) {
   return /^\d+$/.test(str)
-}
-
-export function isFloatValid(str: string) {
-  return /^-?\d+(?:\.\d+)?$/.test(str)
-}
-
-function isValidCSVString(str: string) {
-  return /^[a-z0-9]+(?:, ?[a-z0-9]+)*$/.test(str)
 }
 
 function emptyOrNull(v?: string | null) {
   return v === ''  || v == null
 }
 
-function areAllValuesInB(a: string[], b: string[]): boolean {
+function areAllAValuesInB(a: string[], b: string[]): boolean {
   const bSet = new Set(b)
   return a.every(item => bSet.has(item))
+}
+
+export function isFloatValid(str: string) {
+  return /^-?\d+(?:\.\d+)?$/.test(str)
+}
+function isIntegerValid(str: string) {
+  return Number.isSafeInteger(Number(str))
+}
+function isValidaArrayOfFloat(strs: string[]) {
+  return strs.reduce((acc, value) => acc && isFloatValid(value), true)
+}
+function isValidaArrayOfInteger(strs: string[]) {
+  return strs.reduce((acc, value) => acc && isIntegerValid(value), true)
 }
 
 const IOName = Yup.string().required('Name field is required').test(
@@ -183,91 +164,72 @@ export const validationSchema = Yup.object().shape({
       class: Yup.string()
         .oneOf(['string', 'file', 'int', 'float', 'boolean', 'array:file', 'array:string', 'array:int', 'array:float'])
         .required('Class field is required'),
-      default: Yup.string().when(['class', 'choices'], (classVal: string, choices: string[], schema: Yup.StringSchema) => {
+      default: Yup.array().when(['class', 'choices'], (classVal: string, choices: string[], schema: Yup.StringSchema) => {
+        const containsSchema = schema.test(
+          'val-is-not-in-choices',
+          'One of the values is not in the choices list',
+          value => {
+            if(value && choices) {
+              return areAllAValuesInB(value, choices)
+            }
+            return true
+          },
+        )
         if(classVal === 'array:string') {
-          return Yup.string()
+          return containsSchema
             .test(
               'is-array-of-string',
               'The field must contain valid comma separated strings',
               value => {
-                return value ? isValidCSVString(value) : true
-              },
-            )
-            .test(
-              'val-is-not-in-choices',
-              'One of the values is not in the choices list',
-              value => {
-                if(value && choices) {
-                  return areAllValuesInB(formatStringToArray(value), formatStringToArray(choices))
-                }
-                return true
+                if (emptyOrNull(value)) return true
+                return Array.isArray(value)
               },
             )
             .optional().nullable()
         }
-        if(classVal === 'string') return Yup.string().nullable()
-        if(classVal === 'boolean') return Yup.string().nullable()
+        if(classVal === 'string') return containsSchema.nullable().optional()
+        if(classVal === 'boolean') return schema.nullable()
         if(classVal === 'array:file') {
-          return Yup.array(Yup.string()).nullable().optional()
+          return schema.nullable().optional()
         }
         if(classVal === 'file') {
-          return Yup.array(Yup.string()).max(1, 'Must not contain more than one file').nullable().optional()
+          return schema.max(1, 'Must not contain more than one file').nullable().optional()
         }
         if(classVal === 'array:int') {
-          return Yup.string()
+          return containsSchema
           .test(
             'is-array-of-int',
             'The field must contain a valid comma separated array of integers',
             value => {
               if (emptyOrNull(value)) return true
-              return isValidArrayOfInts(value)},
-            )
-            .test(
-              'val-is-not-in-choices',
-              'One of the values is not in the choices list',
-              value => {
-                if(value && choices) {
-                  return areAllValuesInB(formatStringToArray(value), formatStringToArray(choices))
-                }
-                return true
-              },
+              return isValidaArrayOfInteger(value)},
             )
             .optional().nullable()
           }
         if(classVal === 'int') {
-          return Yup.string().optional().test(
+          return containsSchema.test(
             'is-int',
             'The field must contain an integer',
             value => {
               if(emptyOrNull(value)) return true
-              return isStrictlyInteger(value)
+              return isIntegerValid(value)
             },
           ).optional().nullable()
         }
         if(classVal === 'array:float') {
-          return Yup.string()
+          return containsSchema
             .test(
               'is-array-of-float',
               'The field must contain a valid comma separated array of floats',
               value => {
                 if(emptyOrNull(value)) return true
-                return isValidArrayOfFloats(value)
-              },
-            )
-            .test(
-              'val-is-not-in-choices',
-              'One of the values is not in the choices list',
-              value => {
-                if(value && choices) {
-                  return areAllValuesInB(formatStringToArray(value), formatStringToArray(choices))
-                }
-                return true
+                return isValidaArrayOfFloat(value)
               },
             )
             .optional().nullable()
         }
         if(classVal === 'float') {
-          return Yup.string().test(
+          return containsSchema.test(
             'is-float',
             'The field must contain a float',
             value => {
@@ -282,21 +244,22 @@ export const validationSchema = Yup.object().shape({
       label: Yup.string().optional(),
       name: IOName,
       optional: Yup.boolean().optional(),
-      choices: Yup.string().when(['class'], (classVal, schema) => {
+      choices: Yup.array().when(['class'], (classVal, schema) => {
         const noArrayStringClass = classVal.replace('array:', '')
+
         return schema.test(
           'is-csv-of-choices',
-          `The field must contain valid comma separated ${noArrayStringClass}`,
+          `The field must contain valid comma separated values of ${noArrayStringClass}`,
           (value) => {
             if(noArrayStringClass === 'float') {
               if(emptyOrNull(value)) return true
-              return isValidArrayOfFloats(value)
+              return isValidaArrayOfFloat(value)
             }
             if(noArrayStringClass === 'int') {
               if(emptyOrNull(value)) return true
-              return isValidArrayOfInts(value)
+              return isValidaArrayOfInteger(value)
             }
-            return value ? isValidCSVString(value) : true
+            return true
           },
         ).optional().nullable()
       }),

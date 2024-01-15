@@ -68,13 +68,36 @@ const StyledPageRow = styled.div`
   }
 `
 const StyledInnerHTML = styled.div`
-  border-radius: 2px;
   max-width: 900px;
+  font-size: 15px;
   color: #000;
-  position: relative;
   line-height: 1.7;
   font-weight: 400;
-  font-size: 15px;
+
+  details {
+    background: #fcfcfc;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  summary {
+    cursor: pointer;
+    padding: 5px 5px 5px 20px;
+    position: relative;
+    font-weight: bold;
+    outline: none;
+  }
+  [data-lexical-collapsible-content] {
+    padding: 0 5px 5px 20px;
+  }
+
+  table, tbody, tr, td, th {
+    border: 1px solid #bbb !important; 
+  }
+
+  .PlaygroundEditorTheme__layoutItem {
+    border: 0px;
+  }
 `
 
 export const DataPortalDetails = ({
