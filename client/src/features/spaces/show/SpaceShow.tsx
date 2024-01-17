@@ -67,6 +67,7 @@ import { RunJobPage } from '../../apps/run/RunJobPage'
 import { EditAppPage } from '../../apps/form/EditAppPage'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 import { ForkAppPage } from '../../apps/form/ForkAppPage'
+import { TrackProvenancePage } from '../../tracks/TrackProvenancePage'
 
 const Spaces2 = ({
   space,
@@ -279,6 +280,10 @@ const Spaces2 = ({
                 element={<FileShow space={space} />}
               />
               <Route
+                path={`files/:fileUid/track`}
+                element={<TrackProvenancePage entityType='file' spaceId={space.id} />}
+              />
+              <Route
                 path={`apps`}
                 element={<AppList spaceId={space.id} />}
               />
@@ -299,6 +304,10 @@ const Spaces2 = ({
                 element={<AppsShow spaceId={space.id} />}
               />
               <Route
+                path={`apps/:appUid/track`}
+                element={<TrackProvenancePage entityType='app' spaceId={space.id} />}
+              />
+              <Route
                 path={`workflows`}
                 element={<WorkflowList spaceId={space.id} />}
               />
@@ -313,6 +322,10 @@ const Spaces2 = ({
               <Route
                 path={`executions/:executionUid`}
                 element={<ExecutionDetails spaceId={space.id} />}
+              />
+              <Route
+                path={`executions/:executionUid/track`}
+                element={<TrackProvenancePage entityType='execution' spaceId={space.id} />}
               />
               <Route
                 path={`members`}

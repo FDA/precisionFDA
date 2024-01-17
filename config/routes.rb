@@ -517,6 +517,7 @@ Rails.application.routes.draw do
       get "list_licenses"
       get "cli_latest_version"
       post "list_licenses_for_files"
+      get "tracks/provenance", action: :track_provenance, as: "track_provenance"
     end
     # end API
 

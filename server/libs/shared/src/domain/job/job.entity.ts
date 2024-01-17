@@ -22,6 +22,7 @@ import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { JobRepository } from './job.repository'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
+import { STATIC_SCOPE } from '@shared/enums'
 import { Provenance } from './job.input'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { formatDuration } from '../../utils/format'
@@ -48,7 +49,7 @@ import { SCOPE } from '../../types/common'
 @Filter({
   name: 'accessibleBy', cond: args => ({
     $or: [
-      {user: {id: args.userId}, scope: 'private'},
+      {user: {id: args.userId}, scope: STATIC_SCOPE.PRIVATE},
       {scope: {$in: args.spaceScopes}}]
   })
 })
