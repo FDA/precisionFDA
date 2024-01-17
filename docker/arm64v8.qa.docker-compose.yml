@@ -43,9 +43,10 @@ services:
       file: ./base.services.yml
       service: nodejs-worker
   db:
+    platform: linux/arm64
     extends:
       file: ./base.services.yml
-      service: db_emulated
+      service: db
     volumes:
       - db-pfda-mysql-volume:/var/lib/mysql
   redis:
