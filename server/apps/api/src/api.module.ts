@@ -27,6 +27,7 @@ import { BaseErrorFilter } from './server/filter/base-error.filter'
 import { DefaultExceptionFilter } from './server/filter/default-exception.filter'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
+import { TracksApiModule } from './tracks/tracks.api.module'
 import { UserContextModule } from './user-context/user-context.module'
 import { UsersApiModule } from './users/users.api.module'
 import { WorkflowApiModule } from './workflows/workflow.api.module'
@@ -59,6 +60,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     PropertiesApiModule,
     SiteSettingsApiModule,
     SpacesApiModule,
+    TracksApiModule,
     UsersApiModule,
     WorkflowApiModule,
   ],

@@ -10,7 +10,7 @@ import {
   Enum,
   ManyToMany,
   EntityRepositoryType,
-  JsonType,
+  Filter,
 } from '@mikro-orm/core'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -19,6 +19,7 @@ import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { getLogger } from '../../logger'
 import { BaseEntity } from '../../database/base-entity'
 import { ENTITY_TYPE } from './app.enum'
+import { STATIC_SCOPE } from '@shared/enums'
 import { AppRepository } from './app.repository'
 import type { Spec } from './app.input'
 
@@ -39,6 +40,13 @@ export interface Internal {
 }
 
 @Entity({ tableName: 'apps', customRepository: () => AppRepository })
+@Filter({
+  name: 'accessibleBy', cond: args => ({
+    $or: [
+      {user: {id: args.userId}, scope: STATIC_SCOPE.PRIVATE},
+      {scope: {$in: args.spaceScopes}}]
+  })
+})
 export class App extends BaseEntity {
   @PrimaryKey()
   id: number

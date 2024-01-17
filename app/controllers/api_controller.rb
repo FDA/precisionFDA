@@ -1501,6 +1501,11 @@ class ApiController < ApplicationController
     render json: res, adapter: :json
   end
 
+  def track_provenance
+    res = https_apps_client.track_provenance(params[:uid])
+    render json: res, adapter: :json
+  end
+
   protected
 
   # Verifies that if nodes collection contains items that belong to Protected

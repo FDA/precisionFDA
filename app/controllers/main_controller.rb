@@ -639,19 +639,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
        scope_to_publish_to: scope, message: t("main.publish.apps_notification")
   end
 
-  def track
-    id = unsafe_params[:id]
-    raise "Missing id in track route" unless id.is_a?(String) && id.present?
-
-    @item = item_from_uid(id)
-    unless @item.accessible_by?(@context)
-      flash[:error] = "This item is not accessible by you"
-      redirect_to :root
-      return
-    end
-    @graph = GraphDecorator.build(@context, @item)
-  end
-
   def tokify
     @key = generate_auth_key
   end

@@ -13,6 +13,7 @@ import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import {
   FILE_STATE,
   FILE_ORIGIN_TYPE,
@@ -35,6 +36,13 @@ import { UserFileRepository } from './user-file.repository'
   { 'state': FILE_STATE_DX.ABANDONED },
   { 'state': FILE_STATE_PFDA.REMOVING },
 ]}})
+@Filter({
+  name: 'accessibleBy', cond: args => ({
+    $or: [
+      {user: {id: args.userId}, scope: STATIC_SCOPE.PRIVATE},
+      {scope: {$in: args.spaceScopes}}]
+  })
+})
 class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
   dxid: string

@@ -12,6 +12,8 @@ import { getExecutionJobsList } from './executions.util'
 import { useTerminateModal } from './useTerminateModal'
 import { useSnapshotModal } from './useSnapshotModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
+import { getBaseLink } from '../apps/run/utils'
+import { getSpaceIdFromScope } from '../../utils'
 
 export enum ExecutionAction {
   'View Logs' = 'View Logs',
@@ -102,6 +104,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const links = selected[0]?.links
+  const spaceId = getSpaceIdFromScope(selected[0]?.scope)?.toString()
 
   let actions: ActionFunctionsType<ExecutionAction> = {
     'View Logs': {
@@ -117,8 +120,8 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       showModal: isShownTerminateModal,
     },
     'Track': {
-      type: 'link',
-      link: links?.track,
+      type: 'route',
+      to: `/${getBaseLink(spaceId)}/executions/${selected[0]?.uid}/track`,
       isDisabled: selected.length !== 1 || !links.track,
     },
     'Copy to space': {

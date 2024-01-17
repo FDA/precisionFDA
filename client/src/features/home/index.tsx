@@ -62,6 +62,7 @@ import { ForkAppPage } from '../apps/form/ForkAppPage'
 import { RunJobPage } from '../apps/run/RunJobPage'
 import { getHomeScopeFromServerScope } from './getHomeScopeFromServerScope'
 import NavigateWithParams from '../../utils/NavigateWithParams'
+import { TrackProvenancePage } from '../tracks/TrackProvenancePage'
 
 interface CounterRequest {
   apps: string
@@ -324,6 +325,7 @@ const Home2 = () => {
                 />
               }
             />
+            <Route path="/apps/:appUid/track" element={<TrackProvenancePage entityType='app' />} />
             <Route
               path="databases"
               element={<DatabaseList homeScope={persistedHomeScope} />}
@@ -373,6 +375,7 @@ const Home2 = () => {
                 />
               }
             />
+            <Route path="/files/:fileUid/track" element={<TrackProvenancePage entityType='file' />} />
             <Route
               path="executions"
               element={<ExecutionList homeScope={persistedHomeScope} />}
@@ -386,6 +389,7 @@ const Home2 = () => {
                 />
               }
             />
+            <Route path="/executions/:executionUid/track" element={<TrackProvenancePage entityType='execution' />} />
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
             <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" />} />
             <Route path="jobs" element={<Navigate to="/home/executions"/>} />

@@ -161,5 +161,6 @@ export const Help = styled.div`
   color: #777777;
   text-align: left;
   font-size: 13px;
+  line-height: 24px;
   width: fit-content;
 `

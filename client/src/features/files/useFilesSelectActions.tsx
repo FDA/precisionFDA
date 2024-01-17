@@ -28,6 +28,7 @@ import {
 } from '../spaces/common'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { displayPayloadMessage } from '../../utils/api'
+import { getBaseLink } from '../apps/run/utils'
 
 export enum FileActions {
   'Track' = 'Track',
@@ -302,8 +303,8 @@ export const useFilesSelectActions = ({
 
   let actions: ActionFunctionsType<FileActions> = {
     Track: {
-      type: 'link',
-      link: selected[0]?.links?.track || '',
+      type: 'route',
+      to: `/${getBaseLink(space?.id)}/files/${selected[0]?.uid}/track`,
       isDisabled: selected.length !== 1 || !selected[0].links.track || openSelected,
     },
     Open: {

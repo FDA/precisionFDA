@@ -120,6 +120,11 @@ export class EntityProvenanceSvgResultTransformerService
       .append('span')
       .text((d) => `${d.data.data.title}`)
 
+    if (options?.pixelated) {
+      g.selectAll('foreignObject.node')
+        .classed('pixelated', true)
+    }
+
     return dom.window.document.querySelector('svg.canvas')!.outerHTML
   }
 
