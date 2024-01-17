@@ -80,7 +80,6 @@ services:
     depends_on:
       - redis
   db:
-    # ! Don't forget to update "db_emulated" image when updating version
     image: mysql:8.0
     environment:
       - MYSQL_ROOT_PASSWORD=password
@@ -91,11 +90,3 @@ services:
     image: redis:6.2.11
     ports:
       - 6379:6379
-
-  # Emulated images
-  # Note - it's better to keep this in this file as all the versions are at the same place
-
-  db_emulated:
-    extends:
-      service: db
-    image: amd64/mysql:8.0
