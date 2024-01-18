@@ -63,6 +63,7 @@ import { RunJobPage } from '../apps/run/RunJobPage'
 import { getHomeScopeFromServerScope } from './getHomeScopeFromServerScope'
 import NavigateWithParams from '../../utils/NavigateWithParams'
 import { TrackProvenancePage } from '../tracks/TrackProvenancePage'
+import { ScrollableInnerGlobalStyles } from '../../styles/global'
 
 interface CounterRequest {
   apps: string
@@ -155,6 +156,8 @@ const Home2 = () => {
   }
 
   return (
+    <>
+    <ScrollableInnerGlobalStyles />
     <UserLayout>
       <ResourceBanner data-testid="home-banner">
         <BannerTitle>My Home</BannerTitle>
@@ -398,6 +401,7 @@ const Home2 = () => {
         </Main>
       </Row>
     </UserLayout>
+    </>
   )
 }
 

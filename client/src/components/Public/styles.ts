@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { breakPoints } from '../../styles/theme'
+import { compactScrollBarV2 } from '../Page/styles'
 
 export const ButtonRow = styled.div`
   display: flex;
@@ -44,7 +45,7 @@ export const RightSideItem = styled.div`
   font-size: 14px;
   line-height: 20px;
   color: var(--c-text-500);
-  padding-bottom: 44px;
+  padding-bottom: 32px;
   border-bottom: 1px solid var(--tertiary-200);
 `
 export const RightSide = styled.div`
@@ -57,10 +58,21 @@ export const RightSide = styled.div`
     border-bottom: 0;
   }
 `
+export const RightSideScroll = styled.div`
+  ${compactScrollBarV2}
+  margin: 2px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-right: 1px solid var(--c-layout-border-200);
+
+  ${RightSideItem}:last-child {
+    border-bottom: 0;
+  }
+`
 
 export const SectionTitle = styled.h3`
-  margin: 0;
-  padding: 0;
   font-size: 14px;
   font-weight: bold;
   text-transform: uppercase;
@@ -73,10 +85,13 @@ export const NewsListItem = styled.div`
   gap: 32px;
 `
 export const PageMainBody = styled.div`
+  ${compactScrollBarV2}
   display: flex;
   flex: 1;
-  flex-direction: column;
   flex-grow: 1;
+  overflow-y: scroll;
+  justify-content: center;
+  padding: 64px 16px;
 `
 export const PageFilterTitle = styled.h2`
   font-size: 22px;
@@ -127,6 +142,7 @@ export const RightList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  padding-left: 12px;
 `
 export const ListItem = styled(Link)``
 export const Container = styled.div`

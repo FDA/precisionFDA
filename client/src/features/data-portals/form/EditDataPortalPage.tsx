@@ -13,6 +13,7 @@ import { EditDataPortalRequest, editDataPortalRequest } from '../api'
 import { useDataPortalByIdQuery } from '../queries'
 import { canEditSettings, isUserInMemberRole } from '../utils'
 import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
+import { ScrollableMainGlobalStyles } from '../../../styles/global'
 
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
@@ -59,6 +60,8 @@ const EditDataPortalPage = () => {
   }
 
   return (
+    <>
+    <ScrollableMainGlobalStyles />
     <UserLayout>
       <StyledPageCenter>
       <StyledPageContent>
@@ -102,6 +105,8 @@ const EditDataPortalPage = () => {
         <NotAllowedPage />
       )}
     </UserLayout>
+    </>
+
   )
 }
 

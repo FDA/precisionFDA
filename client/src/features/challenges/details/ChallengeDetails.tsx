@@ -28,7 +28,7 @@ import { getTimeStatus } from '../util'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
 import { ChallengeNotFound } from './ChallengeNotFound'
 import { CallToActionButton, NoInfo, StyledTabs } from './styles'
-import { setTocFromRef, ToC, IToCItem } from '../../markdown/Toc'
+import { setTocFromRef, ToC, IToCItem } from '../../markdown/TocNext'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 
 export const ChallengeDetails = ({

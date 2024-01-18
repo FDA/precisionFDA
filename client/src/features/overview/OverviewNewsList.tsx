@@ -27,7 +27,6 @@ export const NewsItem = styled.div`
 
 export const Name = styled.div`
   font-size: 13px;
-  color: #333333;
   font-weight: bold;
 `
 

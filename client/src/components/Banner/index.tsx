@@ -24,6 +24,7 @@ export const ResourceBanner = styled(MainBanner)`
   padding: 18px ${padding.mainContentHorizontal};
   margin: 0 auto;
   box-sizing: border-box;
+  border-bottom: 1px solid var(--c-layout-border);
 
   @media (max-width: 640px) {
     flex-flow: column wrap;

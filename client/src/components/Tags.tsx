@@ -40,6 +40,7 @@ export const StyledPropertyItem = styled.div`
   background-color: var(--c-property-item);
   font-size: 12px;
   position: relative;
+  color: #333;
 
   &:before {
     content: "";

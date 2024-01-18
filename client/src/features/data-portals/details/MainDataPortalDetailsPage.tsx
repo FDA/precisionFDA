@@ -7,8 +7,9 @@ import { useMainDataPortal } from '../queries'
 import { DataPortalNotFound } from './DataPortalNotFound'
 
 import '../../lexi/themes/PlaygroundEditorTheme.css'
-import { DataPortalDetails } from './DataPortalDetails'
 import { canEditContent, canEditSettings } from '../utils'
+import { DataPortalDetails } from './DataPortalDetails'
+import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 
 
 const MainDataPortalDetailsPage = () => {
@@ -23,23 +24,25 @@ const MainDataPortalDetailsPage = () => {
     )
   }
 
-
   return (
-    <UserLayout>
-      {isLoading || !data || !user ? (
-        <PageContainerMargin>
-          <Loader />
-        </PageContainerMargin>
-      ) : (
-        <DataPortalDetails
-          portal={data}
-          canViewResources={canEditSettings(user.dxuser, data.members) || user.admin}
-          canEditContent={canEditContent(user.dxuser, data.members)}
-          canEditSettings={canEditSettings(user.dxuser, data.members)}
-          canListPortals={user?.admin}
-        />
-      )}
-    </UserLayout>
+    <>
+      <ScrollableInnerGlobalStyles />
+      <UserLayout>
+        {isLoading || !data || !user ? (
+          <PageContainerMargin>
+            <Loader />
+          </PageContainerMargin>
+        ) : (
+          <DataPortalDetails
+            portal={data}
+            canViewResources={canEditSettings(user.dxuser, data.members) || user.admin}
+            canEditContent={canEditContent(user.dxuser, data.members)}
+            canEditSettings={canEditSettings(user.dxuser, data.members)}
+            canListPortals={user?.admin}
+          />
+        )}
+      </UserLayout>
+    </>
   )
 }
 

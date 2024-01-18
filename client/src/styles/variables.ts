@@ -1,7 +1,10 @@
-import { css } from "styled-components";
+import { css } from 'styled-components'
+import { inputSelectDarkModeHack } from '../components/form/styles'
 
 export const colorvars = css`
   &:root {
+    --base-opacity-06: rgba(0, 0, 0, 0.06);
+
     --primary-50: hsl(207, 70%, 91%);
     --primary-100: hsl(207, 70%, 87%);
     --primary-200: hsl(207, 70%, 79%);
@@ -73,6 +76,8 @@ export const colorvars = css`
   
   html[data-theme="dark"] {
     &:root {
+      --base-opacity-06: rgba(255, 255, 255, 0.06);
+
       --primary-50: hsl(207, 70%, 18%);
       --primary-100: hsl(207, 70%, 25%);
       --primary-200: hsl(208, 71%, 30%);
@@ -173,7 +178,8 @@ export const themes = css`
   --c-dropdown-bg: var(--tertiary-50);
   --c-dropdown-hover-bg: var(--tertiary-100);
 
-  --c-scrollbar: #97a0af;
+  --c-scrollbar: rgba(193, 200, 212, 0.8);
+  --c-scrollbar-2: rgba(193, 200, 212, 1);
 
   --c-input-border: var(--tertiary-250);
   --c-textarea-bg: var(--tertiary-100);
@@ -186,6 +192,8 @@ export const themes = css`
   --c-discussion-answer-bg: #fdfcf2;
   --c-discussion-answer-500: #ac8f43;
   --c-discussion-answer-300: #e4c472;
+  
+  --c-footer-bg: #f4f8fd;
 }
 
 html[data-theme="dark"] {
@@ -194,6 +202,7 @@ html[data-theme="dark"] {
     --c-layout-border-200: hsl(0, 0%, 23%);
     --background: hsl(0, 0%, 12%);
     --background-shaded: hsl(199 4% 15%);
+    --c-bg-300: #212326;
     --base: hsl(0, 0%, 80%);
 
     --c-text-700: var(--tertiary-700);
@@ -213,7 +222,8 @@ html[data-theme="dark"] {
     --c-dropdown-hover-bg: hsl(199 4% 19%);
     --c-dropdown-menu-border: var(--c-layout-border-200);
 
-    --c-scrollbar: rgb(88, 88, 88);
+    --c-scrollbar: rgba(88, 88, 88, 0.5);
+    --c-scrollbar-2: rgba(103, 102, 102, 0.6);
 
     --c-input-border: var(--tertiary-250);
     --c-textarea-bg: var(--tertiary-50);
@@ -230,6 +240,8 @@ html[data-theme="dark"] {
 
     --c-modal-border: var(--c-layout-border);
   }
+
+  ${inputSelectDarkModeHack}
 }
 
 `

@@ -83,7 +83,6 @@ export const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: ${padding.mainContentVertical};
 `
 
 export const PageActions = styled.div`
@@ -129,4 +128,30 @@ export const PageContentItems = styled.div`
 
 export const Filler = styled.div<{ $size: number }>`
   height: ${({ $size }) => $size}px;
+`
+
+export const compactScrollBarV2 = css`
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 20px;
+    border: solid 5px transparent;
+    box-sizing: border-box;
+  }
+  &::-webkit-scrollbar {
+    width: 18px;
+    height: 18px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--c-scrollbar);
+    border-radius: 20px;
+    border: solid 5px transparent;
+    background-clip: content-box;
+    min-height: 30px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--c-scrollbar-2);
+    border-radius: 20px;
+    border: solid 5px transparent;
+    background-clip: content-box;
+  }
 `

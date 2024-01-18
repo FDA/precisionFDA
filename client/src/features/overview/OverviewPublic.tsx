@@ -33,6 +33,7 @@ import {
   Hr,
   InfoRow,
   PFDATeamSection,
+  PageOverviewMainBody,
 } from './styles'
 
 export const OverviewPublic = () => {
@@ -54,7 +55,7 @@ export const OverviewPublic = () => {
       </NavigationBar>
       <PageContainerMargin>
         <PageRow>
-          <PageMainBody>
+          <PageOverviewMainBody>
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
               {expertsData?.experts[0] && (expertsIsLoading ? (
@@ -64,7 +65,7 @@ export const OverviewPublic = () => {
 
             <ChallengesBanner />
             <ChallengesOverviewList />
-          </PageMainBody>
+          </PageOverviewMainBody>
           <RightSide>
             <RightSideItem>
               <SectionTitle>RECENT EXPERT BLOGS</SectionTitle>

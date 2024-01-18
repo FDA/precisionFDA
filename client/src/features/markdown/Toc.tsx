@@ -15,6 +15,7 @@ export const StyledToC = styled.div`
     height: initial;
     overflow: initial;
     position: initial;
+    word-wrap: break-word;
 
     @media (min-width: ${breakPoints.large}px) {
       box-sizing: border-box;

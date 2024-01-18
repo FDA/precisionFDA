@@ -9,8 +9,10 @@ import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
 import styled from 'styled-components'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { IToCItem, ToC, setTocFromRef } from '../../markdown/Toc'
+import { IToCItem, setTocFromRef } from '../../markdown/Toc'
+import { TocList, TocPanel } from '../../markdown/TocNext'
 import { DocBody, DocRow } from '../styles'
+import { LWrap, Loader } from '../../../components/Loader'
 
 const StyledMarkdown = styled.div`
   img {
@@ -85,7 +87,7 @@ const Markdown = ({ data, setToc }: any) => {
   useScrollToHash()
   useEffect(() => {
     setTocFromRef(docRef, setToc)
-  }, [])
+  }, [data])
 
   return (
     <StyledMarkdown ref={docRef}>
@@ -104,7 +106,6 @@ const Markdown = ({ data, setToc }: any) => {
 export const TutorialMarkdown = ({ fileName }: { fileName: string }) => {
   const { data, isLoading } = useTutorialFileQuery(fileName)
   const [toc, setToc] = useState<IToCItem[]>()
-  const containerRef = useRef<HTMLDivElement>(null)
 
   // Detect if we are scrolled to bottom
   // const [showFade, setShowFade] = useState(true)
@@ -127,13 +128,13 @@ export const TutorialMarkdown = ({ fileName }: { fileName: string }) => {
   //   }
   // }, [])
 
-  if (isLoading) return <div>Loading...</div>
   return (
     <DocRow>
       <DocBody>
+        {isLoading && <LWrap><Loader /></LWrap>}
         <Markdown data={data} setToc={setToc} />
       </DocBody>
-      {toc && <ToC containerRef={containerRef} items={toc} />}
+      {toc && toc.length > 0 && <TocPanel><TocList items={toc} /></TocPanel>}
     </DocRow>
   )
 }

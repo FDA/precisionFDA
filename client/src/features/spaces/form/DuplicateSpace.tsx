@@ -8,6 +8,8 @@ import { PageTitle } from '../../../components/Page/styles'
 import { createSpaceRequest, spaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
 import { StyledPageCenter, StyledPageContent } from './styles'
+import { UserLayout } from '../../../layouts/UserLayout'
+import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 
 export const DuplicateSpace = () => {
   const navigate = useNavigate()
@@ -40,7 +42,9 @@ export const DuplicateSpace = () => {
     return <Loader />
   }
 
-  return (
+  return (<>
+    <ScrollableInnerGlobalStyles />
+    <UserLayout>
     <StyledPageCenter>
       <StyledPageContent>
         <BackLinkMargin linkTo={`/spaces/${spaceId}`}>Back to Space</BackLinkMargin>
@@ -56,8 +60,10 @@ export const DuplicateSpace = () => {
             cts: data.space.cts,
           }}
           isDuplicate
-        />
+          />
       </StyledPageContent>
     </StyledPageCenter>
+    </UserLayout>
+  </>
   )
 }

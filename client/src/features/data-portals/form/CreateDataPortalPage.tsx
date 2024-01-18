@@ -10,6 +10,13 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { createDataPortalRequest } from '../api'
 import { DataPortalForm } from './DataPortalForm'
+import { ScrollableMainGlobalStyles } from '../../../styles/global'
+import styled from 'styled-components'
+
+const Scrollable = styled.div`
+  overflow-y: auto;
+
+`
 
 const CreateDataPortalPage = () => {
   const navigate = useNavigate()
@@ -48,25 +55,31 @@ const CreateDataPortalPage = () => {
   }
 
   return (
-    <UserLayout>
-      <StyledPageCenter>
-        <StyledPageContent>
-          <BackLinkMargin linkTo="/data-portals">
-            Back to Data Portals
-          </BackLinkMargin>
-        </StyledPageContent>
-      </StyledPageCenter>
-      {user?.isAdmin ? (
+    <>
+      <ScrollableMainGlobalStyles />
+      <UserLayout>
+
+
         <StyledPageCenter>
           <StyledPageContent>
-            <PageTitle>Create a Data Portal</PageTitle>
-            <DataPortalForm onSubmit={handleSubmit} canEditMainDataPortal />
+            <BackLinkMargin linkTo="/data-portals">
+              Back to Data Portals
+            </BackLinkMargin>
           </StyledPageContent>
         </StyledPageCenter>
-      ) : (
-        <NotAllowedPage />
-      )}
-    </UserLayout>
+        {user?.isAdmin ? (
+          <StyledPageCenter>
+            <StyledPageContent>
+              <PageTitle>Create a Data Portal</PageTitle>
+              <DataPortalForm onSubmit={handleSubmit} canEditMainDataPortal />
+            </StyledPageContent>
+          </StyledPageCenter>
+        ) : (
+          <NotAllowedPage />
+          )}
+
+      </UserLayout>
+      </>
   )
 }
 

@@ -1,8 +1,12 @@
 /* eslint-disable react/require-default-props */
 import React from 'react'
 import styled from 'styled-components'
-import { colors } from '../styles/theme'
 import { Svg } from './icons/Svg'
+
+export const LWrap = styled.div`
+  align-self: stretch;
+  height: 100%;
+`
 
 const LoaderWrapper = styled.div`
   display: flex;

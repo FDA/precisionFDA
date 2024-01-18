@@ -1,7 +1,6 @@
 import styled, { css } from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Svg } from '../../../components/icons/Svg'
-import { colors, fontSize, fontWeight } from '../../../styles/theme'
 
 const marginBottom = css`
   margin-bottom: 16px;
@@ -42,11 +41,11 @@ export const SpaceHeaderTitle = styled.div`
 
 export const ActionButton = styled(Button)`
   color: var(--c-text-700);
-  background: var(--tertiary-100);
+  background: var(--tertiary-70);
   border: 1px solid var(--c-layout-border);
 
   &:hover {
-    background: var(--tertiary-200);
+    background: var(--tertiary-50);
     color: var(--c-text-800);
   }
 `
@@ -71,25 +70,24 @@ export const Tab = styled.div<{ $isactive?: string }>`
   font-size: 14px;
   font-weight: 600;
   box-sizing: border-box;
-  background: var(--background);
+  background: var(--tertiary-100);
   border-width: 1px 1px 1px 1px;
   border-style: solid;
   border-color: var(--c-layout-border);
   border-radius: 4px 4px 0px 0px;
   padding: 6px 20px;
-  color: var(--c-text-100);
+  color: var(--c-text-400);
   cursor: pointer;
   flex: 1 0 auto;
-
-
-  &:hover {
-    color: var(--c-text-700);
-  }
-
+  
   ${({ $isactive }) => $isactive &&
     css`
+      background: var(--background);
       border-bottom: 0;
       color: var(--c-text-700);
+      &:hover {
+        color: var(--c-text-700);
+      }
     `}
 `
 export const TransparentTab = styled(Tab)`
