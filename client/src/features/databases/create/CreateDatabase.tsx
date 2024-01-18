@@ -12,7 +12,7 @@ import styled from 'styled-components'
 import * as Yup from 'yup'
 import { getDatabaseAllowedInstances } from '../../../api/home'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
+import { FieldGroup, FieldLabelRow, Hint, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { StyledBackLink } from '../../home/home.styles'
@@ -271,7 +271,7 @@ export const CreateDatabase = () => {
         </FieldGroup>
         <FieldGroup>
           <label>Database type (required):</label>
-          <label htmlFor="field-aurora-mysql">
+          <FieldLabelRow htmlFor="field-aurora-mysql">
             <input
               {...register('engine')}
               type="radio"
@@ -281,8 +281,8 @@ export const CreateDatabase = () => {
               disabled={isSubmitting}
             />
             MySQL
-          </label>
-          <label htmlFor="field-aurora-postgresql">
+          </FieldLabelRow>
+          <FieldLabelRow htmlFor="field-aurora-postgresql">
             <input
               {...register('engine')}
               type="radio"
@@ -292,7 +292,7 @@ export const CreateDatabase = () => {
               disabled={isSubmitting}
             />
             PostgreSQL
-          </label>
+          </FieldLabelRow>
           <ErrorMessage
             errors={errors}
             name="engine"

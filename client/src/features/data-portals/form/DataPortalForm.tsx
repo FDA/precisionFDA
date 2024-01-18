@@ -3,18 +3,18 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { unstable_usePrompt } from 'react-router-dom'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
+import { Checkbox } from '../../../components/CheckboxNext'
 import { InputFile, InputNumber, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
-import { IndeterminateCheckbox } from '../../../components/Table/IndeterminateCheckbox'
 import { FieldGroup } from '../../../components/form/FieldGroup'
-import { CheckboxLabel, CheckboxTip, InputError } from '../../../components/form/styles'
+import { CheckboxTip, FieldLabelRow, InputError } from '../../../components/form/styles'
 import { SavingModal } from './SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
 import { createValidationSchema, editValidationSchema } from './common'
-import { unstable_usePrompt } from 'react-router-dom'
 
 type SelectItem = { label: string; value: string }
 
@@ -92,6 +92,7 @@ export const DataPortalForm = ({
     handleSubmit,
     setError,
     watch,
+    setValue,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<CreateDataPortalForm>({
     mode: 'onBlur',
@@ -139,7 +140,6 @@ export const DataPortalForm = ({
 
   return (
     <>
-      <div>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FieldGroup label="Name" required>
             <InputText
@@ -275,24 +275,24 @@ export const DataPortalForm = ({
                 />
               </FieldGroup>
               <FieldGroup>
-                <CheckboxLabel>
-                  <Controller
-                    data-tip
-                    data-for="default"
-                    name="default"
-                    control={control}
-                    render={({ field }) => {
-                      return (
-                        <IndeterminateCheckbox
+                <Controller
+                  data-tip
+                  data-for="default"
+                  name="default"
+                  control={control}
+                  render={({ field }) => {
+                    return (
+                      <FieldLabelRow>
+                        <Checkbox
                           checked={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
+                          disabled={isSubmitting}
+                          onChange={e => setValue(field.name, e.target.checked)}
                         />
-                      )
-                    }}
-                  />
-                  Default
-                </CheckboxLabel>
+                        Default
+                      </FieldLabelRow>
+                    )
+                  }}
+                />
                 <CheckboxTip>
                   Enabling will make this Data Portal the default for users
                 </CheckboxTip>
@@ -313,7 +313,7 @@ export const DataPortalForm = ({
             {isSubmitting && <Loader />}
           </Row>
         </StyledForm>
-      </div>
+
       <SavingModal isEditMode={isEditMode} isSaving={isSubmitting} key="data-portal-save" />
     </>
   )

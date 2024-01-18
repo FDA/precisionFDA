@@ -4,7 +4,7 @@ import { ButtonSolidBlue } from '../../components/Button'
 import { ArrowIcon } from '../../components/icons/ArrowIcon'
 import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
-import { colors, theme } from '../../styles/theme'
+import { theme } from '../../styles/theme'
 
 export const MetadataSection = styled.div`
   border-top: 1px solid var(--c-layout-border);

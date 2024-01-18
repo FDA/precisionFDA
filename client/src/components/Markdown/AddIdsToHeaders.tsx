@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react'
+import styled from 'styled-components'
 
-export function AddIdsToHeaders({ docRef, content }: { docRef: any, content: string }) {
+const Content = styled.div``
+
+export function AddIdsToHeaders({ docRef, content, as }: { docRef: any, content: string, as: any }) {
   useEffect(() => {
     if (docRef.current) {
       const headings = docRef.current.querySelectorAll('h1, h2, h3')
@@ -17,6 +20,6 @@ export function AddIdsToHeaders({ docRef, content }: { docRef: any, content: str
   }, [docRef])
   
   return (
-    <div ref={docRef} dangerouslySetInnerHTML={{ __html: content }} />
+    <Content as={as} ref={docRef} dangerouslySetInnerHTML={{ __html: content }} />
   )
 }

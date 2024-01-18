@@ -5,8 +5,11 @@ export const AppsConfiguration = styled.div`
 `
 
 export const TipsRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 16px 0;
-  color: #777777;
+  color: var(--c-text-600);
   text-align: left;
 `
 
@@ -14,19 +17,13 @@ export const StyledLabel = styled.div`
   display: flex;
   font-size: 14px;
   font-weight: 500;
-  color: #333333;
 `
 
 export const SectionHeader = styled.div`
   padding: 20px 15px;
   border-bottom: 1px solid transparent;
-  color: #333333;
-  background-color: #f5f5f5;
-  border-color: #ddd;
-  border-top-color: rgb(221, 221, 221);
-  border-right-color: rgb(221, 221, 221);
-  border-bottom-color: rgb(221, 221, 221);
-  border-left-color: rgb(221, 221, 221);
+  background-color: var(--c-layout-border-200);
+  border-color: var(--c-layout-border-200);
 `
 
 export const SectionBody = styled.div`
@@ -40,7 +37,7 @@ export const Section = styled.div`
   margin-bottom: 32px;
   border-radius: 3px;
   border: 1px solid transparent;
-  border-color: #ddd;
+  border-color: var(--c-layout-border-200);
 `
 
 export const Topbox = styled.div` 

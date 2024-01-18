@@ -37,7 +37,7 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     return children
   }
   return (
-    <main className="pfda-loader-wrapper">
+    <main>
       <ErrorBoundary>
         {content()}
       </ErrorBoundary>

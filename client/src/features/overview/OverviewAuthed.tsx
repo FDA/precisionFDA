@@ -34,6 +34,7 @@ import {
   Hr,
   InfoRow,
   PFDATeamSection,
+  PageOverviewMainBody,
 } from './styles'
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
@@ -241,7 +242,7 @@ export const OverviewAuthed = () => {
       <NavigationBar user={user} title="Overview" />
       <PageContainerMargin>
         <PageRow>
-          <PageMainBody>
+          <PageOverviewMainBody>
             <TopApps />
             <ChallengesBanner />
             <ChallengesOverviewList />
@@ -253,7 +254,7 @@ export const OverviewAuthed = () => {
                 <ExpertListItem expert={expertsData.experts[0]} />
               ))}
             </ExpertSection>
-          </PageMainBody>
+          </PageOverviewMainBody>
           <RightSide>
             <GetStarted user={user} />
             <RightSideItem>

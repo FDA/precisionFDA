@@ -1,27 +1,17 @@
-import { backendCall } from '../../../utils/api'
+import axios from 'axios'
+import { NotificationPreferences, NotificationPreferencesPayload } from './types'
 
-export const fetchNotificationsPreferences = async () => {
-  const res = await backendCall('/api/notification_preferences', 'GET')
-  return res?.payload
+type NotificationPreferencesResponse = {
+  preference: NotificationPreferences
 }
 
-export const saveNotificationsPreferences = async (preference: any) => {
-  const input = {
-    ...preference.reviewer,
-    ...preference.sponsor,
-    ...preference.reviewer_lead,
-    ...preference.sponsor_lead,
-    ...preference.admin,
-    ...preference.private,
-  }
-  Object.entries(input).forEach(([key, value]) => {
-    const newValue = value === true ? 1 : 0
-    input[key] = newValue
-  })
-  const res = await backendCall(
+export const fetchNotificationsPreferences = async () => {
+  return axios.get<NotificationPreferencesResponse>('/api/notification_preferences').then(r => r.data)
+}
+
+export const saveNotificationsPreferences = async (payload: NotificationPreferencesPayload) => {
+  return axios.post(
     '/api/notification_preferences/change',
-    'POST',
-    { ...input },
-  )
-  return res?.payload
+    payload,
+  ).then(r => r.data)
 }

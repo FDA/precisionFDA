@@ -27,8 +27,9 @@ const GlobalStyle = createGlobalStyle`
   html {
     scroll-padding-top: 70px;
   }
-  html, body, main, #app-root, .pfda-loader-wrapper {
+  html, body, main, #app-root {
     height: 100%;
+    min-height: 0;
   }
   a {
     color: var(--c-link);
@@ -37,7 +38,7 @@ const GlobalStyle = createGlobalStyle`
       color: var(--c-link-hover);
     }
   }
-  .pfda-loader-wrapper {
+  main {
     display: flex;
     flex-direction: column;
   }
@@ -77,8 +78,8 @@ const GlobalStyle = createGlobalStyle`
     text-wrap: balance;
   }
   p {
-    max-width: 72ch;
-    text-wrap: pretty;
+    /* max-width: 72ch; */
+    /* text-wrap: pretty; */
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -86,6 +87,24 @@ const GlobalStyle = createGlobalStyle`
       scroll-behavior: smooth;
       scroll-padding-top: 2rem;
     }
+  }
+
+  ::-webkit-scrollbar-corner { background: inherit; }
+`
+
+export const ScrollableMainGlobalStyles = createGlobalStyle`
+  html, body, #app-root {
+    overflow: hidden;
+  }
+  main {
+    overflow-y: auto;
+  }
+`
+
+export const ScrollableInnerGlobalStyles = createGlobalStyle`
+  html, body, #app-root, main {
+    height: 100%;
+    overflow: hidden;
   }
 `
  

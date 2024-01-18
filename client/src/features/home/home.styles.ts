@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
 import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'
-import { compactScrollBar } from '../../components/Page/styles'
+import { compactScrollBar, compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { fontWeight } from '../../styles/theme'
 
@@ -51,6 +51,21 @@ export const Row = styled.div`
   flex-direction: row;
   height: 0;
 `
+
+export const Expand = styled.div`
+  position: relative;
+  padding-right: 24px;
+  padding-bottom: 16px;
+  display: flex;
+  cursor: pointer;
+  justify-content: flex-end;
+  justify-self: flex-end;
+
+  svg:hover {
+    color: var(--tertiary-500);
+  }
+`
+
 export const StyledMenu = styled.div<{ $expanded: boolean }>`
   display: flex;
   flex-direction: column;
@@ -93,19 +108,6 @@ export const Main = styled.div`
   flex-direction: column;
   ${compactScrollBar}
 `
-export const Expand = styled.div`
-  position: relative;
-  padding-right: 24px;
-  padding-bottom: 16px;
-  display: flex;
-  cursor: pointer;
-  justify-content: flex-end;
-  justify-self: flex-end;
-
-  svg:hover {
-    color: var(--tertiary-500);
-  }
-`
 export const Fill = styled.div`
   flex: 1 0 auto;
   min-height: 20px;
@@ -115,7 +117,7 @@ export const StyledHomeTable = styled.div`
   overflow-y: auto;
   font-size: 14px;
   flex: 1;
-  ${compactScrollBar}
+  ${compactScrollBarV2}
 `
 
 export const QuickActions = styled.div`
@@ -153,7 +155,9 @@ export const StyledNameCell = styled.div<{ color?: string }>`
 
   ${Svg} {
     margin-right: 7px;
+    width: 15px;
   }
+  min-width: max-content;
 `
 
 export const StyledLinkCell = styled(Link)`

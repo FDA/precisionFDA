@@ -16,23 +16,17 @@ import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { useEditTagsModal } from '../../actionModals/useEditTagsModal'
 import { SpaceTypeName } from '../common'
-import {
-  CreateSpacePayload,
-  editSpaceRequest,
-  spaceRequest,
-} from '../spaces.api'
+import { CreateSpacePayload, editSpaceRequest, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { validationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './styles'
+import { UserLayout } from '../../../layouts/UserLayout'
+import { ScrollableMainGlobalStyles } from '../../../styles/global'
 
-
-const EditTags = ({ spaceId, tags = []}: { spaceId: string, tags?: string[]}) => {
+const EditTags = ({ spaceId, tags = [] }: { spaceId: string; tags?: string[] }) => {
   const queryClient = useQueryClient()
-  const {
-    modalComp: tagsModal,
-    setShowModal: setTagsModal,
-  } = useEditTagsModal({
+  const { modalComp: tagsModal, setShowModal: setTagsModal } = useEditTagsModal({
     resource: 'spaces',
     selected: { uid: `space-${spaceId}`, name: 'space', tags },
     onSuccess: () => {
@@ -43,16 +37,15 @@ const EditTags = ({ spaceId, tags = []}: { spaceId: string, tags?: string[]}) =>
   return (
     <FieldGroup label="Tags">
       <StyledTags>
-        {tags && tags.map(tag => (
-          <StyledTagItem key={tag}>{tag}</StyledTagItem>
-        ))}
-        <StyledButton type="button" onClick={() => setTagsModal(true)}>Edit Tags</StyledButton>
+        {tags && tags.map(tag => <StyledTagItem key={tag}>{tag}</StyledTagItem>)}
+        <StyledButton type="button" onClick={() => setTagsModal(true)}>
+          Edit Tags
+        </StyledButton>
       </StyledTags>
       {tagsModal}
     </FieldGroup>
   )
 }
-
 
 interface SpaceSettingsVals {
   space_type: ISpace['type']
@@ -77,7 +70,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const spaceActions = useSpaceActions({ space })
-  const[formError, setFormError] = useState<string | undefined>()
+  const [formError, setFormError] = useState<string | undefined>()
 
   const {
     register,
@@ -103,19 +96,18 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
   const mutation = useMutation({
     mutationKey: ['edit-space'],
-    mutationFn: (payload: CreateSpacePayload) =>
-      editSpaceRequest(space.id, payload),
+    mutationFn: (payload: CreateSpacePayload) => editSpaceRequest(space.id, payload),
     onSuccess: res => {
       if (res?.space) {
         navigate(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries(['spaces'])
         toast.success('Success: editing space settings')
       } else if (res?.errors) {
-          toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
-          setFormError(`Error: ${res.errors.messages.join('\r\n')}`)
-        } else {
-          toast.error('Something went wrong')
-        }
+        toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
+        setFormError(`Error: ${res.errors.messages.join('\r\n')}`)
+      } else {
+        toast.error('Something went wrong')
+      }
     },
     onError: () => {
       toast.error('Error: Editing space settings')
@@ -147,11 +139,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
       {!spaceActions['Lock/Unlock']?.shouldHide && (
         <div>
-          <ButtonOutlineGrey
-            type="button"
-            data-testid="lock-space-button"
-            onClick={() => spaceActions['Lock/Unlock']?.func()}
-          >
+          <ButtonOutlineGrey type="button" data-testid="lock-space-button" onClick={() => spaceActions['Lock/Unlock']?.func()}>
             {space.links.unlock && 'Unlock Space'}
             {space.links.lock && 'Lock Space'}
           </ButtonOutlineGrey>
@@ -159,35 +147,15 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         </div>
       )}
       <FieldGroup label="Space Type">
-        <InputText
-          label="Space Type"
-          value={SpaceTypeName[space.type]}
-          disabled
-        />
+        <InputText value={SpaceTypeName[space.type]} disabled />
       </FieldGroup>
       <FieldGroup label="Name" required>
-        <InputText
-          label="Space Name"
-          {...register('name', { required: 'Name is required.' })}
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
+        <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
       <FieldGroup label="Description" required>
-        <InputText
-          label="Description"
-          {...register('description')}
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="description"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <InputText {...register('description')} disabled={isSubmitting} />
+        <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
 
       <EditTags spaceId={space.id} tags={space.tags} />
@@ -195,28 +163,12 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       {watch().space_type === 'groups' && (
         <>
           <FieldGroup label="Host Lead">
-            <InputText
-              label="Host Lead"
-              disabled
-              {...register('host_lead_dxuser')}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="host_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText disabled {...register('host_lead_dxuser')} />
+            <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
           <FieldGroup label="Guest Lead">
-            <InputText
-              label="Guest Lead"
-              disabled
-              {...register('guest_lead_dxuser')}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="guest_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText disabled {...register('guest_lead_dxuser')} />
+            <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
         </>
       )}
@@ -224,11 +176,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       {watch().space_type === 'review' && (
         <>
           <FieldGroup label="Reviewer Lead">
-            <InputText
-              label="Reviewer Lead"
-              disabled={isSubmitting}
-              {...register('review_lead_dxuser')}
-            />
+            <InputText disabled={isSubmitting} {...register('review_lead_dxuser')} />
             <ErrorMessage
               errors={errors}
               name="review_lead_dxuser"
@@ -237,11 +185,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           </FieldGroup>
 
           <FieldGroup label="Sponsor Lead">
-            <InputText
-              label="Sponsor Lead"
-              disabled
-              {...register('sponsor_lead_dxuser')}
-            />
+            <InputText disabled {...register('sponsor_lead_dxuser')} />
             <ErrorMessage
               errors={errors}
               name="sponsor_lead_dxuser"
@@ -250,38 +194,25 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
           </FieldGroup>
 
           <FieldGroup label="Center Tracking System #">
-            <InputText
-              label="CTS"
-              {...register('cts')}
-              disabled={isSubmitting}
-            />
+            <InputText {...register('cts')} disabled={isSubmitting} />
             <HintText>
-              FDA uses the Center Tracking System (CTS) to track the progress of
-              industry submitted pre-market documents through the review
-              process. CTS is a workflow/work management system that provides
-              support for the Center for Devices and Radiogical Health (CDRH)
-              business processes and business rules, for all stages of the
-              product lifecycle for medical devices.
+              FDA uses the Center Tracking System (CTS) to track the progress of industry submitted pre-market documents through
+              the review process. CTS is a workflow/work management system that provides support for the Center for Devices and
+              Radiogical Health (CDRH) business processes and business rules, for all stages of the product lifecycle for medical
+              devices.
             </HintText>
-            <ErrorMessage
-              errors={errors}
-              name="cts"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="cts" render={({ message }) => <InputError>{message}</InputError>} />
             <Divider />
           </FieldGroup>
         </>
       )}
 
       <Row>
-        <ButtonSolidBlue
-          disabled={Object.keys(errors).length > 0 || isSubmitting}
-          type="submit"
-        >
+        <ButtonSolidBlue disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">
           Save
         </ButtonSolidBlue>
         {isSubmitting && <Loader />}
-       {formError && <InputError>{formError}</InputError>}
+        {formError && <InputError>{formError}</InputError>}
       </Row>
     </StyledForm>
   )
@@ -289,21 +220,24 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
 export const SpaceSettings = () => {
   const { spaceId } = useParams<{ spaceId: string }>()
-  const { data } = useQuery(['space', spaceId], () =>
-    spaceRequest({ id: spaceId }),
-  )
+  const { data } = useQuery(['space', spaceId], () => spaceRequest({ id: spaceId }))
 
   if (!data?.space) {
     return <Loader />
   }
 
   return (
-    <StyledPageCenter>
-      <StyledPageContent>
-        <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
-        <PageTitle>Space Settings</PageTitle>
-        <SpaceSettingsForm space={data.space} />
-      </StyledPageContent>
-    </StyledPageCenter>
+    <>
+      <ScrollableMainGlobalStyles />
+      <UserLayout>
+        <StyledPageCenter>
+          <StyledPageContent>
+            <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
+            <PageTitle>Space Settings</PageTitle>
+            <SpaceSettingsForm space={data.space} />
+          </StyledPageContent>
+        </StyledPageCenter>
+      </UserLayout>
+    </>
   )
 }

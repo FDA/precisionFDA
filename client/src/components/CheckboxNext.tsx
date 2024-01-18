@@ -16,7 +16,6 @@ const IndeterminateIcon = () => (
 
 
 const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
-
   border: 0;
   clip: rect(0 0 0 0);
   clippath: inset(50%);
@@ -24,6 +23,7 @@ const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
   margin: -1px;
   overflow: hidden;
   padding: 0;
+  opacity: 0;
   position: absolute;
   white-space: nowrap;
   width: 1px;
@@ -33,7 +33,7 @@ const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
   }
 `
 
-const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean }>`
+const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean, disabled?: boolean }>`
   --checked-background-color: var(--primary-500);
   --background-color: var(--background);
   --focus-color: var(--primary-200);
@@ -62,24 +62,36 @@ const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean 
       color: var(--base-color);
     }
   `}
+
+  ${props => props.disabled && css`
+    background-color: var(--background-shaded);
+    border-color: var(--base-color);
+    svg {
+      color: var(--tertiary-500);
+    }
+  `}
 `
 
 export type CheckboxProps = {
-  id?: string
   disabled?: boolean
   onChange?: (e: ChangeEvent) => void
-  checked?: boolean
-  title?: string
+  checked: boolean
   indeterminate?: boolean
 }
 
-export const Checkbox = React.forwardRef(({ id, ...props }: CheckboxProps, ref) => {
+
+// If the layout shifts when clicking a checkbox, make sure to set the parent to position: relative;
+// The cuase is absolute positioning on the hidden checkbox.
+export const Checkbox = React.forwardRef((props: CheckboxProps, ref) => {
+  const isChecked = props.checked ? props.checked : false
   return (
     <>
-      <HiddenCheckbox ref={ref} checked={props.checked || props.indeterminate} onChange={props.onChange} disabled={props.disabled} />
-      <StyledCheckbox checked={props.checked} $indeterminate={props.indeterminate}>
+      <HiddenCheckbox ref={ref} checked={isChecked} onChange={props.onChange} />
+      <StyledCheckbox checked={isChecked} $indeterminate={props.indeterminate} disabled={props.disabled}>
         {props.indeterminate ? <IndeterminateIcon /> : <CheckIcon />}
       </StyledCheckbox>
     </>
   )
 })
+
+Checkbox.displayName = 'Checkbox'
