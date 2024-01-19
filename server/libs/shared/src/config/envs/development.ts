@@ -8,11 +8,12 @@ export const config: ConfigOverride = () => ({
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? '../key.pem',
   },
   database: {
+    debug: true,
     clientUrl: process.env.NODE_DATABASE_URL ?? 'mysql://root:password@0.0.0.0:32800/precision-fda',
   },
   logs: {
-    pretty: false,
-    level: 'debug',
+    pretty: true,
+    maskSensitive: false,
   },
   devFlags: {
     middleware: {
@@ -24,17 +25,24 @@ export const config: ConfigOverride = () => ({
   },
   workerJobs: {
     syncJob: {
-      repeatPattern: '*/2 * * * *', // Every 2 minutes
-      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 9, // 9 minutes
-      staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 10, // 10 minutes
+      repeatPattern: '*/1 * * * *', // Every 1 minute
+      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 2, // 2 minutes
+      staleJobsTerminateAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 24 * 60 * 60 * 10, // 10 days
+      nonTerminatedDbClusters: {
+        repeatPattern: process.env.NODE_NON_TERMINATED_DB_CLUSTERS_CRON ?? '0 6 * * *',
+      },
+      adminDataConsistencyReport: {
+        // To test this locally, override the default config, e.g.:
+        // repeatPattern: '16 * * * *', // Once an hour
+      },
     },
     queues: {
-      default: { name: 'https-apps-worker-queue' },
-      emails: { name: 'https-apps-worker-emails-queue-dev' },
       maintenance: {
         onInit: {
-          adminDataConsistencyReport: false,
-          checkNonterminatedClusters: false,
+          // Also override the repeatPattern to test locally
+          adminDataConsistencyReport: true,
+          checkNonterminatedClusters: true,
         },
       },
     },
@@ -45,7 +53,7 @@ export const config: ConfigOverride = () => ({
   },
   emails: {
     smtp: {
-      saveEmailToFile: false,
+      saveEmailToFile: true,
     },
   },
   bullBoardEnabled: true,
