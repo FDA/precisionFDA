@@ -25,10 +25,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api/test/jest-e2e.json",
-    "cptemp": "npm run cptemp:api && npm run cptemp:worker",
-    "cptemp:api": "cp -r temp ./apps/api && find ./apps/api/temp -type f -exec sed -i '' 's|\"./libs/shared|\"./../../libs/shared|g' {} +",
-    "cptemp:worker": "cp -r temp ./apps/worker && find ./apps/worker/temp -type f -exec sed -i '' 's|\"./libs/shared|\"./../../libs/shared|g' {} +"
+    "test:e2e": "jest --config ./apps/api/test/jest-e2e.json"
   },
   "dependencies": {
     "@bull-board/api": "^5.9.1",

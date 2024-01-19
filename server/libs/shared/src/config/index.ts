@@ -1,4 +1,5 @@
 /* eslint-disable no-warning-comments */
+import { parseEnumValueFromString } from '@shared/validation/parsers'
 /* eslint-disable max-len */
 // eslint-disable-next-line import/no-named-default
 import { default as dotenv } from 'dotenv'
@@ -32,8 +33,17 @@ export const parseIntFromProcess = (envValue: string | undefined): Maybe<number>
 const parseBooleanFromProcess = (value: string | undefined, defaultValue = false): boolean =>
   value ? value.toLowerCase() === 'true' : defaultValue
 
+const getEnv = () => {
+  try {
+    return parseEnumValueFromString(Object.values(ENVS))(process.env.NODE_ENV)
+  } catch {
+    throw new Error(`NODE_ENV value "${process.env.NODE_ENV}" is not a valid environment`)
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const env = (process.env.NODE_ENV ?? ENVS.LOCAL) as ENVS
+const env = getEnv()
+
 const defaultConfig = {
   appName: 'https-apps-worker',
   env,

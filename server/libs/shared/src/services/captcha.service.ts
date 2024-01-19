@@ -5,7 +5,7 @@ import { config } from '../config'
 export class CaptchaService {
 
   async verifyCaptchaAssessment(token: string, recaptchaAction: string, minimalScore = 0.7): Promise<boolean> {
-    if ([ENVS.DEVELOPMENT, ENVS.TEST, ENVS.LOCAL].includes(config.env)) {
+    if ([ENVS.DEVELOPMENT, ENVS.TEST].includes(config.env)) {
       return true
     }
 
