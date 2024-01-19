@@ -15,7 +15,7 @@ import { Logger } from 'nestjs-pino'
 export async function setupNestApp(app: INestApplicationContext) {
   app.enableShutdownHooks()
 
-  if (config.env !== ENVS.LOCAL) {
+  if (config.env !== ENVS.DEVELOPMENT) {
     app.useLogger(app.get(Logger))
   }
 

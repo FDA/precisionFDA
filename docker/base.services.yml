@@ -22,6 +22,7 @@ services:
         - NODEJS_IMAGE_TAG=20.9.0-slim
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
+      - NODE_REDIS_URL=redis://redis:6379/0
       
 
   web:
@@ -54,6 +55,9 @@ services:
     command: pnpm run watch:docker
   # TODO(samuel) setup correct NODE_ENV here
   nodejs-api:
+    environment:
+      - NODE_PATH_CERT=/keys/cert.pem
+      - NODE_PATH_KEY_CERT=/keys/key.pem
     extends:
       service: base_nodejs
     command: ['make', 'run-dist']
