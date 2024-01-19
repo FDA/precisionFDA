@@ -39,28 +39,26 @@ class EmailClient implements IEmailService {
   }
 
   async sendEmail(input: SendEmailJob['payload']): Promise<void> {
-    return this.transporter.sendMail(
-      {
+    try {
+      const info = await this.transporter.sendMail({
         from: config.emails.smtp.fromAddress,
         cc: [],
         to: input.to,
         subject: input.subject,
         html: input.body,
-      },
-      (error, info) => {
-        if (info) {
-          log.verbose({ info }, 'SMTP request successful')
-        }
-        if (error) {
-          log.error({ error: error }, 'SendEmail failed')
-          throw new ServiceError('SMTP request failed', {
-            code: ErrorCodes.AWS_SES_SERVICE_ERROR,
-            clientResponse: error.message,
-            clientStatusCode: 424,
-          })
-        }
-      },
-    )
+      })
+
+      if (info) {
+        log.verbose({ info }, 'SMTP request successful')
+      }
+    } catch (error) {
+      log.error({ error: error }, 'SendEmail failed')
+      throw new ServiceError('SMTP request failed', {
+        code: ErrorCodes.AWS_SES_SERVICE_ERROR,
+        clientResponse: error?.message,
+        clientStatusCode: 424,
+      })
+    }
   }
 }
 
