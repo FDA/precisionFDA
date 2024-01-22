@@ -11,9 +11,9 @@ import { theme } from '../../styles/theme'
 import { IAccessibleFile } from '../databases/databases.api'
 import { DialogType } from '../home/types'
 
-const FileButton = styled(Button)<{ isError?: boolean }>`
+const FileButton = styled(Button)<{ $isError?: boolean }>`
   margin-right: 4px;
-  ${({ isError }) => isError && css`
+  ${({ $isError }) => $isError && css`
     border-color: ${theme.colors.darkRed};
     color: ${theme.colors.darkRed};
     &:hover {
@@ -68,7 +68,7 @@ export const SelectMultiFileInput = ({
       {modalComp}
       <ButtonGroup>
         <FileButton
-          isError={isError}
+          $isError={isError}
           type="button"
           onClick={evt => {
             evt.preventDefault()

@@ -247,7 +247,7 @@ const Docs = () => {
             <DocsMainForFooter>
           <DocsContent>
             <Routes>
-              <Route path="/" element={<Navigate to="/docs/introduction" />} />
+              <Route path="/" element={<Navigate to="/docs/introduction" replace />} />
               <Route path="/introduction" element={<Intro />} />
               <Route
                 path="/tutorials/apps-workflows"

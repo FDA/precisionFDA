@@ -63,6 +63,7 @@ module.exports = {
   globals: {
     'PROD_OR_STAGE': 'false',
     'RECAPTCHA_SITE_KEY': 'some-key',
+    ENABLE_DEV_MSW: false,
   },
 
   // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.

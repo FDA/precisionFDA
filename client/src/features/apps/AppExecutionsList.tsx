@@ -22,7 +22,7 @@ import { useOrderByState } from '../../hooks/useOrderByState'
 import { fetchAppExecutions } from './apps.api'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { toArrayFromObject } from '../../utils/object'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 
 const ExecutionsPagination = styled.div`
   padding-left: 12px;
@@ -62,7 +62,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {

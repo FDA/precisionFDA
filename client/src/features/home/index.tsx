@@ -394,9 +394,9 @@ const Home2 = () => {
             />
             <Route path="/executions/:executionUid/track" element={<TrackProvenancePage entityType='execution' />} />
             {/* TODO: remove this route when we have a better way to redirect user to executions page */}
-            <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" />} />
-            <Route path="jobs" element={<Navigate to="/home/executions"/>} />
-            <Route path="*" element={<Navigate to="/home/files" />} />
+            <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" replace />} />
+            <Route path="jobs" element={<Navigate to="/home/executions" replace />} />
+            <Route path="*" element={<Navigate to="/home/files" replace />} />
           </Routes>
         </Main>
       </Row>

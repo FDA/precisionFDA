@@ -8,6 +8,7 @@ import { IUser } from '../types/user'
 import {
   DEFAULT_RECONNECT_ATTEMPTS,
   DEFAULT_RECONNECT_INTERVAL,
+  SHOULD_RECONNECT,
   getNodeWsUrl,
   notificationsConfig,
 } from '../utils/config'
@@ -30,7 +31,7 @@ export const useToastWSHandler = (user?: IUser) => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {

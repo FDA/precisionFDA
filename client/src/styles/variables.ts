@@ -11,7 +11,7 @@ export const colorvars = css`
     --primary-300: hsl(207, 70%, 62%);
     --primary-400: hsl(207, 70%, 51%);
     --primary-500: hsl(208, 71%, 42%);
-    --primary-600: hsl(208, 71%, 38%);
+    --primary-600: hsl(208, 71%, 34%);
     --primary-700: hsl(208, 71%, 30%);
     --primary-800: hsl(207, 70%, 25%);
     --primary-900: hsl(207, 70%, 18%);
@@ -27,8 +27,9 @@ export const colorvars = css`
     --purple-800: hsl(273, 67%, 39%);
     --purple-900: hsl(274, 66%, 32%);
     
+    --tertiary-30: hsl(0, 0%, 99%);
     --tertiary-50: hsl(0, 0%, 98%);
-    --tertiary-70: hsl(0, 0%, 96.1%);
+    --tertiary-70: hsl(0, 0%, 94%);
     --tertiary-100: hsl(210, 4%, 93%);
     --tertiary-200: hsl(210, 4%, 88%); 
     --tertiary-250: hsl(202, 11%, 80%);
@@ -100,6 +101,7 @@ export const colorvars = css`
       --purple-800: hsl(300, 100%, 92%);
       --purple-900: hsl(300, 100%, 97%);
 
+      --tertiary-30: hsl(0, 0%, 11%);
       --tertiary-50: hsl(0, 0%, 15%);
       --tertiary-70: hsl(0, 0%, 17%);
       --tertiary-100: hsl(0, 0%, 20%);

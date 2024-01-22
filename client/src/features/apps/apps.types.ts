@@ -91,24 +91,26 @@ export interface IApp {
   added_by_fullname: string;
   created_at: string;
   created_at_date_time: string;
-  updated_at: Date;
+  updated_at: string;
   location: HomeScope | 'Private';
   readme: string;
   revision: number;
   latest_revision: boolean;
+  job_count: number;
   app_series_id: number;
   run_by_you: string;
   org: string;
   explorers: number;
   featured: boolean;
   active: boolean;
-  links: Links;
+  /** @deprecated create links from client side */
+  links: Links | any;
   tags: string[];
-  properties: {
+  properties?: {
     [key: string]: string;
   };
   scope: ServerScope;
-  forked_from: string;
+  forked_from?: string;
 }
 
 export interface Revision {

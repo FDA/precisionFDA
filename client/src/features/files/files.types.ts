@@ -86,7 +86,8 @@ export interface IFile {
   'uid': string,
   'file_size': string,
   'created_at_date_time': string,
-  'description': string,
+  'description': string | null,
+  /** @deprecated create links from client side */
   'links': FileLinks,
   'file_license': {
     id: string

@@ -194,7 +194,7 @@ const IsAdminWrapper = () => {
   const { data } = useAuthUserQuery()
   if (!data?.user) return <div />
   if (!data?.user.admin) {
-    return <Navigate to="/news" />
+    return <Navigate to="/news" replace />
   }
   return <ListAdminNews />
 }

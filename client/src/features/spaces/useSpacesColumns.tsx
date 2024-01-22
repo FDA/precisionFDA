@@ -7,7 +7,6 @@ import {
   SelectColumnFilter,
 } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
-import { colors, fontWeight } from '../../styles/theme'
 import { ISpace } from './spaces.types'
 import { SpaceTypeName } from './common'
 import { UsersIcon } from '../../components/icons/UsersIcon'
@@ -27,7 +26,7 @@ export const SpaceTableNameCell = styled.div`
   flex-direction: column;
 
   a {
-    font-weight: ${fontWeight.bold};
+    font-weight: bold;
     font-size: 16px;
     line-height: 18px;
   }
@@ -35,7 +34,7 @@ export const SpaceTableNameCell = styled.div`
   p {
     margin: 0;
     font-size: 12px;
-    color: ${colors.textMediumGrey};
+    color: var(--c-text-500);
   }
 `
 
@@ -51,7 +50,7 @@ export const StyledName = styled.span<{ $isAccess: boolean }>`
   ${({ $isAccess }) =>
     !$isAccess &&
     css`
-      color: ${colors.textDarkGreyInactive};
+      color: var(--c-text-400);
       cursor: not-allowed;
     `}
 `
@@ -59,12 +58,12 @@ export const StyledName = styled.span<{ $isAccess: boolean }>`
 export const StatusCell = styled.div<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
-  color: ${({ $isActive }) => ($isActive ? 'green' : 'red')};
+  color: ${({ $isActive }) => ($isActive ? 'var(--success-600)' : 'var(--warning-500)')};
   text-transform: capitalize;
   font-weight: 600;
 
   ${Dot} {
-    color: ${({ $isActive }) => ($isActive ? 'green' : 'red')};
+    color: ${({ $isActive }) => ($isActive ? 'var(--success-600)' : 'var(--warning-500)')};
     margin-right: 8px;
   }
 `
@@ -86,12 +85,7 @@ export const SpaceTableTypeCell = styled.div`
   text-transform: capitalize;
   display: flex;
   align-items: center;
-  gap: 4px;
-
-  ${TypeDot} {
-    background-color: black;
-    margin-right: 8px;
-  }
+  gap: 10px;
 `
 export const SpaceTableCounterCell = styled.div`
   display: flex;
@@ -164,7 +158,7 @@ export const useSpacesColumns = ({
                     color={
                       original.current_user_membership
                         ? undefined
-                        : colors.textDarkGreyInactive
+                        : 'var(--c-text-400)'
                     }
                   />
                 )}
@@ -173,7 +167,7 @@ export const useSpacesColumns = ({
                           color={
                               original.current_user_membership
                                   ? undefined
-                                  : colors.textDarkGreyInactive
+                                  : 'var(--c-text-400)'
                           }
                   />
                 )}

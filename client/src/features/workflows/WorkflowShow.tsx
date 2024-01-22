@@ -164,7 +164,7 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
 export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: number, homeScope?: HomeScope, emitScope?: EmmitScope }) => {
   const location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
-  const { data, status, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
     queryFn: () => fetchWorkflow(workflowUid),
     onSuccess: (d) => {
@@ -268,23 +268,23 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
       <StyledTabPanel>
         <Routes>
           <Route
-            path={`/`}
+            path="/"
             element={<HomeWorkflowsSpec spec={meta.spec} />}
           />
           <Route
-            path={`spec`}
-            element={<Navigate to={`${location.pathname}`} />}
+            path="spec"
+            element={<Navigate to={`${location.pathname}`} replace />}
           />
           <Route
-            path={`readme`}
+            path="readme"
             element={<MarkdownStyle><Markdown data={workflow.readme} /></MarkdownStyle>}
           />
           <Route
-            path={`diagram`}
+            path="diagram"
             element={<WorkflowsDiagram workflowId={workflow.uid} />}
           />
           <Route
-            path={`jobs`}
+            path="jobs"
             element={<WorkflowExecutionsList uid={workflow.uid} />}
           />
         </Routes>

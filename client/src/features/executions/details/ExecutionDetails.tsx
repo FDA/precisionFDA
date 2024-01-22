@@ -11,7 +11,7 @@ import {
   StyledPropertyKey,
 } from '../../../components/Tags'
 import { RESOURCE_LABELS } from '../../../types/user'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 import { getBackPath } from '../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home/home.styles'
 import {
@@ -66,7 +66,7 @@ export const ExecutionDetails = ({
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {

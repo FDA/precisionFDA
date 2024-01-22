@@ -49,11 +49,13 @@ import { getSpaceIdFromScope } from '../../../utils'
 import { CreateAppPayload } from '../apps.api'
 import { Select } from '../../../components/Select'
 
-loader.config({
-  paths: {
-    vs: '/assets/monaco-editor/min/vs',
-  },
-})
+if(!ENABLE_DEV_MSW) {
+  loader.config({
+    paths: {
+      vs: '/assets/monaco-editor/min/vs',
+    },
+  })
+}
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
 

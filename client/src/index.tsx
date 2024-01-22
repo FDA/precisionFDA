@@ -9,6 +9,24 @@ import ReactModal from 'react-modal'
 import Root from './root'
 import { getAuthenticityToken } from './utils/api'
 
+async function enableMocking() {
+  if (!ENABLE_DEV_MSW) {
+    return
+  }
+
+  const { worker } = await import('./mocks/browser')
+
+  // `worker.start()` returns a Promise that resolves
+  // once the Service Worker is up and ready to intercept requests.
+  // eslint-disable-next-line consistent-return
+  return worker.start({
+    serviceWorker: {
+      url: '/mockServiceWorker.js',
+    },
+    onUnhandledRequest: 'bypass',
+  })
+}
+
 Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
 
 const renderApp = () => {
@@ -17,12 +35,13 @@ const renderApp = () => {
 
   if (container) {
     ReactModal.setAppElement('#app-root')
-    root.render(<Root />)
+    enableMocking().then(() => {
+      root.render(<Root />)
+    })
   }
 }
-
-document.addEventListener('DOMContentLoaded', renderApp)
-document.addEventListener('page:load', renderApp)
+  document.addEventListener('DOMContentLoaded', renderApp)
+  document.addEventListener('page:load', renderApp)
 
 if (NODE_ENV === 'development' && module.hot) {
   module.hot.accept()

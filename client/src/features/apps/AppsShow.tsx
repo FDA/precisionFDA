@@ -275,7 +275,7 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
             </MetadataRow>
           </MetadataSection>
         )}
-        {Object.entries(app.properties).length > 0 && (
+        {app?.properties && Object.entries(app.properties).length > 0 && (
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
@@ -307,10 +307,10 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
       </StyledTabList>
       <StyledTabPanel>
         <Routes>
-          <Route path={`/`} element={<SpecTab spaceId={spaceId} spec={meta.spec} />} />
-          <Route path={`spec`} element={<Navigate to={`${location.pathname}`} />} />
-          <Route path={`readme`} element={<MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>} />
-          <Route path={`jobs`} element={<AppExecutionsList appUid={app.uid} />} />
+          <Route path="/" element={<SpecTab spaceId={spaceId} spec={meta.spec} />} />
+          <Route path="spec" element={<Navigate to={`${location.pathname}`} replace />} />
+          <Route path="readme" element={<MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>} />
+          <Route path="jobs" element={<AppExecutionsList appUid={app.uid} />} />
         </Routes>
       </StyledTabPanel>
     </>

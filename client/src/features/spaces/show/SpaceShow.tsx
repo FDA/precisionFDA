@@ -197,7 +197,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               <Route path="discussions/create" element={<CreateDiscussionPage scope={`space-${space.id}`} />} />
               <Route path="discussions/:discussionId" element={<DiscussionShow space={space} />} />
 
-              <Route path="/" element={<Navigate to="files" />} />
+              <Route path="/" element={<Navigate to="files" replace />} />
             </Routes>
           )}
         </Main>
