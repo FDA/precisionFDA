@@ -74,7 +74,7 @@ const Front = styled(Dropdown)`
   z-index: 3;
   width: 32px;
   svg {
-    color: #3c4043;
+    color: var(--tertiary-400);
   }
 `
 

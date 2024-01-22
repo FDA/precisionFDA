@@ -57,6 +57,7 @@ export interface IDatabase {
   properties: {
     [key: string]: string;
   };
+  /** @deprecated create links from client side */
   links: Links;
   scope: ServerScope;
   featured: boolean;

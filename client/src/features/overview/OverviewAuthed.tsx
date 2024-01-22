@@ -209,9 +209,7 @@ export const TopApps = () => {
           {isLoadingRecentAppsData ? (
             <Loader className="inline" />
           ) : (
-            recentAppsData?.apps
-              .slice(0, 4)
-              .map(a => <TopAppItem key={a.id} app={a} />)
+            recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
           )}
         </TopAppsList>
       </TopAppsColumn>
@@ -221,8 +219,7 @@ export const TopApps = () => {
           {isLoadingFeaturedAppsData ? (
             <Loader className="inline" />
           ) : (
-            featuredAppsData?.apps
-              .slice(0, 4)
+            featuredAppsData?.apps?.slice(0, 4)
               .map(a => <TopAppItem key={a.id} app={a} />)
           )}
         </TopAppsList>

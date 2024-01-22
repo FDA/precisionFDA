@@ -1,23 +1,30 @@
 import React from 'react'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { colors } from '../../../styles/theme'
-import { Modal } from '../../modal'
 import { useModal } from '../../modal/useModal'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
 const Row = styled.div`
   display: flex;
   gap: 16px;
 `
 const MBody = styled.div`
-  padding: 0 12px;
-  padding-bottom: 12px;
+  padding: 24px 24px;
+
+  h3 {
+    font-weight: bolder;
+    margin-bottom: 1rem;
+    font-size: 17px;
+  }
+  p {
+    margin-bottom: 1rem;
+  }
 `
 
 const Spacer = styled.div`
   width: 2px;
   flex: 1 0 auto;
-  background: ${colors.backgroundLightGray};
+  background: var(--c-layout-border);
 `
 
 const Option = styled.div`
@@ -38,18 +45,23 @@ export const useOptionAddFileModal = ({
 }: any) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
-    <Modal
+    <ModalNext
+      id="choose-add-file-option-modal"
       data-testid="choose-add-file-option-modal"
-      headerText="How would you like to add files?"
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
+            <ModalHeaderTop
+        disableClose={false}
+        headerText="How would you like to add files?"
+        hide={() => setShowModal(false)}
+      />
       <MBody>
         <Row>
           <Option>
             <div>
               <h3>Copy data already on PrecisionFDA</h3>
-              <div>This includes files, apps, workflows, and jobs</div>
+              <p>This includes files, apps, workflows, and jobs</p>
             </div>
             <div>
               <ButtonSolidBlue
@@ -66,11 +78,11 @@ export const useOptionAddFileModal = ({
           <Option>
             <div>
               <h3>Upload new files</h3>
-              <div>Only files can be uploaded from your computer.</div>
-              <div>
+              <p>Only files can be uploaded from your computer.</p>
+              <p>
                 Apps, workflows, and jobs cannot be uploaded. These resources
                 must be created in PrecisionFDA and copied into a space.
-              </div>
+              </p>
             </div>
             <div>
               <ButtonSolidBlue
@@ -85,7 +97,7 @@ export const useOptionAddFileModal = ({
           </Option>
         </Row>
       </MBody>
-    </Modal>
+    </ModalNext>
   )
 
   return {

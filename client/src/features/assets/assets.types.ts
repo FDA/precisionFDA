@@ -95,6 +95,7 @@ export interface IAsset {
   scope: ServerScope;
   user: FileUser
   active: boolean;
+  /** @deprecated create links from client side */
   links: Links;
   tags: string[];
   properties: {

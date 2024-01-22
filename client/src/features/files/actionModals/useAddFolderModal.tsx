@@ -3,7 +3,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
+import { Button } from '../../../components/Button/ButtonNext'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../../modal/styles'
@@ -64,6 +64,7 @@ export const useAddFolderModal = ({
 
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-add-folder"
       data-testid="modal-files-add-folder"
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
@@ -77,7 +78,6 @@ export const useAddFolderModal = ({
           <FieldGroup>
             <label>Folder Name</label>
             <InputText
-              label="Folder Name"
               {...register('name')}
               placeholder="Enter Name..."
               autoFocus
@@ -100,13 +100,13 @@ export const useAddFolderModal = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            data-variant="primary"
             type="submit"
             form="add-folder-form"
-            disabled={mutation.isLoading}
           >
             Add
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

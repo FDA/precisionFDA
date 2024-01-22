@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components'
 import { compactScrollBar } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { fontSize, fontWeight, sizing } from '../../styles/theme'
+import { TransparentButton } from '../../components/Button'
 
 export const Wrapper = styled.div`
   position: fixed;
@@ -73,17 +74,20 @@ export const HeaderText = styled.div`
   font-size: ${fontSize.h2};
   font-weight: ${fontWeight.bold};
 `
-export const CloseButton = styled.button`
+export const CloseButton = styled(TransparentButton)`
+  justify-content: center;
+  align-items: center;
   font-size: 0.8rem;
   border: none;
   border-radius: 3px;
-  margin-left: 0.5rem;
   background: none;
-  padding: 0;
+  padding: 4px 5px;
   margin: 0;
-  color: var(--c-text-700);
+  color: var(--c-text-600);
   &:hover {
     cursor: pointer;
+    background-color: var(--tertiary-70);
+    color: var(--c-text-900);
   }
   ${Svg} {
     transform: rotate(45deg);

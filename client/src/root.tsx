@@ -124,7 +124,7 @@ const router = createBrowserRouter([
       { path: 'admin/news/create', element: <CreateNewsItemPage /> },
       { path: 'admin/news/:id/edit', element: <EditNewsItemPage /> },
       { path: 'data-portals/*', element: <DataPortalRoutes /> },
-      { path: 'daaas', element: <Navigate to="/data-portals/main" /> },
+      { path: 'daaas', element: <Navigate to="/data-portals/main" replace /> },
       { path: '*', element: <NoFoundPage /> },
     ],
   },

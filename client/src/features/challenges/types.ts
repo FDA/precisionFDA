@@ -28,6 +28,7 @@ export interface Challenge {
   guest_lead_dxuser: string;
   host_lead_dxuser: string;
   app_owner_id: string;
+  /** @deprecated create links from client side */
   links?: any;
   is_followed?: any;
   can_edit?: any;

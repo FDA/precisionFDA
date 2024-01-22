@@ -61,7 +61,7 @@ export const ExpertMeta = styled.div`
   justify-content: space-between;
 `
 
-export const OverviewNewsList = ({ pick }: { pick?: number }) => {
+export const OverviewNewsList = ({ pick = 3 }: { pick?: number }) => {
   const { data, isLoading } = useNewsListQuery({ orderBy: 'isPublication' })
   if (isLoading) return <Loader className="inline" />
   const newsList = pick ? data?.news_items?.slice(0, pick) : data?.news_items

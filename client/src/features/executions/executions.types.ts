@@ -1,18 +1,19 @@
 import { RESOURCE_LABELS } from '../../types/user'
-import { ServerScope } from "../home/types";
-import { FileOrg, FileUser } from "../apps/apps.types";
+import { ServerScope } from '../home/types'
+import { FileOrg, FileUser } from '../apps/apps.types'
+import { RESOURCE_TYPES } from '../admin/users/types'
 
 export enum ExecutionActions {
-  "Run" = "Run",
-  "Run batch" = "Run batch",
-  "Track" = "Track",
-  "Edit" = "Edit",
-  "Fork" = "Fork",
-  "Export to" = "Export to",
-  "Make public" = "Make public",
-  "Delete" = "Delete",
-  "Copy to space" = "Copy to space",
-  "Attach to..." = "Attach to...",
+  'Run' = 'Run',
+  'Run batch' = 'Run batch',
+  'Track' = 'Track',
+  'Edit' = 'Edit',
+  'Fork' = 'Fork',
+  'Export to' = 'Export to',
+  'Make public' = 'Make public',
+  'Delete' = 'Delete',
+  'Copy to space' = 'Copy to space',
+  'Attach to...' = 'Attach to...',
 }
 
 
@@ -24,6 +25,7 @@ export interface Links {
   publish?: string;
   copy?: string;
   run_workflow?: string;
+  run_job?: string;
   batch_run_workflow?: string;
   edit?: string;
   fork?: string;
@@ -40,6 +42,7 @@ export interface Links {
   terminate?: string;
   sync_files?: string;
   open_external?: string;
+  workflow?: string;
 }
 
 export interface RunInputs {
@@ -49,9 +52,10 @@ export interface RunOutputs {
 }
 
 export interface RunDataUpdates {
-  run_instance_type: string;
+  output_folder_path: string,
+  run_instance_type: typeof RESOURCE_TYPES[number],
   run_inputs: RunInputs;
-  run_outputs: RunOutputs;
+  run_outputs: RunOutputs | null;
 }
 
 export interface Links2 {
@@ -95,6 +99,7 @@ export interface Job {
   launched_by: string;
   launched_on: string;
   featured: boolean;
+  /** @deprecated create links from client side */
   links: Links2;
   entity_type: string;
   logged_dxuser: string;
@@ -131,12 +136,14 @@ export interface IExecution {
   name: string
   title: string
   added_by: string
-  app_revision: string
+  app_revision: number
+  app_active: boolean
   app_uid: string
   app_title: string
   workstation_api_version: string | null
   run_input_data: Array<any>
   run_output_data: Array<any>
+  run_data_updates?: RunDataUpdates,
   failure_message?: string
   failure_reason?: string
   created_at: string
@@ -155,6 +162,7 @@ export interface IExecution {
   scope: ServerScope
   featured: boolean
   active: boolean
+  /** @deprecated create links from client side */
   links: Links
   jobs?: Job[]
   logged_dxuser: string
@@ -163,6 +171,7 @@ export interface IExecution {
     [key: string]: string
   }
   workflow_uid?: string
+  platform_tags?: null
   workflow_title?: string
 }
 

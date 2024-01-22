@@ -1,17 +1,14 @@
 import styled from 'styled-components'
 import { Svg } from '../../../../components/icons/Svg'
-import { colors } from '../../../../styles/theme'
 
 export const Row = styled.tr`
   display: flex;
 `
 export const Title = styled.div`
   font-size: 18px;
-  color: ${colors.textDarkGrey};
 `
 export const SubTitle = styled.div`
   font-size: 16px;
-  color: ${colors.textDarkGrey};
 `
 export const Remove = styled.th`
   display: flex;
@@ -34,7 +31,7 @@ export const StyledDropSection = styled.div`
   align-items: center;
   padding: 16px;
   gap: 8px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--c-layout-border-200);
 `
 
 export const StyledUploadInfoSection = styled.div`

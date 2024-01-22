@@ -17,7 +17,7 @@ export const InputText = styled.input.attrs({ type: 'text' })`
     color: var(--c-text-700);
     font-size: 14px;
     line-height: 1.5715;
-    background-color: var(--background-color);
+    background-color: var(--tertiary-30);
     background-image: none;
     border: 1px solid var(--c-input-border);
     border-radius: 2px;
