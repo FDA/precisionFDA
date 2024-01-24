@@ -25,8 +25,8 @@ export const MetadataRow = styled.div`
 export const MetadataItem = styled.div``
 
 export const MetadataKey = styled.div`
-  color: var(--c-text-300);
-  font-weight: 300;
+  color: var(--c-text-400);
+  font-weight: 400;
   text-transform: uppercase;
   white-space: nowrap;
   font-size: 14px;

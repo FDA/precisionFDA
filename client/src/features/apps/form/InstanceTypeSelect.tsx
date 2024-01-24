@@ -1,9 +1,13 @@
 import React from 'react'
-import { useFetchComputeInstanceQuery } from '../useFetchComputeInstanceQuery'
+import { ControllerRenderProps, FieldValues } from 'react-hook-form'
+import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
-import { ControllerRenderProps } from 'react-hook-form'
-import { FieldValues } from 'react-hook-form'
 import { Select } from '../../../components/Select'
+import { useFetchComputeInstanceQuery } from '../useFetchComputeInstanceQuery'
+
+const StyledInstanceSelect = styled(Select)`
+  min-width: 225px;
+`
 
 type InstanceTypeSelectProps = {
   field: ControllerRenderProps<FieldValues, 'instance_type'>
@@ -16,7 +20,7 @@ export const InstanceTypeSelect = ({ field }: InstanceTypeSelectProps) => {
   const options = data?.map(i => ({ value: i.value, label: i.label }))
 
   return (
-    <Select
+    <StyledInstanceSelect
       {...field}
       options={options}
       onChange={option => field.onChange(option?.value)}
