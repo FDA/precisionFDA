@@ -2,6 +2,7 @@ import React from 'react'
 import { SpecTable } from './SpecTable'
 import { StyledSpecTab } from './styles'
 import { AppSpec } from '../apps.types'
+import { MetadataKey } from '../../home/show.styles'
 
 
 export const SpecTab = ({ spec, spaceId }: { spec: AppSpec, spaceId?: string }) => {
@@ -11,17 +12,17 @@ export const SpecTab = ({ spec, spaceId }: { spec: AppSpec, spaceId?: string }) 
     <StyledSpecTab>
       <div className="__header">
         <div className="__header_item">
-          <div className="__header_item_label">
+          <MetadataKey>
             default instance type
-          </div>
+          </MetadataKey>
           <div className="__header_item_value">
             {spec.instance_type}
           </div>
         </div>
         <div className="__header_item">
-          <div className="__header_item_label">
+          <MetadataKey>
             has internet access
-          </div>
+          </MetadataKey>
           <div className="__header_item_value">
             {internetAccess}
           </div>

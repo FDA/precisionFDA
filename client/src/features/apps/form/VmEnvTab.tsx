@@ -67,6 +67,9 @@ const AssetButtonRow = styled.div`
   align-items: center;
   justify-content: space-between;
   a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 14px;
   }
 
