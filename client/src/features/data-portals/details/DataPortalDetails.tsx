@@ -48,7 +48,7 @@ const StyledInnerHTML = styled.div`
   [data-lexical-collapsible-content] {
     padding: 0 5px 5px 20px;
   }
-
+  
   table,
   tbody,
   tr,
