@@ -15,6 +15,7 @@ import { addMembersToSpaceRequest } from './members.api'
 import { MemberRole } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
 import { Select } from '../../../components/Select'
+
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
   invitees: string
