@@ -1,4 +1,4 @@
-import { getLogger } from '@shared'
+import { getLogger } from '@shared/logger'
 
 const log = getLogger()
 

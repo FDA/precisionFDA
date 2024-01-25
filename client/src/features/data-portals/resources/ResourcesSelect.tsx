@@ -17,9 +17,9 @@ const ResourceList = styled.div`
   max-width: 500px;
 `
 
-const Item = styled(TransparentButton)<{ isSelected: boolean }>`
-  ${({ isSelected }) =>
-    isSelected &&
+const Item = styled(TransparentButton)<{ $isSelected: boolean }>`
+  ${({ $isSelected }) =>
+    $isSelected &&
     css`
       border: 3px solid blue;
     `}
@@ -45,7 +45,7 @@ const ResourcesSelect = ({
         return (
           <StyledResourceItem key={re.id}>
             <Item
-              isSelected={selected === re.id}
+              $isSelected={selected === re.id}
               onClick={() => handleSelect(re.id, re.url)}
             >
               <img src={re.url} alt="resource item" />

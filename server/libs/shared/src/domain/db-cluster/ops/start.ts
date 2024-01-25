@@ -1,6 +1,6 @@
 import { invertObj } from 'ramda'
 import * as errors from '../../../errors'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import * as client from '../../../platform-client'
 import { DbCluster } from '../db-cluster.entity'
 import { STATUS, STATUSES } from '../db-cluster.enum'
@@ -27,7 +27,7 @@ export class StartDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput
       dxid: dbCluster.dxid,
     }, 'start')
 
-    this.ctx.log.info(
+    this.ctx.log.verbose(
       { id: dbCluster.id, dxid: dbCluster.dxid, apiResult },
       'Run start action for DB Cluster'
     )

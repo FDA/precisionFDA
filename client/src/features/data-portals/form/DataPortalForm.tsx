@@ -3,14 +3,14 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Prompt } from 'react-router'
+import { unstable_usePrompt } from 'react-router-dom'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { InputText } from '../../../components/InputText'
+import { Checkbox } from '../../../components/CheckboxNext'
+import { InputFile, InputNumber, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
-import { IndeterminateCheckbox } from '../../../components/Table/IndeterminateCheckbox'
 import { FieldGroup } from '../../../components/form/FieldGroup'
-import { CheckboxLabel, CheckboxTip, InputError } from '../../../components/form/styles'
+import { CheckboxTip, FieldLabelRow, InputError } from '../../../components/form/styles'
 import { SavingModal } from './SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
@@ -92,6 +92,7 @@ export const DataPortalForm = ({
     handleSubmit,
     setError,
     watch,
+    setValue,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<CreateDataPortalForm>({
     mode: 'onBlur',
@@ -127,22 +128,21 @@ export const DataPortalForm = ({
     }
   }, [mutationErrors])
 
+  unstable_usePrompt({
+    message: 'There are unsaved changes, are you sure you want to leave?',
+    when: ({ currentLocation, nextLocation }: any) =>
+      (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
+      currentLocation.pathname !== nextLocation.pathname,
+  })
+
   const submitErrors = { ...errors }
   delete submitErrors['root']
 
   return (
     <>
-      <Prompt
-        when={
-          !isSubmitting && isEditMode && Object.keys(dirtyFields).length > 0
-        }
-        message="There are unsaved changes, are you sure you want to leave?"
-      />
-      <div>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FieldGroup label="Name" required>
             <InputText
-              label="Name"
               placeholder="Name of the portal"
               {...register('name')}
               disabled={isSubmitting}
@@ -156,7 +156,6 @@ export const DataPortalForm = ({
           <FieldGroup label="Description">
             <InputText
               type="textarea"
-              label="Description"
               placeholder="What is this portal about?"
               {...register('description')}
               disabled={isSubmitting}
@@ -185,8 +184,7 @@ export const DataPortalForm = ({
             )}
 
             <>
-              <InputText
-                label="cardImage"
+              <InputFile
                 type="file"
                 accept="image/*"
                 {...register('card_image_file')}
@@ -263,11 +261,9 @@ export const DataPortalForm = ({
           {canEditMainDataPortal && (
             <Row>
               <FieldGroup label="Sort order">
-                <InputText
-                  type="number"
+                <InputNumber
                   step="1"
                   min="0"
-                  label="Sort Order"
                   placeholder="What is the portal's sort order?"
                   {...register('sort_order')}
                   disabled={isSubmitting || watch().default === true}
@@ -279,24 +275,24 @@ export const DataPortalForm = ({
                 />
               </FieldGroup>
               <FieldGroup>
-                <CheckboxLabel>
-                  <Controller
-                    data-tip
-                    data-for="default"
-                    name="default"
-                    control={control}
-                    render={({ field }) => {
-                      return (
-                        <IndeterminateCheckbox
+                <Controller
+                  data-tip
+                  data-for="default"
+                  name="default"
+                  control={control}
+                  render={({ field }) => {
+                    return (
+                      <FieldLabelRow>
+                        <Checkbox
                           checked={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
+                          disabled={isSubmitting}
+                          onChange={e => setValue(field.name, e.target.checked)}
                         />
-                      )
-                    }}
-                  />
-                  Default
-                </CheckboxLabel>
+                        Default
+                      </FieldLabelRow>
+                    )
+                  }}
+                />
                 <CheckboxTip>
                   Enabling will make this Data Portal the default for users
                 </CheckboxTip>
@@ -317,7 +313,7 @@ export const DataPortalForm = ({
             {isSubmitting && <Loader />}
           </Row>
         </StyledForm>
-      </div>
+
       <SavingModal isEditMode={isEditMode} isSaving={isSubmitting} key="data-portal-save" />
     </>
   )

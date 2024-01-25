@@ -1,11 +1,11 @@
+import { database } from '@shared/database'
+import { db } from '@shared/test'
+import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
-import { database, queue } from '@shared'
-import { db } from '@shared/test'
-import { mocksRestore, mocksSetup } from '@shared/test/mocks'
-import { setupHandlers } from '../src/queues'
-import { mocksSetup as localMocksSetup, mocksRestore as localMocksRestore } from './utils/mocks'
+import { startWorker } from '../src'
+import { mocksRestore as localMocksRestore, mocksSetup as localMocksSetup } from './utils/mocks'
 
 // Handle exception being thrown inside an async test
 // This seems to be a flaw in mocha since 8.2.1
@@ -28,17 +28,11 @@ before(async () => {
   mocksSetup()
   localMocksSetup()
 
-  await database.start()
-  await setupHandlers()
+  await startWorker()
   await db.initDeleteProcedure(database.connection())
 })
 
 after(async () => {
   localMocksRestore()
   mocksRestore()
-  // TODO(samuel) solve this somehow
-  // uncommenting throws timeout errors, failed to investigate why, as it works locally
-  // shouldn't impact test results as redis communication is mocked
-  // await queue.disconnectQueues()
-  await database.stop()
 })

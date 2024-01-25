@@ -9,6 +9,17 @@
     "transform": null,
     "target": "es2017",
     "loose": false,
-    "externalHelpers": false
+    "externalHelpers": false,
+    "experimental": {
+      "plugins": [
+        [
+          "@swc/plugin-styled-components",
+          {
+            "displayName": true,
+            "ssr": false
+          }
+        ]
+      ]
+    }
   }
 }

@@ -923,6 +923,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def track_provenance(uid)
+    request(
+      "/tracks/provenance",
+      {},
+      Net::HTTP::Get::METHOD,
+      { uid: uid },
+    )
+  end
+
   private
 
   # rubocop:disable Metrics/ParameterLists

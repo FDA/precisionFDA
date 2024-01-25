@@ -1,6 +1,8 @@
+import { PlatformClient } from '@shared/platform-client'
+import * as queue from '@shared/queue'
+import * as redis from '@shared/services/redis.service'
 import sinon from 'sinon'
 import Bull from 'bull'
-import { client, queue, redis } from '..'
 // import { handler } from '../../src/jobs'
 import * as generate from './generate'
 import {
@@ -122,44 +124,44 @@ const mocksSetDefaultBehaviour = () => {
 const mocksSetup = () => {
   mocksSetDefaultBehaviour()
   // client
-  sandbox.replace(client.PlatformClient.prototype, 'jobDescribe', fakes.client.jobDescribeFake)
-  sandbox.replace(client.PlatformClient.prototype, 'jobCreate', fakes.client.jobCreateFake)
-  sandbox.replace(client.PlatformClient.prototype, 'jobTerminate', fakes.client.jobTerminateFake)
-  sandbox.replace(client.PlatformClient.prototype, 'fileClose', fakes.client.fileCloseFake)
-  sandbox.replace(client.PlatformClient.prototype, 'fileDescribe', fakes.client.fileDescribeFake)
-  sandbox.replace(client.PlatformClient.prototype, 'fileStates', fakes.client.fileStatesFake)
-  sandbox.replace(client.PlatformClient.prototype, 'filesList', fakes.client.filesListFake)
-  sandbox.replace(client.PlatformClient.prototype, 'folderCreate', fakes.client.folderCreateFake)
-  sandbox.replace(client.PlatformClient.prototype, 'filesMoveToFolder', fakes.client.filesMoveFake)
-  // sandbox.replace(client.PlatformClient.prototype, 'filesDescribe', fakes.client.filesDescFake)
-  sandbox.replace(client.PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
-  sandbox.replace(client.PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
-  sandbox.replace(client.PlatformClient.prototype, 'projectInvite', fakes.client.projectInviteFake)
-  sandbox.replace(client.PlatformClient.prototype, 'projectDescribe', fakes.client.projectDescribeFake)
-  sandbox.replace(client.PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
-  sandbox.replace(client.PlatformClient.prototype, 'orgFindMembers', fakes.client.orgFindMembersFake)
-  sandbox.replace(client.PlatformClient.prototype, 'projectAcceptTransfer', fakes.client.projectAcceptTransferFake)
-  sandbox.replace(client.PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
-  sandbox.replace(client.PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
-  sandbox.replace(client.PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
-  sandbox.replace(client.PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
-  sandbox.replace(client.PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
-  sandbox.replace(client.PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
-  sandbox.replace(client.PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
-  sandbox.replace(client.PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
+  sandbox.replace(PlatformClient.prototype, 'jobDescribe', fakes.client.jobDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'jobCreate', fakes.client.jobCreateFake)
+  sandbox.replace(PlatformClient.prototype, 'jobTerminate', fakes.client.jobTerminateFake)
+  sandbox.replace(PlatformClient.prototype, 'fileClose', fakes.client.fileCloseFake)
+  sandbox.replace(PlatformClient.prototype, 'fileDescribe', fakes.client.fileDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'fileStates', fakes.client.fileStatesFake)
+  sandbox.replace(PlatformClient.prototype, 'filesList', fakes.client.filesListFake)
+  sandbox.replace(PlatformClient.prototype, 'folderCreate', fakes.client.folderCreateFake)
+  sandbox.replace(PlatformClient.prototype, 'filesMoveToFolder', fakes.client.filesMoveFake)
+  // sandbox.replace(PlatformClient.prototype, 'filesDescribe', fakes.client.filesDescFake)
+  sandbox.replace(PlatformClient.prototype, 'foldersList', fakes.client.foldersListFake)
+  sandbox.replace(PlatformClient.prototype, 'renameFolder', fakes.client.folderRenameFake)
+  sandbox.replace(PlatformClient.prototype, 'projectInvite', fakes.client.projectInviteFake)
+  sandbox.replace(PlatformClient.prototype, 'projectDescribe', fakes.client.projectDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
+  sandbox.replace(PlatformClient.prototype, 'orgFindMembers', fakes.client.orgFindMembersFake)
+  sandbox.replace(PlatformClient.prototype, 'projectAcceptTransfer', fakes.client.projectAcceptTransferFake)
+  sandbox.replace(PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
+  sandbox.replace(PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
+  sandbox.replace(PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
+  sandbox.replace(PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
+  sandbox.replace(PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
+  sandbox.replace(PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
+  sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
 
   sandbox.replace(
-    client.PlatformClient.prototype,
+    PlatformClient.prototype,
     'dbClusterAction',
     fakes.client.dbClusterActionFake,
   )
   sandbox.replace(
-    client.PlatformClient.prototype,
+    PlatformClient.prototype,
     'dbClusterCreate',
     fakes.client.dbClusterCreateFake,
   )
   sandbox.replace(
-    client.PlatformClient.prototype,
+    PlatformClient.prototype,
     'dbClusterDescribe',
     fakes.client.dbClusterDescribeFake,
   )

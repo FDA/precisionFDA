@@ -1,8 +1,7 @@
 import { EntityRepository } from '@mikro-orm/mysql'
-import { UserFile } from './user-file.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
-import { Asset } from '.'
-
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   async findProjectFilesInSubfolder(input: {

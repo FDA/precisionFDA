@@ -1,6 +1,8 @@
-import { Folder, UserFile } from '../..'
-import { BaseOperation } from '../../../utils/base-operation'
-import { client, errors } from '../../..'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FolderNotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { BaseOperation } from '@shared/utils/base-operation'
 import {
   childrenTraverse,
   getFolderPath,
@@ -21,7 +23,7 @@ number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     try {
       const repo = em.getRepository(Folder)
@@ -30,7 +32,7 @@ number
 
       await em.begin()
       if (!existingFolder) {
-        throw new errors.FolderNotFoundError()
+        throw new FolderNotFoundError()
       }
 
       await validateProtectedSpaces(em, 'remove', this.ctx.user.id, existingFolder)
@@ -72,7 +74,7 @@ number
       }
 
       await em.commit()
-      this.ctx.log.info(
+      this.ctx.log.verbose(
         { foldersCnt: folderSubtree.length, filesCnt: filesToRemove.length },
         'Removed total objects',
       )

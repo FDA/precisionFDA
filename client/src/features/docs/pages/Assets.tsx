@@ -3,15 +3,12 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import {
     DocBody,
-    DocTable,
     DocsTip,
     DocRow,
     RightSide,
     PageMap,
 } from '../styles'
-import exportScreenshot from '../images/export_screenshot.png'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { OutdatedDocs } from '../common'
 
 export const Assets = () => {
     useScrollToHash()

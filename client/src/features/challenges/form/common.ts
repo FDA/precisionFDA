@@ -52,8 +52,12 @@ const commonValidationSchema = {
     .when('status', {
       is: (val: { value: string }) => val?.value === 'pre-registration',
       then: Yup.string()
-        .required('Preregistration link is required for the pre_registration status'),
-    }),
+        .required('Preregistration link is required for the pre-registration status')
+    }).test(
+      'is-valid-url',
+      'Link must be a valid URL and start with either \'http://\' or \'https://\'',
+      value => !value || /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(value)
+    ),
 }
 
 export const createValidationSchema = Yup.object().shape({

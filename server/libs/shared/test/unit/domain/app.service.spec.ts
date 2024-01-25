@@ -1,8 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { App, AppSeries, User, Event, app as appDomain } from '../../../src/domain'
+import { database } from '@shared/database'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { App } from '@shared/domain/app/app.entity'
+import { AppService } from '@shared/domain/app/services/app.service'
+import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
+import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db } from '../../../src/test'
-import { database } from '../../../src'
-import { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
+import { PlatformClient } from '../../../src/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
@@ -79,7 +84,7 @@ describe('app service tests', () => {
   }
 
   it('save app - test call orchestration', async () => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
 
     const appInput: AppInput = getDefaultApp()
     const resultId = await appService.create(appInput, user.id)
@@ -159,7 +164,7 @@ describe('app service tests', () => {
     const asset1 = create.assetHelper.create(em, {user}, {name: "asset-1"})
     const asset2 = create.assetHelper.create(em, {user}, {name: "asset-2"})
 
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
 
     const appInput: AppInput = getDefaultApp()
     appInput.entity_type = 'https'
@@ -181,7 +186,7 @@ describe('app service tests', () => {
   })
 
   it('save app - new revision of an app', async () => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput1: AppInput = getDefaultApp()
     const appInput2: AppInput = getDefaultApp()
     appInput2.is_new = false
@@ -216,7 +221,7 @@ describe('app service tests', () => {
   }
 
   it('save app - complex inputs and outputs', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput1: AppInput = getDefaultApp()
 
     const intSpec = getSpec('intName', 'int', 'intHelp', 'intLabel', false, 0, [])
@@ -249,7 +254,7 @@ describe('app service tests', () => {
   })
 
   it('save app - don\'t send default and choices to createApplet' , async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput1: AppInput = getDefaultApp()
     const intSpec = getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2, 3])
     appInput1.input_spec = [intSpec]
@@ -261,7 +266,7 @@ describe('app service tests', () => {
   })
 
   it('save app - strip empty choices from input and output spec', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
     appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
     appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
@@ -275,7 +280,7 @@ describe('app service tests', () => {
   })
 
   it('save app - preserve choices in input and output spec', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
     appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2])]
     appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [3, 4])]
@@ -289,7 +294,7 @@ describe('app service tests', () => {
   })
 
   it('save app - validate release', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
 
     appInput.release = 'nonsense'
@@ -303,7 +308,7 @@ describe('app service tests', () => {
     }
   })
 
-  const createAppWithNameAndFail = async (name: string, appService: appDomain.AppService) => {
+  const createAppWithNameAndFail = async (name: string, appService: AppService) => {
     const appInput: AppInput = getDefaultApp()
     appInput.name = name
 
@@ -317,7 +322,7 @@ describe('app service tests', () => {
     }
   }
 
-  const createAppWithNameAndSucceed = async (name: string, appService: appDomain.AppService) => {
+  const createAppWithNameAndSucceed = async (name: string, appService: AppService) => {
     const appInput: AppInput = getDefaultApp()
     appInput.name = name
     appId = name // just to make it unique
@@ -327,7 +332,7 @@ describe('app service tests', () => {
   }
 
   it('save app - validate appName', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
 
     // all will fail
     await createAppWithNameAndFail('žýá', appService)
@@ -342,7 +347,7 @@ describe('app service tests', () => {
   })
 
   it('save app - validate instance', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
 
     appInput.instance_type = 'nonsense'
@@ -357,7 +362,7 @@ describe('app service tests', () => {
   })
 
   it('save app - validate package', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
 
     appInput.packages = ['nonsense']
@@ -372,7 +377,7 @@ describe('app service tests', () => {
   })
 
   it('save app - validate assets', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
     const asset1 = create.assetHelper.create(em, {user}, {name: "asset-1"})
     await em.flush()
@@ -389,7 +394,7 @@ describe('app service tests', () => {
   })
 
   it('save app - validate inputs and outputs', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
     const intSpec = getSpec('', 'int', 'intHelp', 'intLabel', false, 1, [1, 2, 3])
     appInput.input_spec = [intSpec]
@@ -448,7 +453,7 @@ describe('app service tests', () => {
   })
 
   it('save app - array as inputs and outputs', async() => {
-    const appService = new appDomain.AppService(em, platformClient)
+    const appService = new AppService(em, platformClient)
     const appInput: AppInput = getDefaultApp()
 
     const fileSpec = getSpec('file_array', 'array:file', '', 'inputArray', false, [], [1, 2, 3])

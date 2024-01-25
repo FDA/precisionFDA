@@ -4,12 +4,14 @@ export interface NewsItem {
   link: string;
   isPublication: boolean;
   content: string;
-  user_id?: number;
+  userId?: number | null;
   video: string;
   position: number;
   published: boolean;
   createdAt: string;
   updatedAt: string;
+  user?: null
+  when?: null
 }
 
 export interface NewsListParams {

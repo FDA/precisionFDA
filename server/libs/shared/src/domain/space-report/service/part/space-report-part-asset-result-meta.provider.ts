@@ -1,8 +1,12 @@
-import { Asset } from '../../../user-file'
+import { Injectable } from '@nestjs/common'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { SpaceReportPartResultMeta } from '../../model/space-report-part-result-meta'
 import { SpaceReportPartResultMetaProvider } from './space-report-part-result-meta.provider'
 
-export class SpaceReportPartAssetResultMetaProvider implements SpaceReportPartResultMetaProvider<'asset'> {
+@Injectable()
+export class SpaceReportPartAssetResultMetaProvider
+  implements SpaceReportPartResultMetaProvider<'asset'>
+{
   getResultMeta(entity: Asset): SpaceReportPartResultMeta {
     return {
       title: entity.name,

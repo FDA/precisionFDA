@@ -1,12 +1,13 @@
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ValidationError } from '@shared/errors'
 import { getLogger } from '../../logger'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Folder, User } from '..'
 import { createFolderEvent, EVENT_TYPES } from '../event/event.helper'
 import { getNodePath } from './user-file.helper'
 import { scopeContainsId } from '../space/space.helper'
 import { SCOPE } from '../../types/common'
 import { PARENT_TYPE } from './user-file.types'
-import { errors } from '../..'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
 
 const logger = getLogger('folder.service')
@@ -31,9 +32,9 @@ export class FolderService implements IFolderService {
    * Creates folders on a path. If the folder already exists, it is not created and only returned.
    */
   async createFoldersOnPath(path: string, scope: SCOPE, userId: number, parent?: InputEntityUnion,): Promise<Folder[]> {
-    logger.info(`FolderService: creating folders ${path} with scope ${scope}`)
+    logger.verbose(`FolderService: creating folders ${path} with scope ${scope}`)
     if (!path) {
-      throw new errors.ValidationError('Path must not be empty')
+      throw new ValidationError('Path must not be empty')
     }
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
     const folderNames = path.split('/').filter((folder) => folder !== '')
@@ -59,7 +60,7 @@ export class FolderService implements IFolderService {
     parent?: InputEntityUnion,
     parentFolderId?: number,
   ): Promise<Folder> {
-    logger.info(`FolderService: creating folder ${name}` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
+    logger.verbose(`FolderService: creating folder ${name}` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
 
     try {
@@ -84,7 +85,7 @@ export class FolderService implements IFolderService {
   ): Promise<Folder> {
     let folder = await this.findFolder(name, scope, parentFolderId)
     if (folder) {
-      logger.info(`FolderService: folder ${name} already exists`)
+      logger.verbose(`FolderService: folder ${name} already exists`)
       return folder
     }
 

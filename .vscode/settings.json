@@ -1,5 +1,5 @@
 {
-  "prettier.configPath": "./server/.prettierrc.js",
+  "prettier.configPath": "",
   "eslint.packageManager": "pnpm",
   "eslint.workingDirectories": [
   "./server"

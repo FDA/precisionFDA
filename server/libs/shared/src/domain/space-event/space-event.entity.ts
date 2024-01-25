@@ -6,7 +6,8 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { User, Space } from '..'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,

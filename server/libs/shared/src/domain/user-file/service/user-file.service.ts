@@ -1,14 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { User } from '../../user'
+import { Injectable } from '@nestjs/common'
+import { User } from '@shared/domain/user/user.entity'
 import { UserFileCreate } from '../domain/user-file-create'
 import { UserFile } from '../user-file.entity'
 
+@Injectable()
 export class UserFileService {
-  private readonly em
-
-  constructor(em: SqlEntityManager) {
-    this.em = em
-  }
+  constructor(private readonly em: SqlEntityManager) {}
 
   async createFile(fileCreate: UserFileCreate) {
     const file = new UserFile(this.em.getReference(User, fileCreate.userId))
@@ -27,10 +25,5 @@ export class UserFileService {
     await this.em.persistAndFlush(file)
 
     return file
-  }
-
-  // TODO(PFDA-4701) - Remove with IOC
-  static getInstance(em: SqlEntityManager) {
-    return new UserFileService(em)
   }
 }

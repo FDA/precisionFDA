@@ -1,9 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { User, UserFile, Event, Notification, Folder } from '../../../src/domain'
+import { database } from '@shared/database'
+import { JobService } from '@shared/domain/job/job.service'
+import { JobRunData } from '@shared/domain/job/job.types'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
+import { Notification } from '@shared/domain/notification/notification.entity'
 import { expect } from 'chai'
-import { database } from '@shared'
 import { create, db } from '@shared/test'
-import { JobService } from '@shared/domain/job'
 import { PlatformClient } from '../../../src/platform-client'
 import {
   FileStatesParams,
@@ -18,7 +23,6 @@ import {
 import { FILE_STATE_DX, PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '../../../src/enums'
 import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
-import { RunData } from '../../../src/domain/job/job.entity'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -233,7 +237,7 @@ describe('Job service tests', () => {
     const job = create.jobHelper.create(
       em,
       { user },
-      { scope: `space-${space.id}`, runData: { output_folder_path: folder.name } as RunData },
+      { scope: `space-${space.id}`, runData: { output_folder_path: folder.name } as JobRunData },
     )
     await em.flush()
 
@@ -256,7 +260,7 @@ describe('Job service tests', () => {
     const job = create.jobHelper.create(
       em,
       { user },
-      { scope: `space-${space.id}`, runData: { output_folder_path: '/test-folder' } as RunData },
+      { scope: `space-${space.id}`, runData: { output_folder_path: '/test-folder' } as JobRunData },
     )
     await em.flush()
 
@@ -282,7 +286,7 @@ describe('Job service tests', () => {
     const job = create.jobHelper.create(
       em,
       { user },
-      { runData: { output_folder_path: 'folder1/folder2/folder3' } as RunData },
+      { runData: { output_folder_path: 'folder1/folder2/folder3' } as JobRunData },
     )
     await em.flush()
 

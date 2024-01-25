@@ -1,21 +1,18 @@
-import type { WorkerOpsCtx } from '@shared/types'
+import { Injectable } from '@nestjs/common'
+import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { createHash } from 'crypto'
 import { PlatformClient } from '../../../platform-client'
 import type { FileCreateParams } from '../../../platform-client/platform-client.params'
-import type { UserOpsCtx } from '../../../types'
-import type { UserFile } from '../../user-file'
-import { FileCloseOperation } from '../../user-file'
 
+@Injectable()
 export class PlatformFileService {
   private readonly CHUNK_SIZE = 50 * 1024 * 1024 // 50MB
 
-  private readonly platformClient
-  private readonly fileCloseOperation
-
-  constructor(platformClient: PlatformClient, fileCloseOperation: FileCloseOperation) {
-    this.platformClient = platformClient
-    this.fileCloseOperation = fileCloseOperation
-  }
+  constructor(
+    private readonly platformClient: PlatformClient,
+    private readonly fileCloseOperation: FileCloseOperation,
+  ) {}
 
   async createFile(params: FileCreateParams) {
     return await this.platformClient.fileCreate(params)
@@ -55,13 +52,5 @@ export class PlatformFileService {
     const size = content.byteLength
 
     return await this.platformClient.getFileUploadUrl({ dxid, index, md5, size })
-  }
-
-  // TODO(PFDA-4701) - Remove with IOC
-  static getInstance(userCtx: WorkerOpsCtx<UserOpsCtx>) {
-    const client = new PlatformClient(userCtx.user.accessToken)
-    const fileCloseOp = new FileCloseOperation(userCtx)
-
-    return new PlatformFileService(client, fileCloseOp)
   }
 }

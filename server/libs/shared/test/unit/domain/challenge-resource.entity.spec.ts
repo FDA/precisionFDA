@@ -1,5 +1,8 @@
+import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { Challenge, ChallengeResource, User } from '@shared/domain'
 import { database } from '../../../src/database'
 import { create, db, generate } from '../../../src/test'
 

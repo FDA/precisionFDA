@@ -1,9 +1,9 @@
-import { SpaceEvent } from '../../space-event'
+import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../space-event/space-event.enum'
 import { EmailProcessInput, EMAIL_TYPES } from '../email.config'
-import { email } from '../..'
 import { UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 
 const CONTENT_TYPES = [SPACE_EVENT_ACTIVITY_TYPE.file_added,
   SPACE_EVENT_ACTIVITY_TYPE.note_added,
@@ -25,7 +25,7 @@ const SPACE_TYPES = [SPACE_EVENT_ACTIVITY_TYPE.space_locked,
 
 class NotificationSendOperation extends BaseOperation<UserOpsCtx, SpaceEvent, void> {
   async run(event: SpaceEvent) {
-    const op = new email.EmailProcessOperation(this.ctx)
+    const op = new EmailProcessOperation(this.ctx)
 
     if (CONTENT_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput = {

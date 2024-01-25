@@ -1,1 +1,0 @@
-export { Follow } from './follow.entity'

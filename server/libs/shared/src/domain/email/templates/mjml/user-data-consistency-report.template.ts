@@ -1,5 +1,5 @@
 import { UserDataConsistencyReportOutput } from '../../../user/ops/user-data-consistency-report'
-import { EmailTemplateInput } from '../../email.config'
+import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer } from './common'
 
 
@@ -22,7 +22,7 @@ const createSection = (title: string, count: number | undefined, content: any[])
 }
 
 /**
- * Report various data consistency 
+ * Report various data consistency
  */
 export const userDataConsistencyReportTemplate = (data: UserDataConsistencyReportTemplateInput): string => `
   ${header}

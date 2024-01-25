@@ -9,7 +9,7 @@ import { Button, ButtonSolidBlue } from '../../Button/index'
 import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 
 type StyledPublicNavbarProps = {
-  isSticky?: boolean
+  $isSticky?: boolean
 }
 
 const StyledPublicNavbar = styled(PageContainerMargin)<StyledPublicNavbarProps>`
@@ -39,7 +39,7 @@ const StyledPublicNavbar = styled(PageContainerMargin)<StyledPublicNavbarProps>`
   }
 
   ${props =>
-    props.isSticky
+    props.$isSticky
       ? css`
           position: fixed;
           top: 0;
@@ -95,7 +95,7 @@ const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
     border-bottom: 2px solid transparent;
     text-decoration: none;
     ${props =>
-      props.isSticky
+      props.$isSticky
         ? css`
             color: ${theme.colors.textBlack};
           `
@@ -105,7 +105,7 @@ const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
 
     &:hover {
       ${props =>
-        props.isSticky
+        props.$isSticky
           ? css`
               border-bottom: 2px solid black;
             `
@@ -120,7 +120,7 @@ const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
     border-bottom: 2px solid ${theme.colors.blueOnBlack};
 
     ${props =>
-      props.isSticky
+      props.$isSticky
         ? css`
             &:hover {
               border-bottom: 2px solid ${theme.colors.blueOnBlack};
@@ -147,8 +147,8 @@ const PublicNavbarRightButtons = styled.div<StyledPublicNavbarProps>`
     letter-spacing: normal;
   }
 
-  ${({ isSticky }) =>
-    isSticky &&
+  ${({ $isSticky }) =>
+    $isSticky &&
     css`
       margin-right: 32px;
     `}
@@ -206,7 +206,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
   }
 
   return (
-    <StyledPublicNavbar as="nav" id="pfda-navbar" isSticky={sticky}>
+    <StyledPublicNavbar as="nav" id="pfda-navbar" $isSticky={sticky}>
       {sticky ? (
         <StyledPFDALogoDark className="pfda-navbar-logo" />
       ) : (
@@ -215,7 +215,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
           hidden={!shouldShowLogo}
         />
       )}
-      <PublicNavbarCenterButtons isSticky={sticky}>
+      <PublicNavbarCenterButtons $isSticky={sticky}>
         <Link data-turbolinks="false" to="/" className={getLinkClassName('/')}>
           Overview
         </Link>
@@ -251,7 +251,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
           UNII Search
         </a>
       </PublicNavbarCenterButtons>
-      <PublicNavbarRightButtons isSticky={sticky}>
+      <PublicNavbarRightButtons $isSticky={sticky}>
         <Button onClick={onRequestAccess}>Request Access</Button>
         <ButtonSolidBlue onClick={onLogIn}>Log In</ButtonSolidBlue>
         {data?.ssoButton.isEnabled && (

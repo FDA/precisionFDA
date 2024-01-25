@@ -1,13 +1,18 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import {
+  NotificationPreference
+} from '@shared/domain/notification-preference/notification-preference.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
-import { App, Job, NotificationPreference, User } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
-import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers'
+import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers/job-finished.handler'
 import { UserOpsCtx } from '@shared/types'
 import { defaultLogger } from '@shared/logger'
-import { database } from '@shared'
 
 describe('job-finished.handler', () => {
   let em: EntityManager

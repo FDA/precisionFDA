@@ -1,28 +1,28 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { PlatformClient } from '../../../platform-client'
-import { AppInput, PlatformSpec, Spec } from '../app.input'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ValidationError } from '@shared/errors'
+import * as crypto from 'crypto'
+import { UBUNTU_16, UBUNTU_RELEASES, VALID_IO_CLASSES } from '../../../config/consts'
+import { validUbuntuPackages } from '../../../config/ubuntu_packages'
 import { STATIC_SCOPE } from '../../../enums'
-import { AssetRepository } from '../../user-file/asset.repository'
-import { Asset } from '../../user-file'
-import { constructDxid, constructDxname } from '../app.helper'
-import { User } from '../../user'
-import { AppSeries } from '../../app-series'
-import { UBUNTU_16, UBUNTU_RELEASES, VALID_IO_CLASSES} from '../../../config/consts'
+import { getLogger } from '../../../logger'
+import { PlatformClient } from '../../../platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
-  PackageMapping
+  PackageMapping,
 } from '../../../platform-client/platform-client.params'
-import { allowedInstanceTypes } from '../../job/job.enum'
-import * as crypto from 'crypto'
-import { App, Internal, AppSpec } from '../app.entity'
-import { ENTITY_TYPE } from '../app.enum'
-import { scopeContainsId } from '../../space/space.helper'
-import { createAppCreated } from '../../event/event.helper'
-import { errors } from '@shared'
-import { getLogger } from '../../../logger'
-import { validUbuntuPackages } from '../../../config/ubuntu_packages'
 import { codeRemap } from '../../../utils/app'
+import { createAppCreated } from '../../event/event.helper'
+import { allowedInstanceTypes } from '../../job/job.enum'
+import { scopeContainsId } from '../../space/space.helper'
+import { AssetRepository } from '../../user-file/asset.repository'
+import { App, AppSpec, Internal } from '../app.entity'
+import { ENTITY_TYPE } from '../app.enum'
+import { constructDxid, constructDxname } from '../app.helper'
+import { AppInput, PlatformSpec, Spec } from '../app.input'
 
 const logger = getLogger('app.service')
 
@@ -67,11 +67,11 @@ export class AppService implements IAppService {
 
   private throwValidationError(message: string) {
     logger.error(message)
-    throw new errors.ValidationError(message)
+    throw new ValidationError(message)
   }
 
   private async validateAppInput(appInput: AppInput, userId: number) {
-    logger.info('starting app validations')
+    logger.verbose('starting app validations')
 
     if (!UBUNTU_RELEASES.includes(appInput.release)) {
       this.throwValidationError(`Unacceptable release ${appInput.release}`)
@@ -107,7 +107,7 @@ export class AppService implements IAppService {
     const alreadySeenOutputs: string[] = []
     appInput.output_spec.forEach(spec => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
-    logger.info('app validations finished successfully')
+    logger.verbose('app validations finished successfully')
   }
 
   private getScope = (scope?: string) => {
@@ -151,7 +151,7 @@ export class AppService implements IAppService {
       appSeries.name = appName
       appSeries.dxid = appSeriesDxid
       appSeries.scope = scope
-      logger.info('AppService: creating app series', appSeries)
+      logger.verbose('AppService: creating app series', appSeries)
       await this.em.persistAndFlush(appSeries)
     }
     return appSeries
@@ -189,7 +189,7 @@ export class AppService implements IAppService {
    * @param release
    */
   private createApplet = async (user: User, appInput: AppInput, release: string): Promise<string> => {
-    logger.info('AppService: creating applet in platform', user, appInput, release)
+    logger.verbose('AppService: creating applet in platform', user, appInput, release)
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
       inputSpec: this.remapPfdaSpecToPlatformSpec(appInput.input_spec),
@@ -217,7 +217,7 @@ export class AppService implements IAppService {
 
   private createAppInPlatform = async (appletId: string, appInput: AppInput, revision: number, user: User,
                                assets: Asset[]): Promise<string> => {
-    logger.info('AppService: creating app in platform', appletId, appInput, revision, user, assets)
+    logger.verbose('AppService: creating app in platform', appletId, appInput, revision, user, assets)
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
       applet: appletId,
@@ -237,13 +237,13 @@ export class AppService implements IAppService {
   }
 
   private createAppEvent = async (user: User, app: App) => {
-    logger.info('AppService: creating app event', user, app)
+    logger.verbose('AppService: creating app event', user, app)
     const createAppEvent = await createAppCreated(user, app)
     await this.em.persistAndFlush(createAppEvent)
   }
 
   private updateAppSeries = async (appSeries: AppSeries, appInput: AppInput, app: App) => {
-    logger.info('AppService: updating app series', appSeries, appInput, app)
+    logger.verbose('AppService: updating app series', appSeries, appInput, app)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && scopeContainsId(appInput.scope)) {
       appSeries.latestVersionAppId = app.id
@@ -261,7 +261,7 @@ export class AppService implements IAppService {
 
   private saveAppInDB = async (user: User, platformAppId: string, revision: number, release: string,
                        assets: Asset[], appInput: AppInput, appSeriesId: number) => {
-    logger.info('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
+    logger.verbose('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
     const app = new App(user)
     app.dxid = platformAppId
     app.uid = `${app.dxid}-${revision}`
@@ -297,7 +297,7 @@ export class AppService implements IAppService {
    * @return uid of newly created app
    */
   create = async (appInput: AppInput, userId: number): Promise<string> => {
-    logger.info('AppService: creating app', appInput, userId)
+    logger.verbose('AppService: creating app', appInput, userId)
     await this.validateAppInput(appInput, userId)
     await this.em.begin()
     try {

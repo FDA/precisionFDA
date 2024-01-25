@@ -1,4 +1,5 @@
 /* eslint-disable no-warning-comments */
+import { parseEnumValueFromString } from '@shared/validation/parsers'
 /* eslint-disable max-len */
 // eslint-disable-next-line import/no-named-default
 import { default as dotenv } from 'dotenv'
@@ -32,8 +33,17 @@ export const parseIntFromProcess = (envValue: string | undefined): Maybe<number>
 const parseBooleanFromProcess = (value: string | undefined, defaultValue = false): boolean =>
   value ? value.toLowerCase() === 'true' : defaultValue
 
+const getEnv = () => {
+  try {
+    return parseEnumValueFromString(Object.values(ENVS))(process.env.NODE_ENV)
+  } catch {
+    throw new Error(`NODE_ENV value "${process.env.NODE_ENV}" is not a valid environment`)
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const env = (process.env.NODE_ENV ?? ENVS.LOCAL) as ENVS
+const env = getEnv()
+
 const defaultConfig = {
   appName: 'https-apps-worker',
   env,
@@ -46,13 +56,13 @@ const defaultConfig = {
     url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
-    allowErrorTestingRoutes: process.env.NODE_ALLOW_ERROR_TESTING_ROUTES ?? true,
+    allowErrorTestingRoutes: parseBooleanFromProcess(process.env.NODE_ALLOW_ERROR_TESTING_ROUTES, true),
     fdaSubnet: {
       allowedIpCidrBlock: {
         ipv4Quadruple: [127, 0, 0, 1],
         maskSize: 0,
       },
-      nginxIpHeader: 'X-Forwarded-For',
+      nginxIpHeader: 'x-forwarded-for',
     },
   },
   logs: {

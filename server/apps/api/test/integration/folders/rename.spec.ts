@@ -1,11 +1,14 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { App, Folder, Job, User } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { database } from '@shared'
 import {
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,

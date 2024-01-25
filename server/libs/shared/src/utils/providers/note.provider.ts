@@ -1,5 +1,5 @@
+import { Note } from '@shared/domain/note/note.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
-import { Note } from '../../domain/note'
 import { EntityDataProvider } from './entity-data.provider'
 
 export class NoteEntityDataProvider extends EntityDataProvider<'note'> {

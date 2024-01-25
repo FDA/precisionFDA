@@ -1,6 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import { EntityRepository } from '@mikro-orm/mysql'
-import { Folder, UserFile } from '..'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STI_TYPE } from '../user-file/user-file.types'
 import { Tagging } from './tagging.entity'
 

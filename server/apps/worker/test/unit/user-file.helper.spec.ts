@@ -1,19 +1,20 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { Folder, User } from '@shared/domain'
-import { userFile, database } from '@shared'
 import { create, db } from '@shared/test'
 import {
   splitFolderPath,
   detectIntersectedTraverse,
-  findFolderForPath,
+  findFolderForPath, folderPathsFromFolders, parseFoldersFromClient,
 } from '@shared/domain/user-file/user-file.helper'
 
 describe('user-file.helper', () => {
   context('parseFoldersFromClient()', () => {
     it('should return folders structure - filtered and sorted', () => {
       const input = ['/', '/platform-folder', '/.Notebook_snapshots', '/platform-folder/subfolder']
-      const result = userFile.helper.parseFoldersFromClient(input)
+      const result = parseFoldersFromClient(input)
       expect(result).to.be.an('array').with.lengthOf(3)
       expect(result).to.have.ordered.members([
         '/.Notebook_snapshots',
@@ -26,14 +27,14 @@ describe('user-file.helper', () => {
       // incorrect output discovered from the API
       // could break the folders sync
       const input = ['/', '/foo-renamed/bar', '/foo-renamed']
-      const result = userFile.helper.parseFoldersFromClient(input)
+      const result = parseFoldersFromClient(input)
       expect(result).to.be.an('array').with.lengthOf(2)
       expect(result).to.have.ordered.members(['/foo-renamed', '/foo-renamed/bar'])
     })
 
     it('puts longer strings after shorter strings', () => {
       const input = ['/', '/a/b/c', '/a/b']
-      const result = userFile.helper.parseFoldersFromClient(input)
+      const result = parseFoldersFromClient(input)
       expect(result).to.be.an('array').with.lengthOf(2)
       expect(result).to.have.ordered.members(['/a/b', '/a/b/c'])
     })
@@ -74,7 +75,7 @@ describe('user-file.helper', () => {
         },
       )
       await em.flush()
-      const result = userFile.helper.folderPathsFromFolders([subfolder, parentFolder, subfolder2])
+      const result = folderPathsFromFolders([subfolder, parentFolder, subfolder2])
       expect(result).to.be.an('array').with.lengthOf(3)
       expect(result).to.have.ordered.members([
         '/parent-folder',
@@ -108,7 +109,7 @@ describe('user-file.helper', () => {
         },
       )
       await em.flush()
-      const result = userFile.helper.folderPathsFromFolders([subfolder, parentFolder, subfolder2])
+      const result = folderPathsFromFolders([subfolder, parentFolder, subfolder2])
       expect(result).to.be.an('array').with.lengthOf(3)
       expect(result).to.have.ordered.members([
         '/parent-folder',

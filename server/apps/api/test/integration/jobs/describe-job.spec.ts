@@ -1,9 +1,12 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { DateTime } from 'luxon'
 import { repeat } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
-import { database, errors } from '@shared'
-import { App, User, Job } from '@shared/domain'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@shared/domain/job/job.enum'
 import supertest from 'supertest'
 import { create, db } from '@shared/test'
@@ -117,7 +120,7 @@ describe.skip('GET /jobs/:id', () => {
   context('error states', () => {
     it('returns 400 when query data is not provided', async () => {
       const { body } = await supertest(getServer()).get(`/jobs/${job.dxid}`).expect(400)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID)
+      expect(body.error).to.have.property('code', ErrorCodes.USER_CONTEXT_QUERY_INVALID)
       expect(body.props).to.have.property('validationErrors')
     })
 
@@ -127,7 +130,7 @@ describe.skip('GET /jobs/:id', () => {
         .get(`/jobs/${longString}`)
         .set(getDefaultHeaderData(user))
         .expect(400)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.VALIDATION)
+      expect(body.error).to.have.property('code', ErrorCodes.VALIDATION)
       expect(body.props).to.have.property('validationErrors')
     })
 
@@ -137,7 +140,7 @@ describe.skip('GET /jobs/:id', () => {
         .set(getDefaultHeaderData(user))
         .query({ id: user.id + 1 })
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
     })
 
     it.skip('returns 404 when job does not belong to the given app', async () => {
@@ -145,7 +148,7 @@ describe.skip('GET /jobs/:id', () => {
         .get(`/apps/${(app.id + 1).toString()}/jobs/${job.dxid}`)
         .set(getDefaultHeaderData(user))
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
     })
   })
 })

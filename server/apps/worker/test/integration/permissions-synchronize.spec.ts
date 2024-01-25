@@ -1,7 +1,10 @@
 /* eslint-disable no-undefined */
 import { EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import { User, Space } from '@shared/domain'
+import { database } from '@shared/database'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMaintenanceQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, db } from '@shared/test'
 import { UserCtx } from '@shared/types'
@@ -10,15 +13,18 @@ import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-mem
 import { JobOptions } from 'bull'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
-
 const createSyncSpacesPermissionsTask = async (user: UserCtx) => {
-  const defaultQueue = queue.getMaintenanceQueue()
-  const options: JobOptions = { jobId: `${queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS}` }
+  const defaultQueue = getMaintenanceQueue()
+  const options: JobOptions = { jobId: `${TASK_TYPE.SYNC_SPACES_PERMISSIONS}` }
 
-  await defaultQueue.add({
-    type: queue.types.TASK_TYPE.SYNC_SPACES_PERMISSIONS,
-    user,
-  }, options)
+  await defaultQueue.add(
+    TASK_TYPE.SYNC_SPACES_PERMISSIONS,
+    {
+      type: TASK_TYPE.SYNC_SPACES_PERMISSIONS,
+      user,
+    },
+    options,
+  )
 }
 
 describe('TASK: permissions-synchronize', () => {
@@ -55,7 +61,14 @@ describe('TASK: permissions-synchronize', () => {
   it('checks platform side of a space and does nothing as it matches pFDA', async () => {
     create.spacesHelper.addMember(em, { user: user1, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
     create.spacesHelper.addMember(em, { user: user2, space }, { role: SPACE_MEMBERSHIP_ROLE.ADMIN })
-    create.spacesHelper.addMember(em, { user: user3, space }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user3,
+        space,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
     await em.flush()
     await createSyncSpacesPermissionsTask(userContext)
     expect(fakes.client.orgFindMembersFake.calledOnce).to.be.true()
@@ -66,10 +79,24 @@ describe('TASK: permissions-synchronize', () => {
   it('checks platform side of a space and adds missing users to platform to match pFDA side', async () => {
     create.spacesHelper.addMember(em, { user: user1, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
     create.spacesHelper.addMember(em, { user: user2, space }, { role: SPACE_MEMBERSHIP_ROLE.ADMIN })
-    create.spacesHelper.addMember(em, { user: user3, space }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user3,
+        space,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
     const user4 = create.userHelper.create(em, { dxuser: 'pfda_autotest1' })
 
-    create.spacesHelper.addMember(em, { user: user4, space }, { role: SPACE_MEMBERSHIP_ROLE.VIEWER })
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user4,
+        space,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
+    )
 
     await em.flush()
     await createSyncSpacesPermissionsTask(userContext)
@@ -92,11 +119,7 @@ describe('TASK: permissions-synchronize', () => {
     expect(fakes.client.removeUserFromOrganizationFake.notCalled).to.be.true()
 
     em.clear()
-    const fixedSpace = await em.findOne(
-      Space,
-      { id: space.id },
-      {},
-    )
+    const fixedSpace = await em.findOne(Space, { id: space.id }, {})
 
     await fixedSpace.spaceMemberships.loadItems()
     expect(fixedSpace.spaceMemberships.getItems().length).to.be.eq(2)

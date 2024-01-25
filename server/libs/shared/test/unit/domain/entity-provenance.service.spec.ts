@@ -1,14 +1,12 @@
+import { App } from '@shared/domain/app/app.entity'
+import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
+import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
+import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
+import { EntityProvenanceDataProviderService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data-provider.service'
+import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
+import { EntityProvenanceSvgResultTransformerService } from '@shared/domain/provenance/service/result-transform/entity-provenance-svg-result-transformer.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import type { App } from '../../../src/domain'
-import type {
-  EntityProvenanceDataProviderService,
-  EntityProvenanceSourceUnion,
-  EntityProvenanceSvgResultTransformerService,
-} from '../../../src/domain/provenance'
-import { EntityProvenanceService } from '../../../src/domain/provenance'
-import type { EntityProvenance } from '../../../src/domain/provenance/model/entity-provenance'
-import type { EntityProvenanceSvgOptions } from '../../../src/domain/provenance/model/entity-provenance-svg-options'
 
 describe('EntityProvenanceService', () => {
   const ENTITY_TYPE = 'app'
@@ -18,7 +16,13 @@ describe('EntityProvenanceService', () => {
 
   const TITLE = 'title'
   const URL = 'url'
-  const ENTITY_PROVENANCE: EntityProvenance = { data: { title: TITLE, url: URL, type: ENTITY_TYPE } }
+  const ENTITY_PROVENANCE: EntityProvenance = {
+    data: {
+      title: TITLE,
+      url: URL,
+      type: ENTITY_TYPE,
+    },
+  }
 
   const SVG = 'svg'
   const STYLES = 'styles'
@@ -46,7 +50,9 @@ describe('EntityProvenanceService', () => {
       getEntityProvenanceDataStub.reset()
       getEntityProvenanceDataStub.throws(error)
 
-      await expect(getInstance().getEntityProvenance(ENTITY_PROVENANCE_SOURCE, 'raw')).to.be.rejectedWith(error)
+      await expect(
+        getInstance().getEntityProvenance(ENTITY_PROVENANCE_SOURCE, 'raw'),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from svgTransform', async () => {
@@ -54,7 +60,9 @@ describe('EntityProvenanceService', () => {
       svgTransformStub.reset()
       svgTransformStub.throws(error)
 
-      await expect(getInstance().getEntityProvenance(ENTITY_PROVENANCE_SOURCE, 'svg')).to.be.rejectedWith(error)
+      await expect(
+        getInstance().getEntityProvenance(ENTITY_PROVENANCE_SOURCE, 'svg'),
+      ).to.be.rejectedWith(error)
     })
 
     it('should return the provenance data when format is raw', async () => {
@@ -106,6 +114,9 @@ describe('EntityProvenanceService', () => {
       getStyles: getStylesStub,
     } as unknown as EntityProvenanceSvgResultTransformerService
 
-    return new EntityProvenanceService(entityProvenanceDataProviderService, entityProvenanceSvgResultTransformerService)
+    return new EntityProvenanceService(
+      entityProvenanceDataProviderService,
+      entityProvenanceSvgResultTransformerService,
+    )
   }
 })

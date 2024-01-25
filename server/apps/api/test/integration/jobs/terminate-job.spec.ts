@@ -1,12 +1,15 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { App, Job, User } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { errors, database } from '@shared'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -78,7 +81,7 @@ describe('PATCH /jobs/:id/terminate', () => {
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .set(getDefaultHeaderData(user))
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
     })
 
     it('throws 404 when the job type is NOT HTTPS', async () => {
@@ -88,7 +91,7 @@ describe('PATCH /jobs/:id/terminate', () => {
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .set(getDefaultHeaderData(user))
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.JOB_NOT_FOUND)
     })
   })
 })

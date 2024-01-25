@@ -1,5 +1,5 @@
 import { Connection } from '@mikro-orm/core'
-import { config } from '..'
+import { config } from '@shared/config'
 
 const tableNamesToOmit = ['ar_internal_metadata', 'schema_migrations']
 

@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
-import { Note } from '../note'
+import { Note } from '@shared/domain/note/note.entity'
 
 export type ItemType = 'Node' | 'Job' | 'App' | 'Workflow' | 'Comparison'
 

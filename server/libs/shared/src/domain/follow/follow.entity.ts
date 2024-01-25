@@ -1,6 +1,5 @@
 import { Entity, PrimaryKey, Property, Reference } from "@mikro-orm/core";
 import { BaseEntity } from '../../database/base-entity'
-import { Discussion } from "../discussion";
 @Entity({tableName: 'follows'})
 export class Follow extends BaseEntity {
     @PrimaryKey()

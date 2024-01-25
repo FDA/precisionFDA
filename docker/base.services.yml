@@ -1,5 +1,6 @@
 services:
   base_ruby:
+    platform: linux/x86_64
     env_file: ../.env
     build:
       context: ../
@@ -21,6 +22,7 @@ services:
         - NODEJS_IMAGE_TAG=20.9.0-slim
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
+      - NODE_REDIS_URL=redis://redis:6379/0
       
 
   web:
@@ -53,6 +55,9 @@ services:
     command: pnpm run watch:docker
   # TODO(samuel) setup correct NODE_ENV here
   nodejs-api:
+    environment:
+      - NODE_PATH_CERT=/keys/cert.pem
+      - NODE_PATH_KEY_CERT=/keys/key.pem
     extends:
       service: base_nodejs
     command: ['make', 'run-dist']
@@ -79,7 +84,6 @@ services:
     depends_on:
       - redis
   db:
-    # ! Don't forget to update "db_emulated" image when updating version
     image: mysql:8.0
     environment:
       - MYSQL_ROOT_PASSWORD=password
@@ -90,11 +94,3 @@ services:
     image: redis:6.2.11
     ports:
       - 6379:6379
-
-  # Emulated images
-  # Note - it's better to keep this in this file as all the versions are at the same place
-
-  db_emulated:
-    extends:
-      service: db
-    image: amd64/mysql:8.0

@@ -1,9 +1,12 @@
-import { entities, errors } from '@shared'
+import { Space } from '@shared/domain/space/space.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { PermissionError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
-import { Folder, Node, UserFile } from '../..'
 import { UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getScopeFromSpaceId } from '../../space/space.helper'
 import { CLINodeSearchInput } from '../user-file.input'
@@ -24,7 +27,7 @@ class CLINodeSearchOperation extends BaseOperation<
         const scopedParentFolderId = input.folderId && input.spaceId ? input.folderId : null
 
         const spaces = await em.find(
-            entities.Space,
+            Space,
             {
                 spaceMemberships: {
                     user: {
@@ -39,14 +42,14 @@ class CLINodeSearchOperation extends BaseOperation<
 
         const spaceScopes = spaces.map(s => `space-${s.id}`)
         if (input.spaceId && !spaceScopes.includes(scope)) {
-            throw new errors.PermissionError("You don't have permission to access this space or remove files in it!")
+            throw new PermissionError("You don't have permission to access this space or remove files in it!")
         }
 
         let result: UserFile[] | Folder[]
 
         if (input.type === 'Folder') {
             result = await em.find(
-                entities.Folder,
+                Folder,
                 {
                     $or: [
                         {userId: user.id, scope: STATIC_SCOPE.PRIVATE},
@@ -64,7 +67,7 @@ class CLINodeSearchOperation extends BaseOperation<
             }
         } else {
             result = await em.find(
-                entities.UserFile,
+                UserFile,
                 {
                     $or: [
                         {$and: [{userId: user.id, scope: STATIC_SCOPE.PRIVATE, parentFolder}]},

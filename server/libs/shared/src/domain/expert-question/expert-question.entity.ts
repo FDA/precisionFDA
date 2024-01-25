@@ -1,8 +1,8 @@
 import { Entity, Enum, Ref, ManyToOne, OneToOne, Property, Reference } from "@mikro-orm/core";
+import { ExpertAnswer } from '@shared/domain/expert-answer/expert-answer.entity'
+import { Expert } from '@shared/domain/expert/expert.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { ExpertAnswer } from "../expert-answer";
-import { Expert } from "../expert";
-import { User } from "../user";
 
 export enum ExpertQuestionState {
   OPEN = 'open',
@@ -32,10 +32,10 @@ export class ExpertQuestion extends BaseEntity {
   body!: string
 
   @Property({ type: 'text'})
-  meta?: QuestionMeta 
+  meta?: QuestionMeta
 
   @Enum()
-  state!: ExpertQuestionState 
+  state!: ExpertQuestionState
 
   constructor(answer?: ExpertAnswer) {
     super()

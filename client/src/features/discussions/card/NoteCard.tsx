@@ -64,7 +64,7 @@ export function NoteCard({
 
   if (editMode) {
     return (
-      <StyledMarkdown isAnswer={!!answerId}>
+      <StyledMarkdown $isAnswer={!!answerId}>
         <EditNoteEntity
           onSuccess={() => setEditMode(false)}
           onCancel={() => setEditMode(false)}
@@ -77,7 +77,7 @@ export function NoteCard({
   }
 
   return (
-    <StyledCommentCard isAnswer={!!answerId}>
+    <StyledCommentCard $isAnswer={!!answerId}>
       <CardHeader
         timestamp={note.createdAt}
         cardType={answerId ? 'answer' : 'discussion'}

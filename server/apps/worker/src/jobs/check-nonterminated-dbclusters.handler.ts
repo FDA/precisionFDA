@@ -1,7 +1,10 @@
-import { database, dbCluster } from '@shared'
+import { database } from '@shared/database'
+import {
+  CheckNonTerminatedDbClustersOperation
+} from '@shared/domain/db-cluster/ops/check-non-terminated'
 import type { CheckNonTerminatedDbClustersJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const checkNonTerminatedDbClustersHandler = async (bullJob: Job<CheckNonTerminatedDbClustersJob>) => {
   const requestId = String(bullJob.id)
@@ -12,7 +15,7 @@ export const checkNonTerminatedDbClustersHandler = async (bullJob: Job<CheckNonT
     log,
     job: bullJob
   }
-  await new dbCluster.CheckNonTerminatedDbClustersOperation(ctx as any).execute()
+  await new CheckNonTerminatedDbClustersOperation(ctx as any).execute()
 
 }
 

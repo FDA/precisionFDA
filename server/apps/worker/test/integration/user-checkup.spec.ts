@@ -1,7 +1,11 @@
 /* eslint-disable no-undefined */
 import type { EntityManager } from '@mikro-orm/mysql'
-import { config, database, queue } from '@shared'
-import type { App, User } from '@shared/domain'
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -11,9 +15,9 @@ import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.t
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createUserCheckupTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.USER_CHECKUP,
+  const defaultTestQueue = getMainQueue()
+  await defaultTestQueue.add(TASK_TYPE.USER_CHECKUP, {
+    type: TASK_TYPE.USER_CHECKUP,
     user,
   })
 }
@@ -57,24 +61,48 @@ describe('TASK: user-checkup', () => {
   })
 
   it('adds job sync tasks for HTTPS apps but not regular apps to the queue', async () => {
-    const job1 = create.jobHelper.create(em, { user, app: regularApp }, {
-      state: JOB_STATE.IDLE,
-    })
-    const job2 = create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.IDLE,
-    })
-    const job3 = create.jobHelper.create(em, { user, app: regularApp }, {
-      state: JOB_STATE.TERMINATING,
-    })
-    const job4 = create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.RUNNING,
-    })
-    const job5 = create.jobHelper.create(em, { user, app: regularApp }, {
-      state: JOB_STATE.RUNNING,
-    })
-    create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.TERMINATED,
-    })
+    const job1 = create.jobHelper.create(
+      em,
+      { user, app: regularApp },
+      {
+        state: JOB_STATE.IDLE,
+      },
+    )
+    const job2 = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.IDLE,
+      },
+    )
+    const job3 = create.jobHelper.create(
+      em,
+      { user, app: regularApp },
+      {
+        state: JOB_STATE.TERMINATING,
+      },
+    )
+    const job4 = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.RUNNING,
+      },
+    )
+    const job5 = create.jobHelper.create(
+      em,
+      { user, app: regularApp },
+      {
+        state: JOB_STATE.RUNNING,
+      },
+    )
+    create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.TERMINATED,
+      },
+    )
     await em.flush()
 
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -103,24 +131,44 @@ describe('TASK: user-checkup', () => {
   })
 
   it('ignores jobs that have sync tasks already there', async () => {
-    const job1 = create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.RUNNING,
-    })
-    const job2 = create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.RUNNING,
-    })
-    const job3 = create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.TERMINATING,
-    })
-    const job4 = create.jobHelper.create(em, { user, app: httpsApp }, {
-      state: JOB_STATE.TERMINATING,
-    })
+    const job1 = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.RUNNING,
+      },
+    )
+    const job2 = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.RUNNING,
+      },
+    )
+    const job3 = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.TERMINATING,
+      },
+    )
+    const job4 = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      {
+        state: JOB_STATE.TERMINATING,
+      },
+    )
     await em.flush()
 
     fakes.queue.findRepeatableFake.onCall(0).returns(undefined)
-    fakes.queue.findRepeatableFake.onCall(1).returns(generate.bullQueue.syncJobStatus(job2.dxid, userContext))
+    fakes.queue.findRepeatableFake
+      .onCall(1)
+      .returns(generate.bullQueue.syncJobStatus(job2.dxid, userContext))
     fakes.queue.findRepeatableFake.onCall(2).returns(undefined)
-    fakes.queue.findRepeatableFake.onCall(3).returns(generate.bullQueue.syncJobStatus(job4.dxid, userContext))
+    fakes.queue.findRepeatableFake
+      .onCall(3)
+      .returns(generate.bullQueue.syncJobStatus(job4.dxid, userContext))
 
     await createUserCheckupTask(userContext)
 
@@ -184,7 +232,9 @@ describe('TASK: user-checkup', () => {
     create.filesHelper.create(em, { user }, { name: 'file1', ...params })
     await em.flush()
 
-    fakes.queue.findRepeatableFake.callsFake(() => generate.bullQueueRepeatable.syncFilesState(user.dxuser))
+    fakes.queue.findRepeatableFake.callsFake(() =>
+      generate.bullQueueRepeatable.syncFilesState(user.dxuser),
+    )
 
     await createUserCheckupTask(userContext)
 
@@ -201,7 +251,7 @@ describe('TASK: user-checkup', () => {
 
   it('queues UserDataConsistencyReport if last checkup is over the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date(new Date().getTime() + (repeat * 1000) + 1)
+    user.lastDataCheckup = new Date(new Date().getTime() + repeat * 1000 + 1)
     await em.flush()
 
     await createUserCheckupTask(userContext)
@@ -210,7 +260,7 @@ describe('TASK: user-checkup', () => {
 
   it('does not queue UserDataConsistencyReport if last checkup is under the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date(new Date().getTime() + (repeat * 1000) - 1)
+    user.lastDataCheckup = new Date(new Date().getTime() + repeat * 1000 - 1)
     await em.flush()
 
     await createUserCheckupTask(userContext)

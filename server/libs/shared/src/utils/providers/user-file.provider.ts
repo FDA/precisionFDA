@@ -1,5 +1,5 @@
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
-import { UserFile } from '../../domain/user-file'
 import { EntityDataProvider } from './entity-data.provider'
 
 export class UserFileEntityDataProvider extends EntityDataProvider<'userFile'> {

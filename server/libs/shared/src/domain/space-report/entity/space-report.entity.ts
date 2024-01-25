@@ -1,8 +1,8 @@
 import { Collection, Entity, ManyToOne, OneToMany, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../../database/base-entity'
-import { Space } from '../../space'
-import { User } from '../../user'
-import { UserFile } from '../../user-file'
 import { SpaceReportState } from '../model/space-report-state.type'
 import { SpaceReportPart } from './space-report-part.entity'
 

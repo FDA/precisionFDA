@@ -25,7 +25,7 @@ const ToS = () => {
       <PageContainerMargin>
         <StyledTos>
           <h1>Terms of Service</h1>
-          <p>Last modified: May 16, 2022</p>
+          <p>Last modified: January 24, 2024</p>
           <hr />
           <p>WE'RE IN PRODUCTION!</p>
           <p>
@@ -254,7 +254,7 @@ const ToS = () => {
             breach remains uncured at the end of the notice period.
             <br />
             8.4. Termination of Services. Services are currently delivered under
-            an FDA research grant which terminates on April 30th, 2016, at which
+            an FDA research grant which terminates on September 30th, 2024, at which
             time FDA may terminate Services without prior notice.
             <br />
             8.5. Effect. Upon termination of this Agreement, all applicable

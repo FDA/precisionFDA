@@ -2,8 +2,11 @@
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-undefined */
 import type { EntityManager } from '@mikro-orm/core'
-import { database, queue } from '@shared'
-import type { App, User } from '@shared/domain'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -13,9 +16,9 @@ import { range } from 'ramda'
 import { mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createCheckUserJobsTask = async (user: UserCtx) => {
-  const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.CHECK_USER_JOBS,
+  const defaultTestQueue = getMainQueue()
+  await defaultTestQueue.add(TASK_TYPE.CHECK_USER_JOBS, {
+    type: TASK_TYPE.CHECK_USER_JOBS,
     payload: undefined,
     user,
   })
@@ -98,9 +101,9 @@ describe('TASK: check-user-jobs', () => {
     // Expect job sync calls to be made on missing or orphaned jobs
     expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(6)
 
-    const jobDxids = jobs.map(job => job.dxid)
-    const callArgs = fakes.queue.createSyncJobStatusTaskFake.getCalls().map(call => call.args[0])
-    callArgs.forEach(callArg => {
+    const jobDxids = jobs.map((job) => job.dxid)
+    const callArgs = fakes.queue.createSyncJobStatusTaskFake.getCalls().map((call) => call.args[0])
+    callArgs.forEach((callArg) => {
       callArg.index = jobDxids.indexOf(callArg.dxid)
     })
     // Useful for debugging:

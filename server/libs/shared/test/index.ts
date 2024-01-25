@@ -1,7 +1,12 @@
+import { INestApplicationContext } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
+import { exposeOrm } from '@shared/app-initialization'
+import { database } from '@shared/database'
+import { DatabaseModule } from '@shared/database/database.module'
+import { getLogger } from '@shared/logger'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
-import { database, getLogger } from '@shared'
 import { db } from '../src/test'
 import { mocksRestore, mocksSetup } from '../src/test/mocks'
 
@@ -13,25 +18,30 @@ const log = getLogger()
 //     https://github.com/modernweb-dev/web/issues/1730
 //     https://github.com/mochajs/mocha/issues/2640
 process.on('uncaughtException', err => {
-  log.info({ err }, 'nodejs worker test: uncaughtException')
+  log.verbose({ err }, 'nodejs worker test: uncaughtException')
   throw err
 })
 process.on('unhandledRejection', err => {
-  log.info({ err }, 'nodejs worker test: unhandledRejection')
+  log.verbose({ err }, 'nodejs worker test: unhandledRejection')
   throw err
 })
 
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
+let app: INestApplicationContext
+
 before(async () => {
   mocksSetup()
 
-  await database.start()
+  app = await NestFactory.create(DatabaseModule)
+  app.enableShutdownHooks()
+  exposeOrm(app)
+
   await db.initDeleteProcedure(database.connection())
 })
 
 after(async () => {
+  await app.close()
   mocksRestore()
-  await database.stop()
 })

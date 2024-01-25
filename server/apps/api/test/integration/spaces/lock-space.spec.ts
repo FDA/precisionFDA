@@ -1,12 +1,14 @@
 import type { EntityManager } from '@mikro-orm/mysql'
-import { database, errors } from '@shared'
-import type { SpaceMembership, User } from '@shared/domain'
-import { Space } from '@shared/domain'
+import { database } from '@shared/database'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
 	SPACE_MEMBERSHIP_ROLE,
 	SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
@@ -77,7 +79,7 @@ describe('PATCH /spaces/:id/lock', () => {
         .patch('/spaces/4848/lock')
         .set(getDefaultHeaderData(user))
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.SPACE_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.SPACE_NOT_FOUND)
     })
 
     it('does not allow to lock space (user is not RSA) and returns 403', async () => {
@@ -85,7 +87,7 @@ describe('PATCH /spaces/:id/lock', () => {
         .patch(`/spaces/${space.id}/lock`)
         .set(getDefaultHeaderData(hostLead))
         .expect(403)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_PERMITTED)
     })
 
     it('does not allow to lock space (space already locked) and returns 403', async () => {
@@ -97,7 +99,7 @@ describe('PATCH /spaces/:id/lock', () => {
         .patch(`/spaces/${alreadyLockedSpace.id}/lock`)
         .set(getDefaultHeaderData(user))
         .expect(403)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_PERMITTED)
     })
 
     it('does not allow to lock space (only review space can be locked) and returns 403', async () => {
@@ -110,7 +112,7 @@ describe('PATCH /spaces/:id/lock', () => {
         .set(getDefaultHeaderData(user)) // different user has to do this in order to fail? i guess.
         .send({})
         .expect(403)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_PERMITTED)
     })
   })
 })

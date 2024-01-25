@@ -6,8 +6,8 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { Comparison } from '../comparison'
-import { UserFile } from '../user-file'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 // intentionally doesn't extend BaseEntity, because it doesn't contain all its fields
 @Entity({ tableName: 'comparison_inputs' })

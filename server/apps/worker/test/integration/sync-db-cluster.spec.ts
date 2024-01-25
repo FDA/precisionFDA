@@ -1,7 +1,11 @@
+import { database } from '@shared/database'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ClientRequestError } from '@shared/errors'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { invertObj } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
-import { database, queue, errors } from '@shared'
-import { DbCluster, User } from '@shared/domain'
 import type { SyncDbClusterJob } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db, mockResponses } from '@shared/test'
@@ -14,9 +18,9 @@ const createSyncDbClusterTestTask = async (
   payload: SyncDbClusterJob['payload'],
   user: SyncDbClusterJob['user'],
 ) => {
-  const defaultTestQueue = queue.getMainQueue()
-  await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+  const defaultTestQueue = getMainQueue()
+  await defaultTestQueue.add(TASK_TYPE.SYNC_DBCLUSTER_STATUS, {
+    type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
     payload,
     user,
   })
@@ -83,7 +87,7 @@ describe('TASK: sync db cluster', () => {
   })
 
   it('updates local database if remote port is different', async () => {
-    const remotePort = parseInt(dbCluster.port) + 1;
+    const remotePort = parseInt(dbCluster.port) + 1
     const describeCallRes = {
       ...mockResponses.DBCLUSTER_DESC_RES,
       endpoint: dbCluster.host,
@@ -207,10 +211,11 @@ describe('TASK: sync db cluster', () => {
 
     it('does not remove task from queue when client API call returns 5xx error', async () => {
       fakes.client.dbClusterDescribeFake.rejects(
-        new errors.ClientRequestError('client error', {
+        new ClientRequestError('client error', {
           clientResponse: {},
           clientStatusCode: 500,
-        }))
+        }),
+      )
       await createSyncDbClusterTestTask(
         { dxid: dbCluster.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },

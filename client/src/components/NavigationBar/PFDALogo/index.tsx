@@ -5,6 +5,7 @@ import precisionFDALight from '../../../assets/precisionFDA.white.svg'
 import precisionFDADark from '../../../assets/precisionFDA.dark.svg'
 
 const StyledImg = styled.img`
+  --c-logo: var(--base);
   height: 40px;
 `
 

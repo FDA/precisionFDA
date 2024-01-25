@@ -1,14 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ArrayUtils } from '@shared'
-import { App } from '../../app'
-import { Workflow } from '@shared/domain'
+import { Injectable } from '@nestjs/common'
+import { App } from '@shared/domain/app/app.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
+@Injectable()
 export class WorkflowService {
-  private readonly em
-
-  constructor(em: SqlEntityManager) {
-    this.em = em
-  }
+  constructor(private readonly em: SqlEntityManager) {}
 
   async getApps(workflow: Workflow) {
     const inputStages = workflow?.spec?.input_spec?.stages
@@ -17,6 +15,6 @@ export class WorkflowService {
       return []
     }
 
-    return await this.em.find(App, { uid: inputStages.map(s => s.app_uid) })
+    return await this.em.find(App, { uid: inputStages.map((s) => s.app_uid) })
   }
 }

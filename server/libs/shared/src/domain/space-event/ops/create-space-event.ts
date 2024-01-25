@@ -1,14 +1,14 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { NotificationSendOperation } from '@shared/domain/email/ops/notification-send'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 import type {
   SpaceEventInput,
 } from '../space-event.input'
 import { SpaceEvent } from '../space-event.entity'
-import { Space } from '../../space'
-import { User } from '../../user'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import type { UserOpsCtx } from '../../../types'
-import { email } from '../../..'
-import { SpaceMembership } from '../..'
 import { getEntityType, getObjectType, getSpaceEventJsonData } from '../../../utils/object-utils'
 
 // TODO add infrastructure for Task in the future
@@ -37,7 +37,7 @@ class CreateSpaceEventOperation extends BaseOperation<UserOpsCtx, SpaceEventInpu
 
       await em.persistAndFlush(spaceEvent)
 
-      await new email.NotificationSendOperation(this.ctx).execute(spaceEvent)
+      await new NotificationSendOperation(this.ctx).execute(spaceEvent)
 
       return spaceEvent
     }

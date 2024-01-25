@@ -1,1 +1,0 @@
-export { router } from './challenge.routes'

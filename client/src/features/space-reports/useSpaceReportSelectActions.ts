@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { ActionFunctionsType } from '../home/types'
 import { ISpaceReport, SpaceReportState } from './space-report.types'
 import { useDeleteSpaceReportModal } from './useDeleteSpaceReportModal'
@@ -20,7 +20,7 @@ export const userReportSelectActions = ({
   resetSelected?: () => void,
 }) => {
   const queryClient = useQueryClient()
-  const history = useHistory()
+  const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
 
   const {
@@ -31,7 +31,7 @@ export const userReportSelectActions = ({
     selected,
     onClose: () => {
       queryClient.invalidateQueries(['space-reports'])
-      history.push(`/spaces/${spaceId}/reports`)
+      navigate(`/spaces/${spaceId}/reports`)
       if(resetSelected) resetSelected()
     },
   })

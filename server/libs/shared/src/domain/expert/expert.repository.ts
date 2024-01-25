@@ -4,14 +4,14 @@ import { PaginationParams } from '../../types/common';
 import { Expert, ExpertScope } from './expert.entity'
 import { serializeExpert } from './expert.serializer';
 
-interface ExpertFindPaginatedParams extends PaginationParams {
+export interface ExpertFindPaginatedParams extends PaginationParams {
   year?: number
 }
 
 // todo(samuel) find a way to unify
 // Duplicate from API package
 interface UserCtx {
-  id: number 
+  id: number
   accessToken: string
   dxuser: string
 }

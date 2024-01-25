@@ -1,8 +1,8 @@
-import { errors, getLogger } from '@shared'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { getLogger } from '@shared/logger'
 import { PlatformClient } from '../../../platform-client'
 import { getHandle } from '../org.utils'
-import { ClientErrorProps } from '../../../errors'
+import { ClientErrorProps, ServiceError } from '../../../errors'
 import { BILLING_INFO } from '../../../config/consts'
 
 const logger = getLogger('org.service')
@@ -39,10 +39,10 @@ export class OrgService implements IOrgService {
   }
 
   async create(dxid: string, billable: boolean | undefined): Promise<string> {
-    logger.info(`OrgService: creating new organization ${dxid}, billable: ${billable}`)
+    logger.verbose(`OrgService: creating new organization ${dxid}, billable: ${billable}`)
 
     if (await this.exists(dxid)) {
-      throw new errors.ServiceError(`Org with dxid ${dxid} already exists`, {} as ClientErrorProps)
+      throw new ServiceError(`Org with dxid ${dxid} already exists`, {} as ClientErrorProps)
     }
 
     const handle = getHandle(dxid)

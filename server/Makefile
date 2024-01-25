@@ -70,15 +70,15 @@ run-worker-repl:
 	$(bin)bull-repl
 
 test-shared:
-	NODE_ENV=test $(bin)mocha --config ./libs/shared/.mocharc.js \
+	$(bin)mocha --config ./libs/shared/.mocharc.js \
 	--recursive "./libs/shared/test/**/*.spec.ts"
 
 test-api:
-	NODE_ENV=test $(bin)mocha --config ./apps/api/.mocharc.js \
+	$(bin)mocha --config ./apps/api/.mocharc.js \
 	--recursive "./apps/api/test/**/*.spec.ts"
 
 test-worker:
-	NODE_ENV=test $(bin)mocha --config ./apps/worker/.mocharc.js \
+	$(bin)mocha --config ./apps/worker/.mocharc.js \
 	--recursive "./apps/worker/test/**/*.spec.ts"
 
 test: test-api

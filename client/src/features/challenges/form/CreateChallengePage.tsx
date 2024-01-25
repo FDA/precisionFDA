@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -16,7 +16,7 @@ import { IChallengeForm, ChallengeForm } from './ChallengeForm'
 import { mapFormToPayload, subtitle, title } from './common'
 
 const CreateChallengePage = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
 
   const queryClient = useQueryClient()
@@ -26,7 +26,7 @@ const CreateChallengePage = () => {
     onSuccess: res => {
       if (res?.challenge) {
         queryClient.invalidateQueries(['challenges'])
-        history.push('/challenges')
+        navigate('/challenges')
         toast.success('Challenge has been created')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)

@@ -1,5 +1,5 @@
+import { App } from '@shared/domain/app/app.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
-import { App } from '../../domain/app'
 import { EntityDataProvider } from './entity-data.provider'
 
 export class AppEntityDataProvider extends EntityDataProvider<'app'> {

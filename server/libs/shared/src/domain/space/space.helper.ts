@@ -1,6 +1,7 @@
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
 import { defaultLogger as log } from '../../logger'
 import { InternalError } from '../../errors'
-import { Space, SpaceMembership } from '..'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_TYPE } from './space.enum'
 

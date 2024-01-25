@@ -1,15 +1,20 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { FileLockOperation } from '@shared/domain/user-file/ops/file-lock'
+import { FileUnlockOperation } from '@shared/domain/user-file/ops/file-unlock'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
+import { userFile } from '@shared/test/generate'
 import { expect } from 'chai'
 import pino from 'pino'
-import { User, UserFile, userFile } from '../../../src/domain'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 
 describe('lock/unlock file tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -34,7 +39,7 @@ describe('lock/unlock file tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FileLockOperation({
+    const op = new FileLockOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -63,7 +68,7 @@ describe('lock/unlock file tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FileLockOperation({
+    const op = new FileLockOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -92,7 +97,7 @@ describe('lock/unlock file tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FileUnlockOperation({
+    const op = new FileUnlockOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

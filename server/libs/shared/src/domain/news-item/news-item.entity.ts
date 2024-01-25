@@ -1,6 +1,6 @@
 import { Entity, EntityRepositoryType, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
 import { NewsRepository } from './news-item.repository'
 
 @Entity({ tableName: 'news_items', customRepository: () => NewsRepository })

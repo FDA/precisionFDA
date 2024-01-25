@@ -1,6 +1,5 @@
 import styled from 'styled-components'
-import { theme } from '../../styles/theme'
-import { SectionTitle } from '../../components/Public/styles'
+import { PageMainBody, SectionTitle } from '../../components/Public/styles'
 
 export const InfoRow = styled.div`
   display: flex;
@@ -13,7 +12,7 @@ export const InfoRow = styled.div`
 export const ViewAllButton = styled.div`
   width: 192px;
   text-align: left;
-  border-top: 1px solid ${theme.colors.highlightBlue};
+  border-top: 1px solid var(--primary-500);
   padding-top: 6px;
 `
 
@@ -22,24 +21,29 @@ export const ExpertSection = styled.div`
 `
 
 export const Hr = styled.div`
-  border-bottom: 1px solid #dbdbdb;
+  border-bottom: 1px solid var(--c-layout-border);
   margin: 1rem 0;
 `
 
 export const CommunityParticipants = styled.div`
-  background-color: ${theme.colors.subtleBlue};
+  background-color: var(--tertiary-100);
   margin: 0;
   margin-bottom: 64px;
   padding: 32px 0;
   text-align: center;
+  color: var(--base);
 
   ${SectionTitle} {
     margin-bottom: 32px;
   }
 `
 
+export const PageOverviewMainBody = styled(PageMainBody)`
+  flex-direction: column;
+`
+
 export const PFDATeamSection = styled.div`
-  background-color: ${theme.colors.subtleBlue};
+  background-color: var(--c-bg-300);
   text-align: center;
   margin: 64px 0;
   padding: 32px 0;

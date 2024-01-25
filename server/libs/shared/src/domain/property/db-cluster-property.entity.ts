@@ -3,8 +3,8 @@ import {
     Ref,
     ManyToOne,
 } from '@mikro-orm/core'
-import { GeneralProperty } from "./property.entity"
-import { DbCluster } from "../db-cluster"
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { GeneralProperty } from '@shared/domain/property/property.entity'
 
 @Entity({ discriminatorValue: 'dbCluster' })
 export class DbClusterProperty extends GeneralProperty {

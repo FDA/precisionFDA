@@ -2,7 +2,7 @@ import { $generateHtmlFromNodes } from '@lexical/html'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
@@ -33,14 +33,14 @@ const SubmitRow = styled.div`
 `
 
 const TopBar = ({ portalId, data }: { portalId: string | number, data: DataPortal }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationKey: ['update-data-portal'],
     mutationFn: (payload: Pick<CreateDataPortalRequest, 'content' | 'editor_state'>) => updateDataPortalRequest(payload, portalId),
     onSuccess: async () => {
       await queryClient.invalidateQueries(['data-portals', portalId.toString()])
-      history.push(`/data-portals/${portalId}`)
+      navigate(`/data-portals/${portalId}`)
       toast.success('Data Portal content updated')
     },
   })
