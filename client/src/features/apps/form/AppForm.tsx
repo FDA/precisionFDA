@@ -2,7 +2,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import Editor, { loader } from '@monaco-editor/react'
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
@@ -48,21 +47,14 @@ import { getBaseLink } from '../run/utils'
 import { getSpaceIdFromScope } from '../../../utils'
 import { CreateAppPayload } from '../apps.api'
 import { Select } from '../../../components/Select'
-
-if(!ENABLE_DEV_MSW) {
-  loader.config({
-    paths: {
-      vs: '/assets/monaco-editor/min/vs',
-    },
-  })
-}
+import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
 
 const ubuntuReleasesOptions = [
   { value: '16.04', label: '16.04' },
-  { value: '20.04', label: '20.04' }
-];
+  { value: '20.04', label: '20.04' },
+]
 
 export const AppForm = ({
   isEdit = false,
@@ -188,7 +180,6 @@ export const AppForm = ({
           <TopFieldGroup>
             <label>Name</label>
             <InputText
-              label="App Name"
               {...register('name', {
                 required: 'Name is required.',
                 onChange: handleSnakeNameChange,
@@ -205,7 +196,6 @@ export const AppForm = ({
           <TopFieldGroup>
             <label>Title</label>
             <InputText
-              label="App title"
               {...register('title', { required: 'Title is required.' })}
               disabled={isSubmitting}
             />
@@ -316,16 +306,11 @@ export const AppForm = ({
                       Learn more about app scripts
                     </Link>
                   </Help>
-                  <Editor
+                  <MonacoEditor
                     height="40vh"
                     onChange={value => field.onChange(value)}
                     defaultLanguage="shell"
                     defaultValue={field.value}
-                    options={{
-                      minimap: {
-                        enabled: false,
-                      },
-                    }}
                   />
                 </FormFields>
               )}
